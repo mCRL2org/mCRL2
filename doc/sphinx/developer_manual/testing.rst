@@ -1,10 +1,46 @@
-================================
-Toolset tests
-================================
+.. _build-testing:
+
+Testing
+=======
+
+For tests can be run the python packages yaml and psutil need to be installed. 
+
+* This can be done using pip as follows:
+
+   pip install pyyaml psutil
+
+Before executing tests, make sure that your build has been configured
+with the value of ``MCRL2_ENABLE_TESTS`` set to ``YES`` and that
+the toolset has been compiled.
+
+To conduct the tests specified in the build tree execute::
+
+  ctest
+
+Specific tests can be run by using ``ctest``. Below some examples are given. 
+
+* To displays the list of tests, without running them, execute::
+
+    ctest -N .
+
+* To execute the 2nd up until the 5th test targets, execute::
+
+    ctest -I2,5 .
+
+* To execute tests targets that match the description "FOO", execute::
+
+    ctest -R FOO .
+
+For additional help, run::
+
+  ctest --help
+
+Regression tests
+------------------
 
 The toolset contains several types of regression tests. These tests are
 automatically executed on a continuous integration service to maintain the
-quality of the toolset, for information see :doc:`teamcity_testing`. First of
+quality of the toolset, for information see :ref:`teamcity-testing`. First of
 all, each library contains a `test` directory consisting of several :file:`.cpp`
 files in which unit and integration tests are defined using the unit testing
 framework of the Boost library. Existing tests give an idea on how the tests are
@@ -20,9 +56,9 @@ the :file:`tests/regression/` directory and use a similar setup as random
 testing.
 
 All tests are set up such that they can be executed locally by using ctest. For
-example, by executing :option:`ctest -j8` in the build directory we can run all
+example, by executing `ctest -j8` in the build directory we can run all
 test on eight cores. This can take more than an hour to complete. Furthermore,
-using the :option:`-R` option we can only execute tests that contain
+using the `-R` option we can only execute tests that contain
 the given string in their name.
 
 Random Testing

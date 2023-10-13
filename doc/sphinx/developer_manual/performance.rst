@@ -6,7 +6,7 @@ To keep track of the run time performance of the most important tools of the too
 The details of the benchmarks are described below. To perform these benchmarks yourself, see the Setup section.
 
 Benchmarks
-=======================
+-----------
 
 The run time of the following tools are currently being measured:
 
@@ -38,8 +38,8 @@ Each tool is used on a number of mCRL2 examples. The process performed depends o
 Besides tool benchmarks there are also microbenchmarks that measure specific aspects of individual libraries.
 
 Setup
-==========================
+-----------
 
-For compiling the toolset itself and the build configuration, see :doc:`compilation`. If you are able to compile the toolset then enable the MCRL2_ENABLE_BENCHMARKS CMake option to enable the generation of benchmark targets. Compile the ``benchmarks`` target, this will generate the necessary files to perform the benchmarks. It will also compile the tools and microbenchmarks if necessary.
+For compiling the toolset itself and the build configuration, see :ref:`build-instructions`. If you are able to compile the toolset then enable the `MCRL2_ENABLE_BENCHMARKS`` CMake option to enable the generation of benchmark targets. Compile the ``benchmarks`` target, this will generate the necessary files to perform the benchmarks. It will also compile the tools and microbenchmarks if necessary.
 
 After this step, performing the benchmarks can be done using ctest. For each tool, specification and option it generates a target named ``benchmark_<tool>_<specification>_<options>``. Each benchmark target has the ``benchmark`` label. For example to run all benchmarks pertaining the 1394-fin specification use ``ctest -L benchmark -R 1394-fin``, or to benchmark a specific tool use ``ctest -L benchmark -R lps2lts``. 

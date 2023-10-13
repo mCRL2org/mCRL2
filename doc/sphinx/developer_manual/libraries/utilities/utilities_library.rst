@@ -234,7 +234,7 @@ menu containing the following menu items:
 * Contents: a link to the tool user manual;
 * About: a message dialog containing the tool version information.
 
-Use of the :cpp:class:`mcrl2::utilities::qt::qt_tool` class takes care of both by
+Use of the :mcrl2:`mcrl2::utilities::qt::qt_tool` class takes care of both by
 default. This class must be used for all QT tools to get the correct
 command line interface behaviour.
 
@@ -267,16 +267,16 @@ available tool classes, and the command line options that they handle.
    ================================================================================  ===================================================================
    tool class                                                                        command line arguments
    ================================================================================  ===================================================================
-   class :cpp:class:`mcrl2::utilities::tool`                                         handles =--quiet=, =--verbose=, =--debug=, =--help= and =--version=
-   class :cpp:class:`mcrl2::utilities::input_tool`                                   in addition handles a positional input file argument
-   class :cpp:class:`mcrl2::utilities::input_output_tool`                            in addition handles a positional output file argument
-   template <typename Tool> class :cpp:class:`mcrl2::utilities::rewriter_tool`       extends a tool with a =--rewriter= option
-   template <typename Tool> class :cpp:class:`mcrl2::utilities::pbes_rewriter_tool`  extends a tool with =--rewriter= and =--pbes-rewriter= options
+   class :mcrl2:`mcrl2::utilities::tool`                                              handles =--quiet=, =--verbose=, =--debug=, =--help= and =--version=
+   class :mcrl2:`mcrl2::utilities::input_tool`                                        in addition handles a positional input file argument
+   class :mcrl2:`mcrl2::utilities::input_output_tool`                                 in addition handles a positional output file argument
+   template <typename Tool> class :mcrl2:`mcrl2::utilities::rewriter_tool`            extends a tool with a =--rewriter= option
+   template <typename Tool> class :mcrl2:`mcrl2::utilities::pbes_rewriter_tool`       extends a tool with =--rewriter= and =--pbes-rewriter= options
    ================================================================================  ===================================================================
 
-The class :cpp:class:`mcrl2::utilities::rewriter_tool` makes strategies of the
+The class :mcrl2:`mcrl2::utilities::rewriter_tool` makes strategies of the
 data rewriter available to the user. The class
-:cpp:class:`mcrl2::utilities::pbes_rewriter_tool` makes pbes rewriters available
+:mcrl2:`mcrl2::utilities::pbes_rewriter_tool` makes pbes rewriters available
 to the user.
 
 Example
@@ -284,7 +284,7 @@ Example
 
 A good example to look at is the pbesparelm tool. Since this is a tool that
 takes a file as input and also writes output to a file, it derives from the
-class :cpp:class:`mcrl2:utilities:input_output_tool`. It can be found in
+class :mcrl2:`mcrl2:utilities:input_output_tool`. It can be found in
 the directory ``tools/release/pbesparelm/pbesparelm.cpp``.
 
 In the constructor a few settings are provided.
@@ -313,11 +313,11 @@ Creating a new tool
 ^^^^^^^^^^^^^^^^^^^
 To create a new tool, the following needs to be done:
 
-  #. Override the :cpp:member:`run` member function
+  #. Override the :mcrl2:`run` member function
 
-     The actual execution of the tool happens in the virtual member function :cpp:member:`run`.
+     The actual execution of the tool happens in the virtual member function :mcrl2:`run`.
      The developer has to override this function to add the behavior of the tool
-     The :cpp:member:`run` function is called from the :cpp:member:`execute` member function, after the
+     The :mcrl2:`run` function is called from the :mcrl2:`execute` member function, after the
      command line parameters have been parsed.
 
   #. Set some parameters in the constructor
@@ -341,7 +341,7 @@ To create a new tool, the following needs to be done:
 
   #. Optionally add additional command line arguments]
      Additional command line arguments can be specified by overriding the virtual
-     methods :cpp:member:`parse_options` and :cpp:member:`add_options`:
+     methods :mcrl2:`parse_options` and :mcrl2:`add_options`:
 
      .. code-block:: c++
 
@@ -363,7 +363,7 @@ To create a new tool, the following needs to be done:
         };
 
 One can change this selection
-by overriding the method :cpp:member:`available_rewriters`.
+by overriding the method :mcrl2:`available_rewriters`.
 
 .. _logging_library:
 
@@ -387,7 +387,7 @@ The logging library incorporates the concepts introduced in this section.
 Log level
 ^^^^^^^^^
 
-The type :cpp:type:`log_level_t` describes the various log levels that we identify.
+The type :mcrl2:`log_level_t` describes the various log levels that we identify.
 The log level describes the severity of the message.
 
 .. note::
@@ -413,7 +413,7 @@ file related to the hint of the current message.
 
 Library interface
 -----------------
-The main routine in the library is :cpp:func:`mCRL2log(level, hint)`, where level is a
+The main routine in the library is :mcrl2:`mCRL2log(level, hint)`, where level is a
 loglevel, and hint is a (optional) string hint. The routine returns an output
 stream to which a single log message may be printed. Printing defaults
 to stderr.
@@ -428,12 +428,12 @@ meaning they will not be in the generated executable.
 Maximal log level (runtime)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The maximal reporting level can be set using
-:cpp:member:`mcrl2_logger::set_reporting_level(level)`, by default info is assumed.
+:mcrl2:`mcrl2_logger::set_reporting_level(level)`, by default info is assumed.
 
 Setting output stream
 ^^^^^^^^^^^^^^^^^^^^^
 The output stream of the logger can be set to be any file using
-:cpp:member:`mcrl2_logger::output_policy_t::set_stream(file_pointer)`. Note that
+:mcrl2:`mcrl2_logger::output_policy_t::set_stream(file_pointer)`. Note that
 file_pointer in this case can also be stderr or stdout. The default
 output stream is stderr.
 
@@ -442,19 +442,11 @@ Incorporating hints
 For both the reporting level and the stream, the routines to change them have
 an optional hint argument that can be used to override the defaults for a
 specific hint. To set a reporting level for a specific hint "hint" one can
-use :cpp:member:`mcrl2_logger::set_reporting_level(level, "hint")`, likewise, for a stream
-one can use :cpp:member:`mcrl2_logger::output_policy_t::set_stream(file_pointer, "hint")`.
+use :mcrl2:`mcrl2_logger::set_reporting_level`, likewise, for a stream
+one can use :mcrl2:`mcrl2_logger::output_policy_t::set_stream`.
 In order to remove specific treatment of a hint, the routines
-:cpp:member:`mcrl2_logger::clear_reporting_level("hint")` an
-:cpp:member:`mcrl2_logger::output_policy_t::clear_stream("hint")` can be used.
-
-Formatting the output
-^^^^^^^^^^^^^^^^^^^^^
-By default each line in the output is prefixed with a fixed string,
-including a timestamp, the log level and, if provided, a hint. Furthermore,
-the user of the library can control indentation (at a global level) using
-the routines :cpp:member:`mcrl2_logger::indent()` and
-:cpp:member:`mcrl2_logger::unindent()`.
+:mcrl2:`mcrl2_logger::clear_reporting_level` an
+:mcrl2:`mcrl2_logger::output_policy_t::clear_stream` can be used.
 
 Tutorial
 --------
@@ -500,7 +492,7 @@ Let's do some logging.
     mCRL2log(log::info) << "This shows the way info messages are printed, using the default messages" << std::endl;
     mCRL2log(log::debug) << "This line is not printed, and the function " << my_function() << " is not evaluated" << std::endl;
 
-Now we call an algorithm :cpp:func:`my_algorithm`, which we will define later.
+Now we call an algorithm `my_algorithm`, which we will define later.
 The algorithm uses "my_algorithm" as hint for logging, and we want to write
 its output to a file. First we create a file logger_test_file.txt to which
 we log, and assign it to the hint "my_algorithm".
@@ -554,7 +546,7 @@ Let's take a look at an implementation of =my_algorithm()=.
   }
 
 Note that, with the settings so far, only the first debug statement in
-:cpp:func:`my_algorithm` will be printed, the other log messages are compiled away due
+:mcrl2:`my_algorithm` will be printed, the other log messages are compiled away due
 to the setting of :c:macro:`MCRL2_MAX_LOG_LEVEL`. To overcome this, the define before
 the include of ``logger.h`` must allow for more debug levels, e.g. by setting
 it as follows
@@ -568,7 +560,7 @@ statements of all levels up to and including debug3 are actually compiled
 into the code. We still have to enable the logging statements at run-time,
 because so far we have only allowed logging of messages up to verbose level.
 Therefore we should add the following anywhere before the execution of
-the second debug print in :cpp:func:`my_algorithm`
+the second debug print in `my_algorithm`
 
 .. code-block:: c++
 
@@ -632,7 +624,7 @@ The complete code now looks as follows:
     fclose(plogfile);
   }
 
-Note that in this code, the logging of :cpp:func:`my_algorithm` is done to the file
+Note that in this code, the logging of `my_algorithm` is done to the file
 logger_test_file.txt, whereas the other log messages are printed to stderr.
 
 After execution, stderr looks as follows::

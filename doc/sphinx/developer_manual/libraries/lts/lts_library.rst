@@ -11,7 +11,7 @@ or the removal of unreachable states.
 
 Essentially, a labelled transition system consists
 of a collection of transitions, where a transition is a triple of three 
-numbers <start_state,action,end_state> each of type :cpp:type:`size_t` (i.e. unsigned machine word). 
+numbers <start_state,action,end_state> each of type :mcrl2:`size_t` (i.e. unsigned machine word). 
 Each labelled transition system contains an initial state. Furthermore, each
 action has an associated label, for instance a string. Optionally, each state index
 has also an associated label. Finally, each label is either internal
@@ -24,8 +24,8 @@ transition system the initial state is also a probabilistic transition system.
 
 A labelled transition system has template parameters for the state labels,
 action labels and probabilistic states. There are several standard labelled transition systems defined.
-For example, the :cpp:type:`lts_aut_t` is an LTS with strings as transition labels, and no state
-labels. The :cpp:type:`lts_lts_t` has multi actions as state labels, and vectors
+For example, the :mcrl2:`lts_aut_t` is an LTS with strings as transition labels, and no state
+labels. The :mcrl2:`lts_lts_t` has multi actions as state labels, and vectors
 of data expressions as state labels. Furthermore, this latter contains
 a data specification, action declarations and a declaration of process
 parameters. 
@@ -33,9 +33,9 @@ parameters.
 Structure
 =========
 The LTS library resides in the namespace mcrl2::lts. The main class of this
-library is the :cpp:class:`lts` class. This class represents an LTS and contains almost all
+library is the :mcrl2:`lts` class. This class represents an LTS and contains almost all
 available functionality to work with LTSs. States and actions are identified by unsigned integers of
-the type :cpp:type:`size_t` and transitions are triples (from_state, action, to_state).
+the type :mcrl2:`size_t` and transitions are triples (from_state, action, to_state).
 Each LTS has an initial state and every transition 
 label is either internal or external.
 
@@ -47,10 +47,10 @@ used in a standard C++ container is usable for the labels in a labelled transiti
 system. 
 
 There are four standard template instantiations of labelled transitions systems:
-  * :cpp:type:`lts_lts_t`: Multi actions as label values. Vectors of data expressions as state values. Contains a data specification, action declarations and process parameters.
-  * :cpp:type:`lts_aut_t`: Strings as label values. No state values. Is stored in the aut file format.
-  * :cpp:type:`lts_fsm_t`: Strings as label values. Vectors of strings as state values. Contains the names and sorts of process parameters. Is stored in the fsm file format.
-  * :cpp:type:`lts_dot_t`: Label values are strings. State values are a pair of a state name, and a state label. 
+  * :mcrl2:`lts_lts_t`: Multi actions as label values. Vectors of data expressions as state values. Contains a data specification, action declarations and process parameters.
+  * :mcrl2:`lts_aut_t`: Strings as label values. No state values. Is stored in the aut file format.
+  * :mcrl2:`lts_fsm_t`: Strings as label values. Vectors of strings as state values. Contains the names and sorts of process parameters. Is stored in the fsm file format.
+  * :mcrl2:`lts_dot_t`: Label values are strings. State values are a pair of a state name, and a state label. 
 
 The first three classes contain load and save functionality. The `lts_dot_t` is only provided for saving. 
 
@@ -141,8 +141,8 @@ value types of states and action labels, they can contain additional information
 Each of these labelled transition systems are related to some file format and therefore,
 they all provide load and save functionality. 
 
-The enumerated type :cpp:type:`lts_type` contains for all the formats an element. The default element
-is :cpp:member:`lts_none`, not referring to any type.
+The enumerated type :mcrl2:`lts_type` contains for all the formats an element. The default element
+is :mcrl2:`lts_none`, not referring to any type.
 Furthermore, each standard
 labelled transition system has its own file extension. The Extra information refers to data and action declarations for the 
 `lts_lts_t` format. For the `lts_fsm_t` it is recalled which variables occur in the state vector, which labels a state, and
@@ -154,15 +154,14 @@ The table below shows them.
    +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+
    |Class                  | Element from lts_type | File extension | State value type            | Label value type              | Extra information |
    +=======================+=======================+================+=============================+===============================+===================+
-   |:cpp:class:`lts_lts_t` | :cpp:member:`lts_lts` | .lts           |:cpp:type:`state_label_lts`  |:cpp:type:`action_label_lts`   |Yes                |
+   |:mcrl2:`lts_lts_t`     | :mcrl2:`lts_lts`      | .lts           |:mcrl2:`state_label_lts`     |:mcrl2:`action_label_lts`      |Yes                |
    +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+
-   |:cpp:class:`lts_aut_t` | :cpp:member:`lts_aut` | .aut           |:cpp:type:`state_label_empty`|:cpp:type:`action_label_string`|No                 |
+   |:mcrl2:`lts_aut_t`     | :mcrl2:`lts_aut`      | .aut           |:mcrl2:`state_label_empty`   |:mcrl2:`action_label_string`   |No                 |
    +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+   
-   |:cpp:class:`lts_fsm_t` | :cpp:member:`lts_fsm` | .fsm           |:cpp:type:`state_label_fsm`  |:cpp:type:`action_label_string`|Yes                |
+   |:mcrl2:`lts_fsm_t`     | :mcrl2:`lts_fsm`      | .fsm           |:mcrl2:`state_label_fsm`     |:mcrl2:`action_label_string`   |Yes                |
    +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+   
-   |:cpp:class:`lts_dot_t` | :cpp:member:`lts_dot` | .dot           |:cpp:type:`state_label_dot`  |:cpp:type:`action_label_string`|No                 |
+   |:mcrl2:`lts_dot_t`     | :mcrl2:`lts_dot`      | .dot           |:mcrl2:`state_label_dot`     |:mcrl2:`action_label_string`   |No                 |
    +-----------------------+-----------------------+----------------+-----------------------------+-------------------------------+-------------------+   
-
 
 For the reduction we simply call the reduce() method with the option
 lts_eq_trace.
@@ -214,26 +213,26 @@ are available change all the time. It is best to see the help
 text of tools such as `ltscompare` and `ltsconvert` for the latest
 available reductions. Some that have been implemented are:
 
-  * :cpp:member:`lts_eq_none`:             No reduction
-  * :cpp:member:`lts_eq_bisim`:            Strong bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
-  * :cpp:member:`lts_eq_bisim_gv`:         Strong bisimulation equivalence, using the traditional O(mn) algorithm [Groote/Vaandrager 1990]
-  * :cpp:member:`lts_eq_bisim_dnj`:        Strong bisimulation equivalence, using an experimental O(m log n) algorithm (Jansen, not yet published)
-  * :cpp:member:`lts_eq_bisim_sigref`:     Strong bisimulation equivalence, using the signature refinement algorithm [Blom/Orzan 2003]
-  * :cpp:member:`lts_eq_branching_bisim`:  Branching bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
-  * :cpp:member:`lts_eq_branching_bisim_gv`: Branching bisimulation equivalence, using the traditional O(mn) algorithm [Groote/Vaandrager 1990]
-  * :cpp:member:`lts_eq_branching_bisim_dnj`: Branching bisimulation equivalence, using an experimental O(m log n) algorithm (Jansen, not yet published)
-  * :cpp:member:`lts_eq_branching_bisim_sigref`: Branching bisimulation equivalence, using the signature refinement algorithm [Blom/Orzan 2003]
-  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim`: Divergence-preserving branching bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
-  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_gv`: Divergence-preserving branching bisimulation equivalence, using the traditional O(mn) algorithm [Groote/Vaandrager 1990]
-  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_dnj`: Divergence-preserving branching bisimulation equivalence, using an experimental O(m log n) algorithm (Jansen, not yet published)
-  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_sigref`: Divergence-preserving branching bisimulation equivalence, using the signature refinement algorithm [Blom/Orzan 2003]
-  * :cpp:member:`lts_eq_weak_bisim`:       Weak bisimulation equivalence
-  * :cpp:member:`lts_eq_divergence_preserving_weak_bisim`: Divergence-preserving weak bisimulation equivalence
-  * :cpp:member:`lts_eq_sim`:              Strong simulation equivalence
-  * :cpp:member:`lts_eq_ready_sim`:        Strong ready simulation equivalence     
-  * :cpp:member:`lts_eq_trace`:            Strong trace equivalence
-  * :cpp:member:`lts_eq_weak_trace`:       Weak trace equivalence
-  * :cpp:member:`lts_eq_isomorph`:         Isomorphism.
+  * :mcrl2:`lts_eq_none`:             No reduction
+  * :mcrl2:`lts_eq_bisim`:            Strong bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
+  * :mcrl2:`lts_eq_bisim_gv`:         Strong bisimulation equivalence, using the traditional O(mn) algorithm [Groote/Vaandrager 1990]
+  * :mcrl2:`lts_eq_bisim_dnj`:        Strong bisimulation equivalence, using an experimental O(m log n) algorithm (Jansen, not yet published)
+  * :mcrl2:`lts_eq_bisim_sigref`:     Strong bisimulation equivalence, using the signature refinement algorithm [Blom/Orzan 2003]
+  * :mcrl2:`lts_eq_branching_bisim`:  Branching bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
+  * :mcrl2:`lts_eq_branching_bisim_gv`: Branching bisimulation equivalence, using the traditional O(mn) algorithm [Groote/Vaandrager 1990]
+  * :mcrl2:`lts_eq_branching_bisim_dnj`: Branching bisimulation equivalence, using an experimental O(m log n) algorithm (Jansen, not yet published)
+  * :mcrl2:`lts_eq_branching_bisim_sigref`: Branching bisimulation equivalence, using the signature refinement algorithm [Blom/Orzan 2003]
+  * :mcrl2:`lts_eq_divergence_preserving_branching_bisim`: Divergence-preserving branching bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
+  * :mcrl2:`lts_eq_divergence_preserving_branching_bisim_gv`: Divergence-preserving branching bisimulation equivalence, using the traditional O(mn) algorithm [Groote/Vaandrager 1990]
+  * :mcrl2:`lts_eq_divergence_preserving_branching_bisim_dnj`: Divergence-preserving branching bisimulation equivalence, using an experimental O(m log n) algorithm (Jansen, not yet published)
+  * :mcrl2:`lts_eq_divergence_preserving_branching_bisim_sigref`: Divergence-preserving branching bisimulation equivalence, using the signature refinement algorithm [Blom/Orzan 2003]
+  * :mcrl2:`lts_eq_weak_bisim`:       Weak bisimulation equivalence
+  * :mcrl2:`lts_eq_divergence_preserving_weak_bisim`: Divergence-preserving weak bisimulation equivalence
+  * :mcrl2:`lts_eq_sim`:              Strong simulation equivalence
+  * :mcrl2:`lts_eq_ready_sim`:        Strong ready simulation equivalence     
+  * :mcrl2:`lts_eq_trace`:            Strong trace equivalence
+  * :mcrl2:`lts_eq_weak_trace`:       Weak trace equivalence
+  * :mcrl2:`lts_eq_isomorph`:         Isomorphism.
 
 Application of the reduction of an lts is pretty simple. Note that the
 lts is replaced by the reduced lts. The original lts will be destroyed.
@@ -249,18 +248,18 @@ It is also possible to compare an lts to another lts. This can be done
 using the equivalence options mentioned above. But it is also possible to
 use the other preorders such as: 
 
-  * :cpp:member:`lts_pre_none`:             No preorder 
-  * :cpp:member:`lts_pre_sim`:              Strong simulation preorder
-  * :cpp:member:`lts_pre_ready_sim`:        Strong ready simulation preorder     
-  * :cpp:member:`lts_pre_trace`:            Strong trace preorder 
-  * :cpp:member:`lts_pre_weak_trace`:       Weak trace preorder 
+  * :mcrl2:`lts_pre_none`:             No preorder 
+  * :mcrl2:`lts_pre_sim`:              Strong simulation preorder
+  * :mcrl2:`lts_pre_ready_sim`:        Strong ready simulation preorder     
+  * :mcrl2:`lts_pre_trace`:            Strong trace preorder 
+  * :mcrl2:`lts_pre_weak_trace`:       Weak trace preorder 
 
 Comparing labelled transition systems is done using the reduction algorithms.
 This means that the transition systems are destroyed when the comparison is
 calculated. To avoid destruction a copy is made of the transition system. But as
 transition systems can be extremely large, this is not always desired. Therefore,
-we provide a :cpp:func:`compare` function that makes copies of the transition system to 
-avoid that they get damaged and a :cpp:func:`destructive_compare` which may change both
+we provide a :mcrl2:`compare` function that makes copies of the transition system to 
+avoid that they get damaged and a :mcrl2:`destructive_compare` which may change both
 transition systems.
 
 .. code-block:: c++

@@ -37,6 +37,9 @@ option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF
 option(MCRL2_ENABLE_HEADER_TESTS    "Enable generation of headertest targets." OFF)
 option(MCRL2_ENABLE_TESTS           "Enable generation of library, tool and random test targets." OFF)
 option(MCRL2_ENABLE_DOCUMENTATION   "Enable generation of documentation." OFF)
+option(MCRL2_ENABLE_DOC_MANUAL      "Enable generation of tool manual pages, which requires built tools." ON)
+option(MCRL2_ENABLE_DOC_DOXYGEN     "Enable generation of code reference using Doxygen." ON)
+option(MCRL2_ENABLE_DOC_PDFLATEX    "Enable generation of reference pdfs using pdflatex, which requires tikz and amsmath packages." ON)
 option(MCRL2_ENABLE_BENCHMARKS      "Enable benchmarks. Build the 'benchmarks' target to generate the necessary files and tools. Run the benchmarks using ctest." OFF)
 option(MCRL2_ENABLE_SYLVAN          "Enable the Sylvan library required by the following symbolic tools: lpsreach, pbessolvesymbolic and ltsconvertsymbolic" ${UNIX})
 option(MCRL2_ENABLE_MULTITHREADING  "Enable the usage of multiple threads. Disabling removes usage of synchronisation primitives" ON)
@@ -45,6 +48,7 @@ option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the li
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
 
 option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks implemented by the AddressSanitizer." OFF)
+option(MCRL2_ENABLE_THREADSANITIZER  "Enable additional data race run-time checks implemented by the ThreadSanitizer." OFF)
 option(MCRL2_ENABLE_CODE_COVERAGE    "Enable generation of code coverage statistics." OFF)
 option(MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS "Enable extensive soundness check in the Debug build type." ON)
 option(MCRL2_ENABLE_MSVC_CCACHE     "Enable MSVC specific flags to enable building with ccache" OFF)
@@ -96,6 +100,9 @@ endif()
 if (MCRL2_ENABLE_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
+
+# A list of tools that is being built by the current configuration (populated by build/cmake/AddMCRL2Binary.cmake)
+set_property(GLOBAL PROPERTY MCRL2_TOOLS)
 
 add_subdirectory(libraries)
 add_subdirectory(tools)

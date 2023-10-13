@@ -9,6 +9,8 @@
 
 #include "mcrl2/utilities/indexed_set.h"
 
+#include <thread>
+
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
@@ -26,6 +28,7 @@ BOOST_AUTO_TEST_CASE(basic_test_indexed_set)
 
   {
     const indexed_set<std::string>& t1 = t;
+    BOOST_CHECK(t1.size() == t.size());
   }
   indexed_set<std::string> t2 = t;
 
@@ -49,3 +52,27 @@ BOOST_AUTO_TEST_CASE(basic_test_indexed_set)
   x[2] = t;
 }
 
+BOOST_AUTO_TEST_CASE(test_indexed_set_parallel)
+{
+#ifdef MCRL2_THREAD_SAFE
+  // One thread continuously modifies a local atermpp::vector of aterms while the main thread performs garbage collection extensively.
+  std::vector<std::thread> threads;
+
+  indexed_set<std::size_t, true> set(20);
+
+  for (int i = 0; i < 20; ++i)
+  {
+    threads.emplace_back([&set](int index) 
+    {
+      // Insert every elements into the set.
+      set.insert(5, index);
+    }, i);
+  }
+
+  for (auto& thread : threads)
+  {
+    thread.join();
+  }
+#endif // MCRL2_THREAD_SAFE
+
+}

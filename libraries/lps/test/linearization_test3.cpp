@@ -13,6 +13,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
+#include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/linearise.h"
 
 using namespace mcrl2;
@@ -25,8 +26,7 @@ void run_linearisation_instance(const std::string& spec, const t_lin_options& op
 {
   if (expect_success)
   {
-    lps::stochastic_specification s=linearise(spec, options);
-    BOOST_CHECK(s != lps::stochastic_specification());
+    BOOST_CHECK(mcrl2::lps::detail::is_well_typed(linearise(spec, options)));
   }
   else
   {
@@ -180,6 +180,32 @@ BOOST_AUTO_TEST_CASE(linearisation_of_the_enclosed_spec_caused_a_name_conflict_w
 
   run_linearisation_test_case(spec,true);
 } 
+
+// In the test below, the value 1 for the parameter step should be properly substituted,
+// also in the distribution.
+BOOST_AUTO_TEST_CASE(linearisation_of_distribution_over_initial_process)
+{
+  const std::string spec =
+     "act RequestReading_;\n"
+     "    SWFault;\n"
+     "\n"
+     "map sw_fault_prob: Pos -> Real;\n"
+     "var x: Pos;\n"
+     "eqn sw_fault_prob(x) = if(x == 2, 1/20, if(x == 1, 1/10, Int2Real(0)));\n"
+     "\n"
+     "proc Software(step: Pos) = (\n"
+     "    (dist f:Bool[if(f, sw_fault_prob(step), 1-sw_fault_prob(step))] . (f -> SWFault . delta <> (\n"
+     "        (step == 1) -> (\n"
+     "            % First step: get sensor reading\n"
+     "            RequestReading_ . delta\n"
+     "        )))));\n"
+     "\n"
+     "init Software(1);\n";
+
+  run_linearisation_test_case(spec,true);
+}   
+
+
 
 #else // ndef MCRL2_SKIP_LONG_TESTS
 

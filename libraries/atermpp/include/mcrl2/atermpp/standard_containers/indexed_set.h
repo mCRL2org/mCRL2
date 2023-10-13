@@ -9,10 +9,11 @@
 #ifndef MCRL2_ATERMPP_INDEXED_SET_H
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
+#include "mcrl2/atermpp/detail/thread_aterm_pool.h"
+#include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/indexed_set.h"
-#include "mcrl2/atermpp/detail/shared_guard.h"
-#include <mcrl2/atermpp/standard_containers/deque.h>
+#include "mcrl2/utilities/shared_mutex.h"
 
 
 namespace atermpp
@@ -55,13 +56,13 @@ public:
   
   void clear(std::size_t thread_index=0)
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::clear(thread_index);
   }
 
   std::pair<size_type, bool> insert(const Key& key, std::size_t thread_index=0)
   {
-    detail::shared_guard _;
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::insert(key, thread_index);
   }
 };

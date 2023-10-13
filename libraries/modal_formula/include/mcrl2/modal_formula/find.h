@@ -515,7 +515,6 @@ make_find_free_state_variables_traverser(OutputIterator out, const VariableConta
 {
   return find_free_state_variables_traverser<Traverser, Binder, OutputIterator>(out, v);
 }
-/// \endcond
 
 } // namespace detail
 

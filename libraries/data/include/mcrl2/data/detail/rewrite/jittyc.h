@@ -170,9 +170,7 @@ class RewriterCompilingJitty: public Rewriter
     // is relatively slow. It is expected that in some future version of the compiler
     // such access is faster, and no copy of these flags is needed anymore. 
   public:
-    std::atomic<bool>* m_busy_flag = nullptr;
-    std::atomic<bool>* m_forbidden_flag = nullptr;
-    std::size_t* m_lock_depth = nullptr;
+    atermpp::detail::thread_aterm_pool* m_thread_aterm_pool;
 
   protected:
     // Copy construction. Not (yet) for public use.
@@ -206,9 +204,7 @@ class RewriterCompilingJitty: public Rewriter
   void thread_initialise()
   {
     mCRL2log(mcrl2::log::debug) << "Initialise busy/forbidden flags\n";
-    m_busy_flag = atermpp::detail::g_thread_term_pool().get_busy_flag();
-    m_forbidden_flag = atermpp::detail::g_thread_term_pool().get_forbidden_flag();
-    m_lock_depth = atermpp::detail::g_thread_term_pool().get_lock_depth();
+    m_thread_aterm_pool = &atermpp::detail::g_thread_term_pool();
   }
 };
 

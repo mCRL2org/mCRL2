@@ -169,7 +169,7 @@ bool is_enumerable(const data_specification& dataspec,
   }
   else if (is_function_sort(sort))
   {
-    const auto& func = atermpp::down_cast<function_sort>(sort);
+    const function_sort& func = atermpp::down_cast<function_sort>(sort);
     enumerator_identifier_generator id_gen;
     data_expression_vector expr_vec;
     variable_list var_list;

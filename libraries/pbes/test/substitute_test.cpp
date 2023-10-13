@@ -14,6 +14,7 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
 using namespace mcrl2;
@@ -159,9 +160,4 @@ BOOST_AUTO_TEST_CASE(test_variable_assignment)
     std::cout << "error: " << pbes_system::pp(result) << " != " << pbes_system::pp(expected_result) << std::endl;
   }
   BOOST_CHECK(result == expected_result);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

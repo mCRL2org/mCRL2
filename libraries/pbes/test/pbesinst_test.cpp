@@ -188,7 +188,7 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
       pbes q1 = ::pbesinst_finite(p);
       std::cout << pbes_system::pp(q1) << std::endl;
     }
-    catch (mcrl2::runtime_error e)
+    catch (mcrl2::runtime_error& e)
     {
       std::cout << "pbesinst failed: " << e.what() << std::endl;
     }
@@ -203,7 +203,7 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
       pbes q1 = pbesinst_lazy(p);
       std::cout << pbes_system::pp(q1) << std::endl;
     }
-    catch (mcrl2::runtime_error e)
+    catch (mcrl2::runtime_error& e)
     {
       std::cout << "pbesinst failed: " << e.what() << std::endl;
     }

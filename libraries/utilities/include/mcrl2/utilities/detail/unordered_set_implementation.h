@@ -17,6 +17,8 @@
 
 #include "mcrl2/utilities/power_of_two.h"
 
+#include <algorithm>
+
 namespace mcrl2::utilities
 {
 
@@ -246,11 +248,11 @@ void print_performance_statistics(const T& unordered_set)
     ++histogram[bucket_length];
   }
 
-  mCRL2log(mcrl2::log::info, "Performance") << "Table stores " << unordered_set.size() << " keys in " << unordered_set.bucket_count() << " buckets.\n";
+  mCRL2log(mcrl2::log::info) << "Table stores " << unordered_set.size() << " keys in " << unordered_set.bucket_count() << " buckets.\n";
 
   for (std::size_t i = 0; i < histogram.size(); ++i)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "There are " << histogram[i] << " buckets that store " << i << " keys.\n";
+    mCRL2log(mcrl2::log::debug) << "There are " << histogram[i] << " buckets that store " << i << " keys.\n";
   }
 }
 

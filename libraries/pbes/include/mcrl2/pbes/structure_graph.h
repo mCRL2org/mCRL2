@@ -26,26 +26,6 @@ namespace pbes_system {
 
 namespace detail {
 
-//--- workaround for missing dynamic_bitset::all() function in boost versions prior to 1.56 ---//
-template <typename T>
-auto call_dynamic_bitset_all_helper(T t, int) -> decltype(t.all())
-{
-  return t.all();
-}
-
-// inefficient alternative for all()
-template <typename T>
-auto call_dynamic_bitset_all_helper(T t, long) -> bool
-{
-  return (~t).none();
-}
-
-template <typename T>
-bool call_dynamic_bitset_all(const T& t)
-{
-  return call_dynamic_bitset_all_helper(t, 0);
-}
-
 struct structure_graph_builder;
 struct manual_structure_graph_builder;
 
@@ -64,6 +44,7 @@ class structure_graph
   friend struct detail::structure_graph_builder;
   friend struct detail::manual_structure_graph_builder;
 
+
   public:
     enum decoration_type
     {
@@ -75,9 +56,6 @@ class structure_graph
     };
 
     using index_type = unsigned int;
-
-    // TODO: when using the CMake build, this declaration causes strange linker errors
-    // static constexpr index_type undefined_vertex = (std::numeric_limits<index_type>::max)();
 
     struct vertex
     {
@@ -131,8 +109,10 @@ class structure_graph
       }
     };
 
+    using vertex_vector = atermpp::vector<vertex, std::allocator<atermpp::detail::reference_aterm<vertex>>, mcrl2::utilities::detail::GlobalThreadSafe>;
+
   protected:
-    atermpp::vector<vertex> m_vertices;
+    vertex_vector m_vertices;
     index_type m_initial_vertex = 0;
     boost::dynamic_bitset<> m_exclude;
 
@@ -152,10 +132,10 @@ class structure_graph
 
     struct vertices_not_contained_in
     {
-      const atermpp::vector<vertex>& vertices;
+      const vertex_vector& vertices;
       const boost::dynamic_bitset<>& subset;
 
-      vertices_not_contained_in(const atermpp::vector<vertex>& vertices_, const boost::dynamic_bitset<>& subset_)
+      vertices_not_contained_in(const vertex_vector& vertices_, const boost::dynamic_bitset<>& subset_)
         : vertices(vertices_),
           subset(subset_)
       {}
@@ -170,7 +150,7 @@ class structure_graph
   public:
     structure_graph() = default;
 
-    structure_graph(atermpp::vector<vertex> vertices, index_type initial_vertex, boost::dynamic_bitset<> exclude)
+    structure_graph(vertex_vector vertices, index_type initial_vertex, boost::dynamic_bitset<> exclude)
       : m_vertices(std::move(vertices)),
         m_initial_vertex(initial_vertex),
         m_exclude(std::move(exclude))
@@ -196,7 +176,7 @@ class structure_graph
       return find_vertex(u).rank;
     }
 
-    const atermpp::vector<vertex>& all_vertices() const
+    const vertex_vector& all_vertices() const
     {
       return m_vertices;
     }
@@ -211,7 +191,7 @@ class structure_graph
       return find_vertex(u).successors;
     }
 
-    boost::filtered_range<vertices_not_contained_in, const atermpp::vector<vertex>> vertices() const
+    boost::filtered_range<vertices_not_contained_in, const vertex_vector> vertices() const
     {
       return all_vertices() | boost::adaptors::filtered(vertices_not_contained_in(m_vertices, m_exclude));
     }
@@ -259,9 +239,7 @@ class structure_graph
     // TODO: avoid this linear time check
     bool is_empty() const
     {
-      // This requires boost 1.56
-      // return m_exclude.all();
-      return detail::call_dynamic_bitset_all(m_exclude);
+      return m_exclude.all();
     }
 
     // Returns true if all vertices have a rank and a decoration

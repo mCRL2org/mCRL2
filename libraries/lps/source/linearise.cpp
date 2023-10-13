@@ -624,8 +624,8 @@ class specification_basic_type
 
       if (is_if_then(t))
       {
-        const data_expression new_cond=RewriteTerm(if_then(t).condition());
-        const process_expression new_then_case=pCRLrewrite(if_then(t).then_case());
+        const data_expression new_cond=RewriteTerm(down_cast<if_then>(t).condition());
+        const process_expression new_then_case=pCRLrewrite(down_cast<if_then>(t).then_case());
         if (new_cond==sort_bool::true_())
         {
           return new_then_case;
@@ -643,8 +643,8 @@ class specification_basic_type
 
       if (is_at(t))
       {
-        const data_expression atTime=RewriteTerm(at(t).time_stamp());
-        const process_expression t1=pCRLrewrite(at(t).operand());
+        const data_expression& atTime=RewriteTerm(down_cast<at>(t).time_stamp());
+        const process_expression t1=pCRLrewrite(down_cast<at>(t).operand());
         return at(t1,atTime);
       }
 
@@ -2348,7 +2348,7 @@ class specification_basic_type
            Before october 2008 this code was wrong, as it transformed
            an expression to c-> a x, ommitting the a.delta@0. */
 
-        const data_expression c=if_then(restterm).condition();
+        const data_expression& c=down_cast<if_then>(restterm).condition();
         const process_expression r=choice(
                                      distributeActionOverConditions(
                                        act,
@@ -2375,7 +2375,7 @@ class specification_basic_type
            On industrial examples, it appears to reduce the state space
            with a factor up to 2. */
 
-        const data_expression c=if_then_else(restterm).condition();
+        const data_expression& c=down_cast<if_then_else>(restterm).condition();
         const process_expression r=choice(
                                      distributeActionOverConditions(
                                        act,
@@ -2504,8 +2504,8 @@ class specification_basic_type
 
       if (is_if_then(body))
       {
-        const data_expression condition=if_then(body).condition();
-        const process_expression body1=if_then(body).then_case();
+        const data_expression& condition=down_cast<if_then>(body).condition();
+        const process_expression& body1=down_cast<if_then>(body).then_case();
 
         if (s<=sum_state)
         {
@@ -2524,9 +2524,9 @@ class specification_basic_type
 
       if (is_if_then_else(body))
       {
-        const data_expression condition=data_expression(if_then_else(body).condition());
-        const process_expression body1=if_then_else(body).then_case();
-        const process_expression body2=if_then_else(body).else_case();
+        const data_expression& condition=down_cast<if_then_else>(body).condition();
+        const process_expression& body1=down_cast<if_then_else>(body).then_case();
+        const process_expression& body2=down_cast<if_then_else>(body).else_case();
 
         if (isDeltaAtZero(body1) && isDeltaAtZero(body2))
         {
@@ -2595,7 +2595,7 @@ class specification_basic_type
                with a factor up to 2. Until 1/11/2008 this code was incorrect,
                because the summand a (!c -> delta@0) was not forgotten.*/
 
-            const data_expression c(if_then(body2).condition());
+            const data_expression& c=down_cast<if_then>(body2).condition();
 
             const process_expression r= choice(
                                           distributeActionOverConditions(body1,c,if_then(body2).then_case(),freevars,variables_bound_in_sum),
@@ -2617,7 +2617,7 @@ class specification_basic_type
                with a factor up to 2. */
 
 
-            const data_expression c(if_then_else(body2).condition());
+            const data_expression& c=down_cast<if_then_else>(body2).condition();
             const process_expression r= choice(
                                           distributeActionOverConditions(body1,c,if_then_else(body2).then_case(),freevars,variables_bound_in_sum),
                                           distributeActionOverConditions(body1,lazy::not_(c),if_then_else(body2).else_case(),freevars,variables_bound_in_sum));
@@ -2665,8 +2665,8 @@ class specification_basic_type
       if (is_sync(body))
       {
         bool isnew=false;
-        const process_expression body1=process::sync(body).left();
-        const process_expression body2=process::sync(body).right();
+        const process_expression& body1=down_cast<process::sync>(body).left();
+        const process_expression& body2=down_cast<process::sync>(body).right();
         const action_list ma=linMergeMultiActionListProcess(
                                bodytovarheadGNF(body1,multiaction_state,freevars,v,variables_bound_in_sum),
                                bodytovarheadGNF(body2,multiaction_state,freevars,v,variables_bound_in_sum));
@@ -3195,7 +3195,7 @@ class specification_basic_type
 
       if (is_seq(sequence))
       {
-        const process_expression first=seq(sequence).left();
+        const process_expression& first=down_cast<seq>(sequence).left();
         if (is_process_instance_assignment(first))
         {
           result.push_back(atermpp::down_cast<process_instance_assignment>(first));
@@ -3226,7 +3226,7 @@ class specification_basic_type
 
       if (is_seq(oldbody))
       {
-        const process_expression first=seq(oldbody).left();
+        const process_expression& first=down_cast<seq>(oldbody).left();
         if (is_process_instance_assignment(first))
         {
           objectdatatype& object=objectIndex(process_instance_assignment(first).identifier());
@@ -3333,7 +3333,7 @@ class specification_basic_type
 
       if (is_seq(t))
       {
-        const process_expression firstproc=seq(t).left();
+        const process_expression& firstproc=down_cast<seq>(t).left();
         objectdatatype& object=objectIndex(process_instance_assignment(firstproc).identifier());
         if (object.canterminate)
         {
@@ -3450,7 +3450,7 @@ class specification_basic_type
 
       if (is_seq(t))
       {
-        const process_expression firstact=seq(t).left();
+        const process_expression& firstact=down_cast<seq>(t).left();
         assert(is_at(firstact)||is_tau(firstact)||is_action(firstact)||is_sync(firstact));
         /* the sequence of variables in
                    the second argument must be replaced */
@@ -5010,7 +5010,7 @@ class specification_basic_type
       if (is_seq(t))
       {
         const process_instance_assignment process=atermpp::down_cast<process_instance_assignment>(seq(t).left());
-        const process_expression process2=seq(t).right();
+        const process_expression& process2=down_cast<seq>(t).right();
         const process_identifier& procId=process.identifier();
         const assignment_list& t1=process.assignments();
 
@@ -5349,7 +5349,7 @@ class specification_basic_type
       {
         if (is_if_then(summandterm))
         {
-          const data_expression localcondition=data_expression(if_then(summandterm).condition());
+          const data_expression& localcondition=down_cast<if_then>(summandterm).condition();
           if (!(regular && singlestate))
           {
             condition1=lazy::and_(
@@ -5525,8 +5525,8 @@ class specification_basic_type
     {
       if (is_choice(body))
       {
-        const process_expression t1=choice(body).left();
-        const process_expression t2=choice(body).right();
+        const process_expression& t1=down_cast<choice>(body).left();
+        const process_expression& t2=down_cast<choice>(body).right();
 
         collectsumlistterm(procId,action_summands,deadlock_summands,t1,pars,stack,
                            regular,singlestate,pCRLprocs);
@@ -6439,7 +6439,7 @@ class specification_basic_type
         {
           if (smmnd.has_time())
           {
-            const data_expression actiontime=smmnd.multi_action().time();
+            const data_expression& actiontime=smmnd.multi_action().time();
 
             assert(auxrename_list_pars!=rename_list_pars.end());
             assert(auxrename_list_args!=rename_list_args.end());
@@ -6531,7 +6531,7 @@ class specification_basic_type
         equaluptillnow=1;
         for (const stochastic_action_summand& smmnd: action_summands)
         {
-          const data_expression dist=smmnd.distribution().distribution();
+          const data_expression& dist=smmnd.distribution().distribution();
           const variable_list stochastic_variables=smmnd.distribution().variables();
           assert(auxrename_list_pars!=rename_list_pars.end());
           assert(auxrename_list_args!=rename_list_args.end());
@@ -6961,7 +6961,7 @@ class specification_basic_type
         {
           if (smmnd.deadlock().has_time())
           {
-            const data_expression actiontime=smmnd.deadlock().time();
+            const data_expression& actiontime=smmnd.deadlock().time();
 
             assert(auxrename_list_pars!=rename_list_pars.end());
             assert(auxrename_list_args!=rename_list_args.end());
@@ -7324,26 +7324,26 @@ class specification_basic_type
 
       if (sort_bool::is_and_application(c2))
       {
-        return implies_condition(c1,data::binary_left(application(c2))) &&
-               implies_condition(c1,data::binary_right(application(c2)));
+        return implies_condition(c1,data::binary_left(down_cast<application>(c2))) &&
+               implies_condition(c1,data::binary_right(down_cast<application>(c2)));
       }
 
       if (sort_bool::is_or_application(c1))
       {
-        return implies_condition(data::binary_left(application(c1)),c2) &&
-               implies_condition(data::binary_right(application(c1)),c2);
+        return implies_condition(data::binary_left(down_cast<application>(c1)),c2) &&
+               implies_condition(data::binary_right(down_cast<application>(c1)),c2);
       }
 
       if (sort_bool::is_and_application(c1))
       {
-        return implies_condition(data::binary_left(application(c1)),c2) ||
-               implies_condition(data::binary_right(application(c1)),c2);
+        return implies_condition(data::binary_left(down_cast<application>(c1)),c2) ||
+               implies_condition(data::binary_right(down_cast<application>(c1)),c2);
       }
 
       if (sort_bool::is_or_application(c2))
       {
-        return implies_condition(c1,data::binary_left(application(c2))) ||
-               implies_condition(c1,data::binary_right(application(c2)));
+        return implies_condition(c1,data::binary_left(down_cast<application>(c2))) ||
+               implies_condition(c1,data::binary_right(down_cast<application>(c2)));
       }
 
       return false;
@@ -7358,27 +7358,29 @@ class specification_basic_type
 
       // const variable_list sumvars=s.summation_variables();
       const data_expression& cond=s.condition();
-      const data_expression actiontime=s.deadlock().time();
+      const data_expression& actiontime=s.deadlock().time();
 
       // First check whether the delta summand is subsumed by an action summands.
-      for (const stochastic_action_summand& as: action_summands)
+      if (!options.ignore_time)
       {
-        const data_expression cond1=as.condition();
-        if ((!options.ignore_time) &&
-            ((actiontime==as.multi_action().time()) || (!as.multi_action().has_time())) &&
-            (implies_condition(cond,cond1)))
+        for (const stochastic_action_summand& as: action_summands)
         {
-          /* De delta summand is subsumed by action summand as. So, it does not
-             have to be added. */
+          const data_expression& cond1=as.condition();
+          if (((actiontime==as.multi_action().time()) || (!as.multi_action().has_time())) &&
+              (implies_condition(cond,cond1)))
+          {
+            /* De delta summand is subsumed by action summand as. So, it does not
+               have to be added. */
 
-          return;
+            return;
+          }
         }
       }
 
       for (deadlock_summand_vector::iterator i=deadlock_summands.begin(); i!=deadlock_summands.end(); ++i)
       {
-        const deadlock_summand smmnd=*i;
-        const data_expression cond1=i->condition();
+        const deadlock_summand& smmnd=*i;
+        const data_expression& cond1=i->condition();
         if ((!options.ignore_time) &&
             ((actiontime==i->deadlock().time()) || (!i->deadlock().has_time())) &&
             (implies_condition(cond,cond1)))
@@ -7524,7 +7526,7 @@ class specification_basic_type
       {
         const variable_list& sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.multi_action().actions();
-        const data_expression actiontime=smmnd.multi_action().time();
+        const data_expression& actiontime=smmnd.multi_action().time();
         const data_expression& condition=smmnd.condition();
 
         // Explicitly allow the termination action in any allow.
@@ -8852,7 +8854,7 @@ class specification_basic_type
       {
         const variable_list& sumvars1=summand1.summation_variables();
         const action_list multiaction1=summand1.multi_action().actions();
-        const data_expression actiontime1=summand1.multi_action().time();
+        const data_expression& actiontime1=summand1.multi_action().time();
         const data_expression& condition1=summand1.condition();
         const assignment_list& nextstate1=summand1.assignments();
         const stochastic_distribution& distribution1=summand1.distribution();
@@ -8861,7 +8863,7 @@ class specification_basic_type
         {
           const variable_list& sumvars2=summand2.summation_variables();
           const action_list multiaction2=summand2.multi_action().actions();
-          const data_expression actiontime2=summand2.multi_action().time();
+          const data_expression& actiontime2=summand2.multi_action().time();
           const data_expression& condition2=summand2.condition();
           const assignment_list& nextstate2=summand2.assignments();
           const stochastic_distribution& distribution2=summand2.distribution();
@@ -8946,13 +8948,13 @@ class specification_basic_type
       for (const stochastic_action_summand& summand1: action_summands1)
       {
         const variable_list& sumvars1=summand1.summation_variables();
-        const data_expression actiontime1=summand1.multi_action().time();
+        const data_expression& actiontime1=summand1.multi_action().time();
         const data_expression& condition1=summand1.condition();
 
         for (const deadlock_summand& summand2: deadlock_summands1)
         {
           const variable_list& sumvars2=summand2.summation_variables();
-          const data_expression actiontime2=summand2.deadlock().time();
+          const data_expression& actiontime2=summand2.deadlock().time();
           const data_expression& condition2=summand2.condition();
 
           const variable_list allsums=sumvars1+sumvars2;
@@ -9004,13 +9006,13 @@ class specification_basic_type
       for (const deadlock_summand& summand1: deadlock_summands1)
       {
         const variable_list& sumvars1=summand1.summation_variables();
-        const data_expression actiontime1=summand1.deadlock().time();
+        const data_expression& actiontime1=summand1.deadlock().time();
         const data_expression& condition1=summand1.condition();
 
         for (const deadlock_summand& summand2: deadlock_summands2)
         {
           const variable_list& sumvars2=summand2.summation_variables();
-          const data_expression actiontime2=summand2.deadlock().time();
+          const data_expression& actiontime2=summand2.deadlock().time();
           const data_expression& condition2=summand2.condition();
 
           const variable_list allsums=sumvars1+sumvars2;
@@ -9210,6 +9212,7 @@ class specification_basic_type
 
         objectdatatype& object=objectIndex(process_instance_assignment(t).identifier());
 
+        // Now apply the assignment in this process to the obtained initial process and the distribution. 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
         for (const assignment& a: process_instance_assignment(t).assignments())
         {
@@ -9217,6 +9220,10 @@ class specification_basic_type
         }
 
         init=replace_variables_capture_avoiding_alt(init,sigma);
+        initial_stochastic_distribution = 
+                   stochastic_distribution(
+                         initial_stochastic_distribution.variables(),
+                         replace_variables_capture_avoiding_alt(initial_stochastic_distribution.distribution(), sigma));
 
         // Make the bound variables and parameters in this process unique.
 
@@ -9435,7 +9442,9 @@ class specification_basic_type
     /* The result are a list of action summands, deadlock summand, the parameters of this
        linear process and its initial values. A initial stochastic distribution that must
        precede the initial linear process and the ultimate delay condition of this
-       linear process that can be used or be ignored. */
+       linear process that can be used or be ignored. 
+
+    */
 
     void generateLPEmCRL(
       stochastic_action_summand_vector& action_summands,
@@ -10036,8 +10045,8 @@ class specification_basic_type
           return stochastic_operator(r.variables(),
                                      r.distribution(),
                                      sum(s.variables(),r.operand()));
-         }
-        return t;
+        }
+        return sum(s.variables(),r_);
       }
 
       if (is_stochastic_operator(t))
@@ -10139,7 +10148,7 @@ class specification_basic_type
 
       if (is_seq(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(seq(t).left());
+        const process_expression r_=obtain_initial_distribution_term(down_cast<seq>(t).left());
         if (is_stochastic_operator(r_))
         {
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
@@ -10150,7 +10159,7 @@ class specification_basic_type
 
       if (is_if_then(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(if_then(t).then_case());
+        const process_expression r_=obtain_initial_distribution_term(down_cast<if_then>(t).then_case());
         if (is_stochastic_operator(r_))
         {
           const if_then& t_if_then=atermpp::down_cast<if_then>(t);
@@ -10164,8 +10173,8 @@ class specification_basic_type
 
       if (is_if_then_else(t))
       {
-        const process_expression r1_=obtain_initial_distribution_term(if_then_else(t).then_case());
-        const process_expression r2_=obtain_initial_distribution_term(if_then_else(t).else_case());
+        const process_expression r1_=obtain_initial_distribution_term(down_cast<if_then_else>(t).then_case());
+        const process_expression r2_=obtain_initial_distribution_term(down_cast<if_then_else>(t).else_case());
         if (is_stochastic_operator(r1_))
         {
           const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);

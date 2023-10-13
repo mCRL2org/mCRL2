@@ -1,7 +1,5 @@
 include(CMakeParseArguments)
 
-# The Threads module provides the Threads::Threads target since 3.1
-cmake_minimum_required(VERSION 3.1)
 find_package(Threads)
 
 macro(append_unique LIST_VAR VALUE)
@@ -13,13 +11,12 @@ endmacro()
 
 function(_add_library_tests TARGET_NAME)
   file(GLOB librarytest "test/*.cpp")
-  file(GLOB libraryexample "example/*.cpp")
 
   if(MCRL2_SKIP_LONG_TESTS)
     add_definitions(-DMCRL2_SKIP_LONG_TESTS)
   endif(MCRL2_SKIP_LONG_TESTS)
 
-  foreach(category "librarytest" "libraryexample")
+  foreach(category "librarytest")
     foreach(test IN LISTS ${category})
 
       get_filename_component(base ${test} NAME_WE)
@@ -33,20 +30,10 @@ function(_add_library_tests TARGET_NAME)
         target_compile_definitions(${testname} PUBLIC -DMCRL2_TEST_JITTYC)
       endif()
 
-      if("${category}" STREQUAL "librarytest")
-        add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
-           --build-and-test
-           "${CMAKE_SOURCE_DIR}"
-           "${CMAKE_BINARY_DIR}"
-           --build-noclean
-           --build-nocmake
-           --build-generator "${CMAKE_GENERATOR}"
-           --build-target "${testname}"
-           --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
-           --test-command "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}"
-        )
+      if(CMAKE_CONFIGURATION_TYPES)
+        add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/$<CONFIG>/${testname}")
       else()
-        add_test(NAME ${testname} COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${testname})
+        add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}")
       endif()
 
       target_link_libraries(${testname} Threads::Threads)
@@ -133,6 +120,7 @@ macro(_add_man_page TARGET_NAME)
       TARGET ${TARGET_NAME} POST_BUILD
       COMMAND ${TARGET_NAME} --generate-man-page | gzip --best > ${TARGET_NAME}.1.gz
       COMMENT "Generating man page for ${TARGET_NAME}"
+      USES_TERMINAL
     )
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.1.gz DESTINATION share/man/man1 COMPONENT Documentation)
   endif(MCRL2_MAN_PAGES)
@@ -279,6 +267,9 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
             RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
             BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH})
     get_target_property(IS_BUNDLE ${TARGET_NAME} MACOSX_BUNDLE)
+    
+    get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
+    set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TARGET_NAME}")
   endif()
   
   target_include_directories(${TARGET_NAME} PUBLIC ${ARG_INCLUDEDIR} ${ARG_INCLUDE} )

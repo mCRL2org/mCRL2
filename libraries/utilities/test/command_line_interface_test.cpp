@@ -9,7 +9,6 @@
 /// \file command_line_interface_test.cpp
 
 #define BOOST_AUTO_TEST_MAIN
-#include <boost/test/auto_unit_test.hpp>
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/utilities/command_line_interface.h"

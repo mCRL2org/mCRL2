@@ -19,7 +19,7 @@
 
 using namespace atermpp;
 
-BOOST_AUTO_TEST_CASE(parallel_vector)
+BOOST_AUTO_TEST_CASE(parallel_vector, *boost::unit_test::timeout(240))
 {
 #ifdef MCRL2_THREAD_SAFE
   // One thread continuously modifies a local atermpp::vector of aterms while the main thread performs garbage collection extensively.
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(parallel_vector)
   {
     for (std::size_t i = 0; i < 1000; ++i)
     {
-      atermpp::detail::g_term_pool().collect();
+      atermpp::detail::g_thread_term_pool().collect();
     }
 
     if (local.joinable())

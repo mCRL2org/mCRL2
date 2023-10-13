@@ -17,10 +17,11 @@
 
 #ifndef MCRL2_ATERMPP_STANDARD_CONTAINER_UNORDERED_MAP_H
 #define MCRL2_ATERMPP_STANDARD_CONTAINER_UNORDERED_MAP_H
+#pragma once
 
 #include <unordered_map>
 #include "mcrl2/atermpp/detail/aterm_container.h"
-#include "mcrl2/atermpp/detail/shared_guard.h"
+#include "mcrl2/utilities/shared_mutex.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
@@ -124,203 +125,83 @@ public:
   /// \brief Standard destructor.
   ~unordered_map()=default;
 
-  void clear() noexcept
-  {
-    detail::shared_guard _;
-    super::clear();
-  }
+  void clear() noexcept;
 
   /// \brief Inserts an element referring to a default value in the map. 
-  std::pair<iterator,bool> insert( const value_type& value )
-  {
-    detail::shared_guard _;
-    return super::insert(value);
-  }
+  std::pair<iterator,bool> insert( const value_type& value );
 
   template< class P >
-  std::pair<iterator,bool> insert( P&& value )
-  {
-    detail::shared_guard _;
-    return super::insert(value); 
-  }
+  std::pair<iterator,bool> insert( P&& value );
 
-  iterator insert( const_iterator hint, const value_type& value )
-  {
-    detail::shared_guard _;
-    return super::insert(hint, value);
-  }
+  iterator insert( const_iterator hint, const value_type& value );
 
   template< class P >
-  iterator insert( const_iterator hint, P&& value )
-  {
-    detail::shared_guard _;
-    return super::insert(hint, value);
-  }
+  iterator insert( const_iterator hint, P&& value );
 
   template< class InputIt >
-  void insert( InputIt first, InputIt last )
-  {
-    detail::shared_guard _;
-    super::insert(first, last);
-  }
+  void insert( InputIt first, InputIt last );
 
-  void insert( std::initializer_list<value_type> ilist )
-  {
-    detail::shared_guard _;
-    super::insert(ilist);
-  }
+  void insert( std::initializer_list<value_type> ilist );
 
-  insert_return_type insert( node_type&& nh )
-  {
-    detail::shared_guard _;
-    return super::insert(nh);
-  }
+  insert_return_type insert( node_type&& nh );
 
-  iterator insert( const_iterator hint, node_type&& nh )
-  {
-    detail::shared_guard _;
-    return super::insert(hint, nh);
-  }
+  iterator insert( const_iterator hint, node_type&& nh );
 
   template <class M>
-  std::pair<iterator, bool> insert_or_assign( const Key& k, M&& obj )
-  {
-    detail::shared_guard _;
-    return super::insert_or_assign(k, obj);
-  }
+  std::pair<iterator, bool> insert_or_assign( const Key& k, M&& obj );
 
   template <class M>
-  std::pair<iterator, bool> insert_or_assign( Key&& k, M&& obj )
-  {
-    detail::shared_guard _;
-    return super::insert_or_assign(k, obj);
-  }
+  std::pair<iterator, bool> insert_or_assign( Key&& k, M&& obj );
 
   template <class M>
-  iterator insert_or_assign( const_iterator hint, const Key& k, M&& obj )
-  {
-    detail::shared_guard _;
-    return super::insert_or_assign(hint, k, obj); 
-  }
+  iterator insert_or_assign( const_iterator hint, const Key& k, M&& obj );
 
   template <class M>
-  iterator insert_or_assign( const_iterator hint, Key&& k, M&& obj )
-  {
-    detail::shared_guard _;
-    return super::insert_or_assign(hint, k, obj);   
-  }
+  iterator insert_or_assign( const_iterator hint, Key&& k, M&& obj );
 
   template< class... Args >
-  std::pair<iterator,bool> emplace( Args&&... args )
-  {
-    detail::shared_guard _;
-    return super::emplace(args...);
-  }
+  std::pair<iterator,bool> emplace( Args&&... args );
 
   template <class... Args>
-  iterator emplace_hint( const_iterator hint, Args&&... args )
-  {
-    detail::shared_guard _;
-    return super::emplace_hint(hint, args...);
-  }
+  iterator emplace_hint( const_iterator hint, Args&&... args );
 
   template< class... Args >
-  std::pair<iterator, bool> try_emplace( const Key& k, Args&&... args )
-  {
-    detail::shared_guard _;
-    return super::try_emplace(k, args...);
-  }
+  std::pair<iterator, bool> try_emplace( const Key& k, Args&&... args );
 
   template< class... Args >
-  std::pair<iterator, bool> try_emplace( Key&& k, Args&&... args )
-  {
-    detail::shared_guard _;
-    return super::try_emplace(k, args...);
-  }
+  std::pair<iterator, bool> try_emplace( Key&& k, Args&&... args );
 
   template< class... Args >
-  iterator try_emplace( const_iterator hint, const Key& k, Args&&... args )
-  {
-    detail::shared_guard _;
-    return super::try_emplace(hint, k, args...);
-  }
+  iterator try_emplace( const_iterator hint, const Key& k, Args&&... args );
 
   template< class... Args >
-  iterator try_emplace( const_iterator hint, Key&& k, Args&&... args )
-  {
-    detail::shared_guard _;
-    return super::try_emplace(hint, k, args...);
-  }
+  iterator try_emplace( const_iterator hint, Key&& k, Args&&... args );
 
-  iterator erase( iterator pos )
-  {
-    detail::shared_guard _;
-    return super::erase(pos);
-  }
+  iterator erase( iterator pos );
 
-  iterator erase( const_iterator pos )
-  {
-    detail::shared_guard _;
-    return super::erase(pos);   
-  }	
+  iterator erase( const_iterator pos );
   
-  iterator erase( const_iterator first, const_iterator last )
-  {
-    detail::shared_guard _;
-    return super::erase(first, last);
-  }
+  iterator erase( const_iterator first, const_iterator last );
 
-  size_type erase( const Key& key )
-  {
-    detail::shared_guard _;
-    return super::erase(key);
-  }
+  size_type erase( const Key& key );
 
-  void swap( unordered_map& other )
-  {
-    detail::shared_guard _;
-    super::swap(other);
-  }
+  void swap( unordered_map& other );
 
-  node_type extract( const_iterator position )
-  {
-    detail::shared_guard _;
-    return extract(position);
-  }
+  node_type extract( const_iterator position );
   
-  node_type extract( const Key& k )
-  {
-    detail::shared_guard _;
-    return extract(k);
-  }
+  node_type extract( const Key& k );
 
   template<class H2, class P2>
-  void merge( std::unordered_map<Key, T, H2, P2, allocator_type>& source )
-  {
-    detail::shared_guard _;
-    return merge(source);
-  }
+  void merge( std::unordered_map<Key, T, H2, P2, allocator_type>& source );
 
   template<class H2, class P2>
-  void merge( std::unordered_map<Key, T, H2, P2, allocator_type>&& source )
-  {
-    detail::shared_guard _;
-    return merge(source);
-  }
+  void merge( std::unordered_map<Key, T, H2, P2, allocator_type>&& source );
 
   template<class H2, class P2>
-  void merge( std::unordered_multimap<Key, T, H2, P2, allocator_type>& source )
-  {
-    detail::shared_guard _;
-    return merge(source);
-  }
+  void merge( std::unordered_multimap<Key, T, H2, P2, allocator_type>& source );
 
   template<class H2, class P2>
-  void merge( std::unordered_multimap<Key, T, H2, P2, allocator_type>&& source )
-  {
-    detail::shared_guard _;
-    return merge(source);
-  }
+  void merge( std::unordered_multimap<Key, T, H2, P2, allocator_type>&& source );
 
   std::size_t size() const override
   {
@@ -428,245 +309,95 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     /// \brief Standard destructor.
     ~unordered_map() = default;
 
-    void clear() noexcept
-    {
-      detail::shared_guard _;
-      super::clear();
-    }
+    void clear() noexcept;
 
     /// \brief Standard find function in a map.
     /// \returns Element with the specified key.
     template<typename ...Args>
-    iterator find(const Args&... args)
-    { 
-      if constexpr (ThreadSafe)
-      {
-        detail::shared_guard _;
-        return super::find(args...); 
-      }
-      return super::find(args...); 
-    }
+    iterator find(const Args&... args);
 
     /// \brief Standard find function in a map.
     /// \returns Element with the specified key.
     template<typename ...Args>
-    const_iterator find(const Args&... args) const 
-    { 
-      if (ThreadSafe)
-      {
-        detail::shared_guard _;
-        return super::find(args...); 
-      }
-      return super::find(args...); 
-    }
+    const_iterator find(const Args&... args) const;
 
-    std::pair<iterator, bool> insert(const value_type& value)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::insert(value);
-    }
+    std::pair<iterator, bool> insert(const value_type& value);
 
     template< class P >
-    std::pair<iterator, bool> insert(P&& value)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::insert(value);
-    }
+    std::pair<iterator, bool> insert(P&& value);
 
-    iterator insert(const_iterator hint, value_type&& value)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::insert(hint, value);
-    }
+    iterator insert(const_iterator hint, value_type&& value);
 
     template< class P >
-    iterator insert(const_iterator hint, P&& value)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::insert(hint, value);
-    }
+    iterator insert(const_iterator hint, P&& value);
 
     template< class InputIt >
-    void insert(InputIt first, InputIt last)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      super::insert(first, last);
-    }
+    void insert(InputIt first, InputIt last);
 
-    void insert(std::initializer_list<value_type> ilist)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      super::insert(ilist);
-    }
-
-    /*insert_return_type insert(node_type&& nh)
-    {
-      detail::shared_guard _;
-      return super::insert(nh);
-    }
-
-    iterator insert(const_iterator hint, node_type&& nh)
-    {
-      detail::shared_guard _;
-      return super::insert(hint, nh);
-    }*/
-    
-    template <class M>
-    std::pair<iterator, bool> insert_or_assign(const Key& k, M&& obj)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::insert_or_assign(k, obj);
-    }
-
-    template <class M>
-    std::pair<iterator, bool> insert_or_assign(Key&& k, M&& obj)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::insert_or_assign(k, obj);
-    }
-
-    template <class M>
-    iterator insert_or_assign(const_iterator hint, const Key& k, M&& obj)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::insert_or_assign(hint, k, obj);
-    }
-
-    template <class M>
-    iterator insert_or_assign(const_iterator hint, Key&& k, M&& obj)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::insert_or_assign(hint, k, obj);
-    }
-
-    template< class... Args >
-    std::pair<iterator, bool> emplace(Args&&... args)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::emplace(args...);
-    }
-
-    template <class... Args>
-    iterator emplace_hint(const_iterator hint, Args&&... args)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::emplace(hint, args...);
-    }
-
-    template< class... Args >
-    std::pair<iterator, bool> try_emplace(const Key& k, Args&&... args)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::try_emplace(k, args...);
-    }
-
-    template< class... Args >
-    std::pair<iterator, bool> try_emplace(Key&& k, Args&&... args)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::try_emplace(k, args...);
-    }
-
-    template< class... Args >
-    iterator try_emplace(const_iterator hint, const Key& k, Args&&... args)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::try_emplace(hint, k, args...);
-    }
-
-    template< class... Args >
-    iterator try_emplace(const_iterator hint, Key&& k, Args&&... args)
-    {
-      rehash_if_needed();
-      detail::shared_guard _;
-      return super::try_emplace(hint, k, args...);
-    }
-
-    iterator erase(iterator pos)
-    {
-      detail::shared_guard _;
-      return super::erase(pos);
-    }
-
-    iterator erase(const_iterator pos)
-    {
-      detail::shared_guard _;
-      return super::erase(pos);
-    }
-
-    iterator erase(const_iterator first, const_iterator last)
-    {
-      detail::shared_guard _;
-      return super::erase(first, last);
-    }
-
-    size_type erase(const Key& key)
-    {
-      detail::shared_guard _;
-      return super::erase(key);
-    }
-
-    void swap(unordered_map& other)
-    {
-      detail::shared_guard _;
-      super::swap(other);
-    }
-
-    /*node_type extract(const_iterator position)
-    {
-      detail::shared_guard _;
-      return extract(position);
-    }
-
-    node_type extract(const Key& k)
-    {
-      detail::shared_guard _;
-      return extract(k);
-    }*/
+    void insert(std::initializer_list<value_type> ilist);
 
     /*
-    template<class H2, class P2>
-    void merge(std::unordered_map<Key, T, H2, P2, allocator_type>& source)
-    {
-      detail::shared_guard _;
-      return merge(source);
-    }
+    insert_return_type insert(node_type&& nh);
+
+    iterator insert(const_iterator hint, node_type&& nh);
+    */
+    
+    template <class M>
+    std::pair<iterator, bool> insert_or_assign(const Key& k, M&& obj);
+
+    template <class M>
+    std::pair<iterator, bool> insert_or_assign(Key&& k, M&& obj);
+
+    template <class M>
+    iterator insert_or_assign(const_iterator hint, const Key& k, M&& obj);
+
+    template <class M>
+    iterator insert_or_assign(const_iterator hint, Key&& k, M&& obj);
+
+    template< class... Args >
+    std::pair<iterator, bool> emplace(Args&&... args);
+
+    template <class... Args>
+    iterator emplace_hint(const_iterator hint, Args&&... args);
+
+    template< class... Args >
+    std::pair<iterator, bool> try_emplace(const Key& k, Args&&... args);
+
+    template< class... Args >
+    std::pair<iterator, bool> try_emplace(Key&& k, Args&&... args);
+
+    template< class... Args >
+    iterator try_emplace(const_iterator hint, const Key& k, Args&&... args);
+
+    template< class... Args >
+    iterator try_emplace(const_iterator hint, Key&& k, Args&&... args);
+
+    iterator erase(iterator pos);
+
+    iterator erase(const_iterator pos);
+
+    iterator erase(const_iterator first, const_iterator last);
+
+    size_type erase(const Key& key);
+
+    void swap(unordered_map& other);
+
+    /*
+    node_type extract(const_iterator position);
+
+    node_type extract(const Key& k);
 
     template<class H2, class P2>
-    void merge(std::unordered_map<Key, T, H2, P2, allocator_type>&& source)
-    {
-      detail::shared_guard _;
-      return merge(source);
-    }
+    void merge(std::unordered_map<Key, T, H2, P2, allocator_type>& source);
 
     template<class H2, class P2>
-    void merge(std::unordered_multimap<Key, T, H2, P2, allocator_type>& source)
-    {
-      detail::shared_guard _;
-      return merge(source);
-    }
+    void merge(std::unordered_map<Key, T, H2, P2, allocator_type>&& source);
 
     template<class H2, class P2>
-    void merge(std::unordered_multimap<Key, T, H2, P2, allocator_type>&& source)
-    {
-      detail::shared_guard _;
-      return merge(source);
-    }
+    void merge(std::unordered_multimap<Key, T, H2, P2, allocator_type>& source);
+
+    template<class H2, class P2>
+    void merge(std::unordered_multimap<Key, T, H2, P2, allocator_type>&& source);
     */
 
     std::size_t size() const override

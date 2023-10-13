@@ -331,15 +331,7 @@ void rewrite_aux(data_expression& result, const data_expression& t, RewriterComp
   {
     const std::size_t index = get_index(down_cast<function_symbol>(t));
     if (index<this_rewriter->normal_forms_for_constants.size())
-    {
-      // The following line is replaced by the more efficient assign, but should be reinstalled
-      // in due time, when the compiler can more efficiently handle thread local terms. 
-      // result = this_rewriter->normal_forms_for_constants[index];
-      /* result.assign(this_rewriter->normal_forms_for_constants[index], 
-                    this_rewriter->m_busy_flag,
-                    this_rewriter->m_forbidden_flag,
-                    *this_rewriter->m_creation_depth); */
-             
+    {             
       // In this case we can use an unprotected_assign as the normal_forms_for_constants will 
       // not change anymore, while rewriting is going on. 
       result.unprotected_assign<false>(this_rewriter->normal_forms_for_constants[index]);
@@ -382,9 +374,7 @@ void rewrite_aux(data_expression& result, const data_expression& t, RewriterComp
   if (is_variable(t))
   {
     sigma(this_rewriter).apply(down_cast<variable>(t),result,
-                               this_rewriter->m_busy_flag,           // Adding the busy/forbidden/creation depth is an optimisation.
-                               this_rewriter->m_forbidden_flag,
-                               this_rewriter->m_lock_depth);
+                               *this_rewriter->m_thread_aterm_pool);
     return;
   }
   else

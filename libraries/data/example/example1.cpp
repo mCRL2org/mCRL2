@@ -2,7 +2,7 @@
 
 using namespace mcrl2::data;
 
-int main(int argc, char* argv[])
+int main(int /* argc */, char** /* argv*/)
 {
   data_expression two   = sort_nat::nat(2);
   data_expression three = sort_nat::nat(3);

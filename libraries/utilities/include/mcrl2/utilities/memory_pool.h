@@ -12,6 +12,7 @@
 
 #include "mcrl2/utilities/detail/free_list.h"
 #include "mcrl2/utilities/noncopyable.h"
+#include "mcrl2/utilities/mutex.h"
 
 #include <array>
 #include <cstdint>
@@ -79,12 +80,12 @@ public:
   T* allocate()
   {
     // Only allow one thread to allocate at the time.
-    if constexpr (ThreadSafe) { m_block_mutex.lock(); }
+    m_block_mutex.lock();
 
     if (!m_freelist.empty())
     {
       T& element = m_freelist.pop_front();
-      if constexpr (ThreadSafe) { m_block_mutex.unlock(); }
+      m_block_mutex.unlock();
       return &element;
     }
 
@@ -99,26 +100,28 @@ public:
     // The object was last written as this slot is not part of the freelist.
     T& slot = (m_blocks.front()[m_current_index++]).element();
 
-    if constexpr (ThreadSafe) { m_block_mutex.unlock(); }
     assert(contains(&slot));
+    m_block_mutex.unlock();
     return &slot;
   }
 
   /// \brief Free the memory used by the given pointer that has been allocated by this pool.
   void deallocate(T* pointer)
   {    
-    if constexpr (ThreadSafe) { m_block_mutex.lock(); }
+    m_block_mutex.lock();
 
     assert(contains(pointer));
     m_freelist.push_front(reinterpret_cast<Slot&>(*pointer));
 
-    if constexpr (ThreadSafe) { m_block_mutex.unlock(); }
+    m_block_mutex.unlock();
   }
 
   /// \brief Frees blocks that are no longer storing elements of T.
   /// \returns The number of blocks that have been removed.
   std::size_t consolidate()
   {
+    m_block_mutex.lock();
+
     m_freelist.destructive_mark();
     std::size_t old_number_of_blocks = m_number_of_blocks;
 
@@ -163,6 +166,7 @@ public:
       }
     }
 
+    m_block_mutex.unlock();
     return old_number_of_blocks - m_number_of_blocks;
   }
 
@@ -203,7 +207,7 @@ private:
   std::forward_list<Block> m_blocks;
 
   /// \brief Ensures that the block list is only modified by a single thread.
-  std::mutex m_block_mutex = {};
+  mcrl2::utilities::mutex m_block_mutex = {};
 
   /// \brief Indicates the head of the freelist.
   Freelist m_freelist;

@@ -1,0 +1,26 @@
+\documentclass[tikz]{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{automata}
+
+\begin{document}
+
+\begin{tikzpicture}
+    \tikzstyle{every state}=[
+        draw,
+        shape=circle,
+        inner sep=1pt,
+        minimum size=5pt,
+        final/.style={double,minimum size=6pt},
+        initial text=]
+        
+    [auto,->]
+    \renewcommand{\a}[1]{\textit{#1}}
+    \node[state,initial] (n0) {}; 
+    \node[state, right of=n0] (n1) {}; 
+    \node[state, right of=n1, below of=n1] (n2) {};
+    \node[state,final,right of=n2,above of=n2] (n3) {};
+    \path (n0) edge node{\a{coin}} (n1) (n1) edge node{\a{bad}} (n3)
+            (n1) edge node[left]{\a{coin}} (n2) (n2) edge node[right]{\a{good}} (n3);
+\end{tikzpicture}
+\end{document}

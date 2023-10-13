@@ -14,6 +14,7 @@
 using namespace atermpp;
 using namespace atermpp::detail;
 using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::detail;
 
 function_symbol_pool::function_symbol_pool()
 {
@@ -109,20 +110,21 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
 
 void function_symbol_pool::deregister(const std::string& prefix)
 {
-  if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
+  m_mutex.lock();
   m_prefix_to_register_function_map.erase(prefix);
-  if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
+  m_mutex.unlock();
 }
 
 std::shared_ptr<std::size_t> function_symbol_pool::register_prefix(const std::string& prefix)
 {
-  if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
+  m_mutex.lock();
 
   auto it = m_prefix_to_register_function_map.find(prefix);
   if (it != m_prefix_to_register_function_map.end())
   {
-    if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
-    return it->second;
+    auto result = it->second;
+    m_mutex.unlock();
+    return result;
   }
   else
   {
@@ -130,7 +132,7 @@ std::shared_ptr<std::size_t> function_symbol_pool::register_prefix(const std::st
     std::shared_ptr<std::size_t> shared_index = std::make_shared<std::size_t>(index);
     m_prefix_to_register_function_map[prefix] = shared_index;
 
-    if constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
+    m_mutex.unlock();
     return shared_index;
   }
 }
@@ -170,6 +172,9 @@ std::size_t function_symbol_pool::get_sufficiently_large_postfix_index(const std
 
 void function_symbol_pool::sweep()
 {
+  // Prevents changes to the symbol_set
+  std::unique_lock lock(m_mutex);
+
   auto timestamp = std::chrono::system_clock::now();
   std::size_t old_size = size();
 
@@ -186,17 +191,17 @@ void function_symbol_pool::sweep()
     }
   }
 
-  std::size_t erased_blocks = m_symbol_set.get_allocator().consolidate();
+  std::size_t erased_blocks = 0; //m_symbol_set.get_allocator().consolidate();
 
   if (EnableGarbageCollectionMetrics)
   {
     auto sweep_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
 
     // Print the relevant information.
-    mCRL2log(mcrl2::log::info, "Performance") << "function_symbol_pool: Garbage collected " << old_size - size() << " function symbols, " << size() << " function symbols remaining in "
+    mCRL2log(mcrl2::log::info) << "function_symbol_pool: Garbage collected " << old_size - size() << " function symbols, " << size() << " function symbols remaining in "
       << sweep_duration << " ms.\n";
 
-    mCRL2log(mcrl2::log::info, "Performance") << "function_symbol_pool: Consolidate removed " << erased_blocks << " blocks.\n";
+    mCRL2log(mcrl2::log::info) << "function_symbol_pool: Consolidate removed " << erased_blocks << " blocks.\n";
   }
 
   if constexpr (EnableHashtableMetrics)
@@ -206,12 +211,12 @@ void function_symbol_pool::sweep()
 
   if (EnableCreationMetrics)
   {
-    mCRL2log(mcrl2::log::info, "Performance") << "g_function_symbol_pool: Stores " << size() << " function symbols. create() " << m_function_symbol_metrics.message() << ".\n";
+    mCRL2log(mcrl2::log::info) << "g_function_symbol_pool: Stores " << size() << " function symbols. create() " << m_function_symbol_metrics.message() << ".\n";
   }
 
   if (EnableReferenceCountMetrics)
   {
-    mCRL2log(mcrl2::log::info, "Performance") << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
+    mCRL2log(mcrl2::log::info) << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
   }
 }
 void function_symbol_pool::resize_if_needed()

@@ -20,7 +20,6 @@
 #include "parser.h"
 #include "settingsdialog.h"
 #include "simulator.h"
-#include "timeseries.h"
 
 class MainWindow : public QMainWindow
 {
@@ -30,7 +29,6 @@ class MainWindow : public QMainWindow
     MainWindow();
 
     bool simulationMode() const { return m_ui.actionSimulationMode->isChecked(); }
-    bool traceMode() const { return m_ui.actionTraceMode->isChecked(); }
     bool editMode() const { return m_ui.actionEditMode->isChecked(); }
 
   public slots:
@@ -59,7 +57,6 @@ class MainWindow : public QMainWindow
     void showDomainContextMenu(const QPoint& position);
 
     void clusterNodes();
-    void viewTrace();
     void distributionPlot();
     void correlationPlot();
     void combinationPlot();
@@ -76,8 +73,6 @@ class MainWindow : public QMainWindow
     void routeCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
     void toSimulator() { m_simulator->initFrameCurr(m_routingCluster, 
                                                     std::vector<Attribute*>(m_routingClusterAttributes.begin(), m_routingClusterAttributes.end())); }
-    void toTrace() { m_timeSeries->markItems(m_routingCluster); }
-    void allToTrace() { m_timeSeries->markItems(m_routingClusterSet); }
     void toExaminer() { m_examiner->addFrameHist(m_routingCluster, 
                                                  std::vector<Attribute*>(m_routingClusterAttributes.begin(), m_routingClusterAttributes.end())); }
     void allToExaminer() { m_examiner->addFrameHist(m_routingClusterSet, 
@@ -111,7 +106,6 @@ class MainWindow : public QMainWindow
     Examiner *m_examiner;
     ArcDiagram *m_arcDiagram;
     Simulator *m_simulator;
-    TimeSeries *m_timeSeries;
     DiagramEditor *m_diagramEditor;
 
     Cluster *m_routingCluster;

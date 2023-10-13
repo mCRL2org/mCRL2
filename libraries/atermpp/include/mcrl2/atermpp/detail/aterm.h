@@ -10,9 +10,8 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_H
 
-#include <iostream> //  FOR DEBUGGING. 
 #include <limits>
-// #include <type_traits>
+
 #include "mcrl2/utilities/type_traits.h"
 #include "mcrl2/atermpp/function_symbol.h"
 
@@ -44,14 +43,8 @@ using is_term_or_function = std::disjunction<std::is_convertible<Term, unprotect
 template<typename ...Terms>
 using are_terms_or_functions = mcrl2::utilities::forall<is_term_or_function<Terms>...>;
 
-/// \brief This is the class to which an aterm points. Each _aterm consists
-///        of a function symbol and a reference count used for garbage
-///        collection.
-class _aterm : public
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-  mcrl2::utilities::shared_reference_counted<_aterm, GlobalThreadSafe>,
-#endif
-  mcrl2::utilities::noncopyable
+/// \brief This is the class to which an aterm points.
+class _aterm : public mcrl2::utilities::noncopyable
 {
 public:
   /// \brief Create a term from a function symbol.
@@ -87,33 +80,6 @@ private:
 };
 
 inline _aterm* address(const unprotected_aterm& t);
-
-#ifdef MCRL2_ATERMPP_REFERENCE_COUNTED
-const std::size_t offset = 2;
-#else
-const std::size_t offset = 2;
-#endif
-
-inline void debug_print(std::ostream& out, const _aterm* t, const std::size_t d)
-{
-  if (d==0) { out << "..."; return; }
-  if (!t->function().defined()) { out << "UNDEFFUNC"; return; }
-
-  out << t->function().name();
-  std::string separator="(";
-
-  for(std::size_t i=0; i< t->function().arity() ; ++i)
-  {
-    out << separator;
-    debug_print(out, *((reinterpret_cast<_aterm *const*>(t))+offset+i),d-1);
-    separator = ",";
-  }
-  if (t->function().arity()>0)
-  {
-    out << ")";
-  }
-}
-
 
 } // namespace detail
 } // namespace atermpp

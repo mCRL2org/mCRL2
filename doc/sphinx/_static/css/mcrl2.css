@@ -1,0 +1,110 @@
+/**
+ * mCRL2 homepage specific updates of the sphinx theme.
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+@import 'theme.css';
+
+/* mCRL2 color theme */
+:root {
+  --mcrl2-caption:hsl(153, 22%, 18%);
+  --mcrl2-title:hsl(152, 33%, 49%);
+  --mcrl2-light:#c3e2d4;
+}
+
+/* Non standard classes */
+table.docutils { margin: 0 auto; }
+table.docutils td { padding: 0.3em 0; }
+table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
+table.docutils.field-list { margin: 0; }
+
+image.image-no-text-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.citation {
+  display: flex;
+  flex-wrap: wrap;
+}
+.citation dt {
+  width: 7rem;
+  background-color: transparent; /* cancel highlighting of targeted line */
+}
+.citation dd {
+  width: calc(100% - 7rem);
+  margin-left: 0;
+  margin-top: 0;
+}
+.citation dd > p {
+  margin-bottom: 0;
+}
+
+/* citations don't have square brackets around them, so we add them with CSS */
+.citation .brackets:before { content: "["; }
+.citation .brackets:after { content: "]"; }
+
+div.tool-docs li { display: inline-block; width: 20%; }
+div.tool-docs { clear: both; }
+
+div.dparser .admonition-title {
+  font-family: monospace;
+}
+
+.admonition .admonition-title { background-color: var(--mcrl2-title); }
+.rst-content .admonition { background: var(--mcrl2-light); }
+
+.admonition.admonition-release .admonition-title { display: none; }
+.admonition.admonition-release { margin: 1em 0; font-family: sans-serif; text-align: center; background-color:var(--mcrl2-light); }
+
+.admonition.admonition-exercise .admonition-title { background-color: var(--mcrl2-title); }
+.admonition.admonition-exercise { background-color: var(--mcrl2-light); }
+
+.admonition.admonition-example .admonition-title { background-color: var(--mcrl2-title); }
+.admonition.admonition-example { background-color: var(--mcrl2-light); }
+
+.admonition.admonition-definition-lts .admonition-title { background-color: var(--mcrl2-title); }
+.admonition.admonition-definition-lts { background-color: var(--mcrl2-light); }
+
+.invisible {
+    display: none;
+}
+
+.smallcaps {
+    font-variant: small-caps;
+}
+
+/* Custom Layout */
+
+table.frontpage-table td { border: 0; margin: 0; padding: 0; }
+table.teamcity-blurb { margin-top: 1em; width: 100%; }
+table.teamcity-blurb td { border: 0; vertical-align: middle; white-space: normal; }
+
+img.frontpage-logo { margin-top: 1.5em; }
+
+.wy-nav-content {
+  max-width: 100%
+}
+
+.rst-content .note {
+  background: var(--mcrl2-light);
+}
+.rst-content .note .admonition-title {
+  background: var(--mcrl2-title);
+}
+
+.rst-content code.literal {
+  white-space: nowrap;
+}
+
+.wy-menu-vertical p.caption {
+  color: var(--mcrl2-title);
+}
+
+.wy-side-nav-search {
+  background-color: var(--mcrl2-caption);
+}
+
+.wy-side-nav-search > div.version {
+  color: var(--mcrl2-light);
+}

@@ -197,7 +197,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
     std::string print_edge_index()
     {
-      mCRL2log(log::debug, "stategraph") << "--- computed marking edge index ---" << std::endl;
+      mCRL2log(log::debug) << "--- computed marking edge index ---" << std::endl;
       auto const& equations = m_pbes.equations();
       std::ostringstream out;
 
@@ -273,7 +273,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         auto const& eq_X = *find_equation(m_pbes, X);
         auto const& dpX = eq_X.data_parameter_indices();
         std::set<std::size_t> belongs(dpX.begin(), dpX.end());
-        mCRL2log(log::debug1, "stategraph") << "  initial belong set for equation " << X << " = " << print_belong_set(eq_X, belongs) << std::endl;
+        mCRL2log(log::debug1) << "  initial belong set for equation " << X << " = " << print_belong_set(eq_X, belongs) << std::endl;
 
         auto const& predvars = eq_X.predicate_variables();
         for (std::size_t i = 0; i < predvars.size(); i++)
@@ -284,8 +284,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
             std::size_t m = *j;
             if ((contains(Ye.used(), m) || contains(Ye.changed(), m)) && !rules(X, i))
             {
-              mCRL2log(log::debug1, "stategraph") << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs " << std::endl;
-              mCRL2log(log::debug2, "stategraph") << "  used = " << print_parameters(Ye.name(), Ye.used()) << " changed = " << print_parameters(Ye.name(), Ye.changed()) << std::endl;
+              mCRL2log(log::debug1) << " remove (X, i, m) = (" << X << ", " << i << ", " << m << ") variable=" << eq_X.parameters()[m] << " from belongs " << std::endl;
+              mCRL2log(log::debug2) << "  used = " << print_parameters(Ye.name(), Ye.used()) << " changed = " << print_parameters(Ye.name(), Ye.changed()) << std::endl;
               belongs.erase(j++);
             }
             else
@@ -294,7 +294,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             }
           }
         }
-        mCRL2log(log::debug1, "stategraph") << "  final   belong set for equation " << X << " = " << print_belong_set(eq_X, belongs) << std::endl;
+        mCRL2log(log::debug1) << "  final   belong set for equation " << X << " = " << print_belong_set(eq_X, belongs) << std::endl;
         for (std::size_t i: belongs)
         {
           Bk[X].insert(eq_X.parameters()[i]);
@@ -307,10 +307,10 @@ class stategraph_local_algorithm: public stategraph_algorithm
     void compute_belongs()
     {
       assert(m_local_control_flow_graphs.size() == m_connected_components_values.size());
-      mCRL2log(log::debug, "stategraph") << "=== computing belongs relation ===" << std::endl;
+      mCRL2log(log::debug) << "=== computing belongs relation ===" << std::endl;
       for (std::size_t k = 0; k < m_local_control_flow_graphs.size(); k++)
       {
-        mCRL2log(log::debug, "stategraph") << "--- compute belongs for graph " << k << " ---" << std::endl;
+        mCRL2log(log::debug) << "--- compute belongs for graph " << k << " ---" << std::endl;
         auto const& Vk = m_local_control_flow_graphs[k];
         belongs_relation Bk = compute_belongs(Vk, default_rules_predicate(Vk));
         m_belongs.push_back(Bk);
@@ -337,7 +337,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         auto const& Bk = m_belongs[k];
         out << print_belongs(Bk);
       }
-      mCRL2log(log::debug, "stategraph") << out.str() << std::endl;
+      mCRL2log(log::debug) << out.str() << std::endl;
     }
 
     std::set<data::variable> significant_variables(const local_control_flow_graph_vertex& u) const
@@ -437,7 +437,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
     void print_marking_statistics()
     {
-      mCRL2log(log::verbose, "stategraph") << "--- marking statistics: " << m_marking_rewrite_count << " rewrite calls, from which " << m_marking_rewrite_cached_count << " were cached" << std::endl;
+      mCRL2log(log::verbose) << "--- marking statistics: " << m_marking_rewrite_count << " rewrite calls, from which " << m_marking_rewrite_cached_count << " were cached" << std::endl;
     }
 
     // updates u.marking
@@ -489,7 +489,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
     void compute_control_flow_marking()
     {
-      mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
+      mCRL2log(log::debug) << "=== computing control flow marking ===" << std::endl;
       using utilities::detail::pick_element;
 
       start_timer("marking initialization");
@@ -503,7 +503,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
           auto const& X = u.name();
           u.set_marking(belongs_intersection(significant_variables(u), Bj, X));
         }
-        mCRL2log(log::debug, "stategraph") << "--- initial control flow marking for graph " << j << "\n" << Vj.print_marking();
+        mCRL2log(log::debug) << "--- initial control flow marking for graph " << j << "\n" << Vj.print_marking();
       }
       finish_timer("marking initialization");
 
@@ -528,7 +528,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             {
               auto const& v = *pick_element(todo);
 
-              mCRL2log(log::debug1, "stategraph") << " extend marking rule1: v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
+              mCRL2log(log::debug1) << " extend marking rule1: v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
 
               auto const& incoming_edges = v.incoming_edges();
               for (const auto& e: incoming_edges)
@@ -544,7 +544,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
                 }
                 if (changed)
                 {
-                  mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
+                  mCRL2log(log::debug1) << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
                   todo.insert(&u);
                   stableint = false;
                 }
@@ -568,7 +568,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               {
                 continue;
               }
-              mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
+              mCRL2log(log::debug1) << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
 
               bool changed = false;
               auto const& eq_X = *find_equation(m_pbes, X); // slow
@@ -591,7 +591,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
                     for (auto vk = Vk.vertices.begin(); vk != Vk.vertices.end(); ++vk)
                     {
                       auto const& v = *vk;
-                      mCRL2log(log::debug1, "stategraph") << "     v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
+                      mCRL2log(log::debug1) << "     v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
                       if (v.name() != Y)
                       {
                         continue;
@@ -607,7 +607,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               }
               if (changed)
               {
-                mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
+                mCRL2log(log::debug1) << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
                 stableint = false;
                 stableext = false;
               }
@@ -638,7 +638,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     // a more comprehensible version
     void compute_control_flow_marking_using_edge_index()
     {
-      mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
+      mCRL2log(log::debug) << "=== computing control flow marking ===" << std::endl;
       using utilities::detail::pick_element;
 
       start_timer("marking initialization");
@@ -669,7 +669,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             }
           }
        }
-        mCRL2log(log::debug, "stategraph") << "--- initial control flow marking for graph " << j << "\n" << Vj.print_marking();
+        mCRL2log(log::debug) << "--- initial control flow marking for graph " << j << "\n" << Vj.print_marking();
       }
       finish_timer("marking initialization");
 
@@ -680,15 +680,15 @@ class stategraph_local_algorithm: public stategraph_algorithm
         auto const& X = Xi.X;
         std::size_t i = Xi.i;
 
-        mCRL2log(log::debug1, "stategraph") << "    rule: considering equation " << X << std::endl;
-        mCRL2log(log::debug1, "stategraph") << "    rule2: considering PVI nr. " << i << std::endl;
+        mCRL2log(log::debug1) << "    rule: considering equation " << X << std::endl;
+        mCRL2log(log::debug1) << "    rule2: considering PVI nr. " << i << std::endl;
 
         auto& EX = m_edge_index[X];
         auto& EXi = EX[i];
         for (auto ei = EXi.begin(); ei != EXi.end(); ++ei)
         {
           const local_control_flow_graph_vertex& u = *ei->u;
-          mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
+          mCRL2log(log::debug1) << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
           std::size_t j = ei->k;
           auto const& Bj = m_belongs[j];
           for (const auto& ej: EXi)
@@ -719,7 +719,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     // an efficient version that uses an edge index
     void compute_control_flow_marking_efficient()
     {
-      mCRL2log(log::debug, "stategraph") << "=== computing control flow marking ===" << std::endl;
+      mCRL2log(log::debug) << "=== computing control flow marking ===" << std::endl;
       using utilities::detail::pick_element;
 
       start_timer("marking initialization");
@@ -733,7 +733,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
           auto const& X = u.name();
           u.set_marking(belongs_intersection(significant_variables(u), Bj, X));
         }
-        mCRL2log(log::debug, "stategraph") << "--- initial control flow marking for graph " << j << "\n" << Vj.print_marking();
+        mCRL2log(log::debug) << "--- initial control flow marking for graph " << j << "\n" << Vj.print_marking();
       }
       finish_timer("marking initialization");
 
@@ -758,7 +758,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             {
               auto const& v = *pick_element(todo);
 
-              mCRL2log(log::debug1, "stategraph") << " extend marking rule1: v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
+              mCRL2log(log::debug1) << " extend marking rule1: v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
 
               auto const& incoming_edges = v.incoming_edges();
               for (const auto& e: incoming_edges)
@@ -774,7 +774,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
                 }
                 if (changed)
                 {
-                  mCRL2log(log::debug1, "stategraph") << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
+                  mCRL2log(log::debug1) << "   marking(u)' = " << core::detail::print_set(u.marking()) << std::endl;
                   todo.insert(&u);
                   stableint = false;
                 }
@@ -854,7 +854,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       for (std::size_t k = 0; k < K; k++)
       {
         const local_control_flow_graph& Gk = m_local_control_flow_graphs[k];
-        mCRL2log(log::debug, "stategraph") <<  "--- computed control flow marking for graph " << k << "\n" << Gk.print_marking() << std::endl;
+        mCRL2log(log::debug) <<  "--- computed control flow marking for graph " << k << "\n" << Gk.print_marking() << std::endl;
       }
     }
 
@@ -875,7 +875,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
           auto j = B_X.find(v);
           if (j != B_X.end())
           {
-            mCRL2log(log::debug, "stategraph") <<  "removing belongs variable " << *j << " in B[" << X << "] , since it already appears in belongs relation " << k << std::endl;
+            mCRL2log(log::debug) <<  "removing belongs variable " << *j << " in B[" << X << "] , since it already appears in belongs relation " << k << std::endl;
             B_X.erase(*j);
           }
         }
@@ -884,7 +884,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
     void compute_extra_local_control_flow_graph()
     {
-      mCRL2log(log::debug1, "stategraph") << "--- computing extra local control flow graph" << std::endl;
+      mCRL2log(log::debug1) << "--- computing extra local control flow graph" << std::endl;
 
       local_control_flow_graph V;
       belongs_relation B;
@@ -902,7 +902,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         {
           B_X.insert(d_X[i]);
         }
-        mCRL2log(log::debug1, "stategraph") << "initial belongs relation B[" << X << "] = " << core::detail::print_set(B_X) << std::endl;
+        mCRL2log(log::debug1) << "initial belongs relation B[" << X << "] = " << core::detail::print_set(B_X) << std::endl;
 
         for (std::size_t k = 0; k < m_belongs.size(); k++)
         {
@@ -965,15 +965,15 @@ class stategraph_local_algorithm: public stategraph_algorithm
       m_local_control_flow_graphs.push_back(V);
       m_local_control_flow_graphs.back().compute_index();
       m_belongs.push_back(B);
-      mCRL2log(log::debug, "stategraph") << "--- extra local control flow graph\n" << m_local_control_flow_graphs.back() << std::endl;
-      mCRL2log(log::debug, "stategraph") << "--- belongs relation for extra graph\n" << print_belongs(B);
+      mCRL2log(log::debug) << "--- extra local control flow graph\n" << m_local_control_flow_graphs.back() << std::endl;
+      mCRL2log(log::debug) << "--- belongs relation for extra graph\n" << print_belongs(B);
     }
 
     void compute_local_control_flow_graph(const std::set<local_control_flow_graph_vertex>& U, const std::map<core::identifier_string, std::size_t>& C)
     {
       using utilities::detail::pick_element;
 
-      mCRL2log(log::debug, "stategraph") << "--- compute_local_control_flow_graph for vertices " << core::detail::print_set(U) << std::endl;
+      mCRL2log(log::debug) << "--- compute_local_control_flow_graph for vertices " << core::detail::print_set(U) << std::endl;
       local_control_flow_graph V;
       std::set<const local_control_flow_graph_vertex*> todo;
 
@@ -990,7 +990,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
         auto const& X = u.name();
         const data::variable& d = u.variable();
         const data::data_expression& e = u.value();
-        mCRL2log(log::debug1, "stategraph") << "choose todo element (X, k, d=e) = " << u << std::endl;
+        mCRL2log(log::debug1) << "choose todo element (X, k, d=e) = " << u << std::endl;
         std::size_t k = u.index();
         auto const& eq_X = *find_equation(m_pbes, X);
         auto const& predvars = eq_X.predicate_variables();
@@ -1004,7 +1004,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
           if (d == data::undefined_variable())
           {
             // case 1: (X, ?, ?=?) -> (Y, k', d'=e')
-            mCRL2log(log::debug1, "stategraph") << "case 1" << std::endl;
+            mCRL2log(log::debug1) << "case 1" << std::endl;
             if (q != C.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
@@ -1012,7 +1012,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               if (e1 != data::undefined_data_expression())
               {
                 // target(X, i, k') = e'
-                mCRL2log(log::debug1, "stategraph") << "case 1: (X, e) -> (Y, d', e') ; target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
+                mCRL2log(log::debug1) << "case 1: (X, e) -> (Y, d', e') ; target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                 V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
               }
             }
@@ -1021,7 +1021,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
             {
               if (X != Y)
               {
-                mCRL2log(log::debug1, "stategraph") << "case 2: (X, ?) -> (Y, ?)" << std::endl;
+                mCRL2log(log::debug1) << "case 2: (X, ?) -> (Y, ?)" << std::endl;
                 V.insert_edge(todo, m_pbes, u, Y, data::undefined_index(), data::undefined_data_expression(), edge_label);
               }
             }
@@ -1036,7 +1036,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               {
                 // source(X, i, k) = e && target(X, i, k') = e'
                 auto e1 = i->target(k1);
-                mCRL2log(log::debug1, "stategraph") << "case 3a: (X, d, e) -> (Y, d', e') ; source(X, i, k) = e && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
+                mCRL2log(log::debug1) << "case 3a: (X, d, e) -> (Y, d', e') ; source(X, i, k) = e && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                 if (e1 != data::undefined_data_expression())
                 {
                   V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
@@ -1048,14 +1048,14 @@ class stategraph_local_algorithm: public stategraph_algorithm
                 auto e1 = i->target(k1);
                 if (e1 != data::undefined_data_expression())
                 {
-                  mCRL2log(log::debug1, "stategraph") << "case 3b: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
+                  mCRL2log(log::debug1) << "case 3b: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                   V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
                 }
 
                 // Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k'
                 if (i->copy(k) == k1)
                 {
-                  mCRL2log(log::debug1, "stategraph") << "case 3c: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k' ; k' = " << print_index(k1) << std::endl;
+                  mCRL2log(log::debug1) << "case 3c: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && copy(X, i, k) = k' ; k' = " << print_index(k1) << std::endl;
                   V.insert_edge(todo, m_pbes, u, Y, k1, e, edge_label);
                 }
               }
@@ -1067,7 +1067,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
               if (e1 == e || e1 == data::undefined_data_expression())
               {
                 std::size_t k1 = data::undefined_index();
-                mCRL2log(log::debug1, "stategraph") << "case 4: (X, d, e) -> (Y, ?)" << std::endl;
+                mCRL2log(log::debug1) << "case 4: (X, d, e) -> (Y, ?)" << std::endl;
                 V.insert_edge(todo, m_pbes, u, Y, k1, data::undefined_data_expression(), edge_label);
               }
             }
@@ -1089,7 +1089,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     // Computes a local control flow graph that corresponds to the given component in m_GCFP_graph.
     void compute_local_control_flow_graph(const std::set<std::size_t>& component, const std::set<data::data_expression>& component_values)
     {
-      mCRL2log(log::debug, "stategraph") << "Compute local control flow graphs for component " << print_connected_component(component) << std::endl;
+      mCRL2log(log::debug) << "Compute local control flow graphs for component " << print_connected_component(component) << std::endl;
 
       // preprocessing
       std::map<core::identifier_string, std::size_t> C;
@@ -1123,7 +1123,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     {
       for (auto i = m_local_control_flow_graphs.begin(); i != m_local_control_flow_graphs.end(); ++i)
       {
-        mCRL2log(log::debug, "stategraph") << "--- computed local control flow graph " << (i - m_local_control_flow_graphs.begin()) << "\n" << *i << std::endl;
+        mCRL2log(log::debug) << "--- computed local control flow graph " << (i - m_local_control_flow_graphs.begin()) << "\n" << *i << std::endl;
       }
     }
 
@@ -1172,13 +1172,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
         }
         case 1: {
           compute_edge_index();
-          mCRL2log(log::debug2, "stategraph") << print_edge_index() << std::endl;
+          mCRL2log(log::debug2) << print_edge_index() << std::endl;
           compute_control_flow_marking_using_edge_index();
           break;
         }
         case 2: {
           compute_edge_index();
-          mCRL2log(log::debug2, "stategraph") << print_edge_index() << std::endl;
+          mCRL2log(log::debug2) << print_edge_index() << std::endl;
           compute_control_flow_marking_efficient();
           break;
         }

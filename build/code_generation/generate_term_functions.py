@@ -260,7 +260,7 @@ bool %(check_name)s(const Term& t)
                 elif arg.repetitions == '+':
                     body = body + '  if (!check_list_argument(a[%d], %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
                 body = body + '  {\n'
-                body = body + '    mCRL2log(log::debug, "soundness_checks") << "%s" << std::endl;\n'                % (arg.check_name())
+                body = body + '    mCRL2log(log::debug) << "%s" << std::endl;\n'                % (arg.check_name())
                 body = body + '    return false;\n'
                 body = body + '  }\n'
             body = body + '#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS\n'

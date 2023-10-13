@@ -9,20 +9,20 @@
 
 #include "glscene.h"
 
-#include "layoututility.h"
 #include "bezier.h"
+#include "layoututility.h"
 
 #include <QElapsedTimer>
 
 #include <QFont>
 #include <QFontMetrics>
 #include <QImage>
-#include <QStaticText>
 #include <QOpenGLFramebufferObjectFormat>
+#include <QStaticText>
 
-#include <list>
 #include <algorithm>
 #include <cmath>
+#include <list>
 
 /// \brief Number of orthogonal slices from which a circle representing a node
 /// is constructed.
@@ -53,31 +53,24 @@ constexpr int OFFSET_NODE_SPHERE = OFFSET_NODE_BORDER + VERTICES_NODE_BORDER;
 constexpr int OFFSET_HINT = OFFSET_NODE_SPHERE + VERTICES_NODE_SPHERE;
 constexpr int OFFSET_HANDLE_BODY = OFFSET_HINT + VERTICES_HINT;
 constexpr int OFFSET_HANDLE_OUTLINE = OFFSET_HANDLE_BODY + VERTICES_HANDLE_BODY;
-constexpr int OFFSET_ARROWHEAD =
-    OFFSET_HANDLE_OUTLINE + VERTICES_HANDLE_OUTLINE;
+constexpr int OFFSET_ARROWHEAD = OFFSET_HANDLE_OUTLINE + VERTICES_HANDLE_OUTLINE;
 constexpr int OFFSET_ARROWHEAD_BASE = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
 constexpr int OFFSET_ARC = OFFSET_ARROWHEAD_BASE + VERTICES_ARROWHEAD_BASE;
 
 GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
-    : m_glwidget(glwidget), m_graph(g)
+    : m_glwidget(glwidget),
+      m_graph(g)
 {
   setFontSize(m_fontsize);
   rebuild();
-  m_drawNodeBorder = DrawInstances(OFFSET_NODE_BORDER, VERTICES_NODE_BORDER, 0,
-                                   GL_TRIANGLE_FAN, "node border");
-  m_drawHalfSphere = DrawInstances(OFFSET_NODE_BORDER, VERTICES_NODE_BORDER,
-                                   0, GL_TRIANGLE_FAN, "half-sphere");
-  m_drawSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE, 0,
-                               GL_TRIANGLE_STRIP, "sphere");
-  m_drawMinusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT / 2, 0,
-                                  GL_TRIANGLES, "minus hint");
-  m_drawPlusHint =
-      DrawInstances(OFFSET_HINT, VERTICES_HINT, 0, GL_TRIANGLES, "plus hint");
-  m_drawHandleBody = DrawInstances(OFFSET_HANDLE_BODY, VERTICES_HANDLE_BODY, 0,
-                                   GL_TRIANGLE_STRIP, "handle body");
-  m_drawHandleOutline =
-      DrawInstances(OFFSET_HANDLE_OUTLINE, VERTICES_HANDLE_OUTLINE, 0,
-                    GL_LINE_LOOP, "handle outline");
+  m_drawNodeBorder = DrawInstances(OFFSET_NODE_BORDER, VERTICES_NODE_BORDER, 0, GL_TRIANGLE_FAN, "node border");
+  m_drawHalfSphere = DrawInstances(OFFSET_NODE_BORDER, VERTICES_NODE_BORDER, 0, GL_TRIANGLE_FAN, "half-sphere");
+  m_drawSphere = DrawInstances(OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE, 0, GL_TRIANGLE_STRIP, "sphere");
+  m_drawMinusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT / 2, 0, GL_TRIANGLES, "minus hint");
+  m_drawPlusHint = DrawInstances(OFFSET_HINT, VERTICES_HINT, 0, GL_TRIANGLES, "plus hint");
+  m_drawHandleBody = DrawInstances(OFFSET_HANDLE_BODY, VERTICES_HANDLE_BODY, 0, GL_TRIANGLE_STRIP, "handle body");
+  m_drawHandleOutline
+      = DrawInstances(OFFSET_HANDLE_OUTLINE, VERTICES_HANDLE_OUTLINE, 0, GL_LINE_LOOP, "handle outline");
   updateDrawInstructions();
 
   m_drawInstances = std::vector<DrawInstances*>({
@@ -105,8 +98,7 @@ void GLScene::initialize()
     for (int i = 0; i < RES_NODE_SLICE; ++i)
     {
       float t = -i * 2.0f * PI / (RES_NODE_SLICE - 1);
-      nodeborder[static_cast<std::size_t>(i) + 1] =
-          QVector3D(std::sin(t), std::cos(t), 0.0f);
+      nodeborder[static_cast<std::size_t>(i) + 1] = QVector3D(std::sin(t), std::cos(t), 0.0f);
     }
   }
 
@@ -123,19 +115,15 @@ void GLScene::initialize()
       {
         float slice = i * 2.0f * PI / (RES_NODE_SLICE - 2);
         node[n++] = QVector3D(std::sin(stack + stackd) * std::sin(slice),
-                              std::sin(stack + stackd) * std::cos(slice),
-                              std::cos(stack + stackd));
-        node[n++] =
-            QVector3D(std::sin(stack) * std::sin(slice),
-                              std::sin(stack) * std::cos(slice),
-                              std::cos(stack));
+            std::sin(stack + stackd) * std::cos(slice),
+            std::cos(stack + stackd));
+        node[n++] = QVector3D(std::sin(stack) * std::sin(slice), std::sin(stack) * std::cos(slice), std::cos(stack));
       }
 
       node[n++] = QVector3D(std::sin(stack + stackd) * std::sin(0.0f),
-                            std::sin(stack + stackd) * std::cos(0.0f),
-                            std::cos(stack + stackd));
-      node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
-                    std::sin(stack) * std::cos(0.0f), std::cos(stack));
+          std::sin(stack + stackd) * std::cos(0.0f),
+          std::cos(stack + stackd));
+      node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f), std::sin(stack) * std::cos(0.0f), std::cos(stack));
     }
   }
 
@@ -179,8 +167,7 @@ void GLScene::initialize()
     for (int i = 0; i < RES_ARROWHEAD; ++i)
     {
       float t = -i * 2.0f * PI / (RES_ARROWHEAD - 1);
-      arrowhead[static_cast<std::size_t>(i) + 1] =
-          QVector3D(-1.0f, 0.3f * std::sin(t), 0.3f * std::cos(t));
+      arrowhead[static_cast<std::size_t>(i) + 1] = QVector3D(-1.0f, 0.3f * std::sin(t), 0.3f * std::cos(t));
     }
   }
 
@@ -191,8 +178,7 @@ void GLScene::initialize()
     for (int i = 0; i < RES_ARROWHEAD; ++i)
     {
       float t = i * 2.0f * PI / (RES_ARROWHEAD - 1);
-      arrowhead_base[static_cast<std::size_t>(i) + 1] =
-          QVector3D(-1.0f, 0.3f * std::sin(t), 0.3f * std::cos(t));
+      arrowhead_base[static_cast<std::size_t>(i) + 1] = QVector3D(-1.0f, 0.3f * std::sin(t), 0.3f * std::cos(t));
     }
   }
 
@@ -202,8 +188,7 @@ void GLScene::initialize()
   {
     for (int i = 0; i < VERTICES_ARC; ++i)
     {
-      arc[static_cast<std::size_t>(i)] =
-          QVector3D(static_cast<float>(i) / (VERTICES_ARC - 1), 0.0f, 0.0f);
+      arc[static_cast<std::size_t>(i)] = QVector3D(static_cast<float>(i) / (VERTICES_ARC - 1), 0.0f, 0.0f);
     }
   }
 
@@ -222,8 +207,7 @@ void GLScene::initialize()
   m_fbo_format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
   m_fbo_format.setSamples(16);
 
-  m_fbo = new QOpenGLFramebufferObject(
-      m_glwidget.size(), m_fbo_format);
+  m_fbo = new QOpenGLFramebufferObject(m_glwidget.size(), m_fbo_format);
   // Initialize the global shader.
   m_node_shader.link();
   // Initialize the arc shader.
@@ -239,12 +223,10 @@ void GLScene::initialize()
 
   int recommended_max_buffer_size;
   glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &recommended_max_buffer_size);
-  mCRL2log(mcrl2::log::verbose)
-      << "The recommended maximum vertices per buffer on this machine is "
-      << recommended_max_buffer_size << std::endl;
-  mCRL2log(mcrl2::log::verbose)
-      << "Based on maximum recommended, setting batch rendering size to "
-      << recommended_max_buffer_size / 4 << std::endl;
+  mCRL2log(mcrl2::log::verbose) << "The recommended maximum vertices per buffer on this machine is "
+                                << recommended_max_buffer_size << std::endl;
+  mCRL2log(mcrl2::log::verbose) << "Based on maximum recommended, setting batch rendering size to "
+                                << recommended_max_buffer_size / 4 << std::endl;
   // To be safe we divide by 4 since a mat4 is technically 4 vec4s stacked
   // together
   m_batch_size = static_cast<std::size_t>(recommended_max_buffer_size / 16);
@@ -255,14 +237,12 @@ void GLScene::initialize()
   m_vertexbuffer.create();
   m_vertexbuffer.bind();
   m_vertexbuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-  m_vertexbuffer.allocate(
-      vertices.data(), static_cast<int>(vertices.size() * sizeof(QVector3D)));
+  m_vertexbuffer.allocate(vertices.data(), static_cast<int>(vertices.size() * sizeof(QVector3D)));
 
   m_node_shader.setAttributeBuffer(vertex_attrib_location, GL_FLOAT, 0, 3);
   m_node_shader.enableAttributeArray(vertex_attrib_location);
 
-  m_current_scene_size = std::max(
-      m_batch_size, std::max(m_graph.nodeCount(), m_graph.edgeCount()));
+  m_current_scene_size = std::max(m_batch_size, std::max(m_graph.nodeCount(), m_graph.edgeCount()));
   m_drawInstances.resize(m_batch_size);
 
   m_colorBuffer.create();
@@ -294,12 +274,10 @@ void GLScene::initialize()
   int arc_ctrl_4_attrib_location = m_arc_shader.attributeLocation("ctrl4");
   int arc_color_attrib_location = m_arc_shader.attributeLocation("color");
 
-  mCRL2log(mcrl2::log::debug)
-      << "vertex: " << arc_vertex_attrib_location << " ctrl1 "
-      << arc_ctrl_1_attrib_location << " ctrl2 " << arc_ctrl_2_attrib_location
-      << " ctrl3 " << arc_ctrl_3_attrib_location << " ctrl4 "
-      << arc_ctrl_4_attrib_location << " color " << arc_color_attrib_location
-      << std::endl;
+  mCRL2log(mcrl2::log::debug) << "vertex: " << arc_vertex_attrib_location << " ctrl1 " << arc_ctrl_1_attrib_location
+                              << " ctrl2 " << arc_ctrl_2_attrib_location << " ctrl3 " << arc_ctrl_3_attrib_location
+                              << " ctrl4 " << arc_ctrl_4_attrib_location << " color " << arc_color_attrib_location
+                              << std::endl;
 
   m_vaoArc.create();
   m_vaoArc.bind();
@@ -310,28 +288,29 @@ void GLScene::initialize()
   m_controlpointbuffer.create();
   m_controlpointbuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
   m_controlpointbuffer.bind();
-  m_controlpointbuffer.allocate(
-      static_cast<int>(m_batch_size * sizeof(QVector3D) * 4));
+  m_controlpointbuffer.allocate(static_cast<int>(m_batch_size * sizeof(QVector3D) * 4));
   // TODO: Duplicate code removal with loop
-  m_arc_shader.setAttributeBuffer(arc_ctrl_1_attrib_location, GL_FLOAT, 0, 3,
-                                  4 * sizeof(QVector3D));
+  m_arc_shader.setAttributeBuffer(arc_ctrl_1_attrib_location, GL_FLOAT, 0, 3, 4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_1_attrib_location);
   glVertexAttribDivisor(arc_ctrl_1_attrib_location, 1);
 
-  m_arc_shader.setAttributeBuffer(arc_ctrl_2_attrib_location, GL_FLOAT,
-                                  sizeof(QVector3D), 3, 4 * sizeof(QVector3D));
+  m_arc_shader.setAttributeBuffer(arc_ctrl_2_attrib_location, GL_FLOAT, sizeof(QVector3D), 3, 4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_2_attrib_location);
   glVertexAttribDivisor(arc_ctrl_2_attrib_location, 1);
 
-  m_arc_shader.setAttributeBuffer(arc_ctrl_3_attrib_location, GL_FLOAT,
-                                  2 * sizeof(QVector3D), 3,
-                                  4 * sizeof(QVector3D));
+  m_arc_shader.setAttributeBuffer(arc_ctrl_3_attrib_location,
+      GL_FLOAT,
+      2 * sizeof(QVector3D),
+      3,
+      4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_3_attrib_location);
   glVertexAttribDivisor(arc_ctrl_3_attrib_location, 1);
 
-  m_arc_shader.setAttributeBuffer(arc_ctrl_4_attrib_location, GL_FLOAT,
-                                  3 * sizeof(QVector3D), 3,
-                                  4 * sizeof(QVector3D));
+  m_arc_shader.setAttributeBuffer(arc_ctrl_4_attrib_location,
+      GL_FLOAT,
+      3 * sizeof(QVector3D),
+      3,
+      4 * sizeof(QVector3D));
   m_arc_shader.enableAttributeArray(arc_ctrl_4_attrib_location);
   glVertexAttribDivisor(arc_ctrl_4_attrib_location, 1);
 
@@ -354,13 +333,11 @@ void GLScene::initialize()
   int arrow_dir_attrib_location = m_arrow_shader.attributeLocation("direction");
 
   m_vertexbuffer.bind();
-  m_arrow_shader.setAttributeBuffer(arrow_vertex_attrib_location, GL_FLOAT, 0,
-                                    3);
+  m_arrow_shader.setAttributeBuffer(arrow_vertex_attrib_location, GL_FLOAT, 0, 3);
   m_arrow_shader.enableAttributeArray(arrow_vertex_attrib_location);
 
   m_offsetBuffer.bind();
-  m_arrow_shader.setAttributeArray(arrow_offset_attrib_location, GL_FLOAT, 0,
-                                   3);
+  m_arrow_shader.setAttributeArray(arrow_offset_attrib_location, GL_FLOAT, 0, 3);
   m_arrow_shader.enableAttributeArray(arrow_offset_attrib_location);
   glVertexAttribDivisor(arrow_offset_attrib_location, 1);
 
@@ -372,8 +349,7 @@ void GLScene::initialize()
   m_directionBuffer.create();
   m_directionBuffer.setUsagePattern(QOpenGLBuffer::UsagePattern::StreamDraw);
   m_directionBuffer.bind();
-  m_directionBuffer.allocate(
-      static_cast<int>(m_current_scene_size * sizeof(QVector3D)));
+  m_directionBuffer.allocate(static_cast<int>(m_current_scene_size * sizeof(QVector3D)));
   m_arrow_shader.setAttributeArray(arrow_dir_attrib_location, GL_FLOAT, 0, 3);
   m_arrow_shader.enableAttributeArray(arrow_dir_attrib_location);
   glVertexAttribDivisor(arrow_dir_attrib_location, 1);
@@ -386,10 +362,10 @@ void GLScene::resize(std::size_t width, std::size_t height)
 {
   m_camera.viewport(width, height);
   if (m_fbo)
+  {
     delete m_fbo;
-  m_fbo = new QOpenGLFramebufferObject(
-      static_cast<int>(width), static_cast<int>(height),
-      m_fbo_format);
+  }
+  m_fbo = new QOpenGLFramebufferObject(static_cast<int>(width), static_cast<int>(height), m_fbo_format);
   m_graph.hasNewFrame(true);
 }
 
@@ -410,8 +386,7 @@ void GLScene::rebuild()
   }
 
   // Update the transition labels.
-  m_transition_labels =
-      std::vector<QStaticText>(m_graph.transitionLabelCount());
+  m_transition_labels = std::vector<QStaticText>(m_graph.transitionLabelCount());
 
   for (std::size_t i = 0; i < m_graph.transitionLabelCount(); ++i)
   {
@@ -423,12 +398,8 @@ void GLScene::rebuild()
 void GLScene::project2D()
 {
   m_graph.lock(GRAPH_LOCK_TRACE);
-  std::size_t nodeCount = m_graph.hasExploration()
-                              ? m_graph.explorationNodeCount()
-                              : m_graph.nodeCount();
-  std::size_t edgeCount = m_graph.hasExploration()
-                              ? m_graph.explorationEdgeCount()
-                              : m_graph.edgeCount();
+  std::size_t nodeCount = m_graph.hasExploration() ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = m_graph.hasExploration() ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
   std::vector<QVector3D> positions;
 
   for (std::size_t i = 0; i < nodeCount; i++)
@@ -443,25 +414,30 @@ void GLScene::project2D()
   }
 
   auto cam_rotate = [&](const QVector3D& u)
-  { return m_camera.rotation().rotatedVector(u); };
+  {
+    return m_camera.rotation().rotatedVector(u);
+  };
   auto cam_anti_rotate = [&](const QVector3D& u)
-  { return m_camera.rotation().inverted().rotatedVector(u); };
+  {
+    return m_camera.rotation().inverted().rotatedVector(u);
+  };
   QVector3D eye = m_camera.position();
   QVector3D e_z = QVector3D(0, 0, 1);
   QVector3D _debug_e_z = cam_anti_rotate(cam_rotate(e_z));
-  mCRL2log(mcrl2::log::debug)
-      << "Rot^-1 Rot (e_z): " << _debug_e_z.x() << "," << _debug_e_z.y() << ","
-      << _debug_e_z.z() << std::endl;
+  mCRL2log(mcrl2::log::debug) << "Rot^-1 Rot (e_z): " << _debug_e_z.x() << "," << _debug_e_z.y() << ","
+                              << _debug_e_z.z() << std::endl;
   QVector3D forward = (-m_camera.center() - eye).normalized();
 
-  mCRL2log(mcrl2::log::debug)
-      << "Forward: " << forward.x() << ", " << forward.y() << ", "
-      << forward.z() << std::endl;
+  mCRL2log(mcrl2::log::debug) << "Forward: " << forward.x() << ", " << forward.y() << ", " << forward.z() << std::endl;
 
   auto perp_distance = [&](const QVector3D& u)
-  { return QVector3D::dotProduct(u, forward); };
+  {
+    return QVector3D::dotProduct(u, forward);
+  };
   auto compare = [&](const QVector3D& u, const QVector3D& v)
-  { return perp_distance(u - eye) < perp_distance(v - eye); };
+  {
+    return perp_distance(u - eye) < perp_distance(v - eye);
+  };
 
   std::sort(positions.begin(), positions.end(), compare);
 
@@ -469,12 +445,10 @@ void GLScene::project2D()
   QVector3D relative_reference_point = forward * plane_dist;
   QVector3D reference_point = eye + relative_reference_point;
 
-  mCRL2log(mcrl2::log::debug) << "Cam pos: " << eye.x() << ", " << eye.y()
-                              << ", " << eye.z() << std::endl;
+  mCRL2log(mcrl2::log::debug) << "Cam pos: " << eye.x() << ", " << eye.y() << ", " << eye.z() << std::endl;
 
-  mCRL2log(mcrl2::log::debug)
-      << "R: (" << reference_point.x() << "," << reference_point.y() << ","
-      << reference_point.z() << ")" << std::endl;
+  mCRL2log(mcrl2::log::debug) << "R: (" << reference_point.x() << "," << reference_point.y() << ","
+                              << reference_point.z() << ")" << std::endl;
 
   mCRL2log(mcrl2::log::debug) << "dist: " << plane_dist << std::endl;
 
@@ -483,11 +457,12 @@ void GLScene::project2D()
     QVector3D dir = (u - eye).normalized();
     float denom = QVector3D::dotProduct(dir, forward);
     if (std::abs(denom) < 0.0001f)
+    {
       return u;
+    }
     else
     {
-      float t =
-          QVector3D::dotProduct(relative_reference_point, forward) / denom;
+      float t = QVector3D::dotProduct(relative_reference_point, forward) / denom;
       QVector3D projection = eye + t * dir;
       /*mCRL2log(mcrl2::log::debug)
           << "u: (" << u.x() << "," << u.y() << "," << u.z() << ") -> ("
@@ -498,22 +473,22 @@ void GLScene::project2D()
     }
   };
   auto transform = [&](const QVector3D& x)
-  { return cam_rotate(project(x) - reference_point); };
+  {
+    return cam_rotate(project(x) - reference_point);
+  };
   for (std::size_t i = 0; i < nodeCount; i++)
   {
     std::size_t n = m_graph.hasExploration() ? m_graph.explorationNode(i) : i;
     m_graph.node(n).pos_mutable() = transform(m_graph.node(n).pos());
     m_graph.node(n).pos_mutable().setZ(0);
 
-    m_graph.stateLabel(n).pos_mutable() =
-        transform(m_graph.stateLabel(n).pos());
+    m_graph.stateLabel(n).pos_mutable() = transform(m_graph.stateLabel(n).pos());
     m_graph.stateLabel(n).pos_mutable().setZ(0);
   }
   for (std::size_t i = 0; i < edgeCount; i++)
   {
     std::size_t n = m_graph.hasExploration() ? m_graph.explorationEdge(i) : i;
-    m_graph.transitionLabel(n).pos_mutable() =
-        transform(m_graph.transitionLabel(n).pos());
+    m_graph.transitionLabel(n).pos_mutable() = transform(m_graph.transitionLabel(n).pos());
     m_graph.transitionLabel(n).pos_mutable().setZ(0);
 
     m_graph.handle(n).pos_mutable() = transform(m_graph.handle(n).pos());
@@ -539,7 +514,7 @@ void GLScene::project2D()
   m_graph.unlock(GRAPH_LOCK_TRACE);
   m_camera.reset();
   m_camera.translate(center_of_mass);
-  m_camera.m_zoom *= std::abs(plane_dist)/m_camera.m_zoom;
+  m_camera.m_zoom *= std::abs(plane_dist) / m_camera.m_zoom;
 }
 
 void GLScene::render()
@@ -550,8 +525,12 @@ void GLScene::render()
 
   // reset the draw instance vectors
   for (auto ptr : m_drawInstances)
+  {
     if (ptr)
+    {
       ptr->resize(0);
+    }
+  }
   m_drawArc.resize(0);
   m_drawArcColors.resize(0);
   m_drawArrowColors.resize(0);
@@ -561,13 +540,10 @@ void GLScene::render()
   m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
   bool exploration_active = m_graph.hasExploration();
-  std::size_t nodeCount =
-      exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
-  std::size_t edgeCount =
-      exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
+  std::size_t nodeCount = exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
-  QMatrix4x4 viewProjMatrix =
-      m_camera.projectionMatrix() * m_camera.viewMatrix();
+  QMatrix4x4 viewProjMatrix = m_camera.projectionMatrix() * m_camera.viewMatrix();
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
     renderNode(exploration_active ? m_graph.explorationNode(i) : i, false);
@@ -590,7 +566,7 @@ void GLScene::render()
 
   QElapsedTimer openglTimer;
   openglTimer.restart();
-  
+
   // Cull polygons that are facing away (back) from the camera, where their
   // front is defined as counter clockwise by default, see glFrontFace, meaning
   // that the vertices that make up a triangle should be oriented counter
@@ -610,7 +586,6 @@ void GLScene::render()
   glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-
   m_arc_shader.bind();
   m_vaoArc.bind();
 
@@ -625,13 +600,10 @@ void GLScene::render()
     {
       std::size_t n = std::min(m_batch_size, amount_to_render);
       m_controlpointbuffer.bind();
-      m_controlpointbuffer.write(0, &m_drawArc[index],
-                                 static_cast<int>(n * 12 * sizeof(float)));
+      m_controlpointbuffer.write(0, &m_drawArc[index], static_cast<int>(n * 12 * sizeof(float)));
       m_colorBuffer.bind();
-      m_colorBuffer.write(0, &m_drawArcColors[index],
-                          static_cast<int>(n * 3 * sizeof(float)));
-      glDrawArraysInstanced(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC,
-                            static_cast<GLsizei>(n));
+      m_colorBuffer.write(0, &m_drawArcColors[index], static_cast<int>(n * 3 * sizeof(float)));
+      glDrawArraysInstanced(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC, static_cast<GLsizei>(n));
       glCheckError();
       index += n;
       amount_to_render -= n;
@@ -657,21 +629,16 @@ void GLScene::render()
       std::size_t n = std::min(m_batch_size, amount_to_render);
 
       m_colorBuffer.bind();
-      m_colorBuffer.write(0, &m_drawArrowColors[index],
-                          static_cast<int>(n * 4 * sizeof(float)));
+      m_colorBuffer.write(0, &m_drawArrowColors[index], static_cast<int>(n * 4 * sizeof(float)));
 
       m_offsetBuffer.bind();
-      m_offsetBuffer.write(0, &m_drawArrowOffsets[index],
-                           static_cast<int>(n * 3 * sizeof(float)));
+      m_offsetBuffer.write(0, &m_drawArrowOffsets[index], static_cast<int>(n * 3 * sizeof(float)));
 
       m_directionBuffer.bind();
-      m_directionBuffer.write(0, &m_drawArrowDirections[index],
-                              static_cast<int>(n * 3 * sizeof(float)));
+      m_directionBuffer.write(0, &m_drawArrowDirections[index], static_cast<int>(n * 3 * sizeof(float)));
 
-      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD,
-                            VERTICES_ARROWHEAD, static_cast<int>(n));
-      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE,
-                            VERTICES_ARROWHEAD_BASE, static_cast<int>(n));
+      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD, VERTICES_ARROWHEAD, static_cast<int>(n));
+      glDrawArraysInstanced(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE, VERTICES_ARROWHEAD_BASE, static_cast<int>(n));
 
       index += n;
       amount_to_render -= n;
@@ -702,25 +669,22 @@ void GLScene::render()
         std::size_t n = std::min(m_batch_size, amount_to_render);
         // NB: sizeof(QMatrix4x4) is NOT the same as 16 * sizeof(float)
         m_offsetBuffer.bind();
-        void* buff_ptr1 =
-            m_offsetBuffer.mapRange(0, static_cast<int>(n * 3 * sizeof(float)),
-                                    QOpenGLBuffer::RangeAccessFlag::RangeWrite);
+        void* buff_ptr1 = m_offsetBuffer.mapRange(0,
+            static_cast<int>(n * 3 * sizeof(float)),
+            QOpenGLBuffer::RangeAccessFlag::RangeWrite);
 
         // void* buff_ptr =
         // m_matrixBuffer.map(QOpenGLBuffer::Access::WriteOnly);
-        std::memcpy(buff_ptr1, &di_ptr->offsets[index * 3],
-                    n * 3 * sizeof(float));
+        std::memcpy(buff_ptr1, &di_ptr->offsets[index * 3], n * 3 * sizeof(float));
         m_offsetBuffer.unmap();
 
         m_offsetBuffer.release();
 
         m_colorBuffer.bind();
-        m_colorBuffer.write(0, &di_ptr->colors[index * 4],
-                            static_cast<int>(n * sizeof(QVector4D)));
+        m_colorBuffer.write(0, &di_ptr->colors[index * 4], static_cast<int>(n * sizeof(QVector4D)));
         m_colorBuffer.release();
 
-        glDrawArraysInstanced(di_ptr->draw_mode, di_ptr->offset,
-                              di_ptr->vertices, static_cast<int>(n));
+        glDrawArraysInstanced(di_ptr->draw_mode, di_ptr->offset, di_ptr->vertices, static_cast<int>(n));
         index += n;
         amount_to_render -= n;
         glCheckError();
@@ -759,12 +723,13 @@ void GLScene::renderText(QPainter& painter)
     return;
   }
   bool exploration_active = m_graph.hasExploration();
-  std::size_t nodeCount =
-      exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
-  std::size_t edgeCount =
-      exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
+  std::size_t nodeCount = exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
   if (nodeCount < 1 || edgeCount < 1)
+  {
     return;
+  }
+
   QFont font = m_font;
   painter.setFont(font);
   painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
@@ -775,10 +740,10 @@ void GLScene::renderText(QPainter& painter)
     std::vector<std::size_t> indices(nodeCount);
     QVector3D closest_node;
     QVector3D cam_pos = m_camera.position();
-    QVector3D center_of_screen = m_camera.windowToWorld(
-        QVector3D(m_camera.viewport().width() * 0.5,
-                  m_camera.viewport().height() * 0.5, 0));
+    QVector3D center_of_screen
+        = m_camera.windowToWorld(QVector3D(m_camera.viewport().width() * 0.5, m_camera.viewport().height() * 0.5, 0));
     double distance_to_closest_node = 1e15;
+
     for (std::size_t i = 0; i < nodeCount; i++)
     {
       std::size_t n = exploration_active ? m_graph.explorationNode(i) : i;
@@ -791,13 +756,13 @@ void GLScene::renderText(QPainter& painter)
         closest_node = m_graph.node(n).pos();
       }
     }
+
+    bool is_2D = (m_graph.getClipMax().z() - m_graph.getClipMin().z() < 0.001f);
+
     // project onto plane
-    QVector3D focus_point =
-        center_of_screen +
-        QVector3D::dotProduct(closest_node - center_of_screen,
-                              cam_pos - center_of_screen) /
-            (cam_pos - center_of_screen).lengthSquared() *
-            (cam_pos - center_of_screen);
+    QVector3D focus_point = center_of_screen
+                            + QVector3D::dotProduct(closest_node - center_of_screen, cam_pos - center_of_screen)
+                                  / (cam_pos - center_of_screen).lengthSquared() * (cam_pos - center_of_screen);
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
       std::size_t n = exploration_active ? m_graph.explorationNode(i) : i;
@@ -805,22 +770,22 @@ void GLScene::renderText(QPainter& painter)
       distances[i] = (m_graph.node(n).pos() - focus_point).lengthSquared();
       indices[i] = i;
     }
+
     auto compare = [&](std::size_t i, std::size_t j)
-    { return distances[i] < distances[j]; };
+    {
+      return distances[i] < distances[j];
+    };
 
     std::sort(indices.begin(), indices.end(), compare);
 
     double closest = 10000000000000;
     double furthest = 0;
-    for (std::size_t i = 0;
-         i <
-         std::min(nodeCount,
-                  std::max(static_cast<std::size_t>(m_textLimitStateLabels),
-                           static_cast<std::size_t>(m_textLimitStateNumbers)));
+    for (std::size_t i = 0; i < std::min(nodeCount,
+                                std::max(static_cast<std::size_t>(m_textLimitStateLabels),
+                                    static_cast<std::size_t>(m_textLimitStateNumbers)));
          ++i)
     {
-      std::size_t n =
-          exploration_active ? m_graph.explorationNode(indices[i]) : indices[i];
+      std::size_t n = exploration_active ? m_graph.explorationNode(indices[i]) : indices[i];
       double dist = (m_graph.node(n).pos() - cam_pos).lengthSquared();
       distances[indices[i]] = dist;
       dist = std::sqrt(dist);
@@ -828,35 +793,35 @@ void GLScene::renderText(QPainter& painter)
       furthest = std::max(dist, furthest);
     }
 
-    const double furthest_scale = 0.8;
-    const double closest_scale = 1.0;
-    auto getScale = [&](std::size_t i)
+    auto getScale = [&](std::size_t i) -> double
     {
-      return (closest_scale - (closest_scale - furthest_scale) *
-                                  (std::sqrt(distances[i]) - closest) /
-                                  (furthest - closest));
+      const double furthest_scale = 0.8;
+      const double closest_scale = 1.0;
+      if (!m_is_threedimensional || furthest == closest)
+      {
+        return closest_scale;
+      }
+      else
+      {
+        return (closest_scale
+                - (closest_scale - furthest_scale) * (std::sqrt(distances[i]) - closest) / (furthest - closest));
+      }
     };
-    for (std::size_t i = 0;
-         i <
-         std::min(nodeCount,
-                  std::max(static_cast<std::size_t>(m_textLimitStateLabels),
-                           static_cast<std::size_t>(m_textLimitStateNumbers)));
+    for (std::size_t i = 0; i < std::min(nodeCount,
+                                std::max(static_cast<std::size_t>(m_textLimitStateLabels),
+                                    static_cast<std::size_t>(m_textLimitStateNumbers)));
          ++i)
     {
       font.setPixelSize(getScale(indices[i]) * m_fontsize);
       painter.setFont(font);
-      if (m_drawstatenumbers && i < m_textLimitStateNumbers)
+      if (m_drawstatenumbers && i < static_cast<std::size_t>(m_textLimitStateNumbers))
       {
-        renderStateNumber(painter, exploration_active
-                                       ? m_graph.explorationNode(indices[i])
-                                       : indices[i]);
+        renderStateNumber(painter, exploration_active ? m_graph.explorationNode(indices[i]) : indices[i]);
       }
 
-      if (m_drawstatelabels && i < m_textLimitStateLabels)
+      if (m_drawstatelabels && i < static_cast<std::size_t>(m_textLimitStateLabels))
       {
-        renderStateLabel(painter, exploration_active
-                                      ? m_graph.explorationNode(indices[i])
-                                      : indices[i]);
+        renderStateLabel(painter, exploration_active ? m_graph.explorationNode(indices[i]) : indices[i]);
       }
     }
   }
@@ -867,16 +832,14 @@ void GLScene::renderText(QPainter& painter)
     std::vector<std::size_t> indices(edgeCount);
     QVector3D closest_node;
     QVector3D cam_pos = m_camera.position();
-    QVector3D center_of_screen = m_camera.windowToWorld(
-        QVector3D(m_camera.viewport().width() * 0.5,
-                  m_camera.viewport().height() * 0.5, 0));
+    QVector3D center_of_screen
+        = m_camera.windowToWorld(QVector3D(m_camera.viewport().width() * 0.5, m_camera.viewport().height() * 0.5, 0));
     double distance_to_closest_node = 1e15;
     for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t n = exploration_active ? m_graph.explorationEdge(i) : i;
 
-      double dist =
-          (m_graph.transitionLabel(n).pos() - cam_pos).lengthSquared();
+      double dist = (m_graph.transitionLabel(n).pos() - cam_pos).lengthSquared();
 
       if (dist < distance_to_closest_node)
       {
@@ -884,63 +847,61 @@ void GLScene::renderText(QPainter& painter)
         closest_node = m_graph.transitionLabel(n).pos();
       }
     }
+
     // project onto plane
-    QVector3D focus_point =
-        center_of_screen +
-        QVector3D::dotProduct(closest_node - center_of_screen,
-                              cam_pos - center_of_screen) /
-            (cam_pos - center_of_screen).lengthSquared() *
-            (cam_pos - center_of_screen);
+    QVector3D focus_point = center_of_screen
+                            + QVector3D::dotProduct(closest_node - center_of_screen, cam_pos - center_of_screen)
+                                  / (cam_pos - center_of_screen).lengthSquared() * (cam_pos - center_of_screen);
+
     for (std::size_t i = 0; i < edgeCount; ++i)
     {
       std::size_t n = exploration_active ? m_graph.explorationEdge(i) : i;
 
-      distances[i] =
-          (m_graph.transitionLabel(n).pos() - focus_point).lengthSquared();
+      distances[i] = (m_graph.transitionLabel(n).pos() - focus_point).lengthSquared();
       indices[i] = i;
     }
+
     auto compare = [&](std::size_t i, std::size_t j)
-    { return distances[i] < distances[j]; };
+    {
+      return distances[i] < distances[j];
+    };
 
     std::sort(indices.begin(), indices.end(), compare);
 
     double closest = 10000000000000;
     double furthest = 0;
-    for (std::size_t i = 0;
-         i <
-         std::min(edgeCount, static_cast<std::size_t>(m_textLimitTransLabels));
-         ++i)
+    for (std::size_t i = 0; i < std::min(edgeCount, static_cast<std::size_t>(m_textLimitTransLabels)); ++i)
     {
-      std::size_t n =
-          exploration_active ? m_graph.explorationEdge(indices[i]) : indices[i];
-      double dist =
-          (m_graph.transitionLabel(n).pos() - cam_pos).lengthSquared();
+      std::size_t n = exploration_active ? m_graph.explorationEdge(indices[i]) : indices[i];
+      double dist = (m_graph.transitionLabel(n).pos() - cam_pos).lengthSquared();
       distances[indices[i]] = dist;
       dist = std::sqrt(dist);
       closest = std::min(dist, closest);
       furthest = std::max(dist, furthest);
     }
 
-    const double furthest_scale = 0.8;
-    const double closest_scale = 1.0;
-    auto getScale = [&](std::size_t i)
+    auto getScale = [&](std::size_t i) -> double
     {
-      return (closest_scale - (closest_scale - furthest_scale) *
-                                  (std::sqrt(distances[i]) - closest) /
-                                  (furthest - closest));
+      const double furthest_scale = 0.8;
+      const double closest_scale = 1.0;
+      if (!m_is_threedimensional || furthest == closest)
+      {
+        return closest_scale;
+      }
+      else
+      {
+        return (closest_scale
+                - (closest_scale - furthest_scale) * (std::sqrt(distances[i]) - closest) / (furthest - closest));
+      }
     };
+
     if (m_drawtransitionlabels)
     {
-      for (std::size_t i = 0;
-           i < std::min(edgeCount,
-                        static_cast<std::size_t>(m_textLimitTransLabels));
-           ++i)
+      for (std::size_t i = 0; i < std::min(edgeCount, static_cast<std::size_t>(m_textLimitTransLabels)); ++i)
       {
         font.setPixelSize(getScale(indices[i]) * m_fontsize);
         painter.setFont(font);
-        renderTransitionLabel(painter, exploration_active
-                                           ? m_graph.explorationEdge(indices[i])
-                                           : indices[i]);
+        renderTransitionLabel(painter, exploration_active ? m_graph.explorationEdge(indices[i]) : indices[i]);
       }
     }
   }
@@ -949,11 +910,10 @@ void GLScene::renderText(QPainter& painter)
 GLScene::Selection GLScene::select(int x, int y)
 {
   Selection s{SelectableObject::none, 0};
-  selectObject(s, x, y, SelectableObject::node) ||
-      selectObject(s, x, y, SelectableObject::handle)
+  selectObject(s, x, y, SelectableObject::node)
+      || selectObject(s, x, y, SelectableObject::handle)
       // Only select transition labels when they are rendered
-      ||
-      (m_drawtransitionlabels && selectObject(s, x, y, SelectableObject::label))
+      || (m_drawtransitionlabels && selectObject(s, x, y, SelectableObject::label))
       // Only select state labels when they are rendered
       || (m_drawstatelabels && selectObject(s, x, y, SelectableObject::slabel));
   return s;
@@ -961,11 +921,8 @@ GLScene::Selection GLScene::select(int x, int y)
 
 float GLScene::sizeOnScreen(const QVector3D& pos, float length) const
 {
-  QVector3D rightPoint =
-      sphericalBillboard(pos) * QVector3D(length, 0.0f, 0.0f);
-  return (m_camera.worldToWindow(pos) -
-          m_camera.worldToWindow(pos + rightPoint))
-      .length();
+  QVector3D rightPoint = sphericalBillboard(pos) * QVector3D(length, 0.0f, 0.0f);
+  return (m_camera.worldToWindow(pos) - m_camera.worldToWindow(pos + rightPoint)).length();
 }
 
 //
@@ -977,40 +934,37 @@ QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
   return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
 }
 
-void GLScene::drawCenteredText3D(QPainter& painter, const QString& text,
-                                 const QVector3D& position,
-                                 const QVector3D& color)
+void GLScene::drawCenteredText3D(QPainter& painter,
+    const QString& text,
+    const QVector3D& position,
+    const QVector3D& color)
 {
   QVector3D window = m_camera.worldToWindow(position);
   float fog = 0.0f;
-  if (!text.isEmpty() && window.z() <= 1.0f &&
-      isVisible(position, fog)) // There is text, that is not behind the camera
-                                // and it is visible.
+  if (!text.isEmpty() && window.z() <= 1.0f && isVisible(position, fog)) // There is text, that is not behind the camera
+                                                                         // and it is visible.
   {
     QColor qcolor = vectorToColor(color);
     qcolor.setAlpha(static_cast<int>(255 * (1.0f - fog)));
 
-    drawCenteredText(painter, window.x() / m_device_pixel_ratio,
-                     window.y() / m_device_pixel_ratio, text, qcolor);
+    drawCenteredText(painter, window.x() / m_device_pixel_ratio, window.y() / m_device_pixel_ratio, text, qcolor);
   }
 }
 
 void GLScene::drawCenteredStaticText3D(QPainter& painter,
-                                       const QStaticText& text,
-                                       const QVector3D& position,
-                                       const QVector3D& color)
+    const QStaticText& text,
+    const QVector3D& position,
+    const QVector3D& color)
 {
   QVector3D window = m_camera.worldToWindow(position);
   float fog = 0.0f;
-  if (window.z() <= 1.0f &&
-      isVisible(position, fog)) // There is text, that is not behind the camera
-                                // and it is visible.
+  if (window.z() <= 1.0f && isVisible(position, fog)) // There is text, that is not behind the camera
+                                                      // and it is visible.
   {
     QColor qcolor = vectorToColor(color);
     qcolor.setAlpha(static_cast<int>(255 * (1.0f - fog)));
 
-    drawCenteredStaticText(painter, window.x() / m_device_pixel_ratio,
-                           window.y() / m_device_pixel_ratio, text, qcolor);
+    drawCenteredStaticText(painter, window.x() / m_device_pixel_ratio, window.y() / m_device_pixel_ratio, text, qcolor);
   }
 }
 
@@ -1019,9 +973,7 @@ bool GLScene::isVisible(const QVector3D& position, float& fogamount)
   // Should match the vertex shader: fogAmount = (1.0f - exp(-1.0f *
   // pow(distance * g_density, 2)));
   float distance = (m_camera.position() - position).length();
-  fogamount =
-      m_drawfog *
-      (1.0f - std::exp(-1.0f * std::pow(distance * m_fogdensity, 2.0f)));
+  fogamount = m_drawfog * (1.0f - std::exp(-1.0f * std::pow(distance * m_fogdensity, 2.0f)));
   return (distance < m_camera.viewdistance() && fogamount < 0.99f);
 }
 
@@ -1037,10 +989,8 @@ void GLScene::renderEdge(std::size_t i)
   const QVector3D from = m_graph.node(edge.from()).pos();
   const QVector3D via = m_graph.handle(i).pos();
   const QVector3D to = m_graph.node(edge.to()).pos();
-  std::array<QVector3D, 4> control =
-      calculateArc(from, via, to, edge.is_selfloop());
+  std::array<QVector3D, 4> control = calculateArc(from, via, to, edge.is_selfloop());
 
-  
   // Calculate the position of the tip of the arrow, and the orientation of the
   // arc
   QVector3D start;
@@ -1054,8 +1004,7 @@ void GLScene::renderEdge(std::size_t i)
     const Math::Circle from_node{from, 0.5f * nodeSizeScaled()};
     t = Math::make_intersection(from_node, arc).guessNearFront();
     start = from_node.project(arc.at(t));
-    const Math::Circle head{to,
-                            0.5f * nodeSizeScaled() + arrowheadSizeScaled()};
+    const Math::Circle head{to, 0.5f * nodeSizeScaled() + arrowheadSizeScaled()};
     const Math::Scalar s = Math::make_intersection(head, arc).guessNearBack();
     const QVector3D top = arc.at(s);
     vec = tip - top;
@@ -1065,31 +1014,24 @@ void GLScene::renderEdge(std::size_t i)
 
   QVector3D arcColor(m_graph.handle(i).selected(), 0.0f, 0.0f);
 
-  // m_arc_shader.setControlPoints(control);
   // Use the arc shader to draw the arcs.
   m_drawArc.emplace_back(control);
   m_drawArcColors.emplace_back(arcColor);
 
+  // If to == ctrl[2], then something odd is going on.
+  vec.normalize();
 
-  // If to == ctrl[2], then something odd is going on. We'll just
-  // make the executive decision not to draw the arrowhead then, as it
-  // will just clutter the image.
-  if (vec.length() > 0)
+  float fog = 0.0f;
+  if (isVisible(tip, fog))
   {
-    vec.normalize();
+    // Apply the fog color.
+    // m_global_shader.setColor();
+    QVector4D color = applyFog(arcColor, fog);
+    color.setW(1);
 
-    float fog = 0.0f;
-    if (isVisible(tip, fog))
-    {
-      // Apply the fog color.
-      // m_global_shader.setColor();
-      QVector4D color = applyFog(arcColor, fog);
-      color.setW(1);
-
-      m_drawArrowColors.push_back(color);
-      m_drawArrowOffsets.push_back(tip);
-      m_drawArrowDirections.push_back(vec);
-    }
+    m_drawArrowColors.push_back(color);
+    m_drawArrowOffsets.push_back(tip);
+    m_drawArrowDirections.push_back(vec);
   }
 }
 
@@ -1146,37 +1088,25 @@ void GLScene::renderNode(std::size_t i, bool transparent)
   }
 
   float fog = 0.0f;
-  float alpha = (m_graph.hasExploration() && !node.active())
-                    ? 1.0f
-                    : 1.0f; // Disabled for now until the transparent window
-                            // issue can be resolved.
-  if (transparent || alpha > 0.99f) // Check if these elements are visible and
-                                    // opaque if transparency is disallowed.
+  float alpha = (m_graph.hasExploration() && !node.active()) ? 1.0f : 1.0f; // Disabled for now until the transparent
+                                                                            // window issue can be resolved.
+  if (transparent || alpha > 0.99f)                                         // Check if these elements are visible and
+                                                                            // opaque if transparency is disallowed.
   {
-    // Node stroke color: red when selected, black otherwise. Apply fogging
+    // Node border color: red when selected, blue when probabilistic, and black otherwise. Apply fogging
     // afterwards.
-    QVector3D line(0.6f * node.selected(), 0.0f, 0.0f);
+    QVector3D line(0.6f * node.selected(), 0.0f, 1.0f*node.is_probabilistic());
+
     QVector4D color = QVector4D(applyFog(line, fog), alpha);
     m_drawNodeBorder.push_back(node.pos(), color);
 
     color = QVector4D(applyFog(fill, fog), alpha);
-    if (node.is_probabilistic())
-    {
-      // Draw only the top section of the half sphere
-      // This gives the appearance of a thicker border
-      m_drawHalfSphere.push_back(node.pos(), color);
-    }
-    else
-    {
-      // Draw the sphere
-      m_drawSphere.push_back(node.pos(), color);
-    }
+    // Draw the sphere to fill the internal area of a node. 
+    m_drawSphere.push_back(node.pos(), color);
 
-    if (m_graph.hasExploration() && !m_graph.isBridge(i) &&
-        m_graph.initialState() != i)
+    if (m_graph.hasExploration() && !m_graph.isBridge(i) && m_graph.initialState() != i)
     {
-      float s = (fill.x() < 0.5f && fill.y() < 0.5f && fill.z() < 0.5f) ? 0.2f
-                                                                        : -0.2f;
+      float s = (fill.x() < 0.5f && fill.y() < 0.5f && fill.z() < 0.5f) ? 0.2f : -0.2f;
       QVector4D hint = QVector4D(fill.x() + s, fill.y() + s, fill.z() + s, 1);
 
       // When the node is active, which means that its successors are shown in
@@ -1203,10 +1133,9 @@ void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
 
   const Graph::LabelNode& label = m_graph.transitionLabel(i);
   QVector3D fill(std::max(label.color().x(), label.selected()),
-                 std::min(label.color().y(), 1.0f - label.selected()),
-                 std::min(label.color().z(), 1.0f - label.selected()));
-  drawCenteredStaticText3D(painter, m_transition_labels[label.labelindex()],
-                           label.pos(), fill);
+      std::min(label.color().y(), 1.0f - label.selected()),
+      std::min(label.color().z(), 1.0f - label.selected()));
+  drawCenteredStaticText3D(painter, m_transition_labels[label.labelindex()], label.pos(), fill);
 }
 
 void GLScene::renderStateLabel(QPainter& painter, std::size_t i)
@@ -1219,10 +1148,9 @@ void GLScene::renderStateLabel(QPainter& painter, std::size_t i)
   }
 
   QVector3D color(std::max(label.color().x(), label.selected()),
-                  std::min(label.color().y(), 1.0f - label.selected()),
-                  std::min(label.color().z(), 1.0f - label.selected()));
-  drawCenteredStaticText3D(painter, m_state_labels[label.labelindex()],
-                           label.pos(), color);
+      std::min(label.color().y(), 1.0f - label.selected()),
+      std::min(label.color().z(), 1.0f - label.selected()));
+  drawCenteredStaticText3D(painter, m_state_labels[label.labelindex()], label.pos(), color);
 }
 
 void GLScene::renderStateNumber(QPainter& painter, std::size_t i)
@@ -1232,15 +1160,12 @@ void GLScene::renderStateNumber(QPainter& painter, std::size_t i)
   drawCenteredText3D(painter, QString::number(i), node.pos(), color);
 }
 
-bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
-                           SelectableObject type)
+bool GLScene::selectObject(GLScene::Selection& s, int x, int y, SelectableObject type)
 {
   float bestZ = 1.0f;
   bool exploration_active = m_graph.hasExploration();
-  std::size_t nodeCount =
-      exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
-  std::size_t edgeCount =
-      exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
+  std::size_t nodeCount = exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
   QFontMetrics metrics(m_font);
   switch (type)
@@ -1251,8 +1176,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
     {
       std::size_t index = exploration_active ? m_graph.explorationNode(i) : i;
       QVector3D screenPos = m_camera.worldToWindow(m_graph.node(index).pos());
-      float radius =
-          sizeOnScreen(m_graph.node(index).pos(), nodeSizeScaled()) / 2.0f;
+      float radius = sizeOnScreen(m_graph.node(index).pos(), nodeSizeScaled()) / 2.0f;
       if (isCloseCircle(x, y, screenPos, radius, bestZ))
       {
         s.selectionType = type;
@@ -1344,8 +1268,7 @@ QQuaternion GLScene::sphericalBillboard(const QVector3D& position) const
   camera.normalize();
   // Compute the roration with the cross product and the dot product (aka
   // inproduct)
-  QQuaternion perspectiveRotation = QQuaternion::fromAxisAndAngle(
-      QVector3D::crossProduct(camera, posToCamera),
+  QQuaternion perspectiveRotation = QQuaternion::fromAxisAndAngle(QVector3D::crossProduct(camera, posToCamera),
       radiansToDegrees(std::acos(QVector3D::dotProduct(camera, posToCamera))));
 
   // Return the combination of both rotations

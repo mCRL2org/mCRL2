@@ -82,7 +82,7 @@ public:
   signature_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_)
   {
-    mCRL2log(log::verbose, "sigref") << "initialising signature computation for strong bisimulation" << std::endl;
+    mCRL2log(log::verbose) << "initialising signature computation for strong bisimulation" << std::endl;
   }
 
   /** \overload */
@@ -149,7 +149,7 @@ public:
     : signature<LTS_T>(lts_),
       m_prev_transitions(lts_.get_transitions(),lts_.num_states(),false)  // transitions stored backward. 
   {
-    mCRL2log(log::verbose, "sigref") << "initialising signature computation for branching bisimulation" << std::endl;
+    mCRL2log(log::verbose) << "initialising signature computation for branching bisimulation" << std::endl;
   }
 
   /** \overload */
@@ -299,7 +299,7 @@ public:
     : signature_branching_bisim<LTS_T>(lts_),
       m_divergent(lts_.num_states(), false)
   {
-    mCRL2log(log::verbose, "sigref") << "initialising signature computation for divergence preserving branching bisimulation" << std::endl;
+    mCRL2log(log::verbose) << "initialising signature computation for divergence preserving branching bisimulation" << std::endl;
     compute_tau_sccs();
   }
 
@@ -388,7 +388,7 @@ protected:
 
     do
     {
-      mCRL2log(log::verbose, "sigref") << "Iteration " << iterations
+      mCRL2log(log::verbose) << "Iteration " << iterations
                                        << " currently have " << m_count << " blocks" << std::endl;
 
       m_signature.compute_signature(m_partition);
@@ -402,7 +402,7 @@ protected:
       {
         if(hashtable.find(m_signature.get_signature(i)) == hashtable.end())
         {
-          mCRL2log(log::debug, "sigref") << "Adding block for signature " << print_sig(m_signature.get_signature(i)) << std::endl;
+          mCRL2log(log::debug) << "Adding block for signature " << print_sig(m_signature.get_signature(i)) << std::endl;
           hashtable[m_signature.get_signature(i)] = m_count++;
         }
       }
@@ -417,7 +417,7 @@ protected:
 
     } while (count_prev != m_count);
 
-    mCRL2log(log::verbose, "sigref") << "Done after " << iterations << " iterations with " << m_count << " blocks" << std::endl;
+    mCRL2log(log::verbose) << "Done after " << iterations << " iterations with " << m_count << " blocks" << std::endl;
   }
 
   /** \brief Perform the quotient with respect to the partition that has

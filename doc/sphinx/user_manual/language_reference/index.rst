@@ -7,9 +7,6 @@ mCRL2 language reference
 
    mcrl2
    lps
-   lts
    mucalc
    bes
    pbes
-   file_formats
-

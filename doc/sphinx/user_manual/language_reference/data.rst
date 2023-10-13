@@ -480,7 +480,8 @@ substituted.
 
 .. list-table:: Predefined operations on numeric sorts
    :header-rows: 1
-   :widths: 15 20 50
+   :widths: auto
+   :width: 100%
 
    * - Name
      - Sort(s)
@@ -713,15 +714,15 @@ enumeration is defined as a shorthand to denote lists::
      - :samp:`{a}` concatenated with :samp:`{b}`.
    * - :samp:`head({a})`
      - ``List(S) -> S``
-     - The first element :samp:`{a}`.
+     - The first element of :samp:`{a}`.
    * - :samp:`tail({a})`
      - ``List(S) -> List(S)``
      - :samp:`{a}` without its first element.
    * - :samp:`rhead({a})`
-     - ``List(S) -> Nat``
+     - ``List(S) -> S``
      - The last element of :samp:`{a}`.
    * - :samp:`rtail({a})`
-     - ``List(S) -> Nat``
+     - ``List(S) -> List(S)``
      - :samp:`{a}` without its last element.
   
 .. warning::

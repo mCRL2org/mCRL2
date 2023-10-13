@@ -184,7 +184,8 @@ When committing changes, the following guidelines should be adhered to:
     
 
 Documentation guidelines
-========================
+------------------------
+
 This page describes the documentation guidelines for tools and libraries.
 
 Tools
@@ -325,18 +326,3 @@ Where to acknowledge and to what extent:
   acknowledgements and one of the main tasks of a tool is to read a file apply
   F and return the result, then the tool should include the acknowledgements
   for F.)
-  
-Release guidelines
-==================
-* An mCRL2 toolset release takes place every 6 months.
-* The precise next release date is determined well in advance by the mCRL2 developers.
-* During a period of 15 days prior to the release date, only bug-fixing changes
-  to the development source tree are allowed. Feature additions or large,
-  structural changes are not allowed. Also, every bug fix should be checked by
-  at least one person other than its author, prior to its submission into the
-  source tree.
-* The version number of a release consists of the year and month of
-  the release date. For example: 2008.01.
-* The release itself consists of at least (but not limited to) one binary
-  Windows package and one source code package. These are made available for
-  download on the mCRL2 website.

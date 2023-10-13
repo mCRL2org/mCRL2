@@ -549,8 +549,7 @@ class progress_monitor
 
     std::size_t last_state_count = 0;
     std::size_t last_transition_count = 0;
-    time_t last_log_time = time(nullptr) - 1;
-    time_t new_log_time = time(nullptr);
+    std::atomic<time_t> last_log_time = time(nullptr) - 1;
 
     lps::exploration_strategy search_strategy;
 
@@ -566,10 +565,13 @@ class progress_monitor
 
     void finish_state(std::size_t state_count, std::size_t todo_list_size, std::size_t number_of_threads)
     {
+      time_t new_log_time = 0;
+
       static std::mutex exclusive_print_mutex;
       if (search_strategy == lps::es_breadth)
       {
-        if (++count == level_up) 
+        ++count;
+        if (number_of_threads == 1 && count == level_up) 
         {
           exclusive_print_mutex.lock();
           mCRL2log(log::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
@@ -580,9 +582,10 @@ class progress_monitor
           exclusive_print_mutex.unlock();
         }
 
-        if (time(&new_log_time) > last_log_time)
+        if (time(&new_log_time) > last_log_time.load(std::memory_order_relaxed))
         {
           exclusive_print_mutex.lock();
+
           last_log_time = new_log_time;
           std::size_t lvl_states = state_count - last_state_count;
           std::size_t lvl_transitions = transition_count - last_transition_count;
@@ -607,7 +610,7 @@ class progress_monitor
       else
       {
         count++;
-        if (time(&new_log_time) > last_log_time)
+        if (time(&new_log_time) > last_log_time.load(std::memory_order_relaxed))
         {
           exclusive_print_mutex.lock();
           last_log_time = new_log_time;
@@ -764,7 +767,10 @@ struct state_space_generator
         // start_state
         [&](const std::size_t thread_index, const lps::state& s, std::size_t /* s_index */)
         {
-          source = &s;
+          if (options.number_of_threads == 1) {
+            source = &s;
+          }
+
           assert(thread_index<has_outgoing_transitions.size());
           has_outgoing_transitions[thread_index].m_bool = false;
           if (options.detect_nondeterminism)
@@ -784,7 +790,7 @@ struct state_space_generator
           }
           if (!options.suppress_progress_messages)
           {
-            m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size, number_of_threads);
+            m_progress_monitor.finish_state(explorer.state_map().size(thread_index), todo_list_size, number_of_threads);
           }
         },
 

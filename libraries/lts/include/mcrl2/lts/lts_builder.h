@@ -29,7 +29,7 @@ lps::state remove_time_stamp(const lps::state& s)
 
 struct lts_builder
 {
-  typedef atermpp::indexed_set<lps::state, atermpp::detail::GlobalThreadSafe> indexed_set_for_states_type;
+  typedef atermpp::indexed_set<lps::state, mcrl2::utilities::detail::GlobalThreadSafe> indexed_set_for_states_type;
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
   // is needed to avoid duplicates.
   utilities::unordered_map_large<lps::multi_action, std::size_t> m_actions;
@@ -87,10 +87,10 @@ class lts_aut_builder: public lts_builder
 
     void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to, const std::size_t number_of_threads) override
     {
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
       std::size_t label = add_action(a);
       m_lts.add_transition(transition(from, label, to));
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
     }
 
     // Add actions and states to the LTS
@@ -135,10 +135,10 @@ class lts_aut_disk_builder: public lts_builder
 
     void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to, const std::size_t number_of_threads) override
     {
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
       m_transition_count++;
       out << "(" << from << ",\"" << lps::pp(a) << "\"," << to << ")\n";
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
     }
 
     // Add actions and states to the LTS
@@ -177,10 +177,10 @@ class lts_lts_builder: public lts_builder
 
     void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to, const std::size_t number_of_threads) override
     {
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
       std::size_t label = add_action(a);
       m_lts.add_transition(transition(from, label, to));
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
     }
 
     // Add actions and states to the LTS
@@ -254,9 +254,9 @@ class lts_lts_disk_builder: public lts_builder
 
     void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to, const std::size_t number_of_threads) override
     {
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
       write_transition(*stream, from, a, to);
-      if (atermpp::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
     }
 
     // Add actions and states to the LTS

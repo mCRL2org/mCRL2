@@ -1147,7 +1147,7 @@ class RewriterCompilingJitty::ImplementTree
           else 
           {
             s << m_padding << target_for_output << ".assign(" << variable_name.substr(1) 
-                           << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, this_rewriter->m_lock_depth);\n";
+                           << ", *this_rewriter->m_thread_aterm_pool);\n";
           }
         }
         else 
@@ -1191,7 +1191,7 @@ class RewriterCompilingJitty::ImplementTree
         //     "static_cast<const data_expression&>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << "))\n";
         s << m_padding << target_for_output << ".assign(" 
           << "static_cast<const data_expression&>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << ")), " 
-          << "this_rewriter), this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, this_rewriter->m_lock_depth);\n";
+          << "this_rewriter), *this_rewriter->m_thread_aterm_pool);\n";
       }
       result_type << "data_expression";
       return;
@@ -2267,7 +2267,7 @@ public:
       {
         // m_stream << m_padding << target_for_output << " = " << ss.str() << ";\n";
         m_stream << m_padding << target_for_output << ".assign(" << ss.str() 
-                 << ", this_rewriter->m_busy_flag, this_rewriter->m_forbidden_flag, this_rewriter->m_lock_depth);\n";
+                 << ", *this_rewriter->m_thread_aterm_pool);\n";
       }
       return;
     }
@@ -3093,7 +3093,7 @@ void RewriterCompilingJitty::rewrite(
     }
     catch (recalculate_term_as_stack_is_too_small&)
     {
-      assert(*atermpp::detail::g_thread_term_pool().get_lock_depth()==0); 
+      assert(!atermpp::detail::g_thread_term_pool().is_shared_locked()); 
       rewriting_in_progress=false; // Restart rewriting, due to a stack overflow.
                                    // The stack is a vector, and it may be relocated in memory when
                                    // resized. References to the stack loose their validity. 

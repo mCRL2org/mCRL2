@@ -13,6 +13,7 @@
 #include "mcrl2/atermpp/detail/aterm_pool.h"
 #include "mcrl2/atermpp/detail/aterm_container.h"
 #include "mcrl2/utilities/hashtable.h"
+#include "mcrl2/utilities/shared_mutex.h"
 
 #include <atomic>
 
@@ -27,7 +28,8 @@ class thread_aterm_pool final : public thread_aterm_pool_interface, mcrl2::utili
 {
 public:
   thread_aterm_pool(aterm_pool& global_pool)
-    : m_pool(global_pool)
+    : m_pool(global_pool),
+      m_shared_mutex(global_pool.shared_mutex())
   {
     /// Identify the first constructor call as the main thread.
     static bool is_main_thread = true;
@@ -36,7 +38,7 @@ public:
       m_is_main_thread = true;
       is_main_thread = false;
     }
-
+    
     m_variables = new mcrl2::utilities::hashtable<aterm*>();
     m_containers = new mcrl2::utilities::hashtable<detail::_aterm_container*>();
     
@@ -56,27 +58,27 @@ public:
     }
   }
 
-  /// \threadsafe
+  /// \details threadsafe
   inline function_symbol create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
-  /// \threadsafe
+  /// \details threadsafe
   inline function_symbol create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
-  /// \threadsafe
+  /// \details threadsafe
   inline void create_int(aterm& term, std::size_t val);
 
-  /// \threadsafe
+  /// \details threadsafe
   inline void create_term(aterm& term, const function_symbol& sym);
 
-  /// \threadsafe
+  /// \details threadsafe
   template<class ...Terms>
   inline void create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments);
 
-  /// \threadsafe
+  /// \details threadsafe
   template<class Term, class INDEX_TYPE, class ...Terms>
   inline void create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments);
 
-  /// \threadsafe
+  /// \details threadsafe
   template<typename ForwardIterator>
   inline void create_appl_dynamic(aterm& term,
       const function_symbol& sym,
@@ -106,65 +108,30 @@ public:
   // Implementation of thread_aterm_pool_interface
   inline void mark() override;
   inline void print_local_performance_statistics() const override;
-  inline bool is_busy() const override;
-  inline void wait_for_busy() const override;
-  inline void set_forbidden(bool value) override;
   inline std::size_t protection_set_size() const override;
 
-  /// \brief Called before entering the global term pool.
-  inline void lock_shared();
+  /// Acquire a shared lock on this thread aterm pool.
+  inline mcrl2::utilities::shared_guard lock_shared() { return m_shared_mutex.lock_shared(); }
 
-  /// \brief Called after leaving the global term pool.
-  inline void unlock_shared();
+  /// Acquire an exclusive lock
+  inline mcrl2::utilities::lock_guard lock() { return m_shared_mutex.lock(); }
 
-  /// \brief Called before entering the global term pool to obtain exclusive access.
-  inline void lock();
+  /// Returns true iff we are in a shared section.
+  inline bool is_shared_locked() { return m_shared_mutex.is_shared_locked(); }
 
-  /// \brief Called after leaving the global term pool to release exclusive access.
-  inline void unlock();
-
-  /// \brief Waits for the global term pool.
-  inline void wait();
-
-  /// \brief Deliver the busy flag to rewriters for faster access.
-  /// \details This is a performance optimisation to be deleted in due time. 
-  inline std::atomic<bool>* get_busy_flag()
-  {
-    return &m_busy_flag;
-  }
-
-  /// \brief Deliver the forbidden flag to rewriters for faster access.
-  /// \details This is a performance optimisation to be deleted in due time. 
-  inline std::atomic<bool>* get_forbidden_flag()
-  {
-    return &m_forbidden_flag;
-  }
-
-  /// \brief Deliver the forbidden flag to rewriters for faster access.
-  /// \details This is a performance optimisation to be deleted in due time. 
-  inline std::size_t* get_lock_depth()
-  {
-    return &m_lock_depth;
-  }
+  /// Triggers a global garbage collection
+  inline void collect() { m_pool.collect(m_shared_mutex); }
 
 private:
   aterm_pool& m_pool;
 
   /// Keeps track of pointers to all existing aterm variables and containers.
+  mcrl2::utilities::shared_mutex m_shared_mutex;
   mcrl2::utilities::hashtable<aterm*>* m_variables;
   mcrl2::utilities::hashtable<detail::_aterm_container*>* m_containers;
 
   std::size_t m_variable_insertions = 0;
   std::size_t m_container_insertions = 0;
-
-  /// \brief A boolean flag indicating whether this thread is working inside the global aterm pool.
-  std::atomic<bool> m_busy_flag = false;
-  std::atomic<bool> m_forbidden_flag = false;
-
-  /// \brief It can happen that un/lock_shared calls are nested, so keep track of the nesting depth and only
-  ///        actually perform un/locking at the root.
-  std::size_t m_lock_depth = 0;
-
   std::stack<std::reference_wrapper<_aterm>> m_todo; ///< A reusable todo stack.
 
   bool m_is_main_thread = false;

@@ -39,7 +39,7 @@ To further guide the effectiveness of the exploration we need some additional
 background information.
 
 Symbolic Exploration
----------------
+-------------------------
 
 The effectiveness of the symbolic representation is mostly determined by the
 size (in the number of nodes shown by `--print-nodesize`) of the symbolic data
@@ -83,7 +83,7 @@ required, but doing so will over-approximate their dependencies (except for the
 consequences of the symbolic representation we explain it in more detail.
 
 Symbolic Representation
----------------
+-------------------------
 
 For the state space of a linear process the set of states is typically a set of
 vectors, where every element in the vector corresponds to a process parameter.

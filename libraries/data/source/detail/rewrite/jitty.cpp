@@ -211,10 +211,7 @@ void RewriterJitty::subst_values(
   if (is_function_symbol(t))
   {
     // result=t;  The following is more efficient as it avoids a call to thread local variables. Should be removed in due time. 
-    result.assign(t,
-                  this->m_busy_flag,
-                  this->m_forbidden_flag,
-                  this->m_lock_depth);
+    result.assign(t, *m_thread_aterm_pool);
     return;
   }
   else if (is_variable(t))
@@ -231,17 +228,12 @@ void RewriterJitty::subst_values(
         }
         // result=assignments.assignment[i].term;
         result.assign(assignments.assignment[i].term,
-                      this->m_busy_flag,
-                      this->m_forbidden_flag,
-                      this->m_lock_depth);
+                      *m_thread_aterm_pool);
         return;
       }
     }
     // result=t;
-    result.assign(t,
-                  this->m_busy_flag,
-                  this->m_forbidden_flag,
-                  this->m_lock_depth);
+    result.assign(t, *m_thread_aterm_pool);
     return;
   }
   else if (is_abstraction(t))
@@ -436,10 +428,7 @@ void RewriterJitty::rewrite_aux(
       assert(terma.size()==1);
       assert(remove_normal_form_function(terma[0])==terma[0]);
       // result=terma[0]; the following is more efficient.
-      result.assign(terma[0],
-                    this->m_busy_flag,
-                    this->m_forbidden_flag,
-                    this->m_lock_depth);
+      result.assign(terma[0], *m_thread_aterm_pool);
       return;
     }
 
@@ -526,10 +515,7 @@ void RewriterJitty::rewrite_aux(
   }
   if (is_variable(term))
   {
-    sigma.apply(atermpp::down_cast<variable>(term),result, 
-                  this->m_busy_flag,                         // Adding the busy/forbidden/creation depth is an optimisation.
-                  this->m_forbidden_flag,
-                  this->m_lock_depth);
+    sigma.apply(atermpp::down_cast<variable>(term),result, *m_thread_aterm_pool);
     return;
   }
   if (is_where_clause(term))
@@ -806,8 +792,8 @@ void RewriterJitty::rewrite_aux_const_function_symbol(
     /* result.assign(cached_rhs,
                   this->m_busy_flag,
                   this->m_forbidden_flag,
-                  *this->m_creation_depth); */
-    result.unprotected_assign<false>(cached_rhs);
+                  *this->m_creation_depth); */                 
+    result.assign(cached_rhs, *m_thread_aterm_pool);
     return;
   }
 

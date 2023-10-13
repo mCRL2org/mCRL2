@@ -286,7 +286,7 @@ void lpssuminst(const std::string& input_filename,
     sorts = std::set<data::sort_expression>(sort_set.begin(),sort_set.end());
   }
 
-  mCRL2log(log::verbose, "lpssuminst") << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
+  mCRL2log(log::verbose) << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
 
   mcrl2::data::rewriter r(spec.data(), rewrite_strategy);
   lps::suminst_algorithm<data::rewriter, stochastic_specification>(spec, r, sorts, tau_summands_only).run();

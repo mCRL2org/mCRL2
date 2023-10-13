@@ -36,11 +36,7 @@ set(STATESPACE_BENCHMARKS
 # These specifications use lists of lists to represent the board of a game. The
 # symbolic tools cannot deal with this single parameter and require additional
 # preprocessing of the LPS (using lpsparunfold).
-set(GAME_BENCHMARKS
-  "examples/games/clobber/clobber.mcrl2"
-  "examples/games/domineering/domineering.mcrl2"
-  "examples/games/othello/othello.mcrl2"
-  )
+set(GAME_BENCHMARKS "")
 
 # This target is used to generate all intermediate files required for benchmarks. 
 add_custom_target(benchmarks)
@@ -58,11 +54,13 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
   # Generate the lps for this benchmark.
   add_custom_command(TARGET benchmarks 
     COMMAND mcrl22lps "${CMAKE_SOURCE_DIR}/${benchmark}" "${LPS_FILENAME}"
+    USES_TERMINAL
     )
 
   # Generate a pbes for the nodeadlock property for this benchmark
   add_custom_command(TARGET benchmarks
     COMMAND lps2pbes -f "${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf" "${LPS_FILENAME}" "${NODEADLOCK_PBES_FILENAME}"
+    USES_TERMINAL
     )
 
   # Benchmark linearisation.
@@ -70,12 +68,19 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
 
   # Benchmark statespace generation.
   add_tool_benchmark("${NAME}" lps2lts "${LPS_FILENAME}" "")
-  add_tool_benchmark("${NAME}_jittyc" lps2lts "${LPS_FILENAME}" "" "-rjittyc")
   add_tool_benchmark("${NAME}_parallel" lps2lts "${LPS_FILENAME}" "" "--threads=4")
-  add_tool_benchmark("${NAME}_jittyc_parallel" lps2lts "${LPS_FILENAME}" "" "-rjittyc" "--threads=4")
+
+  if(NOT WIN32)
+    add_tool_benchmark("${NAME}_jittyc" lps2lts "${LPS_FILENAME}" "" "-rjittyc")
+    add_tool_benchmark("${NAME}_jittyc_parallel" lps2lts "${LPS_FILENAME}" "" "-rjittyc" "--threads=4")
+  endif()
 
   # Benchmark statespace reduction techniques, the first target generates the statespaces.
-  add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}" "-rjittyc")
+  if(NOT WIN32)
+    add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}" "-rjittyc")
+  else()
+    add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}")
+  endif()
 
   add_tool_benchmark("${NAME}_bisim" ltsconvert "${LTS_FILENAME}" "" "-ebisim")
   add_tool_benchmark("${NAME}_bisim-gjkw" ltsconvert "${LTS_FILENAME}" "" "-ebisim-gjkw")

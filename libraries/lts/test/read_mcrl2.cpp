@@ -19,7 +19,7 @@
 using namespace mcrl2;
 using namespace mcrl2::lts;
 
-const std::string trace_data="Testing/trace_mcrl2.trc";
+const std::string trace_data = "trace_mcrl2.trc";
 
 
 void test_next_action(trace& t, const char* s)

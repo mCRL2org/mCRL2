@@ -345,11 +345,11 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_ca
         static enumerator_queue<EnumeratorListElement>& default_deque()
         {
 #ifdef MCRL2_THREAD_SAFE 
-          static_assert(atermpp::detail::GlobalThreadSafe);
+          static_assert(mcrl2::utilities::detail::GlobalThreadSafe);
           thread_local enumerator_queue<EnumeratorListElement> result; // Changed this static variable to thread local,
                                                                        // as it could be the cause of a thread conflict. 
 #else
-          static_assert(!atermpp::detail::GlobalThreadSafe);
+          static_assert(!mcrl2::utilities::detail::GlobalThreadSafe);
           static enumerator_queue<EnumeratorListElement> result; // Changed this static variable to thread local,
 #endif
           return result;
@@ -440,10 +440,10 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_ca
     const iterator& end()
     {
 #ifdef MCRL2_THREAD_SAFE 
-      static_assert(atermpp::detail::GlobalThreadSafe);
+      static_assert(mcrl2::utilities::detail::GlobalThreadSafe);
       thread_local iterator result(m_accept);  
 #else
-      static_assert(!atermpp::detail::GlobalThreadSafe);
+      static_assert(!mcrl2::utilities::::detail::GlobalThreadSafe);
       static iterator result(m_accept);  
 #endif
       return result;

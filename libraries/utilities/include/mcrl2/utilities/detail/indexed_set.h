@@ -36,13 +36,13 @@ static constexpr float max_load_factor = 0.6f; ///< The load factor before the h
 static constexpr std::size_t PRIME_NUMBER = 999953;
 
 #ifndef NDEBUG  // Numbers are small in debug mode for more intensive checks. 
-static constexpr std::size_t minimal_hashtable_size = 16; 
+  static constexpr std::size_t minimal_hashtable_size = 16; 
 #else
-static constexpr std::size_t minimal_hashtable_size = 2048;
+  static constexpr std::size_t minimal_hashtable_size = 2048;
 #endif
-static constexpr std::size_t RESERVATION_FRACTION = 8;        // If the reserved keys entries are exploited, 1/RESERVATION_FRACTION new
-                                                              // keys are reserved. This is an expensive operation, as it is executed
-                                                              // using a lock_exclusive. 
+  static constexpr std::size_t RESERVATION_FRACTION = 8;        // If the reserved keys entries are exploited, 1/RESERVATION_FRACTION new
+                                                                // keys are reserved. This is an expensive operation, as it is executed
+                                                                // using a lock_exclusive. 
 
 static_assert(minimal_hashtable_size/RESERVATION_FRACTION != 0);
 static_assert(minimal_hashtable_size>=8);       ///< With a max_load of 0.75 the minimal size of the hashtable must be 8.
@@ -55,97 +55,17 @@ static_assert(minimal_hashtable_size>=8);       ///< With a max_load of 0.75 the
 INDEXED_SET_TEMPLATE
 inline void INDEXED_SET::reserve_indices(const std::size_t thread_index)
 {
-  if (thread_index>0) lock_exclusive(thread_index);
-  if (m_next_index+m_thread_control.size()>=m_keys.size())   // otherwise another process already reserved entries, and nothing needs to be done. 
+  lock_guard guard = m_shared_mutexes[thread_index].lock();
+
+  if (m_next_index + m_shared_mutexes.size() >= m_keys.size())   // otherwise another process already reserved entries, and nothing needs to be done. 
   {
-    assert(thread_index<m_thread_control.size());
-    assert(m_next_index<=m_keys.size());
-    m_keys.resize(m_keys.size()+std::max(m_keys.size() / detail::RESERVATION_FRACTION, m_thread_control.size()));  // Increase with at least the number of threads. 
+    assert(m_next_index <= m_keys.size());
+    m_keys.resize(m_keys.size() + std::max(m_keys.size() / detail::RESERVATION_FRACTION, m_shared_mutexes.size()));  // Increase with at least the number of threads. 
 
     while ((detail::max_load_factor * m_hashtable.size()) < m_keys.size())
     {
        resize_hashtable();
     }
-  }
-  if (thread_index>0) unlock_exclusive(thread_index);
-}
-
-
-INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::lock_shared(const std::size_t thread_index) const
-{
-  assert(ThreadSafe || thread_index==0);
-  if constexpr (ThreadSafe)
-  {
-    assert(!m_thread_control[thread_index].busy_flag);
-    m_thread_control[thread_index].busy_flag.store(true);
-    
-    // Wait for the forbidden flag to become false.
-    while (m_thread_control[thread_index].forbidden_flag.load())
-    { 
-      m_thread_control[thread_index].busy_flag = false;
-      std::unique_lock lock(*m_mutex);
-      m_thread_control[thread_index].busy_flag = true;
-    }
-  }
-}
-
-INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::unlock_shared(const std::size_t thread_index) const
-{
-  assert(ThreadSafe || thread_index==0);
-  if constexpr (ThreadSafe)
-  {
-    assert(m_thread_control[thread_index].busy_flag);
-    m_thread_control[thread_index].busy_flag.store(false, std::memory_order_release);
-  }
-}
-
-INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::lock_exclusive(const std::size_t thread_index) const
-{
-  assert(ThreadSafe || thread_index==0);
-  if constexpr (ThreadSafe)
-  {
-    // Only one thread can halt everything.
-    m_mutex->lock();
-
-    // Indicate that threads must wait.
-    for (std::size_t i=0; i<m_thread_control.size(); ++i)
-    {
-      if (i != thread_index)
-      {
-        m_thread_control[i].forbidden_flag=true;
-      }
-    }
-
-    // Wait for all pools to indicate that they are not busy.
-    for (std::size_t i=0; i<m_thread_control.size(); ++i)
-    {
-      if (i != thread_index)
-      {
-        // wait for busy 
-        while (m_thread_control[i].busy_flag.load());
-      }
-    }
-  }
-}
-
-INDEXED_SET_TEMPLATE
-inline void INDEXED_SET::unlock_exclusive(const std::size_t thread_index) const
-{
-  assert(ThreadSafe || thread_index==0);
-  if constexpr (ThreadSafe)
-  {
-    for (std::size_t i=0; i<m_thread_control.size(); ++i)
-    {
-      if (i != thread_index)
-      {
-        m_thread_control[i].forbidden_flag=false;
-      }
-    }
-
-    m_mutex->unlock();
   }
 }
 
@@ -156,7 +76,7 @@ inline typename INDEXED_SET::size_type INDEXED_SET::put_in_hashtable(
                   std::size_t& new_position)
 {
   // Find a place to insert key and find whether key already exists.
-  assert(m_hashtable.size()>0);
+  assert(m_hashtable.size() > 0);
 
   new_position = ((m_hasher(key) * detail::PRIME_NUMBER) >> 2) % m_hashtable.size();
   std::size_t start = new_position;
@@ -178,6 +98,7 @@ inline typename INDEXED_SET::size_type INDEXED_SET::put_in_hashtable(
       index=pos;             // Insertion failed, but another process put an alternative value "pos"
                              // at this position. 
     }
+
     // If the index is RESERVED, we go into a busy loop, as another process 
     // will shortly change the RESERVED value into a sensible index. 
     if (index != detail::RESERVED) 
@@ -196,6 +117,7 @@ inline typename INDEXED_SET::size_type INDEXED_SET::put_in_hashtable(
   }
 
   // not reached. 
+  std::abort();
   return detail::EMPTY;
 }
 
@@ -228,7 +150,7 @@ INDEXED_SET_TEMPLATE
 inline INDEXED_SET::indexed_set(std::size_t number_of_threads)
   : indexed_set(number_of_threads, detail::minimal_hashtable_size)
 {
-  assert(number_of_threads!=0);
+  assert(number_of_threads != 0);
 }
 
 INDEXED_SET_TEMPLATE
@@ -237,30 +159,36 @@ inline INDEXED_SET::indexed_set(
            std::size_t initial_size,
            const hasher& hasher,
            const key_equal& equals)
-      : m_hashtable(std::max(initial_size, detail::minimal_hashtable_size), detail::EMPTY), 
-        m_mutex(new std::mutex()),
-        m_thread_control((number_of_threads==1)?1:number_of_threads+1),
-        m_hasher(hasher),
-        m_equals(equals)
+  : m_hashtable(std::max(initial_size, detail::minimal_hashtable_size), detail::EMPTY), 
+    m_mutex(new std::mutex()),
+    m_hasher(hasher),
+    m_equals(equals)
 {
-  assert(number_of_threads!=0);
+  assert(number_of_threads != 0);
+
+  // Insert the main mutex.
+  m_shared_mutexes.emplace_back();
+
+  for (std::size_t i = 1; i < ((number_of_threads == 1) ? 1 : number_of_threads + 1); ++i)
+  {
+    // Copy the mutex n times for all the other threads.
+    m_shared_mutexes.emplace_back(m_shared_mutexes[0]);
+  }
 }
 
 INDEXED_SET_TEMPLATE
 inline typename INDEXED_SET::size_type INDEXED_SET::index(const key_type& key, const std::size_t thread_index) const
 {
-  indexed_set_assertion(thread_index);
-  if (thread_index>0) lock_shared(thread_index);
-  assert(m_hashtable.size()>0);
+  shared_guard guard = m_shared_mutexes[thread_index].lock_shared();
+  assert(m_hashtable.size() > 0);
+
   std::size_t start = ((m_hasher(key) * detail::PRIME_NUMBER) >> 2) % m_hashtable.size();
   std::size_t position = start;
-
   do
   {
     std::size_t index = m_hashtable[position];
     if (index == detail::EMPTY)
     {
-      if (thread_index>0) unlock_shared(thread_index);
       return npos; // Not found.
     }
     // If the index is RESERVED, go into a busy loop. Another thread will 
@@ -270,25 +198,24 @@ inline typename INDEXED_SET::size_type INDEXED_SET::index(const key_type& key, c
       assert(index < m_keys.size());
       if (m_equals(key, m_keys[index]))
       {
-        if (thread_index>0) unlock_shared(thread_index);
-        assert(index<m_next_index && m_next_index<=m_keys.size());
+        assert(index<m_next_index && m_next_index <= m_keys.size());
         return index;
       }
 
-      assert(m_hashtable.size()>0);
+      assert(m_hashtable.size() > 0);
       position = (position + detail::STEP) % m_hashtable.size();
-      assert(position!=start); // The hashtable is full. This should never happen.
+      assert(position != start); // The hashtable is full. This should never happen.
     }
   }
   while (true);
 
+  std::abort();
   return npos; // Dummy return.
 }
 
 INDEXED_SET_TEMPLATE
 inline typename INDEXED_SET::const_iterator INDEXED_SET::find(const key_type& key, const std::size_t thread_index) const
 {
-  indexed_set_assertion(thread_index);
   const std::size_t idx = index(key, thread_index);
   if (idx < m_keys.size())
   {
@@ -321,47 +248,44 @@ inline const Key& INDEXED_SET::operator[](std::size_t index) const
 INDEXED_SET_TEMPLATE
 inline void INDEXED_SET::clear(const std::size_t thread_index)
 {
-  indexed_set_assertion(thread_index);
-  if (thread_index>0) lock_exclusive(thread_index);
+  lock_guard guard = m_shared_mutexes[thread_index].lock();
   m_hashtable.assign(m_hashtable.size(), detail::EMPTY);
 
   m_keys.clear();
   m_next_index.store(0);
-  if (thread_index>0) unlock_exclusive(thread_index);
 }
 
 
 INDEXED_SET_TEMPLATE
 inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(const Key& key, const std::size_t thread_index)
 {
-  indexed_set_assertion(thread_index);
-  if (thread_index>0) lock_shared(thread_index);
-  assert(m_next_index<=m_keys.size());
-  if (m_next_index+m_thread_control.size()>=m_keys.size())
+  shared_guard guard = m_shared_mutexes[thread_index].lock_shared();
+  assert(m_next_index <= m_keys.size());
+  if (m_next_index + m_shared_mutexes.size() >= m_keys.size())
   {
-    if (thread_index>0) unlock_shared(thread_index);
+    guard.unlock_shared();
     reserve_indices(thread_index);
-    if (thread_index>0) lock_shared(thread_index);
+    guard.lock_shared();
   }
   std::size_t new_position;
   const std::size_t index = put_in_hashtable(key, detail::RESERVED, new_position);
   
   if (index != detail::RESERVED) // Key already exists.
   {
-    if (thread_index>0) unlock_shared(thread_index);
-    assert(index<m_next_index && m_next_index<=m_keys.size());
+    assert(index < m_next_index && m_next_index <= m_keys.size());
     return std::make_pair(index, false);
   }
-  const std::size_t new_index=m_next_index.fetch_add(1);
-  assert(new_index<m_keys.size());
-  m_keys[new_index]=key; 
+
+  const std::size_t new_index = m_next_index.fetch_add(1);
+  assert(new_index < m_keys.size());
+  m_keys[new_index] = key; 
+
   std::atomic_thread_fence(std::memory_order_seq_cst);   // Necessary for ARM. std::memory_order_acquire and 
                                                          // std::memory_order_release appear to work, too.
-  m_hashtable[new_position]=new_index;
+  m_hashtable[new_position] = new_index;
 
-  if (thread_index>0) unlock_shared(thread_index);
 
-  assert(new_index<m_next_index && m_next_index<=m_keys.size());
+  assert(new_index < m_next_index && m_next_index <= m_keys.size());
   return std::make_pair(new_index, true);
 }
 

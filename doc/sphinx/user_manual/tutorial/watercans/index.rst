@@ -86,7 +86,7 @@ indicates that a can of capacity ``n`` is currently holding a volume of ``m``.
      [16:05:07.994 warning] generated 500 new internal processes. A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method.
    
    As the tool indicates, this can be overcome by using an alternative
-   linearisation strategy, by passing the option :option:`lregular2`
+   linearisation strategy, by passing the option ``-lregular2``
    to :ref:`tool-mcrl22lps`. This issue is caused by the possibility
    of successful termination in case the ``done`` action is performed.
 
@@ -101,7 +101,7 @@ and 335 transitions::
 
 .. note::
 
-   Currently, the size of the state space is not printed when the :option:`-v`
+   Currently, the size of the state space is not printed when the ``-v``
    flag is not passed to the tool.
 
 It is possible to do the ``done`` action. This is confirmed by model checking

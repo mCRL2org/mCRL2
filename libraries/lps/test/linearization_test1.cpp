@@ -15,6 +15,7 @@
 #ifndef MCRL2_SKIP_LONG_TESTS
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
+#include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/linearise.h"
 
 using namespace mcrl2;
@@ -27,8 +28,7 @@ void run_linearisation_instance(const std::string& spec, const t_lin_options& op
 {
   if (expect_success)
   {
-    lps::specification s=remove_stochastic_operators(linearise(spec, options));
-    BOOST_CHECK(s != lps::specification());
+    BOOST_CHECK(mcrl2::lps::detail::is_well_typed(linearise(spec, options))); 
   }
   else
   {
