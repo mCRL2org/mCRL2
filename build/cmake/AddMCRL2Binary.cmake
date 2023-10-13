@@ -1,7 +1,5 @@
 include(CMakeParseArguments)
 
-# The Threads module provides the Threads::Threads target since 3.1
-cmake_minimum_required(VERSION 3.1)
 find_package(Threads)
 
 macro(append_unique LIST_VAR VALUE)
