@@ -100,7 +100,7 @@ class pressolve_tool
         throw mcrl2::runtime_error("Option --precision (-p) can only be used in combination with --algorithm=numerical.");
       }   
       options.precision = std::stol(parser.option_argument("precision"));
-      if (options.precision>std::numeric_limits<double>::digits10)
+      if (-options.precision<=std::numeric_limits<double>::min_exponent)
       {
         throw mcrl2::runtime_error("Precision " + std::to_string(options.precision) + " is too large. ");
       }
