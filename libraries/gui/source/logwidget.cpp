@@ -28,7 +28,7 @@ LogWidget::LogWidget(QWidget *parent)
 {
   m_ui->setupUi(this);
   connect(&m_relay, SIGNAL(logMessage(QString,  QDateTime, QString)), this, SLOT(writeMessage(QString, QDateTime, QString)));
-  mcrl2_logger::register_output_policy(m_relay);
+  logger::register_output_policy(m_relay);
 }
 
 LogWidget::~LogWidget()

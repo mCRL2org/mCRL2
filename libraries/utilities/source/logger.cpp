@@ -35,8 +35,7 @@ namespace mcrl2 {
                                 const bool print_time_information)
   {
     // Construct the message header, with or without time and debug level info.
-    const log_level_t default_level=logger::get_reporting_level();
-    const bool print_log_level= level==error || level > verbose || default_level>=debug;
+    const bool print_log_level= level >= debug;
     std::stringstream start_of_line;
     if (print_time_information || print_log_level)
     {

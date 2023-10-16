@@ -403,9 +403,6 @@ std::set<output_policy*> initialise_output_policies()
   return result;
 }
 
-/// \brief Default logger that we use
-typedef logger mcrl2_logger;
-
 /// \brief Unless otherwise specified, we compile away all debug messages that have
 /// a log level greater than MCRL2MaxLogLevel.
 constexpr log_level_t MCRL2MaxLogLevel = mcrl2::log::debug;
