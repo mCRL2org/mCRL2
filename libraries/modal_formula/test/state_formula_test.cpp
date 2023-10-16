@@ -269,7 +269,7 @@ bool contains(const std::set<state_formulas::state_formula>& v, const std::strin
 
 BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
 {
-  mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug);
+  mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
 
   specification lpsspec;
   state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", lpsspec);

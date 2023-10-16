@@ -192,7 +192,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         }
       }
 
-      if (log::mcrl2_logger::get_reporting_level() >= log::verbose)
+      if (log::logger::get_reporting_level() >= log::verbose)
       {
         if (algorithms::is_bes(p))
         {

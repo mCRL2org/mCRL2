@@ -25,7 +25,7 @@ struct LogDebug
 {
   LogDebug()
   {
-    log::mcrl2_logger::set_reporting_level(log::debug);
+    log::logger::set_reporting_level(log::debug);
   }
 };
 BOOST_GLOBAL_FIXTURE(LogDebug);

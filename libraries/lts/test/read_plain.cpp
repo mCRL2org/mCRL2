@@ -51,7 +51,7 @@ std::cerr << "Current action " << a << " compare to " << s << "\n";
 
 BOOST_AUTO_TEST_CASE(test_main)
 {
-  mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug);
+  mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
   trace t;
 
   process::action_label_list action_decls = process::parse_action_declaration("a;") +

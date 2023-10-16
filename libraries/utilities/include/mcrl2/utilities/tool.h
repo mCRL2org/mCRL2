@@ -78,7 +78,7 @@ class tool
       if (parser.options.count("timings") > 0)
       {
         m_timing_enabled = true;
-        log::mcrl2_logger::set_report_time_info();
+        log::logger::set_report_time_info();
         m_timing_filename = parser.option_argument("timings");
       }
     }
@@ -108,19 +108,19 @@ class tool
 #ifndef MCRL2_TOOL_CLASSES_NO_CORE
       if (parser.options.count("quiet"))
       {
-        log::mcrl2_logger::set_reporting_level(log::quiet);
+        log::logger::set_reporting_level(log::quiet);
       }
       if (parser.options.count("verbose"))
       {
-        log::mcrl2_logger::set_reporting_level(log::verbose);
+        log::logger::set_reporting_level(log::verbose);
       }
       if (parser.options.count("debug"))
       {
-        log::mcrl2_logger::set_reporting_level(log::debug);
+        log::logger::set_reporting_level(log::debug);
       }
       if (parser.options.count("log-level"))
       {
-        log::mcrl2_logger::set_reporting_level(log::log_level_from_string(parser.option_argument("log-level")));
+        log::logger::set_reporting_level(log::log_level_from_string(parser.option_argument("log-level")));
       }
 #endif
     }

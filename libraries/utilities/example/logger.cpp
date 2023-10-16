@@ -27,7 +27,7 @@ std::string my_algorithm()
 
 int main(int /*argc*/, char** /*argv*/)
 {
-  mcrl2_logger::set_reporting_level(debug3);
+  logger::set_reporting_level(debug3);
 
   mCRL2log(info) << "This shows the way info messages are printed, using the default messages" << std::endl;
   mCRL2log(debug) << "This line is not printed, and the function " << my_algorithm() << " is not evaluated" << std::endl;
@@ -39,7 +39,7 @@ int main(int /*argc*/, char** /*argv*/)
     throw std::runtime_error("Cannot open logfile for writing");
   }
   file_output::set_stream(plogfile);
-  mcrl2_logger::set_reporting_level(debug3);
+  logger::set_reporting_level(debug3);
 
   // Execute algorithm
   my_algorithm();
