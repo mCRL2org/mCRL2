@@ -19,7 +19,7 @@ namespace mcrl2 {
 
 namespace pres_system {
 
-enum solution_algorithm { gauss_elimination, numerical };
+enum solution_algorithm { gauss_elimination, numerical, numerical_directed };
 
 inline
 std::string print_algorithm(const solution_algorithm alg)
@@ -28,6 +28,7 @@ std::string print_algorithm(const solution_algorithm alg)
   {
     case gauss_elimination: return "gauss";
     case numerical: return "numerical";
+    case numerical_directed: return "numerical_directed";
     default: throw mcrl2::runtime_error("unknown res algorithm");
   }
 }
@@ -40,6 +41,7 @@ std::string description(const solution_algorithm a)
   {
     case gauss_elimination: return "solve the res using gauss elimination; this is guaranteed to terminate but may require an excessive amount of time.";
     case numerical: return "solve the res by a numerical recursive algorithm; this is not guaranteed to terminate.";
+    case numerical_directed: return "solve the res by a numerical recursive algorithm with directed propagation; this is not guaranteed to terminate.";
     default: throw mcrl2::runtime_error("unknown algorithm");
   }
 }
@@ -57,6 +59,10 @@ solution_algorithm parse_algorithm(const std::string& s)
   else if (s == "n" || s == "numerical")
   {
     return numerical;
+  }
+  else if (s == "m" || s == "numerical_directed")
+  {
+    return numerical_directed;
   }
   else
   {

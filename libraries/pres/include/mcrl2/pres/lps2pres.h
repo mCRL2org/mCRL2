@@ -110,7 +110,7 @@ std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ "
       std::vector<pres_equation> equations;
       detail::lps2pres_parameters parameters(f, lpsspec.process(), m_generator, T);
       run(f, structured, unoptimized, equations, parameters);
-std::cerr << "OBTAINED EQUATIONS AAAAA\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\ni----------------------------------\n";
+std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ " << e << "\n"; } std::cerr << "\n----------------------------------\n";
 
       // compute the initial state
       assert(!equations.empty());

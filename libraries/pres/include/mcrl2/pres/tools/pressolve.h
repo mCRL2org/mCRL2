@@ -23,6 +23,7 @@
 #include "mcrl2/pres/pres2res.h"
 #include "mcrl2/pres/ressolve_gauss_elimination.h"
 #include "mcrl2/pres/ressolve_numerical.h"
+#include "mcrl2/pres/ressolve_numerical_directed.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -62,7 +63,8 @@ class pressolve_tool
         "Do not move constant expressions to a substitution.");
     desc.add_option("algorithm", utilities::make_enum_argument<pres_system::solution_algorithm>("NAME")
                                  .add_value_short(pres_system::solution_algorithm::gauss_elimination, "g", true)
-                                 .add_value_short(pres_system::solution_algorithm::numerical, "n"),
+                                 .add_value_short(pres_system::solution_algorithm::numerical, "n")
+                                 .add_value_short(pres_system::solution_algorithm::numerical_directed, "m"),
                     "select the algorithm NAME to solve the res after it is generated.",'a');
     desc.add_option("precision", utilities::make_mandatory_argument("NUM"),
                     "provide an answer within precision 10^-precision. [AS IT STANDS THIS IS THE NOW THE DIFFERENCE BETWEEN TWO ITERATIONS]", 'p');
@@ -95,9 +97,9 @@ class pressolve_tool
 
     if (parser.has_option("precision"))
     {
-      if (options.algorithm!=pres_system::solution_algorithm::numerical)
+      if (options.algorithm!=pres_system::solution_algorithm::numerical && options.algorithm!=pres_system::solution_algorithm::numerical_directed)
       {
-        throw mcrl2::runtime_error("Option --precision (-p) can only be used in combination with --algorithm=numerical.");
+        throw mcrl2::runtime_error("Option --precision (-p) can only be used in combination with --algorithm=numerical or --algorithm=numerical_directed.");
       }   
       options.precision = std::stol(parser.option_argument("precision"));
       if (options.precision>=static_cast<std::size_t>(-std::numeric_limits<double>::min_exponent))
@@ -111,6 +113,30 @@ class pressolve_tool
   {
     return {pres_system::pres_format_internal()};
   }
+
+  data::rewriter construct_rewriter(const pres& presspec)
+  {
+    if (options.remove_unused_rewrite_rules)
+    {
+      std::set<data::function_symbol> used_functions = pres_system::find_function_symbols(presspec);
+      used_functions.insert(data::less(data::sort_real::real_()));
+      used_functions.insert(data::sort_real::divides(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::times(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::plus(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::minus(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::minimum(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::maximum(data::sort_real::real_(),data::sort_real::real_()));
+
+      return data::rewriter(presspec.data(),
+                            data::used_data_equation_selector(presspec.data(), used_functions, presspec.global_variables()),
+                            options.rewrite_strategy);
+    }
+    else
+    {
+      return data::rewriter(presspec.data(), options.rewrite_strategy);
+    }
+  }
+
 
   public:
   pressolve_tool(const std::string& toolname)
@@ -129,7 +155,8 @@ class pressolve_tool
   bool run() override
   {
     pres_system::pres presspec = pres_system::detail::load_pres(input_filename());
-    
+    enumerate_quantifiers_rewriter m_R(construct_rewriter(presspec), presspec.data());
+ 
     // mCRL2log(log::debug) << "INPUT PRES\n" << presspec << "\n";
     data::mutable_map_substitution<> sigma;
     sigma = pres_system::detail::instantiate_global_variables(presspec);
@@ -140,7 +167,7 @@ class pressolve_tool
     
     mCRL2log(log::verbose) << "Generating RES..." << std::endl;
     timer().start("instantiation");
-    pres2res_algorithm pres2res(options,presspec);
+    pres2res_algorithm pres2res(options,presspec,m_R);
     pres resulting_res = pres2res.run();
     timer().finish("instantiation");
 
@@ -148,15 +175,25 @@ class pressolve_tool
 
     mCRL2log(log::verbose) << "Solving RES..." << std::endl;
     timer().start("solving");
+
     if (options.algorithm==gauss_elimination)
     {
+std::cerr << "GAUSS\n";
       ressolve_by_gauss_elimination_algorithm solver(options, resulting_res);
       pres_expression result = solver.run();
       std::cout << "Solution: " << result << std::endl;
     }
-    else 
-    {
+    else if (options.algorithm==numerical)
+    { 
+std::cerr << "NUMERICAL PLAIN\n";
       ressolve_by_numerical_iteration solver(options, resulting_res);
+      double result = solver.run();
+      std::cout << "Solution: " << std::setprecision(options.precision) << result << std::endl;
+    }  
+    else if (options.algorithm==numerical_directed)
+    { 
+std::cerr << "NUMERICAL DIRECTED\n";
+      ressolve_by_numerical_iteration_directed solver(options, resulting_res);
       double result = solver.run();
       std::cout << "Solution: " << std::setprecision(options.precision) << result << std::endl;
     }  

@@ -57,7 +57,6 @@ class pres2res_algorithm
 {
   protected:
     pressolve_options m_options;
-    data::rewriter m_datar;    // data_rewriter
     pres m_input_pres;
     atermpp::indexed_set<propositional_variable_instantiation> m_stored_variables;
     pbes_system::pbes_equation_index m_equation_index;
@@ -67,31 +66,16 @@ class pres2res_algorithm
 
     enumerate_quantifiers_rewriter m_R;   // The rewriter.
 
-    data::rewriter construct_rewriter(const pres& presspec)
-    {
-      if (m_options.remove_unused_rewrite_rules)
-      {
-        return data::rewriter(presspec.data(),
-                              data::used_data_equation_selector(presspec.data(), pres_system::find_function_symbols(presspec), presspec.global_variables()),
-                              m_options.rewrite_strategy);
-      }
-      else
-      {
-        return data::rewriter(presspec.data(), m_options.rewrite_strategy);
-      }
-    }
-
   public:
     pres2res_algorithm(
-      const pressolve_options& options,
-      const pres& input_pres
-    ) 
-     : m_options(options),
-       m_datar(construct_rewriter(input_pres)),
+         const pressolve_options& options,
+         const pres& input_pres,
+         enumerate_quantifiers_rewriter& R)
+    : m_options(options),
        m_input_pres(input_pres),
        m_equation_index(input_pres),
        fresh_identifier_generator("X"),
-       m_R(m_datar,input_pres.data())
+       m_R(R) 
     {}
 
     const pres run()
@@ -151,6 +135,7 @@ class pres2res_algorithm
         }
         eqns=atermpp::vector<pres_equation>(); // clear the equations.
       } 
+std::cerr << "GENERATED EQUATIONS " << resulting_equations.size() << "\n";
 
       return pres(m_input_pres.data(), 
                   resulting_equations, 
