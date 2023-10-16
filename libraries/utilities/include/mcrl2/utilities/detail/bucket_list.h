@@ -70,7 +70,7 @@ public:
     void set_next(node_base* next) noexcept { m_next.store(next, std::memory_order_relaxed); }
 
     /// \returns True iff next has been replaced by value iff next is equal to expected.
-    bool exchange(node_base*& expected, node_base* value) { return m_next.compare_exchange_weak(expected, value, std::memory_order_release, std::memory_order_acquire); }
+    bool exchange(node_base*& expected, node_base* value) { return m_next.compare_exchange_weak(expected, value, std::memory_order_acq_rel); }
   protected:
 
     /// \brief Pointer to the next node.
@@ -125,13 +125,6 @@ public:
     {
       m_current_node = reinterpret_cast<node*>(m_current_node->next());
       return *this;
-    }
-
-    key_iterator operator++(int)
-    {
-      key_iterator copy(*this);
-      ++(*this);
-      return copy;
     }
 
     reference operator*() const

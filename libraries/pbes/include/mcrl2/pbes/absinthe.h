@@ -950,7 +950,7 @@ struct absinthe_algorithm
 
   void enable_logging()
   {
-    log::mcrl2_logger::set_reporting_level(log::debug);
+    log::logger::set_reporting_level(log::debug);
   }
 
   void run(pbes& p, const std::string& abstraction_text, bool is_over_approximation)

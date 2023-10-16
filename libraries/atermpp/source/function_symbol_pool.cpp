@@ -172,6 +172,9 @@ std::size_t function_symbol_pool::get_sufficiently_large_postfix_index(const std
 
 void function_symbol_pool::sweep()
 {
+  // Prevents changes to the symbol_set
+  std::unique_lock lock(m_mutex);
+
   auto timestamp = std::chrono::system_clock::now();
   std::size_t old_size = size();
 

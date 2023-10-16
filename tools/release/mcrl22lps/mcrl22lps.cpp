@@ -10,9 +10,6 @@
 /// \brief This tool linearises mcrl2 specifications into linear
 ///         form.
 
-#define TOOLNAME "mcrl22lps"
-#define AUTHOR "Jan Friso Groote"
-
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -163,8 +160,8 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
   public:
 
     mcrl22lps_tool() : super(
-        TOOLNAME,
-        AUTHOR,
+        "mcrl22lps",
+        "Jan Friso Groote",
         "translate an mCRL2 specification to an LPS",
         "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
         "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "

@@ -34,7 +34,7 @@ void print_all_log_levels()
 BOOST_AUTO_TEST_CASE(test_logging_basic)
 {
   // Messages will only be printed up to debug, due to standard MCRL2_MAX_LOG_LEVEL
-  mcrl2_logger::set_reporting_level(debug2);
+  logger::set_reporting_level(debug2);
   print_all_log_levels();
 }
 
@@ -104,12 +104,12 @@ BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_static)
 }
 
 // Show that arguments to logging are not executed if the log level is larger
-// than mcrl2_logger::reporting_level() (i.e. the BOOST_CHECK(false) in test_assert() should
+// than logger::reporting_level() (i.e. the BOOST_CHECK(false) in test_assert() should
 // never be triggered.
 BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_dynamic)
 {
   BOOST_CHECK(MCRL2MaxLogLevel >= debug);
-  mcrl2_logger::set_reporting_level(verbose);
+  logger::set_reporting_level(verbose);
   mCRL2log(debug) << "This line should not end with BOOM! ............. " << test_assert() << std::endl;
 }
 
