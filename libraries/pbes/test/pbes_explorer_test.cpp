@@ -343,6 +343,6 @@ BOOST_AUTO_TEST_CASE(skip_test)
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   (void) argc;  (void) argv;  //< avoid warning about unused parameters
-  mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug);
+  mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
   return nullptr;
 }
