@@ -183,7 +183,7 @@ class logger
     static
     std::set<output_policy*>& output_policies()
     {
-      thread_local std::set<output_policy*> m_output_policies = initialise_output_policies();
+      static std::set<output_policy*> m_output_policies = initialise_output_policies();
       return m_output_policies;
     }
 
