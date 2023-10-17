@@ -13,8 +13,8 @@
 #define MCRL2_UTILITIES_EXECUTION_TIMER_H
 
 #include "mcrl2/utilities/exception.h"
-#include <ctime>
-#include <cmath>
+
+#include <chrono>
 #include <fstream>
 #include <map>
 #include <string>
@@ -50,12 +50,15 @@ class execution_timer
     /// \brief Pair of start and finish times
     struct timing
     {
-      clock_t start;
-      clock_t finish;
+      std::chrono::steady_clock::time_point start;      
+      std::chrono::steady_clock::time_point finish;
+
+      clock_t start_user;      
+      clock_t finish_user;
 
       timing() :
-        start(0),
-        finish(0)
+        start(),
+        finish()
       {}
     };
 
@@ -68,14 +71,14 @@ class execution_timer
     void write_report(std::ostream& s)
     {
       std::ios::fmtflags oldflags = s.setf(std::ios::fixed, std::ios::floatfield);
-      s.precision((std::streamsize) (log10(CLOCKS_PER_SEC) + 0.95));
+      s.precision(3);
 
       s << "- tool: " << m_tool_name << std::endl
         << "  timing:" << std::endl;
 
       for (std::map<std::string, timing>::const_iterator i = m_timings.begin(); i != m_timings.end(); ++i)
       {
-        if (i->second.finish==0)
+        if (i->second.finish == std::chrono::steady_clock::time_point())
         {
           s << "    " << i->first << ": did not finish. " << std::endl;
         }
@@ -86,7 +89,8 @@ class execution_timer
         else
         {
           s << "    " << i->first << ": "
-            << static_cast<double>(i->second.finish - i->second.start) / CLOCKS_PER_SEC
+            << std::chrono::duration_cast<std::chrono::milliseconds>(i->second.finish - i->second.start).count() / 1000.0
+            << "s (user: " << static_cast<double>(i->second.finish_user - i->second.start_user) / CLOCKS_PER_SEC << "s)"
             << std::endl;
         }
       }
@@ -119,7 +123,9 @@ class execution_timer
         throw mcrl2::runtime_error("Starting already known timing '" + timing_name + "'. This causes unreliable results.");
       }
       t = m_timings.insert(t, make_pair(timing_name, timing()));
-      t->second.start = clock();
+
+      t->second.start = std::chrono::steady_clock::now();
+      t->second.start_user = clock();
     }
 
     /// \brief Finish a measurement with a hint
@@ -128,17 +134,19 @@ class execution_timer
     /// \post The current time has been recorded as end time of timing_name
     void finish(const std::string& timing_name)
     {
-      clock_t finish = clock();
+      std::chrono::steady_clock::time_point finish = std::chrono::steady_clock::now();
       const std::map<std::string, timing>::iterator t = m_timings.find(timing_name);
       if (t == m_timings.end())
       {
         throw mcrl2::runtime_error("Finishing timing '" + timing_name + "' that was not started.");
       }
-      if (0 != t->second.finish)
+      if (std::chrono::steady_clock::time_point() != t->second.finish)
       {
         throw mcrl2::runtime_error("Finishing timing '" + timing_name + "' for the second time.");
       }
+
       t->second.finish = finish;
+      t->second.finish_user = clock();
     }
 
     /// \brief Write all timing information that has been recorded.
