@@ -31,9 +31,9 @@ function(_add_library_tests TARGET_NAME)
       endif()
 
       if(CMAKE_CONFIGURATION_TYPES)
-        add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/$<CONFIG>/${testname}")
+        add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/$<CONFIG>/${testname}" WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/Testing/")
       else()
-        add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}")
+        add_test(NAME ${testname} COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category}/${testname}" WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/Testing/")
       endif()
 
       target_link_libraries(${testname} Threads::Threads)
