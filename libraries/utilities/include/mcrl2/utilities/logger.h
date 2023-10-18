@@ -300,30 +300,30 @@ protected:
   /// \brief Records whether the last message that was printed ended with
   ///        a new line.
   static
-  bool& last_message_ended_with_newline()
+  std::atomic<bool>& last_message_ended_with_newline()
   {
-    thread_local bool m_last_message_ended_with_newline = true;
+    static std::atomic<bool> m_last_message_ended_with_newline = true;
     return m_last_message_ended_with_newline;
   }
 
   static
-  bool& last_message_was_status()
+  std::atomic<bool>& last_message_was_status()
   {
-    thread_local bool m_last_message_was_status = false;
+    static std::atomic<bool> m_last_message_was_status = false;
     return m_last_message_was_status;
   }
 
   static
-  std::size_t& caret_pos()
+  std::atomic<std::size_t>& caret_pos()
   {
-    thread_local std::size_t m_caret_pos = 0;
+    static std::atomic<std::size_t> m_caret_pos = 0;
     return m_caret_pos;
   }
 
   static
-  std::size_t& last_caret_pos()
+  std::atomic<std::size_t>& last_caret_pos()
   {
-    thread_local std::size_t m_last_caret_pos = 0;
+    static std::atomic<std::size_t> m_last_caret_pos = 0;
     return m_last_caret_pos;
   }
 
