@@ -138,7 +138,7 @@ namespace mcrl2 {
     {
       if (level == status)
       {
-        last_caret_pos() = caret_pos();
+        last_caret_pos() = caret_pos().load(std::memory_order_acq_rel);
       }
       else
       {
