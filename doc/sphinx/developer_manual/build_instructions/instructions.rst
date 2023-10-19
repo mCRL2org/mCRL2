@@ -53,7 +53,7 @@ Install Sphinx (currently version 2.2.0) and other dependencies.
 When using a virtual environment ensure that CMake uses the right Python binary.
 
     $ cmake [other options] \
-          -DPYTHON_EXECUTABLE=absolute/path/to/sphinx-venv/bin/python \
+          -DPython_EXECUTABLE=absolute/path/to/sphinx-venv/bin/python \
           path/to/mCRL2/src
 
 Then the `doc` target can be build for a full documentation build, or `fastdoc`

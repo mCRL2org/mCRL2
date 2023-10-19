@@ -1,9 +1,9 @@
 find_package(Python 3.6.0)
 
-if(PYTHON_FOUND)
+if(Python_FOUND)
   if(PythonModules_FIND_COMPONENTS)
     foreach(MODULE ${PythonModules_FIND_COMPONENTS})
-      execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import  ${MODULE}"
+      execute_process(COMMAND ${Python_EXECUTABLE} -c "import  ${MODULE}"
                       OUTPUT_VARIABLE _TRASH RESULT_VARIABLE MODULE_NOT_FOUND ERROR_QUIET)
       if(MODULE_NOT_FOUND)
         set(PythonModules_${MODULE}_FOUND "NOTFOUND")
@@ -16,5 +16,5 @@ if(PYTHON_FOUND)
     endforeach()
   endif()
 else()
-  message(FATAL_ERROR "Could not find a suitable python3 interpreter. Ensure that variable PYTHON_EXECUTABLE is set to a python3 interpreter.")
+  message(FATAL_ERROR "Could not find a suitable python3 interpreter. Ensure that variable Python_EXECUTABLE is set to a python3 interpreter.")
 endif()

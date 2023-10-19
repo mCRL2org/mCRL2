@@ -42,7 +42,7 @@ file(MAKE_DIRECTORY ${WORKSPACE})
 #
 foreach(type "random" "regression")
   set(testrunner ${CMAKE_CURRENT_SOURCE_DIR}/${type}/${type}_testing.py)
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${testrunner} --names
+  execute_process(COMMAND ${Python_EXECUTABLE} ${testrunner} --names
     WORKING_DIRECTORY ${WORKSPACE}
     OUTPUT_VARIABLE available_tests
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -64,7 +64,7 @@ foreach(type "random" "regression")
 
     add_test(NAME ${targetname}
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
-             COMMAND ${PYTHON_EXECUTABLE} ${testrunner} ${REPETITIONS} --toolpath ${MCRL2_TOOL_PATH} --pattern ${testname})
+             COMMAND ${Python_EXECUTABLE} ${testrunner} ${REPETITIONS} --toolpath ${MCRL2_TOOL_PATH} --pattern ${testname})
     set_tests_properties(${targetname} PROPERTIES LABELS ${type})
   endforeach()
 endforeach()
