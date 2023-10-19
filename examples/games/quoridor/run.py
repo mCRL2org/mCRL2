@@ -4,8 +4,7 @@ import os
 os.system("mcrl22lps -v quoridor.mcrl2 quoridor.lps")
 
 # Optimize LPS
-os.system("lpssuminst -v -sBool quoridor.lps | lpsparunfold -v -l -n5 -sPosition | lpsrewr -v | lpsconstelm -v -c | "
-          "lpsrewr -v quoridor-1.lps")
+os.system("lpssuminst -v -sBool quoridor.lps | lpsparunfold -v -n5 -sPosition | lpsrewr -v | lpsconstelm -v -c | lpsrewr -v > quoridor-1.lps")
 
 # Transform LPS into a LTS
 os.system("lps2lts --cached -v -rjittyc --threads=16 quoridor-1.lps quoridor.lts")
