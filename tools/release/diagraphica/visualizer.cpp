@@ -10,6 +10,7 @@
 
 #include <iostream> // only temporary for std::clog
 #include <QOpenGLFramebufferObject>
+#include <QOpenGLDebugLogger>
 
 #include <QMessageBox>
 #include "visualizer.h"
@@ -49,9 +50,36 @@ void Visualizer::updateSelection() {
     m_inSelectMode = false;
     m_hit_FBO->bindDefault();
 }
-void Visualizer::initializeGL() {
-    m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
-    m_gl_initialized = true;
+
+void Visualizer::initializeGL() 
+{
+  m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
+  m_gl_initialized = true;
+
+  
+  QPair<int, int> version = format().version();
+  qDebug() << "Created an OpenGL " << version.first
+           << "." << version.second << " context.\n";
+        
+  // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension
+  // is available. Ruben: Disabled because this makes the UI unusable with -d
+  // flag
+  m_logger = new QOpenGLDebugLogger(this);
+  if (m_logger->initialize())
+  {
+    connect(m_logger, &QOpenGLDebugLogger::messageLogged, this,
+            &Visualizer::logMessage);
+    m_logger->startLogging();
+  }
+  else
+  {
+    qDebug() << "QOpenGLDebugLogger initialisation failed\n";
+  }
+}
+
+void Visualizer::logMessage(const QOpenGLDebugMessage& debugMessage)
+{
+  qDebug() << "OpenGL: " << debugMessage.message().toStdString() << "\n";
 }
 
 void Visualizer::paintGL()

@@ -16,6 +16,7 @@
 
 #include <QOpenGLWidget>
 #include <QOpenGLFramebufferObject>
+#include <QOpenGLDebugLogger>
 
 class Visualizer : public QOpenGLWidget
 {
@@ -34,6 +35,7 @@ class Visualizer : public QOpenGLWidget
     QSizeF worldSize();
     double pixelSize();
     QPointF worldCoordinate(QPointF deviceCoordinate);
+    void logMessage(const QOpenGLDebugMessage& debugMessage);
 
     // -- set functions ---------------------------------------------
     virtual void setClearColor(
@@ -120,6 +122,8 @@ class Visualizer : public QOpenGLWidget
     bool texCushOK;
     GLuint texCushId;
     float texCush[CUSHSIZE];
+  
+    QOpenGLDebugLogger* m_logger; ///< Logs OpenGL debug messages.
 };
 
 #endif
