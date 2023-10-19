@@ -74,7 +74,7 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(OpenGL     QUIET REQUIRED)
   find_package(TR         QUIET REQUIRED)
   find_package(CVC3       QUIET)
-  find_package(Qt6 6.0.0 COMPONENTS Core OpenGL OpenGLWidgets Widgets Xml Gui QUIET REQUIRED)
+  find_package(Qt6 6.2.4 COMPONENTS Core OpenGL OpenGLWidgets Widgets Xml Gui QUIET REQUIRED)
 	
   # The directories for components are derived from Qt6_DIR, as such they can be marked as advanced.
   mark_as_advanced(Qt6_DIR Qt6Core_DIR Qt6OpenGL_DIR Qt6OpenGLWidgets_DIR Qt6Widgets_DIR Qt6Xml_DIR Qt6Gui_DIR)
