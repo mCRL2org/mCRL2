@@ -1,0 +1,5 @@
+nu X(rfP1:Nat=F, rfP2:Nat=F).(
+	(forall r,c:Pos.forall d:Direction.[addFence(P1, c, r, d)] (val(rfP1 > 0) && X(Int2Nat(rfP1 - 1), rfP2))) &&
+	(forall r,c:Pos.forall d:Direction.[addFence(P2, c, r, d)] (val(rfP2 > 0) && X(rfP1, Int2Nat(rfP2 - 1)))) &&
+	[!(exists r,c:Pos.exists d:Direction.exists t:Turn.addFence(t, c, r, d))] X(rfP1, rfP2)
+)

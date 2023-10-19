@@ -1,0 +1,1 @@
+[!(win(P1) || win(P2))*]<true>true

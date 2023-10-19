@@ -1,0 +1,8 @@
+nu X(turn:Turn=P1).(
+	forall r,c:Pos.(val(c <= N) && val(r <= N)) => 
+		forall t:Turn.[movePawn(t, c, r)] (val(t == turn) && X(if(t == P1, P2, P1))) &&
+	forall r,c:Pos.(val(c <= N) && val(r <= N)) => 
+		forall t:Turn.forall d:Direction.[addFence(t, c, r, d)] (val(t == turn) && X(if(t == P1, P2, P1))) &&
+	[!(exists r,c:Pos.(val(c <= N) && val(r <= N)) => 
+		exists t:Turn.exists d:Direction.(movePawn(t,c,r) || addFence(t, c, r, d)))] X(turn)
+)

@@ -1,0 +1,15 @@
+nu X(turn:Turn=P1, rfP1:Nat=F, rfP2:Nat=F,fences:FSet(FPosition)={},pA:Position=pos(upperMiddle + 1, 1),pB:Position=pos(upperMiddle + 1, N)).(
+	([!(exists r,c:Pos.exists d:Direction.exists t:Turn.movePawn(t, c, r) || addFence(t, c, r, d))] X(turn, rfP1, rfP2, fences, pA, pB)) &&
+	(val(turn == P1) => (exists c,r:Pos.exists d:Direction.
+		<movePawn(P1, c, r)>X(if(r==N, None, P2), rfP1, rfP2, fences, pos(c,r), pB) && 
+	(exists c3,r3:Pos.exists d3:Direction.(val(rfP1 > 0) && val(isValidPlace(pA, pB, fpos(c3, r3, d3), fences))) => 
+		<addFence(P1, c3, r3, d3)>X(P2, Int2Nat(rfP1 - 1), rfP2, {fpos(c3, r3, d3)} + fences, pA, pB))
+		
+	)) &&
+	(val(turn == P2) => (exists c,r:Pos.exists d:Direction.
+		<movePawn(P2, c, r)>X(if(r==1, None, P1), rfP1, rfP2, fences, pA, pos(c,r)) && 
+	(exists c3,r3:Pos.exists d3:Direction.(val(rfP2 > 0) && val(isValidPlace(pA, pB, fpos(c3, r3, d3), fences))) => 
+		<addFence(P2, c3, r3, d3)>X(P1, rfP1, Int2Nat(rfP2 - 1), {fpos(c3, r3, d3)} + fences, pA, pB))
+		
+	))
+)

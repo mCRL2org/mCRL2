@@ -1,0 +1,88 @@
+nu X(pA:Position=pos(upperMiddle + 1, 1),pB:Position=pos(upperMiddle + 1, N), fences:FSet(FPosition)={}).(
+	forall c,r:Pos.(val(c <= N) && val(r <= N)) => [movePawn(P1, c, r)] (
+		(
+			% Move to adjacent place
+			(val(c == col(pA) + 1) && val(r == row(pA)))
+			|| (val(c == col(pA) - 1) && val(r == row(pA)))
+			|| (val(c == col(pA)) && val(r == row(pA) + 1))
+			|| (val(c == col(pA)) && val(r == Int2Pos(row(pA) - 1)))
+			% Jump in straight line
+			|| (val(c == col(pA) + 2) && val(r == row(pA)) && val(col(pA) + 1 == col(pB)) && val(row(pA) == row(pB)))
+			|| (val(c == Int2Pos(col(pA) - 2)) && val(r == row(pA)) && val(Int2Pos(col(pA) - 1) == col(pB)) && val(row(pA) == row(pB)))
+			|| (val(c == col(pA)) && val(r == row(pA) + 2) && val(col(pA) == col(pB)) && val(row(pA) + 1 == row(pB)))
+			|| (val(c == col(pA)) && val(r == Int2Pos(row(pA) - 2)) && val(col(pA) == col(pB)) && val(Int2Pos(row(pA) - 1) == row(pB)))
+			% Diagonal Jump
+			|| (val(c == col(pA) + 1) && val(r == row(pA) + 1) && 
+				(
+					val(isBlocked(pB, pos(col(pA) + 2, row(pA)), fences) && col(pA) + 1 == col(pB) && row(pA) == row(pB))
+					|| val(isBlocked(pB, pos(col(pA), row(pA) + 2), fences) && col(pA) == col(pB) && row(pA) + 1 == row(pB))
+				)
+			)
+			|| val(if(row(pA) == 1, false, ((c == col(pA) + 1) && (r == Int2Pos(row(pA) - 1)) && 
+				(
+					(isBlocked(pB, pos(col(pA) + 2, row(pA)), fences) && col(pA) + 1 == col(pB) && row(pA) == row(pB))
+					|| (if((row(pA) - 2 < 1), true, isBlocked(pB, pos(col(pA), Int2Pos(row(pA) - 2)), fences)) && col(pA) == col(pB) && Int2Pos(row(pA) - 1) == row(pB))
+				)
+			)))
+			|| val(if((row(pA) == 1) || (col(pA) == 1), false, ((c == Int2Pos(col(pA) - 1)) && (r == Int2Pos(row(pA) - 1)) && 
+				(
+					(if((col(pA) - 2 < 1), true, isBlocked(pB, pos(Int2Pos(col(pA) - 2), row(pA)), fences)) && Int2Pos(col(pA) - 1) == col(pB) && row(pA) == row(pB))
+					|| (if((row(pA) - 2 < 1), true, isBlocked(pB, pos(col(pA), Int2Pos(row(pA) - 2)), fences)) && col(pA) == col(pB) && Int2Pos(row(pA) - 1) == row(pB))
+				)
+			)))
+			|| val(if((col(pA) == 1), false, ((c == Int2Pos(col(pA) - 1)) && (r == row(pA) + 1) && 
+				(
+					(if((col(pA) - 2 < 1), true, isBlocked(pB, pos(Int2Pos(col(pA) - 2), row(pA)), fences)) && Int2Pos(col(pA) - 1) == col(pB) && row(pA) == row(pB))
+					|| (isBlocked(pB, pos(col(pA), row(pA) + 2), fences) && col(pA) == col(pB) && row(pA) + 1 == row(pB))
+				)
+			)))
+		) && X(pos(c,r), pB, fences)) &&
+
+		forall c,r:Pos.(val(c <= N) && val(r <= N)) => [movePawn(P2, c, r)] (
+		(
+			% Move to adjacent place
+			(val(c == col(pB) + 1) && val(r == row(pB)))
+			|| (val(c == Int2Pos(col(pB) - 1)) && val(r == row(pB)))
+			|| (val(c == col(pB)) && val(r == row(pB) + 1))
+			|| (val(c == col(pB)) && val(r == Int2Pos(row(pB) - 1)))
+			% Jump in straight line
+			|| (val(c == col(pB) + 2) && val(r == row(pB)) && val(col(pB) + 1 == col(pA)) && val(row(pB) == row(pA)))
+			|| (val(c == Int2Pos(col(pB) - 2)) && val(r == row(pB)) && val(Int2Pos(col(pB) - 1) == col(pA)) && val(row(pB) == row(pA)))
+			|| (val(c == col(pB)) && val(r == row(pB) + 2) && val(col(pB) == col(pA)) && val(row(pB) + 1 == row(pA)))
+			|| (val(c == col(pB)) && val(r == Int2Pos(row(pB) - 2)) && val(col(pB) == col(pA)) && val(Int2Pos(row(pB) - 1) == row(pA)))
+			% Diagonal Jump
+			|| (val(c == col(pB) + 1) && val(r == row(pB) + 1) && 
+				(
+					val(isBlocked(pA, pos(col(pB) + 2, row(pB)), fences) && col(pB) + 1 == col(pA) && row(pB) == row(pA))
+					|| val(isBlocked(pA, pos(col(pB), row(pB) + 2), fences) && col(pB) == col(pA) && row(pB) + 1 == row(pA))
+				)
+			)
+			|| val(if(row(pB) == 1, false, ((c == col(pB) + 1) && (r == Int2Pos(row(pB) - 1)) && 
+				(
+					(isBlocked(pA, pos(col(pB) + 2, row(pB)), fences) && col(pB) + 1 == col(pA) && row(pB) == row(pA))
+					|| (if((row(pB) - 2 < 1), true, isBlocked(pA, pos(col(pB), Int2Pos(row(pB) - 2)), fences)) && col(pB) == col(pA) && Int2Pos(row(pB) - 1) == row(pA))
+				)
+			)))
+			|| val(if((row(pB) == 1) || (col(pB) == 1), false, ((c == Int2Pos(col(pB) - 1)) && (r == Int2Pos(row(pB) - 1)) && 
+				(
+					(if((col(pB) - 2 < 1), true, isBlocked(pA, pos(Int2Pos(col(pB) - 2), row(pB)), fences)) && Int2Pos(col(pB) - 1) == col(pA) && row(pB) == row(pA))
+					|| (if((row(pB) - 2 < 1), true, isBlocked(pA, pos(col(pB), Int2Pos(row(pB) - 2)), fences)) && col(pB) == col(pA) && Int2Pos(row(pB) - 1) == row(pA))
+				)
+			)))
+			|| val(if((col(pB) == 1), false, ((c == Int2Pos(col(pB) - 1)) && (r == row(pB) + 1) && 
+				(
+					(if((col(pB) - 2 < 1), true, isBlocked(pA, pos(Int2Pos(col(pB) - 2), row(pB)), fences)) && Int2Pos(col(pB) - 1) == col(pA) && row(pB) == row(pA))
+					|| (isBlocked(pA, pos(col(pB), row(pB) + 2), fences) && col(pB) == col(pA) && row(pB) + 1 == row(pA))
+				)
+			)))
+		) && X(pA, pos(c,r), fences)) &&
+	forall t:Turn.forall c,r:Pos.forall d:Direction.[addFence(t, c, r, d)] X(pA, pB, {fpos(c, r, d)} + fences) &&
+	[!(exists t:Turn. exists c,r:Pos. exists d:Direction.
+		(val(c <= N) && val(r <= N))
+		&& (
+			movePawn(P1, c, r) || 
+			movePawn(P2, c, r) ||
+			addFence(t, c, r, d)
+		)
+	)] X(pA, pB, fences)
+)

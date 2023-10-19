@@ -1,0 +1,19 @@
+% For all possible opening moves by player 1
+forall c,r:Pos.forall d:Direction.[movePawn(P1, c, r) || addFence(P1, c, r, d)]
+	(
+		mu X.
+			% Player 2 wins
+			<win(P2)>true ||
+
+			% Or, there exists a move for player 2 such that:
+			<exists c2,r2:Pos.exists d2:Direction.movePawn(P2, c2, r2) || addFence(P2, c2, r2, d2)>
+				(
+					% 1. He directly wins the game
+					<win(P2)>true ||
+
+					% Or, 2. For all moves possible moves of player 1, player 2 can force a win
+					(
+						forall c3,r3:Pos.forall d3:Direction.[movePawn(P1, c3, r3) || addFence(P1, c3, r3, d3)]X
+					)
+				)
+	)
