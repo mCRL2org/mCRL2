@@ -1,9 +1,3 @@
-if(${CMAKE_VERSION} VERSION_LESS 3.1)
-  return()
-endif()
-
-# The Threads module provides the Threads::Threads target since 3.1
-cmake_minimum_required(VERSION 3.1)
 find_package(Threads)
 
 # Add a benchmark with the name that executes the given target.
