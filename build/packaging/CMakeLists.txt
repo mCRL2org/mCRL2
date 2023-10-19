@@ -199,7 +199,6 @@ endif()
 # -------
 
 if (WIN32)
-  find_program(WINDEPLOYQT_EXECUTABLE NAMES "windeployqt" PATHS "${Qt6_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
   foreach(EXECUTABLE ${MCRL2_QT_APPS})
     find_program(WINDEPLOYQT NAMES "windeployqt" PATHS "${Qt5_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
     install(CODE "
