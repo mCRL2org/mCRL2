@@ -9,7 +9,7 @@
 
 #include <QMessageBox>
 #include <QSettings>
-#include <QRegularExpression.h>
+#include <QRegularExpression>
 
 #include "mainwindow.h"
 
