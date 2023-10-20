@@ -372,7 +372,23 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
   {
     if (m_formula_is_quantitative)
     {
-      result = m_data_type_checker.typecheck_data_expression(x, data::sort_real::real_(), m_variable_context);
+      try
+      {
+        result = m_data_type_checker.typecheck_data_expression(x, data::sort_real::real_(), m_variable_context);
+      }
+      catch (mcrl2::runtime_error& e1)
+      {
+        try 
+        {
+          result = m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
+        }
+        catch (mcrl2::runtime_error& e2)
+        {
+          throw mcrl2::runtime_error("Fail to type data expression as bool or real: " + pp(x) + ".\n" +
+                                     e1.what() + "\n" +
+                                     e2.what());
+        }
+      }
     }
     else
     {
