@@ -410,3 +410,28 @@ BOOST_AUTO_TEST_CASE(parse_state_formula_specification_test)
   std::cout << text1 << std::endl;
   BOOST_CHECK_EQUAL(utilities::remove_whitespace(text), utilities::remove_whitespace(text1));
 }
+
+BOOST_AUTO_TEST_CASE(parse_state_formula_with_supremum_specification_test)
+{
+  const std::string text =
+    "sort S;                       \n"
+    "cons s0: S;                   \n"
+    "act a: S;                     \n"
+    "form sup s: S. [a(s)]true; \n"
+    ;
+  state_formula_specification x = parse_state_formula_specification(text, true);
+  std::string text1 = state_formulas::pp(x);
+  std::cout << text1 << std::endl;
+  BOOST_CHECK_EQUAL(utilities::remove_whitespace(text), utilities::remove_whitespace(text1));
+}
+
+BOOST_AUTO_TEST_CASE(parse_state_formula_with_infimum_specification_test)
+{
+  const std::string text =
+    "form inf n: Nat. val(n); \n"
+    ;
+  state_formula_specification x = parse_state_formula_specification(text, true);
+  std::string text1 = state_formulas::pp(x);
+  std::cout << text1 << std::endl;
+  BOOST_CHECK_EQUAL(utilities::remove_whitespace(text), utilities::remove_whitespace(text1));
+}
