@@ -1,0 +1,12 @@
+nu X(lf:List(FPosition)=[]).(
+	forall c,r:Pos.forall d:Direction. forall t:Turn.[addFence(t, c, r, d)] 
+		(
+			!val(fpos(c, r, V) in lf)
+			&& !val(fpos(c, r, H) in lf)
+			&& val(if((((c == 1) && (d == H)) || ((r == 1) && (d == V))), true, !(fpos(Int2Pos(c - if((d==H), 1, 0)), Int2Pos(r - if((d==V), 1, 0)), d) in lf)))
+			&& !val(fpos(c + if((d==H), 1, 0), r + if((d==V), 1, 0), d) in lf)
+
+			&& X(lf ++ [fpos(c, r, d)])
+		)
+	&& [!(exists c,r:Pos.exists d:Direction.exists t:Turn.addFence(t,c,r,d))] X(lf)
+)

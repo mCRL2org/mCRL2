@@ -104,7 +104,6 @@ if(NOT NumProc EQUAL 0)
 endif()
 
 set(coverage_target mcrl2_coverage)
-set(COVERAGE_LCOV_EXCLUDES '*.g' '/usr/*' '*/3rd-party/*' '*toolset_version_const.h' '${PROJECT_BINARY_DIR}/jittyc_*.cpp')
 
 # Setup target
 add_custom_target(${coverage_target}
@@ -112,18 +111,23 @@ add_custom_target(${coverage_target}
   # Cleanup lcov
   COMMAND ${LCOV_PATH} --directory . --zerocounters
   # Create baseline to make sure untouched files show up in the report
-  COMMAND ${LCOV_PATH} -c -i -d . -o ${coverage_target}.base
+  COMMAND ${LCOV_PATH} --capture --initial --directory . 
+    --exclude *.g --exclude */3rd-party/* --exclude *toolset_version_const.h --exclude *jittyc_*.cpp
+    --output ${coverage_target}.base
 
   # Run tests
   # ctest exits with a non-zero exit code when at least one test fails. To make
-  # sure that the rest of the commands are also executed, we use || true.
+  # sure that the rest of the commands are still executed, we use || true.
   COMMAND ctest --output-on-failure ${PROCESSOR_ARG} -L librarytest || true
 
   # Capturing lcov counters and generating report
-  COMMAND ${LCOV_PATH} --directory . --capture --output-file ${coverage_target}.info
+  COMMAND ${LCOV_PATH} --capture --directory . 
+    --exclude *.g --exclude */3rd-party/* --exclude *toolset_version_const.h --exclude *jittyc_*.cpp
+    --output-file ${coverage_target}.info
+
   # add baseline counters
   COMMAND ${LCOV_PATH} -a ${coverage_target}.base -a ${coverage_target}.info --output-file ${coverage_target}.total
-  COMMAND ${LCOV_PATH} --remove ${coverage_target}.total ${COVERAGE_LCOV_EXCLUDES} --output-file ${PROJECT_BINARY_DIR}/${coverage_target}.info.cleaned
+  COMMAND ${LCOV_PATH} --remove ${coverage_target}.total --output-file ${PROJECT_BINARY_DIR}/${coverage_target}.info.cleaned
   COMMAND ${GENHTML_PATH} --legend -o ${coverage_target} ${PROJECT_BINARY_DIR}/${coverage_target}.info.cleaned
   # COMMAND ${CMAKE_COMMAND} -E remove ${coverage_target}.base ${coverage_target}.total ${PROJECT_BINARY_DIR}/${coverage_target}.info.cleaned
 

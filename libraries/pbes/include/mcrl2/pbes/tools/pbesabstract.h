@@ -21,13 +21,13 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-void pbesabstract(const std::string& input_filename,
-                  const std::string& output_filename,
-                  const utilities::file_format& input_format,
-                  const utilities::file_format& output_format,
-                  const std::string& parameter_selection,
-                  bool value_true
-                 )
+inline void pbesabstract(const std::string& input_filename,
+                         const std::string& output_filename,
+                         const utilities::file_format& input_format,
+                         const utilities::file_format& output_format,
+                         const std::string& parameter_selection,
+                         bool value_true
+                        )
 {
   // load the pbes
   pbes p;

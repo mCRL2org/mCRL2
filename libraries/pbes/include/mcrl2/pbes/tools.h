@@ -12,13 +12,14 @@
 #ifndef MCRL2_PBES_TOOLS_H
 #define MCRL2_PBES_TOOLS_H
 
+#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/core/print_format.h"
 #include "mcrl2/pbes/absinthe_strategy.h"
 #include "mcrl2/pbes/bisimulation_type.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
-#include "mcrl2/utilities/file_utility.h"
+#include "mcrl2/pbes/tools/pbesabstract.h"
 
 namespace mcrl2 {
 
@@ -102,7 +103,7 @@ void lpsbisim2pbes(const std::string& input_filename1,
                    bool normalize
                   );
 
-void pbesabstract(const std::string& input_filename,
+inline void pbesabstract(const std::string& input_filename,
                   const std::string& output_filename,
                   const utilities::file_format& input_format,
                   const utilities::file_format& output_format,

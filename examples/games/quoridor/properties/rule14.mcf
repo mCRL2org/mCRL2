@@ -1,0 +1,1 @@
+forall t:Turn.forall c:Pos.(val(c <= N)) => [true*.movePawn(t, c, if(t == P1, N, 1))]<win(t)>true

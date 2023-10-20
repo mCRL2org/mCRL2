@@ -1,0 +1,5 @@
+nu X(pA:Position=pos(upperMiddle + 1, 1),pB:Position=pos(upperMiddle + 1, N)).(
+	forall c,r:Pos.[movePawn(P1, c, r)] (val(col(pB) != c || row(pB) != r) && X(pos(c,r), pB)) &&
+	forall c,r:Pos.[movePawn(P2, c, r)] (val(col(pA) != c || row(pA) != r) && X(pA, pos(c,r))) &&
+	[!(exists c,r:Pos.(movePawn(P1, c, r) || movePawn(P2, c, r)))] X(pA, pB)
+)

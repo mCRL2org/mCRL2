@@ -1,0 +1,4 @@
+[!(exists c1,r1:Pos.exists d1:Direction.movePawn(P1, c1, r1) || addFence(P1, c1, r1, d1))*.
+		forall c2,r2:Pos.(val(c2 <= N) && val(r2 <= N)) => forall d2:Direction.
+			(movePawn(P2, c2, r2) || addFence(P2, c2, r2, d2))
+] false

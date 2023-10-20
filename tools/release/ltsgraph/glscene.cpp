@@ -441,7 +441,7 @@ void GLScene::project2D()
 
   std::sort(positions.begin(), positions.end(), compare);
 
-  float plane_dist = perp_distance(positions[positions.size() / 2] - eye);
+  float plane_dist = !positions.empty() ? perp_distance(positions[positions.size() / 2] - eye) : 0.0f;
   QVector3D relative_reference_point = forward * plane_dist;
   QVector3D reference_point = eye + relative_reference_point;
 

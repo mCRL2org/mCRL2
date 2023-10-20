@@ -1,0 +1,39 @@
+nu X(fences:FSet(FPosition)={},pA:Position=pos(upperMiddle + 1, 1),pB:Position=pos(upperMiddle + 1, N)).(
+	(forall c,r:Pos.(val(c <= N) && val(r <= N)) &&
+		(
+			(val(abs(col(pA)-c)+abs(row(pA)-r) == 1) &&  val(!isBlocked(pA, pos(c,r), fences)))
+			|| (
+				val(abs(col(pA)-c)+abs(row(pA)-r) == 2)
+				&& val(col(pA) != c)
+				&& val(row(pA) != r)
+				&& val(!isBlocked(pA, pB, fences))
+				&& val(!isBlocked(pB, pos(c,r), fences))
+				&& (
+					val(if(pB == pos(col(pA), r), 
+						if (row(pB) - (row(pA)-row(pB)) < 1 || row(pB) - (row(pA)-row(pB)) > N, true, 
+                        	isBlocked(pB, pos(col(pA), Int2Pos(row(pB) - (row(pA)-row(pB)))), fences)
+						),
+						if (col(pB) - (col(pA)-col(pB)) < 1 || col(pB) - (col(pA)-col(pB)) > N, true, 
+                        	isBlocked(pB, pos(Int2Pos(col(pB) - (col(pA)-col(pB))), row(pA)), fences)
+						)
+					))
+				)
+			)
+			|| (
+				val(abs(col(pA)-c)+abs(row(pA)-r) == 2)
+				&& (val(col(pA) == c) || val(row(pA) != r))
+				&& val(!isBlocked(pA, pB, fences))
+				&& val(!isBlocked(pB, pos(c,r), fences))
+			)
+		) => 
+			(
+				[movePawn(P1, c, r)] (val(!isBlocked(pA, pos(c,r), fences)) && X(fences, pos(c, r), pB)) ||
+				[movePawn(P2, c, r)] (val(!isBlocked(pB, pos(c,r), fences)) && X(fences, pA, pos(c, r)))
+			)
+		) &&
+	(val(# fences < 2 * F) => (forall c,r:Pos.(val(c <= N) && val(r <= N)) => forall d:Direction.
+		[addFence(P1, c,r,d) || addFence(P2, c,r,d)] X({fpos(c,r,d)} + fences, pA, pB))) &&
+	[!(exists c,r:Pos.exists d:Direction.val(c <= N) && val(r <= N) && (
+		movePawn(P1, c, r) || movePawn(P2, c, r) || addFence(P1,c,r,d) || addFence(P2,c,r,d)
+	))] X(fences, pA, pB)
+)

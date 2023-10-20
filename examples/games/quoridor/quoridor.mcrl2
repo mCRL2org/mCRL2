@@ -1,0 +1,369 @@
+% This mCRL2 specification describes the game 'Quoridor'.
+% 
+% Quoridor is a two or four player strategy game designed by Mirko Marchesi that was introduced in 1997 by Gigamic
+% Games. The game is played on a board consisting of 9 rows of 9 squares each, with grooves in between the squares 
+% that allow fences to be placed between the squares. At the start of the game, the pawns of the players are 
+% positioned on opposite sides of the board and the number of fences are equally divided among the players. The aim 
+% of the game is to reach the opposite side of the board. The first player to reach their opposing side wins the game.
+%
+%
+% To generate the state space of this game, the following sequence of commands can be used:
+%
+% mcrl22lps -v Quoridor.mCRL2 Quoridor.lps
+% lpssuminst -v -sBool Quoridor.lps
+%    | lpsparunfold -v -l -n5 -sPosition
+%    | lpsrewr -v
+%    | lpsconstelm -v -c
+%    | lpsrewr -v Quoridor-1.lps
+% lps2lts --cached -v -rjittyc --threads=16 Quoridor-1.lps Quoridor.lts
+%
+%
+% Using the following formula, it can be determined whether the first player has a winning strategy.
+%
+%   mu X.(<win(P1)>true || 
+%		<exists c,r:Pos.(movePawn(P1, c, r) || exists d:Direction.addFence(P1, c, r, d))> (
+% 			<win(P1)>true || (
+%				forall c2,r2:Pos.forall d2:Direction.[movePawn(P2, c2, r2) || addFence(P2, c2, r2, d2)]X
+%			)
+%		)
+%	)
+%
+% Using the following formula, it can be determined whether the second player has a winning strategy.
+% 
+%	forall c,r:Pos.forall d:Direction.[movePawn(P1, c, r) || addFence(P1, c, r, d)] (
+%		mu X.<win(P2)>true ||
+%			<exists c2,r2:Pos.exists d2:Direction.movePawn(P2, c2, r2) || addFence(P2, c2, r2, d2)> (
+%				<win(P2)>true || (
+%					forall c3,r3:Pos.forall d3:Direction.[movePawn(P1, c3, r3) || addFence(P1, c3, r3, d3)]X
+%				)
+%			)
+%	)
+%
+% The following sequence of commands can be used to verify whether one of the formulas hold.
+% In these commands, replace FORMULA, with either of the two formulas expressing a winning strategy for a player
+%
+% ltsconvert -v -ebisim Quoridor.lts Quoridor-1.lts
+% lts2pbes -v -c -p -f"FORMULA" Quoridor-1.lts
+%   | pbessolve -v --threads=16 -rjittyc -s1 
+%        --file=Quoridor-1.lts
+%        --evidence-file=Quoridor-evidence.lts
+%
+% Note that, due to the high state space, only small instances of the game can be solved on a normal computer.
+% 
+% The table below shows the player that has a winning strategies for all instances of the game.
+% This has been verified using the above mentioned sequence of commands.
+%
+%       			   F
+%	  |	0  1  2  3  4  5  6  7  8  9  10
+%  -------------------------------------			LEGENDA
+%   3 | 2  2  2  2  2  2  2  2  2  2  2	
+%   4 | 1  1  1  1  1  1  1  1  1  1  1				1:	Player 1 has a winning strategy
+%   5 | 2  2  2  ?  ?  ?  ?  ?  ?  ?  ?				2:	Player 2 has a winning strategy
+% N 6 | 1  1  ?  ?  ?  ?  ?  ?  ?  ?  ?				3: 	Not verified
+%   7 | 2  2  ?  ?  ?  ?  ?  ?  ?  ?  ?
+%   8 | 1  1  ?  ?  ?  ?  ?  ?  ?  ?  ?
+%   9 | 2  2  ?  ?  ?  ?  ?  ?  ?  ?  ?
+%
+% Here N is the size of the board (NxN) and F is the number of fences that each player has at the start of the game. 
+%
+% In the model, the values for N and F can be set in the equation part of the specification, lines 121 and 122.
+%
+% 
+% Jordi van Laarhoven, February 3, 2023
+% Supervised by Jan Friso Groote
+
+sort
+	Position = struct pos(col: Pos, row: Pos);
+	FPosition = struct fpos(col: Pos, row: Pos, dir:Direction);
+	Direction = struct H | V;
+	Turn = struct P1 | P2 | None;
+
+map 
+	% N is the number of squares on 1 row/column of the board, the board is N by N squares
+	N: Pos;
+
+	% F is the number of fences per player. Therefore, in total 2F fences can be used throughout the game
+	F: Nat;
+
+	% Get center column
+	upperMiddle: Pos;
+
+	% Check whether a position is valid
+	validPos: Position -> Bool;
+
+	% Check whether a fence is placed between two coordinates
+	isBlocked: Position # Position # FSet(FPosition) -> Bool;
+
+	% Check whether a move is valid, format: curPos, opponentPos, newPos, Fences -> Bool valid
+	isValidMove: Position # Position # Position # FSet(FPosition) -> Bool;
+
+	% Check whether the placement of a fence is valid
+	isValidPlace: Position # Position # FPosition # FSet(FPosition) -> Bool;
+
+	% Check whether the goal of each player remains reachable
+	isGoalReachable: Turn # List(Position) # FSet(Position) # FSet(FPosition) -> Bool;
+
+	% Check how many fences the requested fence touches.
+	countFenceTouching: FPosition # FSet(FPosition) -> Nat;
+
+	% Add blocked fences
+	addBlocked: FSet(FPosition) # FPosition -> FSet(FPosition);
+
+var 
+	p : Turn;
+	pA, pB, pD : Position;
+	fences : FSet(FPosition);
+	lv : List(Position);
+	lp : FSet(Position);
+	fp : FPosition;
+	
+eqn
+	N = 3;
+	F = 0;
+
+	upperMiddle = Int2Pos(N div 2);
+
+	% A position pA is valid if both its column and row are in range 1..N
+	validPos(pA) = 1 <= col(pA) && 1 <= row(pA) && col(pA) <= N && row(pA) <= N;
+
+	% A move from position pA to position pD is blocked if pD is invalid (not on the board)
+	% or if there is a fence between pA and pD.
+	isBlocked(pA, pD, fences) = !validPos(pD) || if(col(pA) != col(pD),
+		% Adjacent cells in same row, different column
+		(
+			fpos(min(col(pA), col(pD)), row(pA), V) in fences
+			|| if(row(pA) == 1, false, fpos(min(col(pA), col(pD)), Int2Pos(row(pA) - 1), V) in fences)
+		),
+		% Adjacent cells in same column, different row
+		(
+			fpos(col(pA), min(row(pA), row(pD)), H) in fences
+			|| if(col(pA) == 1, false, fpos(Int2Pos(col(pA) - 1), min(row(pA), row(pD)), H) in fences)
+		)	
+	);
+
+	% Calculate whether the move from pA to pD is valid, pB is the location of the opponent.
+	% fences is the list of fences which are placed on the board.
+	isValidMove(pA, pB, pD, fences) = if(
+        % A valid move either consist of 1 or 2 steps, the destination may not be occupied and should be a 
+        % valid position. If any of these conditions are violated, we can directly return false.
+        (
+            (abs(col(pA) - col(pD)) + abs(row(pA) - row(pD)) > 2)
+            || (abs(col(pA) - col(pD)) + abs(row(pA) - row(pD)) == 0)
+            || pB == pD
+            || !validPos(pD)
+        ),
+		
+        % Not valid according to above mentioned conditions
+        false,
+		
+        % So far, it is valid, we check if it is a 1 step move
+        if(
+            % 1 step move
+            (abs(col(pA) - col(pD)) + abs(row(pA) - row(pD)) == 1),
+            
+            % We only need to check whether there is no fence blocking the move
+            !isBlocked(pA, pD, fences),
+            
+            % 2 step move
+            if(
+                % Determine whether its a straight or diagonal jump
+                (col(pA) == col(pD) || row(pA) == row(pD)),
+                
+                % Jump over opponent in line (not diagonal)
+                (
+					(
+						(pB == pos(min(col(pA), col(pD)) + 1, row(pA)) && row(pA) == row(pD))
+						|| (pB == pos(col(pA), min(row(pA), row(pD)) + 1) && col(pA) == col(pD))
+					)
+                    && !isBlocked(pA, pB, fences)
+                    && !isBlocked(pB, pD, fences)
+                ),
+
+                % Diagonal Jump over opponent
+                (
+                    (pB == pos(col(pA), row(pD)) || pB == pos(col(pD), row(pA)))
+                    && !isBlocked(pA, pB, fences)
+                    && !isBlocked(pB, pD, fences)
+                    && if(
+                        % Check whether the opponent is in the same column
+                        pB == pos(col(pA), row(pD)),
+    
+                        % Opponent is in the same column
+						if (row(pB) - (row(pA)-row(pB)) < 1 || row(pB) - (row(pA)-row(pB)) > N, true, 
+                        	isBlocked(pB, pos(col(pA), Int2Pos(row(pB) - (row(pA)-row(pB)))), fences)
+						),
+
+                        % Opponent is in the same row
+						if (col(pB) - (col(pA)-col(pB)) < 1 || col(pB) - (col(pA)-col(pB)) > N, true, 
+                        	isBlocked(pB, pos(Int2Pos(col(pB) - (col(pA)-col(pB))), row(pA)), fences)
+						)
+                    )
+                )
+            )
+        )			
+    );
+
+	% A place is valid if it is not overlapping another fence and the goals remain reachable
+	isValidPlace(pA, pB, fp, fences) = if(
+			% We check if it is touching 2 fences or 1 fence and the border of the board
+			% If so, we need to check if it blocks the goal line for both players
+			(
+				X == 1 && ((dir(fp) == H && (col(fp) == 1 || col(fp) == N - 1))
+				|| (dir(fp) == V && (row(fp) == 1 || row(fp) == N - 1)))
+			) || X >= 2,
+			isGoalReachable(P1, [pA], {}, {fp} + fences) && isGoalReachable(P2, [pB], {}, {fp} + fences), true) 
+			whr X = countFenceTouching(fp, fences) end;
+	 
+	% addBlocked adds all fences to the fset that would overlap with the placed fence
+    addBlocked(fences, fp) = 
+		{fp} 
+		+ {fpos(col(fp), row(fp), if(dir(fp) == V, H, V))}
+		+ if((col(fp) == 1 && dir(fp) == H) || (row(fp) == 1 && dir(fp) == V), {}, 
+			{fpos(Int2Pos(col(fp) - if(dir(fp) == H, 1, 0)), Int2Pos(row(fp) - if(dir(fp) == V, 1, 0)), dir(fp))})
+		+ {fpos(col(fp) + if(dir(fp) == H, 1, 0), row(fp) + if(dir(fp) == V, 1, 0), dir(fp))}
+		+ fences;
+
+	% isGoalReachable checks if the goal line for a player is still reachable.
+	% The arguments are: the player for which we check (Turn), a list of visited but not processed positions
+	% (initially the position of the player), the list of processed positions (initially empty) and
+	% the set of fences. This function follows an BFS approach.
+	isGoalReachable(p, [], lp, fences) = (exists g : Position . g in lp && row(g) == if(p == P1, N, 1));
+    isGoalReachable(None, lv, lp, fences) = true;
+	(p == P1 || p == P2) -> isGoalReachable(p, pA |> lv, lp, fences) = 
+        if(
+            % Always allowed if its the first fence placed or if player has reached goal
+            # fences == 1 || row(pA) == if(p == P1, N, 1),
+
+            % Condition holds
+            true, 
+
+            % Add all 4 adjacent squares to list if that move is not blocked
+            isGoalReachable(p,
+                if(
+                    % Condition
+                    !(pos(col(pA), row(pA)+1) in lv || pos(col(pA), row(pA)+1) in lp) 
+                    && validPos(pos(col(pA), row(pA)+1)) 
+                    && !isBlocked(pA, pos(col(pA), row(pA)+1), fences), 
+                
+                    % Condition holds
+                    [pos(col(pA), row(pA)+1)],
+                
+                    % Condition does not hold
+                    []
+                ) ++
+				if (row(pA) <= 1, [], 
+                	if(
+	                    % Condition
+	                    !(pos(col(pA), Int2Pos(row(pA)-1)) in lv || pos(col(pA), Int2Pos(row(pA)-1)) in lp)
+	                    && validPos(pos(col(pA), Int2Pos(row(pA)-1)))
+	                    && !isBlocked(pA, pos(col(pA), Int2Pos(row(pA)-1)), fences), 
+	                
+	                    % Condition holds
+	                    [pos(col(pA), Int2Pos(row(pA)-1))],
+	                
+	                    % Condition does not hold
+	                    []
+	                )
+				) ++
+				if (col(pA) <= 1, [], 
+	                if(
+	                    % Condition
+	                    !(pos(Int2Pos(col(pA)-1), row(pA)) in lv || pos(Int2Pos(col(pA)-1), row(pA)) in lp)
+	                    && validPos(pos(Int2Pos(col(pA)-1), row(pA)))
+	                    && !isBlocked(pA, pos(Int2Pos(col(pA)-1), row(pA)), fences), 
+	                
+	                    % Condition holds
+	                    [pos(Int2Pos(col(pA)-1), row(pA))],
+	                
+	                    % Condition does not hold
+	                    []
+	                )
+				) ++
+                if(
+                    % Condition
+                    !(pos(col(pA)+1, row(pA)) in lv || pos(col(pA)+1, row(pA)) in lp)
+                    && validPos(pos(col(pA)+1, row(pA)))
+                    && !isBlocked(pA, pos(col(pA)+1, row(pA)), fences), 
+                
+                    % Condition holds
+                    [pos(col(pA)+1, row(pA))],
+                
+                    % Condition does not hold
+                    []
+                ) ++
+            lv, {pA} + lp, fences)
+        );
+
+	% Check if the fence placed is touching another fence on the board.
+	% Used to reduce the number of isGoalReachable executions
+	countFenceTouching(fp, fences) = 
+		if(dir(fp) == H,
+			% Horizontal placed fence
+			if(col(fp) <= 2, 0, if(fpos(Int2Pos(col(fp) - 2), row(fp), dir(fp)) in fences, 1, 0))
+			+ if(fpos(col(fp) + 2, row(fp), dir(fp)) in fences, 1, 0),
+
+			% Vertical placed fence
+			if(row(fp) <= 2, 0, if(fpos(col(fp), Int2Pos(row(fp) - 2), dir(fp)) in fences, 1, 0))
+			+ if(fpos(col(fp), row(fp) + 2, dir(fp)) in fences, 1, 0)
+		)
+		+ if((fpos(col(fp) + 1, row(fp) + 1, if(dir(fp) == V, H, V)) in fences), 1, 0)
+		+ if((fpos(col(fp), row(fp) + 1, if(dir(fp) == V, H, V)) in fences), 1, 0)
+		+ if(col(fp) <= 1, 0, if(fpos(Int2Pos(col(fp) - 1), row(fp) + 1, if(dir(fp) == V, H, V)) in fences, 1, 0))
+		+ if((fpos(col(fp) + 1, row(fp), if(dir(fp) == V, H, V)) in fences), 1, 0)
+		+ if(col(fp) <= 1, 0, if(fpos(Int2Pos(col(fp) - 1), row(fp), if(dir(fp) == V, H, V)) in fences, 1, 0))
+		+ if(row(fp) <= 1, 0, if(fpos(col(fp) + 1, Int2Pos(row(fp) - 1), if(dir(fp) == V, H, V)) in fences, 1, 0))
+		+ if(row(fp) <= 1, 0, if(fpos(col(fp), Int2Pos(row(fp) - 1), if(dir(fp) == V, H, V)) in fences, 1, 0))
+		+ if(col(fp) <= 1 || row(fp) <= 1, 0, 
+				if(fpos(Int2Pos(col(fp) - 1), Int2Pos(row(fp) - 1), if(dir(fp) == V, H, V)) in fences, 1, 0));
+
+act
+	movePawn: Turn # Pos # Pos;
+	addFence: Turn # Pos # Pos # Direction;
+	win: Turn;
+
+proc Game(turn:Turn, p1:Position, p2:Position, rf1:Nat, fences:FSet(FPosition), blocked:FSet(FPosition)) =
+	(turn != None) -> (
+		(row(p1) == N || row(p2) == 1)
+			% One of the players won
+			->	win(if(row(p1) == N, P1, P2)).Game(None, pos(1,1), pos(1,1), 0, {}, {})
+			% No winning player yet
+			<> (
+				(turn == P1)
+					-> (
+						% Player 1 moves his pawn
+						(sum c,r:Pos.
+							(validPos(pos(c, r)) && isValidMove(p1, p2, pos(c, r), fences))
+							-> movePawn(turn, c, r).Game(P2, pos(c, r), p2, rf1, fences, blocked)
+						)
+						% Player 1 places a fence on the board
+						+ (sum c,r:Pos.sum d:Direction.(
+							validPos(pos(c, r)) && validPos(pos(c + 1, r + 1))
+							&& !(fpos(c, r, d) in blocked)
+							&& rf1 > 0 && isValidPlace(p1, p2, fpos(c, r, d), fences)
+						) -> addFence(turn, c, r, d)
+								.Game(P2, p1, p2, Int2Nat(rf1 - 1), {fpos(c, r, d)} + fences, addBlocked(blocked, fpos(c,r,d))))
+					)
+				+ (turn == P2)
+					-> (
+						% Player 2 moves his pawn
+						(sum c,r:Pos.
+							(validPos(pos(c, r)) && isValidMove(p2, p1, pos(c, r), fences))
+							-> movePawn(turn, c, r).Game(P1, p1, pos(c, r), rf1, fences, blocked)
+						)
+						% Player 2 places a fence on the board
+						+ (sum c,r:Pos.sum d:Direction.(
+							validPos(pos(c, r)) && validPos(pos(c + 1, r + 1))
+							&& !(fpos(c, r, d) in blocked)
+							&& ((2 * F) - (# fences) - rf1) > 0 && isValidPlace(p1, p2, fpos(c, r, d), fences)
+						) -> addFence(turn, c, r, d)
+								.Game(P1, p1, p2, rf1, {fpos(c, r, d)} + fences, addBlocked(blocked, fpos(c,r,d))))
+					)
+			)
+	);		
+
+init 
+	allow ({
+		movePawn, addFence, win
+	},
+	Game(P1, pos(upperMiddle + 1,1), pos(upperMiddle + 1,N), F, {}, {})
+);

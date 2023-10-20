@@ -11,6 +11,7 @@
 
 #include "mcrl2/pbes/tools.h"
 
+#include "mcrl2/pbes/tools/pbesabstract.h"
 #include "mcrl2/pbes/tools/pbesconstelm.h"
 #include "mcrl2/pbes/tools/pbesinfo.h"
 #include "mcrl2/pbes/tools/pbespp.h"

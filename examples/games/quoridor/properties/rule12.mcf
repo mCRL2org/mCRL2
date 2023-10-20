@@ -1,0 +1,11 @@
+nu X(pA:Position=pos(upperMiddle + 1, 1),pB:Position=pos(upperMiddle + 1, N), fences:FSet(FPosition)={}).(
+	(forall t:Turn.forall c,r:Pos.[movePawn(t, c, r)] X(if(t==P1, pos(c,r), pA), if(t==P2, pos(c,r), pB), fences)) &&
+	(forall t:Turn.forall c,r:Pos.forall d:Direction.
+		[addFence(t, c, r, d)] (
+			val(isGoalReachable(P1, [pA], {}, {fpos(c,r,d)} + fences))
+			&& val(isGoalReachable(P2, [pB], {}, {fpos(c,r,d)} + fences))
+			&& X(pA, pB, {fpos(c,r,d)} + fences)
+		)
+	) &&
+	[!(exists c,r:Pos.exists t:Turn.exists d:Direction.movePawn(t, c, r) || addFence(t, c, r, d))] X(pA, pB, fences)
+)
