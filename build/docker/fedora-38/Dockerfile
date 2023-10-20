@@ -4,24 +4,26 @@ FROM fedora:38
 RUN dnf install -y \
  boost-devel \
  cmake \
+ doxygen \
  gcc-c++ \
  git \
  make \
  mesa-libGL-devel \
  mesa-libGLU-devel \
- qt5-qtbase \
- qt5-qtbase-devel \
+ qt6-qtbase-devel \
  which \
 # Packages needed for packaging
  rpm-build \
 # Packages needed for documentation
  doxygen \
- python3-devel \
+ python3 \
+ python3-pip \
  python3-sphinx \
  swig \
  texlive \
  texlive-scheme-medium \
- texlive-collection-mathextra
+ texlive-collection-mathextra \
+ texlive-preprint
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt
