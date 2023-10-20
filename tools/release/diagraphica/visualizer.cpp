@@ -14,6 +14,8 @@
 
 #include <QMessageBox>
 #include "visualizer.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/exception.h"
 
 Visualizer::Visualizer(
   QWidget *parent,
@@ -44,6 +46,11 @@ void Visualizer::updateSelection() {
         delete m_hit_FBO; // make sure FBO is cleaned up
         m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
     }
+    
+    if (!m_hit_FBO->isValid())
+    {
+      throw mcrl2::runtime_error("Invalid framebuffer created");
+    }
     m_hit_FBO->bind();
     m_inSelectMode = true;
     paintGL();
@@ -54,32 +61,38 @@ void Visualizer::updateSelection() {
 void Visualizer::initializeGL() 
 {
   m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
+  if (!m_hit_FBO->isValid())
+  {
+    throw mcrl2::runtime_error("Invalid framebuffer created");
+  }
+
   m_gl_initialized = true;
 
-  
-  QPair<int, int> version = format().version();
-  qDebug() << "Created an OpenGL " << version.first
-           << "." << version.second << " context.\n";
-        
-  // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension
-  // is available. Ruben: Disabled because this makes the UI unusable with -d
-  // flag
-  m_logger = new QOpenGLDebugLogger(this);
-  if (m_logger->initialize())
-  {
-    connect(m_logger, &QOpenGLDebugLogger::messageLogged, this,
-            &Visualizer::logMessage);
-    m_logger->startLogging();
-  }
-  else
-  {
-    qDebug() << "QOpenGLDebugLogger initialisation failed\n";
+  if (mCRL2logEnabled(mcrl2::log::log_level_t::debug)) 
+  {  
+    QPair<int, int> version = format().version();
+    qDebug() << "Created an OpenGL " << version.first
+            << "." << version.second << " context.\n";
+          
+    // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension
+    // is available.
+    m_logger = new QOpenGLDebugLogger(this);
+    if (m_logger->initialize())
+    {
+      connect(m_logger, &QOpenGLDebugLogger::messageLogged, this,
+              &Visualizer::logMessage);
+      m_logger->startLogging();
+    }
+    else
+    {
+      qDebug() << "QOpenGLDebugLogger initialisation failed\n";
+    }
   }
 }
 
 void Visualizer::logMessage(const QOpenGLDebugMessage& debugMessage)
 {
-  qDebug() << "OpenGL: " << debugMessage.message().toStdString() << "\n";
+  qDebug() << "OpenGL: " << debugMessage.message() << "\n";
 }
 
 void Visualizer::paintGL()
