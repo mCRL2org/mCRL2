@@ -200,6 +200,16 @@ inline state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
     part = mcrl2::state_formulas::exists(mcrl2::state_formulas::exists(part).variables(),
                   translate_reg_frms_appl(mcrl2::state_formulas::exists(part).body(),xyz_generator));
   }
+  else if (state_formulas::is_infimum(part))
+  {
+    part = mcrl2::state_formulas::infimum(mcrl2::state_formulas::infimum(part).variables(),
+                  translate_reg_frms_appl(mcrl2::state_formulas::infimum(part).body(),xyz_generator));
+  }
+  else if (state_formulas::is_supremum(part))
+  {
+    part = mcrl2::state_formulas::supremum(mcrl2::state_formulas::supremum(part).variables(),
+                  translate_reg_frms_appl(mcrl2::state_formulas::supremum(part).body(),xyz_generator));
+  }
   else if (state_formulas::is_nu(part))
   {
     const nu nu_part(part);

@@ -232,6 +232,24 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     derived().leave(x);
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    derived().enter(x);
+    push_variables(x.variables());
+    derived().apply(x.body());
+    make_infimum(top(), x.variables(), top());
+    derived().leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    derived().enter(x);
+    push_variables(x.variables());
+    derived().apply(x.body());
+    tr::make_supremum(top(), x.variables(), top());
+    derived().leave(x);
+  }
+
   // This function is overridden in the structured variant of the algorithm
   template <typename MustMayExpression>
   pres_expression apply_may_must_rhs(const MustMayExpression& x)
@@ -471,13 +489,13 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Param
 
   void enter(const state_formulas::forall& x)
   {
-  	const data::variable_list& v = x.variables();
-  	variables.insert(v.begin(), v.end());
+    const data::variable_list& v = x.variables();
+    variables.insert(v.begin(), v.end());
   }
 
   void leave(const state_formulas::forall& x)
   {
-  	for (const data::variable& var: x.variables())
+    for (const data::variable& var: x.variables())
     {
       variables.erase(var);
     }
@@ -485,13 +503,41 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Param
 
   void enter(const state_formulas::exists& x)
   {
-  	const data::variable_list& v = x.variables();
-  	variables.insert(v.begin(), v.end());
+    const data::variable_list& v = x.variables();
+    variables.insert(v.begin(), v.end());
   }
 
   void leave(const state_formulas::exists& x)
   {
-  	for (const data::variable& var: x.variables())
+    for (const data::variable& var: x.variables())
+    {
+      variables.erase(var);
+    }
+  }
+
+  void enter(const state_formulas::infimum& x)
+  {
+    const data::variable_list& v = x.variables();
+    variables.insert(v.begin(), v.end());
+  }
+
+  void leave(const state_formulas::infimum& x)
+  {
+    for (const data::variable& var: x.variables())
+    {
+      variables.erase(var);
+    }
+  }
+
+  void enter(const state_formulas::supremum& x)
+  {
+    const data::variable_list& v = x.variables();
+    variables.insert(v.begin(), v.end());
+  }
+
+  void leave(const state_formulas::supremum& x)
+  {
+    for (const data::variable& var: x.variables())
     {
       variables.erase(var);
     }

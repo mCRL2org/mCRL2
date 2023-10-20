@@ -107,6 +107,16 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
     push(Par(X, l + x.variables(), x.body()));
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    push(Par(X, l + x.variables(), x.body()));
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    push(Par(X, l + x.variables(), x.body()));
+  }
+
   void leave(const state_formulas::must&)
   {
     // skip

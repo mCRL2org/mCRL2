@@ -299,6 +299,8 @@ constexpr inline int precedence(const mu&)                 { return 41; }
 constexpr inline int precedence(const nu&)                 { return 41; }
 constexpr inline int precedence(const forall&)             { return 42; }
 constexpr inline int precedence(const exists&)             { return 42; }
+constexpr inline int precedence(const infimum&)            { return 42; }
+constexpr inline int precedence(const supremum&)           { return 42; }
 constexpr inline int precedence(const imp&)                { return 45; }
 constexpr inline int precedence(const or_&)                { return 46; }
 constexpr inline int precedence(const and_&)               { return 47; }
@@ -314,6 +316,8 @@ inline int precedence(const state_formula& x)
   else if (is_nu(x))                 { return precedence(atermpp::down_cast<nu>(x)); }
   else if (is_forall(x))             { return precedence(atermpp::down_cast<forall>(x)); }
   else if (is_exists(x))             { return precedence(atermpp::down_cast<exists>(x)); }
+  else if (is_infimum(x))            { return precedence(atermpp::down_cast<infimum>(x)); }
+  else if (is_supremum(x))           { return precedence(atermpp::down_cast<supremum>(x)); }
   else if (is_imp(x))                { return precedence(atermpp::down_cast<imp>(x)); }
   else if (is_or(x))                 { return precedence(atermpp::down_cast<or_>(x)); }
   else if (is_and(x))                { return precedence(atermpp::down_cast<and_>(x)); }
@@ -499,6 +503,20 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   {
     derived().enter(x);
     print_abstraction(x, "exists");
+    derived().leave(x);
+  }
+
+  void apply(const state_formulas::infimum& x)
+  {
+    derived().enter(x);
+    print_abstraction(x, "inf");
+    derived().leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    derived().enter(x);
+    print_abstraction(x, "sup");
     derived().leave(x);
   }
 

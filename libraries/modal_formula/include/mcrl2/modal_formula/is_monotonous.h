@@ -97,6 +97,16 @@ bool is_monotonous(const state_formula& f,
     const exists& g = atermpp::down_cast<exists>(f);
     return is_monotonous(g.body(), non_negated_variables, negated_variables);
   }
+  else if (is_infimum(f))
+  {
+    const infimum& g = atermpp::down_cast<infimum>(f);
+    return is_monotonous(g.body(), non_negated_variables, negated_variables);
+  }
+  else if (is_supremum(f))
+  {
+    const supremum& g = atermpp::down_cast<supremum>(f);
+    return is_monotonous(g.body(), non_negated_variables, negated_variables);
+  }
   else if (is_may(f))
   {
     const may& g = atermpp::down_cast<may>(f);

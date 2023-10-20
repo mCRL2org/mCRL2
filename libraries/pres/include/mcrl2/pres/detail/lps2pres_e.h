@@ -138,6 +138,16 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     // skip
   }
 
+  void leave(const state_formulas::infimum&)
+  {
+    // skip
+  }
+
+  void leave(const state_formulas::supremum&)
+  {
+    // skip
+  }
+
   void leave(const state_formulas::must&)
   {
     // skip
