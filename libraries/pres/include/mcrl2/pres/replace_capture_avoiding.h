@@ -38,22 +38,22 @@ struct add_capture_avoiding_replacement
   { }
 
   template <class T>
-  void apply(T& result, const minall& x)
+  void apply(T& result, const infimum& x)
   {
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
     pres_expression body;
     apply(body, x.body());
-    make_minall(result, v1, body);
+    make_infimum(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
   }
 
   template <class T>
-  void apply(T& result, const maxall& x)
+  void apply(T& result, const supremum& x)
   {
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
     pres_expression body;
     apply(body, x.body());
-    make_maxall(result, v1, body);
+    make_supremum(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
   }
 

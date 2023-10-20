@@ -103,12 +103,12 @@ struct pres_expression2res_expression_traverser: public pres_system::pres_expres
     push(br::imp(left, right));
   }
 
-  void enter(const pres_system::minall&)
+  void enter(const pres_system::infimum&)
   {
     throw mcrl2::runtime_error("Minall encountered in pres_expression2res_expression_traverser.");
   }
 
-  void enter(const pres_system::maxall&)
+  void enter(const pres_system::supremum&)
   {
     throw mcrl2::runtime_error("Maxall encountered in pres_expression2res_expression_traverser.");
   }

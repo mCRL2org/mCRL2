@@ -33,9 +33,9 @@ std::string pp(const pres_system::propositional_variable_vector& x) { return pre
 std::string pp(const pres_system::propositional_variable_instantiation_list& x) { return pres_system::pp< pres_system::propositional_variable_instantiation_list >(x); }
 std::string pp(const pres_system::propositional_variable_instantiation_vector& x) { return pres_system::pp< pres_system::propositional_variable_instantiation_vector >(x); }
 std::string pp(const pres_system::and_& x) { return pres_system::pp< pres_system::and_ >(x); }
-std::string pp(const pres_system::maxall& x) { return pres_system::pp< pres_system::maxall >(x); }
+std::string pp(const pres_system::supremum& x) { return pres_system::pp< pres_system::supremum >(x); }
 std::string pp(const pres_system::fixpoint_symbol& x) { return pres_system::pp< pres_system::fixpoint_symbol >(x); }
-std::string pp(const pres_system::minall& x) { return pres_system::pp< pres_system::minall >(x); }
+std::string pp(const pres_system::infimum& x) { return pres_system::pp< pres_system::infimum >(x); }
 std::string pp(const pres_system::imp& x) { return pres_system::pp< pres_system::imp >(x); }
 std::string pp(const pres_system::minus& x) { return pres_system::pp< pres_system::minus >(x); }
 std::string pp(const pres_system::or_& x) { return pres_system::pp< pres_system::or_ >(x); }

@@ -125,7 +125,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::minall& x)
+  void apply(const pres_system::infimum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.variables());
@@ -133,7 +133,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::maxall& x)
+  void apply(const pres_system::supremum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.variables());
@@ -228,13 +228,13 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
-    else if (pres_system::is_minall(x))
+    else if (pres_system::is_infimum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::minall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::infimum>(x));
     }
-    else if (pres_system::is_maxall(x))
+    else if (pres_system::is_supremum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::maxall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::supremum>(x));
     }
     else if (pres_system::is_sum(x))
     {
@@ -354,14 +354,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::minall& x)
+  void apply(const pres_system::infimum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::maxall& x)
+  void apply(const pres_system::supremum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.body());
@@ -454,13 +454,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
-    else if (pres_system::is_minall(x))
+    else if (pres_system::is_infimum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::minall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::infimum>(x));
     }
-    else if (pres_system::is_maxall(x))
+    else if (pres_system::is_supremum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::maxall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::supremum>(x));
     }
     else if (pres_system::is_sum(x))
     {
@@ -577,14 +577,14 @@ struct add_traverser_pres_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::minall& x)
+  void apply(const pres_system::infimum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::maxall& x)
+  void apply(const pres_system::supremum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.body());
@@ -677,13 +677,13 @@ struct add_traverser_pres_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
-    else if (pres_system::is_minall(x))
+    else if (pres_system::is_infimum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::minall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::infimum>(x));
     }
-    else if (pres_system::is_maxall(x))
+    else if (pres_system::is_supremum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::maxall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::supremum>(x));
     }
     else if (pres_system::is_sum(x))
     {
@@ -804,7 +804,7 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::minall& x)
+  void apply(const pres_system::infimum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.variables());
@@ -812,7 +812,7 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::maxall& x)
+  void apply(const pres_system::supremum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.variables());
@@ -907,13 +907,13 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
-    else if (pres_system::is_minall(x))
+    else if (pres_system::is_infimum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::minall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::infimum>(x));
     }
-    else if (pres_system::is_maxall(x))
+    else if (pres_system::is_supremum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::maxall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::supremum>(x));
     }
     else if (pres_system::is_sum(x))
     {
@@ -1035,7 +1035,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::minall& x)
+  void apply(const pres_system::infimum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.variables());
@@ -1043,7 +1043,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const pres_system::maxall& x)
+  void apply(const pres_system::supremum& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.variables());
@@ -1138,13 +1138,13 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
-    else if (pres_system::is_minall(x))
+    else if (pres_system::is_infimum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::minall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::infimum>(x));
     }
-    else if (pres_system::is_maxall(x))
+    else if (pres_system::is_supremum(x))
     {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::maxall>(x));
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<pres_system::supremum>(x));
     }
     else if (pres_system::is_sum(x))
     {

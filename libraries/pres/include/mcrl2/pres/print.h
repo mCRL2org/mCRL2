@@ -19,19 +19,19 @@ namespace mcrl2 {
 
 namespace pres_system {
 
-constexpr inline int precedence(const minall&) { return 21; }
-constexpr inline int precedence(const maxall&) { return 21; }
-constexpr inline int precedence(const plus&)   { return 22; }
-constexpr inline int precedence(const imp&)    { return 23; }
-constexpr inline int precedence(const or_&)    { return 24; }
-constexpr inline int precedence(const and_&)   { return 25; }
-constexpr inline int precedence(const minus&)  { return 25; }
+constexpr inline int precedence(const infimum&)  { return 21; }
+constexpr inline int precedence(const supremum&) { return 21; }
+constexpr inline int precedence(const plus&)     { return 22; }
+constexpr inline int precedence(const imp&)      { return 23; }
+constexpr inline int precedence(const or_&)      { return 24; }
+constexpr inline int precedence(const and_&)     { return 25; }
+constexpr inline int precedence(const minus&)    { return 25; }
 constexpr inline int precedence(const const_multiply&) { return 26; }
 constexpr inline int precedence(const const_multiply_alt&) { return 26; }
 inline int precedence(const pres_expression& x)
 {
-  if      (is_minall(x))            { return precedence(atermpp::down_cast<minall>(x)); }
-  else if (is_maxall(x))            { return precedence(atermpp::down_cast<maxall>(x)); }
+  if      (is_infimum(x))            { return precedence(atermpp::down_cast<infimum>(x)); }
+  else if (is_supremum(x))            { return precedence(atermpp::down_cast<supremum>(x)); }
   else if (is_imp(x))               { return precedence(atermpp::down_cast<imp>(x)); }
   else if (is_or(x))                { return precedence(atermpp::down_cast<or_>(x)); }
   else if (is_and(x))               { return precedence(atermpp::down_cast<and_>(x)); }
@@ -269,17 +269,17 @@ struct printer: public pres_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
-  void apply(const pres_system::minall& x)
+  void apply(const pres_system::infimum& x)
   {
     derived().enter(x);
-    print_pres_abstraction(x, "minall");
+    print_pres_abstraction(x, "inf");
     derived().leave(x);
   }
 
-  void apply(const pres_system::maxall& x)
+  void apply(const pres_system::supremum& x)
   {
     derived().enter(x);
-    print_pres_abstraction(x, "maxall");
+    print_pres_abstraction(x, "sup");
     derived().leave(x);
   }
 

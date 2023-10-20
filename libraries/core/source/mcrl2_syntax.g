@@ -339,8 +339,8 @@ PresExpr
   | 'true'                                     $left        30   // True, representing infinity
   | 'false'                                    $left        30   // False, representing minus infinity
   | Id ( '(' DataExprList ')' )?               $left        30   // Instantiated PRES variable or data application
-  | 'minall' VarsDeclList '.' PresExpr      $unary_right 21      // Universal quantifier
-  | 'maxall' VarsDeclList '.' PresExpr      $unary_right 21      // Existential quantifier
+  | 'inf' VarsDeclList '.' PresExpr      $unary_right 21         // Infimum operator
+  | 'sup' VarsDeclList '.' PresExpr      $unary_right 21         // Supremum operator
   | 'sum' VarsDeclList '.' PresExpr         $unary_right 21      // Sum operator
   | PresExpr ('+' $binary_op_right 22) PresExpr                  // Addition
   | PresExpr ('=>' $binary_op_right 23) PresExpr                 // Implication
@@ -410,8 +410,10 @@ StateFrm
   | 'yaled' ( '@' DataExpr )?                  $left        50   // Yaled
   | 'mu' StateVarDecl '.' StateFrm             $unary_right 41   // Minimal fixed point
   | 'nu' StateVarDecl '.' StateFrm             $unary_right 41   // Maximal fixed point
-  | 'forall' VarsDeclList '.' StateFrm         $unary_right 42   // Universal quantification, also minimum
-  | 'exists' VarsDeclList '.' StateFrm         $unary_right 42   // Existential quantification, also maximum
+  | 'forall' VarsDeclList '.' StateFrm         $unary_right 42   // Universal quantification
+  | 'exists' VarsDeclList '.' StateFrm         $unary_right 42   // Existential quantification
+  | 'inf' VarsDeclList '.' StateFrm            $unary_right 42   // The infimum operator
+  | 'sup' VarsDeclList '.' StateFrm            $unary_right 42   // The supremum operator
   | StateFrm ('+' $binary_op_right 43) StateFrm                  // Addition
   | DataValExpr ('*' $binary_op_right 44) StateFrm               // Left constant multiply
   | StateFrm ('*' $binary_op_right 44) DataValExpr               // Right constant multiply

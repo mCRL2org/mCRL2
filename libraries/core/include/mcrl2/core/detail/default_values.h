@@ -150,6 +150,8 @@ const atermpp::aterm_appl& default_value_StateConstantMultiply();
 const atermpp::aterm_appl& default_value_StateConstantMultiplyAlt();
 const atermpp::aterm_appl& default_value_StateForall();
 const atermpp::aterm_appl& default_value_StateExists();
+const atermpp::aterm_appl& default_value_StateInfimum();
+const atermpp::aterm_appl& default_value_StateSupremum();
 const atermpp::aterm_appl& default_value_StateMust();
 const atermpp::aterm_appl& default_value_StateMay();
 const atermpp::aterm_appl& default_value_StateYaled();
@@ -216,8 +218,8 @@ const atermpp::aterm_appl& default_value_PRESImp();
 const atermpp::aterm_appl& default_value_PRESPlus();
 const atermpp::aterm_appl& default_value_PRESConstantMultiply();
 const atermpp::aterm_appl& default_value_PRESConstantMultiplyAlt();
-const atermpp::aterm_appl& default_value_PRESMinall();
-const atermpp::aterm_appl& default_value_PRESMaxall();
+const atermpp::aterm_appl& default_value_PRESInfimum();
+const atermpp::aterm_appl& default_value_PRESSupremum();
 const atermpp::aterm_appl& default_value_PRESSum();
 const atermpp::aterm_appl& default_value_PRESEqInf();
 const atermpp::aterm_appl& default_value_PRESEqNInf();
@@ -967,6 +969,22 @@ const atermpp::aterm_appl& default_value_StateExists()
   return t;
 }
 
+// StateInfimum
+inline
+const atermpp::aterm_appl& default_value_StateInfimum()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateInfimum(), default_value_List(default_value_DataVarId()), default_value_StateFrm());
+  return t;
+}
+
+// StateSupremum
+inline
+const atermpp::aterm_appl& default_value_StateSupremum()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateSupremum(), default_value_List(default_value_DataVarId()), default_value_StateFrm());
+  return t;
+}
+
 // StateMust
 inline
 const atermpp::aterm_appl& default_value_StateMust()
@@ -1495,19 +1513,19 @@ const atermpp::aterm_appl& default_value_PRESConstantMultiplyAlt()
   return t;
 }
 
-// PRESMinall
+// PRESInfimum
 inline
-const atermpp::aterm_appl& default_value_PRESMinall()
+const atermpp::aterm_appl& default_value_PRESInfimum()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESMinall(), default_value_List(default_value_DataVarId()), default_value_PRExpr());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESInfimum(), default_value_List(default_value_DataVarId()), default_value_PRExpr());
   return t;
 }
 
-// PRESMaxall
+// PRESSupremum
 inline
-const atermpp::aterm_appl& default_value_PRESMaxall()
+const atermpp::aterm_appl& default_value_PRESSupremum()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESMaxall(), default_value_List(default_value_DataVarId()), default_value_PRExpr());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_PRESSupremum(), default_value_List(default_value_DataVarId()), default_value_PRExpr());
   return t;
 }
 
@@ -1939,6 +1957,8 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl StateConstantMultiplyAlt;
   static const atermpp::aterm_appl StateForall;
   static const atermpp::aterm_appl StateExists;
+  static const atermpp::aterm_appl StateInfimum;
+  static const atermpp::aterm_appl StateSupremum;
   static const atermpp::aterm_appl StateMust;
   static const atermpp::aterm_appl StateMay;
   static const atermpp::aterm_appl StateYaled;
@@ -2005,8 +2025,8 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl PRESPlus;
   static const atermpp::aterm_appl PRESConstantMultiply;
   static const atermpp::aterm_appl PRESConstantMultiplyAlt;
-  static const atermpp::aterm_appl PRESMinall;
-  static const atermpp::aterm_appl PRESMaxall;
+  static const atermpp::aterm_appl PRESInfimum;
+  static const atermpp::aterm_appl PRESSupremum;
   static const atermpp::aterm_appl PRESSum;
   static const atermpp::aterm_appl PRESEqInf;
   static const atermpp::aterm_appl PRESEqNInf;

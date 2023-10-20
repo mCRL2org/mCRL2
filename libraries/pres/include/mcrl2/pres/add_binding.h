@@ -41,22 +41,22 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
     decrease_bind_count(x.variable().parameters());
   }
 
-  void enter(maxall const& x)
+  void enter(supremum const& x)
   {
     increase_bind_count(x.variables());
   }
 
-  void leave(maxall const& x)
+  void leave(supremum const& x)
   {
     decrease_bind_count(x.variables());
   }
 
-  void enter(minall const& x)
+  void enter(infimum const& x)
   {
     increase_bind_count(x.variables());
   }
 
-  void leave(minall const& x)
+  void leave(infimum const& x)
   {
     decrease_bind_count(x.variables());
   }

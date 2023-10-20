@@ -1121,15 +1121,15 @@ public:
   }
 
   template <class T>
-  void apply(T&, const pres_system::minall& x)
+  void apply(T&, const pres_system::infimum& x)
   {
-    throw runtime_error("Cannot normalise and solve a res with a minall operator: " + pp(static_cast<pres_expression>(x)) + ".");
+    throw runtime_error("Cannot normalise and solve a res with a infimum operator: " + pp(static_cast<pres_expression>(x)) + ".");
   }
 
   template <class T>
-  void apply(T&, const pres_system::maxall& x)
+  void apply(T&, const pres_system::supremum& x)
   {
-    throw runtime_error("Cannot normalise and solve a res with a maxall operator: " + pp(static_cast<pres_expression>(x)) + ".");
+    throw runtime_error("Cannot normalise and solve a res with a supremum operator: " + pp(static_cast<pres_expression>(x)) + ".");
   }
 
   template <class T>

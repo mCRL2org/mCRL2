@@ -32,13 +32,13 @@ struct find_quantifier_variables_traverser: public pres_expression_traverser<fin
 
   std::set<data::variable> result;
 
-  void enter(const minall& x)
+  void enter(const infimum& x)
   {
     auto const& v = x.variables();
     result.insert(v.begin(), v.end());
   }
 
-  void enter(const maxall& x)
+  void enter(const supremum& x)
   {
     auto const& v = x.variables();
     result.insert(v.begin(), v.end());
@@ -120,22 +120,22 @@ struct has_quantifier_name_clashes_traverser: public pres_expression_traverser<h
     quantifier_stack.pop_back();
   }
 
-  void enter(const minall& x)
+  void enter(const infimum& x)
   {
     push(x.variables());
   }
 
-  void leave(const minall&)
+  void leave(const infimum&)
   {
     pop();
   }
 
-  void enter(const maxall& x)
+  void enter(const supremum& x)
   {
     push(x.variables());
   }
 
-  void leave(const maxall&)
+  void leave(const supremum&)
   {
     pop();
   }

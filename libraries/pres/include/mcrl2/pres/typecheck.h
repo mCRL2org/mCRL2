@@ -50,7 +50,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
   }
 
   template <class T>
-  void apply(T& result, const minall& x)
+  void apply(T& result, const infimum& x)
   {
     try
     {
@@ -60,7 +60,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
       pres_expression body;
       (*this).apply(body, x.body());
       m_variable_context = m_variable_context_copy;
-      result = minall(x.variables(), body);
+      result = infimum(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -69,7 +69,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
   }
 
   template <class T>
-  void apply(T& result, const maxall& x)
+  void apply(T& result, const supremum& x)
   {
     try
     {
@@ -79,7 +79,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
       pres_expression body;
       (*this).apply(body, x.body());
       m_variable_context = m_variable_context_copy;
-      result = maxall(x.variables(), body);
+      result = supremum(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
     {

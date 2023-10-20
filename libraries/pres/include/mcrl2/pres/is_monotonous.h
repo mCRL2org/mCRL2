@@ -80,9 +80,9 @@ bool is_monotonous(pres_expression f)
       const auto& left = atermpp::down_cast<const_multiply_alt>(f).left();
       return is_monotonous(minus(left));
     }
-    else if (is_minall(f))
+    else if (is_infimum(f))
     {
-      const auto& body = atermpp::down_cast<minall>(f).body();
+      const auto& body = atermpp::down_cast<infimum>(f).body();
       return is_monotonous(minus(body));
     }
     else if (is_sum(f))
@@ -90,9 +90,9 @@ bool is_monotonous(pres_expression f)
       const auto& body = atermpp::down_cast<sum>(f).body();
       return is_monotonous(minus(body));
     }
-    else if (is_maxall(f))
+    else if (is_supremum(f))
     {
-      const auto& body = atermpp::down_cast<maxall>(f).body();
+      const auto& body = atermpp::down_cast<supremum>(f).body();
       return is_monotonous(minus(body));
     }
     else if (is_propositional_variable_instantiation(f))
@@ -148,14 +148,14 @@ bool is_monotonous(pres_expression f)
     const auto& left = atermpp::down_cast<const_multiply_alt>(f).left();
     return is_monotonous(left);
   }
-  else if (is_minall(f))
+  else if (is_infimum(f))
   {
-    const auto& body = atermpp::down_cast<minall>(f).body();
+    const auto& body = atermpp::down_cast<infimum>(f).body();
     return is_monotonous(body);
   }
-  else if (is_maxall(f))
+  else if (is_supremum(f))
   {
-    const auto& body = atermpp::down_cast<maxall>(f).body();
+    const auto& body = atermpp::down_cast<supremum>(f).body();
     return is_monotonous(body);
   }
   else if (is_sum(f))

@@ -34,12 +34,12 @@ struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
     : result(true)
   {}
 
-  void enter(const minall& /* x */)
+  void enter(const infimum& /* x */)
   {
     result = false;
   }
 
-  void enter(const maxall& /* x */)
+  void enter(const supremum& /* x */)
   {
     result = false;
   }

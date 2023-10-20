@@ -57,11 +57,11 @@ struct lps2pres_parameters
     typedef TermTraits tr;
     if (is_must)
     {
-      return tr::minall(y, tr::imp(left, tr::sum(dist.variables(), tr::const_multiply(dist.distribution(), right))));
+      return tr::infimum(y, tr::imp(left, tr::sum(dist.variables(), tr::const_multiply(dist.distribution(), right))));
     }
     else
     {
-      return tr::maxall(y, tr::and_(left,  tr::sum(dist.variables(), tr::const_multiply(dist.distribution(), right))));
+      return tr::supremum(y, tr::and_(left,  tr::sum(dist.variables(), tr::const_multiply(dist.distribution(), right))));
     }
   }
 };
@@ -219,7 +219,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     derived().enter(x);
     push_variables(x.variables());
     derived().apply(x.body());
-    make_minall(top(), x.variables(), top());
+    make_infimum(top(), x.variables(), top());
     derived().leave(x);
   }
 
@@ -228,7 +228,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     derived().enter(x);
     push_variables(x.variables());
     derived().apply(x.body());
-    tr::make_maxall(top(), x.variables(), top());
+    tr::make_supremum(top(), x.variables(), top());
     derived().leave(x);
   }
 
@@ -313,7 +313,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& ci = i.condition();
       const data::data_expression& ti = i.multi_action().time();
       const data::variable_list&   yi = i.summation_variables();
-      pres_expression p = tr::minall(yi, tr::or_(data::not_(ci), data::greater(t, ti)));
+      pres_expression p = tr::infimum(yi, tr::or_(data::not_(ci), data::greater(t, ti)));
       v.push_back(p);
     }
     for (const lps::deadlock_summand& j: parameters.lps.deadlock_summands())
@@ -321,7 +321,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& cj = j.condition();
       const data::data_expression& tj = j.deadlock().time();
       const data::variable_list&   yj = j.summation_variables();
-      pres_expression p = tr::minall(yj, tr::or_(data::not_(cj), data::greater(t, tj)));
+      pres_expression p = tr::infimum(yj, tr::or_(data::not_(cj), data::greater(t, tj)));
       v.push_back(p);
     }
     push(tr::and_(tr::join_or(v.begin(), v.end()), data::greater(t, parameters.T)));
@@ -341,7 +341,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& ci = i.condition();
       data::data_expression ti = i.multi_action().time();
       const data::variable_list&   yi = i.summation_variables();
-      pres_expression p = tr::maxall(yi, tr::and_(ci, data::less_equal(t, ti)));
+      pres_expression p = tr::supremum(yi, tr::and_(ci, data::less_equal(t, ti)));
       v.push_back(p);
     }
     for (const lps::deadlock_summand& j: parameters.lps.deadlock_summands())
@@ -349,7 +349,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& cj = j.condition();
       data::data_expression tj = j.deadlock().time();
       const data::variable_list&   yj = j.summation_variables();
-      pres_expression p = tr::maxall(yj, tr::and_(cj, data::less_equal(t, tj)));
+      pres_expression p = tr::supremum(yj, tr::and_(cj, data::less_equal(t, tj)));
       v.push_back(p);
     }
     push(tr::or_(tr::join_or(v.begin(), v.end()), data::less_equal(t, parameters.T)));

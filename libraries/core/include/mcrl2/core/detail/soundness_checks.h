@@ -296,6 +296,8 @@ template <typename Term> bool check_term_StateConstantMultiply(const Term& t);
 template <typename Term> bool check_term_StateConstantMultiplyAlt(const Term& t);
 template <typename Term> bool check_term_StateForall(const Term& t);
 template <typename Term> bool check_term_StateExists(const Term& t);
+template <typename Term> bool check_term_StateInfimum(const Term& t);
+template <typename Term> bool check_term_StateSupremum(const Term& t);
 template <typename Term> bool check_term_StateMust(const Term& t);
 template <typename Term> bool check_term_StateMay(const Term& t);
 template <typename Term> bool check_term_StateYaled(const Term& t);
@@ -362,8 +364,8 @@ template <typename Term> bool check_term_PRESImp(const Term& t);
 template <typename Term> bool check_term_PRESPlus(const Term& t);
 template <typename Term> bool check_term_PRESConstantMultiply(const Term& t);
 template <typename Term> bool check_term_PRESConstantMultiplyAlt(const Term& t);
-template <typename Term> bool check_term_PRESMinall(const Term& t);
-template <typename Term> bool check_term_PRESMaxall(const Term& t);
+template <typename Term> bool check_term_PRESInfimum(const Term& t);
+template <typename Term> bool check_term_PRESSupremum(const Term& t);
 template <typename Term> bool check_term_PRESSum(const Term& t);
 template <typename Term> bool check_term_PRESEqInf(const Term& t);
 template <typename Term> bool check_term_PRESEqNInf(const Term& t);
@@ -914,6 +916,8 @@ bool check_rule_StateFrm(const Term& t)
          || check_term_StateConstantMultiplyAlt(t)
          || check_term_StateForall(t)
          || check_term_StateExists(t)
+         || check_term_StateInfimum(t)
+         || check_term_StateSupremum(t)
          || check_term_StateMust(t)
          || check_term_StateMay(t)
          || check_term_StateYaled(t)
@@ -1236,8 +1240,8 @@ bool check_rule_PRExpr(const Term& t)
          || check_term_PRESPlus(t)
          || check_term_PRESConstantMultiply(t)
          || check_term_PRESConstantMultiplyAlt(t)
-         || check_term_PRESMinall(t)
-         || check_term_PRESMaxall(t)
+         || check_term_PRESInfimum(t)
+         || check_term_PRESSupremum(t)
          || check_term_PRESSum(t)
          || check_term_PRESEqInf(t)
          || check_term_PRESEqNInf(t)
@@ -4659,6 +4663,86 @@ bool check_term_StateExists(const Term& t)
   return true;
 }
 
+// StateInfimum(DataVarId+, StateFrm)
+template <typename Term>
+bool check_term_StateInfimum(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateInfimum)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// StateSupremum(DataVarId+, StateFrm)
+template <typename Term>
+bool check_term_StateSupremum(const Term& t)
+{
+  utilities::mcrl2_unused(t);
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  const atermpp::aterm& term(t);
+  if (!term.type_is_appl())
+  {
+    return false;
+  }
+  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  if (a.function() != core::detail::function_symbols::StateSupremum)
+  {
+    return false;
+  }
+
+  // check the children
+  if (a.size() != 2)
+  {
+    return false;
+  }
+#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  {
+    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    return false;
+  }
+  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  {
+    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    return false;
+  }
+#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
 // StateMust(RegFrm, StateFrm)
 template <typename Term>
 bool check_term_StateMust(const Term& t)
@@ -7133,9 +7217,9 @@ bool check_term_PRESConstantMultiplyAlt(const Term& t)
   return true;
 }
 
-// PRESMinall(DataVarId+, PRExpr)
+// PRESInfimum(DataVarId+, PRExpr)
 template <typename Term>
-bool check_term_PRESMinall(const Term& t)
+bool check_term_PRESInfimum(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7146,7 +7230,7 @@ bool check_term_PRESMinall(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PRESMinall)
+  if (a.function() != core::detail::function_symbols::PRESInfimum)
   {
     return false;
   }
@@ -7173,9 +7257,9 @@ bool check_term_PRESMinall(const Term& t)
   return true;
 }
 
-// PRESMaxall(DataVarId+, PRExpr)
+// PRESSupremum(DataVarId+, PRExpr)
 template <typename Term>
-bool check_term_PRESMaxall(const Term& t)
+bool check_term_PRESSupremum(const Term& t)
 {
   utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -7186,7 +7270,7 @@ bool check_term_PRESMaxall(const Term& t)
     return false;
   }
   const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::PRESMaxall)
+  if (a.function() != core::detail::function_symbols::PRESSupremum)
   {
     return false;
   }

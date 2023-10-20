@@ -232,17 +232,17 @@ struct add_simplify: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const minall& x)
+  void apply(T& result, const infimum& x)
   {
     apply(result, x.body());
-    make_minall(result, x.variables(), result);
+    make_infimum(result, x.variables(), result);
   }
 
   template <class T>
-  void apply(T& result, const maxall& x)
+  void apply(T& result, const supremum& x)
   {
     apply(result, x.body());
-    make_maxall(result, x.variables(), result);
+    make_supremum(result, x.variables(), result);
   }
 
   template <class T>

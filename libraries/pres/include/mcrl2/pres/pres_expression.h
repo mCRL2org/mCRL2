@@ -82,8 +82,8 @@ inline bool is_imp(const atermpp::aterm_appl& x);
 inline bool is_plus(const atermpp::aterm_appl& x);
 inline bool is_const_multiply(const atermpp::aterm_appl& x);
 inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
-inline bool is_minall(const atermpp::aterm_appl& x);
-inline bool is_maxall(const atermpp::aterm_appl& x);
+inline bool is_infimum(const atermpp::aterm_appl& x);
+inline bool is_supremum(const atermpp::aterm_appl& x);
 inline bool is_sum(const atermpp::aterm_appl& x);
 inline bool is_eqinf(const atermpp::aterm_appl& x);
 inline bool is_eqninf(const atermpp::aterm_appl& x);
@@ -107,8 +107,8 @@ bool is_pres_expression(const atermpp::aterm_appl& x)
          pres_system::is_plus(x) ||
          pres_system::is_const_multiply(x) ||
          pres_system::is_const_multiply_alt(x) ||
-         pres_system::is_minall(x) ||
-         pres_system::is_maxall(x) ||
+         pres_system::is_infimum(x) ||
+         pres_system::is_supremum(x) ||
          pres_system::is_sum(x) ||
          pres_system::is_eqinf(x) ||
          pres_system::is_eqninf(x) ||
@@ -756,33 +756,33 @@ inline void swap(const_multiply_alt& t1, const_multiply_alt& t2)
 }
 
 
-/// \\brief The minimum operator for pres expressions
-class minall: public pres_expression
+/// \\brief The infimum over a data type for pres expressions
+class infimum: public pres_expression
 {
   public:
     /// \\brief Default constructor.
-    minall()
-      : pres_expression(core::detail::default_values::PRESMinall)
+    infimum()
+      : pres_expression(core::detail::default_values::PRESInfimum)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit minall(const atermpp::aterm& term)
+    explicit infimum(const atermpp::aterm& term)
       : pres_expression(term)
     {
-      assert(core::detail::check_term_PRESMinall(*this));
+      assert(core::detail::check_term_PRESInfimum(*this));
     }
 
     /// \\brief Constructor.
-    minall(const data::variable_list& variables, const pres_expression& body)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMinall(), variables, body))
+    infimum(const data::variable_list& variables, const pres_expression& body)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESInfimum(), variables, body))
     {}
 
     /// Move semantics
-    minall(const minall&) noexcept = default;
-    minall(minall&&) noexcept = default;
-    minall& operator=(const minall&) noexcept = default;
-    minall& operator=(minall&&) noexcept = default;
+    infimum(const infimum&) noexcept = default;
+    infimum(infimum&&) noexcept = default;
+    infimum& operator=(const infimum&) noexcept = default;
+    infimum& operator=(infimum&&) noexcept = default;
 
     const data::variable_list& variables() const
     {
@@ -795,70 +795,70 @@ class minall: public pres_expression
     }
 };
 
-/// \\brief Make_minall constructs a new term into a given address.
-/// \\ \param t The reference into which the new minall is constructed. 
+/// \\brief Make_infimum constructs a new term into a given address.
+/// \\ \param t The reference into which the new infimum is constructed. 
 template <class... ARGUMENTS>
-inline void make_minall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_infimum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl(t, core::detail::function_symbol_PRESMinall(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESInfimum(), args...);
 }
 
-/// \\brief Test for a minall expression
+/// \\brief Test for a infimum expression
 /// \\param x A term
-/// \\return True if \\a x is a minall expression
+/// \\return True if \\a x is a infimum expression
 inline
-bool is_minall(const atermpp::aterm_appl& x)
+bool is_infimum(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::detail::function_symbols::PRESMinall;
+  return x.function() == core::detail::function_symbols::PRESInfimum;
 }
 
 // prototype declaration
-std::string pp(const minall& x);
+std::string pp(const infimum& x);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
 /// \\param x Object x
 /// \\return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const minall& x)
+std::ostream& operator<<(std::ostream& out, const infimum& x)
 {
   return out << pres_system::pp(x);
 }
 
 /// \\brief swap overload
-inline void swap(minall& t1, minall& t2)
+inline void swap(infimum& t1, infimum& t2)
 {
   t1.swap(t2);
 }
 
 
-/// \\brief The maximum operator for pres expressions
-class maxall: public pres_expression
+/// \\brief The supremeum over a data type for pres expressions
+class supremum: public pres_expression
 {
   public:
     /// \\brief Default constructor.
-    maxall()
-      : pres_expression(core::detail::default_values::PRESMaxall)
+    supremum()
+      : pres_expression(core::detail::default_values::PRESSupremum)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit maxall(const atermpp::aterm& term)
+    explicit supremum(const atermpp::aterm& term)
       : pres_expression(term)
     {
-      assert(core::detail::check_term_PRESMaxall(*this));
+      assert(core::detail::check_term_PRESSupremum(*this));
     }
 
     /// \\brief Constructor.
-    maxall(const data::variable_list& variables, const pres_expression& body)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMaxall(), variables, body))
+    supremum(const data::variable_list& variables, const pres_expression& body)
+      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESSupremum(), variables, body))
     {}
 
     /// Move semantics
-    maxall(const maxall&) noexcept = default;
-    maxall(maxall&&) noexcept = default;
-    maxall& operator=(const maxall&) noexcept = default;
-    maxall& operator=(maxall&&) noexcept = default;
+    supremum(const supremum&) noexcept = default;
+    supremum(supremum&&) noexcept = default;
+    supremum& operator=(const supremum&) noexcept = default;
+    supremum& operator=(supremum&&) noexcept = default;
 
     const data::variable_list& variables() const
     {
@@ -871,38 +871,38 @@ class maxall: public pres_expression
     }
 };
 
-/// \\brief Make_maxall constructs a new term into a given address.
-/// \\ \param t The reference into which the new maxall is constructed. 
+/// \\brief Make_supremum constructs a new term into a given address.
+/// \\ \param t The reference into which the new supremum is constructed. 
 template <class... ARGUMENTS>
-inline void make_maxall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_supremum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 {
-  atermpp::make_term_appl(t, core::detail::function_symbol_PRESMaxall(), args...);
+  atermpp::make_term_appl(t, core::detail::function_symbol_PRESSupremum(), args...);
 }
 
-/// \\brief Test for a maxall expression
+/// \\brief Test for a supremum expression
 /// \\param x A term
-/// \\return True if \\a x is a maxall expression
+/// \\return True if \\a x is a supremum expression
 inline
-bool is_maxall(const atermpp::aterm_appl& x)
+bool is_supremum(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::detail::function_symbols::PRESMaxall;
+  return x.function() == core::detail::function_symbols::PRESSupremum;
 }
 
 // prototype declaration
-std::string pp(const maxall& x);
+std::string pp(const supremum& x);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
 /// \\param x Object x
 /// \\return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const maxall& x)
+std::ostream& operator<<(std::ostream& out, const supremum& x)
 {
   return out << pres_system::pp(x);
 }
 
 /// \\brief swap overload
-inline void swap(maxall& t1, maxall& t2)
+inline void swap(supremum& t1, supremum& t2)
 {
   t1.swap(t2);
 }
@@ -1369,17 +1369,17 @@ inline bool is_pres_imp(const pres_expression& t)
 /// \brief Returns true if the term t is a generalized minus expression
 /// \param t A PRES expression
 /// \return True if the term t is a generalized minus expression
-inline bool is_pres_minall(const pres_expression& t)
+inline bool is_pres_infimum(const pres_expression& t)
 {
-  return pres_system::is_minall(t);
+  return pres_system::is_infimum(t);
 }
 
 /// \brief Returns true if the term t is a generalized maximum expression
 /// \param t A PRES expression
 /// \return True if the term t is a generalized maximum expression
-inline bool is_pres_maxall(const pres_expression& t)
+inline bool is_pres_supremum(const pres_expression& t)
 {
-  return pres_system::is_maxall(t);
+  return pres_system::is_supremum(t);
 }
 
 /* /// \brief Test for a conjunction
@@ -1430,7 +1430,7 @@ const pres_expression& arg(const pres_expression& t)
   }
   else
   {
-    assert(is_minall(t) || is_maxall(t) || is_sum(t));
+    assert(is_infimum(t) || is_supremum(t) || is_sum(t));
     return atermpp::down_cast<const pres_expression>(t[1]);
   }
 }
@@ -1510,7 +1510,7 @@ pres_expression data_right(const pres_expression& x)
 inline
 const data::variable_list& var(const pres_expression& t)
 {
-  assert(is_minall(t) || is_maxall(t) || is_sum(t));
+  assert(is_infimum(t) || is_supremum(t) || is_sum(t));
   return atermpp::down_cast<data::variable_list>(t[0]);
 }
 
@@ -1539,15 +1539,15 @@ const data::data_expression_list& param(const pres_expression& t)
 /// which is not allowed.
 /// \param l A sequence of data variables
 /// \param p A PRES expression
-/// \return The value <tt>minall l.p</tt>
+/// \return The value <tt>infimum l.p</tt>
 inline
-pres_expression make_minall(const data::variable_list& l, const pres_expression& p)
+pres_expression make_infimum(const data::variable_list& l, const pres_expression& p)
 {
   if (l.empty())
   {
     return p;
   }
-  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMinall(), l, p));
+  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESInfimum(), l, p));
 }
 
 /// \brief Make an generalized maximum. It checks for an empty variable list,
@@ -1556,13 +1556,13 @@ pres_expression make_minall(const data::variable_list& l, const pres_expression&
 /// \param p A PRES expression
 /// \return The value <tt>exists l.p</tt>
 inline
-pres_expression make_maxall(const data::variable_list& l, const pres_expression& p)
+pres_expression make_supremum(const data::variable_list& l, const pres_expression& p)
 {
   if (l.empty())
   {
     return p;
   }
-  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMaxall(), l, p));
+  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESSupremum(), l, p));
 }
 
 /// \brief Make a negation
@@ -1657,13 +1657,13 @@ void optimized_imp(pres_expression& result, const pres_expression& p, const pres
   data::optimized_imp(result, p, q);
 } */
 
-/// \brief Make a minall quantification
+/// \brief Make an infimum quantification
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
 /// \param p A PRES expression
-/// \return The value <tt>minall l.p</tt>
+/// \return The value <tt>inf l.p</tt>
 inline
-void optimized_minall(pres_expression& result, const data::variable_list& l, const pres_expression& p)
+void optimized_infimum(pres_expression& result, const data::variable_list& l, const pres_expression& p)
 {
   if (l.empty() || is_false(p) || is_true(p))
   {
@@ -1671,17 +1671,17 @@ void optimized_minall(pres_expression& result, const data::variable_list& l, con
     result = p;
     return;
   }
-  make_minall(result, l, p);
+  make_infimum(result, l, p);
   return;
 }
 
-/// \brief Make an maxall quantification
+/// \brief Make a supremum.
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
 /// \param p A PRES expression
-/// \return The value <tt>maxall l.p</tt>
+/// \return The value <tt>sup l.p</tt>
 inline
-void optimized_maxall(pres_expression& result, const data::variable_list& l, const pres_expression& p)
+void optimized_supremum(pres_expression& result, const data::variable_list& l, const pres_expression& p)
 {
   if (l.empty() || is_false(p) || is_true(p))
   {
@@ -1689,7 +1689,7 @@ void optimized_maxall(pres_expression& result, const data::variable_list& l, con
     result = p;
     return;
   }
-  make_maxall(result, l, p);
+  make_supremum(result, l, p);
   return;
 } 
 
@@ -2103,59 +2103,59 @@ struct term_traits<pres_system::pres_expression>
   /// \brief Make a generalized minimum
   /// \param l A sequence of variables
   /// \param p A term
-  /// \return The value <tt>minall l.p</tt>
+  /// \return The value <tt>inf l.p</tt>
   static inline
-  term_type minall(const variable_sequence_type& l, const term_type& p)
+  term_type infimum(const variable_sequence_type& l, const term_type& p)
   {
     if (l.empty())
     {
       return p;
     }
-    return pres_system::minall(l, p);
+    return pres_system::infimum(l, p);
   }
 
   /// \brief Make a generalized maximum
-  /// \param result The value <tt>minall l.p</tt>
+  /// \param result The value <tt>infimum l.p</tt>
   /// \param l A sequence of variables
   /// \param p A term
   static inline
-  void make_minall(term_type& result, const variable_sequence_type& l, const term_type& p)
+  void make_infimum(term_type& result, const variable_sequence_type& l, const term_type& p)
   {
     if (l.empty())
     {
       result = p;
       return;
     }
-    pres_system::make_minall(result, l, p);
+    pres_system::make_infimum(result, l, p);
   }
 
   /// \brief Make a generalized maximum
   /// \param l A sequence of variables
   /// \param p A term
-  /// \return The value <tt>maxall l.p</tt>
+  /// \return The value <tt>sup l.p</tt>
   static inline
-  term_type maxall(const variable_sequence_type& l, const term_type& p)
+  term_type supremum(const variable_sequence_type& l, const term_type& p)
   {
     if (l.empty())
     {
       return p;
     }
-    return pres_system::maxall(l, p);
+    return pres_system::supremum(l, p);
   }
 
   /// \brief Make a generalized maximum
-  /// \param result The value <tt>maxall l.p</tt>
+  /// \param result The value <tt>supremum l.p</tt>
   /// \param l A sequence of variables
   /// \param p A term
   static inline
-  void make_maxall(term_type& result, const variable_sequence_type& l, const term_type& p)
+  void make_supremum(term_type& result, const variable_sequence_type& l, const term_type& p)
   {
     if (l.empty())
     {
       result = p;
       return;
     }
-    pres_system::make_maxall(result, l, p);
+    pres_system::make_supremum(result, l, p);
   }
 
   /// \brief Make a generalized sum operator
@@ -2241,22 +2241,22 @@ struct term_traits<pres_system::pres_expression>
     return pres_system::is_imp(t);
   }
 
-  /// \brief Test for a minall quantification
+  /// \brief Test for an infimum.
   /// \param t A term
-  /// \return True if the argument is a minall
+  /// \return True if the argument is an infimum application
   static inline
-  bool is_minall(const term_type& t)
+  bool is_infimum(const term_type& t)
   {
-    return pres_system::is_minall(t);
+    return pres_system::is_infimum(t);
   }
 
   /// \brief Test for a max quantification
   /// \param t A term
   /// \return True if t is an maximum  quantification
   static inline
-  bool is_maxall(const term_type& t)
+  bool is_supremum(const term_type& t)
   {
-    return pres_system::is_maxall(t);
+    return pres_system::is_supremum(t);
   }
 
   /// \brief Test for data term

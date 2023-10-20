@@ -1311,6 +1311,24 @@ struct add_sort_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const state_formulas::infimum& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_infimum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::supremum& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_supremum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const state_formulas::must& x)
   { 
     
@@ -1467,6 +1485,14 @@ struct add_sort_expressions: public Builder<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -1639,6 +1665,24 @@ struct add_data_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const state_formulas::infimum& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_infimum(result, x.variables(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::supremum& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_supremum(result, x.variables(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const state_formulas::must& x)
   { 
     
@@ -1792,6 +1836,14 @@ struct add_data_expressions: public Builder<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -1964,6 +2016,24 @@ struct add_variables: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const state_formulas::infimum& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_infimum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::supremum& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_supremum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const state_formulas::must& x)
   { 
     
@@ -2117,6 +2187,14 @@ struct add_variables: public Builder<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -2289,6 +2367,24 @@ struct add_state_formula_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const state_formulas::infimum& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_infimum(result, x.variables(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::supremum& x)
+  { 
+    
+    static_cast<Derived&>(*this).enter(x);
+    state_formulas::make_supremum(result, x.variables(), [&](state_formula& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
   void apply(T& result, const state_formulas::must& x)
   { 
     
@@ -2448,6 +2544,14 @@ struct add_state_formula_expressions: public Builder<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {

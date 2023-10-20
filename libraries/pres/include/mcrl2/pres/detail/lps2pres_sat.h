@@ -124,7 +124,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     data::variable_list y = data::replace_variables(x.variables(), sigma_x);
     
     pres_expression result;
-    make_minall(result, y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x), id_generator, TermTraits()));
+    make_infimum(result, y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x), id_generator, TermTraits()));
     push(result);
   }
 
@@ -135,7 +135,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     data::variable_list y = data::replace_variables(x.variables(), sigma_x);
 
     pres_expression result;
-    make_maxall(result, y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x), id_generator, TermTraits()));
+    make_supremum(result, y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x), id_generator, TermTraits()));
     push(result);
   }
 

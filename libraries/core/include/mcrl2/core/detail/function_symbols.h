@@ -796,20 +796,12 @@ const atermpp::function_symbol& function_symbol_PRESImp()
   return function_symbol_PRESImp;
 }
 
-// PRESMaxall
+// PRESInfimum
 inline
-const atermpp::function_symbol& function_symbol_PRESMaxall()
+const atermpp::function_symbol& function_symbol_PRESInfimum()
 {
-  static const atermpp::global_function_symbol function_symbol_PRESMaxall("PRESMaxall", 2);
-  return function_symbol_PRESMaxall;
-}
-
-// PRESMinall
-inline
-const atermpp::function_symbol& function_symbol_PRESMinall()
-{
-  static const atermpp::global_function_symbol function_symbol_PRESMinall("PRESMinall", 2);
-  return function_symbol_PRESMinall;
+  static const atermpp::global_function_symbol function_symbol_PRESInfimum("PRESInfimum", 2);
+  return function_symbol_PRESInfimum;
 }
 
 // PRESMinus
@@ -842,6 +834,14 @@ const atermpp::function_symbol& function_symbol_PRESSum()
 {
   static const atermpp::global_function_symbol function_symbol_PRESSum("PRESSum", 2);
   return function_symbol_PRESSum;
+}
+
+// PRESSupremum
+inline
+const atermpp::function_symbol& function_symbol_PRESSupremum()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESSupremum("PRESSupremum", 2);
+  return function_symbol_PRESSupremum;
 }
 
 // PRESTrue
@@ -1308,6 +1308,14 @@ const atermpp::function_symbol& function_symbol_StateImp()
   return function_symbol_StateImp;
 }
 
+// StateInfimum
+inline
+const atermpp::function_symbol& function_symbol_StateInfimum()
+{
+  static const atermpp::global_function_symbol function_symbol_StateInfimum("StateInfimum", 2);
+  return function_symbol_StateInfimum;
+}
+
 // StateMay
 inline
 const atermpp::function_symbol& function_symbol_StateMay()
@@ -1370,6 +1378,14 @@ const atermpp::function_symbol& function_symbol_StatePlus()
 {
   static const atermpp::global_function_symbol function_symbol_StatePlus("StatePlus", 2);
   return function_symbol_StatePlus;
+}
+
+// StateSupremum
+inline
+const atermpp::function_symbol& function_symbol_StateSupremum()
+{
+  static const atermpp::global_function_symbol function_symbol_StateSupremum("StateSupremum", 2);
+  return function_symbol_StateSupremum;
 }
 
 // StateTrue
@@ -1644,6 +1660,8 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol StateConstantMultiplyAlt;
   static const atermpp::function_symbol StateForall;
   static const atermpp::function_symbol StateExists;
+  static const atermpp::function_symbol StateInfimum;
+  static const atermpp::function_symbol StateSupremum;
   static const atermpp::function_symbol StateMust;
   static const atermpp::function_symbol StateMay;
   static const atermpp::function_symbol StateYaled;
@@ -1710,8 +1728,8 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol PRESPlus;
   static const atermpp::function_symbol PRESConstantMultiply;
   static const atermpp::function_symbol PRESConstantMultiplyAlt;
-  static const atermpp::function_symbol PRESMinall;
-  static const atermpp::function_symbol PRESMaxall;
+  static const atermpp::function_symbol PRESInfimum;
+  static const atermpp::function_symbol PRESSupremum;
   static const atermpp::function_symbol PRESSum;
   static const atermpp::function_symbol PRESEqInf;
   static const atermpp::function_symbol PRESEqNInf;

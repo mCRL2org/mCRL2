@@ -79,6 +79,8 @@ inline bool is_const_multiply(const atermpp::aterm_appl& x);
 inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
 inline bool is_forall(const atermpp::aterm_appl& x);
 inline bool is_exists(const atermpp::aterm_appl& x);
+inline bool is_infimum(const atermpp::aterm_appl& x);
+inline bool is_supremum(const atermpp::aterm_appl& x);
 inline bool is_must(const atermpp::aterm_appl& x);
 inline bool is_may(const atermpp::aterm_appl& x);
 inline bool is_yaled(const atermpp::aterm_appl& x);
@@ -109,6 +111,8 @@ bool is_state_formula(const atermpp::aterm_appl& x)
          state_formulas::is_const_multiply_alt(x) ||
          state_formulas::is_forall(x) ||
          state_formulas::is_exists(x) ||
+         state_formulas::is_infimum(x) ||
+         state_formulas::is_supremum(x) ||
          state_formulas::is_must(x) ||
          state_formulas::is_may(x) ||
          state_formulas::is_yaled(x) ||
@@ -991,6 +995,158 @@ std::ostream& operator<<(std::ostream& out, const exists& x)
 
 /// \\brief swap overload
 inline void swap(exists& t1, exists& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The infimum over a data type for state formulas
+class infimum: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    infimum()
+      : state_formula(core::detail::default_values::StateInfimum)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit infimum(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateInfimum(*this));
+    }
+
+    /// \\brief Constructor.
+    infimum(const data::variable_list& variables, const state_formula& body)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateInfimum(), variables, body))
+    {}
+
+    /// Move semantics
+    infimum(const infimum&) noexcept = default;
+    infimum(infimum&&) noexcept = default;
+    infimum& operator=(const infimum&) noexcept = default;
+    infimum& operator=(infimum&&) noexcept = default;
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const state_formula& body() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[1]);
+    }
+};
+
+/// \\brief Make_infimum constructs a new term into a given address.
+/// \\ \param t The reference into which the new infimum is constructed. 
+template <class... ARGUMENTS>
+inline void make_infimum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateInfimum(), args...);
+}
+
+/// \\brief Test for a infimum expression
+/// \\param x A term
+/// \\return True if \\a x is a infimum expression
+inline
+bool is_infimum(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StateInfimum;
+}
+
+// prototype declaration
+std::string pp(const infimum& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const infimum& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(infimum& t1, infimum& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The supremum over a data type for state formulas
+class supremum: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    supremum()
+      : state_formula(core::detail::default_values::StateSupremum)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit supremum(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateSupremum(*this));
+    }
+
+    /// \\brief Constructor.
+    supremum(const data::variable_list& variables, const state_formula& body)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateSupremum(), variables, body))
+    {}
+
+    /// Move semantics
+    supremum(const supremum&) noexcept = default;
+    supremum(supremum&&) noexcept = default;
+    supremum& operator=(const supremum&) noexcept = default;
+    supremum& operator=(supremum&&) noexcept = default;
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const state_formula& body() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[1]);
+    }
+};
+
+/// \\brief Make_supremum constructs a new term into a given address.
+/// \\ \param t The reference into which the new supremum is constructed. 
+template <class... ARGUMENTS>
+inline void make_supremum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateSupremum(), args...);
+}
+
+/// \\brief Test for a supremum expression
+/// \\param x A term
+/// \\return True if \\a x is a supremum expression
+inline
+bool is_supremum(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StateSupremum;
+}
+
+// prototype declaration
+std::string pp(const supremum& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const supremum& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(supremum& t1, supremum& t2)
 {
   t1.swap(t2);
 }

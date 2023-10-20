@@ -142,20 +142,20 @@ struct add_sort_expressions: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const pres_system::minall& x)
+  void apply(T& result, const pres_system::infimum& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_minall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    pres_system::make_infimum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const pres_system::maxall& x)
+  void apply(T& result, const pres_system::supremum& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_maxall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    pres_system::make_supremum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -253,13 +253,13 @@ struct add_sort_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
-    else if (pres_system::is_minall(x))
+    else if (pres_system::is_infimum(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::minall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::infimum>(x));
     }
-    else if (pres_system::is_maxall(x))
+    else if (pres_system::is_supremum(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::maxall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::supremum>(x));
     }
     else if (pres_system::is_sum(x))
     {
@@ -396,20 +396,20 @@ struct add_data_expressions: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const pres_system::minall& x)
+  void apply(T& result, const pres_system::infimum& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_minall(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    pres_system::make_infimum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const pres_system::maxall& x)
+  void apply(T& result, const pres_system::supremum& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_maxall(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    pres_system::make_supremum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -507,13 +507,13 @@ struct add_data_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
-    else if (pres_system::is_minall(x))
+    else if (pres_system::is_infimum(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::minall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::infimum>(x));
     }
-    else if (pres_system::is_maxall(x))
+    else if (pres_system::is_supremum(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::maxall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::supremum>(x));
     }
     else if (pres_system::is_sum(x))
     {
@@ -650,20 +650,20 @@ struct add_variables: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const pres_system::minall& x)
+  void apply(T& result, const pres_system::infimum& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_minall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    pres_system::make_infimum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const pres_system::maxall& x)
+  void apply(T& result, const pres_system::supremum& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_maxall(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    pres_system::make_supremum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -761,13 +761,13 @@ struct add_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
-    else if (pres_system::is_minall(x))
+    else if (pres_system::is_infimum(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::minall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::infimum>(x));
     }
-    else if (pres_system::is_maxall(x))
+    else if (pres_system::is_supremum(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::maxall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::supremum>(x));
     }
     else if (pres_system::is_sum(x))
     {
@@ -903,20 +903,20 @@ struct add_pres_expressions: public Builder<Derived>
   }
 
   template <class T>
-  void apply(T& result, const pres_system::minall& x)
+  void apply(T& result, const pres_system::infimum& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_minall(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    pres_system::make_infimum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
   template <class T>
-  void apply(T& result, const pres_system::maxall& x)
+  void apply(T& result, const pres_system::supremum& x)
   { 
     
     static_cast<Derived&>(*this).enter(x);
-    pres_system::make_maxall(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
+    pres_system::make_supremum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1014,13 +1014,13 @@ struct add_pres_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::const_multiply_alt>(x));
     }
-    else if (pres_system::is_minall(x))
+    else if (pres_system::is_infimum(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::minall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::infimum>(x));
     }
-    else if (pres_system::is_maxall(x))
+    else if (pres_system::is_supremum(x))
     {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::maxall>(x));
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<pres_system::supremum>(x));
     }
     else if (pres_system::is_sum(x))
     {

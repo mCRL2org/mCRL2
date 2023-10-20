@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h
-/// \brief A rewriter that enumerates minall, maxall and sum operators in pres expressions. 
+/// \brief A rewriter that enumerates infimum, supremum and sum operators in pres expressions. 
 
 #ifndef MCRL2_PRES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
 #define MCRL2_PRES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
@@ -88,7 +88,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     }
   }
 
-  void enumerate_minall(pres_expression& result, const data::variable_list& v, const pres_expression& phi)
+  void enumerate_infimum(pres_expression& result, const data::variable_list& v, const pres_expression& phi)
   {
     assert(&result!=&phi);
     auto undo = undo_substitution(v);
@@ -109,7 +109,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     redo_substitution(v, undo);
   }
 
-  void enumerate_maxall(pres_expression& result, const data::variable_list& v, const pres_expression& phi)
+  void enumerate_supremum(pres_expression& result, const data::variable_list& v, const pres_expression& phi)
   {
     assert(&result!=&phi);
     auto undo = undo_substitution(v);
@@ -152,15 +152,15 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   }
 
   template <class T>
-  void apply(T& result, const minall& x)
+  void apply(T& result, const infimum& x)
   {
     if (m_enumerate_infinite_sorts)
     {
       data::variable_list enumerable;
       data::variable_list non_enumerable;
       data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
-      enumerate_minall(result, enumerable, x.body());
-      optimized_minall(result, non_enumerable, result);
+      enumerate_infimum(result, enumerable, x.body());
+      optimized_infimum(result, non_enumerable, result);
     }
     else
     {
@@ -171,26 +171,26 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         pres_expression body;
         derived().apply(body, x.body());
-        optimized_minall(result, infinite, body);
+        optimized_infimum(result, infinite, body);
       }
       else
       {
-        enumerate_minall(result, finite, x.body());
-        optimized_minall(result, infinite, result);
+        enumerate_infimum(result, finite, x.body());
+        optimized_infimum(result, infinite, result);
       }
     }
   }
 
   template <class T>
-  void apply(T& result, const maxall& x)
+  void apply(T& result, const supremum& x)
   {
     if (m_enumerate_infinite_sorts)
     {
       data::variable_list enumerable;
       data::variable_list non_enumerable;
       data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
-      enumerate_maxall(result, enumerable, x.body());
-      optimized_maxall(result, non_enumerable, result);
+      enumerate_supremum(result, enumerable, x.body());
+      optimized_supremum(result, non_enumerable, result);
     }
     else
     {
@@ -201,12 +201,12 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         pres_expression body;
         derived().apply(body, x.body());
-        optimized_maxall(result, infinite, body);
+        optimized_supremum(result, infinite, body);
       }
       else
       {
-        enumerate_maxall(result, finite, x.body());
-        optimized_maxall(result, infinite, result);
+        enumerate_supremum(result, finite, x.body());
+        optimized_supremum(result, infinite, result);
       }
     }
   }

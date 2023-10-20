@@ -1635,6 +1635,22 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.variables());
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.variables());
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::must& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1768,6 +1784,14 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -1916,6 +1940,20 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::must& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2048,6 +2086,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -2194,6 +2240,20 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::must& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2322,6 +2382,14 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -2472,6 +2540,22 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.variables());
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.variables());
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::must& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2604,6 +2688,14 @@ struct add_traverser_variables: public Traverser<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -2750,6 +2842,20 @@ struct add_traverser_state_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::must& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2878,6 +2984,14 @@ struct add_traverser_state_variables: public Traverser<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -3028,6 +3142,22 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.variables());
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.variables());
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::must& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -3164,6 +3294,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -3310,6 +3448,20 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::must& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -3440,6 +3592,14 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {
@@ -3586,6 +3746,20 @@ struct add_traverser_action_labels: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::infimum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::supremum& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::must& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -3717,6 +3891,14 @@ struct add_traverser_action_labels: public Traverser<Derived>
     else if (state_formulas::is_exists(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_infimum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::infimum>(x));
+    }
+    else if (state_formulas::is_supremum(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::supremum>(x));
     }
     else if (state_formulas::is_must(x))
     {

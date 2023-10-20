@@ -49,7 +49,7 @@ class variable_replace_builder: public pres_expression_builder <variable_replace
 };
 
 /// \brief A simple algorithm that takes a pres, instantiates it into a res, without parameterized 
-///        variables, and sum, minall and maxall operators.
+///        variables, and sum, infimum and supremum operators.
 /// \details It does not attempt to optimize the solution, by partially solving it. It only applies some
 ///          simple rewriting, and small ad hoc optimisations. 
 /// The result will be put in the structure graph that is passed in the constructor.

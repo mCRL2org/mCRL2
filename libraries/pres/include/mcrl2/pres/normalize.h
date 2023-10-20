@@ -132,19 +132,19 @@ struct normalize_builder: public pres_expression_builder<normalize_builder>
   }
 
   template <class T>
-  void apply(T& result, const minall& x)
+  void apply(T& result, const infimum& x)
   {
     pres_expression body;
     super::apply(body, x.body());
-    result = negated ? make_maxall(x.variables(), body) : make_minall(x.variables(), body);
+    result = negated ? make_supremum(x.variables(), body) : make_infimum(x.variables(), body);
   }
 
   template <class T>
-  void apply(T& result, const maxall& x)
+  void apply(T& result, const supremum& x)
   {
     pres_expression body;
     super::apply(body, x.body());
-    result = negated ? make_minall(x.variables(), body) : make_maxall(x.variables(), body);
+    result = negated ? make_supremum(x.variables(), body) : make_supremum(x.variables(), body);
   }
 
   template <class T>
