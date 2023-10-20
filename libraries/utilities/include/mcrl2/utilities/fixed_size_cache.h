@@ -96,7 +96,7 @@ protected:
 ///        has (an optional) maximum size and a policy that determines what element gets evicted when
 ///        the cache is full.
 /// \details Works with arbirary maps that implement the unordered_map interface.
-template<typename Policy, typename F, typename Args>
+template<typename Policy, typename F, typename ...Args>
 class function_cache : public fixed_size_cache<Policy>
 {
 private:
@@ -114,12 +114,12 @@ public:
 
   /// \brief Stores the given key-value pair in the cache. Depending on the cache policy and capacity an existing element
   ///        might be removed.
-  auto operator()(Args args) -> typename std::result_of<F(Args)>::type
+  auto operator()(Args... args) -> typename std::invoke_result_t<F, Args...>
   {
     // The reason to split the find and emplace is that when we insert an element the replacement_candidate should not be
     // the key that we just inserted. The other way around, when an element that we are looking for was first removed and
     // then searched for also leads to unnecessary inserts.
-    auto result = find(args);
+    auto result = find(args...);
     if (result == m_map.end())
     {
       // If the cache would be full after an inserted.
@@ -130,7 +130,7 @@ public:
       }
 
       // Insert an element and inform the policy that an element was inserted.
-      auto emplace_result = m_map.emplace(std::make_pair(args, m_cached_function(args)));
+      auto emplace_result = m_map.emplace(std::make_pair(args..., m_cached_function(args...)));
 
       m_policy.inserted((*emplace_result.first).first);
       return emplace_result.first->second;
