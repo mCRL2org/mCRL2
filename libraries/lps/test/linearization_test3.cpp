@@ -19,58 +19,7 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-typedef data::rewriter::strategy rewrite_strategy;
-typedef std::vector<rewrite_strategy> rewrite_strategy_vector;
-
-void run_linearisation_instance(const std::string& spec, const t_lin_options& options, bool expect_success)
-{
-  if (expect_success)
-  {
-    BOOST_CHECK(mcrl2::lps::detail::is_well_typed(linearise(spec, options)));
-  }
-  else
-  {
-    BOOST_CHECK_THROW(linearise(spec, options), mcrl2::runtime_error);
-  }
-}
-
-void run_linearisation_test_case(const std::string& spec, const bool expect_success = true)
-{
-  // Set various rewrite strategies
-  rewrite_strategy_vector rewrite_strategies = data::detail::get_test_rewrite_strategies(false);
-
-  for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
-  {
-    std::clog << std::endl << "Testing with rewrite strategy " << *i << std::endl;
-
-    t_lin_options options;
-    options.rewrite_strategy=*i;
-
-    std::clog << "  Default options" << std::endl;
-    run_linearisation_instance(spec, options, expect_success);
-
-    std::clog << "  Linearisation method regular2" << std::endl;
-    options.lin_method=lmRegular2;
-    run_linearisation_instance(spec, options, expect_success);
-
-    std::clog << "  Linearisation method stack" << std::endl;
-    options.lin_method=lmStack;
-    run_linearisation_instance(spec, options, expect_success);
-
-    std::clog << "  Linearisation method stack; binary enabled" << std::endl;
-    options.binary=true;
-    run_linearisation_instance(spec, options, expect_success);
-
-    std::clog << "  Linearisation method regular; binary enabled" << std::endl;
-    options.lin_method=lmRegular;
-    run_linearisation_instance(spec, options, expect_success);
-
-    std::clog << "  Linearisation method regular; no intermediate clustering" << std::endl;
-    options.binary=false; // reset binary
-    options.no_intermediate_cluster=true;
-    run_linearisation_instance(spec, options, expect_success);
-  }
-}
+#include "utility.h"
 
 BOOST_AUTO_TEST_CASE(The_unreachability_of_tau_is_not_properly_recognized)
 {
@@ -180,32 +129,6 @@ BOOST_AUTO_TEST_CASE(linearisation_of_the_enclosed_spec_caused_a_name_conflict_w
 
   run_linearisation_test_case(spec,true);
 } 
-
-// In the test below, the value 1 for the parameter step should be properly substituted,
-// also in the distribution.
-BOOST_AUTO_TEST_CASE(linearisation_of_distribution_over_initial_process)
-{
-  const std::string spec =
-     "act RequestReading_;\n"
-     "    SWFault;\n"
-     "\n"
-     "map sw_fault_prob: Pos -> Real;\n"
-     "var x: Pos;\n"
-     "eqn sw_fault_prob(x) = if(x == 2, 1/20, if(x == 1, 1/10, Int2Real(0)));\n"
-     "\n"
-     "proc Software(step: Pos) = (\n"
-     "    (dist f:Bool[if(f, sw_fault_prob(step), 1-sw_fault_prob(step))] . (f -> SWFault . delta <> (\n"
-     "        (step == 1) -> (\n"
-     "            % First step: get sensor reading\n"
-     "            RequestReading_ . delta\n"
-     "        )))));\n"
-     "\n"
-     "init Software(1);\n";
-
-  run_linearisation_test_case(spec,true);
-}   
-
-
 
 #else // ndef MCRL2_SKIP_LONG_TESTS
 

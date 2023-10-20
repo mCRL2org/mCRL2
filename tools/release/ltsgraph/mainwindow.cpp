@@ -11,6 +11,7 @@
 
 #include "mcrl2/lts/lts_lts.h"
 
+#include <QMessageBox>
 #include <QSettings>
 
 #include "dimensionsdialog.h"

@@ -51,7 +51,7 @@ if(APPLE)
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/bin)
 
   if(MCRL2_ENABLE_GUI_TOOLS)
-    find_program(MACDEPLOYQT NAMES macdeployqt PATHS ${Qt5_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)" REQUIRED)
+    find_program(MACDEPLOYQT NAMES macdeployqt PATHS ${Qt6_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)" REQUIRED)
     set(EXECUTABLES "")
     foreach(EXECUTABLE ${MCRL2_QT_APPS})
       set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
@@ -202,7 +202,7 @@ if (WIN32)
   foreach(EXECUTABLE ${MCRL2_QT_APPS})
     find_program(WINDEPLOYQT NAMES "windeployqt" PATHS "${Qt5_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
     install(CODE "
-      message(STATUS \"Executing ${WINDEPLOYQT} ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
+      message(STATUS \"Executing ${WINDEPLOYQT_EXECUTABLE} ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
       execute_process(
         COMMAND ${WINDEPLOYQT} --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLE}.exe
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}

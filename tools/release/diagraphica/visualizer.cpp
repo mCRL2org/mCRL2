@@ -9,14 +9,19 @@
 /// \file ./visualizer.cpp
 
 #include <iostream> // only temporary for std::clog
+#include <QOpenGLFramebufferObject>
+#include <QOpenGLDebugLogger>
+
 #include <QMessageBox>
 #include "visualizer.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/exception.h"
 
 Visualizer::Visualizer(
   QWidget *parent,
   Graph *graph_)
   : QOpenGLWidget(parent),
-    m_lastMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier),
+    m_lastMouseEvent(std::make_unique<QMouseEvent>(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier)),
     m_graph(graph_)
 {
   setMinimumSize(10,10);
@@ -41,15 +46,53 @@ void Visualizer::updateSelection() {
         delete m_hit_FBO; // make sure FBO is cleaned up
         m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
     }
+    
+    if (!m_hit_FBO->isValid())
+    {
+      throw mcrl2::runtime_error("Invalid framebuffer created");
+    }
     m_hit_FBO->bind();
     m_inSelectMode = true;
     paintGL();
     m_inSelectMode = false;
     m_hit_FBO->bindDefault();
 }
-void Visualizer::initializeGL() {
-    m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
-    m_gl_initialized = true;
+
+void Visualizer::initializeGL() 
+{
+  m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
+  if (!m_hit_FBO->isValid())
+  {
+    throw mcrl2::runtime_error("Invalid framebuffer created");
+  }
+
+  m_gl_initialized = true;
+
+  if (mCRL2logEnabled(mcrl2::log::log_level_t::debug)) 
+  {  
+    QPair<int, int> version = format().version();
+    qDebug() << "Created an OpenGL " << version.first
+            << "." << version.second << " context.\n";
+          
+    // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension
+    // is available.
+    m_logger = new QOpenGLDebugLogger(this);
+    if (m_logger->initialize())
+    {
+      connect(m_logger, &QOpenGLDebugLogger::messageLogged, this,
+              &Visualizer::logMessage);
+      m_logger->startLogging();
+    }
+    else
+    {
+      qDebug() << "QOpenGLDebugLogger initialisation failed\n";
+    }
+  }
+}
+
+void Visualizer::logMessage(const QOpenGLDebugMessage& debugMessage)
+{
+  qDebug() << "OpenGL: " << debugMessage.message() << "\n";
 }
 
 void Visualizer::paintGL()
@@ -147,14 +190,15 @@ void Visualizer::handleMouseEvent(QMouseEvent* e)
   if (!m_mouseDrag && e->buttons() != Qt::NoButton && e->type() == QEvent::MouseMove)
   {
     m_mouseDrag = true;
-    m_mouseDragStart = m_lastMouseEvent.pos();
+    m_mouseDragStart = m_lastMouseEvent->pos();
   }
   if (m_mouseDrag && e->buttons() == Qt::NoButton)
   {
     m_mouseDrag = false;
     m_mouseDragReleased = true;
   }
-  m_lastMouseEvent = QMouseEvent(e->type(), e->pos(), e->globalPos(), e->button(), e->buttons(), e->modifiers());
+
+  m_lastMouseEvent = std::make_unique<QMouseEvent>(e->type(), e->pos(), e->globalPosition(), e->button(), e->buttons(), e->modifiers());
 }
 
 void Visualizer::handleKeyEvent(QKeyEvent* e)
@@ -181,7 +225,7 @@ void Visualizer::clear()
 
 void Visualizer::initMouse()
 {
-  m_lastMouseEvent = QMouseEvent(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+  m_lastMouseEvent = std::make_unique<QMouseEvent>(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
   m_mouseDrag = false;
   m_mouseDragStart = QPoint(0,0);
 }
@@ -208,8 +252,8 @@ void Visualizer::startSelectMode(
   glPushMatrix();
   glLoadIdentity();
 
-  gluPickMatrix(m_lastMouseEvent.x()*devicePixelRatio(), // center x
-          viewport[3] - m_lastMouseEvent.y()*devicePixelRatio(), // center y
+  gluPickMatrix(m_lastMouseEvent->position().x()*devicePixelRatio(), // center x
+          viewport[3] - m_lastMouseEvent->position().y()*devicePixelRatio(), // center y
           pickWth,    // picking width
           pickHgt,    // picking height
           viewport);

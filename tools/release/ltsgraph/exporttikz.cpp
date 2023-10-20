@@ -20,9 +20,9 @@ namespace Export
 inline QString escapeLatex(const QString& str)
 {
   QString escaped;
-  QRegExp rx("[#$%_&{}^]");
+  QRegularExpression rx("[#$%_&{}^]");
   for (QChar x : str) {
-    if (rx.indexIn(x) != -1) {
+    if (rx.globalMatch(x).isValid()) {
       escaped.append('\\');
     }
     escaped.append(x);

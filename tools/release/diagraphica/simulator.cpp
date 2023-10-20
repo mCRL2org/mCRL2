@@ -1246,9 +1246,9 @@ void Simulator::handleHits(const std::vector< int > &ids)
   }
   else if (ids.size() > 1)
   {
-    if (m_lastMouseEvent.button() == Qt::LeftButton)
+    if (m_lastMouseEvent->button() == Qt::LeftButton)
     {
-      if (m_lastMouseEvent.type() == QEvent::MouseButtonPress)
+      if (m_lastMouseEvent->type() == QEvent::MouseButtonPress)
       {
         if (ids[1] == ID_ICON_CLEAR && (m_previousFrames.size() > 0 || m_currentFrame != 0 || m_nextFrames.size() > 0))
         {
@@ -1286,7 +1286,7 @@ void Simulator::handleHits(const std::vector< int > &ids)
           handleKeyLft();
         }
       }
-      else if (m_lastMouseEvent.type() == QEvent::MouseButtonDblClick)
+      else if (m_lastMouseEvent->type() == QEvent::MouseButtonDblClick)
       {
         if (ids[1] == ID_FRAME_PREV)
         {
@@ -1301,9 +1301,9 @@ void Simulator::handleHits(const std::vector< int > &ids)
 
     if (ids[1] == ID_FRAME_CURR || ids[1] == ID_FRAME_PREV || ids[1] == ID_FRAME_NEXT)
     {
-      if (m_lastMouseEvent.type() == QEvent::MouseButtonPress &&
-          ((m_lastMouseEvent.button() == Qt::LeftButton && ids.size() > 3 && ids[3] == ID_DIAGRAM_MORE) ||
-          m_lastMouseEvent.button() == Qt::RightButton))
+      if (m_lastMouseEvent->type() == QEvent::MouseButtonPress &&
+          ((m_lastMouseEvent->button() == Qt::LeftButton && ids.size() > 3 && ids[3] == ID_DIAGRAM_MORE) ||
+          m_lastMouseEvent->button() == Qt::RightButton))
       {
         m_currentSelection      = ids[1];
 

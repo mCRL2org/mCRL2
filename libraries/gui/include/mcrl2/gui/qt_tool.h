@@ -129,7 +129,14 @@ class qt_tool: public Tool
       // to here, since creating it in execute would make it
       // impossible to view the help text in an environment
       // without display server
-      m_application = std::unique_ptr<QApplication>(new QApplication(argc, argv));
+      try
+      {
+        m_application = std::unique_ptr<QApplication>(new QApplication(argc, argv));
+      }
+      catch (...)
+      {
+        mCRL2log(mcrl2::log::debug) << "Creating QApplication failed." << std::endl;
+      }
       return true;
     }
 

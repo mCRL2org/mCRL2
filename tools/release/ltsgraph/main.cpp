@@ -50,23 +50,6 @@ class ltsgraph_tool : public ltsgraph_base
 
     bool run() override
     {
-      // This tool requires at least Qt 5.9 as runtime library.
-      QVersionNumber runtime_version = QVersionNumber::fromString(qVersion());
-      QVersionNumber required_version(5,9,0);
-
-      if (QVersionNumber::compare(required_version, runtime_version) > 0)
-      {
-        // Print a message to the console and show a message box.
-        std::stringstream message;
-
-        message << "The runtime version of Qt (" << runtime_version.toString().toStdString() << ") is below the least supported version of Qt ("
-          << required_version.toString().toStdString() << ").";
-        mCRL2log(mcrl2::log::error) << message.str().c_str() << "\n";
-
-        QMessageBox box(QMessageBox::Warning, "Unsupported Qt Version", message.str().c_str(), QMessageBox::Ok);
-        box.exec();
-      }
-
       MainWindow window;
 
       if (!m_input_filename.empty())

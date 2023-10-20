@@ -80,14 +80,14 @@ void FindAndReplaceDialog::resetFocus()
 
 void FindAndReplaceDialog::setFindEnabled()
 {
-  ui->findButton->setEnabled(ui->textToFind->text().count() > 0);
+  ui->findButton->setEnabled(ui->textToFind->text().size() > 0);
 }
 
 void FindAndReplaceDialog::setReplaceEnabled()
 {
   Qt::CaseSensitivity flag =
       ui->caseCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive;
-  bool enable = !editor->isReadOnly() && ui->textToFind->text().count() > 0 &&
+  bool enable = !editor->isReadOnly() && ui->textToFind->text().size() > 0 &&
                 QString::compare(editor->textCursor().selectedText(),
                                  ui->textToFind->text(), flag) == 0;
   ui->replaceButton->setEnabled(enable);
@@ -95,7 +95,7 @@ void FindAndReplaceDialog::setReplaceEnabled()
 
 void FindAndReplaceDialog::setReplaceAllEnabled()
 {
-  bool enable = !editor->isReadOnly() && ui->textToFind->text().count() > 0;
+  bool enable = !editor->isReadOnly() && ui->textToFind->text().size() > 0;
   ui->replaceAllButton->setEnabled(enable);
 }
 
