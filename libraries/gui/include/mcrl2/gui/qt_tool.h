@@ -9,7 +9,7 @@
 #ifndef MCRL2_UTILITIES_QT_TOOL_H
 #define MCRL2_UTILITIES_QT_TOOL_H
 
-#include "mcrl2/utilities/toolset_version.h"
+#include <memory>
 #include <QAction>
 #include <QApplication>
 #include <QDateTime>
@@ -21,8 +21,8 @@
 #include <QString>
 #include <QUrl>
 #include <QtGlobal>
-
-#include <memory>
+#include "mcrl2/utilities/toolset_version.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
