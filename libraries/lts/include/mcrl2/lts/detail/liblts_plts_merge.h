@@ -154,13 +154,19 @@ void plts_merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   l1.add_probabilistic_state(l1.initial_probabilistic_state());
 
   // Then add the initia probabilistic state of l2
-  typename LTS_TYPE::probabilistic_state_t new_initial_prob_states_l2;
-  const typename LTS_TYPE::probabilistic_state_t& old_inital_prob_state = l2.initial_probabilistic_state();
-  for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : old_inital_prob_state)
+  typename LTS_TYPE::probabilistic_state_t new_initial_prob_state_l2;
+  if (l2.initial_probabilistic_state().size()<=1)
   {
-    new_initial_prob_states_l2.add(sp_pair.state() + old_nstates, sp_pair.probability());
+    new_initial_prob_state_l2.set(l2.initial_probabilistic_state().get() + old_nstates);
   }
-  l1.add_probabilistic_state(new_initial_prob_states_l2);
+  else // If the initial state is a distribution with more than one state.
+  {
+    for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : l2.initial_probabilistic_state())
+    {
+      new_initial_prob_state_l2.add(sp_pair.state() + old_nstates, sp_pair.probability());
+    }
+  }
+  l1.add_probabilistic_state(new_initial_prob_state_l2);
 }
 } // namespace detail
 } // namespace lts

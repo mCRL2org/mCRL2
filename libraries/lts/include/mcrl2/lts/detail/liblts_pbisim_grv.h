@@ -567,6 +567,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     void preprocessing_stage()
     {
       // Allocate space for states and transitions
+
       action_states.resize(aut.num_states());
       probabilistic_states.resize(aut.num_probabilistic_states());
       action_transitions.resize(aut.num_transitions());
@@ -592,7 +593,6 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       for (std::size_t i = 0; i < aut.num_probabilistic_states(); i++)
       {
         const typename LTS_TYPE::probabilistic_state_t& ps = aut.probabilistic_state(i);
-
         probabilistic_transition_type pt;
         if (ps.size()>1) // The probabilistic state is stored as a vector. 
         {
@@ -1383,8 +1383,8 @@ bool destructive_probabilistic_bisimulation_compare_grv(
 
   detail::prob_bisim_partitioner_grv<LTS_TYPE> prob_bisim_part(l1,timer);
 
-  return prob_bisim_part.in_same_probabilistic_class_grv(initial_probabilistic_state_key_l2,
-    initial_probabilistic_state_key_l1);
+  return prob_bisim_part.in_same_probabilistic_class_grv(initial_probabilistic_state_key_l2, 
+                                                         initial_probabilistic_state_key_l1);
 }
 
 } // end namespace detail

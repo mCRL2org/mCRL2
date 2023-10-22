@@ -22,33 +22,35 @@ namespace detail {
 
 // returns the names of the variables in v
 template <typename VariableContainer>
-std::set<core::identifier_string> variable_names(const VariableContainer& v)
+std::set<core::identifier_string> variable_names(const VariableContainer& vars)
 {
   std::set<core::identifier_string> result;
-  for (auto i = v.begin(); i != v.end(); ++i)
+  for (const data::variable& v: vars)
   {
-    result.insert(i->name());
+    result.insert(v.name());
   }
   return result;
 }
 
 // returns the names of variables in v that are also in w
 template <typename VariableContainer>
-std::set<core::identifier_string> variable_name_clashes(const VariableContainer& v, const std::set<core::identifier_string>& w)
+std::set<core::identifier_string> variable_name_clashes(const VariableContainer& vars, const std::set<core::identifier_string>& w)
 {
   std::set<core::identifier_string> result;
-  for (auto i = v.begin(); i != v.end(); ++i)
+  for (const data::variable& v: vars)
   {
-    if (w.find(i->name()) != w.end())
+    if (w.find(v.name()) != w.end())
     {
-      result.insert(i->name());
+      result.insert(v.name());
     }
   }
   return result;
 }
 
 inline
-void resolve_summand_variable_name_clashes(action_summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
+void resolve_summand_variable_name_clashes(action_summand& summand, 
+                                           const std::set<core::identifier_string>& process_parameter_names, 
+                                           data::set_identifier_generator& generator)
 {
   const data::variable_list& summation_variables = summand.summation_variables();
   std::set<core::identifier_string> names = variable_name_clashes(summation_variables, process_parameter_names);
@@ -67,7 +69,9 @@ void resolve_summand_variable_name_clashes(action_summand& summand, const std::s
 }
 
 inline
-void resolve_summand_variable_name_clashes(deadlock_summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
+void resolve_summand_variable_name_clashes(deadlock_summand& summand, 
+                                           const std::set<core::identifier_string>& process_parameter_names, 
+                                           data::set_identifier_generator& generator)
 {
   const data::variable_list& summation_variables = summand.summation_variables();
   std::set<core::identifier_string> names = variable_name_clashes(summation_variables, process_parameter_names);
@@ -86,9 +90,12 @@ void resolve_summand_variable_name_clashes(deadlock_summand& summand, const std:
 }
 
 inline
-void resolve_summand_variable_name_clashes(stochastic_action_summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
+void resolve_summand_variable_name_clashes(stochastic_action_summand& summand, 
+                                           const std::set<core::identifier_string>& process_parameter_names, 
+                                           data::set_identifier_generator& generator)
 {
   data::mutable_map_substitution<> sigma;
+  std::set<core::identifier_string> summation_names;
 
   // handle the summation variables
   for (const data::variable& v: summand.summation_variables())
@@ -97,6 +104,7 @@ void resolve_summand_variable_name_clashes(stochastic_action_summand& summand, c
     {
       sigma[v] = data::variable(generator(v.name()), v.sort());
     }
+    summation_names.insert(v.name());
   }
   if (!sigma.empty())
   {
@@ -105,9 +113,11 @@ void resolve_summand_variable_name_clashes(stochastic_action_summand& summand, c
 
   // handle the distribution variables
   sigma.clear();
+
   for (const data::variable& v: summand.distribution().variables())
   {
-    if (process_parameter_names.find(v.name()) != process_parameter_names.end())
+    if (process_parameter_names.find(v.name()) != process_parameter_names.end() ||
+        summation_names.find(v.name()) != process_parameter_names.end())  // Check stochastic variables also with respect to the summand variables. 
     {
       sigma[v] = data::variable(generator(v.name()), v.sort());
     }
@@ -125,19 +135,19 @@ void resolve_summand_variable_name_clashes(stochastic_action_summand& summand, c
 template <typename Specification>
 void resolve_summand_variable_name_clashes(Specification& spec)
 {
-  auto& proc = spec.process();
+  typename Specification::process_type& proc = spec.process();
   std::set<core::identifier_string> process_parameter_names = detail::variable_names(proc.process_parameters());
 
   data::set_identifier_generator generator;
   generator.add_identifiers(lps::find_identifiers(spec));
   generator.add_identifiers(data::function_and_mapping_identifiers(spec.data()));
 
-  for (auto& s: proc.action_summands())
+  for (typename Specification::process_type::action_summand_type& s: proc.action_summands())
   {
     detail::resolve_summand_variable_name_clashes(s, process_parameter_names, generator);
   }
 
-  for (auto& s: proc.deadlock_summands())
+  for (deadlock_summand& s: proc.deadlock_summands())
   {
     detail::resolve_summand_variable_name_clashes(s, process_parameter_names, generator);
   }
