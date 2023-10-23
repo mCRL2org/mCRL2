@@ -55,6 +55,9 @@ RUN cd ~/ltsmin && git checkout 3499bb5afb06c5e955d0df5bb3220eb7b654f3da
 # This step is necessary according to the 'Building from a Git Repository' section of the readme.
 RUN cd ~/ltsmin && git submodule update --init
 
+# Fix issues with the ltl2ba submodule, use a more recent version
+RUN cd ~/ltsmin/ltl2ba && git checkout ea33bb2091a34f6af8dba8e26978fecb969aa93b
+
 # Build the ltsmin toolset.
 RUN cd ~/ltsmin \
     && ./ltsminreconf \
