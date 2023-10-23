@@ -439,10 +439,21 @@ class prob_bisim_partitioner_bem
         }
       }
       /* Add all the state probabilities pairs in the mapping to its actual data type*/
-      for (const std::pair<const state_type, probability_fraction_type>& i: prob_state_map)
+      /* Add all the state probabilities pairs in the mapping to its actual data type*/
+      typename std::map<state_type, probability_fraction_type>::const_iterator i = prob_state_map.begin();
+      if (++i==prob_state_map.end()) // There is only one state with probability 1. 
       {
-        new_prob_state.add(i.first, i.second);
+        new_prob_state.set(prob_state_map.begin()->first);
       }
+      else
+      {
+        // This probabilistic state has more components. 
+        for (const std::pair<const state_type, probability_fraction_type>& i: prob_state_map)
+        {
+          new_prob_state.add(i.first, i.second);
+        }
+      }
+
     }
     else // The state consists of a number with implicit probability 1.
     {

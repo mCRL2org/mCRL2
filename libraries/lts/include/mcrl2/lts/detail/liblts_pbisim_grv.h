@@ -1280,9 +1280,18 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
           }
         }
         /* Add all the state probabilities pairs in the mapping to its actual data type*/
-        for (typename std::map<state_key_type, probability_fraction_type>::iterator i = prob_state_map.begin(); i != prob_state_map.end(); i++)
+        typename std::map<state_key_type, probability_fraction_type>::iterator i = prob_state_map.begin();
+        if (++i==prob_state_map.end()) // There is only one state with probability one. 
         {
-          new_prob_state.add(i->first, i->second);
+          new_prob_state.set(prob_state_map.begin()->first);
+        }
+        else
+        {
+          // This probabilistic state has more components. 
+          for (const std::pair<state_key_type, probability_fraction_type>& i: prob_state_map)
+          {
+            new_prob_state.add(i.first, i.second);
+          }
         }
       }
       else // The state is stored as a number with implicit probability 1. 
@@ -1290,7 +1299,6 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
         /* Check the resulting action state in the final State partition */
         new_prob_state.set(get_eq_class(ps.get()));
       }
-
       return new_prob_state;
     }
 
