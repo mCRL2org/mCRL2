@@ -64,7 +64,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, probabilistic
   }
   else
   {
-    state = {};
+    state.clear();
     lps::probabilistic_data_expression probability;
 
     for (std::size_t i = 0; i < value; ++i)
