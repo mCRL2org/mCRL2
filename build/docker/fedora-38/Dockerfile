@@ -20,10 +20,7 @@ RUN dnf install -y \
  python3-pip \
  python3-sphinx \
  swig \
- texlive \
- texlive-scheme-medium \
- texlive-collection-mathextra \
- texlive-preprint
+ texlive-scheme-full
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt
@@ -42,6 +39,7 @@ RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
  -DMCRL2_ENABLE_DEVELOPER=OFF \
  -DMCRL2_ENABLE_DEPRECATED=OFF \
  -DMCRL2_ENABLE_EXPERIMENTAL=OFF \
+ -DMCRL2_ENABLE_DOC_DOXYGEN=OFF \
  -DMCRL2_ENABLE_GUI_TOOLS=ON \
  -DCMAKE_INSTALL_PREFIX=`pwd`/install \
  ~/mcrl2

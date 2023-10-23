@@ -10,23 +10,33 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
  build-essential \
  cmake \
+ dos2unix \
  git \
  libboost-dev \
  libgl1-mesa-dev \
- qtbase5-dev \
+ libglu1-mesa-dev \
+ qt6-base-dev \
  ubuntu-dev-tools \
  debhelper \
  python3-psutil \
  python3-yaml
 
 # Copy the current source files into the root home directory
-COPY ./ /root/mcrl2/
+COPY ./ /root/ppa/mcrl2/
 
 # Build the mCRL2 release.
-RUN ["/bin/bash", "-c", "mkdir ~/ppa && cd ~/ppa && source ~/mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION build_mcrl2_release"]
+SHELL ["/bin/bash", "-c"] 
+RUN cd ~/ppa \
+    && dos2unix ~/ppa/mcrl2/build/make_release/make_release \
+    && source ~/ppa/mcrl2/build/make_release/make_release \
+    && MCRL2_VERSION=$MCRL2_VERSION build_mcrl2_release
 
 # Package the source package.
-RUN ["/bin/bash", "-c",                "cd ~/ppa && source ~/mcrl2/build/make_release/make_release && MCRL2_VERSION=$MCRL2_VERSION build_source_package"]
+SHELL ["/bin/bash", "-c"] 
+RUN cd ~/ppa \
+    && dos2unix ~/ppa/mcrl2/build/make_release/make_release \
+    && source ~/ppa/mcrl2/build/make_release/make_release \
+    && MCRL2_VERSION=$MCRL2_VERSION build_source_package
 
 # Here we have to add the gpg key into the docker image.
 
