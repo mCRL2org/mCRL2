@@ -29,44 +29,52 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 enable_testing()
 
-option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
-option(MCRL2_ENABLE_BOOST_JSON_SUPPORT "Enable compilation of tools and libraries that require boost::json. This raises the minimal boost version requirement to 1.71.0." OFF)
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
 option(MCRL2_ENABLE_DEPRECATED      "Enable compilation of deprecated tools." OFF)
 option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF)
-option(MCRL2_ENABLE_HEADER_TESTS    "Enable generation of headertest targets." OFF)
-option(MCRL2_ENABLE_TESTS           "Enable generation of library, tool and random test targets." OFF)
+option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
+
 option(MCRL2_ENABLE_DOCUMENTATION   "Enable generation of documentation." OFF)
 option(MCRL2_ENABLE_DOC_MANUAL      "Enable generation of tool manual pages, which requires built tools." ON)
 option(MCRL2_ENABLE_DOC_DOXYGEN     "Enable generation of code reference using Doxygen." ON)
 option(MCRL2_ENABLE_DOC_PDFLATEX    "Enable generation of reference pdfs using pdflatex, which requires tikz and amsmath packages." ON)
-option(MCRL2_ENABLE_BENCHMARKS      "Enable benchmarks. Build the 'benchmarks' target to generate the necessary files and tools. Run the benchmarks using ctest." OFF)
+
+option(MCRL2_ENABLE_BOOST_JSON_SUPPORT "Enable compilation of tools and libraries that require boost::json. This raises the minimal boost version requirement to 1.71.0." OFF)
 option(MCRL2_ENABLE_SYLVAN          "Enable the Sylvan library required by the following symbolic tools: lpsreach, pbessolvesymbolic and ltsconvertsymbolic" ${UNIX})
 option(MCRL2_ENABLE_MULTITHREADING  "Enable the usage of multiple threads. Disabling removes usage of synchronisation primitives" ON)
-option(MCRL2_ENABLE_JITTYC          "Enable the compiling rewriter (jittyc) functionality," ${UNIX})
+
+option(MCRL2_ENABLE_BENCHMARKS      "Enable benchmarks. Build the 'benchmarks' target to generate the necessary files and tools. Run the benchmarks using ctest." OFF)
+
+option(MCRL2_ENABLE_TESTS           "Enable generation of library and random test targets." OFF)
+option(MCRL2_ENABLE_HEADER_TESTS    "Enable generation of headertest targets." OFF)
+option(MCRL2_ENABLE_TOOL_TESTS       "Enable generation of tool tests." ON)
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
+option(MCRL2_SKIP_LONG_TESTS        "Do not execute tests that take a long time to run." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 
+# Advanced options
+option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
 option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks implemented by the AddressSanitizer." OFF)
 option(MCRL2_ENABLE_THREADSANITIZER  "Enable additional data race run-time checks implemented by the ThreadSanitizer." OFF)
 option(MCRL2_ENABLE_CODE_COVERAGE    "Enable generation of code coverage statistics." OFF)
 option(MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS "Enable extensive soundness check in the Debug build type." ON)
 option(MCRL2_ENABLE_MSVC_CCACHE     "Enable MSVC specific flags to enable building with ccache" OFF)
-option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
-option(MCRL2_SKIP_LONG_TESTS        "Do not execute tests that take a long time to run." OFF)
-
-# A list of tools that is being built by the current configuration (populated by build/cmake/MCRL2AddTarget.cmake)
-set_property(GLOBAL PROPERTY MCRL2_TOOLS)
-set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
+option(MCRL2_ENABLE_JITTYC          "Enable the compiling rewriter (jittyc) functionality," ${UNIX})
 
 mark_as_advanced(
   MCRL2_ENABLE_ADDRESSSANITIZER
+  MCRL2_ENABLE_THREADSANITIZER
   MCRL2_ENABLE_CODE_COVERAGE
   MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS 
   MCRL2_ENABLE_MSVC_CCACHE
   MCRL2_ENABLE_STABLE
   MCRL2_ENABLE_JITTYC
 )
+
+# A list of tools that is being built by the current configuration (populated by build/cmake/MCRL2AddTarget.cmake)
+set_property(GLOBAL PROPERTY MCRL2_TOOLS)
+set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
+set(MCRL2_JITTYC_ARGUMENTS "" CACHE INTERNAL "Keeps track of compile flags used by the compiling rewriter")
 
 if(MCRL2_ENABLE_BOOST_JSON_SUPPORT)
   set(MCRL2_MIN_BOOST_VERSION 1.75.0)

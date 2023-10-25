@@ -40,4 +40,6 @@ foreach(type "random" "regression")
 endforeach()
 
 # Enable tool tests if desired
-include(GenerateToolTests.cmake)
+if(MCRL2_ENABLE_TOOL_TESTS)
+  include(GenerateToolTests.cmake)
+endif()
