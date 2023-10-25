@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(basic_test_indexed_set)
 
 BOOST_AUTO_TEST_CASE(test_indexed_set_parallel)
 {
-  if constexpr (GlobalThreadsafe)
+  if (mcrl2::utilities::detail::GlobalThreadsafe)
   {
     // One thread continuously modifies a local atermpp::vector of aterms while the main thread performs garbage collection extensively.
     std::vector<std::thread> threads;

@@ -37,7 +37,7 @@ class parallel_tool: public Tool
     void add_options(utilities::interface_description& desc)
     {
       Tool::add_options(desc);
-      if constexpr (GlobalThreadSafe)
+      if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
       {
         desc.add_option("threads", utilities::make_mandatory_argument("NUM"), "run with NUM threads (default=1). With multiple threads the stack size on a Mac is limited which can lead to bus errors. ");
       }
@@ -61,7 +61,7 @@ class parallel_tool: public Tool
         {
           throw mcrl2::runtime_error("The number of threads should at least be 1.");
         }
-        if constexpr (!GlobalThreadsafe && number_of_threads()!=1)
+        if (!mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads()!=1)
         {
           throw mcrl2::runtime_error("This tool is compiled for sequential use. The number of threads (now: " + 
                                      std::to_string(number_of_threads()) +

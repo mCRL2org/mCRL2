@@ -9,8 +9,8 @@
 /// \file mcrl2/utilities/dynamic_library.h
 
 
-#ifndef __DYNAMIC_LIBRARY_H
-#define __DYNAMIC_LIBRARY_H
+#ifndef MCRL2_UTILITIES_DYNAMIC_LIBRARY_H
+#define MCRL2_UTILITIES_DYNAMIC_LIBRARY_H
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/platform.h"
@@ -160,4 +160,4 @@ class dynamic_library
     }
 };
 
-#endif // __DYNAMIC_LIBRARY_H
+#endif // MCRL2_UTILITIES_DYNAMIC_LIBRARY_H
