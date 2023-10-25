@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "mcrl2/utilities/configuration.h"
 #include "mcrl2/utilities/indexed_set.h"
 
 #include <thread>
@@ -54,25 +55,25 @@ BOOST_AUTO_TEST_CASE(basic_test_indexed_set)
 
 BOOST_AUTO_TEST_CASE(test_indexed_set_parallel)
 {
-#ifdef MCRL2_THREAD_SAFE
-  // One thread continuously modifies a local atermpp::vector of aterms while the main thread performs garbage collection extensively.
-  std::vector<std::thread> threads;
-
-  indexed_set<std::size_t, true> set(20);
-
-  for (int i = 0; i < 20; ++i)
+  if constexpr (GlobalThreadsafe)
   {
-    threads.emplace_back([&set](int index) 
+    // One thread continuously modifies a local atermpp::vector of aterms while the main thread performs garbage collection extensively.
+    std::vector<std::thread> threads;
+
+    indexed_set<std::size_t, true> set(20);
+
+    for (int i = 0; i < 20; ++i)
     {
-      // Insert every elements into the set.
-      set.insert(5, index);
-    }, i);
-  }
+      threads.emplace_back([&set](int index) 
+      {
+        // Insert every elements into the set.
+        set.insert(5, index);
+      }, i);
+    }
 
-  for (auto& thread : threads)
-  {
-    thread.join();
+    for (auto& thread : threads)
+    {
+      thread.join();
+    }
   }
-#endif // MCRL2_THREAD_SAFE
-
 }

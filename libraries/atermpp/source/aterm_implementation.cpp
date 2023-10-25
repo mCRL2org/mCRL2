@@ -30,7 +30,7 @@ namespace atermpp::detail
 /// \brief A reference to the thread local term pool storage
 thread_aterm_pool& g_thread_term_pool()
 {
-#ifdef MCRL2_THREAD_SAFE
+#ifdef MCRL2_ENABLE_MULTITHREADING
   static_assert(mcrl2::utilities::detail::GlobalThreadSafe);
   thread_local thread_aterm_pool instance(g_aterm_pool_instance);
 #else 

@@ -1,5 +1,5 @@
-// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
+// Author(s): Jan Friso Groote
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
@@ -14,7 +14,7 @@ namespace mcrl2::utilities::detail
 {
 
 /// Enables thread safety for the whole toolset.
-#ifdef MCRL2_THREAD_SAFE 
+#ifdef MCRL2_ENABLE_MULTITHREADING 
   constexpr static bool GlobalThreadSafe = true;
 #else
   constexpr static bool GlobalThreadSafe = false;

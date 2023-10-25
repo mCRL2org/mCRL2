@@ -99,19 +99,14 @@ void aterm_pool::collect(mcrl2::utilities::shared_mutex& mutex)
 
 void aterm_pool::register_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
-#ifdef MCRL2_THREAD_SAFE
   mcrl2::utilities::lock_guard guard = m_shared_mutex.lock();
-#endif
-
   m_thread_pools.insert(m_thread_pools.end(), &pool);
 }
 
 void aterm_pool::remove_thread_aterm_pool(thread_aterm_pool_interface& pool)
 {
-#ifdef MCRL2_THREAD_SAFE
   mcrl2::utilities::lock_guard guard = m_shared_mutex.lock();
-#endif
-
+  
   auto it = std::find(m_thread_pools.begin(), m_thread_pools.end(), &pool);
   if (it != m_thread_pools.end())
   {
