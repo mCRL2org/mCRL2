@@ -12,6 +12,8 @@ mcrl2_add_library(mcrl2_utilities
     source/logger.cpp
     source/text_utility.cpp
     source/toolset_version.cpp
+  INCLUDE_DIRS
+    ${CMAKE_CURRENT_BINARY_DIR}
   DEPENDS
     Boost::boost
     Threads::Threads

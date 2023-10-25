@@ -25,9 +25,8 @@ if(POLICY CMP0110)
   cmake_policy(SET CMP0110 NEW)
 endif()
 
-
+# This path is used for FindXXX modules and common cmake function definitions.
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 enable_testing()
 
 option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
@@ -56,6 +55,8 @@ option(MCRL2_ENABLE_MSVC_CCACHE     "Enable MSVC specific flags to enable buildi
 option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
 option(MCRL2_SKIP_LONG_TESTS        "Do not execute tests that take a long time to run." OFF)
 
+# A list of tools that is being built by the current configuration (populated by build/cmake/MCRL2AddTarget.cmake)
+set_property(GLOBAL PROPERTY MCRL2_TOOLS)
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
 
 mark_as_advanced(
@@ -85,10 +86,12 @@ endif()
 
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
 
+# We always require Threads even for single threaded application, but then threadsafe features are not used.
+find_package(Threads)
+
 include(ConfigurePlatform)
 include(ConfigureCompiler)
 include(MCRL2Version)
-include(AddMCRL2Binary)
 include(MCRL2AddTarget)
 
 if(MCRL2_ENABLE_CODE_COVERAGE)
@@ -104,9 +107,6 @@ if (MCRL2_ENABLE_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
 
-# A list of tools that is being built by the current configuration (populated by build/cmake/MCRL2AddTarget.cmake)
-set_property(GLOBAL PROPERTY MCRL2_TOOLS)
-
 add_subdirectory(libraries)
 add_subdirectory(tools)
 
@@ -118,11 +118,11 @@ if (MCRL2_ENABLE_TESTS)
   add_subdirectory(tests)
 endif()
 
+# Install the example directory.
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 
-# Add the packaging as a subdirectory to assure that CMake only performs install
-# commands from this script _after_ all install commands from other subdirectories
-# are completed.
+# Add the packaging script, done after all the configuration has finished.
 add_subdirectory(build/packaging)
 
+# Prints dependency versions to the cmake configure output.
 include(PrintBuildInfo)

@@ -4,7 +4,7 @@
 function(mcrl2_add_library TARGET_NAME)  
   set(OPTION_KW)
   set(VALUE_K)
-  set(LIST_KW EXCLUDE_HEADERTEST DPARSER_SOURCES SOURCES DEPENDS)
+  set(LIST_KW EXCLUDE_HEADERTEST DPARSER_SOURCES INCLUDE_DIRS SOURCES DEPENDS)
   cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
 
   # Finds header files, can be glob since it is only used to show headers in MSVC
@@ -40,10 +40,6 @@ function(mcrl2_add_library TARGET_NAME)
     list(APPEND ARG_SOURCES ${OUTPUT_FILE})
     list(APPEND DEPENDS make_${GRAMMER_NAME})
   endforeach()
-
-  if(MCRL2_ENABLE_TESTS)
-    mcrl2_add_tests(${TARGET_NAME} "test/" "librarytest")
-  endif()
   
   if(MCRL2_ENABLE_HEADER_TESTS)
     mcrl2_add_header_tests(${TARGET_NAME} "include" "${ARG_EXCLUDE_HEADERTEST}")
@@ -51,8 +47,12 @@ function(mcrl2_add_library TARGET_NAME)
   
   add_library(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
 
-  target_link_libraries(${TARGET_NAME} ${ARG_DEPENDS})
-  target_include_directories(${TARGET_NAME} PUBLIC "include/")
+  target_link_libraries(${TARGET_NAME} PUBLIC ${ARG_DEPENDS})
+  target_include_directories(${TARGET_NAME} PUBLIC "include/" ${ARG_INCLUDE_DIRS})
+
+  if(MCRL2_ENABLE_TESTS)
+    mcrl2_add_tests(${TARGET_NAME} "test/" "librarytest")
+  endif()
 
 endfunction()
 
@@ -60,7 +60,7 @@ endfunction()
 function(mcrl2_add_tool TARGET_NAME)
   set(OPTION_KW)
   set(VALUE_K)
-  set(LIST_KW SOURCES DEPENDS RESOURCES)
+  set(LIST_KW SOURCES DEPENDS)
   cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
 
   # Add application to the MCRL2_TOOLS
@@ -85,10 +85,40 @@ endfunction()
 # This will do the same as mcrl_add_tool, but in addition to that also
 # prepare a desktop application with desired icons.
 function(mcrl2_add_gui_tool TARGET_NAME)
+  set(OPTION_KW)
+  set(VALUE_K MENUNAME DESCRIPTION ICON)
+  set(LIST_KW SOURCES DEPENDS RESOURCES)
+  
+  cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
+
+  if(NOT MCRL2_ENABLE_GUI_TOOLS)
+    return()
+  endif()
 
   if(MCRL2_MAN_PAGES)
     mcrl2_add_man_page(${TARGET_NAME})
   endif()
+
+  # Add application to the MCRL2_QT_APPS
+  set(MCRL2_QT_APPS "${MCRL2_QT_APPS};${TARGET_NAME}" CACHE INTERNAL "")
+  
+  # Add application to the MCRL2_TOOLS
+  get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
+  set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TARGET_NAME}")
+
+  # Finds header files, can be glob since it is only used to show headers in MSVC
+  file(GLOB_RECURSE TARGET_INCLUDE_FILES "*.h")
+
+  add_executable(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
+
+  target_link_libraries(${TARGET_NAME} ${ARG_DEPENDS})
+  target_include_directories(${TARGET_NAME} PUBLIC ".")
+
+  if(MCRL2_MAN_PAGES)
+    mcrl2_add_man_page(${TARGET_NAME})
+  endif()
+
+  mcrl2_add_resource_files(${TARGET_NAME} ${ARG_MENUNAME} ${ARG_DESCRIPTION} ${ARG_ICON} ${ARG_SOURCES})
 
   if(MSVC)
     # Change to WIN32 application to avoid spawning a terminal
@@ -99,13 +129,6 @@ function(mcrl2_add_gui_tool TARGET_NAME)
     configure_file(${CMAKE_SOURCE_DIR}/build/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
     install(FILES ${DESKTOP_FILE} DESTINATION share/applications)
   endif()
-
-  # Add application to the MCRL2_QT_APPS
-  set(MCRL2_QT_APPS "${MCRL2_QT_APPS};${TARGET_NAME}" CACHE INTERNAL "")
-  
-  # Add application to the MCRL2_TOOLS
-  get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
-  set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TARGET_NAME}")
 
   # Enable the CMake build system to automatically run MOC/UIC/RCC on source files that need it.
   set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
@@ -190,4 +213,41 @@ function(mcrl2_add_header_tests TARGET_NAME INCLUDE_DIR EXCLUDE_FILES)
 
     endif()
   endforeach()
+endfunction()
+
+# TODO: Document this function.
+function(mcrl2_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_FILES)
+  if(MSVC)
+    if(NOT ICON)
+      set(ICON "mcrl2-blue")
+    endif()
+
+    set(ORIGFILENAME ${TARGET_NAME}.exe)
+    set(RC_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_icon.rc)
+
+    string(SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 VERSION_HIHI)
+    string(SUBSTRING ${MCRL2_MAJOR_VERSION} 4 -1 VERSION_HILO)
+    string(LENGTH ${VERSION_HILO} _vlen)
+    if(_vlen GREATER 4)
+      string(REPLACE "." "" VERSION_HILO ${VERSION_HILO})
+    else()
+      string(REPLACE "." "0" VERSION_HILO ${VERSION_HILO})
+    endif()
+    string(REPLACE "M" "" REVISION ${MCRL2_MINOR_VERSION})
+
+    if(NOT MCRL2_PACKAGE_RELEASE)
+      set(FILEFLAGS "VS_FF_PRERELEASE")
+    else()
+      set(FILEFLAGS "VER_DBG")
+    endif()
+    set(ICOFILE ${CMAKE_SOURCE_DIR}/build/packaging/icons/${ICON}.ico)
+    get_filename_component(ORIGFILENAME ${ORIGFILENAME} NAME)
+    configure_file(${CMAKE_SOURCE_DIR}/build/packaging/icon.rc.in ${RC_FILE} @ONLY)
+    set(${SOURCE_FILES} ${${SOURCE_FILES}} ${RC_FILE})
+  elseif(APPLE)
+    set(ICNS_FILE ${CMAKE_SOURCE_DIR}/build/packaging/icons/${ICON}.icns)
+    set_source_files_properties(${ICNS_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    set(${SOURCE_FILES} ${${SOURCE_FILES}} ${ICNS_FILE})
+  endif()
+  set(${SOURCE_FILES} "${${SOURCE_FILES}}" PARENT_SCOPE)
 endfunction()
