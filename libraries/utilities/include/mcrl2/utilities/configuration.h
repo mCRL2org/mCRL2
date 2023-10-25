@@ -14,12 +14,12 @@ namespace mcrl2::utilities::detail
 {
 
 /// Enables thread safety for the whole toolset.
+  constexpr static bool GlobalThreadSafe =     
 #ifdef MCRL2_ENABLE_MULTITHREADING 
-  constexpr static bool GlobalThreadSafe = true;
+    true;
 #else
-  constexpr static bool GlobalThreadSafe = false;
+    false;
 #endif 
-
 }
 
 #endif // MCRL2_UTILITIES_CONFIGURATION_H
