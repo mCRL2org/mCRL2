@@ -6,6 +6,7 @@ mcrl2_add_library(mcrl2_symbolic
   DEPENDS
     mcrl2_data
     Boost::boost
+    sylvan
 )
 
 

@@ -16,7 +16,11 @@ if(MCRL2_ENABLE_GUI_TOOLS)
       Qt6::Gui
       Qt6::Widgets
       Qt6::OpenGL
-      Opengl::Opengl
+      OpenGL::GL
   )
 
+  # Enable the CMake build system to automatically run MOC/UIC/RCC on source files that need it.
+  set_target_properties(mcrl2_gui PROPERTIES AUTOMOC TRUE)
+  set_target_properties(mcrl2_gui PROPERTIES AUTOUIC TRUE)
+  set_target_properties(mcrl2_gui PROPERTIES AUTORCC TRUE)
 endif()
