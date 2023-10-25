@@ -5,15 +5,20 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   endif()
   include(ConfigureMSVC)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+
   if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 7.0)
     message(FATAL_ERROR "GCC version must be at least 7.0.")
   endif()
   include(ConfigureUNIX)
+
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+
   if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 5.0)
     message(FATAL_ERROR "Clang version must be at least 5.0.")
   endif()
+  set(MCRL2_IS_CLANG TRUE)
   include(ConfigureUNIX)
+
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   # The following should actually be version 10.0.1, but then VERSION_LESS does not handle AppleClang 11 correctly.
   if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 10.0)
