@@ -8,8 +8,10 @@
 //
 /// \file mcrl2/data/detail/rewrite/jittycpreamble.h
 
-#ifndef __REWR_JITTYC_PREAMBLE_H
-#define __REWR_JITTYC_PREAMBLE_H
+#ifndef MCRL2_DATA_DETAIL_REWR_JITTYC_PREAMBLE_H
+#define MCRL2_DATA_DETAIL_REWR_JITTYC_PREAMBLE_H
+
+#ifdef MCRL2_ENABLE_JITTYC
 
 #include "mcrl2/utilities/toolset_version_const.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
@@ -427,4 +429,6 @@ bool init(rewriter_interface* i, RewriterCompilingJitty* this_rewriter)
   return true;
 }
 
-#endif // __REWR_JITTYC_PREAMBLE_H
+#endif // MCRL2_ENABLE_JITTYC
+
+#endif // MCRL2_DATA_DETAIL_REWR_JITTYC_PREAMBLE_H
