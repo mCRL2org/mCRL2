@@ -6,23 +6,6 @@ include_directories(build/workarounds/msvc)
 ## Set MSVC specific compiler flags
 ##---------------------------------------------------
 
-function(add_cxx_flag FLAG)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${FLAG}>)
-endfunction()
-
-# TODO: Adapt this generator expression
-function(add_cxx_debug_flag FLAG)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${FLAG}>)
-endfunction()
-
-function(add_c_flag FLAG)
-  add_compile_options($<$<COMPILE_LANGUAGE:C>:${FLAG}>)
-endfunction()
-
-function(add_c_debug_flag FLAG)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${FLAG}>)
-endfunction()
-
 add_cxx_flag(/wd4267)      # Disable size_t to smaller type conversion warnings.
 add_cxx_flag(/wd4244)      # Disable signed integer to smaller type conversion warnings.
 add_cxx_flag(/EHs)         # From MSDN:  Although Windows and Visual C++ support SEH, we strongly recommend 
