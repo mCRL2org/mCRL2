@@ -46,7 +46,7 @@ add_library(mkdparse STATIC
   version.c
 )
 
-add_library(dparser STATIC
+add_library(dparser
   arg.c
   parse.c
   scan.c
