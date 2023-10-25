@@ -47,6 +47,10 @@ endif()
 
 if(MCRL2_ENABLE_JITTYC)
   add_compile_definitions(MCRL2_ENABLE_JITTYC)
+
+  if(MCRL2_TEST_JITTYC)
+    add_compile_definitions(MCRL2_TEST_JITTYC)
+  endif()
 endif()
 
 if(MCRL2_ENABLE_MULTITHREADING)
@@ -56,10 +60,6 @@ endif()
 if(MCRL2_SKIP_LONG_TESTS)
   add_compile_definitions(MCRL2_SKIP_LONG_TESTS)
 endif(MCRL2_SKIP_LONG_TESTS)
-
-if(MCRL2_TEST_JITTYC)
-  add_compile_definitions(MCRL2_TEST_JITTYC)
-endif()
 
 # Enable C++17 for all targets.
 set(CMAKE_CXX_STANDARD 17)
