@@ -33,6 +33,7 @@ std::ostream& operator<<(std::ostream& out, const answer& a)
     case smt::answer::SAT: return out << "sat";
     case smt::answer::UNSAT: return out << "unsat";
     case smt::answer::UNKNOWN: return out << "unknown";
+    default: std::abort();
   }
 }
 
