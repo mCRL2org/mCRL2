@@ -95,10 +95,6 @@ function(mcrl2_add_gui_tool TARGET_NAME)
     return()
   endif()
 
-  if(MCRL2_MAN_PAGES)
-    mcrl2_add_man_page(${TARGET_NAME})
-  endif()
-
   # Add application to the MCRL2_QT_APPS
   set(MCRL2_QT_APPS "${MCRL2_QT_APPS};${TARGET_NAME}" CACHE INTERNAL "")
   
