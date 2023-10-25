@@ -1,12 +1,13 @@
-add_mcrl2_library(bes
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_bes
   SOURCES
-    bes.cpp
-    io.cpp
-    pgsolver.cpp
-    pg_syntax.g
+    source/bes.cpp
+    source/io.cpp
+    source/pgsolver.cpp
+  DPARSER_SOURCES
+    source/pg_syntax.g
   DEPENDS
     mcrl2_pbes
+    dparser
 )
 
 add_subdirectory(example)

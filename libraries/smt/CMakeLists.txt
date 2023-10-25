@@ -1,8 +1,7 @@
-add_mcrl2_library(smt
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_smt
   SOURCES
-    child_process.cpp
-    solver.cpp
+    source/child_process.cpp
+    source/solver.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data

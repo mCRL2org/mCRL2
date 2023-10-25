@@ -1,12 +1,15 @@
-add_mcrl2_library(symbolic
+
+
+mcrl2_add_ibrary(mcrl2_symbolic
   SOURCES
-    ldd_stream.cpp
+    source/ldd_stream.cpp
   DEPENDS
     mcrl2_data
-  INCLUDE
-    ${Boost_INCLUDE_DIRS}
+    Boost::boost
 )
 
+
 if(MCRL2_ENABLE_SYLVAN)
-  target_link_libraries(mcrl2_symbolic sylvan)
+  # Only depend on Sylvan when we have enabled Sylvan compilation.
+  target_include_directories(mcrl2_symbolic PUBLIC sylvan)
 endif()

@@ -1,13 +1,13 @@
-add_mcrl2_library(atermpp
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_atermpp
   SOURCES
-    aterm_implementation.cpp
-    aterm_io_binary.cpp
-    aterm_io_text.cpp
-    function_symbol.cpp
-    function_symbol_pool.cpp
+    source/aterm_implementation.cpp
+    source/aterm_io_binary.cpp
+    source/aterm_io_text.cpp
+    source/function_symbol.cpp
+    source/function_symbol_pool.cpp
   DEPENDS
     mcrl2_utilities
+    Threads::Threads
 )
 
 if (${MCRL2_ENABLE_BENCHMARKS})

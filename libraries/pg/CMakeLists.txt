@@ -1,24 +1,23 @@
-add_mcrl2_library(pg
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_pg
   SOURCES
-	Abortable.cpp
-	ComponentSolver.cpp
-	DecycleSolver.cpp
-	DeloopSolver.cpp
-	FocusListLiftingStrategy.cpp
-	Graph.cpp
-	LiftingStrategy.cpp
-	LinearLiftingStrategy.cpp
-	MaxMeasureLiftingStrategy.cpp
-	OldMaxMeasureLiftingStrategy.cpp
-	ParityGame.cpp
-	ParityGame_IO.cpp
-	ParityGameSolver.cpp
-	ParityGame_verify.cpp
-	PredecessorLiftingStrategy.cpp
-	PriorityPromotionSolver.cpp
-	RecursiveSolver.cpp
-	SmallProgressMeasures.cpp
+	source/Abortable.cpp
+	source/ComponentSolver.cpp
+	source/DecycleSolver.cpp
+	source/DeloopSolver.cpp
+	source/FocusListLiftingStrategy.cpp
+	source/Graph.cpp
+	source/LiftingStrategy.cpp
+	source/LinearLiftingStrategy.cpp
+	source/MaxMeasureLiftingStrategy.cpp
+	source/OldMaxMeasureLiftingStrategy.cpp
+	source/ParityGame.cpp
+	source/ParityGame_IO.cpp
+	source/ParityGameSolver.cpp
+	source/ParityGame_verify.cpp
+	source/PredecessorLiftingStrategy.cpp
+	source/PriorityPromotionSolver.cpp
+	source/RecursiveSolver.cpp
+	source/SmallProgressMeasures.cpp
   DEPENDS
     mcrl2_pbes
     mcrl2_bes

@@ -1,21 +1,19 @@
-add_mcrl2_library(lps
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_lps
   SOURCES
-    lps.cpp
-    lps_io.cpp
-    tools.cpp
-    linearise.cpp
-    lpsparunfoldlib.cpp
-    next_state_generator.cpp
-    symbolic_lts_io.cpp
+    source/lps.cpp
+    source/lps_io.cpp
+    source/tools.cpp
+    source/linearise.cpp
+    source/lpsparunfoldlib.cpp
+    source/next_state_generator.cpp
+    source/symbolic_lts_io.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data
     mcrl2_process
     mcrl2_smt
     mcrl2_symbolic
-  INCLUDE
-    ${Boost_INCLUDE_DIRS}
+    Boost::boost
 )
 
 add_subdirectory(example)
