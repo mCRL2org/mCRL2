@@ -1,4 +1,4 @@
-add_mcrl2_tool(mcrl2i
+mcrl2_add_tool(mcrl2i
   SOURCES
     mcrl2i.cpp
   DEPENDS

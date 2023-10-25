@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpssim
+mcrl2_add_tool(lpssim
   SOURCES
     lpssim.cpp
   DEPENDS

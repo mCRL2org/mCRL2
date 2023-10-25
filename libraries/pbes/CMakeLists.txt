@@ -34,7 +34,7 @@ target_include_directories(mcrl2_pbes PUBLIC ${CMAKE_SOURCE_DIR}/libraries/bes/i
 
 # Copied the code below from AddMCRL2Binary.cmake so as to also link all tests
 # against the BES library
-if(${MCRL2_ENABLE_TESTS})
+if(MCRL2_ENABLE_TESTS)
   file(GLOB all_tests "test/*.cpp")
   foreach(test ${all_tests})
     get_filename_component(base ${test} NAME_WE)

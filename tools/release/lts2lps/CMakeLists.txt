@@ -1,4 +1,4 @@
-add_mcrl2_tool(lts2lps
+mcrl2_add_tool(lts2lps
   SOURCES
     lts2lps.cpp
   DEPENDS

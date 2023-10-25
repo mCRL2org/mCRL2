@@ -1,4 +1,4 @@
-add_mcrl2_tool(lps2pbes
+mcrl2_add_tool(lps2pbes
   SOURCES
     lps2pbes.cpp
   DEPENDS

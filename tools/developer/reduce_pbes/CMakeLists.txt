@@ -1,4 +1,4 @@
-add_mcrl2_tool(reduce_pbes
+mcrl2_add_tool(reduce_pbes
   SOURCES
     reduce_pbes.cpp
   DEPENDS

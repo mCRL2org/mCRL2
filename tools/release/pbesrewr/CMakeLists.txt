@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbesrewr
+mcrl2_add_tool(pbesrewr
   SOURCES
     pbesrewr.cpp
   DEPENDS

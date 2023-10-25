@@ -1,4 +1,4 @@
-add_mcrl2_tool(symbolic_exploration
+mcrl2_add_tool(symbolic_exploration
   SOURCES
     symbolic_exploration.cpp
   DEPENDS

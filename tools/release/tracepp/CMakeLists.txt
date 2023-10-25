@@ -1,4 +1,4 @@
-add_mcrl2_tool(tracepp
+mcrl2_add_tool(tracepp
   SOURCES
     tracepp.cpp
   DEPENDS

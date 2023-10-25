@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbesabstract
+mcrl2_add_tool(pbesabstract
   SOURCES
     pbesabstract.cpp
   DEPENDS

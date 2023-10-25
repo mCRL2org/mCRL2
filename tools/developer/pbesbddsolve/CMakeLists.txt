@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbesbddsolve
+mcrl2_add_tool(pbesbddsolve
   SOURCES
     pbesbddsolve.cpp
   DEPENDS
@@ -6,5 +6,3 @@ add_mcrl2_tool(pbesbddsolve
     mcrl2_bes
     sylvan
 )
-
-include_directories(sylvan_include)

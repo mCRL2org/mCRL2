@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpssumelm
+mcrl2_add_tool(lpssumelm
   SOURCES
     lpssumelm.cpp
   DEPENDS

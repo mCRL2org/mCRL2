@@ -1,4 +1,4 @@
-add_mcrl2_tool(bespp
+mcrl2_add_tool(bespp
   SOURCES
     bespp.cpp
   DEPENDS

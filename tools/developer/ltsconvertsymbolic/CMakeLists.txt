@@ -1,4 +1,4 @@
-add_mcrl2_tool(ltsconvertsymbolic
+mcrl2_add_tool(ltsconvertsymbolic
   SOURCES
     ltsconvertsymbolic.cpp
   DEPENDS

@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsrealzone
+mcrl2_add_tool(lpsrealzone
   SOURCES
     lpsrealzone.cpp
     simplify.cpp

@@ -4,7 +4,7 @@
 function(mcrl2_add_library TARGET_NAME)  
   set(OPTION_KW)
   set(VALUE_K)
-  set(LIST_KW EXCLUDE_HEADERTEST DPARSER_SOURCES SOURCES DEPENDS RESOURCES)
+  set(LIST_KW EXCLUDE_HEADERTEST DPARSER_SOURCES SOURCES DEPENDS)
   cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
 
   # Finds header files, can be glob since it is only used to show headers in MSVC
@@ -58,11 +58,23 @@ endfunction()
 
 # Adds an executable target for an mCRL2 tool.
 function(mcrl2_add_tool TARGET_NAME)
+  set(OPTION_KW)
+  set(VALUE_K)
+  set(LIST_KW SOURCES DEPENDS RESOURCES)
+  cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
 
   # Add application to the MCRL2_TOOLS
   get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
   set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TARGET_NAME}")
     
+  # Finds header files, can be glob since it is only used to show headers in MSVC
+  file(GLOB_RECURSE TARGET_INCLUDE_FILES "include/*.h")
+
+  add_executable(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
+
+  target_link_libraries(${TARGET_NAME} ${ARG_DEPENDS})
+  target_include_directories(${TARGET_NAME} PUBLIC ".")
+
   if(MCRL2_MAN_PAGES)
     mcrl2_add_man_page(${TARGET_NAME})
   endif()

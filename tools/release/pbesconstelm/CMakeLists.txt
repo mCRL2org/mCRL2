@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbesconstelm
+mcrl2_add_tool(pbesconstelm
   SOURCES
     pbesconstelm.cpp
   DEPENDS

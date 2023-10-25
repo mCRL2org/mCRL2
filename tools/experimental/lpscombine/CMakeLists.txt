@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpscombine
+mcrl2_add_tool(lpscombine
   SOURCES
     combine.cpp
     lpscombine.cpp
