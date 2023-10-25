@@ -201,9 +201,9 @@ void test_ltsmin()
   std::string abp_filename = "temporary_abp.lps";
   save_lps(abp_spec, abp_filename);
   test_ltsmin(abp_spec, abp_filename, "jitty");
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
   test_ltsmin(abp_spec, abp_filename, "jittyc");
-#endif // MCRL2_JITTYC_AVAILABLE
+#endif // MCRL2_ENABLE_JITTYC
   std::remove(abp_filename.c_str());
 }
 
