@@ -1,4 +1,4 @@
-add_mcrl2_tool(mcrl2ide
+mcrl2_add_gui_tool(mcrl2ide
   MENUNAME "mCRL2 IDE"
   DESCRIPTION "A graphical IDE for creating, analyzing, visualizing and verifying mCRL2 specifications"
   ICON "mcrl2-red"

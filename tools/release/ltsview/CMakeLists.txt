@@ -1,4 +1,4 @@
-add_mcrl2_tool(ltsview
+mcrl2_add_gui_tool(ltsview
   MENUNAME "LTSView"
   DESCRIPTION "Visualisation tool for large state spaces (mCRL2 toolset)"
   ICON "mcrl2-green"

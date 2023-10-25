@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsxsim
+mcrl2_add_gui_tool(lpsxsim
   MENUNAME "LPSXSim"
   DESCRIPTION "Linear process simulator (mCRL2 toolset)"
   ICON "mcrl2-red"
