@@ -51,7 +51,7 @@
 #else
 #include <GL/glu.h>
 #endif
-#include "tr.h"
+#include "tr/tr.h"
 
 
 #define DEFAULT_TILE_WIDTH  256

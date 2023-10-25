@@ -27,4 +27,4 @@ target_link_libraries(${PROJECT_NAME}
   OpenGL::GL
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC include/tr)
+target_include_directories(${PROJECT_NAME} PUBLIC include/)
