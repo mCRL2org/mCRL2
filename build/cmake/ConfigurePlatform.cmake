@@ -1,7 +1,7 @@
 set(MCRL2_STAGE_PATH ${CMAKE_BINARY_DIR}/stage)
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "Shared")
-if(WIN32)
 
+if(WIN32)
   # Platform is Windows
   #
   # Shared libraries are currently not supported, because none of our library exports are marked

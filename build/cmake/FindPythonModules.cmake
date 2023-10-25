@@ -1,8 +1,12 @@
+# This script can be used to find Python and specific modules.
+
 find_package(Python 3.6.0)
 
 if(Python_FOUND)
   if(PythonModules_FIND_COMPONENTS)
     foreach(MODULE ${PythonModules_FIND_COMPONENTS})
+      
+      # Execute Python and try to import the module, if this fails then the module cannot be found.
       execute_process(COMMAND ${Python_EXECUTABLE} -c "import  ${MODULE}"
                       OUTPUT_VARIABLE _TRASH RESULT_VARIABLE MODULE_NOT_FOUND ERROR_QUIET)
       if(MODULE_NOT_FOUND)
@@ -13,6 +17,7 @@ if(Python_FOUND)
       else()
         set(PythonModules_${MODULE}_FOUND "FOUND")
       endif()
+      
     endforeach()
   endif()
 else()
