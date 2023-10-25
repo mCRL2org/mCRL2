@@ -8,7 +8,6 @@
 
 # ########## Project setup ##########
 project(dparser)
-cmake_minimum_required(VERSION 3.8)
 
 add_definitions(
   -DD_MAJOR_VERSION=1
@@ -57,6 +56,5 @@ add_library(dparser STATIC
   dparse_tree.c
 )
 
+target_include_directories(dparser PUBLIC ".")
 target_link_libraries(make_dparser PRIVATE mkdparse dparser)
-
-set(dparser_include ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
