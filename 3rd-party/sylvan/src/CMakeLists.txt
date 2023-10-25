@@ -28,8 +28,6 @@ add_library(sylvan
 )
 
 target_include_directories(sylvan PUBLIC .)
-target_compile_options(sylvan PRIVATE -Wno-pedantic)
-
 target_link_libraries(sylvan pthread)
 
 set(sylvan_include ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
