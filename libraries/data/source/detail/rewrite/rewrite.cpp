@@ -8,7 +8,7 @@
 
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #endif
 
@@ -534,13 +534,13 @@ std::shared_ptr<Rewriter> createRewriter(
   {
     case jitty:
       return std::shared_ptr<Rewriter>(new RewriterJitty(data_spec,equations_selector));
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
     case jitty_compiling:
       return std::shared_ptr<Rewriter>(new RewriterCompilingJitty(data_spec,equations_selector));
 #endif
     case jitty_prover:
       return std::shared_ptr<Rewriter>(new RewriterProver(data_spec,jitty,equations_selector));
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
     case jitty_compiling_prover:
       return std::shared_ptr<Rewriter>(new RewriterProver(data_spec,jitty_compiling,equations_selector));
 #endif

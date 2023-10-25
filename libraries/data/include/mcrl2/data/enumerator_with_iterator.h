@@ -344,7 +344,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_ca
 
         static enumerator_queue<EnumeratorListElement>& default_deque()
         {
-#ifdef MCRL2_THREAD_SAFE 
+#ifdef MCRL2_ENABLE_MULTITHREADING 
           static_assert(mcrl2::utilities::detail::GlobalThreadSafe);
           thread_local enumerator_queue<EnumeratorListElement> result; // Changed this static variable to thread local,
                                                                        // as it could be the cause of a thread conflict. 
@@ -439,7 +439,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_ca
 
     const iterator& end()
     {
-#ifdef MCRL2_THREAD_SAFE 
+#ifdef MCRL2_ENABLE_MULTITHREADING
       static_assert(mcrl2::utilities::detail::GlobalThreadSafe);
       thread_local iterator result(m_accept);  
 #else

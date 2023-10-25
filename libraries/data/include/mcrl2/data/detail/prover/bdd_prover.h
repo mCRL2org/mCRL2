@@ -476,7 +476,7 @@ class BDD_Prover: protected rewriter
       switch (a_rewrite_strategy)
       {
         case(jitty):
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
         case(jitty_compiling):
 #endif
         {
@@ -484,7 +484,7 @@ class BDD_Prover: protected rewriter
           break;
         }
         case(jitty_prover):
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
         case(jitty_compiling_prover):
 #endif
         {

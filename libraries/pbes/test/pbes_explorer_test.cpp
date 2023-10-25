@@ -36,7 +36,7 @@ private:
     std::size_t transition_count;
 
 public:
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
     explorer(const pbes& p, const std::string& rewrite_strategy = "jittyc", bool reset = false, bool always_split = false) :
 #else
     explorer(const pbes& p, const std::string& rewrite_strategy = "jitty", bool reset = false, bool always_split = false) :
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(buffer)
   int num_states = 7;
   int num_transitions = 12;
   run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jitty");
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
   run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jittyc");
 #endif
 }
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(buffer_2_read_then_eventually_send_pbesparelm_simple)
 
   run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jitty");
   run_pbes_explorer_file(pbes_filename, num_parts, num_groups, num_states, num_transitions, "jitty");
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
   run_pbes_explorer(pbes_text, num_parts, num_groups, num_states, num_transitions, "jittyc");
   run_pbes_explorer_file(pbes_filename, num_parts, num_groups, num_states, num_transitions, "jittyc");
 #endif

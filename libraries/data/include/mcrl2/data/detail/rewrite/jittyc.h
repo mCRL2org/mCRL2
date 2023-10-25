@@ -22,7 +22,7 @@
 #include "mcrl2/data/detail/rewrite/nfs_array.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
 
 namespace mcrl2
 {
@@ -221,6 +221,6 @@ struct rewriter_interface
 }
 }
 
-#endif // MCRL2_JITTYC_AVAILABLE
+#endif // MCRL2_ENABLE_JITTYC
 
 #endif // MCRL2_DATA_DETAIL_REWR_JITTYC_H

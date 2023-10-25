@@ -83,7 +83,7 @@ class rewriter: public basic_rewriter<data_expression>
     // cache the empty substitution, since it is expensive to construct
     static substitution_type& empty_substitution()
     {
-#ifdef MCRL2_THREAD_SAFE 
+#ifdef MCRL2_ENABLE_MULTITHREADING 
       static_assert(mcrl2::utilities::detail::GlobalThreadSafe);
       thread_local substitution_type result;
 #else
