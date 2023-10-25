@@ -1,63 +1,54 @@
-set(MCRL2_TOOLS
-  besinfo
-  bespp
-  diagraphica
-  lps2lts
-  lps2pbes
-  lpsactionrename
-  lpsbinary
-  lpsconfcheck
-  lpsconstelm
-  lpsinfo
-  lpsinvelm
-  lpsparelm
-  lpsparunfold
-  lpspp
-  lpsrewr
-  lpssim
-  lpsstategraph
-  lpssumelm
-  lpssuminst
-  lpsuntime
-  lpsxsim
-  lts2lps
-  lts2pbes
-  ltscompare
-  ltsconvert
-  ltsgraph
-  ltsinfo
-  ltspbisim
-  ltspcompare
-  ltsview
-  mcrl2-gui
-  mcrl22lps
-  mcrl2i
-  mcrl2ide
-  mcrl2xi
-  pbes2bes
-  pbes2bool
-  pbesconstelm
-  pbesinfo
-  pbesparelm
-  pbespgsolve
-  pbespp
-  pbesrewr
-  pbessolve
-  pbesstategraph
-  tracepp
-  txt2lps
-  txt2pbes
-  bessolve
-  txt2bes
-  pbesinst
-  lpsbisim2pbes
-)
-
-if(MCRL2_ENABLE_SYLVAN)
-  list(APPEND MCRL2_TOOLS lpsreach)
-  list(APPEND MCRL2_TOOLS pbessolvesymbolic)
-endif()
-
-foreach(TOOL ${MCRL2_TOOLS})
-  add_subdirectory(${TOOL})
-endforeach()
+add_subdirectory(besinfo)
+add_subdirectory(bespp)
+add_subdirectory(diagraphica)
+add_subdirectory(lps2lts)
+add_subdirectory(lps2pbes)
+add_subdirectory(lpsactionrename)
+add_subdirectory(lpsbinary)
+add_subdirectory(lpsconfcheck)
+add_subdirectory(lpsconstelm)
+add_subdirectory(lpsinfo)
+add_subdirectory(lpsinvelm)
+add_subdirectory(lpsparelm)
+add_subdirectory(lpsparunfold)
+add_subdirectory(lpspp)
+add_subdirectory(lpsrewr)
+add_subdirectory(lpssim)
+add_subdirectory(lpsstategraph)
+add_subdirectory(lpssumelm)
+add_subdirectory(lpssuminst)
+add_subdirectory(lpsuntime)
+add_subdirectory(lpsxsim)
+add_subdirectory(lts2lps)
+add_subdirectory(lts2pbes)
+add_subdirectory(ltscompare)
+add_subdirectory(ltsconvert)
+add_subdirectory(ltsgraph)
+add_subdirectory(ltsinfo)
+add_subdirectory(ltspbisim)
+add_subdirectory(ltspcompare)
+add_subdirectory(ltsview)
+add_subdirectory(lpsreach)
+add_subdirectory(mcrl2-gui)
+add_subdirectory(mcrl22lps)
+add_subdirectory(mcrl2i)
+add_subdirectory(mcrl2ide)
+add_subdirectory(mcrl2xi)
+add_subdirectory(pbes2bes)
+add_subdirectory(pbes2bool)
+add_subdirectory(pbesconstelm)
+add_subdirectory(pbesinfo)
+add_subdirectory(pbesparelm)
+add_subdirectory(pbespgsolve)
+add_subdirectory(pbespp)
+add_subdirectory(pbessolvesymbolic)
+add_subdirectory(pbesrewr)
+add_subdirectory(pbessolve)
+add_subdirectory(pbesstategraph)
+add_subdirectory(tracepp)
+add_subdirectory(txt2lps)
+add_subdirectory(txt2pbes)
+add_subdirectory(bessolve)
+add_subdirectory(txt2bes)
+add_subdirectory(pbesinst)
+add_subdirectory(lpsbisim2pbes)

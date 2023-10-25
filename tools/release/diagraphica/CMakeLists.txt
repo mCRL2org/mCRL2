@@ -1,4 +1,4 @@
-add_mcrl2_tool(diagraphica
+mcrl2_add_gui_tool(diagraphica
   MENUNAME "DiaGraphica"
   DESCRIPTION "Advanced state space visualisation tool (mCRL2 toolset)"
   ICON "mcrl2-green"
@@ -44,7 +44,5 @@ add_mcrl2_tool(diagraphica
     Qt6::OpenGLWidgets
     Qt6::Xml
     Qt6::Gui
-    ${OPENGL_LIBRARIES}
-  INCLUDE
-    ${OPENGL_INCLUDE_DIR}
+    OpenGL::OpenGL
 )

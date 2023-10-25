@@ -1,4 +1,4 @@
-add_mcrl2_tool(ltsgraph
+mcrl2_add_gui_tool(ltsgraph
   MENUNAME "LTSGraph"
   DESCRIPTION "Visualisation tool for small state spaces (mCRL2 toolset)"
   ICON "mcrl2-green"
