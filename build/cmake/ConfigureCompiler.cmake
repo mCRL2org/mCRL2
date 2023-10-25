@@ -37,15 +37,28 @@ endif()
 
 # Add the definition to disable soundness checks when the configuration is set to OFF.
 if(NOT ${MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS})
-  add_definitions(-DMCRL2_NO_SOUNDNESS_CHECKS)
+  add_compile_definitions(MCRL2_NO_SOUNDNESS_CHECKS)
 endif()
 
+# Add compiler definitions
 if(MCRL2_ENABLE_SYLVAN)
-  add_definitions(-DMCRL2_ENABLE_SYLVAN)
+  add_compile_definitions(MCRL2_ENABLE_SYLVAN)
+endif()
+
+if(MCRL2_ENABLE_JITTYC)
+  add_compile_definitions(MCRL2_ENABLE_JITTYC)
 endif()
 
 if(MCRL2_ENABLE_MULTITHREADING)
-  add_definitions(-DMCRL2_THREAD_SAFE)
+  add_compile_definitions(MCRL2_ENABLE_MULTITHREADING)
+endif()
+
+if(MCRL2_SKIP_LONG_TESTS)
+  add_compile_definitions(MCRL2_SKIP_LONG_TESTS)
+endif(MCRL2_SKIP_LONG_TESTS)
+
+if(MCRL2_TEST_JITTYC)
+  add_compile_definitions(MCRL2_TEST_JITTYC)
 endif()
 
 # Enable C++17 for all targets.
