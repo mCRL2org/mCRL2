@@ -6,6 +6,9 @@ function(add_cxx_flag FLAG)
   check_cxx_compiler_flag(${FLAG} CXX_${FLAG}_ACCEPTED)
 
   if(CXX_${FLAG}_ACCEPTED)
+    # This is not really nice, but here we keep track of jittyc compile flags.
+    set(MCRL2_JITTYC_ARGUMENTS "${FLAG} ${MCRL2_JITTYC_ARGUMENTS}" CACHE INTERNAL "")
+
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${FLAG}>)
   endif()
 endfunction()

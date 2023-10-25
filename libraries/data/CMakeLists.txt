@@ -1,6 +1,5 @@
 if(MCRL2_ENABLE_JITTYC)
   set(COMPILING_REWRITER_SRC source/detail/rewrite/jittyc.cpp)
-  include(CompilingRewriter.cmake)
 endif()
 
 mcrl2_add_library(mcrl2_data
@@ -24,6 +23,7 @@ mcrl2_add_library(mcrl2_data
 
 if(MCRL2_ENABLE_JITTYC)
   target_link_libraries(mcrl2_data PUBLIC dl)
+  include(CompilingRewriter.cmake)
 endif()
 
 add_subdirectory(example)
