@@ -33,7 +33,5 @@ mcrl2_add_gui_tool(ltsgraph
     Qt6::Xml
     mcrl2_gui
     mcrl2_lts
-    ${OPENGL_LIBRARIES}
-  INCLUDE
-    ${OPENGL_INCLUDE_DIR}
+    OpenGL::GL
 )

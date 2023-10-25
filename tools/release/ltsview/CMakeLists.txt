@@ -47,9 +47,6 @@ mcrl2_add_gui_tool(ltsview
     Qt6::OpenGLWidgets
     Qt6::Widgets
     Qt6::Xml
-    ${OPENGL_LIBRARIES}
-    ${TR_LIBRARIES}
-  INCLUDE
-    ${OPENGL_INCLUDE_DIR}
-    ${TR_INCLUDE_DIR}
+    OpenGL::GL
+    tr
 )
