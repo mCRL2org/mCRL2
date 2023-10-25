@@ -40,9 +40,13 @@ function(mcrl2_add_library TARGET_NAME)
     list(APPEND ARG_SOURCES ${OUTPUT_FILE})
     list(APPEND DEPENDS make_${GRAMMER_NAME})
   endforeach()
+
+  if(MCRL2_ENABLE_TESTS)
+    mcrl2_add_tests(${TARGET_NAME} "test/" "librarytest")
+  endif()
   
   if(MCRL2_ENABLE_HEADER_TESTS)
-    mcrl2_add_header_tests(${TARGET_NAME} "include" ${EXCLUDE_HEADERTEST})
+    mcrl2_add_header_tests(${TARGET_NAME} "include" "${ARG_EXCLUDE_HEADERTEST}")
   endif()
   
   add_library(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
@@ -121,8 +125,8 @@ endfunction()
 
 # Finds all .cpp files in the test/ subdirectory and generates one test executable for each that
 # is subsequently added as a test executed in the Testing directory.
-function(mcrl2_add_tests TARGET_NAME TEST_CATEGORY)
-  file(GLOB tests "test/*.cpp")
+function(mcrl2_add_tests TARGET_NAME TEST_DIR TEST_CATEGORY)
+  file(GLOB tests "${TEST_DIR}/*.cpp")
 
   foreach(test ${tests})
 
@@ -147,7 +151,7 @@ function(mcrl2_add_tests TARGET_NAME TEST_CATEGORY)
 
     # Some tests need jittyc so ensure that the compile rewriter script is available.
     set_tests_properties(${testname} PROPERTIES
-      LABELS ${category}
+      LABELS ${TEST_CATEGORY}
       ENVIRONMENT "MCRL2_COMPILEREWRITER=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter")
   endforeach()  
 endfunction()
@@ -167,13 +171,9 @@ function(mcrl2_add_header_tests TARGET_NAME INCLUDE_DIR EXCLUDE_FILES)
 
       if(NOT TARGET ${testname})
         # In test.cpp we define BOOST_UNITS_HEADER_NAME to be the current header
-        add_executable(${testname} EXCLUDE_FROM_ALL "${CMAKE_SOURCE_DIR}/build/cmake/test.cpp")
+        add_executable(${testname} "${CMAKE_SOURCE_DIR}/build/cmake/headertest.cpp")
         target_link_libraries(${testname} ${TARGET_NAME})
         set_target_properties(${testname} PROPERTIES COMPILE_DEFINITIONS "BOOST_UNITS_HEADER_NAME=${cppname}")
-
-        # Build the resulting executable, this should succeed for the test to pass
-        add_test(NAME ${testname} COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${testname})
-        set_tests_properties(${testname} PROPERTIES LABELS headertest)
       endif()
 
     endif()
