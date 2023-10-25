@@ -45,4 +45,5 @@ mcrl2_add_gui_tool(diagraphica
     Qt6::Xml
     Qt6::Gui
     OpenGL::GL
+    OpenGL::GLU
 )

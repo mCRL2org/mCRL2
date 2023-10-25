@@ -9,7 +9,8 @@
 /// \file symbolic_reachability_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE symbolic_reachability_test
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/io.h"

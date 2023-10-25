@@ -28,16 +28,12 @@ add_c_flag(-Wall)
 add_c_flag(-Wno-inline)
 add_c_flag(-fno-strict-overflow)
 add_c_flag(-pipe)
-# The amount of warnings produced in third party library makes this useless.
-# try_add_c_flag(-pedantic)
 add_c_debug_flag(-W)
 
 # Ignore specific warnings produced in Sylvan.
-if(MCRL2_IS_CLANG)
-  add_c_flag(-Wno-c99-extensions)
-  add_c_flag(-Wno-gnu-zero-variadic-macro-arguments)
-  add_c_flag(-Wno-zero-length-array)
-endif()
+add_c_flag(-Wno-c99-extensions)
+add_c_flag(-Wno-gnu-zero-variadic-macro-arguments)
+add_c_flag(-Wno-zero-length-array)
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
   add_c_flag(-fsanitize=address)
@@ -54,8 +50,6 @@ endif()
 ##---------------------------------------------------
 
 # This first flag is only necessary for our compiling rewriter script (that ignores 'other' build flags).
-add_cxx_flag(-std=c++17)
-
 add_cxx_flag(-Wall)
 add_cxx_flag(-Wno-inline)
 add_cxx_flag(-fno-strict-overflow)
@@ -71,7 +65,6 @@ add_cxx_debug_flag(-Wunused)
 add_cxx_debug_flag(-Wno-system-headers)
 add_cxx_debug_flag(-Woverloaded-virtual)
 add_cxx_debug_flag(-Wwrite-strings)
-add_cxx_debug_flag(-Wmissing-declarations)
 
 # Ignore specific warnings produced in Sylvan.
 if(MCRL2_IS_CLANG)
