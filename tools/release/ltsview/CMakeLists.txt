@@ -48,5 +48,6 @@ mcrl2_add_gui_tool(ltsview
     Qt6::Widgets
     Qt6::Xml
     OpenGL::GL
+    OpenGL::GLU
     tr
 )
