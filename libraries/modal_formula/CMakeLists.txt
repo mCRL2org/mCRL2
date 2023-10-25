@@ -1,8 +1,7 @@
-add_mcrl2_library(modal_formula
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_modal_formula
   SOURCES
-    modal_formula.cpp
-    regfrmtrans.cpp
+    source/modal_formula.cpp
+    source/regfrmtrans.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data

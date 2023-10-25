@@ -1,9 +1,9 @@
-add_mcrl2_library(core
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_core
   SOURCES
-    dparser.cpp
-    core.cpp
-    mcrl2_syntax.g
+    source/dparser.cpp
+    source/core.cpp
+  DPARSER_SOURCES
+    source/mcrl2_syntax.g
   DEPENDS
     mcrl2_atermpp
     mcrl2_utilities

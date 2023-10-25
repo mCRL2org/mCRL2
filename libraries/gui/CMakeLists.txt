@@ -1,24 +1,22 @@
 if(MCRL2_ENABLE_GUI_TOOLS)
 
-  add_mcrl2_library(gui
+  mcrl2_add_library(mcrl2_gui
     INSTALL_HEADERS TRUE
     SOURCES
-      arcball.cpp
-      logwidget.ui
-      logwidget.cpp
-      extendedtabwidget.cpp
-      codeeditor.cpp
-      persistentfiledialog.cpp
-      utilities.cpp
+      source/arcball.cpp
+      source/logwidget.ui
+      source/logwidget.cpp
+      source/extendedtabwidget.cpp
+      source/codeeditor.cpp
+      source/persistentfiledialog.cpp
+      source/utilities.cpp
     DEPENDS
       mcrl2_utilities
       Qt6::Core
       Qt6::Gui
       Qt6::Widgets
       Qt6::OpenGL
-      ${OPENGL_LIBRARIES}
-    INCLUDE
-      ${OPENGL_INCLUDE_DIR}
+      Opengl::Opengl
   )
 
 endif()

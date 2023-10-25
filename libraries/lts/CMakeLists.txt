@@ -1,16 +1,15 @@
-add_mcrl2_library(lts
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_lts
   SOURCES
-    check_complexity.cpp
-    liblts_bisim_gjkw.cpp
-    liblts_fsm.cpp
-    liblts_aut.cpp
-    liblts_lts.cpp
-    liblts_dot.cpp
-    liblts.cpp
-    tree_set.cpp
-    sim_hashtable.cpp
-    simulation.cpp
+    source/check_complexity.cpp
+    source/liblts_bisim_gjkw.cpp
+    source/liblts_fsm.cpp
+    source/liblts_aut.cpp
+    source/liblts_lts.cpp
+    source/liblts_dot.cpp
+    source/liblts.cpp
+    source/tree_set.cpp
+    source/sim_hashtable.cpp
+    source/simulation.cpp
   DEPENDS
     mcrl2_data
     mcrl2_lps
