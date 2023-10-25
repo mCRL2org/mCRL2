@@ -10,7 +10,7 @@
 project(sylvan)
 cmake_minimum_required(VERSION 3.8)
 
-add_library(sylvan STATIC
+add_library(sylvan
   lace.c
   sha2.c
   sylvan_bdd.c
