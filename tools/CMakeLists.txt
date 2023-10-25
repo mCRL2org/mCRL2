@@ -1,10 +1,15 @@
-set(MCRL2_TOOL_CLASSES
-  release                  # These tools are production tools in the toolset.
-  experimental             # These tools are experiments with the intention to become production tools.
-  deprecated               # These are outphased tools, to be deleted.
-  developer                # This directory contains tools useful for local experiments by developers.
-)
+if(MCRL2_ENABLE_STABLE)
+  add_subdirectory(release)
+endif()
 
-foreach(TOOL ${MCRL2_TOOL_CLASSES})
-  add_subdirectory(${TOOL})
-endforeach()
+if(MCRL2_ENABLE_EXPERIMENTAL)
+  add_subdirectory(experimental)
+endif()
+
+if(MCRL2_ENABLE_DEPRECATED)
+  add_subdirectory(deprecated)
+endif()
+
+if(MCRL2_ENABLE_DEVELOPER)
+  add_subdirectory(developer)
+endif()
