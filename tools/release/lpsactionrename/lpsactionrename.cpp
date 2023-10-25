@@ -119,6 +119,12 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       stochastic_specification old_spec;
       load_lps(old_spec, input_filename());
 
+      data::rewriter datar;
+      if (m_rewrite)
+      {
+        datar = create_rewriter(old_spec.data());
+      }
+
       stochastic_specification new_spec;
       if (m_use_renamefile)
       {
@@ -139,7 +145,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 
         //rename all assigned actions
         mCRL2log(verbose) << "Renaming actions in LPS..." << std::endl;
-        new_spec = action_rename(action_rename_spec, old_spec);
+        new_spec = action_rename(action_rename_spec, old_spec, datar, m_rewrite);
       }
       else
       {
@@ -162,11 +168,9 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
           throw mcrl2::runtime_error("Type checking the specification obtained after renaming was unsuccesful.");
         }
       }
-      data::rewriter datar;
       if (m_rewrite)
       {
         mCRL2log(verbose) << "Rewriting data expressions in LPS..." << std::endl;
-        datar = create_rewriter(new_spec.data());
         lps::rewrite(new_spec, datar);
         lps::remove_trivial_summands(new_spec);
       }
