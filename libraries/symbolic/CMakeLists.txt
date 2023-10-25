@@ -1,6 +1,6 @@
 
 
-mcrl2_add_ibrary(mcrl2_symbolic
+mcrl2_add_library(mcrl2_symbolic
   SOURCES
     source/ldd_stream.cpp
   DEPENDS
