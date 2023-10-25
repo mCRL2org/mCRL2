@@ -14,30 +14,37 @@ function(mcrl2_add_library TARGET_NAME)
   mcrl2_install_header_files(${TARGET_INCLUDE_FILES})
 
   # For dparser grammer files we need to generate a .c file using make_dparser, and include that file as dependency.
-  foreach(GRAMMER_FILE ${DPARSER_SOURCES})
-      # This is a grammar file. Generate a .c file using DParser
-      get_filename_component(GRAMMER_FILE ${GRAMMER_FILE} NAME_WE)
-      file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/source)
+  foreach(GRAMMER_FILE ${ARG_DPARSER_SOURCES})
 
-      set(PARSER_CODE ${CMAKE_CURRENT_BINARY_DIR}/source/${GRAMMER_FILE}.c)
-      string(REGEX REPLACE "(.*)_syntax" "\\1" GRAMMAR_IDENT ${GRAMMER_FILE})
+    # Get the absolute path to be able to run make_dparser    
+    get_filename_component(GRAMMER_ABS ${GRAMMER_FILE} ABSOLUTE)
 
-      add_custom_command(
-          OUTPUT ${PARSER_CODE}
-          COMMAND make_dparser -A -H0 -i${GRAMMAR_IDENT} -o${PARSER_CODE} ${_SRC_ABS}
-          DEPENDS make_dparser ${_SRC_ABS}
-          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-          COMMENT "Generating ${GRAMMAR_IDENT} parser"
-        )
+    # Determine the output file, and grammar identifier
+    get_filename_component(GRAMMER_NAME ${GRAMMER_FILE} NAME_WE)
+    
+    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/source)
+    set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/source/${GRAMMER_NAME}.c)
+    string(REGEX REPLACE "(.*)_syntax" "\\1" GRAMMAR_IDENT ${GRAMMER_NAME})
 
-      add_custom_target(${TARGET_NAME}_${GRAMMER_FILE} SOURCES ${GRAMMER_FILE})
+    add_custom_command(
+        OUTPUT ${OUTPUT_FILE}
+        COMMAND make_dparser -A -H0 -i${GRAMMAR_IDENT} -o${OUTPUT_FILE} ${GRAMMER_ABS}
+        DEPENDS make_dparser ${GRAMMER_ABS}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating ${GRAMMAR_IDENT} parser"
+      )
+
+    add_custom_target(make_${GRAMMER_NAME} SOURCES ${GRAMMER_FILE})
+
+    # include the generated syntax file into the source for the library, and depend on this target
+    list(APPEND ARG_SOURCES ${OUTPUT_FILE})
+    list(APPEND DEPENDS make_${GRAMMER_NAME})
   endforeach()
   
   if(MCRL2_ENABLE_HEADER_TESTS)
     mcrl2_add_header_tests(${TARGET_NAME} "include" ${EXCLUDE_HEADERTEST})
   endif()
   
-
   add_library(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
 
   target_link_libraries(${TARGET_NAME} ${ARG_DEPENDS})

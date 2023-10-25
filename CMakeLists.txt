@@ -86,6 +86,7 @@ include(ConfigurePlatform)
 include(ConfigureCompiler)
 include(MCRL2Version)
 include(AddMCRL2Binary)
+include(MCRL2AddTarget)
 
 if(MCRL2_ENABLE_CODE_COVERAGE)
   include(CodeCoverage)
@@ -100,7 +101,7 @@ if (MCRL2_ENABLE_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
 
-# A list of tools that is being built by the current configuration (populated by build/cmake/AddMCRL2Binary.cmake)
+# A list of tools that is being built by the current configuration (populated by build/cmake/MCRL2AddTarget.cmake)
 set_property(GLOBAL PROPERTY MCRL2_TOOLS)
 
 add_subdirectory(libraries)
