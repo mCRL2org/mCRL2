@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbespp
+mcrl2_add_tool(pbespp
   SOURCES
     pbespp.cpp
   DEPENDS

@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsinfo
+mcrl2_add_tool(lpsinfo
   SOURCES
     lpsinfo.cpp
   DEPENDS

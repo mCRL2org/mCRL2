@@ -1,4 +1,4 @@
-add_mcrl2_tool(confcheck
+mcrl2_add_tool(confcheck
   SOURCES
     confcheck.cpp
   DEPENDS

@@ -1,4 +1,4 @@
-add_mcrl2_tool(ltsinfo
+mcrl2_add_tool(ltsinfo
   SOURCES
     ltsinfo.cpp
   DEPENDS

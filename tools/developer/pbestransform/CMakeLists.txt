@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbestransform
+mcrl2_add_tool(pbestransform
   SOURCES
     pbestransform.cpp
   DEPENDS

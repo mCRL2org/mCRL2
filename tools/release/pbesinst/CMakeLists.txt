@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbesinst
+mcrl2_add_tool(pbesinst
   SOURCES
     pbesinst.cpp
   DEPENDS

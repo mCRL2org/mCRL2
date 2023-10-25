@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbesstategraph
+mcrl2_add_tool(pbesstategraph
   SOURCES
     pbesstategraph.cpp
   DEPENDS

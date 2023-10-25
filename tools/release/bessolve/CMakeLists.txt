@@ -1,4 +1,4 @@
-add_mcrl2_tool(bessolve
+mcrl2_add_tool(bessolve
   SOURCES
     bessolve.cpp
   DEPENDS

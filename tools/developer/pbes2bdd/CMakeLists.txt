@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbes2bdd
+mcrl2_add_tool(pbes2bdd
   SOURCES
     pbes2bdd.cpp
   DEPENDS

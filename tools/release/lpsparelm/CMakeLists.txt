@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsparelm
+mcrl2_add_tool(lpsparelm
   SOURCES
     lpsparelm.cpp
   DEPENDS

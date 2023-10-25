@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbesinfo
+mcrl2_add_tool(pbesinfo
   SOURCES
     pbesinfo.cpp
   DEPENDS

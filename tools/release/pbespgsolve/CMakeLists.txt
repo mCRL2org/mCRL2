@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbespgsolve
+mcrl2_add_tool(pbespgsolve
   SOURCES
     pbespgsolve.cpp
   DEPENDS

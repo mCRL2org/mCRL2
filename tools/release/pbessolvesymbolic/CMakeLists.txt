@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbessolvesymbolic
+mcrl2_add_tool(pbessolvesymbolic
   SOURCES
     pbessolvesymbolic.cpp
   DEPENDS

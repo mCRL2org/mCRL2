@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsparunfold
+mcrl2_add_tool(lpsparunfold
   SOURCES
     lpsparunfold.cpp
   DEPENDS

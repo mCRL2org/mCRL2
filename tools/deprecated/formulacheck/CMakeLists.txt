@@ -1,4 +1,4 @@
-add_mcrl2_tool(formulacheck
+mcrl2_add_tool(formulacheck
   SOURCES
     formulacheck.cpp
   DEPENDS

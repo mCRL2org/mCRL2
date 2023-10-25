@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsrealelm
+mcrl2_add_tool(lpsrealelm
   SOURCES
     lpsrealelm.cpp
     realelm.cpp

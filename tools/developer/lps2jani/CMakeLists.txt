@@ -1,4 +1,4 @@
-add_mcrl2_tool(lps2jani
+mcrl2_add_tool(lps2jani
   SOURCES
     lps2jani.cpp
   DEPENDS

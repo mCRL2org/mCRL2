@@ -1,4 +1,4 @@
-add_mcrl2_tool(mcrl2rewrite
+mcrl2_add_tool(mcrl2rewrite
   SOURCES
     mcrl2rewrite.cpp
   DEPENDS

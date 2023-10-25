@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbesabsinthe
+mcrl2_add_tool(pbesabsinthe
   SOURCES
     pbesabsinthe.cpp
   DEPENDS

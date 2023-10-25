@@ -1,5 +1,3 @@
-# MCRL2Version.cmake
-#
 # This script defines the version information that is displayed in the tools and
 # the documentation. It defines the following variables:
 #
@@ -23,6 +21,7 @@
 #     in place to prevent users from unknowingly publishing a release that can
 #     not be generated from a clean Git clone.
 #
+
 # Package maintainers may set the variable below to issue a new release.
 set(MCRL2_MAJOR_VERSION "202307.1")
 string(SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 MCRL2_COPYRIGHT_YEAR)

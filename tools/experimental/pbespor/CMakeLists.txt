@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbespor
+mcrl2_add_tool(pbespor
   SOURCES
     pbespor.cpp
   DEPENDS

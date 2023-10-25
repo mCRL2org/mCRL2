@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsuntime
+mcrl2_add_tool(lpsuntime
   SOURCES
     lpsuntime.cpp
   DEPENDS
