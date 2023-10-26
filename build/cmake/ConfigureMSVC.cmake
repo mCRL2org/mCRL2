@@ -29,6 +29,7 @@ mcrl2_add_c_flag(/permissive-)
 mcrl2_add_c_debug_flag(/W3)
   
 add_compile_definitions(NOMINMAX)                 # Don't let <windows.h> (re)define min and max
+add_compile_definitions(WIN32_LEAN_AND_MEAN)      # Cleans up a lot of garbage from the windows.h header, and makes it compatible with other windows headers.
 add_compile_definitions(_USE_MATH_DEFINES)        # Make <cmath> define M_PI, M_PI_2 etc.
 add_compile_definitions(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES) # Enables template overloads of standard CRT functions that call the more secure variants automatically.
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)                 # Prevents many CRT deprecation warnings, especially in dparser.
