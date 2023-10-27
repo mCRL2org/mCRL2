@@ -122,7 +122,7 @@ function(mcrl2_add_gui_tool TARGET_NAME)
   elseif(UNIX AND NOT APPLE)
     # Add the desktop file
     set(DESKTOP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.desktop)
-    configure_file(${CMAKE_SOURCE_DIR}/build/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
     install(FILES ${DESKTOP_FILE} DESTINATION share/applications)
   endif()
 

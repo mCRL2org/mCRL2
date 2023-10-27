@@ -26,7 +26,7 @@ if(POLICY CMP0110)
 endif()
 
 # This path is used for FindXXX modules and common cmake function definitions.
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 enable_testing()
 
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
@@ -130,7 +130,7 @@ endif()
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 
 # Add the packaging script, done after all the configuration has finished.
-add_subdirectory(build/packaging)
+add_subdirectory(cmake/packaging)
 
 # Prints dependency versions to the cmake configure output.
 include(PrintBuildInfo)
