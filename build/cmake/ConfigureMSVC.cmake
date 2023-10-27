@@ -1,4 +1,4 @@
-include(AddFlag)
+include(MCRL2AddFlag)
 
 include_directories(build/workarounds/msvc)
 
@@ -33,7 +33,7 @@ add_compile_definitions(WIN32_LEAN_AND_MEAN)      # Cleans up a lot of garbage f
 add_compile_definitions(_USE_MATH_DEFINES)        # Make <cmath> define M_PI, M_PI_2 etc.
 add_compile_definitions(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES) # Enables template overloads of standard CRT functions that call the more secure variants automatically.
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)                 # Prevents many CRT deprecation warnings, especially in dparser.
-add_compile_definitions()dd_compile_definitions(BOOST_ALL_NO_LIB=1) # Tells the config system not to automatically select which libraries to link against. Normally if a compiler supports #pragma lib, 
+add_compile_definitions(BOOST_ALL_NO_LIB=1) # Tells the config system not to automatically select which libraries to link against. Normally if a compiler supports #pragma lib, 
                                             # then the correct library build variant will be automatically selected and linked against, simply by the act of including one of 
                                             # that library's headers. This macro turns that feature off. 
 
@@ -50,4 +50,4 @@ if(MCRL2_ENABLE_ADDRESSSANITIZER)
 endif()
 
 # increase the stack size
-mcrl2_add_link_options("/STACK:32000000000")
+add_link_options("/STACK:32000000000")
