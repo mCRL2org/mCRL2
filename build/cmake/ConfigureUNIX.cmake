@@ -46,6 +46,16 @@ if(MCRL2_ENABLE_THREADSANITIZER)
 endif()
 
 ##---------------------------------------------------
+##---------------------------------------------------
+
+# Enable libstdc++ debug checks and "fortify" mode, when code correctness is optional.
+add_compile_definitions($<$<CONFIG:Debug>:_GLIBCXX_DEBUG>)
+add_compile_definitions($<$<CONFIG:Debug>:_FORTIFY_SOURCE=3>)
+
+# For libc++ (the LLVM standard library, what a naming scheme) there is also a debug mode
+add_compile_definitions($<$<CONFIG:Debug>:_LIBCPP_ENABLE_DEBUG_MODE=1>)
+
+##---------------------------------------------------
 ## Set C++ compile flags
 ##---------------------------------------------------
 
@@ -54,7 +64,6 @@ add_cxx_flag(-Wall)
 add_cxx_flag(-Wno-inline)
 add_cxx_flag(-fno-strict-overflow)
 add_cxx_flag(-pipe)
-add_cxx_flag(-pedantic)
 
 add_cxx_debug_flag(-W)
 add_cxx_debug_flag(-Wextra)
@@ -66,12 +75,16 @@ add_cxx_debug_flag(-Wno-system-headers)
 add_cxx_debug_flag(-Woverloaded-virtual)
 add_cxx_debug_flag(-Wwrite-strings)
 
-# Ignore specific warnings produced in Sylvan.
-if(MCRL2_IS_CLANG)
-  add_cxx_flag(-Wno-c99-extensions)
-  add_cxx_flag(-Wno-gnu-zero-variadic-macro-arguments)
-  add_cxx_flag(-Wno-zero-length-array)
-endif()
+# This prevents warnings in the dnj bisimulation algorithm.
+add_cxx_debug_flag(-Wno-switch)
+
+# Ignore specific warnings produced in Sylvan in clang.
+add_cxx_flag(-Wno-c99-extensions)
+add_cxx_flag(-Wno-gnu-zero-variadic-macro-arguments)
+add_cxx_flag(-Wno-zero-length-array)
+
+# Under GCC there are too many warnings caused by Sylvan to make this usable.
+#add_cxx_flag(-pedantic)
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
   add_cxx_flag(-fsanitize=address)
@@ -110,7 +123,6 @@ endif()
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
   add_link_options(-fsanitize=address)
 endif()
-
 
 if(MCRL2_ENABLE_THREADSANITIZER)
   add_link_options(-fsanitize=thread)
