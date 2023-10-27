@@ -336,7 +336,7 @@ protected:
       std::pair< data_expression, data_expression > key = std::get<0>(sb);
       std::set< data_expression, bound_comp_s > value = std::get<1>(sb);
       data_expression bounds_list = sort_list::empty(sort_bound::bound());
-      for(std::set< data_expression >::reverse_iterator bound = value.rbegin(); bound != value.rend(); bound++)
+      for(typename std::set< data_expression, bound_comp_s >::reverse_iterator bound = value.rbegin(); bound != value.rend(); bound++)
       {
         bounds_list = sort_list::cons_(sort_bound::bound())(*bound, bounds_list);
       }
@@ -434,7 +434,7 @@ protected:
       std::pair< data_expression, data_expression > key = std::get<0>(sb);
       std::set< data_expression, bound_comp_s > value = std::get<1>(sb);
       data_expression bounds_list = sort_list::empty(sort_bound::bound());
-      for(std::set< data_expression >::reverse_iterator bound = value.rbegin(); bound != value.rend(); bound++)
+      for(typename std::set< data_expression, bound_comp_s >::reverse_iterator bound = value.rbegin(); bound != value.rend(); bound++)
       {
         std::cerr << pp(std::get<0>(key)) << " - " << pp(std::get<1>(key)) << " " 
             << pp(sort_bound::right(*bound)) << " " << pp(sort_bound::left(*bound)) << std::endl;
