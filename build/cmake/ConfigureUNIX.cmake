@@ -5,7 +5,8 @@
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
-include(AddFlag)
+
+include(MCRL2AddFlag)
 
 ##---------------------------------------------------
 ## Add option for profiling support
@@ -13,37 +14,27 @@ include(AddFlag)
 
 option(MCRL2_ENABLE_PROFILING "Enable/disable profiling support" OFF)
 if( MCRL2_ENABLE_PROFILING )
-  add_cxx_flag(-pg)
-  add_c_flag(-pg)
+  mcrl2_add_cxx_flag(-pg)
+  mcrl2_add_c_flag(-pg)
 
-  add_link_options(-pg)
+  mcrl2_add_link_options(-pg)
 endif()
 
 ##---------------------------------------------------
 ## Set C compile flags
 ##---------------------------------------------------
 
-#try_add_c_flag(-std=c11)
-add_c_flag(-Wall)
-add_c_flag(-Wno-inline)
-add_c_flag(-fno-strict-overflow)
-add_c_flag(-pipe)
-add_c_debug_flag(-W)
+#try_mcrl2_add_c_flag(-std=c11)
+mcrl2_add_c_flag(-Wall)
+mcrl2_add_c_flag(-Wno-inline)
+mcrl2_add_c_flag(-fno-strict-overflow)
+mcrl2_add_c_flag(-pipe)
+mcrl2_add_c_debug_flag(-W)
 
 # Ignore specific warnings produced in Sylvan.
-add_c_flag(-Wno-c99-extensions)
-add_c_flag(-Wno-gnu-zero-variadic-macro-arguments)
-add_c_flag(-Wno-zero-length-array)
-
-if(MCRL2_ENABLE_ADDRESSSANITIZER)
-  add_c_flag(-fsanitize=address)
-  add_c_flag(-fno-omit-frame-pointer)
-endif()
-
-if(MCRL2_ENABLE_THREADSANITIZER)
-  add_c_flag(-fsanitize=thread)
-  add_c_flag(-fno-omit-frame-pointer)
-endif()
+mcrl2_add_c_flag(-Wno-c99-extensions)
+mcrl2_add_c_flag(-Wno-gnu-zero-variadic-macro-arguments)
+mcrl2_add_c_flag(-Wno-zero-length-array)
 
 ##---------------------------------------------------
 ##---------------------------------------------------
@@ -60,40 +51,40 @@ add_compile_definitions($<$<CONFIG:Debug>:_LIBCPP_ENABLE_DEBUG_MODE=1>)
 ##---------------------------------------------------
 
 # This first flag is only necessary for our compiling rewriter script (that ignores 'other' build flags).
-add_cxx_flag(-Wall)
-add_cxx_flag(-Wno-inline)
-add_cxx_flag(-fno-strict-overflow)
-add_cxx_flag(-pipe)
+mcrl2_add_cxx_flag(-Wall)
+mcrl2_add_cxx_flag(-Wno-inline)
+mcrl2_add_cxx_flag(-fno-strict-overflow)
+mcrl2_add_cxx_flag(-pipe)
 
-add_cxx_debug_flag(-W)
-add_cxx_debug_flag(-Wextra)
-add_cxx_debug_flag(-Wunused-variable)
-add_cxx_debug_flag(-Wunused-parameter)
-add_cxx_debug_flag(-Wunused-function)
-add_cxx_debug_flag(-Wunused)
-add_cxx_debug_flag(-Wno-system-headers)
-add_cxx_debug_flag(-Woverloaded-virtual)
-add_cxx_debug_flag(-Wwrite-strings)
+mcrl2_add_cxx_debug_flag(-W)
+mcrl2_add_cxx_debug_flag(-Wextra)
+mcrl2_add_cxx_debug_flag(-Wunused-variable)
+mcrl2_add_cxx_debug_flag(-Wunused-parameter)
+mcrl2_add_cxx_debug_flag(-Wunused-function)
+mcrl2_add_cxx_debug_flag(-Wunused)
+mcrl2_add_cxx_debug_flag(-Wno-system-headers)
+mcrl2_add_cxx_debug_flag(-Woverloaded-virtual)
+mcrl2_add_cxx_debug_flag(-Wwrite-strings)
 
 # This prevents warnings in the dnj bisimulation algorithm.
-add_cxx_debug_flag(-Wno-switch)
+mcrl2_add_cxx_debug_flag(-Wno-switch)
 
 # Ignore specific warnings produced in Sylvan in clang.
-add_cxx_flag(-Wno-c99-extensions)
-add_cxx_flag(-Wno-gnu-zero-variadic-macro-arguments)
-add_cxx_flag(-Wno-zero-length-array)
+mcrl2_add_cxx_flag(-Wno-c99-extensions)
+mcrl2_add_cxx_flag(-Wno-gnu-zero-variadic-macro-arguments)
+mcrl2_add_cxx_flag(-Wno-zero-length-array)
 
 # Under GCC there are too many warnings caused by Sylvan to make this usable.
-#add_cxx_flag(-pedantic)
+#mcrl2_add_cxx_flag(-pedantic)
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
-  add_cxx_flag(-fsanitize=address)
-  add_cxx_flag(-fno-omit-frame-pointer)
+  add_compile_options(-fsanitize=address)
+  add_compile_options(-fno-omit-frame-pointer)
 endif()
 
 if(MCRL2_ENABLE_THREADSANITIZER)
-  try_add_cxx_flag(-fsanitize=thread)
-  try_add_cxx_flag(-fno-omit-frame-pointer)
+  add_compile_options(-fsanitize=thread)
+  add_compile_options(-fno-omit-frame-pointer)
 endif()
 
 ##---------------------------------------------------
@@ -116,8 +107,9 @@ if(APPLE)
   set_property(CACHE CMAKE_APPLE_SILICON_PROCESSOR PROPERTY STRINGS "x86_64" "arm64")
   set(CMAKE_OSX_ARCHITECTURES ${CMAKE_APPLE_SILICON_PROCESSOR} CACHE INTERNAL "" FORCE)
 else()
-  add_link_options(-Wl,--as-needed)
-  add_debug_link_options(-Wl,--warn-unresolved-symbols,--warn-once)
+  mcrl2_add_link_options(-Wl,--as-needed)
+
+  mcrl2_add_debug_link_options(-Wl,--warn-unresolved-symbols,--warn-once)
 endif()
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
