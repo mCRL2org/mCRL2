@@ -72,8 +72,8 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
       set(MCRL2_MINOR_VERSION ${MCRL2_SOURCE_PACKAGE_REVISION})
     endif()
   else()
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion.in"
-                   "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion" @ONLY)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/SourceVersion.in"
+                   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/SourceVersion" @ONLY)
   endif()
 else()
   message(WARNING "No version information could be included because ${CMAKE_SOURCE_DIR} is unversioned.")
