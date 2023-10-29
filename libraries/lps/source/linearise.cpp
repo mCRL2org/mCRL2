@@ -6183,10 +6183,12 @@ class specification_basic_type
       data_expression binarysumcondition;
       int equaluptillnow=1;
 
+      std::set<variable> all_sum_variables;
       for (const stochastic_action_summand& smmnd: action_summands)
       {
         const variable_list sumvars=smmnd.summation_variables();
         resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist,parameters);
+        all_sum_variables.insert(sumvars.begin(),sumvars.end());
       }
 
       if (options.binary)
@@ -6517,7 +6519,8 @@ class specification_basic_type
         {
           const variable_list stochastic_vars=smmnd.distribution().variables();
           resulting_stochastic_variables=merge_var(stochastic_vars,resulting_stochastic_variables,
-                              stochastic_rename_list_pars,stochastic_rename_list_args,stochastic_conditionlist,parameters);
+                              stochastic_rename_list_pars,stochastic_rename_list_args,stochastic_conditionlist,
+                              parameters + variable_list(all_sum_variables.begin(),all_sum_variables.end()));
         }
 
         std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
