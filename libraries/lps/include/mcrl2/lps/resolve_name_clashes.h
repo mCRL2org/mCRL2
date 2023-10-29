@@ -117,7 +117,7 @@ void resolve_summand_variable_name_clashes(stochastic_action_summand& summand,
   for (const data::variable& v: summand.distribution().variables())
   {
     if (process_parameter_names.find(v.name()) != process_parameter_names.end() ||
-        summation_names.find(v.name()) != process_parameter_names.end())  // Check stochastic variables also with respect to the summand variables. 
+        summation_names.find(v.name()) != summation_names.end())  // Check stochastic variables also with respect to the summand variables. 
     {
       sigma[v] = data::variable(generator(v.name()), v.sort());
     }

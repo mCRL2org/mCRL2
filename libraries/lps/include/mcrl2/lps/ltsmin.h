@@ -21,7 +21,6 @@
 #include "mcrl2/lps/parse.h"
 
 // For backwards compatibility
-//using namespace mcrl2::log;
 typedef mcrl2::log::log_level_t mcrl2_log_level_t;
 using mcrl2::log::logger;
 

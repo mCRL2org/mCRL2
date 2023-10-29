@@ -43,23 +43,20 @@ ARG THREADS=8
 RUN cd ~/mcrl2-build && make -j${THREADS} install
 
 # Clone and build the sylvan.
-RUN cd ~/ && git clone --depth=1 --branch=v1.4.1 https://github.com/trolando/sylvan.git sylvan
+RUN cd ~/ && git clone --depth=1 --branch=v1.5.0 https://github.com/trolando/sylvan.git sylvan
 
 # Disabled a specific warning as error since sylvan cannot be compiled otherwise.
 RUN cd ~/sylvan && cmake -DCMAKE_C_FLAGS="-Wno-error=array-parameter" -DBUILD_SHARED_LIBS=OFF . && make -j${THREADS} install
 
-# Clone ltsmin git repository.
-RUN cd ~/ && git clone -b v3.0.2 https://github.com/utwente-fmt/ltsmin.git ltsmin
-RUN cd ~/ltsmin && git checkout fea250ecc03ac456f26e272f44b8035eae968b9f
+# Clone ltsmin git repository at a specific version.
+RUN cd ~/ && git clone https://github.com/utwente-fmt/ltsmin.git ltsmin
+RUN cd ~/ltsmin && git checkout 3499bb5afb06c5e955d0df5bb3220eb7b654f3da
 
 # This step is necessary according to the 'Building from a Git Repository' section of the readme.
 RUN cd ~/ltsmin && git submodule update --init
 
-# Fix issues with the ltl2ba submodule
+# Fix issues with the ltl2ba submodule, use a more recent version
 RUN cd ~/ltsmin/ltl2ba && git checkout ea33bb2091a34f6af8dba8e26978fecb969aa93b
-
-# Fix a compilation error in ltsmin.
-RUN cd ~/ltsmin && git apply --ignore-whitespace ~/mcrl2/build/workarounds/ltsmin.patch
 
 # Build the ltsmin toolset.
 RUN cd ~/ltsmin \

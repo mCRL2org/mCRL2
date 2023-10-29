@@ -4,24 +4,23 @@ FROM fedora:38
 RUN dnf install -y \
  boost-devel \
  cmake \
+ doxygen \
  gcc-c++ \
  git \
  make \
  mesa-libGL-devel \
  mesa-libGLU-devel \
- qt5-qtbase \
- qt5-qtbase-devel \
+ qt6-qtbase-devel \
  which \
 # Packages needed for packaging
  rpm-build \
 # Packages needed for documentation
  doxygen \
- python3-devel \
+ python3 \
+ python3-pip \
  python3-sphinx \
  swig \
- texlive \
- texlive-scheme-medium \
- texlive-collection-mathextra
+ texlive-scheme-full
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt
@@ -40,6 +39,7 @@ RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
  -DMCRL2_ENABLE_DEVELOPER=OFF \
  -DMCRL2_ENABLE_DEPRECATED=OFF \
  -DMCRL2_ENABLE_EXPERIMENTAL=OFF \
+ -DMCRL2_ENABLE_DOC_DOXYGEN=OFF \
  -DMCRL2_ENABLE_GUI_TOOLS=ON \
  -DCMAKE_INSTALL_PREFIX=`pwd`/install \
  ~/mcrl2

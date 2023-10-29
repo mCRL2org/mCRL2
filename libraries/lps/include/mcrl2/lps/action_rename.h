@@ -435,12 +435,15 @@ void translate_user_notation(action_rename_specification& arspec)
 ///         are generated can be obtained, often allowing many summands to be removed.
 /// \param  action_rename_spec The action_rename_specification to be used.
 /// \param  lps_old_spec The input linear specification.
+/// \param  rewr A data rewriter.
 /// \return The lps_old_spec where all actions have been renamed according
 ///         to action_rename_spec.
 inline
 lps::stochastic_specification action_rename(
   const action_rename_specification& action_rename_spec,
-  const lps::stochastic_specification& lps_old_spec)
+  const lps::stochastic_specification& lps_old_spec,
+  const data::rewriter& rewr,
+  const bool enable_rewriting)
 {
   using namespace mcrl2::core;
   using namespace mcrl2::data;
@@ -580,8 +583,9 @@ lps::stochastic_specification action_rename(
             {
               assert((data::find_all_variables(rule_old_argument_i).empty())); // the argument must be closed, which is checked above.
               renamed_rule_condition=
-                lazy::and_(renamed_rule_condition,
+                  lazy::and_(renamed_rule_condition,
                            data::equal_to(rule_old_argument_i, *lps_old_argument_i));
+              if (enable_rewriting) renamed_rule_condition=rewr(renamed_rule_condition);  // Make sure that renamed_rule_condition is as simple as possible. 
             }
             lps_old_argument_i++;
           }
@@ -602,6 +606,7 @@ lps::stochastic_specification action_rename(
             }
           }
 
+          if (enable_rewriting) renamed_rule_condition=rewr(renamed_rule_condition);  // Make sure that renamed_rule_condition is as simple as possible. 
           if (renamed_rule_condition==sort_bool::true_())
           {
             if (to_delta)

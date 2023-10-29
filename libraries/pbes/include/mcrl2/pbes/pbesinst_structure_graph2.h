@@ -130,11 +130,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
        : S(S_), graph_builder(graph_builder_)
       {}
 
-      static void unexpected(const pbes_expression& x)
-      {
-        throw mcrl2::runtime_error("Unexpected term " + pbes_system::pp(x) + " encountered in Rplus");
-      }
-
       void push(const stack_element& elem)
       {
         stack.push_back(elem);
@@ -173,7 +168,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
         else
         {
-          unexpected(x);
+         throw mcrl2::runtime_error("Fail to evaluate the expression " + pbes_system::pp(x) + " as it should be equal to true or false.");
         }
       }
 
@@ -321,19 +316,34 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
 
+      void enter(const imp& x)
+      {
+        throw mcrl2::runtime_error("Fail to evaluate the expression " + pbes_system::pp(x) + " as the routine Rplus does not expect an implication, which is an internal error.");
+      }
+
       void leave(const imp& x)
       {
-        unexpected(x);
+        enter(x);  // Print an error message, although this should never be reached..
+      }
+
+      void enter(const exists& x)
+      {
+        throw mcrl2::runtime_error("Fail to evaluate the expression " + pbes_system::pp(x) + " as enumeration of this exists is not possible.");
       }
 
       void leave(const exists& x)
       {
-        unexpected(x);
+        enter(x); // Print an error message. 
+      }
+
+      void enter(const forall& x)
+      {
+        throw mcrl2::runtime_error("Fail to evaluate the expression " + pbes_system::pp(x) + " as enumeration of this forall is not possible.");
       }
 
       void leave(const forall& x)
       {
-        unexpected(x);
+        enter(x); // Print an error. 
       }
     };
 

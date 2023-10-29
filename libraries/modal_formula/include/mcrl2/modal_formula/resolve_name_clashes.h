@@ -144,7 +144,11 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
 
     void erase(const data::variable& v)
     {
-      bound_variables.erase(v);
+      // Remove one variable, which must exist. Do not use bound_variables.erase(v) as it removes all variables v. 
+      std::multiset<data::variable>::const_iterator var_iter=bound_variables.find(v);
+      assert(var_iter!=bound_variables.end()); 
+      bound_variables.erase(var_iter); 
+
       auto i = substitutions.find(v);
       if (i != substitutions.end())
       {

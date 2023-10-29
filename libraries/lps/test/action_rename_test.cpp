@@ -42,7 +42,7 @@ void test1()
   stochastic_specification spec=lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
-  stochastic_specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec,data::rewriter(),false);
   BOOST_CHECK(check_well_typedness(new_spec));
   BOOST_CHECK(new_spec.process().summand_count()==3);
 }
@@ -69,7 +69,7 @@ void test2()
   stochastic_specification spec=lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
-  stochastic_specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec,data::rewriter(),false);
   BOOST_CHECK(check_well_typedness(new_spec));
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
@@ -90,7 +90,7 @@ void test3()
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
-  stochastic_specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec,data::rewriter(),false);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
   BOOST_CHECK(check_well_typedness(new_spec));
@@ -118,7 +118,7 @@ void test4()
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
-  stochastic_specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec,data::rewriter(),false);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
   BOOST_CHECK(check_well_typedness(new_spec));
@@ -165,7 +165,7 @@ void test5() // Test whether partial renaming to delta is going well. See bug re
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
-  stochastic_specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec,data::rewriter(),false);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
   BOOST_CHECK(check_well_typedness(new_spec));
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(multiple_action_declarations)
   stochastic_specification spec = lps::linearise(SPEC);
   std::istringstream ar_spec_stream(RENAME_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
-  stochastic_specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec,data::rewriter(),false);
 
   BOOST_CHECK(new_spec.action_labels().size() == 4);
 }

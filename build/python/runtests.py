@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+"""
+A script that can take a number of executables as input and runs all Boost.Test
+tests in parallel up to given amount. Can be (much) faster for multiple tests
+defined in a single executable.
+"""
+
 import os
 import argparse
 import concurrent.futures
@@ -9,7 +15,12 @@ import re
 
 target_regex = re.compile(r"(.*)\*$")
 
+
 def discover_tests(executable):
+    """
+    Runs the executable and uses --list_content to figure out the contained tests, if it fails
+    to discover tests it is ignored.
+    """
     try:
         result = subprocess.run(
             [executable, "--list_content"],
@@ -28,7 +39,11 @@ def discover_tests(executable):
         print(f"skipped {os.path.basename(executable)}")
         return None
 
+
 def run_test(executable, target):
+    """
+    Runs the specific target test defined in the given executable.
+    """
     start = time.time()
     result = subprocess.run(
         [executable, "--run_test=", target], check=False, capture_output=True, text=True
@@ -37,6 +52,7 @@ def run_test(executable, target):
 
 
 def main():
+    """Entrypoint"""
     # Parse some configuration options
     parser = argparse.ArgumentParser(
         prog="run.py",
@@ -53,19 +69,19 @@ def main():
         max_workers=args.max_workers
     ) as executor:
         futures = {}
-        
+
         print(f"Discovering {len(args.test_executables)} test executable(s)...")
         mapping = {}
         for executable in args.test_executables:
             futures[executor.submit(discover_tests, executable)] = executable
-        
+
         mapping = {}
         for future in concurrent.futures.as_completed(futures):
             targets = future.result()
 
             if targets:
                 executable = futures[future]
-                mapping[executable] = targets            
+                mapping[executable] = targets
 
         futures = {}
         total = sum(map(len, mapping.values()))
@@ -86,7 +102,9 @@ def main():
 
             finished += 1
             txt = f"{finished}/{total} {os.path.basename(executable)}:{target}"
-            print(f"{txt} {(100 - len(txt))*'.'} {'ok' if success else 'failed'} ({result:.2f}s)")
+            print(
+                f"{txt} {(100 - len(txt))*'.'} {'ok' if success else 'failed'} ({result:.2f}s)"
+            )
 
             if not success:
                 failed.append((executable, target))

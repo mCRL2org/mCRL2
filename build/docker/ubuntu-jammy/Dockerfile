@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
  git \
  libboost-dev \
  libgl1-mesa-dev \
- qtbase5-dev \
+ libglu1-mesa-dev \
+ qt6-base-dev \
 # Packages needed for generating the documentation
 # doxygen \
  wget \ 

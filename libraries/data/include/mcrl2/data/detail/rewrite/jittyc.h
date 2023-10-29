@@ -8,8 +8,8 @@
 //
 /// \file mcrl2/data/detail/rewrite/jittyc.h
 
-#ifndef __REWR_JITTYC_H
-#define __REWR_JITTYC_H
+#ifndef MCRL2_DATA_DETAIL_REWR_JITTYC_H
+#define MCRL2_DATA_DETAIL_REWR_JITTYC_H
 
 #include <utility>
 #include <string>
@@ -223,4 +223,4 @@ struct rewriter_interface
 
 #endif // MCRL2_JITTYC_AVAILABLE
 
-#endif // __REWR_JITTYC_H
+#endif // MCRL2_DATA_DETAIL_REWR_JITTYC_H

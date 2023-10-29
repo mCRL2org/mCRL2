@@ -443,7 +443,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_ca
       static_assert(mcrl2::utilities::detail::GlobalThreadSafe);
       thread_local iterator result(m_accept);  
 #else
-      static_assert(!mcrl2::utilities::::detail::GlobalThreadSafe);
+      static_assert(!mcrl2::utilities::detail::GlobalThreadSafe);
       static iterator result(m_accept);  
 #endif
       return result;

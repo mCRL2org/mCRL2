@@ -18,16 +18,18 @@ add_definitions(
 )
 
 if(MSVC)
-add_definitions(
-  -Dstrtoll=_strtoi64
-  -Dstrncasecmp=_strnicmp
-)
+  # MSVC complains about deprecated POSIX names, so this replaces those by other deprecated functions.
+  add_compile_definitions(
+    strtoll=_strtoi64
+    strnicmp=_strnicmp
+    strncasecmp=_strnicmp
+  )
 endif(MSVC)
 
 if(MSVC AND MSVC_VERSION LESS 1900)
-add_definitions(
-  -Dsnprintf=_snprintf
-)
+  add_compile_definitions(
+    snprintf=_snprintf
+  )
 endif(MSVC AND MSVC_VERSION LESS 1900)
 
 add_executable(make_dparser
