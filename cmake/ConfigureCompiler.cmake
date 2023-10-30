@@ -16,6 +16,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 5.0)
     message(FATAL_ERROR "Clang version must be at least 5.0.")
   endif()
+  set(MCRL2_IS_CLANG 1)
   include(ConfigureUNIX)
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")

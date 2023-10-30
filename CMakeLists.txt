@@ -41,25 +41,25 @@ option(MCRL2_ENABLE_DOC_PDFLATEX    "Enable generation of reference pdfs using p
 
 option(MCRL2_ENABLE_BOOST_JSON_SUPPORT "Enable compilation of tools and libraries that require boost::json. This raises the minimal boost version requirement to 1.71.0." OFF)
 option(MCRL2_ENABLE_SYLVAN          "Enable the Sylvan library required by the following symbolic tools: lpsreach, pbessolvesymbolic and ltsconvertsymbolic" ${UNIX})
-option(MCRL2_ENABLE_MULTITHREADING  "Enable the usage of multiple threads. Disabling removes usage of synchronisation primitives" ON)
-
 option(MCRL2_ENABLE_BENCHMARKS      "Enable benchmarks. Build the 'benchmarks' target to generate the necessary files and tools. Run the benchmarks using ctest." OFF)
 
 option(MCRL2_ENABLE_TESTS           "Enable generation of library and random test targets." OFF)
 option(MCRL2_ENABLE_HEADER_TESTS    "Enable generation of headertest targets." OFF)
-option(MCRL2_ENABLE_TOOL_TESTS       "Enable generation of tool tests." ON)
+option(MCRL2_ENABLE_TOOL_TESTS      "Enable generation of tool tests." ON)
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_SKIP_LONG_TESTS        "Do not execute tests that take a long time to run." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 
 # Advanced options
-option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
+option(MCRL2_ENABLE_STABLE           "Enable compilation of stable tools." ON)
 option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks implemented by the AddressSanitizer." OFF)
 option(MCRL2_ENABLE_THREADSANITIZER  "Enable additional data race run-time checks implemented by the ThreadSanitizer." OFF)
+option(MCRL2_ENABLE_FORTIFY          "Enable libstdc++ and libc++ specific assertions in Debug, e.g. safe iterator checks." OFF)
 option(MCRL2_ENABLE_CODE_COVERAGE    "Enable generation of code coverage statistics." OFF)
 option(MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS "Enable extensive soundness check in the Debug build type." ON)
 option(MCRL2_ENABLE_MSVC_CCACHE     "Enable MSVC specific flags to enable building with ccache" OFF)
 option(MCRL2_ENABLE_JITTYC          "Enable the compiling rewriter (jittyc) functionality," ${UNIX})
+option(MCRL2_ENABLE_MULTITHREADING  "Enable the usage of multiple threads. Disabling removes usage of synchronisation primitives" ON)
 
 mark_as_advanced(
   MCRL2_ENABLE_ADDRESSSANITIZER
@@ -69,6 +69,7 @@ mark_as_advanced(
   MCRL2_ENABLE_MSVC_CCACHE
   MCRL2_ENABLE_STABLE
   MCRL2_ENABLE_JITTYC
+  MCRL2_ENABLE_MULTITHREADING
 )
 
 # A list of tools that is being built by the current configuration (populated by build/cmake/MCRL2AddTarget.cmake)
