@@ -31,20 +31,30 @@ mcrl2_add_c_flag(-fno-strict-overflow)
 mcrl2_add_c_flag(-pipe)
 mcrl2_add_c_debug_flag(-W)
 
-# Ignore specific warnings produced in Sylvan.
-mcrl2_add_c_flag(-Wno-c99-extensions)
-mcrl2_add_c_flag(-Wno-gnu-zero-variadic-macro-arguments)
-mcrl2_add_c_flag(-Wno-zero-length-array)
+if(MCRL2_IS_CLANG)
+  # Ignore specific warnings produced in Sylvan.
+  mcrl2_add_c_flag(-Wno-c99-extensions)
+  mcrl2_add_c_flag(-Wno-gnu-zero-variadic-macro-arguments)
+  mcrl2_add_c_flag(-Wno-zero-length-array)
+endif()
 
 ##---------------------------------------------------
 ##---------------------------------------------------
 
-# Enable libstdc++ debug checks and "fortify" mode, when code correctness is optional.
-add_compile_definitions($<$<CONFIG:Debug>:_GLIBCXX_DEBUG>)
-add_compile_definitions($<$<CONFIG:Debug>:_FORTIFY_SOURCE=3>)
+if (MCRL2_ENABLE_FORTIFY)
+  if(MCRL2_IS_CLANG)
+    # For libc++ (the LLVM standard library, what a naming scheme) there is also a debug mode
+    add_compile_definitions($<$<CONFIG:Debug>:_LIBCPP_ENABLE_DEBUG_MODE=1>)
+  else()
+    # Enable libstdc++ debug checks and "fortify" mode, when code correctness is optional.
+    add_compile_definitions($<$<CONFIG:Debug>:_GLIBCXX_DEBUG>)
+    add_compile_definitions($<$<CONFIG:Debug>:_FORTIFY_SOURCE=3>)
 
-# For libc++ (the LLVM standard library, what a naming scheme) there is also a debug mode
-add_compile_definitions($<$<CONFIG:Debug>:_LIBCPP_ENABLE_DEBUG_MODE=1>)
+    # These debug checks require basic optimisation for some reason, otherwise it gives a warning.
+    mcrl2_add_c_debug_flag(-O)
+  endif()
+
+endif()
 
 ##---------------------------------------------------
 ## Set C++ compile flags
@@ -106,7 +116,7 @@ if(APPLE)
   endif()
   set_property(CACHE CMAKE_APPLE_SILICON_PROCESSOR PROPERTY STRINGS "x86_64" "arm64")
   set(CMAKE_OSX_ARCHITECTURES ${CMAKE_APPLE_SILICON_PROCESSOR} CACHE INTERNAL "" FORCE)
-else()
+elseif(NOT MCRL2_IS_CLANG)
   mcrl2_add_link_options(-Wl,--as-needed)
 
   mcrl2_add_debug_link_options(-Wl,--warn-unresolved-symbols,--warn-once)
