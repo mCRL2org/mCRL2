@@ -51,15 +51,15 @@ if(APPLE)
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/bin)
 
   if(MCRL2_ENABLE_GUI_TOOLS)
-    find_program(MACDEPLOYQT NAMES macdeployqt PATHS ${Qt6_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)" REQUIRED)
+    find_program(MACDEPLOYQT_EXECUTABLE NAMES macdeployqt PATHS ${Qt6_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)" REQUIRED)
     set(EXECUTABLES "")
     foreach(EXECUTABLE ${MCRL2_QT_APPS})
       set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
     endforeach()
     install(CODE "
-      message(STATUS \"Executing ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+      message(STATUS \"Executing ${MACDEPLOYQT_EXECUTABLE} mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
       execute_process(
-        COMMAND ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES}
+        COMMAND ${MACDEPLOYQT_EXECUTABLE} mCRL2.app ${EXECUTABLES}
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
         OUTPUT_FILE /tmp/macdeployqt.log
         RESULT_VARIABLE retval
@@ -198,13 +198,13 @@ endif()
 # Windows
 # -------
 
-if (WIN32)
+if (WIN32 AND MCRL2_ENABLE_GUI_TOOLS)
+  find_program(WINDEPLOYQT_EXECUTABLE NAMES "windeployqt.exe" PATHS "${Qt6_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
   foreach(EXECUTABLE ${MCRL2_QT_APPS})
-    find_program(WINDEPLOYQT NAMES "windeployqt" PATHS "${Qt5_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
     install(CODE "
       message(STATUS \"Executing ${WINDEPLOYQT_EXECUTABLE} ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
       execute_process(
-        COMMAND ${WINDEPLOYQT} --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLE}.exe
+        COMMAND ${WINDEPLOYQT_EXECUTABLE} --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLE}.exe
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}
         RESULT_VARIABLE retval
       )
