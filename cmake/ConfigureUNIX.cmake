@@ -14,10 +14,8 @@ include(MCRL2AddFlag)
 
 option(MCRL2_ENABLE_PROFILING "Enable/disable profiling support" OFF)
 if( MCRL2_ENABLE_PROFILING )
-  mcrl2_add_cxx_flag(-pg)
-  mcrl2_add_c_flag(-pg)
-
-  mcrl2_add_link_options(-pg)
+  add_compile_options(-pg)
+  add_link_options(-pg)
 endif()
 
 ##---------------------------------------------------
