@@ -15,6 +15,9 @@
 
 #include "mcrl2/pbes/parity_game_generator.h"
 
+// This include is necessary for ltsmin related workarounds.
+#include "mcrl2/lps/ltsmin.h"
+
 namespace mcrl2 {
 
 namespace pbes_system {
