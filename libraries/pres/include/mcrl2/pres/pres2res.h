@@ -126,12 +126,14 @@ class pres2res_algorithm
       variable_replace_builder variable_replacer(m_stored_variables, new_pres_variables);
       std::vector<pres_equation> resulting_equations;
       pres_expression result;
+      mCRL2log(log::debug) << "generated equation in final form.\n";
       for(atermpp::vector<pres_equation>& eqns: generated_equations)
       {
         for(const pres_equation& eqn: eqns)
         {
           variable_replacer.apply(result, eqn.formula());
           resulting_equations.push_back(pres_equation(eqn.symbol(), eqn.variable(), result));
+          mCRL2log(log::debug) <<  resulting_equations.back() << "\n";
         }
         eqns=atermpp::vector<pres_equation>(); // clear the equations.
       } 

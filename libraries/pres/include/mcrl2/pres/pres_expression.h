@@ -1388,7 +1388,7 @@ inline bool is_pres_supremum(const pres_expression& t)
 inline bool is_universal_not(const pres_expression& t)
 {
   return is_pres_not(t) || data::sort_bool::is_not_application(t);
-}
+} */
 
 /// \brief Test for a conjunction
 /// \param t A PRES expression or a data expression
@@ -1404,7 +1404,7 @@ inline bool is_universal_and(const pres_expression& t)
 inline bool is_universal_or(const pres_expression& t)
 {
   return is_pres_or(t) || data::sort_bool::is_or_application(t);
-} */
+}
 
 /// \brief Returns true if the term t is a data expression
 /// \param t A PRES expression

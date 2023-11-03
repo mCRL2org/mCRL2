@@ -14,17 +14,18 @@
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
-// #include "mcrl2/pbes/detail/bqnf_traverser.h"
-// #include "mcrl2/pbes/detail/ppg_rewriter.h"
-// #include "mcrl2/pbes/detail/ppg_traverser.h"
+// #include "mcrl2/pres/detail/bqnf_traverser.h"
+// #include "mcrl2/pres/detail/ppg_rewriter.h"
+// #include "mcrl2/pres/detail/ppg_traverser.h"
 #include "mcrl2/pres/io.h"
 #include "mcrl2/pres/normalize.h"
 #include "mcrl2/pres/pres_rewriter_type.h"
 #include "mcrl2/pres/rewriters/simplify_rewriter.h"
 #include "mcrl2/pres/rewrite.h"
 #include "mcrl2/pres/rewriter.h"
-// #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
-// #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
+#include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pres/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pres/rewriters/quantifiers_inside_rewriter.h"
 
 namespace mcrl2 {
 
@@ -54,7 +55,7 @@ void presrewr(const std::string& input_filename,
       pres_rewrite(p, presr);
       break;
     }
-    /* case quantifier_all:
+    case quantifier_all:
     {
       bool enumerate_infinite_sorts = true;
       enumerate_quantifiers_rewriter presr(datar, p.data(), enumerate_infinite_sorts);
@@ -86,7 +87,7 @@ void presrewr(const std::string& input_filename,
       pres_rewrite(p, simp);
       break;
     }
-    case pfnf:
+    /* case pfnf:
     {
       pfnf_rewriter presr;
       pres_system::normalize(p);

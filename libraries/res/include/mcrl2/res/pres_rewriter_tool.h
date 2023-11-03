@@ -40,10 +40,10 @@ class pres_rewriter_tool: public Tool
     {
       std::set<pres_system::pres_rewriter_type> result;
       result.insert(pres_system::simplify);
-      // result.insert(pres_system::quantifier_all);
-      // result.insert(pres_system::quantifier_finite);
-      // result.insert(pres_system::quantifier_inside);
-      // result.insert(pres_system::quantifier_one_point);
+      result.insert(pres_system::quantifier_all);
+      result.insert(pres_system::quantifier_finite);
+      result.insert(pres_system::quantifier_inside);
+      result.insert(pres_system::quantifier_one_point);
       return result;
     }
 

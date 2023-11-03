@@ -12,8 +12,8 @@
 #ifndef MCRL2_PRES_PRES_REWRITER_TYPE_H
 #define MCRL2_PRES_PRES_REWRITER_TYPE_H
 
-#include "mcrl2/utilities/exception.h"
 #include <string>
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -23,6 +23,11 @@ namespace pres_system {
 enum pres_rewriter_type
 {
   simplify,
+  quantifier_all,
+  quantifier_finite,
+  quantifier_inside,
+  quantifier_one_point,
+
 };
 
 /// \brief Parses a pres rewriter type
@@ -31,7 +36,23 @@ pres_rewriter_type parse_pres_rewriter_type(const std::string& type)
 {
   if (type == "simplify")
   {
-    return simplify         ;
+    return simplify;
+  }
+  if (type == "quantifier-all")
+  {
+    return quantifier_all;
+  }
+  if (type == "quantifier-finite")
+  {
+    return quantifier_finite;
+  }
+  if (type == "quantifier-inside")
+  {
+    return quantifier_inside;
+  }
+  if (type == "quantifier-one-point")
+  {
+    return quantifier_one_point;
   }
   throw mcrl2::runtime_error("unknown pres rewriter option " + type);
 }
@@ -44,6 +65,15 @@ std::string print_pres_rewriter_type(const pres_rewriter_type type)
   {
     case simplify:
       return "simplify";
+    case quantifier_all:
+      return "quantifier-all";
+    case quantifier_finite:
+      return "quantifier-finite";
+    case quantifier_inside:
+      return "quantifier-inside";
+    case quantifier_one_point:
+      return "quantifier-one-point";
+    default:
     return "unknown pres rewriter";
   }
 }
@@ -56,6 +86,15 @@ std::string description(const pres_rewriter_type type)
   {
     case simplify          :
       return "for simplification";
+    case quantifier_all    :
+      return "for eliminating all quantifiers";
+    case quantifier_finite :
+      return "for eliminating finite quantifier variables";
+    case quantifier_inside :
+      return "for pushing quantifiers inside";
+    case quantifier_one_point :
+      return "for one point rule quantifier elimination";
+
   }
   throw mcrl2::runtime_error("unknown pres rewriter");
 }
