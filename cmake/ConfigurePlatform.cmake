@@ -39,7 +39,7 @@ elseif(UNIX)
   else()
 
     # Platform is any other *nix flavour
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/build/packaging/icons/hicolor DESTINATION share/icons)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake/packaging/icons/hicolor DESTINATION share/icons)
 
     set(MCRL2_RUNTIME_PATH bin)
     set(MCRL2_LIBRARY_PATH lib)
