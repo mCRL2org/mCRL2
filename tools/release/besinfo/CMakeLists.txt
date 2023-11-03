@@ -1,4 +1,4 @@
-add_mcrl2_tool(besinfo
+mcrl2_add_tool(besinfo
   SOURCES
     besinfo.cpp
   DEPENDS

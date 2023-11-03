@@ -1,4 +1,4 @@
-add_mcrl2_tool(ltspcompare
+mcrl2_add_tool(ltspcompare
   SOURCES
     ltspcompare.cpp
   DEPENDS

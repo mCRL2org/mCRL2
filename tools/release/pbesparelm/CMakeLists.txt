@@ -1,4 +1,4 @@
-add_mcrl2_tool(pbesparelm
+mcrl2_add_tool(pbesparelm
   SOURCES
     pbesparelm.cpp
   DEPENDS

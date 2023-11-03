@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsactionrename
+mcrl2_add_tool(lpsactionrename
   SOURCES
     lpsactionrename.cpp
   DEPENDS

@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpspp
+mcrl2_add_tool(lpspp
   SOURCES
     lpspp.cpp
   DEPENDS

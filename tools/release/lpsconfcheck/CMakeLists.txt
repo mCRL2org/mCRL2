@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsconfcheck
+mcrl2_add_tool(lpsconfcheck
   SOURCES
     lpsconfcheck.cpp
   DEPENDS

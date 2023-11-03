@@ -1,4 +1,4 @@
-add_mcrl2_tool(ltsconvert
+mcrl2_add_tool(ltsconvert
   SOURCES
     ltsconvert.cpp
   DEPENDS

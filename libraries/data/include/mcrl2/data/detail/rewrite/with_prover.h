@@ -46,7 +46,7 @@ class RewriterProver: public Rewriter
       {
         case jitty:
           return jitty_prover;
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
         case jitty_compiling:
           return jitty_compiling_prover;
 #endif

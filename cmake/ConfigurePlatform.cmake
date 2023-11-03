@@ -1,7 +1,7 @@
 set(MCRL2_STAGE_PATH ${CMAKE_BINARY_DIR}/stage)
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "Shared")
-if(WIN32)
 
+if(WIN32)
   # Platform is Windows
   #
   # Shared libraries are currently not supported, because none of our library exports are marked
@@ -39,7 +39,7 @@ elseif(UNIX)
   else()
 
     # Platform is any other *nix flavour
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/build/packaging/icons/hicolor DESTINATION share/icons)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake/packaging/icons/hicolor DESTINATION share/icons)
 
     set(MCRL2_RUNTIME_PATH bin)
     set(MCRL2_LIBRARY_PATH lib)

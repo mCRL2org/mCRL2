@@ -1,4 +1,4 @@
-add_mcrl2_tool(ltspbisim
+mcrl2_add_tool(ltspbisim
   SOURCES
     ltspbisim.cpp
   DEPENDS

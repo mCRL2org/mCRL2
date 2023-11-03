@@ -10,7 +10,7 @@
 
 #include "mcrl2/data/detail/rewrite.h" // Required for MCRL2_JITTTYC_AVAILABLE.
 
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
 
 #define NAME "rewr_jittyc"
 

@@ -21,38 +21,37 @@ using namespace atermpp;
 
 BOOST_AUTO_TEST_CASE(parallel_vector, *boost::unit_test::timeout(240))
 {
-#ifdef MCRL2_THREAD_SAFE
-  // One thread continuously modifies a local atermpp::vector of aterms while the main thread performs garbage collection extensively.
-  std::thread local([]() 
+  if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
   {
-    // Push a constant to avoid term creations.
-    atermpp::aterm_int value(0);
-
-    for (std::size_t i = 0; i < 10000; ++i)
+    // One thread continuously modifies a local atermpp::vector of aterms while the main thread performs garbage collection extensively.
+    std::thread local([]() 
     {
-      atermpp::vector<atermpp::aterm> vector;
+      // Push a constant to avoid term creations.
+      atermpp::aterm_int value(0);
+
       for (std::size_t i = 0; i < 10000; ++i)
       {
-        vector.push_back(value);
+        atermpp::vector<atermpp::aterm> vector;
+        for (std::size_t i = 0; i < 10000; ++i)
+        {
+          vector.push_back(value);
+        }
+      }
+    });
+
+    while (true)
+    {
+      for (std::size_t i = 0; i < 1000; ++i)
+      {
+        atermpp::detail::g_thread_term_pool().collect();
+      }
+
+      if (local.joinable())
+      {
+        local.join();
+        break;
       }
     }
-  });
-
-  while (true)
-  {
-    for (std::size_t i = 0; i < 1000; ++i)
-    {
-      atermpp::detail::g_thread_term_pool().collect();
-    }
-
-    if (local.joinable())
-    {
-      local.join();
-      break;
-    }
   }
-
-  // If there are runtime errors during execution then test is fine.
-#endif
 }
 

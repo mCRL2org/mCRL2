@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsbinary
+mcrl2_add_tool(lpsbinary
   SOURCES
     lpsbinary.cpp
   DEPENDS

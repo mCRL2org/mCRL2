@@ -10,7 +10,7 @@
 project(sylvan)
 cmake_minimum_required(VERSION 3.8)
 
-add_library(sylvan STATIC
+add_library(sylvan
   lace.c
   sha2.c
   sylvan_bdd.c
@@ -28,8 +28,6 @@ add_library(sylvan STATIC
 )
 
 target_include_directories(sylvan PUBLIC .)
-target_compile_options(sylvan PRIVATE -Wno-pedantic)
-
 target_link_libraries(sylvan pthread)
 
 set(sylvan_include ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

@@ -13,7 +13,7 @@ namespace data
 enum rewrite_strategy
 {
   jitty,                      /** \brief JITty */
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
   jitty_compiling,            /** \brief Compiling JITty */
   jitty_prover,               /** \brief JITty + Prover */
   jitty_compiling_prover      /** \brief Compiling JITty + Prover*/
@@ -31,12 +31,12 @@ rewrite_strategy parse_rewrite_strategy(const std::string& s)
   else if (s == "jittyp")
     return jitty_prover;
 
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
   if (s == "jittyc")
     return jitty_compiling;
   else if (s == "jittycp")
     return jitty_compiling_prover;
-#endif //MCRL2_JITTYC_AVAILABLE
+#endif //MCRL2_ENABLE_JITTYC
 
   throw mcrl2::runtime_error("unknown rewrite strategy " + s);
 }
@@ -65,11 +65,11 @@ inline std::string pp(const rewrite_strategy s)
   switch (s)
   {
     case jitty: return "jitty";
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
     case jitty_compiling: return "jittyc";
 #endif
     case jitty_prover: return "jittyp";
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
     case jitty_compiling_prover: return "jittycp";
 #endif
     default: throw mcrl2::runtime_error("unknown rewrite_strategy");
@@ -89,11 +89,11 @@ inline std::string description(const rewrite_strategy s)
   switch (s)
   {
     case jitty: return "jitty rewriting";
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
     case jitty_compiling: return "compiled jitty rewriting";
 #endif
     case jitty_prover: return "jitty rewriting with prover";
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
     case jitty_compiling_prover: return "compiled jitty rewriting with prover";
 #endif
     default: throw mcrl2::runtime_error("unknown rewrite_strategy");

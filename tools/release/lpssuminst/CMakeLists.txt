@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpssuminst
+mcrl2_add_tool(lpssuminst
   SOURCES
     lpssuminst.cpp
   DEPENDS

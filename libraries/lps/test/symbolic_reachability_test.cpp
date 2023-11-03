@@ -9,7 +9,8 @@
 /// \file symbolic_reachability_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE symbolic_reachability_test
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/io.h"
@@ -167,7 +168,7 @@ void check_info(mcrl2::lps::stochastic_specification const& model)
 #endif
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(reachability_test)
 {
   using namespace mcrl2;
   using namespace mcrl2::lps;
@@ -183,42 +184,38 @@ int test_main(int argc, char** argv)
 
   lps::stochastic_specification model=linearise(case_no_influenced_parameters);
 
-  if (1 < argc)
-  {
-    load_lps(model, argv[1]);
+  // TODO: Apparently this test required some user input?
+  // load_lps(model, argv[1]);
 
-    model.process().deadlock_summands().clear();
+  // model.process().deadlock_summands().clear();
 
-    data::rewriter        rewriter(model.data());
+  // data::rewriter        rewriter(model.data());
 
-    next_state_generator explorer(model, rewriter);
+  // next_state_generator explorer(model, rewriter);
 
-    std::stack< state >     stack;
-    std::set< state >   known;
+  // std::stack< state >     stack;
+  // std::set< state >   known;
 
-    stack.push(explorer.initial_states().front().state());
-    known.insert(stack.top());
+  // stack.push(explorer.initial_states().front().state());
+  // known.insert(stack.top());
 
-    while (!stack.empty())
-    {
-      state current(stack.top());
-      stack.pop();
+  // while (!stack.empty())
+  // {
+  //   state current(stack.top());
+  //   stack.pop();
 
-      for (std::size_t i = 0; i < model.process().summand_count(); ++i)
-      {
-        next_state_generator::enumerator_queue_t enumeration_queue;
-        for(next_state_generator::iterator j = explorer.begin(current, i, &enumeration_queue); j != explorer.end(); ++j)
-        {
-          if (known.find(j->target_state()) == known.end())
-          {
-            std::cerr << atermpp::pp(j->target_state()) << std::endl;
-            known.insert(j->target_state());
-            stack.push(j->target_state());
-          }
-        }
-      }
-    }
-  }
-
-  return 0;
+  //   for (std::size_t i = 0; i < model.process().summand_count(); ++i)
+  //   {
+  //     next_state_generator::enumerator_queue_t enumeration_queue;
+  //     for(next_state_generator::iterator j = explorer.begin(current, i, &enumeration_queue); j != explorer.end(); ++j)
+  //     {
+  //       if (known.find(j->target_state()) == known.end())
+  //       {
+  //         std::cerr << atermpp::pp(j->target_state()) << std::endl;
+  //         known.insert(j->target_state());
+  //         stack.push(j->target_state());
+  //       }
+  //     }
+  //   }
+  // }
 }

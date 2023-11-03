@@ -1,27 +1,18 @@
-set(MCRL2_TOOLS
-  confcheck
-  lpstransform
-  mcrl2rewrite
-  mcrl2transform
-  mcrl2typecheck
-  pbes2bdd
-  pbestransform
-  reduce_pbes
-  reduce_process
-)
+add_subdirectory(confcheck)
+add_subdirectory(lpstransform)
+add_subdirectory(mcrl2rewrite)
+add_subdirectory(mcrl2transform)
+add_subdirectory(mcrl2typecheck)
+add_subdirectory(pbes2bdd)
+add_subdirectory(pbestransform)
+add_subdirectory(reduce_pbes)
+add_subdirectory(reduce_process)
 
 if(MCRL2_ENABLE_SYLVAN)
-  list(APPEND MCRL2_TOOLS ltsconvertsymbolic)
-  list(APPEND MCRL2_TOOLS pbesbddsolve)
+  add_subdirectory(ltsconvertsymbolic)
+  add_subdirectory(pbesbddsolve)
 endif()
 
 if(MCRL2_ENABLE_BOOST_JSON_SUPPORT)
-  list(APPEND MCRL2_TOOLS lps2jani)
-endif()
-
-# N.B. Some developer tools are needed for the random tests.
-if(${MCRL2_ENABLE_DEVELOPER} OR ${MCRL2_ENABLE_TESTS})
-  foreach(TOOL ${MCRL2_TOOLS})
-    add_subdirectory(${TOOL})
-  endforeach()
+  add_subdirectory(lps2jani)
 endif()

@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsconstelm
+mcrl2_add_tool(lpsconstelm
   SOURCES
     lpsconstelm.cpp
   DEPENDS

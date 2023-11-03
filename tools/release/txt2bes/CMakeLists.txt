@@ -1,4 +1,4 @@
-add_mcrl2_tool(txt2bes
+mcrl2_add_tool(txt2bes
   SOURCES
     txt2bes.cpp
   DEPENDS

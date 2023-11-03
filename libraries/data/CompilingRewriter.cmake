@@ -10,16 +10,20 @@ set(R_NAME "mcrl2compilerewriter")
 set(R_IN_PATH "source/${R_NAME}.in")
 set(R_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${R_NAME}" )
 
-# Configure compiler
+# Find the compiler path
 get_filename_component(CC_PATH ${CMAKE_C_COMPILER} NAME)
 get_filename_component(CXX_PATH ${CMAKE_CXX_COMPILER} NAME)
 
-# Configure the default build options
+# Add the standard flags
 set(R_CXXFLAGS ${CMAKE_CXX_FLAGS})
 if(CMAKE_BUILD_TYPE)
+  # Add build specific configuration flags, does not work for multi-config generators.
   string(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" R_CXXFLAGS_NAME)
   set(R_CXXFLAGS "${R_CXXFLAGS} ${${R_CXXFLAGS_NAME}}")
 endif()
+
+# Add the MCRL2_JITTYC_ARGUMENTS, and c++17 since it is not included by default.
+set(R_CXXFLAGS "${R_CXXFLAGS} -std=c++17 ${MCRL2_JITTYC_ARGUMENTS}")
 
 # Add compiler flags to allow to compile rewritercode with a large number
 # of recursively used templates. The value 2000 is taken
@@ -63,6 +67,7 @@ endif()
 if(CMAKE_OSX_DEPLOYMENT_TARGET)
   set(R_OSX_FLAGS "${R_OSX_FLAGS} -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}" )
 endif()
+
 set(R_CXXFLAGS "${R_CXXFLAGS} ${R_OSX_FLAGS}")
 set(R_LDFLAGS "${R_LDFLAGS} ${R_OSX_FLAGS}")
 
@@ -71,17 +76,14 @@ file(RELATIVE_PATH REL_INCLUDE_PATH ${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH
 
 # Configure one version for deployment
 set(R_INCLUDE_DIRS "-I\"`dirname $0`/${REL_INCLUDE_PATH}\"")
-configure_file(${R_IN_PATH} "${R_PATH}.install" @ONLY)
+configure_file(${R_IN_PATH} ${R_PATH}.install @ONLY)
 
 # Configure one version for use in the build tree
 set(R_INCLUDE_DIRS "-I\"${CMAKE_BINARY_DIR}/libraries/utilities\" ")
 foreach(LIB "atermpp" "utilities" "core" "data")
   set(R_INCLUDE_DIRS "${R_INCLUDE_DIRS}-I\"${CMAKE_SOURCE_DIR}/libraries/${LIB}/include\" " )
 endforeach()
-configure_file(${R_IN_PATH} "${R_PATH}" @ONLY)
-
-# Make the build tree version available in the rest of the build as a target
-add_executable(${R_NAME} IMPORTED IMPORTED_LOCATION ${R_PATH})
+configure_file(${R_IN_PATH} ${R_PATH} @ONLY)
 
 # Make the deployment version available at install time
 install(PROGRAMS ${R_PATH}.install RENAME ${R_NAME} DESTINATION ${MCRL2_RUNTIME_PATH} COMPONENT Runtime)

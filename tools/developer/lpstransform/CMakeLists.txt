@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpstransform
+mcrl2_add_tool(lpstransform
   SOURCES
     lpstransform.cpp
   DEPENDS

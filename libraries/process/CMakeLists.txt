@@ -1,11 +1,9 @@
-add_mcrl2_library(process
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_process
   SOURCES
-    process.cpp
+    source/process.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data
-  INCLUDE
-    # TODO: get rid of the LPS header dependency
-    ${CMAKE_SOURCE_DIR}/libraries/lps/include
 )
+
+target_include_directories(mcrl2_process PUBLIC ${CMAKE_SOURCE_DIR}/libraries/lps/include)

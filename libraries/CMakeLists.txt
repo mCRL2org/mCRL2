@@ -2,30 +2,17 @@
 ### The mCRL2 libraries
 ###
 
-set(MCRL2_LIBRARIES
-  atermpp
-  bes
-  core
-  data
-  gui
-  lps
-  lts
-  modal_formula
-  pbes
-  pres
-  pg
-  process
-  res
-  smt
-  symbolic
-  utilities
-)
-
-foreach(LIB ${MCRL2_LIBRARIES})
-  add_subdirectory(${LIB})
-endforeach()
-
-# Add custom directory if it exists.
-IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/custom)
-  add_subdirectory(custom)
-endif()
+add_subdirectory(atermpp)
+add_subdirectory(bes)
+add_subdirectory(core)
+add_subdirectory(data)
+add_subdirectory(gui)
+add_subdirectory(lps)
+add_subdirectory(lts)
+add_subdirectory(modal_formula)
+add_subdirectory(pbes)
+add_subdirectory(pg)
+add_subdirectory(process)
+add_subdirectory(smt)
+add_subdirectory(symbolic)
+add_subdirectory(utilities)

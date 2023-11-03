@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsinvelm
+mcrl2_add_tool(lpsinvelm
   SOURCES
     lpsinvelm.cpp
   DEPENDS

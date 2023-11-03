@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpscleave
+mcrl2_add_tool(lpscleave
   SOURCES
     cleave.cpp
     lpscleave.cpp

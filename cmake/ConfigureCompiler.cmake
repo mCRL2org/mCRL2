@@ -5,15 +5,20 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   endif()
   include(ConfigureMSVC)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+
   if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 7.0)
     message(FATAL_ERROR "GCC version must be at least 7.0.")
   endif()
   include(ConfigureUNIX)
+
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+
   if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 5.0)
     message(FATAL_ERROR "Clang version must be at least 5.0.")
   endif()
+  set(MCRL2_IS_CLANG 1)
   include(ConfigureUNIX)
+
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   # The following should actually be version 10.0.1, but then VERSION_LESS does not handle AppleClang 11 correctly.
   if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 10.0)
@@ -37,16 +42,29 @@ endif()
 
 # Add the definition to disable soundness checks when the configuration is set to OFF.
 if(NOT ${MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS})
-  add_definitions(-DMCRL2_NO_SOUNDNESS_CHECKS)
+  add_compile_definitions(MCRL2_NO_SOUNDNESS_CHECKS)
 endif()
 
+# Add compiler definitions
 if(MCRL2_ENABLE_SYLVAN)
-  add_definitions(-DMCRL2_ENABLE_SYLVAN)
+  add_compile_definitions(MCRL2_ENABLE_SYLVAN)
+endif()
+
+if(MCRL2_ENABLE_JITTYC)
+  add_compile_definitions(MCRL2_ENABLE_JITTYC)
+
+  if(MCRL2_TEST_JITTYC)
+    add_compile_definitions(MCRL2_TEST_JITTYC)
+  endif()
 endif()
 
 if(MCRL2_ENABLE_MULTITHREADING)
-  add_definitions(-DMCRL2_THREAD_SAFE)
+  add_compile_definitions(MCRL2_ENABLE_MULTITHREADING)
 endif()
+
+if(MCRL2_SKIP_LONG_TESTS)
+  add_compile_definitions(MCRL2_SKIP_LONG_TESTS)
+endif(MCRL2_SKIP_LONG_TESTS)
 
 # Enable C++17 for all targets.
 set(CMAKE_CXX_STANDARD 17)

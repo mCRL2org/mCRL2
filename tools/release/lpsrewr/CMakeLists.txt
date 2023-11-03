@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpsrewr
+mcrl2_add_tool(lpsrewr
   SOURCES
     lpsrewr.cpp
   DEPENDS

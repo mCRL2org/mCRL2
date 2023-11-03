@@ -33,9 +33,9 @@ set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_BINARY_DIR}/COPYING.txt )
 set(CPACK_RESOURCE_FILE_README  ${CMAKE_BINARY_DIR}/README.txt )
 
 if(APPLE)
-  configure_file(${CMAKE_SOURCE_DIR}/build/packaging/osx/Contents/Info.plist
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/osx/Contents/Info.plist
             ${MCRL2_STAGE_PATH}/${MCRL2_BUNDLE_PATH}/Contents/Info.plist @ONLY)
-  configure_file(${CMAKE_SOURCE_DIR}/build/packaging/osx/Contents/MacOS/mCRL2
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/osx/Contents/MacOS/mCRL2
             ${MCRL2_STAGE_PATH}/${MCRL2_BUNDLE_PATH}/Contents/MacOS/mCRL2 @ONLY)
 
   add_executable(mCRL2 IMPORTED
@@ -45,21 +45,21 @@ if(APPLE)
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents)
   install(PROGRAMS ${MCRL2_STAGE_PATH}/${MCRL2_BUNDLE_PATH}/Contents/MacOS/mCRL2
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/MacOS)
-  install(FILES ${CMAKE_SOURCE_DIR}/build/packaging/icons/mcrl2-orange.icns
+  install(FILES ${CMAKE_SOURCE_DIR}/cmake/packaging/icons/mcrl2-orange.icns
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/Resources)
-  install(FILES ${CMAKE_SOURCE_DIR}/build/packaging/osx/Contents/bin/qt.conf
+  install(FILES ${CMAKE_SOURCE_DIR}/cmake/packaging/osx/Contents/bin/qt.conf
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/bin)
 
   if(MCRL2_ENABLE_GUI_TOOLS)
-    find_program(MACDEPLOYQT NAMES macdeployqt PATHS ${Qt6_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)" REQUIRED)
+    find_program(MACDEPLOYQT_EXECUTABLE NAMES macdeployqt PATHS ${Qt6_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)" REQUIRED)
     set(EXECUTABLES "")
     foreach(EXECUTABLE ${MCRL2_QT_APPS})
       set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
     endforeach()
     install(CODE "
-      message(STATUS \"Executing ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+      message(STATUS \"Executing ${MACDEPLOYQT_EXECUTABLE} mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
       execute_process(
-        COMMAND ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES}
+        COMMAND ${MACDEPLOYQT_EXECUTABLE} mCRL2.app ${EXECUTABLES}
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
         OUTPUT_FILE /tmp/macdeployqt.log
         RESULT_VARIABLE retval
@@ -75,9 +75,9 @@ endif()
 # Branding image displayed inside the installer
 if(WIN32)
   # Install icon for NSIS (must be a .bmp file)
-  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\build\\\\packaging\\\\mcrl2-install-logo.bmp")
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\cmake\\\\packaging\\\\mcrl2-install-logo.bmp")
 elseif(APPLE)
-  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/build/packaging/icons/mcrl2-green.icns")
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/cmake/packaging/icons/mcrl2-green.icns")
 endif()
 
 # Source packages
@@ -176,7 +176,7 @@ set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://www.mcrl2.org")
 set(CPACK_DEBIAN_PACKAGE_SECTION "science")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY ${CPACK_DEBIAN_PACKAGE_PRIORITY})
-set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/build/packaging/debian/postinst")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/cmake/packaging/debian/postinst")
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
 # -----------------------------------------------------------------------------
 "toolset for the mCRL2 formal specification language
@@ -198,23 +198,27 @@ endif()
 # Windows
 # -------
 
-if (WIN32)
+if (WIN32 AND MCRL2_ENABLE_GUI_TOOLS)
+  find_program(WINDEPLOYQT_EXECUTABLE NAMES "windeployqt.exe" PATHS "${Qt6_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
+  set(EXECUTABLES "")
   foreach(EXECUTABLE ${MCRL2_QT_APPS})
-    find_program(WINDEPLOYQT NAMES "windeployqt" PATHS "${Qt5_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
-    install(CODE "
-      message(STATUS \"Executing ${WINDEPLOYQT_EXECUTABLE} ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
-      execute_process(
-        COMMAND ${WINDEPLOYQT} --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLE}.exe
-        WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}
-        RESULT_VARIABLE retval
-      )
-      if(retval AND NOT retval EQUAL 0)
-        message(FATAL_ERROR \"Failed: ${retval}\")
-      endif()
-    "
-    COMPONENT Stable)
+    set(EXECUTABLES "${EXECUTABLES} ${EXECUTABLE}.exe")
   endforeach()
+  
+  install(CODE "
+    message(STATUS \"Executing ${WINDEPLOYQT_EXECUTABLE} for ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
+    execute_process(
+      COMMAND ${WINDEPLOYQT_EXECUTABLE} --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLES}
+      WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}
+      RESULT_VARIABLE retval
+    )
+    if(retval AND NOT retval EQUAL 0)
+      message(FATAL_ERROR \"Failed: ${retval}\")
+    endif()
+  "
+  COMPONENT Stable)
 endif()
+
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
 SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")

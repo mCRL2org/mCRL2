@@ -413,9 +413,6 @@ constexpr bool mCRL2logEnabled(const log_level_t level)
   return level <= MCRL2MaxLogLevel && level <= mcrl2::log::logger::get_reporting_level();
 }
 
-// For backward compatibility with ltsmin.
-using mcrl2_logger = logger;
-
 } // namespace mcrl2::log
 
 /// \brief mCRL2log(LEVEL) provides the stream used to log.

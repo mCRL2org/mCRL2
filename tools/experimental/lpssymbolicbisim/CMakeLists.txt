@@ -1,4 +1,4 @@
-add_mcrl2_tool(lpssymbolicbisim
+mcrl2_add_tool(lpssymbolicbisim
   SOURCES
     lpssymbolicbisim.cpp
     ../pbessymbolicbisim/simplifier.cpp
