@@ -39,14 +39,14 @@ endif()
 ##---------------------------------------------------
 ##---------------------------------------------------
 
-if (MCRL2_ENABLE_FORTIFY)
+if (MCRL2_ENABLE_STD_CHECKS)
   if(MCRL2_IS_CLANG)
     # For libc++ (the LLVM standard library, what a naming scheme) there is also a debug mode
-    add_compile_definitions($<$<CONFIG:Debug>:_LIBCPP_ENABLE_DEBUG_MODE=1>)
+    add_compile_definitions(_LIBCPP_ENABLE_DEBUG_MODE=1)
   else()
     # Enable libstdc++ debug checks and "fortify" mode, when code correctness is optional.
-    add_compile_definitions($<$<CONFIG:Debug>:_GLIBCXX_DEBUG>)
-    add_compile_definitions($<$<CONFIG:Debug>:_FORTIFY_SOURCE=3>)
+    add_compile_definitions(_GLIBCXX_DEBUG)
+    add_compile_definitions(_FORTIFY_SOURCE=3)
 
     # These debug checks require basic optimisation for some reason, otherwise it gives a warning.
     mcrl2_add_c_debug_flag(-O)
