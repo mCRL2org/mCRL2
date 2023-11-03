@@ -54,6 +54,12 @@ function(mcrl2_add_library TARGET_NAME)
     mcrl2_add_tests(${TARGET_NAME} "test/" "librarytest")
   endif()
 
+  install(TARGETS ${TARGET_NAME}
+    COMPONENT "Libraries"
+    LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
+    ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
+    FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
+
 endfunction()
 
 # Adds an executable target for an mCRL2 tool.
@@ -78,6 +84,11 @@ function(mcrl2_add_tool TARGET_NAME)
   if(MCRL2_MAN_PAGES)
     mcrl2_add_man_page(${TARGET_NAME})
   endif()
+  
+  install(TARGETS ${TARGET_NAME}
+    COMPONENT "Stable"
+    RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
+    BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH})
 
 endfunction()
 
@@ -131,6 +142,11 @@ function(mcrl2_add_gui_tool TARGET_NAME)
   set_target_properties(${TARGET_NAME} PROPERTIES AUTOUIC TRUE)
   set_target_properties(${TARGET_NAME} PROPERTIES AUTORCC TRUE)
     
+  install(TARGETS ${TARGET_NAME}
+    COMPONENT "Stable"
+    RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
+    BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH})
+
 endfunction()
 
 # Install the given headers into the MCRL2_INCLUDE_PATH
@@ -202,7 +218,7 @@ function(mcrl2_add_header_tests TARGET_NAME INCLUDE_DIR EXCLUDE_FILES)
 
       if(NOT TARGET ${testname})
         # In test.cpp we define BOOST_UNITS_HEADER_NAME to be the current header
-        add_executable(${testname} "${CMAKE_SOURCE_DIR}/build/cmake/headertest.cpp")
+        add_executable(${testname} "${CMAKE_SOURCE_DIR}/cmake/headertest.cpp")
         target_link_libraries(${testname} ${TARGET_NAME})
         set_target_properties(${testname} PROPERTIES COMPILE_DEFINITIONS "BOOST_UNITS_HEADER_NAME=${cppname}")
       endif()
