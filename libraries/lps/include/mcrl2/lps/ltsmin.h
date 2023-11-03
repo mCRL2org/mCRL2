@@ -24,6 +24,14 @@
 typedef mcrl2::log::log_level_t mcrl2_log_level_t;
 using mcrl2::log::logger;
 
+namespace mcrl2::log {
+  using mcrl2_logger = mcrl2::log::logger;
+}
+
+#ifdef MCRL2_ENABLE_JITTYC
+#define MCRL2_JITTYC_AVAILABLE
+#endif
+
 namespace mcrl2 {
 
 namespace lps {
