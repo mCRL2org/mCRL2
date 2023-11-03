@@ -130,6 +130,21 @@ endif()
 # Install the example directory.
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 
+# Install third party libraries
+install(TARGETS dparser
+  COMPONENT "Libraries"
+  LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
+  ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
+  FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
+
+if (MCRL2_ENABLE_SYLVAN)
+  install(TARGETS sylvan
+    COMPONENT "Libraries"
+    LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
+    ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
+    FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
+endif()
+
 # Add the packaging script, done after all the configuration has finished.
 add_subdirectory(cmake/packaging)
 
