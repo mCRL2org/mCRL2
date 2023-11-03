@@ -1,6 +1,6 @@
 include(MCRL2AddFlag)
 
-include_directories(build/workarounds/msvc)
+include_directories(cmake/workarounds/msvc)
 
 ##---------------------------------------------------
 ## Set MSVC specific compiler flags
