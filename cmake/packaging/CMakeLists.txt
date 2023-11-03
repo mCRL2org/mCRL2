@@ -200,21 +200,25 @@ endif()
 
 if (WIN32 AND MCRL2_ENABLE_GUI_TOOLS)
   find_program(WINDEPLOYQT_EXECUTABLE NAMES "windeployqt.exe" PATHS "${Qt6_DIR}/../../../bin/" DOC "Path to windeployqt executable (in the Qt binary directory)" REQUIRED)
+  set(EXECUTABLES "")
   foreach(EXECUTABLE ${MCRL2_QT_APPS})
-    install(CODE "
-      message(STATUS \"Executing ${WINDEPLOYQT_EXECUTABLE} ${EXECUTABLE} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
-      execute_process(
-        COMMAND ${WINDEPLOYQT_EXECUTABLE} --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLE}.exe
-        WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}
-        RESULT_VARIABLE retval
-      )
-      if(retval AND NOT retval EQUAL 0)
-        message(FATAL_ERROR \"Failed: ${retval}\")
-      endif()
-    "
-    COMPONENT Stable)
+    set(EXECUTABLES "${EXECUTABLES} ${EXECUTABLE}.exe")
   endforeach()
+  
+  install(CODE "
+    message(STATUS \"Executing ${WINDEPLOYQT_EXECUTABLE} for ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}\")
+    execute_process(
+      COMMAND ${WINDEPLOYQT_EXECUTABLE} --no-translations --no-system-d3d-compiler --no-quick-import ${EXECUTABLES}
+      WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${MCRL2_RUNTIME_PATH}
+      RESULT_VARIABLE retval
+    )
+    if(retval AND NOT retval EQUAL 0)
+      message(FATAL_ERROR \"Failed: ${retval}\")
+    endif()
+  "
+  COMPONENT Stable)
 endif()
+
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
 SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
