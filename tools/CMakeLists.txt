@@ -17,5 +17,6 @@ endif()
 if(MCRL2_ENABLE_TESTS AND NOT MCRL2_ENABLE_DEVELOPER)
   # For testing we need several developer tools anyway
   add_subdirectory(developer/lpstransform)
+  add_subdirectory(developer/ltsconvertsymbolic)
   add_subdirectory(developer/pbestransform)
 endif()
