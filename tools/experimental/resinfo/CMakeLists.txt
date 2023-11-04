@@ -1,4 +1,4 @@
-add_mcrl2_tool(resinfo
+mcrl2_add_tool(resinfo
   SOURCES
     resinfo.cpp
   DEPENDS

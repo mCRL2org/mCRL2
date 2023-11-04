@@ -1,4 +1,4 @@
-add_mcrl2_tool(pressolve
+mcrl2_add_tool(pressolve
   SOURCES
     pressolve.cpp
   DEPENDS

@@ -1,4 +1,4 @@
-add_mcrl2_tool(respp
+mcrl2_add_tool(respp
   SOURCES
     respp.cpp
   DEPENDS

@@ -1,8 +1,7 @@
-add_mcrl2_library(res
-  INSTALL_HEADERS TRUE
+mcrl2_add_library(mcrl2_res
   SOURCES
-    res.cpp
-    io.cpp
+    source/res.cpp
+    source/io.cpp
   DEPENDS
     mcrl2_pres
 )

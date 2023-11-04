@@ -1,4 +1,4 @@
-add_mcrl2_tool(presinfo
+mcrl2_add_tool(presinfo
   SOURCES
     presinfo.cpp
   DEPENDS

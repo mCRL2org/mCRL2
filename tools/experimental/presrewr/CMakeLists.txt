@@ -1,4 +1,4 @@
-add_mcrl2_tool(presrewr
+mcrl2_add_tool(presrewr
   SOURCES
     presrewr.cpp
   DEPENDS

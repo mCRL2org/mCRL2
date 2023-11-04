@@ -1,4 +1,4 @@
-add_mcrl2_tool(txt2res
+mcrl2_add_tool(txt2res
   SOURCES
     txt2res.cpp
   DEPENDS

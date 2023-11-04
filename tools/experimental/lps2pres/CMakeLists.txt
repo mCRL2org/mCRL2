@@ -1,4 +1,4 @@
-add_mcrl2_tool(lps2pres
+mcrl2_add_tool(lps2pres
   SOURCES
     lps2pres.cpp
   DEPENDS
