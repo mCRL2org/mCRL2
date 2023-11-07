@@ -16,7 +16,7 @@ identification of the version you are dealing with by inspecting the output of
 modified sources, the commit hash is appended with ``M``, such that the
 `--version` output shows that the checkout was not clean.
 
-Version numbers are computed in :file:`scripts/MCRL2Version.cmake`. This is the
+Version numbers are computed in :file:`cmake/MCRL2Version.cmake`. This is the
 *only* place where the main version (``YYYYMM.B``) can be defined. The rest of
 the source code *should not* contain hardcoded version numbers.
 
@@ -117,7 +117,7 @@ Updating release number and copyright information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Update the version number in the file
-  ``scripts/MCRL2Version.cmake`` by updating the value assigned to the CMake
+  ``cmake/MCRL2Version.cmake`` by updating the value assigned to the CMake
   variable ``MCRL2_MAJOR_VERSION``.
 
 * Update the copyright period in the file ``COPYING``.

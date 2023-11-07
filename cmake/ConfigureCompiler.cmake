@@ -41,7 +41,7 @@ if(CMAKE_BUILD_TYPE)
 endif()
 
 # Add the definition to disable soundness checks when the configuration is set to OFF.
-if(NOT ${MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS})
+if(NOT ${MCRL2_ENABLE_SOUNDNESS_CHECKS})
   add_compile_definitions(MCRL2_NO_SOUNDNESS_CHECKS)
 endif()
 

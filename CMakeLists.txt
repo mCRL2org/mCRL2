@@ -54,12 +54,12 @@ option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the li
 option(MCRL2_ENABLE_STABLE           "Enable compilation of stable tools." ON)
 option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks implemented by the AddressSanitizer." OFF)
 option(MCRL2_ENABLE_THREADSANITIZER  "Enable additional data race run-time checks implemented by the ThreadSanitizer." OFF)
-option(MCRL2_ENABLE_FORTIFY          "Enable libstdc++ and libc++ specific assertions in Debug, e.g. safe iterator checks." OFF)
 option(MCRL2_ENABLE_CODE_COVERAGE    "Enable generation of code coverage statistics." OFF)
-option(MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS "Enable extensive soundness check in the Debug build type." ON)
-option(MCRL2_ENABLE_MSVC_CCACHE     "Enable MSVC specific flags to enable building with ccache" OFF)
-option(MCRL2_ENABLE_JITTYC          "Enable the compiling rewriter (jittyc) functionality," ${UNIX})
-option(MCRL2_ENABLE_MULTITHREADING  "Enable the usage of multiple threads. Disabling removes usage of synchronisation primitives" ON)
+option(MCRL2_ENABLE_STD_CHECKS       "Enable libstdc++ and libc++ specific assertions, e.g. safe iterator checks." OFF)
+option(MCRL2_ENABLE_SOUNDNESS_CHECKS "Enable extensive soundness checks." ON)
+option(MCRL2_ENABLE_MSVC_CCACHE      "Enable MSVC specific flags to enable building with ccache" OFF)
+option(MCRL2_ENABLE_JITTYC           "Enable the compiling rewriter (jittyc) functionality," ${UNIX})
+option(MCRL2_ENABLE_MULTITHREADING   "Enable the usage of multiple threads. Disabling removes usage of synchronisation primitives" ON)
 
 mark_as_advanced(
   MCRL2_ENABLE_ADDRESSSANITIZER
@@ -129,6 +129,21 @@ endif()
 
 # Install the example directory.
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
+
+# Install third party libraries
+install(TARGETS dparser
+  COMPONENT "Libraries"
+  LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
+  ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
+  FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
+
+if (MCRL2_ENABLE_SYLVAN)
+  install(TARGETS sylvan
+    COMPONENT "Libraries"
+    LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
+    ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
+    FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
+endif()
 
 # Add the packaging script, done after all the configuration has finished.
 add_subdirectory(cmake/packaging)

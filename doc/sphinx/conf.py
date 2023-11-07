@@ -36,7 +36,7 @@ olddir = os.getcwd()
 try:
     os.chdir(_CMAKE_SOURCE_DIR)
     out = call('CMake', ['cmake', '-P',
-        f'{_CMAKE_SOURCE_DIR}/build/cmake/MCRL2Version.cmake']).decode('utf-8')
+        f'{_CMAKE_SOURCE_DIR}/cmake/MCRL2Version.cmake']).decode('utf-8')
     for line in iter(out.splitlines()):
         matches = re.findall(r'MCRL2_MAJOR_VERSION ([\S]+)', line)
         if matches:
