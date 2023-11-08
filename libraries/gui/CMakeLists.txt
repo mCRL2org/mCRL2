@@ -22,7 +22,7 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   if(APPLE)
     # This is a macOS hack to ensure that this framework is being deployed.
     # Even though Qt6::Gui also uses it it was being ignored.
-    target_link_libraries(mcrl2_gui Qt6::DBus)
+    target_link_libraries(mcrl2_gui PUBLIC Qt6::DBus)
   endif()
 
   # Enable the CMake build system to automatically run MOC/UIC/RCC on source files that need it.
