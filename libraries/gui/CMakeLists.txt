@@ -19,6 +19,12 @@ if(MCRL2_ENABLE_GUI_TOOLS)
       OpenGL::GL
   )
 
+  if(APPLE)
+    # This is a macOS hack to ensure that this framework is being deployed.
+    # Even though Qt6::Gui also uses it it was being ignored.
+    target_link_libraries(mcrl2_gui Qt6::DBus)
+  endif()
+
   # Enable the CMake build system to automatically run MOC/UIC/RCC on source files that need it.
   set_target_properties(mcrl2_gui PROPERTIES AUTOMOC TRUE)
   set_target_properties(mcrl2_gui PROPERTIES AUTOUIC TRUE)

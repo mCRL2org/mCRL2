@@ -56,16 +56,23 @@ if(APPLE)
     foreach(EXECUTABLE ${MCRL2_QT_APPS})
       set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
     endforeach()
+    # We are running macdeployqt twice since somehow it does not take into account transitive dependencies anymore. (2023/11/08)
     install(CODE "
       message(STATUS \"Executing ${MACDEPLOYQT_EXECUTABLE} mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
       execute_process(
         COMMAND ${MACDEPLOYQT_EXECUTABLE} mCRL2.app ${EXECUTABLES}
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
         RESULT_VARIABLE retval
-      )      
+      )
+      execute_process(
+        COMMAND ${MACDEPLOYQT_EXECUTABLE} mCRL2.app ${EXECUTABLES}
+        WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
+        RESULT_VARIABLE retval
+      )       
       if(retval AND NOT retval EQUAL 0)
         message(FATAL_ERROR \"Failed: ${retval}\")
       endif()
+
     "
     COMPONENT Stable)
   endif()
