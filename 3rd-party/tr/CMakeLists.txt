@@ -18,7 +18,7 @@ add_custom_target(${PROJECT_NAME}_headers
 )
 
 # actual target:
-add_library(${PROJECT_NAME} STATIC
+add_library(${PROJECT_NAME}
   source/tr.c
 )
 
