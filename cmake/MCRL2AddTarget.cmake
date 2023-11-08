@@ -147,6 +147,12 @@ function(mcrl2_add_gui_tool TARGET_NAME)
     RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
     BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH})
 
+  if(WIN32)
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+      COMMAND ${WINDEPLOYQT_EXECUTABLE} --no-translations --no-system-d3d-compiler --no-quick-import $<TARGET_FILE:${TARGET_NAME}>
+      WORKING_DIRECTORY ${MCRL2_TOOL_PATH})
+  endif()
+
 endfunction()
 
 # Install the given headers into the MCRL2_INCLUDE_PATH
@@ -227,7 +233,8 @@ function(mcrl2_add_header_tests TARGET_NAME INCLUDE_DIR EXCLUDE_FILES)
   endforeach()
 endfunction()
 
-# TODO: Document this function.
+# This function adds versions and icon meta data to the executable by adapting the source files.
+# On windows this function adds a .rc file to the input source files.
 function(mcrl2_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_FILES)
   if(MSVC)
     if(NOT ICON)
@@ -237,6 +244,7 @@ function(mcrl2_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_F
     set(ORIGFILENAME ${TARGET_NAME}.exe)
     set(RC_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_icon.rc)
 
+    # Destructure the version number.
     string(SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 VERSION_HIHI)
     string(SUBSTRING ${MCRL2_MAJOR_VERSION} 4 -1 VERSION_HILO)
     string(LENGTH ${VERSION_HILO} _vlen)
@@ -256,6 +264,7 @@ function(mcrl2_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_F
     set(ICOFILE ${CMAKE_SOURCE_DIR}/cmake/packaging/icons/${ICON}.ico)
     get_filename_component(ORIGFILENAME ${ORIGFILENAME} NAME)
     configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/icon.rc.in ${RC_FILE} @ONLY)
+
     set(${SOURCE_FILES} ${${SOURCE_FILES}} ${RC_FILE})
   elseif(APPLE)
     set(ICNS_FILE ${CMAKE_SOURCE_DIR}/cmake/packaging/icons/${ICON}.icns)
