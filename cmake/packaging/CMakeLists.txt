@@ -61,7 +61,6 @@ if(APPLE)
       execute_process(
         COMMAND ${MACDEPLOYQT_EXECUTABLE} mCRL2.app ${EXECUTABLES}
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
-        OUTPUT_FILE /tmp/macdeployqt.log
         RESULT_VARIABLE retval
       )      
       if(retval AND NOT retval EQUAL 0)
