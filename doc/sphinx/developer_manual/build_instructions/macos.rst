@@ -6,7 +6,7 @@ MacOS instructions
 Below we list the various dependencies required to build the mCRL2 toolset in
 its basic configuration. For testing and building the documentation we need
 additional dependencies that are listed at the end. We can use `Homebrew
-<https://brew.sh/>_` to acquire the necessary dependencies easily or use the
+<https://brew.sh/>`_ to acquire the necessary dependencies easily or use the
 provided websites to acquire them individually.
 
   * *XCode* must be installed. It can be obtained from Apple's developer website. Afterwards we have to execute `xcode-select --install` to install the required command line tools.
