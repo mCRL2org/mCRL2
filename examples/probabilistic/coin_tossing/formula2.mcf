@@ -1,0 +1,13 @@
+% Determine the probability of throwing exactly L heads in K throws. 
+%
+% Jan Friso Groote, November 2023
+
+map K,L :Nat;
+eqn K = 6;
+    L = 2;
+form mu X(throws:Nat = 0, heads:Nat=0). 
+         val(0) || 
+         ( val(throws<K) && 
+             [head]X(throws+1, heads+1) && 
+             [tail]X(throws+1, heads)) ||
+         ( val(throws>=K && heads==L) && val(1) );

@@ -1,0 +1,9 @@
+% A simple process to repeatedly toss a fair coin.
+%
+% Tim Willemse. Novemer 2023
+
+act head, tail;
+
+proc Coin = dist b:Bool[1/2]. (b -> head.Coin <> tail.Coin);
+
+init Coin;
