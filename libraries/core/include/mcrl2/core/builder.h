@@ -142,6 +142,30 @@ make_apply_builder_arg1(const Arg1& arg1)
   return apply_builder_arg1<Builder, Arg1>(arg1);
 }
 
+// apply a builder with two additional template arguments
+template <template <class> class Builder, class Arg1, class Arg2>
+class apply_builder_arg2: public Builder<apply_builder_arg2<Builder, Arg1, Arg2> >
+{
+  typedef Builder<apply_builder_arg2<Builder, Arg1, Arg2> > super;
+
+  public:
+    using super::enter;
+    using super::leave;
+    using super::apply;
+    using super::update;
+
+    apply_builder_arg2(const Arg1& arg1, const Arg2& arg2):
+      super(arg1, arg2)
+    {}
+};
+
+template <template <class> class Builder, class Arg1, class Arg2>
+apply_builder_arg2<Builder, Arg1, Arg2>
+make_apply_builder_arg2(const Arg1& arg1, const Arg2& arg2)
+{
+  return apply_builder_arg2<Builder, Arg1, Arg2>(arg1, arg2);
+}
+
 
 // apply a builder without additional template arguments
 template <template <class> class Builder, class Function>

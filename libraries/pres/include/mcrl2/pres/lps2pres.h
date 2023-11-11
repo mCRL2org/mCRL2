@@ -95,7 +95,7 @@ std::cerr << "OBTAINED EQUATIONS\n "; for(auto e: equations){ std::cerr << "EQ "
       std::set<core::identifier_string> lps_ids = lps::find_identifiers(lpsspec);
       std::set<core::identifier_string> dataspec_ids = data::function_and_mapping_identifiers(lpsspec.data());
       lps_ids.insert(dataspec_ids.begin(), dataspec_ids.end());
-      f = state_formulas::preprocess_state_formula(f, lps_ids, preprocess_modal_operators);
+      f = state_formulas::preprocess_state_formula(f, lps_ids, preprocess_modal_operators, true);
 
       if (m_check_only)
       {

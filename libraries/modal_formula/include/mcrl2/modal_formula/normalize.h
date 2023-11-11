@@ -83,10 +83,25 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   {
     if (m_quantitative)
     {
-      result = m_negated ? (x.sort()==data::sort_bool::bool_() ? static_cast<T>(not_(x)) : static_cast<T>(minus(x)) ) : x;
+      if (m_negated)
+      {
+        if (x.sort()==data::sort_bool::bool_()) 
+        {
+          result = data::sort_bool::not_(x);
+        }
+        else
+        {
+          result = data::sort_real::negate(x);
+        }
+      }
+      else
+      {
+        result = x;
+      }
     }
     else // x is an ordinary modal formula.
     {
+      assert(x.sort()==data::sort_bool::bool_());
       result = m_negated ? data::sort_bool::not_(x) : x;
     }
   }
@@ -282,7 +297,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     state_formula operand;
     if (m_negated)
     {
-      apply(operand, negate_variables(x.name(), x.operand()));
+      apply(operand, negate_variables(x.name(), m_quantitative, x.operand()));
       make_nu(result, x.name(), x.assignments(), operand);
     }
     else
@@ -298,7 +313,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     state_formula operand;
     if (m_negated)
     {
-      apply(operand, negate_variables(x.name(), x.operand()));
+      apply(operand, negate_variables(x.name(), m_quantitative, x.operand()));
       make_mu(result, x.name(), x.assignments(), operand);
     }
     else

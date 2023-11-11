@@ -350,6 +350,7 @@ inline
 state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula,
                                                        const std::set<core::identifier_string>& context_ids,
                                                        bool preprocess_modal_operators,
+                                                       bool quantitative = false, 
                                                        bool warn_for_modal_operator_nesting = true
                                                       )
 {
@@ -396,7 +397,7 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   // remove occurrences of ! and =>
   if (!state_formulas::is_normalized(f))
   {
-    f = state_formulas::normalize(f);
+    f = state_formulas::normalize(f, quantitative); // true indicates that the formula is quantitative.
     mCRL2log(log::debug) << "formula after normalization:  " << f << std::endl;
     assert(state_formulas::is_normalized(f));
   }
