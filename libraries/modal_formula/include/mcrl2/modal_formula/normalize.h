@@ -58,12 +58,6 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
 
 /// \cond INTERNAL_DOCS
 
-template <typename T>
-void normalize(T& x, bool quantitative = false, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0);
-
-template <typename T>
-T normalize(const T& x, bool quantitative = false, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr);
-
 // \brief Visitor for normalizing a state formula.
 struct normalize_builder: public state_formula_builder<normalize_builder>
 {
@@ -385,7 +379,7 @@ bool is_normalized(const T& x)
 /// \param quantitative Indication whether the formula is a quantitative boolean formula.
 /// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
-void normalize(T& x, bool quantitative, bool negated, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type*)
+void normalize(T& x, bool quantitative = false, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
 {
   normalize_builder f(quantitative, negated);
   f.update(x);
@@ -397,7 +391,7 @@ void normalize(T& x, bool quantitative, bool negated, typename std::enable_if< !
 /// \param quantitative Indication whether the formula is a quantitative boolean formula.
 /// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
-T normalize(const T& x, bool quantitative, bool negated, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type*)
+T normalize(const T& x, bool quantitative = false, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
 {
   T result;
   normalize_builder f(quantitative, negated);
