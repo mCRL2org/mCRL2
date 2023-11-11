@@ -183,6 +183,25 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   }
 
   template <class T>
+  void apply(T& result, const plus& x)
+  {
+    state_formula left, right;
+    apply(left, x.left());
+    apply(right, x.right()); 
+    if (m_negated)
+    {
+      // The plus operator can be inverted if for instance the operator eq_mininf(x) is present, being equal to -infinity
+      // if x is minus infinity, and being plus infinity otherwise. 
+      // The dual plus then is: e1 dual+ e2 = eq_mininf(e1) && eq_mininf(e2) && (e1+e2).
+      throw mcrl2::runtime_error("Cannot negate the plus operator in quantitative modal formulas: " + pp(x) + ".");
+    }
+    else
+    {
+      make_plus(result, left, right);
+    }
+  }
+
+  template <class T>
   void apply(T& result, const imp& x)
   {
     state_formula y = m_quantitative ?
