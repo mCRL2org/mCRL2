@@ -42,6 +42,12 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
     result = false;
   }
 
+  /// \brief Visit minus node
+  void enter(const minus& /* x */)
+  {
+    result = false;
+  }
+
   /// \brief Visit imp node
   void enter(const imp& /* x */)
   {
@@ -53,10 +59,10 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
 /// \cond INTERNAL_DOCS
 
 template <typename T>
-void normalize(T& x, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0);
+void normalize(T& x, bool quantitative = false, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0);
 
 template <typename T>
-T normalize(const T& x, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr);
+T normalize(const T& x, bool quantitative = false, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr);
 
 // \brief Visitor for normalizing a state formula.
 struct normalize_builder: public state_formula_builder<normalize_builder>
@@ -67,22 +73,34 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   using super::update;
   using super::apply;
 
-  bool negated;
+  bool m_quantitative;
+  bool m_negated;
 
-  normalize_builder(bool negated_)
-    : negated(negated_)
+  // negated indicates that the formulas is under a negation.
+  // quantitative indicates that the formula yields a real value, 
+  // in which case forall, exists and not are replaced by supremum, infimum and minus. 
+  normalize_builder(bool quantitative, bool negated)
+    : m_quantitative(quantitative),
+      m_negated(negated)
   {}
 
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = negated ? data::sort_bool::not_(x) : x;
+    if (m_quantitative)
+    {
+      result = m_negated ? (x.sort()==data::sort_bool::bool_() ? static_cast<T>(not_(x)) : static_cast<T>(minus(x)) ) : x;
+    }
+    else // x is an ordinary modal formula.
+    {
+      result = m_negated ? data::sort_bool::not_(x) : x;
+    }
   }
 
   template <class T>
   void apply(T& result, const true_& /*x*/)
   {
-    if (negated)
+    if (m_negated)
     {
       result = false_();
     }
@@ -95,7 +113,7 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   template <class T>
   void apply(T& result, const false_& /*x*/)
   {
-    if (negated)
+    if (m_negated)
     {
       result = true_();
     }
@@ -108,76 +126,126 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   template <class T>
   void apply(T& result, const not_& x)
   {
-    result = normalize(x.operand(), !negated);
+    assert(!m_quantitative);
+    m_negated=!m_negated;
+    apply(result, x.operand());
+    m_negated=!m_negated;
+  }
+
+  template <class T>
+  void apply(T& result, const minus& x)
+  {
+    assert(m_quantitative);
+    m_negated=!m_negated;
+    apply(result, x.operand());
+    m_negated=!m_negated;
   }
 
   template <class T>
   void apply(T& result, const and_& x)
   {
-    state_formula left = normalize(x.left(), negated);
-    state_formula right = normalize(x.right(), negated);
-    if (negated)
+    state_formula left, right;
+    apply(left, x.left());
+    apply(right, x.right()); 
+    if (m_negated)
     {
-      result = or_(left, right);
+      make_or_(result, left, right);
     }
     else
     {
-      result = and_(left, right);
+      make_and_(result, left, right);
     }
   }
 
   template <class T>
   void apply(T& result, const or_& x)
   {
-    state_formula left = normalize(x.left(), negated);
-    state_formula right = normalize(x.right(), negated);
-    if (negated)
+    state_formula left, right;
+    apply(left, x.left());
+    apply(right, x.right()); 
+    if (m_negated)
     {
-      result = and_(left, right);
+      make_and_(result, left, right);
     }
     else
     {
-      result = or_(left, right);
+      make_or_(result, left, right);
     }
   }
 
   template <class T>
   void apply(T& result, const imp& x)
   {
-    state_formula y = or_(not_(x.left()), x.right());
-    result = normalize(y, negated);
+    state_formula y = m_quantitative ?
+                        or_(minus(x.left()), x.right()) :
+                        or_(not_(x.left()), x.right());
+    apply(result, y);
   }
 
   template <class T>
   void apply(T& result, const forall& x)
   {
-    if (negated)
+    state_formula body;
+    apply(body, x.body());
+    if (m_negated)
     {
-      result = exists(x.variables(), normalize(x.body(), true));
+      make_exists(result, x.variables(), body); 
     }
     else
     {
-      result = forall(x.variables(), normalize(x.body(), false));
+      make_forall(result, x.variables(), body);
     }
   }
 
   template <class T>
   void apply(T& result, const exists& x)
   {
-    if (negated)
+    state_formula body;
+    apply(body, x.body());
+    if (m_negated)
     {
-      result = forall(x.variables(), normalize(x.body(), true));
+      make_forall(result, x.variables(), body); 
     }
     else
     {
-      result = exists(x.variables(), normalize(x.body(), false));
+      make_exists(result, x.variables(), body);
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const supremum& x)
+  {
+    state_formula body;
+    apply(body, x.body());
+    if (m_negated)
+    {
+      make_infimum(result, x.variables(), body);
+    }
+    else
+    {
+      make_supremum(result, x.variables(), body); 
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const infimum& x)
+  {
+    state_formula body;
+    apply(body, x.body());
+    if (m_negated)
+    {
+      make_supremum(result, x.variables(), body); 
+    }
+    else
+    {
+      make_infimum(result, x.variables(), body);
     }
   }
 
   template <class T>
   void apply(T& result, const variable& x)
   {
-    if (negated)
+    if (m_negated)
     {
       throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + pp(x));
     }
@@ -187,77 +255,115 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   template <class T>
   void apply(T& result, const must& x)
   {
-    if (negated)
+    state_formula operand;
+    apply(operand, x.operand());
+    if (m_negated)
     {
-      result = may(x.formula(), normalize(x.operand(), negated));
+      make_may(result, x.formula(), operand);
     }
     else
     {
-      result = must(x.formula(), normalize(x.operand(), negated));
+      make_must(result, x.formula(), operand);
     }
   }
 
   template <class T>
   void apply(T& result, const may& x)
   {
-    if (negated)
+    state_formula operand;
+    apply(operand, x.operand());
+    if (m_negated)
     {
-      result = must(x.formula(), normalize(x.operand(), negated));
+      make_must(result, x.formula(), operand);
     }
     else
     {
-      result = may(x.formula(), normalize(x.operand(), negated));
+      make_may(result, x.formula(), operand);
     }
   }
 
   template <class T>
   void apply(T& result, const mu& x)
   {
-    if (negated)
+    state_formula operand;
+    if (m_negated)
     {
-      result = nu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
+      apply(operand, negate_variables(x.name(), x.operand()));
+      make_nu(result, x.name(), x.assignments(), operand);
     }
     else
     {
-      result = mu(x.name(), x.assignments(), normalize(x.operand(), false));
+      apply(operand, x.operand());
+      make_mu(result, x.name(), x.assignments(), operand);
     }
   }
 
   template <class T>
   void apply(T& result, const nu& x)
   {
-    if (negated)
+    state_formula operand;
+    if (m_negated)
     {
-      result = mu(x.name(), x.assignments(), normalize(negate_variables(x.name(), x.operand()), true));
+      apply(operand, negate_variables(x.name(), x.operand()));
+      make_mu(result, x.name(), x.assignments(), operand);
     }
     else
     {
-      result = nu(x.name(), x.assignments(), normalize(x.operand(), false));
+      apply(operand, x.operand());
+      make_nu(result, x.name(), x.assignments(), operand);
     }
   }
 
   template <class T>
   void apply(T& result, const delay& x)
   {
-    result = x;
+    if (m_negated)
+    {
+      result=yaled();
+    }
+    else
+    {
+      result=x;
+    }
   }
 
   template <class T>
   void apply(T& result, const delay_timed& x)
   {
-    result = x;
+    if (m_negated)
+    {
+      make_yaled_timed(result, x.time_stamp());
+    }
+    else
+    {
+      result=x;
+    }
   }
 
   template <class T>
   void apply(T& result, const yaled& x)
   {
-    result = x;
+    if (m_negated)
+    {
+      result=delay();
+    }
+    else
+    {
+      result=x;
+    }
   }
 
   template <class T>
   void apply(T& result,  const yaled_timed& x)
   {
-    result = x;
+    if (m_negated)
+    {
+      make_delay_timed(result, x.time_stamp());
+    }
+    else
+    {
+      result=x;
+    }
   }
 };
 /// \endcond
@@ -276,23 +382,25 @@ bool is_normalized(const T& x)
 /// \brief The function normalize brings (embedded) state formulas into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing state formulas.
+/// \param quantitative Indication whether the formula is a quantitative boolean formula.
 /// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
-void normalize(T& x, bool negated, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type*)
+void normalize(T& x, bool quantitative, bool negated, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
-  normalize_builder f(negated);
+  normalize_builder f(quantitative, negated);
   f.update(x);
 }
 
 /// \brief The function normalize brings (embedded) state formulas into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing state formulas
+/// \param quantitative Indication whether the formula is a quantitative boolean formula.
 /// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
-T normalize(const T& x, bool negated, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type*)
+T normalize(const T& x, bool quantitative, bool negated, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
   T result;
-  normalize_builder f(negated);
+  normalize_builder f(quantitative, negated);
   f.apply(result, x);
   return result;
 }

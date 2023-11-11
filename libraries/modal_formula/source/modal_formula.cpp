@@ -188,9 +188,9 @@ bool is_monotonous(const state_formula& f)
   return state_formulas::is_monotonous(f);
 }
 
-state_formula normalize(const state_formula& x)
+state_formula normalize(const state_formula& x, bool quantitative=false, bool negated=false)
 {
-  return state_formulas::normalize(x);
+  return state_formulas::normalize(x, quantitative, negated);
 }
 
 bool is_normalized(const state_formula& x)
