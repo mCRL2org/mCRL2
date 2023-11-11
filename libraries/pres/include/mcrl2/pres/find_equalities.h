@@ -79,6 +79,12 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
   }
 
   // N.B. Use apply here, to avoid going into the recursion
+  void apply(const sum& x)
+  {
+    push(data::detail::find_equalities_expression());
+  }
+
+  // N.B. Use apply here, to avoid going into the recursion
   void apply(const propositional_variable_instantiation&)
   {
     push(data::detail::find_equalities_expression());

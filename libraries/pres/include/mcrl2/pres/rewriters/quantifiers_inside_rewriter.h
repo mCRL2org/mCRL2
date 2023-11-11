@@ -71,7 +71,7 @@ struct quantifiers_inside_builder: public pres_expression_builder<quantifiers_in
   template <class T>
   void apply(T& result, const infimum& x)
   {
-    pres_expression const& phi = x.body();
+    const pres_expression& phi = x.body();
     std::set<data::variable> W = data::detail::make_variable_set(x.variables());
     apply(result, phi);
     result = quantifiers_inside_infimum(W, result);
@@ -80,7 +80,7 @@ struct quantifiers_inside_builder: public pres_expression_builder<quantifiers_in
   template <class T>
   void apply(T& result, const supremum& x)
   {
-    pres_expression const& phi = x.body();
+    const pres_expression& phi = x.body();
     std::set<data::variable> W = data::detail::make_variable_set(x.variables());
     apply(result, phi);
     result = quantifiers_inside_supremum(W, result);
