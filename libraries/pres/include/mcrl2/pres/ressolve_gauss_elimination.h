@@ -881,6 +881,7 @@ pres_expression conjunction_fj_cj(std::vector< linear_fixed_point_equation >& l,
 
 pres_expression solve_fixed_point_inner(const propositional_variable& v, 
                                         const pres_expression& t, 
+                                        const data::data_specification& dataspec,
                                         const data::rewriter& rewriter, 
                                         const bool minimal_fixed_point)
 {
@@ -924,7 +925,7 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
     pres_expression solution;
     optimized_condeq(solution, eqinf_cond, exp2, true_());
 // std::cerr << "solution " << solution << "\n";
-    pres_expression rewritten_solution=simplify_data_rewriter(rewriter)(solution);
+    pres_expression rewritten_solution=simplify_data_rewriter(dataspec, rewriter)(solution);
 // std::cerr << "SOLVEDXXXX " << rewritten_solution << "\n";
     return rewritten_solution;
   }
@@ -941,23 +942,27 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
     optimized_condsm(cond1_, cond1, false_(), U);
     pres_expression solution;
     optimized_condeq(solution, eqinf_m, cond1_, true_());
-    pres_expression rewritten_solution=simplify_data_rewriter(rewriter)(solution);
+    pres_expression rewritten_solution=simplify_data_rewriter(dataspec, rewriter)(solution);
     return rewritten_solution;
   }
 }
 
-const pres_expression solve_single_equation(const fixpoint_symbol& f, const propositional_variable& v, const pres_expression& t, const data::rewriter& rewriter)
+const pres_expression solve_single_equation(const fixpoint_symbol& f, 
+                                            const propositional_variable& v, 
+                                            const pres_expression& t, 
+                                            const data::data_specification& dataspec, 
+                                            const data::rewriter& rewriter)
 {
   pres_expression aux;
   if (is_condsm(t) && f==pbes_system::fixpoint_symbol::mu())
   { 
     const condsm tc = atermpp::down_cast<condsm>(t);
-    pres_expression solution_arg2 = solve_single_equation(f, v, tc.arg2(), rewriter);
+    pres_expression solution_arg2 = solve_single_equation(f, v, tc.arg2(), dataspec, rewriter);
     
     const bool conjunctive_normal_form = true;
     push_or_inside(aux, tc.arg2(), tc.arg3(), conjunctive_normal_form);
 
-    pres_expression solution_arg2_or_arg3 = solve_single_equation(f, v, aux, rewriter);
+    pres_expression solution_arg2_or_arg3 = solve_single_equation(f, v, aux, dataspec, rewriter);
     
     pres_expression new_condition;
     substitute_pres_equation_builder variable_substituter(v, solution_arg2);
@@ -967,8 +972,8 @@ const pres_expression solve_single_equation(const fixpoint_symbol& f, const prop
   else if (is_condsm(t) && f==pbes_system::fixpoint_symbol::nu())
   { 
     const condsm tc = atermpp::down_cast<condsm>(t);
-    pres_expression solution_arg2 = solve_single_equation(f, v, tc.arg2(), rewriter);
-    pres_expression solution_arg3 = solve_single_equation(f, v, tc.arg3(), rewriter);
+    pres_expression solution_arg2 = solve_single_equation(f, v, tc.arg2(), dataspec, rewriter);
+    pres_expression solution_arg3 = solve_single_equation(f, v, tc.arg3(), dataspec, rewriter);
     
     pres_expression new_condition;
     substitute_pres_equation_builder variable_substituter(v, or_(solution_arg2, solution_arg3));
@@ -979,8 +984,8 @@ const pres_expression solve_single_equation(const fixpoint_symbol& f, const prop
   else if (is_condeq(t) && f==pbes_system::fixpoint_symbol::mu())
   { 
     const condeq tc = atermpp::down_cast<condeq>(t);
-    pres_expression solution_arg2 = solve_single_equation(f, v, tc.arg2(), rewriter);
-    pres_expression solution_arg3 = solve_single_equation(f, v, tc.arg3(), rewriter);
+    pres_expression solution_arg2 = solve_single_equation(f, v, tc.arg2(), dataspec, rewriter);
+    pres_expression solution_arg3 = solve_single_equation(f, v, tc.arg3(), dataspec, rewriter);
     
     pres_expression new_condition;
     substitute_pres_equation_builder variable_substituter(v, and_(solution_arg2, solution_arg3));
@@ -991,12 +996,12 @@ const pres_expression solve_single_equation(const fixpoint_symbol& f, const prop
   if (is_condeq(t) && f==pbes_system::fixpoint_symbol::nu())
   { 
     const condeq tc = atermpp::down_cast<condeq>(t);
-    pres_expression solution_arg2 = solve_single_equation(f, v, tc.arg2(), rewriter);
+    pres_expression solution_arg2 = solve_single_equation(f, v, tc.arg2(), dataspec, rewriter);
     
     const bool conjunctive_normal_form = false;
     push_and_inside(aux, tc.arg2(), tc.arg3(), conjunctive_normal_form);
 
-    pres_expression solution_arg2_or_arg3 = solve_single_equation(f, v, aux, rewriter);
+    pres_expression solution_arg2_or_arg3 = solve_single_equation(f, v, aux, dataspec, rewriter);
     
     pres_expression new_condition;
     substitute_pres_equation_builder variable_substituter(v, solution_arg2);
@@ -1007,29 +1012,29 @@ const pres_expression solve_single_equation(const fixpoint_symbol& f, const prop
   else if (is_and(t) && f==pbes_system::fixpoint_symbol::mu())
   {
     const and_ tc = atermpp::down_cast<and_>(t);
-    pres_expression solution_left = solve_single_equation(f, v, tc.left(), rewriter);
-    pres_expression solution_right = solve_single_equation(f, v, tc.right(), rewriter);
+    pres_expression solution_left = solve_single_equation(f, v, tc.left(), dataspec, rewriter);
+    pres_expression solution_right = solve_single_equation(f, v, tc.right(), dataspec, rewriter);
     
     return and_(solution_left, solution_right);
   }
   else if (is_or(t) && f==pbes_system::fixpoint_symbol::nu())
   {
     const or_ tc = atermpp::down_cast<or_>(t);
-    pres_expression solution_left = solve_single_equation(f, v, tc.left(), rewriter);
-    pres_expression solution_right = solve_single_equation(f, v, tc.right(), rewriter);
+    pres_expression solution_left = solve_single_equation(f, v, tc.left(), dataspec, rewriter);
+    pres_expression solution_right = solve_single_equation(f, v, tc.right(), dataspec, rewriter);
     
     return or_(solution_left, solution_right);
   }
   else if (f==pbes_system::fixpoint_symbol::mu())
   {
     // Solve minimal fixed point. 
-    return solve_fixed_point_inner(v, t, rewriter, true);
+    return solve_fixed_point_inner(v, t, dataspec, rewriter, true);
   }
   else 
   {
     assert(f==pbes_system::fixpoint_symbol::nu());
     // Solve maximal fixed point. 
-    return solve_fixed_point_inner(v, t, rewriter, false);
+    return solve_fixed_point_inner(v, t, dataspec, rewriter, false);
   }
 }
 
@@ -1249,6 +1254,7 @@ class ressolve_by_gauss_elimination_algorithm
         pres_expression solution = detail::solve_single_equation(equation_it->symbol(),
                                                                  equation_it->variable(),
                                                                  result,
+                                                                 m_input_pres.data(),
                                                                  m_datar);
         equation_it->formula() = solution;
         mCRL2log(log::debug) << "Solution   " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";

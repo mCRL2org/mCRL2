@@ -104,16 +104,16 @@ struct apply_rewriter_builder: public Builder<apply_rewriter_builder<Builder, Da
   using super::enter;
   using super::leave;
 
-  apply_rewriter_builder(const DataRewriter& datar, SubstitutionFunction& sigma)
-    : super(datar, sigma)
+  apply_rewriter_builder(const data::data_specification& dataspec, const DataRewriter& datar, SubstitutionFunction& sigma)
+    : super(dataspec, datar, sigma)
   {}
 };
 
 template <template <class, class, class> class Builder, class DataRewriter, class SubstitutionFunction>
 apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>
-make_apply_rewriter_builder(const DataRewriter& datar, SubstitutionFunction& sigma)
+make_apply_rewriter_builder(const data::data_specification& dataspec, const DataRewriter& datar, SubstitutionFunction& sigma)
 {
-  return apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>(datar, sigma);
+  return apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>(dataspec, datar, sigma);
 }
 
 } // namespace detail

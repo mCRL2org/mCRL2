@@ -58,7 +58,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                                 const data::data_specification& dataspec,
                                 data::enumerator_identifier_generator& id_generator,
                                 bool enumerate_infinite_sorts = true)
-    : super(r, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)())
+    : super(dataspec, r, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)())
   { }
 
   Derived& derived()
@@ -219,8 +219,9 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       data::variable_list enumerable;
       data::variable_list non_enumerable;
       data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
-      enumerate_sum(result, enumerable, x.body());
-      optimized_sum(result, non_enumerable, result);
+      pres_expression expanded_sum;
+      enumerate_sum(expanded_sum, enumerable, x.body());
+      optimized_sum(result, non_enumerable, expanded_sum, m_dataspec, super::R);
     }
     else
     {
@@ -231,12 +232,13 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         pres_expression body;
         derived().apply(body, x.body());
-        optimized_sum(result, infinite, body);
+        optimized_sum(result, infinite, body, m_dataspec, super::R);
       }
       else
       {
-        enumerate_sum(result, finite, x.body());
-        optimized_sum(result, infinite, result);
+        pres_expression expanded_sum;
+        enumerate_sum(expanded_sum, finite, x.body());
+        optimized_sum(result, infinite, expanded_sum, m_dataspec, super::R);
       }
     }
   }

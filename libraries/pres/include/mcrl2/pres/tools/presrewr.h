@@ -51,7 +51,7 @@ void presrewr(const std::string& input_filename,
     case simplify:
     {
       // simplify_quantifiers_data_rewriter<data::rewriter> presr(datar);
-      simplify_data_rewriter<data::rewriter> presr(datar);
+      simplify_data_rewriter<data::rewriter> presr(p.data(), datar);
       pres_rewrite(p, presr);
       break;
     }
@@ -83,7 +83,7 @@ void presrewr(const std::string& input_filename,
       replace_pres_expressions(p, presr, innermost); // use replace, since the one point rule rewriter does the recursion itself
 
       // post processing: apply the simplifying rewriter
-      simplify_data_rewriter<data::rewriter> simp(datar);
+      simplify_data_rewriter<data::rewriter> simp(p.data(), datar);
       pres_rewrite(p, simp);
       break;
     }

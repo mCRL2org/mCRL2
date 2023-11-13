@@ -27,6 +27,9 @@ struct add_simplify: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::apply;
 
+  add_simplify()
+  {}
+
   template <class T>
   void apply(T& result, const minus& x)
   {
@@ -315,7 +318,8 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const sum& x)
   {
-    apply(result, x.body());
+    pres_expression body;
+    apply(body, x.body());
     make_sum(result, x.variables(), result);
   }
 
@@ -586,10 +590,20 @@ struct simplify_data_rewriter_builder : public mcrl2::pres_system::detail::add_d
   typedef add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction > super;
 
   using super::apply;
-
-  simplify_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
-    : super(R, sigma)
+  const data::data_specification m_data_spec;
+  
+  simplify_data_rewriter_builder(const data::data_specification& data_spec, const DataRewriter& R, SubstitutionFunction& sigma)
+    : super(R, sigma),
+      m_data_spec(data_spec)
   {}
+
+  template <class T>
+  void apply(T& result, const sum& x)
+  {
+    pres_expression body;
+    apply(body, x.body());
+    optimized_sum(result, x.variables(), body, m_data_spec, super::R);
+  }
 
   template <class T>
   void apply(T& result, const condeq& x)
@@ -701,16 +715,18 @@ struct simplify_data_rewriter
   typedef data::variable variable_type;
 
   const DataRewriter& R;
+  const data::data_specification& m_dataspec;
 
-  explicit simplify_data_rewriter(const DataRewriter& R_)
-    : R(R_)
+  explicit simplify_data_rewriter(const data::data_specification& dataspec, const DataRewriter& R_)
+    : R(R_),
+      m_dataspec(dataspec)
   {}
 
   pres_expression operator()(const pres_expression& x) const
   {
     data::no_substitution sigma;
     pres_expression result;
-    detail::make_apply_rewriter_builder<pres_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(result,x);
+    detail::make_apply_rewriter_builder<pres_system::detail::simplify_data_rewriter_builder>(m_dataspec, R, sigma).apply(result,x);
     return result;
   }
 

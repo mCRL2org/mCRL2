@@ -15,6 +15,7 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/real_utilities.h"
+#include "mcrl2/data/cardinality.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace mcrl2
@@ -1572,6 +1573,8 @@ inline
 void optimized_minus(pres_expression& result, const pres_expression& p)
 {
   // Should be optimized. 
+  // true false special cases.
+  // data::sort_real::is_zero(p)
   make_minus(result, p);
 }
 
@@ -1665,14 +1668,19 @@ void optimized_imp(pres_expression& result, const pres_expression& p, const pres
 inline
 void optimized_infimum(pres_expression& result, const data::variable_list& l, const pres_expression& p)
 {
-  if (l.empty() || is_false(p) || is_true(p))
+  std::set<data::variable> free_variables = find_free_variables(p);
+  data::variable_list new_l(l.begin(), 
+                           l.end(), 
+                           [](const data::variable& v){ return v; }, 
+                           [&free_variables](const data::variable& v){ return free_variables.find(v)!=free_variables.end(); });
+  if (new_l.empty())
   {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = p;
-    return;
+    result=p;
   }
-  make_infimum(result, l, p);
-  return;
+  else
+  { 
+    make_infimum(result, new_l, p);
+  }
 }
 
 /// \brief Make a supremum.
@@ -1683,31 +1691,101 @@ void optimized_infimum(pres_expression& result, const data::variable_list& l, co
 inline
 void optimized_supremum(pres_expression& result, const data::variable_list& l, const pres_expression& p)
 {
-  if (l.empty() || is_false(p) || is_true(p))
+  std::set<data::variable> free_variables = find_free_variables(p);
+  data::variable_list new_l(l.begin(), 
+                           l.end(), 
+                           [](const data::variable& v){ return v; }, 
+                           [&free_variables](const data::variable& v){ return free_variables.find(v)!=free_variables.end(); });
+  if (new_l.empty())
   {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = p;
-    return;
+    result=p;
   }
-  make_supremum(result, l, p);
-  return;
-} 
+  else
+  { 
+    make_supremum(result, new_l, p);
+  }
+}
 
-/// \brief Make an sum quantification
+/// \brief Make an sum quantification.
 /// If l is empty, p is returned.
-/// \param l A sequence of data variables
-/// \param p A PRES expression
+/// \param l A sequence of data variables.
+/// \param p A PRES expression.
+/// \param data_specification A data specification to determine the cardinality of sorts.
+/// \param rewr A rewriter to determine the cardinality of sorts.
 /// \return The value <tt>sum l.p</tt>
 inline
-void optimized_sum(pres_expression& result, const data::variable_list& l, const pres_expression& p)
+void optimized_sum(pres_expression& result, 
+                   const data::variable_list& l, 
+                   const pres_expression& p, 
+                   const data::data_specification& data_specification, 
+                   const data::rewriter& rewr)
 {
-  if (l.empty() || data::sort_real::is_zero(p) || data::sort_real::is_one(p))
+  if (l.size()==0)
   {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = p;
+    result=p;
     return;
   }
-  make_sum(result, l, p);
+  std::set<data::variable> free_variables = find_free_variables(p);
+  data::variable_list new_l;
+  std::size_t factor=1;
+  data::cardinality_calculator cardinality(data_specification, rewr);
+  for(const data::variable& v: l)
+  {
+    if (free_variables.find(v)==free_variables.end()) // not found.
+    {
+      // Determine the c
+      std::size_t c = cardinality(v.sort());
+      if (c==0) // This means the cardinality is infinite or cannot be determined.
+      {
+        new_l.push_front(v);
+      }
+      else
+      {
+        factor=factor*c;
+      }
+    }
+    else
+    {
+      new_l.push_front(v);
+    }
+  }
+  if (factor!=1)
+  {
+    if (is_const_multiply(p))
+    {
+      const const_multiply& cm=atermpp::down_cast<const_multiply>(p);
+      make_const_multiply(result, rewr(data::sort_real::times(cm.left(),data::sort_real::real_(factor))),cm.right());
+    }
+    else if (is_false(p) || is_true(p))
+    {
+      result=p;
+    }
+    else if (data::is_data_expression(p))
+    {
+      const data::data_expression& d = atermpp::down_cast<data::data_expression>(p);
+      if (d.sort()==data::sort_bool::bool_())
+      {
+        result = d;  
+      }
+      else
+      {
+        assert(d.sort()==data::sort_real::real_());
+        result=rewr(data::sort_real::times(d,data::sort_real::real_(factor)));
+      }
+    }
+    else
+    {
+      make_const_multiply(result, data::sort_real::real_(factor),p);
+    }
+  }
+  else 
+  {
+    result=p;
+  }
+  if (new_l.size()>0)
+  {
+    make_sum(result, new_l, result);
+  }
   return;
 } 
 
