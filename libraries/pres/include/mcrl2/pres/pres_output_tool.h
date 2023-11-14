@@ -6,20 +6,19 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/res/pres_output_tool.h
+/// \file mcrl2/pres/pres_output_tool.h
 /// \brief Base class for tools that produce a (P)RES as output.
 
 #ifndef MCRL2_RES_PRES_OUTPUT_TOOL_H
 #define MCRL2_RES_PRES_OUTPUT_TOOL_H
 
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/res/io.h"
 #include "mcrl2/pres/io.h"
 
 namespace mcrl2
 {
 
-namespace res
+namespace pres_system
 {
 
 namespace tools
@@ -43,7 +42,6 @@ class pres_output_tool: public Tool
       std::set<utilities::file_format> result;
       result.insert(pres_system::pres_format_internal());
       result.insert(pres_system::pres_format_text());
-      result.insert(res::res_format_internal());
       return result;
     }
 
@@ -133,70 +131,9 @@ class pres_output_tool: public Tool
     }
 };
 
-/// \brief Base class for filter tools that produce a res as output
-/// \pre Tool provides output_filename()
-template <typename Tool>
-class res_output_tool: public pres_output_tool<Tool>
-{
-  public:
-    /// \brief Constructor.
-    /// \param name The name of the tool
-    /// \param author The author(s) of the tool
-    /// \param what_is One-line "what is" description of the tool
-    /// \param tool_description The description of the tool
-    /// \param known_issues Known issues with the tool
-    res_output_tool(const std::string& name,
-                    const std::string& author,
-                    const std::string& what_is,
-                    const std::string& tool_description,
-                    std::string known_issues = "")
-      : pres_output_tool<Tool>(name, author, what_is, tool_description, known_issues)
-    {}
-
-  protected:
-
-    /// \brief Returns the file formats that are available for this tool.
-    /// Override this method to change the standard behavior.
-    /// \return The set { pres, res }
-    virtual std::set<utilities::file_format> available_output_formats() const
-    {
-      std::set<utilities::file_format> result;
-      result.insert(pres_system::pres_format_internal());
-      result.insert(pres_system::pres_format_text());
-      result.insert(res::res_format_internal());
-      return result;
-    }
-
-    /// \brief Returns the default file format.
-    /// Override this method to change the standard behavior.
-    /// \return The default format is determined based on the extension of the output file. 
-    //          If this fails, res_format_internal() is returned. 
-    virtual utilities::file_format default_output_format() const
-    {
-      utilities::file_format result = res::guess_format(Tool::output_filename());
-      if (result == utilities::file_format())
-      {
-        result = pres_system::guess_format(Tool::output_filename());
-      }
-      if (result == utilities::file_format())
-      {
-        result = res::res_format_internal();
-      }
-      return result;
-    }
-
-  public:
-    /// \brief Returns the output format
-    /// \return The output file format
-    utilities::file_format res_output_format() const
-    {
-      return pres_output_tool<Tool>::pres_output_format();
-    }
-};
-
 } // namespace tools
 
-} // namespace res
+} // namespace pres_system
 
 } // namespace mcrl2
 

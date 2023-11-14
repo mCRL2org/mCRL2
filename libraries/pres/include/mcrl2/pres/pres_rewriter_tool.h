@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/res/pres_rewriter_tool.h
+/// \file mcrl2/pres/pres_rewriter_tool.h
 /// \brief Base class for tools that use a pres rewriter.
 
 #ifndef MCRL2_RES_PRES_REWRITER_TOOL_H
@@ -19,7 +19,7 @@
 namespace mcrl2
 {
 
-namespace res
+namespace pres_system
 {
 
 namespace tools
@@ -117,7 +117,7 @@ class pres_rewriter_tool: public Tool
 
 } // namespace tools
 
-} // namespace res
+} // namespace pres_system
 
 } // namespace mcrl2
 

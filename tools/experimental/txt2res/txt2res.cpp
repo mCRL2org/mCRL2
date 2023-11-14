@@ -11,18 +11,17 @@
 
 //mCRL2 specific
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/res/pres_output_tool.h"
+#include "mcrl2/pres/pres_output_tool.h"
 #include "mcrl2/pres/txt2pres.h"
-#include "mcrl2/res/presinst_conversion.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using res::tools::res_output_tool;
+using pres_system::tools::pres_output_tool;
 
-class txt2res_tool: public res_output_tool<input_output_tool>
+class txt2res_tool: public pres_output_tool<input_output_tool>
 {
-    typedef res_output_tool<input_output_tool> super;
+    typedef pres_output_tool<input_output_tool> super;
 
   public:
     txt2res_tool()
@@ -46,8 +45,7 @@ class txt2res_tool: public res_output_tool<input_output_tool>
         std::ifstream from(input_filename().c_str());
         p = pres_system::txt2pres(from);
       }
-      res::res_equation_system b = res::presinst_conversion(p);
-      res::save_res(b, output_filename(), res_output_format());
+      pres_system::save_pres(p, output_filename(), pres_output_format());
       return true;
     }
 };

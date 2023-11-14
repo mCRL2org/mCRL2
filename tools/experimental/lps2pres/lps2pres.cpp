@@ -10,16 +10,16 @@
 /// \brief This tool translates an .lps and a real modal formula to
 ///        a parameterised real equation system. 
 
-#include "mcrl2/pres/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/res/pres_output_tool.h"
+#include "mcrl2/pres/tools.h"
+#include "mcrl2/pres/pres_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pres_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
-using res::tools::pres_output_tool;
+using pres_system::tools::pres_output_tool;
 
 class lps2pres_tool : public pres_output_tool<input_output_tool>
 {

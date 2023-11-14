@@ -4,5 +4,4 @@ mcrl2_add_tool(lps2pres
   DEPENDS
     mcrl2_lps
     mcrl2_pres
-    mcrl2_res
 )

@@ -3,5 +3,4 @@ mcrl2_add_tool(prespp
     prespp.cpp
   DEPENDS
     mcrl2_pres
-    mcrl2_res
 )

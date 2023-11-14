@@ -13,22 +13,22 @@
 #include <exception>
 
 //MCRL2-specific
-#include "mcrl2/res/detail/res_property_map.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/res/pres_input_tool.h"
+#include "mcrl2/pres/detail/pres_property_map.h"
+#include "mcrl2/pres/pres_input_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using namespace mcrl2::res;
+using namespace mcrl2::pres_system;
 using namespace mcrl2::utilities::tools;
-using res::tools::res_input_tool;
+using pres_system::tools::pres_input_tool;
 
-class resinfo_tool: public res_input_tool<input_tool>
+class resinfo_tool: public pres_input_tool<input_tool>
 {
   protected:
-    typedef res_input_tool<input_tool> super;
+    typedef pres_input_tool<input_tool> super;
 
     bool opt_full;
 
@@ -70,10 +70,10 @@ class resinfo_tool: public res_input_tool<input_tool>
     /// - Give error
     bool run()
     {
-      res_equation_system b;
-      load_res(b,input_filename(), res_input_format());
+      pres b;
+      load_pres(b,input_filename(), pres_input_format());
 
-      res::detail::res_property_map info(b);
+      pres_system::detail::pres_property_map info(b);
 
       // Show file from which RES was read
       std::cout << input_file_message() << "\n\n";
@@ -97,9 +97,9 @@ class resinfo_tool: public res_input_tool<input_tool>
       if (opt_full)
       {
         std::cout << "Predicate variables:\n";
-        for (std::vector<res_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+        for (std::vector<pres_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
         {
-          std::cout << core::pp(i->symbol()) << "." << res::pp(i->variable()) << std::endl;
+          std::cout << core::pp(i->symbol()) << "." << pres_system::pp(i->variable()) << std::endl;
         }
       }
       return true;

@@ -43,10 +43,6 @@ if __name__ == "__main__":
 
     result = True
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/core/include/mcrl2/core',                                      CORE_CLASSES                     , namespace = 'core'            ) and result
-    result = make_classes(all_classes, MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes/boolean_expression.h',                   BOOLEAN_EXPRESSION_CLASSES       , namespace = 'bes'             ) and result
-    result = make_classes(all_classes, MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes',                                        BOOLEAN_CLASSES                  , namespace = 'bes'             ) and result
-    result = make_classes(all_classes, MCRL2_ROOT + 'libraries/res/include/mcrl2/res/res_expression.h',                       RES_EXPRESSION_CLASSES           , namespace = 'res'             ) and result
-    result = make_classes(all_classes, MCRL2_ROOT + 'libraries/res/include/mcrl2/res',                                        RES_CLASSES                      , namespace = 'res'             ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data/assignment.h',                         ASSIGNMENT_EXPRESSION_CLASSES    , namespace = 'data'            ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data/binder_type.h',                        BINDER_TYPES                     , namespace = 'data'            ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data/container_type.h',                     CONTAINER_TYPES                  , namespace = 'data'            ) and result

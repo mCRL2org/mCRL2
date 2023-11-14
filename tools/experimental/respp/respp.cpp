@@ -9,22 +9,22 @@
 /// \file respp.cpp
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/res/pres_input_tool.h"
-#include "mcrl2/res/print.h"
+#include "mcrl2/pres/pres_input_tool.h"
+#include "mcrl2/pres/print.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
-using mcrl2::res::tools::res_input_tool;
+using mcrl2::pres_system::tools::pres_input_tool;
 
 //local declarations
 
-class respp_tool: public res_input_tool<input_output_tool>
+class respp_tool: public pres_input_tool<input_output_tool>
 {
   private:
-    typedef res_input_tool<input_output_tool> super;
+    typedef pres_input_tool<input_output_tool> super;
 
   public:
     respp_tool()
@@ -63,8 +63,8 @@ class respp_tool: public res_input_tool<input_output_tool>
   private:
     void print_specification()
     {
-      res::res_equation_system res;
-      load_res(res,input_filename(), res_input_format());
+      pres_system::pres res;
+      load_pres(res,input_filename(), pres_input_format());
 
       mCRL2log(verbose) << "printing RES from " << (input_filename().empty()?"standard input":input_filename())
                         << " to " << (output_filename().empty()?"standard output":output_filename())
@@ -72,14 +72,14 @@ class respp_tool: public res_input_tool<input_output_tool>
 
       if (output_filename().empty())
       {
-        std::cout << res::pp(res);
+        std::cout << pres_system::pp(res);
       }
       else
       {
         std::ofstream output_stream(output_filename().c_str());
         if (output_stream.is_open())
         {
-          output_stream << res::pp(res);
+          output_stream << pres_system::pp(res);
           output_stream.close();
         }
         else

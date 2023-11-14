@@ -13,9 +13,10 @@
 #ifndef MCRL2_PRES_TOOLS_PRESSOLVE_H
 #define MCRL2_PRES_TOOLS_PRESSOLVE_H
 
-#include "mcrl2/res/pres_input_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/lps_io.h"
+#include "mcrl2/pres/pres_input_tool.h"
 #include "mcrl2/pres/detail/pres_io.h"
 #include "mcrl2/pres/pressolve_options.h"
 #include "mcrl2/pres/normalize.h"
@@ -24,12 +25,11 @@
 #include "mcrl2/pres/ressolve_gauss_elimination.h"
 #include "mcrl2/pres/ressolve_numerical.h"
 #include "mcrl2/pres/ressolve_numerical_directed.h"
-#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pres_system;
 using namespace mcrl2::utilities::tools;
-using mcrl2::res::tools::pres_input_tool;
+using mcrl2::pres_system::tools::pres_input_tool;
 using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_tool;
 

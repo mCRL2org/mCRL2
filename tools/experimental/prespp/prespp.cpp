@@ -9,14 +9,14 @@
 /// \file prespp.cpp
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/res/pres_input_tool.h"
+#include "mcrl2/pres/pres_input_tool.h"
 #include "mcrl2/pres/tools.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2;
-using res::tools::pres_input_tool;
+using pres_system::tools::pres_input_tool;
 
 //local declarations
 

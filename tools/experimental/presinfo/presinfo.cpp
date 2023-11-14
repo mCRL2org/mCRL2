@@ -23,15 +23,15 @@
 #include <exception>
 
 //MCRL2-specific
-#include "mcrl2/pres/tools.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/res/pres_input_tool.h"
+#include "mcrl2/pres/tools.h"
+#include "mcrl2/pres/pres_input_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::pres_system;
 using namespace mcrl2::utilities::tools;
-using res::tools::pres_input_tool;
+using pres_system::tools::pres_input_tool;
 
 class presinfo_tool: public pres_input_tool<input_tool>
 {
@@ -78,7 +78,7 @@ class presinfo_tool: public pres_input_tool<input_tool>
     /// - Give error
     bool run() override
     {
-      res::res_expression b;
+      pres_system::pres_expression b;
       presinfo(input_filename(),
                input_file_message(),
                pres_input_format(),

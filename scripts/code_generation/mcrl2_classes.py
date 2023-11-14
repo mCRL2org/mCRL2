@@ -265,30 +265,6 @@ condsm(const pres_expression& arg1, const pres_expression& arg2, const pres_expr
 condeq(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)                           : public pres_system::pres_expression | EI    | PRESCondEq              | Conditional operator with condition smaller than or equal to 0
 '''
 
-RES_CLASSES = r'''
-res_equation(const fixpoint_symbol& symbol, const res_variable& variable, const res_expression& formula) : public atermpp::aterm_appl | MS  | RESEquation    | real equation
-res_equation_system(const std::vector<res::res_equation>& equations, const res_expression& initial_state)                             | MSW | RES             | A real equation system
-'''
-
-RES_EXPRESSION_CLASSES = r'''
-res_expression()                                                                   : public atermpp::aterm_appl             | XCI  | RESExpression          | A res expression
-true_()                                                                            : public res::res_expression             | EI   | RESTrue                | The value true for res expressions
-false_()                                                                           : public res::res_expression             | EI   | RESFalse               | The value false for res expressions
-res_variable(const core::identifier_string& name)                                  : public res::res_expression             | EIUs | RESVariable            | A res variable
-minus(const res_expression& operand)                                               : public res::res_expression             | EI   | RESMinus               | The minus operator for res expressions
-and_(const res_expression& left, const res_expression& right)                      : public res::res_expression             | EI   | RESAnd                 | The and operator for res expressions
-or_(const res_expression& left, const res_expression& right)                       : public res::res_expression             | EI   | RESOr                  | The or operator for res expressions
-imp(const res_expression& left, const res_expression& right)                       : public res::res_expression             | EI   | RESImp                 | The implication operator for res expressions
-plus(const res_expression& left, const res_expression& right)                      : public res::res_expression             | EI   | RESPlus                | The plus operator for res expressions
-const_multiply(const data::data_expression& left, const res_expression& right)     : public res::res_expression             | EI   | RESConstantMultiply    | Left multiplication with a positive constant for res expressions
-const_multiply_alt(const res_expression& left, const data::data_expression& right) : public res::res_expression             | EI   | RESConstantMultiplyAlt | Right multiplication with a positive constant for res expressions
-eqinf(const res_expression& operand)                                               : public res::res_expression             | EI   | RESEqInf            | The operator to check for infinity
-eqninf(const res_expression& operand)                                              : public res::res_expression             | EI   | RESEqInf            | The operator to check for negative infinity
-condsm(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3) : public res::res_expression  | EI   | RESCondSm             | The conditional and expression for res expressions
-condeq(const res_expression& arg1, const res_expression& arg2, const res_expression& arg3) : public res::res_expression  | EI   | RESCondEq           | The conditional or expression for res expressions
-'''
-# ---------
-
 BDD_EXPRESSION_CLASSES = r'''
 bdd_expression()                                                                                  : public atermpp::aterm_appl | XCI  | BddExpression | A bdd expression
 true_()                                                                                           : public bdd::bdd_expression | EI   | BddTrue       | The value true for bdd expressions
@@ -1523,6 +1499,5 @@ def mcrl2_class_map():
           'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
           'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES,
           'pres_system'      : PRES_CLASSES + PRES_EXPRESSION_CLASSES,
-          'res'              : RES_CLASSES + RES_EXPRESSION_CLASSES,
           'bdd'              : BDD_EXPRESSION_CLASSES
         }

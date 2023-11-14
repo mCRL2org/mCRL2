@@ -8,21 +8,21 @@
 //
 /// \file presrewr.cpp
 
-#include "mcrl2/pres/tools.h"
-#include "mcrl2/pres/tools/presrewr.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/res/pres_rewriter_tool.h"
-#include "mcrl2/res/pres_input_tool.h"
-#include "mcrl2/res/pres_output_tool.h"
+#include "mcrl2/pres/tools.h"
+#include "mcrl2/pres/tools/presrewr.h"
+#include "mcrl2/pres/pres_rewriter_tool.h"
+#include "mcrl2/pres/pres_input_tool.h"
+#include "mcrl2/pres/pres_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
-using res::tools::pres_input_tool;
-using res::tools::pres_output_tool;
-using res::tools::pres_rewriter_tool;
+using pres_system::tools::pres_input_tool;
+using pres_system::tools::pres_output_tool;
+using pres_system::tools::pres_rewriter_tool;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 

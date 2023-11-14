@@ -2,5 +2,5 @@ mcrl2_add_tool(respp
   SOURCES
     respp.cpp
   DEPENDS
-    mcrl2_res
+    mcrl2_pres
 )

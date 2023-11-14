@@ -3,5 +3,4 @@ mcrl2_add_tool(txt2pres
     txt2pres.cpp
   DEPENDS
     mcrl2_pres
-    mcrl2_res
 )

@@ -10,16 +10,16 @@
 /// \brief Parse a textual description of a PRES.
 
 //mCRL2 specific
-#include "mcrl2/pres/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/res/pres_output_tool.h"
+#include "mcrl2/pres/tools.h"
+#include "mcrl2/pres/pres_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
 using namespace mcrl2::pres_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using mcrl2::res::tools::pres_output_tool;
+using mcrl2::pres_system::tools::pres_output_tool;
 
 class txt2pres_tool: public pres_output_tool<input_output_tool>
 {
