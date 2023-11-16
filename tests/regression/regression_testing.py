@@ -143,10 +143,8 @@ def main(tests):
     if args.names:
         print_names(tests)
         return
-    toolpath = args.toolpath
-    if not toolpath:
-        toolpath = MCRL2_INSTALL_DIR
-    settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
+    
+    settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
 
     if args.output:
         if not os.path.exists(args.output):

@@ -46,7 +46,7 @@ class RandomTest(YmlTest):
 
     def execute(self, runpath = '.'):
         self.create_inputfiles(runpath)
-        super(RandomTest, self).execute(runpath)
+        super(RandomTest, self).execute()
         self.remove_inputfiles(runpath)
 
 class ProcessTest(RandomTest):
@@ -467,7 +467,7 @@ def main(tests):
         print_names(tests)
         return
        
-    settings = {'toolpath': args.toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
+    settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
 
     repeats = range(int(args.repetitions))
 
