@@ -88,6 +88,7 @@ def main():
         print(f"Executing {total} test(s)...")
         for executable, targets in mapping.items():
             for target in targets:
+                print(f"Running {os.path.basename(executable)}:{target}...")
                 futures[executor.submit(run_test, executable, target)] = (
                     executable,
                     target,
@@ -111,7 +112,7 @@ def main():
 
         print("Failed tests...")
         for executable, target in failed:
-            print(f"{os.path.basename(executable)}:{target} failed ({result:.2f}s)")
+            print(f"{os.path.basename(executable)}:{target} failed")
 
 
 if __name__ == "__main__":
