@@ -1,0 +1,203 @@
+%% The original Ricart-Agrawala Algorithm with bounded sequence numbers.
+%% Model of the algorithm as presented in https://doi.org/10.1145/358527.358537
+
+%% This version of the model can handle N = 2 and N = 3, by modifying the initialization and the assignment to N.
+%% To allow greater number of nodes, further modifications need to be made. 
+
+map
+	M: Pos;
+	valid_id: Nat -> Bool;
+	valid_sn: Nat -> Bool;
+	next_sn: Nat -> Nat;
+	greater_sn: Nat # Nat -> Bool;
+	max_sn: Nat # Nat -> Nat;
+	equal_sn: Nat # Nat -> Bool;
+	others: Nat # Pos -> List(Nat);
+
+var
+	n, n': Nat;
+	l: List(Nat);
+eqn
+	M = Int2Pos(2* N - 1 );
+	valid_id(n) = n < N;
+	valid_sn(n) = n < M;
+	next_sn(n) = (n + 1) mod M;
+	(n < n' && abs(n - n') >= N) -> greater_sn(n, n') = (n + M) > n';
+	(n' < n && abs(n - n') >= N) -> greater_sn(n, n') = n > (n' + M);
+	(abs(n - n') < N) ->			greater_sn(n, n') = n > n';
+	(greater_sn(n, n')) ->  max_sn(n, n') = n;
+	(!greater_sn(n, n')) -> max_sn(n, n') = n';
+	equal_sn(n, n') = n == n';
+	others(0, 3) = [1, 2];
+	others(1, 3) = [0, 2];
+	others(2, 3) = [0, 1];
+	others(0, 2) = [1];
+	others(1, 2) = [0];
+
+sort
+	Message = struct REQUEST(seqnr: Nat) | REPLY;
+
+sort
+	Register = struct chosen(pid: Nat) | highest(pid: Nat) | awaiting(pid: Nat) | flag(pid: Nat) | deferred(pid: Nat, pid': Nat);
+
+act
+	crit, noncrit: Nat;
+	read_nat_s, read_nat_r, read_nat,
+		write_nat_s, write_nat_r, write_nat: Register # Nat;
+	read_bool_s, read_bool_r, read_bool,
+		write_bool_s, write_bool_r, write_bool: Register # Bool;
+	send_s, send_r, send,
+		receive_s, receive_r, receive: Nat # Nat # Message;
+	lock_s, unlock_s,
+		lock_r, unlock_r,
+		lock, unlock: Nat;
+
+proc
+
+%% The algorithm
+% A node has three processes that run asynchronously 
+% and every node has a chosen, highest, awaiting and flag register, as well as a deferred array and semaphore.
+Node(ME: Nat) =
+	Main(ME) || Requests(ME) || Replies(ME) || 
+	Reg_Nat(chosen(ME), 0) || Reg_Nat(highest(ME), 0) || Reg_Nat(awaiting(ME), 0) ||
+	Reg_Bool(flag(ME), false) || 
+	Reg_Bool(deferred(ME, 0), false) || Reg_Bool(deferred(ME, 1), false) || Reg_Bool(deferred(ME, 2), false)||
+	Semaphore(ME);
+
+% The Main thread
+Main(ME: Nat) =
+	noncrit(ME).
+	Main_2(ME);
+
+Main_2(ME: Nat) =
+	lock_s(ME).
+	write_bool_s(flag(ME), true).
+	sum h: Nat.
+	read_nat_r(highest(ME), h).
+	write_nat_s(chosen(ME), next_sn(h)).
+	unlock_s(ME). 
+	write_nat_s(awaiting(ME), Int2Nat(N - 1)).
+	Main_3(ME, others(ME, N), next_sn(h));
+
+Main_3(ME: Nat, to_send: List(Nat), sn: Nat) =
+	(#to_send > 0) -> (
+		send_s(ME, head(to_send), REQUEST(sn)). Main_3(ME, tail(to_send), sn)
+	) <> (
+		Main_4(ME)
+	);
+
+Main_4(ME: Nat) =
+	read_nat_r(awaiting(ME), 0).
+	Main_5(ME);
+
+Main_5(ME: Nat) =
+	crit(ME).
+	Main_6(ME);
+
+Main_6(ME: Nat) =
+	write_bool_s(flag(ME), false).
+	Main_7(ME, others(ME, N));
+
+Main_7(ME: Nat, to_check: List(Nat)) =
+	(#to_check > 0) -> (
+		sum d: Bool.
+		read_bool_r(deferred(ME, head(to_check)), d).
+		(d) -> (
+			write_bool_s(deferred(ME, head(to_check)), false).
+			send_s(ME, head(to_check), REPLY).
+			Main_7(ME, tail(to_check))
+		) <> (
+			Main_7(ME, tail(to_check))
+		)
+	) <> (
+		Main(ME)
+	);
+
+% The second process receives and processes request messages
+Requests(ME: Nat) =
+	sum YOU: Nat. (valid_id(YOU) && YOU != ME) -> (
+		sum sn: Nat. valid_sn(sn) -> (
+			receive_r(YOU, ME, REQUEST(sn)).
+			sum h: Nat.
+			read_nat_r(highest(ME), h).
+			write_nat_s(highest(ME), max_sn(sn, h)).
+			lock_s(ME).
+			sum c: Nat.
+			read_nat_r(chosen(ME), c).
+			sum f: Bool.
+			read_bool_r(flag(ME), f).
+			unlock_s(ME).
+			((greater_sn(c, sn)) || (equal_sn(c, sn) && ME > YOU) || (!f) ) -> (
+				send_s(ME, YOU, REPLY).
+				Requests()
+			) <> (
+				write_bool_s(deferred(ME, YOU), true).
+				Requests()
+			)
+		)
+	);
+
+% The third process receives and processes reply messages
+Replies(ME: Nat) =
+	sum YOU: Nat. (valid_id(YOU) && YOU != ME) -> (
+		receive_r(YOU, ME, REPLY).
+		sum n: Nat.
+		read_nat_r(awaiting(ME), n).
+		write_nat_s(awaiting(ME), Int2Nat(n - 1)).
+		Replies()	
+	);
+
+
+%% The registers
+Reg_Nat(ME: Register, n: Nat) =
+	read_nat_s(ME, n). Reg_Nat() +
+	sum n': Nat. (valid_sn(n')) -> (
+		write_nat_r(ME, n'). Reg_Nat(ME, n') 
+	);
+
+Reg_Bool(ME: Register, b: Bool) =
+	read_bool_s(ME, b). Reg_Bool() +
+	sum b': Bool. write_bool_r(ME, b'). Reg_Bool(ME, b');
+
+%% The channels
+Channel(from: Nat, to: Nat, messages: Bag(Message)) =
+    sum m: Message. send_r(from, to, m). Channel(messages = messages + {m:1}) +
+	sum m: Message. (count(m, messages) > 0) -> receive_s(from, to, m). Channel(messages = messages - {m:1});
+
+%% Semaphores
+Semaphore(ME: Nat) =
+	lock_r(ME).unlock_r(ME).Semaphore();
+
+%% initialization
+init
+%	hide({
+%		read_nat, write_nat,
+%		read_bool, write_bool,
+%		send, receive,
+%		lock, unlock
+%	},
+	allow({
+		crit, noncrit,
+		read_nat, write_nat,
+		read_bool, write_bool,
+		send, receive,
+		lock, unlock
+		},
+	comm({
+		read_nat_s | read_nat_r -> read_nat,
+		read_bool_s | read_bool_r -> read_bool,
+		write_nat_s | write_nat_r -> write_nat,
+		write_bool_s | write_bool_r -> write_bool,
+		send_s | send_r -> send,
+		receive_s | receive_r -> receive,
+		lock_s | lock_r -> lock,
+		unlock_s | unlock_r -> unlock
+		},
+	Node(0) || Node(1) || Channel(0, 1, {:}) || Channel(1, 0, {:}) 
+    %|| Node(2) || Channel(0, 2, {:}) || Channel(1, 2, {:}) || Channel(2, 0, {:}) || Channel(2, 1, {:})
+	));%);
+
+map 
+	N : Pos;
+eqn
+	N = 2;
