@@ -210,7 +210,7 @@ class YmlTest(object):
         for file in filenames:
             if os.path.exists(file) and (file.endswith('.mcrl2') or file.endswith('.pbesspec') or file.endswith('.mcf')):
                 contents = read_text(file)
-                print('Contents of file {}:\n{}'.format(file, contents))
+                print(f'Contents of file {file}:\n{contents}')
 
     def _run(self):
         tasks = self.tasks[:]
@@ -224,7 +224,7 @@ class YmlTest(object):
                 if returncode != 0 and not self.allow_non_zero_return_values:
                     self.dump_file_contents()
                     self.print_commands(no_paths = True)
-                    raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
+                    raise RuntimeError(f'The execution of tool {tool.name} ended with return code {returncode}')
             except MemoryExceededError as e:
                 if self.verbose:
                     print('Memory limit exceeded: ' + str(e))
@@ -277,24 +277,26 @@ class YmlTest(object):
         print('\n'.join([tool.command(working_directory, no_paths) for tool in self.tasks]))
 
     def result_string(self, result):
-        if result == True:
+        if result:
             return 'Pass'
-        elif result == False:
+        elif not result:
             return 'FAIL'
         else:
             return 'Indeterminate'
 
-    def execute(self, runpath = '.'):
+    def execute(self):
         for filename in [self.ymlfile] + self.inputfiles:
             if not os.path.isfile(filename):
-                print('Error:', filename, 'does not exist!')
+                print(f'Error: {filename} does not exist!')
                 return
         if 'verbose' in self.settings and self.settings['verbose']:
             print('Running test ' + self.ymlfile)
+
         self.setup(self.inputfiles)
         result = self._run()
-        print('{} {}'.format(self.name, self.result_string(result)))
-        if result == False:
+
+        print(f'{self.name} {self.result_string(result)}', flush=True)
+        if not result:
             raise RuntimeError(
                 'The result expression evaluated to False. The output of the tools likely does not match.')
         return result

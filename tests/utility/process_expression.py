@@ -43,9 +43,9 @@ def parse_variable(text: str):
     return result
 
 # example: 'b: Bool, m: Nat'
-def parse_variables(text: str):
-    variables = filter(None, list(map(str.strip, text.split(','))))
-    return map(parse_variable, variables)
+def parse_variables(text: str) -> list[Variable]:
+    variables = map(str.strip, text.split(','))
+    return list(map(parse_variable, variables))
 
 # example: 'P(m: Nat, b: Bool)'
 class ProcessIdentifier(object):

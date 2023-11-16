@@ -68,13 +68,13 @@ class Tool(object):
     # value[key] is an integer
     def parse_number(self, text, key, regex):
         m = re.search(regex, text)
-        if m != None:
+        if m is not None:
             self.value[key] = int(m.group(1))
 
     # value[key] is an integer
     def parse_numbers(self, text, key1, key2, regex):
         m = re.search(regex, text)
-        if m != None:
+        if m is not None:
             self.value[key1] = int(m.group(1))
             self.value[key2] = int(m.group(2))
 
@@ -91,7 +91,7 @@ class Tool(object):
     def parse_boolean_regexes(self, text, key, regexes):
         result = False
         for regex in regexes:
-            if re.search(regex, text, re.DOTALL) != None:
+            if re.search(regex, text, re.DOTALL) is not None:
                 result = True
         self.value[key] = result
 
@@ -99,11 +99,11 @@ class Tool(object):
     def parse_boolean(self, text, key, regex, negated_regex = None):
         if negated_regex:
             m = re.search(negated_regex, text, re.DOTALL)
-            if m != None:
+            if m is not None:
                 self.value[key] = False
         if regex:
             m = re.search(regex, text, re.DOTALL)
-            if m != None:
+            if m is not None:
                 self.value[key] = True
 
     def parse_output(self):
@@ -164,7 +164,7 @@ class Tool(object):
         if verbose:
             print('Executing ' + ' '.join([name] + args + self.args))
 
-        process = RunProcess(name, args, memlimit, timeout)
+        process = RunProcess(name, args + self.args, memlimit, timeout)
    
         self.executed = True
         self.stdout = process.stdout
