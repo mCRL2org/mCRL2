@@ -1,0 +1,4 @@
+[true*] 
+forall i, j: Nat.
+    val(valid_id(i) && valid_id(j) && i != j) =>
+        !(<crit(i)>true && <crit(j)>true)
