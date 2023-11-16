@@ -5,10 +5,12 @@
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-from subprocess import  PIPE
 import os.path
+import platform
 import re
-from text_utility import read_text
+
+from .text_utility import read_text
+from .run_process import RunProcess
 
 def is_list_of(l, types):
     if not isinstance(l, list):
@@ -19,9 +21,9 @@ def is_list_of(l, types):
     return True
 
 class Node:
-    def __init__(self, label, type, value):
+    def __init__(self, label, _type, value):
         self.label = label
-        self.type = type
+        self.type = _type
         self.value = value
         return
 
@@ -35,7 +37,6 @@ class Tool(object):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         assert is_list_of(input_nodes, Node)
         assert is_list_of(output_nodes, Node)
-        import platform
         self.label = label
         self.name = name
         self.toolpath = toolpath
@@ -44,36 +45,6 @@ class Tool(object):
         self.args = args
         self.executed = False
         self.value = {}
-        if platform.system() == 'Windows':
-            # Don't display the Windows GPF dialog if the invoked program dies.
-            # See comp.os.ms-windows.programmer.win32
-            # How to suppress crash notification dialog?, Raymond Chen Jan 14,2004 -
-            import ctypes
-            SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
-            ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
-            self.subprocess_flags = 0x8000000 #win32con.CREATE_NO_WINDOW?
-        else:
-            self.subprocess_flags = 0
-
-    # Raises an exception if the execution was aborted or produced an error
-    def check_execution(self, process, timeout, memlimit, returncode):
-        import platform
-        import popen
-        if process.user_time > timeout:
-            raise popen.TimeExceededError(process.user_time)
-        if process.max_virtual_memory > memlimit:
-            raise popen.MemoryExceededError(process.max_virtual_memory)
-        if returncode != 0:
-            print(self.stderr)
-            raise popen.ToolRuntimeError('Tool {} ended with return code {}'.format(self.name, returncode))
-        if platform.system() == 'Windows' and returncode == -1073740777:
-            raise popen.ToolRuntimeError('Tool {} failed with the return code STATUS_INVALID_CRUNTIME_PARAMETER (0xC0000417)'.format(self.name))
-        if platform.system() == 'Windows' and returncode == -1073741571:
-            raise popen.StackOverflowError(self.name)
-        if platform.system() == 'Linux' and returncode == -11:
-            raise popen.SegmentationFault(self.name)
-        if self.stderr and 'error' in self.stderr:
-            raise popen.ToolRuntimeError('Tool {} failed: {}'.format(self.name, self.stderr))
 
     # If no_paths is True, then all paths in the command are excluded
     def arguments(self, working_directory = None, no_paths = False):
@@ -186,33 +157,18 @@ class Tool(object):
             name = os.path.join(self.toolpath, name)
         return ' '.join([name] + args + self.args)
 
-    def check_exists(self, name):
-        import platform
-        if os.path.exists(name):
-            return True
-        if not name.endswith('.exe') and platform.system() == 'Windows':
-            if os.path.exists(name + '.exe'):
-                return True
-        return False
 
     def execute(self, timeout, memlimit, verbose):
-        import popen
         args = self.arguments()
         name = os.path.join(self.toolpath, self.name)
         if verbose:
             print('Executing ' + ' '.join([name] + args + self.args))
-        if not self.check_exists(name):
-            raise popen.ToolNotFoundError(name)
-        process = popen.Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=memlimit, usrTimeLimit=timeout)
 
-        input = None
-        stdout, stderr = process.communicate(input)
-        self.stdout = stdout.decode("utf-8")
-        self.stderr = stderr.decode("utf-8")
+        process = RunProcess(name, args, memlimit, timeout)
+   
         self.executed = True
-        self.user_time = process.user_time
-        self.max_virtual_memory = process.max_virtual_memory
-        self.check_execution(process, timeout, memlimit, process.returncode)
+        self.stdout = process.stdout
+        self.stderr = process.stderr
         self.assign_outputs()
         self.parse_output()
         return process.returncode

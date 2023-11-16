@@ -6,25 +6,24 @@
 
 import argparse
 import shutil
-import os
 import re
-import sys
-import time
 import traceback
 
+position_regex = re.compile(r'[^[]*\[')
+
 # Runs a command, and returns the output
-def run_command(cmd, print_output = False):
-    print cmd
+def run_command(cmd: str, print_output = False):
+    print(cmd)
     import subprocess
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     if print_output:
-        print indent_text(output, '    ')
+        print(indent_text(output, '    '))
     return output
 
 def position_counts(pbesfile):
     cmd = 'reduce_pbes -d {}'.format(pbesfile)
     text = run_command(cmd).strip()
-    text = re.sub(r'[^[]*\[', '[', text)
+    text = position_regex.sub(position_regex, text)
     return eval(text)
 
 def reduce_pbes(pbesfile, depth):
@@ -57,11 +56,11 @@ def minimize_pbes(pbesfile, script, maxdepth):
         for depth in range(0, maxdepth):
             file = minimize_pbes_at_depth(pbesfile, script, depth)
             if file:
-                print 'found', file
+                print(f'found {file}')
                 shutil.copy(file, pbesfile)
                 break
-        if not file:
-            return
+            else:
+                return
 
 def remove_equations(pbesfile):
     cmd = 'pbestransform -aremove-unused-pbes-equations {0} {0}'.format(pbesfile)
@@ -83,5 +82,5 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        print 'ERROR:', e
+        print(f'ERROR: {e}')
         traceback.print_exc()

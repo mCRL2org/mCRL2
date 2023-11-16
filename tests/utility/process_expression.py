@@ -32,34 +32,26 @@
 # binit                       |     2      |  y   |
 
 import re
-from data_expression import *
-import random_data_expression
-
-def is_list_of(l, types):
-    if not isinstance(l, list):
-        return False
-    for x in l:
-        if not isinstance(x, types):
-            return False
-    return True
+from .data_expression import DataExpression, Variable
 
 # example: 'b: Bool'
-def parse_variable(text):
+def parse_variable(text: str):
     text = text.strip()
-    m = re.match('([^,:]+)\s*\:(.+)', text)
+    m = re.match(r'([^,:]+)\s*\:(.+)', text)
+    assert m is not None
     result = Variable(m.group(1).strip(), m.group(2).strip())
     return result
 
 # example: 'b: Bool, m: Nat'
-def parse_variables(text):
-    import string
+def parse_variables(text: str):
     variables = filter(None, list(map(str.strip, text.split(','))))
     return map(parse_variable, variables)
 
 # example: 'P(m: Nat, b: Bool)'
 class ProcessIdentifier(object):
-    def __init__(self, text):
+    def __init__(self, text: str):
         m = re.search(r'(\w*)(\(.*\))?', text)
+        assert m is not None
         self.name = m.group(1)
         if m.group(2):
             vartext = m.group(2)[1:-1]
@@ -69,7 +61,7 @@ class ProcessIdentifier(object):
 
     def __str__(self):
         if self.variables:
-            return '{}({})'.format(self.name, ', '.join(['{}: {}'.format(x, x.type) for x in self.variables]))
+            return '{}({})'.format(self.name, ', '.join([f'{x}: {x.type}' for x in self.variables]))
         else:
             return self.name
 
@@ -112,9 +104,7 @@ class Tau(ProcessExpression):
         return 'tau'
 
 class ProcessInstance(ProcessExpression):
-    def __init__(self, identifier, parameters = []):
-        assert isinstance(identifier, ProcessIdentifier)
-        assert is_list_of(parameters, DataExpression)
+    def __init__(self, identifier: ProcessIdentifier, parameters: list[DataExpression]):
         self.identifier = identifier
         self.parameters = parameters
 
@@ -131,9 +121,7 @@ class Sum(ProcessExpression):
         self.x = x
 
     def __str__(self):
-        d = self.d
-        x = self.x
-        return 'sum {}: {}. ({})'.format(d, d.type, x)
+        return f'sum {self.d}: {self.d.type}. ({self.x})'
 
 class IfThen(ProcessExpression):
     def __init__(self, c, x):
@@ -141,9 +129,7 @@ class IfThen(ProcessExpression):
         self.c = c
 
     def __str__(self):
-        x = self.x
-        c = self.c
-        return '({}) -> ({})'.format(c, x)
+        return f'({self.c}) -> ({self.x})'
 
 class IfThenElse(ProcessExpression):
     def __init__(self, c, x, y):
@@ -152,10 +138,7 @@ class IfThenElse(ProcessExpression):
         self.y = y
 
     def __str__(self):
-        c = self.c
-        x = self.x
-        y = self.y
-        return '({}) -> ({}) <> ({})'.format(c, x, y)
+        return f'({self.c}) -> ({self.x}) <> ({self.y})'
 
 class BinaryOperator(ProcessExpression):
     def __init__(self, op, x, y):

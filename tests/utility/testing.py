@@ -8,8 +8,12 @@
 import os
 import os.path
 import shutil
-from text_utility import read_text, write_text
-from tools import Node, ToolFactory
+from collections import defaultdict
+
+from .run_process import MemoryExceededError, TimeExceededError, StackOverflowError, ToolRuntimeError, SegmentationFault
+from .text_utility import read_text, write_text
+from .tools import Node, ToolFactory
+from .topological_sort import topological_sort
 
 class ToolInputError(Exception):
     def __init__(self, name, value):
@@ -47,47 +51,46 @@ class YmlTest(object):
         self.toolpath = settings.get('toolpath', '')
         self.cleanup_files = settings.get('cleanup_files', False)
         self.timeout = 5
-        self.memlimit = 1000000000
+        self.memlimit = 1000
         self.allow_non_zero_return_values = settings.get('allow-non-zero-return-values', False)
 
         # Reads a test from a YAML file
-        f = open(ymlfile)
-        data = yaml.safe_load(f)
+        with open(ymlfile, encoding="UTF-8") as f:
+            data = yaml.safe_load(f)
 
-        # Add tool arguments specified in settings
-        if 'tools' in settings:
-            for tool in settings['tools']:
-                if 'args' in settings['tools'][tool]:
-                    data['tools'][tool]['args'] += settings['tools'][tool]['args']
+            # Add tool arguments specified in settings
+            if 'tools' in settings:
+                for tool in settings['tools']:
+                    if 'args' in settings['tools'][tool]:
+                        data['tools'][tool]['args'] += settings['tools'][tool]['args']
 
-        # Overwrite node values specified in settings
-        if 'nodes' in settings:
-            for label in settings['nodes']:
-                data['nodes'][label]['value'] = settings['nodes'][label]['value']
+            # Overwrite node values specified in settings
+            if 'nodes' in settings:
+                for label in settings['nodes']:
+                    data['nodes'][label]['value'] = settings['nodes'][label]['value']
 
-        # Overwrite result value with the one specified in settings
-        if 'result' in settings:
-            data['result'] = settings['result']
+            # Overwrite result value with the one specified in settings
+            if 'result' in settings:
+                data['result'] = settings['result']
 
-        if 'memlimit' in settings:
-            self.memlimit = settings['memlimit']
+            if 'memlimit' in settings:
+                self.memlimit = settings['memlimit']
 
-        if 'timeout' in settings:
-            self.timeout = settings['timeout']
+            if 'timeout' in settings:
+                self.timeout = settings['timeout']
 
-        #print yaml.dump(data)
+            #print yaml.dump(data)
 
-        self.nodes = []
-        for label in data['nodes']: # create nodes
-            self._add_node(data['nodes'][label], label)
+            self.nodes = []
+            for label in data['nodes']: # create nodes
+                self._add_node(data['nodes'][label], label)
 
-        self.tools = []
-        for label in data['tools']: # create tools
-            assert isinstance(data['tools'], dict)
-            self._add_tool(data['tools'][label], label)
+            self.tools = []
+            for label in data['tools']: # create tools
+                assert isinstance(data['tools'], dict)
+                self._add_tool(data['tools'][label], label)
 
-        self.result_code = data['result']
-        f.close()
+            self.result_code = data['result']
 
         # These are the global variables used for the computation of the test result
         self.globals = {}
@@ -160,8 +163,6 @@ class YmlTest(object):
 
     # Returns a valid schedule for executing the tools in this test
     def make_task_schedule(self):
-        from collections import defaultdict
-        from topological_sort import topological_sort
 
         # Create a label based mapping E that contains outgoing edges for all nodes.
         E = defaultdict(lambda: set([]))
@@ -212,8 +213,6 @@ class YmlTest(object):
                 print('Contents of file {}:\n{}'.format(file, contents))
 
     def _run(self):
-        import popen
-
         tasks = self.tasks[:]
         commands = [tool.command() for tool in tasks]
 
@@ -226,22 +225,22 @@ class YmlTest(object):
                     self.dump_file_contents()
                     self.print_commands(no_paths = True)
                     raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
-            except popen.MemoryExceededError as e:
+            except MemoryExceededError as e:
                 if self.verbose:
                     print('Memory limit exceeded: ' + str(e))
                 self.cleanup()
                 return None
-            except popen.TimeExceededError as e:
+            except TimeExceededError as e:
                 if self.verbose:
                     print('Time limit exceeded: ' + str(e))
                 self.cleanup()
                 return None
-            except popen.StackOverflowError:
+            except StackOverflowError:
                 if self.verbose:
                     print('Stack overflow detected during execution of the tool ' + tool.name)
                 self.cleanup()
                 return None
-            except (popen.ToolRuntimeError, popen.SegmentationFault) as e:
+            except (ToolRuntimeError, SegmentationFault) as e:
                 self.dump_file_contents()
                 self.print_commands(no_paths = True)
                 self.cleanup()

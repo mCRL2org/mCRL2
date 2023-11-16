@@ -1,76 +1,82 @@
 #!/usr/bin/env python
 
-#~ Copyright 2010 Wieger Wesselink.
-#~ Distributed under the Boost Software License, Version 1.0.
-#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+# ~ Copyright 2010 Wieger Wesselink.
+# ~ Distributed under the Boost Software License, Version 1.0.
+# ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import argparse
 import os
 import random
-from text_utility import write_text
 
-PREDICATE_INTEGERS = ['m', 'n']
-PREDICATE_BOOLEANS = ['b', 'c']
-QUANTIFIER_INTEGERS = ['t', 'u', 'v', 'w']
+from .text_utility import write_text
+
+PREDICATE_INTEGERS = ["m", "n"]
+PREDICATE_BOOLEANS = ["b", "c"]
+QUANTIFIER_INTEGERS = ["t", "u", "v", "w"]
 INTEGERS = PREDICATE_INTEGERS + QUANTIFIER_INTEGERS
 BOOLEANS = PREDICATE_BOOLEANS
 
 # As a convention we use that k, m, n are always natural numbers and
 # b, c, d are always booleans.
 
+
 # Adds a type ':Bool' or ':Nat' to the name of a variable
 def add_type(var):
     if var in BOOLEANS:
-        return '%s:Bool' % var
+        return f"{var}:Bool"
     elif var in INTEGERS:
-        return '%s:Nat' % var
+        return f"{var}:Nat"
     return None
 
+
 class Boolean:
-    def __init__(self, value = None):
+    def __init__(self, value=None):
         self.value = value
 
     def __repr__(self):
-        if self.value == None:
-            return '<BOOL>'
+        if self.value is None:
+            return "<BOOL>"
         else:
-            return '%s' % self.value
+            return f"{self.value}"
 
-    def finish(self, freevars, negated, add_val = True):
-        if self.value == None:
+    def finish(self, freevars, negated, add_val=True):
+        if self.value is None:
             self.value = make_boolean(freevars, add_val)
 
+
 class Natural:
-    def __init__(self, value = None):
+    def __init__(self, value=None):
         self.value = value
 
     def __repr__(self):
-        if self.value == None:
-            return '<NAT>'
+        if self.value is None:
+            return "<NAT>"
         else:
-            return '%s' % self.value
+            return f"{self.value}"
 
-    def finish(self, freevars, negated, add_val = True):
-        if self.value == None:
+    def finish(self, freevars, negated, add_val=True):
+        if self.value is None:
             self.value = make_natural(freevars, add_val)
+
 
 class PropositionalVariable:
     def __init__(self, name, args):
         self.name = name
         self.args = args
-        self.prefix = ''   # sometimes we need to add a '!' to make a PBES monotonic
+        self.prefix = ""  # sometimes we need to add a '!' to make a PBES monotonic
 
     def __repr__(self):
         if len(self.args) == 0:
-            return '%s%s' % (self.prefix, self.name)
-        return '%s%s(%s)' % (self.prefix, self.name, ', '.join(map(str, self.args)))
+            return f"{self.prefix}{self.name}"
+        return "%s%s(%s)" % (self.prefix, self.name, ", ".join(map(str, self.args)))
 
     def finish(self, freevars, negated):
         if negated:
-            self.prefix = '!'
+            self.prefix = "!"
         add_val = False
         for a in self.args:
             a.finish(freevars, negated, add_val)
+
 
 class PredicateVariable:
     def __init__(self, name, args):
@@ -81,10 +87,11 @@ class PredicateVariable:
         if len(self.args) == 0:
             return self.name
         args = map(add_type, self.args)
-        return '%s(%s)' % (self.name, ', '.join(map(str, args)))
+        return "%s(%s)" % (self.name, ", ".join(map(str, args)))
 
     def finish(self, freevars, negated):
         pass
+
 
 class Equation:
     def __init__(self, sigma, var, formula):
@@ -93,12 +100,13 @@ class Equation:
         self.formula = formula
 
     def __repr__(self):
-        return '%s %s = %s;' % (self.sigma, self.var, self.formula)
+        return "%s %s = %s;" % (self.sigma, self.var, self.formula)
 
     def finish(self):
         freevars = self.var.args
         negated = False
         self.formula.finish(freevars, negated)
+
 
 class PBES:
     def __init__(self, equations, init):
@@ -106,11 +114,12 @@ class PBES:
         self.init = init
 
     def __repr__(self):
-        return 'pbes\n%s\n\ninit %s;' % ('\n'.join(map(str, self.equations)), self.init)
+        return "pbes\n%s\n\ninit %s;" % ("\n".join(map(str, self.equations)), self.init)
 
     def finish(self):
         for e in self.equations:
             e.finish()
+
 
 class UnaryOperator:
     def __init__(self, op, x):
@@ -120,12 +129,13 @@ class UnaryOperator:
     def __repr__(self):
         x = self.x
         op = self.op
-        return '%s(%s)' % (op, x)
+        return "%s(%s)" % (op, x)
 
     def finish(self, freevars, negated):
-        if self.op == '!':
+        if self.op == "!":
             negated = not negated
         self.x.finish(freevars, negated)
+
 
 class BinaryOperator:
     def __init__(self, op, x, y):
@@ -137,26 +147,27 @@ class BinaryOperator:
         x = self.x
         y = self.y
         op = self.op
-        return '(%s) %s (%s)' % (x, op, y)
+        return "(%s) %s (%s)" % (x, op, y)
 
     def finish(self, freevars, negated):
-        if self.op == '=>':
+        if self.op == "=>":
             self.x.finish(freevars, not negated)
         else:
             self.x.finish(freevars, negated)
         self.y.finish(freevars, negated)
 
+
 class Quantifier:
     def __init__(self, quantor, x, y):
         self.quantor = quantor
-        self.x = x    # the bound variable
-        self.y = y    # the formula
+        self.x = x  # the bound variable
+        self.y = y  # the formula
 
     def __repr__(self):
         x = self.x
         y = self.y
         quantor = self.quantor
-        return '%s %s.(%s)' % (quantor, add_type(x), y)
+        return "%s %s.(%s)" % (quantor, add_type(x), y)
 
     def finish(self, freevars, negated):
         qvar = []
@@ -164,130 +175,153 @@ class Quantifier:
             if not q in freevars:
                 qvar.append(q)
         if len(qvar) == 0:
-            raise RuntimeError('warning: Quantifier nesting depth exceeded')
+            raise RuntimeError("warning: Quantifier nesting depth exceeded")
         var, dummy = pick_element(qvar)
         self.x = var
-        if self.quantor == 'exists':
-            self.y = or_(Boolean(make_val('%s < 3' % var)), self.y)
+        if self.quantor == "exists":
+            self.y = or_(Boolean(make_val("%s < 3" % var)), self.y)
         else:
-            self.y = and_(Boolean(make_val('%s < 3' % var)), self.y)
+            self.y = and_(Boolean(make_val("%s < 3" % var)), self.y)
         self.y.finish(freevars + [self.x], negated)
 
+
 def not_(x):
-    return UnaryOperator('!', x)
+    return UnaryOperator("!", x)
+
 
 def and_(x, y):
-    return BinaryOperator('&&', x, y)
+    return BinaryOperator("&&", x, y)
+
 
 def or_(x, y):
-    return BinaryOperator('||', x, y)
+    return BinaryOperator("||", x, y)
+
 
 def implies(x, y):
-    return BinaryOperator('=>', x, y)
+    return BinaryOperator("=>", x, y)
+
 
 def forall(x):
     var = Natural()
     phi = x
-    return Quantifier('forall', var, phi)
+    return Quantifier("forall", var, phi)
+
 
 def exists(x):
     var = Natural()
     phi = x
-    return Quantifier('exists', var, phi)
+    return Quantifier("exists", var, phi)
+
 
 def equal_to(x, y):
-    return BinaryOperator('==', x, y)
+    return BinaryOperator("==", x, y)
+
 
 def not_equal_to(x, y):
-    return BinaryOperator('!=', x, y)
+    return BinaryOperator("!=", x, y)
 
-#operators = [not_, forall, exists, and_, or_, implies, equal_to, not_equal_to]
+
+# operators = [not_, forall, exists, and_, or_, implies, equal_to, not_equal_to]
 operators = [not_, and_, or_, implies, forall, exists]
 
+
 def is_boolean_constant(x):
-    return isinstance(x, Boolean) and x.value in ['false', 'true']
+    return isinstance(x, Boolean) and x.value in ["false", "true"]
+
 
 def is_natural_constant(x):
-    return isinstance(x, Natural) and x.value in ['0', '1']
+    return isinstance(x, Natural) and x.value in ["0", "1"]
+
 
 def is_unary(op):
     return op in [not_, forall, exists]
+
 
 # pick a random element x from a set s
 # returns x, (s - {x})
 def pick_element(s):
     n = random.randint(0, len(s) - 1)
     x = s[n]
-    s = s[:n] + s[n+1:]
+    s = s[:n] + s[n + 1 :]
     return x, s
+
 
 # randomly pick n elements from a set s
 # returns a sequence with the selected elements
 def pick_elements(s, n):
     result = []
-    for i in range(n):
+    for _ in range(n):
         x, s = pick_element(s)
         result.append(x)
     return result
 
+
 # with a 100% probability wrap s inside val
 def make_val(s):
-    return 'val({})'.format(s)
+    return "val({})".format(s)
 
-    #n = random.randint(0, 1)
-    #if n == 0:
+    # n = random.randint(0, 1)
+    # if n == 0:
     #    return 'val({})'.format(s)
-    #else:
+    # else:
     #    return s
 
-def make_predvar(n, use_integers=True, size = random.randint(0, 2)):
-    name = 'X%d' % n
+
+def make_predvar(n, use_integers=True, size=random.randint(0, 2)):
+    name = "X%d" % n
     arguments = []
-    variables = PREDICATE_INTEGERS + PREDICATE_BOOLEANS if use_integers else PREDICATE_BOOLEANS
-    for i in range(size):
+    variables = (
+        PREDICATE_INTEGERS + PREDICATE_BOOLEANS if use_integers else PREDICATE_BOOLEANS
+    )
+    for _ in range(size):
         v, variables = pick_element(variables)
         arguments.append(v)
     return PredicateVariable(name, arguments)
+
 
 # Generates n random predicate variables with 0, 1 or 2 parameters
 def make_predvars(n, use_integers):
     return [make_predvar(i, use_integers, random.randint(0, 2)) for i in range(n)]
 
+
 # Creates elementary random boolean terms, with free variables
 # from the set freevars.
-def make_atoms(freevars, add_val = True):
+def make_atoms(freevars, add_val=True):
     naturals = set(freevars).intersection(set(INTEGERS))
     booleans = set(freevars).intersection(set(BOOLEANS))
     result = []
     for m in naturals:
-        result.append('%s > 0' % m)
-        result.append('%s > 1' % m)
-        result.append('%s < 2' % m)
-        result.append('%s < 3' % m)
+        result.append(f"{m} > 0")
+        result.append(f"{m} > 1")
+        result.append(f"{m} < 2")
+        result.append(f"{m} < 3")
         for n in naturals - {m}:
-            result.append('%s == %s' % (m, n))
+            result.append(f"{m} == {n}")
     for b in booleans:
         result.append(b)
-    result.append('true')
-    result.append('false')
+    result.append("true")
+    result.append("false")
     if add_val:
-        result = [make_val('%s' % x) for x in result]
+        result = [make_val(f"{x}") for x in result]
     return result
 
-def make_boolean(freevars, add_val = True):
+
+def make_boolean(freevars, add_val=True):
     atoms = make_atoms(freevars, add_val)
     x, dummy = pick_element(atoms)
     return x
 
-def make_natural(freevars, add_val = True):
+
+def make_natural(freevars, add_val=True):
     naturals = set(freevars).intersection(set(INTEGERS))
     result = []
-    result.append('0')
-    result.append('1')
+    result.append("0")
+    result.append("1")
     for m in naturals:
-        result.append('%s + 1' % m)
+        result.append(f"{m} + 1")
     x, dummy = pick_element(result)
     return x
+
 
 # returns instantiations of predicate variables
 def make_predvar_instantiations(predvars):
@@ -302,14 +336,16 @@ def make_predvar_instantiations(predvars):
         result.append(PropositionalVariable(X.name, args))
     return result
 
+
 # Creates m boolean terms, and n propositional variable instantiations.
 def make_terms(predvars, m, n):
     result = []
     for i in range(m):
         result.append(Boolean())
-    inst  = make_predvar_instantiations(predvars)
+    inst = make_predvar_instantiations(predvars)
     result = result + pick_elements(inst, n)
     return result
+
 
 def join_terms(terms):
     op = operators[random.randint(0, len(operators) - 1)]
@@ -323,12 +359,19 @@ def join_terms(terms):
     terms.append(z)
     return terms
 
-def make_pbes(equation_count, atom_count=5, propvar_count=3, use_quantifiers=True, use_integers=True):
+
+def make_pbes(
+    equation_count,
+    atom_count=5,
+    propvar_count=3,
+    use_quantifiers=True,
+    use_integers=True,
+):
     global operators
     if use_quantifiers:
-      operators = [not_, and_, or_, implies, not_, and_, or_, implies, forall, exists]
+        operators = [not_, and_, or_, implies, not_, and_, or_, implies, forall, exists]
     else:
-      operators = [not_, and_, or_, implies]
+        operators = [not_, and_, or_, implies]
     while True:
         try:
             predvars = make_predvars(equation_count, use_integers)
@@ -337,38 +380,87 @@ def make_pbes(equation_count, atom_count=5, propvar_count=3, use_quantifiers=Tru
                 terms = make_terms(predvars, atom_count, propvar_count)
                 while len(terms) > 1:
                     terms = join_terms(terms)
-                sigma, dummy = pick_element(['mu', 'nu'])
+                sigma, dummy = pick_element(["mu", "nu"])
                 equations.append(Equation(sigma, predvars[i], terms[0]))
             X = predvars[0]
             args = []
             for a in X.args:
                 if a in BOOLEANS:
-                    args.append('true')
+                    args.append("true")
                 elif a in INTEGERS:
-                    args.append('0')
+                    args.append("0")
             init = PropositionalVariable(X.name, args)
             p = PBES(equations, init)
             p.finish()
             return p
         except Exception as inst:
-            #print inst
+            # print inst
             pass
+
 
 def main():
     cmdline_parser = argparse.ArgumentParser()
-    cmdline_parser.add_argument('destination', metavar='DIR', type=str, help='the output directory')
-    cmdline_parser.add_argument('--equation-count', metavar='VALUE', type=int, action = 'store', help='the number of equations', default=4)
-    cmdline_parser.add_argument('--atom-count', metavar='VALUE', type=int, action = 'store', help='the number of atoms', default='5')
-    cmdline_parser.add_argument('--propvar-count', metavar='VALUE', type=int, action = 'store', help='the number of atoms', default='3')
-    cmdline_parser.add_argument("--no-use-quantifiers", help="disable the generation of quantifiers", action="store_true", default=False)
-    cmdline_parser.add_argument("--no-use-integers", help="disable the generation of integers", action="store_true", default=False)
-    cmdline_parser.add_argument('-r', '--repetitions', dest='repetitions', type=int, metavar='N', default=10, help='generate N instances')
+    cmdline_parser.add_argument(
+        "destination", metavar="DIR", type=str, help="the output directory"
+    )
+    cmdline_parser.add_argument(
+        "--equation-count",
+        metavar="VALUE",
+        type=int,
+        action="store",
+        help="the number of equations",
+        default=4,
+    )
+    cmdline_parser.add_argument(
+        "--atom-count",
+        metavar="VALUE",
+        type=int,
+        action="store",
+        help="the number of atoms",
+        default="5",
+    )
+    cmdline_parser.add_argument(
+        "--propvar-count",
+        metavar="VALUE",
+        type=int,
+        action="store",
+        help="the number of atoms",
+        default="3",
+    )
+    cmdline_parser.add_argument(
+        "--no-use-quantifiers",
+        help="disable the generation of quantifiers",
+        action="store_true",
+        default=False,
+    )
+    cmdline_parser.add_argument(
+        "--no-use-integers",
+        help="disable the generation of integers",
+        action="store_true",
+        default=False,
+    )
+    cmdline_parser.add_argument(
+        "-r",
+        "--repetitions",
+        dest="repetitions",
+        type=int,
+        metavar="N",
+        default=10,
+        help="generate N instances",
+    )
     args = cmdline_parser.parse_args()
 
     for i in range(args.repetitions):
-        file = os.path.join(args.destination, '{}.txt'.format(i))
-        pbes = make_pbes(args.equation_count, args.atom_count, args.propvar_count, not args.no_use_quantifiers, not args.no_use_integers)
+        file = os.path.join(args.destination, f"{i}.txt")
+        pbes = make_pbes(
+            args.equation_count,
+            args.atom_count,
+            args.propvar_count,
+            not args.no_use_quantifiers,
+            not args.no_use_integers,
+        )
         write_text(file, str(pbes))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
