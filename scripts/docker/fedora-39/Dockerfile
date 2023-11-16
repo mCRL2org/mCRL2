@@ -1,4 +1,4 @@
-FROM fedora:38
+FROM fedora:39
 
 # Install packages needed for compiling and testing the tools
 RUN dnf install -y \
