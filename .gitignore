@@ -3,3 +3,6 @@ SourceVersion
 
 # Compiled byte-code for Python.
 *.pyc
+
+# Ignore the standard build directory
+build/
