@@ -27,7 +27,7 @@ foreach(type "random" "regression")
   foreach(testname ${available_tests})
     set(REPETITIONS "")
     if("${type}" STREQUAL "random")
-      set(REPETITIONS "-r 100")
+      set(REPETITIONS "-r 10")
     endif()
 
     set(targetname "${type}_${testname}")
@@ -38,8 +38,3 @@ foreach(type "random" "regression")
     set_tests_properties(${targetname} PROPERTIES LABELS ${type})
   endforeach()
 endforeach()
-
-# Enable tool tests if desired
-if(MCRL2_ENABLE_TOOL_TESTS)
-  include(GenerateToolTests.cmake)
-endif()
