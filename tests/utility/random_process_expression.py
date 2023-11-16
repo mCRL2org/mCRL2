@@ -35,9 +35,10 @@
 import copy
 import random
 import re
-import random_data_expression
-from process_expression import *
-from data_expression import *
+
+import tests.utility.random_data_expression as random_data_expression
+from .process_expression import *
+from .data_expression import *
 
 # Generate unique dist variables.
 # TODO: Check if variable clashes between nested dists are allowed.
@@ -147,19 +148,6 @@ def select_generators(generators, actions, process_identifiers, variables, is_pc
     for x in result:
         r = r + [x] * generators[x]
     return r
-
-# example: 'b: Bool'
-def parse_variable(text):
-    text = text.strip()
-    m = re.match('([^,:]+)\s*:(.+)', text)
-    result = Variable(m.group(1).strip(), m.group(2).strip())
-    return result
-
-# example: 'b: Bool, m: Nat'
-def parse_variables(text):
-    import string
-    variables = filter(None, list(map(str.strip, text.split(','))))
-    return list(map(parse_variable, variables))
 
 #---------------------------------------------------------------------------#
 #           generators for process expressions

@@ -4,12 +4,16 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import argparse
 import os
 import re
 import sys
 import traceback
-sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
-from testing import YmlTest
+
+# Makes sure that the script can find the modules when ran directly.
+sys.path.append(os.path.join(os.path.dirname(__file__),'../../'))
+
+from tests.utility.testing import YmlTest
 
 MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'install', 'bin')
@@ -128,7 +132,6 @@ def print_names(tests):
 
 # Command line interface to run tests.
 def main(tests):
-    import argparse
     cmdline_parser = argparse.ArgumentParser()
     cmdline_parser.add_argument('-t', '--toolpath', dest='toolpath', help='The path where the mCRL2 tools are installed')
     cmdline_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Display additional progress messages.')

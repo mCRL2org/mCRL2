@@ -9,15 +9,15 @@ class DataExpression(object):
         pass
 
 class Variable(DataExpression):
-    def __init__(self, name, type = 'Bool'):
+    def __init__(self, name: str, _type: str = 'Bool'):
         self.name = name
-        self.type = type
+        self.type = _type
 
     def __str__(self):
         return self.name
 
 class Integer(DataExpression):
-    def __init__(self, value):
+    def __init__(self, value: str):
         self.value = value
         self.type = 'Int'
 
@@ -25,7 +25,7 @@ class Integer(DataExpression):
         return self.value
 
 class Boolean(DataExpression):
-    def __init__(self, value):
+    def __init__(self, value: str):
         self.value = value
         self.type = 'Bool'
 
