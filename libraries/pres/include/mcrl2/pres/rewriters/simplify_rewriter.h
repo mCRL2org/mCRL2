@@ -27,8 +27,58 @@ struct add_simplify: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::apply;
 
-  add_simplify()
-  {}
+protected:
+  template <class T>
+  void const_multiply_helper(T& result, const data::data_expression& f, const pres_expression& x)
+  {
+    if (data::sort_real::is_zero(f))
+    {
+      result=f;
+      return;
+    }
+    apply(result, x);
+    assert(!is_const_multiply_alt(result));
+    if (data::sort_real::is_zero(result))
+    {
+      return;
+    }
+    if (data::sort_real::is_one(result))
+    {
+      apply(result, f);
+      return;
+    }
+    if (data::is_data_expression(result))
+    { 
+      const data::data_expression& d=atermpp::down_cast<data::data_expression>(result);
+      if (d.sort()==data::sort_real::real_())
+      {
+        assert(!data::sort_real::is_one(d));
+        result=data::sort_real::times(f, d);
+        return;
+      }
+      assert(d.sort()==data::sort_bool::bool_());
+      // return result
+      return;
+    }
+
+    if (is_const_multiply(result))
+    {
+      const const_multiply& cm=atermpp::down_cast<const_multiply>(result);
+      apply(result, const_multiply(data::sort_real::times(f, cm.left()), cm.right()));
+      return;
+    }
+    if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
+    {
+      // return result.
+      return;
+    }
+
+    make_const_multiply(result, f, result);
+    return;  
+  }
+
+public:
+  add_simplify()=default;
 
   template <class T>
   void apply(T& result, const minus& x)
@@ -251,68 +301,13 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const const_multiply& x)
   {
-    apply(result, x.right());
-    if (is_const_multiply(result))
-    {
-      apply(result, const_multiply(data::sort_real::times(x.left(),
-                                                          atermpp::down_cast<const_multiply>(result).left()),
-                                   atermpp::down_cast<const_multiply>(result).right()));
-      return;
-    }
-    if (is_const_multiply_alt(result))
-    {
-      apply(result, const_multiply(data::sort_real::times(x.left(),
-                                                          atermpp::down_cast<const_multiply_alt>(result).right()),
-                               atermpp::down_cast<const_multiply_alt>(result).left()));
-      return;
-    }
-    if (data::is_data_expression(result) && atermpp::down_cast<data::data_expression>(result).sort()==data::sort_real::real_())
-    {
-      apply(result, data::sort_real::times(x.left(),
-                                           atermpp::down_cast<data::data_expression>(result)));
-      return;
-    }
-    pres_expression result_lhs;
-    apply(result_lhs, static_cast<pres_expression>(x.left()));
-    if (data::sort_real::is_one(result_lhs))
-    {
-      apply(result, x.right());
-      return;
-    }
-    if (data::sort_real::is_zero(result_lhs))
-    {
-      result = result_lhs;
-      return;
-    }
-    data::data_expression inequality;
-    apply(inequality, data::less(data::sort_real::real_zero(), atermpp::down_cast<data::data_expression>(result_lhs)));
-    if (is_true(inequality)) // if the factor in const_multiply is larger than zero, we can simplify further. 
-    {
-      if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
-      {
-        // return result.
-        return;
-      }
-    }
-    make_const_multiply(result, result_lhs, result);
+    const_multiply_helper(result, x.left(), x.right());
   }
 
   template <class T>
   void apply(T& result, const const_multiply_alt& x)
   {
-    apply(result, x.right());
-    if (data::sort_real::is_zero(result))
-    {
-      return;
-    }
-    if (data::sort_real::is_one(result))
-    {
-      apply(result, x.left());
-      return;
-    }
-    pres_expression result_left;
-    apply(result_left, x.left());
-    make_const_multiply(result, result, result_left);
+    const_multiply_helper(result, x.right(), x.left());
   }
 
   template <class T>
@@ -592,6 +587,86 @@ struct simplify_data_rewriter_builder : public mcrl2::pres_system::detail::add_d
   using super::apply;
   const data::data_specification m_data_spec;
   
+protected:
+  template <class T>
+  void const_multiply_helper(T& result, const data::data_expression& f, const pres_expression& x)
+  {
+    data::data_expression data_result;
+    apply(data_result, f);
+    if (data::sort_real::is_zero(data_result))
+    {
+      result=data_result;
+      return;
+    }
+    apply(result, x);
+    assert(!is_const_multiply_alt(result));
+    assert(!data::sort_real::is_zero(data_result));
+    if (data::sort_real::is_one(data_result))
+    {
+      return;
+    }
+    if (is_const_multiply(result))
+    {
+      data::data_expression data_result1;
+      const const_multiply& result_cm=atermpp::down_cast<const_multiply>(result);
+      apply(data_result1, data::sort_real::times(data_result, result_cm.left()));
+
+      assert(!data::sort_real::is_zero(data_result1));
+      if (!data::sort_real::is_one(data_result1))
+      {
+        make_const_multiply(result, data_result1, result_cm.right());
+      }
+      return;
+    }
+    if (data::is_data_expression(result))
+    {
+      const data::data_expression& d=atermpp::down_cast<data::data_expression>(result);
+      if (d.sort()==data::sort_real::real_())
+      {
+        if (data::sort_real::is_one(d))
+        {
+          result=data_result;
+          return;
+        }
+        if (data::sort_real::is_zero(d))
+        {
+          return;
+        }
+        data::data_expression data_result1;
+        apply(result, data::sort_real::times(data_result, d));
+
+        return;
+      }
+      else 
+      {
+        assert(d.sort()==data::sort_bool::bool_());
+        // return result;
+        return;
+      }
+    }
+    if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
+    {
+      if (data::sort_real::is_creal_application(data_result) && !data::sort_real::is_zero(data_result))
+      {
+        assert(data::sort_real::value(data_result)>0);
+        // return result.
+        return;
+      }
+      make_const_multiply(result, data_result, result);
+      return;
+    }
+    data::data_expression result_f;
+    apply(result_f, f);
+    if (data::sort_real::is_one(result_f))
+    {   
+      return;
+    } 
+
+    make_const_multiply(result, result_f, result);
+    return;  
+  }
+
+public:
   simplify_data_rewriter_builder(const data::data_specification& data_spec, const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma),
       m_data_spec(data_spec)
@@ -603,6 +678,19 @@ struct simplify_data_rewriter_builder : public mcrl2::pres_system::detail::add_d
     pres_expression body;
     apply(body, x.body());
     optimized_sum(result, x.variables(), body, m_data_spec, super::R);
+  }
+
+
+  template <class T>
+  void apply(T& result, const const_multiply& x)
+  {
+    const_multiply_helper(result, x.left(), x.right());
+  }
+
+  template <class T>
+  void apply(T& result, const const_multiply_alt& x)
+  {
+    const_multiply_helper(result, x.right(), x.left());
   }
 
   template <class T>
