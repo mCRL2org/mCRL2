@@ -288,14 +288,14 @@ public:
   void apply(T& result, const infimum& x)
   {
     apply(result, x.body());
-    make_infimum(result, x.variables(), result);
+    optimized_infimum(result, x.variables(), result);
   }
 
   template <class T>
   void apply(T& result, const supremum& x)
   {
     apply(result, x.body());
-    make_supremum(result, x.variables(), result);
+    optimized_supremum(result, x.variables(), result);
   }
 
   template <class T>
