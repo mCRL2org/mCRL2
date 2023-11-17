@@ -1,0 +1,9 @@
+<root>
+ <spec>RA_fixed+broadcast_spec.mcrl2</spec>
+ <properties>
+  <property>no deadlock in model</property>
+  <property>mutual exclusion</property>
+  <property>deadlock freedom</property>
+  <property>starvation freedom</property>
+ </properties>
+</root>

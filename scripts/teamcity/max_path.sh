@@ -1,0 +1,1 @@
+find -regextype posix-extended -regex '.{110,}'

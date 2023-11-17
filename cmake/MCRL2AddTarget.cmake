@@ -74,12 +74,12 @@ function(mcrl2_add_tool TARGET_NAME)
   set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TARGET_NAME}")
     
   # Finds header files, can be glob since it is only used to show headers in MSVC
-  file(GLOB_RECURSE TARGET_INCLUDE_FILES "include/*.h")
+  file(GLOB_RECURSE TARGET_INCLUDE_FILES "*.h")
 
   add_executable(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
 
   target_link_libraries(${TARGET_NAME} ${ARG_DEPENDS})
-  target_include_directories(${TARGET_NAME} PUBLIC ".")
+  target_include_directories(${TARGET_NAME} PUBLIC "." "include/")
 
   if(MCRL2_MAN_PAGES)
     mcrl2_add_man_page(${TARGET_NAME})
@@ -119,7 +119,7 @@ function(mcrl2_add_gui_tool TARGET_NAME)
   add_executable(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
 
   target_link_libraries(${TARGET_NAME} ${ARG_DEPENDS})
-  target_include_directories(${TARGET_NAME} PUBLIC ".")
+  target_include_directories(${TARGET_NAME} PUBLIC "." "include/")
 
   if(MCRL2_MAN_PAGES)
     mcrl2_add_man_page(${TARGET_NAME})

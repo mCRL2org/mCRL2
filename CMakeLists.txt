@@ -85,7 +85,6 @@ endif()
 
 if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(OpenGL     QUIET REQUIRED)
-  find_package(TR         QUIET REQUIRED)
   find_package(CVC3       QUIET)
   find_package(Qt6 6.2.4 COMPONENTS Core OpenGL OpenGLWidgets Widgets Xml Gui QUIET REQUIRED)
 	
@@ -103,11 +102,15 @@ include(ConfigureCompiler)
 include(MCRL2Version)
 include(MCRL2AddTarget)
 
+
 if(MCRL2_ENABLE_CODE_COVERAGE)
   include(CodeCoverage)
 endif()
 
 add_subdirectory(3rd-party/dparser)
+if(MCRL2_ENABLE_GUI_TOOLS)
+  add_subdirectory(3rd-party/tr)
+endif()
 if (MCRL2_ENABLE_SYLVAN)
   add_subdirectory(3rd-party/sylvan/src)
 endif()

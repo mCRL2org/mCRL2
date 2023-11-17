@@ -66,6 +66,12 @@ if(MCRL2_SKIP_LONG_TESTS)
   add_compile_definitions(MCRL2_SKIP_LONG_TESTS)
 endif(MCRL2_SKIP_LONG_TESTS)
 
+if(APPLE)
+  # Silence useless OpenGL deprecration warnings on macOS. Some GUI tools use outdated OpenGL and this will 
+  # only be replaced when it is removed.
+  add_compile_definitions(GL_SILENCE_DEPRECATION)
+endif()
+
 # Enable C++17 for all targets.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)

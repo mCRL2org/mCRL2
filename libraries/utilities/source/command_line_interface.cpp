@@ -217,7 +217,7 @@ std::string interface_description::option_descriptor::man_page_description() con
          std::regex_replace(word_wrap(m_description, 80),
                             std::regex("\'"), 
                             std::string("\\&'")),
-         std::regex("."), 
+         std::regex("\\."), 
          "\\&.")
     << std::endl;
 
@@ -242,7 +242,7 @@ std::string interface_description::option_descriptor::man_page_description() con
             std::regex_replace(word_wrap(arg, 80),
                                std::regex("\'"), 
                                std::string("\\&'")),
-            std::regex("."), 
+            std::regex("\\."), 
             std::string("\\&."))
        << std::endl;
     }
