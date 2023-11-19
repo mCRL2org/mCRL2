@@ -8,7 +8,9 @@
 //
 /// \file pbestransform.cpp
 
-#include "mcrl2/bes/io.h"
+#include "mcrl2/utilities/detail/io.h"
+#include "mcrl2/utilities/detail/transform_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/anonymize.h"
 #include "mcrl2/pbes/detail/pbes_command.h"
@@ -21,9 +23,6 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/pbes/unify_parameters.h"
-#include "mcrl2/utilities/detail/io.h"
-#include "mcrl2/utilities/detail/transform_tool.h"
-#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

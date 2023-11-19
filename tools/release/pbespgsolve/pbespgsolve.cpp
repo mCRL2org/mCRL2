@@ -11,13 +11,12 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/pg_parse.h"
+#include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
+#include "mcrl2/pbes/pg_parse.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pg/pbespgsolve.h"
-#include "mcrl2/utilities/input_tool.h"
 
 #include <queue>
 
@@ -26,7 +25,7 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using namespace mcrl2::log;
-using bes::tools::pbes_input_tool;
+using pbes_system::tools::pbes_input_tool;
 using data::tools::rewriter_tool;
 using utilities::tools::input_tool;
 
@@ -110,7 +109,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       mCRL2log(verbose) << "  only generate:   " << std::boolalpha << m_options.only_generate << std::endl;
 
       bool value;
-      if(pbes_input_format() == bes::bes_format_pgsolver())
+      if(pbes_input_format() == pbes_system::pbes_format_pgsolver())
       {
         pbespgsolve_algorithm algorithm(timer(), m_options);
         ParityGame pg;
@@ -125,7 +124,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       {
         pbes p;
         timer().start("load");
-        mcrl2::bes::load_pbes(p, input_filename(), pbes_input_format());
+        mcrl2::pbes_system::load_pbes(p, input_filename(), pbes_input_format());
         timer().finish("load");
 
         value = pbespgsolve(p, timer(), m_options);

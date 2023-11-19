@@ -20,18 +20,18 @@
 // ======================================================================
 
 //C++
-#include <exception>
+// #include <exception>
 
 //MCRL2-specific
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
+#include "mcrl2/pbes/tools.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
-using bes::tools::pbes_input_tool;
+using pbes_system::tools::pbes_input_tool;
 
 class pbesinfo_tool: public pbes_input_tool<input_tool>
 {
@@ -78,7 +78,7 @@ class pbesinfo_tool: public pbes_input_tool<input_tool>
     /// - Give error
     bool run() override
     {
-      bes::boolean_expression b;
+      pbes_system::pbes b;
       pbesinfo(input_filename(),
                input_file_message(),
                pbes_input_format(),

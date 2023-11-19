@@ -12,23 +12,22 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 
-#include "mcrl2/bes/pbes_input_output_tool.h"
-
-#include "mcrl2/bes/detail/bes_algorithm.h"
-#include "mcrl2/bes/parse.h"
-#include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/normal_forms.h"
-#include "mcrl2/bes/join.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 
-using namespace mcrl2::bes;
+#include "mcrl2/pbes/pbes_input_output_tool.h"
+#include "mcrl2/pbes/detail/bes_algorithm.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/normal_forms.h"
+#include "mcrl2/pbes/join.h"
+
+using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
-using mcrl2::bes::tools::bes_input_output_tool;
+using mcrl2::pbes_system::tools::pbes_input_output_tool;
 
 namespace mcrl2
 {
-namespace bes
+namespace pbes_system
 {
 
 class bes_reduction_algorithm: public detail::bes_algorithm
@@ -114,9 +113,9 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       m_equivalence_strings[eq_none] = "none";
     }
 
-    boolean_operand_t get_operand(boolean_expression const& e)
+    boolean_operand_t get_operand(pbes_expression const& e)
     {
-      typedef core::term_traits<boolean_expression> tr;
+      typedef core::term_traits<pbes_expression> tr;
 
       if (tr::is_and(e))
       {
@@ -188,8 +187,8 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       mCRL2log(debug) << "Tranforming BES to LTS" << std::endl;
 
       // Collect block indices and operands of all equations
-      std::map<boolean_variable, std::pair<std::size_t, boolean_operand_t> > statistics;
-      std::map<boolean_variable, std::size_t> indices;
+      std::map<propositional_variable, std::pair<std::size_t, boolean_operand_t> > statistics;
+      std::map<propositional_variable, std::size_t> indices;
       std::map<unsigned int, boolean_operand_t> block_to_operand; // Stores operand assigned to equations without boolean operand.
 
       // std::size_t occurring_variable_count = 0; // count total number of occurring variables in right hand sides. Not used!
@@ -213,7 +212,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           and_in_block = true;
         }
 
-        std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
+        std::set<propositional_variable_instantiation> occurring_variables = find_propositional_variable_instantiations(i->formula());
         // occurring_variable_count += occurring_variables.size(); Not used.
 
         statistics[i->variable()] = std::make_pair(current_block, get_operand(i->formula()));
@@ -229,7 +228,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         ++statecount;
         // transitioncount += m_bes.equations().size(); Not used.
       }
-      unsigned int initial_state = indices[mcrl2::bes::boolean_variable(m_bes.initial_state())];
+      unsigned int initial_state = indices[mcrl2::pbes_system::propositional_variable(m_bes.initial_state().name())];
 
       m_lts.set_num_states(statecount, false);
       m_lts.set_initial_state(initial_state);
@@ -237,7 +236,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       utilities::indexed_set<process::action> labs;
       labs.insert(process::action(process::action_label(core::identifier_string("tau"), data::sort_expression_list()), data::data_expression_list()));  // Take care that the internal action has number 1.
 
-      for (const boolean_equation& i: m_bes.equations())
+      for (const pbes_equation& i: m_bes.equations())
       {
         std::pair<unsigned int, boolean_operand_t> info = statistics[i.variable()];
         // If variable, map to operand that was precomputed for variables.
@@ -286,11 +285,11 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         }
 
         // Edges to successors
-        std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i.formula());
-        for (std::set<boolean_variable>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
+        std::set<propositional_variable_instantiation> occurring_variables = find_propositional_variable_instantiations(i.formula());
+        for (std::set<propositional_variable_instantiation>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
         {
           std::stringstream label;
-          std::pair<unsigned int, boolean_operand_t> info_target = statistics[*j];
+          std::pair<unsigned int, boolean_operand_t> info_target = statistics[propositional_variable(j->name())];
 
           // If variable, map to operand that was precomputed for variables.
           if (info_target.second == BOOL_VAR)
@@ -310,7 +309,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           {
             label << "block(" << info_target.first << "),op(" << info_target.second << ")";
           }
-          std::size_t to = indices[*j];
+          std::size_t to = indices[propositional_variable(j->name())];
           process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           std::size_t label_index = labs.index(t);
           if (label_index == labs.npos)
@@ -393,11 +392,11 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       // Build formulas
       std::size_t cur_state = 0;
       std::vector<lts::transition>::const_iterator i = transitions.begin();
-      std::map<std::size_t, std::vector<boolean_equation> > blocks;
+      std::map<std::size_t, std::vector<pbes_equation> > blocks;
 
       while (i != transitions.end())
       {
-        std::vector<boolean_variable> variables;
+        std::vector<propositional_variable_instantiation> variables;
         std::size_t block = 0;
         boolean_operand_t op = BOOL_VAR;
         cur_state = i->from();
@@ -435,7 +434,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
               // Construct part of formula
               std::stringstream name;
               name << "X" << i->to();
-              variables.push_back(boolean_variable(name.str()));
+              variables.push_back(propositional_variable_instantiation(name.str()));
             }
           }
           else
@@ -443,7 +442,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
             // Construct part of formula
             std::stringstream name;
             name << "X" << i->to();
-            variables.push_back(boolean_variable(name.str()));
+            variables.push_back(propositional_variable_instantiation(name.str()));
           }
           ++i;
         }
@@ -458,7 +457,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           fp = fixpoint_symbol::mu();
         }
 
-        boolean_expression expr;
+        pbes_expression expr;
         switch (op)
         {
           case BOOL_AND:
@@ -476,14 +475,14 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         }
         std::stringstream name;
         name << "X" << cur_state;
-        boolean_equation eq(fp, boolean_variable(name.str()), expr);
+        pbes_equation eq(fp, propositional_variable(name.str()), expr);
         blocks[block].push_back(eq);
       }
 
-      std::vector<boolean_equation> eqns;
+      std::vector<pbes_equation> eqns;
       for (std::size_t i = 0; i <= blocks.size(); ++i)
       {
-        std::map<std::size_t, std::vector<boolean_equation> >::const_iterator j = blocks.find(i);
+        std::map<std::size_t, std::vector<pbes_equation> >::const_iterator j = blocks.find(i);
         if (j != blocks.end())
         {
           eqns.insert(eqns.end(), j->second.begin(), j->second.end());
@@ -493,11 +492,11 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       m_bes.equations().swap(eqns);
       std::stringstream name;
       name << "X" << m_lts.initial_state();
-      m_bes.initial_state() = boolean_variable(name.str());
+      m_bes.initial_state() = propositional_variable_instantiation(name.str());
     }
 
   public:
-    bes_reduction_algorithm(boolean_equation_system& v_bes, const equivalence_t equivalence=eq_stut, const to_lts_translation_t translation = to_lts_selfloop, const std::string& lts_filename = "", const bool to_lts_only = false)
+    bes_reduction_algorithm(pbes& v_bes, const equivalence_t equivalence=eq_stut, const to_lts_translation_t translation = to_lts_selfloop, const std::string& lts_filename = "", const bool to_lts_only = false)
       : detail::bes_algorithm(v_bes),
         m_equivalence(equivalence),
         m_translation(translation),
@@ -541,13 +540,13 @@ class bes_reduction_algorithm: public detail::bes_algorithm
     }
 
 };
-} // namespace bes
+} // namespace pbes_system
 } // namespace mcrl2
 
 
 /// \brief Simple input/output tool to perform strong as well as oblivious bisimulation
 ///        reduction on a boolean equation system.
-typedef bes_input_output_tool<input_output_tool> super;
+typedef pbes_input_output_tool<input_output_tool> super;
 class besconvert_tool: public super
 {
   protected:
@@ -585,8 +584,8 @@ class besconvert_tool: public super
 
       if (parser.options.count("equivalence"))
       {
-        boolean_equation_system b; // TODO: build proper solution.
-        mcrl2::bes::bes_reduction_algorithm a(b);
+        pbes b; // TODO: build proper solution.
+        mcrl2::pbes_system::bes_reduction_algorithm a(b);
         equivalence = a.parse_equivalence(parser.option_argument("equivalence"));
         if (a.allowed_eqs().count(equivalence) == 0)
         {
@@ -646,13 +645,13 @@ class besconvert_tool: public super
 
     bool run()
     {
-      using namespace mcrl2::bes;
+      using namespace mcrl2::pbes_system;
       using namespace mcrl2;
 
-      boolean_equation_system b;
+      pbes b;
 
       mCRL2log(verbose) << "Loading BES from input file...";
-      load_bes(b, input_filename(), bes_input_format());
+      load_pbes(b, input_filename(), pbes_input_format());
 
       if(equivalence != bes_reduction_algorithm::eq_none)
       {
@@ -666,7 +665,7 @@ class besconvert_tool: public super
         mCRL2log(verbose) << "done" << std::endl;
         bes_reduction_algorithm(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
       }
-      save_bes(b, output_filename(), bes_output_format());
+      save_pbes(b, output_filename(), pbes_output_format());
 
       return true;
     }

@@ -13,7 +13,9 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/normal_forms.h"
 
 namespace mcrl2
 {
@@ -30,10 +32,14 @@ const std::vector<utilities::file_format>& pbes_file_formats()
     result.back().add_extension("pbes");
     result.push_back(utilities::file_format("text", "PBES in textual (mCRL2) format", true));
     result.back().add_extension("txt");
+    result.push_back(utilities::file_format("bes", "BES in internal format", false));
+    result.back().add_extension("bes");
+    result.push_back(utilities::file_format("pgsolver", "BES in PGSolver format", true));
+    result.back().add_extension("gm");
+    result.back().add_extension("pg");
   }
   return result;
 }
-
 
 /// \brief Save a PBES in the format specified.
 /// \param pbes The PBES to be stored
@@ -49,12 +55,15 @@ void save_pbes(const pbes& pbes,
     format = pbes_format_internal();
   }
   mCRL2log(log::verbose) << "Saving result in " << format.shortname() << " format..." << std::endl;
-  if (format == pbes_format_internal())
+  if (format == pbes_format_internal() || (format == pbes_format_internal_bes() && pbes_system::algorithms::is_bes(pbes)))
   {
     atermpp::binary_aterm_ostream(stream) << pbes;
   }
-  else
-  if (format == pbes_format_text())
+  else if (format == pbes_format_pgsolver() && pbes_system::algorithms::is_bes(pbes))
+  {
+    save_bes_pgsolver(pbes, stream);
+  }
+  else if (format == pbes_format_text())
   {
     stream << pp(pbes);
   }
@@ -77,7 +86,7 @@ void load_pbes(pbes& pbes, std::istream& stream, utilities::file_format format, 
     format = pbes_format_internal();
   }
   mCRL2log(log::verbose) << "Loading PBES in " << format.shortname() << " format..." << std::endl;
-  if (format == pbes_format_internal())
+  if (format == pbes_format_internal() || format == pbes_format_internal_bes())
   {
     atermpp::binary_aterm_istream(stream) >> pbes;
   }

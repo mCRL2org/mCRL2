@@ -11,15 +11,15 @@
 #define NAME "reduce_pbes"
 #define AUTHOR "Wieger Wesselink"
 
-#include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/replace_subterm.h"
-#include "mcrl2/utilities/input_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
-using bes::tools::pbes_input_tool;
+using pbes_system::tools::pbes_input_tool;
 using utilities::tools::input_tool;
 
 void generate_reduced_pbesses(const pbes& p, std::size_t depth, const std::string& input_filename)

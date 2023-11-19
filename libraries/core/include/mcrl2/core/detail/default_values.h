@@ -190,18 +190,6 @@ const atermpp::aterm_appl& default_value_PBESImp();
 const atermpp::aterm_appl& default_value_PBESForall();
 const atermpp::aterm_appl& default_value_PBESExists();
 const atermpp::aterm_appl& default_value_PropVarInst();
-const atermpp::aterm_appl& default_value_BES();
-const atermpp::aterm_appl& default_value_BooleanEquation();
-const atermpp::aterm_appl& default_value_BooleanVariable();
-const atermpp::aterm_appl& default_value_BooleanTrue();
-const atermpp::aterm_appl& default_value_BooleanFalse();
-const atermpp::aterm_appl& default_value_BooleanNot();
-const atermpp::aterm_appl& default_value_BooleanAnd();
-const atermpp::aterm_appl& default_value_BooleanOr();
-const atermpp::aterm_appl& default_value_BooleanImp();
-const atermpp::aterm_appl& default_value_BddTrue();
-const atermpp::aterm_appl& default_value_BddFalse();
-const atermpp::aterm_appl& default_value_BddIf();
 const atermpp::aterm_appl& default_value_SortExpr();
 const atermpp::aterm_appl& default_value_SortConsType();
 const atermpp::aterm_appl& default_value_DataExpr();
@@ -218,8 +206,6 @@ const atermpp::aterm_appl& default_value_ParamIdOrAction();
 const atermpp::aterm_appl& default_value_ActionRenameRuleRHS();
 const atermpp::aterm_appl& default_value_FixPoint();
 const atermpp::aterm_appl& default_value_PBExpr();
-const atermpp::aterm_appl& default_value_BooleanExpression();
-const atermpp::aterm_appl& default_value_BddExpression();
 
 // SortCons
 inline
@@ -1245,102 +1231,6 @@ const atermpp::aterm_appl& default_value_PropVarInst()
   return t;
 }
 
-// BES
-inline
-const atermpp::aterm_appl& default_value_BES()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BES(), default_value_List(), default_value_BooleanExpression());
-  return t;
-}
-
-// BooleanEquation
-inline
-const atermpp::aterm_appl& default_value_BooleanEquation()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanEquation(), default_value_FixPoint(), default_value_BooleanVariable(), default_value_BooleanExpression());
-  return t;
-}
-
-// BooleanVariable
-inline
-const atermpp::aterm_appl& default_value_BooleanVariable()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanVariable(), default_value_String());
-  return t;
-}
-
-// BooleanTrue
-inline
-const atermpp::aterm_appl& default_value_BooleanTrue()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanTrue());
-  return t;
-}
-
-// BooleanFalse
-inline
-const atermpp::aterm_appl& default_value_BooleanFalse()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanFalse());
-  return t;
-}
-
-// BooleanNot
-inline
-const atermpp::aterm_appl& default_value_BooleanNot()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanNot(), default_value_BooleanExpression());
-  return t;
-}
-
-// BooleanAnd
-inline
-const atermpp::aterm_appl& default_value_BooleanAnd()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanAnd(), default_value_BooleanExpression(), default_value_BooleanExpression());
-  return t;
-}
-
-// BooleanOr
-inline
-const atermpp::aterm_appl& default_value_BooleanOr()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanOr(), default_value_BooleanExpression(), default_value_BooleanExpression());
-  return t;
-}
-
-// BooleanImp
-inline
-const atermpp::aterm_appl& default_value_BooleanImp()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BooleanImp(), default_value_BooleanExpression(), default_value_BooleanExpression());
-  return t;
-}
-
-// BddTrue
-inline
-const atermpp::aterm_appl& default_value_BddTrue()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BddTrue());
-  return t;
-}
-
-// BddFalse
-inline
-const atermpp::aterm_appl& default_value_BddFalse()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BddFalse());
-  return t;
-}
-
-// BddIf
-inline
-const atermpp::aterm_appl& default_value_BddIf()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BddIf(), default_value_String(), default_value_BddExpression(), default_value_BddExpression());
-  return t;
-}
-
 // SortExpr
 inline
 const atermpp::aterm_appl& default_value_SortExpr()
@@ -1451,20 +1341,6 @@ inline
 const atermpp::aterm_appl& default_value_PBExpr()
 {
   return default_value_DataExpr();
-}
-
-// BooleanExpression
-inline
-const atermpp::aterm_appl& default_value_BooleanExpression()
-{
-  return default_value_BooleanTrue();
-}
-
-// BddExpression
-inline
-const atermpp::aterm_appl& default_value_BddExpression()
-{
-  return default_value_BddTrue();
 }
 //--- end generated constructors ---//
 
@@ -1603,18 +1479,6 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl PBESForall;
   static const atermpp::aterm_appl PBESExists;
   static const atermpp::aterm_appl PropVarInst;
-  static const atermpp::aterm_appl BES;
-  static const atermpp::aterm_appl BooleanEquation;
-  static const atermpp::aterm_appl BooleanVariable;
-  static const atermpp::aterm_appl BooleanTrue;
-  static const atermpp::aterm_appl BooleanFalse;
-  static const atermpp::aterm_appl BooleanNot;
-  static const atermpp::aterm_appl BooleanAnd;
-  static const atermpp::aterm_appl BooleanOr;
-  static const atermpp::aterm_appl BooleanImp;
-  static const atermpp::aterm_appl BddTrue;
-  static const atermpp::aterm_appl BddFalse;
-  static const atermpp::aterm_appl BddIf;
   static const atermpp::aterm_appl SortExpr;
   static const atermpp::aterm_appl SortConsType;
   static const atermpp::aterm_appl DataExpr;
@@ -1631,8 +1495,6 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl ActionRenameRuleRHS;
   static const atermpp::aterm_appl FixPoint;
   static const atermpp::aterm_appl PBExpr;
-  static const atermpp::aterm_appl BooleanExpression;
-  static const atermpp::aterm_appl BddExpression;
 //--- end generated variables ---//
 };
 

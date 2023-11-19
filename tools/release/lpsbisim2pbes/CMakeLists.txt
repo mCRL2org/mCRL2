@@ -3,5 +3,4 @@ mcrl2_add_tool(lpsbisim2pbes
     lpsbisim2pbes.cpp
   DEPENDS
     mcrl2_pbes
-    mcrl2_bes
 )

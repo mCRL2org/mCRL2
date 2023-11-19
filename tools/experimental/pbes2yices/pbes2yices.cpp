@@ -14,7 +14,7 @@
 #include "pbes2yices.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
 
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/normalize.h"
@@ -27,7 +27,7 @@ using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using namespace mcrl2::bes::tools;
+using namespace mcrl2::pbes_system::tools;
 
 enum goal_t { disjunctiveWitness, disjunctiveAcyclicUnrolling, conjunctiveWitness, conjunctiveAcyclicUnrolling };
 

@@ -154,18 +154,6 @@ const atermpp::function_symbol core::detail::function_symbols::SortCons = core::
   const atermpp::function_symbol core::detail::function_symbols::PBESForall = core::detail::function_symbol_PBESForall();
   const atermpp::function_symbol core::detail::function_symbols::PBESExists = core::detail::function_symbol_PBESExists();
   const atermpp::function_symbol core::detail::function_symbols::PropVarInst = core::detail::function_symbol_PropVarInst();
-  const atermpp::function_symbol core::detail::function_symbols::BES = core::detail::function_symbol_BES();
-  const atermpp::function_symbol core::detail::function_symbols::BooleanEquation = core::detail::function_symbol_BooleanEquation();
-  const atermpp::function_symbol core::detail::function_symbols::BooleanVariable = core::detail::function_symbol_BooleanVariable();
-  const atermpp::function_symbol core::detail::function_symbols::BooleanTrue = core::detail::function_symbol_BooleanTrue();
-  const atermpp::function_symbol core::detail::function_symbols::BooleanFalse = core::detail::function_symbol_BooleanFalse();
-  const atermpp::function_symbol core::detail::function_symbols::BooleanNot = core::detail::function_symbol_BooleanNot();
-  const atermpp::function_symbol core::detail::function_symbols::BooleanAnd = core::detail::function_symbol_BooleanAnd();
-  const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core::detail::function_symbol_BooleanOr();
-  const atermpp::function_symbol core::detail::function_symbols::BooleanImp = core::detail::function_symbol_BooleanImp();
-  const atermpp::function_symbol core::detail::function_symbols::BddTrue = core::detail::function_symbol_BddTrue();
-  const atermpp::function_symbol core::detail::function_symbols::BddFalse = core::detail::function_symbol_BddFalse();
-  const atermpp::function_symbol core::detail::function_symbols::BddIf = core::detail::function_symbol_BddIf();
 //--- end generated function symbol definitions ---//
 
 //--- start generated default value definitions ---//
@@ -297,18 +285,6 @@ const atermpp::aterm_appl core::detail::default_values::SortCons = core::detail:
   const atermpp::aterm_appl core::detail::default_values::PBESForall = core::detail::default_value_PBESForall();
   const atermpp::aterm_appl core::detail::default_values::PBESExists = core::detail::default_value_PBESExists();
   const atermpp::aterm_appl core::detail::default_values::PropVarInst = core::detail::default_value_PropVarInst();
-  const atermpp::aterm_appl core::detail::default_values::BES = core::detail::default_value_BES();
-  const atermpp::aterm_appl core::detail::default_values::BooleanEquation = core::detail::default_value_BooleanEquation();
-  const atermpp::aterm_appl core::detail::default_values::BooleanVariable = core::detail::default_value_BooleanVariable();
-  const atermpp::aterm_appl core::detail::default_values::BooleanTrue = core::detail::default_value_BooleanTrue();
-  const atermpp::aterm_appl core::detail::default_values::BooleanFalse = core::detail::default_value_BooleanFalse();
-  const atermpp::aterm_appl core::detail::default_values::BooleanNot = core::detail::default_value_BooleanNot();
-  const atermpp::aterm_appl core::detail::default_values::BooleanAnd = core::detail::default_value_BooleanAnd();
-  const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail::default_value_BooleanOr();
-  const atermpp::aterm_appl core::detail::default_values::BooleanImp = core::detail::default_value_BooleanImp();
-  const atermpp::aterm_appl core::detail::default_values::BddTrue = core::detail::default_value_BddTrue();
-  const atermpp::aterm_appl core::detail::default_values::BddFalse = core::detail::default_value_BddFalse();
-  const atermpp::aterm_appl core::detail::default_values::BddIf = core::detail::default_value_BddIf();
   const atermpp::aterm_appl core::detail::default_values::SortExpr = core::detail::default_value_SortExpr();
   const atermpp::aterm_appl core::detail::default_values::SortConsType = core::detail::default_value_SortConsType();
   const atermpp::aterm_appl core::detail::default_values::DataExpr = core::detail::default_value_DataExpr();
@@ -325,8 +301,6 @@ const atermpp::aterm_appl core::detail::default_values::SortCons = core::detail:
   const atermpp::aterm_appl core::detail::default_values::ActionRenameRuleRHS = core::detail::default_value_ActionRenameRuleRHS();
   const atermpp::aterm_appl core::detail::default_values::FixPoint = core::detail::default_value_FixPoint();
   const atermpp::aterm_appl core::detail::default_values::PBExpr = core::detail::default_value_PBExpr();
-  const atermpp::aterm_appl core::detail::default_values::BooleanExpression = core::detail::default_value_BooleanExpression();
-  const atermpp::aterm_appl core::detail::default_values::BddExpression = core::detail::default_value_BddExpression();
 //--- end generated default value definitions ---//
 
 } // namespace core

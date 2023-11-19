@@ -252,14 +252,6 @@ const atermpp::function_symbol& function_symbol_AtTime()
   return function_symbol_AtTime;
 }
 
-// BES
-inline
-const atermpp::function_symbol& function_symbol_BES()
-{
-  static const atermpp::global_function_symbol function_symbol_BES("BES", 2);
-  return function_symbol_BES;
-}
-
 // BInit
 inline
 const atermpp::function_symbol& function_symbol_BInit()
@@ -276,30 +268,6 @@ const atermpp::function_symbol& function_symbol_BagComp()
   return function_symbol_BagComp;
 }
 
-// BddFalse
-inline
-const atermpp::function_symbol& function_symbol_BddFalse()
-{
-  static const atermpp::global_function_symbol function_symbol_BddFalse("BddFalse", 0);
-  return function_symbol_BddFalse;
-}
-
-// BddIf
-inline
-const atermpp::function_symbol& function_symbol_BddIf()
-{
-  static const atermpp::global_function_symbol function_symbol_BddIf("BddIf", 3);
-  return function_symbol_BddIf;
-}
-
-// BddTrue
-inline
-const atermpp::function_symbol& function_symbol_BddTrue()
-{
-  static const atermpp::global_function_symbol function_symbol_BddTrue("BddTrue", 0);
-  return function_symbol_BddTrue;
-}
-
 // Binder
 inline
 const atermpp::function_symbol& function_symbol_Binder()
@@ -314,70 +282,6 @@ const atermpp::function_symbol& function_symbol_Block()
 {
   static const atermpp::global_function_symbol function_symbol_Block("Block", 2);
   return function_symbol_Block;
-}
-
-// BooleanAnd
-inline
-const atermpp::function_symbol& function_symbol_BooleanAnd()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanAnd("BooleanAnd", 2);
-  return function_symbol_BooleanAnd;
-}
-
-// BooleanEquation
-inline
-const atermpp::function_symbol& function_symbol_BooleanEquation()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanEquation("BooleanEquation", 3);
-  return function_symbol_BooleanEquation;
-}
-
-// BooleanFalse
-inline
-const atermpp::function_symbol& function_symbol_BooleanFalse()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanFalse("BooleanFalse", 0);
-  return function_symbol_BooleanFalse;
-}
-
-// BooleanImp
-inline
-const atermpp::function_symbol& function_symbol_BooleanImp()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanImp("BooleanImp", 2);
-  return function_symbol_BooleanImp;
-}
-
-// BooleanNot
-inline
-const atermpp::function_symbol& function_symbol_BooleanNot()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanNot("BooleanNot", 1);
-  return function_symbol_BooleanNot;
-}
-
-// BooleanOr
-inline
-const atermpp::function_symbol& function_symbol_BooleanOr()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanOr("BooleanOr", 2);
-  return function_symbol_BooleanOr;
-}
-
-// BooleanTrue
-inline
-const atermpp::function_symbol& function_symbol_BooleanTrue()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanTrue("BooleanTrue", 0);
-  return function_symbol_BooleanTrue;
-}
-
-// BooleanVariable
-inline
-const atermpp::function_symbol& function_symbol_BooleanVariable()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanVariable("BooleanVariable", 1);
-  return function_symbol_BooleanVariable;
 }
 
 // Choice
@@ -1364,18 +1268,6 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol PBESForall;
   static const atermpp::function_symbol PBESExists;
   static const atermpp::function_symbol PropVarInst;
-  static const atermpp::function_symbol BES;
-  static const atermpp::function_symbol BooleanEquation;
-  static const atermpp::function_symbol BooleanVariable;
-  static const atermpp::function_symbol BooleanTrue;
-  static const atermpp::function_symbol BooleanFalse;
-  static const atermpp::function_symbol BooleanNot;
-  static const atermpp::function_symbol BooleanAnd;
-  static const atermpp::function_symbol BooleanOr;
-  static const atermpp::function_symbol BooleanImp;
-  static const atermpp::function_symbol BddTrue;
-  static const atermpp::function_symbol BddFalse;
-  static const atermpp::function_symbol BddIf;
 //--- end generated variables ---//
 };
 

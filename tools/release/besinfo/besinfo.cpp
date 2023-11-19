@@ -13,22 +13,24 @@
 #include <exception>
 
 //MCRL2-specific
-#include "mcrl2/bes/detail/bes_property_map.h"
+
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/bes/pbes_input_tool.h"
+
+#include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using namespace mcrl2::bes;
+using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
-using bes::tools::bes_input_tool;
+using pbes_system::tools::pbes_input_tool;
 
-class besinfo_tool: public bes_input_tool<input_tool>
+class besinfo_tool: public pbes_input_tool<input_tool>
 {
   protected:
-    typedef bes_input_tool<input_tool> super;
+    typedef pbes_input_tool<input_tool> super;
 
     bool opt_full;
 
@@ -70,10 +72,10 @@ class besinfo_tool: public bes_input_tool<input_tool>
     /// - Give error
     bool run()
     {
-      boolean_equation_system b;
-      load_bes(b,input_filename(), bes_input_format());
+      pbes b;
+      load_pbes(b,input_filename(), pbes_input_format());
 
-      bes::detail::bes_property_map info(b);
+      pbes_system::detail::pbes_property_map info(b);
 
       // Show file from which BES was read
       std::cout << input_file_message() << "\n\n";
@@ -97,9 +99,9 @@ class besinfo_tool: public bes_input_tool<input_tool>
       if (opt_full)
       {
         std::cout << "Predicate variables:\n";
-        for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+        for (std::vector<pbes_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
         {
-          std::cout << core::pp(i->symbol()) << "." << bes::pp(i->variable()) << std::endl;
+          std::cout << core::pp(i->symbol()) << "." << pbes_system::pp(i->variable()) << std::endl;
         }
       }
       return true;

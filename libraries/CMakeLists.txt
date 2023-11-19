@@ -3,7 +3,6 @@
 ###
 
 add_subdirectory(atermpp)
-add_subdirectory(bes)
 add_subdirectory(core)
 add_subdirectory(data)
 add_subdirectory(gui)

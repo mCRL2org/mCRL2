@@ -12,7 +12,10 @@ mcrl2_add_library(mcrl2_pbes
     source/tools.cpp
     source/tools2.cpp
     source/pbes_explorer.cpp
+    source/pgsolver.cpp
     ${EXPERIMENTAL_TOOLS}
+  DPARSER_SOURCES
+    source/pg_syntax.g
   DEPENDS
     mcrl2_core
     mcrl2_data
@@ -27,19 +30,5 @@ mcrl2_add_library(mcrl2_pbes
     # The headertest below fails as the sylvan library is required for it. 
     mcrl2/pbes/pbesbddsolve1.h   
 )
-
-# This is a hack to get rid of circular dependencies somehow
-# TODO: Get rid of dependency on BES library
-target_include_directories(mcrl2_pbes PUBLIC ${CMAKE_SOURCE_DIR}/libraries/bes/include)
-
-# Copied the code below from AddMCRL2Binary.cmake so as to also link all tests
-# against the BES library
-if(MCRL2_ENABLE_TESTS)
-  file(GLOB all_tests "test/*.cpp")
-  foreach(test ${all_tests})
-    get_filename_component(base ${test} NAME_WE)
-    target_link_libraries(librarytest_mcrl2_pbes_${base} mcrl2_pbes mcrl2_bes)
-  endforeach()
-endif()
 
 add_subdirectory(example)

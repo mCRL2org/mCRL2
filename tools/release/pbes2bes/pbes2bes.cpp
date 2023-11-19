@@ -25,39 +25,36 @@
 #define AUTHOR "Jan Friso Groote"
 
 //Tool framework
-#include "mcrl2/bes/pbes_output_tool.h"
-#include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/bes/pbes_rewriter_tool.h"
-#include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 
+#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
+#include "mcrl2/pbes/pbes_rewriter_tool.h"
+//
 //Parameterised boolean equation systems
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbesinst_alternative_lazy_algorithm.h"
 
-//Boolean equation systems
-#include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/pbesinst_conversion.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using namespace mcrl2::bes;
+using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system;
 
 
 //Function declarations used by main program
 //------------------------------------------
 
-using mcrl2::bes::tools::pbes_input_tool;
-using mcrl2::bes::tools::pbes_output_tool;
-using mcrl2::bes::tools::pbes_rewriter_tool;
-using mcrl2::bes::tools::bes_output_tool;
+using mcrl2::pbes_system::tools::pbes_input_tool;
+using mcrl2::pbes_system::tools::pbes_output_tool;
+using mcrl2::pbes_system::tools::pbes_rewriter_tool;
 using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_output_tool;
 
-class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > >
+class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input_output_tool> > >
 {
   protected:
     // Tool options.
@@ -73,7 +70,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
                                              // If approximate_true is false, true is used, meaning that
                                              // the answer false is correct, and true might be incorrect.
 
-    typedef rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > super;
+    typedef rewriter_tool<pbes_input_tool<pbes_output_tool<input_output_tool> > > super;
 
     pbes_rewriter_type default_rewriter() const
     {
@@ -195,11 +192,11 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy,
                                                     m_erase_unused_bes_variables, m_maximal_todo_size, m_approximate_true);
       algorithm.run(p);
-      boolean_equation_system bes = pbesinst_conversion(algorithm.get_result());
+      pbes bes = algorithm.get_result();
 
       timer().finish("instantiation");
 
-      mcrl2::bes::save_bes(bes, output_filename(), bes_output_format());
+      mcrl2::pbes_system::save_pbes(bes, output_filename(), pbes_output_format());
 
       return true;
     }

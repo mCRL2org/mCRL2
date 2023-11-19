@@ -20,7 +20,6 @@ mcrl2_add_library(mcrl2_pg
 	source/SmallProgressMeasures.cpp
   DEPENDS
     mcrl2_pbes
-    mcrl2_bes
 )
 
 add_subdirectory(example)

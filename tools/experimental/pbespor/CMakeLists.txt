@@ -3,6 +3,5 @@ mcrl2_add_tool(pbespor
     pbespor.cpp
   DEPENDS
     mcrl2_pbes
-    mcrl2_bes
     mcrl2_smt
 )

@@ -43,8 +43,6 @@ if __name__ == "__main__":
 
     result = True
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/core/include/mcrl2/core',                                      CORE_CLASSES                     , namespace = 'core'            ) and result
-    result = make_classes(all_classes, MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes/boolean_expression.h',                   BOOLEAN_EXPRESSION_CLASSES       , namespace = 'bes'             ) and result
-    result = make_classes(all_classes, MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes',                                        BOOLEAN_CLASSES                  , namespace = 'bes'             ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data/assignment.h',                         ASSIGNMENT_EXPRESSION_CLASSES    , namespace = 'data'            ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data/binder_type.h',                        BINDER_TYPES                     , namespace = 'data'            ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data/container_type.h',                     CONTAINER_TYPES                  , namespace = 'data'            ) and result
@@ -62,5 +60,4 @@ if __name__ == "__main__":
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data',                                      DATA_CLASSES                     , namespace = 'data'            ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps',                                        LPS_CLASSES                      , namespace = 'lps'             ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/process/include/mcrl2/process',                                PROCESS_CLASSES                  , namespace = 'process'         ) and result
-    result = make_classes(all_classes, MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes/bdd_expression.h',                       BDD_EXPRESSION_CLASSES           , namespace = 'bdd'             ) and result
     sys.exit(not result) # 0 result indicates successful execution

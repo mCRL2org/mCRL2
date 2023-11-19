@@ -17,9 +17,9 @@
 #include <boost/algorithm/string.hpp>
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 
+#include "mcrl2/pbes/pbes_input_output_tool.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbesinst_alternative_lazy_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
@@ -29,7 +29,7 @@ using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
-using bes::tools::pbes_input_output_tool;
+using pbes_system::tools::pbes_input_output_tool;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 using utilities::command_line_parser;
@@ -211,7 +211,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       }
 
       // save the result
-      bes::save_pbes(p, output_filename(), pbes_output_format());
+      pbes_system::save_pbes(p, output_filename(), pbes_output_format());
 
       return true;
     }
