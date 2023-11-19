@@ -151,15 +151,27 @@ class propositional_variable_instantiation: public pbes_expression
     }
 
     /// \brief Constructor.
-    propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
+    explicit propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
     {
       atermpp::make_term_appl(*this,core::detail::function_symbol_PropVarInst(), name, parameters);
     }
 
     /// \brief Constructor.
-    propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
+    explicit propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
+      : propositional_variable_instantiation(core::identifier_string(name), parameters)
     {
-      atermpp::make_term_appl(*this,core::detail::function_symbol_PropVarInst(), core::identifier_string(name), parameters);
+    }
+    
+    /// \brief Constructor.
+    explicit propositional_variable_instantiation(const core::identifier_string& name)
+      : propositional_variable_instantiation(name, data::data_expression_list())
+    {
+    }
+
+    /// \brief Constructor.
+    explicit propositional_variable_instantiation(const std::string& name)
+      : propositional_variable_instantiation(name, data::data_expression_list())
+    {
     }
 
 //--- end user section propositional_variable_instantiation ---//
