@@ -4,5 +4,4 @@ mcrl2_add_tool(mcrl2transform
   DEPENDS
     mcrl2_process
     mcrl2_pbes
-    mcrl2_bes
 )

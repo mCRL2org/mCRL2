@@ -14,18 +14,17 @@
 
 //mCRL2 specific
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_output_tool.h"
+#include "mcrl2/pbes/pbes_output_tool.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/bes/pbesinst_conversion.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using bes::tools::bes_output_tool;
+using pbes_system::tools::pbes_output_tool;
 
-class txt2bes_tool: public bes_output_tool<input_output_tool>
+class txt2bes_tool: public pbes_output_tool<input_output_tool>
 {
-    typedef bes_output_tool<input_output_tool> super;
+    typedef pbes_output_tool<input_output_tool> super;
 
   public:
     txt2bes_tool()
@@ -48,8 +47,7 @@ class txt2bes_tool: public bes_output_tool<input_output_tool>
         std::ifstream from(input_filename().c_str());
         p = pbes_system::txt2pbes(from);
       }
-      bes::boolean_equation_system b = bes::pbesinst_conversion(p);
-      bes::save_bes(b, output_filename(), bes_output_format());
+      pbes_system::save_pbes(p, output_filename(), pbes_output_format());
       return true;
     }
 };

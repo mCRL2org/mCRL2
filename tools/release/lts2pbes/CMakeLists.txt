@@ -4,5 +4,4 @@ mcrl2_add_tool(lts2pbes
   DEPENDS
     mcrl2_lts
     mcrl2_pbes
-    mcrl2_bes
 )

@@ -120,6 +120,19 @@ class pbes_equation
       swap(m_variable, other.m_variable);
       swap(m_formula, other.m_formula);
     }
+
+    /// \brief A comparison operator on pbes equations.
+    /// \detail The comparison is on the addresses of aterm objects and can therefore differ in every run.
+    /// \parameter other The variable to compare with. 
+    /// \return True if the this argument is smaller than other.
+    bool operator<(const pbes_equation& other) const
+    {
+      return (m_formula < other.m_formula) ||
+             ((m_formula == other.m_formula &&
+                 (m_variable < other.m_variable ||
+                 (m_variable == other.m_variable &&
+                   m_symbol < other.m_symbol))));
+    }
 };
 
 //--- start generated class pbes_equation ---//

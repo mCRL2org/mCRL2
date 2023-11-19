@@ -3,5 +3,4 @@ mcrl2_add_tool(pbes2booldeprecated
     pbes2booldeprecated.cpp
   DEPENDS
     mcrl2_pbes
-    mcrl2_bes
 )

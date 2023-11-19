@@ -8,20 +8,20 @@
 //
 /// \file pbesrewr.cpp
 
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/bes/pbes_rewriter_tool.h"
-#include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/bes/pbes_output_tool.h"
+#include "mcrl2/pbes/pbes_rewriter_tool.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
+#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/pbes/tools.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
-using bes::tools::pbes_input_tool;
-using bes::tools::pbes_output_tool;
-using bes::tools::pbes_rewriter_tool;
+using pbes_system::tools::pbes_input_tool;
+using pbes_system::tools::pbes_output_tool;
+using pbes_system::tools::pbes_rewriter_tool;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 

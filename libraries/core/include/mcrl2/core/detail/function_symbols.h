@@ -252,14 +252,6 @@ const atermpp::function_symbol& function_symbol_AtTime()
   return function_symbol_AtTime;
 }
 
-// BES
-inline
-const atermpp::function_symbol& function_symbol_BES()
-{
-  static const atermpp::global_function_symbol function_symbol_BES("BES", 2);
-  return function_symbol_BES;
-}
-
 // BInit
 inline
 const atermpp::function_symbol& function_symbol_BInit()
@@ -276,30 +268,6 @@ const atermpp::function_symbol& function_symbol_BagComp()
   return function_symbol_BagComp;
 }
 
-// BddFalse
-inline
-const atermpp::function_symbol& function_symbol_BddFalse()
-{
-  static const atermpp::global_function_symbol function_symbol_BddFalse("BddFalse", 0);
-  return function_symbol_BddFalse;
-}
-
-// BddIf
-inline
-const atermpp::function_symbol& function_symbol_BddIf()
-{
-  static const atermpp::global_function_symbol function_symbol_BddIf("BddIf", 3);
-  return function_symbol_BddIf;
-}
-
-// BddTrue
-inline
-const atermpp::function_symbol& function_symbol_BddTrue()
-{
-  static const atermpp::global_function_symbol function_symbol_BddTrue("BddTrue", 0);
-  return function_symbol_BddTrue;
-}
-
 // Binder
 inline
 const atermpp::function_symbol& function_symbol_Binder()
@@ -314,70 +282,6 @@ const atermpp::function_symbol& function_symbol_Block()
 {
   static const atermpp::global_function_symbol function_symbol_Block("Block", 2);
   return function_symbol_Block;
-}
-
-// BooleanAnd
-inline
-const atermpp::function_symbol& function_symbol_BooleanAnd()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanAnd("BooleanAnd", 2);
-  return function_symbol_BooleanAnd;
-}
-
-// BooleanEquation
-inline
-const atermpp::function_symbol& function_symbol_BooleanEquation()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanEquation("BooleanEquation", 3);
-  return function_symbol_BooleanEquation;
-}
-
-// BooleanFalse
-inline
-const atermpp::function_symbol& function_symbol_BooleanFalse()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanFalse("BooleanFalse", 0);
-  return function_symbol_BooleanFalse;
-}
-
-// BooleanImp
-inline
-const atermpp::function_symbol& function_symbol_BooleanImp()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanImp("BooleanImp", 2);
-  return function_symbol_BooleanImp;
-}
-
-// BooleanNot
-inline
-const atermpp::function_symbol& function_symbol_BooleanNot()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanNot("BooleanNot", 1);
-  return function_symbol_BooleanNot;
-}
-
-// BooleanOr
-inline
-const atermpp::function_symbol& function_symbol_BooleanOr()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanOr("BooleanOr", 2);
-  return function_symbol_BooleanOr;
-}
-
-// BooleanTrue
-inline
-const atermpp::function_symbol& function_symbol_BooleanTrue()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanTrue("BooleanTrue", 0);
-  return function_symbol_BooleanTrue;
-}
-
-// BooleanVariable
-inline
-const atermpp::function_symbol& function_symbol_BooleanVariable()
-{
-  static const atermpp::global_function_symbol function_symbol_BooleanVariable("BooleanVariable", 1);
-  return function_symbol_BooleanVariable;
 }
 
 // Choice
@@ -946,134 +850,6 @@ const atermpp::function_symbol& function_symbol_PropVarInst()
 {
   static const atermpp::global_function_symbol function_symbol_PropVarInst("PropVarInst", 2);
   return function_symbol_PropVarInst;
-}
-
-// RES
-inline
-const atermpp::function_symbol& function_symbol_RES()
-{
-  static const atermpp::global_function_symbol function_symbol_RES("RES", 2);
-  return function_symbol_RES;
-}
-
-// RESAnd
-inline
-const atermpp::function_symbol& function_symbol_RESAnd()
-{
-  static const atermpp::global_function_symbol function_symbol_RESAnd("RESAnd", 2);
-  return function_symbol_RESAnd;
-}
-
-// RESCondEq
-inline
-const atermpp::function_symbol& function_symbol_RESCondEq()
-{
-  static const atermpp::global_function_symbol function_symbol_RESCondEq("RESCondEq", 3);
-  return function_symbol_RESCondEq;
-}
-
-// RESCondSm
-inline
-const atermpp::function_symbol& function_symbol_RESCondSm()
-{
-  static const atermpp::global_function_symbol function_symbol_RESCondSm("RESCondSm", 3);
-  return function_symbol_RESCondSm;
-}
-
-// RESConstantMultiply
-inline
-const atermpp::function_symbol& function_symbol_RESConstantMultiply()
-{
-  static const atermpp::global_function_symbol function_symbol_RESConstantMultiply("RESConstantMultiply", 2);
-  return function_symbol_RESConstantMultiply;
-}
-
-// RESConstantMultiplyAlt
-inline
-const atermpp::function_symbol& function_symbol_RESConstantMultiplyAlt()
-{
-  static const atermpp::global_function_symbol function_symbol_RESConstantMultiplyAlt("RESConstantMultiplyAlt", 2);
-  return function_symbol_RESConstantMultiplyAlt;
-}
-
-// RESEqInf
-inline
-const atermpp::function_symbol& function_symbol_RESEqInf()
-{
-  static const atermpp::global_function_symbol function_symbol_RESEqInf("RESEqInf", 1);
-  return function_symbol_RESEqInf;
-}
-
-// RESEqNInf
-inline
-const atermpp::function_symbol& function_symbol_RESEqNInf()
-{
-  static const atermpp::global_function_symbol function_symbol_RESEqNInf("RESEqNInf", 1);
-  return function_symbol_RESEqNInf;
-}
-
-// RESEquation
-inline
-const atermpp::function_symbol& function_symbol_RESEquation()
-{
-  static const atermpp::global_function_symbol function_symbol_RESEquation("RESEquation", 3);
-  return function_symbol_RESEquation;
-}
-
-// RESFalse
-inline
-const atermpp::function_symbol& function_symbol_RESFalse()
-{
-  static const atermpp::global_function_symbol function_symbol_RESFalse("RESFalse", 0);
-  return function_symbol_RESFalse;
-}
-
-// RESImp
-inline
-const atermpp::function_symbol& function_symbol_RESImp()
-{
-  static const atermpp::global_function_symbol function_symbol_RESImp("RESImp", 2);
-  return function_symbol_RESImp;
-}
-
-// RESMinus
-inline
-const atermpp::function_symbol& function_symbol_RESMinus()
-{
-  static const atermpp::global_function_symbol function_symbol_RESMinus("RESMinus", 1);
-  return function_symbol_RESMinus;
-}
-
-// RESOr
-inline
-const atermpp::function_symbol& function_symbol_RESOr()
-{
-  static const atermpp::global_function_symbol function_symbol_RESOr("RESOr", 2);
-  return function_symbol_RESOr;
-}
-
-// RESPlus
-inline
-const atermpp::function_symbol& function_symbol_RESPlus()
-{
-  static const atermpp::global_function_symbol function_symbol_RESPlus("RESPlus", 2);
-  return function_symbol_RESPlus;
-}
-
-// RESTrue
-inline
-const atermpp::function_symbol& function_symbol_RESTrue()
-{
-  static const atermpp::global_function_symbol function_symbol_RESTrue("RESTrue", 0);
-  return function_symbol_RESTrue;
-}
-
-// RESVariable
-inline
-const atermpp::function_symbol& function_symbol_RESVariable()
-{
-  static const atermpp::global_function_symbol function_symbol_RESVariable("RESVariable", 1);
-  return function_symbol_RESVariable;
 }
 
 // RegAlt
@@ -1706,15 +1482,6 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol PBESForall;
   static const atermpp::function_symbol PBESExists;
   static const atermpp::function_symbol PropVarInst;
-  static const atermpp::function_symbol BES;
-  static const atermpp::function_symbol BooleanEquation;
-  static const atermpp::function_symbol BooleanVariable;
-  static const atermpp::function_symbol BooleanTrue;
-  static const atermpp::function_symbol BooleanFalse;
-  static const atermpp::function_symbol BooleanNot;
-  static const atermpp::function_symbol BooleanAnd;
-  static const atermpp::function_symbol BooleanOr;
-  static const atermpp::function_symbol BooleanImp;
   static const atermpp::function_symbol PRES;
   static const atermpp::function_symbol PREqnSpec;
   static const atermpp::function_symbol PRInit;
@@ -1735,25 +1502,6 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol PRESEqNInf;
   static const atermpp::function_symbol PRESCondSm;
   static const atermpp::function_symbol PRESCondEq;
-  static const atermpp::function_symbol RES;
-  static const atermpp::function_symbol RESEquation;
-  static const atermpp::function_symbol RESVariable;
-  static const atermpp::function_symbol RESTrue;
-  static const atermpp::function_symbol RESFalse;
-  static const atermpp::function_symbol RESMinus;
-  static const atermpp::function_symbol RESAnd;
-  static const atermpp::function_symbol RESOr;
-  static const atermpp::function_symbol RESImp;
-  static const atermpp::function_symbol RESPlus;
-  static const atermpp::function_symbol RESConstantMultiply;
-  static const atermpp::function_symbol RESConstantMultiplyAlt;
-  static const atermpp::function_symbol RESEqInf;
-  static const atermpp::function_symbol RESEqNInf;
-  static const atermpp::function_symbol RESCondSm;
-  static const atermpp::function_symbol RESCondEq;
-  static const atermpp::function_symbol BddTrue;
-  static const atermpp::function_symbol BddFalse;
-  static const atermpp::function_symbol BddIf;
 //--- end generated variables ---//
 };
 

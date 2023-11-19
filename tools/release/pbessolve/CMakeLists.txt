@@ -3,6 +3,5 @@ mcrl2_add_tool(pbessolve
     pbessolve.cpp
   DEPENDS
     mcrl2_pbes
-    mcrl2_bes
     mcrl2_lts
 )

@@ -337,27 +337,6 @@
 //propositional variable instantiation
 <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
 
-//Boolean expressions
-//-------------------
-
-// BES specification (equations + initialization)
-<BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
-
-// boolean equation
-<BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
-
-// boolean variable
-<BooleanVariable>   ::= BooleanVariable(<String>)
-
-// boolean expression
-<BooleanExpression> ::= BooleanTrue
-                      | BooleanFalse
-                      | <BooleanVariable>
-                      | BooleanNot(<BooleanExpression>)
-                      | BooleanAnd(<BooleanExpression>, <BooleanExpression>)
-                      | BooleanOr(<BooleanExpression>, <BooleanExpression>)
-                      | BooleanImp(<BooleanExpression>, <BooleanExpression>)
-
 //PRES's
 //------
 
@@ -393,42 +372,4 @@
                  | PRESCondEq(<PRExpr>,<PRExpr>,<PRExpr>)
                  | <PropVarInst>
                  | <UntypedDataParameter>
-
-
-//Real equation systems
-//---------------------
-
-// RES specification (equations + initialization)
-<RES>          ::= RES(<RESEquation>*, <RESExpression>)
-
-// real equation
-<RESEquation>   ::= RESEquation(<FixPoint>, <RESVariable>, <RESExpression>)
-
-// real variable
-<RESVariable>   ::= RESVariable(<String>)
-
-// real expression
-<RESExpression> ::= RESTrue
-                  | RESFalse
-                  | <RESVariable>
-                  | RESMinus(<RESExpression>)
-                  | RESAnd(<RESExpression>, <RESExpression>)
-                  | RESOr(<RESExpression>, <RESExpression>)
-                  | RESImp(<RESExpression>, <RESExpression>)
-                  | RESPlus(<RESExpression>, <RESExpression>)
-                  | RESConstantMultiply(<DataExpr>, <RESExpression>)
-                  | RESConstantMultiplyAlt(<RESExpression>, <DataExpr>)
-                  | <DataExpr>
-                  | RESEqInf(<RESExpression>)
-                  | RESEqNInf(<RESExpression>)
-                  | RESCondSm(<RESExpression>, <RESExpression>, <RESExpression>)
-                  | RESCondEq(<RESExpression>, <RESExpression>, <RESExpression>)
-
-//BDDs
-//-------------------
-
-// bdd expression
-<BddExpression> ::= BddTrue
-                  | BddFalse
-                  | BddIf(<String>, <BddExpression>, <BddExpression>)
 

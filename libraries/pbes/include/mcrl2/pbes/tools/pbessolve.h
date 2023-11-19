@@ -13,19 +13,19 @@
 #ifndef MCRL2_PBES_TOOLS_PBESSOLVE_H
 #define MCRL2_PBES_TOOLS_PBESSOLVE_H
 
-#include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/detail/lps_io.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/pbesinst_structure_graph2.h"
-#include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/parallel_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
-using mcrl2::bes::tools::pbes_input_tool;
+using mcrl2::pbes_system::tools::pbes_input_tool;
 using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_tool;
 using utilities::tools::parallel_tool;

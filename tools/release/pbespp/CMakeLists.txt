@@ -3,5 +3,4 @@ mcrl2_add_tool(pbespp
     pbespp.cpp
   DEPENDS
     mcrl2_pbes
-    mcrl2_bes
 )

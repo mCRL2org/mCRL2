@@ -12,27 +12,26 @@
 #define AUTHOR "Jeroen Keiren"
 
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/bes/gauss_elimination.h"
-#include "mcrl2/bes/small_progress_measures.h"
-#include "mcrl2/bes/local_fixpoints.h"
-#include "mcrl2/bes/solution_strategy.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
+#include "mcrl2/pbes/pbes_gauss_elimination.h"
+#include "mcrl2/pbes/small_progress_measures.h"
+#include "mcrl2/pbes/solution_strategy.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
-using bes::tools::bes_input_tool;
+using pbes_system::tools::pbes_input_tool;
 
-using namespace mcrl2::bes;
+using namespace mcrl2::pbes_system;
 
 //local declarations
 
-class bessolve_tool: public bes_input_tool<input_tool>
+class bessolve_tool: public pbes_input_tool<input_tool>
 {
   private:
-    typedef bes_input_tool<input_tool> super;
+    typedef pbes_input_tool<input_tool> super;
 
   public:
     bessolve_tool()
@@ -45,8 +44,8 @@ class bessolve_tool: public bes_input_tool<input_tool>
 
     bool run() override
     {
-      bes::boolean_equation_system bes;
-      load_bes(bes,input_filename(),bes_input_format());
+      pbes_system::pbes bes;
+      load_pbes(bes,input_filename(),pbes_input_format());
 
       mCRL2log(verbose) << "solving BES in " <<
                    (input_filename().empty()?"standard input":input_filename()) << " using " <<
@@ -64,9 +63,6 @@ class bessolve_tool: public bes_input_tool<input_tool>
         case small_progr_measures:
           result = small_progress_measures(bes);
           break;
-        case local_fixed_point:
-          result = local_fixpoints(bes, &full_solution);
-          break;
         default:
           throw mcrl2::runtime_error("unhandled strategy provided");
       }
@@ -74,38 +70,25 @@ class bessolve_tool: public bes_input_tool<input_tool>
 
       mCRL2log(info) << "The solution for the initial variable of the BES is " << (result?"true":"false") << std::endl;
 
-      if (print_justification)
-      {
-        print_justification_tree(bes, full_solution, result);
-      }
-
       return true;
     }
 
   protected:
     solution_strategy_t strategy;
-    bool print_justification = false;
 
     void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("strategy", make_enum_argument<solution_strategy_t>("STRATEGY")
                       .add_value(small_progr_measures, true)
-                      .add_value(gauss)
-                      .add_value(local_fixed_point),
+                      .add_value(gauss),
                       "solve the BES using the specified STRATEGY:", 's');
-      desc.add_option("print-justification", "print justification for solution. Works only with the local fixpoint strategy.", 'j');
     }
 
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       strategy = parser.option_argument_as<solution_strategy_t>("strategy");
-      print_justification = parser.options.count("print-justification") > 0;
-      if (print_justification && strategy!=local_fixed_point)
-      {
-        throw mcrl2::runtime_error("Justifications can only be printed when the solving strategy is lf.");
-      } 
     }
 };
 

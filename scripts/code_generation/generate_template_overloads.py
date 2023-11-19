@@ -12,7 +12,6 @@ modifiability_map = make_modifiability_map(all_classes)
 
 file_map = {
   'action_formulas' : MCRL2_ROOT + 'libraries/modal_formula/source/modal_formula.cpp',
-  'bes' : MCRL2_ROOT + 'libraries/bes/source/bes.cpp',
   'core' : MCRL2_ROOT + 'libraries/core/source/core.cpp',
   'data' : MCRL2_ROOT + 'libraries/data/source/data.cpp',
   'lps' : MCRL2_ROOT + 'libraries/lps/source/lps.cpp',

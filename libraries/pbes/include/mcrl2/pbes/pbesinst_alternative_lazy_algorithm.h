@@ -13,7 +13,7 @@
 #ifndef MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
 
-#include "mcrl2/bes/remove_level.h"
+#include "mcrl2/pbes/remove_level.h"
 #include "mcrl2/pbes/detail/check_well_formed_bes.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/search_strategy.h"
@@ -153,7 +153,7 @@ class pbesinst_alternative_lazy_algorithm
 
     /// Indicate to which extent explored bes equations that turn out not to reachable can be thrown away.
     /// Values are: none, some or all.
-    const mcrl2::bes::remove_level m_erase_unused_bes_variables;
+    const mcrl2::pbes_system::remove_level m_erase_unused_bes_variables;
 
     /// \brief Propositional variable instantiations that need to be handled.
     std::deque<propositional_variable_instantiation> todo;
@@ -237,7 +237,7 @@ class pbesinst_alternative_lazy_algorithm
         const data::rewriter& datar,
         search_strategy search_strategy = breadth_first,
         transformation_strategy transformation_strategy = lazy,
-        const mcrl2::bes::remove_level erase_unused_bes_variables = mcrl2::bes::none,
+        const mcrl2::pbes_system::remove_level erase_unused_bes_variables = mcrl2::pbes_system::none,
         const std::size_t maximum_todo_size = std::numeric_limits<std::size_t>::max(),
         const bool approximate_true = true
         )
@@ -396,7 +396,7 @@ class pbesinst_alternative_lazy_algorithm
 
     void regenerate_states()
     {
-      if (m_erase_unused_bes_variables==bes::none)
+      if (m_erase_unused_bes_variables==pbes_system::none)
       {
         // Nothing will be thrown away. Therefore, it makes no sense to rebuild
         // the data structures on the basis of reachable bes variables.
@@ -459,7 +459,7 @@ class pbesinst_alternative_lazy_algorithm
       for(std::unordered_map<propositional_variable_instantiation, pbes_expression>::const_iterator i=equation.begin(); i!=equation.end(); ++i)
       {
         // Insert the new equation if it is reachable, or if it equal to true or false and m_erase_unused_bes_variables is set to some.
-        if (reachable.count(i->first)>0 || (m_erase_unused_bes_variables==bes::some && (is_true(i->second) || is_false(i->second))))
+        if (reachable.count(i->first)>0 || (m_erase_unused_bes_variables==pbes_system::some && (is_true(i->second) || is_false(i->second))))
         {
           new_equations.insert(*i);
           std::size_t index = equation_index[i->first.name()];

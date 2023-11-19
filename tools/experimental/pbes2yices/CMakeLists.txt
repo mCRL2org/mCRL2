@@ -5,7 +5,6 @@ mcrl2_add_tool(pbes2yices
     unrolling.cpp
   DEPENDS
     mcrl2_data
-    mcrl2_bes
     mcrl2_pbes
     mcrl2_utilities
 )

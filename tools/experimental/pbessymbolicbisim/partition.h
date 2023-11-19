@@ -15,9 +15,9 @@
 #include <queue>
 #include <random>
 
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/join.h"
 #include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
+#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/structure_graph_builder.h"
 
 #include "simplifier.h"

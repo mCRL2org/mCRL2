@@ -5,7 +5,6 @@ if(MCRL2_ENABLE_SYLVAN)
       pbesbddsolve.cpp
     DEPENDS
       mcrl2_pbes
-      mcrl2_bes
       sylvan
   )
 

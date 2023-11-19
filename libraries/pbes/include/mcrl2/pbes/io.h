@@ -21,6 +21,8 @@ namespace mcrl2
 namespace pbes_system
 {
 
+void save_bes_pgsolver(const pbes& bes, std::ostream& stream, bool maxpg = true);
+
 const std::vector<utilities::file_format>& pbes_file_formats();
 
 inline
@@ -40,6 +42,10 @@ inline
 const utilities::file_format& pbes_format_internal() { return pbes_file_formats()[0]; }
 inline
 const utilities::file_format& pbes_format_text() { return pbes_file_formats()[1]; }
+inline
+const utilities::file_format& pbes_format_internal_bes() { return pbes_file_formats()[2]; }
+inline
+const utilities::file_format& pbes_format_pgsolver() { return pbes_file_formats()[3]; }
 
 inline
 const utilities::file_format guess_format(const std::string& filename)

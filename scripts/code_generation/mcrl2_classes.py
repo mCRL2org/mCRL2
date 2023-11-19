@@ -223,24 +223,6 @@ forall(const data::variable_list& variables, const pbes_expression& body)       
 exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESExists        | The existential quantification operator for pbes expressions
 '''
 
-BOOLEAN_CLASSES = r'''
-boolean_equation(const fixpoint_symbol& symbol, const boolean_variable& variable, const boolean_expression& formula) : public atermpp::aterm_appl | MS  | BooleanEquation | A boolean equation
-boolean_equation_system(const std::vector<bes::boolean_equation>& equations, const boolean_expression& initial_state)                             | MSW | BES             | A boolean equation system
-'''
-
-BOOLEAN_EXPRESSION_CLASSES = r'''
-boolean_expression()                                                  : public atermpp::aterm_appl     | XCI  | BooleanExpression    | A boolean expression
-true_()                                                               : public bes::boolean_expression | EI   | BooleanTrue          | The value true for boolean expressions
-false_()                                                              : public bes::boolean_expression | EI   | BooleanFalse         | The value false for boolean expressions
-not_(const boolean_expression& operand)                               : public bes::boolean_expression | EI   | BooleanNot           | The not operator for boolean expressions
-and_(const boolean_expression& left, const boolean_expression& right) : public bes::boolean_expression | EI   | BooleanAnd           | The and operator for boolean expressions
-or_(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI   | BooleanOr            | The or operator for boolean expressions
-imp(const boolean_expression& left, const boolean_expression& right)  : public bes::boolean_expression | EI   | BooleanImp           | The implication operator for boolean expressions
-boolean_variable(const core::identifier_string& name)                 : public bes::boolean_expression | EIUs | BooleanVariable      | A boolean variable
-'''
-
-# ---------
-# propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm_appl | CI  | PropVarDecl | A propositional variable declaration
 PRES_CLASSES = r'''
 pres_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pres_expression& formula)                                                                                                                                      | SMC | PREqn       | A PRES equation
 pres(const data::data_specification& data, const std::set<data::variable>& global_variables, const std::vector<pres_system::pres_equation>& equations, const propositional_variable_instantiation& initial_state)                                         | SMW | PRES        | A PRES
@@ -263,13 +245,6 @@ eqinf(const pres_expression& operand)                                           
 eqninf(const pres_expression& operand)                                                                                  : public pres_system::pres_expression | EI    | PRESEqNInf              | The indicator whether the argument is -infinite
 condsm(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)                           : public pres_system::pres_expression | EI    | PRESCondSm              | Conditional operator with condition smaller than 0
 condeq(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)                           : public pres_system::pres_expression | EI    | PRESCondEq              | Conditional operator with condition smaller than or equal to 0
-'''
-
-BDD_EXPRESSION_CLASSES = r'''
-bdd_expression()                                                                                  : public atermpp::aterm_appl | XCI  | BddExpression | A bdd expression
-true_()                                                                                           : public bdd::bdd_expression | EI   | BddTrue       | The value true for bdd expressions
-false_()                                                                                          : public bdd::bdd_expression | EI   | BddFalse      | The value false for bdd expressions
-if_(const core::identifier_string& name, const bdd_expression& left, const bdd_expression& right) : public bdd::bdd_expression | EI   | BddIf         | The if operator for bdd expressions
 '''
 
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
@@ -1497,7 +1472,5 @@ def mcrl2_class_map():
           'lps'              : LPS_CLASSES,
           'process'          : PROCESS_CLASSES + PROCESS_EXPRESSION_CLASSES,
           'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
-          'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES,
           'pres_system'      : PRES_CLASSES + PRES_EXPRESSION_CLASSES,
-          'bdd'              : BDD_EXPRESSION_CLASSES
         }

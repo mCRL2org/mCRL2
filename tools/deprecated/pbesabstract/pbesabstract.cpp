@@ -9,10 +9,10 @@
 /// \file pbesabstract.cpp
 
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/bes/pbes_output_tool.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
+#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/pbes/tools.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -20,8 +20,8 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using bes::tools::pbes_input_tool;
-using bes::tools::pbes_output_tool;
+using pbes_system::tools::pbes_input_tool;
+using pbes_system::tools::pbes_output_tool;
 
 class pbes_abstract_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {

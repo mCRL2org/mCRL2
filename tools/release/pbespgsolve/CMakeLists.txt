@@ -4,5 +4,4 @@ mcrl2_add_tool(pbespgsolve
   DEPENDS
     mcrl2_pg
     mcrl2_pbes
-    mcrl2_bes
 )

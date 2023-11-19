@@ -64,6 +64,17 @@ class propositional_variable: public atermpp::aterm_appl
     {
       return atermpp::down_cast<data::variable_list>((*this)[1]);
     }
+//--- start user section propositional_variable ---//
+
+    explicit propositional_variable(const atermpp::aterm_string& name)
+     : propositional_variable(name, data::variable_list())
+    {}
+
+    explicit propositional_variable(const std::string& name)
+     : propositional_variable(atermpp::aterm_string(name))
+    {}
+
+//--- end user section propositional_variable ---//
 };
 
 /// \\brief Make_propositional_variable constructs a new term into a given address.

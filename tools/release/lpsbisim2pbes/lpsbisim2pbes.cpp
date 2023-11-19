@@ -8,9 +8,9 @@
 //
 /// \file lpsbisim2pbes.cpp
 
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_input_output_tool.h"
-#include "mcrl2/bes/pbes_output_tool.h"
+#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/pbes/tools.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -20,7 +20,7 @@ using utilities::make_enum_argument;
 using utilities::tools::tool;
 using utilities::tools::input_input_output_tool;
 using namespace mcrl2::log;
-using bes::tools::pbes_output_tool;
+using pbes_system::tools::pbes_output_tool;
 
 typedef pbes_output_tool<input_input_output_tool> super;
 class lpsbisim2pbes_tool: public super

@@ -12,22 +12,22 @@
 #define AUTHOR "Jeroen Keiren"
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/bes/print.h"
+#include "mcrl2/pbes/pbes_input_tool.h"
+#include "mcrl2/pbes/print.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
-using mcrl2::bes::tools::bes_input_tool;
+using mcrl2::pbes_system::tools::pbes_input_tool;
 
 //local declarations
 
-class bespp_tool: public bes_input_tool<input_output_tool>
+class bespp_tool: public pbes_input_tool<input_output_tool>
 {
   private:
-    typedef bes_input_tool<input_output_tool> super;
+    typedef pbes_input_tool<input_output_tool> super;
 
   public:
     bespp_tool()
@@ -65,8 +65,8 @@ class bespp_tool: public bes_input_tool<input_output_tool>
   private:
     void print_specification()
     {
-      bes::boolean_equation_system bes;
-      load_bes(bes,input_filename(), bes_input_format());
+      pbes_system::pbes bes;
+      load_pbes(bes,input_filename(), pbes_input_format());
 
       mCRL2log(verbose) << "printing BES from " << (input_filename().empty()?"standard input":input_filename())
                         << " to " << (output_filename().empty()?"standard output":output_filename())
@@ -74,14 +74,14 @@ class bespp_tool: public bes_input_tool<input_output_tool>
 
       if (output_filename().empty())
       {
-        std::cout << bes::pp(bes);
+        std::cout << pbes_system::pp(bes);
       }
       else
       {
         std::ofstream output_stream(output_filename().c_str());
         if (output_stream.is_open())
         {
-          output_stream << bes::pp(bes);
+          output_stream << pbes_system::pp(bes);
           output_stream.close();
         }
         else

@@ -3,5 +3,5 @@ mcrl2_add_tool(besconvert
     besconvert.cpp
   DEPENDS
     mcrl2_lts
-    mcrl2_bes
+    mcrl2_pbes
 )

@@ -12,15 +12,15 @@
 #define TOOLNAME "lts2pbes"
 #define AUTHOR "Wieger Wesselink"
 
-#include "mcrl2/bes/pbes_output_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/lts/detail/lts_load.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/lts2pbes.h"
-#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/pbes/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
-using bes::tools::pbes_output_tool;
+using pbes_system::tools::pbes_output_tool;
 using utilities::tools::input_output_tool;
 
 inline

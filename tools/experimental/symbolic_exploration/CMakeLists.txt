@@ -3,5 +3,4 @@ mcrl2_add_tool(symbolic_exploration
     symbolic_exploration.cpp
   DEPENDS
     mcrl2_pbes
-    mcrl2_bes
 )
