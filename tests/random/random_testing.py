@@ -240,12 +240,6 @@ class PbesabstractTest(PbesTest):
     def __init__(self, name, settings):
         super(PbesabstractTest, self).__init__(name, ymlfile('pbesabstract'), settings)
 
-class PbesbddsolveTest(PbesTest):
-    def __init__(self, name, settings):
-        super(PbesbddsolveTest, self).__init__(name, ymlfile('pbesbddsolve'), settings)
-        self.use_integers = False
-        self.use_quantifiers = False
-
 class PbesconstelmTest(PbesTest):
     def __init__(self, name, settings):
         super(PbesconstelmTest, self).__init__(name, ymlfile('pbesconstelm'), settings)
@@ -445,7 +439,6 @@ if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic' : lambda name, settings: PbessolvesymbolicTest(name, settings) })
     available_tests.update({'pbessolvesymbolic-partial' : lambda name, settings: PbessolvesymbolicTest(name, settings) })
     available_tests.update({'ltsconvertsymbolic' : lambda name, settings: LtsconvertsymbolicTest(name, settings) })
-#    available_tests.update({ 'pbesbddsolve' : lambda name, settings: PbesbddsolveTest(name, settings) })
 
 def print_names(tests):
     for name in sorted(tests):
