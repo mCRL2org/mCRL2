@@ -332,6 +332,9 @@ def main(tests):
             print("Failed tests...")
             for name in failed:
                 print(f"{name} failed")
+
+            if failed:
+                return os._exit(1)
     except KeyboardInterrupt:
         print("Killed")
 
