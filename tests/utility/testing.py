@@ -246,23 +246,31 @@ class YmlTest(object):
                 self.cleanup()
                 raise e
 
-        if not all(tool.executed for tool in self.tools):
-            not_executed = [tool for tool in self.tools if not tool.executed]
-            raise UnusedToolsError(not_executed)
-        else:
+        if all(tool.executed for tool in self.tools):
             for node in self.nodes:
                 if not os.path.exists(node.filename()):
-                    raise RuntimeError('Error in test {}: output file {} is missing!'.format(self.name, node.filename()))
-            write_text('commands', '\n'.join(commands))
+                    raise RuntimeError(
+                        f"Error in test {self.name}: output file {node.filename()} is missing!"
+                    )
+
+            write_text("commands", "\n".join(commands))
             result = self.result()
-            if result == False:
+            if not result:
                 self.dump_file_contents()
                 for tool in self.tools:
                     if tool.value != {}:
-                        print('Output of {} {}: {}'.format(tool.name, ' '.join(tool.args), tool.value))
+                        print(
+                            "Output of {} {}: {}".format(
+                                tool.name, " ".join(tool.args), tool.value
+                            )
+                        )
                 self.print_commands(no_paths=True)
+
             self.cleanup()
             return result
+        else:
+            not_executed = [tool for tool in self.tools if not tool.executed]
+            raise UnusedToolsError(not_executed)
 
     # Returns the tool with the given label
     def find_tool(self, label):
@@ -277,12 +285,12 @@ class YmlTest(object):
         print('\n'.join([tool.command(working_directory, no_paths) for tool in self.tasks]))
 
     def result_string(self, result):
-        if result:
-            return 'Pass'
-        elif not result:
-            return 'FAIL'
+        if result is True:
+            return "Pass"
+        elif result is False:
+            return "FAIL"
         else:
-            return 'Indeterminate'
+            return "Indeterminate"
 
     def execute(self):
         for filename in [self.ymlfile] + self.inputfiles:
