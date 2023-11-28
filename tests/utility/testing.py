@@ -8,89 +8,105 @@
 import os
 import os.path
 import shutil
+import copy
+import yaml
+import io
 from collections import defaultdict
 
-from .run_process import MemoryExceededError, TimeExceededError, StackOverflowError, ToolRuntimeError, SegmentationFault
+from .run_process import (
+    MemoryExceededError,
+    TimeExceededError,
+    StackOverflowError,
+    ToolRuntimeError,
+    SegmentationFault,
+)
 from .text_utility import read_text, write_text
 from .tools import Node, ToolFactory
 from .topological_sort import topological_sort
+
 
 class ToolInputError(Exception):
     def __init__(self, name, value):
         self.tool = name
         self.value = value
+
     def __str__(self):
         return repr(self.value)
+
 
 class UnusedToolsError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
+
 
 class ToolCrashedError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
 
+
 class YmlTest(object):
     def __init__(self, name, ymlfile, inputfiles, settings):
-        import copy
-        import yaml
 
         if not settings:
-            raise RuntimeError('ERROR in Test.__init__: settings == None')
+            raise RuntimeError("ERROR in Test.__init__: settings == None")
 
         settings = copy.deepcopy(settings)
         self.name = name
         self.ymlfile = ymlfile
         self.inputfiles = inputfiles
         self.settings = settings
-        self.verbose = settings.get('verbose', True)
-        self.toolpath = settings.get('toolpath', '')
-        self.cleanup_files = settings.get('cleanup_files', False)
-        self.timeout = 5
+        self.verbose = settings.get("verbose", True)
+        self.toolpath = settings.get("toolpath", "")
+        self.cleanup_files = settings.get("cleanup_files", False)
+        self.timeout = 1
         self.memlimit = 1000
-        self.allow_non_zero_return_values = settings.get('allow-non-zero-return-values', False)
+        self.allow_non_zero_return_values = settings.get(
+            "allow-non-zero-return-values", False
+        )
 
         # Reads a test from a YAML file
         with open(ymlfile, encoding="UTF-8") as f:
             data = yaml.safe_load(f)
 
             # Add tool arguments specified in settings
-            if 'tools' in settings:
-                for tool in settings['tools']:
-                    if 'args' in settings['tools'][tool]:
-                        data['tools'][tool]['args'] += settings['tools'][tool]['args']
+            if "tools" in settings:
+                for tool in settings["tools"]:
+                    if "args" in settings["tools"][tool]:
+                        data["tools"][tool]["args"] += settings["tools"][tool]["args"]
 
             # Overwrite node values specified in settings
-            if 'nodes' in settings:
-                for label in settings['nodes']:
-                    data['nodes'][label]['value'] = settings['nodes'][label]['value']
+            if "nodes" in settings:
+                for label in settings["nodes"]:
+                    data["nodes"][label]["value"] = settings["nodes"][label]["value"]
 
             # Overwrite result value with the one specified in settings
-            if 'result' in settings:
-                data['result'] = settings['result']
+            if "result" in settings:
+                data["result"] = settings["result"]
 
-            if 'memlimit' in settings:
-                self.memlimit = settings['memlimit']
+            if "memlimit" in settings:
+                self.memlimit = settings["memlimit"]
 
-            if 'timeout' in settings:
-                self.timeout = settings['timeout']
+            if "timeout" in settings:
+                self.timeout = settings["timeout"]
 
-            #print yaml.dump(data)
+            # print yaml.dump(data)
 
             self.nodes = []
-            for label in data['nodes']: # create nodes
-                self._add_node(data['nodes'][label], label)
+            for label in data["nodes"]:  # create nodes
+                self._add_node(data["nodes"][label], label)
 
             self.tools = []
-            for label in data['tools']: # create tools
-                assert isinstance(data['tools'], dict)
-                self._add_tool(data['tools'][label], label)
+            for label in data["tools"]:  # create tools
+                assert isinstance(data["tools"], dict)
+                self._add_tool(data["tools"][label], label)
 
-            self.result_code = data['result']
+            self.result_code = data["result"]
 
         # These are the global variables used for the computation of the test result
         self.globals = {}
@@ -105,14 +121,22 @@ class YmlTest(object):
         self.tasks = self.make_task_schedule()
 
     def __str__(self):
-        import io
+
         out = io.StringIO()
-        out.write('name        = ' + str(self.name)     + '\n')
-        out.write('verbose     = ' + str(self.verbose)  + '\n')
-        out.write('result_code = ' + str(self.result_code)      + '\n\n')
-        out.write('\n'.join(['--- Node ---\n{0}'.format(node) for node in self.nodes]) + '\n\n')
-        out.write('\n'.join(['--- Tool ---\n{0}'.format(tool) for tool in self.tools]) + '\n\n')
-        out.write('\n'.join(['--- Init ---\n{0}'.format(node) for node in self.input_nodes]))
+        out.write("name        = " + str(self.name) + "\n")
+        out.write("verbose     = " + str(self.verbose) + "\n")
+        out.write("result_code = " + str(self.result_code) + "\n\n")
+        out.write(
+            "\n".join(["--- Node ---\n{0}".format(node) for node in self.nodes])
+            + "\n\n"
+        )
+        out.write(
+            "\n".join(["--- Tool ---\n{0}".format(tool) for tool in self.tools])
+            + "\n\n"
+        )
+        out.write(
+            "\n".join(["--- Init ---\n{0}".format(node) for node in self.input_nodes])
+        )
         return out.getvalue()
 
     # Returns the input nodes of the test, ordered by label
@@ -121,26 +145,45 @@ class YmlTest(object):
         for tool in self.tools:
             outputs = outputs + tool.output_nodes
         result = [node for node in self.nodes if not node in outputs]
-        return sorted(result, key = lambda node: node.label)
+        return sorted(result, key=lambda node: node.label)
 
     def _add_node(self, data, label):
         value = None
-        if 'value' in data:
-            value = data['value']
-        self.nodes.append(Node(label, data['type'], value))
+        if "value" in data:
+            value = data["value"]
+        self.nodes.append(Node(label, data["type"], value))
 
     def _find_node(self, label):
         return
 
     def _add_tool(self, data, label):
-        input_nodes = [next(node for node in self.nodes if node.label == key) for key in data['input']]
-        output_nodes = sorted([node for node in self.nodes if node.label in data['output']], key = lambda node: node.label)
-        self.tools.append(ToolFactory().create_tool(label, data['name'], self.toolpath, input_nodes, output_nodes, data['args']))
+        input_nodes = [
+            next(node for node in self.nodes if node.label == key)
+            for key in data["input"]
+        ]
+        output_nodes = sorted(
+            [node for node in self.nodes if node.label in data["output"]],
+            key=lambda node: node.label,
+        )
+        self.tools.append(
+            ToolFactory().create_tool(
+                label,
+                data["name"],
+                self.toolpath,
+                input_nodes,
+                output_nodes,
+                data["args"],
+            )
+        )
 
     def setup(self, inputfiles):
         input_nodes = [node for node in self.input_nodes if node.value is None]
         if len(input_nodes) != len(inputfiles):
-            raise RuntimeError('Invalid number of input files provided: expected {0}, got {1}'.format(len(input_nodes), len(inputfiles)))
+            raise RuntimeError(
+                "Invalid number of input files provided: expected {0}, got {1}".format(
+                    len(input_nodes), len(inputfiles)
+                )
+            )
         for i in range(len(inputfiles)):
             shutil.copy(inputfiles[i], self.input_nodes[i].filename())
             self.input_nodes[i].value = read_text(inputfiles[i])
@@ -151,19 +194,26 @@ class YmlTest(object):
             exec(self.result_code, self.globals)
         except Exception as e:
             if isinstance(e, KeyError):
-                print('A KeyError occurred during evaluation of the test result: {}'.format(e))
-                print('result_code', self.result_code)
+                print(
+                    "A KeyError occurred during evaluation of the test result: {}".format(
+                        e
+                    )
+                )
+                print("result_code", self.result_code)
                 print(self)
             else:
-                print('An exception occurred during evaluation of the test result: {}'.format(e))
-                print('result_code', self.result_code)
+                print(
+                    "An exception occurred during evaluation of the test result: {}".format(
+                        e
+                    )
+                )
+                print("result_code", self.result_code)
                 print(self)
             return False
-        return self.globals['result']
+        return self.globals["result"]
 
     # Returns a valid schedule for executing the tools in this test
     def make_task_schedule(self):
-
         # Create a label based mapping E that contains outgoing edges for all nodes.
         E = defaultdict(lambda: set([]))
         for tool in self.tools:
@@ -173,7 +223,7 @@ class YmlTest(object):
                 E[tool.label].add(node.label)
 
         # Create a label based graph G
-        G = defaultdict(lambda: (set([]), set([]))) # (predecessors, successors)
+        G = defaultdict(lambda: (set([]), set([])))  # (predecessors, successors)
         for tool in self.tools:
             u = tool.label
             for v in E[u]:
@@ -197,7 +247,7 @@ class YmlTest(object):
 
     def cleanup(self):
         if self.cleanup_files:
-            filenames = [node.filename() for node in self.nodes] + ['commands']
+            filenames = [node.filename() for node in self.nodes] + ["commands"]
             for filename in filenames:
                 try:
                     os.remove(filename)
@@ -208,9 +258,13 @@ class YmlTest(object):
     def dump_file_contents(self):
         filenames = [node.filename() for node in self.nodes]
         for file in filenames:
-            if os.path.exists(file) and (file.endswith('.mcrl2') or file.endswith('.pbesspec') or file.endswith('.mcf')):
+            if os.path.exists(file) and (
+                file.endswith(".mcrl2")
+                or file.endswith(".pbesspec")
+                or file.endswith(".mcf")
+            ):
                 contents = read_text(file)
-                print(f'Contents of file {file}:\n{contents}')
+                print(f"Contents of file {file}:\n{contents}")
 
     def _run(self):
         tasks = self.tasks[:]
@@ -220,29 +274,37 @@ class YmlTest(object):
             tool = tasks.pop(0)
             try:
                 commands.append(tool.command())
-                returncode = tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
+                returncode = tool.execute(
+                    timeout=self.timeout, memlimit=self.memlimit, verbose=self.verbose
+                )
                 if returncode != 0 and not self.allow_non_zero_return_values:
                     self.dump_file_contents()
-                    self.print_commands(no_paths = True)
-                    raise RuntimeError(f'The execution of tool {tool.name} ended with return code {returncode}')
+                    self.print_commands(no_paths=True)
+                    raise RuntimeError(
+                        f"The execution of tool {tool.name} ended with return code {returncode}"
+                    )
             except MemoryExceededError as e:
                 if self.verbose:
-                    print('Memory limit exceeded: ' + str(e))
+                    print("Memory limit exceeded: " + str(e))
                 self.cleanup()
                 return None
             except TimeExceededError as e:
                 if self.verbose:
-                    print('Time limit exceeded: ' + str(e))
+                    print("Time limit exceeded: " + str(e))
                 self.cleanup()
+                print(f"This???? {tool.executed}")
                 return None
             except StackOverflowError:
                 if self.verbose:
-                    print('Stack overflow detected during execution of the tool ' + tool.name)
+                    print(
+                        "Stack overflow detected during execution of the tool "
+                        + tool.name
+                    )
                 self.cleanup()
                 return None
             except (ToolRuntimeError, SegmentationFault) as e:
                 self.dump_file_contents()
-                self.print_commands(no_paths = True)
+                self.print_commands(no_paths=True)
                 self.cleanup()
                 raise e
 
@@ -277,12 +339,18 @@ class YmlTest(object):
         try:
             return next(tool for tool in self.tools if tool.label == label)
         except StopIteration:
-            raise RuntimeError("could not find model a tool with label '{0}'".format(label))
+            raise RuntimeError(
+                "could not find model a tool with label '{0}'".format(label)
+            )
 
     # If no_paths is True, then all paths in the command are excluded
-    def print_commands(self, working_directory = None, no_paths = False):
-        print('#--- commands ---#')
-        print('\n'.join([tool.command(working_directory, no_paths) for tool in self.tasks]))
+    def print_commands(self, working_directory=None, no_paths=False):
+        print("#--- commands ---#")
+        print(
+            "\n".join(
+                [tool.command(working_directory, no_paths) for tool in self.tasks]
+            )
+        )
 
     def result_string(self, result):
         if result is True:
@@ -295,18 +363,19 @@ class YmlTest(object):
     def execute(self):
         for filename in [self.ymlfile] + self.inputfiles:
             if not os.path.isfile(filename):
-                print(f'Error: {filename} does not exist!')
+                print(f"Error: {filename} does not exist!")
                 return
-        if 'verbose' in self.settings and self.settings['verbose']:
-            print('Running test ' + self.ymlfile)
+        if "verbose" in self.settings and self.settings["verbose"]:
+            print("Running test " + self.ymlfile)
 
         self.setup(self.inputfiles)
         result = self._run()
 
-        print(f'{self.name} {self.result_string(result)}', flush=True)
-        if not result:
+        print(f"{self.name} {self.result_string(result)}", flush=True)
+        if result is False:
             raise RuntimeError(
-                'The result expression evaluated to False. The output of the tools likely does not match.')
+                "The result expression evaluated to False. The output of the tools likely does not match."
+            )
         return result
 
     def execute_in_sandbox(self):
