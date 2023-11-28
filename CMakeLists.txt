@@ -130,11 +130,6 @@ if (MCRL2_ENABLE_TESTS)
   add_subdirectory(tests)
 endif()
 
-# Enable tool tests if desired
-if(MCRL2_ENABLE_TOOL_TESTS)
-  include(tests/GenerateToolTests.cmake)
-endif()
-
 # Install the example directory.
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 

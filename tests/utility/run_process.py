@@ -94,11 +94,10 @@ class RunProcess:
             ) as proc:
                 self._user_time = 0
                 self._max_memory_used = 0
-                process = psutil.Process(proc.pid)
 
                 try:
+                    process = psutil.Process(proc.pid)
                     while proc.returncode is None:
-                        t = process.cpu_times()
                         m = process.memory_info()
 
                         self._max_memory_used = max(
