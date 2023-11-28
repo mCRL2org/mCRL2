@@ -122,8 +122,8 @@ class RunProcess:
 
                 try:
                     stdout, stderr = proc.communicate()
-                    self.stdout = stdout.decode("UTF-8")
-                    self.stderr = stderr.decode("UTF-8")
+                    self.stdout = stdout.decode("utf-8")
+                    self.stderr = stderr.decode("utf-8")
                 except Exception as _:
                     self.stdout = "Unreadable mess"
                     self.stderr = "Unreadable mess"
