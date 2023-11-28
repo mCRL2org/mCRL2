@@ -18,20 +18,24 @@ MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")
 
 
 class LpsFile:
-    None
+    pass
+
+
+class LtsFile:
+    pass
 
 
 class ToolTest:
-    def __init__(self, toolname: str, input: str | LpsFile, options: list[str]):
+    def __init__(self, toolname: str, file_input: str, options: list[str]):
         self.toolname = toolname
-        self.input = input
+        self.file_input = file_input
         self.options = options
 
 
 available_tests = [
     ToolTest(
         "mcrl22lps",
-        os.path.join(MCRL2_ROOT, "examples/academic/abp/abp.mcrl2"),
+        "[mcrl2file]",
         [
             "-a",
             "-b",
@@ -55,7 +59,7 @@ available_tests = [
     ),
     ToolTest(
         "lps2lts",
-        LpsFile(),
+        "[lpsfile]",
         [
             "-ctau",
             "-D",
@@ -72,31 +76,151 @@ available_tests = [
     ),
     ToolTest(
         "lpsconstelm",
-        LpsFile(),
+        "[lpsfile]",
         ["-c", "-f", "-s", "-t", "-rjitty", "-rjittyp", "-rjittyc"],
     ),
-    ToolTest("lpsrewr", LpsFile(), ["-rjitty", "-rjittyp", "-rjittyc"]),
-    ToolTest("lpsinfo", LpsFile(), []),
-    ToolTest("lpspp", LpsFile(), []),
-    ToolTest("lpsparelm", LpsFile(), []),
-    ToolTest("lpssumelm", LpsFile(), ["-c"]),
+    ToolTest("lpsrewr", "[lpsfile]", ["-rjitty", "-rjittyp", "-rjittyc"]),
+    ToolTest("lpsinfo", "[lpsfile]", []),
+    ToolTest("lpspp", "[lpsfile]", []),
+    ToolTest("lpsparelm", "[lpsfile]", []),
+    ToolTest("lpssumelm", "[lpsfile]", ["-c"]),
     ToolTest(
         "lpsactionrename",
-        LpsFile(),
-        ["-m", "-o", "-t", "-rjitty", "-rjittyp", "-rjittyc"],
+        "[lpsfile]",
+        list(
+            map(
+                lambda x: "-f[rename] " + x,
+                ["-m", "-o", "-t", "-rjitty", "-rjittyp", "-rjittyc"],
+            )
+        ),
     ),
-    ToolTest("lpsuntime", LpsFile(), ["-i", "-e"]),
-    # TODO: "-zcvc"
+    ToolTest("lpsuntime", "[lpsfile]", ["-i", "-e"]),
+    # TODO: detect "-zcvc"
     ToolTest(
         "lpsinvelm",
-        LpsFile(),
-        ["-c", "-e", "-l", "-n", "-pinvelm_test", "-rjitty", "-t10", "-rjittyc"],
+        "[lpsfile]",
+        list(
+            map(
+                lambda x: "-i[trueinv] " + x,
+                [
+                    "-c",
+                    "-e",
+                    "-l",
+                    "-n",
+                    "-pinvelm_test",
+                    "-rjitty",
+                    "-t10",
+                    "-rjittyc",
+                ],
+            )
+        ),
     ),
+    ToolTest(
+        "lpsconfcheck",
+        "[lpsfile]",
+        ["-rjitty", "-rjittyc"],
+    ),
+    ToolTest(
+        "lpsbinary",
+        "[lpsfile]",
+        ["-rjitty", "-rjittyp", "-rjittyc"],
+    ),
+    ToolTest(
+        "lpsparunfold",
+        "[lpsfile]",
+        list(
+            map(
+                lambda x: "-sNat " + x,
+                ["-a", "-p", "-n10", "-rjitty", "-rjittyp", "-rjittyc"],
+            )
+        )
+        + ["-i0"],
+    ),
+    ToolTest(
+        "lpssuminst",
+        "[lpsfile]",
+        list(map(lambda x: "--finite " + x, ["-rjitty", "-rjittyp", "-rjittyc"])),
+    ),
+    ToolTest(
+        "lpsconfcheck",
+        "[lpsfile]",
+        [
+            "-a",
+            "-c",
+            "-g",
+            "-i[trueinv]",
+            "-i[falseinv]",
+            "-p[dotfile] -i[trueinv]",
+            "-m",
+            "-n",
+            "-o",
+            "-rjitty",
+            "-rjittyc",
+            "-s10 -i[trueinv]",
+            "-t10 -i[trueinv]",
+        ],
+    ),
+    ToolTest(
+        "ltsinfo",
+        "[ltsfile]",
+        ["-v"],
+    ),
+    ToolTest(
+        "lts2lps",
+        "[ltsfile]",
+        ["-m [mcrl2file]"],
+    ),
+    # TODO: Add action hiding --tau
+    ToolTest(
+        "ltsconvert",
+        "[ltsfile]",
+        list(
+            map(
+                lambda x: "-oaut " + x,
+                [
+                    "-D",
+                    "-ebisim",
+                    "-ebranching-bisim",
+                    "-edpbranching-bisim",
+                    "-esim",
+                    "-etau-star",
+                    "-etrace",
+                    "-eweak-trace",
+                    "-n",
+                    "--no-reach",
+                ],
+            )
+        ),
+    ),
+    ToolTest(
+        "ltscompare",
+        "[ltsfile] [ltsfile]",
+        [
+            "-c -ebranching-bisim",
+            "-c -edpbranching-bisim",
+            "-c -esim",
+            "-c -etrace",
+            "-c -eweak-trace",
+            "-psim",
+            "-pweak-trace",
+        ],
+    ),
+    ToolTest("lps2pbes", "[lpsfile]", ["-f[mcffile]", "-t -f[mcffile]"]),
+    ToolTest("lts2pbes", "[ltsfile]", ["-f[mcffile]"]),
+    ToolTest("pbes2bool", "[pbesfile]", ["-v", "-f"]),
+    ToolTest("pbespp", "[pbesfile]", ["-finternal", "-fdefault"]),
+    ToolTest("pbesconstelm", "[pbesfile]", [ "-c", "-e", "-psimplify", "-pquantifier-all", "-pquantifier-finite", "-ppfnf", "-rjitty", "-rjittyp", "-rjittyc"]),
+    ToolTest("pbesparelm", "[pbesfile]", ["-v"]),
+    ToolTest("pbesrewr", "[pbesfile]", ["-psimplify", "-pquantifier-all", "-pquantifier-finite", "-ppfnf", "-rjitty", "-rjittyp", "-rjittyc"]),
+    ToolTest("txt2lps", "[lpstxtfile]", ["-v"]),
+    ToolTest("txt2lps", "[pbestxtfile]", ["-v"]),
+    ToolTest("pbes2bes", "[pbesfile]", [ "-opbes", "-otext", "-obes", "-opgsolver", "-rjitty", "-rjittyp", "-rjittyc", "-s0", "-s1", "-s2", "-s3", "-u", "-zb", "-zd", "--erase=none", "--erase=some", "--erase=all"]),
+    ToolTest("besinfo", "[pbesfile]", ["-v", "-f"]),
 ]
 
 
 def run_test(toolpath, arguments):
-    return RunProcess(toolpath, arguments, 1000, 1)
+    return RunProcess(toolpath, arguments, 1000, 2)
 
 
 def main(tests):
@@ -139,15 +263,28 @@ def main(tests):
     true_file = os.path.join(output, "true.inv")
     false_file = os.path.join(output, "false.inv")
 
-    with open(true_file, encoding="utf-8") as f:
+    with open(true_file, "w", encoding="utf-8") as f:
         f.write("true")
-    with open(false_file, encoding="utf-8") as f:
+    with open(false_file, "w", encoding="utf-8") as f:
         f.write("false")
 
+    # Create input files for lpsactionrename
+    rename_file = os.path.join(output, "abp.rename")
+    with open(rename_file, "w", encoding="utf-8") as f:
+        f.write("act renamed;\n var x:D;\n rename r1(x) => renamed;")
+
+    # Create a generic nodeadlock formula
+    mcf_file = os.path.join(output, "nodeadlock.mcf")
+    with open(mcf_file, "w", encoding="utf-8") as f:
+        f.write("[true*]<true>true")
+    pbes_file = os.path.join(output, "abp.nodeadlock.pbes")
 
     # Generate the input files for all tests beforehand
     run_test(os.path.join(args.toolpath, "mcrl22lps"), ["-D", mcrl2_file, lps_file])
     run_test(os.path.join(args.toolpath, "lps2lts"), [lps_file, lts_file])
+    run_test(
+        os.path.join(args.toolpath, "lps2pbes"), [lps_file, "-f", mcf_file, pbes_file]
+    )
 
     try:
         with concurrent.futures.ThreadPoolExecutor(
@@ -156,24 +293,28 @@ def main(tests):
             # Start the test cases
             futures = {}
             for test in tests:
-                for argument in test.options + ["-v"]:
-                    if argument == "-rjittyc":
+                for argument in test.options:
+                    if "-rjittyc" in argument:
                         continue
 
-                    if isinstance(test.input, str):
-                        arg_input = test.input
-                    else:
-                        arg_input = lps_file
+                    # Replace placeholders by actual filenames
+                    arguments = argument + " " + test.file_input
+                    arguments = arguments.replace("[mcrl2file]", mcrl2_file)
+                    arguments = arguments.replace("[lpsfile]", lps_file)
+                    arguments = arguments.replace("[ltsfile]", lts_file)
+                    arguments = arguments.replace("[trueinv]", true_file)
+                    arguments = arguments.replace("[falseinv]", false_file)
+                    arguments = arguments.replace("[rename]", rename_file)
+                    arguments = arguments.replace("[mcffile]", mcf_file)
+                    arguments = arguments.replace("[pbesfile]", pbes_file)
 
                     toolpath = os.path.join(args.toolpath, test.toolname)
                     if True:
-                        print(f"Executing {test.toolname} {argument} {arg_input}")
+                        print(f"Executing {test.toolname} {arguments}")
                         futures[
-                            executor.submit(
-                                run_test, toolpath, argument.split(" ") + [arg_input]
-                            )
+                            executor.submit(run_test, toolpath, arguments.split(" "))
                         ] = f"{test.toolname} {argument}"
-                    #else:
+                    # else:
                     #    print(f"Skipped tool {test.toolname} since it cannot be found")
 
             # Wait for the results and keep track of failed tests.
