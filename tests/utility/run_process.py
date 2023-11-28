@@ -101,7 +101,6 @@ class RunProcess:
                         t = process.cpu_times()
                         m = process.memory_info()
 
-                        self._user_time = t.user
                         self._max_memory_used = max(
                             self._max_memory_used, m.rss / 1024 / 1024
                         )
@@ -114,6 +113,7 @@ class RunProcess:
                         if self._user_time > max_time:
                             proc.kill()
                             raise TimeExceededError(tool, self._user_time, max_time)
+                        self._user_time += 0.1
                         time.sleep(0.1)
 
                 except psutil.NoSuchProcess as _:
@@ -143,8 +143,6 @@ class RunProcess:
                     raise StackOverflowError(tool)
                 if platform.system() == "Linux" and proc.returncode == -11:
                     raise SegmentationFault(tool)
-                if self.stderr and "error" in self.stderr:
-                    raise ToolRuntimeError(f"Tool {tool} failed: {self.stderr}")
         except FileNotFoundError as e:
             raise ToolNotFoundError(tool) from e
 

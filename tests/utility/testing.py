@@ -64,7 +64,7 @@ class YmlTest(object):
         self.verbose = settings.get("verbose", True)
         self.toolpath = settings.get("toolpath", "")
         self.cleanup_files = settings.get("cleanup_files", False)
-        self.timeout = 1
+        self.timeout = 0
         self.memlimit = 1000
         self.allow_non_zero_return_values = settings.get(
             "allow-non-zero-return-values", False
@@ -292,7 +292,6 @@ class YmlTest(object):
                 if self.verbose:
                     print("Time limit exceeded: " + str(e))
                 self.cleanup()
-                print(f"This???? {tool.executed}")
                 return None
             except StackOverflowError:
                 if self.verbose:
