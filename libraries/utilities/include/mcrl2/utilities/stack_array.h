@@ -35,7 +35,7 @@ public:
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
   /// \brief The given pointer should be able to hold N element of sizeof(T) bytes.
-  stack_array<T>(T* reserved_memory, std::size_t N)
+  stack_array(T* reserved_memory, std::size_t N)
     : m_reserved_memory(reserved_memory),
       m_size(N)
   {
