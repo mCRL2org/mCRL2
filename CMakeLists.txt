@@ -20,6 +20,11 @@ if(POLICY CMP0072)
   cmake_policy(SET CMP0072 NEW)
 endif()
 
+if(POLICY CMP0069)
+  # Actually enforce LTO when it is requested instead of silently ignoring it.
+  cmake_policy(SET CMP0069 NEW)
+endif()
+
 if(POLICY CMP0110)
   # add_test() supports arbitrary characters in test names.
   cmake_policy(SET CMP0110 NEW)
@@ -55,6 +60,7 @@ option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks i
 option(MCRL2_ENABLE_THREADSANITIZER  "Enable additional data race run-time checks implemented by the ThreadSanitizer." OFF)
 option(MCRL2_ENABLE_CODE_COVERAGE    "Enable generation of code coverage statistics." OFF)
 option(MCRL2_ENABLE_STD_CHECKS       "Enable libstdc++ and libc++ specific assertions, e.g. safe iterator checks." OFF)
+option(MCRL2_ENABLE_LTO              "Enable link time optimisation." OFF)
 option(MCRL2_ENABLE_SOUNDNESS_CHECKS "Enable extensive soundness checks." ON)
 option(MCRL2_ENABLE_MSVC_CCACHE      "Enable MSVC specific flags to enable building with ccache" OFF)
 option(MCRL2_ENABLE_JITTYC           "Enable the compiling rewriter (jittyc) functionality," ${UNIX})
@@ -69,6 +75,7 @@ mark_as_advanced(
   MCRL2_ENABLE_STABLE
   MCRL2_ENABLE_JITTYC
   MCRL2_ENABLE_MULTITHREADING
+  MCRL2_ENABLE_LTO
 )
 
 # A list of tools that is being built by the current configuration (populated by build/cmake/MCRL2AddTarget.cmake)

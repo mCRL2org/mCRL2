@@ -40,6 +40,20 @@ if(CMAKE_BUILD_TYPE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo") 
 endif()
 
+# Enable 'thin' link time optimisation when asked
+if(MCRL2_ENABLE_LTO)
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT supported OUTPUT error)
+
+  if(supported)
+      set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE true)
+      set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO true)
+      set(CMAKE_CXX_COMPILE_OPTIONS_IPO ${CMAKE_CXX_COMPILE_OPTIONS_IPO} -flto=auto)
+  else()
+      message(STATUS "IPO / LTO not supported: <${error}>")
+  endif()
+endif()
+
 # Add the definition to disable soundness checks when the configuration is set to OFF.
 if(NOT ${MCRL2_ENABLE_SOUNDNESS_CHECKS})
   add_compile_definitions(MCRL2_NO_SOUNDNESS_CHECKS)
