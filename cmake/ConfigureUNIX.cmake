@@ -29,6 +29,11 @@ mcrl2_add_c_flag(-fno-strict-overflow)
 mcrl2_add_c_flag(-pipe)
 mcrl2_add_c_debug_flag(-W)
 
+if(MCRL2_ENABLE_LINKER_LLD)
+  mcrl2_add_c_flag(-fuse-ld=lld)
+endif()
+mcrl2_add_c_flag(-ftls-model=initial-exec)
+
 if(MCRL2_IS_CLANG)
   # Ignore specific warnings produced in Sylvan.
   mcrl2_add_c_flag(-Wno-c99-extensions)
@@ -74,8 +79,20 @@ mcrl2_add_cxx_debug_flag(-Wno-system-headers)
 mcrl2_add_cxx_debug_flag(-Woverloaded-virtual)
 mcrl2_add_cxx_debug_flag(-Wwrite-strings)
 
+# Change to lld as default linker.
+if(MCRL2_ENABLE_LLD)
+  mcrl2_add_cxx_flag(-fuse-ld=lld)
+endif()
+
+# Make inline functions hidden by default, allowing them to not be exported
+mcrl2_add_cxx_flag(-fvisibility-inlines-hidden)
+
+# Change the thread local storage model to 'initial-exec', which applies additional
+# optimisations which assume that the shared library will never be dynamically loaded.
+mcrl2_add_cxx_flag(-ftls-model=initial-exec)
+
 # This prevents warnings in the dnj bisimulation algorithm.
-mcrl2_add_cxx_debug_flag(-Wno-switch)
+mcrl2_add_cxx_flag(-Wno-switch)
 
 # Ignore specific warnings produced in Sylvan in clang.
 mcrl2_add_cxx_flag(-Wno-c99-extensions)

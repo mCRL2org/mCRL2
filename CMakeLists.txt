@@ -65,6 +65,7 @@ option(MCRL2_ENABLE_SOUNDNESS_CHECKS "Enable extensive soundness checks." ON)
 option(MCRL2_ENABLE_MSVC_CCACHE      "Enable MSVC specific flags to enable building with ccache" OFF)
 option(MCRL2_ENABLE_JITTYC           "Enable the compiling rewriter (jittyc) functionality," ${UNIX})
 option(MCRL2_ENABLE_MULTITHREADING   "Enable the usage of multiple threads. Disabling removes usage of synchronisation primitives" ON)
+option(MCRL2_ENABLE_LINKER_LLD       "Enable LLVM lld as linker, which offers significantly linking speedup" OFF)
 
 mark_as_advanced(
   MCRL2_ENABLE_ADDRESSSANITIZER
@@ -76,6 +77,7 @@ mark_as_advanced(
   MCRL2_ENABLE_JITTYC
   MCRL2_ENABLE_MULTITHREADING
   MCRL2_ENABLE_LTO
+  MCRL2_ENABLE_LINKER_LLD
 )
 
 # A list of tools that is being built by the current configuration (populated by build/cmake/MCRL2AddTarget.cmake)

@@ -392,7 +392,7 @@ struct is_not_zero
   bool operator()(const data_expression& x) const
   {
     assert(x.sort()==sort_real::real_());
-    return x!=probabilistic_data_expression::zero();
+    return x!=static_cast<const data_expression&>(probabilistic_data_expression::zero());
   }
 };
 
