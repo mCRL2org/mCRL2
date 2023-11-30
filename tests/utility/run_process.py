@@ -8,7 +8,7 @@ import time
 import psutil
 import subprocess
 import platform
-import threading
+import concurrent.futures
 
 class TimeExceededError(Exception):
     def __init__(self, name: str, value: float, max_time: float):
@@ -125,17 +125,19 @@ class RunProcess:
                         # The tool finished before we could acquire the pid
                         None
 
-                output_thread = threading.Thread(target=enforce_limits, args=(proc, ))
-                output_thread.start()
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(enforce_limits, proc)
                                  
-                try:
-                    stdout, stderr = proc.communicate()
-                    self.stdout = stdout.decode("utf-8")
-                    self.stderr = stderr.decode("utf-8")
-                    self.returncode = proc.returncode
-                except Exception as _:
-                    self.stdout = "Unreadable mess"
-                    self.stderr = "Unreadable mess"
+                    try:
+                        stdout, stderr = proc.communicate()
+                        self.stdout = stdout.decode("utf-8")
+                        self.stderr = stderr.decode("utf-8")
+                        self.returncode = proc.returncode
+                    except Exception as _:
+                        self.stdout = "Unreadable mess"
+                        self.stderr = "Unreadable mess"
+
+                    future.result()
 
                 if proc.returncode != 0:
                     print(self.stderr)
