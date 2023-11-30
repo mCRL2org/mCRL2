@@ -8,7 +8,7 @@ import time
 import psutil
 import subprocess
 import platform
-
+import threading
 
 class TimeExceededError(Exception):
     def __init__(self, name: str, value: float, max_time: float):
@@ -63,6 +63,10 @@ class ToolRuntimeError(Exception):
 
 
 class RunProcess:
+    stdout = ""
+    stderr = ""
+    returncode = -1
+
     def __init__(
         self, tool: str, arguments: list[str], max_memory: float, max_time: float
     ):
@@ -95,39 +99,43 @@ class RunProcess:
                 self._user_time = 0
                 self._max_memory_used = 0
 
-                try:
-                    process = psutil.Process(proc.pid)
-                    while proc.returncode is None:
-                        m = process.memory_info()
+                # Start a thread to limit the process memory and time usage.
+                def enforce_limits(proc): 
+                    try:
+                        process = psutil.Process(proc.pid)
+                        while proc.returncode is None:
+                            m = process.memory_info()
 
-                        self._max_memory_used = max(
-                            self._max_memory_used, m.rss / 1024 / 1024
-                        )
-
-                        if self._max_memory_used > max_memory:
-                            proc.kill()
-                            raise MemoryExceededError(
-                                tool, self._max_memory_used, max_memory
+                            self._max_memory_used = max(
+                                self._max_memory_used, m.rss / 1024 / 1024
                             )
-                        if self._user_time > max_time:
-                            proc.kill()
-                            raise TimeExceededError(tool, self._user_time, max_time)
-                        self._user_time += 0.1
-                        time.sleep(0.1)
 
-                except psutil.NoSuchProcess as _:
-                    # The tool finished before we could acquire the pid
-                    None
+                            if self._max_memory_used > max_memory:
+                                proc.kill()
+                                raise MemoryExceededError(
+                                    tool, self._max_memory_used, max_memory
+                                )
+                            if self._user_time > max_time:
+                                proc.kill()
+                                raise TimeExceededError(tool, self._user_time, max_time)
+                            self._user_time += 0.1
+                            time.sleep(0.1)
 
+                    except psutil.NoSuchProcess as _:
+                        # The tool finished before we could acquire the pid
+                        None
+
+                output_thread = threading.Thread(target=enforce_limits, args=(proc, ))
+                output_thread.start()
+                                 
                 try:
                     stdout, stderr = proc.communicate()
                     self.stdout = stdout.decode("utf-8")
                     self.stderr = stderr.decode("utf-8")
+                    self.returncode = proc.returncode
                 except Exception as _:
                     self.stdout = "Unreadable mess"
                     self.stderr = "Unreadable mess"
-
-                self.returncode = proc.returncode
 
                 if proc.returncode != 0:
                     print(self.stderr)

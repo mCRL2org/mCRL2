@@ -57,6 +57,8 @@ available_tests = [
             "-z",
         ],
     ),
+    ToolTest("lpsinfo", "[lpsfile]", ["-v"]),
+    ToolTest("lpspp", "[lpsfile]", ["-fdefault", "-finternal"]),
     ToolTest(
         "lps2lts",
         "[lpsfile]",
@@ -80,9 +82,7 @@ available_tests = [
         ["-c", "-f", "-s", "-t", "-rjitty", "-rjittyp", "-rjittyc"],
     ),
     ToolTest("lpsrewr", "[lpsfile]", ["-rjitty", "-rjittyp", "-rjittyc"]),
-    ToolTest("lpsinfo", "[lpsfile]", []),
-    ToolTest("lpspp", "[lpsfile]", []),
-    ToolTest("lpsparelm", "[lpsfile]", []),
+    ToolTest("lpsparelm", "[lpsfile]", ["-v"]),
     ToolTest("lpssumelm", "[lpsfile]", ["-c"]),
     ToolTest(
         "lpsactionrename",
@@ -94,8 +94,7 @@ available_tests = [
             )
         ),
     ),
-    ToolTest("lpsuntime", "[lpsfile]", ["-i", "-e"]),
-    # TODO: detect "-zcvc"
+    ToolTest("lpsuntime", "[lpsfile]", ["-v", "-i", "-e"]),
     ToolTest(
         "lpsinvelm",
         "[lpsfile]",
@@ -111,35 +110,10 @@ available_tests = [
                     "-rjitty",
                     "-t10",
                     "-rjittyc",
+                    "-zcvc",
                 ],
             )
         ),
-    ),
-    ToolTest(
-        "lpsconfcheck",
-        "[lpsfile]",
-        ["-rjitty", "-rjittyc"],
-    ),
-    ToolTest(
-        "lpsbinary",
-        "[lpsfile]",
-        ["-rjitty", "-rjittyp", "-rjittyc"],
-    ),
-    ToolTest(
-        "lpsparunfold",
-        "[lpsfile]",
-        list(
-            map(
-                lambda x: "-sNat " + x,
-                ["-a", "-p", "-n10", "-rjitty", "-rjittyp", "-rjittyc"],
-            )
-        )
-        + ["-i0"],
-    ),
-    ToolTest(
-        "lpssuminst",
-        "[lpsfile]",
-        list(map(lambda x: "--finite " + x, ["-rjitty", "-rjittyp", "-rjittyc"])),
     ),
     ToolTest(
         "lpsconfcheck",
@@ -161,6 +135,27 @@ available_tests = [
         ],
     ),
     ToolTest(
+        "lpsbinary",
+        "[lpsfile]",
+        ["-v", "-rjitty", "-rjittyp", "-rjittyc"],
+    ),
+    ToolTest(
+        "lpsparunfold",
+        "[lpsfile]",
+        list(
+            map(
+                lambda x: "-sNat " + x,
+                ["-a", "-p", "-n10", "-rjitty", "-rjittyp", "-rjittyc"],
+            )
+        )
+        + ["-i0"],
+    ),
+    ToolTest(
+        "lpssuminst",
+        "[lpsfile]",
+        list(map(lambda x: "--finite " + x, ["-rjitty", "-rjittyp", "-rjittyc"])),
+    ),
+    ToolTest(
         "ltsinfo",
         "[ltsfile]",
         ["-v"],
@@ -170,7 +165,6 @@ available_tests = [
         "[ltsfile]",
         ["-m [mcrl2file]"],
     ),
-    # TODO: Add action hiding --tau
     ToolTest(
         "ltsconvert",
         "[ltsfile]",
@@ -188,6 +182,7 @@ available_tests = [
                     "-eweak-trace",
                     "-n",
                     "--no-reach",
+                    "--tau=[actions]",
                 ],
             )
         ),
@@ -203,19 +198,136 @@ available_tests = [
             "-c -eweak-trace",
             "-psim",
             "-pweak-trace",
+            "-ebisim --tau=[actions]",
         ],
     ),
     ToolTest("lps2pbes", "[lpsfile]", ["-f[mcffile]", "-t -f[mcffile]"]),
     ToolTest("lts2pbes", "[ltsfile]", ["-f[mcffile]"]),
-    ToolTest("pbes2bool", "[pbesfile]", ["-v", "-f"]),
+    ToolTest("pbes2bool", "[pbesfile]", ["-v"]),
     ToolTest("pbespp", "[pbesfile]", ["-finternal", "-fdefault"]),
-    ToolTest("pbesconstelm", "[pbesfile]", [ "-c", "-e", "-psimplify", "-pquantifier-all", "-pquantifier-finite", "-ppfnf", "-rjitty", "-rjittyp", "-rjittyc"]),
+    ToolTest(
+        "pbesconstelm",
+        "[pbesfile]",
+        [
+            "-c",
+            "-e",
+            "-psimplify",
+            "-pquantifier-all",
+            "-pquantifier-finite",
+            "-ppfnf",
+            "-rjitty",
+            "-rjittyp",
+            "-rjittyc",
+        ],
+    ),
     ToolTest("pbesparelm", "[pbesfile]", ["-v"]),
-    ToolTest("pbesrewr", "[pbesfile]", ["-psimplify", "-pquantifier-all", "-pquantifier-finite", "-ppfnf", "-rjitty", "-rjittyp", "-rjittyc"]),
-    ToolTest("txt2lps", "[lpstxtfile]", ["-v"]),
-    ToolTest("txt2lps", "[pbestxtfile]", ["-v"]),
-    ToolTest("pbes2bes", "[pbesfile]", [ "-opbes", "-otext", "-obes", "-opgsolver", "-rjitty", "-rjittyp", "-rjittyc", "-s0", "-s1", "-s2", "-s3", "-u", "-zb", "-zd", "--erase=none", "--erase=some", "--erase=all"]),
+    ToolTest(
+        "pbesrewr",
+        "[pbesfile]",
+        [
+            "-psimplify",
+            "-pquantifier-all",
+            "-pquantifier-finite",
+            "-ppfnf",
+            "-rjitty",
+            "-rjittyp",
+            "-rjittyc",
+        ],
+    ),
+    ToolTest("txt2lps", "[txtlpsfile]", ["-v"]),
+    ToolTest(
+        "pbes2bes",
+        "[pbesfile]",
+        [
+            "-opbes",
+            "-otext",
+            "-obes",
+            "-opgsolver",
+            "-rjitty",
+            "-rjittyp",
+            "-rjittyc",
+            "-s0",
+            "-s1",
+            "-s2",
+            "-s3",
+            "-u",
+            "-zb",
+            "-zd",
+            "--erase=none",
+            "--erase=some",
+            "--erase=all",
+        ],
+    ),
+    ToolTest("pbesinfo", "[pbesfile]", ["-v", "-f"]),
     ToolTest("besinfo", "[pbesfile]", ["-v", "-f"]),
+    ToolTest("bespp", "[pbesfile]", ["-fdefault"]),
+    # TODO: "-sspm" causes a segfault.
+    ToolTest("bessolve", "[pbesfile]", ["-sgauss"]),
+    ToolTest("besconvert", "[pbesfile]", ["-ebisim", "-estuttering"]),
+    ToolTest(
+        "pbesinst",
+        "[pbesfile]",
+        [
+            "-v",
+            "-opbes",
+            "-obes",
+            "-otext",
+            "-opgsolver",
+            "-slazy",
+            '-sfinite -f"*(*:Bool)"',
+            "-rjitty",
+            "-rjittyp",
+            "-rjittyc",
+        ],
+    ),
+    ToolTest(
+        "pbespareqelm",
+        "[pbesfile]",
+        [
+            "-v",
+            "-I",
+            "-psimplify",
+            "-pquantifier-all",
+            "-pquantifier-finite",
+            "-ppfnf",
+            "-rjitty",
+            "-rjittyp",
+            "-rjittyc",
+        ],
+    ),
+    ToolTest(
+        "pbespgsolve",
+        "[pbesfile]",
+        [
+            "-v",
+            "-c",
+            "-C",
+            "-L",
+            "-e",
+            "-sspm",
+            "-saltspm",
+            "-srecursive",
+            "-rjitty",
+            "-rjittyp",
+            "-rjittyc",
+        ],
+    ),
+    # TODO: This test takes too much time
+    # ToolTest(
+    #     "lpsbisim2pbes",
+    #     "[lpsfile]",
+    #     [
+    #         "-bstrong-bisim",
+    #         "-bweak-bisim",
+    #         "-bbranching-bisim",
+    #         "-bbranching-sim",
+    #         "-bstrong-bisim -n",
+    #     ],
+    # ),
+    ToolTest("txt2bes", "[txtpbesfile]", ["-v"]),
+    ToolTest(
+        "lpsrealelm", "[lpsfile]", ["-v", "--max=10", "-rjitty", "-rjittyp", "-rjittyc"]
+    ),
 ]
 
 
@@ -244,6 +356,10 @@ def main(tests):
     cmdline_parser.add_argument(
         "-m", "--max_workers", action="store", default=1, type=int
     )
+    cmdline_parser.add_argument("-jittyc", help="Enables tests using the -rjittyc flag")
+    cmdline_parser.add_argument(
+        "-cvc3", help="Enables tests using the -zcvc flag, requires CVC3"
+    )
 
     args = cmdline_parser.parse_args()
 
@@ -258,6 +374,10 @@ def main(tests):
     name, _ = os.path.splitext(os.path.basename(mcrl2_file))
     lps_file = os.path.join(output, f"{name}.lps")
     lts_file = os.path.join(output, f"{name}.lts")
+
+    # Generate textual versions from the lps and pbes
+    txtlps_file = os.path.join(output, f"{name}.txtlps")
+    txtpbes_file = os.path.join(output, f"{name}.txtpbes")
 
     # Create input files for lpsconfcheck and lpsinvelm
     true_file = os.path.join(output, "true.inv")
@@ -285,6 +405,8 @@ def main(tests):
     run_test(
         os.path.join(args.toolpath, "lps2pbes"), [lps_file, "-f", mcf_file, pbes_file]
     )
+    run_test(os.path.join(args.toolpath, "lpspp"), [lps_file, txtlps_file])
+    run_test(os.path.join(args.toolpath, "pbespp"), [pbes_file, txtpbes_file])
 
     try:
         with concurrent.futures.ThreadPoolExecutor(
@@ -294,7 +416,9 @@ def main(tests):
             futures = {}
             for test in tests:
                 for argument in test.options:
-                    if "-rjittyc" in argument:
+                    if not args.jittyc and "-rjittyc" in argument:
+                        continue
+                    if not args.cvc3 and "-zcvc" in argument:
                         continue
 
                     # Replace placeholders by actual filenames
@@ -307,15 +431,20 @@ def main(tests):
                     arguments = arguments.replace("[rename]", rename_file)
                     arguments = arguments.replace("[mcffile]", mcf_file)
                     arguments = arguments.replace("[pbesfile]", pbes_file)
+                    arguments = arguments.replace("[txtlpsfile]", txtlps_file)
+                    arguments = arguments.replace("[txtpbesfile]", txtpbes_file)
+                    arguments = arguments.replace("[actions]", "r1")
 
                     toolpath = os.path.join(args.toolpath, test.toolname)
-                    if True:
+                    if os.path.exists(toolpath) or os.path.exists(toolpath + ".exe"):
                         print(f"Executing {test.toolname} {arguments}")
                         futures[
                             executor.submit(run_test, toolpath, arguments.split(" "))
-                        ] = f"{test.toolname} {argument}"
-                    # else:
-                    #    print(f"Skipped tool {test.toolname} since it cannot be found")
+                        ] = f"{test.toolname} {arguments}"
+                    else:
+                        print(
+                            f"Skipped {test.toolname} since it cannot be found as {toolpath}"
+                        )
 
             # Wait for the results and keep track of failed tests.
             failed = []
