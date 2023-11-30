@@ -284,21 +284,18 @@ class YmlTest(object):
                         f"The execution of tool {tool.name} ended with return code {returncode}"
                     )
             except MemoryExceededError as e:
-                if self.verbose:
-                    print("Memory limit exceeded: " + str(e))
+                print("Memory limit exceeded: " + str(e))
                 self.cleanup()
                 return None
             except TimeExceededError as e:
-                if self.verbose:
-                    print("Time limit exceeded: " + str(e))
+                print("Time limit exceeded: " + str(e))
                 self.cleanup()
                 return None
             except StackOverflowError:
-                if self.verbose:
-                    print(
-                        "Stack overflow detected during execution of the tool "
-                        + tool.name
-                    )
+                print(
+                    "Stack overflow detected during execution of the tool "
+                    + tool.name
+                )
                 self.cleanup()
                 return None
             except (ToolRuntimeError, SegmentationFault) as e:
