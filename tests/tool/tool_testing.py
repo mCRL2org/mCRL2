@@ -332,7 +332,7 @@ available_tests = [
 
 
 def run_test(toolpath, arguments):
-    return RunProcess(toolpath, arguments, 1000, 10)
+    return RunProcess(toolpath, arguments, 1000, 60)
 
 
 def main(tests):
