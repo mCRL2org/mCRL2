@@ -42,11 +42,9 @@ endforeach()
 #
 # Add a ctest test for the tooltests
 #
-if(MCRL2_ENABLE_TOOL_TESTS)
-  add_test(NAME tooltests
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
-    COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tool/tool_testing.py
-      --toolpath ${MCRL2_TOOL_PATH}
-      -m8
-  )
-endif()
+add_test(NAME tooltests
+  COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tool/tool_testing.py
+    --toolpath ${MCRL2_TOOL_PATH}
+    -m8
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
+)

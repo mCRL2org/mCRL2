@@ -87,6 +87,8 @@ inline std::string description(const symbolic_lts_equivalence eq)
       return "identity equivalence to concrete LTS";
     case symbolic_lts_equivalence::bisim:
       return "naive symbolic strong bisimilarity algorithm requiring O(n^2) symbolic operations.";
+    default:
+      std::abort();
   }
 }
 
