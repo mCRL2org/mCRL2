@@ -863,7 +863,6 @@ void remove_probabilities(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, P
   for(transition& t: lts_out.get_transitions())
   {
     std::size_t probabilistic_target_state_number=t.to();
-    assert(lts_in.probabilistic_state(probabilistic_target_state_number).size()!=0);
     if (lts_in.probabilistic_state(probabilistic_target_state_number).size()>1)
     {
       throw mcrl2::runtime_error("Transition " + std::to_string(transition_number) + " is probabilistic.");
