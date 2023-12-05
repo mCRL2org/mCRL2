@@ -1,0 +1,124 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+sort Xint = struct
+  d0
+| s (Xint)
+| p (Xint) ;
+
+sort Bank = struct
+  west
+| east ;
+
+sort Text = struct
+  missionary_rows_east
+| two_missionaries_row_east
+| missionary_and_cannibal_row_east
+| cannibal_rows_east
+| two_cannibals_row_east
+| missionary_rows_west
+| two_missionaries_row_west
+| missionary_and_cannibal_row_west
+| cannibal_rows_west
+| two_cannibals_row_west ;
+
+sort Position = struct
+  Xpos (Bank, Xint, Xint, Xint, Xint) ;
+
+sort Move = struct
+  mov (Text, Xint, Xint, Xint, Xint, Bank) ;
+
+sort MoveList = struct
+  nil_ml
+| cm (Move, MoveList) ;
+
+sort PosList = struct
+  nil_pl
+| cp (Position, PosList) ;
+
+sort TextList = struct
+  nil_tl
+| fail
+| ct (Text, TextList) ;
+
+map
+  d1 : Xint ;
+  d2 : Xint ;
+  d3 : Xint ;
+  m1 : Xint ;
+  m2 : Xint ;
+  and : Xbool # Xbool -> Xbool ;
+  or : Xbool # Xbool -> Xbool ;
+  plus : Xint # Xint -> Xint ;
+  gte : Xint # Xint -> Xbool ;
+  equal : Xint # Xint -> Xbool ;
+  moves : MoveList ;
+  member : Position # PosList -> Xbool ;
+  gte_tl : TextList # TextList -> Xbool ;
+  solve : Position # Position # PosList -> TextList ;
+  try : MoveList # Position # Position # PosList -> TextList ;
+  apply : Move # Position # Position # PosList -> TextList ;
+  check : Text # Position # Position # PosList -> TextList ;
+  valid : Position -> Xbool ;
+  evalct : Text # TextList -> TextList ;
+  best : TextList # TextList -> TextList ;
+var
+  NP, Posi, Final : Position ;
+  Prev : PosList ;
+  T, T2 : Text ;
+  TL, TL2 : TextList ;
+  B, D : Bank ;
+  X, Y, DMW, DCW, DME, DCE, MW, CW, ME, CE : Xint ;
+  M : Move ;
+  ML : MoveList ;
+  L : Xbool ;
+eqn
+  and (L, Xtrue) = L ;
+  and (L, Xfalse) = Xfalse ;
+  or (L, Xtrue) = Xtrue ;
+  or (L, Xfalse) = L ;
+  plus (X, d0) = X ;
+  plus (d0, Y) = Y ;
+  plus (s (X), s (Y)) = s (s (plus (X, Y))) ;
+  plus (p (X), p (Y)) = p (p (plus (X, Y))) ;
+  plus (s (X), p (Y)) = plus (X, Y) ;
+  plus (p (X), s (Y)) = plus (X, Y) ;
+  gte (d0, d0) = Xtrue ;
+  gte (d0, s (Y)) = Xfalse ;
+  gte (d0, p (Y)) = Xtrue ;
+  gte (s (X), d0) = Xtrue ;
+  gte (s (X), s (Y)) = gte (X, Y) ;
+  gte (s (X), p (Y)) = Xtrue ;
+  gte (p (X), d0) = Xfalse ;
+  gte (p (X), s (Y)) = Xfalse ;
+  gte (p (X), p (Y)) = gte (X, Y) ;
+  equal (X, Y) = and (gte (X, Y), gte (Y, X)) ;
+  d1 = s (d0) ;
+  d2 = s (s (d0)) ;
+  d3 = s (s (s (d0))) ;
+  m1 = p (d0) ;
+  m2 = p (p (d0)) ;
+  moves = cm (mov (missionary_rows_east, m1, d0, d1, d0, east),cm (mov (two_missionaries_row_east, m2, d0, d2, d0, east),cm (mov (missionary_and_cannibal_row_east, m1, m1, d1, d1, east),cm (mov (cannibal_rows_east, d0, m1, d0, d1, east),cm (mov (two_cannibals_row_east, d0, m2, d0, d2, east),cm (mov (missionary_rows_west, d1, d0, m1, d0, west),cm (mov (two_missionaries_row_west, d2, d0, m2, d0, west),cm (mov (missionary_and_cannibal_row_west, d1, d1, m1, m1, west),cm (mov (cannibal_rows_west, d0, d1, d0, m1, west),cm (mov (two_cannibals_row_west, d0, d2, d0, m2, west), nil_ml)))))))))) ;
+  member (NP, nil_pl) = Xfalse ;
+  NP == Posi -> member (NP, cp (Posi, Prev)) = Xtrue ;
+  NP != Posi -> member (NP, cp (Posi, Prev)) = member (NP, Prev) ;
+  evalct (T, fail) = fail ;
+  TL != fail -> evalct (T, TL) = ct (T,TL) ;
+  gte_tl (TL, nil_tl) = Xtrue ;
+  gte_tl (nil_tl, ct (T, TL)) = Xfalse ;
+  gte_tl (ct (T, TL), ct (T2, TL2)) = gte_tl (TL, TL2) ;
+  best (fail, TL) = TL ;
+  best (TL, fail) = TL ;
+  gte_tl (TL, TL2) == Xtrue && TL != fail && TL2 != fail -> best (TL, TL2) = TL2 ;
+  gte_tl (TL, TL2) == Xfalse && TL != fail && TL2 != fail -> best (TL, TL2) = TL ;
+  Posi == Final -> solve (Posi, Final, Prev) = nil_tl ;
+  Posi != Final -> solve (Posi, Final, Prev) = try (moves, Posi, Final, Prev) ;
+  try (nil_ml, Posi, Final, Prev) = fail ;
+  try (cm (M, ML), Posi, Final, Prev) = best (apply (M, Posi, Final, Prev), try (ML, Posi, Final, Prev)) ;
+  D != B -> apply (mov (T, DMW, DCW, DME, DCE, D), Xpos (B, MW, CW, ME, CE), Final, Prev) = check (T, Xpos (D, plus (MW, DMW), plus (CW, DCW), plus (ME, DME), plus (CE, DCE)), Final, Prev) ;
+  D == B -> apply (mov (T, DMW, DCW, DME, DCE, D), Xpos (B, MW, CW, ME, CE), Final, Prev) = fail ;
+  member (NP, Prev) == Xfalse && valid (NP) == Xtrue -> check (T, NP, Final, Prev) = evalct (T, solve (NP, Final, cp (NP, Prev))) ;
+  member (NP, Prev) == Xtrue -> check (T, NP, Final, Prev) = fail ;
+  valid (NP) == Xfalse -> check (T, NP, Final, Prev) = fail ;
+  valid (Xpos (B, MW, CW, ME, CE)) = and (gte (MW, d0), and (gte (CW, d0), and (gte (ME, d0), and (gte (CE, d0), and (or (equal (MW, d0), gte (MW, CW)), or (equal (ME, d0), gte (ME, CE))))))) ;

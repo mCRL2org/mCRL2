@@ -1,0 +1,38 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+sort Xint = struct
+  Xpos (Xnat)
+| Neg (Xnat) ;
+
+map
+  gte : Xnat # Xnat -> Xbool ;
+  gte_Int : Xint # Xint -> Xbool ;
+  Xpred : Xint -> Xint ;
+  Xsucc : Xint -> Xint ;
+  tak : Xint # Xint # Xint -> Xint ;
+var
+  X, Y, Z : Xnat ;
+  I, J, K : Xint ;
+eqn
+  gte (d0, d0) = Xtrue ;
+  gte (s (X), d0) = Xtrue ;
+  gte (d0, s (X)) = Xfalse ;
+  gte (s (X), s (Y)) = gte (X, Y) ;
+  gte_Int (Xpos (X), Xpos (Y)) = gte (X,Y) ;
+  gte_Int (Neg (X), Neg (Y)) = gte (Y,X) ;
+  gte_Int (Xpos (X), Neg (Y)) = Xtrue ;
+  gte_Int (Neg (X), Xpos (Y)) = Xfalse ;
+  Xpred (Xpos (d0)) = Neg (d0) ;
+  Xpred (Xpos (s (X))) = Xpos (X) ;
+  Xpred (Neg (X)) = Neg (s (X)) ;
+  Xsucc (Neg (d0)) = Xpos (d0) ;
+  Xsucc (Neg (s (X))) = Neg (X) ;
+  Xsucc (Xpos (X)) = Xpos (s (X)) ;
+  gte_Int (J, I) == Xtrue -> tak (I, J, K) = K ;
+  gte_Int (J, I) == Xfalse -> tak (I, J, K) = tak (tak (Xpred (I), J, K), tak (Xpred (J), K, I), tak (Xpred (K), I, J)) ;

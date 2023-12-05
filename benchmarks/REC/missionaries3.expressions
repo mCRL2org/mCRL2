@@ -1,0 +1,1 @@
+solve (Xpos (west, d3, d3, d0, d0), Xpos (east, d0, d0, d3, d3), nil_pl)

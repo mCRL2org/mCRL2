@@ -1,0 +1,1 @@
+rev (gen (times (d10, times (d10, d10))))

@@ -10,12 +10,8 @@ function(add_tool_benchmark NAME TOOL INPUT OUTPUT)
   set(TARGET "benchmark_target_${TOOL}_${NAME}")
   set(TEST "benchmark_${TOOL}_${NAME}")
 
-  add_custom_target(${TARGET}
-    COMMAND ${BENCHMARK_SCRIPT} $<TARGET_FILE:${TOOL}> ${ARGN} ${INPUT} ${OUTPUT}
-  )
-
   add_test(NAME ${TEST} 
-    COMMAND ${CMAKE_COMMAND} "--build" ${CMAKE_BINARY_DIR} "--target" "${TARGET}")
+    COMMAND ${BENCHMARK_SCRIPT} $<TARGET_FILE:${TOOL}> ${ARGN} ${INPUT} ${OUTPUT})
   set_property(TEST ${TEST} PROPERTY LABELS "benchmark_tool")
 endfunction()
 
@@ -70,14 +66,15 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
   add_tool_benchmark("${NAME}" lps2lts "${LPS_FILENAME}" "")
   add_tool_benchmark("${NAME}_parallel" lps2lts "${LPS_FILENAME}" "" "--threads=4")
 
-  if(NOT WIN32)
+  if(MCRL2_ENABLE_JITTY)
     add_tool_benchmark("${NAME}_jittyc" lps2lts "${LPS_FILENAME}" "" "-rjittyc")
     add_tool_benchmark("${NAME}_jittyc_parallel" lps2lts "${LPS_FILENAME}" "" "-rjittyc" "--threads=4")
   endif()
 
   # Benchmark statespace reduction techniques, the first target generates the statespaces.
   if(NOT WIN32)
-    add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}" "-rjittyc")
+    #add_tool_benchmark("${NAME}_exploration_jittyc" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}" "-rjittyc")
+    add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}")
   else()
     add_tool_benchmark("${NAME}_exploration" lps2lts "${LPS_FILENAME}" "${LTS_FILENAME}")
   endif()
@@ -100,13 +97,16 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
 
   # Benchmark solving PBES
   add_tool_benchmark("${NAME}" pbes2bool "${NODEADLOCK_PBES_FILENAME}" "")
-  add_tool_benchmark("${NAME}_jittyc" pbes2bool "${NODEADLOCK_PBES_FILENAME}" "" "-rjittyc")
   add_tool_benchmark("${NAME}_parallel" pbes2bool "${NODEADLOCK_PBES_FILENAME}" "" "--threads=4")
-  add_tool_benchmark("${NAME}_jittyc_parallel" pbes2bool "${NODEADLOCK_PBES_FILENAME}" "" "-rjittyc" "--threads=4")
+  
+  if(MCRL2_ENABLE_JITTY)
+    add_tool_benchmark("${NAME}_jittyc" pbes2bool "${NODEADLOCK_PBES_FILENAME}" "" "-rjittyc")
+    add_tool_benchmark("${NAME}_jittyc_parallel" pbes2bool "${NODEADLOCK_PBES_FILENAME}" "" "-rjittyc" "--threads=4")
+  endif()
 
 endforeach()
 
-# Only add the symbolic benchmarks when the tools are part of the build, i.e., developer tools enabled and Sylvan can be compiled.
+# Only add the symbolic benchmarks when the tools are part of the build, i.e., experimental tools enabled and Sylvan can be compiled.
 if (MCRL2_ENABLE_EXPERIMENTAL AND MCRL2_ENABLE_SYLVAN)
 
   add_dependencies(benchmarks lpsreach pbessolvesymbolic)
@@ -120,10 +120,33 @@ if (MCRL2_ENABLE_EXPERIMENTAL AND MCRL2_ENABLE_SYLVAN)
     set(NODEADLOCK_PBES_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.nodeadlock.pbes")
 
     # Benchmark symbolic statespace generation.
-    add_tool_benchmark("${NAME}_jittyc" lpsreach "${LPS_FILENAME}" "" "-rjittyc")
+    add_tool_benchmark("${NAME}" lpsreach "${LPS_FILENAME}" "")
 
     # Benchmark solving PBES symbolically.
-    add_tool_benchmark("${NAME}_jittyc" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-Q0" "-rjittyc")
+    add_tool_benchmark("${NAME}" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-Q0")
 
+    if(MCRL2_ENABLE_JITTY)
+      add_tool_benchmark("${NAME}_jittyc" lpsreach "${LPS_FILENAME}" "" "-rjittyc")
+      add_tool_benchmark("${NAME}_jittyc" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-Q0" "-rjittyc")
+    endif()
+  endforeach()
+endif()
+
+if (MCRL2_ENABLE_DEVELOPER)
+  # Find all the benchmark files
+  file(GLOB BENCHMARK_FILES ${CMAKE_CURRENT_SOURCE_DIR}/REC/*.dataspec)
+
+  foreach(benchmark ${BENCHMARK_FILES})
+    get_filename_component(benchmark ${benchmark} NAME)
+    string(REPLACE ".dataspec" "" NAME ${benchmark})
+
+    add_tool_benchmark("${NAME}_jitty" mcrl2rewrite 
+      "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.dataspec" 
+      "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.expressions" 
+      "-rjitty")
+    add_tool_benchmark("${NAME}_jittyc" mcrl2rewrite 
+      "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.dataspec" 
+      "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.expressions" 
+      "-rjittyc")
   endforeach()
 endif()

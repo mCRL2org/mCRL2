@@ -1,0 +1,43 @@
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+sort NatList = struct
+  nil
+| l (Xnat)
+| ll (NatList, NatList) ;
+
+sort NatListList = struct
+  nilP
+| p (NatList)
+| pp (NatListList, NatListList) ;
+
+map
+  perm : Xnat -> NatListList ;
+  insert1 : Xnat # NatListList -> NatListList ;
+  insert0 : Xnat # NatList -> NatListList ;
+  map_cons : Xnat # NatListList -> NatListList ;
+  ppreduce : NatListList # NatListList -> NatListList ;
+  ppflat : NatListList # NatListList -> NatListList ;
+var
+  P1, P2 : NatList ;
+  Ps, Ps1, Ps2, accumulator : NatListList ;
+  N, M : Xnat ;
+eqn
+  perm (d0) = ppreduce (p (nil), nilP) ;
+  perm (s (d0)) = ppreduce (p (ll (l (s (d0)), nil)), nilP) ;
+  perm (s (N)) = insert1 (s (N), perm (N)) ;
+  insert1 (N, pp (p (P1), Ps)) = ppreduce (insert0 (N, P1), insert1 (N, Ps)) ;
+  insert1 (N, p (P1)) = insert0 (N,P1) ;
+  insert1 (N, nilP) = nilP ;
+  insert0 (N, ll (l (M), P2)) = ppreduce (p (ll (l (N), ll (l (M), P2))), map_cons (M, insert0 (N, P2))) ;
+  insert0 (N, nil) = ppreduce (p (ll (l (N), nil)), nilP) ;
+  map_cons (M, pp (p (P1), Ps)) = ppreduce (p (ll (l (M), P1)), map_cons (M, Ps)) ;
+  map_cons (M, p (P1)) = p (ll (l (M), P1)) ;
+  map_cons (M, nilP) = nilP ;
+  ppreduce (nilP, Ps2) = Ps2 ;
+  ppreduce (Ps1, nilP) = Ps1 ;
+  ppreduce (Ps1, Ps2) = ppflat (Ps1, ppflat (Ps2, nilP)) ;
+  ppflat (nilP, accumulator) = accumulator ;
+  ppflat (p (P1), accumulator) = pp (p (P1), accumulator) ;
+  ppflat (pp (Ps1, Ps2), accumulator) = ppflat (Ps1, ppflat (Ps2, accumulator)) ;

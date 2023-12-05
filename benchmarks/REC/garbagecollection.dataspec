@@ -1,0 +1,24 @@
+sort Xnat = struct
+  d0
+| s (Xnat)
+| p
+| n ;
+
+map
+  d1 : Xnat ;
+  f : Xnat # Xnat # Xnat # Xnat # Xnat -> Xnat ;
+  c : Xnat # Xnat -> Xnat ;
+var
+  T, U, X, Y, Z : Xnat ;
+eqn
+  d1 = s (d0) ;
+  c (d0, Y) = Y ;
+  c (s (X), Y) = s (c (X,Y)) ;
+  f (X, Y, s (Z), T, U) = f (X, Y, Z, c (T, T), U) ;
+  f (X, s (Y), d0, T, U) = f (X, Y, p, T, T) ;
+  f (s (X), d0, d0, T, U) = f (X, n, p, d1, d0) ;
+  f (d0, d0, d0, T, U) = T ;
+  f (X, s (Y), p, T, U) = f (X, Y, p, T, s (U)) ;
+  f (X, d0, p, T, U) = f (X, n, p, s (T), U) ;
+  f (s (X), n, p, T, U) = f (X, n, p, T, U) ;
+  f (d0, n, p, T, U) = U ;

@@ -1,0 +1,1 @@
+bs (XPos2Nat (cDub (T,cDub (T,cDub (F,cDub (T,cDub (F,cDub (T,cDub (T,cDub (F,cDub (T,cDub (F,cDub (T,One)))))))))))),XPos2Nat (cDub (F,cDub (F,cDub (F,cDub (F,cDub (F,cDub (F,One))))))))

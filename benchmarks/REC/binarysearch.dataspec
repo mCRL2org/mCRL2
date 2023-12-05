@@ -1,0 +1,144 @@
+sort Xbool = struct
+  T
+| F ;
+
+sort Xpos = struct
+  One
+| cDub (Xbool, Xpos) ;
+
+sort Xint = struct
+  cInt (Xnat)
+| cNeg (Xpos) ;
+
+sort Xnat = struct
+  Zero
+| cNat (Xpos) ;
+
+map
+  eqBool : Xbool # Xbool -> Xbool ;
+  Xnot : Xbool -> Xbool ;
+  and : Xbool # Xbool -> Xbool ;
+  eqPos : Xpos # Xpos -> Xbool ;
+  lePos : Xpos # Xpos -> Xbool ;
+  ltPos : Xpos # Xpos -> Xbool ;
+  gePos : Xpos # Xpos -> Xbool ;
+  succ2Pos : Xpos -> Xpos ;
+  plusPos : Xpos # Xpos -> Xpos ;
+  addc : Xbool # Xpos # Xpos -> Xpos ;
+  lambda0 : Xnat # Xnat # Xnat # Xnat -> Xnat ;
+  max2Int : Xint # Xnat -> Xnat ;
+  min2 : Xnat -> Xint ;
+  minus : Xnat # Xnat -> Xint ;
+  eq : Xnat # Xnat -> Xbool ;
+  ite : Xbool # Xnat # Xnat -> Xnat ;
+  XPos2Nat : Xpos -> Xnat ;
+  XNat2Pos : Xnat -> Xpos ;
+  le : Xnat # Xnat -> Xbool ;
+  lt : Xnat # Xnat -> Xbool ;
+  ge : Xnat # Xnat -> Xbool ;
+  max2 : Xnat # Xnat -> Xnat ;
+  succ2 : Xnat -> Xpos ;
+  pred2 : Xpos -> Xnat ;
+  dub : Xbool # Xnat -> Xnat ;
+  plusNatPos : Xnat # Xpos -> Xpos ;
+  plus : Xnat # Xnat -> Xnat ;
+  gtesubtp : Xpos # Xpos -> Xnat ;
+  gtesubtn : Xnat # Xnat -> Xnat ;
+  gtesubtb : Xbool # Xpos # Xpos -> Xnat ;
+  dividePos : Xpos # Xpos -> Xnat ;
+  divide : Xnat # Xpos -> Xnat ;
+  f : Xnat -> Xnat ;
+  bs : Xnat # Xnat -> Xnat ;
+  bs2 : Xnat # Xnat # Xnat -> Xnat ;
+var
+  m, n, y, x, h : Xnat ;
+  b, c, d : Xbool ;
+  i, j : Xint ;
+  p, q : Xpos ;
+eqn
+  eqBool (T,b) = b ;
+  eqBool (F,T) = F ;
+  eqBool (F,F) = T ;
+  and (T,b) = b ;
+  and (F,b) = F ;
+  Xnot (T) = F ;
+  Xnot (F) = T ;
+  eqPos (One,One) = T ;
+  eqPos (One,cDub (b,p)) = F ;
+  eqPos (cDub (b,p),One) = F ;
+  eqPos (cDub (b,p),cDub (c,q)) = and (eqBool (b,c), eqPos (p,q)) ;
+  lePos (One,p) = T ;
+  lePos (cDub (b,p),One) = F ;
+  b == c -> lePos (cDub (b,p),cDub (c,q)) = lePos (p,q) ;
+  b != c && b == F -> lePos (cDub (b,p),cDub (c,q)) = lePos (p,q) ;
+  b != c && b == T -> lePos (cDub (b,p),cDub (c,q)) = ltPos (p,q) ;
+  ltPos (p,One) = F ;
+  ltPos (One,cDub (b,p)) = T ;
+  b == c -> ltPos (cDub (b,p),cDub (c,q)) = ltPos (p,q) ;
+  b != c && b == F -> ltPos (cDub (b,p),cDub (c,q)) = lePos (p,q) ;
+  b != c && b == T -> ltPos (cDub (b,p),cDub (c,q)) = ltPos (p,q) ;
+  gePos (p,q) = lePos (q,p) ;
+  succ2Pos (One) = cDub (F,One) ;
+  succ2Pos (cDub (F,p)) = cDub (T,p) ;
+  succ2Pos (cDub (T,p)) = cDub (F,succ2Pos (p)) ;
+  plusPos (p,q) = addc (F,p,q) ;
+  addc (F,One,p) = succ2Pos (p) ;
+  addc (T,One,p) = succ2Pos (succ2Pos (p)) ;
+  addc (F,p,One) = succ2Pos (p) ;
+  addc (T,p,One) = succ2Pos (succ2Pos (p)) ;
+  c == d -> addc (b,cDub (c,p),cDub (d,q)) = cDub (b,addc (c,p,q)) ;
+  c != d -> addc (b,cDub (c,p),cDub (d,q)) = cDub (Xnot (b),addc (b,p,q)) ;
+  lt (f (h),n) == T -> lambda0 (n,y,x,h) = bs2 (n,h,y) ;
+  lt (f (h),n) == F -> lambda0 (n,y,x,h) = bs2 (n,x,h) ;
+  max2Int (cInt (m),n) = max2 (m,n) ;
+  max2Int (cNeg (p),n) = n ;
+  min2 (Zero) = cInt (Zero) ;
+  min2 (cNat (p)) = cNeg (p) ;
+  ge (m,n) == T -> minus (m,n) = cInt (gtesubtn (m,n)) ;
+  lt (m,n) == T -> minus (m,n) = min2 (gtesubtn (n,m)) ;
+  eq (Zero,Zero) = T ;
+  eq (Zero,cNat (p)) = F ;
+  eq (cNat (p),Zero) = F ;
+  eq (cNat (p),cNat (q)) = eqPos (p,q) ;
+  ite (T,m,n) = m ;
+  ite (F,m,n) = n ;
+  XPos2Nat (p) = cNat (p) ;
+  XNat2Pos (cNat (p)) = p ;
+  le (Zero,n) = T ;
+  le (cNat (p),Zero) = F ;
+  le (cNat (p),cNat (q)) = lePos (p,q) ;
+  lt (n,Zero) = F ;
+  lt (Zero,cNat (p)) = T ;
+  lt (cNat (p),cNat (q)) = ltPos (p,q) ;
+  ge (m,n) = le (n,m) ;
+  max2 (m,n) = ite (le (m,n),n,m) ;
+  succ2 (Zero) = One ;
+  succ2 (cNat (p)) = succ2Pos (p) ;
+  pred2 (One) = Zero ;
+  pred2 (cDub (T,p)) = cNat (cDub (F,p)) ;
+  pred2 (cDub (F,p)) = dub (T,pred2 (p)) ;
+  dub (F,Zero) = Zero ;
+  dub (T,Zero) = cNat (One) ;
+  dub (b,cNat (p)) = cNat (cDub (b,p)) ;
+  plusNatPos (Zero,p) = p ;
+  plusNatPos (cNat (p),q) = plusPos (p,q) ;
+  plus (Zero,n) = n ;
+  plus (n,Zero) = n ;
+  plus (cNat (p),cNat (q)) = cNat (addc (F,p,q)) ;
+  gtesubtp (p,q) = gtesubtb (F,p,q) ;
+  gtesubtn (n,Zero) = n ;
+  gtesubtn (cNat (p),cNat (q)) = gtesubtp (p,q) ;
+  gtesubtb (F,p,One) = pred2 (p) ;
+  gtesubtb (T,p,One) = pred2 (XNat2Pos (pred2 (p))) ;
+  c == d -> gtesubtb (b,cDub (c,p),cDub (d,q)) = dub (b,gtesubtb (b,p,q)) ;
+  c != d -> gtesubtb (b,cDub (c,p),cDub (d,q)) = dub (Xnot (b),gtesubtb (d,p,q)) ;
+  gePos (p,q) == T -> dividePos (p,q) = cNat (succ2 (divide (gtesubtp (p,q),q))) ;
+  ltPos (p,q) == T -> dividePos (p,q) = Zero ;
+  divide (Zero,p) = Zero ;
+  divide (cNat (p),q) = dividePos (p,q) ;
+  f (Zero) = Zero ;
+  f (cNat (One)) = cNat (One) ;
+  f (cNat (cDub (b,p))) = plus (f (max2Int (minus (cNat (cDub (b,p)),XPos2Nat (One)),Zero)),f (max2Int (minus (cNat (cDub (b,p)),XPos2Nat (cDub (F,One))),Zero))) ;
+  bs (n,m) = bs2 (n,Zero,m) ;
+  eq (XPos2Nat (plusNatPos (x,One)),y) == T -> bs2 (n,x,y) = x ;
+  eq (XPos2Nat (plusNatPos (x,One)),y) == F -> bs2 (n,x,y) = lambda0 (n,y,x,divide (plus (x,y),cDub (F,One))) ;

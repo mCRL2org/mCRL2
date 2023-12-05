@@ -1,0 +1,11 @@
+sort S = struct
+  d0
+| g (S) ;
+
+map
+  f : S -> S ;
+var
+  X : S ;
+eqn
+  X == d0 -> f (g (X)) = X ;
+  f (g (g (X))) = f (g (X)) ;

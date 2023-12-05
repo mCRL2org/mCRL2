@@ -1,0 +1,39 @@
+sort Bit = struct
+  d0
+| d1 ;
+
+sort Vector = struct
+  empty_vector
+| v (Bit, Vector) ;
+
+sort Matrix = struct
+  empty_matrix
+| m (Vector, Matrix) ;
+
+map
+  plus : Bit # Bit -> Bit ;
+  btimes : Bit # Bit -> Bit ;
+  vchop : Matrix -> Matrix ;
+  innerProduct : Vector # Matrix -> Bit ;
+  vecMat : Vector # Matrix -> Vector ;
+  mtimes : Matrix # Matrix -> Matrix ;
+  closure : Matrix -> Matrix ;
+var
+  X, Y : Bit ;
+  U, VEC : Vector ;
+  N, L : Matrix ;
+eqn
+  btimes (d0, X) = d0 ;
+  btimes (d1, X) = X ;
+  plus (d0, X) = X ;
+  plus (d1, X) = d1 ;
+  vchop (m (v (X, U), N)) = m (U, vchop (N)) ;
+  vchop (empty_matrix) = empty_matrix ;
+  innerProduct (v (X, U), m (v (Y, VEC), L)) = plus (btimes (X, Y), innerProduct (U, L)) ;
+  innerProduct (empty_vector, empty_matrix) = d0 ;
+  vecMat (U, m (v (Y, VEC), L)) = v (innerProduct (U, m (v (Y, VEC), L)), vecMat (U, vchop (m (v (Y, VEC), L)))) ;
+  vecMat (U, m (empty_vector, L)) = empty_vector ;
+  mtimes (m (U, N), L) = m (vecMat (U, L), mtimes (N, L)) ;
+  mtimes (empty_matrix, L) = empty_matrix ;
+  L == mtimes (L, L) -> closure (L) = L ;
+  L != mtimes (L, L) -> closure (L) = closure (mtimes (L, L)) ;

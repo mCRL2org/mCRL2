@@ -1,0 +1,4 @@
+sort Xnat = struct
+  d0
+| Xsucc (Xnat) ;
+
