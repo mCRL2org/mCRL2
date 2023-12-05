@@ -12,6 +12,7 @@
 #define MCRL2_DATA_DETAIL_REWR_JITTYC_PREAMBLE_H
 
 #include "mcrl2/utilities/toolset_version_const.h"
+#include "mcrl2/utilities/export.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 
@@ -22,14 +23,9 @@ using atermpp::down_cast;
 //
 // Declaration of rewriter library interface
 //
-#ifdef _MSC_VER
-#define DLLEXPORT __declspec(dllexport)
-#else
-#define DLLEXPORT
-#endif // _MSC_VER
 
 extern "C" {
-  DLLEXPORT bool init(rewriter_interface* i, RewriterCompilingJitty* this_rewriter);
+  MCRL2_EXPORT bool init(rewriter_interface* i, RewriterCompilingJitty* this_rewriter);
 }
 
 // A rewrite_term is a term that may or may not be in normal form. If the method"
@@ -413,13 +409,12 @@ void rewrite_cleanup()
 
 bool init(rewriter_interface* i, RewriterCompilingJitty* this_rewriter)
 {
-#ifndef MCRL2_DISABLE_JITTYC_VERSION_CHECK
   if (mcrl2::utilities::MCRL2_VERSION != i->caller_toolset_version)
   {
     i->status = "rewriter version does not match the version of the calling application.";
     return false;
   }
-#endif
+
   i->rewrite_external = &rewrite;
   i->rewrite_cleanup = &rewrite_cleanup;
   set_the_precompiled_rewrite_functions_in_a_lookup_table(this_rewriter);
