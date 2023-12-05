@@ -224,7 +224,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
         std::vector<data::data_expression>::const_iterator pi = probabilities.begin();
         for (; ti != targets.end(); ++pi, ++ti)
         {
-          result.add(*ti, *pi);
+          result.add(*ti, lps::probabilistic_data_expression(*pi));
         }
       }
       return result;

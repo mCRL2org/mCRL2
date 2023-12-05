@@ -84,10 +84,7 @@ lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::lts::pro
   std::vector<lps::state_probability_pair<std::size_t, lps::probabilistic_data_expression> > result;
   for(const lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& p: state_in)
   {
-    result.push_back(lps::state_probability_pair<std::size_t, lps::probabilistic_data_expression>(
-                          p.state(), 
-                          data::sort_real::creal(data::sort_int::int_(pp(p.probability().enumerator())),
-                                                 data::sort_pos::pos(pp(p.probability().denominator())))));
+    result.emplace_back(p.state(), lps::probabilistic_data_expression(pp(p.probability().enumerator()), pp(p.probability().denominator())));
   }
   return probabilistic_state<std::size_t, lps::probabilistic_data_expression>(result.begin(), result.end());
 }
