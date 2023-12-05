@@ -33,6 +33,8 @@ if(MCRL2_ENABLE_LINKER_LLD)
   mcrl2_add_c_flag(-fuse-ld=lld)
 endif()
 mcrl2_add_c_flag(-ftls-model=initial-exec)
+mcrl2_add_c_flag(-fno-plt)
+mcrl2_add_c_flag(-fno-semantic-interposition)
 
 if(MCRL2_IS_CLANG)
   # Ignore specific warnings produced in Sylvan.
@@ -84,12 +86,18 @@ if(MCRL2_ENABLE_LLD)
   mcrl2_add_cxx_flag(-fuse-ld=lld)
 endif()
 
-# Make inline functions hidden by default, allowing them to not be exported
+# Make inline member functions hidden by default, allowing them to not be exported
 mcrl2_add_cxx_flag(-fvisibility-inlines-hidden)
 
 # Change the thread local storage model to 'initial-exec', which applies additional
 # optimisations which assume that the shared library will never be dynamically loaded.
 mcrl2_add_cxx_flag(-ftls-model=initial-exec)
+
+# Disable the procedure linkage table, which is used for lazy loading.
+mcrl2_add_cxx_flag(-fno-plt)
+
+# Disable interposition, which allows inlining external definitions.
+mcrl2_add_cxx_flag(-fno-semantic-interposition)
 
 # This prevents warnings in the dnj bisimulation algorithm.
 mcrl2_add_cxx_flag(-Wno-switch)
