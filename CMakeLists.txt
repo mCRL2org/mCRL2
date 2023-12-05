@@ -46,7 +46,6 @@ option(MCRL2_ENABLE_BENCHMARKS      "Enable benchmarks. Build the 'benchmarks' t
 option(MCRL2_ENABLE_TESTS           "Enable generation of library and random test targets." OFF)
 option(MCRL2_ENABLE_HEADER_TESTS    "Enable generation of headertest targets." OFF)
 option(MCRL2_ENABLE_TOOL_TESTS      "Enable generation of tool tests." ON)
-option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_SKIP_LONG_TESTS        "Do not execute tests that take a long time to run." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 
@@ -101,7 +100,6 @@ include(ConfigurePlatform)
 include(ConfigureCompiler)
 include(MCRL2Version)
 include(MCRL2AddTarget)
-
 
 if(MCRL2_ENABLE_CODE_COVERAGE)
   include(CodeCoverage)
