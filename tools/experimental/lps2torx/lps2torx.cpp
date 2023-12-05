@@ -205,7 +205,7 @@ class torx_tool : public rewriter_tool< input_tool >
               std::cout << "EE" << std::endl;
 
             }
-            catch (mcrl2::runtime_error e)
+            catch (const mcrl2::runtime_error& e)
             {
               std::cout << "E0 an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
             }

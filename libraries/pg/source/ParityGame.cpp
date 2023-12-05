@@ -153,7 +153,7 @@ void ParityGame::compress_priorities( const verti cardinality[],
         while (cardinality[first_prio] == 0) ++first_prio;
         assert(first_prio < d_);  // fails only if cardinality count is invalid!
     }
-    priority_t swap_players = first_prio%2;
+    int swap_players = first_prio%2;
     prio_map[first_prio] = last_prio;
     for (int p = first_prio + 1; p < d_; ++p)
     {
