@@ -263,7 +263,7 @@ available_tests = [
     ToolTest("bespp", "[pbesfile]", ["-fdefault"]),
     # TODO: "-sspm" causes a segfault.
     ToolTest("bessolve", "[pbesfile]", ["-sgauss"]),
-    ToolTest("besconvert", "[pbesfile]", ["-ebisim", "-estuttering"]),
+    ToolTest("besconvert", "[besfile]", ["-ebisim", "-estuttering"]),
     ToolTest(
         "pbesinst",
         "[pbesfile]",
@@ -413,6 +413,7 @@ def main(tests):
         with open(mcf_file, "w", encoding="utf-8") as f:
             f.write("[true*]<true>true")
         pbes_file = os.path.join(output, "abp.nodeadlock.pbes")
+        bes_file = os.path.join(output, "abp.nodeadlock.bes")
 
         # Generate the input files for all tests beforehand
         run_test(os.path.join(args.toolpath, "mcrl22lps"), ["-D", mcrl2_file, lps_file])
@@ -422,6 +423,7 @@ def main(tests):
         )
         run_test(os.path.join(args.toolpath, "lpspp"), [lps_file, txtlps_file])
         run_test(os.path.join(args.toolpath, "pbespp"), [pbes_file, txtpbes_file])
+        run_test(os.path.join(args.toolpath, "pbes2bes"), [pbes_file, bes_file])
 
         try:
             with concurrent.futures.ThreadPoolExecutor(
@@ -448,6 +450,7 @@ def main(tests):
                         arguments = arguments.replace("[rename]", rename_file)
                         arguments = arguments.replace("[mcffile]", mcf_file)
                         arguments = arguments.replace("[pbesfile]", pbes_file)
+                        arguments = arguments.replace("[besfile]", bes_file)
                         arguments = arguments.replace("[txtlpsfile]", txtlps_file)
                         arguments = arguments.replace("[txtpbesfile]", txtpbes_file)
                         arguments = arguments.replace("[actions]", "r1")
