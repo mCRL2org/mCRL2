@@ -852,7 +852,6 @@ template < class STATE_LABEL1, class ACTION_LABEL1, class PROBABILISTIC_STATE1, 
 void remove_probabilities(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, PROBABILISTIC_STATE1, LTS_BASE1>& lts_in,
                           lts<STATE_LABEL2, ACTION_LABEL2, LTS_BASE2>& lts_out)
 {
-  assert(lts_in.initial_probabilistic_state().size()!=0);
   if (lts_in.initial_probabilistic_state().size()<=1)
   {
     lts_out.set_initial_state(lts_in.initial_probabilistic_state().get());
