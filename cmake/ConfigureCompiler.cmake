@@ -6,8 +6,9 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   include(ConfigureMSVC)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
-  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 11.0)
-    message(FATAL_ERROR "GCC version must be at least 11.0.")
+  # We do not test on GCC9 directly, but it used on the mastodont.
+  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 9.0)
+    message(FATAL_ERROR "GCC version must be at least 9.0.")
   endif()
   include(ConfigureUNIX)
 
