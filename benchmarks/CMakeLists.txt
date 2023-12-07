@@ -133,6 +133,9 @@ if (MCRL2_ENABLE_EXPERIMENTAL AND MCRL2_ENABLE_SYLVAN)
 endif()
 
 if (MCRL2_ENABLE_DEVELOPER)
+
+  add_dependencies(benchmarks mcrl2rewrite)
+
   # Find all the benchmark files
   file(GLOB BENCHMARK_FILES ${CMAKE_CURRENT_SOURCE_DIR}/REC/*.dataspec)
 
