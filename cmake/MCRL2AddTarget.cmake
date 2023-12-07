@@ -52,17 +52,15 @@ function(mcrl2_add_library TARGET_NAME)
     mcrl2_add_tests(${TARGET_NAME} "test/" "librarytest")
   endif()
 
-  if(BUILD_SHARED_LIBS OR MCRL2_ENABLE_JITTYC)
-    # Install the header files for mCRL2 libraries
-    mcrl2_install_header_files(${TARGET_INCLUDE_FILES})
+  # Install the header files for mCRL2 libraries
+  mcrl2_install_header_files(${TARGET_INCLUDE_FILES})
 
-    # Install the libraries only when we are using jittyc, or shared libraries.
-    install(TARGETS ${TARGET_NAME}
-      COMPONENT "Libraries"
-      LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
-      ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
-      FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
-  endif()
+  # Install the libraries only when we are using jittyc, or shared libraries.
+  install(TARGETS ${TARGET_NAME}
+    COMPONENT "Libraries"
+    LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
+    ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
+    FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
 
 endfunction()
 
