@@ -30,10 +30,29 @@
 #include <string>
 #include <vector>
 
+#include "mcrl2/utilities/platform.h"
+
+// Ignore useless warnings that are in third party libraries. We do not necessarily want to 
+// disable these warnings globally in all C++ targets. Added compiler checks to avoid useless
+// warnings, very nice.
+#ifdef MCRL2_COMPILER_GCC
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wpedantic"
+#endif // MCRL2_COMPILER_GCC
+
+#ifdef MCRL2_COMPILER_CLANG
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wpedantic"
+  #pragma clang diagnostic ignored "-Wc99-extensions"
+  #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+  #pragma clang diagnostic ignored "-Wzero-length-array"
+#endif // MCRL2_COMPILER_CLANG
+
 #include <lace.h>
 #include <sylvan.h>
 #include <sylvan_table.h>
 #include <sylvan_ldd.h>
+
 #include <boost/iterator/iterator_facade.hpp>
 
 extern llmsset_t nodes;
@@ -634,5 +653,13 @@ bool includes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
 }
 
 } // namespace sylvan::ldds
+
+#ifdef MCRL2_COMPILER_GCC
+  #pragma GCC diagnostic pop
+#endif
+
+#ifdef MCRL2_COMPILER_CLANG
+  #pragma clang diagnostic pop
+#endif
 
 #endif // SYLVAN_LDD_OBJ_H

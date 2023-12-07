@@ -16,7 +16,8 @@ add_library(sylvan
   sylvan_ldd.c
   sylvan_mt.c
   sylvan_mtbdd.c
-  sylvan_obj.cpp
+  # Sylvan is actually a C library, and this should not compile in C++17.
+  #sylvan_obj.cpp
   sylvan_refs.c
   sylvan_sl.c
   sylvan_stats.c

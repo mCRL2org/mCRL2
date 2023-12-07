@@ -12,19 +12,29 @@
 
 /// \brief Define macros to conditionally enable platform specific code.
 #ifdef _WIN32
-#define MCRL2_PLATFORM_WINDOWS 1
+    #define MCRL2_PLATFORM_WINDOWS 1
 #endif
 
 #ifdef __linux
-#define MCRL2_PLATFORM_LINUX 1
+    #define MCRL2_PLATFORM_LINUX 1
 #endif
 
 #ifdef __FreeBSD__
-#define MCRL2_PLATFORM_FREEBSD 1
+    #define MCRL2_PLATFORM_FREEBSD 1
 #endif
 
 #ifdef __APPLE__
-#define MCRL2_PLATFORM_MAC 1
+    #define MCRL2_PLATFORM_MAC 1
+#endif
+
+/// \brief Define macros to conditionally enable compiler specific code.
+#if defined(__GNUC__) && !defined(__clang)
+// __GNUC__ is defined for all GNU compliant compilers, e.g., gcc, clang and icc so this is not quite perfect.
+    #define MCRL2_COMPILER_GCC 1
+#endif
+
+#ifdef __clang__
+    #define MCRl2_COMPILER_CLANG 1
 #endif
 
 #endif // MCRL2_UTILITIES_PLATFORM_H_

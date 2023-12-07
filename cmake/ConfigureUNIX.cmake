@@ -41,11 +41,12 @@ endif()
 ## Set C++ compile flags
 ##---------------------------------------------------
 
-# This first flag is only necessary for our compiling rewriter script (that ignores 'other' build flags).
+# Enables various warnings.
 mcrl2_add_cxx_flag(-Wall)
 mcrl2_add_cxx_flag(-Wno-inline)
 mcrl2_add_cxx_flag(-fno-strict-overflow)
 mcrl2_add_cxx_flag(-pipe)
+mcrl2_add_cxx_flag(-pedantic)
 
 mcrl2_add_cxx_debug_flag(-W)
 mcrl2_add_cxx_debug_flag(-Wextra)
@@ -57,11 +58,6 @@ mcrl2_add_cxx_debug_flag(-Wno-system-headers)
 mcrl2_add_cxx_debug_flag(-Woverloaded-virtual)
 mcrl2_add_cxx_debug_flag(-Wwrite-strings)
 
-# Change to lld as default linker.
-if(MCRL2_ENABLE_LLD)
-  mcrl2_add_cxx_flag(-fuse-ld=lld)
-endif()
-
 # Make inline member functions hidden by default, allowing them to not be exported
 mcrl2_add_cxx_flag(-fvisibility-inlines-hidden)
 
@@ -72,8 +68,17 @@ mcrl2_add_cxx_flag(-ftls-model=initial-exec)
 # Disable the procedure linkage table, which is used for lazy loading.
 mcrl2_add_cxx_flag(-fno-plt)
 
-# Disable interposition, which allows inlining external definitions.
-mcrl2_add_cxx_flag(-fno-semantic-interposition)
+if(NOT MCRL2_IS_CLANG)
+  # Disable interposition, which allows inlining external definitions.
+  mcrl2_add_cxx_flag(-fno-semantic-interposition)
+  
+  # Change to lld as default linker.
+  if(MCRL2_ENABLE_LLD)
+    mcrl2_add_cxx_flag(-fuse-ld=lld)
+  endif()
+
+  mcrl2_add_cxx_flag(-fuse-linker-plugin)
+endif()
 
 # This prevents warnings in the dnj bisimulation algorithm.
 mcrl2_add_cxx_flag(-Wno-switch)
@@ -81,16 +86,7 @@ mcrl2_add_cxx_flag(-Wno-switch)
 # Enable additional flags to make link time optimisation actually useful
 if(MCRL2_ENABLE_LTO)
   set(CMAKE_CXX_COMPILE_OPTIONS_IPO ${CMAKE_CXX_COMPILE_OPTIONS_IPO} -flto=auto)
-  mcrl2_add_cxx_flag(-fuse-linker-plugin)
 endif()
-
-# Ignore specific warnings produced in Sylvan in clang.
-mcrl2_add_cxx_flag(-Wno-c99-extensions)
-mcrl2_add_cxx_flag(-Wno-gnu-zero-variadic-macro-arguments)
-mcrl2_add_cxx_flag(-Wno-zero-length-array)
-
-# Under GCC there are too many warnings caused by Sylvan to make this usable.
-#mcrl2_add_cxx_flag(-pedantic)
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
   add_compile_options(-fsanitize=address)
@@ -136,28 +132,28 @@ if(MCRL2_ENABLE_THREADSANITIZER)
 endif()
 
 ##---------------------------------------------------
-## Set C compile flags, see above for documentation
+## Set C compilation flags, see above for documentation
 ##---------------------------------------------------
 
-#try_mcrl2_add_c_flag(-std=c11)
-mcrl2_add_c_flag(-Wall)
-mcrl2_add_c_flag(-Wno-inline)
-mcrl2_add_c_flag(-fno-strict-overflow)
 mcrl2_add_c_flag(-pipe)
-mcrl2_add_c_debug_flag(-W)
-
-if(MCRL2_ENABLE_LINKER_LLD)
-  mcrl2_add_c_flag(-fuse-ld=lld)
-endif()
 mcrl2_add_c_flag(-ftls-model=initial-exec)
 mcrl2_add_c_flag(-fno-plt)
-mcrl2_add_c_flag(-fno-semantic-interposition)
 
+# Explicitly disable some warnings for C third party libraries
 if(MCRL2_IS_CLANG)
-  # Ignore specific warnings produced in Sylvan.
   mcrl2_add_c_flag(-Wno-c99-extensions)
   mcrl2_add_c_flag(-Wno-gnu-zero-variadic-macro-arguments)
   mcrl2_add_c_flag(-Wno-zero-length-array)
+else()
+  mcrl2_add_c_flag(-Wno-strict-aliasing)
+endif()
+
+if(NOT MCRL2_IS_CLANG)
+  mcrl2_add_c_flag(-fno-semantic-interposition)
+  
+  if(MCRL2_ENABLE_LINKER_LLD)
+    mcrl2_add_c_flag(-fuse-ld=lld)
+  endif()
 endif()
 
 if(MCRL2_ENABLE_LTO)
