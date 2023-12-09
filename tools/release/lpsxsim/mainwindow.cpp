@@ -218,7 +218,7 @@ void MainWindow::updateSimulation()
     }
     else
     {
-      m_ui.traceTable->item(i, 1)->setText(m_trace[i - 1].transitions[m_trace[i - 1].transitionNumber].action_or_probability); //XXXXXX TODO MAKE CORRECT.
+      m_ui.traceTable->item(i, 1)->setText(m_trace[i - 1].transitions[m_trace[i - 1].transitionNumber].action_or_probability); 
       m_ui.traceTable->item(i, 2)->setText(renderStateChange(m_trace[i - 1].state, m_trace[i].state));
     }
   }
@@ -231,7 +231,7 @@ void MainWindow::updateSimulation()
     m_ui.transitionTable->setItem(i, 0, item());
     m_ui.transitionTable->setItem(i, 1, item());
 
-    m_ui.transitionTable->item(i, 0)->setText(m_trace[selectedState].transitions[i].action_or_probability); /// XXXXXX TODO MAKE CORRECT
+    m_ui.transitionTable->item(i, 0)->setText(m_trace[selectedState].transitions[i].action_or_probability); 
     m_ui.transitionTable->item(i, 1)->setText(renderStateChange(m_trace[selectedState].state, m_trace[selectedState].transitions[i].destination));
   }
   if (m_trace[selectedState].transitions.size() > 0)
