@@ -1,4 +1,4 @@
-// Author(s): Ruud Koolen
+// Author(s): Muck van Weerdenburg, Ruud Koolen; adapted by Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,172 +6,25 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <limits>
+#include "mcrl2/data//standard_numbers_utility.h"
 #include "mcrl2/lts/simulation.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-simulation::simulation(const stochastic_specification& specification, data::rewrite_strategy strategy)
-  : m_specification(specification),
-    m_rewriter(m_specification.data(), strategy),
-    m_generator(stochastic_specification(m_specification), m_rewriter),
-    m_tau_prioritization(false)
-{
-  state_t state;
-  if (++m_generator.initial_states().begin()!=m_generator.initial_states().end()) // size()>1
-  {
-    mCRL2log(mcrl2::log::warning) << "This simulator does not take the initial distribution into account. It just picks one state.\n";
-  }
-  state.source_state = m_generator.initial_states().front().state();
-  state.transitions = transitions(state.source_state);
-  m_full_trace.push_back(state);
-}
-
-void simulation::truncate(std::size_t state_number)
-{
-  assert(state_number < m_full_trace.size());
-  if (m_tau_prioritization)
-  {
-    m_prioritized_trace.resize(state_number + 1);
-    m_prioritized_originals.resize(state_number + 1);
-    m_full_trace.resize(m_prioritized_originals.back() + 1);
-  }
-  else
-  {
-    m_full_trace.resize(state_number + 1);
-  }
-}
-
-void simulation::select(std::size_t transition_number)
-{
-  assert(transition_number < m_full_trace.back().transitions.size());
-  if (m_tau_prioritization)
-  {
-    m_prioritized_trace.back().transition_number = transition_number;
-    state_t prioritized_state;
-    prioritized_state.source_state = m_prioritized_trace.back().transitions[transition_number].destination;
-    prioritized_state.transitions = prioritize(transitions(prioritized_state.source_state));
-    m_prioritized_trace.push_back(prioritized_state);
-
-    m_full_trace.back().transition_number = transition_number;
-    state_t full_state;
-    full_state.source_state = m_full_trace.back().transitions[transition_number].destination;
-    full_state.transitions = transitions(full_state.source_state);
-    m_full_trace.push_back(full_state);
-
-    while (true)
-    {
-      bool found = false;
-      std::vector<transition_t> &transitions = m_full_trace.back().transitions;
-      for (std::size_t index = 0; index < transitions.size(); index++)
-      {
-        if (is_prioritized(transitions[index].action))
-        {
-          m_full_trace.back().transition_number = index;
-          state_t state;
-          state.source_state = transitions[index].destination;
-          state.transitions = simulation::transitions(state.source_state);
-          m_full_trace.push_back(state);
-          found = true;
-          break;
-        }
-      }
-      if (!found)
-      {
-        break;
-      }
-    }
-
-    m_prioritized_originals.push_back(m_full_trace.size() - 1);
-  }
-  else
-  {
-    m_full_trace.back().transition_number = transition_number;
-    state_t state;
-    state.source_state = m_full_trace.back().transitions[transition_number].destination;
-    state.transitions = transitions(state.source_state);
-    m_full_trace.push_back(state);
-  }
-}
-
-void simulation::enable_tau_prioritization(bool enable, const std::string& action)
-{
-  m_tau_prioritization = enable;
-  m_prioritized_action = action;
-
-  m_prioritized_trace.clear();
-  m_prioritized_originals.clear();
-  if (enable)
-  {
-    prioritize_trace();
-  }
-}
-
-void simulation::save(const std::string &filename)
-{
-  lts::trace trace;
-  trace.set_state(m_full_trace[0].source_state);
-  for (std::size_t i = 0; i + 1 < m_full_trace.size(); i++)
-  {
-    trace.add_action(m_full_trace[i].transitions[m_full_trace[i].transition_number].action);
-    trace.set_state(m_full_trace[i+1].source_state);
-  }
-  trace.save(filename);
-}
-
-void simulation::load(const std::string &filename)
-{
-  // Load the trace from file
-  lts::trace trace(filename, m_specification.data(), m_specification.action_labels());
-  trace.reset_position();
-
-  // Get the first state from the generator
-  m_full_trace.clear();
-  if (++m_generator.initial_states().begin()!=m_generator.initial_states().end()) // size()>1
-  {
-    mCRL2log(mcrl2::log::warning) << "This simulator does not take distributions into account. It just picks a state.\n";
-  }
-  // push_back(m_generator.initial_state());
-  push_back(m_generator.initial_states().front().state());
-
-  // Check that the first state (if given) matches the first state of our generator
-  if (trace.current_state_exists() && trace.current_state() != m_full_trace.back().source_state)
-  {
-    throw mcrl2::runtime_error("The initial state of the trace does not match the initial state "
-                               "of this specification");
-  }
-
-  // Replay the trace using the generator.
-  if (!match_trace(trace))
-  {
-    std::stringstream ss;
-    ss << "could not perform action " << (m_full_trace.size() - 1) << " ("
-       << pp(trace.current_action()) << ") from trace";
-    throw mcrl2::runtime_error(ss.str());
-  }
-
-  // Perform tau-prioritization if necessary
-  if (m_tau_prioritization)
-  {
-    m_prioritized_trace.clear();
-    m_prioritized_originals.clear();
-    prioritize_trace();
-  }
-}
-
 std::vector<simulation::transition_t> simulation::transitions(const state& source_state)
 {
   try
   {
-    std::vector<simulation::transition_t> output;
-    next_state_generator::enumerator_queue_t enumeration_queue;
-    for (next_state_generator::iterator i = m_generator.begin(source_state, &enumeration_queue); i != m_generator.end(); i++)
-    {
-      transition_t transition;
-      transition.destination = i->target_state();
-      transition.action = i->action();
-      output.push_back(transition);
-    }
+    std::list<transition> outgoing_transitions = out_edges(source_state, 
+                                                           m_regular_summands,
+                                                           m_confluent_summands,
+                                                           m_global_sigma, 
+                                                           m_global_rewr, 
+                                                           m_global_enumerator, 
+                                                           m_global_id_generator);
+    std::vector<simulation::transition_t> output(outgoing_transitions.begin(), outgoing_transitions.end());
     return output;
   }
   catch (mcrl2::runtime_error& e)
@@ -181,94 +34,202 @@ std::vector<simulation::transition_t> simulation::transitions(const state& sourc
   }
 }
 
-std::vector<simulation::transition_t> simulation::prioritize(const std::vector<simulation::transition_t> &transitions)
+simulation::simulation(const stochastic_specification& specification, data::rewrite_strategy strategy)
+  : explorer(specification, explorer_options()),
+    m_specification(specification),
+    m_rewriter(m_specification.data(), strategy),
+    m_gen(),
+    m_distrib(0,std::numeric_limits<std::size_t>::max())
 {
-  std::vector<simulation::transition_t> output;
-  for (std::vector<simulation::transition_t>::const_iterator i = transitions.begin(); i != transitions.end(); i++)
+  state_type initial_state;
+  compute_stochastic_state(initial_state, m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+  simulator_state_t state;
+  state.source_state = initial_state;
+  state.state_number=initial_state.size();  // This indicates that no state is selected yet.
+  m_full_trace.push_back(state);
+
+  if (initial_state.size()==1 || m_auto_select_probabilistic_state)
   {
-    simulation::transition_t transition = *i;
-    while (true)
+    randomly_select_state();  // There is only one state, or we select states at random. Select the state. 
+  }
+}
+
+void simulation::truncate(std::size_t state_number, bool probabilistic)
+{
+  assert(state_number < m_full_trace.size());
+  m_full_trace.resize(state_number + 1);
+  if (probabilistic && m_full_trace[state_number].source_state.size()>1)  // Indicate that this is a probabilistic state and forget about transitions.
+  {
+    m_full_trace[state_number].state_number=m_full_trace[state_number].source_state.size();
+  }
+  
+}
+
+void simulation::select_state(std::size_t state_number)
+{
+  simulator_state_t& state = m_full_trace.back();
+
+  assert(state_number<state.source_state.states.size());
+  state.state_number=state_number;
+  state.transitions = transitions(state.source_state.states[state_number]);
+}
+
+void simulation::randomly_select_state()
+{
+  simulator_state_t& state = m_full_trace.back();
+  std::size_t state_number=0;
+  
+  if (state.source_state.states.size()>1)
+  {
+    // Generate a random size_t with random distribution. 
+    double random_value=static_cast<double>(m_distrib(m_gen))/std::numeric_limits<std::size_t>::max(); 
+    random_value=random_value-data::sort_real::value(state.source_state.probabilities[state_number]);
+    while (random_value>0)
     {
-      bool found = false;
-      std::vector<transition_t> next_transitions = simulation::transitions(transition.destination);
-      for (std::vector<transition_t>::iterator j = next_transitions.begin(); j != next_transitions.end(); j++)
+      state_number++;
+      assert(state_number<state.source_state.states.size());
+      random_value=random_value-data::sort_real::value(state.source_state.probabilities[state_number]);
+    }
+  }
+  state.state_number=state_number;
+  state.transitions = transitions(state.source_state.states[state_number]);
+}
+
+void simulation::select_transition(std::size_t transition_number)
+{
+  assert(transition_number < m_full_trace.back().transitions.size());
+  m_full_trace.back().transition_number = transition_number;
+  simulator_state_t state;
+  state.source_state = m_full_trace.back().transitions[transition_number].state;
+  state.state_number=state.source_state.size();
+  m_full_trace.push_back(state);
+
+  if (state.source_state.size()==1 || m_auto_select_probabilistic_state)
+  {
+    randomly_select_state();
+  }
+}
+
+void simulation::randomly_select_transition()
+{
+  std::size_t s=m_full_trace.back().transitions.size();
+  std::size_t transition_number= m_distrib(m_gen) % s;
+  select_transition(transition_number);
+}
+
+void simulation::enable_auto_select_probability(bool enable)
+{
+  m_auto_select_probabilistic_state=enable;
+}
+
+void simulation::save(const std::string& filename) const
+{
+  lts::trace trace;
+  if (m_full_trace[0].state_number>=m_full_trace[0].source_state.size())
+  {
+    throw mcrl2::runtime_error("initial state is not set. Trace is not saved.");
+  }
+  trace.set_state(m_full_trace[0].source_state.states[m_full_trace[0].state_number]);
+  for (std::size_t i = 0; i + 1 < m_full_trace.size(); i++)
+  {
+    assert(m_full_trace[i].state_number<m_full_trace[i].source_state.size());
+    if (m_full_trace[i].transition_number<m_full_trace[i].transitions.size())
+    {
+      trace.add_action(m_full_trace[i].transitions[m_full_trace[i].transition_number].action);
+      if (m_full_trace[i+1].state_number<m_full_trace[i+1].source_state.size())
       {
-        if (is_prioritized(j->action))
-        {
-          transition.destination = j->destination;
-          found = true;
-          break;
-        }
+        trace.set_state(m_full_trace[i+1].source_state.states[m_full_trace[i+1].state_number]);
       }
-      if (!found)
+      else
       {
-        break;
+        trace.set_state(m_full_trace[i+1].source_state.states[0]);
+        std::cout << "the last state in the saved trace is the first concrete state from the last probabilistic state." << std::endl;
       }
     }
-    output.push_back(transition);
   }
-  return output;
+  trace.save(filename);
 }
 
-bool simulation::is_prioritized(const multi_action &action)
+void simulation::load(const std::string& filename)
 {
-  if (m_prioritized_action == "tau")
-  {
-    return action.actions().size() == 0;
-  }
-  else
-  {
-    return action.actions().size() == 1 && (std::string)action.actions().front().label().name() == m_prioritized_action;
-  }
-}
+  // Load the trace from file
+  lts::trace trace(filename, m_specification.data(), m_specification.action_labels());
+  trace.reset_position();
 
-void simulation::prioritize_trace()
-{
-  m_prioritized_trace.push_back(m_full_trace.front());
-  for (std::size_t index = 0; index < m_full_trace.size() - 1; index++)
-  {
-    transition_t transition = m_full_trace[index].transitions[m_full_trace[index].transition_number];
-    if (is_prioritized(transition.action))
+  // Get the first state from the generator
+  m_full_trace.clear();
+
+  state_type initial_state;
+  compute_stochastic_state(initial_state, m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+
+  add_new_state(initial_state);
+  // Check that the first state (if given) matches one of the probabilistic states of the specification.
+  if (trace.current_state_exists()) 
+  {    
+    if (std::find(initial_state.states.begin(), initial_state.states.end(), trace.current_state()) == initial_state.states.end())
     {
-      m_prioritized_trace.back().source_state = transition.destination;
+      throw mcrl2::runtime_error("The initial state of the trace does not match the initial state "
+                                 "of this specification");
     }
-    else
-    {
-      m_prioritized_trace.push_back(m_full_trace[index + 1]);
-      m_prioritized_originals.push_back(index);
-    }
-  }
-  m_prioritized_originals.push_back(m_full_trace.size() - 1);
 
-  for (std::deque<state_t>::iterator i = m_prioritized_trace.begin(); i != m_prioritized_trace.end(); i++)
-  {
-    i->transitions = prioritize(transitions(i->source_state));
+
+    // Replay the trace using the generator.
+    if (!match_trace_probabilistic_state(trace))
+    {
+      throw mcrl2::runtime_error("Failed to perform action " + pp(trace.current_action()) + " at position "
+                                 + std::to_string(m_full_trace.size() - 1) + " from the trace loaded from " + filename + ".");
+    }
   }
 }
 
-void simulation::push_back(const lps::state& lps_state)
+// Add a new state to m_full_trace with the indicated state. 
+void simulation::add_new_state(const lps::stochastic_state& s)
 {
-  state_t state;
-  state.source_state = lps_state;
-  state.transitions = transitions(lps_state);
+  simulator_state_t state;
+  state.source_state = s;
+  state.state_number = s.size();
   state.transition_number = 0;
   m_full_trace.push_back(state);
+} 
+
+bool simulation::match_trace_probabilistic_state(lts::trace& trace)
+{
+  if (!trace.current_state_exists())
+  {
+    return true;
+  } 
+  assert(trace.current_state_exists());
+  simulator_state_t& current = m_full_trace.back();
+  for (std::size_t i = 0; i < current.source_state.size(); ++i)
+  {
+    if (current.source_state.states[i] == trace.current_state())
+    {
+      select_state(i);
+      if (match_trace_transition(trace))
+      {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
-bool simulation::match_trace(lts::trace& trace)
+bool simulation::match_trace_transition(lts::trace& trace)
 {
-  state_t& current = m_full_trace.back();
+  if (!trace.current_action_exists())
+  {
+    return true;
+  }
+  simulator_state_t& current = m_full_trace.back();
   lps::multi_action action = trace.current_action();
   trace.increase_position();
   for (std::size_t i = 0; i < current.transitions.size(); ++i)
   {
-    if (current.transitions[i].action == action &&
-        (!trace.current_state_exists() ||
-         current.transitions[i].destination == trace.current_state()))
+    if (current.transitions[i].action == action)
     {
+      add_new_state(current.transitions[i].state);
       current.transition_number = i;
-      push_back(trace.current_state());
-      if (trace.get_position() == trace.number_of_actions() || match_trace(trace))
+      if (match_trace_probabilistic_state(trace))
       {
         return true;
       }
@@ -278,15 +239,3 @@ bool simulation::match_trace(lts::trace& trace)
   return false;
 }
 
-bool simulation::match(const state &left, const state &right)
-{
-  assert(left.size() == right.size());
-  for (std::size_t i = 0; i < left.size(); i++)
-  {
-    if (!is_variable(left[i]) && !is_variable(right[i]) && left[i] != right[i])
-    {
-      return false;
-    }
-  }
-  return true;
-}

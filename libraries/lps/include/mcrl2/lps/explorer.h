@@ -240,14 +240,14 @@ class highway_todo_set : public todo_set
 };
 
 template <typename Summand>
-const stochastic_distribution& summand_distribution(const Summand& /* summand */)
+inline const stochastic_distribution& summand_distribution(const Summand& /* summand */)
 {
   static stochastic_distribution empty_distribution;
   return empty_distribution;
 }
 
 template <>
-const stochastic_distribution& summand_distribution(const lps::stochastic_action_summand& summand)
+inline const stochastic_distribution& summand_distribution(const lps::stochastic_action_summand& summand)
 {
   return summand.distribution();
 }
@@ -466,7 +466,7 @@ class explorer: public abortable
       {}
     };
 
-    const explorer_options& m_options;
+    const explorer_options m_options;  // must not be a reference.
 
     // The four data structures that must be separate per thread.
     mutable data::mutable_indexed_substitution<> m_global_sigma;

@@ -39,13 +39,13 @@ class MainWindow : public QMainWindow
     void setPlayDelay();
     void updateSimulation();
     void stateSelected();
-    void setTauPrioritization();
+    void setAutoSelectProbability();
 
   public slots:
     void openSpecification(QString filename);
     void onInitializedSimulation();
-    void selectState(int state);
-    void truncateTrace(int state);
+    void selectState(std::size_t state);
+    void truncateTrace(int state, int column_on_screen);
     void selectTransition(int transition);
     void animationStep();
     void undoLast();
@@ -53,17 +53,18 @@ class MainWindow : public QMainWindow
     /**
      * @brief Updates the statusbar with the latest log output
      */
-    void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
+    void onLogOutput(QString level, QDateTime timestamp, QString message, QString formattedMessage);
 
   protected:
-    void reset(unsigned int selectedState);
-    void select(unsigned int transition);
+    void reset(std::size_t selectedState, bool probabilistic);
+    void select(std::size_t transition);
     void waitForResponse(QEventLoop *eventLoop, QSemaphore *semaphore, int timeout = 50);
     /**
      * @brief Saves window information
      */
     void closeEvent(QCloseEvent *event);
     QString renderStateChange(Simulation::State source, Simulation::State destination);
+    void auto_select_state_or_probability();
 
   private:
     Ui::MainWindow m_ui;
@@ -72,7 +73,7 @@ class MainWindow : public QMainWindow
     Simulation *m_simulation;
     Simulation *m_newSimulation = nullptr;
     Simulation::Trace m_trace;
-    int m_selectedState;
+    std::size_t m_selected_state;
     QTimer *m_animationTimer;
     bool m_randomAnimation;
     bool m_animationDisabled;

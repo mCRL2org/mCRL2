@@ -61,6 +61,12 @@ struct stochastic_state
     probabilities.clear();
     states.clear();
   }
+
+  std::size_t size() const
+  {
+    assert(states.size()==probabilities.size());
+    return states.size();
+  }
 };
 
 inline

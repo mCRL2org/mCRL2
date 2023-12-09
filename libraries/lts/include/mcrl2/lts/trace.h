@@ -267,6 +267,14 @@ class trace
       return m_states[m_pos];
     }
 
+    /// \brief Indicate whether the current action exists. 
+    /// \return A boolean indicating that the current action exists;
+    bool current_action_exists() const
+    {
+      assert(m_actions.size()+1 >= m_states.size() && m_pos <=m_actions.size());
+      return m_pos < m_actions.size(); 
+    }
+
     /// \brief Get the outgoing action from the current position in the trace.
     /// \details This routine returns the action at the current position of the
     /// trace. It is not allowed to request an action if no action is available.
@@ -379,11 +387,7 @@ class trace
       }
       catch (mcrl2::runtime_error& err)
       {
-        std::string s;
-        s = "error loading trace: ";
-        s += err.what();
-        s += ".";
-        throw mcrl2::runtime_error(s);
+        throw mcrl2::runtime_error("Error loading trace: " + std::string(err.what()));
       }
     }
 

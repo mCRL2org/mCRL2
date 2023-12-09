@@ -18,6 +18,7 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/exploration_strategy.h"
 
+
 namespace mcrl2 {
 
 namespace lps {
@@ -55,6 +56,14 @@ struct explorer_options
   std::set<lps::multi_action> trace_multiactions;
   std::set<core::identifier_string> actions_internal_for_divergencies;
   std::string confluence_action = "ctau";
+
+  // Constructor.
+  explorer_options()
+  {}
+
+  //
+  explorer_options(const explorer_options& other) = default;
+  explorer_options& operator=(const explorer_options& other) = default;
 };
 
 inline
