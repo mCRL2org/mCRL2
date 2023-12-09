@@ -19,13 +19,6 @@
 #include "diagram.h"
 #include "settings.h"
 
-
-enum RenderMode
-{
-  NormalRender,
-  HitRender
-};
-
 class ArcDiagram : public Visualizer
 {
   Q_OBJECT
@@ -52,15 +45,8 @@ class ArcDiagram : public Visualizer
     void unmarkBundles();
 
     // -- visualization functions  ----------------------------------
-    void visualize(const bool& inSelectMode);
-    void visualizeParts(const bool& inSelectMode);
-    void drawBundles(const bool& inSelectMode);
-    void drawLeaves(const bool& inSelectMode);
-    void drawTree(const bool& inSelectMode);
-    void drawTreeLvls(const bool& inSelectMode);
-    void drawBarTree(const bool& inSelectMode);
-    void drawMarkedLeaves(const bool& inSelectMode);
-    void drawDiagrams(const bool& inSelectMode);
+    void visualize();
+    void select();
 
     // -- input event handlers --------------------------------------
 
@@ -75,8 +61,18 @@ class ArcDiagram : public Visualizer
     void hoverCluster(Cluster *cluster, QList<Attribute *> attributes = QList<Attribute *>());
     void clickedCluster(Cluster *cluster);
 
-  protected:
+  private:
     // -- utility drawing functions ---------------------------------
+    template <Mode> void drawBundles();
+    template <Mode> void drawLeaves();
+    template <Mode> void drawTree();
+    template <Mode> void drawTreeLvls();
+    template <Mode> void drawBarTree();
+    template <Mode> void drawMarkedLeaves();
+    template <Mode> void drawDiagrams();
+    template <Mode> void drawParts();
+    template <Mode> void draw();
+
     void clear();
     QColor calcColor(std::size_t iter, std::size_t numr);
     void calcSettingsGeomBased();
@@ -105,11 +101,11 @@ class ArcDiagram : public Visualizer
     void clearSettingsDiagram();
 
     // -- utility event handlers ------------------------------------
-  protected slots:
+  private slots:
     void animate();
     void clustersChanged();
 
-  protected:
+  private:
     void handleHits(const std::vector< int > &ids);
 
     void handleHoverCluster(

@@ -30,33 +30,34 @@ class CombnPlot : public Visualizer
     // -- set vis settings functions --------------------------------
 
     // -- visualization functions  ----------------------------------
-    void visualize(const bool& inSelectMode);
-    void drawAxes(const bool& inSelectMode);
-    void drawAxesBC(const bool& inSelectMode);
-    void drawAxesCP(const bool& inSelectMode);
-    void drawLabels(const bool& inSelectMode);
-    void drawLabelsBC(const bool& inSelectMode);
-    void drawLabelsCP(const bool& inSelectMode);
-    void drawPlot(const bool& inSelectMode);
-    void drawPlotBC(const bool& inSelectMode);
-    void drawPlotCP(const bool& inSelectMode);
-    void drawMousePos(const bool& inSelectMode);
-    void drawDiagram(const bool& inSelectMode);
+    void visualize();
+    void select();
 
     // -- input event handlers --------------------------------------
     void handleMouseEvent(QMouseEvent* e);
 
     QSize sizeHint() const { return QSize(400,400); }
 
-  protected:
+  private:
     // -- utility data functions ------------------------------------
     void initLabels();
     void calcMaxAttrCard();
     void calcMaxNumberPerComb();
 
     // -- utility drawing functions ---------------------------------
-    // ***
-    //void clear();
+    template <Mode> void drawAxesBC();
+    template <Mode> void drawAxesCP();
+    template <Mode> void drawAxes();
+    template <Mode> void drawLabelsBC();
+    template <Mode> void drawLabelsCP();
+    template <Mode> void drawLabels();
+    template <Mode> void drawPlotBC();
+    template <Mode> void drawPlotCP();
+    template <Mode> void drawPlot();
+    template <Mode> void drawMousePos();
+    template <Mode> void drawDiagram();
+    template <Mode> void draw();
+
     void setScalingTransf();
     void displTooltip(const std::size_t& posIdx);
 

@@ -31,7 +31,6 @@ Visualizer::Visualizer(
 
   initMouse();
 
-  m_inSelectMode = false;
   texCharOK = false;
   texCushOK = false;
 
@@ -42,32 +41,19 @@ Visualizer::Visualizer(
 }
 
 void Visualizer::updateSelection() {
-    if (!m_hit_FBO || m_hit_FBO->width() != width()*devicePixelRatio() || m_hit_FBO->height() != height()*devicePixelRatio()) {
-        delete m_hit_FBO; // make sure FBO is cleaned up
-        m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
-    }
-    
-    if (!m_hit_FBO->isValid())
+    QOpenGLFramebufferObject selectionBuffer(width() * devicePixelRatio(), height() * devicePixelRatio());
+    if (!selectionBuffer.isValid())
     {
-      throw mcrl2::runtime_error("Invalid framebuffer created");
+      throw mcrl2::runtime_error("Failed to create frame buffer for selection handling.");
     }
-    m_hit_FBO->bind();
-    m_inSelectMode = true;
-    paintGL();
-    m_inSelectMode = false;
-    m_hit_FBO->bindDefault();
+
+    selectionBuffer.bind();
+    select();
+    selectionBuffer.release();
 }
 
 void Visualizer::initializeGL() 
 {
-  m_hit_FBO = new QOpenGLFramebufferObject(width()*devicePixelRatio(), height()*devicePixelRatio());
-  if (!m_hit_FBO->isValid())
-  {
-    throw mcrl2::runtime_error("Invalid framebuffer created");
-  }
-
-  m_gl_initialized = true;
-
   if (mCRL2logEnabled(mcrl2::log::log_level_t::debug)) 
   {  
     QPair<int, int> version = format().version();
@@ -114,8 +100,7 @@ void Visualizer::paintGL()
   glLoadIdentity();
   glViewport(0, 0, width()*devicePixelRatio(), height()*devicePixelRatio());
 
-  visualize(m_inSelectMode);
-  m_inSelectMode = false;
+  visualize();
 }
 
 

@@ -44,7 +44,8 @@ class Examiner : public Visualizer
       const std::vector< Attribute* > &attrs);
 
     // -- visualization functions  ----------------------------------
-    void visualize(const bool& inSelectMode);
+    void visualize();
+    void select();
 
     // -- event handlers --------------------------------------------
     void handleSizeEvent();
@@ -62,7 +63,7 @@ class Examiner : public Visualizer
     void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
     void selectionChanged();
 
-  protected:
+  private:
     // -- utility functions -----------------------------------------
     /*
         void initAttributes( const std::vector< Attribute* > &attrs );
@@ -93,9 +94,10 @@ class Examiner : public Visualizer
     // -- utility drawing functions ---------------------------------
     void clear();
 
-    void drawFrame(const bool& inSelectMode);
-    void drawFramesHist(const bool& inSelectMode);
-    void drawControls(const bool& inSelectMode);
+    template <Mode> void drawFrame();
+    template <Mode> void drawFramesHist();
+    template <Mode> void drawControls();
+    template <Mode> void draw();
 
     enum
     {

@@ -37,7 +37,8 @@ class DiagramEditor : public Visualizer
     void deselectAll();
 
     // -- visualization functions  ----------------------------------
-    void visualize(const bool& inSelectMode);
+    void visualize();
+    void select();
     void generateTextures();
 
     // -- public constants ------------------------------------------

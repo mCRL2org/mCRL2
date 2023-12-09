@@ -189,64 +189,6 @@ void Examiner::clearData()
 }
 
 
-// -- visualization functions  --------------------------------------
-
-
-void Examiner::visualize(const bool& inSelectMode)
-{
-  clear();
-
-  // check if positions are ok
-  if (geomChanged == true)
-  {
-    calcSettingsGeomBased();
-  }
-  if (dataChanged == true)
-  {
-    calcSettingsDataBased();
-  }
-
-  if (inSelectMode == true)
-  {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
-
-    if (diagram != 0)
-    {
-      drawFrame(inSelectMode);
-
-      if (framesHist.size() > 0)
-      {
-        drawFramesHist(inSelectMode);
-        drawControls(inSelectMode);
-      }
-    }
-
-    finishSelectMode(
-      hits,
-      selectBuf);
-  }
-  else
-  {
-    if (diagram != 0)
-    {
-      drawFrame(inSelectMode);
-
-      if (framesHist.size() > 0)
-      {
-        drawFramesHist(inSelectMode);
-        drawControls(inSelectMode);
-      }
-    }
-  }
-}
-
-
 // -- event handlers ------------------------------------------------
 
 
@@ -673,11 +615,11 @@ void Examiner::clear()
 }
 
 
-void Examiner::drawFrame(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Examiner::drawFrame()
 {
   double pix = pixelSize();
 
-  if (inSelectMode == true)
+  if constexpr (mode == Selecting)
   {
     glPushMatrix();
     glTranslatef(posFrame.x, posFrame.y, 0.0);
@@ -730,11 +672,7 @@ void Examiner::drawFrame(const bool& inSelectMode)
     attr = 0;
     node = 0;
 
-    diagram->visualize(
-      false,
-      pixelSize(),
-      attributes,
-      valsFrame);
+    diagram->draw<mode>(pixelSize(), attributes, valsFrame);
 
     VisUtils::enableLineAntiAlias();
     VisUtils::setColor(colFrm);
@@ -748,9 +686,9 @@ void Examiner::drawFrame(const bool& inSelectMode)
 }
 
 
-void Examiner::drawFramesHist(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Examiner::drawFramesHist()
 {
-  if (inSelectMode == true)
+  if constexpr (mode == Selecting)
   {
     glPushName(ID_FRAME_HIST);
     //for ( int i = 0; i < framesHist.size(); ++i )
@@ -824,11 +762,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
           1.0 - 3*pix/scaleFramesHist, -1.0-3*pix/scaleFramesHist);
       }
 
-      diagram->visualize(
-        false,
-        pixelSize(),
-        attrsHist[i],
-        valsFrame);
+      diagram->draw<mode>(pixelSize(), attrsHist[i], valsFrame);
 
       glPopMatrix();
     }
@@ -836,13 +770,13 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
 }
 
 
-void Examiner::drawControls(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Examiner::drawControls()
 {
   double itvHist = hgtHstPix;
 
   double pix = pixelSize();
 
-  if (inSelectMode == true)
+  if constexpr (mode == Selecting)
   {
     // clear icon
     double itvSml = 6.0*pix;
@@ -1102,3 +1036,63 @@ void Examiner::drawControls(const bool& inSelectMode)
     }
   }
 }
+
+
+template <Visualizer::Mode mode> void Examiner::draw()
+{
+  clear();
+
+  // check if positions are ok
+  if (geomChanged == true)
+  {
+    calcSettingsGeomBased();
+  }
+  if (dataChanged == true)
+  {
+    calcSettingsDataBased();
+  }
+
+  if constexpr (mode == Selecting)
+  {
+    GLint hits = 0;
+    GLuint selectBuf[512];
+    startSelectMode(
+      hits,
+      selectBuf,
+      2.0,
+      2.0);
+
+    if (diagram != 0)
+    {
+      drawFrame<mode>();
+
+      if (framesHist.size() > 0)
+      {
+        drawFramesHist<mode>();
+        drawControls<mode>();
+      }
+    }
+
+    finishSelectMode(
+      hits,
+      selectBuf);
+  }
+  else
+  {
+    if (diagram != 0)
+    {
+      drawFrame<mode>();
+
+      if (framesHist.size() > 0)
+      {
+        drawFramesHist<mode>();
+        drawControls<mode>();
+      }
+    }
+  }
+}
+
+
+void Examiner::visualize() { draw<Visualizing>(); }
+void Examiner::select() { draw<Selecting>(); }
+

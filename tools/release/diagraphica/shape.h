@@ -122,14 +122,13 @@ class Shape : public QObject
     QString dofLabel(int index);
 
     // -- visualization ---------------------------------------------
-    void visualize(
-        const bool& inSelectMode,
-        double pixelSize);
-    void visualize(
-        double pixelSize,
-        const double& opacity,
+    using Mode = Visualizer::Mode;
+
+    template <Mode> void draw(double pixelSize);
+    template <Mode> void draw(double pixelSize,
         const std::vector< Attribute* > attrs,
-        const std::vector< double > attrValIdcs);
+        const std::vector< double > attrValIdcs,
+        const double& opacity);
 
     void setTransf();
     void clrTransf();
@@ -183,7 +182,7 @@ class Shape : public QObject
   public slots:
     void setModeEditDof(int dofIndex);
 
-  protected:
+  private:
     // -- private utility functions ---------------------------------
     void initDOF();
     void clearDOF();
@@ -191,46 +190,20 @@ class Shape : public QObject
     void handleHitEdtDOFAgl(const std::size_t& hdlIdx);
 
     // -- private visualization functions ---------------------------
-    void drawNormal(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawEdit(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawText(double pixelSize);
-    void drawEditDOF(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawEditDOFXCtr(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawDOFXCtr(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawEditDOFYCtr(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawDOFYCtr(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawEditDOFWth(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawDOFWth(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawEditDOFHgt(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawDOFHgt(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawEditDOFAgl(
-        const bool& inSelectMode,
-        double pixelSize);
-    void drawDOFAgl(
-        const bool& inSelectMode,
-        double pixelSize);
+    template <Mode> void drawText(double pixelSize);
+    template <Mode> void drawNormal(double pixelSize);
+    template <Mode> void drawEdit(double pixelSize);
+    template <Mode> void drawEditDOF(double pixelSize);
+    template <Mode> void drawEditDOFXCtr(double pixelSize);
+    template <Mode> void drawDOFXCtr(double pixelSize);
+    template <Mode> void drawEditDOFYCtr(double pixelSize);
+    template <Mode> void drawDOFYCtr(double pixelSize);
+    template <Mode> void drawEditDOFWth(double pixelSize);
+    template <Mode> void drawDOFWth(double pixelSize);
+    template <Mode> void drawEditDOFHgt(double pixelSize);
+    template <Mode> void drawDOFHgt(double pixelSize);
+    template <Mode> void drawEditDOFAgl(double pixelSize);
+    template <Mode> void drawDOFAgl(double pixelSize);
 
     // -- data members ----------------------------------------------
     std::size_t m_index;

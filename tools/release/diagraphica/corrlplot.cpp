@@ -54,61 +54,7 @@ void CorrlPlot::setDiagram(Diagram* dgrm)
 // -- visualization functions  --------------------------------------
 
 
-void CorrlPlot::visualize(const bool& inSelectMode)
-{
-  // have textures been generated
-  if (!texCharOK)
-  {
-    genCharTex();
-  }
-
-  // check if positions are ok
-  if (geomChanged)
-  {
-    calcPositions();
-  }
-
-  // visualize
-  if (inSelectMode)
-  {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
-
-    //setScalingTransf();
-    //drawNumberPlot( inSelectMode );
-    drawPlot(inSelectMode);
-
-    finishSelectMode(
-      hits,
-      selectBuf);
-  }
-  else
-  {
-    clear();
-    //setScalingTransf();
-    drawAxes(
-      inSelectMode,
-      "x-label",
-      "y-label");
-    drawLabels(inSelectMode);
-    drawPlot(inSelectMode);
-    if (showDgrm)
-    {
-      drawDiagram(inSelectMode);
-    }
-  }
-}
-
-
-void CorrlPlot::drawAxes(
-  const bool& inSelectMode,
-  const std::string& /*xLbl*/,
-  const std::string& /*yLbl*/)
+template <Visualizer::Mode mode> void CorrlPlot::drawAxes()
 {
   QSizeF size = worldSize();
   double pix = pixelSize();
@@ -120,7 +66,7 @@ void CorrlPlot::drawAxes(
   double yBot = -0.5*size.height()+20*pix;
 
   // rendering mode
-  if (!inSelectMode)
+  if (mode == Visualizing)
   {
     // draw guides
     VisUtils::setColor(VisUtils::lightGray);
@@ -139,8 +85,12 @@ void CorrlPlot::drawAxes(
 }
 
 
-void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
+template <Visualizer::Mode mode> void CorrlPlot::drawLabels()
 {
+  if (mode == Selecting)
+  {
+    return;
+  }
   QSizeF size = worldSize();
   double pix = pixelSize();
   // calc scaling to use
@@ -164,10 +114,10 @@ void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
 }
 
 
-void CorrlPlot::drawPlot(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CorrlPlot::drawPlot()
 {
   // selection mode
-  if (inSelectMode)
+  if constexpr (mode == Selecting)
   {
     for (std::size_t i = 0; i < positions.size(); ++i)
     {
@@ -222,8 +172,12 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
 }
 
 
-void CorrlPlot::drawDiagram(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CorrlPlot::drawDiagram()
 {
+  if constexpr (mode == Selecting)
+  {
+    return;
+  }
   double pix = pixelSize();
   double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
@@ -247,17 +201,65 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
     1.0 - 4.0*pix/scaleDgrm,
     -1.0 - 4.0*pix/scaleDgrm);
   // diagram
-  diagram->visualize(
-    inSelectMode,
-    pixelSize(),
-    attrs,
-    vals);
+  diagram->draw<mode>(pixelSize(), attrs, vals);
 
   VisUtils::setColor(Qt::black);
   VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
 
   glPopMatrix();
 }
+
+
+template <Visualizer::Mode mode> void CorrlPlot::draw()
+{
+  // have textures been generated
+  if (!texCharOK)
+  {
+    genCharTex();
+  }
+
+  // check if positions are ok
+  if (geomChanged)
+  {
+    calcPositions();
+  }
+
+  // visualize
+  if constexpr (mode == Selecting)
+  {
+    GLint hits = 0;
+    GLuint selectBuf[512];
+    startSelectMode(
+      hits,
+      selectBuf,
+      2.0,
+      2.0);
+
+    //setScalingTransf();
+    //drawNumberPlot( inSelectMode );
+    drawPlot<mode>();
+
+    finishSelectMode(
+      hits,
+      selectBuf);
+  }
+  else
+  {
+    clear();
+    //setScalingTransf();
+    drawAxes<mode>();
+    drawLabels<mode>();
+    drawPlot<mode>();
+    if (showDgrm)
+    {
+      drawDiagram<mode>();
+    }
+  }
+}
+
+
+void CorrlPlot::visualize() { draw<Visualizing>(); }
+void CorrlPlot::select() { draw<Selecting>(); }
 
 
 // -- input event handlers ------------------------------------------

@@ -34,11 +34,8 @@ class DistrPlot : public Visualizer
     void setDiagram(Diagram* dgrm);
 
     // -- visualization functions  ----------------------------------
-    void visualize(const bool& inSelectMode);
-    void drawAxes(const bool& inSelectMode);
-    void drawLabels(const bool& inSelectMode);
-    void drawPlot(const bool& inSelectMode);
-    void drawDiagram(const bool& inSelectMode);
+    void visualize();
+    void select();
 
     // -- input event handlers --------------------------------------
     void handleMouseEvent(QMouseEvent* e);
@@ -50,8 +47,12 @@ class DistrPlot : public Visualizer
     void calcMaxNumber();
 
     // -- utility drawing functions ---------------------------------
-    // ***
-    //void clear();
+    template <Mode> void drawAxes();
+    template <Mode> void drawLabels();
+    template <Mode> void drawPlot();
+    template <Mode> void drawDiagram();
+    template <Mode> void draw();
+
     void setScalingTransf();
     void displTooltip(const std::size_t& posIdx);
 

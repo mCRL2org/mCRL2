@@ -41,7 +41,8 @@ class Simulator : public Visualizer
       const Position2D& pos);
 
     // -- visualization functions  ----------------------------------
-    void visualize(const bool& inSelectMode);
+    void visualize();
+    void select();
 
     // -- event handlers --------------------------------------------
     void handleMouseEvent(QMouseEvent* e);
@@ -60,7 +61,7 @@ class Simulator : public Visualizer
     void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
     void hoverCluster(Cluster *cluster, QList<Attribute *> attributes = QList<Attribute *>());
 
-  protected:
+  private:
     // -- utility functions -----------------------------------------
     void initFramesPrevNext();
     void initBundles();
@@ -94,14 +95,15 @@ class Simulator : public Visualizer
     void clear();
     QColor calcColor(std::size_t iter, std::size_t numr);
 
-    void drawFrameCurr(const bool& inSelectMode);
-    void drawFramesPrev(const bool& inSelectMode);
-    void drawFramesNext(const bool& inSelectMode);
-    void drawBdlLblGridPrev(const bool& inSelectMode);
-    void drawBdlLblGridNext(const bool& inSelectMode);
-    void drawBundlesPrev(const bool& inSelectMode);
-    void drawBundlesNext(const bool& inSelectMode);
-    void drawControls(const bool& inSelectMode);
+    template <Mode> void drawFrameCurr();
+    template <Mode> void drawFramesPrev();
+    template <Mode> void drawFramesNext();
+    template <Mode> void drawBdlLblGridPrev();
+    template <Mode> void drawBdlLblGridNext();
+    template <Mode> void drawBundlesPrev();
+    template <Mode> void drawBundlesNext();
+    template <Mode> void drawControls();
+    template <Mode> void draw();
     void animate();
 
     enum

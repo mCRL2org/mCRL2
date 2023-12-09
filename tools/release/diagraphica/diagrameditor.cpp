@@ -95,101 +95,100 @@ void DiagramEditor::deselectAll()
 // -- visualization functions  ----------------------------------
 
 
-void DiagramEditor::visualize(const bool& inSelectMode)
+void DiagramEditor::select()
 {
-  if (inSelectMode)
+  // set up picking
+  GLint hits = 0;
+  GLuint selectBuf[512];
+  startSelectMode(
+        hits,
+        selectBuf,
+        2.0,
+        2.0);
+
+  // render in select mode
+  glPushName(0);
+  m_diagram->draw<Selecting>(pixelSize());
+  glPopName();
+
+  // finish up picking
+  finishSelectMode(
+        hits,
+        selectBuf);
+}
+
+
+void DiagramEditor::visualize()
+{
+  clear();
+  m_diagram->draw<Visualizing>(pixelSize());
+
+  if (m_mouseDrag && m_lastMouseEvent->buttons() == Qt::LeftButton)
   {
-    // set up picking
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-          hits,
-          selectBuf,
-          2.0,
-          2.0);
+    double pix = pixelSize();
 
-    // render in select mode
-    glPushName(0);
-    m_diagram->visualize(inSelectMode, pixelSize());
-    glPopName();
+    QPointF start = worldCoordinate(m_mouseDragStart);
+    QPointF stop = worldCoordinate(m_lastMouseEvent->pos());
 
-    // finish up picking
-    finishSelectMode(
-          hits,
-          selectBuf);
-  }
-  else
-  {
-    clear();
-    m_diagram->visualize(inSelectMode, pixelSize());
+    QRectF gridCoordinates = m_diagram->gridCoordinates();
 
-    if (m_mouseDrag && m_lastMouseEvent->buttons() == Qt::LeftButton)
+    qreal x1 = qMin(start.x(), gridCoordinates.right());
+    qreal y1 = qMin(start.y(), gridCoordinates.top());
+    qreal x2 = qMax(stop.x(), gridCoordinates.left());
+    qreal y2 = qMax(stop.y(), gridCoordinates.bottom());
+
+    x1 = qMax(x1, gridCoordinates.left());
+    y1 = qMax(y1, gridCoordinates.bottom());
+    x2 = qMin(x2, gridCoordinates.right());
+    y2 = qMin(y2, gridCoordinates.top());
+
+    if (m_diagram->snapGrid())
     {
-      double pix = pixelSize();
+      double intv = m_diagram->gridInterval(pixelSize());
 
-      QPointF start = worldCoordinate(m_mouseDragStart);
-      QPointF stop = worldCoordinate(m_lastMouseEvent->pos());
+      x1 = Utils::rndToNearestMult(x1, intv);
+      y1 = Utils::rndToNearestMult(y1, intv);
+      x2 = Utils::rndToNearestMult(x2, intv);
+      y2 = Utils::rndToNearestMult(y2, intv);
+    }
 
-      QRectF gridCoordinates = m_diagram->gridCoordinates();
+    double dX = x2-x1;
+    double dY = y2-y1;
 
-      qreal x1 = qMin(start.x(), gridCoordinates.right());
-      qreal y1 = qMin(start.y(), gridCoordinates.top());
-      qreal x2 = qMax(stop.x(), gridCoordinates.left());
-      qreal y2 = qMax(stop.y(), gridCoordinates.bottom());
+    double xC = x1+0.5*dX;
+    double yC = y1+0.5*dY;
 
-      x1 = qMax(x1, gridCoordinates.left());
-      y1 = qMax(y1, gridCoordinates.bottom());
-      x2 = qMin(x2, gridCoordinates.right());
-      y2 = qMin(y2, gridCoordinates.top());
-
-      if (m_diagram->snapGrid())
+    VisUtils::setColor(VisUtils::darkGray);
+    if (m_editMode == EDIT_MODE_SELECT)
+    {
+      m_selection.setCoords(x1, y1, x2, y2);
+      if (m_currentSelectedShapeId == -1)
       {
-        double intv = m_diagram->gridInterval(pixelSize());
-
-        x1 = Utils::rndToNearestMult(x1, intv);
-        y1 = Utils::rndToNearestMult(y1, intv);
-        x2 = Utils::rndToNearestMult(x2, intv);
-        y2 = Utils::rndToNearestMult(y2, intv);
+        VisUtils::drawRect(x1, x2, y1, y2);
       }
-
-      double dX = x2-x1;
-      double dY = y2-y1;
-
-      double xC = x1+0.5*dX;
-      double yC = y1+0.5*dY;
-
-      VisUtils::setColor(VisUtils::darkGray);
-      if (m_editMode == EDIT_MODE_SELECT)
+    }
+    else
+    {
+      m_selection.setCoords(-1, -1, -1, -1);
+      if (m_editMode == EDIT_MODE_RECT || m_editMode == EDIT_MODE_NOTE)
       {
-        m_selection.setCoords(x1, y1, x2, y2);
-        if (m_currentSelectedShapeId == -1)
-        {
-          VisUtils::drawRect(x1, x2, y1, y2);
-        }
+        VisUtils::drawRect(x1, x2, y1, y2);
       }
-      else
+      else if (m_editMode == EDIT_MODE_ELLIPSE)
       {
-        m_selection.setCoords(-1, -1, -1, -1);
-        if (m_editMode == EDIT_MODE_RECT || m_editMode == EDIT_MODE_NOTE)
-        {
-          VisUtils::drawRect(x1, x2, y1, y2);
-        }
-        else if (m_editMode == EDIT_MODE_ELLIPSE)
-        {
-          VisUtils::drawEllipse(xC, yC, 0.5*dX, 0.5*dY, Shape::segNumHnt);
-        }
-        else if (m_editMode == EDIT_MODE_LINE)
-        {
-          VisUtils::drawLine(x1, x2, y1, y2);
-        }
-        else if (m_editMode == EDIT_MODE_ARROW)
-        {
-          VisUtils::drawArrow(x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix);
-        }
-        else if (m_editMode == EDIT_MODE_DARROW)
-        {
-          VisUtils::drawDArrow(x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix);
-        }
+        VisUtils::drawEllipse(xC, yC, 0.5*dX, 0.5*dY, Shape::segNumHnt);
+      }
+      else if (m_editMode == EDIT_MODE_LINE)
+      {
+        VisUtils::drawLine(x1, x2, y1, y2);
+      }
+      else if (m_editMode == EDIT_MODE_ARROW)
+      {
+        VisUtils::drawArrow(x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix);
+      }
+      else if (m_editMode == EDIT_MODE_DARROW)
+      {
+        VisUtils::drawDArrow(x1, x2, y1, y2, Shape::hdlSzeHnt*pix, 2.0*Shape::hdlSzeHnt*pix);
       }
     }
   }

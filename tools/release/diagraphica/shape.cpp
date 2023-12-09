@@ -231,270 +231,6 @@ QString Shape::dofLabel(int index)
 }
 
 
-// -- visualization ---------------------------------------------
-
-
-void Shape::visualize(
-    const bool& inSelectMode,
-    double pixelSize)
-{
-  m_variableValue = "";
-
-  // set up transf
-  glPushMatrix();
-  glTranslatef(m_xCenter, m_yCenter, 0.0);
-  glRotatef(m_angle, 0.0, 0.0, 1.0);
-
-  if (m_drawMode == MODE_NORMAL)
-  {
-    drawNormal(inSelectMode, pixelSize);
-  }
-  else if (m_drawMode == MODE_EDIT)
-  {
-    drawEdit(inSelectMode, pixelSize);
-  }
-  else
-  {
-    drawEditDOF(inSelectMode, pixelSize);
-  }
-
-  // clear transf
-  glPopMatrix();
-}
-
-
-void Shape::visualize(
-    double pixelSize,
-    const double& opacity,
-    const std::vector< Attribute* > attrs,
-    const std::vector< double > attrValIdcs
-    )
-{
-  m_variableValue = "";
-
-  double xC, yC; // center, [-1,1]
-  double xD, yD; // bound dist from ctr,norm
-  double aglH;   // rotation about hinge, degrees
-
-  double alpha = 0.0;
-
-  xC         = m_xCenter;
-  yC         = m_yCenter;
-  xD         = m_xDistance;
-  yD         = m_yDistance;
-  aglH       = 0.0;
-  QColor colFill = m_fillColor;
-
-  for (std::size_t i = 0; i < attrs.size(); ++i)
-  {
-    /*
-    if ( attrs[i]->getSizeCurValues() == 1 )
-        alpha = 0.0;
-    else
-        alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
-    */
-    if (attrs[i]->getSizeCurValues() == 1)
-    {
-      alpha = 0.0;
-    }
-    else
-    {
-      alpha = (double)attrValIdcs[i]/((double)attrs[i]->getSizeCurValues() - 1.0);
-    }
-
-    if (attrs[i] == m_xCenterDOF->attribute())
-    {
-      xC = m_xCenter + (1-alpha)*m_xCenterDOF->min() + alpha*m_xCenterDOF->max();
-    }
-
-    if (attrs[i] == m_yCenterDOF->attribute())
-    {
-      yC = m_yCenter + (1-alpha)*m_yCenterDOF->min() + alpha*m_yCenterDOF->max();
-    }
-
-    if (attrs[i] == m_widthDOF->attribute())
-    {
-      xD = m_xDistance + (1-alpha)*m_widthDOF->min() + alpha*m_widthDOF->max();
-    }
-
-    if (attrs[i] == m_heightDOF->attribute())
-    {
-      yD = m_yDistance + (1-alpha)*m_heightDOF->min() + alpha*m_heightDOF->max();
-    }
-
-    if (attrs[i] == m_angleDOF->attribute())
-    {
-      if (m_angleDOF->direction() > 0)
-      {
-        aglH = 0.0 + (1-alpha)*m_angleDOF->min() + alpha*m_angleDOF->max();
-      }
-      else
-      {
-        aglH = 360.0 - (1-alpha)*m_angleDOF->min() + alpha*m_angleDOF->max();
-      }
-    }
-
-    if (attrs[i] == m_colorDOF->attribute())
-    {
-      double intPtVal;
-      double dblPtVal;
-
-      dblPtVal = modf(alpha*(m_colorDOF->valueCount()-1), &intPtVal);
-
-      if (intPtVal < m_colorDOF->valueCount()-1)
-      {
-        colFill = QColor::fromHsvF((1.0-dblPtVal) * m_colorDOF->value((int)intPtVal) + dblPtVal * m_colorDOF->value((int)intPtVal+1), 1.0, 1.0);
-      }
-      else
-      {
-        colFill = QColor::fromHsvF(m_colorDOF->value((int)intPtVal), 1.0, 1.0);
-      }
-    }
-
-    if (attrs[i] == m_opacityDOF->attribute())
-    {
-      double intPtVal;
-      double dblPtVal;
-
-      dblPtVal = modf(alpha*(m_opacityDOF->valueCount()-1), &intPtVal);
-
-      if (intPtVal < m_opacityDOF->valueCount()-1)
-      {
-        colFill.setAlphaF((1.0-dblPtVal)*m_opacityDOF->value((int)intPtVal) + dblPtVal*m_opacityDOF->value((int)intPtVal+1));
-      }
-      else
-      {
-        colFill.setAlphaF(m_opacityDOF->value((int)intPtVal));
-      }
-    }
-    if (attrs[i] == m_textDOF->attribute() && attrs[i]->getSizeCurValues() > 0)
-    {
-      m_variableValue = QString::fromStdString(attrs[i]->getCurValue((int) attrValIdcs[i])->getValue());
-    }
-  }
-
-  colFill.setAlphaF(colFill.alphaF() * opacity);
-
-  QColor colLine = m_lineColor;
-  colLine.setAlphaF(colLine.alphaF() * opacity);
-
-  // set up transf
-  glPushMatrix();
-
-  // move to center pos & rotate
-  glTranslatef(xC, yC, 0.0);
-  glRotatef(m_angle, 0.0, 0.0, 1.0);
-
-  // move to hinge pos & rotate
-  glTranslatef(m_xHinge, m_yHinge, 0.0);
-  glRotatef(aglH, 0.0, 0.0, 1.0);
-  glTranslatef(-m_xHinge, -m_yHinge, 0.0);
-
-  VisUtils::enableLineAntiAlias();
-  VisUtils::enableBlending();
-
-  if (m_shapeType == TYPE_RECT)
-  {
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colFill);
-    VisUtils::fillRect(
-          -xD,  xD,   // new
-          yD, -yD);  // new
-    VisUtils::setColor(colLine);
-    VisUtils::drawRect(
-          -xD,  xD,   // new
-          yD, -yD);  // new
-  }
-  else if (m_shapeType == TYPE_RECT)
-  {
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colFill);
-    VisUtils::fillRect(
-          -xD,  xD,   // new
-          yD, -yD);  // new
-    VisUtils::setColor(colLine);
-    VisUtils::drawRect(
-          -xD,  xD,   // new
-          yD, -yD);  // new
-  }
-  else if (m_shapeType == TYPE_ELLIPSE)
-  {
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colFill);
-    VisUtils::fillEllipse(
-          0.0, 0.0,
-          xD,  yD,
-          segNumHnt);
-    VisUtils::setColor(colLine);
-    VisUtils::drawEllipse(
-          0.0, 0.0,
-          xD,  yD,
-          segNumHnt);
-  }
-  else if (m_shapeType == TYPE_LINE)
-  {
-    //VisUtils::setColor( colLin );
-    VisUtils::setColor(colFill);
-    VisUtils::drawLine(
-          -xD,  xD,
-          yD, -yD);
-  }
-  else if (m_shapeType == TYPE_ARROW)
-  {
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colFill);
-    VisUtils::fillArrow(
-          -xD,         xD,
-          yD,        -yD,
-          hdlSzeHnt*pixelSize, 2*hdlSzeHnt*pixelSize);
-
-    VisUtils::setColor(colLine);
-    VisUtils::drawArrow(
-          -xD,       xD,
-          yD,      -yD,
-          hdlSzeHnt*pixelSize, 2*hdlSzeHnt*pixelSize);
-  }
-  else if (m_shapeType == TYPE_DARROW)
-  {
-    //VisUtils::setColor( colFil );
-    VisUtils::setColor(colFill);
-    VisUtils::fillDArrow(
-          -xD,         xD,
-          yD,        -yD,
-          hdlSzeHnt*pixelSize, 2*hdlSzeHnt*pixelSize);
-    VisUtils::setColor(colLine);
-    VisUtils::drawDArrow(
-          -xD,         xD,
-          yD,        -yD,
-          hdlSzeHnt*pixelSize, 2*hdlSzeHnt*pixelSize);
-  }
-  drawText(pixelSize);   // Draw the textual values of the shape
-  VisUtils::disableBlending();
-  VisUtils::disableLineAntiAlias();
-
-  // clear transf
-  glPopMatrix();
-}
-
-
-void Shape::setTransf()
-{
-  // set up transf
-  VisUtils::setTransf(
-        m_xCenter,   m_yCenter,
-        m_xDistance,   m_yDistance,
-        m_xHinge,   m_yHinge,
-        m_angle, 0.0);
-}
-
-
-void Shape::clrTransf()
-{
-  // clear transf
-  VisUtils::clrTransf();
-}
-
-
 // -- event handlers --------------------------------------------
 
 
@@ -599,11 +335,35 @@ void Shape::handleHitEdtDOFAgl(const std::size_t& hdlIdx)
 // -- private visualization functions -------------------------------
 
 
-void Shape::drawNormal(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawText(double pixelSize)
 {
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
+  {
+    return;
+  }
+  if (!m_note.isEmpty() || !m_variableValue.isEmpty())
+  {
+    QString text = m_note;
+    if (!text.isEmpty() && !m_variableValue.isEmpty())
+      text.append(" ");
+    text.append(m_variableValue);
+
+
+    if (!m_texturesGenerated)
+    {
+      VisUtils::genCharTextures(m_texCharId, m_texChar);
+      m_texturesGenerated = true;
+    }
+
+    VisUtils::setColor(colTxt);
+    VisUtils::drawLabelInBoundBox(m_texCharId, -m_xDistance, m_xDistance, m_yDistance, -m_yDistance, m_textSize*pixelSize/CHARHEIGHT, text.toStdString());
+  }
+}
+
+
+template <Visualizer::Mode mode> void Shape::drawNormal(double pixelSize)
+{
+  if constexpr (mode == Visualizer::Selecting)
   {
     if (m_shapeType == TYPE_NOTE)
     {
@@ -716,44 +476,20 @@ void Shape::drawNormal(
             m_yDistance,     -m_yDistance,
             hdlSzeHnt*pixelSize, 2*hdlSzeHnt*pixelSize);
     }
-    drawText(pixelSize);   // Draw the textual values of the shape
+    drawText<mode>(pixelSize);   // Draw the textual values of the shape
     VisUtils::disableLineAntiAlias();
   }
 }
 
 
-void Shape::drawText(double pixelSize)
-{
-  if (!m_note.isEmpty() || !m_variableValue.isEmpty())
-  {
-    QString text = m_note;
-    if (!text.isEmpty() && !m_variableValue.isEmpty())
-      text.append(" ");
-    text.append(m_variableValue);
-
-
-    if (!m_texturesGenerated)
-    {
-      VisUtils::genCharTextures(m_texCharId, m_texChar);
-      m_texturesGenerated = true;
-    }
-
-    VisUtils::setColor(colTxt);
-    VisUtils::drawLabelInBoundBox(m_texCharId, -m_xDistance, m_xDistance, m_yDistance, -m_yDistance, m_textSize*pixelSize/CHARHEIGHT, text.toStdString());
-  }
-}
-
-
-void Shape::drawEdit(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawEdit(double pixelSize)
 {
   double hdlDelta = hdlSzeHnt*pixelSize;
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     // draw shape
-    drawNormal(inSelectMode, pixelSize);
+    drawNormal<mode>(pixelSize);
 
     glPushName(ID_HDL_CTR);
     VisUtils::fillRect(-m_xDistance, m_xDistance, m_yDistance, -m_yDistance);
@@ -814,7 +550,7 @@ void Shape::drawEdit(
     VisUtils::disableLineAntiAlias();
 
     // draw shape
-    drawNormal(inSelectMode, pixelSize);
+    drawNormal<mode>(pixelSize);
 
     // enable antialiasing
     VisUtils::enableLineAntiAlias();
@@ -921,83 +657,81 @@ void Shape::drawEdit(
 }
 
 
-void Shape::drawEditDOF(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawEditDOF(double pixelSize)
 {
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     // draw shape
-    drawNormal(inSelectMode, pixelSize);
+    drawNormal<mode>(pixelSize);
 
     if (m_drawMode == MODE_EDIT_DOF_XCTR)
     {
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
 
-      drawEditDOFXCtr(inSelectMode, pixelSize);
+      drawEditDOFXCtr<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_YCTR)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
 
-      drawEditDOFYCtr(inSelectMode, pixelSize);
+      drawEditDOFYCtr<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_WTH)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
 
-      drawEditDOFWth(inSelectMode, pixelSize);
+      drawEditDOFWth<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_HGT)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
 
-      drawEditDOFHgt(inSelectMode, pixelSize);
+      drawEditDOFHgt<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_AGL)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
 
-      drawEditDOFAgl(inSelectMode, pixelSize);
+      drawEditDOFAgl<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_COL)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_OPA)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_TEXT)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
     }
   }
   else
@@ -1011,86 +745,84 @@ void Shape::drawEditDOF(
     VisUtils::disableLineAntiAlias();
 
     // draw shape
-    drawNormal(inSelectMode, pixelSize);
+    drawNormal<mode>(pixelSize);
 
     VisUtils::enableLineAntiAlias();
     if (m_drawMode == MODE_EDIT_DOF_XCTR)
     {
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
 
-      drawEditDOFXCtr(inSelectMode, pixelSize);
+      drawEditDOFXCtr<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_YCTR)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
 
-      drawEditDOFYCtr(inSelectMode, pixelSize);
+      drawEditDOFYCtr<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_WTH)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
 
-      drawEditDOFWth(inSelectMode, pixelSize);
+      drawEditDOFWth<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_HGT)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
 
-      drawEditDOFHgt(inSelectMode, pixelSize);
+      drawEditDOFHgt<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_AGL)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
 
-      drawEditDOFAgl(inSelectMode, pixelSize);
+      drawEditDOFAgl<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_COL)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_OPA)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
     }
     else if (m_drawMode == MODE_EDIT_DOF_TEXT)
     {
-      drawDOFXCtr(inSelectMode, pixelSize);
-      drawDOFYCtr(inSelectMode, pixelSize);
-      drawDOFWth(inSelectMode, pixelSize);
-      drawDOFHgt(inSelectMode, pixelSize);
-      drawDOFAgl(inSelectMode, pixelSize);
+      drawDOFXCtr<mode>(pixelSize);
+      drawDOFYCtr<mode>(pixelSize);
+      drawDOFWth<mode>(pixelSize);
+      drawDOFHgt<mode>(pixelSize);
+      drawDOFAgl<mode>(pixelSize);
     }
     VisUtils::disableLineAntiAlias();
   }
 }
 
 
-void Shape::drawDOFXCtr(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawDOFXCtr(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
   double xBeg   = m_xCenterDOF->min();
@@ -1099,7 +831,7 @@ void Shape::drawDOFXCtr(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {}
   else
   {
@@ -1211,9 +943,7 @@ void Shape::drawDOFXCtr(
 }
 
 
-void Shape::drawEditDOFXCtr(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawEditDOFXCtr(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
   double xBeg   = m_xCenterDOF->min();
@@ -1222,7 +952,7 @@ void Shape::drawEditDOFXCtr(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     // pointing right
     if (xEnd <= xBeg)
@@ -1384,9 +1114,7 @@ void Shape::drawEditDOFXCtr(
 }
 
 
-void Shape::drawDOFYCtr(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawDOFYCtr(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
   double yBeg   = m_yCenterDOF->min();
@@ -1395,7 +1123,7 @@ void Shape::drawDOFYCtr(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {}
   else
   {
@@ -1506,9 +1234,7 @@ void Shape::drawDOFYCtr(
 }
 
 
-void Shape::drawEditDOFYCtr(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawEditDOFYCtr(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
   double yBeg   = m_yCenterDOF->min();
@@ -1517,7 +1243,7 @@ void Shape::drawEditDOFYCtr(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     // pointing down
     if (yEnd < yBeg)
@@ -1678,15 +1404,13 @@ void Shape::drawEditDOFYCtr(
 }
 
 
-void Shape::drawEditDOFWth(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawEditDOFWth(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
   double wBeg   = m_widthDOF->min();
   double wEnd   = m_widthDOF->max();
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     // pointing right
     if (wBeg <= wEnd)
@@ -1866,15 +1590,13 @@ void Shape::drawEditDOFWth(
 }
 
 
-void Shape::drawDOFWth(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawDOFWth(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
   double wBeg   = m_widthDOF->min();
   double wEnd   = m_widthDOF->max();
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {}
   else
   {
@@ -2009,15 +1731,13 @@ void Shape::drawDOFWth(
 }
 
 
-void Shape::drawEditDOFHgt(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawEditDOFHgt(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
   double hBeg   = m_heightDOF->min();
   double hEnd   = m_heightDOF->max();
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     // pointing up
     if (hBeg <= hEnd)
@@ -2197,15 +1917,13 @@ void Shape::drawEditDOFHgt(
 }
 
 
-void Shape::drawDOFHgt(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawDOFHgt(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
   double hBeg   = m_heightDOF->min();
   double hEnd   = m_heightDOF->max();
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {}
   else
   {
@@ -2340,16 +2058,14 @@ void Shape::drawDOFHgt(
 }
 
 
-void Shape::drawEditDOFAgl(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
 
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     double dstHgeCtr, dstHgeHdl;
     double aglRef, aglBeg, aglEnd;
@@ -2675,16 +2391,14 @@ void Shape::drawEditDOFAgl(
 }
 
 
-void Shape::drawDOFAgl(
-    const bool& inSelectMode,
-    double pixelSize)
+template <Visualizer::Mode mode> void Shape::drawDOFAgl(double pixelSize)
 {
   double hdlDOF = hdlSzeHnt*pixelSize;
 
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {}
   else
   {
@@ -2836,6 +2550,275 @@ void Shape::drawDOFAgl(
   }
 
   glPopMatrix();
+}
+
+
+// -- visualization ---------------------------------------------
+
+
+template <Visualizer::Mode mode> void Shape::draw(double pixelSize)
+{
+  m_variableValue = "";
+
+  // set up transf
+  glPushMatrix();
+  glTranslatef(m_xCenter, m_yCenter, 0.0);
+  glRotatef(m_angle, 0.0, 0.0, 1.0);
+
+  if (m_drawMode == MODE_NORMAL)
+  {
+    drawNormal<mode>(pixelSize);
+  }
+  else if (m_drawMode == MODE_EDIT)
+  {
+    drawEdit<mode>(pixelSize);
+  }
+  else
+  {
+    drawEditDOF<mode>(pixelSize);
+  }
+
+  // clear transf
+  glPopMatrix();
+}
+template void Shape::draw<Visualizer::Selecting>(double pixelSize);
+template void Shape::draw<Visualizer::Visualizing>(double pixelSize);
+
+template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
+  const std::vector< Attribute* > attrs,
+  const std::vector< double > attrValIdcs,
+  const double& opacity)
+{
+  if constexpr (mode == Visualizer::Selecting)
+  {
+    return;
+  }
+  m_variableValue = "";
+
+  double xC, yC; // center, [-1,1]
+  double xD, yD; // bound dist from ctr,norm
+  double aglH;   // rotation about hinge, degrees
+
+  double alpha = 0.0;
+
+  xC = m_xCenter;
+  yC = m_yCenter;
+  xD = m_xDistance;
+  yD = m_yDistance;
+  aglH = 0.0;
+  QColor colFill = m_fillColor;
+
+  for (std::size_t i = 0; i < attrs.size(); ++i)
+  {
+    /*
+    if ( attrs[i]->getSizeCurValues() == 1 )
+        alpha = 0.0;
+    else
+        alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
+    */
+    if (attrs[i]->getSizeCurValues() == 1)
+    {
+      alpha = 0.0;
+    }
+    else
+    {
+      alpha = (double)attrValIdcs[i] / ((double)attrs[i]->getSizeCurValues() - 1.0);
+    }
+
+    if (attrs[i] == m_xCenterDOF->attribute())
+    {
+      xC = m_xCenter + (1 - alpha) * m_xCenterDOF->min() + alpha * m_xCenterDOF->max();
+    }
+
+    if (attrs[i] == m_yCenterDOF->attribute())
+    {
+      yC = m_yCenter + (1 - alpha) * m_yCenterDOF->min() + alpha * m_yCenterDOF->max();
+    }
+
+    if (attrs[i] == m_widthDOF->attribute())
+    {
+      xD = m_xDistance + (1 - alpha) * m_widthDOF->min() + alpha * m_widthDOF->max();
+    }
+
+    if (attrs[i] == m_heightDOF->attribute())
+    {
+      yD = m_yDistance + (1 - alpha) * m_heightDOF->min() + alpha * m_heightDOF->max();
+    }
+
+    if (attrs[i] == m_angleDOF->attribute())
+    {
+      if (m_angleDOF->direction() > 0)
+      {
+        aglH = 0.0 + (1 - alpha) * m_angleDOF->min() + alpha * m_angleDOF->max();
+      }
+      else
+      {
+        aglH = 360.0 - (1 - alpha) * m_angleDOF->min() + alpha * m_angleDOF->max();
+      }
+    }
+
+    if (attrs[i] == m_colorDOF->attribute())
+    {
+      double intPtVal;
+      double dblPtVal;
+
+      dblPtVal = modf(alpha * (m_colorDOF->valueCount() - 1), &intPtVal);
+
+      if (intPtVal < m_colorDOF->valueCount() - 1)
+      {
+        colFill = QColor::fromHsvF((1.0 - dblPtVal) * m_colorDOF->value((int)intPtVal) + dblPtVal * m_colorDOF->value((int)intPtVal + 1), 1.0, 1.0);
+      }
+      else
+      {
+        colFill = QColor::fromHsvF(m_colorDOF->value((int)intPtVal), 1.0, 1.0);
+      }
+    }
+
+    if (attrs[i] == m_opacityDOF->attribute())
+    {
+      double intPtVal;
+      double dblPtVal;
+
+      dblPtVal = modf(alpha * (m_opacityDOF->valueCount() - 1), &intPtVal);
+
+      if (intPtVal < m_opacityDOF->valueCount() - 1)
+      {
+        colFill.setAlphaF((1.0 - dblPtVal) * m_opacityDOF->value((int)intPtVal) + dblPtVal * m_opacityDOF->value((int)intPtVal + 1));
+      }
+      else
+      {
+        colFill.setAlphaF(m_opacityDOF->value((int)intPtVal));
+      }
+    }
+    if (attrs[i] == m_textDOF->attribute() && attrs[i]->getSizeCurValues() > 0)
+    {
+      m_variableValue = QString::fromStdString(attrs[i]->getCurValue((int)attrValIdcs[i])->getValue());
+    }
+  }
+
+  colFill.setAlphaF(colFill.alphaF() * opacity);
+
+  QColor colLine = m_lineColor;
+  colLine.setAlphaF(colLine.alphaF() * opacity);
+
+  // set up transf
+  glPushMatrix();
+
+  // move to center pos & rotate
+  glTranslatef(xC, yC, 0.0);
+  glRotatef(m_angle, 0.0, 0.0, 1.0);
+
+  // move to hinge pos & rotate
+  glTranslatef(m_xHinge, m_yHinge, 0.0);
+  glRotatef(aglH, 0.0, 0.0, 1.0);
+  glTranslatef(-m_xHinge, -m_yHinge, 0.0);
+
+  VisUtils::enableLineAntiAlias();
+  VisUtils::enableBlending();
+
+  if (m_shapeType == TYPE_RECT)
+  {
+    //VisUtils::setColor( colFil );
+    VisUtils::setColor(colFill);
+    VisUtils::fillRect(
+      -xD, xD,   // new
+      yD, -yD);  // new
+    VisUtils::setColor(colLine);
+    VisUtils::drawRect(
+      -xD, xD,   // new
+      yD, -yD);  // new
+  }
+  else if (m_shapeType == TYPE_RECT)
+  {
+    //VisUtils::setColor( colFil );
+    VisUtils::setColor(colFill);
+    VisUtils::fillRect(
+      -xD, xD,   // new
+      yD, -yD);  // new
+    VisUtils::setColor(colLine);
+    VisUtils::drawRect(
+      -xD, xD,   // new
+      yD, -yD);  // new
+  }
+  else if (m_shapeType == TYPE_ELLIPSE)
+  {
+    //VisUtils::setColor( colFil );
+    VisUtils::setColor(colFill);
+    VisUtils::fillEllipse(
+      0.0, 0.0,
+      xD, yD,
+      segNumHnt);
+    VisUtils::setColor(colLine);
+    VisUtils::drawEllipse(
+      0.0, 0.0,
+      xD, yD,
+      segNumHnt);
+  }
+  else if (m_shapeType == TYPE_LINE)
+  {
+    //VisUtils::setColor( colLin );
+    VisUtils::setColor(colFill);
+    VisUtils::drawLine(
+      -xD, xD,
+      yD, -yD);
+  }
+  else if (m_shapeType == TYPE_ARROW)
+  {
+    //VisUtils::setColor( colFil );
+    VisUtils::setColor(colFill);
+    VisUtils::fillArrow(
+      -xD, xD,
+      yD, -yD,
+      hdlSzeHnt * pixelSize, 2 * hdlSzeHnt * pixelSize);
+
+    VisUtils::setColor(colLine);
+    VisUtils::drawArrow(
+      -xD, xD,
+      yD, -yD,
+      hdlSzeHnt * pixelSize, 2 * hdlSzeHnt * pixelSize);
+  }
+  else if (m_shapeType == TYPE_DARROW)
+  {
+    //VisUtils::setColor( colFil );
+    VisUtils::setColor(colFill);
+    VisUtils::fillDArrow(
+      -xD, xD,
+      yD, -yD,
+      hdlSzeHnt * pixelSize, 2 * hdlSzeHnt * pixelSize);
+    VisUtils::setColor(colLine);
+    VisUtils::drawDArrow(
+      -xD, xD,
+      yD, -yD,
+      hdlSzeHnt * pixelSize, 2 * hdlSzeHnt * pixelSize);
+  }
+  drawText<mode>(pixelSize);   // Draw the textual values of the shape
+  VisUtils::disableBlending();
+  VisUtils::disableLineAntiAlias();
+
+  // clear transf
+  glPopMatrix();
+}
+template void Shape::draw<Visualizer::Visualizing>(double pixelSize,
+  const std::vector< Attribute* > attrs,
+  const std::vector< double > attrValIdcs,
+  const double& opacity);
+
+
+void Shape::setTransf()
+{
+  // set up transf
+  VisUtils::setTransf(
+    m_xCenter, m_yCenter,
+    m_xDistance, m_yDistance,
+    m_xHinge, m_yHinge,
+    m_angle, 0.0);
+}
+
+
+void Shape::clrTransf()
+{
+  // clear transf
+  VisUtils::clrTransf();
 }
 
 

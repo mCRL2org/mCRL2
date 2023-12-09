@@ -25,40 +25,13 @@ ColorChooser::ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinate
 }
 
 
-void ColorChooser::visualize(const bool& inSelectMode)
-{
-  if (inSelectMode)
-  {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(hits, selectBuf, 2.0, 2.0);
-
-    drawPoints(inSelectMode);
-
-    finishSelectMode(hits, selectBuf);
-  }
-  else
-  {
-    clear();
-    if (m_type == HueColor)
-    {
-      drawColorSpectrum();
-    }
-    else
-    {
-      drawGrayScale();
-    }
-    drawPath(inSelectMode);
-    drawPoints(inSelectMode);
-  }
-}
-
 void ColorChooser::handleMouseEnterEvent()
 {
   emit activated();
   // normal mode
   update();
 }
+
 
 void ColorChooser::handleMouseLeaveEvent()
 {
@@ -107,8 +80,13 @@ void ColorChooser::handleMouseEvent(QMouseEvent* e)
   }
 }
 
-void ColorChooser::drawColorSpectrum()
+
+template <Visualizer::Mode mode> void ColorChooser::drawColorSpectrum()
 {
+  if constexpr (mode == Selecting)
+  {
+    return;
+  }
   QSizeF size = worldSize();
 
   // calc size of bounding box
@@ -126,8 +104,12 @@ void ColorChooser::drawColorSpectrum()
 }
 
 
-void ColorChooser::drawGrayScale()
+template <Visualizer::Mode mode> void ColorChooser::drawGrayScale()
 {
+  if constexpr (mode == Selecting)
+  {
+    return;
+  }
   QSizeF size = worldSize();
 
   // calc size of bounding box
@@ -149,7 +131,7 @@ void ColorChooser::drawGrayScale()
 }
 
 
-void ColorChooser::drawPath(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ColorChooser::drawPath()
 {
   double xRgt;
   double yTop;
@@ -161,7 +143,7 @@ void ColorChooser::drawPath(const bool& inSelectMode)
   xRgt =  0.5*size.width();
   yTop =  0.5*size.height();
 
-  if (!inSelectMode)
+  if constexpr (mode == Visualizing)
   {
     VisUtils::enableLineAntiAlias();
     for (int i = 0; i < m_yCoordinates->size()-1; ++i)
@@ -181,7 +163,7 @@ void ColorChooser::drawPath(const bool& inSelectMode)
 }
 
 
-void ColorChooser::drawPoints(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ColorChooser::drawPoints()
 {
   double xRgt;
   double yTop;
@@ -202,7 +184,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
   size = m_yCoordinates->size();
 
   // selection mode
-  if (inSelectMode)
+  if constexpr (mode == Selecting)
   {
     for (std::size_t i = 0; i < size-1; ++i)
     {
@@ -343,6 +325,39 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
     VisUtils::disableLineAntiAlias();
   }
 }
+
+
+template <Visualizer::Mode mode> void ColorChooser::draw()
+{
+  if constexpr (mode == Selecting)
+  {
+    GLint hits = 0;
+    GLuint selectBuf[512];
+    startSelectMode(hits, selectBuf, 2.0, 2.0);
+
+    drawPoints<mode>();
+
+    finishSelectMode(hits, selectBuf);
+  }
+  else
+  {
+    clear();
+    if (m_type == HueColor)
+    {
+      drawColorSpectrum<mode>();
+    }
+    else
+    {
+      drawGrayScale<mode>();
+    }
+    drawPath<mode>();
+    drawPoints<mode>();
+  }
+}
+
+
+void ColorChooser::visualize() { draw<Visualizing>(); }
+void ColorChooser::select() { draw<Selecting>(); }
 
 
 void ColorChooser::handleHits(const std::vector< int > &ids)

@@ -124,49 +124,12 @@ void Diagram::removeShape(int index)
 }
 
 
-// -- vis functions -------------------------------------------------
-
-
-void Diagram::visualize(
-  const bool& inSelectMode,
-  double pixelSize)
-// Used by diagram editor.
-{
-  drawBorder(inSelectMode, pixelSize);
-  if (m_showGrid)
-  {
-    drawGrid(inSelectMode, pixelSize);
-  }
-  drawShapes(inSelectMode, pixelSize);
-}
-
-void Diagram::visualize(
-  const bool& inSelectMode,
-  double pixelSize,
-  const std::vector< Attribute* > attrs,
-  const std::vector< double > attrValIdcs,
-  double opacity)
-// Used by visualizers.
-{
-  drawBorderFlush(inSelectMode);
-  if (!inSelectMode)
-  {
-    for (int i = 0; i < m_shapes.size(); ++i)
-    {
-      m_shapes[i]->visualize(pixelSize, opacity, attrs, attrValIdcs);
-    }
-  }
-}
-
-
 // -- private utility functions -------------------------------------
 
 
-void Diagram::drawAxes(
-  const bool& inSelectMode,
-  double pixelSize)
+template <Visualizer::Mode mode> void Diagram::drawAxes(double pixelSize)
 {
-  if (!inSelectMode)
+  if constexpr (mode == Visualizer::Visualizing)
   {
     VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
@@ -179,11 +142,9 @@ void Diagram::drawAxes(
 }
 
 
-void Diagram::drawBorder(
-  const bool& inSelectMode,
-  double pixelSize)
+template <Visualizer::Mode mode> void Diagram::drawBorder(double pixelSize)
 {
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     double xLft, xRgt, yTop, yBot;
 
@@ -216,10 +177,9 @@ void Diagram::drawBorder(
 }
 
 
-void Diagram::drawBorderFlush(
-  const bool& inSelectMode)
+template <Visualizer::Mode mode> void Diagram::drawBorderFlush()
 {
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
   }
@@ -235,11 +195,9 @@ void Diagram::drawBorderFlush(
 }
 
 
-void Diagram::drawBorderFlush(
-  const bool& inSelectMode,
-  const double& opacity)
+template <Visualizer::Mode mode> void Diagram::drawBorderFlush(const double& opacity)
 {
-  if (inSelectMode)
+  if constexpr (mode == Visualizer::Selecting)
   {
     VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
   }
@@ -256,11 +214,9 @@ void Diagram::drawBorderFlush(
 }
 
 
-void Diagram::drawGrid(
-  const bool& inSelectMode,
-  double pixelSize)
+template <Visualizer::Mode mode> void Diagram::drawGrid(double pixelSize)
 {
-  if (!inSelectMode)
+  if constexpr (mode == Visualizer::Visualizing)
   {
     double numIntervals = GRID_NUM_INTERV_HINT;
     double sizeInterval;
@@ -299,17 +255,54 @@ void Diagram::drawGrid(
 }
 
 
-void Diagram::drawShapes(
-  const bool& inSelectMode,
-  double pixelSize)
+template <Visualizer::Mode mode> void Diagram::drawShapes(double pixelSize)
 {
   for (int i = 0; i < m_shapes.size(); ++i)
   {
     glPushName((GLuint) i);
-    m_shapes[i]->visualize(inSelectMode, pixelSize);
+    m_shapes[i]->draw<mode>(pixelSize);
     glPopName();
   }
 }
 
+
+// -- vis functions -------------------------------------------------
+
+
+template <Visualizer::Mode mode> void Diagram::draw(double pixelSize)
+// Used by diagram editor.
+{
+  drawBorder<mode>(pixelSize);
+  if (m_showGrid)
+  {
+    drawGrid<mode>(pixelSize);
+  }
+  drawShapes<mode>(pixelSize);
+}
+template void Diagram::draw<Visualizer::Selecting>(double pixelSize);
+template void Diagram::draw<Visualizer::Visualizing>(double pixelSize);
+
+
+template <Visualizer::Mode mode> void Diagram::draw(double pixelSize,
+  const std::vector< Attribute* > attrs,
+  const std::vector< double > attrValIdcs,
+  double opacity)
+  // Used by visualizers.
+{
+  drawBorderFlush<mode>();
+  if constexpr (mode == Visualizer::Visualizing)
+  {
+    for (int i = 0; i < m_shapes.size(); ++i)
+    {
+      m_shapes[i]->draw<mode>(pixelSize, attrs, attrValIdcs, opacity);
+    }
+  }
+}
+template void Diagram::draw<Visualizer::Selecting> (double pixelSize,
+  const std::vector< Attribute* > attrs,
+  const std::vector< double > attrValIdcs, double opacity);
+template void Diagram::draw<Visualizer::Visualizing>(double pixelSize,
+  const std::vector< Attribute* > attrs,
+  const std::vector< double > attrValIdcs, double opacity);
 
 // -- end -----------------------------------------------------------

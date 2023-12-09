@@ -44,7 +44,10 @@ class Visualizer : public QOpenGLWidget
       const double& b);
 
     // -- visualization functions -----------------------------------
-    virtual void visualize(const bool& inSelectMode) = 0;
+    enum Mode { Visualizing, Selecting };
+
+    virtual void visualize() = 0;
+    virtual void select() = 0;
     virtual void setGeomChanged(const bool& flag);
     virtual void setDataChanged(const bool& flag);
 
@@ -89,16 +92,11 @@ class Visualizer : public QOpenGLWidget
     void genCushTex();
 
     // -- hit detection ---------------------------------------------
-    bool m_gl_initialized = false;
-    QOpenGLFramebufferObject* m_hit_FBO;
     virtual void processHits(
       GLint hits,
       GLuint buffer[]) = 0;
 
     // -- mouse -----------------------------------------------------
-
-    bool m_inSelectMode;
-
     std::unique_ptr<QMouseEvent> m_lastMouseEvent;   // The latest received event
     bool m_mouseDrag;               // The mouse is being dragged
     bool m_mouseDragReleased;       // The cursor was released after dragging
