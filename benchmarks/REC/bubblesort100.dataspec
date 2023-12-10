@@ -1,0 +1,40 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+sort NatList = struct
+  nil
+| Xcons (Xnat, NatList) ;
+
+map
+  d10 : Xnat ;
+  lt : Xnat # Xnat -> Xbool ;
+  bubsort : Xnat # NatList -> NatList ;
+  plus : Xnat # Xnat -> Xnat ;
+  times : Xnat # Xnat -> Xnat ;
+  rev : Xnat -> NatList ;
+  fact : Xnat -> Xnat ;
+var
+  N, M : Xnat ;
+  L : NatList ;
+eqn
+  d10 = s (s (s (s (s (s (s (s (s (s (d0)))))))))) ;
+  lt (d0,d0) = Xfalse ;
+  lt (d0, s (N)) = Xtrue ;
+  lt (s (N), d0) = Xfalse ;
+  lt (s (N), s (M)) = lt (N, M) ;
+  plus (d0, N) = N ;
+  plus (s (N), M) = s (plus (N, M)) ;
+  times (d0, N) = d0 ;
+  times (s (N), M) = plus (M, times (N, M)) ;
+  fact (d0) = s (d0) ;
+  fact (s (N)) = times (s (N), fact (N)) ;
+  rev (s (N)) = bubsort (s (N), rev (N)) ;
+  rev (d0) = Xcons (d0, nil) ;
+  bubsort (N, nil) = Xcons (N, nil) ;
+  lt (M, N) == Xtrue -> bubsort (N, Xcons (M, L)) = Xcons (M, bubsort (N, L)) ;
+  lt (M, N) == Xfalse -> bubsort (N, Xcons (M, L)) = Xcons (N, bubsort (M, L)) ;

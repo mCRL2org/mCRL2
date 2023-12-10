@@ -1288,7 +1288,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
         else
         {
           // This probabilistic state has more components. 
-          for (const std::pair<state_key_type, probability_fraction_type>& i: prob_state_map)
+          for (const auto& i: prob_state_map)
           {
             new_prob_state.add(i.first, i.second);
           }

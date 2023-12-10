@@ -221,8 +221,8 @@ class probabilistic_state
     void shrink_to_fit()
     {
       m_probabilistic_state.shrink_to_fit();
-      assert(m_probabilistic_state.size()>1 && m_single_state==std::size_t(-1) ||
-             m_probabilistic_state.size()==0 && m_single_state!=std::size_t(-1));
+      assert((m_probabilistic_state.size()>1 && m_single_state==std::size_t(-1)) ||
+             (m_probabilistic_state.size()==0 && m_single_state!=std::size_t(-1)));
 #ifndef NDEBUG
       PROBABILITY sum=PROBABILITY::zero();
       for(const state_probability_pair& p: m_probabilistic_state)

@@ -1,0 +1,117 @@
+sort Xbool = struct
+  T
+| F ;
+
+sort Xpos = struct
+  d1
+| cDub (Xbool, Xpos) ;
+
+sort Xint = struct
+  cInt (Xnat)
+| cNeg (Xpos) ;
+
+sort Xnat = struct
+  d0
+| cNat (Xpos) ;
+
+map
+  Xnot : Xbool -> Xbool ;
+  eqPos : Xpos # Xpos -> Xbool ;
+  lePos : Xpos # Xpos -> Xbool ;
+  ltPos : Xpos # Xpos -> Xbool ;
+  s : Xpos -> Xpos ;
+  addc : Xbool # Xpos # Xpos -> Xpos ;
+  XInt2Nat : Xint -> Xnat ;
+  minus : Xnat -> Xint ;
+  minus2 : Xnat # Xnat -> Xint ;
+  eq : Xnat # Xnat -> Xbool ;
+  XPos2Nat : Xpos -> Xnat ;
+  XNat2Pos : Xnat -> Xpos ;
+  le : Xnat # Xnat -> Xbool ;
+  lt : Xnat # Xnat -> Xbool ;
+  ge : Xnat # Xnat -> Xbool ;
+  gt : Xnat # Xnat -> Xbool ;
+  pre : Xpos -> Xnat ;
+  dub : Xbool # Xnat -> Xnat ;
+  plus : Xnat # Xnat -> Xnat ;
+  gtesubtPos : Xpos # Xpos -> Xnat ;
+  gtesubt : Xnat # Xnat -> Xnat ;
+  gtesubtb : Xbool # Xpos # Xpos -> Xnat ;
+  fib : Xnat -> Xnat ;
+  eqBool : Xbool # Xbool -> Xbool ;
+  and : Xbool # Xbool -> Xbool ;
+var
+  m, n : Xnat ;
+  b, c, d : Xbool ;
+  x, y : Xint ;
+  p, q : Xpos ;
+eqn
+  eqBool (T,b) = b ;
+  eqBool (F,T) = F ;
+  eqBool (F,F) = T ;
+  and (T,b) = b ;
+  and (F,b) = F ;
+  Xnot (T) = F ;
+  Xnot (F) = T ;
+  eqPos (d1,d1) = T ;
+  eqPos (d1,cDub (b,p)) = F ;
+  eqPos (cDub (b,p),d1) = F ;
+  eqPos (cDub (b,p),cDub (c,q)) = and (eqBool (b,c),eqPos (p,q)) ;
+  lePos (d1,p) = T ;
+  lePos (cDub (b,p),d1) = F ;
+  b == c -> lePos (cDub (b,p),cDub (c,q)) = lePos (p,q) ;
+  b != c && b == F -> lePos (cDub (b,p),cDub (c,q)) = lePos (p,q) ;
+  b != c && b == T -> lePos (cDub (b,p),cDub (c,q)) = ltPos (p,q) ;
+  ltPos (p,d1) = F ;
+  ltPos (d1,cDub (b,p)) = T ;
+  b == c -> ltPos (cDub (b,p),cDub (c,q)) = ltPos (p,q) ;
+  b != c && b == F -> ltPos (cDub (b,p),cDub (c,q)) = lePos (p,q) ;
+  b != c && b == T -> ltPos (cDub (b,p),cDub (c,q)) = ltPos (p,q) ;
+  s (d1) = cDub (F,d1) ;
+  s (cDub (F,p)) = cDub (T,p) ;
+  s (cDub (T,p)) = cDub (F,s (p)) ;
+  addc (F,d1,p) = s (p) ;
+  addc (T,d1,p) = s (s (p)) ;
+  addc (F,p,d1) = s (p) ;
+  addc (T,p,d1) = s (s (p)) ;
+  c == d -> addc (b,cDub (c,p),cDub (d,q)) = cDub (b,addc (c,p,q)) ;
+  c != d -> addc (b,cDub (c,p),cDub (d,q)) = cDub (Xnot (b),addc (c,p,q)) ;
+  XInt2Nat (cInt (n)) = n ;
+  minus (d0) = cInt (d0) ;
+  minus (cNat (p)) = cNeg (p) ;
+  ge (m,n) == T -> minus2 (m,n) = cInt (gtesubt (m,n)) ;
+  ge (m,n) == F -> minus2 (m,n) = minus (gtesubt (n,m)) ;
+  XPos2Nat (p) = cNat (p) ;
+  XNat2Pos (cNat (p)) = p ;
+  eq (d0,d0) = T ;
+  eq (d0,cNat (p)) = F ;
+  eq (cNat (p),d0) = F ;
+  eq (cNat (p),cNat (q)) = eqPos (p,q) ;
+  le (d0,n) = T ;
+  le (cNat (p),d0) = F ;
+  le (cNat (p),cNat (q)) = lePos (p,q) ;
+  lt (n,d0) = F ;
+  lt (d0,cNat (p)) = T ;
+  lt (cNat (p),cNat (q)) = ltPos (p,q) ;
+  ge (m,n) = le (n,m) ;
+  gt (m,n) = lt (n,m) ;
+  pre (d1) = d0 ;
+  pre (cDub (T,p)) = cNat (cDub (F,p)) ;
+  pre (cDub (F,p)) = dub (T,pre (p)) ;
+  dub (F,d0) = d0 ;
+  dub (T,d0) = cNat (d1) ;
+  dub (b,cNat (p)) = cNat (cDub (b,p)) ;
+  plus (d0,n) = n ;
+  plus (n,d0) = n ;
+  plus (cNat (p),cNat (q)) = cNat (addc (F,p,q)) ;
+  gtesubtPos (p,q) = gtesubtb (F,p,q) ;
+  gtesubt (n,d0) = n ;
+  gtesubt (cNat (p),cNat (q)) = gtesubtPos (p,q) ;
+  gtesubtb (F,p,d1) = pre (p) ;
+  gtesubtb (T,p,d1) = pre (XNat2Pos (pre (p))) ;
+  c == d -> gtesubtb (b,cDub (c,p),cDub (d,q)) = dub (b,gtesubtb (b,p,q)) ;
+  c != d && c == F -> gtesubtb (b,cDub (c,p),cDub (d,q)) = dub (Xnot (b),gtesubtb (T,p,q)) ;
+  c != d && c == T -> gtesubtb (b,cDub (c,p),cDub (d,q)) = dub (Xnot (b),gtesubtb (d,p,q)) ;
+  fib (d0) = d0 ;
+  fib (cNat (d1)) = cNat (d1) ;
+  fib (cNat (cDub (b,p))) = plus (fib (XInt2Nat (minus2 (cNat (cDub (b,p)),XPos2Nat (d1)))),fib (XInt2Nat (minus2 (cNat (cDub (b,p)),XPos2Nat (cDub (F,d1)))))) ;

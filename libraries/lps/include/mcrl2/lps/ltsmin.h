@@ -17,7 +17,7 @@
 #include "mcrl2/data/join.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/io.h"
-#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/explorer.h"
 #include "mcrl2/lps/parse.h"
 
 // For backwards compatibility
@@ -329,7 +329,9 @@ class pins
     std::vector<std::vector<std::size_t> > m_write_group;
     std::vector<std::vector<std::size_t> > m_update_group;
     lps::specification m_specification;
-    lps::next_state_generator m_generator;
+    typedef lps::explorer<false, false, lps::specification>  generator_type;
+    generator_type m_generator;
+    
     std::vector<data::variable> m_parameters_list;
     std::vector<std::string> m_process_parameter_names;
 
@@ -341,7 +343,7 @@ class pins
     // For guard-splitting we use a different generator with a different spec.
     // This second spec has guards removed from the conditions.
     lps::specification m_specification_reduced;
-    lps::next_state_generator m_generator_reduced;
+    generator_type m_generator_reduced;
 
     // The type mappings
     // m_data_types[0] ... m_data_types[N-1] contain the state parameter mappings
@@ -660,10 +662,10 @@ class pins
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     pins(const std::string& filename, const std::string& rewriter_strategy)
       : m_specification(load_specification(filename)),
-        m_generator(stochastic_specification(m_specification), data::rewriter(m_specification.data(), data::used_data_equation_selector(m_specification.data(), lps::find_function_symbols(m_specification), m_specification.global_variables()), data::parse_rewrite_strategy(rewriter_strategy))),
+        m_generator(m_specification, data::parse_rewrite_strategy(rewriter_strategy)),
         m_parameters_list(process().process_parameters().begin(), process().process_parameters().end()),
         m_specification_reduced(reduce_specification(m_specification)),
-        m_generator_reduced(stochastic_specification(m_specification_reduced), m_generator.get_rewriter())
+        m_generator_reduced(m_specification_reduced, data::parse_rewrite_strategy(rewriter_strategy))
     {
       initialize_read_write_groups();
 
@@ -817,7 +819,7 @@ class pins
     /// \brief Assigns the initial state to s.
     void get_initial_state(ltsmin_state_type& s)
     {
-      state initial_state = m_generator.initial_states().front().state(); // Only the first state of this state distribution is considered.
+      state initial_state(m_generator.initial_state().begin(), m_generator.initial_state().size());
       for (std::size_t i = 0; i < m_state_length; i++)
       {
         s[i] = state_type_map(i)[initial_state[i]];
@@ -863,15 +865,15 @@ class pins
       // data::data_expression_vector source = state_arguments;
       state source(state_arguments.begin(),nparams);
 
-      next_state_generator::enumerator_queue_t enumeration_queue;
-      for (next_state_generator::iterator i = m_generator.begin(source, &enumeration_queue); i; i++)
+      std::list<generator_type::transition> transitions = m_generator.out_edges(source);
+      for (const generator_type::transition& t: transitions)
       {
-        state destination = i->target_state();
+        state destination = t.state;
         for (std::size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
         }
-        labels[0] = action_label_type_map()[i->action()];
+        labels[0] = action_label_type_map()[t.action];
         f(dest, labels);
       }
     }
@@ -913,7 +915,7 @@ class pins
                StateFunction& f,
                const ltsmin_state_type& dest,
                int* const& labels,
-               lps::next_state_generator* generator)
+               generator_type* generator)
     {
       std::size_t nparams = process_parameter_count();
       data::data_expression_vector state_arguments(nparams);
@@ -923,15 +925,16 @@ class pins
       }
       state source(state_arguments.begin(),nparams);
 
-      next_state_generator::enumerator_queue_t enumeration_queue;
-      for (next_state_generator::iterator i = (*generator).begin(source, group, &enumeration_queue); i; i++)
+      std::list<generator_type::transition> transitions = generator->out_edges(source, group);
+
+      for (const generator_type::transition& t: transitions)
       {
-        state destination = i->target_state();
+        state destination = t.state;
         for (std::size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
         }
-        labels[0] = action_label_type_map()[i->action()];
+        labels[0] = action_label_type_map()[t.action];
         f(dest, labels);
       }
     }

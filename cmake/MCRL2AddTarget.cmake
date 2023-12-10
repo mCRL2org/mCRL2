@@ -10,8 +10,6 @@ function(mcrl2_add_library TARGET_NAME)
   # Finds header files, can be glob since it is only used to show headers in MSVC
   file(GLOB_RECURSE TARGET_INCLUDE_FILES "include/*.h")
 
-  # Install the header files for mCRL2 libraries
-  mcrl2_install_header_files(${TARGET_INCLUDE_FILES})
 
   # For dparser grammer files we need to generate a .c file using make_dparser, and include that file as dependency.
   foreach(GRAMMER_FILE ${ARG_DPARSER_SOURCES})
@@ -54,6 +52,10 @@ function(mcrl2_add_library TARGET_NAME)
     mcrl2_add_tests(${TARGET_NAME} "test/" "librarytest")
   endif()
 
+  # Install the header files for mCRL2 libraries
+  mcrl2_install_header_files(${TARGET_INCLUDE_FILES})
+
+  # Install the libraries only when we are using jittyc, or shared libraries.
   install(TARGETS ${TARGET_NAME}
     COMPONENT "Libraries"
     LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}

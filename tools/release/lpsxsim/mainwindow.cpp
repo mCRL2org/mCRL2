@@ -36,14 +36,14 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
   connect(m_ui.actionRandomPlay, SIGNAL(triggered()), this, SLOT(randomPlay()));
   connect(m_ui.actionStop, SIGNAL(triggered()), this, SLOT(stopPlay()));
   connect(m_ui.actionSetPlayDelay, SIGNAL(triggered()), this, SLOT(setPlayDelay()));
-  connect(m_ui.actionEnableTauPrioritisation, SIGNAL(toggled(bool)), this, SLOT(setTauPrioritization()));
+  connect(m_ui.actionAutoSelectProbability, SIGNAL(toggled(bool)), this, SLOT(setAutoSelectProbability()));
   connect(m_ui.actionOutput, SIGNAL(toggled(bool)), m_ui.dockWidget, SLOT(setVisible(bool)));
 
   connect(m_ui.traceTable, SIGNAL(itemSelectionChanged()), this, SLOT(stateSelected()));
-  connect(m_ui.traceTable, SIGNAL(cellActivated(int, int)), this, SLOT(truncateTrace(int)));
+  connect(m_ui.traceTable, SIGNAL(cellActivated(int, int)), this, SLOT(truncateTrace(int, int)));
   connect(m_ui.transitionTable, SIGNAL(cellActivated(int, int)), this, SLOT(selectTransition(int)));
 
-  connect(m_ui.dockWidget->widget(), SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+  connect(m_ui.dockWidget->widget(), SIGNAL(logMessage(QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QDateTime, QString, QString)));
 
   m_animationTimer->setInterval(1000);
   connect(m_animationTimer, SIGNAL(timeout()), this, SLOT(animationStep()));
@@ -64,8 +64,8 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
 
 void MainWindow::undoLast()
 {
-  selectState(m_selectedState - 1);
-  m_ui.actionUndo_last->setEnabled(m_selectedState > 0);
+  selectState(m_selected_state - 1);
+  m_ui.actionUndo_last->setEnabled(m_selected_state > 0);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -120,7 +120,7 @@ void MainWindow::loadTrace()
     return;
   }
 
-  m_selectedState = 0;
+  m_selected_state = 0;
   QMetaObject::invokeMethod(m_simulation, "load", Qt::BlockingQueuedConnection, Q_ARG(QString, filename));
 
   m_trace = m_simulation->trace();
@@ -198,7 +198,7 @@ void MainWindow::updateSimulation()
 {
   assert(m_simulation);
 
-  int selectedState = m_selectedState < m_trace.size() ? m_selectedState : m_trace.size() - 1;
+  int selectedState = static_cast<long long>(m_selected_state) < m_trace.size() ? m_selected_state : m_trace.size() - 1;
 
   int oldSize = m_ui.traceTable->rowCount();
   m_ui.traceTable->setRowCount(m_trace.size());
@@ -218,7 +218,7 @@ void MainWindow::updateSimulation()
     }
     else
     {
-      m_ui.traceTable->item(i, 1)->setText(m_trace[i - 1].transitions[m_trace[i - 1].transitionNumber].action);
+      m_ui.traceTable->item(i, 1)->setText(m_trace[i - 1].transitions[m_trace[i - 1].transitionNumber].action_or_probability); 
       m_ui.traceTable->item(i, 2)->setText(renderStateChange(m_trace[i - 1].state, m_trace[i].state));
     }
   }
@@ -231,7 +231,7 @@ void MainWindow::updateSimulation()
     m_ui.transitionTable->setItem(i, 0, item());
     m_ui.transitionTable->setItem(i, 1, item());
 
-    m_ui.transitionTable->item(i, 0)->setText(m_trace[selectedState].transitions[i].action);
+    m_ui.transitionTable->item(i, 0)->setText(m_trace[selectedState].transitions[i].action_or_probability); 
     m_ui.transitionTable->item(i, 1)->setText(renderStateChange(m_trace[selectedState].state, m_trace[selectedState].transitions[i].destination));
   }
   if (m_trace[selectedState].transitions.size() > 0)
@@ -243,10 +243,13 @@ void MainWindow::updateSimulation()
   m_ui.traceTable->resizeColumnToContents(2);
   m_ui.stateTable->resizeColumnToContents(1);
 
-  assert(m_trace[selectedState].state.size() == m_ui.stateTable->rowCount());
+  assert(m_trace[selectedState].is_probabilistic || m_trace[selectedState].state.size() == m_ui.stateTable->rowCount());
   for (int i = 0; i < m_trace[selectedState].state.size(); i++)
   {
-    m_ui.stateTable->item(i, 1)->setText(m_trace[selectedState].state[i]);
+    if (!m_trace[selectedState].is_probabilistic)
+    {
+      m_ui.stateTable->item(i, 1)->setText(m_trace[selectedState].state[i]);
+    }
   }
 }
 
@@ -259,7 +262,7 @@ void MainWindow::stateSelected()
   }
 }
 
-void MainWindow::setTauPrioritization()
+void MainWindow::setAutoSelectProbability()
 {
   assert(m_ui.traceTable->isEnabled());
 
@@ -268,7 +271,7 @@ void MainWindow::setTauPrioritization()
     QEventLoop loop;
     connect(m_simulation, SIGNAL(finished()), &loop, SLOT(quit()));
     QSemaphore semaphore;
-    QMetaObject::invokeMethod(m_simulation, "enable_tau_prioritization", Qt::QueuedConnection, Q_ARG(bool, m_ui.actionEnableTauPrioritisation->isChecked()), Q_ARG(QSemaphore *, &semaphore));
+    QMetaObject::invokeMethod(m_simulation, "enable_auto_select_probability", Qt::QueuedConnection, Q_ARG(bool, m_ui.actionAutoSelectProbability->isChecked()), Q_ARG(QSemaphore *, &semaphore));
 
     waitForResponse(&loop, &semaphore);
 
@@ -302,7 +305,7 @@ void MainWindow::onInitializedSimulation()
     m_simulation->deleteLater();
   }
   m_simulation = m_newSimulation;
-  m_selectedState = 0;
+  m_selected_state = 0;
 
   QStringList parameters = m_simulation->parameters();
   m_ui.stateTable->setRowCount(0);
@@ -316,7 +319,7 @@ void MainWindow::onInitializedSimulation()
   }
   m_ui.stateTable->resizeColumnToContents(0);
 
-  setTauPrioritization();
+  setAutoSelectProbability();
 
   m_trace = m_simulation->trace();
   updateSimulation();
@@ -328,7 +331,7 @@ void MainWindow::onInitializedSimulation()
   m_ui.statusBar->clearMessage();
 }
 
-void MainWindow::selectState(int state)
+void MainWindow::selectState(std::size_t state)
 {
   if (!m_simulation)
   {
@@ -337,14 +340,14 @@ void MainWindow::selectState(int state)
 
   assert(m_ui.traceTable->isEnabled());
 
-  if (state != m_selectedState)
+  if (state != m_selected_state)
   {
-    m_selectedState = state;
+    m_selected_state = state;
     updateSimulation();
   }
 }
 
-void MainWindow::truncateTrace(int state)
+void MainWindow::truncateTrace(int state, int column_on_screen)
 {
   if (!m_simulation)
   {
@@ -353,7 +356,9 @@ void MainWindow::truncateTrace(int state)
 
   assert(m_ui.traceTable->isEnabled());
 
-  reset(state);
+  reset(state, column_on_screen<2);  // Double clicking in a left column restores this state with the probabilities not yet determined. 
+                                     // Double clicking right selects the state. 
+  updateSimulation();
 }
 
 void MainWindow::selectTransition(int transition)
@@ -365,11 +370,17 @@ void MainWindow::selectTransition(int transition)
 
   assert(m_ui.traceTable->isEnabled());
 
-  reset(m_selectedState);
-  m_selectedState++;
+  reset(m_selected_state, false);
+  assert(static_cast<long long>(m_selected_state) < m_trace.size());
+  bool original_state_is_probabilistic=m_trace[m_selected_state].is_probabilistic;
   select(transition);
-  m_ui.traceTable->scrollToItem(m_ui.traceTable->item(m_selectedState, 1));
+  if (!original_state_is_probabilistic) 
+  {
+    m_selected_state++;
+  }
+  m_ui.traceTable->scrollToItem(m_ui.traceTable->item(m_selected_state, 1));
   m_ui.actionUndo_last->setEnabled(true);
+  updateSimulation();
 }
 
 void MainWindow::animationStep()
@@ -388,29 +399,32 @@ void MainWindow::animationStep()
 
   if (m_randomAnimation)
   {
-    if (m_selectedState >= m_trace.size())
+    if (static_cast<long long>(m_selected_state) >= m_trace.size())
     {
-      m_selectedState = m_trace.size() - 1;
+      m_selected_state = m_trace.size() - 1;
     }
 
-    if (m_trace.last().transitions.size() == 0)
+    bool original_state_is_probabilistic=m_trace[m_selected_state].is_probabilistic;
+
+    if (!original_state_is_probabilistic && m_trace.last().transitions.size() == 0)
     {
       stopPlay();
       return;
     }
 
-    if (m_selectedState == m_trace.size() - 1)
+    auto_select_state_or_probability();
+
+    if (!original_state_is_probabilistic)
     {
-      m_selectedState++;
+      m_selected_state++;   
     }
-    const quint32 rvalue = QRandomGenerator::global()->generate();
-    select(rvalue % m_trace.last().transitions.size());
+    updateSimulation();
   }
   else
   {
-    if (m_selectedState + 1 < m_trace.size())
+    if (static_cast<long long>(m_selected_state) + 1 < m_trace.size())
     {
-      m_selectedState++;
+      m_selected_state++;
       updateSimulation();
     }
     else
@@ -420,20 +434,32 @@ void MainWindow::animationStep()
   }
 }
 
-void MainWindow::reset(unsigned int selectedState)
+void MainWindow::reset(std::size_t selected_state, bool probabilistic)
 {
-  QMetaObject::invokeMethod(m_simulation, "reset", Qt::BlockingQueuedConnection, Q_ARG(unsigned int, selectedState));
+  QMetaObject::invokeMethod(m_simulation, "reset", Qt::BlockingQueuedConnection, Q_ARG(std::size_t, selected_state), Q_ARG(bool, probabilistic));
+
+  m_trace = m_simulation->trace();
+}
+
+void MainWindow::select(std::size_t transition)
+{
+  QEventLoop loop;
+  connect(m_simulation, SIGNAL(finished()), &loop, SLOT(quit()));
+  QSemaphore semaphore;
+  QMetaObject::invokeMethod(m_simulation, "select", Qt::QueuedConnection, Q_ARG(std::size_t, transition), Q_ARG(std::size_t, m_selected_state), Q_ARG(QSemaphore *, &semaphore));
+
+  waitForResponse(&loop, &semaphore);
 
   m_trace = m_simulation->trace();
   updateSimulation();
 }
 
-void MainWindow::select(unsigned int transition)
+void MainWindow::auto_select_state_or_probability()
 {
   QEventLoop loop;
   connect(m_simulation, SIGNAL(finished()), &loop, SLOT(quit()));
   QSemaphore semaphore;
-  QMetaObject::invokeMethod(m_simulation, "select", Qt::QueuedConnection, Q_ARG(unsigned int, transition), Q_ARG(QSemaphore *, &semaphore));
+  QMetaObject::invokeMethod(m_simulation, "auto_select_state_or_probability", Qt::QueuedConnection, Q_ARG(std::size_t, m_selected_state), Q_ARG(QSemaphore *, &semaphore));
 
   waitForResponse(&loop, &semaphore);
 
@@ -452,7 +478,7 @@ void MainWindow::waitForResponse(QEventLoop *eventLoop, QSemaphore *semaphore, i
     m_ui.actionOpen->setEnabled(false);
     m_ui.actionLoadTrace->setEnabled(false);
     m_ui.actionSaveTrace->setEnabled(false);
-    m_ui.actionEnableTauPrioritisation->setEnabled(false);
+    m_ui.actionAutoSelectProbability->setEnabled(false);
 
     eventLoop->exec();
 
@@ -461,7 +487,7 @@ void MainWindow::waitForResponse(QEventLoop *eventLoop, QSemaphore *semaphore, i
     m_ui.actionOpen->setEnabled(true);
     m_ui.actionLoadTrace->setEnabled(true);
     m_ui.actionSaveTrace->setEnabled(true);
-    m_ui.actionEnableTauPrioritisation->setEnabled(true);
+    m_ui.actionAutoSelectProbability->setEnabled(true);
   }
 
   if (m_animationDisabled)
@@ -470,23 +496,26 @@ void MainWindow::waitForResponse(QEventLoop *eventLoop, QSemaphore *semaphore, i
   }
 }
 
-void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString /*message*/, QString formattedMessage)
-{
+void MainWindow::onLogOutput(QString /*level*/, QDateTime /*timestamp*/, QString /*message*/, QString formattedMessage)
+{ 
   m_ui.statusBar->showMessage(formattedMessage, 5000);
-}
+} 
 
 QString MainWindow::renderStateChange(Simulation::State source, Simulation::State destination)
 {
   QStringList changes;
   for (int i = 0; i < destination.size(); i++)
   {
-    if (i >= source.size() || source[i] != destination[i])
+    if (destination[i].toStdString().find("Probabilistic state of size")!=std::string::npos) // String is found.
     {
-      if (destination[i] == "_" && !m_ui.actionShowDontCaresInStateChanges->isChecked())
+      changes += destination[i];
+    }
+    else if (i >= source.size() || source[i] != destination[i])
+    {
+      if (!(destination[i] == "_") || m_ui.actionShowDontCaresInStateChanges->isChecked())
       {
-        continue;
+        changes += m_simulation->parameters()[i] + " := " + destination[i];
       }
-      changes += m_simulation->parameters()[i] + " := " + destination[i];
     }
   }
   return changes.join(", ");

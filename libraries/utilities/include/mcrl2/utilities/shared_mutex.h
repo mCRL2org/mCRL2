@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <algorithm>
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <vector>
 

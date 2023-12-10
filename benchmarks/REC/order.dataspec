@@ -1,0 +1,15 @@
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+map
+  f : Xnat -> Xnat ;
+  g : Xnat -> Xnat ;
+var
+  x, y : Xnat ;
+eqn
+  g (d0) = d0 ;
+  g (s (x)) = x ;
+  x == d0 -> f (s (x)) = d0 ;
+  x != d0 -> f (s (x)) = x ;
+  f (d0) = s (d0) ;

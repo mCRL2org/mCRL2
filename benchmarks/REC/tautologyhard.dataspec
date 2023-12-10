@@ -1,0 +1,69 @@
+sort Prop = struct
+  tt
+| ff ;
+
+map
+  and : Prop # Prop -> Prop ;
+  xor : Prop # Prop -> Prop ;
+  Xnot : Prop -> Prop ;
+  or : Prop # Prop -> Prop ;
+  implies : Prop # Prop -> Prop ;
+  iff : Prop # Prop -> Prop ;
+  a : Prop ;
+  b : Prop ;
+  c : Prop ;
+  d : Prop ;
+  e : Prop ;
+  a1 : Prop ;
+  a2 : Prop ;
+  a3 : Prop ;
+  a4 : Prop ;
+  a5 : Prop ;
+  a6 : Prop ;
+  a7 : Prop ;
+  a8 : Prop ;
+  a9 : Prop ;
+  a10 : Prop ;
+  a11 : Prop ;
+  a12 : Prop ;
+  a13 : Prop ;
+  a14 : Prop ;
+  a15 : Prop ;
+  a16 : Prop ;
+  a17 : Prop ;
+  a18 : Prop ;
+var
+  P, Q, R : Prop ;
+eqn
+  and (P, tt) = P ;
+  and (P, ff) = ff ;
+  xor (P, ff) = P ;
+  xor (ff, tt) = tt ;
+  xor (tt, tt) = ff ;
+  Xnot (P) = xor (P, tt) ;
+  or (P, Q) = xor (and (P, Q), xor (P, Q)) ;
+  implies (P, Q) = Xnot (xor (P, and (P, Q))) ;
+  iff (P, Q) = Xnot (xor (P, Q)) ;
+  a = ff ;
+  b = tt ;
+  c = ff ;
+  d = tt ;
+  e = ff ;
+  a1 = tt ;
+  a2 = ff ;
+  a3 = tt ;
+  a4 = ff ;
+  a5 = tt ;
+  a6 = ff ;
+  a7 = tt ;
+  a8 = ff ;
+  a9 = tt ;
+  a10 = ff ;
+  a11 = tt ;
+  a12 = ff ;
+  a13 = tt ;
+  a14 = ff ;
+  a15 = tt ;
+  a16 = ff ;
+  a17 = tt ;
+  a18 = ff ;

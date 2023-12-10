@@ -1,0 +1,12 @@
+sort N = struct
+  d0
+| s (N)
+| g (N) ;
+
+map
+  f : N -> N ;
+var
+  X : N ;
+eqn
+  f (g (d0)) = d0 ;
+  f (g (s (X))) = f (g (X)) ;

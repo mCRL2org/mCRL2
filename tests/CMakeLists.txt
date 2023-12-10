@@ -38,3 +38,22 @@ foreach(type "random" "regression")
     set_tests_properties(${targetname} PROPERTIES LABELS ${type})
   endforeach()
 endforeach()
+
+#
+# Add a ctest test for the tooltests
+#
+set(TOOLTEST_ARGS "-m8")
+if(MCRL2_ENABLE_JITTYC)
+  set(TOOLTEST_ARGS "${TOOLTEST_ARGS};--jittyc")
+endif()
+
+if(CVC3_EXECUTABLE)
+  set(TOOLTEST_ARGS "${TOOLTEST_ARGS};--cvc3")
+endif()
+
+add_test(NAME tooltests
+  COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tool/tool_testing.py
+    --toolpath ${MCRL2_TOOL_PATH}
+    ${TOOLTEST_ARGS}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
+)

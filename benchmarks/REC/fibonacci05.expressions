@@ -1,0 +1,5 @@
+fibb (s (s (s (s (s (d0))))))
+fibb (fibb (s (s (s (s (s (d0)))))))
+fibb (fibb (fibb (s (s (s (s (s (d0))))))))
+fibb (fibb (fibb (fibb (s (s (s (s (s (d0)))))))))
+fibb (fibb (fibb (fibb (fibb (s (s (s (s (s (d0))))))))))

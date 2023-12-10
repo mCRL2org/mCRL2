@@ -6,10 +6,6 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-# ########## Project setup ##########
-project(sylvan)
-cmake_minimum_required(VERSION 3.8)
-
 add_library(sylvan
   lace.c
   sha2.c
@@ -20,7 +16,8 @@ add_library(sylvan
   sylvan_ldd.c
   sylvan_mt.c
   sylvan_mtbdd.c
-  sylvan_obj.cpp
+  # Sylvan is actually a C library, and this should not compile in C++17.
+  #sylvan_obj.cpp
   sylvan_refs.c
   sylvan_sl.c
   sylvan_stats.c

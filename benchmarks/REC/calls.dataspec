@@ -1,0 +1,27 @@
+sort S = struct
+  nullary_constructor
+| unary_constructor (S)
+| nary_constructor (S, S, S) ;
+
+map
+  nullary_function : S ;
+  unary_function : S -> S ;
+  nary_function : S # S # S -> S ;
+  a : S ;
+  b : S ;
+  c : S ;
+  d : S ;
+  e : S ;
+  f : S ;
+var
+  x, y, z : S ;
+eqn
+  nullary_function = nullary_constructor ;
+  unary_function (x) = unary_constructor (x) ;
+  nary_function (x, y, z) = nary_constructor (x, y, z) ;
+  a = nullary_constructor ;
+  b = unary_constructor (nullary_constructor) ;
+  c = nary_constructor (nullary_constructor, nullary_constructor, nullary_constructor) ;
+  d = nullary_function ;
+  e = unary_function (nullary_function) ;
+  f = nary_function (nullary_function, nullary_function, nullary_function) ;

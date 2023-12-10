@@ -29,11 +29,14 @@ class Simulation : public QObject
     typedef QStringList State;
     struct Transition
     {
+      QString action_or_probability;
       State destination;
-      QString action;
     };
     struct TracePosition
     {
+      bool is_probabilistic = false; // If true the state is probabilistic, the state is not defined and the transitions represent 
+                                     // probabilistic transitions with a probability and state to be choosen.
+                                     // If false, state is defined and transitions represent outgoing transitions. 
       State state;
       QList<Transition> transitions;
       std::size_t transitionNumber;
@@ -43,22 +46,29 @@ class Simulation : public QObject
   public:
     Simulation(mcrl2::data::rewrite_strategy strategy)
         : m_strategy(strategy), m_initialized(false), m_simulation(NULL) {}
-    ~Simulation() { delete m_simulation; }
+    ~Simulation() 
+    { 
+      delete m_simulation; 
+    }
     bool initialized() const { return m_initialized; }
     const QStringList& parameters() const { return m_parameters; }
     Trace trace() { QMutexLocker locker(&m_traceMutex); return m_trace; }
+    State renderState(const mcrl2::lps::state& state);
+
 
   private slots:
     void init(const QString& filename, bool do_not_use_dummies);
-    void updateTrace(unsigned int firstChangedState);
-
-  private:
-    State renderState(const mcrl2::lps::state& state);
+    void updateTrace(std::size_t firstChangedState);
 
   public slots:
-    void reset(unsigned int stateNumber) { m_simulation->truncate(stateNumber); updateTrace(stateNumber); }
-    void select(unsigned int transitionNumber, QSemaphore *semaphore);
-    void enable_tau_prioritization(bool enable, QSemaphore *semaphore, QString action = "ctau");
+    void reset(std::size_t stateNumber, bool probabilistic) 
+    { 
+      m_simulation->truncate(stateNumber, probabilistic); 
+      updateTrace(stateNumber); 
+    }
+    void select(std::size_t transitionNumber, std::size_t selected_state, QSemaphore *semaphore);
+    void auto_select_state_or_probability(std::size_t selected_state, QSemaphore *semaphore);
+    void enable_auto_select_probability(bool enable, QSemaphore *semaphore);
     void load(QString filename);
     void save(QString filename);
 
@@ -69,6 +79,7 @@ class Simulation : public QObject
   private:
     mcrl2::data::rewrite_strategy m_strategy;
     bool m_initialized;
+    mcrl2::lps::stochastic_specification m_stochastic_spec;
 
     mcrl2::lps::simulation *m_simulation;
     QStringList m_parameters;

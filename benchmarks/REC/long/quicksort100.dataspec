@@ -1,0 +1,55 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+sort NatList = struct
+  nil
+| Xcons (Xnat, NatList) ;
+
+sort NatListPair = struct
+  pair (NatList, NatList) ;
+
+map
+  Xnot : Xbool -> Xbool ;
+  d10 : Xnat ;
+  st : Xnat # Xnat -> Xbool ;
+  get : Xnat # Xnat -> Xbool ;
+  plus : Xnat # Xnat -> Xnat ;
+  times : Xnat # Xnat -> Xnat ;
+  rev : Xnat -> NatList ;
+  split : Xnat # NatList -> NatListPair ;
+  qsort : NatList -> NatList ;
+  append : NatList # NatList -> NatList ;
+  p1 : NatListPair -> NatList ;
+  p2 : NatListPair -> NatList ;
+var
+  N, M : Xnat ;
+  L, L1, L2, LT, GT : NatList ;
+eqn
+  d10 = s (s (s (s (s (s (s (s (s (s (d0)))))))))) ;
+  Xnot (Xtrue) = Xfalse ;
+  Xnot (Xfalse) = Xtrue ;
+  st (d0, s (N)) = Xtrue ;
+  st (s (N), d0) = Xfalse ;
+  st (d0, d0) = Xfalse ;
+  st (s (N), s (M)) = st (N, M) ;
+  get (N, M) = Xnot (st (N, M)) ;
+  plus (d0, N) = N ;
+  plus (s (N), M) = s (plus (N, M)) ;
+  times (d0, N) = d0 ;
+  times (s (N), M) = plus (M, times (N, M)) ;
+  rev (s (N)) = Xcons (s (N), rev (N)) ;
+  rev (d0) = Xcons (d0, nil) ;
+  st (N, M) == Xtrue -> split (N, Xcons (M, L)) = pair (p1 (split (N, L)), Xcons (M, p2 (split (N, L)))) ;
+  get (N, M) == Xtrue -> split (N, Xcons (M, L)) = pair (Xcons (M, p1 (split (N, L))), p2 (split (N, L))) ;
+  split (N, nil) = pair (nil, nil) ;
+  append (Xcons (N, L), LT) = Xcons (N, append (L, LT)) ;
+  append (nil, L) = L ;
+  qsort (nil) = nil ;
+  qsort (Xcons (N, L)) = append (qsort (p1 (split (N, L))), Xcons (N, qsort (p2 (split (N, L))))) ;
+  p1 (pair (L1, L2)) = L1 ;
+  p2 (pair (L1, L2)) = L2 ;

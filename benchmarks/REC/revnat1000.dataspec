@@ -1,0 +1,30 @@
+sort Xlist = struct
+  l (Xnat, Xlist)
+| nil ;
+
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+map
+  d10 : Xnat ;
+  plus : Xnat # Xnat -> Xnat ;
+  times : Xnat # Xnat -> Xnat ;
+  gen : Xnat -> Xlist ;
+  conc : Xlist # Xlist -> Xlist ;
+  rev : Xlist -> Xlist ;
+var
+  E, N, M : Xnat ;
+  L1, L2 : Xlist ;
+eqn
+  d10 = s (s (s (s (s (s (s (s (s (s (d0)))))))))) ;
+  plus (d0, N) = N ;
+  plus (s (N), M) = s (plus (N, M)) ;
+  times (d0, N) = d0 ;
+  times (s (N), M) = plus (M, times (N, M)) ;
+  gen (s (N)) = l (s (N), gen (N)) ;
+  gen (d0) = l (d0, nil) ;
+  conc (l (E, L1), L2) = l (E, conc (L1, L2)) ;
+  conc (nil, L2) = L2 ;
+  rev (l (E, L1)) = conc (rev (L1), l (E, nil)) ;
+  rev (nil) = nil ;

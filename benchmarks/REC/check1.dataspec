@@ -1,0 +1,7 @@
+sort USingleton = struct
+  Ucons (Xnat) ;
+
+sort Xnat = struct
+  d0
+| Xsucc (Xnat) ;
+

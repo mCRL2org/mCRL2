@@ -84,10 +84,7 @@ lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::lts::pro
   std::vector<lps::state_probability_pair<std::size_t, lps::probabilistic_data_expression> > result;
   for(const lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& p: state_in)
   {
-    result.push_back(lps::state_probability_pair<std::size_t, lps::probabilistic_data_expression>(
-                          p.state(), 
-                          data::sort_real::creal(data::sort_int::int_(pp(p.probability().enumerator())),
-                                                 data::sort_pos::pos(pp(p.probability().denominator())))));
+    result.emplace_back(p.state(), lps::probabilistic_data_expression(pp(p.probability().enumerator()), pp(p.probability().denominator())));
   }
   return probabilistic_state<std::size_t, lps::probabilistic_data_expression>(result.begin(), result.end());
 }
@@ -852,7 +849,6 @@ template < class STATE_LABEL1, class ACTION_LABEL1, class PROBABILISTIC_STATE1, 
 void remove_probabilities(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, PROBABILISTIC_STATE1, LTS_BASE1>& lts_in,
                           lts<STATE_LABEL2, ACTION_LABEL2, LTS_BASE2>& lts_out)
 {
-  assert(lts_in.initial_probabilistic_state().size()!=0);
   if (lts_in.initial_probabilistic_state().size()<=1)
   {
     lts_out.set_initial_state(lts_in.initial_probabilistic_state().get());
@@ -867,7 +863,6 @@ void remove_probabilities(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, P
   for(transition& t: lts_out.get_transitions())
   {
     std::size_t probabilistic_target_state_number=t.to();
-    assert(lts_in.probabilistic_state(probabilistic_target_state_number).size()!=0);
     if (lts_in.probabilistic_state(probabilistic_target_state_number).size()>1)
     {
       throw mcrl2::runtime_error("Transition " + std::to_string(transition_number) + " is probabilistic.");

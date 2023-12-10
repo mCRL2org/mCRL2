@@ -1,0 +1,48 @@
+sort Bool3 = struct
+  d0
+| d1
+| d2 ;
+
+map
+  a : Bool3 ;
+  b : Bool3 ;
+  c : Bool3 ;
+  d : Bool3 ;
+  e : Bool3 ;
+  f : Bool3 ;
+  g : Bool3 ;
+  h : Bool3 ;
+  plus : Bool3 # Bool3 -> Bool3 ;
+  times : Bool3 # Bool3 -> Bool3 ;
+  and : Bool3 # Bool3 -> Bool3 ;
+  or : Bool3 # Bool3 -> Bool3 ;
+  Xnot : Bool3 -> Bool3 ;
+  Xsucc : Bool3 -> Bool3 ;
+  eq : Bool3 # Bool3 -> Bool3 ;
+var
+  X, Y, Z : Bool3 ;
+eqn
+  a = d0 ;
+  b = d1 ;
+  c = d2 ;
+  d = d0 ;
+  e = d1 ;
+  f = d2 ;
+  g = d0 ;
+  h = d1 ;
+  Xsucc (d0) = d1 ;
+  Xsucc (d1) = d2 ;
+  Xsucc (d2) = d0 ;
+  plus (d0, X) = X ;
+  plus (d1, X) = Xsucc (X) ;
+  plus (d2, X) = Xsucc (Xsucc (X)) ;
+  times (d0, X) = d0 ;
+  times (d1, X) = X ;
+  times (d2, d0) = d0 ;
+  times (d2, d1) = d2 ;
+  times (d2, d2) = d1 ;
+  and (X,Y) = plus ( times (times (X, X), times (Y, Y)),plus ( times (d2, times (times (X, X), Y)),plus ( times (d2, times (times (Y, Y), X)),times (d2, times (X, Y)) ))) ;
+  or (X,Y) = plus ( times (d2, times (times (X, X), times (Y, Y))),plus ( times (times (X, X), Y),plus ( times (times (Y, Y), X),plus ( times (X, Y),plus (X, Y) )))) ;
+  Xnot (X) = plus (times (d2, X), d1) ;
+  X == Y -> eq (X,Y) = d1 ;
+  X != Y -> eq (X,Y) = d0 ;

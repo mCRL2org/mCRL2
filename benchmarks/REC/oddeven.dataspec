@@ -1,0 +1,20 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+map
+  odd : Xnat -> Xbool ;
+  even : Xnat -> Xbool ;
+var
+  N, M : Xnat ;
+eqn
+  odd (d0) = Xfalse ;
+  even (N) == Xtrue -> odd (s (N)) = Xtrue ;
+  even (N) == Xfalse -> odd (s (N)) = Xfalse ;
+  even (d0) = Xtrue ;
+  odd (N) == Xtrue -> even (s (N)) = Xtrue ;
+  odd (N) == Xfalse -> even (s (N)) = Xfalse ;

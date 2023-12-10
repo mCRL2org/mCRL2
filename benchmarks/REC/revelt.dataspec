@@ -1,0 +1,24 @@
+sort Xlist = struct
+  l (Elt, Xlist)
+| nil ;
+
+sort Elt = struct
+  a
+| b
+| c
+| d
+| e ;
+
+map
+  conc : Xlist # Xlist -> Xlist ;
+  dup : Xlist -> Xlist ;
+  rev : Xlist -> Xlist ;
+var
+  E0 : Elt ;
+  L1, L2 : Xlist ;
+eqn
+  conc (l (E0, L1), L2) = l (E0, conc (L1, L2)) ;
+  conc (nil, L2) = L2 ;
+  dup (L1) = conc (L1, L1) ;
+  rev (l (E0, L1)) = conc (rev (L1), l (E0, nil)) ;
+  rev (nil) = nil ;

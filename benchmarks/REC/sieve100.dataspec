@@ -1,0 +1,93 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+sort Xnat = struct
+  s (Xnat)
+| z ;
+
+sort Digit = struct
+  d0
+| d1
+| d2
+| d3
+| d4
+| d5
+| d6
+| d7
+| d8
+| d9 ;
+
+sort Xlist = struct
+  nil
+| d (Digit)
+| dl (Digit, Xlist)
+| l (Xnat, Xlist)
+| ll (Xlist, Xlist) ;
+
+map
+  lt : Xnat # Xnat -> Xbool ;
+  sub : Xnat # Xnat -> Xnat ;
+  Xdiv : Xnat # Xnat -> Xnat ;
+  rem : Xnat # Xnat -> Xnat ;
+  add : Xnat # Xnat -> Xnat ;
+  divides : Xnat # Xnat -> Xbool ;
+  mult : Xnat # Xnat -> Xnat ;
+  two : Xnat ;
+  ten : Xnat ;
+  find : Xlist # Xnat -> Digit ;
+  digitList : Xlist ;
+  ap : Xlist # Xlist -> Xlist ;
+  conv : Xnat -> Xlist ;
+  digit : Xnat -> Digit ;
+  fact : Xnat -> Xnat ;
+  auxdiv : Xnat # Xnat # Xnat -> Xbool ;
+  ifNat : Xbool # Xnat # Xnat -> Xnat ;
+  intsBetween : Xnat # Xnat -> Xlist ;
+  sieve : Xlist -> Xlist ;
+  filter : Xlist # Xnat -> Xlist ;
+  e : Xnat # Xlist -> Xlist ;
+var
+  N, M, X, Y, A, B : Xnat ;
+  L1, L2 : Xlist ;
+  Dig : Digit ;
+eqn
+  two = s (s (z)) ;
+  ten = s (s (s (s (s (s (s (s (s (s (z)))))))))) ;
+  digitList = dl (d0, dl (d1, dl (d2, dl (d3, dl (d4, dl (d5, dl (d6, dl (d7, dl (d8, dl (d9, nil)))))))))) ;
+  ifNat (Xtrue, N, M) = N ;
+  ifNat (Xfalse, N, M) = M ;
+  lt (X, ten) == Xtrue -> conv (X) = dl (digit (X), nil) ;
+  lt (X, ten) == Xfalse -> conv (X) = ap (conv (Xdiv (X, ten)), conv (rem (X, ten))) ;
+  Y != z -> rem (X, Y) = ifNat (lt (X, Y), X, rem (sub (X, Y), Y)) ;
+  Y != z -> Xdiv (X, Y) = ifNat (lt (X, Y), z, s (Xdiv (sub (X, Y), Y))) ;
+  lt (z, s (X)) = Xtrue ;
+  lt (X, z) = Xfalse ;
+  lt (s (X), s (Y)) = lt (X, Y) ;
+  sub (z, s (Y)) = z ;
+  sub (X, z) = X ;
+  sub (s (X), s (Y)) = sub (X, Y) ;
+  digit (X) = find (digitList, X) ;
+  find (dl (Dig, L1), z) = Dig ;
+  find (dl (Dig, L1), s (X)) = find (L1, X) ;
+  ap (nil, L1) = L1 ;
+  ap (dl (Dig, L1), L2) = dl (Dig, ap (L1, L2)) ;
+  add (z, Y) = Y ;
+  add (s (X), Y) = s (add (X, Y)) ;
+  mult (z, Y) = z ;
+  mult (s (X), Y) = add (Y, mult (X, Y)) ;
+  fact (z) = s (z) ;
+  fact (s (X)) = mult (s (X), fact (X)) ;
+  M != z -> divides (N, M) = auxdiv (N, M, M) ;
+  auxdiv (z, z, M) = Xtrue ;
+  auxdiv (z, s (X), M) = Xfalse ;
+  auxdiv (s (X), s (Y), M) = auxdiv (X, Y, M) ;
+  auxdiv (s (X), z, M) = auxdiv (s (X), M, M) ;
+  N == M -> intsBetween (N, M) = nil ;
+  N != M -> intsBetween (N, M) = l (N, intsBetween (s (N), M)) ;
+  sieve (l (N, L1)) = l (N, sieve (filter (L1, N))) ;
+  sieve (nil) = nil ;
+  divides (N, M) == Xtrue -> filter (l (N, L1), M) = filter (L1, M) ;
+  divides (N, M) == Xfalse -> filter (l (N, L1), M) = l (N, filter (L1, M)) ;
+  filter (nil, M) = nil ;
+  e (N, L1) = ll (conv (N), L1) ;

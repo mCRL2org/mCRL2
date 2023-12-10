@@ -112,7 +112,7 @@ class probabilistic_data_expression: public data::data_expression
 
     /** \brief Construct a probabilistic_data_expression from a data_expression, which must be of sort real.
      */
-    probabilistic_data_expression(const data::data_expression& d)
+    explicit probabilistic_data_expression(const data::data_expression& d)
      : data::data_expression(d)
     { 
       assert(d.sort()==data::sort_real::real_());
@@ -124,7 +124,7 @@ class probabilistic_data_expression: public data::data_expression
     {
       assert(denominator!=0);
       remove_common_factors(enumerator,denominator);
-      *this =data::sort_real::creal(data::sort_int::int_(enumerator),data::sort_pos::pos(denominator));
+      *this = lps::probabilistic_data_expression(data::sort_real::creal(data::sort_int::int_(enumerator),data::sort_pos::pos(denominator)));
     }
 
     /* \brief A constructor, where the enumerator and denominator are constructed
@@ -135,7 +135,7 @@ class probabilistic_data_expression: public data::data_expression
       assert(enumerator.size() <= denominator.size());
       const data_expression d_enumerator=data::sort_nat::nat(enumerator);
       const data_expression d_denominator=data::sort_pos::pos(denominator);
-      *this =data::sort_real::creal(data::sort_int::cint(d_enumerator),d_denominator);
+      *this = lps::probabilistic_data_expression(data::sort_real::creal(data::sort_int::cint(d_enumerator),d_denominator));
     }
 
     /* \brief Standard comparison operator.

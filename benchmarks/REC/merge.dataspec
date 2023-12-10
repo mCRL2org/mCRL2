@@ -1,0 +1,43 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+sort Strg = struct
+  a
+| b
+| c (Strg, Strg) ;
+
+sort Xlist = struct
+  nil
+| l (Strg, Xlist) ;
+
+map
+  gte : Strg # Strg -> Xbool ;
+  merge : Xlist # Xlist -> Xlist ;
+  Xsort : Xlist -> Xlist ;
+  odd : Xlist -> Xlist ;
+  even : Xlist -> Xlist ;
+var
+  E, E2, S, S2 : Strg ;
+  L1, L2 : Xlist ;
+eqn
+  gte (b, a) = Xtrue ;
+  gte (a, b) = Xfalse ;
+  gte (a, a) = Xtrue ;
+  gte (b, b) = Xtrue ;
+  gte (c (E, S), E2) = gte (E, E2) ;
+  E == E2 -> gte (E, c (E2, S2)) = Xfalse ;
+  E != E2 -> gte (E, c (E2, S2)) = gte (E, E2) ;
+  merge (nil, L1) = L1 ;
+  merge (L1, nil) = L1 ;
+  gte (S, S2) == Xtrue -> merge (l (S, L1), l (S2, L2)) = l (S2, merge (l (S, L1), L2)) ;
+  gte (S, S2) == Xfalse -> merge (l (S, L1), l (S2, L2)) = l (S, merge (L1, l (S2, L2))) ;
+  odd (nil) = nil ;
+  odd (l (S, nil)) = l (S, nil) ;
+  odd (l (S, l (S2, L1))) = l (S, odd (L1)) ;
+  even (nil) = nil ;
+  even (l (S, nil)) = nil ;
+  even (l (S, l (S2, L1))) = l (S2, even (L1)) ;
+  Xsort (nil) = nil ;
+  Xsort (l (S, nil)) = l (S, nil) ;
+  Xsort (l (S, l (S2, L1))) = merge (Xsort (odd (l (S, l (S2, L1)))), Xsort (even (l (S, l (S2, L1))))) ;

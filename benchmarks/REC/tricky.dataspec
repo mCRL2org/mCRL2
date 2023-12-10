@@ -1,0 +1,24 @@
+sort NSingleton = struct
+  Ncons ;
+
+sort USingleton = struct
+  Ucons (Xnat) ;
+
+sort Xnat = struct
+  d0
+| Xsucc (Xnat) ;
+
+map
+  d1 : Xnat ;
+  d2 : Xnat ;
+  d3 : Xnat ;
+  f : Xnat -> Xnat ;
+var
+  N : Xnat ;
+eqn
+  d1 = Xsucc (d0) ;
+  d0 == d0 -> d2 = d0 ;
+  d0 != d0 -> d3 = d0 ;
+  Xsucc (d0) == d0 -> d3 = d0 ;
+  Xsucc (d0) != d0 -> d3 = Xsucc (d0) ;
+  N != d0 && N != Xsucc (d0) -> f (N) = N ;

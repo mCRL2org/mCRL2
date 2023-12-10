@@ -20,6 +20,11 @@ if(POLICY CMP0072)
   cmake_policy(SET CMP0072 NEW)
 endif()
 
+if(POLICY CMP0069)
+  # Actually enforce LTO when it is requested instead of silently ignoring it.
+  cmake_policy(SET CMP0069 NEW)
+endif()
+
 if(POLICY CMP0110)
   # add_test() supports arbitrary characters in test names.
   cmake_policy(SET CMP0110 NEW)
@@ -46,7 +51,6 @@ option(MCRL2_ENABLE_BENCHMARKS      "Enable benchmarks. Build the 'benchmarks' t
 option(MCRL2_ENABLE_TESTS           "Enable generation of library and random test targets." OFF)
 option(MCRL2_ENABLE_HEADER_TESTS    "Enable generation of headertest targets." OFF)
 option(MCRL2_ENABLE_TOOL_TESTS      "Enable generation of tool tests." ON)
-option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_SKIP_LONG_TESTS        "Do not execute tests that take a long time to run." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 
@@ -56,10 +60,12 @@ option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks i
 option(MCRL2_ENABLE_THREADSANITIZER  "Enable additional data race run-time checks implemented by the ThreadSanitizer." OFF)
 option(MCRL2_ENABLE_CODE_COVERAGE    "Enable generation of code coverage statistics." OFF)
 option(MCRL2_ENABLE_STD_CHECKS       "Enable libstdc++ and libc++ specific assertions, e.g. safe iterator checks." OFF)
+option(MCRL2_ENABLE_LTO              "Enable link time optimisation." OFF)
 option(MCRL2_ENABLE_SOUNDNESS_CHECKS "Enable extensive soundness checks." ON)
 option(MCRL2_ENABLE_MSVC_CCACHE      "Enable MSVC specific flags to enable building with ccache" OFF)
 option(MCRL2_ENABLE_JITTYC           "Enable the compiling rewriter (jittyc) functionality," ${UNIX})
 option(MCRL2_ENABLE_MULTITHREADING   "Enable the usage of multiple threads. Disabling removes usage of synchronisation primitives" ON)
+option(MCRL2_ENABLE_LINKER_LLD       "Enable LLVM lld as linker, which offers significantly linking speedup" OFF)
 
 mark_as_advanced(
   MCRL2_ENABLE_ADDRESSSANITIZER
@@ -70,6 +76,8 @@ mark_as_advanced(
   MCRL2_ENABLE_STABLE
   MCRL2_ENABLE_JITTYC
   MCRL2_ENABLE_MULTITHREADING
+  MCRL2_ENABLE_LTO
+  MCRL2_ENABLE_LINKER_LLD
 )
 
 # A list of tools that is being built by the current configuration (populated by build/cmake/MCRL2AddTarget.cmake)
@@ -102,7 +110,6 @@ include(ConfigureCompiler)
 include(MCRL2Version)
 include(MCRL2AddTarget)
 
-
 if(MCRL2_ENABLE_CODE_COVERAGE)
   include(CodeCoverage)
 endif()
@@ -130,15 +137,10 @@ if (MCRL2_ENABLE_TESTS)
   add_subdirectory(tests)
 endif()
 
-# Enable tool tests if desired
-if(MCRL2_ENABLE_TOOL_TESTS)
-  include(tests/GenerateToolTests.cmake)
-endif()
-
 # Install the example directory.
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 
-# Install third party libraries
+# Install third party libraries if they are shared libraries
 install(TARGETS dparser
   COMPONENT "Libraries"
   LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}

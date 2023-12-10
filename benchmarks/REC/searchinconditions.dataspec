@@ -1,0 +1,13 @@
+sort Xbool = struct
+  Xtrue
+| Xfalse ;
+
+map
+  a : Xbool ;
+  Xnot : Xbool -> Xbool ;
+var
+  X : Xbool ;
+eqn
+  a = Xtrue ;
+  X == Xfalse -> Xnot (X) = Xtrue ;
+  X == Xtrue -> Xnot (X) = Xfalse ;

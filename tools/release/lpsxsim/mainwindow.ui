@@ -64,12 +64,12 @@
            </attribute>
            <column>
             <property name="text">
-             <string>Action</string>
+             <string>Action/Probability</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>State Change</string>
+             <string>State Selector</string>
             </property>
            </column>
           </widget>
@@ -149,7 +149,7 @@
           </attribute>
           <column>
            <property name="text">
-            <string>#</string>
+            <string>  #  </string>
            </property>
           </column>
           <column>
@@ -206,7 +206,7 @@
     <property name="title">
      <string>&amp;Options</string>
     </property>
-    <addaction name="actionEnableTauPrioritisation"/>
+    <addaction name="actionAutoSelectProbability"/>
     <addaction name="actionShowDontCaresInStateChanges"/>
     <addaction name="separator"/>
     <addaction name="actionOutput"/>
@@ -240,12 +240,12 @@
     <string>Esc</string>
    </property>
   </action>
-  <action name="actionEnableTauPrioritisation">
+  <action name="actionAutoSelectProbability">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Enable &amp;Tau Prioritisation</string>
+    <string>Enable &amp;Autoselect Probability</string>
    </property>
   </action>
   <action name="actionOpen">

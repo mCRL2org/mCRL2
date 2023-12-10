@@ -1,0 +1,8 @@
+sort Xnat = struct
+  d0
+| s (Xnat) ;
+
+sort NatList = struct
+  nil
+| Xcons (Xnat, NatList) ;
+

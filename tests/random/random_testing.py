@@ -4,33 +4,35 @@
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import argparse
 import os
 import os.path
 import random
 import re
 import sys
 import traceback
-sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
 
-import random_state_formula_generator
-from random_bes_generator import make_bes
-from random_pbes_generator import make_pbes
-import random_process_expression
-from testing import YmlTest
-from text_utility import write_text
+# Makes sure that the script can find the modules when ran directly.
+sys.path.append(os.path.join(os.path.dirname(__file__),'../../'))
+
+import tests.utility.random_process_expression as random_process_expression
+import tests.utility.random_state_formula_generator as random_state_formula_generator
+from tests.utility.random_bes_generator import make_bes
+from tests.utility.random_pbes_generator import make_pbes
+from tests.utility.testing import YmlTest
+from tests.utility.text_utility import write_text
 
 MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'install', 'bin')
 
 def ymlfile(file):
-    return '{}/tests/specifications/{}.yml'.format(MCRL2_ROOT, file)
+    return f'{MCRL2_ROOT}/tests/specifications/{file}.yml'
 
 def mcrl2file(file):
     return os.path.join(MCRL2_ROOT, file)
 
 class RandomTest(YmlTest):
-    def __init__(self, name, ymlfile, settings):
-        super(RandomTest, self).__init__(name, ymlfile, [], settings)
+    def __init__(self, name, _ymlfile, settings):
+        super(RandomTest, self).__init__(name, _ymlfile, [], settings)
 
     # create input files for the random test, and add the filenames to self.inputfiles
     def create_inputfiles(self, runpath = '.'):
@@ -44,12 +46,12 @@ class RandomTest(YmlTest):
 
     def execute(self, runpath = '.'):
         self.create_inputfiles(runpath)
-        super(RandomTest, self).execute(runpath)
+        super(RandomTest, self).execute()
         self.remove_inputfiles(runpath)
 
 class ProcessTest(RandomTest):
-    def __init__(self, name, ymlfile, settings):
-        super(ProcessTest, self).__init__(name, ymlfile, settings)
+    def __init__(self, name, _ymlfile, settings):
+        super(ProcessTest, self).__init__(name, _ymlfile, settings)
         self.actions = ['a', 'b', 'c', 'd']
         self.process_identifiers = ['P', 'Q', 'R']
         self.process_size = 13
@@ -59,15 +61,15 @@ class ProcessTest(RandomTest):
         self.generate_process_parameters = False
 
     def create_inputfiles(self, runpath = '.'):
-        filename = '{0}.mcrl2'.format(self.name, self.settings)
+        filename = f'{self.name}.mcrl2'
         p = random_process_expression.make_process_specification(self.parallel_operator_generators, self.process_expression_generators, self.actions, self.process_identifiers, self.process_size, self.init, self.generate_process_parameters)
         write_text(filename, str(p))
         self.inputfiles += [filename]
 
 # generates stochastic random processes
 class StochasticProcessTest(ProcessTest):
-    def __init__(self, name, ymlfile, settings):
-        super(StochasticProcessTest, self).__init__(name, ymlfile, settings)
+    def __init__(self, name, _ymlfile, settings):
+        super(StochasticProcessTest, self).__init__(name, _ymlfile, settings)
         self.process_expression_generators = {
                                random_process_expression.make_action          : 8,
                                random_process_expression.make_delta           : 1,
@@ -170,8 +172,8 @@ class Lps2ltsAlgorithmsTest(ProcessTauTest):
         super(Lps2ltsAlgorithmsTest, self).__init__(name, ymlfile('lps2lts-algorithms'), settings)
         # randomly choose an algorithm
         actions = random.choice(['a', 'a,b', 'a,b,c'])
-        options = [random.choice(['--deadlock', '--divergence', '--nondeterminism', '--action={}'.format(actions)])]
-        options = [random.choice(['--deadlock', '--nondeterminism', '--action={}'.format(actions)])]
+        options = [random.choice(['--deadlock', '--divergence', '--nondeterminism', f'--action={actions}'])]
+        options = [random.choice(['--deadlock', '--nondeterminism', f'--action={actions}'])]
         if 'divergence' in options[0]:
             tau_actions = random.choice(['', '', 'b', 'b,c'])
             if tau_actions:
@@ -225,7 +227,7 @@ class PbesTest(RandomTest):
         self.use_integers = True
 
     def create_inputfiles(self, runpath = '.'):
-        filename = '{0}.txt'.format(self.name)
+        filename = f'{self.name}.txt'
         p = make_pbes(self.equation_count, self.atom_count, self.propvar_count, self.use_quantifiers, use_integers=self.use_integers)
         write_text(filename, str(p))
         self.inputfiles += [filename]
@@ -262,7 +264,7 @@ class Pbespor2Test(ProcessTest):
 
     def create_inputfiles(self, runpath = '.'):
         super(Pbespor2Test, self).create_inputfiles(runpath)
-        filename = '{0}.mcf'.format(self.name, self.settings)
+        filename = f'{self.name}.mcf'
         formula = random_state_formula_generator.make_modal_formula()
         write_text(filename, str(formula))
         self.inputfiles += [filename]
@@ -317,13 +319,13 @@ class Pbes2bool_counter_exampleTest(ProcessTest):
     def __init__(self, name, optimization, settings):
         super(Pbes2bool_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
         if optimization in [4, 5]:
-            self.add_command_line_options('t3', ['-l{}'.format(optimization), '--aggressive', '--prune-todo-list'])
+            self.add_command_line_options('t3', [f'-l{optimization}', '--aggressive', '--prune-todo-list'])
         else:
-            self.add_command_line_options('t3', ['-l{}'.format(optimization), '--prune-todo-list'])
+            self.add_command_line_options('t3', [f'-l{optimization}', '--prune-todo-list'])
 
     def create_inputfiles(self, runpath = '.'):
         super(Pbes2bool_counter_exampleTest, self).create_inputfiles(runpath)
-        filename = '{0}.mcf'.format(self.name, self.settings)
+        filename = f'{self.name}.mcf'
         formula = random_state_formula_generator.make_modal_formula()
         write_text(filename, str(formula))
         self.inputfiles += [filename]
@@ -452,7 +454,6 @@ def matching_tests(tests, pattern):
     return matches
 
 def main(tests):
-    import argparse
     cmdline_parser = argparse.ArgumentParser()
     cmdline_parser.add_argument('-t', '--toolpath', dest='toolpath', help='The path where the mCRL2 tools are installed')
     cmdline_parser.add_argument('-r', '--repetitions', dest='repetitions', metavar='N', default='10', help='Perform N repetitions of each test')
@@ -465,11 +466,10 @@ def main(tests):
     if args.names:
         print_names(tests)
         return
-    toolpath = args.toolpath
-    if not toolpath:
-        toolpath = MCRL2_INSTALL_DIR
-    settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
-    I = range(int(args.repetitions))
+       
+    settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
+
+    repeats = range(int(args.repetitions))
 
     if args.output:
         if not os.path.exists(args.output):
@@ -479,16 +479,17 @@ def main(tests):
     test_failed = False
     for name in matching_tests(tests, args.pattern):
         try:
-            for i in I:
-                test = tests[name]('{}_{}'.format(name, i), settings)
+            for i in repeats:
+                test = tests[name](f'{name}_{i}', settings)
                 test.execute_in_sandbox()
         except Exception as e:
             print('An exception occurred:', e.__class__, e)
             traceback.print_exc()
             test_failed = True
+            sys.exit(-1)
 
-    if (test_failed):
-      sys.exit(-1)
+    if test_failed:
+        sys.exit(-1)
 
 if __name__ == '__main__':
     main(available_tests)

@@ -1,0 +1,77 @@
+sort Disk = struct
+  d0
+| d1
+| d2
+| d3
+| d4
+| d5
+| d6
+| d7
+| d8
+| d9
+| d10
+| d11
+| d12
+| d13
+| d14
+| d15
+| d16
+| d17
+| d18
+| d19
+| d20 ;
+
+sort Tower = struct
+  a
+| b
+| c ;
+
+sort Move = struct
+  movedisk (Disk, Tower, Tower) ;
+
+sort Xlist = struct
+  nil
+| Xcons (Move, Xlist) ;
+
+map
+  dec : Disk -> Disk ;
+  other : Tower # Tower -> Tower ;
+  conc : Xlist # Xlist -> Xlist ;
+  solve : Tower # Tower # Disk -> Xlist ;
+var
+  H : Move ;
+  T, L : Xlist ;
+  ORG, DEST : Tower ;
+  D : Disk ;
+eqn
+  dec (d20) = d19 ;
+  dec (d19) = d18 ;
+  dec (d18) = d17 ;
+  dec (d17) = d16 ;
+  dec (d16) = d15 ;
+  dec (d15) = d14 ;
+  dec (d14) = d13 ;
+  dec (d13) = d12 ;
+  dec (d12) = d11 ;
+  dec (d11) = d10 ;
+  dec (d10) = d9 ;
+  dec (d9) = d8 ;
+  dec (d8) = d7 ;
+  dec (d7) = d6 ;
+  dec (d6) = d5 ;
+  dec (d5) = d4 ;
+  dec (d4) = d3 ;
+  dec (d3) = d2 ;
+  dec (d2) = d1 ;
+  dec (d1) = d0 ;
+  other (a, b) = c ;
+  other (b, a) = c ;
+  other (a, c) = b ;
+  other (c, a) = b ;
+  other (b, c) = a ;
+  other (c, b) = a ;
+  conc (nil, L) = L ;
+  conc (L, nil) = L ;
+  conc (Xcons (H, T), L) = Xcons (H, conc (T, L)) ;
+  solve (ORG, DEST, d0) = nil ;
+  D != d0 -> solve (ORG, DEST, D) = conc (solve (ORG, other (ORG, DEST), dec (D)), Xcons (movedisk (D, ORG, DEST), solve (other (ORG, DEST), DEST, dec (D)))) ;

@@ -175,16 +175,17 @@ bool destructive_compare(LTS_TYPE& l1,
     case lts_eq_trace:
     {
       // Determinise first LTS
-      detail::bisimulation_reduce(l1,false);
+      detail::bisimulation_reduce_dnj(l1,false);
       determinise(l1);
 
       // Determinise second LTS
-      detail::bisimulation_reduce(l2,false);
+      detail::bisimulation_reduce_dnj(l2,false);
       determinise(l2);
 
       // Trace equivalence now corresponds to bisimilarity
-      if (generate_counter_examples) {
-          return detail::destructive_bisimulation_compare_minimal_depth(l1, l2, false, false, generate_counter_examples, counter_example_file, structured_output);
+      if (generate_counter_examples) 
+      {
+        return detail::destructive_bisimulation_compare_minimal_depth(l1, l2, false, false, generate_counter_examples, counter_example_file, structured_output);
       }
       return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples,counter_example_file,structured_output);
     }
@@ -196,15 +197,15 @@ bool destructive_compare(LTS_TYPE& l1,
       }
 
       // Eliminate silent steps and determinise first LTS
-      detail::bisimulation_reduce(l1,true,false);
+      detail::bisimulation_reduce_dnj(l1,true,false);
       detail::tau_star_reduce(l1);
-      detail::bisimulation_reduce(l1,false);
+      detail::bisimulation_reduce_dnj(l1,false);
       determinise(l1);
 
       // Eliminate silent steps and determinise second LTS
-      detail::bisimulation_reduce(l2,true,false);
+      detail::bisimulation_reduce_dnj(l2,true,false);
       detail::tau_star_reduce(l2);
-      detail::bisimulation_reduce(l2,false);
+      detail::bisimulation_reduce_dnj(l2,false);
       determinise(l2);
 
       // Weak trace equivalence now corresponds to bisimilarity
@@ -769,24 +770,24 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       return;
     }
     case lts_eq_trace:
-      detail::bisimulation_reduce(l,false);
+      detail::bisimulation_reduce_dnj(l,false);
       determinise(l);
-      detail::bisimulation_reduce(l,false);
+      detail::bisimulation_reduce_dnj(l,false);
       return;
     case lts_eq_weak_trace:
     {
-      detail::bisimulation_reduce(l,true,false);
+      detail::bisimulation_reduce_dnj(l,true,false);
       detail::tau_star_reduce(l);
-      detail::bisimulation_reduce(l,false);
+      detail::bisimulation_reduce_dnj(l,false);
       determinise(l);
-      detail::bisimulation_reduce(l,false);
+      detail::bisimulation_reduce_dnj(l,false);
       return;
     }
     case lts_red_tau_star:
     {
-      detail::bisimulation_reduce(l,true,false);
+      detail::bisimulation_reduce_dnj(l,true,false);
       detail::tau_star_reduce(l);
-      detail::bisimulation_reduce(l,false);
+      detail::bisimulation_reduce_dnj(l,false);
       return;
     }
     case lts_red_determinisation:
@@ -868,18 +869,18 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       // Preprocessing: reduce modulo strong bisimulation equivalence.
       // This is not strictly necessary, but may reduce time/memory
       // needed for determinisation.
-      detail::bisimulation_reduce(l1,false);
-      detail::bisimulation_reduce(l2,false);
+      detail::bisimulation_reduce_dnj(l1,false);
+      detail::bisimulation_reduce_dnj(l2,false);
 
       // Determinise both LTSes. As postprocessing, reduce modulo
       // strong bisimulation equivalence. This is not strictly
       // necessary, but may reduce time/memory needed for simulation
       // preorder checking.
       determinise(l1);
-      detail::bisimulation_reduce(l1,false);
+      detail::bisimulation_reduce_dnj(l1,false);
 
       determinise(l2);
-      detail::bisimulation_reduce(l2,false);
+      detail::bisimulation_reduce_dnj(l2,false);
 
       // Trace preorder now corresponds to simulation preorder
       return destructive_compare(l1, l2, lts_pre_sim, generate_counter_example, counter_example_file, structured_output, strategy);
@@ -887,11 +888,11 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     case lts_pre_weak_trace:
     {
       // Eliminate silent steps of first LTS
-      detail::bisimulation_reduce(l1,true,false);
+      detail::bisimulation_reduce_dnj(l1,true,false);
       detail::tau_star_reduce(l1);
 
       // Eliminate silent steps of second LTS
-      detail::bisimulation_reduce(l2,true,false);
+      detail::bisimulation_reduce_dnj(l2,true,false);
       detail::tau_star_reduce(l2);
 
       // Weak trace preorder now corresponds to strong trace preorder
