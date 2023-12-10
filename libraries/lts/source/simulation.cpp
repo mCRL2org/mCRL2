@@ -17,13 +17,7 @@ std::vector<simulation::transition_t> simulation::transitions(const state& sourc
 {
   try
   {
-    std::list<transition> outgoing_transitions = out_edges(source_state, 
-                                                           m_regular_summands,
-                                                           m_confluent_summands,
-                                                           m_global_sigma, 
-                                                           m_global_rewr, 
-                                                           m_global_enumerator, 
-                                                           m_global_id_generator);
+    std::list<transition> outgoing_transitions = out_edges(source_state);
     std::vector<simulation::transition_t> output(outgoing_transitions.begin(), outgoing_transitions.end());
     return output;
   }
@@ -35,9 +29,8 @@ std::vector<simulation::transition_t> simulation::transitions(const state& sourc
 }
 
 simulation::simulation(const stochastic_specification& specification, data::rewrite_strategy strategy)
-  : explorer(specification, explorer_options()),
+  : explorer(specification, explorer_options(strategy)),
     m_specification(specification),
-    m_rewriter(m_specification.data(), strategy),
     m_gen(),
     m_distrib(0,std::numeric_limits<std::size_t>::max())
 {

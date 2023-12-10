@@ -5,7 +5,6 @@ mcrl2_add_library(mcrl2_lps
     source/tools.cpp
     source/linearise.cpp
     source/lpsparunfoldlib.cpp
-    source/next_state_generator.cpp
     source/symbolic_lts_io.cpp
   DEPENDS
     mcrl2_core

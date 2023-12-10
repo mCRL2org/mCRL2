@@ -453,8 +453,6 @@ class explorer: public abortable
 
     typedef atermpp::indexed_set<state, mcrl2::utilities::detail::GlobalThreadSafe> indexed_set_for_states_type;
 
-  protected:
-    using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
     struct transition
     {
@@ -466,6 +464,8 @@ class explorer: public abortable
       {}
     };
 
+  protected:
+    using enumerator_element = data::enumerator_list_element_with_substitution<>;
     const explorer_options m_options;  // must not be a reference.
 
     // The four data structures that must be separate per thread.
@@ -1008,6 +1008,37 @@ class explorer: public abortable
     }
 
     ~explorer() = default;
+
+    // Get the initial state of the specification. 
+    const data::data_expression_list& initial_state() const
+    {
+      return m_initial_state;
+    }
+
+    // Make the rewriter available to be used in a class that uses this explorer class.
+    const data::rewriter& get_rewriter() const
+    {
+      return m_global_rewr;
+    }
+
+    // Utility function to obtain the outgoing transitions of the current state.
+    // Should not be used concurrently. 
+    std::list<transition> out_edges(const state& s)
+    {
+      return out_edges(s, m_regular_summands, m_confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator);
+    }
+
+    // Utility function to obtain the outgoing transitions of the current state.
+    // Only transitions for the summand with the indicated index are generated.
+    // Should not be used concurrently. 
+    std::list<transition> out_edges(const state& s, const std::size_t summand_index)
+    {
+      assert(summand_index<m_regular_summands.size());
+      return out_edges(s, 
+                       std::vector(1, m_regular_summands[summand_index]), 
+                       m_confluent_summands, 
+                       m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator);
+    }
 
     // Returns the concatenation of s and [t]
     void make_timed_state(state& result, const state& s, const data::data_expression& t) const

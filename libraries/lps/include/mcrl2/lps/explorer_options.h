@@ -61,6 +61,11 @@ struct explorer_options
   explorer_options()
   {}
 
+  // Constructor.
+  explorer_options(data::rewrite_strategy rewr_strat)
+   : rewrite_strategy(rewr_strat)
+  {}
+
   //
   explorer_options(const explorer_options& other) = default;
   explorer_options& operator=(const explorer_options& other) = default;
