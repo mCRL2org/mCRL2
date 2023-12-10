@@ -36,6 +36,11 @@ protected:
       result=f;
       return;
     }
+    if (data::sort_real::is_one(f))
+    {
+      apply(result, x);
+      return;
+    }
     apply(result, x);
     assert(!is_const_multiply_alt(result));
     if (data::sort_real::is_zero(result))
@@ -596,6 +601,11 @@ protected:
     if (data::sort_real::is_zero(data_result))
     {
       result=data_result;
+      return;
+    }
+    if (data::sort_real::is_one(data_result))
+    {
+      apply(result, x);
       return;
     }
     apply(result, x);
