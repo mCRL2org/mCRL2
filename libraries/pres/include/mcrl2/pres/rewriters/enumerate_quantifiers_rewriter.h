@@ -257,7 +257,6 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <class T>
   void apply(T& result, const sum& x)
   {
-std::cerr << "Enumerating rewriter " << pres_expression(x) << "\n";
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
@@ -298,7 +297,6 @@ std::cerr << "Enumerating rewriter " << pres_expression(x) << "\n";
         optimized_sum(result, infinite + unused, phi_, m_dataspec, super::R);
       }
     }
-std::cerr << "Enumerating rewriter " << pres_expression(x) << " --> " << result << "\n";
   }
 
   // N.B. This function has been added to make this class operate well with the enumerator.
