@@ -88,6 +88,18 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator: public dat
     make_sum(result, v, body);
     update_sigma.pop(v);
   }
+
+  template <class T>
+  void apply(T& result, const stochastic_operator& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    process_expression body;
+    apply(body, x.operand());
+    data::data_expression dist;
+    apply(dist, x.distribution());
+    make_stochastic_operator(result, v, dist, body);
+    update_sigma.pop(v);
+  }
 };
 
 template <template <class> class Builder, template <template <class> class, class, class, class> class Binder, class Substitution, class IdentifierGenerator>
