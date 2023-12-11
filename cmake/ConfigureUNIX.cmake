@@ -68,7 +68,7 @@ mcrl2_add_cxx_flag(-ftls-model=initial-exec)
 # Disable the procedure linkage table, which is used for lazy loading.
 mcrl2_add_cxx_flag(-fno-plt)
 
-if(NOT MCRL2_IS_CLANG)
+if(NOT ${MCRL2_IS_CLANG})
   # Disable interposition, which allows inlining external definitions.
   mcrl2_add_cxx_flag(-fno-semantic-interposition)
   
@@ -76,8 +76,6 @@ if(NOT MCRL2_IS_CLANG)
   if(MCRL2_ENABLE_LLD)
     mcrl2_add_cxx_flag(-fuse-ld=lld)
   endif()
-
-  mcrl2_add_cxx_flag(-fuse-linker-plugin)
 endif()
 
 # This prevents warnings in the dnj bisimulation algorithm.
@@ -112,7 +110,7 @@ if(APPLE)
   endif()
   set_property(CACHE CMAKE_APPLE_SILICON_PROCESSOR PROPERTY STRINGS "x86_64" "arm64")
   set(CMAKE_OSX_ARCHITECTURES ${CMAKE_APPLE_SILICON_PROCESSOR} CACHE INTERNAL "" FORCE)
-elseif(NOT MCRL2_IS_CLANG)
+elseif(NOT ${MCRL2_IS_CLANG})
   mcrl2_add_link_options(-Wl,--as-needed)
 
   mcrl2_add_debug_link_options(-Wl,--warn-unresolved-symbols,--warn-once)
@@ -143,7 +141,7 @@ else()
   mcrl2_add_c_flag(-Wno-strict-aliasing)
 endif()
 
-if(NOT MCRL2_IS_CLANG)
+if(NOT ${MCRL2_IS_CLANG})
   mcrl2_add_c_flag(-fno-semantic-interposition)
   
   if(MCRL2_ENABLE_LINKER_LLD)
