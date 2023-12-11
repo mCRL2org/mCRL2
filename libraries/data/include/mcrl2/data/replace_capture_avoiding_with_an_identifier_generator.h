@@ -42,7 +42,7 @@ class substitution_updater_with_an_identifier_generator
     data::variable bind(const data::variable& v)
     {
       m_undo.push_back(data::assignment(v, m_sigma(v))); // save the old assignment of m_sigma.
-      if (m_sigma.occurs_in_a_rhs(v))                    // v notin FV(m_sigma).
+      if (m_sigma.variable_occurs_in_a_rhs(v))                    // v notin FV(m_sigma).
       {
         m_sigma[v] = v;                                  // Clear sigma[v].
         return v;

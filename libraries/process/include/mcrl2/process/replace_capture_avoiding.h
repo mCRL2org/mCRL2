@@ -88,6 +88,18 @@ struct add_capture_avoiding_replacement
     make_sum(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
   }
+
+  template <class T>
+  void apply(T& result, const stochastic_operator& x)
+  {
+    data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
+    process_expression body;
+    apply(body, x.operand());
+    data::data_expression dist;
+    apply(dist, x.distribution());
+    make_stochastic_operator(result, v1, dist, body);
+    sigma.remove_fresh_variable_assignments(x.variables());
+  }
 };
 
 } // namespace detail

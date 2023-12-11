@@ -306,7 +306,7 @@ class specification_basic_type
     template <class Expression, class Substitution>
     Expression replace_variables_capture_avoiding_alt(const Expression& e, Substitution& sigma)
     {
-      return data::replace_variables_capture_avoiding_with_an_identifier_generator(e, sigma, fresh_identifier_generator);
+      return process::replace_variables_capture_avoiding_with_an_identifier_generator(e, sigma, fresh_identifier_generator);
     }
 
 
@@ -9902,15 +9902,16 @@ class specification_basic_type
 
           // Furthermore, the old assignment must be applied to the distribution, when it is moved
           // outside of the process body.
-          maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
+          mutable_indexed_substitution<> local_sigma;
           for(const assignment& a:u.assignments())
           {
             local_sigma[a.lhs()]=a.rhs();
           }
-          return stochastic_operator(sto.variables(),
-                                     replace_variables_capture_avoiding_alt(sto.distribution(),
-                                                                              local_sigma),
-                                     process_instance_assignment(new_identifier,new_assignments));
+          return process::replace_variables_capture_avoiding(
+                          stochastic_operator(sto.variables(), 
+                                              sto.distribution(),
+                                              process_instance_assignment(new_identifier,new_assignments)),
+                          local_sigma);
         }
         return t;
 

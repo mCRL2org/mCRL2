@@ -124,7 +124,7 @@ class maintain_variables_in_rhs: public Substitution
 
     /// \brief Indicates whether a variable occurs in some rhs of this substitution. 
     /// \param v The variable for which occurrence in a rhs is checked.
-    bool occurs_in_a_rhs(const variable_type& v)
+    bool variable_occurs_in_a_rhs(const variable_type& v)
     {
       return m_variables_in_rhs.find(v)!=m_variables_in_rhs.end();
     }
