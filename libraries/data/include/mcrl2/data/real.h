@@ -2037,6 +2037,8 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp, vq, vx, vy}), plus(creal(vx, vp), creal(vy, vq)), reduce_fraction(plus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
         result.push_back(data_equation(variable_list({vp, vq, vx, vy}), minus(creal(vx, vp), creal(vy, vq)), reduce_fraction(minus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
         result.push_back(data_equation(variable_list({vp, vq, vx, vy}), times(creal(vx, vp), creal(vy, vq)), reduce_fraction(times(vx, vy), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(variable_list({vp, vr}), times(vr, creal(sort_int::cint(sort_nat::c0()), vp)), creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vp, vr}), times(creal(sort_int::cint(sort_nat::c0()), vp), vr), creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())));
         result.push_back(data_equation(variable_list({vp, vq, vx, vy}), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), reduce_fraction(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
         result.push_back(data_equation(variable_list({vp, vq}), divides(vp, vq), reduce_fraction(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq)))));
         result.push_back(data_equation(variable_list({vm, vn}), not_equal_to(vn, sort_nat::c0()), divides(vm, vn), reduce_fraction(sort_int::cint(vm), sort_int::cint(vn))));
