@@ -83,11 +83,6 @@ endif()
 # This prevents warnings in the dnj bisimulation algorithm.
 mcrl2_add_cxx_flag(-Wno-switch)
 
-# Enable additional flags to make link time optimisation actually useful
-if(MCRL2_ENABLE_LTO)
-  set(CMAKE_CXX_COMPILE_OPTIONS_IPO ${CMAKE_CXX_COMPILE_OPTIONS_IPO} -flto=auto)
-endif()
-
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
   add_compile_options(-fsanitize=address)
   add_compile_options(-fno-omit-frame-pointer)
@@ -154,9 +149,4 @@ if(NOT MCRL2_IS_CLANG)
   if(MCRL2_ENABLE_LINKER_LLD)
     mcrl2_add_c_flag(-fuse-ld=lld)
   endif()
-endif()
-
-if(MCRL2_ENABLE_LTO)
-  set(CMAKE_C_COMPILE_OPTIONS_IPO ${CMAKE_CXX_COMPILE_OPTIONS_IPO} -flto=auto)
-  mcrl2_add_c_flag(-fuse-linker-plugin)
 endif()
