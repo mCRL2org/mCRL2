@@ -360,6 +360,9 @@ def main(tests):
     )  
     cmdline_parser.add_argument(
         "--verbose", default=False, action='store_true'
+    )  
+    cmdline_parser.add_argument(
+        "--experimental", action='store_true', help="Enable testing of experimental tests"
     )    
     cmdline_parser.add_argument(
         "--pattern", action="store", default="", type=str
@@ -438,12 +441,7 @@ def main(tests):
                 futures = {}
                 for test in tests:
                     for argument in test.options:
-                        if not args.jittyc and "-rjittyc" in argument:
-                            continue
-                        if not args.cvc3 and "-zcvc" in argument:
-                            continue
-                        if not args.pattern in test.toolname:
-                            continue
+                        toolpath = os.path.join(args.toolpath, test.toolname)
 
                         # Replace placeholders by actual filenames
                         arguments = argument + " " + test.file_input
@@ -460,17 +458,25 @@ def main(tests):
                         arguments = arguments.replace("[txtpbesfile]", txtpbes_file)
                         arguments = arguments.replace("[actions]", "r1")
 
-                        toolpath = os.path.join(args.toolpath, test.toolname)
-                        if os.path.exists(toolpath) or os.path.exists(toolpath + ".exe"):
-                            if args.verbose:
-                                print(f"Executing {test.toolname} {arguments}", flush=True)
-                            futures[
-                                executor.submit(run_test, toolpath, arguments.split(" "))
-                            ] = f"{test.toolname} {arguments}"
-                        else:
-                            print(
-                                f"Skipped {test.toolname} since it cannot be found as {toolpath}", flush=True
-                            )
+                        if not args.jittyc and "-rjittyc" in argument:
+                            print(f"Skipped jittyc test {test.toolname} {arguments}")
+                            continue
+                        if not args.cvc3 and "-zcvc" in argument:
+                            print(f"Skipped cvc test {test.toolname} {arguments}")
+                            continue
+                        if not args.pattern in test.toolname:
+                            print(f"Skipped tool {test.toolname} with does not fit pattern {args.pattern}")
+                            continue
+                        if not args.experimental and test.toolname in ["besconvert", "pbespareqelm", "lpsrealelm"]:
+                            print(f"Skipped experimental tool {test.toolname}")
+                            continue
+
+
+                        if args.verbose:
+                            print(f"Executing {test.toolname} {arguments}", flush=True)
+                        futures[
+                            executor.submit(run_test, toolpath, arguments.split(" "))
+                        ] = f"{test.toolname} {arguments}"
 
                 # Wait for the results and keep track of failed tests.
                 failed = []

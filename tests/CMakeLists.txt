@@ -51,6 +51,10 @@ if(CVC3_EXECUTABLE)
   set(TOOLTEST_ARGS "${TOOLTEST_ARGS};--cvc3")
 endif()
 
+if(MCRL2_ENABLE_EXPERIMENTAL)
+  set(TOOLTEST_ARGS "${TOOLTEST_ARGS};--experimental")
+endif()
+
 add_test(NAME tooltests
   COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tool/tool_testing.py
     --toolpath ${MCRL2_TOOL_PATH}
