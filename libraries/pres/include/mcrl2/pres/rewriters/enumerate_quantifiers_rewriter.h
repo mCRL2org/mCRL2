@@ -88,14 +88,19 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     }
   }
 
+  // We assume that phi is already rewritten. 
   void enumerate_infimum(pres_expression& result, const data::variable_list& v, const pres_expression& phi)
-  {
+  {   
+    assert(!v.empty());
     assert(&result!=&phi);
-    auto undo = undo_substitution(v);
+    atermpp::vector<data::data_expression> undo = undo_substitution(v);
     result = true_();
+#ifndef NDEBUG
     pres_expression phi_;
     derived().apply(phi_, phi);
-    E.enumerate(enumerator_element(v, phi_),
+    assert(phi_==phi); // phi is assumed to be rewritten. 
+#endif
+    E.enumerate(enumerator_element(v, phi),
                 sigma,
                 [&](const enumerator_element& p)
                 {
@@ -105,18 +110,22 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                 is_true,
                 is_false
                );
-
+      
     redo_substitution(v, undo);
-  }
+  }                        
 
   void enumerate_supremum(pres_expression& result, const data::variable_list& v, const pres_expression& phi)
   {
+    assert(!v.empty());
     assert(&result!=&phi);
-    auto undo = undo_substitution(v);
+    atermpp::vector<data::data_expression> undo = undo_substitution(v);
     result = false_();
-    pres_expression phi_;
+#ifndef NDEBUG
+    pres_expression phi_; 
     derived().apply(phi_, phi);
-    E.enumerate(enumerator_element(v, phi_),
+    assert(phi_==phi); // phi is assumed to be rewritten. 
+#endif
+    E.enumerate(enumerator_element(v, phi),
                 sigma,
                 [&](const enumerator_element& p)
                 {
@@ -132,12 +141,16 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
 
   void enumerate_sum(pres_expression& result, const data::variable_list& v, const pres_expression& phi)
   {
+    assert(!v.empty());
     assert(&result!=&phi);
     atermpp::vector<data::data_expression> undo = undo_substitution(v);
     result = data::sort_real::real_zero();
-    pres_expression phi_;
+#ifndef NDEBUG
+    pres_expression phi_; 
     derived().apply(phi_, phi);
-    E.enumerate(enumerator_element(v, phi_),
+    assert(phi_==phi); // phi is assumed to be rewritten. 
+#endif
+    E.enumerate(enumerator_element(v, phi),
                 sigma,
                 [&](const enumerator_element& p)
                 {
@@ -154,29 +167,44 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <class T>
   void apply(T& result, const infimum& x)
   {
+    derived().apply(result, x.body());
+    std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
     {
       data::variable_list enumerable;
       data::variable_list non_enumerable;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
-      enumerate_infimum(result, enumerable, x.body());
-      optimized_infimum(result, non_enumerable, result);
+      data::variable_list unused;
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R,
+                                               enumerable, non_enumerable, unused,
+                                               [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
+      if (enumerable.empty())
+      {
+        optimized_infimum(result, non_enumerable, result);
+      }
+      else
+      {
+        pres_expression phi_;
+        enumerate_infimum(phi_, enumerable, result);
+        optimized_infimum(result, non_enumerable, phi_);
+      }
     }
     else
     {
       data::variable_list finite;
       data::variable_list infinite;
-      data::detail::split_finite_variables(x.variables(), m_dataspec, finite, infinite);
+      data::variable_list unused;
+      data::detail::split_finite_variables(x.variables(), m_dataspec,
+                                           finite, infinite, unused,
+                                           [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
       if (finite.empty())
-      {
-        pres_expression body;
-        derived().apply(body, x.body());
-        optimized_infimum(result, infinite, body);
+      { 
+        optimized_infimum(result, infinite, result);
       }
       else
       {
-        enumerate_infimum(result, finite, x.body());
-        optimized_infimum(result, infinite, result);
+        pres_expression phi_;
+        enumerate_infimum(phi_, finite, result);
+        optimized_infimum(result, infinite, phi_);
       }
     }
   }
@@ -184,29 +212,44 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <class T>
   void apply(T& result, const supremum& x)
   {
+    derived().apply(result, x.body());
+    std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
     {
       data::variable_list enumerable;
       data::variable_list non_enumerable;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
-      enumerate_supremum(result, enumerable, x.body());
-      optimized_supremum(result, non_enumerable, result);
+      data::variable_list unused;
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R,
+                                               enumerable, non_enumerable, unused,
+                                               [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
+      if (enumerable.empty())
+      {
+        optimized_supremum(result, non_enumerable, result);
+      }
+      else
+      {
+        pres_expression phi_;
+        enumerate_supremum(phi_, enumerable, result);
+        optimized_supremum(result, non_enumerable, phi_);
+      }
     }
     else
     {
       data::variable_list finite;
       data::variable_list infinite;
-      data::detail::split_finite_variables(x.variables(), m_dataspec, finite, infinite);
+      data::variable_list unused;
+      data::detail::split_finite_variables(x.variables(), m_dataspec,
+                                           finite, infinite, unused,
+                                           [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
       if (finite.empty())
-      {
-        pres_expression body;
-        derived().apply(body, x.body());
-        optimized_supremum(result, infinite, body);
+      { 
+        optimized_supremum(result, infinite, result);
       }
       else
       {
-        enumerate_supremum(result, finite, x.body());
-        optimized_supremum(result, infinite, result);
+        pres_expression phi_;
+        enumerate_supremum(phi_, finite, result);
+        optimized_supremum(result, infinite, phi_);
       }
     }
   }
@@ -214,36 +257,49 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <class T>
   void apply(T& result, const sum& x)
   {
+std::cerr << "Enumerating rewriter " << pres_expression(x) << "\n";
+    derived().apply(result, x.body());
+    std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
     {
       data::variable_list enumerable;
       data::variable_list non_enumerable;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
-      pres_expression expanded_sum;
-      enumerate_sum(expanded_sum, enumerable, x.body());
-      optimized_sum(result, non_enumerable, expanded_sum, m_dataspec, super::R);
+      data::variable_list unused;
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R,
+                                               enumerable, non_enumerable, unused,
+                                               [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
+      if (enumerable.empty())
+      {
+        optimized_sum(result, non_enumerable + unused, result, m_dataspec, super::R);
+      }
+      else
+      {
+        pres_expression phi_;
+        enumerate_sum(phi_, enumerable, result);
+        optimized_sum(result, non_enumerable + unused, phi_, m_dataspec, super::R);
+      }
     }
     else
     {
       data::variable_list finite;
       data::variable_list infinite;
-      data::detail::split_finite_variables(x.variables(), m_dataspec, finite, infinite);
+      data::variable_list unused;
+      data::detail::split_finite_variables(x.variables(), m_dataspec,
+                                           finite, infinite, unused,
+                                           [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
       if (finite.empty())
-      {
-        pres_expression body;
-        derived().apply(body, x.body());
-        optimized_sum(result, infinite, body, m_dataspec, super::R);
+      { 
+        optimized_sum(result, infinite + unused, result, m_dataspec, super::R);
       }
       else
       {
-        pres_expression expanded_sum;
-        enumerate_sum(expanded_sum, finite, x.body());
-        optimized_sum(result, infinite, expanded_sum, m_dataspec, super::R);
+        pres_expression phi_;
+        enumerate_sum(phi_, finite, result);
+        optimized_sum(result, infinite + unused, phi_, m_dataspec, super::R);
       }
     }
+std::cerr << "Enumerating rewriter " << pres_expression(x) << " --> " << result << "\n";
   }
-
-
 
   // N.B. This function has been added to make this class operate well with the enumerator.
   pres_expression operator()(const pres_expression& x, MutableSubstitution& sigma)

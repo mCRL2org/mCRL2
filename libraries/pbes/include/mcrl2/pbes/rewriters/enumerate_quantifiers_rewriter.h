@@ -87,14 +87,19 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     }
   }
 
+  // We assume that phi is already rewritten. 
   void enumerate_forall(pbes_expression& result, const data::variable_list& v, const pbes_expression& phi)
   {
+    assert(!v.empty());
     assert(&result!=&phi);
-    auto undo = undo_substitution(v);
+    atermpp::vector<data::data_expression> undo = undo_substitution(v);
     result = true_();
-    pbes_expression phi_;
+#ifndef NDEBUG
+    pbes_expression phi_; 
     derived().apply(phi_, phi);
-    E.enumerate(enumerator_element(v, phi_),
+    assert(phi_==phi); // phi is assumed to be rewritten. 
+#endif
+    E.enumerate(enumerator_element(v, phi),
                 sigma,
                 [&](const enumerator_element& p)
                 {
@@ -110,12 +115,16 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
 
   void enumerate_exists(pbes_expression& result, const data::variable_list& v, const pbes_expression& phi)
   {
+    assert(!v.empty());
     assert(&result!=&phi);
-    auto undo = undo_substitution(v);
+    atermpp::vector<data::data_expression> undo = undo_substitution(v);
     result = false_();
-    pbes_expression phi_;
+#ifndef NDEBUG
+    pbes_expression phi_; 
     derived().apply(phi_, phi);
-    E.enumerate(enumerator_element(v, phi_),
+    assert(phi_==phi); // phi is assumed to be rewritten. 
+#endif
+    E.enumerate(enumerator_element(v, phi),
                 sigma,
                 [&](const enumerator_element& p)
                 {
@@ -132,29 +141,45 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <class T>
   void apply(T& result, const forall& x)
   {
+    const bool remove_unused_variables=true;
+    derived().apply(result, x.body());
+    std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
     {
       data::variable_list enumerable;
       data::variable_list non_enumerable;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
-      enumerate_forall(result, enumerable, x.body());
-      data::optimized_forall_no_empty_domain(result, non_enumerable, result);
+      data::variable_list unused;
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, 
+                                               enumerable, non_enumerable, unused,
+                                               [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
+      if (enumerable.empty())
+      {
+        data::optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+      }
+      else
+      {
+        pbes_expression phi_;
+        enumerate_forall(phi_, enumerable, result);
+        data::optimized_forall_no_empty_domain(result, non_enumerable, phi_, remove_unused_variables);
+      }
     }
     else
     {
       data::variable_list finite;
       data::variable_list infinite;
-      data::detail::split_finite_variables(x.variables(), m_dataspec, finite, infinite);
+      data::variable_list unused;
+      data::detail::split_finite_variables(x.variables(), m_dataspec, 
+                                           finite, infinite, unused, 
+                                           [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
       if (finite.empty())
       {
-        pbes_expression body;
-        derived().apply(body, x.body());
-        data::optimized_forall(result, infinite, body);
+        data::optimized_forall_no_empty_domain(result, infinite, result, remove_unused_variables);
       }
       else
       {
-        enumerate_forall(result, finite, x.body());
-        data::optimized_forall_no_empty_domain(result, infinite, result);
+        pbes_expression phi_;
+        enumerate_forall(phi_, finite, result);
+        data::optimized_forall_no_empty_domain(result, infinite, phi_, remove_unused_variables);
       }
     }
   }
@@ -162,29 +187,45 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <class T>
   void apply(T& result, const exists& x)
   {
+    const bool remove_unused_variables=true;
+    derived().apply(result, x.body());
+    std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
     {
       data::variable_list enumerable;
       data::variable_list non_enumerable;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
-      enumerate_exists(result, enumerable, x.body());
-      data::optimized_exists_no_empty_domain(result, non_enumerable, result);
+      data::variable_list unused;
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, 
+                                               enumerable, non_enumerable, unused,
+                                               [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
+      if (enumerable.empty())
+      {
+        data::optimized_exists_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+      }
+      else
+      { 
+        pbes_expression phi_;
+        enumerate_exists(phi_, enumerable, result);
+        data::optimized_exists_no_empty_domain(result, non_enumerable, phi_, remove_unused_variables);
+      }
     }
     else
     {
       data::variable_list finite;
       data::variable_list infinite;
-      data::detail::split_finite_variables(x.variables(), m_dataspec, finite, infinite);
+      data::variable_list unused;
+      data::detail::split_finite_variables(x.variables(), m_dataspec, 
+                                           finite, infinite, unused, 
+                                           [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
       if (finite.empty())
       {
-        pbes_expression body;
-        derived().apply(body, x.body());
-        data::optimized_exists(result, infinite, body);
+        data::optimized_exists_no_empty_domain(result, infinite, result, remove_unused_variables);
       }
       else
       {
-        enumerate_exists(result, finite, x.body());
-        data::optimized_exists_no_empty_domain(result, infinite, result);
+        pbes_expression phi_;
+        enumerate_exists(phi_, finite, result);
+        data::optimized_exists_no_empty_domain(result, infinite, phi_, remove_unused_variables);
       }
     }
   }

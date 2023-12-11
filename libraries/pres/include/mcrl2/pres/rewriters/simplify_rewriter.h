@@ -31,6 +31,7 @@ protected:
   template <class T>
   void const_multiply_helper(T& result, const data::data_expression& f, const pres_expression& x)
   {
+std::cerr << "CONST MULTIOPLY SIMPLIFY " << f << "     " << x << "\n";
     if (data::sort_real::is_zero(f))
     {
       result=f;
@@ -596,6 +597,7 @@ protected:
   template <class T>
   void const_multiply_helper(T& result, const data::data_expression& f, const pres_expression& x)
   {
+std::cerr << "CONST MULTIOPLY SIMPLIFY REWRITING " << f << "     " << x << "\n";
     data::data_expression data_result;
     apply(data_result, f);
     if (data::sort_real::is_zero(data_result))
