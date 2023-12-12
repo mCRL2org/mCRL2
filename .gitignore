@@ -4,5 +4,10 @@ SourceVersion
 # Compiled byte-code for Python.
 *.pyc
 
+# Temp files generates by codegen.py
+scripts/code_generation/data_types/codegen.dot
+scripts/code_generation/data_types/codegen.log
+scripts/code_generation/data_types/codegen.pickle
+
 # Ignore the standard build directory
 build/

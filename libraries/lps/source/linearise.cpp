@@ -1482,9 +1482,8 @@ class specification_basic_type
       const process_expression& p)
     {
       /* This function replaces the variables in sumvars
-         by unique ones if these variables occur in occurvars
-         or occurterms. It extends rename_vars and rename
-         terms to rename the replaced variables to new ones. */
+         by unique ones if these variables occur in the process expression p.
+         The substitution sigma contains the renaming. */
       variable_vector newsumvars;
 
       for (const variable& var: sumvars)
@@ -9877,6 +9876,7 @@ class specification_basic_type
     {
       if (is_process_instance_assignment(t))
       {
+// std::cerr << "PROCESS ASSIGNMENT IN " << t << "\n";
         const process_instance_assignment u=atermpp::down_cast<process_instance_assignment>(t);
         const process_expression new_process=processes_with_initial_distribution.at(u.identifier()).process_body();
         if (is_stochastic_operator(new_process))
@@ -9890,15 +9890,25 @@ class specification_basic_type
           
           const variable_list relevant_stochastic_variables=parameters_that_occur_in_body(sto.variables(),object.processbody);
           assert(relevant_stochastic_variables.size()<=new_parameters.size());
+          // The variables in sto.variables() may clash with local variables u and therefore need to be rename.
+          variable_list renamed_sto_variables=sto.variables();
+          mutable_indexed_substitution<> local_sigma1;
+          alphaconvertprocess(renamed_sto_variables, local_sigma1, t);
+          
+
           variable_list::const_iterator i=new_parameters.begin();
           for(const variable& v: relevant_stochastic_variables)
           {
-            new_assignments=push_back(new_assignments,assignment(*i,v));
+            new_assignments=push_back(new_assignments,assignment(*i,local_sigma1(v)));
             i++;
           }
+          data_expression new_distribution = data::replace_variables_capture_avoiding(sto.distribution(),local_sigma1);
+
           // Some of the variables may occur only in the distribution, which is now moved out.
           // Therefore, the assignments must be filtered.
           new_assignments=filter_assignments(new_assignments + u.assignments(),object.parameters);
+
+          // The variables bound in the distribution may conflict 
 
           // Furthermore, the old assignment must be applied to the distribution, when it is moved
           // outside of the process body.
@@ -9907,12 +9917,19 @@ class specification_basic_type
           {
             local_sigma[a.lhs()]=a.rhs();
           }
+          process_expression result =  
+                          stochastic_operator(renamed_sto_variables,
+                                              data::replace_variables_capture_avoiding(new_distribution, local_sigma),
+                                              process_instance_assignment(new_identifier,new_assignments));
+// std::cerr << "PROCESS ASSIGNMENT OUT1 " << result << "\n";
+          return result;
           return process::replace_variables_capture_avoiding(
                           stochastic_operator(sto.variables(), 
                                               sto.distribution(),
                                               process_instance_assignment(new_identifier,new_assignments)),
                           local_sigma);
         }
+// std::cerr << "PROCESS ASSIGNMENT OUT2 " << t << "\n";
         return t;
 
       }

@@ -78,10 +78,10 @@ consists of the (distinct) elements ``true`` and ``false``::
        cdub: Bool # Positive -> Positive;
 
 If we now interpret the term :samp:`cdub(true, {num})` (where *num* is a term
-of sort ``Positive``) as "twice the number that *num* represents", and interpret
-:samp:`cdub(false, {num})` as "twice the number that *num* represents, plus 
-one", then we have created a binary encoding of the positive numbers. For 
-instance, ``cdub(false, one)`` represents the number 2, and 
+of sort ``Positive``) as "twice the number that *num* represents, plus 1", and interpret
+:samp:`cdub(false, {num})` as "twice the number that *num* represents", 
+then we have created a binary encoding of the positive numbers. For 
+instance, ``cdub(true, one)`` represents the number 3, and 
 ``cdub(false, cdub(true, cdub(false, one)))`` represents the number 10.
 
 .. note::

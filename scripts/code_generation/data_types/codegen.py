@@ -39,11 +39,8 @@
 
 import sys
 import re
-import os
-import string
 from optparse import OptionParser
-import Parsing
-import copy
+import parsing as Parsing
 
 from data import *
 
@@ -158,7 +155,7 @@ class TokenID(Parsing.Token):
         Parsing.Token.__init__(self, parser)
         self.data = identifier(s)
 
-    def __str__():
+    def __str__(self):
         return str(self.data)
 
 #===============================================================================
