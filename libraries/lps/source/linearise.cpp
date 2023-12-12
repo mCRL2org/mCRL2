@@ -4204,9 +4204,7 @@ class specification_basic_type
       {
         objectdatatype& object=objectIndex(processes_with_stochastic_distribution_first.at(p).process_id());
         assert(!is_stochastic_operator(object.processbody));
-std::cerr << "INPUT OF TRANSFORM " << object.processbody << "\n";
         object.processbody=transform_initial_distribution_term(object.processbody,processes_with_stochastic_distribution_first);
-std::cerr << "RESULT OF TRANSFORM " << object.processbody << "\n";
         assert(!is_stochastic_operator(object.processbody));
       }
 
