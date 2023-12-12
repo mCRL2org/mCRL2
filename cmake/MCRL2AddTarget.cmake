@@ -99,7 +99,7 @@ endfunction()
 # prepare a desktop application with desired icons.
 function(mcrl2_add_gui_tool TARGET_NAME)
   set(OPTION_KW)
-  set(VALUE_K MENUNAME DESCRIPTION ICON)
+  set(VALUE_KW MENUNAME DESCRIPTION ICON)
   set(LIST_KW SOURCES DEPENDS RESOURCES)
   
   cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
@@ -118,6 +118,9 @@ function(mcrl2_add_gui_tool TARGET_NAME)
   # Finds header files, can be glob since it is only used to show headers in MSVC
   file(GLOB_RECURSE TARGET_INCLUDE_FILES "*.h")
 
+  # This sets version numbers and icons for the executable.
+  mcrl2_add_resource_files(${TARGET_NAME} ${ARG_MENUNAME} ${ARG_DESCRIPTION} "${ARG_ICON}" ARG_SOURCES)
+
   add_executable(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
 
   target_link_libraries(${TARGET_NAME} ${ARG_DEPENDS})
@@ -126,8 +129,6 @@ function(mcrl2_add_gui_tool TARGET_NAME)
   if(MCRL2_MAN_PAGES)
     mcrl2_add_man_page(${TARGET_NAME})
   endif()
-
-  mcrl2_add_resource_files(${TARGET_NAME} ${ARG_MENUNAME} ${ARG_DESCRIPTION} ${ARG_ICON} ${ARG_SOURCES})
 
   if(MSVC)
     # Change to WIN32 application to avoid spawning a terminal
@@ -239,10 +240,6 @@ endfunction()
 # On windows this function adds a .rc file to the input source files.
 function(mcrl2_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_FILES)
   if(MSVC)
-    if(NOT ICON)
-      set(ICON "mcrl2-blue")
-    endif()
-
     set(ORIGFILENAME ${TARGET_NAME}.exe)
     set(RC_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_icon.rc)
 
@@ -267,11 +264,11 @@ function(mcrl2_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_F
     get_filename_component(ORIGFILENAME ${ORIGFILENAME} NAME)
     configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/icon.rc.in ${RC_FILE} @ONLY)
 
-    set(${SOURCE_FILES} ${${SOURCE_FILES}} ${RC_FILE})
+    list(APPEND ${SOURCE_FILES} ${RC_FILE})
   elseif(APPLE)
     set(ICNS_FILE ${CMAKE_SOURCE_DIR}/cmake/packaging/icons/${ICON}.icns)
     set_source_files_properties(${ICNS_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    set(${SOURCE_FILES} ${${SOURCE_FILES}} ${ICNS_FILE})
+    list(APPEND ${SOURCE_FILES} ${ICNS_FILE})
   endif()
   
   set(${SOURCE_FILES} "${${SOURCE_FILES}}" PARENT_SCOPE)
