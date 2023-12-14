@@ -106,6 +106,18 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
 
 endforeach()
 
+file(GLOB_RECURSE LTS_BENCHMARKS ${CMAKE_CURRENT_SOURCE_DIR} "*.aut")
+foreach(benchmark ${LTS_BENCHMARKS})
+  get_filename_component(LTS_FILENAME ${benchmark} NAME)
+  string(REPLACE ".aut" "" NAME ${LTS_FILENAME})
+  
+  add_tool_benchmark("${NAME}_bisim" ltsconvert "${LTS_FILENAME}" "" "-ebisim")
+  add_tool_benchmark("${NAME}_bisim-gjkw" ltsconvert "${LTS_FILENAME}" "" "-ebisim-gjkw")
+
+  add_tool_benchmark("${NAME}_branching-bisim" ltsconvert "${LTS_FILENAME}" "" "-ebranching-bisim")
+  add_tool_benchmark("${NAME}_branching-bisim-gjkw" ltsconvert "${LTS_FILENAME}" "" "-ebranching-bisim-gjkw")
+endforeach()
+
 # Only add the symbolic benchmarks when the tools are part of the build, i.e., experimental tools enabled and Sylvan can be compiled.
 if (MCRL2_ENABLE_EXPERIMENTAL AND MCRL2_ENABLE_SYLVAN)
 
