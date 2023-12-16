@@ -1,5 +1,6 @@
-.git
-.vscode
-.vs
-script/docker
-build
+.git/
+.vscode/
+.vs/
+benchmarks/
+script/docker/
+build/

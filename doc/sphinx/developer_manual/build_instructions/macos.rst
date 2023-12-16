@@ -13,6 +13,7 @@ provided websites to acquire them individually.
   * Boost library sources, which can be downloaded from `<https://www.boost.org/>`_ and extracted in any desired location.
   * Qt version 6.2.4. Download and install `Qt <https://www.qt.io/download-qt-installer>`_, which requires a Qt account.
   * `CMake 3.14.0 <http://www.cmake.org/cmake/resources/software.html>`_ must be installed. 
+  * `Python 3.6 <https://www.python.org/>` is optionally needed for various activities such as testing, building documentation and code generation.
 
 .. note::
 

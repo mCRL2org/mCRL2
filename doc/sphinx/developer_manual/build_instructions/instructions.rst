@@ -1,19 +1,21 @@
 .. _build-instructions:
 
+   
 Build instructions
 ==================
-
-.. toctree::
-
-   windows
-   macos
-   linux
    
+.. toctree::
+  :hidden:
+
+  windows
+  macos
+  linux
+
 The mCRL2 source code can be obtained in two ways. The source code for releases
 of the toolset are available as a source tarball, see :ref:`download`. The source
 code for the development version of the toolset is available in our `Git <https://git-scm.com/>`_
 repository hosted at `Github <https://github.com/mCRL2org/mCRL2>`_. It can be
-obtained using:
+obtained using the following command:
 
   git clone https://github.com/mCRL2org/mCRL2.git
 
@@ -31,14 +33,11 @@ in ``mCRL2-build``.
 
 See the platform specific instructions for :doc:`Windows <windows>`, :doc:`MacOS <macos>` and :doc:`Linux <linux>`. For testing see the documentation :ref:`here <build-testing>`.
 
-Documentation
----------------
+Python dependencies
+--------------------
 
-To build the documentation we need various dependencies depending on what exact
-configuration is being used. First of all the cmake flag
-``MCRL2_ENABLE_DOCUMENTATION`` must be enabled to build the documentation.
 If you don't want to install Python libraries system wide, you can set up a
-Python virtual environment (needs to be done only once).
+Python virtual environment (needs to be done only once) in the build directory.
 
     $ python3 -m venv sphinx-venv
 
@@ -46,7 +45,7 @@ Activate it.
 
     $ source sphinx-venv/bin/activate
 
-Install Sphinx (currently version 2.2.0) and other dependencies.
+Afterwards dependencies can be installed using `pip` as follows:
 
     $ pip install -r <mCRL2>/requirements.txt
 
@@ -54,8 +53,14 @@ When using a virtual environment ensure that CMake uses the right Python binary.
 
     $ cmake [other options] \
           -DPython_EXECUTABLE=absolute/path/to/sphinx-venv/bin/python \
-          path/to/mCRL2/src
+          <mCRL2-build>
 
+Documentation
+---------------
+
+To build the documentation we need various dependencies depending on what exact
+configuration is being used. First of all the cmake flag
+``MCRL2_ENABLE_DOCUMENTATION`` must be enabled to build the documentation.
 Then the `doc` target can be build for a full documentation build, or `fastdoc`
 to avoid cleaning up the intermediate results. The documentation build can be
 fine tuned using the following cmake configuration flags.
