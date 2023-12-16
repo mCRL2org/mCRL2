@@ -89,19 +89,19 @@ struct term_traits_optimized<pres_system::pres_expression>: public core::term_tr
   static inline
   void make_infimum(term_type& result, const variable_sequence_type& d, const term_type& x)
   {
-    data::optimized_infimum_no_empty_domain(result, d, x);
+    optimized_infimum_no_empty_domain(result, d, x);
   }
 
   static inline
   void make_supremum(term_type& result, const variable_sequence_type& d, const term_type& x)
   {
-    data::optimized_supremum_no_empty_domain(result, d, x);
+    optimized_supremum_no_empty_domain(result, d, x);
   }
 
   static inline
   void make_sum(term_type& result, const variable_sequence_type& d, const term_type& x)
   {
-    data::optimized_sum_no_empty_domain(result, d, x);
+    optimized_sum_no_empty_domain(result, d, x);
   }
 
   template <typename FwdIt>

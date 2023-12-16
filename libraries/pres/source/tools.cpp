@@ -11,7 +11,7 @@
 
 #include "mcrl2/pres/tools.h"
 
-// #include "mcrl2/pres/tools/presconstelm.h"
+#include "mcrl2/pres/tools/presconstelm.h"
 #include "mcrl2/pres/tools/presinfo.h"
 #include "mcrl2/pres/tools/prespp.h"
 #include "mcrl2/pres/tools/presrewr.h"

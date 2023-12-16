@@ -11,6 +11,7 @@ set(MCRL2_TOOLS
   pbespareqelm
   pbespor
   pbessymbolicbisim
+  presconstelm
   presinfo
   prespp
   presrewr

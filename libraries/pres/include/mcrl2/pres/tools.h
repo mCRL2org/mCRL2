@@ -15,6 +15,7 @@
 #include <string>
 
 #include "mcrl2/core/print_format.h"
+#include "mcrl2/data/rewrite_strategy.h"
 // #include "mcrl2/pres/absinthe_strategy.h"
 // #include "mcrl2/pres/bisimulation_type.h"
 #include "mcrl2/pres/pres_rewriter_type.h"
@@ -26,7 +27,7 @@ namespace mcrl2 {
 
 namespace pres_system {
 
-/* void presrewr(const std::string& input_filename,
+void presrewr(const std::string& input_filename,
               const std::string& output_filename,
               const utilities::file_format& input_format,
               const utilities::file_format& output_format,
@@ -42,7 +43,7 @@ void presconstelm(const std::string& input_filename,
                   bool compute_conditions,
                   bool remove_redundant_equations,
                   bool check_quantifiers
-                 ); */
+                 ); 
 
 void presinfo(const std::string& input_filename,
               const std::string& input_file_message,

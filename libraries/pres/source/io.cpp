@@ -324,7 +324,7 @@ atermpp::aterm_appl pres_to_aterm(const pres& p)
 
   atermpp::aterm_list eqn_list;
   const std::vector<pres_equation>& eqn = p.equations();
-  for (auto i = eqn.rbegin(); i != eqn.rend(); ++i)
+  for (std::vector<pres_equation>::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
     atermpp::aterm a = pres_equation_to_aterm(*i);
     eqn_list.push_front(a);

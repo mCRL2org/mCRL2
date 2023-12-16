@@ -832,7 +832,7 @@ struct simplify_data_rewriter
   pres_expression operator()(const pres_expression& x, SubstitutionFunction& sigma) const
   {
     pres_expression result;
-    detail::make_apply_rewriter_builder<pres_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(result, x);
+    detail::make_apply_rewriter_builder<pres_system::detail::simplify_data_rewriter_builder>(m_dataspec, R, sigma).apply(result, x);
     return result;
   }
 

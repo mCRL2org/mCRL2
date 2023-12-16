@@ -11,9 +11,9 @@
 
 #include "mcrl2/pres/normalize.h"
 // #include "mcrl2/pres/presinst_finite_algorithm.h"
-// #include "mcrl2/pres/remove_equations.h"
-// #include "mcrl2/pres/remove_parameters.h"
-// #include "mcrl2/pres/significant_variables.h"
+#include "mcrl2/pres/remove_equations.h"
+#include "mcrl2/pres/remove_parameters.h"
+#include "mcrl2/pres/significant_variables.h"
 
 namespace mcrl2
 {
@@ -23,7 +23,7 @@ namespace pres_system
 
 namespace algorithms {
 
-/* void remove_parameters(pres& x, const std::set<data::variable>& to_be_removed)
+void remove_parameters(pres& x, const std::set<data::variable>& to_be_removed)
 {
   pres_system::remove_parameters(x, to_be_removed);
 }
@@ -31,7 +31,7 @@ namespace algorithms {
 void remove_parameters(pres& x, const std::map<core::identifier_string, std::vector<std::size_t> >& to_be_removed)
 {
   pres_system::remove_parameters(x, to_be_removed);
-} */
+} 
 
 void normalize(pres& x)
 {
@@ -53,7 +53,7 @@ bool is_normalized(const pres& x)
 /* void presinst_finite(pres& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
 {
   pres_system::presinst_finite(p, rewrite_strategy, finite_parameter_selection);
-}
+} */
 
 std::string print_removed_equations(const std::vector<propositional_variable>& removed)
 {
@@ -68,7 +68,7 @@ std::vector<propositional_variable> remove_unreachable_variables(pres& p)
 std::set<data::variable> significant_variables(const pres_expression& x)
 {
   return pres_system::significant_variables(x);
-} */
+} 
 
 } // namespace algorithms
 
