@@ -10,7 +10,7 @@
 /// \brief
 
 #include "mcrl2/pres/normalize.h"
-// #include "mcrl2/pres/presinst_finite_algorithm.h"
+#include "mcrl2/pres/presinst_finite_algorithm.h"
 #include "mcrl2/pres/remove_equations.h"
 #include "mcrl2/pres/remove_parameters.h"
 #include "mcrl2/pres/significant_variables.h"
@@ -50,10 +50,10 @@ bool is_normalized(const pres& x)
   return pres_system::is_normalized(x);
 }
 
-/* void presinst_finite(pres& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
+void presinst_finite(pres& p, data::rewrite_strategy rewrite_strategy, const std::string& finite_parameter_selection)
 {
   pres_system::presinst_finite(p, rewrite_strategy, finite_parameter_selection);
-} */
+} 
 
 std::string print_removed_equations(const std::vector<propositional_variable>& removed)
 {
