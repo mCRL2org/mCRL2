@@ -71,7 +71,7 @@ class pres_parelm_algorithm
         : G(G_), propvar_offsets(propvar_offsets_)
       {}
 
-      void enter(const forall& x)
+      void enter(const infimum& x)
       {
         for (const data::variable& v: x.variables())
         {
@@ -79,7 +79,7 @@ class pres_parelm_algorithm
         }
       }
 
-      void leave(const forall& x)
+      void leave(const infimum& x)
       {
         for (const data::variable& v: x.variables())
         {
@@ -87,7 +87,7 @@ class pres_parelm_algorithm
         }
       }
 
-      void enter(const exists& x)
+      void enter(const supremum& x)
       {
         for (const data::variable& v: x.variables())
         {
@@ -95,13 +95,30 @@ class pres_parelm_algorithm
         }
       }
 
-      void leave(const exists& x)
+      void leave(const supremum& x)
       {
         for (const data::variable& v: x.variables())
         {
           bound_variables.erase(v);
         }
       }
+
+      void enter(const sum& x)
+      {
+        for (const data::variable& v: x.variables())
+        {
+          bound_variables.insert(v);
+        }
+      }
+
+      void leave(const sum& x)
+      {
+        for (const data::variable& v: x.variables())
+        {
+          bound_variables.erase(v);
+        }
+      }
+
 
       void apply(const propositional_variable_instantiation& x)
       {

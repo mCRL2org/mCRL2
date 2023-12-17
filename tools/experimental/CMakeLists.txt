@@ -13,6 +13,7 @@ set(MCRL2_TOOLS
   pbessymbolicbisim
   presconstelm
   presinfo
+  presparelm
   prespp
   presrewr
   pressolve

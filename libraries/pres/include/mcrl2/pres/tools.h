@@ -51,13 +51,13 @@ void presinfo(const std::string& input_filename,
               bool opt_full
              );
 
-/* void presparelm(const std::string& input_filename,
+void presparelm(const std::string& input_filename,
                 const std::string& output_filename,
                 const utilities::file_format& input_format,
                 const utilities::file_format& output_format
                );
 
-void prespareqelm(const std::string& input_filename,
+/* void prespareqelm(const std::string& input_filename,
                   const std::string& output_filename,
                   const utilities::file_format& input_format,
                   const utilities::file_format& output_format,

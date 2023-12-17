@@ -6,12 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes/source/tools2.cpp
+/// \file pres/source/tools2.cpp
 /// \brief Tool implementations.
 
 #include "mcrl2/pres/tools.h"
 
 #include "mcrl2/pres/tools/lps2pres.h"
-// #include "mcrl2/pbes/tools/lpsbisim2pbes.h"
-// #include "mcrl2/pbes/tools/pbesparelm.h"
-// #include "mcrl2/pbes/tools/pbesstategraph.h"
+// #include "mcrl2/pres/tools/lpsbisim2pres.h"
+#include "mcrl2/pres/tools/presparelm.h"
+// #include "mcrl2/pres/tools/presstategraph.h"
