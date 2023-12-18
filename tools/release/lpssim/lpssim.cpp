@@ -89,6 +89,20 @@ class sim_tool : public rewriter_tool< input_tool >
       if (simulation.probabilistic_state_must_be_selected(state_index))
       {
         std::cout << std::endl << (state_index == 0 ? "initial" : "current") 
+                  << " state: " << std::endl;
+
+        assert(current_state.source_state.size()>0);
+        for (std::size_t i = 0; i < current_state.source_state.size(); i++)
+        {
+          std::cout << i << ": " 
+                    << ((current_state.source_state.probabilities[i]!=real_one())?
+                               lps::pp(current_state.source_state.probabilities[i]) + ":  ":"")
+                    << print_state(current_state.source_state.states[i]) << std::endl;
+        }
+      }
+      else // a normal state must be selected. 
+      {
+        std::cout << std::endl << (state_index == 0 ? "initial" : "current") 
                   << " state: " << print_state(current_state.source_state) << std::endl;
 
         for (std::size_t i = 0; i < current_state.transitions.size(); i++)
@@ -100,20 +114,6 @@ class sim_tool : public rewriter_tool< input_tool >
         if (current_state.transitions.size() == 0)
         {
           std::cout << "deadlock" << std::endl;
-        }
-      }
-      else
-      {
-        std::cout << std::endl << (state_index == 0 ? "initial" : "current") 
-                  << " state: " << std::endl;
-
-        assert(current_state.source_state.size()>0);
-        for (std::size_t i = 0; i < current_state.source_state.size(); i++)
-        {
-          std::cout << i << ": " 
-                    << ((current_state.source_state.probabilities[i]!=real_one())?
-                               lps::pp(current_state.source_state.probabilities[i]) + ":  ":"")
-                    << print_state(current_state.source_state.states[i]) << std::endl;
         }
       }
     }
