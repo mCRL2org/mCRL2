@@ -1,0 +1,60 @@
+% This model describes a problem as the secretary selection problem (https://en.wikipedia.org/wiki/Secretary_problem)
+% also known in other forms such as the Sultan of Persia choosing the best spouse. 
+%
+% The young Sultan of must select and mary a spouse. 
+% The court prepared N=100 candidates with qualities between 1 and N, and the sultan wants
+% to pick the candidate with the highest quality. The sultan can perfectly determine the relative
+% quality of candidates. However, the he can only inspect
+% each candidate once and one at the time, and after inspecting a candidate it must decide
+% whether to select that candidate. A non selected candidate cannot be inspected and selected again.
+%
+% The question is how to select a wife such that the best candidate is selected with highers probability. 
+%
+% A strategy for the sultan is to test M out of N candidates, and dispose all of them regardless the quality.
+% After the M candidates the one that is better than all those seen is chosen, unless only one
+% candidate is left as in such a case this last person must be chosen. 
+% When M=37 a probability for getting the absolute best spouse is 37.1%. 
+%
+% The model below figures out by itself what the most successful number of candidates is that
+% must be tried. For low numbers of N it is reasonable fast. For N=100 12M res equations are generated, 
+% which are quickly solved. 
+%
+% An intriguing aspect of the solution of this puzzle is that the description uses the best_seen
+% lady to be selected. However, this is information not known to the sultan. However, the modal 
+% formula optimises on this information. Hence, the value of M, or no_of_candidates_selected, must
+% be set before any of the dist operators. 
+%
+% The formula to select the best spouse is straightforward: <true*>(<pick_the_best_candidate>val(1)||val(0)). 
+%
+% Jan Friso Groote and Maurice Laveaux, December 2023. 
+
+
+map N: Nat;
+eqn N= 10; % 100
+
+act pick_the_best_candidate, 
+    pick_an_inferior_candidate,
+    decide_to_pick_no_candidate,
+    decide_to_pick_a_candidate,
+    skip_as_candidate_is_clearly_inferior;
+
+% best_seen is the index of the best candidate. 
+% no_of_candidates_selected is the number of potentials spouses already tested.
+% no_of_test_spouses is the number M, namely the number of spouses that the Sultan
+% will test without choosing them. In each round this number is decreased. 
+proc P(best_seen: Nat, no_of_candidates_selected: Nat, no_of_test_spouses: Nat) =
+     % Pick candidate if allowed and otherwise continue to determine best value.
+     (no_of_test_spouses==0)
+     -> (decide_to_pick_a_candidate.
+         dist n: Nat[if(n < N-no_of_candidates_selected, 1/(N-no_of_candidates_selected), 0)].
+             (n<best_seen || no_of_candidates_selected==N-1) 
+                   -> ((n==0 && best_seen!=0) -> pick_the_best_candidate.delta
+                                              <> pick_an_inferior_candidate.delta) 
+                   <> skip_as_candidate_is_clearly_inferior. P(min(n,best_seen), no_of_candidates_selected+1, max(no_of_test_spouses-1,0)))
+     <> ((no_of_candidates_selected+1<N) 
+         -> decide_to_pick_no_candidate.
+              dist n: Nat[if(n < N-no_of_candidates_selected, 1/(N-no_of_candidates_selected), 0)].
+                    P(min(n,best_seen), no_of_candidates_selected+1, max(no_of_test_spouses-1,0)));
+
+init sum no_of_test_spouses:Nat.(no_of_test_spouses+1<N) -> P(N, 0, no_of_test_spouses);
+

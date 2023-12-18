@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(test_properly_change_bound_variables)
     "init Play(0, false, 1);\n"
 ;
 
-  std::string result =
+  std::string result1 =
     "map  distribution: Bool # Pos # Pos -> Real;\n"
     "\n"
     "act  win,lose;\n"
@@ -184,8 +184,32 @@ BOOST_AUTO_TEST_CASE(test_properly_change_bound_variables)
     "init dist s1: Pos[distribution(false, 1, s1)] . P(2, s1, 0);\n"
     ;
 
+  std::string result2 =
+    "map  distribution: Bool # Pos # Pos -> Real;\n"
+    "\n"
+    "act  win,lose;\n"
+    "     hold: Bool;\n"
+    "\n"
+    "glob dc: Pos;\n"
+    "     dc1: Nat;\n"
+    "\n"
+    "proc P(s4_Play,s1_Play: Pos, round__Play: Nat) =\n"
+    "       sum b1_Play: Bool.\n"
+    "         (s4_Play == 1 && !(round__Play == 1)) ->\n"
+    "         hold(b1_Play) .\n"
+    "         dist s2_Play: Pos[distribution(b1_Play, s1_Play, s2_Play)] .\n"
+    "         P(s4_Play = 1, s1_Play = s2_Play, round__Play = round__Play + 1)\n"
+    "     + (s4_Play == 1 && round__Play == 1) ->\n"
+    "         lose .\n"
+    "         P(s4_Play = 2, s1_Play = dc, round__Play = dc1)\n"
+    "     + delta;\n"
+    "\n"
+    "init dist s1: Pos[distribution(false, 1, s1)] . P(1, s1, 0);\n"
+    ;
+
   stochastic_specification spec=linearise(text);
-  BOOST_CHECK_EQUAL(lps::pp(spec),result);
+  BOOST_CHECK(lps::pp(spec)==result1 ||   // The lineariser can up with multiple results, depending on how terms are stored internally. 
+              lps::pp(spec)==result2);
 }  
 
 // This test checks whether the outward distribution of dist operators is going 
