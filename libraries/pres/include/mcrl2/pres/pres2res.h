@@ -137,7 +137,6 @@ class pres2res_algorithm
         }
         eqns=atermpp::vector<pres_equation>(); // clear the equations.
       } 
-std::cerr << "GENERATED EQUATIONS " << resulting_equations.size() << "\n";
 
       return pres(m_input_pres.data(), 
                   resulting_equations, 
