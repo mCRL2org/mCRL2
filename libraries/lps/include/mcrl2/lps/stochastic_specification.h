@@ -126,7 +126,8 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
   {
     if (s.distribution().is_defined())
     {
-      throw mcrl2::runtime_error("action summand has non-empty stochastic distribution");
+      throw mcrl2::runtime_error("There is an action summand has non-empty stochastic distribution " + pp(s.distribution()) + ".\n" + 
+                                 "Transformation of this stochastic lps to a plain lps fails.");;
     }
     v.push_back(s);
   }
@@ -134,7 +135,8 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
 
   if (spec.initial_process().distribution().is_defined())
   {
-    throw mcrl2::runtime_error("initial state has non-empty stochastic distribution");
+    throw mcrl2::runtime_error("The initial state has non-empty stochastic distribution " + pp(spec.initial_process().distribution()) + ".\n" + 
+                               "Transformation of this stochastic lps to a plain lps fails.");
   }
   result.initial_process() = process_initializer(spec.initial_process().expressions());
   return result;
