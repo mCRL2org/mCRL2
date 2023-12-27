@@ -700,3 +700,5 @@ BOOST_AUTO_TEST_CASE(test_simplify_rewriter)
   pbes_system::simplify_rewriter R;
   pbes_system::pbes_rewrite(p, R);
 }
+
+

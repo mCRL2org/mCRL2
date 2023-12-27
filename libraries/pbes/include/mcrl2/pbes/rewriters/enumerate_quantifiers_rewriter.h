@@ -142,6 +142,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   void apply(T& result, const forall& x)
   {
     const bool remove_unused_variables=true;
+    atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
@@ -182,12 +183,14 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
         data::optimized_forall_no_empty_domain(result, infinite, phi_, remove_unused_variables);
       }
     }
+    redo_substitution(x.variables(), undo);
   }
 
   template <class T>
   void apply(T& result, const exists& x)
   {
     const bool remove_unused_variables=true;
+    atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
@@ -228,6 +231,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
         data::optimized_exists_no_empty_domain(result, infinite, phi_, remove_unused_variables);
       }
     }
+    redo_substitution(x.variables(), undo);
   }
 
   // N.B. This function has been added to make this class operate well with the enumerator.

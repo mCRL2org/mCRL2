@@ -167,6 +167,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <class T>
   void apply(T& result, const infimum& x)
   {
+    atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
@@ -207,11 +208,13 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
         optimized_infimum(result, infinite, phi_);
       }
     }
+    redo_substitution(x.variables(), undo);
   }
 
   template <class T>
   void apply(T& result, const supremum& x)
   {
+    atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
@@ -252,11 +255,13 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
         optimized_supremum(result, infinite, phi_);
       }
     }
+    redo_substitution(x.variables(), undo);
   }
 
   template <class T>
   void apply(T& result, const sum& x)
   {
+    atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
     if (m_enumerate_infinite_sorts)
@@ -297,6 +302,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
         optimized_sum(result, infinite + unused, phi_, m_dataspec, super::R);
       }
     }
+    redo_substitution(x.variables(), undo);
   }
 
   // N.B. This function has been added to make this class operate well with the enumerator.

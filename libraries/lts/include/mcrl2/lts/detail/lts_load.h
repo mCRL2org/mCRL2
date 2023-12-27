@@ -12,8 +12,9 @@
 #ifndef MCRL2_LTS_DETAIL_LTS_LOAD_H
 #define MCRL2_LTS_DETAIL_LTS_LOAD_H
 
-#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/utilities/tool.h"
+#include "mcrl2/data/real_utilities.h"
+#include "mcrl2/lts/lts_io.h"
 
 namespace mcrl2 {
 
@@ -39,8 +40,8 @@ void add_options(utilities::interface_description& desc)
 
 // Load an LTS from ltsfilename, with additional files specified in the command line parser.
 // TODO: this incomprehensible interface for loading LTSs needs improvement.
-inline
-void load_lts(const utilities::command_line_parser& parser, const std::string& ltsfilename, lts_lts_t& result)
+template <class LTS_TYPE>
+void load_lts(const utilities::command_line_parser& parser, const std::string& ltsfilename, LTS_TYPE& result)
 {
   data_file_type_t data_file_type = data_file_type_t::none_e;
   std::string data_file;
@@ -82,8 +83,8 @@ void load_lts(const utilities::command_line_parser& parser, const std::string& l
 }
 
 // extracts a specification from an LTS
-inline
-lps::stochastic_specification extract_specification(const lts_lts_t& l)
+template <class LTS_TYPE>
+lps::stochastic_specification extract_specification(const LTS_TYPE& l)
 {
   lps::stochastic_action_summand_vector action_summands;
   data::variable process_parameter("x", data::sort_pos::pos());
@@ -92,8 +93,39 @@ lps::stochastic_specification extract_specification(const lts_lts_t& l)
   // Add a single delta.
   lps::deadlock_summand_vector deadlock_summands(1, lps::deadlock_summand(data::variable_list(), data::sort_bool::true_(), lps::deadlock()));
   lps::stochastic_linear_process lps(process_parameters, deadlock_summands, lps::stochastic_action_summand_vector());
-  lps::stochastic_process_initializer initial_process(data::data_expression_list{data::sort_pos::pos(l.initial_state() + 1)}, 
-                                                      lps::stochastic_distribution());
+
+  lps::stochastic_process_initializer initial_process;
+  if constexpr (!(LTS_TYPE::is_probabilistic_lts))
+  {
+    initial_process=lps::stochastic_process_initializer(data::data_expression_list{data::sort_pos::pos(l.initial_state() + 1)}, 
+                                                        lps::stochastic_distribution());
+  }
+  else // The initial state is probabilistic. 
+  {
+    const typename LTS_TYPE::probabilistic_state_t& init = l.initial_probabilistic_state();
+    if (init.size()<=1)
+    {
+      initial_process=lps::stochastic_process_initializer(data::data_expression_list{data::sort_pos::pos(init.get() + 1)}, 
+                                                          lps::stochastic_distribution()); 
+    }
+    else
+    {
+      data::variable stoch_var("stoch_var", data::sort_pos::pos());
+      data::data_expression distribution = data::sort_real::real_zero();
+      data::data_expression state = data::sort_pos::pos(1);
+      std::size_t count=init.size();
+      for(typename LTS_TYPE::probabilistic_state_t::const_reverse_iterator i=init.rbegin(); i!=init.rend(); ++i)
+      {
+        distribution=data::if_(data::equal_to(stoch_var,data::sort_pos::pos(count)), i->probability(), distribution);
+        state=data::if_(data::equal_to(stoch_var,data::sort_pos::pos(count)), data::sort_pos::pos(i->state()+1), state);
+        count--;
+      }
+      initial_process=lps::stochastic_process_initializer(data::data_expression_list{state}, 
+                                                          lps::stochastic_distribution(data::variable_list{stoch_var},
+                                                                                       distribution));
+
+    }
+  }
   return lps::stochastic_specification(l.data(), l.action_label_declarations(), global_variables, lps, initial_process);
 }
 

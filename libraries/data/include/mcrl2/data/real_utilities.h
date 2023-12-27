@@ -13,8 +13,7 @@
 #ifndef MCRL2_DATA_REAL_UTILITIES_H
 #define MCRL2_DATA_REAL_UTILITIES_H
 
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitutions/map_substitution.h"
+#include "mcrl2/data/standard_numbers_utility.h"
 
 namespace mcrl2
 {

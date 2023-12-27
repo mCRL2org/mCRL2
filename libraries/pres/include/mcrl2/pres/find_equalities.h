@@ -79,7 +79,7 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
   }
 
   // N.B. Use apply here, to avoid going into the recursion
-  void apply(const sum& x)
+  void apply(const sum& )
   {
     push(data::detail::find_equalities_expression());
   }

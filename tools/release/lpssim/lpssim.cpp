@@ -95,7 +95,7 @@ class sim_tool : public rewriter_tool< input_tool >
         for (std::size_t i = 0; i < current_state.source_state.size(); i++)
         {
           std::cout << i << ": " 
-                    << ((current_state.source_state.probabilities[i]!=real_one())?
+                    << ((current_state.source_state.probabilities[i]!=data::sort_real::real_one())?
                                lps::pp(current_state.source_state.probabilities[i]) + ":  ":"")
                     << print_state(current_state.source_state.states[i]) << std::endl;
         }

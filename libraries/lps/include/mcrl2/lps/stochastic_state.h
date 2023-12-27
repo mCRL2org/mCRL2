@@ -14,13 +14,14 @@
 
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/real_utilities.h"
 #include "mcrl2/lps/state.h"
 
 namespace mcrl2 {
 
 namespace lps {
 
-inline
+/* inline
 const data::data_expression& real_zero()
 {
   static data::data_expression result = data::sort_real::creal(data::sort_int::cint(data::sort_nat::c0()), data::sort_pos::c1());
@@ -32,7 +33,7 @@ const data::data_expression& real_one()
 {
   static data::data_expression result = data::sort_real::creal(data::sort_int::cint(data::sort_nat::cnat(data::sort_pos::c1())), data::sort_pos::c1());
   return result;
-}
+} */
 
 // invariant: the elements of states must be unique
 // invariant: the elements of probabilities must be >= 0
@@ -47,7 +48,7 @@ struct stochastic_state
   stochastic_state() = default;
 
   explicit stochastic_state(const state& s)
-    : probabilities{real_one()}, states{s}
+    : probabilities{data::sort_real::real_one()}, states{s}
   {}
 
   void push_back(const data::data_expression& probability, const state& s)
@@ -88,11 +89,11 @@ void check_probability(const data::data_expression& x, const data::rewriter& rew
   {
     throw mcrl2::runtime_error("Probability is not a closed expression with a proper enumerator and denominator: " + data::pp(x) + ".");
   }
-  if (rewr(data::greater_equal(x, real_zero())) != data::sort_bool::true_())
+  if (rewr(data::greater_equal(x, data::sort_real::real_zero())) != data::sort_bool::true_())
   {
     throw mcrl2::runtime_error("Probability is smaller than zero: " + data::pp(x) + ".");
   }
-  if (rewr(data::greater_equal(real_one(), x)) != data::sort_bool::true_())
+  if (rewr(data::greater_equal(data::sort_real::real_one(), x)) != data::sort_bool::true_())
   {
     throw mcrl2::runtime_error("Probability is greater than one: " + data::pp(x) + ".");
   }
@@ -101,14 +102,14 @@ void check_probability(const data::data_expression& x, const data::rewriter& rew
 inline
 void check_stochastic_state(const stochastic_state& s, const data::rewriter& rewr)
 {
-  data::data_expression probability = real_zero();
+  data::data_expression probability = data::sort_real::real_zero();
   for (const data::data_expression& prob: s.probabilities)
   {
     check_probability(prob, rewr);
     probability = data::sort_real::plus(probability, prob);
   }
   probability = rewr(probability);
-  if (probability != real_one())
+  if (probability != data::sort_real::real_one())
   {
     std::vector<std::string> v;
     for (const data::data_expression& prob: s.probabilities)

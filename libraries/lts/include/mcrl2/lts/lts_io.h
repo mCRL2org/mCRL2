@@ -149,9 +149,9 @@ inline void read_mcrl2_context(const std::string& data_file,
 }
 
 // converts an arbitrary lts to lts_lts_t
-template <class LTS_TYPE>
-inline void convert_to_lts_lts(LTS_TYPE& src, 
-                               mcrl2::lts::lts_lts_t& dest, 
+template <class LTS_TYPE_IN, class LTS_TYPE_OUT>
+inline void convert_to_lts_lts(LTS_TYPE_IN& src, 
+                               LTS_TYPE_OUT& dest, 
                                const data_file_type_t extra_data_file_type,
                                const std::string& extra_data_file_name)
 {
@@ -198,7 +198,8 @@ inline void convert_to_lts_lts(LTS_TYPE& src,
  *  \param[in] type The type of the lts file, i.e. .lts, .fsm, .dot or .aut.
  *  \param[in] extra_data_file_type The type of the file containing extra information, such as a data specification.
  *  \param[in] extra_data_file_name The name of the file containing extra information. */
-inline void load_lts(lts_lts_t& result, 
+template <class LTS_TYPE>
+inline void load_lts(LTS_TYPE& result, 
                      const std::string& infilename,
                      lts_type type,  
                      const data_file_type_t extra_data_file_type=none_e,
