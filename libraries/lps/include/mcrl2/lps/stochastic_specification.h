@@ -116,13 +116,20 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
   result.action_labels() = spec.action_labels();
   result.global_variables() = spec.global_variables();
 
-  auto& proc = result.process();
+  if (spec.initial_process().distribution().is_defined())
+  {
+    throw mcrl2::runtime_error("The initial state has non-empty stochastic distribution " + pp(spec.initial_process().distribution()) + ".\n" + 
+                               "Transformation of this stochastic lps to a plain lps fails.");
+  }
+  result.initial_process() = process_initializer(spec.initial_process().expressions());
+
+  linear_process& proc = result.process();
   proc.process_parameters() = spec.process().process_parameters();
   proc.deadlock_summands() = spec.process().deadlock_summands();
 
   action_summand_vector v;
-  auto const& action_summands = spec.process().action_summands();
-  for (const auto& s: action_summands)
+
+  for (const stochastic_action_summand& s: spec.process().action_summands())
   {
     if (s.distribution().is_defined())
     {
@@ -132,13 +139,6 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
     v.push_back(s);
   }
   proc.action_summands() = v;
-
-  if (spec.initial_process().distribution().is_defined())
-  {
-    throw mcrl2::runtime_error("The initial state has non-empty stochastic distribution " + pp(spec.initial_process().distribution()) + ".\n" + 
-                               "Transformation of this stochastic lps to a plain lps fails.");
-  }
-  result.initial_process() = process_initializer(spec.initial_process().expressions());
   return result;
 }
 

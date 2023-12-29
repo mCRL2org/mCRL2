@@ -196,7 +196,7 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
     m_stateLabels.push_back(stateLabelToQString(lts.state_label(i)));
   }
 
-  // Position nodes randomly
+  // Position the ordinary states randomly
   for (std::size_t i = 0; i < lts.num_states(); ++i)
   {
     const bool is_not_probabilistic = false;
@@ -213,12 +213,20 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
     m_transitionLabels.push_back(LabelString(lts.is_tau(i), label));
   }
 
+  // Position the probabilistic states randomly and make a mapping for the indices of non trivial probabilistic states.
+  std::unordered_map<std::size_t, std::size_t> probabilistic_state_mapping;
+  for (std::size_t i = 0; i < lts.num_probabilistic_states(); ++i)
+  {
+    probabilistic_state_mapping[i] = add_probabilistic_state<lts_t>(lts.probabilistic_state(i), min, max);
+  }
+
   // Assign and position edge handles, position edge labels
   for (std::size_t i = 0; i < lts.num_transitions(); ++i)
   {
-    mcrl2::lts::transition& t = lts.get_transitions()[i];
-    std::size_t new_probabilistic_state = add_probabilistic_state<lts_t>(
-        lts.probabilistic_state(t.to()), min, max);
+    const mcrl2::lts::transition& t = lts.get_transitions()[i];
+    std::size_t new_probabilistic_state = probabilistic_state_mapping[t.to()];
+    assert(m_edges.size() == m_handles.size());
+    assert(m_transitionLabelnodes.size() == m_edges.size());
     m_edges.emplace_back(t.from(), new_probabilistic_state);
     m_handles.push_back(Node(
         (m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) /
