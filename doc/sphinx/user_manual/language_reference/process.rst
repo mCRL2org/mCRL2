@@ -336,7 +336,7 @@ internal choice ``i`` are not visible. This is done as follows::
          allow({r1,s4,c2,c3,c5,c6,i},
            comm({r2|s2 -> c2, r3|s3 -> c3, r5|s5 -> c5, r6|s6 -> c6},
              S(true) || K || L || R(true)
-       ));
+       )));
 
 It is important to use ``hide``, ``allow`` and ``comm`` in this way. Changing
 the order of these operators will lead to partial hiding of multi-actions, which
