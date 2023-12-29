@@ -93,7 +93,7 @@ class MainWindow : public QMainWindow
     /**
      * @brief Updates the statusbar with the latest log output
      */
-    void onLogOutput(const QString& level, const QString& hint, const QDateTime& timestamp, const QString& message, const QString& formattedMessage);
+    void onLogOutput(const QString& level, const QDateTime& timestamp, const QString& message, const QString& formattedMessage);
 
     /**
      * @brief Toggle fullscreen

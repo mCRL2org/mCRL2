@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget* parent) :
   connect(m_ui.actExportImage, SIGNAL(triggered()), this, SLOT(onExportImage()));
   connect(m_ui.actImport_XML, SIGNAL(triggered()), this, SLOT(onImportXML()));
   connect(m_ui.actExport_XML, SIGNAL(triggered()), this, SLOT(onExportXML()));
-  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QDateTime, QString, QString)));
 
   QSettings settings("mCRL2", "LTSGraph");
   restoreGeometry(settings.value("geometry").toByteArray());
@@ -180,7 +180,7 @@ void MainWindow::onExplore(bool enabled)
   m_glwidget->update();
 }
 
-void MainWindow::onLogOutput(const QString& /*level*/, const QString& /*hint*/, const QDateTime& /*timestamp*/, const QString& /*message*/, const QString& formattedMessage)
+void MainWindow::onLogOutput(const QString& /*level*/, const QDateTime& /*timestamp*/, const QString& /*message*/, const QString& formattedMessage)
 {
   m_ui.statusBar->showMessage(formattedMessage, 5000);
 }
