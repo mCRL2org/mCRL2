@@ -116,7 +116,7 @@ void check_stochastic_state(const stochastic_state& s, const data::rewriter& rew
     {
       v.push_back(print_probability(prob));
     }
-    throw mcrl2::runtime_error("The probabilities " + core::detail::print_list(v) + " do not add up to one.");
+    throw mcrl2::runtime_error("The probabilities " + core::detail::print_list(v) + " do not add up to one, but to " + pp(probability) + "." );
   }
 }
 

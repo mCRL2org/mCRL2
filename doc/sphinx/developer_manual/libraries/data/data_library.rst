@@ -152,7 +152,7 @@ Expressions
 In this section we first introduce the basic structures of sort expressions
 and data expressions. We then continue to defining the sort expressions
 with operations that are predefined in the Data Library.
-The code in the Data Library is inside the namespace =mcrl2::data=.
+The code in the Data Library is inside the namespace ``mcrl2::data``.
 
 Sort expressions
 ----------------
@@ -175,23 +175,23 @@ of which can be represented in the data library.
    =========================  =========================================
 
 .. warning::
-   multiple_possible_sorts= and =unknown_sort= should not be used
-   after type checking
+   The types ``multiple_possible_sorts`` and ``unknown_sort`` should not occur
+   after type checking.
 
 These sort expressions correspond to the grammar
 
      S ::= Sb | Sc | S x ... x S -> S | Sstruct,
 
-where =Sb= is a given set of basic sorts, always including the booleans
-(sort =Bool=). S x ... x S -> S denotes the function sorts, where -> is right
-associative. =Sc= is the set of container sorts, and Sstruct is the set of
+where ``Sb`` is a given set of basic sorts, always including the booleans
+(sort ``Bool``). S x ... x S -> S denotes the function sorts, where -> is right
+associative. ``Sc`` is the set of container sorts, and Sstruct is the set of
 structured sorts.
 
-The set of container sorts =Sc= is defined as follows.
+The set of container sorts ``Sc`` is defined as follows.
 
      Sc ::= List(S) | Set(S) | FSet(S) | Bag(S) | FBag(S)
 
-Where =FSet(S)= and =FBag(S)= represent finite sets and finite bags
+Where ``FSet(S)`` and ``FBag(S)`` represent finite sets and finite bags
 respectively.
 
 The syntax of structured sorts Sstruct is defined as follows
@@ -203,8 +203,8 @@ in which proj has the following syntax:
 
      proj ::= S | p:S
 
-In general, structured sorts have the following form (with =n= a positive number,
-=ki= a natural number with =1 <= i <= n=):
+In general, structured sorts have the following form (with ``n`` a positive number,
+``ki`` a natural number with ``1 <= i <= n``):
 
 .. code-block:: mcrl2
 
@@ -213,10 +213,10 @@ In general, structured sorts have the following form (with =n= a positive number
           ...
           cn(prn,1:Sn,1, ..., prn,kn:Sn,kn)?is_cn;
 
-We refer to =ci= as the constructors of the structured sort. =Si,j= are the
-sorts of the arguments of the constructors. =pri,j= are names for optional
+We refer to ``ci`` as the constructors of the structured sort. ``Si,j`` are the
+sorts of the arguments of the constructors. ``pri,j`` are names for optional
 projection functions, retrieving the corresponding argument for a constructor.
-=is_ci= are the names of optional recognizer functions, returning a boolean
+``is_ci`` are the names of optional recognizer functions, returning a boolean
 value.
 
 As an example of some of the introduced concepts, consider the following code
@@ -254,9 +254,9 @@ of the subexpressions still need to be defined:
 
 Data expressions
 ----------------
-The class =data_expression= represents expressions like =true=,
-[^x > 3] and [^forall n:Nat. f(n) < 5]. Each data expression =d= has a type or
-sort =d.sort()= of type =sort_expression=.
+The class ``data_expression`` represents expressions like ``true``,
+[^x > 3] and [^forall n:Nat. f(n) < 5]. Each data expression ``d`` has a type or
+sort ``d.sort()`` of type ``sort_expression``.
 Let's look at a simple example
 that constructs the numbers two and three, and builds the expression 2 + 3:
 
@@ -299,33 +299,33 @@ that constructs the numbers two and three, and builds the expression 2 + 3:
 
 .. warning::
 
-   =identifier= should not be used after type checking, as it entails an
+   The expression ``identifier`` should not occur after type checking, as it entails an
    untyped sort expression, whereas all libraries and tools in the toolset in
    general assume fully typed expressions.
 
 An overview of all data expressions in the Data Library is given in the table
 above. More detailed, data expressions are divided into function symbols, represented
-by the class =function_symbol=, variables, represented by =variable=,
-abstractions, represented by the class =abstraction=, where clauses,
-represented by =where_clause=, and applications of expressions to expressions,
-represented by =application=. Furthermore, when used in the initial phases
+by the class ``function_symbol``, variables, represented by ``variable``,
+abstractions, represented by the class ``abstraction``, where clauses,
+represented by ``where_clause``, and applications of expressions to expressions,
+represented by ``application``. Furthermore, when used in the initial phases
 of parsing and type checking, the use of untyped identifiers, represented
-by =identifier= is allowed.
+by ``identifier`` is allowed.
 
 Abstractions provide a mechanism for variable binding. As such, they are
-further subdivided into lambda abstraction, represented by =lambda=,
+further subdivided into lambda abstraction, represented by ``lambda``,
 and universal and existential quantifications, represented by
-=forall= and =exists= respectively.
+``forall`` and ``exists`` respectively.
 
-More formally, data expressions =e=, with sort expression =S= and variable names
-=x= correspond to the following grammar:
+More formally, data expressions ``e``, with sort expression ``S`` and variable names
+``x`` correspond to the following grammar:
 
   e ::= x | n | e(e, ..., e) | lambda x:S, ..., x:S . e |
         forall x:S, ..., x:S. e | exists x:S, ..., x:S. e |
         e whr x = e, ..., x = e end
 
- Here =e(e,...,e)= denotes application of data expressions, =lambda x:S, ..., x:S . e=
- denotes lambda abstraction, =forall x:S, ..., x:S . e= and =exists x:S, ..., x:S . e=
+ Here ``e(e,...,e)`` denotes application of data expressions, ``lambda x:S, ..., x:S . e``
+ denotes lambda abstraction, ``forall x:S, ..., x:S . e`` and ``exists x:S, ..., x:S . e``
  denote universal and existential quantification.
 
 Predefined sorts
@@ -371,8 +371,8 @@ Default operations
 For all sorts, a number of operations is available by default. The corresponding
 functions can be found in `standard.h`.
 
-Let =b= be a data expressions of sort =Bool=, and let =x=
-and =y= be two data expressions with the same sort. Then the following
+Let ``b`` be a data expressions of sort ``Bool``, and let ``x``
+and ``y`` be two data expressions with the same sort. Then the following
 operations are supported:
 
 .. table:: Operations on all data types
@@ -403,8 +403,8 @@ by default.
 Booleans
 """"""""
 All standard operations for the Booleans are available in `bool.h`, and can be
-found in the namespace =data::sort_bool=. First of all
-the two constants =true= and =false= can be constructed.
+found in the namespace ``data::sort_bool``. First of all
+the two constants ``true`` and ``false`` can be constructed.
 
 .. table:: Constructors for sort Bool
 
@@ -416,7 +416,7 @@ the two constants =true= and =false= can be constructed.
    ==========  ======  =======
 
 Furthermore the following functions are available on Booleans (for details
-about the allowed types also see bool.spec). Let =b= and =c= be Boolean expressions.
+about the allowed types also see bool.spec). Let ``b`` and ``c`` be Boolean expressions.
 
 .. table:: Functions for sort Bool
 
@@ -432,10 +432,10 @@ about the allowed types also see bool.spec). Let =b= and =c= be Boolean expressi
 Positive numbers
 """"""""""""""""
 All standard operations for positive numbers are available in `pos.h`, and can
-be found in the namespace =data::sort_pos=. The positive numbers have two
+be found in the namespace ``data::sort_pos``. The positive numbers have two
 constructors, facilitating an encoding with size logarithmic in the number
 that is represented.
-Let =b= be a Boolean expression, and =p= be a positive expression.
+Let ``b`` be a Boolean expression, and ``p`` be a positive expression.
 
 .. table:: Constructors for sort Pos
 
@@ -447,7 +447,7 @@ Let =b= be a Boolean expression, and =p= be a positive expression.
    ===========  ==========  =======
 
 Furthermore the standard operations are available on Positive numbers.
-Let =b= and =c= be Boolean expressions, and =p=, =q=, and =r= be positive
+Let ``b`` and ``c`` be Boolean expressions, and ``p``, ``q``, and ``r`` be positive
 numbers.
 
 .. table:: Functions for sort Pos
@@ -466,11 +466,11 @@ numbers.
 Natural numbers
 """""""""""""""
 All standard operations for natural numbers are available in `nat.h`, and can
-be found in the namespace =data::sort_nat=. The natural numbers have two
-constructors, representing =0= and a positive number interpreted as a
+be found in the namespace ``data::sort_nat``. The natural numbers have two
+constructors, representing ``0`` and a positive number interpreted as a
 natural number.
 
-Let =p= be a positive expression.
+Let ``p`` be a positive expression.
 
 .. table:: Constructors for sort Nat
 
@@ -482,16 +482,16 @@ Let =p= be a positive expression.
    ==========  ========  ===============================
 
 Furthermore the standard operations are available on Natural numbers.
-Let =b= and =c= be Boolean expressions, =p=, =q= be positive numbers,
-and =n=, =m=, =u=, =v= be natural numbers.
+Let ``b`` and ``c`` be Boolean expressions, ``p``, ``q`` be positive numbers,
+and ``n``, ``m``, ``u``, ``v`` be natural numbers.
 
 .. table::  Functions for sort Nat
 
    ========================  =========================  =======================================
    Expression                Syntax                     Meaning
    ========================  =========================  =======================================
-   Pos2Nat(p)                Pos2Nat(p)                 explicit conversion of =p= to sort Nat
-   Nat2Pos(n)                Nat2Pos(n)                 explicit conversion of =n= to sort Pos
+   Pos2Nat(p)                Pos2Nat(p)                 explicit conversion of ``p`` to sort Nat
+   Nat2Pos(n)                Nat2Pos(n)                 explicit conversion of ``n`` to sort Pos
    max(p,n)                  max(p,n)                   maximum
    max(n,p)                  max(n,p)                   maximum
    max(m,n)                  max(m,n)                   maximum
@@ -509,8 +509,8 @@ and =n=, =m=, =u=, =v= be natural numbers.
    mod(m,p)                  m mod p                    modulus
    exp(p,n)                  p^n                        exponentiation
    exp(m,n)                  m^n                        exponentiation
-   even(n)                   @even(n)                   predicate to indicate =n= is even
-   monus(m,n)                @monus(m,n)                =(m-n) max 0=
+   even(n)                   @even(n)                   predicate to indicate ``n`` is even
+   monus(m,n)                @monus(m,n)                ``(m-n) max 0``
    swap_zero(m,n)            @swap_zero(m,n)            ???
    swap_zero_add(m,n,u,v)    @swap_zero_add(m,n,u,v)    ???
    swap_zero_min(m,n,u,v)    @swap_zero_min(m,n,u,v)    ???
@@ -518,10 +518,10 @@ and =n=, =m=, =u=, =v= be natural numbers.
    swap_zero_lte(m,n,u,v)    @swap_zero_lte(m,n,u,v)    ???
    ========================  =========================  =======================================
 
-To facilitate efficient rewriting, also a sort =@NatPair= is available. Code
-for this is also present in =nat.h=, in namespace =data::sort_nat=.
+To facilitate efficient rewriting, also a sort ``@NatPair`` is available. Code
+for this is also present in ``nat.h``, in namespace ``data::sort_nat``.
 
-Let =m=, =n= be expressions of sort Nat.
+Let ``m``, ``n`` be expressions of sort Nat.
 
 .. table:: Constructors for sort @NatPair
 
@@ -532,8 +532,8 @@ Let =m=, =n= be expressions of sort Nat.
    ==========  ===========  ===========
 
 Also functions for these pairs are available.
-Let =b= be a Boolean expression, =p=, =q= be positive numbers,
-and =n=, =m=, =u=, =v= be natural numbers.
+Let ``b`` be a Boolean expression, ``p``, ``q`` be positive numbers,
+and ``n``, ``m``, ``u``, ``v`` be natural numbers.
 
 .. table:: Functions for sort @NatPair
 
@@ -550,34 +550,34 @@ and =n=, =m=, =u=, =v= be natural numbers.
 Integers
 """"""""
 All standard operations for integers are available in `int.h`, and can
-be found in the namespace =data::sort_int=. The integers have two
+be found in the namespace ``data::sort_int``. The integers have two
 constructors, one interpreting a natural number as integer, and one
 interpreting a positive number as a negative integer.
 
-Let =p= be a positive expression, and =n= be a natural number.
+Let ``p`` be a positive expression, and ``n`` be a natural number.
 
 .. table:: Constructors for sort Int
 
    ==========  ========  =====================================
    Expression  Syntax    Meaning
    ==========  ========  =====================================
-   cint(n)     @cInt(n)   =n= interpreted as an integer
-   cneg(p)     @cNeg(p)   =p= interpreted as the integer =-p=
+   cint(n)     @cInt(n)   ``n`` interpreted as an integer
+   cneg(p)     @cNeg(p)   ``p`` interpreted as the integer ``-p``
    ==========  ========  =====================================
 
 Furthermore the standard operations are available on Natural numbers.
-Let =b= be a Boolean expression, =p=, =q= be positive numbers,
-=n=, =m= be natural numbers, and =x=, =y= be integers.
+Let ``b`` be a Boolean expression, ``p``, ``q`` be positive numbers,
+``n``, ``m`` be natural numbers, and ``x``, ``y`` be integers.
 
 .. table:: Functions for sort Int
 
    ==========  ==========     =======================================
    Expression  Syntax         Meaning
    ==========  ==========     =======================================
-   Nat2Int(n)  Nat2Int(n)     explicit conversion of =n= to sort Int
-   Int2Nat(x)  Int2Nat(x)     explicit conversion of =x= to sort Nat
-   Pos2Int(p)  Pos2Int(p)     explicit conversion of =p= to sort Int
-   Int2Pos(x)  Int2Pos(x)     explicit conversion of =x= to sort Pos
+   Nat2Int(n)  Nat2Int(n)     explicit conversion of ``n`` to sort Int
+   Int2Nat(x)  Int2Nat(x)     explicit conversion of ``x`` to sort Nat
+   Pos2Int(p)  Pos2Int(p)     explicit conversion of ``p`` to sort Int
+   Int2Pos(x)  Int2Pos(x)     explicit conversion of ``x`` to sort Pos
    max(p,x)    max(p,x)       maximum
    max(x,p)    max(x,p)       maximum
    max(n,x)    max(n,x)       maximum
@@ -605,24 +605,24 @@ Let =b= be a Boolean expression, =p=, =q= be positive numbers,
 Real numbers
 """"""""""""
 All standard operations for real numbers are available in `real.h`, and can
-be found in the namespace =data::sort_real=. The real numbers do not have
+be found in the namespace ``data::sort_real``. The real numbers do not have
 any constructors, because they cannot be finitely enumerated.
 
 Standard functions for real are available however.
-Let =p=, =q= be positive numbers,=n=, =m= be natural numbers, =x=, =y= be integers,
-and =r=, =s= be real numbers.
+Let ``p``, ``q`` be positive numbers,``n``, ``m`` be natural numbers, ``x``, ``y`` be integers,
+and ``r``, ``s`` be real numbers.
 
 .. table:: Functions for sort Real
 
    =================  ==================  ===================================================
    Expression         Syntax              Meaning
    =================  ==================  ===================================================
-   Pos2Real(p)        Pos2Real(p)         explicit conversion of =p= to sort Real
-   Nat2Real(n)        Nat2Real(n)         explicit conversion of =n= to sort Real
-   Int2Real(x)        Int2Real(x)         explicit conversion of =x= to sort Real
-   Real2Pos(r)        Real2Pos(r)         explicit conversion of =r= to sort Pos
-   Real2Nat(r)        Real2Nat(r)         explicit conversion of =r= to sort Nat
-   Real2Int(r)        Real2Int(r)         explicit conversion of =r= to sort Int
+   Pos2Real(p)        Pos2Real(p)         explicit conversion of ``p`` to sort Real
+   Nat2Real(n)        Nat2Real(n)         explicit conversion of ``n`` to sort Real
+   Int2Real(x)        Int2Real(x)         explicit conversion of ``x`` to sort Real
+   Real2Pos(r)        Real2Pos(r)         explicit conversion of ``r`` to sort Pos
+   Real2Nat(r)        Real2Nat(r)         explicit conversion of ``r`` to sort Nat
+   Real2Int(r)        Real2Int(r)         explicit conversion of ``r`` to sort Int
    max(r,s)           max(r,s)            maximum
    min(r,s)           min(r,s)            minimum
    abs(r)             abs(r)              absolute value
@@ -649,7 +649,7 @@ and =r=, =s= be real numbers.
    The sorts that are allowed as arguments to the functions for numeric sorts
    are exactly the ones that correspond to the sorts of the variables in the tables
    with functions. Note that e.g. `sort_real::max(p,q)` is also allowed, and the
-   correct result sort of =Pos= will automatically be inferred.
+   correct result sort of ``Pos`` will automatically be inferred.
 
 Lists
 """""
@@ -676,34 +676,34 @@ let x be an element of sort S, l of sort List(S), and n of sort Nat.
    =================  =========  ==================================================
    Expression         Syntax     Meaning
    =================  =========  ==================================================
-   in(S,x,l)          x in l     Test whether =x= is an element of =l=
-   count(S,l)         #l         The size of =l=
-   snoc(S,l,x)        l <| x     The list =l= suffixed with =x=
-   element_at(S,l,n)  l.n        The element at position =n= in =l=
-   head(S,l)          head(l)    The first element of =l=
-   tail(S,l)          tail(l)    =l= from which the first element has been removed
-   rhead(S,l)         rhead(l)   The last element of =l=
-   rtail(S,l)         rtail(l)   =l= from which the last element has been removed
+   in(S,x,l)          x in l     Test whether ``x`` is an element of ``l``
+   count(S,l)         #l         The size of ``l``
+   snoc(S,l,x)        l <| x     The list ``l`` suffixed with ``x``
+   element_at(S,l,n)  l.n        The element at position ``n`` in ``l``
+   head(S,l)          head(l)    The first element of ``l``
+   tail(S,l)          tail(l)    ``l`` from which the first element has been removed
+   rhead(S,l)         rhead(l)   The last element of ``l``
+   rtail(S,l)         rtail(l)   ``l`` from which the last element has been removed
    =================  =========  ==================================================
 
 Finite sets
 """""""""""
-The finite sets quite closely resemble lists. For sort =FSet(S)= the following
-constructors are available, assuming a sort =S=, an element =x= of sort =S=, and
-=t= being of sort =FSet(S)=.
+The finite sets quite closely resemble lists. For sort ``FSet(S)`` the following
+constructors are available, assuming a sort ``S``, an element ``x`` of sort ``S``, and
+``t`` being of sort ``FSet(S)``.
 
 .. table:: Constructors for sort FSet(S)
 
    ================  =============  ====================================
    Expression        Syntax         Meaning
    ================  =============  ====================================
-   fset_empty(S)     @fset_empty()  The empty finite set of sort =s=
-   fset_cons(S,x,t)  @fset_cons     The finite set =t= extended with =x=
+   fset_empty(S)     @fset_empty()  The empty finite set of sort ``s``
+   fset_cons(S,x,t)  @fset_cons     The finite set ``t`` extended with ``x``
    ================  =============  ====================================
 
 
-Let =b= be a Boolean, =x= an element of sort =S=, =f=,=g= be functions of sort
-=S -> Bool=, and =s=,=t= be of sort =FSet(S)=. The operations of finite
+Let ``b`` be a Boolean, ``x`` an element of sort ``S``, ``f``, ``g`` be functions of sort
+``S -> Bool``, and ``s``, ``t`` be of sort ``FSet(S)``. The operations of finite
 sets are defined as follows.
 
 .. table:: Functions for sort FSet(S)
@@ -711,34 +711,34 @@ sets are defined as follows.
    ===========================  ===================  ===========================
    Expression                   Syntax               Meaning
    ===========================  ===================  ===========================
-   insert(S,x,s)                @fsetinsert(x,s)     Insert =x= into =s=
+   insert(S,x,s)                @fsetinsert(x,s)     Insert ``x`` into ``s``
    cinsert(S,x,b,s)             @fsetinsert(x,b,s)   ???
-   in(S,x,s)                    @fsetin(x,s)         Test whether =x= is in =s=
-   lte(S,f,s,t)                 @fsetlte(f,s,t)      =s= is a subset of =t=
-   union(S,f,g,s,t)             @fsetunion(f,g,s,t)  Union of =s= and =t=
-   intersection(S,f,g,s,t)      @fsetinter(f,g,s,t)  Intersection of =s= and =t=
+   in(S,x,s)                    @fsetin(x,s)         Test whether ``x`` is in ``s``
+   lte(S,f,s,t)                 @fsetlte(f,s,t)      ``s`` is a subset of ``t``
+   union(S,f,g,s,t)             @fsetunion(f,g,s,t)  Union of ``s`` and ``t``
+   intersection(S,f,g,s,t)      @fsetinter(f,g,s,t)  Intersection of ``s`` and ``t``
    ===========================  ===================  ===========================
 
 
 Finite bags
 """""""""""
 Finite bags are defined in a similar vein as finite sets.
-For sort =FBag(S)= the following
-constructors are available, assuming a sort =S=, an element =x= of sort =S=,
-=p= being a positive number, and
-=b= being of sort =FBag(S)=.
+For sort ``FBag(S)`` the following
+constructors are available, assuming a sort ``S``, an element ``x`` of sort ``S``,
+``p`` being a positive number, and
+``b`` being of sort ``FBag(S)``.
 
 .. table:: Constructors for sort FSet(S)
 
    ==================  ================  =========================================================
    Expression          Syntax            Meaning
    ==================  ================  =========================================================
-   fbag_empty(S)       @fbag_empty()     The empty finite bag of sort =s=
-   fbag_cons(S,x,p,b)  @bag_cons(x,p,b)  The finite bag =b=, extended with =p= occurrences of =x=
+   fbag_empty(S)       @fbag_empty()     The empty finite bag of sort ``s``
+   fbag_cons(S,x,p,b)  @bag_cons(x,p,b)  The finite bag ``b``, extended with ``p`` occurrences of ``x``
    ==================  ================  =========================================================
 
-Let =x= an element of sort =S=, =f=,=g= be functions of sort
-=S -> Nat=, =t= of sort =FSet(S)=, and =b=,=c= be elements of sort =FBag(S)=.
+Let ``x`` an element of sort ``S``, ``f``,``g`` be functions of sort
+``S -> Nat``, ``t`` of sort ``FSet(S)``, and ``b``,``c`` be elements of sort ``FBag(S)``.
 The operations on finite bags are defined as follows.
 
 .. table:: Functions for sort FSet(S)
@@ -746,15 +746,15 @@ The operations on finite bags are defined as follows.
    =========================  ====================  ===================================================
    Expression                 Syntax                Meaning
    =========================  ====================  ===================================================
-   fbaginsert(S,x,p,b)        @fbag_insert(x,p,b)   Insert =p= occurrences of =x= into =b=
+   fbaginsert(S,x,p,b)        @fbag_insert(x,p,b)   Insert ``p`` occurrences of ``x`` into ``b``
    fsetcinsert(S,x,n,b)       @fbag_cinsert(x,n,b)  ???
-   fbagcount(S,x,b)           @fbag_count(x,b)      Test count the number of occurrences of =x= in =b=
-   fbagin(S,x,b)              @fbag_in(x,b)         Test whether =x= is in =b=
-   fbaglte(S,f,b,c)           @fbag_lte(f,b,c)      =b= is a subset of =c=
-   fbagjoin(S,f,g,b,c)        @fbag_join(f,g,b,c)   Join of =b= and =c=
-   fbagintersect(S,f,g,b,c)   @fbag_inter(f,g,b,c)  Intersection of =b= and =c=
-   fbagdifference(S,f,g,b,c)  @fbag_diff(f,g,b,c)   Difference of =b= and =c=
-   fset2fbag(S,t)             @fset2fbag(t)         Convert =t= to a finite bag
+   fbagcount(S,x,b)           @fbag_count(x,b)      Test count the number of occurrences of ``x`` in ``b``
+   fbagin(S,x,b)              @fbag_in(x,b)         Test whether ``x`` is in ``b``
+   fbaglte(S,f,b,c)           @fbag_lte(f,b,c)      ``b`` is a subset of ``c``
+   fbagjoin(S,f,g,b,c)        @fbag_join(f,g,b,c)   Join of ``b`` and ``c``
+   fbagintersect(S,f,g,b,c)   @fbag_inter(f,g,b,c)  Intersection of ``b`` and ``c``
+   fbagdifference(S,f,g,b,c)  @fbag_diff(f,g,b,c)   Difference of ``b`` and ``c``
+   fset2fbag(S,t)             @fset2fbag(t)         Convert ``t`` to a finite bag
    =========================  ====================  ===================================================
 
 Sets
@@ -763,9 +763,9 @@ Like the Real numbers, sets and bags do not have
 constructors. This means that elements of these sorts are built using functions,
 as well as their more simple counterparts, the finite sets and bags.
 
-For sets the following functions are available. Let =d=, =e= be of sort Set(S),
-=x= be of sort =S=, =s= be of sort =FSet(S)=, and =f= and =g= be function of
-sort =S -> Bool=.
+For sets the following functions are available. Let ``d``, ``e`` be of sort Set(S),
+``x`` be of sort ``S``, ``s`` be of sort ``FSet(S)``, and ``f`` and ``g`` be function of
+sort ``S -> Bool``.
 
 .. table:: Functions for sort Set(S)
 
@@ -775,18 +775,18 @@ sort =S -> Bool=.
    setconstructor(S, f, s)  @set(f,s)    Construct a set from a function and a finite set
    emptyset(S)              {}           Empty set of sort S
    setfset(S, s)            @setfset(s)  Interpret finite set s as a set
-   setcomprehension(S, f)   @setcomp(f)  The set of all elements of sort =S= satisfying =f=
-   in(S,x,d)                x in d       Test whether =x= is an element of =d=
-   setcomplement(S,d)       !d           Set complement of =d=
-   setunion_(S,d,e)         d + e        Union of =d= and =e=
-   setintersection(S,d,e)   d * e        Intersection of =d= and =e=
-   setdifference(S,d,e)     d - e        Difference of =d= and =e=
+   setcomprehension(S, f)   @setcomp(f)  The set of all elements of sort ``S`` satisfying ``f``
+   in(S,x,d)                x in d       Test whether ``x`` is an element of ``d``
+   setcomplement(S,d)       !d           Set complement of ``d``
+   setunion_(S,d,e)         d + e        Union of ``d`` and ``e``
+   setintersection(S,d,e)   d * e        Intersection of ``d`` and ``e``
+   setdifference(S,d,e)     d - e        Difference of ``d`` and ``e``
    false_function(S)        @false_      The constant function returning false
    true_function(S)         @true_       The constant function returning true
    false_function(S)        @false_      The constant function returning false
-   not_function(S,f)        @not_(f)     The function returning =!f(x)= for all elements =x= in =S=
-   and_function(S,f,g)      @and_(f,g)   The function returning =f(x) && g(x)= for all elements =x= in =S=
-   or_function(S,f,g)       @or_(f,g)    The function returning =f(x) || g(x)= for all elements =x= in =S=
+   not_function(S,f)        @not_(f)     The function returning ``!f(x)`` for all elements ``x`` in ``S``
+   and_function(S,f,g)      @and_(f,g)   The function returning ``f(x) && g(x)`` for all elements ``x`` in ``S``
+   or_function(S,f,g)       @or_(f,g)    The function returning ``f(x) || g(x)`` for all elements ``x`` in ``S``
    =======================  ===========  ===================================================================
 
 Note that the \*_function operations are used as implementation details
@@ -794,9 +794,9 @@ for representing sets.
 
 Bags
 """"
-For bags the following functions are available. Let =b=, =c= be of sort =FBag(S)=,
-=e= of sort =S=, =f=,=g=, of sort =S -> Nat=, =h= of sort =S -> Bool=, =s= of sort
-=FSet(S)=, and =x=,=y= of sort =Bag(S)=.
+For bags the following functions are available. Let ``b``, ``c`` be of sort ``FBag(S)``,
+``e`` of sort ``S``, ``f``,``g``, of sort ``S -> Nat``, ``h`` of sort ``S -> Bool``, ``s`` of sort
+``FSet(S)``, and ``x``,``y`` of sort ``Bag(S)``.
 
 .. table:: Functions for sort Bag(S)
 
@@ -805,22 +805,22 @@ For bags the following functions are available. Let =b=, =c= be of sort =FBag(S)
    =======================  =============  ========================================================================
    bagconstructor(S, f, b)  @bag(f,b)      Construct a bag from a function and a finite bag
    emptybag(S)              {}             Empty bag of sort S
-   bagfbag(S, b)            @bagfset(b)    Interpret finite bag =b= as a bag
-   bagcomprehension(S, f)   @bagcomp(f)    The bag of all elements of sort =S= given by =f=
-   bagcount(S,e,x)          count(e,x)     The number of occurrences of =e= in =x=
-   bagin(S,e,x)             in(e,x)        Determine whether =e= occurs in =x=
-   bagjoin(S,x,y)           x + y          Join of =x= and =y=
-   bagintersect(S,x,y)      x * y          Intersection of =x= and =y=
-   bagdifference(S,x,y)     x - y          Difference of =x= and =y=
-   bag2set(S,x)             Bag2Set(x)     Convert bag =x= to a set
-   set2bag(S,t)             Set2Bag(t)     Convert set =t= to a bag
-   zero_function(S)         @zero_         The constant function returning =0=
-   one_function(S)          @one_          The constant function returning =1=
-   add_function(S,f,g)      @add_(f,g)     The function returning =f(x) + g(x)= for all elements =x= in =S=
-   min_function(S,f,g)      @min_(f,g)     The function returning =min(f(x),g(x))= for all elements =x= in =S=
-   monus_function(S,f,g)    @monus_(f,g)   The function returning =monus(f(x),g(x))= for all elements =x= in =S=
-   nat2bool_function(S,f)   @Nat2Bool_(f)  The function returning false if =f(x)=0=, and true otherwise
-   bool2nat_function(S,h)   @Bool2Nat_(h)  The function returning =1= if =f(x)=, =0= otherwise
+   bagfbag(S, b)            @bagfset(b)    Interpret finite bag ``b`` as a bag
+   bagcomprehension(S, f)   @bagcomp(f)    The bag of all elements of sort ``S`` given by ``f``
+   bagcount(S,e,x)          count(e,x)     The number of occurrences of ``e`` in ``x``
+   bagin(S,e,x)             in(e,x)        Determine whether ``e`` occurs in ``x``
+   bagjoin(S,x,y)           x + y          Join of ``x`` and ``y``
+   bagintersect(S,x,y)      x * y          Intersection of ``x`` and ``y``
+   bagdifference(S,x,y)     x - y          Difference of ``x`` and ``y``
+   bag2set(S,x)             Bag2Set(x)     Convert bag ``x`` to a set
+   set2bag(S,t)             Set2Bag(t)     Convert set ``t`` to a bag
+   zero_function(S)         @zero_         The constant function returning ``0``
+   one_function(S)          @one_          The constant function returning ``1``
+   add_function(S,f,g)      @add_(f,g)     The function returning ``f(x) + g(x)`` for all elements ``x`` in ``S``
+   min_function(S,f,g)      @min_(f,g)     The function returning ``min(f(x),g(x))`` for all elements ``x`` in ``S``
+   monus_function(S,f,g)    @monus_(f,g)   The function returning ``monus(f(x),g(x))`` for all elements ``x`` in ``S``
+   nat2bool_function(S,f)   @Nat2Bool_(f)  The function returning false if ``f(x)``0``, and true otherwise
+   bool2nat_function(S,h)   @Bool2Nat_(h)  The function returning ``1`` if ``f(x)``, ``0`` otherwise
    =======================  =============  ========================================================================
 
 Note that, like for sets, the \*_function operations are used as implementation
@@ -994,7 +994,7 @@ Data rewriters
 ==============
 
 A rewriter is a function that rewrites terms using a number of rewrite rules.
-In the mCRL2 toolset a class =data::rewriter= is available that operates on data expressions,
+In the mCRL2 toolset a class ``data::rewriter`` is available that operates on data expressions,
 and that is initialized using a data specification. The equations of the data specification
 are interpreted as rewrite rules from left to right. An example is given below.
 
@@ -1010,12 +1010,12 @@ are interpreted as rewrite rules from left to right. An example is given below.
 .. tip::
 
    Rewriters can be used to determine equivalence between data expressions. In general this
-   problem is undecidable. Only if [^r(d1) == r(d2)] one can conclude that the expressions =d1=
-   and =d2= are equivalent, otherwise the answer is unknown.
+   problem is undecidable. Only if [^r(d1) == r(d2)] one can conclude that the expressions ``d1``
+   and ``d2`` are equivalent, otherwise the answer is unknown.
 
 For efficiency reasons a rewriter can be invoked with an optional substitution function
 __sigma as a second argument, where __sigma maps data variables to data expressions. The
-function __sigma must satisfy the property that for all data variables =v=
+function __sigma must satisfy the property that for all data variables ``v``
 
    __sigma(v) == r(__sigma(v)).
 
@@ -1045,13 +1045,13 @@ An example of rewriting with a substitution function is given below.
 .. caution::
 
    The current implementation of rewriting with substitutions to data variables is
-   inefficient. The interface of the underlying =Rewriter= class needs to be adapted
+   inefficient. The interface of the underlying ``Rewriter`` class needs to be adapted
    to get rid of these inefficiencies.
 
 Rewriter Concept
 ----------------
 
-In the mCRL2 toolset a =Rewriter= is a concept with the following requirements:
+In the mCRL2 toolset a ``Rewriter`` is a concept with the following requirements:
 
 .. table:: Associated types
 
@@ -1062,19 +1062,19 @@ In the mCRL2 toolset a =Rewriter= is a concept with the following requirements:
    Rewriter::variable_type  the type of the variables
    =======================  ====================================================
 
-A =SubstitutionFunction= is a function that maps variables to terms. Let =sigma= be a
-substitution function, and let =v= be an expression of type =Rewriter::variable_type=.
+A ``SubstitutionFunction`` is a function that maps variables to terms. Let ``sigma`` be a
+substitution function, and let ``v`` be an expression of type ``Rewriter::variable_type``.
 
 .. table:: Expression semantics for SubstitutionFunction
 
    ==========  ===================================================
    Expression  Result
    ==========  ===================================================
-   sigma(v)    Returns an expression of type =Rewriter::term_type=
+   sigma(v)    Returns an expression of type ``Rewriter::term_type``
    ==========  ===================================================
 
-Let =r= be a =Rewriter=, let =d= be an expression of type =Rewriter::term_type=
-and let =sigma= be a =SubstitutionFunction=.
+Let ``r`` be a ``Rewriter``, let ``d`` be an expression of type ``Rewriter::term_type``
+and let ``sigma`` be a ``SubstitutionFunction``.
 
 .. table:: Expression semantics for Rewriter
 
