@@ -2026,7 +2026,7 @@ class specification_basic_type
 
         return stochastic_operator(
                             sumargs,
-                            replace_variables_capture_avoiding_alt(sto.distribution(),sigma),
+                            replace_variables_capture_avoiding_alt(sto.distribution(),local_sigma),
                             substitute_pCRLproc(sto.operand(),local_sigma));
       }
 
@@ -9876,7 +9876,6 @@ class specification_basic_type
     {
       if (is_process_instance_assignment(t))
       {
-// std::cerr << "PROCESS ASSIGNMENT IN " << t << "\n";
         const process_instance_assignment u=atermpp::down_cast<process_instance_assignment>(t);
         const process_expression new_process=processes_with_initial_distribution.at(u.identifier()).process_body();
         if (is_stochastic_operator(new_process))
@@ -9917,19 +9916,10 @@ class specification_basic_type
           {
             local_sigma[a.lhs()]=a.rhs();
           }
-          process_expression result =  
-                          stochastic_operator(renamed_sto_variables,
-                                              data::replace_variables_capture_avoiding(new_distribution, local_sigma),
-                                              process_instance_assignment(new_identifier,new_assignments));
-// std::cerr << "PROCESS ASSIGNMENT OUT1 " << result << "\n";
-          return result;
-          return process::replace_variables_capture_avoiding(
-                          stochastic_operator(sto.variables(), 
-                                              sto.distribution(),
-                                              process_instance_assignment(new_identifier,new_assignments)),
-                          local_sigma);
+          return stochastic_operator(renamed_sto_variables,
+                                     data::replace_variables_capture_avoiding(new_distribution, local_sigma),
+                                     process_instance_assignment(new_identifier,new_assignments));
         }
-// std::cerr << "PROCESS ASSIGNMENT OUT2 " << t << "\n";
         return t;
 
       }
