@@ -56,11 +56,11 @@ class MainWindow : public QMainWindow
     void zoomChanged() { m_ui.zoomOut->setEnabled(m_ltsManager->lts()->getPreviousLevel() != 0); }
     void startStructuring() { setEnabled(false); m_ltsCanvas->setUpdatesEnabled(false); }
     void stopStructuring() { m_ltsCanvas->setUpdatesEnabled(true); setEnabled(true); }
-    void logMessage(QString level, QString hint, QDateTime /* timestamp */, QString message)
+    void logMessage(QString level, QDateTime /* timestamp */, QString message)
     {
       if (log_level_from_string(level.toStdString()) == mcrl2::log::error)
       {
-        QMessageBox::critical(this, QString("LTSView - An error occured (%1)").arg(hint), message);
+        QMessageBox::critical(this, QString("LTSView - An error occured (%1)"), message);
       }
       else
       {
