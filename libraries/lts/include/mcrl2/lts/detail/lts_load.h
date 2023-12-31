@@ -50,7 +50,7 @@ void load_lts(const utilities::command_line_parser& parser, const std::string& l
   {
     if (1 < parser.options.count("data"))
     {
-      mCRL2log(log::warning) << "multiple data specification files are specified; can only use one.\n";
+      mCRL2log(log::warning) << "Multiple data specification files are specified; can only use one.\n";
     }
     data_file_type = data_file_type_t::data_e;
     data_file = parser.option_argument("data");
@@ -60,7 +60,7 @@ void load_lts(const utilities::command_line_parser& parser, const std::string& l
   {
     if (1 < parser.options.count("lps") || data_file_type != data_file_type_t::none_e)
     {
-      mCRL2log(log::warning) << "multiple data specification files are specified; can only use one.\n";
+      mCRL2log(log::warning) << "Multiple data specification files are specified; can only use one.\n";
     }
 
     data_file_type = data_file_type_t::lps_e;
@@ -71,7 +71,7 @@ void load_lts(const utilities::command_line_parser& parser, const std::string& l
   {
     if (1 < parser.options.count("mcrl2") || data_file_type != data_file_type_t::none_e)
     {
-      mCRL2log(log::warning) << "multiple data specification files are specified; can only use one.\n";
+      mCRL2log(log::warning) << "Multiple data specification files are specified; can only use one.\n";
     }
 
     data_file_type = data_file_type_t::mcrl2_e;

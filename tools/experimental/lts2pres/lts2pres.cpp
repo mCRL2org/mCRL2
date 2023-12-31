@@ -42,7 +42,7 @@ std::set<process::action_label> find_action_labels(const lts::probabilistic_lts_
     used_labels.insert(tr.label());
   }
   std::set<process::action_label> result;
-  const auto& action_labels = ltsspec.action_labels();
+  const std::vector<lts::action_label_lts>& action_labels = ltsspec.action_labels();
   for (std::size_t index: used_labels)
   {
     for (const process::action& a: action_labels[index].actions())

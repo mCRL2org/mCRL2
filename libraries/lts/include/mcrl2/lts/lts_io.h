@@ -223,7 +223,7 @@ inline void load_lts(LTS_TYPE& result,
     case lts_aut:
     case lts_aut_probabilistic:
     {
-      lts_aut_t l;
+      probabilistic_lts_aut_t l;
       l.load(infilename);
       convert_to_lts_lts(l, result,extra_data_file_type,extra_data_file_name);
       break;
@@ -231,7 +231,7 @@ inline void load_lts(LTS_TYPE& result,
     case lts_fsm:
     case lts_fsm_probabilistic:
     {
-      lts_fsm_t l;
+      probabilistic_lts_fsm_t l;
       l.load(infilename);
       convert_to_lts_lts(l, result,extra_data_file_type,extra_data_file_name);
       break;
