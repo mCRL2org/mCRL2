@@ -141,9 +141,9 @@ struct rhs_lts2pres_traverser: public state_formulas::state_formula_traverser<De
     push(false_());
   }
 
-  void apply(const state_formulas::not_&)
+  void apply(const state_formulas::minus&)
   {
-    throw mcrl2::runtime_error("rhs_lts2pres_traverser: negation is not supported!");
+    throw mcrl2::runtime_error("rhs_lts2pres_traverser: minus is not supported!");
   }
 
   void leave(const state_formulas::and_&)
@@ -211,7 +211,7 @@ struct rhs_lts2pres_traverser: public state_formulas::state_formula_traverser<De
       pres_expression right;
       if (parameters.lts0.probabilistic_state(t).size()<=1)
       {
-        RHS(phi, parameters.lts0.probabilistic_state(t).get(), parameters, TermTraits());
+        right=RHS(phi, parameters.lts0.probabilistic_state(t).get(), parameters, TermTraits());
       }
       else
       {
@@ -254,7 +254,7 @@ struct rhs_lts2pres_traverser: public state_formulas::state_formula_traverser<De
       pres_expression right;
       if (parameters.lts0.probabilistic_state(t).size()<=1)
       {
-        RHS(phi, parameters.lts0.probabilistic_state(t).get(), parameters, TermTraits());
+        right=RHS(phi, parameters.lts0.probabilistic_state(t).get(), parameters, TermTraits());
       }
       else
       {

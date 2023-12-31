@@ -92,9 +92,9 @@ struct e_lts2pres_traverser: public state_formulas::state_formula_traverser<Deri
     push(epsilon());
   }
 
-  void apply(const state_formulas::not_&)
+  void apply(const state_formulas::minus&)
   {
-    throw mcrl2::runtime_error("e_lts2pres_traverser: 'not' is not supported!");
+    throw mcrl2::runtime_error("e_lts2pres_traverser: 'minus' is not supported!");
   }
 
   void leave(const state_formulas::and_&)
