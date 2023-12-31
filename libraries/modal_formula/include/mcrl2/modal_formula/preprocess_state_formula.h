@@ -365,8 +365,8 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   {
     mCRL2log(log::info) <<
       "Warning: detected nested modal operators. This may result in a long execution time.\n"
-      "Use the option -m or insert dummy fix point operators in between manually to speed\n"
-      "up the transformation." << std::endl;
+      "Use the option -m (for lps2pbes/lps2pres), -p (for lts2pbes/lts2pres) or insert dummy fix \n"
+      "point operators in between manually to speed up the transformation." << std::endl;
   }
 
   mCRL2log(log::debug) << "Formula before preprocessing: " << f << ".\n"; 

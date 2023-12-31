@@ -117,7 +117,7 @@ inline void read_lps_context(const std::string& data_file,
                              process::action_label_list& action_labels,
                              data::variable_list& process_parameters)
 {
-  lps::specification spec;
+  lps::stochastic_specification spec;
   load_lps(spec, data_file);
   data = spec.data();
   action_labels = spec.action_labels();
