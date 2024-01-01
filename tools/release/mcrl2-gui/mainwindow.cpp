@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
   m_ui.mnuMain->addMenu(viewMenu);
 
-  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QDateTime, QString, QString)));
   connect(m_ui.tabInstances, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequest(int)));
   connect(m_ui.treeFiles, SIGNAL(openToolInstance(QString, ToolInformation)), this, SLOT(createToolInstance(QString, ToolInformation)));
   connect(m_ui.treeFiles, SIGNAL(openProperties(QString)), this, SLOT(createFileInformation(QString)));
@@ -136,7 +136,7 @@ void MainWindow::createFileInformation(QString filename)
   m_ui.tabInstances->setCurrentIndex(index);
 }
 
-void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString /*message*/, QString formattedMessage)
+void MainWindow::onLogOutput(QString /*level*/, QDateTime /*timestamp*/, QString /*message*/, QString formattedMessage)
 {
   m_ui.statusBar->showMessage(formattedMessage, 5000);
 }

@@ -46,7 +46,7 @@ class MainWindow : public QMainWindow
     /**
      * @brief Updates the statusbar with the latest log output
      */
-    void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
+    void onLogOutput(QString level, QDateTime timestamp, QString message, QString formattedMessage);
 
     /**
      * @brief Displays information about the selected tool

@@ -44,7 +44,7 @@ MainWindow::MainWindow(QThread *atermThread):
   m_ui.viewMenu->insertSeparator(m_ui.preferences);
 
   mcrl2::log::logger::register_output_policy(m_logRelay);
-  connect(&m_logRelay, SIGNAL(logMessage(QString, QString, QDateTime, QString)), this, SLOT(logMessage(QString, QString, QDateTime, QString)));
+  connect(&m_logRelay, SIGNAL(logMessage(QString, QDateTime, QString)), this, SLOT(logMessage(QString, QDateTime, QString)));
 
   connect(m_ui.open, SIGNAL(triggered()), this, SLOT(open()));
   connect(m_ui.openTrace, SIGNAL(triggered()), this, SLOT(openTrace()));
