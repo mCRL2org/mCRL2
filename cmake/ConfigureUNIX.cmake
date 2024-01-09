@@ -58,9 +58,6 @@ mcrl2_add_cxx_debug_flag(-Wno-system-headers)
 mcrl2_add_cxx_debug_flag(-Woverloaded-virtual)
 mcrl2_add_cxx_debug_flag(-Wwrite-strings)
 
-# Make inline member functions hidden by default, allowing them to not be exported
-mcrl2_add_cxx_flag(-fvisibility-inlines-hidden)
-
 # Change the thread local storage model to 'initial-exec', which applies additional
 # optimisations which assume that the shared library will never be dynamically loaded.
 mcrl2_add_cxx_flag(-ftls-model=initial-exec)
