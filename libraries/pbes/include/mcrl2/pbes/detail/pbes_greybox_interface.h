@@ -153,7 +153,7 @@ namespace detail {
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[atermpp::down_cast<propositional_variable_instantiation>(psi).name()];
 
-        mCRL2log(log::debug2) << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << expr << " into ";
+        mCRL2log(log::trace) << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << expr << " into ";
 
         pbes_expression result;
 
@@ -161,7 +161,7 @@ namespace detail {
         make_substitution(pbes_eqn.variable().parameters(), atermpp::down_cast<propositional_variable_instantiation>(psi).parameters(),sigma);
         result = pbes_rewriter(expr,sigma);
 
-        mCRL2log(log::debug2) << result << std::endl;
+        mCRL2log(log::trace) << result << std::endl;
         return result;
       }
       return psi;

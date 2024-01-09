@@ -52,7 +52,7 @@ class symbolic_pbessolve_algorithm
       ldd W_1[2];
 
       ldd A = m_G.safe_attractor(U, alpha, V, Vplayer);
-      mCRL2log(log::debug1) << "A = attractor(" << m_G.print_nodes(U) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(A) << std::endl;
+      mCRL2log(log::trace) << "A = attractor(" << m_G.print_nodes(U) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(A) << std::endl;
       std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
 
       // Original Zielonka version
@@ -64,16 +64,16 @@ class symbolic_pbessolve_algorithm
       else
       {
         ldd B = m_G.safe_attractor(W_1[1 - alpha], 1 - alpha, V, Vplayer);
-        mCRL2log(log::debug1) << "B = attractor(" << m_G.print_nodes(W_1[1 - alpha]) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(B) << std::endl;
+        mCRL2log(log::trace) << "B = attractor(" << m_G.print_nodes(W_1[1 - alpha]) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(B) << std::endl;
         std::tie(W[0], W[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
       }
 
       mCRL2log(log::debug) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
-      mCRL2log(log::debug1) << "\n  --- zielonka solution for ---\n" << m_G.print_graph(V) << std::endl;
-      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(W[0]) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(W[1]) << std::endl;
+      mCRL2log(log::trace) << "\n  --- zielonka solution for ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(W[0]) << std::endl;
+      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(W[1]) << std::endl;
       assert(union_(W[0], W[1]) == V);
       return { W[0], W[1] };
     }
@@ -106,11 +106,11 @@ class symbolic_pbessolve_algorithm
       }
 
       // If the initial vertex has not yet been won then run the zielonka solver as well.
-      mCRL2log(log::debug1) << "\n--- apply zielonka to ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(V) << std::endl;
       auto const& [solved0, solved1] = zielonka(Vtotal);
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(solved0) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(solved1) << std::endl;
+      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solved0) << std::endl;
+      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solved1) << std::endl;
       if (includes(solved0, initial_vertex))
       {
         return true;
@@ -176,7 +176,7 @@ class symbolic_pbessolve_algorithm
         return { winning[0], winning[1] };
       }
 
-      mCRL2log(log::debug1) << "\n--- apply solitair winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::trace) << "\n--- apply solitair winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
 
       // Computes two vertex sets of all even priority and odd priority nodes respectively.
       std::array<ldd, 2> parity;
@@ -228,8 +228,8 @@ class symbolic_pbessolve_algorithm
         }
       }
 
-      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
 
       return { winning[0], winning[1] };
     }
@@ -256,7 +256,7 @@ class symbolic_pbessolve_algorithm
         return { winning[0], winning[1] };
       }
 
-      mCRL2log(log::debug1) << "\n--- apply forced winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::trace) << "\n--- apply forced winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
 
       // Computes two vertex sets of all even priority and odd priority nodes respectively.
       std::array<ldd, 2> parity;
@@ -315,8 +315,8 @@ class symbolic_pbessolve_algorithm
         }
       }
 
-      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
 
       return { winning[0], winning[1] };
     }
@@ -349,7 +349,7 @@ class symbolic_pbessolve_algorithm
         Vsafe = { m_G.compute_safe_vertices(0, Vtotal, I), m_G.compute_safe_vertices(1, Vtotal, I) };
       }
 
-      mCRL2log(log::debug1) << "\n--- apply fatal attractor detection to ---\n" << m_G.print_graph(Vtotal) << std::endl;
+      mCRL2log(log::trace) << "\n--- apply fatal attractor detection to ---\n" << m_G.print_graph(Vtotal) << std::endl;
 
       // For priorities in descending order
       for (auto it = m_G.ranks().rbegin(); it != m_G.ranks().rend(); it++)
@@ -387,8 +387,8 @@ class symbolic_pbessolve_algorithm
       }
 
       mCRL2log(log::debug) << "finished fatal attractor detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::debug1) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
-      mCRL2log(log::debug1) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
 
       return { winning[0], winning[1] };
     }

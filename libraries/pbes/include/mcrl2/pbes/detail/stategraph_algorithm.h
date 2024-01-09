@@ -916,7 +916,7 @@ class stategraph_algorithm
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();
-      mCRL2log(log::debug1) << "--- GCFP graph = ---\n" << m_GCFP_graph << std::endl;
+      mCRL2log(log::trace) << "--- GCFP graph = ---\n" << m_GCFP_graph << std::endl;
       set_parameters(m_pbes);
       print_final_control_flow_parameters();
 

@@ -170,7 +170,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
                                xy[xy_size - 1] = algorithm.action_index().insert(algorithm.rewrite_action(group.actions[i], rewr, sigma)).first;
                              }
 
-                             mCRL2log(log::debug1) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
+                             mCRL2log(log::trace) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
                              group.L = options.no_relprod ? union_cube(group.L, xy.data(), xy_size) : union_cube_copy(group.L, xy.data(), smd.copy.data(), xy_size);
                              return false;
                            },

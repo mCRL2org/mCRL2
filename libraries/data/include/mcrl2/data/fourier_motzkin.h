@@ -32,15 +32,15 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
                      const rewriter& r)
 {
   assert(resulting_inequalities.empty());
-  if (mCRL2logEnabled(log::debug2))
+  if (mCRL2logEnabled(log::trace))
   {
-    mCRL2log(log::debug2) << "Starting Fourier-Motzkin elimination on " + pp_vector(inequalities_in) + " on variables ";
+    mCRL2log(log::trace) << "Starting Fourier-Motzkin elimination on " + pp_vector(inequalities_in) + " on variables ";
     for (Data_variable_iterator i=variables_begin;
          i!=variables_end; ++i)
     {
-      mCRL2log(log::debug2) << " " << pp(*i) ;
+      mCRL2log(log::trace) << " " << pp(*i) ;
     }
-    mCRL2log(log::debug2) << std::endl;
+    mCRL2log(log::trace) << std::endl;
   }
 
   std::vector < linear_inequality > inequalities;
@@ -94,7 +94,7 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
       }
     }
 
-    mCRL2log(log::debug2) << "Best variable " << pp(best_variable) << "\n";
+    mCRL2log(log::trace) << "Best variable " << pp(best_variable) << "\n";
 
     if (!found)
     {
@@ -130,10 +130,10 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
       }
     }
 
-    mCRL2log(log::debug2) << "Positive :" << pp_vector(inequalities_with_positive_variable) << "\n";
-    mCRL2log(log::debug2) << "Negative :" << pp_vector(inequalities_with_negative_variable) << "\n";
-    mCRL2log(log::debug2) << "Equalities :" << pp_vector(equalities) << "\n";
-    mCRL2log(log::debug2) << "Rest :" << pp_vector(new_inequalities) << "\n";
+    mCRL2log(log::trace) << "Positive :" << pp_vector(inequalities_with_positive_variable) << "\n";
+    mCRL2log(log::trace) << "Negative :" << pp_vector(inequalities_with_negative_variable) << "\n";
+    mCRL2log(log::trace) << "Equalities :" << pp_vector(equalities) << "\n";
+    mCRL2log(log::trace) << "Rest :" << pp_vector(new_inequalities) << "\n";
 
     // Variables are grouped, now construct new inequalities as follows:
     // Keep the zero occurrences
@@ -184,7 +184,7 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
       resulting_inequalities.push_back(*i);
     }
   }
-  mCRL2log(log::debug2) << "Fourier-Motzkin elimination yields " << pp_vector(resulting_inequalities) << std::endl;
+  mCRL2log(log::trace) << "Fourier-Motzkin elimination yields " << pp_vector(resulting_inequalities) << std::endl;
 }
 
 /// \brief Eliminate variables from a data expression using Gauss elimination and

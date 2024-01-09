@@ -311,7 +311,7 @@ struct reset_traverser: public pbes_expression_traverser<reset_traverser>
 
   void push(const pbes_expression& x)
   {
-    mCRL2log(log::debug1) << "<push>" << "\n" << x << std::endl;
+    mCRL2log(log::trace) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 

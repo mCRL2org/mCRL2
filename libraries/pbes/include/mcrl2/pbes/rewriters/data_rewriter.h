@@ -24,28 +24,28 @@ namespace detail {
 template <typename DataRewriter, typename SubstitutionFunction>
 const data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, SubstitutionFunction& sigma)
 {
-  mCRL2log(log::debug2) << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
+  mCRL2log(log::trace) << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
   return R(x, sigma);
 }
 
 template <typename DataRewriter, typename SubstitutionFunction>
 void data_rewrite(data::data_expression& result, const data::data_expression& x, const DataRewriter& R, SubstitutionFunction& sigma)
 {
-  mCRL2log(log::debug2) << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
+  mCRL2log(log::trace) << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
   R(result, x, sigma);
 }
 
 template <typename DataRewriter>
 const data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, data::no_substitution&)
 {
-  mCRL2log(log::debug2) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
+  mCRL2log(log::trace) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
   return R(x);
 }
 
 template <typename DataRewriter>
 void data_rewrite(data::data_expression& result, const data::data_expression& x, const DataRewriter& R, data::no_substitution&)
 {
-  mCRL2log(log::debug2) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
+  mCRL2log(log::trace) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
   result = R(x);
 }
 

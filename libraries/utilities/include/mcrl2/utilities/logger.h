@@ -31,14 +31,10 @@ enum log_level_t
   error,
   warning,
   info,
-  status,
+  status, // This is overwritten in the output when printed consecutively, and the lowest level that is shown by default.
   verbose,
   debug,
-  debug1,
-  debug2,
-  debug3,
-  debug4,
-  debug5
+  trace,
 };
 
 /// \brief Convert log level to string
@@ -46,7 +42,7 @@ enum log_level_t
 inline
 std::string log_level_to_string(const log_level_t level)
 {
-  static const char* const buffer[] = {"quiet", "error", "warning", "info", "status", "verbose", "debug", "debug1", "debug2", "debug3", "debug4", "debug5"};
+  static const char* const buffer[] = {"quiet", "error", "warning", "info", "status", "verbose", "debug", "trace"};
   return buffer[level];
 }
 
@@ -82,25 +78,9 @@ log_level_t log_level_from_string(const std::string& s)
   {
     return debug;
   }
-  else if (s == "debug1")
+  else if (s == "trace")
   {
-    return debug1;
-  }
-  else if (s == "debug2")
-  {
-    return debug2;
-  }
-  else if (s == "debug3")
-  {
-    return debug3;
-  }
-  else if (s == "debug4")
-  {
-    return debug4;
-  }
-  else if (s == "debug5")
-  {
-    return debug5;
+    return trace;
   }
   else
   {
@@ -166,7 +146,7 @@ class logger
     /// \brief Timestamp of the current message
     time_t m_timestamp;
 
-    static std::atomic<log_level_t>& log_level() 
+   static std::atomic<log_level_t>& log_level()
     {
       static std::atomic<log_level_t> g_log_level(log_level_t::info);
       return g_log_level;
@@ -403,14 +383,10 @@ std::set<output_policy*> initialise_output_policies()
   return result;
 }
 
-/// \brief Unless otherwise specified, we compile away all debug messages that have
-/// a log level greater than MCRL2MaxLogLevel.
-constexpr log_level_t MCRL2MaxLogLevel = mcrl2::log::debug;
-
 /// \returns True whenever the logging for the given level is enabled.
-constexpr bool mCRL2logEnabled(const log_level_t level)
+inline bool mCRL2logEnabled(const log_level_t level)
 {
-  return level <= MCRL2MaxLogLevel && level <= mcrl2::log::logger::get_reporting_level();
+  return level <= mcrl2::log::logger::get_reporting_level();
 }
 
 } // namespace mcrl2::log

@@ -340,8 +340,8 @@ class symbolic_parity_game
           return Z;
         }
 
-        mCRL2log(log::debug1) << "todo = " << print_nodes(todo) << std::endl;
-        mCRL2log(log::debug1) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
+        mCRL2log(log::trace) << "todo = " << print_nodes(todo) << std::endl;
+        mCRL2log(log::trace) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
         todo = minus(safe_control_predecessors_impl(alpha, todo, Zoutside, Zoutside, V, Vplayer, I), Z);
@@ -401,8 +401,8 @@ class symbolic_parity_game
           return Z;
         }
 
-        mCRL2log(log::debug1) << "todo = " << print_nodes(todo) << std::endl;
-        mCRL2log(log::debug1) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
+        mCRL2log(log::trace) << "todo = " << print_nodes(todo) << std::endl;
+        mCRL2log(log::trace) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
         todo = intersect(Vc, minus(safe_control_predecessors_impl(alpha, union_(todo, U), V, minus(Zoutside, U), Vc, Vplayer, I), Z));
@@ -521,7 +521,7 @@ class symbolic_parity_game
 
         stopwatch watch;
         result = union_(result, predecessors(U, V, group));
-        mCRL2log(log::debug1) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
+        mCRL2log(log::trace) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
       }
 
@@ -568,7 +568,7 @@ private:
 
         stopwatch watch;
         ldd todo1 = predecessors(U, todo, group);
-        mCRL2log(log::debug1) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
+        mCRL2log(log::trace) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
 
         P = union_(P, todo1);
@@ -601,7 +601,7 @@ private:
         stopwatch watch;
         Pforced = minus(Pforced, predecessors(Pforced, outside, group));
 
-        mCRL2log(log::debug1) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
+        mCRL2log(log::trace) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
       }
 

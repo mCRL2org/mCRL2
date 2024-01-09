@@ -121,7 +121,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 
       for (std::size_t k = 0; k < p_eqn.size(); k++)
       {
-        mCRL2log(log::debug1) << "--- resetting equation " << p_eqn[k] << std::endl;
+        mCRL2log(log::trace) << "--- resetting equation " << p_eqn[k] << std::endl;
         p_eqn[k].formula() = local_reset_variables(*this, p_eqn[k].formula(), s_eqn[k]);
       }
 
@@ -181,7 +181,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
 
   void push(const pbes_expression& x)
   {
-    mCRL2log(log::debug2) << "<push>" << "\n" << x << std::endl;
+    mCRL2log(log::trace) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 
@@ -210,7 +210,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
   void leave(const pbes_system::propositional_variable_instantiation& x)
   {
     pbes_expression result = algorithm.reset_variable(x, eq_X, i);
-    mCRL2log(log::debug1) << "reset variable " << x << " with index " << i << " to " << result << std::endl;
+    mCRL2log(log::trace) << "reset variable " << x << " with index " << i << " to " << result << std::endl;
     i++;
     push(result);
   }
@@ -357,7 +357,7 @@ data::data_expression_list local_reset_variables_algorithm::reset_variable_param
       if (!condition.empty())
       {
         e1[k] = data::if_(data::lazy::join_or(condition.begin(), condition.end()), default_value(Y, k, e1[k].sort()), nth_element(e, k));
-        mCRL2log(log::debug1) << "  reset copy Y = " << Y << " k = " << k << " e'[k] = " << e1[k] << std::endl;
+        mCRL2log(log::trace) << "  reset copy Y = " << Y << " k = " << k << " e'[k] = " << e1[k] << std::endl;
       }
     }
   }

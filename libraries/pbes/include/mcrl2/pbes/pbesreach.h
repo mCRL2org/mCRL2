@@ -213,7 +213,7 @@ class pbesreach_algorithm
     /// \brief Updates R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, pbes_summand_group& R, const ldd& X)
     {
-      mCRL2log(log::debug1) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
+      mCRL2log(log::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
       std::pair<pbesreach_algorithm&, pbes_summand_group&> context{*this, R};
@@ -253,7 +253,7 @@ class pbesreach_algorithm
       // add a sort for the propositional variable names
       data::data_specification propvar_dataspec = construct_propositional_variable_data_specification(result, "PropositionalVariable");
       result.data() = data::merge_data_specifications(result.data(), propvar_dataspec);
-      mCRL2log(log::debug1) << "--- srf pbes ---\n" << result.to_pbes() << std::endl;
+      mCRL2log(log::trace) << "--- srf pbes ---\n" << result.to_pbes() << std::endl;
 
       return result;
     }
@@ -349,13 +349,13 @@ class pbesreach_algorithm
       if (m_options.no_relprod)
       {
         ldd z = symbolic::alternative_relprod(U, group);
-        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
         return z;
       }
       else
       {
         ldd z = relprod(U, group.L, group.Ir);
-        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
         return z;
       }
     }
@@ -382,7 +382,7 @@ class pbesreach_algorithm
             ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
@@ -406,7 +406,7 @@ class pbesreach_algorithm
             ldd proj = project(todo1, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::debug1) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           // Apply one transition relation repeatedly.
@@ -448,7 +448,7 @@ class pbesreach_algorithm
       auto& R = m_summand_groups;
       std::size_t iteration_count = 0;
 
-      mCRL2log(log::debug1) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
+      mCRL2log(log::trace) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       stopwatch timer;
       m_initial_vertex = initial_state();
@@ -460,8 +460,8 @@ class pbesreach_algorithm
       {
         stopwatch loop_start;
         iteration_count++;
-        mCRL2log(log::debug1) << "--- iteration " << iteration_count << " ---" << std::endl;
-        mCRL2log(log::debug1) << "todo = " << print_states(m_data_index, m_todo) << std::endl;
+        mCRL2log(log::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
+        mCRL2log(log::trace) << "todo = " << print_states(m_data_index, m_todo) << std::endl;
         ldd deadlocks = empty_set();
 
         std::tie(m_visited, m_todo, deadlocks) = step(m_visited, m_todo, true, m_options.detect_deadlocks);
