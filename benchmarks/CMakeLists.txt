@@ -159,9 +159,12 @@ if (MCRL2_ENABLE_DEVELOPER)
       "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.dataspec" 
       "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.expressions" 
       "-rjitty")
-    add_tool_benchmark("${NAME}_jittyc" mcrl2rewrite 
-      "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.dataspec" 
-      "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.expressions" 
-      "-rjittyc")
+      
+    if(MCRL2_ENABLE_JITTY)
+      add_tool_benchmark("${NAME}_jittyc" mcrl2rewrite 
+        "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.dataspec" 
+        "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.expressions" 
+        "-rjittyc")
+    endif()
   endforeach()
 endif()

@@ -76,14 +76,14 @@ class AsyncMpiAttractorAlgorithm : public MpiAttractorAlgorithm
         DenseSet<verti> &attr, std::deque<verti> &queue,
         bool quick_start, ParityGame::Strategy &strategy )
     {
-        mCRL2log(mcrl2::log::debug2) << "enter make_attractor_set("
+        mCRL2log(mcrl2::log::trace) << "enter make_attractor_set("
                                      << part.debug_str(attr) << ", "
                                      << player << ", "
                                      << std::boolalpha << quick_start << " in "
                                      << part.debug_str() << std::endl;
         AsyncMpiAttractorImpl impl(vpart, part, player, attr, queue, strategy);
         impl.solve(quick_start);
-        mCRL2log(mcrl2::log::debug2) << "return -> " << part.debug_str(attr) << std::endl;
+        mCRL2log(mcrl2::log::trace) << "return -> " << part.debug_str(attr) << std::endl;
     }
 };
 

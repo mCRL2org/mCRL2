@@ -80,7 +80,7 @@ class lpsreach_algorithm
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)
     {
-      mCRL2log(log::debug1) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
+      mCRL2log(log::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
@@ -171,13 +171,13 @@ class lpsreach_algorithm
       if (m_options.no_relprod)
       {
         ldd z = symbolic::alternative_relprod(U, group);
-        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
+        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
         return z;
       }
       else
       {
         ldd z = relprod(U, group.L, group.Ir);
-        mCRL2log(log::debug1) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
+        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
         return z;
       }
     }
@@ -204,7 +204,7 @@ class lpsreach_algorithm
             ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::debug1) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
@@ -228,7 +228,7 @@ class lpsreach_algorithm
             ldd proj = project(todo1, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::debug1) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           // Apply one transition relation repeatedly.
@@ -270,7 +270,7 @@ class lpsreach_algorithm
       auto& R = m_lts.summand_groups;
       std::size_t iteration_count = 0;
 
-      mCRL2log(log::debug1) << "initial state = " << core::detail::print_list(m_lts.initial_state) << std::endl;
+      mCRL2log(log::trace) << "initial state = " << core::detail::print_list(m_lts.initial_state) << std::endl;
 
       auto start = std::chrono::steady_clock::now();
       ldd x = m_lts.initial_state;
@@ -283,8 +283,8 @@ class lpsreach_algorithm
       {
         stopwatch loop_start;
         iteration_count++;
-        mCRL2log(log::debug1) << "--- iteration " << iteration_count << " ---" << std::endl;
-        mCRL2log(log::debug1) << "todo = " << print_states(m_lts.data_index, todo) << std::endl;
+        mCRL2log(log::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
+        mCRL2log(log::trace) << "todo = " << print_states(m_lts.data_index, todo) << std::endl;
 
         std::tie(visited, todo, deadlocks) = step(visited, todo, true, m_options.detect_deadlocks);
 

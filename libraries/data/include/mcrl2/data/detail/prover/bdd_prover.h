@@ -159,15 +159,15 @@ class BDD_Prover: protected rewriter
       intermediate_bdd = m_rewriter->rewrite(intermediate_bdd,bdd_sigma);
       intermediate_bdd = f_manipulator.orient(intermediate_bdd);
 
-      mCRL2log(log::debug1) << "Formula rewritten and oriented: " << intermediate_bdd << std::endl;
+      mCRL2log(log::trace) << "Formula rewritten and oriented: " << intermediate_bdd << std::endl;
 
       while (v_previous_1 != intermediate_bdd && v_previous_2 != intermediate_bdd)
       {
         v_previous_2 = v_previous_1;
         v_previous_1 = intermediate_bdd;
         intermediate_bdd = bdd_down(intermediate_bdd);
-        mCRL2log(log::debug1) << "End of iteration." << std::endl;
-        mCRL2log(log::debug1) << "Intermediate BDD: " << intermediate_bdd << std::endl;
+        mCRL2log(log::trace) << "End of iteration." << std::endl;
+        mCRL2log(log::trace) << "Intermediate BDD: " << intermediate_bdd << std::endl;
       }
 
       f_bdd = intermediate_bdd;
@@ -220,7 +220,7 @@ class BDD_Prover: protected rewriter
       }
       else
       {
-        mCRL2log(log::debug1) << indent(a_indent) << "Smallest guard: " << v_guard << std::endl;
+        mCRL2log(log::trace) << indent(a_indent) << "Smallest guard: " << v_guard << std::endl;
       }
 
       const size_t extra_indent = a_indent + 2;
@@ -228,16 +228,16 @@ class BDD_Prover: protected rewriter
       data_expression v_term1 = f_manipulator.set_true(formula, v_guard);
       v_term1 = m_rewriter->rewrite(v_term1,bdd_sigma);
       v_term1 = f_manipulator.orient(v_term1);
-      mCRL2log(log::debug1) << indent(extra_indent) << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
+      mCRL2log(log::trace) << indent(extra_indent) << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
       v_term1 = bdd_down(v_term1, extra_indent);
-      mCRL2log(log::debug1) << indent(extra_indent) << "BDD of the true-branch: " << v_term1 << std::endl;
+      mCRL2log(log::trace) << indent(extra_indent) << "BDD of the true-branch: " << v_term1 << std::endl;
 
       data_expression v_term2 = f_manipulator.set_false(formula, v_guard);
       v_term2 = m_rewriter->rewrite(v_term2,bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
-      mCRL2log(log::debug1) << indent(extra_indent) << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
+      mCRL2log(log::trace) << indent(extra_indent) << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
       v_term2 = bdd_down(v_term2, extra_indent);
-      mCRL2log(log::debug1) << indent(extra_indent) << "BDD of the false-branch: " << v_term2 << std::endl;
+      mCRL2log(log::trace) << indent(extra_indent) << "BDD of the false-branch: " << v_term2 << std::endl;
 
       data_expression v_bdd = Manipulator::make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[formula]=v_bdd;

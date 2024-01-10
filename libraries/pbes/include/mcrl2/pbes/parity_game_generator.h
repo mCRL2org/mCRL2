@@ -84,7 +84,7 @@ class parity_game_generator
     {
       std::size_t result;
 
-      mCRL2log(log::debug2) << "Adding equation for " << t << std::endl;
+      mCRL2log(log::trace) << "Adding equation for " << t << std::endl;
 
       // TODO: can this insertion be done more efficiently?
       auto i = m_pbes_expression_index.find(t);
@@ -133,10 +133,10 @@ class parity_game_generator
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[psi1.name()];
         substitution_function sigma;
         make_substitution(pbes_eqn.variable().parameters(), psi1.parameters(), sigma);
-        mCRL2log(log::debug2) << "Expanding right hand side " << pbes_eqn.formula() << " into " << std::flush;
+        mCRL2log(log::trace) << "Expanding right hand side " << pbes_eqn.formula() << " into " << std::flush;
         pbes_expression result = R(pbes_eqn.formula(), sigma);
         R.clear_identifier_generator();
-        mCRL2log(log::debug2) << result << std::endl;
+        mCRL2log(log::trace) << result << std::endl;
         return result;
       }
       return psi;

@@ -24,18 +24,6 @@ void print_all_log_levels()
   mCRL2log(info) << "Some information" << std::endl;
   mCRL2log(verbose) << "Detailed information" << std::endl;
   mCRL2log(debug) << "Debugging info" << std::endl;
-  mCRL2log(debug1) << "Detailed debugging info" << std::endl;
-  mCRL2log(debug2) << "Detailed debugging info (2)" << std::endl;
-  mCRL2log(debug3) << "Detailed debugging info (3)" << std::endl;
-  mCRL2log(debug4) << "Detailed debugging info (4)" << std::endl;
-  mCRL2log(debug5) << "Detailed debugging info (5)" << std::endl;
-}
-
-BOOST_AUTO_TEST_CASE(test_logging_basic)
-{
-  // Messages will only be printed up to debug, due to standard MCRL2_MAX_LOG_LEVEL
-  logger::set_reporting_level(debug2);
-  print_all_log_levels();
 }
 
 BOOST_AUTO_TEST_CASE(test_logging_use_case)
@@ -45,10 +33,10 @@ BOOST_AUTO_TEST_CASE(test_logging_use_case)
   mCRL2log(debug) << "A loop with " << count << " iterations" << std::endl;
   for (int i = 0; i < count; ++i)
   {
-    mCRL2log(debug1) << "the counter i = " << i << std::endl;
+    mCRL2log(debug) << "the counter i = " << i << std::endl;
     if(i >= 2)
     {
-      mCRL2log(debug2) << "the counter is greater then 2" << std::endl;
+      mCRL2log(debug) << "the counter is greater then 2" << std::endl;
     }
   }
 }
@@ -94,25 +82,6 @@ std::string test_assert()
   return "BOOM!";
 }
 
-// Show that arguments to logging are not executed if the log level is larger
-// than MCRL2_MAX_LOG_LEVEL (i.e. the BOOST_CHECK(false) in test_assert() should
-// never be triggered.
-BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_static)
-{
-  BOOST_CHECK(MCRL2MaxLogLevel < debug5);
-  mCRL2log(debug5) << "This line should not end with BOOM! ............. " << test_assert() << std::endl;
-}
-
-// Show that arguments to logging are not executed if the log level is larger
-// than logger::reporting_level() (i.e. the BOOST_CHECK(false) in test_assert() should
-// never be triggered.
-BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_dynamic)
-{
-  BOOST_CHECK(MCRL2MaxLogLevel >= debug);
-  logger::set_reporting_level(verbose);
-  mCRL2log(debug) << "This line should not end with BOOM! ............. " << test_assert() << std::endl;
-}
-
 BOOST_AUTO_TEST_CASE(test_fflush)
 {
   for(int i = 0; i < 10; ++i)
@@ -128,11 +97,6 @@ BOOST_AUTO_TEST_CASE(test_multiline_nonewline)
 {
   mCRL2log(info) << "There is just one newline";
   mCRL2log(info) << "in this message" << std::endl;
-}
-
-BOOST_AUTO_TEST_CASE(test_enabled_constexpr)
-{
-  static_assert(!mCRL2logEnabled(debug3), "This function should evaluate to false at compile time.");
 }
 
 BOOST_AUTO_TEST_CASE(test_parallel_logging)

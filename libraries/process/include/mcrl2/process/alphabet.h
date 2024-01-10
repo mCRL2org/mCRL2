@@ -64,7 +64,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   // Push a node to node_stack
   void push(const Node& node)
   {
-    mCRL2log(log::debug1) << "<push> A = " << pp(node.alphabet) << std::endl;
+    mCRL2log(log::trace) << "<push> A = " << pp(node.alphabet) << std::endl;
     node_stack.push_back(node);
   }
 
@@ -78,7 +78,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   Node pop()
   {
     Node result = node_stack.back();
-    mCRL2log(log::debug1) << "<pop> A = " << pp(result.alphabet) << std::endl;
+    mCRL2log(log::trace) << "<pop> A = " << pp(result.alphabet) << std::endl;
     node_stack.pop_back();
     return result;
   }

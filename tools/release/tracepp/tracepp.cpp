@@ -104,7 +104,7 @@ static void print_state(std::ostream& os, const mcrl2::lps::state &s)
   os << ")";
 }
 
-static void trace2dot(std::ostream& os, trace& trace, const std::string& name)
+static void trace2dot(std::ostream& os, mcrl2::lts::trace& trace, const std::string& name)
 {
   os << "digraph \"" << name << "\" {" << std::endl;
   os << "center = TRUE;" << std::endl;
@@ -137,7 +137,7 @@ static void trace2dot(std::ostream& os, trace& trace, const std::string& name)
   os << "}" << std::endl;
 }
 
-static void trace2statevector(std::ostream& os, trace& trace)
+static void trace2statevector(std::ostream& os, mcrl2::lts::trace& trace)
 {
   trace.reset_position();
 
@@ -158,7 +158,7 @@ static void trace2statevector(std::ostream& os, trace& trace)
   os << std::endl;
 }
 
-static void trace2aut(std::ostream& os, trace& trace)
+static void trace2aut(std::ostream& os, mcrl2::lts::trace& trace)
 {
   os << "des (0," << trace.number_of_actions() << "," << trace.number_of_actions()+1 << ")" << std::endl;
   trace.reset_position();
@@ -171,7 +171,7 @@ static void trace2aut(std::ostream& os, trace& trace)
   }
 }
 
-inline void save_trace(trace& trace, output_type outtype, std::ostream& out, const std::string& name, const std::string& output_filename)
+inline void save_trace(mcrl2::lts::trace& trace, output_type outtype, std::ostream& out, const std::string& name, const std::string& output_filename)
 {
   mCRL2log(verbose) << "writing result in " << description(outtype) << "..." << std::endl;
   switch (outtype)
@@ -215,7 +215,7 @@ class tracepp_tool: public input_output_tool
 
     bool run()
     {
-      trace trace;
+      mcrl2::lts::trace trace;
 
       if (input_filename().empty())
       {
