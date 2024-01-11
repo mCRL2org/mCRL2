@@ -363,10 +363,10 @@ interface_description::interface_description(std::string const& path,
   add_hidden_option("help-all", "display help information, including hidden and experimental options");
   add_hidden_option("version", "display version information");
   add_hidden_option("quiet", "do not display warning messages", 'q');
-  add_hidden_option("verbose", "display short intermediate messages", 'v');
-  add_hidden_option("debug", "display detailed intermediate messages", 'd');
+  add_hidden_option("verbose", "display short log messages", 'v');
+  add_hidden_option("debug", "display detailed log messages", 'd');
   add_hidden_option("log-level", make_mandatory_argument<std::string>("LEVEL", ""),
-                    "display intermediate messages up to and including level");
+                    "display log messages up to and including level; either warn, verbose, debug or trace");
 }
 
 std::string interface_description::copyright_message()
