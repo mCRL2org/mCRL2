@@ -18,6 +18,7 @@ namespace core {
 namespace detail {
 
 std::vector<std::unique_ptr<atermpp::function_symbol>> function_symbols_DataAppl;
+atermpp::function_symbol function_symbols_DataApplFixed[DataApplFixed];
 
 } // namespace detail
 

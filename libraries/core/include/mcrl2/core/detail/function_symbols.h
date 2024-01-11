@@ -25,6 +25,10 @@ namespace detail {
 // Part 1: functions for creating function symbols.
 //----------------------------------------------------------------------------------------------//
 
+// Use a fixed size array for the "smaller" DataAppl and the dynamic
+constexpr std::size_t DataApplFixed = 100;
+extern atermpp::function_symbol function_symbols_DataApplFixed[DataApplFixed];
+
 // We use a vector of pointers here, and not a vector of objects. The latter would
 // result in references becoming invalid when the vector is resized, i.e., when a new
 // element is added. That would mean that function_symbol_DataAppl and function_symbol_DataAppl_helper
@@ -35,24 +39,42 @@ extern std::vector<std::unique_ptr<atermpp::function_symbol>> function_symbols_D
 inline
 const atermpp::function_symbol& function_symbol_DataAppl_helper(std::size_t i)
 {
+  static std::mutex mutex;
+
+  // Since it is larger than DataApplFixed we can ignore the start indices.
+  i -= DataApplFixed;
+  mutex.lock();
   do
   {
-    function_symbols_DataAppl.push_back(std::unique_ptr<atermpp::function_symbol>(new atermpp::function_symbol("DataAppl", function_symbols_DataAppl.size())));
+    function_symbols_DataAppl.push_back(std::make_unique<atermpp::function_symbol>("DataAppl", function_symbols_DataAppl.size() + DataApplFixed));
   }
   while (i >= function_symbols_DataAppl.size());
-  return *function_symbols_DataAppl[i];
+  
+  const atermpp::function_symbol& result = *function_symbols_DataAppl[i];
+  mutex.unlock();
+
+  return result;  
 }
 
 inline
 const atermpp::function_symbol& function_symbol_DataAppl(std::size_t i)
 {
-  if (i >= function_symbols_DataAppl.size())
-  {
-    // This helper is introduced such the function function_symbol_DataAppl, which is called very often,
-    // will be inlined.
+  if (i < DataApplFixed) {
+    // This is not thread safe, but applications are made during the initialisation process.
+    static bool initialised = false;
+    if (!initialised) {
+      for (std::size_t i = 0; i < DataApplFixed; ++i) {
+        function_symbols_DataApplFixed[i] = atermpp::function_symbol("DataAppl", i);
+      }
+
+      initialised = true;
+    }
+
+    return function_symbols_DataApplFixed[i];
+  } else {
+    // This is much more expensive so deferred to a separate function call.
     return function_symbol_DataAppl_helper(i);
   }
-  return *function_symbols_DataAppl[i];
 }
 
 inline
@@ -64,7 +86,11 @@ bool gsIsDataAppl(const atermpp::aterm_appl& Term)
 inline
 bool gsIsDataAppl_no_check(const atermpp::aterm_appl& Term)
 {
-  return Term.function() == *function_symbols_DataAppl[Term.function().arity()];
+  if (Term.function().arity() < DataApplFixed) {
+    return Term.function() == function_symbols_DataApplFixed[Term.function().arity()];
+  } else {
+    return Term.function() == *function_symbols_DataAppl[Term.function().arity() - DataApplFixed];
+  }
 }
 
 // DataVarIdNoIndex
