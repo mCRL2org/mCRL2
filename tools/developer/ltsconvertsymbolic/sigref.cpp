@@ -183,8 +183,8 @@ mcrl2::lps::symbolic_lts_bdd sigref_algorithm::run(const mcrl2::lps::symbolic_lt
 
   mCRL2log(log_level_t::debug) << "transition relation size " << print_size(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables(), prime_variables), lts.action_label_variables()), true, true) << std::endl;
 
-  // mCRL2log(log_level_t::debug) << "transition relation = " << std::endl;     
-  //mCRL2log(log_level_t::debug) << print_vectors(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables, prime_variables), lts.action_label_variables)) << std::endl;
+  mCRL2log(log_level_t::debug) << "transition relation = " << std::endl;     
+  mCRL2log(log_level_t::debug) << print_vectors(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables(), prime_variables), lts.action_label_variables())) << std::endl;
 
   // There are at most |states| blocks since every state can be in a unique block.
   double number_of_states = satcount(lts.states(), lts.state_variables());
@@ -234,6 +234,7 @@ mcrl2::lps::symbolic_lts_bdd sigref_algorithm::run(const mcrl2::lps::symbolic_lt
   mCRL2log(log_level_t::verbose) << "There are " << num_of_blocks << " equivalence classes." << std::endl;  
 
   // Compute a new transition relation for the blocks, rename 'to' states to their block number
+  mCRL2log(log_level_t::verbose) << "Computing the quotient..." << std::endl;  
   std::vector<mcrl2::lps::transition_group> quotient_transition_relation;
   bdd relation = and_exists(new_transition_relations[0], partition, prime_variables);
 
@@ -306,7 +307,7 @@ bdd sigref_algorithm::refine(bdd signature, bdd variables, bdd partition)
     sylvan_gc_test();
 
     bdd result;
-    // std::cerr << "variables = " << variables.top() << ", signature = " << signature.top() << ", partition = " << partition.top() << std::endl;
+    mCRL2log(trace) << "variables = " << variables.top() << ", signature = " << signature.top() << ", partition = " << partition.top() << std::endl;
 
     // 2. if result := cache[(\sigma, P, iter)]: return result
     // 3. v := topVar(\sigma , P)                               # interpret s′ in P as s
@@ -347,7 +348,7 @@ bdd sigref_algorithm::refine(bdd signature, bdd variables, bdd partition)
         auto it = m_block_signature.find(B);
         if (it == m_block_signature.end())
         {
-            //std::cerr << "inserted partition " << B << std::endl;
+            mCRL2log(trace) << "inserted partition " << B << std::endl;
             m_block_signature[B] = signature;
             result = partition;
         }
@@ -358,13 +359,13 @@ bdd sigref_algorithm::refine(bdd signature, bdd variables, bdd partition)
             // 17.   result := encodeBlock(B)
             if (it->second == signature)
             {
-                //std::cerr << "reused partition " << B << std::endl;
+                mCRL2log(trace)  << "reused partition " << B << std::endl;
                 result = partition;
             }
             else
             {
                 std::uint64_t B = get_next_block();
-                //std::cerr << "new block " << B << std::endl;
+                mCRL2log(trace) << "new block " << B << std::endl;
                 m_block_signature[B] = signature;
                 result = encode_block(m_block_variables, m_block_length, B);
             }

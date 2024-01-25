@@ -39,6 +39,7 @@ symbolic_lts::symbolic_lts(const symbolic_lts_bdd& lts)
   : m_data_spec(lts.data_specification()),
     m_process_parameters(lts.process_parameters())
 {
+  // TODO: Convert into this representation
 
 }
 

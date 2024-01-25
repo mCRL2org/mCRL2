@@ -1,13 +1,13 @@
 mcrl2_add_library(mcrl2_lps
   SOURCES
-    lps.cpp
-    lps_io.cpp
-    tools.cpp
-    linearise.cpp
-    lpsparunfoldlib.cpp
-    symbolic_lts.cpp
-    symbolic_lts_bdd.cpp
-    symbolic_lts_io.cpp
+    source/lps.cpp
+    source/lps_io.cpp
+    source/tools.cpp
+    source/linearise.cpp
+    source/lpsparunfoldlib.cpp
+    source/symbolic_lts.cpp
+    source/symbolic_lts_bdd.cpp
+    source/symbolic_lts_io.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data

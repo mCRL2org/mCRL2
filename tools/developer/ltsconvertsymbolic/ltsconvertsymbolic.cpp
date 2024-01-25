@@ -280,6 +280,7 @@ class ltsconvert_tool : public input_output_tool
         mcrl2::lps::symbolic_lts_bdd quotient = algorithm.run(bdd_lts);
 
         // Save the resulting bdd as an LDD.
+        mCRL2log(log_level_t::verbose) << "Converting BDD to LDD representation..." << std::endl;  
         mcrl2::lps::symbolic_lts quotient_ldd(quotient);
 
         if (!output_filename().empty())

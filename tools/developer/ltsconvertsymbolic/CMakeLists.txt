@@ -1,6 +1,6 @@
 if(MCRL2_ENABLE_SYLVAN)
 
-  add_mcrl2_tool(ltsconvertsymbolic
+  mcrl2_add_tool(ltsconvertsymbolic
     SOURCES
       ltsconvertsymbolic.cpp
       sigref.cpp

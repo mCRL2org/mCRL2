@@ -169,8 +169,8 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
     sylvan::bdds::bdd variables = meta_to_bdd(group.Ir, m_bits, 0);
     sylvan::bdds::bdd relation = bdd_from_ldd_rel(group.L, bits_with_action_label, 0, group.Ir);   
 
-    //mCRL2log(log_level_t::debug) << symbolic::print_relation(lts.data_index, lts.action_index, group.L, group.read, group.write) << std::endl;
-    //mCRL2log(log_level_t::debug) << symbolic::print_relation(lts.data_index, lts.action_index, relation, sylvan::bdds::bdd_and(variables, action_label_variables), bits, bits_action_label, group.read, group.write) << std::endl;    
+    mCRL2log(log_level_t::trace) << symbolic::print_relation(lts.data_index(), lts.action_index(), group.L, group.read, group.write) << std::endl;
+    //mCRL2log(log_level_t::trace) << symbolic::print_relation(lts.data_index(), lts.action_index(), relation, sylvan::bdds::bdd_and(variables, action_label_variables()), m_bits, bits_with_action_label, group.read, group.write) << std::endl;    
     
     m_transitions.emplace_back(relation, variables);
     mCRL2log(log_level_t::debug) << "transition relation LLD size " << symbolic::print_size(group.L, true, true) 
