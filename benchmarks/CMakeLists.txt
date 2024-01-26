@@ -137,7 +137,7 @@ if (MCRL2_ENABLE_EXPERIMENTAL AND MCRL2_ENABLE_SYLVAN)
     # Benchmark solving PBES symbolically.
     add_tool_benchmark("${NAME}" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-Q0")
 
-    if(MCRL2_ENABLE_JITTY)
+    if(MCRL2_ENABLE_JITTYC)
       add_tool_benchmark("${NAME}_jittyc" lpsreach "${LPS_FILENAME}" "" "-rjittyc")
       add_tool_benchmark("${NAME}_jittyc" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-Q0" "-rjittyc")
     endif()
@@ -160,7 +160,7 @@ if (MCRL2_ENABLE_DEVELOPER)
       "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.expressions" 
       "-rjitty")
       
-    if(MCRL2_ENABLE_JITTY)
+    if(MCRL2_ENABLE_JITTYC)
       add_tool_benchmark("${NAME}_jittyc" mcrl2rewrite 
         "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.dataspec" 
         "${CMAKE_CURRENT_SOURCE_DIR}/REC/${NAME}.expressions" 
