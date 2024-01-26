@@ -646,6 +646,166 @@ const atermpp::function_symbol& function_symbol_PBInit()
   return function_symbol_PBInit;
 }
 
+// PRES
+inline
+const atermpp::function_symbol& function_symbol_PRES()
+{
+  static const atermpp::global_function_symbol function_symbol_PRES("PRES", 4);
+  return function_symbol_PRES;
+}
+
+// PRESAnd
+inline
+const atermpp::function_symbol& function_symbol_PRESAnd()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESAnd("PRESAnd", 2);
+  return function_symbol_PRESAnd;
+}
+
+// PRESCondEq
+inline
+const atermpp::function_symbol& function_symbol_PRESCondEq()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESCondEq("PRESCondEq", 3);
+  return function_symbol_PRESCondEq;
+}
+
+// PRESCondSm
+inline
+const atermpp::function_symbol& function_symbol_PRESCondSm()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESCondSm("PRESCondSm", 3);
+  return function_symbol_PRESCondSm;
+}
+
+// PRESConstantMultiply
+inline
+const atermpp::function_symbol& function_symbol_PRESConstantMultiply()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESConstantMultiply("PRESConstantMultiply", 2);
+  return function_symbol_PRESConstantMultiply;
+}
+
+// PRESConstantMultiplyAlt
+inline
+const atermpp::function_symbol& function_symbol_PRESConstantMultiplyAlt()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESConstantMultiplyAlt("PRESConstantMultiplyAlt", 2);
+  return function_symbol_PRESConstantMultiplyAlt;
+}
+
+// PRESEqInf
+inline
+const atermpp::function_symbol& function_symbol_PRESEqInf()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESEqInf("PRESEqInf", 1);
+  return function_symbol_PRESEqInf;
+}
+
+// PRESEqNInf
+inline
+const atermpp::function_symbol& function_symbol_PRESEqNInf()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESEqNInf("PRESEqNInf", 1);
+  return function_symbol_PRESEqNInf;
+}
+
+// PRESFalse
+inline
+const atermpp::function_symbol& function_symbol_PRESFalse()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESFalse("PRESFalse", 0);
+  return function_symbol_PRESFalse;
+}
+
+// PRESImp
+inline
+const atermpp::function_symbol& function_symbol_PRESImp()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESImp("PRESImp", 2);
+  return function_symbol_PRESImp;
+}
+
+// PRESInfimum
+inline
+const atermpp::function_symbol& function_symbol_PRESInfimum()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESInfimum("PRESInfimum", 2);
+  return function_symbol_PRESInfimum;
+}
+
+// PRESMinus
+inline
+const atermpp::function_symbol& function_symbol_PRESMinus()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESMinus("PRESMinus", 1);
+  return function_symbol_PRESMinus;
+}
+
+// PRESOr
+inline
+const atermpp::function_symbol& function_symbol_PRESOr()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESOr("PRESOr", 2);
+  return function_symbol_PRESOr;
+}
+
+// PRESPlus
+inline
+const atermpp::function_symbol& function_symbol_PRESPlus()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESPlus("PRESPlus", 2);
+  return function_symbol_PRESPlus;
+}
+
+// PRESSum
+inline
+const atermpp::function_symbol& function_symbol_PRESSum()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESSum("PRESSum", 2);
+  return function_symbol_PRESSum;
+}
+
+// PRESSupremum
+inline
+const atermpp::function_symbol& function_symbol_PRESSupremum()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESSupremum("PRESSupremum", 2);
+  return function_symbol_PRESSupremum;
+}
+
+// PRESTrue
+inline
+const atermpp::function_symbol& function_symbol_PRESTrue()
+{
+  static const atermpp::global_function_symbol function_symbol_PRESTrue("PRESTrue", 0);
+  return function_symbol_PRESTrue;
+}
+
+// PREqn
+inline
+const atermpp::function_symbol& function_symbol_PREqn()
+{
+  static const atermpp::global_function_symbol function_symbol_PREqn("PREqn", 3);
+  return function_symbol_PREqn;
+}
+
+// PREqnSpec
+inline
+const atermpp::function_symbol& function_symbol_PREqnSpec()
+{
+  static const atermpp::global_function_symbol function_symbol_PREqnSpec("PREqnSpec", 1);
+  return function_symbol_PREqnSpec;
+}
+
+// PRInit
+inline
+const atermpp::function_symbol& function_symbol_PRInit()
+{
+  static const atermpp::global_function_symbol function_symbol_PRInit("PRInit", 1);
+  return function_symbol_PRInit;
+}
+
 // ProcEqn
 inline
 const atermpp::function_symbol& function_symbol_ProcEqn()
@@ -886,6 +1046,22 @@ const atermpp::function_symbol& function_symbol_StateAnd()
   return function_symbol_StateAnd;
 }
 
+// StateConstantMultiply
+inline
+const atermpp::function_symbol& function_symbol_StateConstantMultiply()
+{
+  static const atermpp::global_function_symbol function_symbol_StateConstantMultiply("StateConstantMultiply", 2);
+  return function_symbol_StateConstantMultiply;
+}
+
+// StateConstantMultiplyAlt
+inline
+const atermpp::function_symbol& function_symbol_StateConstantMultiplyAlt()
+{
+  static const atermpp::global_function_symbol function_symbol_StateConstantMultiplyAlt("StateConstantMultiplyAlt", 2);
+  return function_symbol_StateConstantMultiplyAlt;
+}
+
 // StateDelay
 inline
 const atermpp::function_symbol& function_symbol_StateDelay()
@@ -934,12 +1110,28 @@ const atermpp::function_symbol& function_symbol_StateImp()
   return function_symbol_StateImp;
 }
 
+// StateInfimum
+inline
+const atermpp::function_symbol& function_symbol_StateInfimum()
+{
+  static const atermpp::global_function_symbol function_symbol_StateInfimum("StateInfimum", 2);
+  return function_symbol_StateInfimum;
+}
+
 // StateMay
 inline
 const atermpp::function_symbol& function_symbol_StateMay()
 {
   static const atermpp::global_function_symbol function_symbol_StateMay("StateMay", 2);
   return function_symbol_StateMay;
+}
+
+// StateMinus
+inline
+const atermpp::function_symbol& function_symbol_StateMinus()
+{
+  static const atermpp::global_function_symbol function_symbol_StateMinus("StateMinus", 1);
+  return function_symbol_StateMinus;
 }
 
 // StateMu
@@ -980,6 +1172,22 @@ const atermpp::function_symbol& function_symbol_StateOr()
 {
   static const atermpp::global_function_symbol function_symbol_StateOr("StateOr", 2);
   return function_symbol_StateOr;
+}
+
+// StatePlus
+inline
+const atermpp::function_symbol& function_symbol_StatePlus()
+{
+  static const atermpp::global_function_symbol function_symbol_StatePlus("StatePlus", 2);
+  return function_symbol_StatePlus;
+}
+
+// StateSupremum
+inline
+const atermpp::function_symbol& function_symbol_StateSupremum()
+{
+  static const atermpp::global_function_symbol function_symbol_StateSupremum("StateSupremum", 2);
+  return function_symbol_StateSupremum;
 }
 
 // StateTrue
@@ -1245,11 +1453,17 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol StateTrue;
   static const atermpp::function_symbol StateFalse;
   static const atermpp::function_symbol StateNot;
+  static const atermpp::function_symbol StateMinus;
   static const atermpp::function_symbol StateAnd;
   static const atermpp::function_symbol StateOr;
   static const atermpp::function_symbol StateImp;
+  static const atermpp::function_symbol StatePlus;
+  static const atermpp::function_symbol StateConstantMultiply;
+  static const atermpp::function_symbol StateConstantMultiplyAlt;
   static const atermpp::function_symbol StateForall;
   static const atermpp::function_symbol StateExists;
+  static const atermpp::function_symbol StateInfimum;
+  static const atermpp::function_symbol StateSupremum;
   static const atermpp::function_symbol StateMust;
   static const atermpp::function_symbol StateMay;
   static const atermpp::function_symbol StateYaled;
@@ -1294,6 +1508,26 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol PBESForall;
   static const atermpp::function_symbol PBESExists;
   static const atermpp::function_symbol PropVarInst;
+  static const atermpp::function_symbol PRES;
+  static const atermpp::function_symbol PREqnSpec;
+  static const atermpp::function_symbol PRInit;
+  static const atermpp::function_symbol PREqn;
+  static const atermpp::function_symbol PRESTrue;
+  static const atermpp::function_symbol PRESFalse;
+  static const atermpp::function_symbol PRESMinus;
+  static const atermpp::function_symbol PRESAnd;
+  static const atermpp::function_symbol PRESOr;
+  static const atermpp::function_symbol PRESImp;
+  static const atermpp::function_symbol PRESPlus;
+  static const atermpp::function_symbol PRESConstantMultiply;
+  static const atermpp::function_symbol PRESConstantMultiplyAlt;
+  static const atermpp::function_symbol PRESInfimum;
+  static const atermpp::function_symbol PRESSupremum;
+  static const atermpp::function_symbol PRESSum;
+  static const atermpp::function_symbol PRESEqInf;
+  static const atermpp::function_symbol PRESEqNInf;
+  static const atermpp::function_symbol PRESCondSm;
+  static const atermpp::function_symbol PRESCondEq;
 //--- end generated variables ---//
 };
 

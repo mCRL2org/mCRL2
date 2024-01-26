@@ -31,9 +31,11 @@ struct state_variable_negator: public state_formulas::state_formula_builder<Deri
   using super::apply;
 
   core::identifier_string m_name;
+  bool m_quantitative;
 
-  state_variable_negator(const core::identifier_string& name)
-    : m_name(name)
+  state_variable_negator(const core::identifier_string& name, bool quantitative)
+    : m_name(name),
+      m_quantitative(quantitative)
   {}
 
   /// \brief Visit variable node.
@@ -44,7 +46,14 @@ struct state_variable_negator: public state_formulas::state_formula_builder<Deri
   {
     if (x.name() == m_name)
     {
-      state_formulas::make_not_(result, x);
+      if (m_quantitative)
+      {
+        state_formulas::make_minus(result, x);
+      }
+      else
+      {
+        state_formulas::make_not_(result, x);
+      }
       return;
     }
     result = x;
@@ -57,10 +66,10 @@ inline
 /// \brief Negates variable instantiations in a state formula with a given name.
 /// \param name The name of the variables that should be negated.
 /// \param x The state formula. 
-state_formula negate_variables(const core::identifier_string& name, const state_formula& x)
+state_formula negate_variables(const core::identifier_string& name, bool quantitative, const state_formula& x)
 {
   state_formula result;
-  core::make_apply_builder_arg1<detail::state_variable_negator>(name).apply(result, x);
+  core::make_apply_builder_arg2<detail::state_variable_negator>(name, quantitative).apply(result, x);
   return result;
 }
 

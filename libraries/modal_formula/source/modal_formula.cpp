@@ -89,20 +89,26 @@ namespace state_formulas
 
 //--- start generated state_formulas overloads ---//
 std::string pp(const state_formulas::and_& x) { return state_formulas::pp< state_formulas::and_ >(x); }
+std::string pp(const state_formulas::const_multiply& x) { return state_formulas::pp< state_formulas::const_multiply >(x); }
+std::string pp(const state_formulas::const_multiply_alt& x) { return state_formulas::pp< state_formulas::const_multiply_alt >(x); }
 std::string pp(const state_formulas::delay& x) { return state_formulas::pp< state_formulas::delay >(x); }
 std::string pp(const state_formulas::delay_timed& x) { return state_formulas::pp< state_formulas::delay_timed >(x); }
 std::string pp(const state_formulas::exists& x) { return state_formulas::pp< state_formulas::exists >(x); }
 std::string pp(const state_formulas::false_& x) { return state_formulas::pp< state_formulas::false_ >(x); }
 std::string pp(const state_formulas::forall& x) { return state_formulas::pp< state_formulas::forall >(x); }
 std::string pp(const state_formulas::imp& x) { return state_formulas::pp< state_formulas::imp >(x); }
+std::string pp(const state_formulas::infimum& x) { return state_formulas::pp< state_formulas::infimum >(x); }
 std::string pp(const state_formulas::may& x) { return state_formulas::pp< state_formulas::may >(x); }
+std::string pp(const state_formulas::minus& x) { return state_formulas::pp< state_formulas::minus >(x); }
 std::string pp(const state_formulas::mu& x) { return state_formulas::pp< state_formulas::mu >(x); }
 std::string pp(const state_formulas::must& x) { return state_formulas::pp< state_formulas::must >(x); }
 std::string pp(const state_formulas::not_& x) { return state_formulas::pp< state_formulas::not_ >(x); }
 std::string pp(const state_formulas::nu& x) { return state_formulas::pp< state_formulas::nu >(x); }
 std::string pp(const state_formulas::or_& x) { return state_formulas::pp< state_formulas::or_ >(x); }
+std::string pp(const state_formulas::plus& x) { return state_formulas::pp< state_formulas::plus >(x); }
 std::string pp(const state_formulas::state_formula& x) { return state_formulas::pp< state_formulas::state_formula >(x); }
 std::string pp(const state_formulas::state_formula_specification& x) { return state_formulas::pp< state_formulas::state_formula_specification >(x); }
+std::string pp(const state_formulas::supremum& x) { return state_formulas::pp< state_formulas::supremum >(x); }
 std::string pp(const state_formulas::true_& x) { return state_formulas::pp< state_formulas::true_ >(x); }
 std::string pp(const state_formulas::variable& x) { return state_formulas::pp< state_formulas::variable >(x); }
 std::string pp(const state_formulas::yaled& x) { return state_formulas::pp< state_formulas::yaled >(x); }
@@ -147,34 +153,34 @@ state_formula_specification parse_state_formula_specification(const std::string&
 
 namespace algorithms {
 
-state_formula parse_state_formula(std::istream& in, lps::specification& lpsspec)
+state_formula parse_state_formula(std::istream& in, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative)
 {
-  return state_formulas::parse_state_formula(in, lpsspec);
+  return state_formulas::parse_state_formula(in, lpsspec, formula_is_quantitative);
 }
 
-state_formula parse_state_formula(const std::string& text, lps::specification& lpsspec)
+state_formula parse_state_formula(const std::string& text, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative)
 {
-  return state_formulas::parse_state_formula(text, lpsspec);
+  return state_formulas::parse_state_formula(text, lpsspec, formula_is_quantitative);
 }
 
-state_formula_specification parse_state_formula_specification(std::istream& in)
+state_formula_specification parse_state_formula_specification(std::istream& in, const bool formula_is_quantitative)
 {
-  return state_formulas::parse_state_formula_specification(in);
+  return state_formulas::parse_state_formula_specification(in, formula_is_quantitative);
 }
 
-state_formula_specification parse_state_formula_specification(const std::string& text)
+state_formula_specification parse_state_formula_specification(const std::string& text, const bool formula_is_quantitative)
 {
-  return state_formulas::parse_state_formula_specification(text);
+  return state_formulas::parse_state_formula_specification(text, formula_is_quantitative);
 }
 
-state_formula_specification parse_state_formula_specification(std::istream& in, lps::specification& lpsspec)
+state_formula_specification parse_state_formula_specification(std::istream& in, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative)
 {
-  return state_formulas::parse_state_formula_specification(in, lpsspec);
+  return state_formulas::parse_state_formula_specification(in, lpsspec, formula_is_quantitative);
 }
 
-state_formula_specification parse_state_formula_specification(const std::string& text, lps::specification& lpsspec)
+state_formula_specification parse_state_formula_specification(const std::string& text, lps::stochastic_specification& lpsspec, const bool formula_is_quantitative)
 {
-  return state_formulas::parse_state_formula_specification(text, lpsspec);
+  return state_formulas::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
 }
 
 bool is_monotonous(const state_formula& f)
@@ -182,9 +188,9 @@ bool is_monotonous(const state_formula& f)
   return state_formulas::is_monotonous(f);
 }
 
-state_formula normalize(const state_formula& x)
+state_formula normalize(const state_formula& x, bool quantitative=false, bool negated=false)
 {
-  return state_formulas::normalize(x);
+  return state_formulas::normalize(x, quantitative, negated);
 }
 
 bool is_normalized(const state_formula& x)

@@ -461,6 +461,7 @@ def generate_rewrite_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/rewrite.h', 'regular_formulas', 'rewrite', REWRITE_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/rewrite.h', 'state_formulas'  , 'rewrite', REWRITE_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/rewrite.h'                  , 'pbes_system'     , 'rewrite', REWRITE_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres/rewrite.h'                  , 'pres_system'     , 'rewrite', REWRITE_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/rewrite.h'            , 'process'         , 'rewrite', REWRITE_TEXT) and result
     return result
 
@@ -472,6 +473,7 @@ def generate_replace_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'regular_formulas', 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'state_formulas'  , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/replace.h'                  , 'pbes_system'     , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres/replace.h'                  , 'pres_system'     , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace.h'            , 'process'         , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
     return result
 
@@ -483,6 +485,7 @@ def generate_replace_capture_avoiding_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding.h', 'regular_formulas', 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding.h', 'state_formulas'  , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/replace_capture_avoiding.h'                  , 'pbes_system'     , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres/replace_capture_avoiding.h'                  , 'pres_system'     , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace_capture_avoiding.h'            , 'process'         , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     return result
 
@@ -494,6 +497,7 @@ def generate_replace_capture_avoiding_with_identifier_generator_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding_with_an_identifier_generator.h', 'regular_formulas', 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding_with_an_identifier_generator.h', 'state_formulas'  , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/replace_capture_avoiding_with_an_identifier_generator.h'                  , 'pbes_system'     , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres/replace_capture_avoiding_with_an_identifier_generator.h'                  , 'pres_system'     , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace_capture_avoiding_with_an_identifier_generator.h'            , 'process'         , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
     return result
 
@@ -505,6 +509,7 @@ def generate_find_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/find.h', 'regular_formulas', 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/find.h', 'state_formulas'  , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/find.h'                  , 'pbes_system'     , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres/find.h'                  , 'pres_system'     , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/find.h'            , 'process'         , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
     return result
 

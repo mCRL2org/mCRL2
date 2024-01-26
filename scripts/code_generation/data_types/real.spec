@@ -76,6 +76,8 @@ eqn  ==(@cReal(x, p), @cReal(y, q))  =  ==(*(x, @cInt(@cNat(q))), *(y, @cInt(@cN
      +(@cReal(x, p), @cReal(y, q))  =  @redfrac(+(*(x, @cInt(@cNat(q))), *(y, @cInt(@cNat(p)))), @cInt(@cNat(*(p, q))));
      -(@cReal(x, p), @cReal(y, q))  =  @redfrac(-(*(x, @cInt(@cNat(q))), *(y, @cInt(@cNat(p)))), @cInt(@cNat(*(p, q))));
      *(@cReal(x, p), @cReal(y, q))  =  @redfrac(*(x, y), @cInt(@cNat(*(p, q))));
+     *(r, @cReal(@cInt(@c0),p)) = @cReal(@cInt(@c0), @c1);
+     *(@cReal(@cInt(@c0),p), r) = @cReal(@cInt(@c0), @c1);
      !=(y, @cInt(@c0))  ->  /(@cReal(x, p), @cReal(y, q))  =  @redfrac(*(x, @cInt(@cNat(q))), *(y, @cInt(@cNat(p))));
      /(p, q)  =  @redfrac(@cInt(@cNat(p)), @cInt(@cNat(q)));
      !=(n, @c0)  ->  /(m, n)  =  @redfrac(@cInt(m), @cInt(n));

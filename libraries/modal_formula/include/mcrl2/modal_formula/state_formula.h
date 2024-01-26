@@ -70,11 +70,17 @@ typedef std::vector<state_formula>    state_formula_vector;
 inline bool is_true(const atermpp::aterm_appl& x);
 inline bool is_false(const atermpp::aterm_appl& x);
 inline bool is_not(const atermpp::aterm_appl& x);
+inline bool is_minus(const atermpp::aterm_appl& x);
 inline bool is_and(const atermpp::aterm_appl& x);
 inline bool is_or(const atermpp::aterm_appl& x);
 inline bool is_imp(const atermpp::aterm_appl& x);
+inline bool is_plus(const atermpp::aterm_appl& x);
+inline bool is_const_multiply(const atermpp::aterm_appl& x);
+inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
 inline bool is_forall(const atermpp::aterm_appl& x);
 inline bool is_exists(const atermpp::aterm_appl& x);
+inline bool is_infimum(const atermpp::aterm_appl& x);
+inline bool is_supremum(const atermpp::aterm_appl& x);
 inline bool is_must(const atermpp::aterm_appl& x);
 inline bool is_may(const atermpp::aterm_appl& x);
 inline bool is_yaled(const atermpp::aterm_appl& x);
@@ -96,11 +102,17 @@ bool is_state_formula(const atermpp::aterm_appl& x)
          state_formulas::is_true(x) ||
          state_formulas::is_false(x) ||
          state_formulas::is_not(x) ||
+         state_formulas::is_minus(x) ||
          state_formulas::is_and(x) ||
          state_formulas::is_or(x) ||
          state_formulas::is_imp(x) ||
+         state_formulas::is_plus(x) ||
+         state_formulas::is_const_multiply(x) ||
+         state_formulas::is_const_multiply_alt(x) ||
          state_formulas::is_forall(x) ||
          state_formulas::is_exists(x) ||
+         state_formulas::is_infimum(x) ||
+         state_formulas::is_supremum(x) ||
          state_formulas::is_must(x) ||
          state_formulas::is_may(x) ||
          state_formulas::is_yaled(x) ||
@@ -304,6 +316,77 @@ std::ostream& operator<<(std::ostream& out, const not_& x)
 
 /// \\brief swap overload
 inline void swap(not_& t1, not_& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The minus operator for state formulas
+class minus: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    minus()
+      : state_formula(core::detail::default_values::StateMinus)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit minus(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateMinus(*this));
+    }
+
+    /// \\brief Constructor.
+    explicit minus(const state_formula& operand)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMinus(), operand))
+    {}
+
+    /// Move semantics
+    minus(const minus&) noexcept = default;
+    minus(minus&&) noexcept = default;
+    minus& operator=(const minus&) noexcept = default;
+    minus& operator=(minus&&) noexcept = default;
+
+    const state_formula& operand() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[0]);
+    }
+};
+
+/// \\brief Make_minus constructs a new term into a given address.
+/// \\ \param t The reference into which the new minus is constructed. 
+template <class... ARGUMENTS>
+inline void make_minus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateMinus(), args...);
+}
+
+/// \\brief Test for a minus expression
+/// \\param x A term
+/// \\return True if \\a x is a minus expression
+inline
+bool is_minus(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StateMinus;
+}
+
+// prototype declaration
+std::string pp(const minus& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const minus& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(minus& t1, minus& t2)
 {
   t1.swap(t2);
 }
@@ -537,6 +620,234 @@ inline void swap(imp& t1, imp& t2)
 }
 
 
+/// \\brief The plus operator for state formulas with values
+class plus: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    plus()
+      : state_formula(core::detail::default_values::StatePlus)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit plus(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StatePlus(*this));
+    }
+
+    /// \\brief Constructor.
+    plus(const state_formula& left, const state_formula& right)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StatePlus(), left, right))
+    {}
+
+    /// Move semantics
+    plus(const plus&) noexcept = default;
+    plus(plus&&) noexcept = default;
+    plus& operator=(const plus&) noexcept = default;
+    plus& operator=(plus&&) noexcept = default;
+
+    const state_formula& left() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[0]);
+    }
+
+    const state_formula& right() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[1]);
+    }
+};
+
+/// \\brief Make_plus constructs a new term into a given address.
+/// \\ \param t The reference into which the new plus is constructed. 
+template <class... ARGUMENTS>
+inline void make_plus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StatePlus(), args...);
+}
+
+/// \\brief Test for a plus expression
+/// \\param x A term
+/// \\return True if \\a x is a plus expression
+inline
+bool is_plus(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StatePlus;
+}
+
+// prototype declaration
+std::string pp(const plus& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const plus& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(plus& t1, plus& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The multiply operator for state formulas with values
+class const_multiply: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    const_multiply()
+      : state_formula(core::detail::default_values::StateConstantMultiply)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit const_multiply(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateConstantMultiply(*this));
+    }
+
+    /// \\brief Constructor.
+    const_multiply(const data::data_expression& left, const state_formula& right)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateConstantMultiply(), left, right))
+    {}
+
+    /// Move semantics
+    const_multiply(const const_multiply&) noexcept = default;
+    const_multiply(const_multiply&&) noexcept = default;
+    const_multiply& operator=(const const_multiply&) noexcept = default;
+    const_multiply& operator=(const_multiply&&) noexcept = default;
+
+    const data::data_expression& left() const
+    {
+      return atermpp::down_cast<data::data_expression>((*this)[0]);
+    }
+
+    const state_formula& right() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[1]);
+    }
+};
+
+/// \\brief Make_const_multiply constructs a new term into a given address.
+/// \\ \param t The reference into which the new const_multiply is constructed. 
+template <class... ARGUMENTS>
+inline void make_const_multiply(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateConstantMultiply(), args...);
+}
+
+/// \\brief Test for a const_multiply expression
+/// \\param x A term
+/// \\return True if \\a x is a const_multiply expression
+inline
+bool is_const_multiply(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StateConstantMultiply;
+}
+
+// prototype declaration
+std::string pp(const const_multiply& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const const_multiply& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(const_multiply& t1, const_multiply& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The multiply operator for state formulas with values
+class const_multiply_alt: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    const_multiply_alt()
+      : state_formula(core::detail::default_values::StateConstantMultiplyAlt)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit const_multiply_alt(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateConstantMultiplyAlt(*this));
+    }
+
+    /// \\brief Constructor.
+    const_multiply_alt(const state_formula& left, const data::data_expression& right)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateConstantMultiplyAlt(), left, right))
+    {}
+
+    /// Move semantics
+    const_multiply_alt(const const_multiply_alt&) noexcept = default;
+    const_multiply_alt(const_multiply_alt&&) noexcept = default;
+    const_multiply_alt& operator=(const const_multiply_alt&) noexcept = default;
+    const_multiply_alt& operator=(const_multiply_alt&&) noexcept = default;
+
+    const state_formula& left() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[0]);
+    }
+
+    const data::data_expression& right() const
+    {
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
+    }
+};
+
+/// \\brief Make_const_multiply_alt constructs a new term into a given address.
+/// \\ \param t The reference into which the new const_multiply_alt is constructed. 
+template <class... ARGUMENTS>
+inline void make_const_multiply_alt(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateConstantMultiplyAlt(), args...);
+}
+
+/// \\brief Test for a const_multiply_alt expression
+/// \\param x A term
+/// \\return True if \\a x is a const_multiply_alt expression
+inline
+bool is_const_multiply_alt(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StateConstantMultiplyAlt;
+}
+
+// prototype declaration
+std::string pp(const const_multiply_alt& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const const_multiply_alt& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(const_multiply_alt& t1, const_multiply_alt& t2)
+{
+  t1.swap(t2);
+}
+
+
 /// \\brief The universal quantification operator for state formulas
 class forall: public state_formula
 {
@@ -684,6 +995,158 @@ std::ostream& operator<<(std::ostream& out, const exists& x)
 
 /// \\brief swap overload
 inline void swap(exists& t1, exists& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The infimum over a data type for state formulas
+class infimum: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    infimum()
+      : state_formula(core::detail::default_values::StateInfimum)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit infimum(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateInfimum(*this));
+    }
+
+    /// \\brief Constructor.
+    infimum(const data::variable_list& variables, const state_formula& body)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateInfimum(), variables, body))
+    {}
+
+    /// Move semantics
+    infimum(const infimum&) noexcept = default;
+    infimum(infimum&&) noexcept = default;
+    infimum& operator=(const infimum&) noexcept = default;
+    infimum& operator=(infimum&&) noexcept = default;
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const state_formula& body() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[1]);
+    }
+};
+
+/// \\brief Make_infimum constructs a new term into a given address.
+/// \\ \param t The reference into which the new infimum is constructed. 
+template <class... ARGUMENTS>
+inline void make_infimum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateInfimum(), args...);
+}
+
+/// \\brief Test for a infimum expression
+/// \\param x A term
+/// \\return True if \\a x is a infimum expression
+inline
+bool is_infimum(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StateInfimum;
+}
+
+// prototype declaration
+std::string pp(const infimum& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const infimum& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(infimum& t1, infimum& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The supremum over a data type for state formulas
+class supremum: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    supremum()
+      : state_formula(core::detail::default_values::StateSupremum)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit supremum(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateSupremum(*this));
+    }
+
+    /// \\brief Constructor.
+    supremum(const data::variable_list& variables, const state_formula& body)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateSupremum(), variables, body))
+    {}
+
+    /// Move semantics
+    supremum(const supremum&) noexcept = default;
+    supremum(supremum&&) noexcept = default;
+    supremum& operator=(const supremum&) noexcept = default;
+    supremum& operator=(supremum&&) noexcept = default;
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const state_formula& body() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[1]);
+    }
+};
+
+/// \\brief Make_supremum constructs a new term into a given address.
+/// \\ \param t The reference into which the new supremum is constructed. 
+template <class... ARGUMENTS>
+inline void make_supremum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateSupremum(), args...);
+}
+
+/// \\brief Test for a supremum expression
+/// \\param x A term
+/// \\return True if \\a x is a supremum expression
+inline
+bool is_supremum(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StateSupremum;
+}
+
+// prototype declaration
+std::string pp(const supremum& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const supremum& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(supremum& t1, supremum& t2)
 {
   t1.swap(t2);
 }

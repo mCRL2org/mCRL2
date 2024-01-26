@@ -1,0 +1,8 @@
+% This formula determines what the probability is of tossing at least one head
+% in K coin tosses.
+%
+% Tim Willemse, November 2023
+
+map K:Nat;
+eqn K = 4;
+form mu X(n:Nat = 0). val(0) || ( [head]val(1) && ( val(if(n >= K, 0, 1) )*[tail]X(n+1) ) );

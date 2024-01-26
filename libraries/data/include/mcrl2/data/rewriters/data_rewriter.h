@@ -55,6 +55,13 @@ struct add_data_rewriter: public Builder<Derived>
   {
     return data_rewrite(x, R, sigma);
   }
+
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
+  {
+    result = data_rewrite(x, R, sigma);
+  }
+
 };
 
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>

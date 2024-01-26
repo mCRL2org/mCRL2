@@ -37,6 +37,7 @@ std::string pp(const lps::stochastic_process_initializer& x) { return lps::pp< l
 std::string pp(const lps::stochastic_specification& x) { return lps::pp< lps::stochastic_specification >(x); }
 lps::multi_action normalize_sorts(const lps::multi_action& x, const data::sort_specification& sortspec) { return lps::normalize_sorts< lps::multi_action >(x, sortspec); }
 void normalize_sorts(lps::specification& x, const data::sort_specification& /* sortspec */) { lps::normalize_sorts< lps::specification >(x, x.data()); }
+void normalize_sorts(lps::stochastic_specification& x, const data::sort_specification& /* sortspec */) { lps::normalize_sorts< lps::stochastic_specification >(x, x.data()); }
 lps::multi_action translate_user_notation(const lps::multi_action& x) { return lps::translate_user_notation< lps::multi_action >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x) { return lps::find_sort_expressions< lps::specification >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::stochastic_specification& x) { return lps::find_sort_expressions< lps::stochastic_specification >(x); }
@@ -61,6 +62,7 @@ std::set<core::identifier_string> find_identifiers(const lps::stochastic_specifi
 std::set<process::action_label> find_action_labels(const lps::linear_process& x) { return lps::find_action_labels< lps::linear_process >(x); }
 std::set<process::action_label> find_action_labels(const lps::process_initializer& x) { return lps::find_action_labels< lps::process_initializer >(x); }
 std::set<process::action_label> find_action_labels(const lps::specification& x) { return lps::find_action_labels< lps::specification >(x); }
+std::set<process::action_label> find_action_labels(const lps::stochastic_specification& x) { return lps::find_action_labels< lps::stochastic_specification >(x); }
 //--- end generated lps overloads ---//
 
 data::data_expression_list action_summand::next_state(const data::variable_list& process_parameters) const

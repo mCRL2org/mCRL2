@@ -29,6 +29,7 @@ std::set<core::identifier_string> find_identifiers(const lps::stochastic_specifi
 
 // template function overloads
 bool check_well_typedness(const stochastic_specification& x);
+void normalize_sorts(stochastic_specification& x, const data::sort_specification& sortspec);
 
 /// \brief Linear process specification.
 class stochastic_specification: public specification_base<stochastic_linear_process, stochastic_process_initializer>
@@ -118,7 +119,7 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
 
   if (spec.initial_process().distribution().is_defined())
   {
-    throw mcrl2::runtime_error("The initial state has non-empty stochastic distribution " + pp(spec.initial_process().distribution()) + ".\n" + 
+    throw mcrl2::runtime_error("The initial state has a non-empty stochastic distribution " + pp(spec.initial_process().distribution()) + ".\n" + 
                                "Transformation of this stochastic lps to a plain lps fails.");
   }
   result.initial_process() = process_initializer(spec.initial_process().expressions());
@@ -133,7 +134,7 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
   {
     if (s.distribution().is_defined())
     {
-      throw mcrl2::runtime_error("There is an action summand has non-empty stochastic distribution " + pp(s.distribution()) + ".\n" + 
+      throw mcrl2::runtime_error("There is an action summand that has a non-empty stochastic distribution " + pp(s.distribution()) + ".\n" + 
                                  "Transformation of this stochastic lps to a plain lps fails.");;
     }
     v.push_back(s);

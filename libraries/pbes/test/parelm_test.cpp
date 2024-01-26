@@ -39,7 +39,7 @@ const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 BOOST_AUTO_TEST_CASE(test_parelm1)
 {
   lps::specification spec = lps::remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
-  state_formulas::state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec, false);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
   pbes_parelm_algorithm algorithm;

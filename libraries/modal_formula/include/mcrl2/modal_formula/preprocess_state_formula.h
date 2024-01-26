@@ -350,6 +350,7 @@ inline
 state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula,
                                                        const std::set<core::identifier_string>& context_ids,
                                                        bool preprocess_modal_operators,
+                                                       bool quantitative = false, 
                                                        bool warn_for_modal_operator_nesting = true
                                                       )
 {
@@ -364,11 +365,11 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   {
     mCRL2log(log::info) <<
       "Warning: detected nested modal operators. This may result in a long execution time.\n"
-      "Use the option -m or insert dummy fix point operators in between manually to speed\n"
-      "up the transformation." << std::endl;
+      "Use the option -m (for lps2pbes/lps2pres), -p (for lts2pbes/lts2pres) or insert dummy fix \n"
+      "point operators in between manually to speed up the transformation." << std::endl;
   }
 
-  mCRL2log(log::debug) << "formula before preprocessing: " << f << std::endl;
+  mCRL2log(log::debug) << "Formula before preprocessing: " << f << ".\n"; 
 
   // rename data variables in f, to prevent name clashes with data variables in the context
   std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
@@ -380,7 +381,7 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   xyz_generator.add_identifiers(state_formulas::find_identifiers(f));
   f = rename_predicate_variables(f, xyz_generator);
 
-  mCRL2log(log::debug) << "formula after renaming variables: " << f << std::endl;
+  mCRL2log(log::debug) << "Formula after renaming variables: " << f << ".\n"; 
 
   // add dummy fixpoints between nested modal operators
   if (preprocess_modal_operators)
@@ -389,15 +390,15 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
     f = state_formulas::preprocess_nested_modal_operators(f);
     if (f0 != f)
     {
-      mCRL2log(log::debug) << "formula after inserting dummy fix points between modal operators:  " << f << std::endl;
+      mCRL2log(log::debug) << "Formula after inserting dummy fix points between modal operators:  " << f << ".\n"; 
     }
   }
 
   // remove occurrences of ! and =>
   if (!state_formulas::is_normalized(f))
   {
-    f = state_formulas::normalize(f);
-    mCRL2log(log::debug) << "formula after normalization:  " << f << std::endl;
+    f = state_formulas::normalize(f, quantitative); // true indicates that the formula is quantitative.
+    mCRL2log(log::debug) << "Formula after normalization:  " << f << ".\n"; 
     assert(state_formulas::is_normalized(f));
   }
 
@@ -408,7 +409,7 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
     generator.add_identifiers(state_formulas::find_identifiers(f));
     core::identifier_string X = generator("X");
     f = state_formulas::nu(X, data::assignment_list(), f);
-    mCRL2log(log::debug) << "formula after wrapping the formula inside a 'nu':  " << f << std::endl;
+    mCRL2log(log::debug) << "Formula after wrapping the formula inside a 'nu':  " << f << ".\n"; 
   }
 
   // resolve name clashes like mu X(n: Nat). forall n: Nat

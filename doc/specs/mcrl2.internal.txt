@@ -219,7 +219,7 @@
                 ::= LinearProcessInit(<DataExpr>*, <Distribution>)
 
 
-//Mu-calculus formulas
+//Mu-calculus formulas (including the plus and multiplication with constants)
 //--------------------
 
 //state formula
@@ -227,11 +227,17 @@
                  | StateTrue
                  | StateFalse
                  | StateNot(<StateFrm>)
+                 | StateMinus(<StateFrm>)
                  | StateAnd(<StateFrm>, <StateFrm>)
                  | StateOr(<StateFrm>, <StateFrm>)
                  | StateImp(<StateFrm>, <StateFrm>)
+                 | StatePlus(<StateFrm>, <StateFrm>)
+                 | StateConstantMultiply(<DataExpr>, <StateFrm>)
+                 | StateConstantMultiplyAlt(<StateFrm>, <DataExpr>)
                  | StateForall(<DataVarId>+, <StateFrm>)
                  | StateExists(<DataVarId>+, <StateFrm>)
+                 | StateInfimum(<DataVarId>+, <StateFrm>)
+                 | StateSupremum(<DataVarId>+, <StateFrm>)
                  | StateMust(<RegFrm>, <StateFrm>)
                  | StateMay(<RegFrm>, <StateFrm>)
                  | StateYaled
@@ -330,4 +336,40 @@
 
 //propositional variable instantiation
 <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
+
+//PRES's
+//------
+
+//PRES specification
+<PRES>         ::= PRES(<DataSpec>, <GlobVarSpec>, <PREqnSpec>, <PRInit>)
+
+//parameterized real equation specification
+<PREqnSpec>    ::= PREqnSpec(<PREqn>*)
+
+//parameterized real initialization
+<PRInit>       ::= PRInit(<PropVarInst>)
+
+//parameterized boolean equation
+<PREqn>        ::= PREqn(<FixPoint>, <PropVarDecl>, <PRExpr>)
+
+//parameterized real expression
+<PRExpr>       ::= <DataExpr>
+                 | PRESTrue
+                 | PRESFalse
+                 | PRESMinus(<PRExpr>)
+                 | PRESAnd(<PRExpr>, <PRExpr>)
+                 | PRESOr(<PRExpr>, <PRExpr>)
+                 | PRESImp(<PRExpr>, <PRExpr>)
+                 | PRESPlus(<PRExpr>, <PRExpr>)
+                 | PRESConstantMultiply(<DataExpr>, <PRExpr>)
+                 | PRESConstantMultiplyAlt(<PRExpr>, <DataExpr>)
+                 | PRESInfimum(<DataVarId>+, <PRExpr>)
+                 | PRESSupremum(<DataVarId>+, <PRExpr>)
+                 | PRESSum(<DataVarId>+, <PRExpr>)
+                 | PRESEqInf(<PRExpr>)
+                 | PRESEqNInf(<PRExpr>)
+                 | PRESCondSm(<PRExpr>,<PRExpr>,<PRExpr>)
+                 | PRESCondEq(<PRExpr>,<PRExpr>,<PRExpr>)
+                 | <PropVarInst>
+                 | <UntypedDataParameter>
 

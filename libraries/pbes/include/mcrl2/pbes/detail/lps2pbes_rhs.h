@@ -26,12 +26,12 @@ namespace detail {
 struct lps2pbes_parameters
 {
   const state_formulas::state_formula& phi0; // the original formula
-  const lps::linear_process& lps;
+  const lps::stochastic_linear_process& lps;
   data::set_identifier_generator& id_generator;
   const data::variable& T;
 
   lps2pbes_parameters(const state_formulas::state_formula& phi0_,
-                      const lps::linear_process& lps_,
+                      const lps::stochastic_linear_process& lps_,
                       data::set_identifier_generator& id_generator_,
                       const data::variable& T_
                      )
@@ -127,7 +127,7 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
   }
 
   lps2pbes_counter_example_parameters(const state_formulas::state_formula& phi0,
-                                      const lps::linear_process& lps,
+                                      const lps::stochastic_linear_process& lps,
                                       data::set_identifier_generator& id_generator,
                                       const data::variable& T
                                      )

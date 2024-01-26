@@ -24,7 +24,7 @@ namespace pbes_system {
 namespace detail
 {
 /// \brief Prints a warning if formula contains an action that is not used in lpsspec.
-inline void check_lps2pbes_actions(const state_formulas::state_formula& formula, const lps::specification& lpsspec)
+inline void check_lps2pbes_actions(const state_formulas::state_formula& formula, const lps::stochastic_specification& lpsspec)
 {
   std::set<process::action_label> used_lps_actions = lps::find_action_labels(lpsspec.process());
   std::set<process::action_label> used_state_formula_actions = state_formulas::find_action_labels(formula);
@@ -63,7 +63,7 @@ void lps2pbes(const std::string& input_filename,
   {
     mCRL2log(log::verbose) << "reading LPS from file '" <<  input_filename << "'..." << std::endl;
   }
-  lps::specification lpsspec;
+  lps::stochastic_specification lpsspec;
   load_lps(lpsspec, input_filename);
   mCRL2log(log::verbose) << "reading input from file '" <<  formula_filename << "'..." << std::endl;
   std::ifstream from(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
@@ -72,7 +72,8 @@ void lps2pbes(const std::string& input_filename,
     throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
   }
   std::string text = utilities::read_text(from);
-  state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec);
+  const bool formula_is_quantitative = false;
+  state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
   detail::check_lps2pbes_actions(formspec.formula(), lpsspec);
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
   pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);

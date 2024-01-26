@@ -99,24 +99,30 @@ untyped_data_parameter(const core::identifier_string& name, const data_expressio
 '''
 
 STATE_FORMULA_CLASSES = r'''
-state_formula()                                                                                                 : public atermpp::aterm_appl           | XICU | StateFrm        | A state formula
-true_()                                                                                                         : public state_formulas::state_formula | EI   | StateTrue       | The value true for state formulas
-false_()                                                                                                        : public state_formulas::state_formula | EI   | StateFalse      | The value false for state formulas
-not_(const state_formula& operand)                                                                              : public state_formulas::state_formula | EI   | StateNot        | The not operator for state formulas
-and_(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EI   | StateAnd        | The and operator for state formulas
-or_(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateOr         | The or operator for state formulas
-imp(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateImp        | The implication operator for state formulas
-forall(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateForall     | The universal quantification operator for state formulas
-exists(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateExists     | The existential quantification operator for state formulas
-must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            : public state_formulas::state_formula | EI   | StateMust       | The must operator for state formulas
-may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             : public state_formulas::state_formula | EI   | StateMay        | The may operator for state formulas
-yaled()                                                                                                         : public state_formulas::state_formula | EI   | StateYaled      | The yaled operator for state formulas
-yaled_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateYaledTimed | The timed yaled operator for state formulas
-delay()                                                                                                         : public state_formulas::state_formula | EI   | StateDelay      | The delay operator for state formulas
-delay_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateDelayTimed | The timed delay operator for state formulas
-variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      : public state_formulas::state_formula | EI   | StateVar        | The state formula variable
-nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateNu         | The nu operator for state formulas
-mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateMu         | The mu operator for state formulas
+state_formula()                                                                                                 : public atermpp::aterm_appl           | XICU | StateFrm                 | A state formula
+true_()                                                                                                         : public state_formulas::state_formula | EI   | StateTrue                | The value true for state formulas
+false_()                                                                                                        : public state_formulas::state_formula | EI   | StateFalse               | The value false for state formulas
+not_(const state_formula& operand)                                                                              : public state_formulas::state_formula | EI   | StateNot                 | The not operator for state formulas
+minus(const state_formula& operand)                                                                             : public state_formulas::state_formula | EI   | StateMinus               | The minus operator for state formulas
+and_(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EI   | StateAnd                 | The and operator for state formulas
+or_(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateOr                  | The or operator for state formulas
+imp(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateImp                 | The implication operator for state formulas
+plus(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EI   | StatePlus                | The plus operator for state formulas with values
+const_multiply(const data::data_expression& left, const state_formula& right)                                   : public state_formulas::state_formula | EI   | StateConstantMultiply    | The multiply operator for state formulas with values
+const_multiply_alt(const state_formula& left, const data::data_expression& right)                               : public state_formulas::state_formula | EI   | StateConstantMultiplyAlt | The multiply operator for state formulas with values
+forall(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateForall              | The universal quantification operator for state formulas
+exists(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateExists              | The existential quantification operator for state formulas
+infimum(const data::variable_list& variables, const state_formula& body)                                        : public state_formulas::state_formula | EI   | StateInfimum             | The infimum over a data type for state formulas
+supremum(const data::variable_list& variables, const state_formula& body)                                       : public state_formulas::state_formula | EI   | StateSupremum            | The supremum over a data type for state formulas
+must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            : public state_formulas::state_formula | EI   | StateMust                | The must operator for state formulas
+may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             : public state_formulas::state_formula | EI   | StateMay                 | The may operator for state formulas
+yaled()                                                                                                         : public state_formulas::state_formula | EI   | StateYaled               | The yaled operator for state formulas
+yaled_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateYaledTimed          | The timed yaled operator for state formulas
+delay()                                                                                                         : public state_formulas::state_formula | EI   | StateDelay               | The delay operator for state formulas
+delay_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateDelayTimed          | The timed delay operator for state formulas
+variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      : public state_formulas::state_formula | EI   | StateVar                 | The state formula variable
+nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateNu                  | The nu operator for state formulas
+mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateMu                  | The mu operator for state formulas
 '''
 
 REGULAR_FORMULA_CLASSES = r'''
@@ -217,12 +223,36 @@ forall(const data::variable_list& variables, const pbes_expression& body)       
 exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESExists        | The existential quantification operator for pbes expressions
 '''
 
+PRES_CLASSES = r'''
+pres_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pres_expression& formula)                                                                                                                                      | SMC | PREqn       | A PRES equation
+pres(const data::data_specification& data, const std::set<data::variable>& global_variables, const std::vector<pres_system::pres_equation>& equations, const propositional_variable_instantiation& initial_state)                                         | SMW | PRES        | A PRES
+'''
+
+PRES_EXPRESSION_CLASSES = r'''
+pres_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PRExpr                  | A pres expression
+propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pres_system::pres_expression | ECIUs | PropVarInst             | A propositional variable instantiation
+minus(const pres_expression& operand)                                                                                   : public pres_system::pres_expression | EI    | PRESMinus               | The not operator for pres expressions
+and_(const pres_expression& left, const pres_expression& right)                                                         : public pres_system::pres_expression | EI    | PRESAnd                 | The and operator for pres expressions
+or_(const pres_expression& left, const pres_expression& right)                                                          : public pres_system::pres_expression | EI    | PRESOr                  | The or operator for pres expressions
+imp(const pres_expression& left, const pres_expression& right)                                                          : public pres_system::pres_expression | EI    | PRESImp                 | The implication operator for pres expressions
+plus(const pres_expression& left, const pres_expression& right)                                                         : public pres_system::pres_expression | EI    | PRESPlus                | The addition operator for pres expressions
+const_multiply(const data::data_expression& left, const pres_expression& right)                                         : public pres_system::pres_expression | EI    | PRESConstantMultiply    | The multiplication with a positive constant with the constant at the left.
+const_multiply_alt(const pres_expression& left, const data::data_expression& right)                                     : public pres_system::pres_expression | EI    | PRESConstantMultiplyAlt | The multiplication with a positive constant with the constant at the right.
+infimum(const data::variable_list& variables, const pres_expression& body)                                              : public pres_system::pres_expression | EI    | PRESInfimum             | The infimum over a data type for pres expressions
+supremum(const data::variable_list& variables, const pres_expression& body)                                             : public pres_system::pres_expression | EI    | PRESSupremum            | The supremeum over a data type for pres expressions
+sum(const data::variable_list& variables, const pres_expression& body)                                                  : public pres_system::pres_expression | EI    | PRESSum                 | The generic sum operator for pres expressions
+eqinf(const pres_expression& operand)                                                                                   : public pres_system::pres_expression | EI    | PRESEqInf               | The indicator whether the argument is infinite
+eqninf(const pres_expression& operand)                                                                                  : public pres_system::pres_expression | EI    | PRESEqNInf              | The indicator whether the argument is -infinite
+condsm(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)                           : public pres_system::pres_expression | EI    | PRESCondSm              | Conditional operator with condition smaller than 0
+condeq(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)                           : public pres_system::pres_expression | EI    | PRESCondEq              | Conditional operator with condition smaller than or equal to 0
+'''
 
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
   'state_formulas::state_formula'     : [ 'data::data_expression', 'data::untyped_data_parameter' ],
   'action_formulas::action_formula'   : [ 'data::data_expression', 'data::untyped_data_parameter', 'process::untyped_multi_action' ],
   'regular_formulas::regular_formula' : [ 'action_formulas::action_formula', 'data::data_expression' ],
   'pbes_system::pbes_expression'      : [ 'data::data_expression', 'data::variable', 'data::untyped_data_parameter' ],
+  'pres_system::pres_expression'      : [ 'data::data_expression', 'data::variable', 'data::untyped_data_parameter' ],
   'process::process_expression'       : [ 'data::untyped_data_parameter' ],
 }
 
@@ -1163,7 +1193,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                         local_type = re.sub('const ','',re.sub('&','',p.type()))
                         if classname == 'lps::stochastic_specification' and local_type == 'process_initializer':
                             local_type = 'stochastic_process_initializer'   # Unclear why this needs to be done. Appears to be a bug. 
-                            print('ADAPTED', local_type)
                         local_variable = 'result_%s' % p.name()
                         updates.append('%s %s;\nstatic_cast<Derived&>(*this).apply(%s, x.%s());\nx.%s() = %s;' \
                                          % (local_type, local_variable, local_variable, p.name(), p.name(), local_variable))
@@ -1443,4 +1472,5 @@ def mcrl2_class_map():
           'lps'              : LPS_CLASSES,
           'process'          : PROCESS_CLASSES + PROCESS_EXPRESSION_CLASSES,
           'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
+          'pres_system'      : PRES_CLASSES + PRES_EXPRESSION_CLASSES,
         }

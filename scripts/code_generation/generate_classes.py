@@ -52,6 +52,8 @@ if __name__ == "__main__":
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/state_formula_specification.h', MODAL_FORMULA_CLASSES , namespace = 'state_formulas'  ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/pbes_expression.h',                    PBES_EXPRESSION_CLASSES          , namespace = 'pbes_system'     ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes',                                      PBES_CLASSES                     , namespace = 'pbes_system'     ) and result
+    result = make_classes(all_classes, MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres/pres_expression.h',                    PRES_EXPRESSION_CLASSES          , namespace = 'pres_system'     ) and result
+    result = make_classes(all_classes, MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres',                                      PRES_CLASSES                     , namespace = 'pres_system'     ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/process/include/mcrl2/process/process_expression.h',           PROCESS_EXPRESSION_CLASSES       , namespace = 'process'         ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data',                                      DATA_EXPRESSION_CLASSES          , namespace = 'data'            ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data',                                      ABSTRACTION_EXPRESSION_CLASSES   , namespace = 'data'            ) and result

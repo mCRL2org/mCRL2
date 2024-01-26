@@ -577,7 +577,7 @@ class explorer: public abortable
                       compute_state(result.states.back(), next_state, sigma, rewr);
                       return false;
                     },
-                    [](const data::data_expression& x) { return x == real_zero(); }
+                    [](const data::data_expression& x) { return x == data::sort_real::real_zero(); }
         );
         data::remove_assignments(sigma, distribution.variables());
         if (m_options.check_probabilities)
@@ -587,7 +587,7 @@ class explorer: public abortable
       }
       else
       {
-        result.probabilities.push_back(real_one());
+        result.probabilities.push_back(data::sort_real::real_one());
         result.states.emplace_back();
         compute_state(result.states.back(),next_state,sigma,rewr);
       }
@@ -1386,7 +1386,7 @@ class explorer: public abortable
         }
         if constexpr (Timed)
         {
-          make_timed_state(s0, s0, real_zero());
+          make_timed_state(s0, s0, data::sort_real::real_zero());
         }
       }
       generate_state_space(recursive, s0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, 
@@ -1596,7 +1596,7 @@ class explorer: public abortable
       }
       if constexpr (Timed)
       {
-        s0 = make_timed_state(s0, real_zero());
+        s0 = make_timed_state(s0, data::sort_real::real_zero());
       }
       generate_state_space_dfs_recursive(s0, gray, discovered, m_regular_summands, m_confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
       m_recursive = false;
@@ -1723,7 +1723,7 @@ class explorer: public abortable
       }
       if constexpr (Timed)
       {
-        s0 = make_timed_state(s0, real_zero());
+        s0 = make_timed_state(s0, data::sort_real::real_zero());
       }
       generate_state_space_dfs_iterative(s0, discovered, m_regular_summands, m_confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
       m_recursive = false;

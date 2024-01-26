@@ -273,7 +273,7 @@ const Derived& down_cast(const Base& t,
 template <class Derived, class Base>
 Derived& reference_cast(Base& t,
                         typename std::enable_if<is_convertible<Base, Derived>::value &&
-                                                !std::is_base_of<Derived, Base>::value>::type* = nullptr)
+                                                !std::is_base_of<Derived, Base>::value >::type* = nullptr)
 {
   static_assert(sizeof(Base) == sizeof(aterm), 
                 "aterm cast can only be applied to terms directly derived from aterms");
@@ -281,6 +281,20 @@ Derived& reference_cast(Base& t,
                 "aterm cast can only be applied to types derived from aterms where no extra fields are added");
   // We do not check types as the content of the term t is likely to be overwritten shortly. 
   return reinterpret_cast<Derived&>(t);
+}
+
+/// \brief A cast from one aterm based type to another, as a reference, allowing to assign to it.
+//         This can be useful when assigning to a term type that contains the derived term type. 
+//         In case Derived and Base are equal, nothing needs to be done. 
+/// \param   t A term of a type inheriting from an aterm.
+/// \return  A term of type Derived&.
+template <class Derived>
+Derived& reference_cast(Derived& t)
+{
+  static_assert(sizeof(Derived) == sizeof(aterm), 
+                "aterm cast can only be applied to terms directly derived from aterms");
+  // We do not check types as the content of the term t is likely to be overwritten shortly. 
+  return t;
 }
 
 template < typename DerivedCont, typename Base, template <typename Elem> class Cont >

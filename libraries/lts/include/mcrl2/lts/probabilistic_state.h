@@ -56,6 +56,8 @@ class probabilistic_state
     typedef PROBABILITY probability_t;
     typedef typename std::vector<state_probability_pair>::iterator iterator;
     typedef typename std::vector<state_probability_pair>::const_iterator const_iterator;
+    typedef typename std::vector<state_probability_pair>::reverse_iterator reverse_iterator;
+    typedef typename std::vector<state_probability_pair>::const_reverse_iterator const_reverse_iterator;
 
   protected:
 
@@ -267,7 +269,7 @@ class probabilistic_state
      ** \return The iterator pointing beyond the last state probability pair in a probabilistic state. */
     const_iterator end() const
     {
-      return m_probabilistic_state.cend();
+      return m_probabilistic_state.end();
     }
 
     /** \brief Gets an iterator over pairs of state and probability. This can only be used if the state is internally stored as a vector. 
@@ -282,6 +284,35 @@ class probabilistic_state
     iterator end()
     {
       return m_probabilistic_state.end();
+    }
+
+    /** \brief Gets a reverse iterator over pairs of state and probability. This can only be used when the state is stored 
+     **        internally as a vector.  
+     *  \return The iterator pointing at the last state probability pair. */
+    const_reverse_iterator rbegin() const
+    {
+      return m_probabilistic_state.rbegin();
+    }
+
+    /** \brief Gets the reverse end iterator over pairs of state and probability.
+     ** \return The iterator pointing before the first state probability pair in a probabilistic state. */
+    const_reverse_iterator rend() const
+    {
+      return m_probabilistic_state.rend();
+    }
+
+    /** \brief Gets a reverse iterator over pairs of state and probability. This can only be used if the state is internally stored as a vector. 
+     ** \return The iterator pointing at the last state probability pair. */
+    reverse_iterator rbegin()
+    {
+      return m_probabilistic_state.rbegin();
+    }
+
+    /** \brief Gets the reverse end iterator over pairs of state and probability.
+     ** \return The iterator pointing before the first state probability pair in a probabilistic state. */
+    reverse_iterator rend()
+    {
+      return m_probabilistic_state.rend();
     }
 };
 

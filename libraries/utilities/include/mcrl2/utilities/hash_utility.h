@@ -20,6 +20,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <map>
 
 namespace mcrl2
 {
@@ -62,6 +63,25 @@ struct hash< std::vector < X > >
     for(const X& x: v)
     {
       hash = mcrl2::utilities::detail::hash_combine(hash,hasher(x)); 
+    }
+    return hash;
+  }
+};
+
+template <class X, class Y>
+struct hash< std::map < X, Y > >
+{
+  std::size_t operator()(const std::map < X, Y >& v) const
+  {
+    hash<X> hasher1;
+    hash<Y> hasher2;
+    // This follows boost.
+    std::size_t hash=0;
+    for(const std::pair< X, Y>& p: v)
+    {
+      hash = mcrl2::utilities::detail::hash_combine(hash,
+                   mcrl2::utilities::detail::hash_combine(hasher1(p.first),
+                                                          hasher2(p.second)));
     }
     return hash;
   }

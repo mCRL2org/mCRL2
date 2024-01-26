@@ -22,7 +22,8 @@ struct pbes_equation_index
 {
   // maps the name of an equation to the pair (i, k) with i the corresponding index of the equation, and k the rank
   std::unordered_map<core::identifier_string, std::pair<std::size_t, std::size_t>> equation_index;
-
+  std::size_t m_max_rank=0;
+  std::size_t m_max_index=0;
   pbes_equation_index() = default;
 
   // PBES can be pbes or srf_pbes
@@ -31,7 +32,8 @@ struct pbes_equation_index
   {
     auto const& equations = p.equations();
     std::size_t rank = 0;
-    for (std::size_t i = 0; i < equations.size(); i++)
+    std::size_t i = 0;
+    for ( ; i < equations.size(); i++)
     {
       const auto& eqn = equations[i];
       if (i == 0)
@@ -47,6 +49,8 @@ struct pbes_equation_index
       }
       equation_index.insert({eqn.variable().name(), std::make_pair(i, rank)});
     }
+    m_max_rank=rank;
+    m_max_index=i;
   }
 
   /// \brief Returns the index of the equation of the variable with the given name
@@ -63,6 +67,18 @@ struct pbes_equation_index
     auto i = equation_index.find(name);
     assert (i != equation_index.end());
     return i->second.second;
+  }
+  
+  /// \brief Returns the rank of the equation of the variable with the given name
+  std::size_t max_rank() const
+  {
+    return m_max_rank;
+  }
+  
+  /// \brief Returns the rank of the equation of the variable with the given name
+  std::size_t max_index() const
+  {
+    return m_max_index;
   }
 };
 
