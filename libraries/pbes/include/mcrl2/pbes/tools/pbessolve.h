@@ -313,17 +313,28 @@ class pbessolve_tool
       pbes_system::detail::replace_global_variables(pbesspec, sigma);
     }
 
+    // When the original has counter example information we remove it, but store the provided pbes.
+    pbes_system::pbes pbesspec_with_counterexample;
+    if (has_counter_example_information(pbesspec))
+    {
+      mCRL2log(log::verbose) << "Removing counter example information for first pass." << std::endl;
+      pbesspec_with_counterexample = pbesspec;
+      pbesspec = detail::remove_counterexample_info(pbesspec);
+
+      mCRL2log(log::trace) << pbesspec;
+    }
+
     structure_graph G;
     if (options.optimization <= 1)
     {
       pbesinst_structure_graph_algorithm algorithm(options, pbesspec, G);
-      run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, G,
+      run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, pbesspec_with_counterexample, G,
                                                         sigma);
     }
     else
     {
       pbesinst_structure_graph_algorithm2 algorithm(options, pbesspec, G);
-      run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, G,
+      run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, pbesspec_with_counterexample, G,
                                                          sigma);
     }
     return true;
