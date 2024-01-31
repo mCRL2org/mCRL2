@@ -12,6 +12,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_APPL_H
 #define MCRL2_ATERMPP_ATERM_APPL_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
@@ -20,33 +21,17 @@
 namespace atermpp
 {
 
-template <class Term>
-class term_appl: public aterm
+class aterm_appl: public aterm
 {
 protected:
   /// \brief Constructor.
   /// \param t A pointer internal data structure from which the term is constructed.
   /// \details This function is explicitly protected such that is not used in common code. 
-  explicit term_appl(detail::_term_appl *t)
+  explicit aterm_appl(detail::_term_appl *t)
    : aterm(reinterpret_cast<detail::_aterm*>(t))
-  {
-    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
-  }
+  {}
 
 public:
-  /// The type of object, T stored in the term_appl.
-  typedef Term value_type;
-
-  /// Pointer to T.
-  typedef Term* pointer;
-
-  /// Reference to T.
-  typedef Term& reference;
-
-  /// Const reference to T.
-  typedef const Term const_reference;
-
   /// An unsigned integral type.
   typedef std::size_t size_type;
 
@@ -54,30 +39,28 @@ public:
   typedef ptrdiff_t difference_type;
 
   /// Iterator used to iterate through an term_appl.
-  typedef term_appl_iterator<Term> iterator;
+  typedef term_appl_iterator<aterm> iterator;
 
   /// Const iterator used to iterate through an term_appl.
-  typedef term_appl_iterator<Term> const_iterator;
+  typedef term_appl_iterator<aterm> const_iterator;
 
   /// \brief Default constructor.
-  term_appl():aterm()
+  aterm_appl():aterm()
   {}
 
   /// \brief Explicit constructor from an aterm.
   /// \param t The aterm from which the term is constructed.
-  explicit term_appl(const aterm& t) 
+  explicit aterm_appl(const aterm& t) 
    : aterm(t)
   {
     assert(type_is_appl());
-    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
   } 
 
   /// This class has user-declared copy constructor so declare default copy and move operators.
-  term_appl(const term_appl& other) noexcept = default;
-  term_appl& operator=(const term_appl& other) noexcept = default;
-  term_appl(term_appl&& other) noexcept = default;
-  term_appl& operator=(term_appl&& other) noexcept = default;
+  aterm_appl(const aterm_appl& other) noexcept = default;
+  aterm_appl& operator=(const aterm_appl& other) noexcept = default;
+  aterm_appl(aterm_appl&& other) noexcept = default;
+  aterm_appl& operator=(aterm_appl&& other) noexcept = default;
 
   /// \brief Constructor that provides an aterm_appl based on a function symbol and forward iterator providing the arguments. 
   /// \details The iterator range is traversed more than once. If only one traversal is required
@@ -91,13 +74,11 @@ public:
             typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr,
             typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr,
             typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value>::type* = nullptr>
-  term_appl(const function_symbol& sym,
+  aterm_appl(const function_symbol& sym,
             ForwardIterator begin,
             ForwardIterator end)
   {
     detail::g_thread_term_pool().create_appl_dynamic(*this, sym, begin, end);
-    static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value,
                   "A forward iterator has more requirements than an input iterator.");
     static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value,
@@ -114,13 +95,11 @@ public:
   template <class InputIterator,
             typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr,
             typename std::enable_if<std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr>
-  term_appl(const function_symbol& sym,
+  aterm_appl(const function_symbol& sym,
             InputIterator begin,
             InputIterator end)
-    : term_appl(sym, begin, end, [](const Term& term) -> const Term& { return term; } )
+    : aterm_appl(sym, begin, end, [](const unprotected_aterm& term) -> const unprotected_aterm& { return term; } )
   {
-    static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
                   "The InputIterator is missing the input iterator tag.");
   }
@@ -136,37 +115,30 @@ public:
   template <class InputIterator,
             class TermConverter,
             typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr>
-  term_appl(const function_symbol& sym,
+  aterm_appl(const function_symbol& sym,
             InputIterator begin,
             InputIterator end,
             TermConverter converter)
   {
     detail::g_thread_term_pool().create_appl_dynamic(*this, sym, converter, begin, end);
-    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     static_assert(!std::is_same<typename InputIterator::iterator_category, std::output_iterator_tag>::value,
                   "The InputIterator has the output iterator tag.");
   }
 
   /// \brief Constructor.
   /// \param sym A function symbol.
-  term_appl(const function_symbol& sym)
+  aterm_appl(const function_symbol& sym)
   {
     detail::g_thread_term_pool().create_term(*this, sym);
-    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
   }
 
   /// \brief Constructor for n-arity function application.
   /// \param symbol A function symbol.
   /// \param arguments The arguments of the function application.
   template<typename ...Terms>
-  term_appl(const function_symbol& symbol, const Terms& ...arguments)
+  aterm_appl(const function_symbol& symbol, const Terms& ...arguments)
   {
-    detail::g_thread_term_pool().create_appl<Term>(*this, symbol, arguments...);
-    static_assert(detail::are_terms<Terms...>::value, "Arguments of function application should be terms.");
-    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+    detail::g_thread_term_pool().create_appl(*this, symbol, arguments...);
   }
 
   /// \brief Returns the function symbol belonging to an aterm_appl.
@@ -194,14 +166,14 @@ public:
   /// \return An iterator pointing to the first argument.
   const_iterator begin() const
   {
-    return const_iterator(reinterpret_cast<const Term*>(&(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(0))));
+    return const_iterator(&static_cast<const aterm_appl&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(0)));
   }
 
   /// \brief Returns a const_iterator pointing past the last argument.
   /// \return A const_iterator pointing past the last argument.
   const_iterator end() const
   {
-    return const_iterator(reinterpret_cast<const Term*>(&reinterpret_cast<const detail::_term_appl*>(m_term)->arg(size())));
+    return const_iterator(&static_cast<const aterm_appl&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(size())));
   }
 
   /// \brief Returns the largest possible number of arguments.
@@ -214,10 +186,10 @@ public:
   /// \brief Returns the i-th argument.
   /// \param i A positive integer.
   /// \return The argument with the given index.
-  const Term& operator[](const size_type i) const
+  const aterm& operator[](const size_type i) const
   {
     assert(i < size()); // Check the bounds.
-    return reinterpret_cast<const detail::_term_appl*>(m_term)->arg(i);
+    return static_cast<const aterm_appl&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(i));
   }
 };
 
@@ -327,30 +299,19 @@ template<class Term,
 void make_term_appl(Term& target, const function_symbol& symbol, const Terms& ...arguments)
 {
   detail::g_thread_term_pool().create_appl(target, symbol, arguments...);
-
-  // TODO: enable the static_assert below. Doesn't seem to work properly now. 
-  // static_assert(detail::are_terms_or_functions<Terms...>::value, "Arguments of function application should be terms.");
-  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
 }
 
 /// \brief Constructor for n-arity function application with an index.
 /// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
 /// \param symbol A function symbol.
 /// \param arguments The arguments of the function application.
-template<class Term, 
+template<class Term,
          class INDEX_TYPE,
          typename ...Terms>
 void make_term_appl_with_index(aterm& target, const function_symbol& symbol, const Terms& ...arguments)
 {
   detail::g_thread_term_pool().create_appl_index<Term, INDEX_TYPE>(target, symbol, arguments...);
-  // TODO: enable the static_assert below. Doesn't seem to work properly now. 
-  // static_assert(detail::are_terms_or_functions<Terms...>::value, "Arguments of function application should be terms.");
-  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
 }
-
-typedef term_appl<aterm> aterm_appl;
 
 } // namespace atermpp
 
@@ -362,21 +323,20 @@ namespace std
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term.
 /// \param t2 The second term.
-template <class T>
-inline void swap(atermpp::term_appl<T>& t1, atermpp::term_appl<T>& t2) noexcept
+inline void swap(atermpp::aterm_appl& t1, atermpp::aterm_appl& t2) noexcept
 {
   t1.swap(t2);
 }
 
 /// \brief Standard hash function.
-template<class T>
-struct hash<atermpp::term_appl<T> >
+template<> struct hash<atermpp::aterm_appl>
 {
-  std::size_t operator()(const atermpp::term_appl<T>& t) const
+  std::size_t operator()(const atermpp::aterm_appl& t) const
   {
     return std::hash<atermpp::aterm>()(t);
   }
 };
+
 } // namespace std
 
 #endif // MCRL2_ATERMPP_ATERM_APPL_H

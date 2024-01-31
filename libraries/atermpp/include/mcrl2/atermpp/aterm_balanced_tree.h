@@ -108,7 +108,7 @@ class term_balanced_tree : public aterm_appl
     }
 
     explicit term_balanced_tree(detail::_term_appl* t)
-         : term_appl(static_cast<detail::_term_appl*>(t))
+         : aterm_appl(t)
     {}
 
   public:

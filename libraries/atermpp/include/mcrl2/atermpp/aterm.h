@@ -138,10 +138,10 @@ public:
   }
 
   /// \brief Returns true if this term is not equal to the term assigned by
-  ///        the default constructor of aterms, term_appl<T>'s and aterm_int.
+  ///        the default constructor of aterms, aterm_appls and aterm_int.
   /// \details The default constructor of a term_list<T> is the empty list, on which
   ///          the operator defined yields true. This operation is more efficient
-  ///          than comparing the current term with an aterm(), term_appl<T>() or an
+  ///          than comparing the current term with an aterm(), aterm_appl() or an
   ///          aterm_int().
   /// \return A boolean indicating whether this term equals the default constructor.
   bool defined() const

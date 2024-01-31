@@ -21,6 +21,8 @@ namespace atermpp
 template <typename Term>
 class term_appl_iterator;
 
+class aterm_appl;
+
 namespace detail
 {
 

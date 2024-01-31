@@ -21,8 +21,7 @@ namespace atermpp
 template <typename Term>
 class term_appl_iterator
 {
-    template <class T>
-    friend class term_appl;
+    friend class aterm_appl;
 
     template < class Derived, class Base >
     friend term_appl_iterator<Derived> detail::aterm_appl_iterator_cast(term_appl_iterator<Base> a,

@@ -131,14 +131,6 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
-  void apply(const atermpp::term_appl<T>& x)
-  {
-    derived().enter(x);
-    derived().print(utilities::to_string(x));
-    derived().leave(x);
-  }
-
-  template <typename T>
   void apply(const std::list<T>& x)
   {
     derived().enter(x);

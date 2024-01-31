@@ -23,10 +23,10 @@ namespace detail
 /// \param a A term
 /// \param f A function on terms
 /// \return The transformed term
-template <typename Term, typename Function>
-aterm_appl appl_apply(const term_appl<Term>& a, const Function f)
+template <typename Function>
+aterm_appl appl_apply(const aterm_appl& a, const Function f)
 {
-  return term_appl<Term>(a.function(), a.begin(), a.end(), f);
+  return aterm_appl(a.function(), a.begin(), a.end(), f);
 }
 
 //--- find ----------------------------------------------------------------//
