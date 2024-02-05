@@ -12,6 +12,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_INT_H
 #define MCRL2_ATERMPP_ATERM_INT_H
 
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
 
 namespace atermpp
@@ -21,7 +22,7 @@ namespace atermpp
 /// 	       no arguments.
 /// \details A special function symbol is used to identify integer terms
 /// 			 internally.
-class aterm_int : public aterm
+class aterm_int : public aterm_appl
 {
 public:
   /// \brief Default constructor.
@@ -37,7 +38,7 @@ public:
 
   /// \brief Constructs an integer term from an aterm.
   explicit aterm_int(const aterm& t)
-   : aterm(t)
+   : aterm_appl(t)
   {
     assert(type_is_int() || !defined());
   }
