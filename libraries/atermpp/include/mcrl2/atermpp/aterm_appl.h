@@ -52,9 +52,7 @@ public:
   /// \param t The aterm from which the term is constructed.
   explicit aterm_appl(const aterm& t) 
    : aterm(t)
-  {
-    assert(type_is_appl());
-  } 
+  {} 
 
   /// This class has user-declared copy constructor so declare default copy and move operators.
   aterm_appl(const aterm_appl& other) noexcept = default;
