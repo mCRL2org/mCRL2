@@ -48,7 +48,7 @@ void Visualizer::updateSelection() {
     }
 
     selectionBuffer.bind();
-    select();
+    mark();
     selectionBuffer.release();
 }
 

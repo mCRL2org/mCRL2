@@ -44,10 +44,10 @@ class Visualizer : public QOpenGLWidget
       const double& b);
 
     // -- visualization functions -----------------------------------
-    enum Mode { Visualizing, Selecting };
+    enum Mode { Visualizing, Marking };
 
     virtual void visualize() = 0;
-    virtual void select() = 0;
+    virtual void mark() = 0;
     virtual void setGeomChanged(const bool& flag);
     virtual void setDataChanged(const bool& flag);
 

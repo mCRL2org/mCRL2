@@ -83,7 +83,7 @@ void ColorChooser::handleMouseEvent(QMouseEvent* e)
 
 template <Visualizer::Mode mode> void ColorChooser::drawColorSpectrum()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     return;
   }
@@ -106,7 +106,7 @@ template <Visualizer::Mode mode> void ColorChooser::drawColorSpectrum()
 
 template <Visualizer::Mode mode> void ColorChooser::drawGrayScale()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     return;
   }
@@ -184,7 +184,7 @@ template <Visualizer::Mode mode> void ColorChooser::drawPoints()
   size = m_yCoordinates->size();
 
   // selection mode
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     for (std::size_t i = 0; i < size-1; ++i)
     {
@@ -329,7 +329,7 @@ template <Visualizer::Mode mode> void ColorChooser::drawPoints()
 
 template <Visualizer::Mode mode> void ColorChooser::draw()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     GLint hits = 0;
     GLuint selectBuf[512];
@@ -357,7 +357,7 @@ template <Visualizer::Mode mode> void ColorChooser::draw()
 
 
 void ColorChooser::visualize() { draw<Visualizing>(); }
-void ColorChooser::select() { draw<Selecting>(); }
+void ColorChooser::mark() { draw<Marking>(); }
 
 
 void ColorChooser::handleHits(const std::vector< int > &ids)

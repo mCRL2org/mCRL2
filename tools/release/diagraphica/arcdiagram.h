@@ -46,7 +46,7 @@ class ArcDiagram : public Visualizer
 
     // -- visualization functions  ----------------------------------
     void visualize();
-    void select();
+    void mark();
 
     // -- input event handlers --------------------------------------
 

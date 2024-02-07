@@ -144,7 +144,7 @@ template <Visualizer::Mode mode> void Diagram::drawAxes(double pixelSize)
 
 template <Visualizer::Mode mode> void Diagram::drawBorder(double pixelSize)
 {
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     double xLft, xRgt, yTop, yBot;
 
@@ -179,7 +179,7 @@ template <Visualizer::Mode mode> void Diagram::drawBorder(double pixelSize)
 
 template <Visualizer::Mode mode> void Diagram::drawBorderFlush()
 {
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
   }
@@ -279,7 +279,7 @@ template <Visualizer::Mode mode> void Diagram::draw(double pixelSize)
   }
   drawShapes<mode>(pixelSize);
 }
-template void Diagram::draw<Visualizer::Selecting>(double pixelSize);
+template void Diagram::draw<Visualizer::Marking>(double pixelSize);
 template void Diagram::draw<Visualizer::Visualizing>(double pixelSize);
 
 
@@ -298,7 +298,7 @@ template <Visualizer::Mode mode> void Diagram::draw(double pixelSize,
     }
   }
 }
-template void Diagram::draw<Visualizer::Selecting> (double pixelSize,
+template void Diagram::draw<Visualizer::Marking> (double pixelSize,
   const std::vector< Attribute* > attrs,
   const std::vector< double > attrValIdcs, double opacity);
 template void Diagram::draw<Visualizer::Visualizing>(double pixelSize,

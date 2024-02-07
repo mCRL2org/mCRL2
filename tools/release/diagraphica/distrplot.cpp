@@ -79,7 +79,7 @@ template <Visualizer::Mode mode> void DistrPlot::drawAxes()
 
 template <Visualizer::Mode mode> void DistrPlot::drawLabels()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     return;
   }
@@ -125,7 +125,7 @@ template <Visualizer::Mode mode> void DistrPlot::drawPlot()
 
   double yBot = -0.5*hCanv + 20*pix;
   // selection mode
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
 
     for (std::size_t i = 0; i < sizePositions; ++i)
@@ -214,7 +214,7 @@ template <Visualizer::Mode mode> void DistrPlot::draw()
   }
 
   // visualize
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     GLint hits = 0;
     GLuint selectBuf[512];
@@ -247,7 +247,7 @@ template <Visualizer::Mode mode> void DistrPlot::draw()
 
 
 void DistrPlot::visualize() { draw<Visualizing>(); }
-void DistrPlot::select() { draw<Selecting>(); }
+void DistrPlot::mark() { draw<Marking>(); }
 
 
 // -- input event handlers ------------------------------------------

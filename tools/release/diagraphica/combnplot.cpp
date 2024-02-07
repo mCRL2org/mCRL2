@@ -158,7 +158,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawAxes()
 
 template <Visualizer::Mode mode> void CombnPlot::drawLabelsBC()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     return;
   }
@@ -211,7 +211,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawLabelsBC()
 
 template <Visualizer::Mode mode> void CombnPlot::drawLabelsCP()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     return;
   }
@@ -290,7 +290,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawPlotBC()
   }
 
   // selection mode
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     for (std::size_t i = 0; i < sizePositions; ++i)
     {
@@ -334,7 +334,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawPlotCP()
   double pix   = pixelSize();
 
   // selection mode
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     for (std::size_t i = 0; i < posLftTop.size(); ++i)
     {
@@ -460,7 +460,7 @@ template <Visualizer::Mode mode> void CombnPlot::draw()
   }
 
   // selection mode
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     GLint hits = 0;
     GLuint selectBuf[512];
@@ -496,7 +496,7 @@ template <Visualizer::Mode mode> void CombnPlot::draw()
 
 
 void CombnPlot::visualize() { draw<Visualizing>(); }
-void CombnPlot::select() { draw<Selecting>(); }
+void CombnPlot::mark() { draw<Marking>(); }
 
 
 // -- input event handlers ------------------------------------------

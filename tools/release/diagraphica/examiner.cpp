@@ -619,7 +619,7 @@ template <Visualizer::Mode mode> void Examiner::drawFrame()
 {
   double pix = pixelSize();
 
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     glPushMatrix();
     glTranslatef(posFrame.x, posFrame.y, 0.0);
@@ -688,7 +688,7 @@ template <Visualizer::Mode mode> void Examiner::drawFrame()
 
 template <Visualizer::Mode mode> void Examiner::drawFramesHist()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     glPushName(ID_FRAME_HIST);
     //for ( int i = 0; i < framesHist.size(); ++i )
@@ -776,7 +776,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
 
   double pix = pixelSize();
 
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     // clear icon
     double itvSml = 6.0*pix;
@@ -1052,7 +1052,7 @@ template <Visualizer::Mode mode> void Examiner::draw()
     calcSettingsDataBased();
   }
 
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     GLint hits = 0;
     GLuint selectBuf[512];
@@ -1094,5 +1094,5 @@ template <Visualizer::Mode mode> void Examiner::draw()
 
 
 void Examiner::visualize() { draw<Visualizing>(); }
-void Examiner::select() { draw<Selecting>(); }
+void Examiner::mark() { draw<Marking>(); }
 

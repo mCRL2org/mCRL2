@@ -337,7 +337,7 @@ void Shape::handleHitEdtDOFAgl(const std::size_t& hdlIdx)
 
 template <Visualizer::Mode mode> void Shape::drawText(double pixelSize)
 {
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     return;
   }
@@ -363,7 +363,7 @@ template <Visualizer::Mode mode> void Shape::drawText(double pixelSize)
 
 template <Visualizer::Mode mode> void Shape::drawNormal(double pixelSize)
 {
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     if (m_shapeType == TYPE_NOTE)
     {
@@ -486,7 +486,7 @@ template <Visualizer::Mode mode> void Shape::drawEdit(double pixelSize)
 {
   double hdlDelta = hdlSzeHnt*pixelSize;
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     // draw shape
     drawNormal<mode>(pixelSize);
@@ -659,7 +659,7 @@ template <Visualizer::Mode mode> void Shape::drawEdit(double pixelSize)
 
 template <Visualizer::Mode mode> void Shape::drawEditDOF(double pixelSize)
 {
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     // draw shape
     drawNormal<mode>(pixelSize);
@@ -831,7 +831,7 @@ template <Visualizer::Mode mode> void Shape::drawDOFXCtr(double pixelSize)
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {}
   else
   {
@@ -952,7 +952,7 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFXCtr(double pixelSize)
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     // pointing right
     if (xEnd <= xBeg)
@@ -1123,7 +1123,7 @@ template <Visualizer::Mode mode> void Shape::drawDOFYCtr(double pixelSize)
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {}
   else
   {
@@ -1243,7 +1243,7 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFYCtr(double pixelSize)
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     // pointing down
     if (yEnd < yBeg)
@@ -1410,7 +1410,7 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFWth(double pixelSize)
   double wBeg   = m_widthDOF->min();
   double wEnd   = m_widthDOF->max();
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     // pointing right
     if (wBeg <= wEnd)
@@ -1596,7 +1596,7 @@ template <Visualizer::Mode mode> void Shape::drawDOFWth(double pixelSize)
   double wBeg   = m_widthDOF->min();
   double wEnd   = m_widthDOF->max();
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {}
   else
   {
@@ -1737,7 +1737,7 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFHgt(double pixelSize)
   double hBeg   = m_heightDOF->min();
   double hEnd   = m_heightDOF->max();
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     // pointing up
     if (hBeg <= hEnd)
@@ -1923,7 +1923,7 @@ template <Visualizer::Mode mode> void Shape::drawDOFHgt(double pixelSize)
   double hBeg   = m_heightDOF->min();
   double hEnd   = m_heightDOF->max();
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {}
   else
   {
@@ -2065,7 +2065,7 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     double dstHgeCtr, dstHgeHdl;
     double aglRef, aglBeg, aglEnd;
@@ -2398,7 +2398,7 @@ template <Visualizer::Mode mode> void Shape::drawDOFAgl(double pixelSize)
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {}
   else
   {
@@ -2581,7 +2581,7 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize)
   // clear transf
   glPopMatrix();
 }
-template void Shape::draw<Visualizer::Selecting>(double pixelSize);
+template void Shape::draw<Visualizer::Marking>(double pixelSize);
 template void Shape::draw<Visualizer::Visualizing>(double pixelSize);
 
 template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
@@ -2589,7 +2589,7 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
   const std::vector< double > attrValIdcs,
   const double& opacity)
 {
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     return;
   }

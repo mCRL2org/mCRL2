@@ -1313,7 +1313,7 @@ QColor Simulator::calcColor(std::size_t iter, std::size_t numr)
 
 template <Visualizer::Mode mode> void Simulator::drawFrameCurr()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     if (m_currentFrame != 0)
     {
@@ -1419,7 +1419,7 @@ template <Visualizer::Mode mode> void Simulator::drawFrameCurr()
 
 template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     glPushName(ID_FRAME_PREV);
     for (std::size_t i = 0; i < m_previousFramePositions.size(); ++i)
@@ -1583,7 +1583,7 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
 
 template <Visualizer::Mode mode> void Simulator::drawFramesNext()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     glPushName(ID_FRAME_NEXT);
     for (std::size_t i = 0; i < m_nextFramePositions.size(); ++i)
@@ -1745,7 +1745,7 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
 
 template <Visualizer::Mode mode> void Simulator::drawBdlLblGridPrev()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     double pix = pixelSize();;
     std::string lbl;
@@ -1931,7 +1931,7 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridPrev()
 
 template <Visualizer::Mode mode> void Simulator::drawBdlLblGridNext()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     double pix = pixelSize();;
 
@@ -2116,7 +2116,7 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridNext()
 
 template <Visualizer::Mode mode> void Simulator::drawBundlesPrev()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     double pix = pixelSize();
 
@@ -2207,7 +2207,7 @@ template <Visualizer::Mode mode> void Simulator::drawBundlesPrev()
 
 template <Visualizer::Mode mode> void Simulator::drawBundlesNext()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     double pix = pixelSize();
     double arrowItv;
@@ -2312,7 +2312,7 @@ template <Visualizer::Mode mode> void Simulator::drawControls()
   double itvSml = 6.0*pix;
   double itvLrg = 9.0*pix;
 
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     // clear icon
     double x = 0.5*size.width() - itvSml - pix;
@@ -2448,7 +2448,7 @@ template <Visualizer::Mode mode> void Simulator::draw()
     calcSettingsDataBased();
   }
 
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     if (!m_animationTimer.isActive())
     {
@@ -2512,7 +2512,7 @@ template <Visualizer::Mode mode> void Simulator::draw()
 
 
 void Simulator::visualize() { draw<Visualizing>(); }
-void Simulator::select() { draw<Selecting>(); }
+void Simulator::mark() { draw<Marking>(); }
 
 
 void Simulator::animate()

@@ -482,7 +482,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawBarTree()
 template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
 {
   // selection mode
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     glPushName(ID_DIAGRAM);
     for (std::size_t i = 0; i < posDgrm.size(); ++i)
@@ -898,7 +898,7 @@ template <Visualizer::Mode mode> void ArcDiagram::draw()
   }
 
   // selection mode
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     QSizeF size = worldSize();
 
@@ -931,7 +931,7 @@ template <Visualizer::Mode mode> void ArcDiagram::draw()
 
 
 void ArcDiagram::visualize() { draw<Visualizing>(); }
-void ArcDiagram::select() { draw<Selecting>(); }
+void ArcDiagram::mark() { draw<Marking>(); }
 
 
 // -- input event handlers ------------------------------------------

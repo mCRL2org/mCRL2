@@ -45,7 +45,7 @@ class Examiner : public Visualizer
 
     // -- visualization functions  ----------------------------------
     void visualize();
-    void select();
+    void mark();
 
     // -- event handlers --------------------------------------------
     void handleSizeEvent();

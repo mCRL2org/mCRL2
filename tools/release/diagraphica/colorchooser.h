@@ -22,7 +22,7 @@ class ColorChooser : public Visualizer
     ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinates, ColorType type);
 
     void visualize();
-    void select();
+    void mark();
 
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();

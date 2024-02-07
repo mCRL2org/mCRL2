@@ -87,7 +87,7 @@ template <Visualizer::Mode mode> void CorrlPlot::drawAxes()
 
 template <Visualizer::Mode mode> void CorrlPlot::drawLabels()
 {
-  if (mode == Selecting)
+  if (mode == Marking)
   {
     return;
   }
@@ -117,7 +117,7 @@ template <Visualizer::Mode mode> void CorrlPlot::drawLabels()
 template <Visualizer::Mode mode> void CorrlPlot::drawPlot()
 {
   // selection mode
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     for (std::size_t i = 0; i < positions.size(); ++i)
     {
@@ -174,7 +174,7 @@ template <Visualizer::Mode mode> void CorrlPlot::drawPlot()
 
 template <Visualizer::Mode mode> void CorrlPlot::drawDiagram()
 {
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     return;
   }
@@ -225,7 +225,7 @@ template <Visualizer::Mode mode> void CorrlPlot::draw()
   }
 
   // visualize
-  if constexpr (mode == Selecting)
+  if constexpr (mode == Marking)
   {
     GLint hits = 0;
     GLuint selectBuf[512];
@@ -259,7 +259,7 @@ template <Visualizer::Mode mode> void CorrlPlot::draw()
 
 
 void CorrlPlot::visualize() { draw<Visualizing>(); }
-void CorrlPlot::select() { draw<Selecting>(); }
+void CorrlPlot::mark() { draw<Marking>(); }
 
 
 // -- input event handlers ------------------------------------------

@@ -38,7 +38,7 @@ class DiagramEditor : public Visualizer
 
     // -- visualization functions  ----------------------------------
     void visualize();
-    void select();
+    void mark();
     void generateTextures();
 
     // -- public constants ------------------------------------------

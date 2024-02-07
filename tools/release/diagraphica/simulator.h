@@ -42,7 +42,7 @@ class Simulator : public Visualizer
 
     // -- visualization functions  ----------------------------------
     void visualize();
-    void select();
+    void mark();
 
     // -- event handlers --------------------------------------------
     void handleMouseEvent(QMouseEvent* e);

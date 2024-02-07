@@ -95,7 +95,7 @@ void DiagramEditor::deselectAll()
 // -- visualization functions  ----------------------------------
 
 
-void DiagramEditor::select()
+void DiagramEditor::mark()
 {
   // set up picking
   GLint hits = 0;
@@ -108,7 +108,7 @@ void DiagramEditor::select()
 
   // render in select mode
   glPushName(0);
-  m_diagram->draw<Selecting>(pixelSize());
+  m_diagram->draw<Marking>(pixelSize());
   glPopName();
 
   // finish up picking

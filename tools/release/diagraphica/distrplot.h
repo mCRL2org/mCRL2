@@ -35,7 +35,7 @@ class DistrPlot : public Visualizer
 
     // -- visualization functions  ----------------------------------
     void visualize();
-    void select();
+    void mark();
 
     // -- input event handlers --------------------------------------
     void handleMouseEvent(QMouseEvent* e);
