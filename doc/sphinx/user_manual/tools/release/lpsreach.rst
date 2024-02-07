@@ -136,6 +136,12 @@ we use Sylvan [3], which implements list decision diagrams. These are unfolded
 multi-valued decision diagrams where every vertex has exactly two edges, one
 being the decision and the other being the next element in the list.
 
+Limitations
+-----------
+
+This tool is only available on macOS and Linux since the Sylvan dependency
+cannot be compiled by Visual Studio.
+
 References 
 ----------------------
 

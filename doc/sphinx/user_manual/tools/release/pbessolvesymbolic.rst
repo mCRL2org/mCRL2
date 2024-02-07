@@ -15,8 +15,7 @@ recursive format (SRF), which is in some sense very similar to a linear process.
 Next, we describe useful options that are exclusive to `pbessolvesymbolic`. One
 option that can be useful to further refine the dependencies of transition
 groups is `--split-conditions`, which introduces new transition groups based on
-the structure of the SRF pbes. Generally, option `1` is safe, but options `2`
-and `3` can yield an infinite PBES due to the conditions becoming weaker.
+the structure of the SRF pbes and is generally safe
 
 Similarly to :ref:`tool-pbessolve` the `pbessolvesymbolic` tool also contains
 various partial solving strategies that attempt to optimistically solve the
@@ -29,3 +28,6 @@ Limitations
 Currently, `pbessolvesymbolic` can not provide counter examples when the property
 does not hold, and solving PBESs with counter example information is extremely
 slow.
+
+This tool is only available on macOS and Linux since the Sylvan dependency
+cannot be compiled by Visual Studio.
