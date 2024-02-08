@@ -206,7 +206,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
                       "split conditions to obtain more summands (and equations) with potentially less dependencies\n"
                       "0 (default) no splitting performed.\n"
                       "1 only split disjunctive conditions, same as --split-conditions.\n"
-                      "2 also split conjunctive conditions into multiple equations which weakens guards and introduces more reachable BES equations. Note that splitting conditions.\n"
+                      "2 also split conjunctive conditions into multiple equations which weakens guards and introduces more reachable BES equations. Note that splitting conditions can lead to expressions that cannot be rewritten if the equations are not sufficiently complete.\n"
                       "3 alternative split for conjunctive conditions where even more states can become reachable.");
     }
 
