@@ -186,12 +186,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
                       "Use solve strategy NUM. All strategies except 0 periodically apply on-the-fly solving, which may lead to early termination.",
                       's');
       desc.add_option("split-conditions",
-                      utilities::make_optional_argument("NUM", "0"),
-                      "split conditions to obtain possibly smaller transition groups\n"
-                      "0 (default) no splitting performed.\n"
-                      "1 only split disjunctive conditions.\n"
-                      "2 also split conjunctive conditions into multiple equations which often yield more reachable states.\n"
-                      "3 alternative split for conjunctive conditions where even more states can become reachable.",
+                      "split disjunctive conditions to obtain more summands with potentially less dependencies",
                       'c');
       desc.add_option("total", "make the SRF PBES total", 't');
       desc.add_option("reset", "set constant values when introducing parameters");
@@ -206,6 +201,13 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       desc.add_hidden_option("table-ratio", utilities::make_optional_argument("NUM", "16"), "power-of-two ratio of node table and cache table (default 1)");
       desc.add_hidden_option("srf", utilities::make_optional_argument("FILE", ""), "save the preprocessed PBES in SRF format");
       desc.add_hidden_option("dot", utilities::make_optional_argument("FILE", ""), "print the LDD of the parity game in dot format");
+      desc.add_hidden_option("split-conditions-unsafe",
+                      utilities::make_optional_argument("NUM", "0"),
+                      "split conditions to obtain more summands (and equations) with potentially less dependencies\n"
+                      "0 (default) no splitting performed.\n"
+                      "1 only split disjunctive conditions, same as --split-conditions.\n"
+                      "2 also split conjunctive conditions into multiple equations which weakens guards and introduces more reachable BES equations. Note that splitting conditions.\n"
+                      "3 alternative split for conjunctive conditions where even more states can become reachable.");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -265,9 +267,15 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           throw mcrl2::runtime_error("The table-ratio should be a power of two.");
         }
       }
+
       if (parser.has_option("split-conditions"))
       {
-        options.split_conditions = parser.option_argument_as<std::size_t>("split-conditions");
+        options.split_conditions = 1;
+      }
+
+      if (parser.has_option("split-conditions-unsafe"))
+      {
+        options.split_conditions = parser.option_argument_as<std::size_t>("split-conditions-unsafe");
       }
 
       options.solve_strategy =  parser.option_argument_as<int>("solve-strategy");
