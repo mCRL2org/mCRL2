@@ -2907,11 +2907,14 @@ class specification_basic_type
         variable_list stochvars=sto.variables();
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvert(stochvars,sigma,variable_list(), data_expression_list({ condition }));
+
         return stochastic_operator(
                  stochvars,
-                 replace_variables_capture_avoiding_alt(
+                 if_(condition,
+                        replace_variables_capture_avoiding_alt(
                                                sto.distribution(),
                                                sigma),
+                        if_(variables_are_equal_to_default_values(stochvars),real_one(),real_zero())),
                  distribute_condition(
                        substitute_pCRLproc(sto.operand(),sigma),
                        condition));
