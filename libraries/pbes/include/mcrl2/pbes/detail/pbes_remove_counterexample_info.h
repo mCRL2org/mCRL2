@@ -18,6 +18,9 @@
  
 namespace mcrl2::pbes_system::detail
 {  
+  
+static std::regex positive("Zpos_(\\d+)_.*");
+static std::regex negative("Zneg_(\\d+)_.*");
 
 struct subsitute_counterexample: public pbes_expression_builder<subsitute_counterexample>
 {
@@ -26,24 +29,25 @@ struct subsitute_counterexample: public pbes_expression_builder<subsitute_counte
   using super::leave;
   using super::apply;
   using super::update;
-    
-  std::regex positive;
-  std::regex negative;
 
-  subsitute_counterexample()
-    : positive("Zpos_(\\d+)_.*"),
-      negative("Zneg_(\\d+)_.*")
+  bool replace_Lplus;
+  bool replace_Lminus;
+    
+
+  subsitute_counterexample(bool replace_Lplus, bool replace_Lminus)
+    : replace_Lplus(replace_Lplus),
+      replace_Lminus(replace_Lminus)
   {}
 
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
     std::smatch match;
-    if (std::regex_match(static_cast<const std::string&>(x.name()), match, positive))
+    if (replace_Lplus && std::regex_match(static_cast<const std::string&>(x.name()), match, positive))
     {
       result = true_();
     }
-    else if (std::regex_match(static_cast<const std::string&>(x.name()), match, negative))
+    else if (replace_Lminus && std::regex_match(static_cast<const std::string&>(x.name()), match, negative))
     {
       result = false_();
     }
@@ -56,31 +60,42 @@ struct subsitute_counterexample: public pbes_expression_builder<subsitute_counte
 
 /// Removes all equations and expressions related to counter examples from the input PBES.
 inline 
-mcrl2::pbes_system::pbes remove_counterexample_info(const pbes_system::pbes& pbes)
+mcrl2::pbes_system::pbes remove_counterexample_info(const pbes_system::pbes& pbes, bool remove_Lplus = true, bool remove_Lminus = true)
 {
   // Remove all equations related to the countexamples
   std::vector<mcrl2::pbes_system::pbes_equation> equations;
-  subsitute_counterexample f;
-
-   std::regex re("Z(neg|pos)_(\\d+)_.*");
+  subsitute_counterexample f(remove_Lplus, remove_Lminus);
 
   /// Replace the corresponding PBES variables by true and false respectively.
   for (auto& equation : pbes.equations())
   {
     std::smatch match;
-    if (!std::regex_match(static_cast<const std::string&>(equation.variable().name()), match, re))
+    bool Lplus = std::regex_match(static_cast<const std::string&>(equation.variable().name()), match, positive);
+    bool Lminus = std::regex_match(static_cast<const std::string&>(equation.variable().name()), match, negative);
+
+    if (!Lplus && !Lminus)
     {
       pbes_expression expression;
       f.apply(expression, equation.formula());
-      std::cerr << expression;
 
       /// TODO: Apply the rewriter to simplify the expressions.
       equations.emplace_back(equation.symbol(), equation.variable(), expression);
+    }
+
+    if (Lplus && !remove_Lplus)
+    {
+      equations.emplace_back(equation);
+    }
+
+    if (Lminus && !remove_Lminus)
+    {      
+      equations.emplace_back(equation);
     }
   }
 
   return mcrl2::pbes_system::pbes(pbes.data(), equations, pbes.initial_state());
 }
+
 
 } // mcrl2::pbes_system::detail
 
