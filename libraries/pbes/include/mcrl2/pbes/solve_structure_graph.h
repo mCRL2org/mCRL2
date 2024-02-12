@@ -79,6 +79,8 @@ class solve_structure_graph_algorithm
 
     bool use_toms_optimization = false;
 
+    bool compute_proof_graph = false;
+
     // find a successor of u
     static structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u)
     {
@@ -362,8 +364,9 @@ class solve_structure_graph_algorithm
         use_toms_optimization(use_toms_optimization_)
     {}
 
+    /// Returns the winning player (alpha) and the set of vertices won by that player. 
     inline
-    bool solve(structure_graph& G)
+    std::pair<bool, vertex_set> solve(structure_graph& G)
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
       mCRL2log(log::debug) << G << std::endl;
@@ -387,7 +390,8 @@ class solve_structure_graph_algorithm
       {
         check_solve_recursive_solution(G, is_disjunctive, W.first, W.second);
       }
-      return is_disjunctive;
+
+      return { is_disjunctive, is_disjunctive ? W.first : W.second };
     }
 };
 
@@ -438,7 +442,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
               condition.push_back(data::equal_to(d1[i], e1[i]));
               next_state_assignments.emplace_back(d1[i], e1[n + m + i]);
             }
-
+              
             process::action_vector actions;
             std::size_t index = 0;
             for (const process::action& a: summand.multi_action().actions())
@@ -565,12 +569,13 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
 };
 
 inline
-bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
+std::pair<bool, vertex_set> solve_structure_graph(structure_graph& G, bool check_strategy = false)
 {
   bool use_toms_optimization = !check_strategy;
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
   return algorithm.solve(G);
 }
+
 
 inline
 std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(structure_graph& G, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)

@@ -20,6 +20,7 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include "mcrl2/pbes/pbesinst_structure_graph2.h"
 
 using namespace mcrl2;
@@ -227,25 +228,36 @@ class pbessolve_tool
   }
 
   template <typename PbesInstAlgorithm>
-  void run_algorithm(PbesInstAlgorithm& algorithm, pbes_system::pbes& pbesspec,
-                     structure_graph& G,
-                     const data::mutable_map_substitution<>& sigma)
+  void run_algorithm(pbes_system::pbes& pbesspec, 
+    pbes_system::pbes& pbesspec_with_counterexample,
+    const data::mutable_map_substitution<>& sigma)
   {
     mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
-    timer().start("instantiation");
-    algorithm.run();
-    timer().finish("instantiation");
+    structure_graph G;
+    PbesInstAlgorithm algorithm(options, pbesspec, G);
+
+    timer().start("first-instantiation");
+    algorithm.run(boost::none);
+    timer().finish("first-instantiation");
 
     mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
                            << G.all_vertices().size() << std::endl;
 
     if ((!lpsfile.empty() || !ltsfile.empty()) &&
-        !has_counter_example_information(pbesspec))
+      pbesspec_with_counterexample == pbes_system::pbes())
     {
       mCRL2log(log::warning)
           << "Warning: the PBES has no counter example information. Did you "
              "use the"
              " --counter-example option when generating the PBES?"
+          << std::endl;
+    }
+
+    if ((lpsfile.empty() && ltsfile.empty()) &&
+      !(pbesspec_with_counterexample == pbes_system::pbes()))
+    {
+      mCRL2log(log::warning)
+          << "Warning: the PBES has counter example information, but no witness will be generated due to lack of --evidence-file"
           << std::endl;
     }
 
@@ -255,24 +267,48 @@ class pbessolve_tool
       lps::load_lps(lpsspec, lpsfile);
       lps::detail::replace_global_variables(lpsspec, sigma);
 
-      bool result;
+      // Solve the initial pbes and obtain the strategies in G.
+      timer().start("first-solving");
+      auto [result, V0] = solve_structure_graph(G);
+      timer().finish("first-solving");
+      std::cout << (result ? "true" : "false") << std::endl;
+
+      // Based on the result remove the unnecessary equations related to counter example information. 
+      mCRL2log(log::verbose) << "Removing unnecessary example information for other player." << std::endl;
+      pbesspec_with_counterexample = detail::remove_counterexample_info(pbesspec_with_counterexample, !result, result); 
+      mCRL2log(log::trace) << pbesspec_with_counterexample << std::endl;
+
+      structure_graph final_G;
+      PbesInstAlgorithm algorithm2(options, pbesspec_with_counterexample, final_G);
+
+      // Perform the second instantiation given the proof graph.      
+      timer().start("instantiation-second");
+      algorithm2.run(boost::make_optional(std::tuple<const structure_graph&, bool, const vertex_set&>(G, result, V0)));
+      timer().finish("instantiation-second");
+      
+      bool result2;
       lps::specification evidence;
       timer().start("solving");
-      std::tie(result, evidence) = solve_structure_graph_with_counter_example(
-          G, lpsspec, pbesspec, algorithm.equation_index());
+      std::tie(result2, evidence) = solve_structure_graph_with_counter_example(
+          final_G, lpsspec, pbesspec_with_counterexample, algorithm2.equation_index());
       timer().finish("solving");
-      std::cout << (result ? "true" : "false") << std::endl;
+
+      assert(result == result2);
+      std::cout << (result2 ? "true" : "false") << std::endl;
       if (evidence_file.empty())
       {
         evidence_file = input_filename() + ".evidence.lps";
       }
       lps::save_lps(evidence, evidence_file);
       mCRL2log(log::verbose)
-          << "Saved " << (result ? "witness" : "counter example") << " in "
+          << "Saved " << (result2 ? "witness" : "counter example") << " in "
           << evidence_file << std::endl;
     }
     else if (!ltsfile.empty())
     {
+      // Not yet implemented.
+      std::abort();
+
       lts::lts_lts_t ltsspec;
       ltsspec.load(ltsfile);
       lts::lts_lts_t evidence;
@@ -292,7 +328,7 @@ class pbessolve_tool
     else
     {
       timer().start("solving");
-      bool result = solve_structure_graph(G, options.check_strategy);
+      auto [result, _] = solve_structure_graph(G, options.check_strategy);
       timer().finish("solving");
       std::cout << (result ? "true" : "false") << std::endl;
     }
@@ -324,18 +360,13 @@ class pbessolve_tool
       mCRL2log(log::trace) << pbesspec;
     }
 
-    structure_graph G;
     if (options.optimization <= 1)
     {
-      pbesinst_structure_graph_algorithm algorithm(options, pbesspec, G);
-      run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, pbesspec_with_counterexample, G,
-                                                        sigma);
+      run_algorithm<pbesinst_structure_graph_algorithm>(pbesspec, pbesspec_with_counterexample, sigma);
     }
     else
     {
-      pbesinst_structure_graph_algorithm2 algorithm(options, pbesspec, G);
-      run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, pbesspec_with_counterexample, G,
-                                                         sigma);
+      run_algorithm<pbesinst_structure_graph_algorithm2>(pbesspec, pbesspec_with_counterexample, sigma);
     }
     return true;
   }

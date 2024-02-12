@@ -134,9 +134,9 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       SG0(X, psi, k);
     }
 
-    void run() override
+    void run(boost::optional<std::tuple<const structure_graph&, bool, const vertex_set&>> proof_graph) override
     {
-      pbesinst_lazy_algorithm::run();
+      pbesinst_lazy_algorithm::run(proof_graph);
       m_graph_builder.finalize();
     }
 };
