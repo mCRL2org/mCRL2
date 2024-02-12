@@ -26,6 +26,7 @@
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/pbes/transformations.h"
+#include "mcrl2\utilities\detail\container_utility.h"
 
 #ifndef MCRL2_PBES_PBESINST_LAZY_H
 #define MCRL2_PBES_PBESINST_LAZY_H
@@ -269,6 +270,104 @@ class pbesinst_lazy_algorithm
       }
     }
 
+    static void rewrite_star(pbes_expression& result,
+                             const structure_graph& G,
+                             bool alpha, 
+                             const vertex_set& W,
+                             const fixpoint_symbol& symbol,
+                             const propositional_variable_instantiation& X,
+                             const pbes_expression& psi)
+    {
+      bool changed = false;
+      replace_propositional_variables(
+        result,
+        psi,
+        [&](const propositional_variable_instantiation& Y) -> pbes_expression
+        {
+          std::regex re("Z(neg|pos)_(\\d+)_.*");
+          std::smatch match;
+
+          std::string name = Y.name();
+          if (std::regex_match(name, match, re))
+          {
+            // If Y in L return Y
+            mCRL2log(log::trace) << Y << " is in L" << std::endl;
+            return Y;
+          }
+          else
+          {
+            // If X is won by player alpha, i.e. in the winning set W.
+            for (const auto& index : W.vertices())
+            {
+              if (G.find_vertex(index).formula() == X)
+              {
+                mCRL2log(log::trace) << "pbes variable "<< X << " is in W\n";
+
+                // Now we need to find all reachable X --> Y following vertices that are not ranked.
+                std::set<structure_graph::index_type> todo = { index };
+                std::set<structure_graph::index_type> done;
+                while (!todo.empty())
+                {
+                  structure_graph::index_type u = *todo.begin();
+                  todo.erase(todo.begin());
+                  done.insert(u);
+                  if ((alpha && G.decoration(u) == structure_graph::d_disjunction) 
+                    || (!alpha && G.decoration(u) == structure_graph::d_conjunction))
+                  {
+                    structure_graph::index_type v = G.strategy(u);
+                    assert (v != undefined_vertex());
+                    if (!mcrl2::utilities::detail::contains(done, v))
+                    {
+                      if (G.rank(v) == undefined_vertex())
+                      {
+                        // explore only the strategy edge if it is unranked
+                        todo.insert(v);
+                      }
+                      else if (G.find_vertex(v).formula() == Y && W.contains(v))
+                      {
+                        // If Y is reachable return false
+                        mCRL2log(log::trace) << Y << " is reachable" << std::endl;
+                        return Y;
+                      }
+                    }
+                  }
+                  else
+                  {
+                    for (structure_graph::index_type v: G.successors(u))
+                    {
+                      if (!mcrl2::utilities::detail::contains(done, v))
+                      {
+                        if (G.rank(v) == undefined_vertex())
+                        {
+                          // explore all outgoing edges that are unranked
+                          todo.insert(v);
+                        }
+                        else if (G.find_vertex(v).formula() == Y && W.contains(v))
+                        {
+                          mCRL2log(log::trace) << Y << " is reachable" << std::endl;
+                          return Y;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            
+            mCRL2log(log::trace) << Y << " is not reachable, becomes false" << std::endl;
+            return false_();
+          }
+        }
+      );
+      if (changed)
+      {
+        simplify_rewriter simplify;
+        const pbes_expression result1=result;
+        simplify(result, result1);
+      }
+
+    }
+
     data::rewriter construct_rewriter(const pbes& pbesspec)
     {
       if (m_options.remove_unused_rewrite_rules)
@@ -341,12 +440,19 @@ class pbesinst_lazy_algorithm
 
     // rewrite the right hand side of the equation X = psi
     virtual void rewrite_psi(const std::size_t /* thread_index */,
+                             boost::optional<std::tuple<const structure_graph&, bool, const vertex_set&>> proof_graph,
                              pbes_expression& result,
                              const fixpoint_symbol& symbol,
                              const propositional_variable_instantiation& X,
                              const pbes_expression& psi
                             )
     {
+      if (proof_graph)
+      {
+        auto& [G, alpha, W] = proof_graph.value();
+        rewrite_star(result, G, alpha, W, symbol, X, psi);
+      }
+      
       if (m_options.optimization >= 1)
       {
         rewrite_true_false(result, symbol, X, psi);
@@ -363,6 +469,7 @@ class pbesinst_lazy_algorithm
     }
 
     virtual void run_thread(const std::size_t thread_index,
+                            boost::optional<std::tuple<const structure_graph&, bool, const vertex_set&>> proof_graph,
                             pbesinst_lazy_todo& todo,
                             std::atomic<std::size_t>& number_of_active_processes,
                             data::mutable_indexed_substitution<> sigma,
@@ -399,7 +506,7 @@ class pbesinst_lazy_algorithm
 
           // optional step
           m_todo_access.lock();
-          rewrite_psi(thread_index, psi_e, eqn.symbol(), X_e, psi_e);
+          rewrite_psi(thread_index, proof_graph, psi_e, eqn.symbol(), X_e, psi_e);
           m_todo_access.unlock();
 
           std::set<propositional_variable_instantiation> occ = find_propositional_variable_instantiations(psi_e);
@@ -440,7 +547,7 @@ class pbesinst_lazy_algorithm
     }
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    virtual void run()
+    virtual void run(boost::optional<std::tuple<const structure_graph&, bool, const vertex_set&>> proof_graph)
     {
       m_iteration_count = 0;
 
@@ -466,6 +573,7 @@ class pbesinst_lazy_algorithm
         {
           std::thread tr([&, i](){
             run_thread(i,
+                       proof_graph,
                        todo,
                        number_of_active_processes,
                        sigma.clone(),
@@ -485,6 +593,7 @@ class pbesinst_lazy_algorithm
         // There is only one thread. Run the process in the main thread, without cloning sigma or the rewriter.
         const std::size_t single_thread_index=0;
         run_thread(single_thread_index,
+                   proof_graph,
                    todo,
                    number_of_active_processes,
                    sigma,
