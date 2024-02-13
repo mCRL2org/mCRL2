@@ -79,8 +79,6 @@ class solve_structure_graph_algorithm
 
     bool use_toms_optimization = false;
 
-    bool compute_proof_graph = false;
-
     // find a successor of u
     static structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u)
     {
@@ -392,9 +390,13 @@ class solve_structure_graph_algorithm
       }
 
       std::set<structure_graph::index_type> minimal_set = extract_minimal_structure_graph(G, G.initial_vertex(), W.first, W.second);
-      auto W_alpha = is_disjunctive ? W.first : W.second;
+
+      // Sorting is necessary for the set intersection computed below.
+      auto& W_alpha = is_disjunctive ? W.first : W.second;
+      W_alpha.sort();
       std::set<structure_graph::index_type> W_minimal;
-      std::set_intersection(W_alpha.vertices().begin(), W_alpha.vertices().end(), minimal_set.begin(), minimal_set.end(), std::inserter(W_minimal, W_minimal.begin()));
+      std::set_intersection(minimal_set.begin(), minimal_set.end(), W_alpha.vertices().begin(), W_alpha.vertices().end(), std::inserter(W_minimal, W_minimal.begin()));
+      mCRL2log(log::debug) << "\nExtracted minimal set W " << core::detail::print_set(W_minimal) << std::endl;
 
       return { is_disjunctive, W_minimal };
     }
