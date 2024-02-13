@@ -18,7 +18,6 @@
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/detail/liblts_bisim_minimal_depth.h"
 
 namespace mcrl2
 {
@@ -1150,40 +1149,6 @@ bool destructive_bisimulation_compare(
   const std::string& counter_example_file = "",
   const bool structured_output = false);
 
-template < class LTS_TYPE>
-bool destructive_bisimulation_compare_minimal_depth(
-    LTS_TYPE & l1,
-    LTS_TYPE & l2,
-    const bool branching /* =false*/,
-    const bool preserve_divergences /*=false*/,
-    const bool generate_counter_examples /* = false */,
-    const std::string & counter_example_file /*= ""*/,
-    const bool /*structured_output = false */)
-    {
-    assert(branching == false && preserve_divergences == false && generate_counter_examples == true);
-    std::size_t init_l2 = l2.initial_state() + l1.num_states();
-    mcrl2::lts::detail::merge(l1, l2);
-    l2.clear(); // No use for l2 anymore.
-    detail::bisim_partitioner_minimal_depth<LTS_TYPE> bisim_partitioner_minimal_depth(l1, init_l2);
-    if (bisim_partitioner_minimal_depth.in_same_class(l1.initial_state(), init_l2))
-    {
-        return true; 
-    }
-    // LTSs are not bisimilar, we can create a counter example. 
-    std::string filename = "Counterexample.mcf";
-    if (!counter_example_file.empty()) {
-        filename = counter_example_file;
-    }
-
-    mcrl2::state_formulas::state_formula counter_example_formula = bisim_partitioner_minimal_depth.dist_formula_mindepth(l1.initial_state(), init_l2);
-    
-    std::ofstream counter_file(filename);
-    counter_file << mcrl2::state_formulas::pp(counter_example_formula);
-    counter_file.close();
-    mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
-    return false;
-}
-
 
 /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
  * \details The current transitions system and the lts l2 are first duplicated and subsequently
@@ -1261,6 +1226,18 @@ bool bisimulation_compare(
                                           generate_counter_examples, structured_output);
 }
 
+/** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
+ * \details This lts and the lts l2 are not usable anymore after this call.
+ *          The space consumption is O(n) and time is O(nm). It uses the branching bisimulation
+ *          algorithm by Groote and Vaandrager from 1990.
+ * \param[in/out] l1 A first transition system.
+ * \param[in/out] l2 A second transition system.
+ * \param[in] branching If true branching bisimulation is used, otherwise strong bisimulation is applied.
+ * \param[in] preserve_divergences If true and branching is true, preserve tau loops on states.
+ * \param[in] generate_counter_examples Whether to generate a counter example
+ * \param[in] counter_example_file The file to store the counter example in
+ * \param[in] structured_output
+ * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
 template < class LTS_TYPE>
 bool destructive_bisimulation_compare(
   LTS_TYPE& l1,
@@ -1301,6 +1278,7 @@ bool destructive_bisimulation_compare(
   }
   return bisim_part.in_same_class(l1.initial_state(),init_l2);
 }
+
 
 }
 }
