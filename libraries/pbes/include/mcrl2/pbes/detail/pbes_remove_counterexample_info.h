@@ -13,6 +13,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 
 #include <regex>
  
@@ -67,6 +68,7 @@ mcrl2::pbes_system::pbes remove_counterexample_info(const pbes_system::pbes& pbe
   subsitute_counterexample f(remove_Lplus, remove_Lminus);
 
   /// Replace the corresponding PBES variables by true and false respectively.
+  simplify_rewriter simplify;
   for (auto& equation : pbes.equations())
   {
     std::smatch match;
@@ -78,8 +80,7 @@ mcrl2::pbes_system::pbes remove_counterexample_info(const pbes_system::pbes& pbe
       pbes_expression expression;
       f.apply(expression, equation.formula());
 
-      /// TODO: Apply the rewriter to simplify the expressions.
-      equations.emplace_back(equation.symbol(), equation.variable(), expression);
+      equations.emplace_back(equation.symbol(), equation.variable(), simplify(expression));
     }
 
     if (Lplus && !remove_Lplus)
