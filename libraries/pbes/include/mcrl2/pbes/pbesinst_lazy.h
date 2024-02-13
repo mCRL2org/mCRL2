@@ -273,20 +273,55 @@ class pbesinst_lazy_algorithm
     static void rewrite_star(pbes_expression& result,
                              const structure_graph& G,
                              bool alpha, 
-                             const vertex_set& W,
+                             const std::set<structure_graph::index_type>& W,
                              const fixpoint_symbol& symbol,
                              const propositional_variable_instantiation& X,
                              const pbes_expression& psi)
     {
       bool changed = false;
+      std::regex re("Z(neg|pos)_(\\d+)_.*");
+      std::smatch match;
+
+      // Now we need to find all reachable X --> Y, following vertices that are not ranked.
+      std::set<pbes_expression> Ys;
+      
+      // If X is won by player alpha, i.e. in the winning set W.
+      for (const auto& index : W)
+      {
+        if (G.find_vertex(index).formula() == X)
+        {
+          std::set<structure_graph::index_type> todo = { index };
+          std::set<structure_graph::index_type> done;
+
+          while (!todo.empty())
+          {
+            structure_graph::index_type u = *todo.begin();
+            todo.erase(todo.begin());
+            done.insert(u);
+            for (structure_graph::index_type v: G.successors(u))
+            {
+              if (!mcrl2::utilities::detail::contains(done, v))
+              {
+                if (G.rank(v) == undefined_vertex())
+                {
+                  // explore all outgoing edges that are unranked
+                  todo.insert(v);
+                }
+                else if (mcrl2::utilities::detail::contains(W, v))
+                {
+                  Ys.insert(G.find_vertex(v).formula());
+                }
+              }
+            }
+          }
+        }
+      }
+
       replace_propositional_variables(
         result,
         psi,
         [&](const propositional_variable_instantiation& Y) -> pbes_expression
         {
-          std::regex re("Z(neg|pos)_(\\d+)_.*");
-          std::smatch match;
-
           std::string name = Y.name();
           if (std::regex_match(name, match, re))
           {
@@ -296,66 +331,16 @@ class pbesinst_lazy_algorithm
           }
           else
           {
-            // If X is won by player alpha, i.e. in the winning set W.
-            for (const auto& index : W.vertices())
+            if (mcrl2::utilities::detail::contains(Ys, Y))
             {
-              if (G.find_vertex(index).formula() == X)
-              {
-                mCRL2log(log::trace) << "pbes variable "<< X << " is in W\n";
-
-                // Now we need to find all reachable X --> Y following vertices that are not ranked.
-                std::set<structure_graph::index_type> todo = { index };
-                std::set<structure_graph::index_type> done;
-                while (!todo.empty())
-                {
-                  structure_graph::index_type u = *todo.begin();
-                  todo.erase(todo.begin());
-                  done.insert(u);
-                  if ((alpha && G.decoration(u) == structure_graph::d_disjunction) 
-                    || (!alpha && G.decoration(u) == structure_graph::d_conjunction))
-                  {
-                    structure_graph::index_type v = G.strategy(u);
-                    assert (v != undefined_vertex());
-                    if (!mcrl2::utilities::detail::contains(done, v))
-                    {
-                      if (G.rank(v) == undefined_vertex())
-                      {
-                        // explore only the strategy edge if it is unranked
-                        todo.insert(v);
-                      }
-                      else if (G.find_vertex(v).formula() == Y && W.contains(v))
-                      {
-                        // If Y is reachable return false
-                        mCRL2log(log::trace) << Y << " is reachable" << std::endl;
-                        return Y;
-                      }
-                    }
-                  }
-                  else
-                  {
-                    for (structure_graph::index_type v: G.successors(u))
-                    {
-                      if (!mcrl2::utilities::detail::contains(done, v))
-                      {
-                        if (G.rank(v) == undefined_vertex())
-                        {
-                          // explore all outgoing edges that are unranked
-                          todo.insert(v);
-                        }
-                        else if (G.find_vertex(v).formula() == Y && W.contains(v))
-                        {
-                          mCRL2log(log::trace) << Y << " is reachable" << std::endl;
-                          return Y;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+              return Y;
             }
-            
-            mCRL2log(log::trace) << Y << " is not reachable, becomes false" << std::endl;
-            return false_();
+            else 
+            {
+              // If Y is not reachable replace it by false
+              mCRL2log(log::trace) << Y << " is not reachable, becomes false" << std::endl;
+              return false_();
+            }
           }
         }
       );
@@ -440,7 +425,7 @@ class pbesinst_lazy_algorithm
 
     // rewrite the right hand side of the equation X = psi
     virtual void rewrite_psi(const std::size_t /* thread_index */,
-                             boost::optional<std::tuple<const structure_graph&, bool, const vertex_set&>> proof_graph,
+                             boost::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
                              pbes_expression& result,
                              const fixpoint_symbol& symbol,
                              const propositional_variable_instantiation& X,
@@ -469,7 +454,7 @@ class pbesinst_lazy_algorithm
     }
 
     virtual void run_thread(const std::size_t thread_index,
-                            boost::optional<std::tuple<const structure_graph&, bool, const vertex_set&>> proof_graph,
+                            boost::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
                             pbesinst_lazy_todo& todo,
                             std::atomic<std::size_t>& number_of_active_processes,
                             data::mutable_indexed_substitution<> sigma,
@@ -547,7 +532,7 @@ class pbesinst_lazy_algorithm
     }
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    virtual void run(boost::optional<std::tuple<const structure_graph&, bool, const vertex_set&>> proof_graph)
+    virtual void run(boost::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph)
     {
       m_iteration_count = 0;
 
