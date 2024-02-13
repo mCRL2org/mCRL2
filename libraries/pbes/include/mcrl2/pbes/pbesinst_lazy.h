@@ -298,6 +298,8 @@ class pbesinst_lazy_algorithm
             structure_graph::index_type u = *todo.begin();
             todo.erase(todo.begin());
             done.insert(u);
+
+            // Explore all outgoing edges.
             for (structure_graph::index_type v: G.successors(u))
             {
               if (!mcrl2::utilities::detail::contains(done, v))
@@ -317,16 +319,16 @@ class pbesinst_lazy_algorithm
         }
       }
 
+      mCRL2log(log::debug) << "Ys := " << core::detail::print_set(Ys) << std::endl;
+
       replace_propositional_variables(
         result,
         psi,
         [&](const propositional_variable_instantiation& Y) -> pbes_expression
         {
-          std::string name = Y.name();
-          if (std::regex_match(name, match, re))
+          if (std::regex_match(static_cast<const std::string&>(Y.name()), match, re))
           {
             // If Y in L return Y
-            mCRL2log(log::trace) << Y << " is in L" << std::endl;
             return Y;
           }
           else
@@ -337,8 +339,8 @@ class pbesinst_lazy_algorithm
             }
             else 
             {
-              // If Y is not reachable replace it by false
-              mCRL2log(log::trace) << Y << " is not reachable, becomes false" << std::endl;
+              // If Y is not reachable, replace it by false
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
               return false_();
             }
           }
@@ -347,7 +349,7 @@ class pbesinst_lazy_algorithm
       if (changed)
       {
         simplify_rewriter simplify;
-        const pbes_expression result1=result;
+        const pbes_expression result1 = result;
         simplify(result, result1);
       }
 
