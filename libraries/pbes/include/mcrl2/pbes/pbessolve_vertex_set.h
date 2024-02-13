@@ -215,6 +215,14 @@ struct vertex_set
       assert(self_check());
     }
 
+    /// @brief Sorts the set of vertices, but resets the include set.
+    void sort()
+    {
+      std::sort(m_vertices.begin(), m_vertices.end());
+      m_include = boost::dynamic_bitset<>(m_include.size());
+      assert(self_check());
+    }
+
     void clear()
     {
       m_vertices.clear();

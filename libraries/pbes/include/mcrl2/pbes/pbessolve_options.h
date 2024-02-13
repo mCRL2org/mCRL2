@@ -33,6 +33,9 @@ struct pbessolve_options
   // if true, apply optimization 4 and 5 at every iteration
   bool aggressive = false;
 
+  // if true, run the naive algorithm for instantiating pbes with counter example information.
+  bool naive_counter_example_instantiation = false;
+
   // for doing a consistency check on the computed strategy
   bool check_strategy = false;
 
