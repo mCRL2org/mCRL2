@@ -366,7 +366,7 @@ class solve_structure_graph_algorithm
 
     /// Returns the winning player (alpha) and the set of vertices won by that player. 
     inline
-    std::pair<bool, vertex_set> solve(structure_graph& G)
+    std::pair<bool, std::set<structure_graph::index_type>> solve(structure_graph& G)
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
       mCRL2log(log::debug) << G << std::endl;
@@ -391,7 +391,12 @@ class solve_structure_graph_algorithm
         check_solve_recursive_solution(G, is_disjunctive, W.first, W.second);
       }
 
-      return { is_disjunctive, is_disjunctive ? W.first : W.second };
+      std::set<structure_graph::index_type> minimal_set = extract_minimal_structure_graph(G, G.initial_vertex(), W.first, W.second);
+      auto W_alpha = is_disjunctive ? W.first : W.second;
+      std::set<structure_graph::index_type> W_minimal;
+      std::set_intersection(W_alpha.vertices().begin(), W_alpha.vertices().end(), minimal_set.begin(), minimal_set.end(), std::inserter(W_minimal, W_minimal.begin()));
+
+      return { is_disjunctive, W_minimal };
     }
 };
 
@@ -569,7 +574,7 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
 };
 
 inline
-std::pair<bool, vertex_set> solve_structure_graph(structure_graph& G, bool check_strategy = false)
+std::pair<bool, const std::set<structure_graph::index_type>> solve_structure_graph(structure_graph& G, bool check_strategy = false)
 {
   bool use_toms_optimization = !check_strategy;
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);

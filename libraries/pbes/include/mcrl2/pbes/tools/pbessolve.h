@@ -269,7 +269,7 @@ class pbessolve_tool
 
       // Solve the initial pbes and obtain the strategies in G.
       timer().start("first-solving");
-      auto [result, V0] = solve_structure_graph(G);
+      auto [result, W_alpha] = solve_structure_graph(G);
       timer().finish("first-solving");
       std::cout << (result ? "true" : "false") << std::endl;
 
@@ -283,7 +283,7 @@ class pbessolve_tool
 
       // Perform the second instantiation given the proof graph.      
       timer().start("instantiation-second");
-      algorithm2.run(boost::make_optional(std::tuple<const structure_graph&, bool, const vertex_set&>(G, result, V0)));
+      algorithm2.run(boost::make_optional(std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>(G, result, W_alpha)));
       timer().finish("instantiation-second");
       
       bool result2;
