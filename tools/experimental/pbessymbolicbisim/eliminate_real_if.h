@@ -72,7 +72,7 @@ make_eliminate_real_if_builder()
 
 template <typename T>
 void eliminate_real_if(T& x,
-                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                        typename std::enable_if<!std::is_base_of<atermpp::aterm_core, T>::value>::type* = nullptr
                        )
 {
   data::detail::make_eliminate_real_if_builder<data::data_expression_builder>().update(x);
@@ -80,7 +80,7 @@ void eliminate_real_if(T& x,
 
 template <typename T>
 T eliminate_real_if(const T x,
-                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                     typename std::enable_if<std::is_base_of<atermpp::aterm_core, T>::value>::type* = nullptr
                     )
 {
   T result; 

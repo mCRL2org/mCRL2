@@ -31,7 +31,7 @@ class stochastic_process_initializer: public process_initializer
 
     /// \brief Constructor.
     /// \param term A term
-    explicit stochastic_process_initializer(const atermpp::aterm& term)
+    explicit stochastic_process_initializer(const atermpp::aterm_core& term)
       : super(term, false)
     {
       assert(core::detail::check_term_LinearProcessInit(*this));

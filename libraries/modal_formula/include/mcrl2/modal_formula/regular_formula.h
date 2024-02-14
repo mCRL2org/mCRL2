@@ -32,7 +32,7 @@ class regular_formula: public atermpp::aterm_appl
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit regular_formula(const atermpp::aterm& term)
+    explicit regular_formula(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_RegFrm(*this));
@@ -114,7 +114,7 @@ class seq: public regular_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit seq(const atermpp::aterm& term)
+    explicit seq(const atermpp::aterm_core& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegSeq(*this));
@@ -190,7 +190,7 @@ class alt: public regular_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit alt(const atermpp::aterm& term)
+    explicit alt(const atermpp::aterm_core& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegAlt(*this));
@@ -266,7 +266,7 @@ class trans: public regular_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit trans(const atermpp::aterm& term)
+    explicit trans(const atermpp::aterm_core& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegTrans(*this));
@@ -337,7 +337,7 @@ class trans_or_nil: public regular_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit trans_or_nil(const atermpp::aterm& term)
+    explicit trans_or_nil(const atermpp::aterm_core& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_RegTransOrNil(*this));
@@ -408,7 +408,7 @@ class untyped_regular_formula: public regular_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit untyped_regular_formula(const atermpp::aterm& term)
+    explicit untyped_regular_formula(const atermpp::aterm_core& term)
       : regular_formula(term)
     {
       assert(core::detail::check_term_UntypedRegFrm(*this));

@@ -10,7 +10,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_APPL_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_H
 
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_core.h"
 #include "mcrl2/utilities/unused.h"
 
 #include <array>
@@ -66,7 +66,7 @@ public:
   }
 
   /// \brief Constructs a term application with the given symbol and arguments.
-  _aterm_appl(const function_symbol& sym, std::array<unprotected_aterm, N> arguments)
+  _aterm_appl(const function_symbol& sym, std::array<unprotected_aterm_core, N> arguments)
     : _aterm(sym),
       m_arguments(arguments)
   {
@@ -94,9 +94,9 @@ public:
   }
 
   /// \returns A const reference to the arguments at the ith position.
-  const aterm& arg(std::size_t index) const
+  const aterm_core& arg(std::size_t index) const
   {
-    return static_cast<const aterm&>(m_arguments.data()[index]);
+    return static_cast<const aterm_core&>(m_arguments.data()[index]);
   }
 
   /// \brief Convert any known number of arguments aterm_appl<N> to the default _aterm_appl.
@@ -106,7 +106,7 @@ public:
   }
 
 private:
-  std::array<unprotected_aterm, N> m_arguments; /// \brief Array of arguments.
+  std::array<unprotected_aterm_core, N> m_arguments; /// \brief Array of arguments.
 };
 
 /// A default instantiation for the underlying term application.
@@ -122,7 +122,7 @@ private:
   /// \returns The size (in bytes) of a class T with arity number of arguments placed at the end.
   constexpr static std::size_t term_appl_size(std::size_t arity)
   {
-    return sizeof(T) + (arity - 1) * sizeof(aterm);
+    return sizeof(T) + (arity - 1) * sizeof(aterm_core);
   }
 
 public:
@@ -140,16 +140,16 @@ public:
   template<typename ForwardIterator>
   T* allocate_args(const function_symbol& symbol, ForwardIterator, ForwardIterator)
   {
-    // We assume that object T contains the _aterm_appl<aterm, 1> at the end and reserve extra space for parameters.
+    // We assume that object T contains the _aterm_appl<aterm_core, 1> at the end and reserve extra space for parameters.
     char* newTerm = m_packed_allocator.allocate(term_appl_size(symbol.arity()));
     return reinterpret_cast<T*>(newTerm);
   }
 
   /// \brief Allocates space for an _aterm_appl where the arity is given by the function symbol.
   /// \details Assumes that arguments contains symbol.arity() number of terms.
-  T* allocate_args(const function_symbol& symbol, unprotected_aterm*)
+  T* allocate_args(const function_symbol& symbol, unprotected_aterm_core*)
   {
-    // We assume that object T contains the _aterm_appl<aterm, 1> at the end and reserve extra space for parameters.
+    // We assume that object T contains the _aterm_appl<aterm_core, 1> at the end and reserve extra space for parameters.
     char* newTerm = m_packed_allocator.allocate(term_appl_size(symbol.arity()));
     return reinterpret_cast<T*>(newTerm);
   }
@@ -161,7 +161,7 @@ public:
     new (element) T(symbol, begin, end, true);
   }
 
-  /// \brief Specialize destroy for _aterm_appl to only destroy the function symbol. The reference count for the aterm does not have to be decreased.
+  /// \brief Specialize destroy for _aterm_appl to only destroy the function symbol. The reference count for the aterm_core does not have to be decreased.
   void destroy(T* element)
   {
     assert(element != nullptr);
@@ -175,7 +175,7 @@ public:
   {
     assert(element != nullptr);
 
-    // Deallocate the memory of this aterm appl.
+    // Deallocate the memory of this aterm_core appl.
     _term_appl& term = *element;
     m_packed_allocator.deallocate(reinterpret_cast<char*>(element), term_appl_size(term.function().arity()));
   }
@@ -189,13 +189,13 @@ private:
   std::allocator<char> m_packed_allocator;
 };
 
-static_assert(sizeof(_term_appl) == sizeof(_aterm) + sizeof(aterm), "Sanity check: aterm_appl size");
+static_assert(sizeof(_term_appl) == sizeof(_aterm) + sizeof(aterm_core), "Sanity check: aterm_appl size");
 
 template < class Derived, class Base >
 term_appl_iterator<Derived> aterm_appl_iterator_cast(term_appl_iterator<Base> a,
                                                                 typename std::enable_if<
-                                                                     std::is_base_of<aterm, Base>::value &&
-                                                                     std::is_base_of<aterm, Derived>::value
+                                                                     std::is_base_of<aterm_core, Base>::value &&
+                                                                     std::is_base_of<aterm_core, Derived>::value
 >::type* = nullptr);
 
 } // namespace detail

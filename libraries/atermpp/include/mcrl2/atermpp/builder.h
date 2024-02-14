@@ -47,7 +47,7 @@ struct builder
   void apply(T& result, const aterm_list& x)
   {
     derived().enter(x);
-    make_term_list(static_cast<aterm_list&>(result), x.begin(), x.end(), [&](aterm& r, const aterm& v) { return derived().apply(r, v); } ) ;
+    make_term_list(static_cast<aterm_list&>(result), x.begin(), x.end(), [&](aterm_core& r, const aterm_core& v) { return derived().apply(r, v); } ) ;
     derived().leave(x);
 
     // return mcrl2::workaround::return_std_move(result);
@@ -57,14 +57,14 @@ struct builder
   void apply(T& result, const aterm_appl& x)
   {
     derived().enter(x);
-    make_term_appl(result, x.function() , x.begin(), x.end(), [&](aterm& r, const aterm& v) { return derived().apply(r, v); } );
+    make_term_appl(result, x.function() , x.begin(), x.end(), [&](aterm_core& r, const aterm_core& v) { return derived().apply(r, v); } );
     derived().leave(x);
 
     // return mcrl2::workaround::return_std_move(result);
   }
 
   template <class T>
-  void apply(T& result, const aterm& x)
+  void apply(T& result, const aterm_core& x)
   {
     derived().enter(x);
     if (x.type_is_appl())

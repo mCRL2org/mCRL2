@@ -20,8 +20,8 @@ namespace atermpp
 namespace detail
 {
   template<typename T>
-  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>&
-    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>::operator=(const unprotected_aterm& other) noexcept
+  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>&
+    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>::operator=(const unprotected_aterm_core& other) noexcept
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     m_term = address(other);
@@ -29,8 +29,8 @@ namespace detail
   }
 
   template<typename T>
-  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>&
-    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm, T>::value>>::operator=(unprotected_aterm&& other) noexcept
+  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>&
+    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>::operator=(unprotected_aterm_core&& other) noexcept
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     m_term = address(other);
@@ -65,42 +65,42 @@ namespace detail
   }
 }
 
-inline aterm::aterm() noexcept
+inline aterm_core::aterm_core() noexcept
 {
   detail::g_thread_term_pool().register_variable(this);
 }
 
-inline aterm::~aterm() noexcept
+inline aterm_core::~aterm_core() noexcept
 {
   detail::g_thread_term_pool().deregister_variable(this);
 }
 
-inline aterm::aterm(const detail::_aterm *t) noexcept
+inline aterm_core::aterm_core(const detail::_aterm *t) noexcept
 {
   detail::g_thread_term_pool().register_variable(this);
   m_term = t;
 }
 
-inline aterm::aterm(const aterm& other) noexcept
- : unprotected_aterm(other.m_term)
+inline aterm_core::aterm_core(const aterm_core& other) noexcept
+ : unprotected_aterm_core(other.m_term)
 {
   detail::g_thread_term_pool().register_variable(this);
 }
 
-inline aterm::aterm(aterm&& other) noexcept
- : unprotected_aterm(other.m_term)
+inline aterm_core::aterm_core(aterm_core&& other) noexcept
+ : unprotected_aterm_core(other.m_term)
 {
   detail::g_thread_term_pool().register_variable(this);
 }
 
-inline aterm& aterm::operator=(const aterm& other) noexcept
+inline aterm_core& aterm_core::operator=(const aterm_core& other) noexcept
 {
   mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
   m_term = other.m_term;
   return *this;
 }
 
-inline aterm& aterm::assign(const aterm& other,
+inline aterm_core& aterm_core::assign(const aterm_core& other,
   detail::thread_aterm_pool& pool) noexcept
 {
   mcrl2::utilities::shared_guard guard = pool.lock_shared();
@@ -110,7 +110,7 @@ inline aterm& aterm::assign(const aterm& other,
 
 
 template <bool CHECK_BUSY_FLAG /* =true*/>
-inline aterm& aterm::unprotected_assign(const aterm& other) noexcept
+inline aterm_core& aterm_core::unprotected_assign(const aterm_core& other) noexcept
 {
   if constexpr (mcrl2::utilities::detail::GlobalThreadSafe && CHECK_BUSY_FLAG) assert(detail::g_thread_term_pool().is_shared_locked());
   m_term = other.m_term;
@@ -118,7 +118,7 @@ inline aterm& aterm::unprotected_assign(const aterm& other) noexcept
 }
 
 
-inline aterm& aterm::operator=(aterm&& other) noexcept
+inline aterm_core& aterm_core::operator=(aterm_core&& other) noexcept
 {
   mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
   // Using hash set protection it is cheaper just to move the value to the new term.

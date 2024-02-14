@@ -15,7 +15,7 @@
 namespace mcrl2::lps
 {
 
-atermpp::aterm linear_process_specification_marker()
+atermpp::aterm_core linear_process_specification_marker()
 {
   return atermpp::aterm_appl(atermpp::function_symbol("linear_process_specification", 0));
 }
@@ -140,7 +140,7 @@ void read_spec(atermpp::aterm_istream& stream, stochastic_specification& spec)
 
   try
   {
-    atermpp::aterm marker;
+    atermpp::aterm_core marker;
     stream >> marker;
 
     if (marker != linear_process_specification_marker())

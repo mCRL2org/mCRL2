@@ -32,7 +32,7 @@ class function_sort: public sort_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit function_sort(const atermpp::aterm& term)
+    explicit function_sort(const atermpp::aterm_core& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortArrow(*this));

@@ -199,7 +199,7 @@ bool %(check_name)s(const Term& t)
 
 '''
     CHECK_TERM_TYPE = '''  // check the type of the term
-  const atermpp::aterm& term(t);
+  const atermpp::aterm_core& term(t);
   if (!term.type_is_appl())
   {
     return false;
@@ -254,11 +254,11 @@ bool %(check_name)s(const Term& t)
             for i in range(arity):
                 arg = f.arguments[i]
                 if arg.repetitions == '':
-                    body = body + '  if (!check_term_argument(a[%d], %s<atermpp::aterm>))\n'    % (i, arg.check_name())
+                    body = body + '  if (!check_term_argument(a[%d], %s<atermpp::aterm_core>))\n'    % (i, arg.check_name())
                 elif arg.repetitions == '*':
-                    body = body + '  if (!check_list_argument(a[%d], %s<atermpp::aterm>, 0))\n' % (i, arg.check_name())
+                    body = body + '  if (!check_list_argument(a[%d], %s<atermpp::aterm_core>, 0))\n' % (i, arg.check_name())
                 elif arg.repetitions == '+':
-                    body = body + '  if (!check_list_argument(a[%d], %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
+                    body = body + '  if (!check_list_argument(a[%d], %s<atermpp::aterm_core>, 1))\n' % (i, arg.check_name())
                 body = body + '  {\n'
                 body = body + '    mCRL2log(log::debug) << "%s" << std::endl;\n'                % (arg.check_name())
                 body = body + '    return false;\n'

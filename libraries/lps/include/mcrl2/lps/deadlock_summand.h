@@ -104,7 +104,7 @@ inline void swap(deadlock_summand& t1, deadlock_summand& t2)
 //--- end generated class deadlock_summand ---//
 
 /// \brief Conversion to atermappl.
-/// \return The deadlock summand converted to aterm format.
+/// \return The deadlock summand converted to aterm_core format.
 inline
 atermpp::aterm_appl deadlock_summand_to_aterm(const deadlock_summand& s)
 {

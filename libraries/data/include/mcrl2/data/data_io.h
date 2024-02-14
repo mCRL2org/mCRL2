@@ -25,10 +25,10 @@ namespace detail
 }
 
 /// \brief Transforms DataVarId to DataVarIdNoIndex and transforms OpId to OpIdNoIndex
-atermpp::aterm add_index(const atermpp::aterm& x);
+atermpp::aterm_core add_index(const atermpp::aterm_core& x);
 
 /// \brief Transforms DataVarIdNoIndex to DataVarId and transforms OpIdNoIndex to OpId
-atermpp::aterm remove_index(const atermpp::aterm& x);
+atermpp::aterm_core remove_index(const atermpp::aterm_core& x);
 
 /// \brief Reads a data specification from a stream.
 atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, data_specification& spec);

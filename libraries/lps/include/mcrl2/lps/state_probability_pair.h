@@ -74,7 +74,7 @@ class state_probability_pair
       }
       else
       {
-        static_assert(!std::is_convertible<PROBABILITY,atermpp::aterm>::value);
+        static_assert(!std::is_convertible<PROBABILITY,atermpp::aterm_core>::value);
         return m_state==other.m_state && m_probability==other.m_probability;
       }
     }

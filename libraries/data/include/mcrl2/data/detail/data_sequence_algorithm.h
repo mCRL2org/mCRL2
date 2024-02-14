@@ -46,7 +46,7 @@ variable_list set_intersection(const variable_list& x, const variable_list& y)
   return variable_list(result.begin(), result.end());
 }
 
-/// \brief Returns the difference of two unordered sets, that are stored in aterm lists.
+/// \brief Returns the difference of two unordered sets, that are stored in aterm_core lists.
 /// \param x A sequence of data variables
 /// \param y A sequence of data variables
 /// \return The difference of two sets.

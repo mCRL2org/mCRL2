@@ -39,7 +39,7 @@ class data_equation: public atermpp::aterm_appl
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit data_equation(const atermpp::aterm& term)
+    explicit data_equation(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_DataEqn(*this));
@@ -145,7 +145,7 @@ inline void swap(data_equation& t1, data_equation& t2)
 //--- end generated class data_equation ---//
 
 /// \brief Recognizer function.
-/// \param[in] t A aterm appl of which it is checked whether it is a data_equation.
+/// \param[in] t A aterm_core appl of which it is checked whether it is a data_equation.
 /// \returns True if the provided argument is a data_equation. 
 inline bool is_data_equation(const atermpp::aterm_appl& t)
 {

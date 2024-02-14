@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(parallel_vector, *boost::unit_test::timeout(240))
 
       for (std::size_t i = 0; i < 10000; ++i)
       {
-        atermpp::vector<atermpp::aterm> vector;
+        atermpp::vector<atermpp::aterm_core> vector;
         for (std::size_t i = 0; i < 10000; ++i)
         {
           vector.push_back(value);

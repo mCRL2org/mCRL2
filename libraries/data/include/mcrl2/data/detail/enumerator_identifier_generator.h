@@ -13,7 +13,7 @@
 ///        to make it as efficient to generate fresh strings. Construction of a
 ///        enumerator identifier generator is less efficient, as it sets up
 ///        internal data structures and searches through all existing
-///        function symbols in the aterm library. 
+///        function symbols in the aterm_core library. 
 
 #ifndef MCRL2_DATA_DETAIL_ENUMERATOR_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_DETAIL_ENUMERATOR_IDENTIFIER_GENERATOR_H

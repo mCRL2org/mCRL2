@@ -24,7 +24,7 @@ extern typename std::aligned_storage<sizeof(aterm_pool), alignof(aterm_pool)>::t
 /// \brief A reference to the global term pool storage
 static aterm_pool& g_aterm_pool_instance = *static_cast<aterm_pool*>(static_cast<void*>(&g_aterm_pool_storage));
 
-/// \brief obtain a reference to the global aterm pool.
+/// \brief obtain a reference to the global aterm_core pool.
 /// \details provides lazy initialization which should be used when instantiating
 ///          global terms and function symbols.
 template<bool lazy = false>

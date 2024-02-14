@@ -35,7 +35,7 @@ function_symbol thread_aterm_pool::create_function_symbol(const std::string& nam
   return create_function_symbol(std::move(name_copy), arity, check_for_registered_functions);
 }
 
-void thread_aterm_pool::create_int(aterm& term, size_t val)
+void thread_aterm_pool::create_int(aterm_core& term, size_t val)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   bool added = m_pool.create_int(term, val);
@@ -44,7 +44,7 @@ void thread_aterm_pool::create_int(aterm& term, size_t val)
   if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
 }
 
-void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol& sym)
+void thread_aterm_pool::create_term(aterm_core& term, const atermpp::function_symbol& sym)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   bool added = m_pool.create_term(term, sym);
@@ -54,7 +54,7 @@ void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol&
 }
 
 template<class ...Terms>
-void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments)
+void thread_aterm_pool::create_appl(aterm_core& term, const function_symbol& sym, const Terms&... arguments)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   bool added = m_pool.create_appl(term, sym, arguments...);
@@ -64,10 +64,10 @@ void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, con
 }
 
 template<class Term, class INDEX_TYPE, class ...Terms>
-void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments)
+void thread_aterm_pool::create_appl_index(aterm_core& term, const function_symbol& sym, const Terms&... arguments)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
-  std::array<unprotected_aterm, sizeof...(arguments)> argument_array;
+  std::array<unprotected_aterm_core, sizeof...(arguments)> argument_array;
   store_in_argument_array(argument_array, arguments...);
 
   bool added;
@@ -75,7 +75,7 @@ void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sy
   {
     /* Code below is more elegant than succeeding code, but it unnecessarily copies and protects a term.
         m_pool.create_int(term, atermpp::detail::index_traits<Term, INDEX_TYPE, 1>::
-            insert(static_cast<INDEX_TYPE>(static_cast<aterm>(address(argument_array[0]))))); */
+            insert(static_cast<INDEX_TYPE>(static_cast<aterm_core>(address(argument_array[0]))))); */
     m_pool.create_int(term, 
                       atermpp::detail::index_traits<Term, INDEX_TYPE, 1>::
                                 insert(*reinterpret_cast<INDEX_TYPE*>(&(argument_array[0]))));
@@ -87,8 +87,8 @@ void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sy
         m_pool.create_int(
           term,
           atermpp::detail::index_traits<Term, INDEX_TYPE, 2>::
-            insert(std::make_pair(static_cast<typename INDEX_TYPE::first_type>(static_cast<aterm>(address(argument_array[0]))),
-                                  static_cast<typename INDEX_TYPE::second_type>(static_cast<aterm>(address(argument_array[1])))))); */
+            insert(std::make_pair(static_cast<typename INDEX_TYPE::first_type>(static_cast<aterm_core>(address(argument_array[0]))),
+                                  static_cast<typename INDEX_TYPE::second_type>(static_cast<aterm_core>(address(argument_array[1])))))); */
     m_pool.create_int(term,
                       atermpp::detail::index_traits<Term, INDEX_TYPE, 2>::
                                 insert(*reinterpret_cast<INDEX_TYPE*>(&argument_array[0])));
@@ -100,7 +100,7 @@ void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sy
 }
 
 template<typename InputIterator>
-void thread_aterm_pool::create_appl_dynamic(aterm& term,
+void thread_aterm_pool::create_appl_dynamic(aterm_core& term,
                             const function_symbol& sym,
                             InputIterator begin,
                             InputIterator end)
@@ -113,7 +113,7 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
 }
 
 template<typename InputIterator, typename ATermConverter>
-void thread_aterm_pool::create_appl_dynamic(aterm& term,
+void thread_aterm_pool::create_appl_dynamic(aterm_core& term,
                             const function_symbol& sym,
                             ATermConverter convert_to_aterm,
                             InputIterator begin,
@@ -126,7 +126,7 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
   if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
 }
 
-void thread_aterm_pool::register_variable(aterm* variable)
+void thread_aterm_pool::register_variable(aterm_core* variable)
 {
   if constexpr (EnableVariableRegistrationMetrics) { ++m_variable_insertions; }
 
@@ -146,7 +146,7 @@ void thread_aterm_pool::register_variable(aterm* variable)
   mcrl2::utilities::mcrl2_unused(inserted);
 }
 
-void thread_aterm_pool::deregister_variable(aterm* variable)
+void thread_aterm_pool::deregister_variable(aterm_core* variable)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   m_variables->erase(variable);
@@ -177,7 +177,7 @@ void thread_aterm_pool::deregister_container(_aterm_container* container)
 
 void thread_aterm_pool::mark()
 {
-  for (const aterm* variable : *m_variables) 
+  for (const aterm_core* variable : *m_variables) 
   {
     if (variable != nullptr)
     {

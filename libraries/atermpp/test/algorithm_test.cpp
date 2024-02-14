@@ -51,7 +51,7 @@ struct for_each_proc
     : m_names(names)
   {}
 
-  bool operator()(const aterm& t)
+  bool operator()(const aterm_core& t)
   {
     if(t.type_is_appl())
     {

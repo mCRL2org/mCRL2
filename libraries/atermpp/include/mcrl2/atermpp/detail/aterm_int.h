@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Jan Friso Groote, based on the aterm library.
+// Author(s): Wieger Wesselink, Jan Friso Groote, based on the aterm_core library.
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -10,7 +10,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_INT_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_INT_H
 
-#include "mcrl2/atermpp/detail/aterm.h"
+#include "mcrl2/atermpp/detail/aterm_core.h"
 
 namespace atermpp
 {

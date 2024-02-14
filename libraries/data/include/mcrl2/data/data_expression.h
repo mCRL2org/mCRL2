@@ -23,7 +23,7 @@ namespace data
 {
 
 /// \brief Returns true if the term t is an abstraction
-inline bool is_abstraction(const atermpp::aterm& x)
+inline bool is_abstraction(const atermpp::aterm_core& x)
 {
   return x.function() == core::detail::function_symbols::Binder;
 }
@@ -71,7 +71,7 @@ inline bool is_function_symbol(const atermpp::aterm_appl& x)
 }
 
 /// \brief Returns true if the term t is a variable
-inline bool is_variable(const atermpp::aterm& x)
+inline bool is_variable(const atermpp::aterm_core& x)
 {
   return x.function() == core::detail::function_symbols::DataVarId;
 }
@@ -131,7 +131,7 @@ class data_expression: public atermpp::aterm_appl
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit data_expression(const atermpp::aterm& term)
+    explicit data_expression(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_DataExpr(*this));
@@ -290,7 +290,7 @@ inline bool is_application(const data_expression& t)
 inline 
 const data_expression_list& variable_list_to_data_expression_list(const variable_list& l)
 {
-  return atermpp::down_cast<data_expression_list>(static_cast<const atermpp::aterm&>(l));
+  return atermpp::down_cast<data_expression_list>(static_cast<const atermpp::aterm_core&>(l));
 }
 
 /// \brief Apply a data expression to a data expression.
@@ -333,7 +333,7 @@ struct hash<mcrl2::data::data_expression>
 {
     std::size_t operator()(const mcrl2::data::data_expression& v) const
     {
-      const hash<atermpp::aterm> hasher;
+      const hash<atermpp::aterm_core> hasher;
       return hasher(v);
     }
 };

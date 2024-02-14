@@ -9,7 +9,7 @@
 /// \file rewrite_stack.h
 /// \brief This file contains a rewrite stack that can operate
 ///        alongside the normal stack. As it is an atermpp container
-///        protection of aterm derived data types is guaranteed, 
+///        protection of aterm_core derived data types is guaranteed, 
 ///        without explicitly putting each entry in a protection set.
 ///        This makes the use of this stack much cheaper than using
 ///        the processor stack. An additional advantage is that

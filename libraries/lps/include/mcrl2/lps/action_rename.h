@@ -94,7 +94,7 @@ class action_rename_rule
 
     /// \brief Constructor.
     /// \param t1 A term
-    explicit action_rename_rule(const atermpp::aterm& t1)
+    explicit action_rename_rule(const atermpp::aterm_core& t1)
     {
       const atermpp::aterm_appl t=atermpp::down_cast<atermpp::aterm_appl>(t1);
       assert(core::detail::check_rule_ActionRenameRule(t));
@@ -195,7 +195,7 @@ class action_rename_specification
       m_action_labels   = atermpp::down_cast<process::action_label_list>(atermpp::down_cast<atermpp::aterm_appl>(*i++)[0]);
 
       atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>(atermpp::down_cast<atermpp::aterm_appl>(*i)[0]);
-      for (const atermpp::aterm& r: rules_list)
+      for (const atermpp::aterm_core& r: rules_list)
       {
         m_rules.push_back(action_rename_rule(r));
       }

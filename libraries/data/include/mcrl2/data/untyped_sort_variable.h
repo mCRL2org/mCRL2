@@ -30,7 +30,7 @@ class untyped_sort_variable: public sort_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit untyped_sort_variable(const atermpp::aterm& term)
+    explicit untyped_sort_variable(const atermpp::aterm_core& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_UntypedSortVariable(*this));

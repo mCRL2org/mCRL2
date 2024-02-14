@@ -25,10 +25,10 @@ class D: public aterm_appl
 
 BOOST_AUTO_TEST_CASE(test_main)
 {
-  aterm t (read_term_from_string("[1,2]"));
+  aterm_core t (read_term_from_string("[1,2]"));
   aterm_appl a (read_appl_from_string("f(x)"));
   aterm_list l (read_list_from_string("[3]"));
-  aterm T      = t;
+  aterm_core T      = t;
   aterm_appl A  = a;
   aterm_list L  = l;
 
@@ -90,10 +90,10 @@ BOOST_AUTO_TEST_CASE(test_main)
   static_cast<void>(b); // Silence compiler/static analysis warnings
 
   // set
-  std::set<atermpp::aterm> st;
+  std::set<atermpp::aterm_core> st;
   std::set<aterm_appl> sa;
   std::set<aterm_list> sl;
-  std::set<aterm> sT;
+  std::set<aterm_core> sT;
   std::set<aterm_appl> sA;
   std::set<aterm_list> sL;
   std::set<D> sD;

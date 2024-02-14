@@ -33,7 +33,7 @@ class propositional_variable: public atermpp::aterm_appl
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit propositional_variable(const atermpp::aterm& term)
+    explicit propositional_variable(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_PropVarDecl(*this));

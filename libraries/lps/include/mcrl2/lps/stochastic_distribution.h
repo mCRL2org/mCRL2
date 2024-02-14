@@ -30,7 +30,7 @@ class stochastic_distribution: public atermpp::aterm_appl
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit stochastic_distribution(const atermpp::aterm& term)
+    explicit stochastic_distribution(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_Distribution(*this));

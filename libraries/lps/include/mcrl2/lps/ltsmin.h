@@ -69,7 +69,7 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
 class pins_data_type
 {
   protected:
-    utilities::indexed_set<atermpp::aterm> m_indexed_set;
+    utilities::indexed_set<atermpp::aterm_core> m_indexed_set;
     const data::data_specification& m_data;
     const process::action_label_list& m_action_labels;
     bool m_is_bounded;
@@ -177,25 +177,25 @@ class pins_data_type
     }
 
     /// \brief Returns the index of the value x
-    std::size_t operator[](const atermpp::aterm& x)
+    std::size_t operator[](const atermpp::aterm_core& x)
     {
       return m_indexed_set.insert(x).first;
     }
 
     /// \brief Returns the value at index i
-    atermpp::aterm get(std::size_t i)
+    atermpp::aterm_core get(std::size_t i)
     {
       return m_indexed_set.at(i);
     }
 
     /// \brief Returns the indexed_set holding the values
-    utilities::indexed_set<atermpp::aterm>& indexed_set()
+    utilities::indexed_set<atermpp::aterm_core>& indexed_set()
     {
       return m_indexed_set;
     }
 
     /// \brief Returns the indexed_set holding the values
-    const utilities::indexed_set<atermpp::aterm>& indexed_set() const
+    const utilities::indexed_set<atermpp::aterm_core>& indexed_set() const
     {
       return m_indexed_set;
     }
@@ -234,13 +234,13 @@ class state_data_type: public pins_data_type
     std::string serialize(int i) const override
     {
       data::data_expression e = index2expression(i);
-      atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm&>(e));
+      atermpp::aterm_core t = data::detail::remove_index(static_cast<atermpp::aterm_core&>(e));
       return pp(t);
     }
 
     std::size_t deserialize(const std::string& s) override
     {
-      atermpp::aterm t = data::detail::add_index(atermpp::read_term_from_string(s));
+      atermpp::aterm_core t = data::detail::add_index(atermpp::read_term_from_string(s));
       return expression2index(atermpp::down_cast<data::data_expression>(t));
     }
 
@@ -335,7 +335,7 @@ class pins
     std::vector<data::variable> m_parameters_list;
     std::vector<std::string> m_process_parameter_names;
 
-    utilities::indexed_set<atermpp::aterm> m_guards;
+    utilities::indexed_set<atermpp::aterm_core> m_guards;
     std::vector<std::vector<std::size_t> > guard_parameters_list;
     std::vector<std::vector<std::size_t> > m_guard_info;
     std::vector<std::string> m_guard_names;
@@ -577,7 +577,7 @@ class pins
         {
           // check if the conjunct is new
           std::size_t at = m_guards.index(conjunct);
-          bool is_new = (at == utilities::indexed_set<atermpp::aterm>::npos);
+          bool is_new = (at == utilities::indexed_set<atermpp::aterm_core>::npos);
           bool use_conjunct_as_guard = true;
 
           if (is_new) { // we have not encountered the guard yet

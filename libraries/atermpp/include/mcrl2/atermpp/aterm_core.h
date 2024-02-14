@@ -13,14 +13,14 @@
 #include <algorithm>
 #include <assert.h>
 #include <sstream>
-#include "mcrl2/atermpp/detail/aterm.h"
+#include "mcrl2/atermpp/detail/aterm_core.h"
 #include "mcrl2/atermpp/type_traits.h"
 
-/// \brief The main namespace for the aterm++ library.
+/// \brief The main namespace for the aterm_core++ library.
 namespace atermpp
 {
 
-typedef void(*term_callback)(const aterm&);
+typedef void(*term_callback)(const aterm_core&);
 
 extern void add_deletion_hook(const function_symbol&, term_callback);
 
@@ -32,9 +32,9 @@ namespace detail
 
 /// \brief An unprotected term does not change the reference count of the
 ///        shared term when it is copied or moved.
-class unprotected_aterm
+class unprotected_aterm_core
 {
-  friend detail::_aterm* detail::address(const unprotected_aterm& t);
+  friend detail::_aterm* detail::address(const unprotected_aterm_core& t);
 
 protected:
   const detail::_aterm* m_term;
@@ -42,13 +42,13 @@ protected:
 public:
 
   /// \brief Default constuctor.
-  unprotected_aterm() noexcept
+  unprotected_aterm_core() noexcept
    : m_term(nullptr)
   {}
 
   /// \brief Constructor.
   /// \param term The term from which the new term is constructed.
-  unprotected_aterm(const detail::_aterm* term) noexcept
+  unprotected_aterm_core(const detail::_aterm* term) noexcept
    : m_term(term)
   {}
 
@@ -84,7 +84,7 @@ public:
   ///         means that this equality operator can be calculated
   ///         in constant time.
   /// \return true iff t is equal to the current term.
-  bool operator ==(const unprotected_aterm& t) const
+  bool operator ==(const unprotected_aterm_core& t) const
   {
     return m_term == t.m_term;
   }
@@ -93,7 +93,7 @@ public:
   /// \details See note at the == operator. This operator requires constant time.
   /// \param t A term to which the current term is compared.
   /// \return false iff t is equal to the current term.
-  bool operator !=(const unprotected_aterm& t) const
+  bool operator !=(const unprotected_aterm_core& t) const
   {
     return m_term!=t.m_term;
   }
@@ -105,7 +105,7 @@ public:
   ///         as long as aterms are not garbage collected.
   /// \param t A term to which the current term is compared.
   /// \return True iff the current term is smaller than the argument.
-  bool operator <(const unprotected_aterm& t) const
+  bool operator <(const unprotected_aterm_core& t) const
   {
     return m_term<t.m_term;
   }
@@ -114,7 +114,7 @@ public:
   /// \details This operator requires constant time. See note at the operator <.
   /// \param t A term to which the current term is compared.
   /// \return True iff the current term is larger than the argument.
-  bool operator >(const unprotected_aterm& t) const
+  bool operator >(const unprotected_aterm_core& t) const
   {
     return m_term>t.m_term;
   }
@@ -123,7 +123,7 @@ public:
   /// \details This operator requires constant time. See note at the operator <.
   /// \param t A term to which the current term is compared.
   /// \return True iff the current term is smaller or equal than the argument.
-  bool operator <=(const unprotected_aterm& t) const
+  bool operator <=(const unprotected_aterm_core& t) const
   {
     return m_term<=t.m_term;
   }
@@ -132,7 +132,7 @@ public:
   /// \details This operator requires constant time. See note at the operator <.
   /// \param t A term to which the current term is compared.
   /// \return True iff the current term is larger or equalthan the argument.
-  bool operator >=(const unprotected_aterm& t) const
+  bool operator >=(const unprotected_aterm_core& t) const
   {
     return m_term>=t.m_term;
   }
@@ -141,7 +141,7 @@ public:
   ///        the default constructor of aterms, aterm_appls and aterm_int.
   /// \details The default constructor of a term_list<T> is the empty list, on which
   ///          the operator defined yields true. This operation is more efficient
-  ///          than comparing the current term with an aterm(), aterm_appl() or an
+  ///          than comparing the current term with an aterm_core(), aterm_appl() or an
   ///          aterm_int().
   /// \return A boolean indicating whether this term equals the default constructor.
   bool defined() const
@@ -153,12 +153,12 @@ public:
   /// \details This operation is more efficient than exchanging terms by an assignment,
   ///          as swapping does not require to change the protection of terms.
   /// \param t The term with which this term is swapped.
-  void swap(unprotected_aterm& t) noexcept
+  void swap(unprotected_aterm_core& t) noexcept
   {
     std::swap(m_term, t.m_term);
   }
 
-  /// \brief Yields the function symbol in an aterm.
+  /// \brief Yields the function symbol in an aterm_core.
   /// \returns The function symbol of the term, which can also be an AS_EMPTY_LIST,
   ///          AS_INT and AS_LIST.
   /// \details This is for internal use only.
@@ -168,7 +168,7 @@ public:
   }
 };
 
-/// \brief The aterm base class that provides protection of the underlying shared terms.
+/// \brief The aterm_core base class that provides protection of the underlying shared terms.
 /// \details Terms are protected using one of the following two invariants:
 ///          (1) A term that can be accessed is a subterm of a term with a reference count
 ///              larger than 0 (when reference counting is used). Or, 
@@ -182,44 +182,44 @@ public:
 ///          that during garbage collection no terms can be deleted, for instance in an
 ///          assignment, or in a destruct. 
 //               
-class aterm : public unprotected_aterm
+class aterm_core : public unprotected_aterm_core
 {
 public:
 
   /// \brief Default constructor.
-  aterm() noexcept;
+  aterm_core() noexcept;
 
   /// \brief Standard destructor.
-  ~aterm() noexcept;
+  ~aterm_core() noexcept;
 
   /// \brief Constructor based on an internal term data structure. This is not for public use.
   /// \details Takes ownership of the passed underlying term.
-  /// \param t A pointer to an internal aterm data structure.
+  /// \param t A pointer to an internal aterm_core data structure.
   /// \todo Should be protected, but this cannot yet be done due to a problem
   ///       in the compiling rewriter.
-  explicit aterm(const detail::_aterm *t) noexcept;
+  explicit aterm_core(const detail::_aterm *t) noexcept;
 
   /// \brief Copy constructor.
-  /// \param other The aterm that is copied.
+  /// \param other The aterm_core that is copied.
   /// \details  This class has a non-trivial destructor so explicitly define the copy and move operators.
-  aterm(const aterm& other) noexcept;
+  aterm_core(const aterm_core& other) noexcept;
 
   /// \brief Move constructor.
-  /// \param other The aterm that is moved into the new term. This term may have changed after this operation.
+  /// \param other The aterm_core that is moved into the new term. This term may have changed after this operation.
   /// \details This operation does not employ increments and decrements of reference counts and is therefore more
   ///          efficient than the standard copy construct.
-  aterm(aterm&& other) noexcept;
+  aterm_core(aterm_core&& other) noexcept;
 
   /// \brief Assignment operator.
-  /// \param other The aterm that will be assigned.
+  /// \param other The aterm_core that will be assigned.
   /// \return A reference to the assigned term.
-  aterm& operator=(const aterm& other) noexcept;
+  aterm_core& operator=(const aterm_core& other) noexcept;
 
   /// \brief Assignment operator, to be used if busy and forbidden flags are explicitly available.
   //  \detail This can be used as an optimisation, because it avoids getting access to thread local variables,
   //          which is as it stands relatively expensive. The effect is equal to the assignment operator =. 
-  /// \param other The aterm that will be assigned.
-  aterm& assign(const aterm& other,
+  /// \param other The aterm_core that will be assigned.
+  aterm_core& assign(const aterm_core& other,
                 detail::thread_aterm_pool& pool) noexcept;
 
   /// \brief Assignment operator, to be used when the busy flags do not need to be set.
@@ -227,72 +227,72 @@ public:
   ///          known to be set. This is also checked by an assert. This can be used for
   ///          instance in a lambda function that is passed in a make_.... function, as
   ///          this unprotected assign will only be called when a term is constructed. 
-  /// \param other The aterm that will be assigned.
+  /// \param other The aterm_core that will be assigned.
   template <bool CHECK_BUSY_FLAG=true>
-  aterm& unprotected_assign(const aterm& other) noexcept;
+  aterm_core& unprotected_assign(const aterm_core& other) noexcept;
 
   /// \brief Move assignment operator.
-  /// \param other The aterm that will be assigned.
+  /// \param other The aterm_core that will be assigned.
   /// \return A reference to the assigned term.
-  aterm& operator=(aterm&& other) noexcept;
+  aterm_core& operator=(aterm_core&& other) noexcept;
 };
 
 template <class Term1, class Term2>
 struct is_convertible : public
-    std::conditional<std::is_base_of<aterm, Term1>::value &&
-                     std::is_base_of<aterm, Term2>::value && (
+    std::conditional<std::is_base_of<aterm_core, Term1>::value &&
+                     std::is_base_of<aterm_core, Term2>::value && (
                      std::is_convertible<Term1, Term2>::value ||
                      std::is_convertible<Term2, Term1>::value),
                      std::true_type, std::false_type>::type
 { };
 
-/// \brief A cheap cast from one aterm based type to another
-///        When casting one aterm based type into another, generally  a new aterm is constructed,
+/// \brief A cheap cast from one aterm_core based type to another
+///        When casting one aterm_core based type into another, generally  a new aterm_core is constructed,
 ///        and the old one is destroyed. This can cause undesired overhead, for instance due to
 ///        increasing and decreasing of reference counts. This cast changes the type, without
-///        changing the aterm itself. It can only be used if Base and Derived inherit from aterm,
+///        changing the aterm_core itself. It can only be used if Base and Derived inherit from aterm_core,
 ///        and contain no additional information than a
-///          single aterm.
-/// \param   t A term of a type inheriting from an aterm.
+///          single aterm_core.
+/// \param   t A term of a type inheriting from an aterm_core.
 /// \return  A term of type const Derived&.
 template <class Derived, class Base>
 const Derived& down_cast(const Base& t,
                          typename std::enable_if<is_convertible<Base, Derived>::value &&
                                                  !std::is_base_of<Derived, Base>::value>::type* = nullptr)
 {
-  static_assert(sizeof(Derived) == sizeof(aterm),
-                "aterm cast can only be applied ot types derived from aterms where no extra fields are added");
-  assert(Derived(static_cast<const aterm&>(t)) != aterm());
+  static_assert(sizeof(Derived) == sizeof(aterm_core),
+                "aterm_core cast can only be applied ot types derived from aterms where no extra fields are added");
+  assert(Derived(static_cast<const aterm_core&>(t)) != aterm_core());
   return reinterpret_cast<const Derived&>(t);
 }
 
-/// \brief A cast from one aterm based type to another, as a reference, allowing to assign to it.
+/// \brief A cast from one aterm_core based type to another, as a reference, allowing to assign to it.
 //         This can be useful when assigning to a term type that contains the derived term type. 
-/// \param   t A term of a type inheriting from an aterm.
+/// \param   t A term of a type inheriting from an aterm_core.
 /// \return  A term of type Derived&.
 template <class Derived, class Base>
 Derived& reference_cast(Base& t,
                         typename std::enable_if<is_convertible<Base, Derived>::value &&
                                                 !std::is_base_of<Derived, Base>::value >::type* = nullptr)
 {
-  static_assert(sizeof(Base) == sizeof(aterm), 
-                "aterm cast can only be applied to terms directly derived from aterms");
-  static_assert(sizeof(Derived) == sizeof(aterm),
-                "aterm cast can only be applied to types derived from aterms where no extra fields are added");
+  static_assert(sizeof(Base) == sizeof(aterm_core), 
+                "aterm_core cast can only be applied to terms directly derived from aterms");
+  static_assert(sizeof(Derived) == sizeof(aterm_core),
+                "aterm_core cast can only be applied to types derived from aterms where no extra fields are added");
   // We do not check types as the content of the term t is likely to be overwritten shortly. 
   return reinterpret_cast<Derived&>(t);
 }
 
-/// \brief A cast from one aterm based type to another, as a reference, allowing to assign to it.
+/// \brief A cast from one aterm_core based type to another, as a reference, allowing to assign to it.
 //         This can be useful when assigning to a term type that contains the derived term type. 
 //         In case Derived and Base are equal, nothing needs to be done. 
-/// \param   t A term of a type inheriting from an aterm.
+/// \param   t A term of a type inheriting from an aterm_core.
 /// \return  A term of type Derived&.
 template <class Derived>
 Derived& reference_cast(Derived& t)
 {
-  static_assert(sizeof(Derived) == sizeof(aterm), 
-                "aterm cast can only be applied to terms directly derived from aterms");
+  static_assert(sizeof(Derived) == sizeof(aterm_core), 
+                "aterm_core cast can only be applied to terms directly derived from aterms");
   // We do not check types as the content of the term t is likely to be overwritten shortly. 
   return t;
 }
@@ -300,19 +300,19 @@ Derived& reference_cast(Derived& t)
 template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
 const DerivedCont& container_cast(const Cont<Base>& t,
                               typename std::enable_if_t<
-                                is_container<DerivedCont, aterm>::value &&
+                                is_container<DerivedCont, aterm_core>::value &&
                                 std::is_same_v<Cont<typename DerivedCont::value_type>, DerivedCont> &&
                                 !std::is_base_of_v<DerivedCont, Cont<Base> > &&
                                 is_convertible<Base, typename DerivedCont::value_type>::value
                               >* = nullptr)
 {
-  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
-                "aterm cast cannot be applied types derived from aterms where extra fields are added");
-  assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return typename DerivedCont::value_type(static_cast<const aterm&>(u)) != aterm();} ));
+  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm_core),
+                "aterm_core cast cannot be applied types derived from aterms where extra fields are added");
+  assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return typename DerivedCont::value_type(static_cast<const aterm_core&>(u)) != aterm_core();} ));
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
-/// \brief A cast form an aterm derived class to a class that inherits in possibly multiple steps from this class.
+/// \brief A cast form an aterm_core derived class to a class that inherits in possibly multiple steps from this class.
 /// \details The derived class is not allowed to contain extra fields. This conversion does not require runtime computation
 ///          effort. Also see down_cast.
 /// \param t The term that is converted.
@@ -321,30 +321,30 @@ template <class Derived, class Base>
 const Derived& vertical_cast(const Base& t,
                           typename std::enable_if<is_convertible<Base, Derived>::value>::type* = nullptr)
 {
-  static_assert(sizeof(Derived) == sizeof(aterm),
-                "aterm cast cannot be applied types derived from aterms where extra fields are added");
-  assert(Derived(static_cast<const aterm&>(t)) != aterm());
+  static_assert(sizeof(Derived) == sizeof(aterm_core),
+                "aterm_core cast cannot be applied types derived from aterms where extra fields are added");
+  assert(Derived(static_cast<const aterm_core&>(t)) != aterm_core());
   return reinterpret_cast<const Derived&>(t);
 }
 
 template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
 const DerivedCont& vertical_cast(const Cont<Base>& t,
                               typename std::enable_if_t<
-                                is_container<DerivedCont, aterm>::value &&
+                                is_container<DerivedCont, aterm_core>::value &&
                                 std::is_same_v<Cont<typename DerivedCont::value_type>, DerivedCont> &&
                                 is_convertible<Base, typename DerivedCont::value_type>::value
                               >* = nullptr)
 {
-  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
-                "aterm cast cannot be applied types derived from aterms where extra fields are added");
-  assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return typename DerivedCont::value_type(static_cast<const aterm&>(u)) != aterm();} ));
+  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm_core),
+                "aterm_core cast cannot be applied types derived from aterms where extra fields are added");
+  assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return typename DerivedCont::value_type(static_cast<const aterm_core&>(u)) != aterm_core();} ));
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
 namespace detail
 {
-  /// \returns A pointer to the underlying aterm.
-  inline _aterm* address(const unprotected_aterm& t)
+  /// \returns A pointer to the underlying aterm_core.
+  inline _aterm* address(const unprotected_aterm_core& t)
   {
     return const_cast<_aterm*>(t.m_term);
   }
@@ -354,12 +354,12 @@ namespace detail
 /// \param out The stream to which the term is sent. 
 /// \param t   The term that is printed to the stream.
 /// \return The stream to which the term is written.
-std::ostream& operator<<(std::ostream& out, const atermpp::aterm& t);
+std::ostream& operator<<(std::ostream& out, const atermpp::aterm_core& t);
 
-/// \brief Transform an aterm to an ascii string.
-/// \param t The input aterm.
-/// \return A string representation of the given term derived from an aterm.
-inline std::string pp(const atermpp::aterm& t)
+/// \brief Transform an aterm_core to an ascii string.
+/// \param t The input aterm_core.
+/// \return A string representation of the given term derived from an aterm_core.
+inline std::string pp(const atermpp::aterm_core& t)
 {
   std::ostringstream oss;
   oss << t;
@@ -376,12 +376,12 @@ namespace std
 ///          as swapping does not require to change the protection of terms.
 ///          In order to be used in the standard containers, the declaration must
 ///          be preceded by an empty template declaration. This swap function is
-///          not used for classes that derive from the aterm class. A specific
+///          not used for classes that derive from the aterm_core class. A specific
 ///          swap function must be provided for derived classes.
 /// \param t1 The first term
 /// \param t2 The second term
 template <>
-inline void swap(atermpp::unprotected_aterm& t1, atermpp::unprotected_aterm& t2) noexcept
+inline void swap(atermpp::unprotected_aterm_core& t1, atermpp::unprotected_aterm_core& t2) noexcept
 {
   t1.swap(t2);
 }

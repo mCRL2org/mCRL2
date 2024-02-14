@@ -146,13 +146,13 @@ struct simplify_rewriter
 };
 
 template <typename T>
-void simplify(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
+void simplify(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm_core, T >::value>::type* = 0)
 {
   core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).update(x);
 }
 
 template <typename T>
-T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
+T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm_core, T >::value>::type* = nullptr)
 {
   T result;
   core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).apply(result, x);

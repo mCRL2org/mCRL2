@@ -33,7 +33,7 @@ class container_type: public atermpp::aterm_appl
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit container_type(const atermpp::aterm& term)
+    explicit container_type(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_SortConsType(*this));
@@ -83,7 +83,7 @@ class list_container: public container_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit list_container(const atermpp::aterm& term)
+    explicit list_container(const atermpp::aterm_core& term)
       : container_type(term)
     {
       assert(core::detail::check_term_SortList(*this));
@@ -136,7 +136,7 @@ class set_container: public container_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit set_container(const atermpp::aterm& term)
+    explicit set_container(const atermpp::aterm_core& term)
       : container_type(term)
     {
       assert(core::detail::check_term_SortSet(*this));
@@ -189,7 +189,7 @@ class bag_container: public container_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit bag_container(const atermpp::aterm& term)
+    explicit bag_container(const atermpp::aterm_core& term)
       : container_type(term)
     {
       assert(core::detail::check_term_SortBag(*this));
@@ -242,7 +242,7 @@ class fset_container: public container_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit fset_container(const atermpp::aterm& term)
+    explicit fset_container(const atermpp::aterm_core& term)
       : container_type(term)
     {
       assert(core::detail::check_term_SortFSet(*this));
@@ -295,7 +295,7 @@ class fbag_container: public container_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit fbag_container(const atermpp::aterm& term)
+    explicit fbag_container(const atermpp::aterm_core& term)
       : container_type(term)
     {
       assert(core::detail::check_term_SortFBag(*this));

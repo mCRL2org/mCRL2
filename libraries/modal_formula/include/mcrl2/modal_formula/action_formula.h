@@ -33,7 +33,7 @@ class action_formula: public atermpp::aterm_appl
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit action_formula(const atermpp::aterm& term)
+    explicit action_formula(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_ActFrm(*this));
@@ -131,7 +131,7 @@ class true_: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit true_(const atermpp::aterm& term)
+    explicit true_(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActTrue(*this));
@@ -184,7 +184,7 @@ class false_: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit false_(const atermpp::aterm& term)
+    explicit false_(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActFalse(*this));
@@ -237,7 +237,7 @@ class not_: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit not_(const atermpp::aterm& term)
+    explicit not_(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActNot(*this));
@@ -308,7 +308,7 @@ class and_: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit and_(const atermpp::aterm& term)
+    explicit and_(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActAnd(*this));
@@ -384,7 +384,7 @@ class or_: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit or_(const atermpp::aterm& term)
+    explicit or_(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActOr(*this));
@@ -460,7 +460,7 @@ class imp: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit imp(const atermpp::aterm& term)
+    explicit imp(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActImp(*this));
@@ -536,7 +536,7 @@ class forall: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit forall(const atermpp::aterm& term)
+    explicit forall(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActForall(*this));
@@ -612,7 +612,7 @@ class exists: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit exists(const atermpp::aterm& term)
+    explicit exists(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActExists(*this));
@@ -688,7 +688,7 @@ class at: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit at(const atermpp::aterm& term)
+    explicit at(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActAt(*this));
@@ -764,7 +764,7 @@ class multi_action: public action_formula
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit multi_action(const atermpp::aterm& term)
+    explicit multi_action(const atermpp::aterm_core& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActMultAct(*this));

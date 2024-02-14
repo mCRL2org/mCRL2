@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_APPL_H
 #define MCRL2_ATERMPP_ATERM_APPL_H
 
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_core.h"
 #include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
@@ -21,14 +21,14 @@
 namespace atermpp
 {
 
-class aterm_appl: public aterm
+class aterm_appl: public aterm_core
 {
 protected:
   /// \brief Constructor.
   /// \param t A pointer internal data structure from which the term is constructed.
   /// \details This function is explicitly protected such that is not used in common code. 
   explicit aterm_appl(detail::_term_appl *t)
-   : aterm(reinterpret_cast<detail::_aterm*>(t))
+   : aterm_core(reinterpret_cast<detail::_aterm*>(t))
   {}
 
 public:
@@ -39,19 +39,19 @@ public:
   typedef ptrdiff_t difference_type;
 
   /// Iterator used to iterate through an term_appl.
-  typedef term_appl_iterator<aterm> iterator;
+  typedef term_appl_iterator<aterm_core> iterator;
 
   /// Const iterator used to iterate through an term_appl.
-  typedef term_appl_iterator<aterm> const_iterator;
+  typedef term_appl_iterator<aterm_core> const_iterator;
 
   /// \brief Default constructor.
-  aterm_appl():aterm()
+  aterm_appl():aterm_core()
   {}
 
-  /// \brief Explicit constructor from an aterm.
-  /// \param t The aterm from which the term is constructed.
-  explicit aterm_appl(const aterm& t) 
-   : aterm(t)
+  /// \brief Explicit constructor from an aterm_core.
+  /// \param t The aterm_core from which the term is constructed.
+  explicit aterm_appl(const aterm_core& t) 
+   : aterm_core(t)
   {} 
 
   /// This class has user-declared copy constructor so declare default copy and move operators.
@@ -96,7 +96,7 @@ public:
   aterm_appl(const function_symbol& sym,
             InputIterator begin,
             InputIterator end)
-    : aterm_appl(sym, begin, end, [](const unprotected_aterm& term) -> const unprotected_aterm& { return term; } )
+    : aterm_appl(sym, begin, end, [](const unprotected_aterm_core& term) -> const unprotected_aterm_core& { return term; } )
   {
     static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
                   "The InputIterator is missing the input iterator tag.");
@@ -184,7 +184,7 @@ public:
   /// \brief Returns the i-th argument.
   /// \param i A positive integer.
   /// \return The argument with the given index.
-  const aterm& operator[](const size_type i) const
+  const aterm_core& operator[](const size_type i) const
   {
     assert(i < size()); // Check the bounds.
     return static_cast<const aterm_appl&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(i));
@@ -213,8 +213,8 @@ void make_term_appl(Term& target,
 {
   detail::g_thread_term_pool().create_appl_dynamic(target, sym, begin, end);
   
-  static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert((std::is_base_of<aterm_core, Term>::value),"Term must be derived from an aterm_core");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
   static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value,
                 "A forward iterator has more requirements than an input iterator.");
   static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value,
@@ -241,8 +241,8 @@ void make_term_appl(Term& target,
 {
   make_term_appl(target, sym, begin, end, [](const Term& term) -> const Term& { return term; } );
 
-  static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert((std::is_base_of<aterm_core, Term>::value),"Term must be derived from an aterm_core");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
   static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
                 "The InputIterator is missing the input iterator tag.");
 }
@@ -269,8 +269,8 @@ void make_term_appl(Term& target,
 {
   detail::g_thread_term_pool().create_appl_dynamic(target, sym, converter, begin, end);
 
-  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert(std::is_base_of<aterm_core, Term>::value,"Term must be derived from an aterm_core");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
   static_assert(!std::is_same<typename InputIterator::iterator_category, std::output_iterator_tag>::value,
                 "The InputIterator has the output iterator tag.");
 }
@@ -284,11 +284,11 @@ void make_term_appl(Term& target,
 {
   detail::g_thread_term_pool().create_term(target, sym);
 
-  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert(std::is_base_of<aterm_core, Term>::value,"Term must be derived from an aterm_core");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
 }
 
-/// \brief Make an aterm application for n-arity function application.
+/// \brief Make an aterm_core application for n-arity function application.
 /// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
 /// \param symbol A function symbol.
 /// \param arguments The arguments of the function application.
@@ -306,7 +306,7 @@ void make_term_appl(Term& target, const function_symbol& symbol, const Terms& ..
 template<class Term,
          class INDEX_TYPE,
          typename ...Terms>
-void make_term_appl_with_index(aterm& target, const function_symbol& symbol, const Terms& ...arguments)
+void make_term_appl_with_index(aterm_core& target, const function_symbol& symbol, const Terms& ...arguments)
 {
   detail::g_thread_term_pool().create_appl_index<Term, INDEX_TYPE>(target, symbol, arguments...);
 }
@@ -331,7 +331,7 @@ template<> struct hash<atermpp::aterm_appl>
 {
   std::size_t operator()(const atermpp::aterm_appl& t) const
   {
-    return std::hash<atermpp::aterm>()(t);
+    return std::hash<atermpp::aterm_core>()(t);
   }
 };
 

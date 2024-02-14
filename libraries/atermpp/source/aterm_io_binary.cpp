@@ -15,7 +15,7 @@ namespace atermpp
 {
 using namespace mcrl2::utilities;
 
-/// \brief The magic value for a binary aterm format stream.
+/// \brief The magic value for a binary aterm_core format stream.
 /// \details As of version 0x8305 the magic and version are written as 2 bytes not encoded as variable-width integers. To ensure
 ///          compatibility with older formats the previously variable-width encoding is mimicked by prefixing them with 1000 (0x8).
 static constexpr std::uint16_t BAF_MAGIC = 0x8baf;
@@ -32,7 +32,7 @@ static constexpr std::uint16_t BAF_MAGIC = 0x8baf;
 /// 23 November 2013  : version changed to 0x0302 (introduction of index for variable types)
 /// 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
 ///  2 April 2017     : version changed to 0x0304 (removed a few superfluous fields in the format)
-/// 19 July 2019      : version changed to 0x8305 (introduction of the streamable aterm format)
+/// 19 July 2019      : version changed to 0x8305 (introduction of the streamable aterm_core format)
 /// 28 February 2020  : version changed to 0x8306 (added ability to stream aterm_int, implemented structured streaming for all objects)
 /// 24 January 2023   : version changed to 0x8307 (removed NoIndex from Variables, Boolean variables. Made the .lts format more
 ///                                                compact by not storing states with a default probability 1)
@@ -43,7 +43,7 @@ static constexpr std::uint16_t BAF_VERSION = 0x8307;
 enum class packet_type
 {
   function_symbol = 0,
-  aterm,
+  aterm_core,
   aterm_output,
   aterm_int_output
 };
@@ -58,7 +58,7 @@ binary_aterm_ostream::binary_aterm_ostream(std::shared_ptr<mcrl2::utilities::obi
   m_function_symbols.insert(function_symbol("end_of_stream", 0));
   m_function_symbol_index_width = 1;
 
-  // Write the header of the binary aterm format.
+  // Write the header of the binary aterm_core format.
   m_stream->write_bits(0, 8);
   m_stream->write_bits(BAF_MAGIC, 16);
   m_stream->write_bits(BAF_VERSION, 16);  
@@ -71,17 +71,17 @@ binary_aterm_ostream::binary_aterm_ostream(std::ostream& stream)
 binary_aterm_ostream::~binary_aterm_ostream()
 {
   // Write the end of the stream.
-  m_stream->write_bits(static_cast<std::size_t>(packet_type::aterm), packet_bits);
+  m_stream->write_bits(static_cast<std::size_t>(packet_type::aterm_core), packet_bits);
   m_stream->write_bits(0, function_symbol_index_width());
 }
 
 /// \brief Keep track of whether the term can be written to the stream.
 struct write_todo
 {
-  detail::reference_aterm<aterm> term;
+  detail::reference_aterm<aterm_core> term;
   bool write = false;
 
-  write_todo(const aterm& term)
+  write_todo(const aterm_core& term)
    : term(term)
   {}
 
@@ -91,7 +91,7 @@ struct write_todo
   }
 };
 
-void binary_aterm_ostream::put(const aterm& term)
+void binary_aterm_ostream::put(const aterm_core& term)
 {
   // Traverse the term bottom up and store the subterms (and function symbol) before the actual term.
   atermpp::stack<write_todo> stack;
@@ -100,7 +100,7 @@ void binary_aterm_ostream::put(const aterm& term)
   do
   {
     write_todo& current = stack.top();
-    aterm_appl transformed = m_transformer(static_cast<const aterm_appl&>(static_cast<const aterm&>(current.term)));
+    aterm_appl transformed = m_transformer(static_cast<const aterm_appl&>(static_cast<const aterm_core&>(current.term)));
 
     // Indicates that this term is output and not a subterm, these should always be written.
     bool is_output = stack.size() == 1;
@@ -114,16 +114,16 @@ void binary_aterm_ostream::put(const aterm& term)
           {
             // If the integer is output, write the header and just an integer
             m_stream->write_bits(static_cast<std::size_t>(packet_type::aterm_int_output), packet_bits);
-            m_stream->write_integer(static_cast<const aterm_int&>(static_cast<const aterm&>(current.term)).value());
+            m_stream->write_integer(static_cast<const aterm_int&>(static_cast<const aterm_core&>(current.term)).value());
           }
           else
           {
             std::size_t symbol_index = write_function_symbol(transformed.function());
 
             // Write the packet identifier of an aterm_int followed by its value.
-            m_stream->write_bits(static_cast<std::size_t>(packet_type::aterm), packet_bits);
+            m_stream->write_bits(static_cast<std::size_t>(packet_type::aterm_core), packet_bits);
             m_stream->write_bits(symbol_index, function_symbol_index_width());
-            m_stream->write_integer(static_cast<const aterm_int&>(static_cast<const aterm&>(current.term)).value());
+            m_stream->write_integer(static_cast<const aterm_int&>(static_cast<const aterm_core&>(current.term)).value());
           }
         }
         else
@@ -131,10 +131,10 @@ void binary_aterm_ostream::put(const aterm& term)
           std::size_t symbol_index = write_function_symbol(transformed.function());
 
           // Write the packet identifier, followed by the indices of its function symbol and arguments.
-          m_stream->write_bits(static_cast<std::size_t>(is_output ? packet_type::aterm_output : packet_type::aterm), packet_bits);
+          m_stream->write_bits(static_cast<std::size_t>(is_output ? packet_type::aterm_output : packet_type::aterm_core), packet_bits);
           m_stream->write_bits(symbol_index, function_symbol_index_width());
 
-          for (const aterm& argument : transformed)
+          for (const aterm_core& argument : transformed)
           {
             std::size_t index = m_terms.index(argument);
             assert(index < m_terms.size()); // Every argument must already be written.
@@ -155,7 +155,7 @@ void binary_aterm_ostream::put(const aterm& term)
       else
       {
         // Add all the arguments to the stack; to be processed first.
-        for (const aterm& argument : transformed)
+        for (const aterm_core& argument : transformed)
         {
           const aterm_appl& term = static_cast<const aterm_appl&>(argument);
           if (m_terms.index(term) >= m_terms.size())
@@ -196,7 +196,7 @@ binary_aterm_istream::binary_aterm_istream(std::shared_ptr<mcrl2::utilities::ibi
   m_function_symbols.emplace_back();
   m_function_symbol_index_width = 1;
 
-  // Read the binary aterm format header.
+  // Read the binary aterm_core format header.
   if (m_stream->read_bits(8) != 0 || m_stream->read_bits(16) != BAF_MAGIC)
   {
     throw mcrl2::runtime_error("Error while reading: missing the BAF_MAGIC control sequence.");
@@ -236,7 +236,7 @@ std::size_t binary_aterm_ostream::write_function_symbol(const function_symbol& s
   }
 }
 
-void binary_aterm_istream::get(aterm& t)
+void binary_aterm_istream::get(aterm_core& t)
 {
   while(true)
   {
@@ -259,7 +259,7 @@ void binary_aterm_istream::get(aterm& t)
       make_aterm_int(static_cast<aterm_int&>(t), value);
       return;
     }
-    else if (packet == packet_type::aterm || packet == packet_type::aterm_output)
+    else if (packet == packet_type::aterm_core || packet == packet_type::aterm_output)
     {
       // First read the function symbol of the following term.
       function_symbol symbol = m_function_symbols[m_stream->read_bits(function_symbol_index_width())];
@@ -267,7 +267,7 @@ void binary_aterm_istream::get(aterm& t)
       if (!symbol.defined())
       {
         // The term with function symbol zero marks the end of the stream.
-        t=aterm();
+        t=aterm_core();
         return;
       }
       else if (symbol == detail::g_as_int)
@@ -280,18 +280,18 @@ void binary_aterm_istream::get(aterm& t)
       else
       {
         // Read arity number of arguments from the stream and search them in the already defined set of terms.
-        std::vector<aterm> arguments(symbol.arity());
+        std::vector<aterm_core> arguments(symbol.arity());
         for (std::size_t argument = 0; argument < symbol.arity(); ++argument)
         {
           arguments[argument] = m_terms[m_stream->read_bits(term_index_width())];
         }
 
         // Transform the resulting term.
-        aterm transformed = m_transformer(aterm_appl(symbol, arguments.begin(), arguments.end()));
+        aterm_core transformed = m_transformer(aterm_appl(symbol, arguments.begin(), arguments.end()));
 
         if (packet == packet_type::aterm_output)
         {
-          // This aterm was marked as output in the file so return it.
+          // This aterm_core was marked as output in the file so return it.
           t=transformed;
           return;
         }
@@ -318,12 +318,12 @@ unsigned int binary_aterm_istream::function_symbol_index_width()
   return m_function_symbol_index_width;
 }
 
-void write_term_to_binary_stream(const aterm& t, std::ostream& os)
+void write_term_to_binary_stream(const aterm_core& t, std::ostream& os)
 {
   binary_aterm_ostream(os) << t;
 }
 
-void read_term_from_binary_stream(std::istream& is, aterm& t)
+void read_term_from_binary_stream(std::istream& is, aterm_core& t)
 {
   binary_aterm_istream(is).get(t);
 }

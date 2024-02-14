@@ -86,7 +86,7 @@ class structure_graph
         predecessors.erase(std::remove(predecessors.begin(), predecessors.end(), u), predecessors.end());
       }
 
-      // Downcast reference aterm
+      // Downcast reference aterm_core
       inline pbes_expression formula() const
       {
         return m_formula;

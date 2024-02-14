@@ -57,7 +57,7 @@ class multi_action: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    explicit multi_action(const atermpp::aterm& term)
+    explicit multi_action(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_TimedMultAct(*this));
@@ -400,7 +400,7 @@ struct hash< mcrl2::lps::multi_action >
 {
   std::size_t operator()(const mcrl2::lps::multi_action& ma) const
   {
-    std::hash<atermpp::aterm> hasher;
+    std::hash<atermpp::aterm_core> hasher;
     return hasher(ma.actions()) ^ (hasher(ma.time())<<1);
   }
 };

@@ -1793,14 +1793,14 @@ class RewriterCompilingJitty::ImplementTree
   class matches
   {
     protected:
-     const aterm m_matchterm;
+     const aterm_core m_matchterm;
 
     public:
-      matches(const aterm& matchterm)
+      matches(const aterm_core& matchterm)
        : m_matchterm(matchterm)
       {}
 
-      bool operator ()(const atermpp::aterm& t) const
+      bool operator ()(const atermpp::aterm_core& t) const
       {
         return t==m_matchterm;
       }

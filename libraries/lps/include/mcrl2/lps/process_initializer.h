@@ -36,7 +36,7 @@ class process_initializer: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param term A term.
     /// \param check_distribution Check whether the initial state is plain or a state distribution.
-    explicit process_initializer(const atermpp::aterm& term, bool check_distribution = true)
+    explicit process_initializer(const atermpp::aterm_core& term, bool check_distribution = true)
       : atermpp::aterm_appl(atermpp::down_cast<atermpp::aterm_appl>(term))
     {
       assert(core::detail::check_term_LinearProcessInit(*this));

@@ -52,7 +52,7 @@ struct balance_summands_builder
 
 /// \brief Reduces the nesting depth of the choice operator
 template <typename T>
-void balance_summands(T& x, typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+void balance_summands(T& x, typename std::enable_if<!std::is_base_of<atermpp::aterm_core, T>::value>::type* = nullptr)
 {
   detail::balance_summands_builder f;
   f.update(x);
@@ -60,7 +60,7 @@ void balance_summands(T& x, typename std::enable_if<!std::is_base_of<atermpp::at
 
 /// \brief Reduces the nesting depth of the choice operator
 template <typename T>
-T balance_summands(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+T balance_summands(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm_core, T>::value>::type* = nullptr)
 {
   T result;
   detail::balance_summands_builder f;

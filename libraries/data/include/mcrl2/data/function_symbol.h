@@ -52,7 +52,7 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    explicit function_symbol(const atermpp::aterm& term)
+    explicit function_symbol(const atermpp::aterm_core& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_OpId(*this));

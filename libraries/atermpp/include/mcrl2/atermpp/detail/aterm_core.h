@@ -19,8 +19,8 @@ namespace atermpp
 {
 
 // Forward declaration.
-class unprotected_aterm;
-class aterm;
+class unprotected_aterm_core;
+class aterm_core;
 
 namespace detail
 {
@@ -30,20 +30,20 @@ inline void debug_print(std::ostream& o, const _aterm* t, const std::size_t d = 
 
 /// Can be used to check whether all elements in the parameter pack are derived from aterms.
 template<typename ...Terms>
-using are_terms = mcrl2::utilities::forall<std::is_convertible<Terms, unprotected_aterm>...>;
+using are_terms = mcrl2::utilities::forall<std::is_convertible<Terms, unprotected_aterm_core>...>;
 
 /// Check whether all arguments of a parameter pack are terms, constant functions yielding a term
 /// or a function putting a term in a result parameter. 
 
 template <typename Term>
-using is_term_or_function = std::disjunction<std::is_convertible<Term, unprotected_aterm>,
-                            std::disjunction<mcrl2::utilities::is_applicable<Term, unprotected_aterm&>,
-                                             mcrl2::utilities::is_constant_function_yielding<Term, unprotected_aterm> > >;
+using is_term_or_function = std::disjunction<std::is_convertible<Term, unprotected_aterm_core>,
+                            std::disjunction<mcrl2::utilities::is_applicable<Term, unprotected_aterm_core&>,
+                                             mcrl2::utilities::is_constant_function_yielding<Term, unprotected_aterm_core> > >;
 
 template<typename ...Terms>
 using are_terms_or_functions = mcrl2::utilities::forall<is_term_or_function<Terms>...>;
 
-/// \brief This is the class to which an aterm points.
+/// \brief This is the class to which an aterm_core points.
 class _aterm : public mcrl2::utilities::noncopyable
 {
 public:
@@ -79,7 +79,7 @@ private:
   function_symbol m_function_symbol;
 };
 
-inline _aterm* address(const unprotected_aterm& t);
+inline _aterm* address(const unprotected_aterm_core& t);
 
 } // namespace detail
 } // namespace atermpp

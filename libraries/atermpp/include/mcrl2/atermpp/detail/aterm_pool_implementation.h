@@ -129,7 +129,7 @@ void aterm_pool::print_performance_statistics() const
 
   m_appl_dynamic_storage.print_performance_stats("arbitrary_function_application_storage");
 
-  // Print information for the local aterm pools.
+  // Print information for the local aterm_core pools.
   for (const thread_aterm_pool_interface* local : m_thread_pools)
   {
     local->print_local_performance_statistics();
@@ -289,18 +289,18 @@ function_symbol aterm_pool::create_function_symbol(std::string&& name, const std
   return m_function_symbol_pool.create(std::forward<std::string>(name), arity, check_for_registered_functions);
 }
 
-bool aterm_pool::create_int(aterm& term, size_t val)
+bool aterm_pool::create_int(aterm_core& term, size_t val)
 {
   return m_int_storage.create_int(term, val);
 }
 
-bool aterm_pool::create_term(aterm& term, const atermpp::function_symbol& sym)
+bool aterm_pool::create_term(aterm_core& term, const atermpp::function_symbol& sym)
 {
   return std::get<0>(m_appl_storage).create_term(term, sym);
 }
 
 template<class ...Terms>
-bool aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments)
+bool aterm_pool::create_appl(aterm_core& term, const function_symbol& sym, const Terms&... arguments)
 {
   if constexpr (sizeof...(Terms) <= 7)
   {
@@ -308,14 +308,14 @@ bool aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Term
   }
   else
   {
-    std::array<unprotected_aterm, sizeof...(Terms)> array;
+    std::array<unprotected_aterm_core, sizeof...(Terms)> array;
     store_in_argument_array(array, arguments...);
     return m_appl_dynamic_storage.create_appl_dynamic(term, sym, array.begin(), array.end());
   }
 }
 
 template<typename ForwardIterator>
-bool aterm_pool::create_appl_dynamic(aterm& term,
+bool aterm_pool::create_appl_dynamic(aterm_core& term,
                             const function_symbol& sym,
                             ForwardIterator begin,
                             ForwardIterator end)
@@ -346,7 +346,7 @@ bool aterm_pool::create_appl_dynamic(aterm& term,
 }
 
 template<typename InputIterator, typename ATermConverter>
-bool aterm_pool::create_appl_dynamic(aterm& term,
+bool aterm_pool::create_appl_dynamic(aterm_core& term,
                             const function_symbol& sym,
                             ATermConverter converter,
                             InputIterator begin,

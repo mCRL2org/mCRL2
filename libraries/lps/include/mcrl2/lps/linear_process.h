@@ -99,7 +99,7 @@ class linear_process_base
       assert(core::detail::check_term_LinearProcess(lps));
       m_process_parameters = down_cast<data::variable_list>(lps[0]);
       const auto& summands = atermpp::down_cast<atermpp::aterm_list>(lps[1]);
-      for (const atermpp::aterm& summand: summands)
+      for (const atermpp::aterm_core& summand: summands)
       {
         assert(core::detail::check_rule_LinearProcessSummand(summand));
         const auto& t = down_cast<atermpp::aterm_appl>(summand);
@@ -222,7 +222,7 @@ class linear_process: public linear_process_base<action_summand>
 };
 
 /// \brief Conversion to aterm_appl.
-/// \return The action summand converted to aterm format.
+/// \return The action summand converted to aterm_core format.
 template <typename ActionSummand>
 atermpp::aterm_appl linear_process_to_aterm(const linear_process_base<ActionSummand>& p)
 {

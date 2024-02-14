@@ -22,7 +22,7 @@ namespace atermpp
 namespace detail
 {
 
-/// \brief This is a thread's specific access to the global aterm pool which ensures that
+/// \brief This is a thread's specific access to the global aterm_core pool which ensures that
 ///        garbage collection and hash table resizing can proceed.
 class thread_aterm_pool final : public thread_aterm_pool_interface, mcrl2::utilities::noncopyable
 {
@@ -39,7 +39,7 @@ public:
       is_main_thread = false;
     }
     
-    m_variables = new mcrl2::utilities::hashtable<aterm*>();
+    m_variables = new mcrl2::utilities::hashtable<aterm_core*>();
     m_containers = new mcrl2::utilities::hashtable<detail::_aterm_container*>();
     
     m_pool.register_thread_aterm_pool(*this);
@@ -51,7 +51,7 @@ public:
 
     if (!m_is_main_thread)
     {
-      // We leak values for the global aterm pool since they contain global variables (for which initialisation order is undefined).
+      // We leak values for the global aterm_core pool since they contain global variables (for which initialisation order is undefined).
       delete m_variables;
       delete m_containers;
     }
@@ -64,39 +64,39 @@ public:
   inline function_symbol create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
   /// \details threadsafe
-  inline void create_int(aterm& term, std::size_t val);
+  inline void create_int(aterm_core& term, std::size_t val);
 
   /// \details threadsafe
-  inline void create_term(aterm& term, const function_symbol& sym);
+  inline void create_term(aterm_core& term, const function_symbol& sym);
 
   /// \details threadsafe
   template<class ...Terms>
-  inline void create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments);
+  inline void create_appl(aterm_core& term, const function_symbol& sym, const Terms&... arguments);
 
   /// \details threadsafe
   template<class Term, class INDEX_TYPE, class ...Terms>
-  inline void create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments);
+  inline void create_appl_index(aterm_core& term, const function_symbol& sym, const Terms&... arguments);
 
   /// \details threadsafe
   template<typename ForwardIterator>
-  inline void create_appl_dynamic(aterm& term,
+  inline void create_appl_dynamic(aterm_core& term,
       const function_symbol& sym,
       ForwardIterator begin,
       ForwardIterator end);
 
   /// \threadsafe
   template<typename InputIterator, typename ATermConverter>
-  inline void create_appl_dynamic(aterm& term,
+  inline void create_appl_dynamic(aterm_core& term,
       const function_symbol& sym,
       ATermConverter convert_to_aterm,
       InputIterator begin,
       InputIterator end);
 
   /// \brief Consider the given variable when marking underlying terms.
-  inline void register_variable(aterm* variable);
+  inline void register_variable(aterm_core* variable);
 
   /// \brief Removes the given variable from the active variables.
-  inline void deregister_variable(aterm* variable);
+  inline void deregister_variable(aterm_core* variable);
 
   /// \brief Consider the given container when marking underlying terms.
   inline void register_container(_aterm_container* variable);
@@ -109,7 +109,7 @@ public:
   inline void print_local_performance_statistics() const override;
   inline std::size_t protection_set_size() const override;
 
-  /// Acquire a shared lock on this thread aterm pool.
+  /// Acquire a shared lock on this thread aterm_core pool.
   inline mcrl2::utilities::shared_guard lock_shared() { return m_shared_mutex.lock_shared(); }
 
   /// Acquire an exclusive lock
@@ -124,9 +124,9 @@ public:
 private:
   aterm_pool& m_pool;
 
-  /// Keeps track of pointers to all existing aterm variables and containers.
+  /// Keeps track of pointers to all existing aterm_core variables and containers.
   mcrl2::utilities::shared_mutex m_shared_mutex;
-  mcrl2::utilities::hashtable<aterm*>* m_variables;
+  mcrl2::utilities::hashtable<aterm_core*>* m_variables;
   mcrl2::utilities::hashtable<detail::_aterm_container*>* m_containers;
 
   std::size_t m_variable_insertions = 0;

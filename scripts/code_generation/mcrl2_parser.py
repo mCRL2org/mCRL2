@@ -148,7 +148,7 @@ class Argument:
         if self.repetitions == '*' or self.repetitions == '+':
             return 'aterm_list'
         else:
-            return 'aterm'
+            return 'aterm_core'
 
     def name(self):
         return self.expressions[0].name()

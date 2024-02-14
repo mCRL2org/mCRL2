@@ -36,7 +36,7 @@ class term_list_iterator
   protected:
     const detail::_aterm_list<Term>* m_list;
 
-    /// \brief Constructor from an aterm which must be a list.
+    /// \brief Constructor from an aterm_core which must be a list.
     /// \param l A sequence of terms
     term_list_iterator(const detail::_aterm* l)
       : m_list(static_cast<const detail::_aterm_list<Term>*>(l))
@@ -164,7 +164,7 @@ class reverse_term_list_iterator
     std::size_t m_position;   // m_position refers one above the position to be deliverd. 
     std::unique_ptr<detail::_aterm_list<Term> const*[]> m_list_element_references;
 
-    /// \brief Constructor from an aterm which must be a list.
+    /// \brief Constructor from an aterm_core which must be a list.
     /// \param l A sequence of terms
     reverse_term_list_iterator(detail::_aterm const* l)
       : m_position(reinterpret_cast<const detail::_aterm_list<Term>*>(l)->size()),

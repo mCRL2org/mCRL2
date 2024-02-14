@@ -66,7 +66,7 @@ class process_specification
     /// \brief The initial state of the specification
     process_expression m_initial_process;
 
-    /// \brief Initializes the specification with an aterm.
+    /// \brief Initializes the specification with an aterm_core.
     /// \param t A term
     void construct_from_aterm(const atermpp::aterm_appl& t)
     {
@@ -87,7 +87,7 @@ class process_specification
     {}
 
     /// \brief Constructor.
-    /// \param t A term containing an aterm representation of a process specification.
+    /// \param t A term containing an aterm_core representation of a process specification.
     process_specification(atermpp::aterm_appl t)
     {
       assert(core::detail::check_term_ProcSpec(t));
@@ -214,7 +214,7 @@ void complete_data_specification(process_specification& spec)
 }
 
 /// \brief Conversion to aterm_appl.
-/// \return The specification converted to aterm format.
+/// \return The specification converted to aterm_core format.
 /// \param spec A process specification
 inline
 atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec)

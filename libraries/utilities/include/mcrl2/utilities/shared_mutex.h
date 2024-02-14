@@ -299,7 +299,7 @@ private:
     m_forbidden_flag.store(value);
   }
 
-  /// \brief A boolean flag indicating whether this thread is working inside the global aterm pool.
+  /// \brief A boolean flag indicating whether this thread is working inside the global aterm_core pool.
   std::atomic<bool> m_busy_flag = false;
   std::atomic<bool> m_forbidden_flag = false;
 

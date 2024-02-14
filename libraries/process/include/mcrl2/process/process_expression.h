@@ -37,7 +37,7 @@ class process_expression: public atermpp::aterm_appl
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit process_expression(const atermpp::aterm& term)
+    explicit process_expression(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_ProcExpr(*this));
@@ -147,7 +147,7 @@ class action: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit action(const atermpp::aterm& term)
+    explicit action(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Action(*this));
@@ -229,7 +229,7 @@ class process_instance: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit process_instance(const atermpp::aterm& term)
+    explicit process_instance(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Process(*this));
@@ -305,7 +305,7 @@ class process_instance_assignment: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit process_instance_assignment(const atermpp::aterm& term)
+    explicit process_instance_assignment(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_ProcessAssignment(*this));
@@ -381,7 +381,7 @@ class delta: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit delta(const atermpp::aterm& term)
+    explicit delta(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Delta(*this));
@@ -434,7 +434,7 @@ class tau: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit tau(const atermpp::aterm& term)
+    explicit tau(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Tau(*this));
@@ -487,7 +487,7 @@ class sum: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit sum(const atermpp::aterm& term)
+    explicit sum(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Sum(*this));
@@ -563,7 +563,7 @@ class block: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit block(const atermpp::aterm& term)
+    explicit block(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Block(*this));
@@ -639,7 +639,7 @@ class hide: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit hide(const atermpp::aterm& term)
+    explicit hide(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Hide(*this));
@@ -715,7 +715,7 @@ class rename: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit rename(const atermpp::aterm& term)
+    explicit rename(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Rename(*this));
@@ -791,7 +791,7 @@ class comm: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit comm(const atermpp::aterm& term)
+    explicit comm(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Comm(*this));
@@ -867,7 +867,7 @@ class allow: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit allow(const atermpp::aterm& term)
+    explicit allow(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Allow(*this));
@@ -943,7 +943,7 @@ class sync: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit sync(const atermpp::aterm& term)
+    explicit sync(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Sync(*this));
@@ -1019,7 +1019,7 @@ class at: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit at(const atermpp::aterm& term)
+    explicit at(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_AtTime(*this));
@@ -1095,7 +1095,7 @@ class seq: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit seq(const atermpp::aterm& term)
+    explicit seq(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Seq(*this));
@@ -1171,7 +1171,7 @@ class if_then: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit if_then(const atermpp::aterm& term)
+    explicit if_then(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_IfThen(*this));
@@ -1247,7 +1247,7 @@ class if_then_else: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit if_then_else(const atermpp::aterm& term)
+    explicit if_then_else(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_IfThenElse(*this));
@@ -1328,7 +1328,7 @@ class bounded_init: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit bounded_init(const atermpp::aterm& term)
+    explicit bounded_init(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_BInit(*this));
@@ -1404,7 +1404,7 @@ class merge: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit merge(const atermpp::aterm& term)
+    explicit merge(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Merge(*this));
@@ -1480,7 +1480,7 @@ class left_merge: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit left_merge(const atermpp::aterm& term)
+    explicit left_merge(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_LMerge(*this));
@@ -1556,7 +1556,7 @@ class choice: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit choice(const atermpp::aterm& term)
+    explicit choice(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Choice(*this));
@@ -1632,7 +1632,7 @@ class stochastic_operator: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit stochastic_operator(const atermpp::aterm& term)
+    explicit stochastic_operator(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_StochasticOperator(*this));
@@ -1713,7 +1713,7 @@ class untyped_process_assignment: public process_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit untyped_process_assignment(const atermpp::aterm& term)
+    explicit untyped_process_assignment(const atermpp::aterm_core& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_UntypedProcessAssignment(*this));
@@ -1832,7 +1832,7 @@ struct hash<mcrl2::process::action>
 {
   std::size_t operator()(const mcrl2::process::action& t) const
   {
-    return std::hash<atermpp::aterm>()(t);
+    return std::hash<atermpp::aterm_core>()(t);
   }
 
 };

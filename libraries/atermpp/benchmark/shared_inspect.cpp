@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
           const aterm_appl& t = *Q.front();
           Q.pop();
 
-          for (const aterm& u : t)
+          for (const aterm_core& u : t)
           {
             Q.push(reinterpret_cast<const aterm_appl*>(&u));
             n++;

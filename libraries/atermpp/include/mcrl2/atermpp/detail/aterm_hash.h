@@ -37,9 +37,9 @@ struct hash<atermpp::detail::_aterm*>
 
 /// \brief specialization of the standard std::hash function.
 template<>
-struct hash<atermpp::unprotected_aterm>
+struct hash<atermpp::unprotected_aterm_core>
 {
-  std::size_t operator()(const atermpp::unprotected_aterm& term) const
+  std::size_t operator()(const atermpp::unprotected_aterm_core& term) const
   {
     const std::hash<atermpp::detail::_aterm*> hasher;
     return hasher(atermpp::detail::address(term));
@@ -48,9 +48,9 @@ struct hash<atermpp::unprotected_aterm>
 
 /// \brief specialization of the standard std::hash function.
 template<>
-struct hash<atermpp::aterm>
+struct hash<atermpp::aterm_core>
 {
-  std::size_t operator()(const atermpp::aterm& t) const
+  std::size_t operator()(const atermpp::aterm_core& t) const
   {
     const std::hash<atermpp::detail::_aterm*> aterm_hasher;
     return aterm_hasher(atermpp::detail::address(t));
@@ -77,7 +77,7 @@ struct aterm_hasher
 
   std::size_t operator()(const _aterm& term) const noexcept;
   std::size_t operator()(const function_symbol& symbol) const noexcept;
-  std::size_t operator()(const function_symbol& symbol, unprotected_aterm arguments[]) const noexcept;
+  std::size_t operator()(const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept;
 
   template<typename ForwardIterator,
            typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value, void>::type* = nullptr>
@@ -92,7 +92,7 @@ struct aterm_hasher_finite : public aterm_hasher<N>
   using is_transparent = void;
 
   using aterm_hasher<N>::operator();
-  std::size_t operator()(const function_symbol& symbol, std::array<unprotected_aterm, N> key) const noexcept;
+  std::size_t operator()(const function_symbol& symbol, std::array<unprotected_aterm_core, N> key) const noexcept;
 
   template<typename ...Args>
   std::size_t operator()(const function_symbol& symbol, const Args&... args) const noexcept;
@@ -117,7 +117,7 @@ struct aterm_equals
 
   bool operator()(const _aterm& first, const _aterm& second) const noexcept;
   bool operator()(const _aterm& term, const function_symbol& symbol) const noexcept;
-  bool operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm arguments[]) const noexcept;
+  bool operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept;
 
   template<typename ForwardIterator,
            typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr>
@@ -128,7 +128,7 @@ template<std::size_t N>
 struct aterm_equals_finite : public aterm_equals<N>
 {
   using aterm_equals<N>::operator();
-  bool operator()(const _aterm& term, const function_symbol& symbol, std::array<unprotected_aterm, N> key) const noexcept;
+  bool operator()(const _aterm& term, const function_symbol& symbol, std::array<unprotected_aterm_core, N> key) const noexcept;
 
   template<typename ...Args>
   bool operator()(const _aterm& term, const function_symbol& symbol, const Args&... args) const noexcept;
@@ -145,9 +145,9 @@ struct aterm_int_equals
 
 /// \brief Auxiliary function to combine hnr with aterms.
 inline
-std::size_t combine(const std::size_t hnr, const unprotected_aterm& term)
+std::size_t combine(const std::size_t hnr, const unprotected_aterm_core& term)
 {
-  const std::hash<unprotected_aterm> hasher;
+  const std::hash<unprotected_aterm_core> hasher;
   return mcrl2::utilities::detail::hash_combine_cheap(hnr, hasher(term));
 }
 
@@ -179,7 +179,7 @@ std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol) const noe
 }
 
 template<std::size_t N>
-std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, unprotected_aterm arguments[]) const noexcept
+std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept
 {
   // The arity is defined by the function symbol iff N is unchanged and the arity is N otherwise.
   const std::size_t arity = (N == DynamicNumberOfArguments) ? symbol.arity() : N;
@@ -219,7 +219,7 @@ inline std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, Fo
 }
 
 template<std::size_t N>
-std::size_t aterm_hasher_finite<N>::operator()(const function_symbol& symbol, std::array<unprotected_aterm, N> arguments) const noexcept
+std::size_t aterm_hasher_finite<N>::operator()(const function_symbol& symbol, std::array<unprotected_aterm_core, N> arguments) const noexcept
 {
   std::size_t hnr = operator()(symbol);
 
@@ -298,7 +298,7 @@ bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symb
 }
 
 template<std::size_t N>
-bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm arguments[]) const noexcept
+bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept
 {
   // Each argument should be equal.
   for (std::size_t i = 0; i < symbol.arity(); ++i)
@@ -338,7 +338,7 @@ inline bool aterm_equals<N>::operator()(const _aterm& term, const function_symbo
 }
 
 template<std::size_t N>
-bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbol& symbol, std::array<unprotected_aterm, N> arguments) const noexcept
+bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbol& symbol, std::array<unprotected_aterm_core, N> arguments) const noexcept
 {
   // Each argument should be equal.
   for (std::size_t i = 0; i < N; ++i)

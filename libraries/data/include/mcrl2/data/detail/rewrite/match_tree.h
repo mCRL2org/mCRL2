@@ -21,8 +21,8 @@ namespace data
 namespace detail
 {
 
-/// This is a list where variables and aterm ints can be stored.
-class variable_or_number: public atermpp::aterm
+/// This is a list where variables and aterm_core ints can be stored.
+class variable_or_number: public atermpp::aterm_core
 {
   public:
     /// Default constructor
@@ -30,8 +30,8 @@ class variable_or_number: public atermpp::aterm
     {}
 
     /// Constructor
-    variable_or_number(const atermpp::aterm& v):
-       atermpp::aterm(v)
+    variable_or_number(const atermpp::aterm_core& v):
+       atermpp::aterm_core(v)
     {
       assert(is_variable(v) || v.type_is_int());
     }
@@ -47,8 +47,8 @@ class match_tree:public atermpp::aterm_appl
      : atermpp::aterm_appl(afunUndefined())
     {}
 
-    /// Constructor based on an aterm.
-    match_tree(const atermpp::aterm& t):
+    /// Constructor based on an aterm_core.
+    match_tree(const atermpp::aterm_core& t):
       atermpp::aterm_appl(t)
     {
       assert(!is_defined() || isS() || isA() || isM() || isF() || 
@@ -210,7 +210,7 @@ class match_tree_S:public match_tree
     match_tree_S()
     {}
 
-    match_tree_S(const atermpp::aterm& t)
+    match_tree_S(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isS());
@@ -239,7 +239,7 @@ class match_tree_A:public match_tree
     match_tree_A()
     {}
 
-    match_tree_A(const atermpp::aterm& t)
+    match_tree_A(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isA());
@@ -263,7 +263,7 @@ class match_tree_M:public match_tree
     match_tree_M()
     {}
 
-    match_tree_M(const atermpp::aterm& t)
+    match_tree_M(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isM());
@@ -296,7 +296,7 @@ class match_tree_F:public match_tree
     match_tree_F()
     {}
 
-    match_tree_F(const atermpp::aterm& t)
+    match_tree_F(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isF());
@@ -329,7 +329,7 @@ class match_tree_N:public match_tree
     match_tree_N()
     {}
 
-    match_tree_N(const atermpp::aterm& t)
+    match_tree_N(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isN());
@@ -355,7 +355,7 @@ class match_tree_D:public match_tree
     match_tree_D()
     {}
 
-    match_tree_D(const atermpp::aterm& t)
+    match_tree_D(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isD());
@@ -382,7 +382,7 @@ class match_tree_R:public match_tree
     match_tree_R()
     {}
 
-    match_tree_R(const atermpp::aterm& t)
+    match_tree_R(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isR());
@@ -405,7 +405,7 @@ class match_tree_C:public match_tree
     match_tree_C()
     {}
 
-    match_tree_C(const atermpp::aterm& t)
+    match_tree_C(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isC());
@@ -435,7 +435,7 @@ class match_tree_C:public match_tree
 class match_tree_X:public match_tree
 {
   public:
-    match_tree_X(const atermpp::aterm& t)
+    match_tree_X(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isX());
@@ -454,7 +454,7 @@ class match_tree_Re:public match_tree
     match_tree_Re()
     {}
 
-    match_tree_Re(const atermpp::aterm& t)
+    match_tree_Re(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isRe());
@@ -483,7 +483,7 @@ class match_tree_CRe:public match_tree
     match_tree_CRe()
     {}
 
-    match_tree_CRe(const atermpp::aterm& t)
+    match_tree_CRe(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isCRe());
@@ -521,7 +521,7 @@ class match_tree_Me:public match_tree
     match_tree_Me()
     {}
 
-    match_tree_Me(const atermpp::aterm& t)
+    match_tree_Me(const atermpp::aterm_core& t)
      : match_tree(t)
     {
       assert(isMe());

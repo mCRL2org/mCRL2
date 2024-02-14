@@ -52,13 +52,13 @@ atermpp::aterm_appl detail::data_specification_to_aterm(const data_specification
 }
 
 inline
-atermpp::aterm add_index(const atermpp::aterm& x)
+atermpp::aterm_core add_index(const atermpp::aterm_core& x)
 {
   return atermpp::bottom_up_replace(x, add_index_impl);
 }
 
 inline
-atermpp::aterm remove_index(const atermpp::aterm& x)
+atermpp::aterm_core remove_index(const atermpp::aterm_core& x)
 {
   return atermpp::bottom_up_replace(x, remove_index_impl);
 }

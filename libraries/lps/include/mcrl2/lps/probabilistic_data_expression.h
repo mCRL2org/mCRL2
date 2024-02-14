@@ -242,7 +242,7 @@ struct hash<mcrl2::lps::probabilistic_data_expression >
 {
   std::size_t operator()(const mcrl2::lps::probabilistic_data_expression& p) const
   {
-    hash<atermpp::aterm> aterm_hasher;
+    hash<atermpp::aterm_core> aterm_hasher;
     return aterm_hasher(p);
   }
 };

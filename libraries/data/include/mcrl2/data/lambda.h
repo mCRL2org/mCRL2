@@ -32,9 +32,9 @@ class lambda: public abstraction
 
     /// Constructor.
     ///
-    /// \param[in] d An aterm.
+    /// \param[in] d An aterm_core.
     /// \pre d is a lambda abstraction.
-    explicit lambda(const aterm& d)
+    explicit lambda(const aterm_core& d)
       : abstraction(d)
     {
       assert(is_abstraction(d));
@@ -75,7 +75,7 @@ class lambda: public abstraction
 }; // class lambda
 
 template <class... ARGUMENTS>
-void make_lambda(atermpp::aterm& result, ARGUMENTS... arguments)
+void make_lambda(atermpp::aterm_core& result, ARGUMENTS... arguments)
 {
   make_abstraction(result, lambda_binder(), arguments...);
 }

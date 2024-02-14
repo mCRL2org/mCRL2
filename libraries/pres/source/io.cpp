@@ -217,7 +217,7 @@ inline atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pres_e
   return stream;
 }
 
-atermpp::aterm pres_marker()
+atermpp::aterm_core pres_marker()
 {
   return atermpp::aterm_appl(atermpp::function_symbol("parameterised_boolean_equation_system", 0));
 }
@@ -242,7 +242,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pres& pres)
 
   try
   {
-    atermpp::aterm marker;
+    atermpp::aterm_core marker;
     stream >> marker;
 
     if (marker != pres_marker())
@@ -315,7 +315,7 @@ void save_pres(const pres& presspec, const std::string& filename)
 } // namespace detail
 
 /// \brief Conversion to atermappl.
-/// \return The PRES converted to aterm format.
+/// \return The PRES converted to aterm_core format.
 atermpp::aterm_appl pres_to_aterm(const pres& p)
 {
   atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(),
@@ -326,7 +326,7 @@ atermpp::aterm_appl pres_to_aterm(const pres& p)
   const std::vector<pres_equation>& eqn = p.equations();
   for (std::vector<pres_equation>::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
-    atermpp::aterm a = pres_equation_to_aterm(*i);
+    atermpp::aterm_core a = pres_equation_to_aterm(*i);
     eqn_list.push_front(a);
   }
   atermpp::aterm_appl equations = atermpp::aterm_appl(core::detail::function_symbol_PREqnSpec(), eqn_list);

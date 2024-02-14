@@ -62,7 +62,7 @@ class structured_sort: public sort_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit structured_sort(const atermpp::aterm& term)
+    explicit structured_sort(const atermpp::aterm_core& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortStruct(*this));

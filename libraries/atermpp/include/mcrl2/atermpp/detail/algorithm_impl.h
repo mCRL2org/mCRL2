@@ -72,12 +72,12 @@ struct found_term_exception
 /// \param op A unary function on terms
 /// \return The result of the algorithm
 template <typename UnaryFunction>
-UnaryFunction for_each_impl(aterm t, UnaryFunction op)
+UnaryFunction for_each_impl(aterm_core t, UnaryFunction op)
 {
   if (t.type_is_list())
   {
     const aterm_list& l = down_cast<aterm_list>(t);
-    for (const aterm& x: l)
+    for (const aterm_core& x: l)
     {
       for_each_impl(x, op);
     }
@@ -87,7 +87,7 @@ UnaryFunction for_each_impl(aterm t, UnaryFunction op)
     const aterm_appl& a = down_cast<aterm_appl>(t);
     if (op(t))
     {
-      for (const aterm& x: a)
+      for (const aterm_core& x: a)
       {
         for_each_impl(x, op);
       }
@@ -103,7 +103,7 @@ UnaryFunction for_each_impl(aterm t, UnaryFunction op)
 /// \param output The variable to store the match in
 /// \return true if a match was found, false otherwise
 template <typename MatchPredicate>
-bool find_if_impl(const aterm& t, MatchPredicate match, aterm_appl& output)
+bool find_if_impl(const aterm_core& t, MatchPredicate match, aterm_appl& output)
 {
   if (t.type_is_appl())
   {
@@ -113,7 +113,7 @@ bool find_if_impl(const aterm& t, MatchPredicate match, aterm_appl& output)
       output = a;
       return true;
     }
-    for (const aterm& x: a)
+    for (const aterm_core& x: a)
     {
       if (find_if_impl(x, match, output))
         return true;
@@ -122,7 +122,7 @@ bool find_if_impl(const aterm& t, MatchPredicate match, aterm_appl& output)
   else if (t.type_is_list())
   {
     const aterm_list& l = down_cast<aterm_list>(t);
-    for (const aterm& x: l)
+    for (const aterm_core& x: l)
     {
       if (find_if_impl(x, match, output))
       {
@@ -138,14 +138,14 @@ bool find_if_impl(const aterm& t, MatchPredicate match, aterm_appl& output)
 /// \param op A predicate function on terms
 /// \param destBegin The beginning of a range to where the results are written
 template <typename MatchPredicate, typename OutputIterator>
-void find_all_if_impl(const aterm& t, MatchPredicate op, OutputIterator& destBegin)
+void find_all_if_impl(const aterm_core& t, MatchPredicate op, OutputIterator& destBegin)
 {
   typedef typename iterator_value<OutputIterator>::type value_type;
 
   if (t.type_is_list())
   {
     const aterm_list& l = down_cast<aterm_list>(t);
-    for (const aterm& x: l)
+    for (const aterm_core& x: l)
     {
       find_all_if_impl<MatchPredicate>(x, op, destBegin);
     }
@@ -157,7 +157,7 @@ void find_all_if_impl(const aterm& t, MatchPredicate op, OutputIterator& destBeg
     {
       *destBegin++ = vertical_cast<value_type>(a);
     }
-    for (const aterm& x: a)
+    for (const aterm_core& x: a)
     {
       find_all_if_impl<MatchPredicate>(x, op, destBegin);
     }
@@ -175,7 +175,7 @@ void find_all_if_impl(const aterm& t, MatchPredicate op, OutputIterator& destBeg
 /// \param match A predicate function on terms
 /// \param stop A predicate function on terms
 template <typename MatchPredicate, typename StopPredicate>
-aterm_appl partial_find_if_impl(const aterm& t, MatchPredicate match, StopPredicate stop)
+aterm_appl partial_find_if_impl(const aterm_core& t, MatchPredicate match, StopPredicate stop)
 {
   if (t.type_is_appl())
   {
@@ -188,7 +188,7 @@ aterm_appl partial_find_if_impl(const aterm& t, MatchPredicate match, StopPredic
     {
       return aterm_appl(); // nothing was found
     }
-    for (const aterm& x: a)
+    for (const aterm_core& x: a)
     {
       aterm_appl result = partial_find_if_impl<MatchPredicate, StopPredicate>(x, match, stop);
       if (result != aterm_appl())
@@ -201,7 +201,7 @@ aterm_appl partial_find_if_impl(const aterm& t, MatchPredicate match, StopPredic
   if (t.type_is_list())
   {
     const aterm_list& l = down_cast<aterm_list>(t);
-    for (const aterm& x: l)
+    for (const aterm_core& x: l)
     {
       aterm_appl result = partial_find_if_impl<MatchPredicate, StopPredicate>(x, match, stop);
       if (result != aterm_appl())
@@ -219,7 +219,7 @@ aterm_appl partial_find_if_impl(const aterm& t, MatchPredicate match, StopPredic
 /// \param stop A predicate function on terms
 /// \param destBegin The beginning of a range to where the results are written
 template <typename MatchPredicate, typename StopPredicate, typename OutputIterator>
-void partial_find_all_if_impl(const aterm& t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
+void partial_find_all_if_impl(const aterm_core& t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
 {
   if (t.type_is_appl())
   {
@@ -232,7 +232,7 @@ void partial_find_all_if_impl(const aterm& t, MatchPredicate match, StopPredicat
     {
       return;
     }
-    for (const aterm& x: a)
+    for (const aterm_core& x: a)
     {
       partial_find_all_if_impl<MatchPredicate, StopPredicate>(x, match, stop, destBegin);
     }
@@ -241,7 +241,7 @@ void partial_find_all_if_impl(const aterm& t, MatchPredicate match, StopPredicat
   if (t.type_is_list())
   {
     const aterm_list& l = down_cast<aterm_list>(t);
-    for (const aterm& x: l)
+    for (const aterm_core& x: l)
     {
       partial_find_all_if_impl<MatchPredicate, StopPredicate>(x, match, stop, destBegin);
     }

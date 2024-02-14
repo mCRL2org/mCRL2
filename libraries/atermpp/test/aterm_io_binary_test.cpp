@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(simple_int_test)
   }
 
   binary_aterm_istream input(stream);
-  aterm t;
+  aterm_core t;
   input.get(t);
   BOOST_CHECK_EQUAL(t, aterm_int(50));
 }
@@ -34,8 +34,8 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
   // The sequence of terms to send.
   std::vector<aterm_appl> sequence;
 
-  aterm f = aterm_appl(function_symbol("f", 0));
-  aterm g = aterm_appl(function_symbol("g", 0));
+  aterm_core f = aterm_appl(function_symbol("f", 0));
+  aterm_core g = aterm_appl(function_symbol("g", 0));
 
   sequence.emplace_back(function_symbol("test", 2), f, g);
   sequence.push_back(static_cast<const aterm_appl&>(f));
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    aterm t;
+    aterm_core t;
     input.get(t);
     BOOST_CHECK_EQUAL(t, sequence[index]);
   }
@@ -70,8 +70,8 @@ BOOST_AUTO_TEST_CASE(transitions_test)
   std::vector<aterm_appl> sequence;
 
   function_symbol transition("transition", 2);
-  aterm label = aterm_appl(function_symbol("state", 1), aterm_int(0));
-  aterm time = aterm_appl(function_symbol("time", 1), aterm_int(50));
+  aterm_core label = aterm_appl(function_symbol("state", 1), aterm_int(0));
+  aterm_core time = aterm_appl(function_symbol("time", 1), aterm_int(50));
 
   aterm_list states;
 
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(transitions_test)
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    aterm t;
+    aterm_core t;
     input.get(t);
     BOOST_CHECK_EQUAL(t, sequence[index]);
   }

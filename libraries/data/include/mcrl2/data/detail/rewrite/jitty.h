@@ -93,7 +93,7 @@ class RewriterJitty: public Rewriter
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
 
-    atermpp::detail::thread_aterm_pool* m_thread_aterm_pool; // Store an explicit reference to the thread aterm pool.
+    atermpp::detail::thread_aterm_pool* m_thread_aterm_pool; // Store an explicit reference to the thread aterm_core pool.
 
 
     template <class ITERATOR>

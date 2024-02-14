@@ -15,14 +15,14 @@
 #include "mcrl2/utilities/unused.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
-class t1 : public atermpp::aterm
+class t1 : public atermpp::aterm_core
 {
 public:
   t1(const int ) 
   {}
 
-  explicit t1(const aterm& x) 
-   : atermpp::aterm(x)
+  explicit t1(const aterm_core& x) 
+   : atermpp::aterm_core(x)
   {}
 };
 
@@ -33,7 +33,7 @@ public:
     : t1(x)
   {}
 
-  explicit t2(const aterm& x)
+  explicit t2(const aterm_core& x)
    : t1(x)
   {}
 };
@@ -45,7 +45,7 @@ public:
     : t1(x)
   {}
 
-  explicit t3(const aterm& x)
+  explicit t3(const aterm_core& x)
    : t1(x)
   {}
 };
@@ -61,14 +61,14 @@ BOOST_AUTO_TEST_CASE(aterm_down_cast)
   atermpp::function_symbol x("x",0);
   atermpp::function_symbol y("y",0);
   atermpp::aterm_appl fxy(fs,atermpp::aterm_appl(x),atermpp::aterm_appl(y));
-  atermpp::aterm fxy_term(fxy);
+  atermpp::aterm_core fxy_term(fxy);
 
   const atermpp::aterm_appl& test = atermpp::down_cast<atermpp::aterm_appl>(fxy_term);
   BOOST_CHECK(fxy_term == test);
   BOOST_CHECK(fxy == test);
   BOOST_CHECK(fxy == fxy_term);
 
-  const atermpp::aterm& t1(fxy);
+  const atermpp::aterm_core& t1(fxy);
   const atermpp::aterm_appl& t2 = atermpp::down_cast<atermpp::aterm_appl>(t1);
   mcrl2::utilities::mcrl2_unused(t2);
   f(atermpp::down_cast<t3>(t1));

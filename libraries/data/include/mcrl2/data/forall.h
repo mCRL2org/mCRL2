@@ -28,10 +28,10 @@ class forall: public abstraction
 
     /// Constructor.
     ///
-    /// \param[in] d An aterm.
+    /// \param[in] d An aterm_core.
     /// \pre d has the interal structure of an abstraction.
     /// \pre d is a universal quantification.
-    explicit forall(const aterm& d)
+    explicit forall(const aterm_core& d)
       : abstraction(d)
     {
       assert(is_abstraction(d));
@@ -61,7 +61,7 @@ class forall: public abstraction
 }; // class forall
 
 template <class... ARGUMENTS>
-void make_forall(atermpp::aterm& result, ARGUMENTS... arguments)
+void make_forall(atermpp::aterm_core& result, ARGUMENTS... arguments)
 {
   make_abstraction(result, forall_binder(), arguments...);
 }

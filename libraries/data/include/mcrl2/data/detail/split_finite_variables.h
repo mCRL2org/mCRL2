@@ -89,7 +89,7 @@ void split_enumerable_variables(data::variable_list variables,
 }
 
 /* /// \brief Computes the subset with variables of finite sort and infinite.
-// TODO: this should be done more efficiently, by avoiding aterm lists
+// TODO: this should be done more efficiently, by avoiding aterm_core lists
 /// \param variables A sequence of data variables
 /// \param data A data specification
 /// \param finite_variables A sequence of data variables

@@ -37,7 +37,7 @@ static std::size_t npos()
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_a_variable
 {
-  bool operator()(const atermpp::aterm& t) const
+  bool operator()(const atermpp::aterm_core& t) const
   {
     return is_variable(atermpp::down_cast<atermpp::aterm_appl>(t));
   }

@@ -175,7 +175,7 @@ public:
   void apply(const variable_type& v, ResultType& target)
   {
     static_assert(std::is_same<ResultType&,expression_type&>::value ||
-                  std::is_same<ResultType&,atermpp::unprotected_aterm&>::value);
+                  std::is_same<ResultType&,atermpp::unprotected_aterm_core&>::value);
     const typename substitution_type::const_iterator i=m_substitution.find(v);
     if (i==m_substitution.end()) // not found.
     {

@@ -124,14 +124,14 @@ BOOST_AUTO_TEST_CASE(replace_test1)
   b = bottom_up_replace(a, read_appl_from_string("f(x)"), read_appl_from_string("x"));
   BOOST_CHECK(b == read_term_from_string("x"));
 
-  atermpp::aterm f = read_term_from_string("[]");
-  atermpp::aterm g = replace(f, a, b);
+  atermpp::aterm_core f = read_term_from_string("[]");
+  atermpp::aterm_core g = replace(f, a, b);
   BOOST_CHECK(f == read_term_from_string("[]"));
   BOOST_CHECK(g == read_term_from_string("[]"));
 
-  atermpp::aterm x = read_term_from_string("g(f(x),f(y),h(f(x)))");
-  atermpp::aterm y = replace(x, fg_replacer());
-  atermpp::aterm z = partial_replace(x, fg_partial_replacer());
+  atermpp::aterm_core x = read_term_from_string("g(f(x),f(y),h(f(x)))");
+  atermpp::aterm_core y = replace(x, fg_replacer());
+  atermpp::aterm_core z = partial_replace(x, fg_partial_replacer());
 
   BOOST_CHECK(y == read_term_from_string("f(f(x),f(y),h(f(x)))"));
   BOOST_CHECK(z == read_term_from_string("f(f(x),f(y),h(f(x)))"));
@@ -233,36 +233,36 @@ struct index_remover
 
 BOOST_AUTO_TEST_CASE(replace_test2)
 {
-  atermpp::aterm t = atermpp::read_term_from_string("g(h(x,[f(y,p(q),1)]))");
+  atermpp::aterm_core t = atermpp::read_term_from_string("g(h(x,[f(y,p(q),1)]))");
   t = atermpp::replace(t, replace_f());
   BOOST_CHECK(t == atermpp::read_term_from_string("g(h(x,[f(y,p(q))]))"));
 }
 
 BOOST_AUTO_TEST_CASE(replace_test3)
 {
-  atermpp::aterm t  = atermpp::read_term_from_string("g(h(z(x,[f(y,p(q),1)],0)))");
-  atermpp::aterm t1 = atermpp::replace(t, replace_f());
-  atermpp::aterm t2 = atermpp::read_term_from_string("g(h(z(x,[f(y,p(q))],0)))");
+  atermpp::aterm_core t  = atermpp::read_term_from_string("g(h(z(x,[f(y,p(q),1)],0)))");
+  atermpp::aterm_core t1 = atermpp::replace(t, replace_f());
+  atermpp::aterm_core t2 = atermpp::read_term_from_string("g(h(z(x,[f(y,p(q))],0)))");
   BOOST_CHECK(t1 == t2);
 }
 
 BOOST_AUTO_TEST_CASE(bottom_up_replace_test)
 {
-  atermpp::aterm t = atermpp::read_term_from_string("PBES(PBInit(PropVarInst(X,[OpId(@c0,SortId(Nat),131)],0)))");
-  atermpp::aterm t1 = atermpp::replace(t, index_remover());
-  atermpp::aterm t2 = atermpp::read_term_from_string("PBES(PBInit(PropVarInstNoIndex(X,[OpId(@c0,SortId(Nat),131)])))");
-  atermpp::aterm t3 = atermpp::bottom_up_replace(t, index_remover());
-  atermpp::aterm t4 = atermpp::read_term_from_string("PBES(PBInit(PropVarInstNoIndex(X,[OpIdNoIndex(@c0,SortId(Nat))])))");
+  atermpp::aterm_core t = atermpp::read_term_from_string("PBES(PBInit(PropVarInst(X,[OpId(@c0,SortId(Nat),131)],0)))");
+  atermpp::aterm_core t1 = atermpp::replace(t, index_remover());
+  atermpp::aterm_core t2 = atermpp::read_term_from_string("PBES(PBInit(PropVarInstNoIndex(X,[OpId(@c0,SortId(Nat),131)])))");
+  atermpp::aterm_core t3 = atermpp::bottom_up_replace(t, index_remover());
+  atermpp::aterm_core t4 = atermpp::read_term_from_string("PBES(PBInit(PropVarInstNoIndex(X,[OpIdNoIndex(@c0,SortId(Nat))])))");
   BOOST_CHECK(t1 == t2);
   BOOST_CHECK(t3 == t4);
 }
 
 BOOST_AUTO_TEST_CASE(cached_bottom_up_replace_test)
 {
-  std::unordered_map<aterm_appl, aterm> cache;
-  atermpp::aterm t  = atermpp::read_term_from_string("h(g(f(x),f(x)),g(f(x),f(x)))");
-  atermpp::aterm t1 = atermpp::bottom_up_replace(t, fg_replacer(), cache);
-  atermpp::aterm t2 = atermpp::read_term_from_string("h(f(g(x),g(x)),f(g(x),g(x)))");
+  std::unordered_map<aterm_appl, aterm_core> cache;
+  atermpp::aterm_core t  = atermpp::read_term_from_string("h(g(f(x),f(x)),g(f(x),f(x)))");
+  atermpp::aterm_core t1 = atermpp::bottom_up_replace(t, fg_replacer(), cache);
+  atermpp::aterm_core t2 = atermpp::read_term_from_string("h(f(g(x),g(x)),f(g(x),g(x)))");
   BOOST_CHECK(t1 == t2);
   BOOST_CHECK(cache.size() == 4);
 }

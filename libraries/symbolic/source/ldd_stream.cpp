@@ -160,7 +160,7 @@ binary_ldd_istream::binary_ldd_istream(std::shared_ptr<mcrl2::utilities::ibitstr
   m_nodes.emplace_back(false_());
   m_nodes.emplace_back(true_());
 
-  // Read the binary aterm format header.
+  // Read the binary aterm_core format header.
   if (m_stream->read_bits(16) != BLF_MAGIC)
   {
     throw mcrl2::runtime_error("Error while reading: missing the BLF_MAGIC control sequence.");

@@ -30,7 +30,7 @@ class untyped_identifier: public data_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit untyped_identifier(const atermpp::aterm& term)
+    explicit untyped_identifier(const atermpp::aterm_core& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_UntypedIdentifier(*this));

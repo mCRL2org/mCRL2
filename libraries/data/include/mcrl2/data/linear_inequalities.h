@@ -179,8 +179,8 @@ namespace detail
        : atermpp::term_list<variable_with_a_rational_factor>()
       {}
 
-      /// \brief Constructor from an aterm.
-      explicit lhs_t(const aterm& t)
+      /// \brief Constructor from an aterm_core.
+      explicit lhs_t(const aterm_core& t)
        : atermpp::term_list<variable_with_a_rational_factor>(t)
       {}
 

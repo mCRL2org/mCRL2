@@ -65,20 +65,20 @@ public:
   std::size_t capacity() const noexcept { return m_term_set.capacity(); }
 
   /// \brief Creates a integral term with the given value.
-  bool create_int(aterm& term, std::size_t value);
+  bool create_int(aterm_core& term, std::size_t value);
 
   /// \brief Creates a term with the given function symbol.
-  bool create_term(aterm& term, const function_symbol& sym);
+  bool create_term(aterm_core& term, const function_symbol& sym);
 
   /// \brief Creates a function application with the given function symbol and arguments.
   template<class ...Terms>
-  bool create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments);
+  bool create_appl(aterm_core& term, const function_symbol& sym, const Terms&... arguments);
 
   /// \brief Creates a function application with the given function symbol and the arguments
   ///       as provided by the given iterator. This function assumes that the arity of the
   ///       function symbol is equal to N and that the iterator has exactly N elements.
   template<typename ForwardIterator>
-  bool create_appl_iterator(aterm& term,
+  bool create_appl_iterator(aterm_core& term,
                             const function_symbol& sym,
                             ForwardIterator begin,
                             ForwardIterator end);
@@ -88,7 +88,7 @@ public:
   ///       function symbol is equal to N and that the iterator has exactly N elements.
   template<typename InputIterator,
            typename TermConverter>
-  bool create_appl_iterator(aterm& term,
+  bool create_appl_iterator(aterm_core& term,
                             const function_symbol& sym,
                             TermConverter converter,
                             InputIterator begin,
@@ -97,7 +97,7 @@ public:
   /// \brief Creates a function application with the given function symbol and the arguments
   ///        as provided by the given iterator.
   template<typename ForwardIterator>
-  bool create_appl_dynamic(aterm& term,
+  bool create_appl_dynamic(aterm_core& term,
                            const function_symbol& sym,
                            ForwardIterator begin,
                            ForwardIterator end);
@@ -108,8 +108,8 @@ public:
            typename TermConverter,
            typename std::enable_if<!std::is_convertible<
                                     typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
-                                    aterm>::value, void>::type* = nullptr>
-  bool create_appl_dynamic(aterm& term,
+                                    aterm_core>::value, void>::type* = nullptr>
+  bool create_appl_dynamic(aterm_core& term,
                            const function_symbol& sym,
                            TermConverter converter,
                            InputIterator begin,
@@ -121,8 +121,8 @@ public:
            typename TermConverter,
            typename std::enable_if<std::is_convertible<
                                     typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
-                                    aterm>::value, void>::type* = nullptr>
-  bool create_appl_dynamic(aterm& term,
+                                    aterm_core>::value, void>::type* = nullptr>
+  bool create_appl_dynamic(aterm_core& term,
                            const function_symbol& sym,
                            TermConverter converter,
                            InputIterator begin,
@@ -137,7 +137,7 @@ public:
                                                                 typename InputIterator::value_type&,
                                                                 typename InputIterator::value_type>::type,
                                     void>::value, void>::type* = nullptr>
-  bool create_appl_dynamic(aterm& term,
+  bool create_appl_dynamic(aterm_core& term,
                            const function_symbol& sym,
                            TermConverter converter,
                            InputIterator begin,
@@ -175,14 +175,14 @@ private:
 
   /// \brief Calls the deletion hook attached to the function symbol of this term.
   /// \threadsafe
-  void call_deletion_hook(unprotected_aterm term);
+  void call_deletion_hook(unprotected_aterm_core term);
 
   /// \brief Removes an element from the unordered set and deallocates it.
   iterator destroy(iterator it);
 
   /// \brief Inserts a term constructed by the given arguments, checks for existing term.
   template<typename ...Args>
-  bool emplace(aterm& term, Args&&... args);
+  bool emplace(aterm_core& term, Args&&... args);
 
   /// \returns True if and only if this term storage can store term applications with a dynamic
   ///          number of arguments.

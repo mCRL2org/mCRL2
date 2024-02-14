@@ -255,7 +255,7 @@ template<>
 inline
 void print_aterm(const atermpp::aterm_appl& x)
 {
-  std::clog << "aterm: " << x << std::endl;
+  std::clog << "aterm_core: " << x << std::endl;
 }
 
 /// \brief Parse an identifier.

@@ -26,7 +26,7 @@ struct counter
     : m_sum(sum)
   {}
 
-  void operator()(const atermpp::aterm& t) const
+  void operator()(const atermpp::aterm_core& t) const
   {
     m_sum += down_cast<aterm_int>(t).value();
   }
@@ -34,7 +34,7 @@ struct counter
 
 struct increment
 {
-  atermpp::aterm operator()(const atermpp::aterm& t) const
+  atermpp::aterm_core operator()(const atermpp::aterm_core& t) const
   {
     return aterm_int(down_cast<aterm_int>(t).value() + 1);
   }
@@ -48,7 +48,7 @@ struct func
   func(int)
   {}
 
-  atermpp::aterm operator()(const atermpp::aterm& x) const
+  atermpp::aterm_core operator()(const atermpp::aterm_core& x) const
   {
     return read_term_from_string("f(" + pp(x) + ")");
   }

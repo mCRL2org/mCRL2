@@ -372,7 +372,7 @@ class application: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    explicit application(const atermpp::aterm& term)
+    explicit application(const atermpp::aterm_core& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_DataAppl(*this));
@@ -543,7 +543,7 @@ inline void swap(application& t1, application& t2)
 
 /// \brief Make function for an application. 
 /// \param result variable into which the application is constructed.
-inline void make_application(atermpp::aterm& result)
+inline void make_application(atermpp::aterm_core& result)
 {
   atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(1));
 }
@@ -576,7 +576,7 @@ template<typename HEAD, typename TERM, typename ...Terms,
                                                   typename std::is_invocable_r<void, Terms, data_expression&>,
                                                   typename std::is_invocable_r<const data_expression, Terms, void> > ...>> > 
 inline void make_application(
-                atermpp::aterm& result,
+                atermpp::aterm_core& result,
                 const HEAD& head,
                 const TERM& arg1,
                 const Terms& ...other_arguments
@@ -609,7 +609,7 @@ inline void make_application(data_expression& result,
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
 template <typename FwdIter>
-inline void make_application(atermpp::aterm& result,
+inline void make_application(atermpp::aterm_core& result,
                       const data_expression& head,
                       FwdIter first,
                       FwdIter last,
@@ -628,7 +628,7 @@ inline void make_application(atermpp::aterm& result,
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
 template <typename FwdIter>
-inline void make_application(atermpp::aterm& result,
+inline void make_application(atermpp::aterm_core& result,
                       const std::size_t arity,
                       const data_expression& head,
                       FwdIter first,
@@ -657,7 +657,7 @@ inline void make_application(atermpp::aterm& result,
 /// \parameter convert_arguments This is a function applied to optionally the head and the arguments.
 /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
 template <typename FwdIter, class ArgumentConverter>
-inline void make_application(atermpp::aterm& result,
+inline void make_application(atermpp::aterm_core& result,
                       const data_expression& head,
                       FwdIter first,
                       FwdIter last,
@@ -689,7 +689,7 @@ inline void make_application(atermpp::aterm& result,
 /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
 template <typename FwdIter, class ArgumentConverter>
 static inline void make_application(
-            atermpp::aterm& result,
+            atermpp::aterm_core& result,
             const data_expression& head,
             FwdIter first,
             FwdIter last,

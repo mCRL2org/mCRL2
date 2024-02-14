@@ -223,7 +223,7 @@ std::set<core::identifier_string> find_identifiers(const lps::specification& x);
 std::set<process::action_label> find_action_labels(const lps::specification& x);
 
 /// \brief Conversion to aterm_appl.
-/// \return The specification converted to aterm format.
+/// \return The specification converted to aterm_core format.
 template <typename LinearProcess, typename InitialProcessExpression>
 atermpp::aterm_appl specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec)
 {

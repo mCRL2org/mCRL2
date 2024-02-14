@@ -69,7 +69,7 @@ class sort_expression: public atermpp::aterm_appl
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit sort_expression(const atermpp::aterm& term)
+    explicit sort_expression(const atermpp::aterm_core& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_SortExpr(*this));
@@ -155,7 +155,7 @@ struct hash<mcrl2::data::sort_expression>
 {
   std::size_t operator()(const mcrl2::data::sort_expression& x) const
   {
-    return hash<atermpp::aterm>()(x);
+    return hash<atermpp::aterm_core>()(x);
   }
 };
 

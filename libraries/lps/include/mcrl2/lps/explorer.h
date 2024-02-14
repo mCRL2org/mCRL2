@@ -291,7 +291,7 @@ struct cache_equality
   bool operator()(const atermpp::aterm_appl& key1, const cheap_cache_key& key2) const
   {
     std::vector<data::variable>::const_iterator i=key2.m_gamma.begin();
-    for(const atermpp::aterm& d: key1)
+    for(const atermpp::aterm_core& d: key1)
     {
       if (d!=key2.m_sigma(*i))
       {
@@ -314,7 +314,7 @@ struct cache_hash
   std::size_t operator()(const atermpp::aterm_appl& key) const
   {
     std::size_t hash=0;
-    for(const atermpp::aterm& d: key)
+    for(const atermpp::aterm_core& d: key)
     {
       hash=atermpp::detail::combine(hash,d);
     }

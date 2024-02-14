@@ -38,7 +38,7 @@ class variable: public aterm_appl
     {}
 };
 
-void on_delete_variable(const aterm&)
+void on_delete_variable(const aterm_core&)
 {
   variable_count--;
 }

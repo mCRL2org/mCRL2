@@ -188,7 +188,7 @@ class specification_basic_type
     bool timeIsBeingUsed;
     bool stochastic_operator_is_being_used;
     bool fresh_equation_added;
-    std::map < aterm, objectdatatype > objectdata; // It is important to guarantee that the objects will not
+    std::map < aterm_core, objectdatatype > objectdata; // It is important to guarantee that the objects will not
                                                    // be moved to another place when the object data structure grows. This
                                                    // is because objects in this datatype  are passed around by reference.
 
@@ -760,7 +760,7 @@ class specification_basic_type
       const bool containstime,
       process_identifier& p)
     {
-      for(const std::pair<const aterm,objectdatatype>& d: objectdata)
+      for(const std::pair<const aterm_core,objectdatatype>& d: objectdata)
       {
         if (d.second.object==proc &&
             d.second.parameters==parameters &&
@@ -826,7 +826,7 @@ class specification_basic_type
       const action firstAction=multiAction.front();
 
       /* Actions are compared on the basis of their position
-         in memory, to order them. As the aterm library maintains
+         in memory, to order them. As the aterm_core library maintains
          pointers to objects that are not garbage collected, this
          is a safe way to do this. */
       if (actioncompare(act.label(),firstAction.label()))

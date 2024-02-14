@@ -19,7 +19,7 @@
 namespace mcrl2::lts
 {
 
-/// \brief Converts a probabilistic state into an aterm that encodes it.
+/// \brief Converts a probabilistic state into an aterm_core that encodes it.
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabilistic_lts_lts_t::probabilistic_state_t& state)
 {
   if (state.size()==0)
@@ -138,7 +138,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   atermpp::aterm_stream_state state(stream);
   stream >> data::detail::add_index_impl;
 
-  atermpp::aterm marker;
+  atermpp::aterm_core marker;
   stream >> marker;
 
   if (marker != labelled_transition_system_mark())
@@ -173,7 +173,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   // Keep track of the number of states (derived from the transitions).
   std::size_t number_of_states = 1;
 
-  aterm term;
+  aterm_core term;
   aterm_int from;
   action_label_lts action;
   aterm_int to;

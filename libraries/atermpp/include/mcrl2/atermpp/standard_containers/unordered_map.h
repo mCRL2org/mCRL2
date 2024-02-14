@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/detail/aterm_container.h"
 #include "mcrl2/utilities/shared_mutex.h"
 
-/// \brief The main namespace for the aterm++ library.
+/// \brief The main namespace for the aterm_core++ library.
 namespace atermpp
 {
 
