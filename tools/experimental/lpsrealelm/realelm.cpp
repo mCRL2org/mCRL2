@@ -326,7 +326,7 @@ static void normalize_specification(
           // Also this is extremely confusing, and should not be done by lpsrealem.
           // for (variable_list::const_iterator k=real_parameters.begin(); k!=real_parameters.end(); k++)
           // {
-          //   data_expression e=(atermpp::aterm_appl)*k;
+          //   data_expression e=(atermpp::aterm)*k;
           //   inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less_eq,r));
           // }
 
@@ -335,7 +335,7 @@ static void normalize_specification(
           // If somebody wants to add this as a constraint, he should do this explicitly in the input code.
           /* for (variable_list::const_iterator k=real_sum_variables.begin(); k!=real_sum_variables.end(); k++)
           {
-            const data_expression e=(atermpp::aterm_appl)*k;
+            const data_expression e=(atermpp::aterm)*k;
             inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less,r));
           } */
 
@@ -435,7 +435,7 @@ static void normalize_specification(
           // Also this is extremely confusing, and should not be done by lpsrealem.
           // for (variable_list::const_iterator k=real_parameters.begin(); k!=real_parameters.end(); k++)
           // {
-          //   data_expression e=(atermpp::aterm_appl)*k;
+          //   data_expression e=(atermpp::aterm)*k;
           //   inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less_eq,r));
           // }
 
@@ -444,7 +444,7 @@ static void normalize_specification(
           // If somebody wants to add this as a constraint, he should do this explicitly in the input code.
           /* for (variable_list::const_iterator k=real_sum_variables.begin(); k!=real_sum_variables.end(); k++)
           {
-            const data_expression e=(atermpp::aterm_appl)*k;
+            const data_expression e=(atermpp::aterm)*k;
             inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less,r));
           } */
 

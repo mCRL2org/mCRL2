@@ -181,7 +181,7 @@ class Info
     // Perform an occur check of expression t2 in expression t1.
     static bool occurs(const data_expression& t1, const data_expression& t2)
     {
-      return atermpp::find_if(t1,[&](const atermpp::aterm_appl& t){return t == t2;}) != atermpp::aterm_appl();
+      return atermpp::find_if(t1,[&](const atermpp::aterm& t){return t == t2;}) != atermpp::aterm();
     }
 
     /// \brief Compares two guards.

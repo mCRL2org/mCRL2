@@ -30,12 +30,12 @@ int main(int argc, char* argv[])
   std::size_t iterations = 1000;
 
   // Initialize the term
-  aterm_appl f = create_nested_function<2>("f", "c", size);
+  aterm f = create_nested_function<2>("f", "c", size);
 
   // Define a function that repeatedly creates nested function applications.
   auto nested_function = [&](std::size_t) -> void
     {
-      std::queue<const aterm_appl*> Q;
+      std::queue<const aterm*> Q;
       std::size_t n = 0;
       
       for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
@@ -47,12 +47,12 @@ int main(int argc, char* argv[])
 
         while (!Q.empty())
         {
-          const aterm_appl& t = *Q.front();
+          const aterm& t = *Q.front();
           Q.pop();
 
           for (const aterm_core& u : t)
           {
-            Q.push(reinterpret_cast<const aterm_appl*>(&u));
+            Q.push(reinterpret_cast<const aterm*>(&u));
             n++;
           }
         }

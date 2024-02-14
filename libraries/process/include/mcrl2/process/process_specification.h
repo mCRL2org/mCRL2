@@ -26,7 +26,7 @@ namespace process
 {
 
 class process_specification;
-atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec);
+atermpp::aterm process_specification_to_aterm(const process_specification& spec);
 void complete_data_specification(process_specification&);
 
 // template function overloads
@@ -41,7 +41,7 @@ std::set<data::variable> find_free_variables(const process::process_specificatio
 /// \param x A term
 /// \return True if \a x is a process specification expression
 inline
-bool is_process_specification(const atermpp::aterm_appl& x)
+bool is_process_specification(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ProcSpec;
 }
@@ -68,16 +68,16 @@ class process_specification
 
     /// \brief Initializes the specification with an aterm_core.
     /// \param t A term
-    void construct_from_aterm(const atermpp::aterm_appl& t)
+    void construct_from_aterm(const atermpp::aterm& t)
     {
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_data            = data::data_specification(atermpp::down_cast<atermpp::aterm_appl>(*i++));
-      m_action_labels   = atermpp::down_cast<process::action_label_list>(atermpp::down_cast<atermpp::aterm_appl>(*i++)[0]);
-      data::variable_list global_variables = atermpp::down_cast<data::variable_list>(atermpp::down_cast<atermpp::aterm_appl>(*i++)[0]);
+      atermpp::aterm::iterator i = t.begin();
+      m_data            = data::data_specification(atermpp::down_cast<atermpp::aterm>(*i++));
+      m_action_labels   = atermpp::down_cast<process::action_label_list>(atermpp::down_cast<atermpp::aterm>(*i++)[0]);
+      data::variable_list global_variables = atermpp::down_cast<data::variable_list>(atermpp::down_cast<atermpp::aterm>(*i++)[0]);
       m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
-      process_equation_list l = atermpp::down_cast<process_equation_list>(atermpp::down_cast<atermpp::aterm_appl>(*i++)[0]);
-      atermpp::aterm_appl init = atermpp::down_cast<atermpp::aterm_appl>(*i);
-      m_initial_process = process_expression(atermpp::down_cast<atermpp::aterm_appl>(init[0]));
+      process_equation_list l = atermpp::down_cast<process_equation_list>(atermpp::down_cast<atermpp::aterm>(*i++)[0]);
+      atermpp::aterm init = atermpp::down_cast<atermpp::aterm>(*i);
+      m_initial_process = process_expression(atermpp::down_cast<atermpp::aterm>(init[0]));
       m_equations       = std::vector<process_equation>(l.begin(), l.end());
     }
 
@@ -88,7 +88,7 @@ class process_specification
 
     /// \brief Constructor.
     /// \param t A term containing an aterm_core representation of a process specification.
-    process_specification(atermpp::aterm_appl t)
+    process_specification(atermpp::aterm t)
     {
       assert(core::detail::check_term_ProcSpec(t));
       construct_from_aterm(t);
@@ -213,18 +213,18 @@ void complete_data_specification(process_specification& spec)
   spec.data().add_context_sorts(s);
 }
 
-/// \brief Conversion to aterm_appl.
+/// \brief Conversion to aterm.
 /// \return The specification converted to aterm_core format.
 /// \param spec A process specification
 inline
-atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec)
+atermpp::aterm process_specification_to_aterm(const process_specification& spec)
 {
-  return atermpp::aterm_appl(core::detail::function_symbol_ProcSpec(),
+  return atermpp::aterm(core::detail::function_symbol_ProcSpec(),
            data::detail::data_specification_to_aterm(spec.data()),
-           atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
-           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
-           atermpp::aterm_appl(core::detail::function_symbol_ProcEqnSpec(), process_equation_list(spec.equations().begin(), spec.equations().end())),
-           atermpp::aterm_appl(core::detail::function_symbol_ProcessInit(), spec.init())
+           atermpp::aterm(core::detail::function_symbol_ActSpec(), spec.action_labels()),
+           atermpp::aterm(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
+           atermpp::aterm(core::detail::function_symbol_ProcEqnSpec(), process_equation_list(spec.equations().begin(), spec.equations().end())),
+           atermpp::aterm(core::detail::function_symbol_ProcessInit(), spec.init())
          );
 }
 

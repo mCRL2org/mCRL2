@@ -46,8 +46,8 @@ private:
   /// \brief Parse a term from the input stream and return it.
   aterm_core parse_aterm(int& character);
 
-  /// \brief Parses an "f"(t0, ..., tn) application as an aterm_appl.
-  aterm_appl parse_aterm_appl(const std::string& function_name, int& character);
+  /// \brief Parses an "f"(t0, ..., tn) application as an aterm.
+  aterm parse_aterm_appl(const std::string& function_name, int& character);
 
   /// \brief Parses an std::size_t as an aterm_int.
   aterm_int parse_aterm_int(int& character);

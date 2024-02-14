@@ -17,37 +17,37 @@
 
 using namespace atermpp;
 
-// function object to test if it is an aterm_appl with function symbol "f"
+// function object to test if it is an aterm with function symbol "f"
 struct is_f
 {
-  bool operator()(const aterm_appl& t) const
+  bool operator()(const aterm& t) const
   {
     return t.function().name() == "f";
   }
 };
 
-// function object to test if it is an aterm_appl with function symbol "g"
+// function object to test if it is an aterm with function symbol "g"
 struct is_g
 {
-  bool operator()(const aterm_appl& t) const
+  bool operator()(const aterm& t) const
   {
     return t.function().name() == "g";
   }
 };
 
-// function object to test if it is an aterm_appl with function symbol "z"
+// function object to test if it is an aterm with function symbol "z"
 struct is_z
 {
-  bool operator()(const aterm_appl& t) const
+  bool operator()(const aterm& t) const
   {
     return t.function().name() == "z";
   }
 };
 
-// function object to test if it is an aterm_appl with function symbol "a" or "b"
+// function object to test if it is an aterm with function symbol "a" or "b"
 struct is_a_or_b
 {
-  bool operator()(const aterm_appl& t) const
+  bool operator()(const aterm& t) const
   {
     return t.function().name() == "a" || t.function().name() == "b";
   }
@@ -56,15 +56,15 @@ struct is_a_or_b
 // replaces function names f by g and vice versa
 struct fg_replacer
 {
-  aterm_appl operator()(const aterm_appl& t) const
+  aterm operator()(const aterm& t) const
   {
     if (t.function().name() == "f")
     {
-      return aterm_appl(function_symbol("g", t.function().arity()), t.begin(), t.end());
+      return aterm(function_symbol("g", t.function().arity()), t.begin(), t.end());
     }
     else if (t.function().name() == "g")
     {
-      return aterm_appl(function_symbol("f", t.function().arity()), t.begin(), t.end());
+      return aterm(function_symbol("f", t.function().arity()), t.begin(), t.end());
     }
     else
     {
@@ -76,15 +76,15 @@ struct fg_replacer
 // replaces function names f by g and vice versa, but stops the recursion once an f or g term is found
 struct fg_partial_replacer
 {
-  std::pair< aterm_appl, bool> operator()(aterm_appl t) const
+  std::pair< aterm, bool> operator()(aterm t) const
   {
     if (t.function().name() == "f")
     {
-      return std::make_pair(aterm_appl(function_symbol("g", t.function().arity()), t.begin(), t.end()), false);
+      return std::make_pair(aterm(function_symbol("g", t.function().arity()), t.begin(), t.end()), false);
     }
     else if (t.function().name() == "g")
     {
-      return std::make_pair(aterm_appl(function_symbol("f", t.function().arity()), t.begin(), t.end()), false);
+      return std::make_pair(aterm(function_symbol("f", t.function().arity()), t.begin(), t.end()), false);
     }
     else
     {
@@ -95,18 +95,18 @@ struct fg_partial_replacer
 
 BOOST_AUTO_TEST_CASE(find_test)
 {
-  aterm_appl a(read_appl_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
+  aterm a(read_appl_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
-  aterm_appl t = find_if(a, is_f());
+  aterm t = find_if(a, is_f());
   BOOST_CHECK(t == read_appl_from_string("f(y)"));
 
-  aterm_appl a1(read_appl_from_string("h(g(x),g(f(y)))"));
+  aterm a1(read_appl_from_string("h(g(x),g(f(y)))"));
   t = partial_find_if(a1, is_f(), is_g());
-  BOOST_CHECK(t == aterm_appl());
+  BOOST_CHECK(t == aterm());
   t = partial_find_if(a1, is_f(), is_z());
   BOOST_CHECK(t == read_appl_from_string("f(y)"));
 
-  std::vector< aterm_appl> v;
+  std::vector< aterm> v;
   find_all_if(a, is_f(), back_inserter(v));
   BOOST_CHECK(v.front() == read_appl_from_string("f(y)"));
   BOOST_CHECK(v.back() == read_appl_from_string("f(z)"));
@@ -118,8 +118,8 @@ BOOST_AUTO_TEST_CASE(replace_test1)
   BOOST_CHECK(replace(read_appl_from_string("x"), read_appl_from_string("x"), read_appl_from_string("f(x)")) == read_term_from_string("f(x)"));
   BOOST_CHECK(replace(read_list_from_string("[x]"), read_term_from_string("x"), read_appl_from_string("f(x)")) == read_term_from_string("[f(x)]"));
 
-  aterm_appl a(read_appl_from_string("f(f(x))"));
-  aterm_appl b(replace(a, read_appl_from_string("f(x)"), read_appl_from_string("x")));
+  aterm a(read_appl_from_string("f(f(x))"));
+  aterm b(replace(a, read_appl_from_string("f(x)"), read_appl_from_string("x")));
   BOOST_CHECK(b == read_appl_from_string("f(x)"));
   b = bottom_up_replace(a, read_appl_from_string("f(x)"), read_appl_from_string("x"));
   BOOST_CHECK(b == read_term_from_string("x"));
@@ -153,11 +153,11 @@ const atermpp::function_symbol& f3()
 
 struct replace_f
 {
-  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  atermpp::aterm operator()(const atermpp::aterm& x) const
   {
     if (x.function() == f3())
     {
-      return atermpp::aterm_appl(f2(), x.begin(), --x.end());
+      return atermpp::aterm(f2(), x.begin(), --x.end());
     }
     return x;
   }
@@ -213,19 +213,19 @@ const atermpp::function_symbol& function_symbol_PropVarInstNoIndex()
 
 struct index_remover
 {
-  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  atermpp::aterm operator()(const atermpp::aterm& x) const
   {
     if (x.function() == function_symbol_DataVarId())
     {
-      return atermpp::aterm_appl(function_symbol_DataVarIdNoIndex(), x.begin(), --x.end());
+      return atermpp::aterm(function_symbol_DataVarIdNoIndex(), x.begin(), --x.end());
     }
     else if (x.function() == function_symbol_OpId())
     {
-      return atermpp::aterm_appl(function_symbol_OpIdNoIndex(), x.begin(), --x.end());
+      return atermpp::aterm(function_symbol_OpIdNoIndex(), x.begin(), --x.end());
     }
     else if (x.function() == function_symbol_PropVarInst())
     {
-      return atermpp::aterm_appl(function_symbol_PropVarInstNoIndex(), x.begin(), --x.end());
+      return atermpp::aterm(function_symbol_PropVarInstNoIndex(), x.begin(), --x.end());
     }
     return x;
   }
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(bottom_up_replace_test)
 
 BOOST_AUTO_TEST_CASE(cached_bottom_up_replace_test)
 {
-  std::unordered_map<aterm_appl, aterm_core> cache;
+  std::unordered_map<aterm, aterm_core> cache;
   atermpp::aterm_core t  = atermpp::read_term_from_string("h(g(f(x),f(x)),g(f(x),f(x)))");
   atermpp::aterm_core t1 = atermpp::bottom_up_replace(t, fg_replacer(), cache);
   atermpp::aterm_core t2 = atermpp::read_term_from_string("h(f(g(x),g(x)),f(g(x),g(x)))");

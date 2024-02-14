@@ -312,7 +312,7 @@ class specification_basic_type
 
     /*****************  retrieve basic objects  ******************/
 
-    void detail_check_objectdata(const aterm_appl& o) const
+    void detail_check_objectdata(const aterm& o) const
     {
       if (objectdata.count(o)==0)
       {
@@ -326,13 +326,13 @@ class specification_basic_type
         }
       }
     }
-    objectdatatype& objectIndex(const aterm_appl& o) 
+    objectdatatype& objectIndex(const aterm& o) 
     {
       detail_check_objectdata(o);
       return objectdata.find(o)->second;
     } 
 
-    const objectdatatype& objectIndex(const aterm_appl& o) const
+    const objectdatatype& objectIndex(const aterm& o) const
     {
       detail_check_objectdata(o);
       return objectdata.find(o)->second;

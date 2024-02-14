@@ -16,7 +16,7 @@
 
 using namespace atermpp;
 
-class D: public aterm_appl
+class D: public aterm
 {
 };
 
@@ -26,10 +26,10 @@ class D: public aterm_appl
 BOOST_AUTO_TEST_CASE(test_main)
 {
   aterm_core t (read_term_from_string("[1,2]"));
-  aterm_appl a (read_appl_from_string("f(x)"));
+  aterm a (read_appl_from_string("f(x)"));
   aterm_list l (read_list_from_string("[3]"));
   aterm_core T      = t;
-  aterm_appl A  = a;
+  aterm A  = a;
   aterm_list L  = l;
 
   // assignment
@@ -91,10 +91,10 @@ BOOST_AUTO_TEST_CASE(test_main)
 
   // set
   std::set<atermpp::aterm_core> st;
-  std::set<aterm_appl> sa;
+  std::set<aterm> sa;
   std::set<aterm_list> sl;
   std::set<aterm_core> sT;
-  std::set<aterm_appl> sA;
+  std::set<aterm> sA;
   std::set<aterm_list> sL;
   std::set<D> sD;
 }

@@ -10,12 +10,12 @@
 #ifndef MCRL2_ATERMPP_ATERM_BALANCED_TREE_H
 #define MCRL2_ATERMPP_ATERM_BALANCED_TREE_H
 
-/* NOTE: A aterm_balanced_tree is actually not always an aterm_appl, namely when numbers
+/* NOTE: A aterm_balanced_tree is actually not always an aterm, namely when numbers
  *       or lists are stored in it. In that case the balanced tree of size 1 is a number
  *       or a list. So, a proper type for a term_balanced_tree should be "aterm_core" and not
- *       aterm_appl. This ought to be adapted. */
+ *       aterm. This ought to be adapted. */
 
-#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm.h"
 
 #include <boost/iterator/iterator_facade.hpp>
 
@@ -27,7 +27,7 @@ namespace
   global_function_symbol g_empty("@empty@", 0);
   global_function_symbol g_tree_node("@node@", 2);
   global_function_symbol g_single_tree_node("@single_node@", 1);
-  aterm_appl g_empty_tree(g_empty);
+  aterm g_empty_tree(g_empty);
 }
 
 template <typename Term>
@@ -41,7 +41,7 @@ void make_term_balanced_tree(term_balanced_tree<Term>& result,
 
 /// \brief Read-only balanced binary tree of terms.
 template <typename Term>
-class term_balanced_tree : public aterm_appl
+class term_balanced_tree : public aterm
 {
   protected:
 
@@ -55,7 +55,7 @@ class term_balanced_tree : public aterm_appl
     static const function_symbol& tree_empty_function() { return g_empty; }
     static const function_symbol& tree_single_node_function() { return g_single_tree_node; }
     static const function_symbol& tree_node_function() { return g_tree_node; }    
-    static const aterm_appl& empty_tree() { return g_empty_tree; }
+    static const aterm& empty_tree() { return g_empty_tree; }
 
     template < typename ForwardTraversalIterator, class Transformer >
     static void make_tree_helper(aterm_core& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
@@ -108,7 +108,7 @@ class term_balanced_tree : public aterm_appl
     }
 
     explicit term_balanced_tree(detail::_term_appl* t)
-         : aterm_appl(t)
+         : aterm(t)
     {}
 
   public:
@@ -133,7 +133,7 @@ class term_balanced_tree : public aterm_appl
 
     /// \brief Default constructor. Creates an empty tree.
     term_balanced_tree()
-      : aterm_appl(empty_tree())
+      : aterm(empty_tree())
     {}
 
     /// \brief Copy constructor.
@@ -150,11 +150,11 @@ class term_balanced_tree : public aterm_appl
 
     /// \brief Construction from aterm_core.
     explicit term_balanced_tree(const aterm_core& tree) 
-       : aterm_appl(tree.function() == tree_empty_function() ||
+       : aterm(tree.function() == tree_empty_function() ||
                     tree.function() == tree_single_node_function() ||
                     tree.function() == tree_node_function()?
-                down_cast<aterm_appl>(tree):
-                aterm_appl(tree_single_node_function(),tree))
+                down_cast<aterm>(tree):
+                aterm(tree_single_node_function(),tree))
     {
       assert(function() == tree_empty_function() ||
              function() == tree_single_node_function() ||
@@ -187,7 +187,7 @@ class term_balanced_tree : public aterm_appl
     const aterm_core& left_branch() const
     {
       assert(is_node());
-      return aterm_appl::operator[](0);
+      return aterm::operator[](0);
     }
 
     /// \brief Get the left branch of the tree
@@ -196,7 +196,7 @@ class term_balanced_tree : public aterm_appl
     const aterm_core& right_branch() const
     {
       assert(is_node());
-      return aterm_appl::operator[](1);
+      return aterm::operator[](1);
     }
 
     /// \brief Element indexing operator.
@@ -252,7 +252,7 @@ class term_balanced_tree : public aterm_appl
         }
       }
 
-      return vertical_cast<Term>((static_cast<aterm_appl>(*this))[0]);
+      return vertical_cast<Term>((static_cast<aterm>(*this))[0]);
     }
 
     /// \brief Returns the size of the term_balanced_tree.
@@ -431,7 +431,7 @@ void make_term_balanced_tree(term_balanced_tree<Term>& result,
 typedef term_balanced_tree<aterm_core> aterm_balanced_tree;
 
 
-inline bool is_aterm_balanced_tree(const aterm_appl& t)
+inline bool is_aterm_balanced_tree(const aterm& t)
 {
   return t.defined() && (t.function()==g_empty || 
                          t.function()==g_single_tree_node ||

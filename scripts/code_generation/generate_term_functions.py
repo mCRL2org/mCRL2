@@ -72,9 +72,9 @@ const atermpp::function_symbol& function_symbol_%(name)s()
 def generate_default_values(rules, declaration_filename, definition_filename, skip_list):
     TERM_FUNCTION = '''// %(name)s
 inline
-const atermpp::aterm_appl& default_value_%(name)s()
+const atermpp::aterm& default_value_%(name)s()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_%(name)s()%(arguments)s);
+  static const atermpp::aterm t = atermpp::aterm(function_symbol_%(name)s()%(arguments)s);
   return t;
 }
 
@@ -82,7 +82,7 @@ const atermpp::aterm_appl& default_value_%(name)s()
 
     RULE_FUNCTION = '''// %(name)s
 inline
-const atermpp::aterm_appl& default_value_%(name)s()
+const atermpp::aterm& default_value_%(name)s()
 {
   return default_value_%(fname)s();
 }
@@ -99,7 +99,7 @@ const atermpp::aterm_appl& default_value_%(name)s()
         name  = f.name()
         if name in skip_list:
             continue
-        ptext = ptext + 'const atermpp::aterm_appl& default_value_%s();\n' % f.name()
+        ptext = ptext + 'const atermpp::aterm& default_value_%s();\n' % f.name()
         arity = f.arity()
         args = []
         for x in f.arguments:
@@ -119,8 +119,8 @@ const atermpp::aterm_appl& default_value_%(name)s()
             'arity'      : arity,
             'arguments'  : arguments,
         }
-        dtext = dtext + '  const atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
-        vtext = vtext + '  static const atermpp::aterm_appl %s;\n' % name
+        dtext = dtext + '  const atermpp::aterm core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
+        vtext = vtext + '  static const atermpp::aterm %s;\n' % name
 
     function_names = [x.name() for x in functions]
     for rule in rules:
@@ -132,13 +132,13 @@ const atermpp::aterm_appl& default_value_%(name)s()
                 if f.phase == None or not f.phase.startswith('-') or not f.phase.startswith('.'):
                     fname = f.name()
                     break
-            ptext = ptext + 'const atermpp::aterm_appl& default_value_%s();\n' % name
+            ptext = ptext + 'const atermpp::aterm& default_value_%s();\n' % name
             ctext = ctext + RULE_FUNCTION % {
                 'name'       : name,
                 'fname'      : fname
             }
-            dtext = dtext + '  const atermpp::aterm_appl core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
-            vtext = vtext + '  static const atermpp::aterm_appl %s;\n' % name
+            dtext = dtext + '  const atermpp::aterm core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
+            vtext = vtext + '  static const atermpp::aterm %s;\n' % name
 
     ctext = ptext + '\n' + ctext
     result = insert_text_in_file(declaration_filename, ctext, 'generated constructors')
@@ -204,7 +204,7 @@ bool %(check_name)s(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::%(name)s)
   {
     return false;

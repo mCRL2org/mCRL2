@@ -410,7 +410,7 @@ void test_constructor()
     "                          \n"
     ;
   data_specification data = parse_data_specification(SPEC);
-  atermpp::aterm_appl a = data::detail::data_specification_to_aterm(data);
+  atermpp::aterm a = data::detail::data_specification_to_aterm(data);
   data_specification spec1(a);
 }
 
@@ -864,7 +864,7 @@ void test_bke()
         for (const structured_sort_constructor_argument& argument: constructor.arguments())
         {
           std::cout << "argument: " << argument << " " << argument << std::endl;
-          const atermpp::aterm_appl& name = argument.name();
+          const atermpp::aterm& name = argument.name();
           if (name != core::empty_identifier_string())
           {
             std::cout << "name = " << name << std::endl;

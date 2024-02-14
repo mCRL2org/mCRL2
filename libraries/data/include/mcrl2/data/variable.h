@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_VARIABLE_H
 #define MCRL2_DATA_VARIABLE_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
 
@@ -77,7 +77,7 @@ class variable: public data_expression
 /// \\brief Make_variable constructs a new term into a given address.
 /// \\ \param t The reference into which the new variable is constructed. 
 template <class... ARGUMENTS>
-inline void make_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_variable(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_DataVarId(), args...);
 }

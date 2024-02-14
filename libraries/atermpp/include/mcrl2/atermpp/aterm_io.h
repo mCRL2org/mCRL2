@@ -20,10 +20,10 @@ namespace atermpp
 /// \brief A function that is applied to all terms. The resulting term should only use
 ///        a subset of the original arguments (i.e. not introduce new terms).
 /// \details Typical usage is removing the index traits from function symbols that represent operators.
-using aterm_transformer = aterm_appl(const aterm_appl&);
+using aterm_transformer = aterm(const aterm&);
 
 /// \brief The default transformer that maps each term to itself.
-inline aterm_appl identity(const aterm_appl& x) { return x; }
+inline aterm identity(const aterm& x) { return x; }
 
 /// \brief The general aterm_core stream interface, which enables the use of a transformer to
 ///        change the written/read terms.
@@ -196,12 +196,12 @@ inline aterm_int read_int_from_string(const std::string& s)
   return n;
 }
 
-/// \brief Reads an aterm_appl from a string. The string can be in either binary or text format.
-/// \details If the input is not an aterm_appl, an aterm_core is returned of the wrong type.
+/// \brief Reads an aterm from a string. The string can be in either binary or text format.
+/// \details If the input is not an aterm, an aterm_core is returned of the wrong type.
 /// \return The term corresponding to the string.
-inline aterm_appl read_appl_from_string(const std::string& s)
+inline aterm read_appl_from_string(const std::string& s)
 {
-  const aterm_appl a = down_cast<aterm_appl>(read_term_from_string(s));
+  const aterm a = down_cast<aterm>(read_term_from_string(s));
   assert(a.type_is_appl());
   return a;
 }

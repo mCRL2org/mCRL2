@@ -773,22 +773,22 @@ bool data_specification::is_well_typed() const
 /// The last type must eventually disappear but is unfortunately still in
 /// use in a substantial amount of source code.
 /// Note, all sorts with name prefix \@legacy_ are eliminated
-void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
+void data_specification::build_from_aterm(const atermpp::aterm& term)
 {
   assert(core::detail::check_rule_DataSpec(term));
 
   // Note backwards compatibility measure: alias is no longer a sort_expression
-  const atermpp::term_list<atermpp::aterm_appl> term_sorts=
-                 atermpp::down_cast<atermpp::term_list<atermpp::aterm_appl> >(atermpp::down_cast<atermpp::aterm_appl>(term[0])[0]);
+  const atermpp::term_list<atermpp::aterm> term_sorts=
+                 atermpp::down_cast<atermpp::term_list<atermpp::aterm> >(atermpp::down_cast<atermpp::aterm>(term[0])[0]);
   const data::function_symbol_list term_constructors=
-                 atermpp::down_cast<data::function_symbol_list>(atermpp::down_cast<atermpp::aterm_appl>(term[1])[0]);
+                 atermpp::down_cast<data::function_symbol_list>(atermpp::down_cast<atermpp::aterm>(term[1])[0]);
   const data::function_symbol_list term_mappings=
-                 atermpp::down_cast<data::function_symbol_list>(atermpp::down_cast<atermpp::aterm_appl>(term[2])[0]);
+                 atermpp::down_cast<data::function_symbol_list>(atermpp::down_cast<atermpp::aterm>(term[2])[0]);
   const data::data_equation_list term_equations=
-                 atermpp::down_cast<data::data_equation_list>(atermpp::down_cast<atermpp::aterm_appl>(term[3])[0]);
+                 atermpp::down_cast<data::data_equation_list>(atermpp::down_cast<atermpp::aterm>(term[3])[0]);
 
   // Store the sorts and aliases.
-  for(const atermpp::aterm_appl& t: term_sorts)
+  for(const atermpp::aterm& t: term_sorts)
   {
     if (data::is_alias(t)) // Compatibility with legacy code
     {

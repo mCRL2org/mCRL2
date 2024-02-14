@@ -10,7 +10,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_HASH_H_
 #define MCRL2_ATERMPP_DETAIL_ATERM_HASH_H_
 
-#include "mcrl2/atermpp/detail/aterm_appl.h"
+#include "mcrl2/atermpp/detail/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/atermpp/detail/function_symbol_hash.h"
 #include "mcrl2/utilities/hash_utility.h"

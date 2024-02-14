@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/atermpp/aterm_appl.h
+/// \file mcrl2/atermpp/aterm.h
 /// \brief The term_appl class represents function application.
 
 #ifndef MCRL2_ATERMPP_ATERM_APPL_H
@@ -21,13 +21,13 @@
 namespace atermpp
 {
 
-class aterm_appl: public aterm_core
+class aterm: public aterm_core
 {
 protected:
   /// \brief Constructor.
   /// \param t A pointer internal data structure from which the term is constructed.
   /// \details This function is explicitly protected such that is not used in common code. 
-  explicit aterm_appl(detail::_term_appl *t)
+  explicit aterm(detail::_term_appl *t)
    : aterm_core(reinterpret_cast<detail::_aterm*>(t))
   {}
 
@@ -45,22 +45,22 @@ public:
   typedef term_appl_iterator<aterm_core> const_iterator;
 
   /// \brief Default constructor.
-  aterm_appl():aterm_core()
+  aterm():aterm_core()
   {}
 
   /// \brief Explicit constructor from an aterm_core.
   /// \param t The aterm_core from which the term is constructed.
-  explicit aterm_appl(const aterm_core& t) 
+  explicit aterm(const aterm_core& t) 
    : aterm_core(t)
   {} 
 
   /// This class has user-declared copy constructor so declare default copy and move operators.
-  aterm_appl(const aterm_appl& other) noexcept = default;
-  aterm_appl& operator=(const aterm_appl& other) noexcept = default;
-  aterm_appl(aterm_appl&& other) noexcept = default;
-  aterm_appl& operator=(aterm_appl&& other) noexcept = default;
+  aterm(const aterm& other) noexcept = default;
+  aterm& operator=(const aterm& other) noexcept = default;
+  aterm(aterm&& other) noexcept = default;
+  aterm& operator=(aterm&& other) noexcept = default;
 
-  /// \brief Constructor that provides an aterm_appl based on a function symbol and forward iterator providing the arguments. 
+  /// \brief Constructor that provides an aterm based on a function symbol and forward iterator providing the arguments. 
   /// \details The iterator range is traversed more than once. If only one traversal is required
   ///          use term_appl with a TermConverter argument. But this function
   ///          is substantially less efficient.
@@ -72,7 +72,7 @@ public:
             typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr,
             typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr,
             typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value>::type* = nullptr>
-  aterm_appl(const function_symbol& sym,
+  aterm(const function_symbol& sym,
             ForwardIterator begin,
             ForwardIterator end)
   {
@@ -83,7 +83,7 @@ public:
                   "A forward iterator has more requirements than an output iterator.");
   }
 
-  /// \brief Constructor that provides an aterm_appl based on a function symbol and an input iterator providing the arguments. 
+  /// \brief Constructor that provides an aterm based on a function symbol and an input iterator providing the arguments. 
   /// \details The given iterator is traversed only once. So it can be used with an input iterator.
   ///          This means that the TermConverter is applied exactly once to each element.
   ///          The length of the iterator range must be equal to the arity of the function symbol.
@@ -93,10 +93,10 @@ public:
   template <class InputIterator,
             typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr,
             typename std::enable_if<std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr>
-  aterm_appl(const function_symbol& sym,
+  aterm(const function_symbol& sym,
             InputIterator begin,
             InputIterator end)
-    : aterm_appl(sym, begin, end, [](const unprotected_aterm_core& term) -> const unprotected_aterm_core& { return term; } )
+    : aterm(sym, begin, end, [](const unprotected_aterm_core& term) -> const unprotected_aterm_core& { return term; } )
   {
     static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
                   "The InputIterator is missing the input iterator tag.");
@@ -113,7 +113,7 @@ public:
   template <class InputIterator,
             class TermConverter,
             typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr>
-  aterm_appl(const function_symbol& sym,
+  aterm(const function_symbol& sym,
             InputIterator begin,
             InputIterator end,
             TermConverter converter)
@@ -125,7 +125,7 @@ public:
 
   /// \brief Constructor.
   /// \param sym A function symbol.
-  aterm_appl(const function_symbol& sym)
+  aterm(const function_symbol& sym)
   {
     detail::g_thread_term_pool().create_term(*this, sym);
   }
@@ -134,12 +134,12 @@ public:
   /// \param symbol A function symbol.
   /// \param arguments The arguments of the function application.
   template<typename ...Terms>
-  aterm_appl(const function_symbol& symbol, const Terms& ...arguments)
+  aterm(const function_symbol& symbol, const Terms& ...arguments)
   {
     detail::g_thread_term_pool().create_appl(*this, symbol, arguments...);
   }
 
-  /// \brief Returns the function symbol belonging to an aterm_appl.
+  /// \brief Returns the function symbol belonging to an aterm.
   /// \return The function symbol of this term.
   const function_symbol& function() const
   {
@@ -164,14 +164,14 @@ public:
   /// \return An iterator pointing to the first argument.
   const_iterator begin() const
   {
-    return const_iterator(&static_cast<const aterm_appl&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(0)));
+    return const_iterator(&static_cast<const aterm&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(0)));
   }
 
   /// \brief Returns a const_iterator pointing past the last argument.
   /// \return A const_iterator pointing past the last argument.
   const_iterator end() const
   {
-    return const_iterator(&static_cast<const aterm_appl&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(size())));
+    return const_iterator(&static_cast<const aterm&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(size())));
   }
 
   /// \brief Returns the largest possible number of arguments.
@@ -187,12 +187,12 @@ public:
   const aterm_core& operator[](const size_type i) const
   {
     assert(i < size()); // Check the bounds.
-    return static_cast<const aterm_appl&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(i));
+    return static_cast<const aterm&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(i));
   }
 };
 
 
-/// \brief Constructor an aterm_appl in a variable based on a function symbol and an forward iterator providing the arguments. 
+/// \brief Constructor an aterm in a variable based on a function symbol and an forward iterator providing the arguments. 
 /// \details The iterator range is traversed more than once. If only one traversal is required
 ///          use term_appl with a TermConverter argument. But this function
 ///          is substantially less efficient.
@@ -222,7 +222,7 @@ void make_term_appl(Term& target,
 }
 
 
-/// \brief Constructor an aterm_appl in a variable based on a function symbol and an input iterator providing the arguments. 
+/// \brief Constructor an aterm in a variable based on a function symbol and an input iterator providing the arguments. 
 /// \details The given iterator is traversed only once. So it can be used with an input iterator.
 ///          This means that the TermConverter is applied exactly once to each element.
 ///          The length of the iterator range must be equal to the arity of the function symbol.
@@ -247,7 +247,7 @@ void make_term_appl(Term& target,
                 "The InputIterator is missing the input iterator tag.");
 }
 
-/// \brief Constructor an aterm_appl in a variable based on a function symbol and an forward iterator providing the arguments. 
+/// \brief Constructor an aterm in a variable based on a function symbol and an forward iterator providing the arguments. 
 /// \details The given iterator is traversed only once. So it can be used with an input iterator.
 ///          This means that the TermConverter is applied exactly once to each element.
 ///          The length of the iterator range must be equal to the arity of the function symbol.
@@ -321,15 +321,15 @@ namespace std
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term.
 /// \param t2 The second term.
-inline void swap(atermpp::aterm_appl& t1, atermpp::aterm_appl& t2) noexcept
+inline void swap(atermpp::aterm& t1, atermpp::aterm& t2) noexcept
 {
   t1.swap(t2);
 }
 
 /// \brief Standard hash function.
-template<> struct hash<atermpp::aterm_appl>
+template<> struct hash<atermpp::aterm>
 {
-  std::size_t operator()(const atermpp::aterm_appl& t) const
+  std::size_t operator()(const atermpp::aterm& t) const
   {
     return std::hash<atermpp::aterm_core>()(t);
   }

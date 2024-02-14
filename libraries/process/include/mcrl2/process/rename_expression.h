@@ -23,30 +23,30 @@ namespace process
 
 //--- start generated class rename_expression ---//
 /// \\brief A rename expression
-class rename_expression: public atermpp::aterm_appl
+class rename_expression: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     rename_expression()
-      : atermpp::aterm_appl(core::detail::default_values::RenameExpr)
+      : atermpp::aterm(core::detail::default_values::RenameExpr)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit rename_expression(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_RenameExpr(*this));
     }
 
     /// \\brief Constructor.
     rename_expression(core::identifier_string& source, core::identifier_string& target)
-      : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), source, target)
+      : atermpp::aterm(core::detail::function_symbol_RenameExpr(), source, target)
     {}
 
     /// \\brief Constructor.
     rename_expression(const std::string& source, const std::string& target)
-      : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), core::identifier_string(source), core::identifier_string(target))
+      : atermpp::aterm(core::detail::function_symbol_RenameExpr(), core::identifier_string(source), core::identifier_string(target))
     {}
 
     /// Move semantics
@@ -69,7 +69,7 @@ class rename_expression: public atermpp::aterm_appl
 /// \\brief Make_rename_expression constructs a new term into a given address.
 /// \\ \param t The reference into which the new rename_expression is constructed. 
 template <class... ARGUMENTS>
-inline void make_rename_expression(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_rename_expression(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RenameExpr(), args...);
 }
@@ -84,7 +84,7 @@ typedef std::vector<rename_expression>    rename_expression_vector;
 /// \\param x A term
 /// \\return True if \\a x is a rename_expression expression
 inline
-bool is_rename_expression(const atermpp::aterm_appl& x)
+bool is_rename_expression(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::RenameExpr;
 }

@@ -1228,23 +1228,23 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().enter(x);
     if (data::is_list_container(x))
     {
-      derived().apply(data::list_container(atermpp::aterm_appl(x)));
+      derived().apply(data::list_container(atermpp::aterm(x)));
     }
     else if (data::is_set_container(x))
     {
-      derived().apply(data::set_container(atermpp::aterm_appl(x)));
+      derived().apply(data::set_container(atermpp::aterm(x)));
     }
     else if (data::is_bag_container(x))
     {
-      derived().apply(data::bag_container(atermpp::aterm_appl(x)));
+      derived().apply(data::bag_container(atermpp::aterm(x)));
     }
     else if (data::is_fset_container(x))
     {
-      derived().apply(data::fset_container(atermpp::aterm_appl(x)));
+      derived().apply(data::fset_container(atermpp::aterm(x)));
     }
     else if (data::is_fbag_container(x))
     {
-      derived().apply(data::fbag_container(atermpp::aterm_appl(x)));
+      derived().apply(data::fbag_container(atermpp::aterm(x)));
     }
     derived().leave(x);
   }

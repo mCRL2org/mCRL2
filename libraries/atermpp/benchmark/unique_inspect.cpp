@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
   std::size_t size = 20;
   std::size_t iterations = 1000;
 
-  std::vector<aterm_appl> terms;
+  std::vector<aterm> terms;
   for (std::size_t id = 0; id < number_of_threads; ++id)
   {
     terms.push_back(create_nested_function<2>("f", std::to_string(id), size));
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
   auto nested_function = [&](int id) -> void
     {
       std::size_t n = 0;
-      std::queue<const aterm_appl*> Q;
+      std::queue<const aterm*> Q;
       for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
       {
         n = 0;
@@ -47,12 +47,12 @@ int main(int argc, char* argv[])
 
         while (!Q.empty())
         {
-          const aterm_appl& t = *Q.front();
+          const aterm& t = *Q.front();
           Q.pop();
 
           for (const aterm_core& u : t)
           {
-            Q.push(reinterpret_cast<const aterm_appl*>(&u));
+            Q.push(reinterpret_cast<const aterm*>(&u));
             n++;
           }
         }

@@ -70,7 +70,7 @@ bool check_rule_String(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.size() > 0)
   {
     return false;
@@ -90,7 +90,7 @@ bool check_rule_StringOrEmpty(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   return a.size() <= 0;
 }
 
@@ -115,7 +115,7 @@ bool check_term_DataAppl(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (!gsIsDataAppl(a))
   {
     return false;
@@ -1179,7 +1179,7 @@ bool check_term_SortCons(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortCons)
   {
     return false;
@@ -1219,7 +1219,7 @@ bool check_term_SortStruct(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortStruct)
   {
     return false;
@@ -1254,7 +1254,7 @@ bool check_term_SortArrow(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortArrow)
   {
     return false;
@@ -1294,7 +1294,7 @@ bool check_term_UntypedSortUnknown(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedSortUnknown)
   {
     return false;
@@ -1322,7 +1322,7 @@ bool check_term_UntypedSortsPossible(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedSortsPossible)
   {
     return false;
@@ -1357,7 +1357,7 @@ bool check_term_UntypedSortVariable(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedSortVariable)
   {
     return false;
@@ -1392,7 +1392,7 @@ bool check_term_SortId(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortId)
   {
     return false;
@@ -1427,7 +1427,7 @@ bool check_term_SortList(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortList)
   {
     return false;
@@ -1455,7 +1455,7 @@ bool check_term_SortSet(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortSet)
   {
     return false;
@@ -1483,7 +1483,7 @@ bool check_term_SortBag(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortBag)
   {
     return false;
@@ -1511,7 +1511,7 @@ bool check_term_SortFSet(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortFSet)
   {
     return false;
@@ -1539,7 +1539,7 @@ bool check_term_SortFBag(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortFBag)
   {
     return false;
@@ -1567,7 +1567,7 @@ bool check_term_StructCons(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StructCons)
   {
     return false;
@@ -1612,7 +1612,7 @@ bool check_term_StructProj(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StructProj)
   {
     return false;
@@ -1652,7 +1652,7 @@ bool check_term_Binder(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Binder)
   {
     return false;
@@ -1697,7 +1697,7 @@ bool check_term_Whr(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Whr)
   {
     return false;
@@ -1737,7 +1737,7 @@ bool check_term_UntypedIdentifier(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedIdentifier)
   {
     return false;
@@ -1772,7 +1772,7 @@ bool check_term_DataVarId(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::DataVarId)
   {
     return false;
@@ -1812,7 +1812,7 @@ bool check_term_OpId(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::OpId)
   {
     return false;
@@ -1857,7 +1857,7 @@ bool check_term_UntypedDataParameter(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedDataParameter)
   {
     return false;
@@ -1897,7 +1897,7 @@ bool check_term_Forall(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Forall)
   {
     return false;
@@ -1925,7 +1925,7 @@ bool check_term_Exists(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Exists)
   {
     return false;
@@ -1953,7 +1953,7 @@ bool check_term_SetComp(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SetComp)
   {
     return false;
@@ -1981,7 +1981,7 @@ bool check_term_BagComp(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::BagComp)
   {
     return false;
@@ -2009,7 +2009,7 @@ bool check_term_Lambda(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Lambda)
   {
     return false;
@@ -2037,7 +2037,7 @@ bool check_term_UntypedSetBagComp(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedSetBagComp)
   {
     return false;
@@ -2065,7 +2065,7 @@ bool check_term_DataVarIdInit(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::DataVarIdInit)
   {
     return false;
@@ -2105,7 +2105,7 @@ bool check_term_UntypedIdentifierAssignment(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedIdentifierAssignment)
   {
     return false;
@@ -2145,7 +2145,7 @@ bool check_term_DataSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::DataSpec)
   {
     return false;
@@ -2195,7 +2195,7 @@ bool check_term_SortSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortSpec)
   {
     return false;
@@ -2230,7 +2230,7 @@ bool check_term_ConsSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ConsSpec)
   {
     return false;
@@ -2265,7 +2265,7 @@ bool check_term_MapSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::MapSpec)
   {
     return false;
@@ -2300,7 +2300,7 @@ bool check_term_DataEqnSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::DataEqnSpec)
   {
     return false;
@@ -2335,7 +2335,7 @@ bool check_term_SortRef(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::SortRef)
   {
     return false;
@@ -2375,7 +2375,7 @@ bool check_term_DataEqn(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::DataEqn)
   {
     return false;
@@ -2425,7 +2425,7 @@ bool check_term_MultAct(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::MultAct)
   {
     return false;
@@ -2460,7 +2460,7 @@ bool check_term_TimedMultAct(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::TimedMultAct)
   {
     return false;
@@ -2500,7 +2500,7 @@ bool check_term_UntypedMultiAction(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedMultiAction)
   {
     return false;
@@ -2535,7 +2535,7 @@ bool check_term_Action(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Action)
   {
     return false;
@@ -2575,7 +2575,7 @@ bool check_term_ActId(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActId)
   {
     return false;
@@ -2615,7 +2615,7 @@ bool check_term_Process(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Process)
   {
     return false;
@@ -2655,7 +2655,7 @@ bool check_term_ProcessAssignment(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ProcessAssignment)
   {
     return false;
@@ -2695,7 +2695,7 @@ bool check_term_Delta(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Delta)
   {
     return false;
@@ -2723,7 +2723,7 @@ bool check_term_Tau(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Tau)
   {
     return false;
@@ -2751,7 +2751,7 @@ bool check_term_Sum(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Sum)
   {
     return false;
@@ -2791,7 +2791,7 @@ bool check_term_Block(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Block)
   {
     return false;
@@ -2831,7 +2831,7 @@ bool check_term_Hide(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Hide)
   {
     return false;
@@ -2871,7 +2871,7 @@ bool check_term_Rename(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Rename)
   {
     return false;
@@ -2911,7 +2911,7 @@ bool check_term_Comm(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Comm)
   {
     return false;
@@ -2951,7 +2951,7 @@ bool check_term_Allow(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Allow)
   {
     return false;
@@ -2991,7 +2991,7 @@ bool check_term_Sync(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Sync)
   {
     return false;
@@ -3031,7 +3031,7 @@ bool check_term_AtTime(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::AtTime)
   {
     return false;
@@ -3071,7 +3071,7 @@ bool check_term_Seq(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Seq)
   {
     return false;
@@ -3111,7 +3111,7 @@ bool check_term_IfThen(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::IfThen)
   {
     return false;
@@ -3151,7 +3151,7 @@ bool check_term_IfThenElse(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::IfThenElse)
   {
     return false;
@@ -3196,7 +3196,7 @@ bool check_term_BInit(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::BInit)
   {
     return false;
@@ -3236,7 +3236,7 @@ bool check_term_Merge(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Merge)
   {
     return false;
@@ -3276,7 +3276,7 @@ bool check_term_LMerge(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::LMerge)
   {
     return false;
@@ -3316,7 +3316,7 @@ bool check_term_Choice(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Choice)
   {
     return false;
@@ -3356,7 +3356,7 @@ bool check_term_StochasticOperator(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StochasticOperator)
   {
     return false;
@@ -3401,7 +3401,7 @@ bool check_term_UntypedProcessAssignment(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedProcessAssignment)
   {
     return false;
@@ -3441,7 +3441,7 @@ bool check_term_ProcVarId(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ProcVarId)
   {
     return false;
@@ -3481,7 +3481,7 @@ bool check_term_MultActName(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::MultActName)
   {
     return false;
@@ -3516,7 +3516,7 @@ bool check_term_RenameExpr(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::RenameExpr)
   {
     return false;
@@ -3556,7 +3556,7 @@ bool check_term_CommExpr(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::CommExpr)
   {
     return false;
@@ -3596,7 +3596,7 @@ bool check_term_ProcSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ProcSpec)
   {
     return false;
@@ -3651,7 +3651,7 @@ bool check_term_ActSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActSpec)
   {
     return false;
@@ -3686,7 +3686,7 @@ bool check_term_GlobVarSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::GlobVarSpec)
   {
     return false;
@@ -3721,7 +3721,7 @@ bool check_term_ProcEqnSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ProcEqnSpec)
   {
     return false;
@@ -3756,7 +3756,7 @@ bool check_term_ProcEqn(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ProcEqn)
   {
     return false;
@@ -3801,7 +3801,7 @@ bool check_term_ProcessInit(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ProcessInit)
   {
     return false;
@@ -3836,7 +3836,7 @@ bool check_term_Distribution(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Distribution)
   {
     return false;
@@ -3876,7 +3876,7 @@ bool check_term_LinProcSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::LinProcSpec)
   {
     return false;
@@ -3931,7 +3931,7 @@ bool check_term_LinearProcess(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::LinearProcess)
   {
     return false;
@@ -3971,7 +3971,7 @@ bool check_term_LinearProcessSummand(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::LinearProcessSummand)
   {
     return false;
@@ -4031,7 +4031,7 @@ bool check_term_LinearProcessInit(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::LinearProcessInit)
   {
     return false;
@@ -4071,7 +4071,7 @@ bool check_term_StateTrue(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateTrue)
   {
     return false;
@@ -4099,7 +4099,7 @@ bool check_term_StateFalse(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateFalse)
   {
     return false;
@@ -4127,7 +4127,7 @@ bool check_term_StateNot(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateNot)
   {
     return false;
@@ -4162,7 +4162,7 @@ bool check_term_StateMinus(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateMinus)
   {
     return false;
@@ -4197,7 +4197,7 @@ bool check_term_StateAnd(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateAnd)
   {
     return false;
@@ -4237,7 +4237,7 @@ bool check_term_StateOr(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateOr)
   {
     return false;
@@ -4277,7 +4277,7 @@ bool check_term_StateImp(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateImp)
   {
     return false;
@@ -4317,7 +4317,7 @@ bool check_term_StatePlus(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StatePlus)
   {
     return false;
@@ -4357,7 +4357,7 @@ bool check_term_StateConstantMultiply(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateConstantMultiply)
   {
     return false;
@@ -4397,7 +4397,7 @@ bool check_term_StateConstantMultiplyAlt(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateConstantMultiplyAlt)
   {
     return false;
@@ -4437,7 +4437,7 @@ bool check_term_StateForall(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateForall)
   {
     return false;
@@ -4477,7 +4477,7 @@ bool check_term_StateExists(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateExists)
   {
     return false;
@@ -4517,7 +4517,7 @@ bool check_term_StateInfimum(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateInfimum)
   {
     return false;
@@ -4557,7 +4557,7 @@ bool check_term_StateSupremum(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateSupremum)
   {
     return false;
@@ -4597,7 +4597,7 @@ bool check_term_StateMust(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateMust)
   {
     return false;
@@ -4637,7 +4637,7 @@ bool check_term_StateMay(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateMay)
   {
     return false;
@@ -4677,7 +4677,7 @@ bool check_term_StateYaled(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateYaled)
   {
     return false;
@@ -4705,7 +4705,7 @@ bool check_term_StateYaledTimed(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateYaledTimed)
   {
     return false;
@@ -4740,7 +4740,7 @@ bool check_term_StateDelay(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateDelay)
   {
     return false;
@@ -4768,7 +4768,7 @@ bool check_term_StateDelayTimed(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateDelayTimed)
   {
     return false;
@@ -4803,7 +4803,7 @@ bool check_term_StateVar(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateVar)
   {
     return false;
@@ -4843,7 +4843,7 @@ bool check_term_StateNu(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateNu)
   {
     return false;
@@ -4888,7 +4888,7 @@ bool check_term_StateMu(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::StateMu)
   {
     return false;
@@ -4933,7 +4933,7 @@ bool check_term_RegNil(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::RegNil)
   {
     return false;
@@ -4961,7 +4961,7 @@ bool check_term_RegSeq(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::RegSeq)
   {
     return false;
@@ -5001,7 +5001,7 @@ bool check_term_RegAlt(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::RegAlt)
   {
     return false;
@@ -5041,7 +5041,7 @@ bool check_term_RegTrans(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::RegTrans)
   {
     return false;
@@ -5076,7 +5076,7 @@ bool check_term_RegTransOrNil(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::RegTransOrNil)
   {
     return false;
@@ -5111,7 +5111,7 @@ bool check_term_UntypedRegFrm(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::UntypedRegFrm)
   {
     return false;
@@ -5156,7 +5156,7 @@ bool check_term_ActTrue(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActTrue)
   {
     return false;
@@ -5184,7 +5184,7 @@ bool check_term_ActFalse(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActFalse)
   {
     return false;
@@ -5212,7 +5212,7 @@ bool check_term_ActNot(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActNot)
   {
     return false;
@@ -5247,7 +5247,7 @@ bool check_term_ActAnd(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActAnd)
   {
     return false;
@@ -5287,7 +5287,7 @@ bool check_term_ActOr(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActOr)
   {
     return false;
@@ -5327,7 +5327,7 @@ bool check_term_ActImp(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActImp)
   {
     return false;
@@ -5367,7 +5367,7 @@ bool check_term_ActForall(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActForall)
   {
     return false;
@@ -5407,7 +5407,7 @@ bool check_term_ActExists(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActExists)
   {
     return false;
@@ -5447,7 +5447,7 @@ bool check_term_ActAt(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActAt)
   {
     return false;
@@ -5487,7 +5487,7 @@ bool check_term_ActMultAct(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActMultAct)
   {
     return false;
@@ -5522,7 +5522,7 @@ bool check_term_ActionRenameRules(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActionRenameRules)
   {
     return false;
@@ -5557,7 +5557,7 @@ bool check_term_ActionRenameRule(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActionRenameRule)
   {
     return false;
@@ -5607,7 +5607,7 @@ bool check_term_ActionRenameSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::ActionRenameSpec)
   {
     return false;
@@ -5652,7 +5652,7 @@ bool check_term_PBES(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBES)
   {
     return false;
@@ -5702,7 +5702,7 @@ bool check_term_PBEqnSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBEqnSpec)
   {
     return false;
@@ -5737,7 +5737,7 @@ bool check_term_PBInit(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBInit)
   {
     return false;
@@ -5772,7 +5772,7 @@ bool check_term_PBEqn(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBEqn)
   {
     return false;
@@ -5817,7 +5817,7 @@ bool check_term_Mu(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Mu)
   {
     return false;
@@ -5845,7 +5845,7 @@ bool check_term_Nu(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::Nu)
   {
     return false;
@@ -5873,7 +5873,7 @@ bool check_term_PropVarDecl(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PropVarDecl)
   {
     return false;
@@ -5913,7 +5913,7 @@ bool check_term_PBESTrue(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBESTrue)
   {
     return false;
@@ -5941,7 +5941,7 @@ bool check_term_PBESFalse(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBESFalse)
   {
     return false;
@@ -5969,7 +5969,7 @@ bool check_term_PBESNot(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBESNot)
   {
     return false;
@@ -6004,7 +6004,7 @@ bool check_term_PBESAnd(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBESAnd)
   {
     return false;
@@ -6044,7 +6044,7 @@ bool check_term_PBESOr(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBESOr)
   {
     return false;
@@ -6084,7 +6084,7 @@ bool check_term_PBESImp(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBESImp)
   {
     return false;
@@ -6124,7 +6124,7 @@ bool check_term_PBESForall(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBESForall)
   {
     return false;
@@ -6164,7 +6164,7 @@ bool check_term_PBESExists(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PBESExists)
   {
     return false;
@@ -6204,7 +6204,7 @@ bool check_term_PropVarInst(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PropVarInst)
   {
     return false;
@@ -6244,7 +6244,7 @@ bool check_term_PRES(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRES)
   {
     return false;
@@ -6294,7 +6294,7 @@ bool check_term_PREqnSpec(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PREqnSpec)
   {
     return false;
@@ -6329,7 +6329,7 @@ bool check_term_PRInit(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRInit)
   {
     return false;
@@ -6364,7 +6364,7 @@ bool check_term_PREqn(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PREqn)
   {
     return false;
@@ -6409,7 +6409,7 @@ bool check_term_PRESTrue(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESTrue)
   {
     return false;
@@ -6437,7 +6437,7 @@ bool check_term_PRESFalse(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESFalse)
   {
     return false;
@@ -6465,7 +6465,7 @@ bool check_term_PRESMinus(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESMinus)
   {
     return false;
@@ -6500,7 +6500,7 @@ bool check_term_PRESAnd(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESAnd)
   {
     return false;
@@ -6540,7 +6540,7 @@ bool check_term_PRESOr(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESOr)
   {
     return false;
@@ -6580,7 +6580,7 @@ bool check_term_PRESImp(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESImp)
   {
     return false;
@@ -6620,7 +6620,7 @@ bool check_term_PRESPlus(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESPlus)
   {
     return false;
@@ -6660,7 +6660,7 @@ bool check_term_PRESConstantMultiply(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESConstantMultiply)
   {
     return false;
@@ -6700,7 +6700,7 @@ bool check_term_PRESConstantMultiplyAlt(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESConstantMultiplyAlt)
   {
     return false;
@@ -6740,7 +6740,7 @@ bool check_term_PRESInfimum(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESInfimum)
   {
     return false;
@@ -6780,7 +6780,7 @@ bool check_term_PRESSupremum(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESSupremum)
   {
     return false;
@@ -6820,7 +6820,7 @@ bool check_term_PRESSum(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESSum)
   {
     return false;
@@ -6860,7 +6860,7 @@ bool check_term_PRESEqInf(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESEqInf)
   {
     return false;
@@ -6895,7 +6895,7 @@ bool check_term_PRESEqNInf(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESEqNInf)
   {
     return false;
@@ -6930,7 +6930,7 @@ bool check_term_PRESCondSm(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESCondSm)
   {
     return false;
@@ -6975,7 +6975,7 @@ bool check_term_PRESCondEq(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
+  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
   if (a.function() != core::detail::function_symbols::PRESCondEq)
   {
     return false;

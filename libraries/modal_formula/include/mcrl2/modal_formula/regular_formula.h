@@ -22,30 +22,30 @@ namespace regular_formulas
 
 //--- start generated classes ---//
 /// \\brief A regular formula
-class regular_formula: public atermpp::aterm_appl
+class regular_formula: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     regular_formula()
-      : atermpp::aterm_appl(core::detail::default_values::RegFrm)
+      : atermpp::aterm(core::detail::default_values::RegFrm)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit regular_formula(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_RegFrm(*this));
     }
 
     /// \\brief Constructor.
     regular_formula(const action_formulas::action_formula& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor.
     regular_formula(const data::data_expression& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// Move semantics
@@ -62,17 +62,17 @@ typedef atermpp::term_list<regular_formula> regular_formula_list;
 typedef std::vector<regular_formula>    regular_formula_vector;
 
 // prototypes
-inline bool is_seq(const atermpp::aterm_appl& x);
-inline bool is_alt(const atermpp::aterm_appl& x);
-inline bool is_trans(const atermpp::aterm_appl& x);
-inline bool is_trans_or_nil(const atermpp::aterm_appl& x);
-inline bool is_untyped_regular_formula(const atermpp::aterm_appl& x);
+inline bool is_seq(const atermpp::aterm& x);
+inline bool is_alt(const atermpp::aterm& x);
+inline bool is_trans(const atermpp::aterm& x);
+inline bool is_trans_or_nil(const atermpp::aterm& x);
+inline bool is_untyped_regular_formula(const atermpp::aterm& x);
 
 /// \\brief Test for a regular_formula expression
 /// \\param x A term
 /// \\return True if \\a x is a regular_formula expression
 inline
-bool is_regular_formula(const atermpp::aterm_appl& x)
+bool is_regular_formula(const atermpp::aterm& x)
 {
   return data::is_data_expression(x) ||
          action_formulas::is_action_formula(x) ||
@@ -122,7 +122,7 @@ class seq: public regular_formula
 
     /// \\brief Constructor.
     seq(const regular_formula& left, const regular_formula& right)
-      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegSeq(), left, right))
+      : regular_formula(atermpp::aterm(core::detail::function_symbol_RegSeq(), left, right))
     {}
 
     /// Move semantics
@@ -145,7 +145,7 @@ class seq: public regular_formula
 /// \\brief Make_seq constructs a new term into a given address.
 /// \\ \param t The reference into which the new seq is constructed. 
 template <class... ARGUMENTS>
-inline void make_seq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_seq(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegSeq(), args...);
 }
@@ -154,7 +154,7 @@ inline void make_seq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a seq expression
 inline
-bool is_seq(const atermpp::aterm_appl& x)
+bool is_seq(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::RegSeq;
 }
@@ -198,7 +198,7 @@ class alt: public regular_formula
 
     /// \\brief Constructor.
     alt(const regular_formula& left, const regular_formula& right)
-      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegAlt(), left, right))
+      : regular_formula(atermpp::aterm(core::detail::function_symbol_RegAlt(), left, right))
     {}
 
     /// Move semantics
@@ -221,7 +221,7 @@ class alt: public regular_formula
 /// \\brief Make_alt constructs a new term into a given address.
 /// \\ \param t The reference into which the new alt is constructed. 
 template <class... ARGUMENTS>
-inline void make_alt(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_alt(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegAlt(), args...);
 }
@@ -230,7 +230,7 @@ inline void make_alt(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a alt expression
 inline
-bool is_alt(const atermpp::aterm_appl& x)
+bool is_alt(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::RegAlt;
 }
@@ -274,7 +274,7 @@ class trans: public regular_formula
 
     /// \\brief Constructor.
     explicit trans(const regular_formula& operand)
-      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTrans(), operand))
+      : regular_formula(atermpp::aterm(core::detail::function_symbol_RegTrans(), operand))
     {}
 
     /// Move semantics
@@ -292,7 +292,7 @@ class trans: public regular_formula
 /// \\brief Make_trans constructs a new term into a given address.
 /// \\ \param t The reference into which the new trans is constructed. 
 template <class... ARGUMENTS>
-inline void make_trans(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_trans(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegTrans(), args...);
 }
@@ -301,7 +301,7 @@ inline void make_trans(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a trans expression
 inline
-bool is_trans(const atermpp::aterm_appl& x)
+bool is_trans(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::RegTrans;
 }
@@ -345,7 +345,7 @@ class trans_or_nil: public regular_formula
 
     /// \\brief Constructor.
     explicit trans_or_nil(const regular_formula& operand)
-      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTransOrNil(), operand))
+      : regular_formula(atermpp::aterm(core::detail::function_symbol_RegTransOrNil(), operand))
     {}
 
     /// Move semantics
@@ -363,7 +363,7 @@ class trans_or_nil: public regular_formula
 /// \\brief Make_trans_or_nil constructs a new term into a given address.
 /// \\ \param t The reference into which the new trans_or_nil is constructed. 
 template <class... ARGUMENTS>
-inline void make_trans_or_nil(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_trans_or_nil(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_RegTransOrNil(), args...);
 }
@@ -372,7 +372,7 @@ inline void make_trans_or_nil(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a trans_or_nil expression
 inline
-bool is_trans_or_nil(const atermpp::aterm_appl& x)
+bool is_trans_or_nil(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::RegTransOrNil;
 }
@@ -416,12 +416,12 @@ class untyped_regular_formula: public regular_formula
 
     /// \\brief Constructor.
     untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right)
-      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), name, left, right))
+      : regular_formula(atermpp::aterm(core::detail::function_symbol_UntypedRegFrm(), name, left, right))
     {}
 
     /// \\brief Constructor.
     untyped_regular_formula(const std::string& name, const regular_formula& left, const regular_formula& right)
-      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), core::identifier_string(name), left, right))
+      : regular_formula(atermpp::aterm(core::detail::function_symbol_UntypedRegFrm(), core::identifier_string(name), left, right))
     {}
 
     /// Move semantics
@@ -449,7 +449,7 @@ class untyped_regular_formula: public regular_formula
 /// \\brief Make_untyped_regular_formula constructs a new term into a given address.
 /// \\ \param t The reference into which the new untyped_regular_formula is constructed. 
 template <class... ARGUMENTS>
-inline void make_untyped_regular_formula(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_untyped_regular_formula(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedRegFrm(), args...);
 }
@@ -458,7 +458,7 @@ inline void make_untyped_regular_formula(atermpp::aterm_appl& t, const ARGUMENTS
 /// \\param x A term
 /// \\return True if \\a x is a untyped_regular_formula expression
 inline
-bool is_untyped_regular_formula(const atermpp::aterm_appl& x)
+bool is_untyped_regular_formula(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::UntypedRegFrm;
 }

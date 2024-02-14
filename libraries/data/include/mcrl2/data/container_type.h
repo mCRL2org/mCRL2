@@ -23,18 +23,18 @@ namespace data
 
 //--- start generated classes ---//
 /// \\brief Container type
-class container_type: public atermpp::aterm_appl
+class container_type: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     container_type()
-      : atermpp::aterm_appl(core::detail::default_values::SortConsType)
+      : atermpp::aterm(core::detail::default_values::SortConsType)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit container_type(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_SortConsType(*this));
     }
@@ -100,7 +100,7 @@ class list_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a list_container expression
 inline
-bool is_list_container(const atermpp::aterm_appl& x)
+bool is_list_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortList;
 }
@@ -153,7 +153,7 @@ class set_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a set_container expression
 inline
-bool is_set_container(const atermpp::aterm_appl& x)
+bool is_set_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortSet;
 }
@@ -206,7 +206,7 @@ class bag_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a bag_container expression
 inline
-bool is_bag_container(const atermpp::aterm_appl& x)
+bool is_bag_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortBag;
 }
@@ -259,7 +259,7 @@ class fset_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a fset_container expression
 inline
-bool is_fset_container(const atermpp::aterm_appl& x)
+bool is_fset_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortFSet;
 }
@@ -312,7 +312,7 @@ class fbag_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a fbag_container expression
 inline
-bool is_fbag_container(const atermpp::aterm_appl& x)
+bool is_fbag_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortFBag;
 }

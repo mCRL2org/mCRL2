@@ -80,7 +80,7 @@ namespace mcrl2 {
       /// \param e A data expression.
       /// \return true iff e is the function symbol matching \@func_update.
       inline
-      bool is_function_update_function_symbol(const atermpp::aterm_appl& e)
+      bool is_function_update_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -120,7 +120,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol function_update to a
       ///     number of arguments.
       inline
-      bool is_function_update_application(const atermpp::aterm_appl& e)
+      bool is_function_update_application(const atermpp::aterm& e)
       {
         return is_application(e) && is_function_update_function_symbol(atermpp::down_cast<application>(e).head());
       }
@@ -149,7 +149,7 @@ namespace mcrl2 {
       /// \param e A data expression.
       /// \return true iff e is the function symbol matching \@func_update_stable.
       inline
-      bool is_function_update_stable_function_symbol(const atermpp::aterm_appl& e)
+      bool is_function_update_stable_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -189,7 +189,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol function_update_stable to a
       ///     number of arguments.
       inline
-      bool is_function_update_stable_application(const atermpp::aterm_appl& e)
+      bool is_function_update_stable_application(const atermpp::aterm& e)
       {
         return is_application(e) && is_function_update_stable_function_symbol(atermpp::down_cast<application>(e).head());
       }
@@ -218,7 +218,7 @@ namespace mcrl2 {
       /// \param e A data expression.
       /// \return true iff e is the function symbol matching \@is_not_an_update.
       inline
-      bool is_is_not_a_function_update_function_symbol(const atermpp::aterm_appl& e)
+      bool is_is_not_a_function_update_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -254,7 +254,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol is_not_a_function_update to a
       ///     number of arguments.
       inline
-      bool is_is_not_a_function_update_application(const atermpp::aterm_appl& e)
+      bool is_is_not_a_function_update_application(const atermpp::aterm& e)
       {
         return is_application(e) && is_is_not_a_function_update_function_symbol(atermpp::down_cast<application>(e).head());
       }
@@ -302,7 +302,7 @@ namespace mcrl2 {
       /// \param e A data expression.
       /// \return true iff e is the function symbol matching \@if_always_else.
       inline
-      bool is_if_always_else_function_symbol(const atermpp::aterm_appl& e)
+      bool is_if_always_else_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -342,7 +342,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol if_always_else to a
       ///     number of arguments.
       inline
-      bool is_if_always_else_application(const atermpp::aterm_appl& e)
+      bool is_if_always_else_application(const atermpp::aterm& e)
       {
         return is_application(e) && is_if_always_else_function_symbol(atermpp::down_cast<application>(e).head());
       }

@@ -129,7 +129,7 @@ sort_expression data_expression::sort() const
     }
     else if (is_lambda(*this))
     {
-      const auto& v_variables = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
+      const auto& v_variables = atermpp::down_cast<atermpp::term_list<aterm> >((*this)[1]);
       sort_expression_vector s;
       for (const auto & v_variable : v_variables)
       {
@@ -140,7 +140,7 @@ sort_expression data_expression::sort() const
     else
     {
       assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_untyped_set_or_bag_comprehension(*this));
-      const auto& v_variables  = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
+      const auto& v_variables  = atermpp::down_cast<atermpp::term_list<aterm> >((*this)[1]);
       assert(v_variables.size() == 1);
 
       if (is_bag_comprehension(*this))
@@ -254,10 +254,10 @@ std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::s
   unsigned int start_symbol_index = p.start_symbol_index("SortSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  std::vector<atermpp::aterm_appl> elements = detail::data_specification_actions(p).parse_SortSpec(node);
+  std::vector<atermpp::aterm> elements = detail::data_specification_actions(p).parse_SortSpec(node);
   basic_sort_vector sorts;
   alias_vector aliases;
-  for (const atermpp::aterm_appl& x: elements)
+  for (const atermpp::aterm& x: elements)
   {
     if (is_basic_sort(x))
     {

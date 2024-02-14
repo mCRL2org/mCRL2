@@ -52,7 +52,7 @@ public:
    : m_term(term)
   {}
 
-  /// \brief Dynamic check whether the term is an aterm_appl.
+  /// \brief Dynamic check whether the term is an aterm.
   /// \return True iff this term is an term_appl.
   /// \details This function has constant complexity.
   ///          It is defined as !type_is_int() && !type_is_list().
@@ -141,7 +141,7 @@ public:
   ///        the default constructor of aterms, aterm_appls and aterm_int.
   /// \details The default constructor of a term_list<T> is the empty list, on which
   ///          the operator defined yields true. This operation is more efficient
-  ///          than comparing the current term with an aterm_core(), aterm_appl() or an
+  ///          than comparing the current term with an aterm_core(), aterm() or an
   ///          aterm_int().
   /// \return A boolean indicating whether this term equals the default constructor.
   bool defined() const

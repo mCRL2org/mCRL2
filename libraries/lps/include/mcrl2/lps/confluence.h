@@ -180,14 +180,14 @@ bool disjoint(const confluence_summand& summand1, const confluence_summand& summ
 /// \brief Creates an identifier for the ctau action
 inline process::action_label make_ctau_act_id()
 {
-  static atermpp::aterm_appl ctau_act_id = atermpp::aterm_appl(core::detail::function_symbol_ActId(), atermpp::aterm_appl(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
+  static atermpp::aterm ctau_act_id = atermpp::aterm(core::detail::function_symbol_ActId(), atermpp::aterm(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
   return process::action_label(ctau_act_id);
 }
 
 /// \brief Creates the ctau action
 inline process::action make_ctau_action()
 {
-  static atermpp::aterm_appl ctau_action = atermpp::aterm_appl(core::detail::function_symbol_Action(), make_ctau_act_id(), atermpp::aterm_list());
+  static atermpp::aterm ctau_action = atermpp::aterm(core::detail::function_symbol_Action(), make_ctau_act_id(), atermpp::aterm_list());
   return process::action(ctau_action);
 }
 

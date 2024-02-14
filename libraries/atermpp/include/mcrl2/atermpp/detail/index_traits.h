@@ -55,7 +55,7 @@ std::size_t& variable_map_max_index()
 /// The class index_traits is used to implement this mapping. A traits class was chosen to
 /// prevent pollution of the public interface of the classes that represent these variables.
 ///
-/// N is the position of the index in the aterm_appl.
+/// N is the position of the index in the aterm.
 template <typename Variable, typename KeyType, const int N>
 struct index_traits
 {

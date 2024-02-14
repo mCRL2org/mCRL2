@@ -1090,7 +1090,7 @@ class RewriterCompilingJitty::ImplementTree
   {
     if (arity == 0)
     {
-      return "pass_on";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
+      return "pass_on";  // This is to avoid confusion with atermpp::aterm on a function symbol and two iterators.
     }
     return "make_application";
   }
@@ -1821,7 +1821,7 @@ class RewriterCompilingJitty::ImplementTree
   {
     const match_tree_S& treeS(tree);
     bool reset_current_data_parameters=false;
-    if (atermpp::find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm_appl()) // treeS.target_variable occurs in treeS.subtree
+    if (atermpp::find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm()) // treeS.target_variable occurs in treeS.subtree
     {
       const std::string parameters = brackets.current_data_parameters.top(); 
       brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& " + (std::string(treeS.target_variable().name()).c_str() + 1));

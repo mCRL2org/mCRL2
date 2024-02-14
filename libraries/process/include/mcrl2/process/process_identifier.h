@@ -22,7 +22,7 @@ namespace process
 
 //--- start generated class process_identifier ---//
 /// \\brief A process identifier
-class process_identifier: public atermpp::aterm_appl
+class process_identifier: public atermpp::aterm
 {
   public:
 
@@ -45,13 +45,13 @@ class process_identifier: public atermpp::aterm_appl
 //--- start user section process_identifier ---//
     /// \brief Default constructor.
     process_identifier()
-      : atermpp::aterm_appl(core::detail::default_values::ProcVarId)
+      : atermpp::aterm(core::detail::default_values::ProcVarId)
     {}
 
     /// \brief Constructor.
     /// \param term A term
     explicit process_identifier(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_ProcVarId(*this));
     }
@@ -73,7 +73,7 @@ class process_identifier: public atermpp::aterm_appl
 /// \\brief Make_process_identifier constructs a new term into a given address.
 /// \\ \param t The reference into which the new process_identifier is constructed. 
 template <class... ARGUMENTS>
-inline void make_process_identifier(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_process_identifier(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ProcVarId(), args...);
 }
@@ -88,7 +88,7 @@ typedef std::vector<process_identifier>    process_identifier_vector;
 /// \\param x A term
 /// \\return True if \\a x is a process_identifier expression
 inline
-bool is_process_identifier(const atermpp::aterm_appl& x)
+bool is_process_identifier(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ProcVarId;
 }

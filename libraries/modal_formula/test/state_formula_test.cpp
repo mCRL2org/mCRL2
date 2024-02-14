@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(test_not)
   BOOST_CHECK_EQUAL(s, t);
 
   // The following is expected to trigger an assertion failure
-  // aterm_appl a = v;
+  // aterm a = v;
   // state_formula t = not_(a);
 }
 

@@ -10,7 +10,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_LIST_H
 #define MCRL2_ATERMPP_ATERM_LIST_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
 #include "mcrl2/atermpp/type_traits.h"
@@ -20,11 +20,11 @@ namespace atermpp
 
 /// \brief A list of aterm_core objects.
 template <typename Term>
-class term_list: public aterm_appl
+class term_list: public aterm
 {
 protected:
   /// \brief Constructor for term lists from internally constructed terms delivered as reference.
-  explicit term_list(detail::_aterm_appl<>* t) noexcept : aterm_appl(t)
+  explicit term_list(detail::_aterm_appl<>* t) noexcept : aterm(t)
   {
     assert(!defined() || type_is_list());
   }
@@ -59,13 +59,13 @@ public:
 
   /// \brief Default constructor. Creates an empty list.
   term_list() noexcept
-    : aterm_appl(detail::g_term_pool().empty_list())
+    : aterm(detail::g_term_pool().empty_list())
   {}
 
   /// \brief Constructor from an aterm_core.
   /// \param t A list.
   explicit term_list(const aterm_core& t) noexcept
-    : aterm_appl(t)
+    : aterm(t)
   {
     // assert(!defined() || type_is_list());
     assert(type_is_list());  // A list should not be a default aterm_core. 
@@ -74,7 +74,7 @@ public:
   /// \brief Copy constructor.
   /// \param t A list.
   term_list(const term_list<Term>& t) noexcept
-    : aterm_appl(t)
+    : aterm(t)
   {
     assert(!defined() || type_is_list());
   }
@@ -82,7 +82,7 @@ public:
   /// \brief Move constructor.
   /// \param t A list.
   term_list(term_list<Term>&& t) noexcept
-    : aterm_appl(std::move(t))
+    : aterm(std::move(t))
   {
     assert(!defined() || type_is_list());
   }
@@ -100,7 +100,7 @@ public:
                 std::bidirectional_iterator_tag,
                 typename std::iterator_traits<Iter>::iterator_category
             >::value>::type* = nullptr) :
-      aterm_appl(detail::make_list_backward<Term,Iter,
+      aterm(detail::make_list_backward<Term,Iter,
                 detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>()))
   {
     assert(!defined() || type_is_list());
@@ -119,7 +119,7 @@ public:
               std::bidirectional_iterator_tag,
               typename std::iterator_traits<Iter>::iterator_category
             >::value>::type* = 0):
-       aterm_appl(detail::make_list_backward<Term,Iter,ATermConverter>(first, last, convert_to_aterm))
+       aterm(detail::make_list_backward<Term,Iter,ATermConverter>(first, last, convert_to_aterm))
   {
     assert(!defined() || type_is_list());
   }
@@ -139,7 +139,7 @@ public:
               std::bidirectional_iterator_tag,
               typename std::iterator_traits<Iter>::iterator_category
             >::value>::type* = 0):
-       aterm_appl(detail::make_list_backward<Term,Iter,ATermConverter,ATermFilter>(first, last, convert_to_aterm, aterm_filter))
+       aterm(detail::make_list_backward<Term,Iter,ATermConverter,ATermFilter>(first, last, convert_to_aterm, aterm_filter))
   {
     assert(!defined() || type_is_list());
   }
@@ -156,7 +156,7 @@ public:
                        std::bidirectional_iterator_tag,
                        typename std::iterator_traits<Iter>::iterator_category
                      >::value>::type* = nullptr):
-       aterm_appl(detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
+       aterm(detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
                                (first, last, detail::do_not_convert_term<Term>()))
   {
     assert(!defined() || type_is_list());
@@ -178,7 +178,7 @@ public:
                        std::bidirectional_iterator_tag,
                        typename std::iterator_traits<Iter>::iterator_category
                      >::value>::type* = nullptr):
-       aterm_appl(detail::make_list_forward<Term,Iter,ATermConverter>
+       aterm(detail::make_list_forward<Term,Iter,ATermConverter>
                                (first, last, convert_to_aterm))
   {
     assert(!defined() || type_is_list());
@@ -202,7 +202,7 @@ public:
                        std::random_access_iterator_tag,
                        typename std::iterator_traits<Iter>::iterator_category
                      >::value>::type* = nullptr):
-       aterm_appl(detail::make_list_forward<Term,Iter,ATermConverter>
+       aterm(detail::make_list_forward<Term,Iter,ATermConverter>
                                (first, last, convert_to_aterm, aterm_filter))
   {
     assert(!defined() || type_is_list());
@@ -212,7 +212,7 @@ public:
   /// \details This constructor is not made explicit to conform to initializer lists in standard containers.
   /// \param init The initialiser list.
   term_list(std::initializer_list<Term> init)
-    : aterm_appl(detail::make_list_backward<Term,
+    : aterm(detail::make_list_backward<Term,
                                        typename std::initializer_list<Term>::const_iterator,
                                        detail::do_not_convert_term<Term> >
                 (init.begin(), init.end(), detail::do_not_convert_term<Term>()))

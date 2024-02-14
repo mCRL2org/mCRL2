@@ -38,7 +38,7 @@ class untyped_sort_variable: public sort_expression
 
     /// \\brief Constructor.
     explicit untyped_sort_variable(const atermpp::aterm_int& value)
-      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortVariable(), value))
+      : sort_expression(atermpp::aterm(core::detail::function_symbol_UntypedSortVariable(), value))
     {}
 
     /// Move semantics
@@ -54,7 +54,7 @@ class untyped_sort_variable: public sort_expression
 //--- start user section untyped_sort_variable ---//
     /// \brief Constructor.
     untyped_sort_variable(std::size_t value)
-      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortVariable(), atermpp::aterm_int(value)))
+      : sort_expression(atermpp::aterm(core::detail::function_symbol_UntypedSortVariable(), atermpp::aterm_int(value)))
     {}
 //--- end user section untyped_sort_variable ---//
 };
@@ -62,7 +62,7 @@ class untyped_sort_variable: public sort_expression
 /// \\brief Make_untyped_sort_variable constructs a new term into a given address.
 /// \\ \param t The reference into which the new untyped_sort_variable is constructed. 
 template <class... ARGUMENTS>
-inline void make_untyped_sort_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_untyped_sort_variable(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedSortVariable(), args...);
 }
@@ -71,7 +71,7 @@ inline void make_untyped_sort_variable(atermpp::aterm_appl& t, const ARGUMENTS&.
 /// \\param x A term
 /// \\return True if \\a x is a untyped_sort_variable expression
 inline
-bool is_untyped_sort_variable(const atermpp::aterm_appl& x)
+bool is_untyped_sort_variable(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::UntypedSortVariable;
 }

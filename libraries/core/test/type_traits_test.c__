@@ -11,7 +11,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
 
 // Condition for recognising types that represent containers

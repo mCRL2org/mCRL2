@@ -54,7 +54,7 @@ struct builder
   }
 
   template <class T>
-  void apply(T& result, const aterm_appl& x)
+  void apply(T& result, const aterm& x)
   {
     derived().enter(x);
     make_term_appl(result, x.function() , x.begin(), x.end(), [&](aterm_core& r, const aterm_core& v) { return derived().apply(r, v); } );
@@ -69,7 +69,7 @@ struct builder
     derived().enter(x);
     if (x.type_is_appl())
     {
-      derived().apply(result, atermpp::down_cast<aterm_appl>(x));
+      derived().apply(result, atermpp::down_cast<aterm>(x));
     }
     else if (x.type_is_list())
     {

@@ -27,25 +27,25 @@ namespace process
 
 //--- start generated classes ---//
 /// \\brief A process expression
-class process_expression: public atermpp::aterm_appl
+class process_expression: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     process_expression()
-      : atermpp::aterm_appl(core::detail::default_values::ProcExpr)
+      : atermpp::aterm(core::detail::default_values::ProcExpr)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit process_expression(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_ProcExpr(*this));
     }
 
     /// \\brief Constructor.
     process_expression(const data::untyped_data_parameter& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// Move semantics
@@ -62,34 +62,34 @@ typedef atermpp::term_list<process_expression> process_expression_list;
 typedef std::vector<process_expression>    process_expression_vector;
 
 // prototypes
-inline bool is_action(const atermpp::aterm_appl& x);
-inline bool is_process_instance(const atermpp::aterm_appl& x);
-inline bool is_process_instance_assignment(const atermpp::aterm_appl& x);
-inline bool is_delta(const atermpp::aterm_appl& x);
-inline bool is_tau(const atermpp::aterm_appl& x);
-inline bool is_sum(const atermpp::aterm_appl& x);
-inline bool is_block(const atermpp::aterm_appl& x);
-inline bool is_hide(const atermpp::aterm_appl& x);
-inline bool is_rename(const atermpp::aterm_appl& x);
-inline bool is_comm(const atermpp::aterm_appl& x);
-inline bool is_allow(const atermpp::aterm_appl& x);
-inline bool is_sync(const atermpp::aterm_appl& x);
-inline bool is_at(const atermpp::aterm_appl& x);
-inline bool is_seq(const atermpp::aterm_appl& x);
-inline bool is_if_then(const atermpp::aterm_appl& x);
-inline bool is_if_then_else(const atermpp::aterm_appl& x);
-inline bool is_bounded_init(const atermpp::aterm_appl& x);
-inline bool is_merge(const atermpp::aterm_appl& x);
-inline bool is_left_merge(const atermpp::aterm_appl& x);
-inline bool is_choice(const atermpp::aterm_appl& x);
-inline bool is_stochastic_operator(const atermpp::aterm_appl& x);
-inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
+inline bool is_action(const atermpp::aterm& x);
+inline bool is_process_instance(const atermpp::aterm& x);
+inline bool is_process_instance_assignment(const atermpp::aterm& x);
+inline bool is_delta(const atermpp::aterm& x);
+inline bool is_tau(const atermpp::aterm& x);
+inline bool is_sum(const atermpp::aterm& x);
+inline bool is_block(const atermpp::aterm& x);
+inline bool is_hide(const atermpp::aterm& x);
+inline bool is_rename(const atermpp::aterm& x);
+inline bool is_comm(const atermpp::aterm& x);
+inline bool is_allow(const atermpp::aterm& x);
+inline bool is_sync(const atermpp::aterm& x);
+inline bool is_at(const atermpp::aterm& x);
+inline bool is_seq(const atermpp::aterm& x);
+inline bool is_if_then(const atermpp::aterm& x);
+inline bool is_if_then_else(const atermpp::aterm& x);
+inline bool is_bounded_init(const atermpp::aterm& x);
+inline bool is_merge(const atermpp::aterm& x);
+inline bool is_left_merge(const atermpp::aterm& x);
+inline bool is_choice(const atermpp::aterm& x);
+inline bool is_stochastic_operator(const atermpp::aterm& x);
+inline bool is_untyped_process_assignment(const atermpp::aterm& x);
 
 /// \\brief Test for a process_expression expression
 /// \\param x A term
 /// \\return True if \\a x is a process_expression expression
 inline
-bool is_process_expression(const atermpp::aterm_appl& x)
+bool is_process_expression(const atermpp::aterm& x)
 {
   return data::is_untyped_data_parameter(x) ||
          process::is_action(x) ||
@@ -155,7 +155,7 @@ class action: public process_expression
 
     /// \\brief Constructor.
     action(const action_label& label, const data::data_expression_list& arguments)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Action(), label, arguments))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Action(), label, arguments))
     {}
 
     /// Move semantics
@@ -178,7 +178,7 @@ class action: public process_expression
 /// \\brief Make_action constructs a new term into a given address.
 /// \\ \param t The reference into which the new action is constructed. 
 template <class... ARGUMENTS>
-inline void make_action(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_action(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Action(), args...);
 }
@@ -193,7 +193,7 @@ typedef std::vector<action>    action_vector;
 /// \\param x A term
 /// \\return True if \\a x is a action expression
 inline
-bool is_action(const atermpp::aterm_appl& x)
+bool is_action(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Action;
 }
@@ -237,7 +237,7 @@ class process_instance: public process_expression
 
     /// \\brief Constructor.
     process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Process(), identifier, actual_parameters))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Process(), identifier, actual_parameters))
     {}
 
     /// Move semantics
@@ -260,7 +260,7 @@ class process_instance: public process_expression
 /// \\brief Make_process_instance constructs a new term into a given address.
 /// \\ \param t The reference into which the new process_instance is constructed. 
 template <class... ARGUMENTS>
-inline void make_process_instance(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_process_instance(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Process(), args...);
 }
@@ -269,7 +269,7 @@ inline void make_process_instance(atermpp::aterm_appl& t, const ARGUMENTS&... ar
 /// \\param x A term
 /// \\return True if \\a x is a process_instance expression
 inline
-bool is_process_instance(const atermpp::aterm_appl& x)
+bool is_process_instance(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Process;
 }
@@ -313,7 +313,7 @@ class process_instance_assignment: public process_expression
 
     /// \\brief Constructor.
     process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_ProcessAssignment(), identifier, assignments))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_ProcessAssignment(), identifier, assignments))
     {}
 
     /// Move semantics
@@ -336,7 +336,7 @@ class process_instance_assignment: public process_expression
 /// \\brief Make_process_instance_assignment constructs a new term into a given address.
 /// \\ \param t The reference into which the new process_instance_assignment is constructed. 
 template <class... ARGUMENTS>
-inline void make_process_instance_assignment(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_process_instance_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ProcessAssignment(), args...);
 }
@@ -345,7 +345,7 @@ inline void make_process_instance_assignment(atermpp::aterm_appl& t, const ARGUM
 /// \\param x A term
 /// \\return True if \\a x is a process_instance_assignment expression
 inline
-bool is_process_instance_assignment(const atermpp::aterm_appl& x)
+bool is_process_instance_assignment(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ProcessAssignment;
 }
@@ -398,7 +398,7 @@ class delta: public process_expression
 /// \\param x A term
 /// \\return True if \\a x is a delta expression
 inline
-bool is_delta(const atermpp::aterm_appl& x)
+bool is_delta(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Delta;
 }
@@ -451,7 +451,7 @@ class tau: public process_expression
 /// \\param x A term
 /// \\return True if \\a x is a tau expression
 inline
-bool is_tau(const atermpp::aterm_appl& x)
+bool is_tau(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Tau;
 }
@@ -495,7 +495,7 @@ class sum: public process_expression
 
     /// \\brief Constructor.
     sum(const data::variable_list& variables, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), variables, operand))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Sum(), variables, operand))
     {}
 
     /// Move semantics
@@ -518,7 +518,7 @@ class sum: public process_expression
 /// \\brief Make_sum constructs a new term into a given address.
 /// \\ \param t The reference into which the new sum is constructed. 
 template <class... ARGUMENTS>
-inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_sum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Sum(), args...);
 }
@@ -527,7 +527,7 @@ inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a sum expression
 inline
-bool is_sum(const atermpp::aterm_appl& x)
+bool is_sum(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Sum;
 }
@@ -571,7 +571,7 @@ class block: public process_expression
 
     /// \\brief Constructor.
     block(const core::identifier_string_list& block_set, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Block(), block_set, operand))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Block(), block_set, operand))
     {}
 
     /// Move semantics
@@ -594,7 +594,7 @@ class block: public process_expression
 /// \\brief Make_block constructs a new term into a given address.
 /// \\ \param t The reference into which the new block is constructed. 
 template <class... ARGUMENTS>
-inline void make_block(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_block(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Block(), args...);
 }
@@ -603,7 +603,7 @@ inline void make_block(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a block expression
 inline
-bool is_block(const atermpp::aterm_appl& x)
+bool is_block(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Block;
 }
@@ -647,7 +647,7 @@ class hide: public process_expression
 
     /// \\brief Constructor.
     hide(const core::identifier_string_list& hide_set, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Hide(), hide_set, operand))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Hide(), hide_set, operand))
     {}
 
     /// Move semantics
@@ -670,7 +670,7 @@ class hide: public process_expression
 /// \\brief Make_hide constructs a new term into a given address.
 /// \\ \param t The reference into which the new hide is constructed. 
 template <class... ARGUMENTS>
-inline void make_hide(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_hide(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Hide(), args...);
 }
@@ -679,7 +679,7 @@ inline void make_hide(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a hide expression
 inline
-bool is_hide(const atermpp::aterm_appl& x)
+bool is_hide(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Hide;
 }
@@ -723,7 +723,7 @@ class rename: public process_expression
 
     /// \\brief Constructor.
     rename(const rename_expression_list& rename_set, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Rename(), rename_set, operand))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Rename(), rename_set, operand))
     {}
 
     /// Move semantics
@@ -746,7 +746,7 @@ class rename: public process_expression
 /// \\brief Make_rename constructs a new term into a given address.
 /// \\ \param t The reference into which the new rename is constructed. 
 template <class... ARGUMENTS>
-inline void make_rename(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_rename(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Rename(), args...);
 }
@@ -755,7 +755,7 @@ inline void make_rename(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a rename expression
 inline
-bool is_rename(const atermpp::aterm_appl& x)
+bool is_rename(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Rename;
 }
@@ -799,7 +799,7 @@ class comm: public process_expression
 
     /// \\brief Constructor.
     comm(const communication_expression_list& comm_set, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Comm(), comm_set, operand))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Comm(), comm_set, operand))
     {}
 
     /// Move semantics
@@ -822,7 +822,7 @@ class comm: public process_expression
 /// \\brief Make_comm constructs a new term into a given address.
 /// \\ \param t The reference into which the new comm is constructed. 
 template <class... ARGUMENTS>
-inline void make_comm(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_comm(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Comm(), args...);
 }
@@ -831,7 +831,7 @@ inline void make_comm(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a comm expression
 inline
-bool is_comm(const atermpp::aterm_appl& x)
+bool is_comm(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Comm;
 }
@@ -875,7 +875,7 @@ class allow: public process_expression
 
     /// \\brief Constructor.
     allow(const action_name_multiset_list& allow_set, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Allow(), allow_set, operand))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Allow(), allow_set, operand))
     {}
 
     /// Move semantics
@@ -898,7 +898,7 @@ class allow: public process_expression
 /// \\brief Make_allow constructs a new term into a given address.
 /// \\ \param t The reference into which the new allow is constructed. 
 template <class... ARGUMENTS>
-inline void make_allow(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_allow(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Allow(), args...);
 }
@@ -907,7 +907,7 @@ inline void make_allow(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a allow expression
 inline
-bool is_allow(const atermpp::aterm_appl& x)
+bool is_allow(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Allow;
 }
@@ -951,7 +951,7 @@ class sync: public process_expression
 
     /// \\brief Constructor.
     sync(const process_expression& left, const process_expression& right)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sync(), left, right))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Sync(), left, right))
     {}
 
     /// Move semantics
@@ -974,7 +974,7 @@ class sync: public process_expression
 /// \\brief Make_sync constructs a new term into a given address.
 /// \\ \param t The reference into which the new sync is constructed. 
 template <class... ARGUMENTS>
-inline void make_sync(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_sync(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Sync(), args...);
 }
@@ -983,7 +983,7 @@ inline void make_sync(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a sync expression
 inline
-bool is_sync(const atermpp::aterm_appl& x)
+bool is_sync(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Sync;
 }
@@ -1027,7 +1027,7 @@ class at: public process_expression
 
     /// \\brief Constructor.
     at(const process_expression& operand, const data::data_expression& time_stamp)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_AtTime(), operand, time_stamp))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_AtTime(), operand, time_stamp))
     {}
 
     /// Move semantics
@@ -1050,7 +1050,7 @@ class at: public process_expression
 /// \\brief Make_at constructs a new term into a given address.
 /// \\ \param t The reference into which the new at is constructed. 
 template <class... ARGUMENTS>
-inline void make_at(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_at(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_AtTime(), args...);
 }
@@ -1059,7 +1059,7 @@ inline void make_at(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a at expression
 inline
-bool is_at(const atermpp::aterm_appl& x)
+bool is_at(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::AtTime;
 }
@@ -1103,7 +1103,7 @@ class seq: public process_expression
 
     /// \\brief Constructor.
     seq(const process_expression& left, const process_expression& right)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Seq(), left, right))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Seq(), left, right))
     {}
 
     /// Move semantics
@@ -1126,7 +1126,7 @@ class seq: public process_expression
 /// \\brief Make_seq constructs a new term into a given address.
 /// \\ \param t The reference into which the new seq is constructed. 
 template <class... ARGUMENTS>
-inline void make_seq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_seq(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Seq(), args...);
 }
@@ -1135,7 +1135,7 @@ inline void make_seq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a seq expression
 inline
-bool is_seq(const atermpp::aterm_appl& x)
+bool is_seq(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Seq;
 }
@@ -1179,7 +1179,7 @@ class if_then: public process_expression
 
     /// \\brief Constructor.
     if_then(const data::data_expression& condition, const process_expression& then_case)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThen(), condition, then_case))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_IfThen(), condition, then_case))
     {}
 
     /// Move semantics
@@ -1202,7 +1202,7 @@ class if_then: public process_expression
 /// \\brief Make_if_then constructs a new term into a given address.
 /// \\ \param t The reference into which the new if_then is constructed. 
 template <class... ARGUMENTS>
-inline void make_if_then(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_if_then(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_IfThen(), args...);
 }
@@ -1211,7 +1211,7 @@ inline void make_if_then(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a if_then expression
 inline
-bool is_if_then(const atermpp::aterm_appl& x)
+bool is_if_then(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::IfThen;
 }
@@ -1255,7 +1255,7 @@ class if_then_else: public process_expression
 
     /// \\brief Constructor.
     if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThenElse(), condition, then_case, else_case))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_IfThenElse(), condition, then_case, else_case))
     {}
 
     /// Move semantics
@@ -1283,7 +1283,7 @@ class if_then_else: public process_expression
 /// \\brief Make_if_then_else constructs a new term into a given address.
 /// \\ \param t The reference into which the new if_then_else is constructed. 
 template <class... ARGUMENTS>
-inline void make_if_then_else(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_if_then_else(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_IfThenElse(), args...);
 }
@@ -1292,7 +1292,7 @@ inline void make_if_then_else(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a if_then_else expression
 inline
-bool is_if_then_else(const atermpp::aterm_appl& x)
+bool is_if_then_else(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::IfThenElse;
 }
@@ -1336,7 +1336,7 @@ class bounded_init: public process_expression
 
     /// \\brief Constructor.
     bounded_init(const process_expression& left, const process_expression& right)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_BInit(), left, right))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_BInit(), left, right))
     {}
 
     /// Move semantics
@@ -1359,7 +1359,7 @@ class bounded_init: public process_expression
 /// \\brief Make_bounded_init constructs a new term into a given address.
 /// \\ \param t The reference into which the new bounded_init is constructed. 
 template <class... ARGUMENTS>
-inline void make_bounded_init(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_bounded_init(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_BInit(), args...);
 }
@@ -1368,7 +1368,7 @@ inline void make_bounded_init(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a bounded_init expression
 inline
-bool is_bounded_init(const atermpp::aterm_appl& x)
+bool is_bounded_init(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::BInit;
 }
@@ -1412,7 +1412,7 @@ class merge: public process_expression
 
     /// \\brief Constructor.
     merge(const process_expression& left, const process_expression& right)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Merge(), left, right))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Merge(), left, right))
     {}
 
     /// Move semantics
@@ -1435,7 +1435,7 @@ class merge: public process_expression
 /// \\brief Make_merge constructs a new term into a given address.
 /// \\ \param t The reference into which the new merge is constructed. 
 template <class... ARGUMENTS>
-inline void make_merge(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_merge(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Merge(), args...);
 }
@@ -1444,7 +1444,7 @@ inline void make_merge(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a merge expression
 inline
-bool is_merge(const atermpp::aterm_appl& x)
+bool is_merge(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Merge;
 }
@@ -1488,7 +1488,7 @@ class left_merge: public process_expression
 
     /// \\brief Constructor.
     left_merge(const process_expression& left, const process_expression& right)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_LMerge(), left, right))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_LMerge(), left, right))
     {}
 
     /// Move semantics
@@ -1511,7 +1511,7 @@ class left_merge: public process_expression
 /// \\brief Make_left_merge constructs a new term into a given address.
 /// \\ \param t The reference into which the new left_merge is constructed. 
 template <class... ARGUMENTS>
-inline void make_left_merge(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_left_merge(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_LMerge(), args...);
 }
@@ -1520,7 +1520,7 @@ inline void make_left_merge(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a left_merge expression
 inline
-bool is_left_merge(const atermpp::aterm_appl& x)
+bool is_left_merge(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::LMerge;
 }
@@ -1564,7 +1564,7 @@ class choice: public process_expression
 
     /// \\brief Constructor.
     choice(const process_expression& left, const process_expression& right)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Choice(), left, right))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Choice(), left, right))
     {}
 
     /// Move semantics
@@ -1587,7 +1587,7 @@ class choice: public process_expression
 /// \\brief Make_choice constructs a new term into a given address.
 /// \\ \param t The reference into which the new choice is constructed. 
 template <class... ARGUMENTS>
-inline void make_choice(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_choice(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Choice(), args...);
 }
@@ -1596,7 +1596,7 @@ inline void make_choice(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a choice expression
 inline
-bool is_choice(const atermpp::aterm_appl& x)
+bool is_choice(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Choice;
 }
@@ -1640,7 +1640,7 @@ class stochastic_operator: public process_expression
 
     /// \\brief Constructor.
     stochastic_operator(const data::variable_list& variables, const data::data_expression& distribution, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_StochasticOperator(), variables, distribution, operand))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_StochasticOperator(), variables, distribution, operand))
     {}
 
     /// Move semantics
@@ -1668,7 +1668,7 @@ class stochastic_operator: public process_expression
 /// \\brief Make_stochastic_operator constructs a new term into a given address.
 /// \\ \param t The reference into which the new stochastic_operator is constructed. 
 template <class... ARGUMENTS>
-inline void make_stochastic_operator(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_stochastic_operator(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StochasticOperator(), args...);
 }
@@ -1677,7 +1677,7 @@ inline void make_stochastic_operator(atermpp::aterm_appl& t, const ARGUMENTS&...
 /// \\param x A term
 /// \\return True if \\a x is a stochastic_operator expression
 inline
-bool is_stochastic_operator(const atermpp::aterm_appl& x)
+bool is_stochastic_operator(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StochasticOperator;
 }
@@ -1721,12 +1721,12 @@ class untyped_process_assignment: public process_expression
 
     /// \\brief Constructor.
     untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), name, assignments))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_UntypedProcessAssignment(), name, assignments))
     {}
 
     /// \\brief Constructor.
     untyped_process_assignment(const std::string& name, const data::untyped_identifier_assignment_list& assignments)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), core::identifier_string(name), assignments))
+      : process_expression(atermpp::aterm(core::detail::function_symbol_UntypedProcessAssignment(), core::identifier_string(name), assignments))
     {}
 
     /// Move semantics
@@ -1749,7 +1749,7 @@ class untyped_process_assignment: public process_expression
 /// \\brief Make_untyped_process_assignment constructs a new term into a given address.
 /// \\ \param t The reference into which the new untyped_process_assignment is constructed. 
 template <class... ARGUMENTS>
-inline void make_untyped_process_assignment(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_untyped_process_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedProcessAssignment(), args...);
 }
@@ -1758,7 +1758,7 @@ inline void make_untyped_process_assignment(atermpp::aterm_appl& t, const ARGUME
 /// \\param x A term
 /// \\return True if \\a x is a untyped_process_assignment expression
 inline
-bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
+bool is_untyped_process_assignment(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::UntypedProcessAssignment;
 }

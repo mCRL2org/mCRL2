@@ -24,9 +24,9 @@ namespace detail
 /// \param f A function on terms
 /// \return The transformed term
 template <typename Function>
-aterm_appl appl_apply(const aterm_appl& a, const Function f)
+aterm appl_apply(const aterm& a, const Function f)
 {
-  return aterm_appl(a.function(), a.begin(), a.end(), f);
+  return aterm(a.function(), a.begin(), a.end(), f);
 }
 
 //--- find ----------------------------------------------------------------//
@@ -60,9 +60,9 @@ struct iterator_value<std::front_insert_iterator<Container> >
 // used to abort the recursive find
 struct found_term_exception
 {
-  aterm_appl t;
+  aterm t;
 
-  found_term_exception(const aterm_appl& t_)
+  found_term_exception(const aterm& t_)
     : t(t_)
   {}
 };
@@ -84,7 +84,7 @@ UnaryFunction for_each_impl(aterm_core t, UnaryFunction op)
   }
   else if (t.type_is_appl())
   {
-    const aterm_appl& a = down_cast<aterm_appl>(t);
+    const aterm& a = down_cast<aterm>(t);
     if (op(t))
     {
       for (const aterm_core& x: a)
@@ -103,11 +103,11 @@ UnaryFunction for_each_impl(aterm_core t, UnaryFunction op)
 /// \param output The variable to store the match in
 /// \return true if a match was found, false otherwise
 template <typename MatchPredicate>
-bool find_if_impl(const aterm_core& t, MatchPredicate match, aterm_appl& output)
+bool find_if_impl(const aterm_core& t, MatchPredicate match, aterm& output)
 {
   if (t.type_is_appl())
   {
-    const aterm_appl& a = down_cast<aterm_appl>(t);
+    const aterm& a = down_cast<aterm>(t);
     if (match(a))
     {
       output = a;
@@ -152,7 +152,7 @@ void find_all_if_impl(const aterm_core& t, MatchPredicate op, OutputIterator& de
   }
   else if (t.type_is_appl())
   {
-    const aterm_appl& a = down_cast<aterm_appl>(t);
+    const aterm& a = down_cast<aterm>(t);
     if (op(a))
     {
       *destBegin++ = vertical_cast<value_type>(a);
@@ -175,23 +175,23 @@ void find_all_if_impl(const aterm_core& t, MatchPredicate op, OutputIterator& de
 /// \param match A predicate function on terms
 /// \param stop A predicate function on terms
 template <typename MatchPredicate, typename StopPredicate>
-aterm_appl partial_find_if_impl(const aterm_core& t, MatchPredicate match, StopPredicate stop)
+aterm partial_find_if_impl(const aterm_core& t, MatchPredicate match, StopPredicate stop)
 {
   if (t.type_is_appl())
   {
-    const aterm_appl& a = down_cast<aterm_appl>(t);
+    const aterm& a = down_cast<aterm>(t);
     if (match(a))
     {
       return a; // report the match
     }
     if (stop(a))
     {
-      return aterm_appl(); // nothing was found
+      return aterm(); // nothing was found
     }
     for (const aterm_core& x: a)
     {
-      aterm_appl result = partial_find_if_impl<MatchPredicate, StopPredicate>(x, match, stop);
-      if (result != aterm_appl())
+      aterm result = partial_find_if_impl<MatchPredicate, StopPredicate>(x, match, stop);
+      if (result != aterm())
       {
         return result;
       }
@@ -203,14 +203,14 @@ aterm_appl partial_find_if_impl(const aterm_core& t, MatchPredicate match, StopP
     const aterm_list& l = down_cast<aterm_list>(t);
     for (const aterm_core& x: l)
     {
-      aterm_appl result = partial_find_if_impl<MatchPredicate, StopPredicate>(x, match, stop);
-      if (result != aterm_appl())
+      aterm result = partial_find_if_impl<MatchPredicate, StopPredicate>(x, match, stop);
+      if (result != aterm())
       {
         return result;
       }
     }
   }
-  return aterm_appl();
+  return aterm();
 }
 
 /// \brief Implements the partial_find_all_if algorithm
@@ -223,10 +223,10 @@ void partial_find_all_if_impl(const aterm_core& t, MatchPredicate match, StopPre
 {
   if (t.type_is_appl())
   {
-    const aterm_appl& a = down_cast<aterm_appl>(t);
+    const aterm& a = down_cast<aterm>(t);
     if (match(a))
     {
-      *destBegin++ = down_cast<aterm_appl>(t);
+      *destBegin++ = down_cast<aterm>(t);
     }
     if (stop(a))
     {

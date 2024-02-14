@@ -37,7 +37,7 @@ std::string pp(const data::data_specification& x);
 /// \param x A term
 /// \return True if \a x is a data specification expression
 inline
-bool is_data_specification(const atermpp::aterm_appl& x)
+bool is_data_specification(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::DataSpec;
 }
@@ -115,7 +115,7 @@ class data_specification: public sort_specification
     };
 
     ///\brief Builds a specification from aterm_core
-    void build_from_aterm(const atermpp::aterm_appl& term);
+    void build_from_aterm(const atermpp::aterm& term);
     /// \endcond
 
   protected:
@@ -315,7 +315,7 @@ class data_specification: public sort_specification
 
     ///\brief Constructor from an aterm_core.
     /// \param[in] t a term adhering to the internal format.
-    data_specification(const atermpp::aterm_appl& t)
+    data_specification(const atermpp::aterm& t)
     {
       build_from_aterm(t);
     }

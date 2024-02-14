@@ -21,7 +21,7 @@ namespace atermpp
 template <typename Term>
 class term_appl_iterator;
 
-class aterm_appl;
+class aterm;
 
 namespace detail
 {
@@ -99,7 +99,7 @@ public:
     return static_cast<const aterm_core&>(m_arguments.data()[index]);
   }
 
-  /// \brief Convert any known number of arguments aterm_appl<N> to the default _aterm_appl.
+  /// \brief Convert any known number of arguments aterm<N> to the default _aterm_appl.
   explicit operator _aterm_appl<1>& ()
   {
     return reinterpret_cast<_aterm_appl<1>&>(*this);
@@ -189,7 +189,7 @@ private:
   std::allocator<char> m_packed_allocator;
 };
 
-static_assert(sizeof(_term_appl) == sizeof(_aterm) + sizeof(aterm_core), "Sanity check: aterm_appl size");
+static_assert(sizeof(_term_appl) == sizeof(_aterm) + sizeof(aterm_core), "Sanity check: aterm size");
 
 template < class Derived, class Base >
 term_appl_iterator<Derived> aterm_appl_iterator_cast(term_appl_iterator<Base> a,

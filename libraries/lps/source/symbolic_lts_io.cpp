@@ -26,7 +26,7 @@ namespace mcrl2::lps
 
 static atermpp::aterm_core symbolic_labelled_transition_system_mark()
 {
-  return atermpp::aterm_appl(atermpp::function_symbol("symbolic_labelled_transition_system", 0));
+  return atermpp::aterm(atermpp::function_symbol("symbolic_labelled_transition_system", 0));
 }
 
 std::ostream& operator<<(std::ostream& stream, const symbolic_lts& lts)

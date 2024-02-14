@@ -39,17 +39,17 @@ class variable_or_number: public atermpp::aterm_core
 
 typedef atermpp::term_list<variable_or_number> variable_or_number_list;
 
-class match_tree:public atermpp::aterm_appl
+class match_tree:public atermpp::aterm
 {
   public:
     /// Default constructor
     match_tree()
-     : atermpp::aterm_appl(afunUndefined())
+     : atermpp::aterm(afunUndefined())
     {}
 
     /// Constructor based on an aterm_core.
     match_tree(const atermpp::aterm_core& t):
-      atermpp::aterm_appl(t)
+      atermpp::aterm(t)
     {
       assert(!is_defined() || isS() || isA() || isM() || isF() || 
              isN() || isD() || isR () || isC() || isX() || isRe() || 
@@ -217,7 +217,7 @@ class match_tree_S:public match_tree
     }
     
     match_tree_S(const variable& target_variable, const match_tree& result_tree)
-     : match_tree(atermpp::aterm_appl(afunS(),target_variable,result_tree))
+     : match_tree(atermpp::aterm(afunS(),target_variable,result_tree))
     {}
 
     const variable& target_variable() const
@@ -246,7 +246,7 @@ class match_tree_A:public match_tree
     }
 
     match_tree_A(const std::size_t n)
-     : match_tree(atermpp::aterm_appl(afunA(),atermpp::aterm_int(n)))
+     : match_tree(atermpp::aterm(afunA(),atermpp::aterm_int(n)))
     {}
 
     std::size_t variable_index() const
@@ -270,7 +270,7 @@ class match_tree_M:public match_tree
     }
     
     match_tree_M(const variable& match_variable, const match_tree& true_tree, const match_tree& false_tree)
-     : match_tree(atermpp::aterm_appl(afunM(),match_variable,true_tree,false_tree))
+     : match_tree(atermpp::aterm(afunM(),match_variable,true_tree,false_tree))
     {}
 
     const variable& match_variable() const
@@ -303,7 +303,7 @@ class match_tree_F:public match_tree
     }
     
     match_tree_F(const data::function_symbol& function, const match_tree& true_tree, const match_tree& false_tree)
-     : match_tree(atermpp::aterm_appl(afunF(),function,true_tree,false_tree))
+     : match_tree(atermpp::aterm(afunF(),function,true_tree,false_tree))
     {}
 
     const data::function_symbol& function() const
@@ -339,7 +339,7 @@ class match_tree_N:public match_tree
     /// The extra non-used std::size_t is provided, to distinghuish this
     /// constructor from the default copy constructor.
     match_tree_N(const match_tree& result_tree, std::size_t)
-     : match_tree(atermpp::aterm_appl(afunN(),result_tree))
+     : match_tree(atermpp::aterm(afunN(),result_tree))
     {}
 
     const match_tree& subtree() const
@@ -365,7 +365,7 @@ class match_tree_D:public match_tree
     /// The extra non-used std::size_t is provided, to distinghuish this
     /// constructor from the default copy constructor.
     match_tree_D(const match_tree& result_tree, std::size_t)
-     : match_tree(atermpp::aterm_appl(afunD(),result_tree))
+     : match_tree(atermpp::aterm(afunD(),result_tree))
     {}
 
     const match_tree& subtree() const
@@ -389,7 +389,7 @@ class match_tree_R:public match_tree
     }
     
     match_tree_R(const data_expression& e)
-     : match_tree(atermpp::aterm_appl(afunR(),e))
+     : match_tree(atermpp::aterm(afunR(),e))
     {}
 
     const data_expression& result() const
@@ -412,7 +412,7 @@ class match_tree_C:public match_tree
     }
     
     match_tree_C(const data_expression& condition, const match_tree& true_tree, const match_tree& false_tree)
-     : match_tree(atermpp::aterm_appl(afunC(),condition,true_tree,false_tree))
+     : match_tree(atermpp::aterm(afunC(),condition,true_tree,false_tree))
     {}
 
     const data_expression& condition() const
@@ -442,7 +442,7 @@ class match_tree_X:public match_tree
     }
     
     match_tree_X()
-     : match_tree(atermpp::aterm_appl(afunX()))
+     : match_tree(atermpp::aterm(afunX()))
     {}
 };
 
@@ -461,7 +461,7 @@ class match_tree_Re:public match_tree
     }
     
     match_tree_Re(const data_expression& result, const variable_or_number_list& vars)
-     : match_tree(atermpp::aterm_appl(afunRe(),result,vars))
+     : match_tree(atermpp::aterm(afunRe(),result,vars))
     {}
 
     const data_expression& result() const
@@ -490,7 +490,7 @@ class match_tree_CRe:public match_tree
     }
     
     match_tree_CRe(const data_expression& condition, const data_expression& result, const variable_or_number_list& vars_condition, const variable_or_number_list& vars_rule)
-     : match_tree(atermpp::aterm_appl(afunCRe(),condition,result,vars_condition,vars_rule))
+     : match_tree(atermpp::aterm(afunCRe(),condition,result,vars_condition,vars_rule))
     {}
 
     const data_expression& condition() const
@@ -528,7 +528,7 @@ class match_tree_Me:public match_tree
     }
     
     match_tree_Me(const variable& match_variable, const std::size_t variable_index)
-     : match_tree(atermpp::aterm_appl(afunMe(),match_variable,atermpp::aterm_int(variable_index)))
+     : match_tree(atermpp::aterm(afunMe(),match_variable,atermpp::aterm_int(variable_index)))
     {}
 
     const variable& match_variable() const

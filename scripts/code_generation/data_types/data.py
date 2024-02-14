@@ -607,7 +607,7 @@ ${cases}
       /// \\param e A data expression.
       /// \\return true iff e is the function symbol matching ${namestring}.
       inline
-      bool is_${functionname}_function_symbol(const atermpp::aterm_appl& e)
+      bool is_${functionname}_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -630,7 +630,7 @@ ${cases}
       /// \\param e A data expression.
       /// \\return true iff e is the function symbol matching ${namestring}.
       inline
-      bool is_${functionname}_function_symbol(const atermpp::aterm_appl& e)
+      bool is_${functionname}_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -771,7 +771,7 @@ ${cases}
       /// \\return true iff e is an application of function symbol ${functionname} to a
       ///     number of arguments.
       inline
-      bool is_${functionname}_application(const atermpp::aterm_appl& e)
+      bool is_${functionname}_application(const atermpp::aterm& e)
       {
         return is_application(e) && is_${functionname}_function_symbol(atermpp::down_cast<application>(e).head());
       }

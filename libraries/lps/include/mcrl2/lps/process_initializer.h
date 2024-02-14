@@ -25,22 +25,22 @@ namespace lps
 {
 
 /// \brief A process initializer
-class process_initializer: public atermpp::aterm_appl
+class process_initializer: public atermpp::aterm
 {
   public:
     /// \brief Default constructor.
     process_initializer()
-      : atermpp::aterm_appl(core::detail::default_values::LinearProcessInit)
+      : atermpp::aterm(core::detail::default_values::LinearProcessInit)
     {}
 
     /// \brief Constructor.
     /// \param term A term.
     /// \param check_distribution Check whether the initial state is plain or a state distribution.
     explicit process_initializer(const atermpp::aterm_core& term, bool check_distribution = true)
-      : atermpp::aterm_appl(atermpp::down_cast<atermpp::aterm_appl>(term))
+      : atermpp::aterm(atermpp::down_cast<atermpp::aterm>(term))
     {
       assert(core::detail::check_term_LinearProcessInit(*this));
-      const lps::stochastic_distribution& dist = atermpp::down_cast<lps::stochastic_distribution>(atermpp::down_cast<atermpp::aterm_appl>(term)[1]);
+      const lps::stochastic_distribution& dist = atermpp::down_cast<lps::stochastic_distribution>(atermpp::down_cast<atermpp::aterm>(term)[1]);
       if (check_distribution && dist.is_defined())
       {
         throw mcrl2::runtime_error("initial state with non-empty stochastic distribution encountered");
@@ -49,7 +49,7 @@ class process_initializer: public atermpp::aterm_appl
 
     /// \brief Constructor.
     explicit process_initializer(const data::data_expression_list& expressions)
-      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), expressions, stochastic_distribution())
+      : atermpp::aterm(core::detail::function_symbol_LinearProcessInit(), expressions, stochastic_distribution())
     {}
 
     /// Move semantics
@@ -66,7 +66,7 @@ class process_initializer: public atermpp::aterm_appl
 
 
 template <class EXPRESSION_LIST>
-inline void make_process_initializer(atermpp::aterm_appl& t, EXPRESSION_LIST args)
+inline void make_process_initializer(atermpp::aterm& t, EXPRESSION_LIST args)
 {
   make_term_appl(t, core::detail::function_symbol_LinearProcessInit(), args, stochastic_distribution());
 }
@@ -83,7 +83,7 @@ typedef std::vector<process_initializer>    process_initializer_vector;
 /// \\param x A term
 /// \\return True if \\a x is a process_initializer expression
 inline
-bool is_process_initializer(const atermpp::aterm_appl& x)
+bool is_process_initializer(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::LinearProcessInit;
 }

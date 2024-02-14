@@ -95,12 +95,12 @@ void binary_aterm_ostream::put(const aterm_core& term)
 {
   // Traverse the term bottom up and store the subterms (and function symbol) before the actual term.
   atermpp::stack<write_todo> stack;
-  stack.emplace(static_cast<const aterm_appl&>(term));
+  stack.emplace(static_cast<const aterm&>(term));
 
   do
   {
     write_todo& current = stack.top();
-    aterm_appl transformed = m_transformer(static_cast<const aterm_appl&>(static_cast<const aterm_core&>(current.term)));
+    aterm transformed = m_transformer(static_cast<const aterm&>(static_cast<const aterm_core&>(current.term)));
 
     // Indicates that this term is output and not a subterm, these should always be written.
     bool is_output = stack.size() == 1;
@@ -157,7 +157,7 @@ void binary_aterm_ostream::put(const aterm_core& term)
         // Add all the arguments to the stack; to be processed first.
         for (const aterm_core& argument : transformed)
         {
-          const aterm_appl& term = static_cast<const aterm_appl&>(argument);
+          const aterm& term = static_cast<const aterm&>(argument);
           if (m_terms.index(term) >= m_terms.size())
           {
             // Only add arguments that have not been written before.
@@ -287,7 +287,7 @@ void binary_aterm_istream::get(aterm_core& t)
         }
 
         // Transform the resulting term.
-        aterm_core transformed = m_transformer(aterm_appl(symbol, arguments.begin(), arguments.end()));
+        aterm_core transformed = m_transformer(aterm(symbol, arguments.begin(), arguments.end()));
 
         if (packet == packet_type::aterm_output)
         {

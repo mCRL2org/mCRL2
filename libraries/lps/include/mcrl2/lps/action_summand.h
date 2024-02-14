@@ -167,11 +167,11 @@ bool operator==(const action_summand& x, const action_summand& y)
          x.assignments() == y.assignments();
 }
 
-/// \brief Conversion to aterm_appl.
+/// \brief Conversion to aterm.
 inline
-atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
+atermpp::aterm action_summand_to_aterm(const action_summand& s)
 {
-  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
+  atermpp::aterm result = atermpp::aterm(core::detail::function_symbol_LinearProcessSummand(),
                        s.summation_variables(),
                        s.condition(),
                        s.multi_action(),

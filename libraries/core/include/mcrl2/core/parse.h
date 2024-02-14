@@ -253,7 +253,7 @@ void print_aterm(const T&)
 
 template<>
 inline
-void print_aterm(const atermpp::aterm_appl& x)
+void print_aterm(const atermpp::aterm& x)
 {
   std::clog << "aterm_core: " << x << std::endl;
 }

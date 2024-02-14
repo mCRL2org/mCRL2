@@ -17,7 +17,7 @@ namespace mcrl2::lps
 
 atermpp::aterm_core linear_process_specification_marker()
 {
-  return atermpp::aterm_appl(atermpp::function_symbol("linear_process_specification", 0));
+  return atermpp::aterm(atermpp::function_symbol("linear_process_specification", 0));
 }
 
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const multi_action& action)

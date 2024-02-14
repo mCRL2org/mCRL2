@@ -22,55 +22,55 @@ namespace data
 {
 
 /// \brief Returns true if the term t is a basic sort
-inline bool is_basic_sort(const atermpp::aterm_appl& x)
+inline bool is_basic_sort(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortId;
 }
 
 /// \brief Returns true if the term t is a function sort
-inline bool is_function_sort(const atermpp::aterm_appl& x)
+inline bool is_function_sort(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortArrow;
 }
 
 /// \brief Returns true if the term t is a container sort
-inline bool is_container_sort(const atermpp::aterm_appl& x)
+inline bool is_container_sort(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortCons;
 }
 
 /// \brief Returns true if the term t is a structured sort
-inline bool is_structured_sort(const atermpp::aterm_appl& x)
+inline bool is_structured_sort(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortStruct;
 }
 
 /// \brief Returns true if the term t is the unknown sort
-inline bool is_untyped_sort(const atermpp::aterm_appl& x)
+inline bool is_untyped_sort(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::UntypedSortUnknown;
 }
 
 /// \brief Returns true if the term t is an expression for multiple possible sorts
-inline bool is_untyped_possible_sorts(const atermpp::aterm_appl& x)
+inline bool is_untyped_possible_sorts(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::UntypedSortsPossible;
 }
 
 //--- start generated class sort_expression ---//
 /// \\brief A sort expression
-class sort_expression: public atermpp::aterm_appl
+class sort_expression: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     sort_expression()
-      : atermpp::aterm_appl(core::detail::default_values::SortExpr)
+      : atermpp::aterm(core::detail::default_values::SortExpr)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit sort_expression(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_SortExpr(*this));
     }
@@ -128,7 +128,7 @@ inline void swap(sort_expression& t1, sort_expression& t2)
 /// \param x A term
 /// \return True if it is a sort_expression expression
 inline
-bool is_sort_expression(const atermpp::aterm_appl& x)
+bool is_sort_expression(const atermpp::aterm& x)
 {
   return is_basic_sort(x)             ||
          is_function_sort(x)          ||

@@ -131,12 +131,12 @@ namespace detail
     return f;
   }
 
-  class variable_with_a_rational_factor: public atermpp::aterm_appl
+  class variable_with_a_rational_factor: public atermpp::aterm
   {
     public:
       // \brief default constructor
       variable_with_a_rational_factor(const variable& v, const data_expression& f)
-       : atermpp::aterm_appl(f_variable_with_a_rational_factor(),v,f)
+       : atermpp::aterm(f_variable_with_a_rational_factor(),v,f)
       {
         assert(f!=real_zero());
       }
@@ -553,7 +553,7 @@ namespace detail
 
 } // end namespace detail
 
-class linear_inequality: public atermpp::aterm_appl
+class linear_inequality: public atermpp::aterm
 {
   // The structure of a linear equality is a function application
   // to two arguments. The function application is either linear_inequality_less,
@@ -642,7 +642,7 @@ class linear_inequality: public atermpp::aterm_appl
 
     /// Basic constructor.
     linear_inequality(const detail::lhs_t& lhs, const data_expression& r, detail::comparison_t t)
-     : atermpp::aterm_appl((t==detail::less?
+     : atermpp::aterm((t==detail::less?
                       detail::linear_inequality_less():
                       (t==detail::less_eq?detail::linear_inequality_less_equal():detail::linear_inequality_equal())),
                   lhs,r)

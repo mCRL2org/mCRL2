@@ -140,10 +140,10 @@ void text_aterm_ostream::write_term_line(const aterm_core& t)
   }
   else
   {
-    // An aterm_appl f(t0, ..., tn) is written as f(t0, ..., tn)
+    // An aterm f(t0, ..., tn) is written as f(t0, ..., tn)
     assert(t.type_is_appl());
 
-    aterm_appl appl = m_transformer(down_cast<aterm_appl>(t));
+    aterm appl = m_transformer(down_cast<aterm>(t));
 
     write_string_with_escape_symbols(appl.function().name(), m_stream);
 
@@ -188,14 +188,14 @@ aterm_core text_aterm_istream::parse_aterm(int& character)
   }
 }
 
-aterm_appl text_aterm_istream::parse_aterm_appl(const std::string& function_name, int& character)
+aterm text_aterm_istream::parse_aterm_appl(const std::string& function_name, int& character)
 {
   // Parse the arguments.
   aterm_list arguments = parse_aterm_list(character, '(', ')');
 
   // Wrap up this function application.
   function_symbol symbol(function_name, arguments.size());
-  return m_transformer(aterm_appl(symbol, arguments.begin(), arguments.end()));
+  return m_transformer(aterm(symbol, arguments.begin(), arguments.end()));
 }
 
 aterm_int text_aterm_istream::parse_aterm_int(int& character)

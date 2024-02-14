@@ -39,7 +39,7 @@ class stochastic_process_initializer: public process_initializer
 
     /// \brief Constructor.
     stochastic_process_initializer(const data::data_expression_list& expressions, const stochastic_distribution& distribution)
-      : super(atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), expressions, distribution), false)
+      : super(atermpp::aterm(core::detail::function_symbol_LinearProcessInit(), expressions, distribution), false)
     {}
 
     const stochastic_distribution& distribution() const
@@ -49,7 +49,7 @@ class stochastic_process_initializer: public process_initializer
 };
 
 template <class... ARGUMENTS>
-inline void make_stochastic_process_initializer(atermpp::aterm_appl& t, ARGUMENTS... args)
+inline void make_stochastic_process_initializer(atermpp::aterm& t, ARGUMENTS... args)
 {
   make_term_appl(t, core::detail::function_symbol_LinearProcessInit(), args...);
 }
@@ -66,7 +66,7 @@ typedef std::vector<stochastic_process_initializer>    stochastic_process_initia
 /// \\param x A term
 /// \\return True if \\a x is a stochastic_process_initializer expression
 inline
-bool is_stochastic_process_initializer(const atermpp::aterm_appl& x)
+bool is_stochastic_process_initializer(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::LinearProcessInit;
 }

@@ -24,35 +24,35 @@ namespace pbes_system
 
 //--- start generated classes ---//
 /// \\brief A pbes expression
-class pbes_expression: public atermpp::aterm_appl
+class pbes_expression: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     pbes_expression()
-      : atermpp::aterm_appl(core::detail::default_values::PBExpr)
+      : atermpp::aterm(core::detail::default_values::PBExpr)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit pbes_expression(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_PBExpr(*this));
     }
 
     /// \\brief Constructor.
     pbes_expression(const data::data_expression& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor.
     pbes_expression(const data::variable& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor.
     pbes_expression(const data::untyped_data_parameter& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// Move semantics
@@ -69,19 +69,19 @@ typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 typedef std::vector<pbes_expression>    pbes_expression_vector;
 
 // prototypes
-inline bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x);
-inline bool is_not(const atermpp::aterm_appl& x);
-inline bool is_and(const atermpp::aterm_appl& x);
-inline bool is_or(const atermpp::aterm_appl& x);
-inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_forall(const atermpp::aterm_appl& x);
-inline bool is_exists(const atermpp::aterm_appl& x);
+inline bool is_propositional_variable_instantiation(const atermpp::aterm& x);
+inline bool is_not(const atermpp::aterm& x);
+inline bool is_and(const atermpp::aterm& x);
+inline bool is_or(const atermpp::aterm& x);
+inline bool is_imp(const atermpp::aterm& x);
+inline bool is_forall(const atermpp::aterm& x);
+inline bool is_exists(const atermpp::aterm& x);
 
 /// \\brief Test for a pbes_expression expression
 /// \\param x A term
 /// \\return True if \\a x is a pbes_expression expression
 inline
-bool is_pbes_expression(const atermpp::aterm_appl& x)
+bool is_pbes_expression(const atermpp::aterm& x)
 {
   return data::is_data_expression(x) ||
          data::is_variable(x) ||
@@ -180,7 +180,7 @@ class propositional_variable_instantiation: public pbes_expression
 /// \\brief Make_propositional_variable_instantiation constructs a new term into a given address.
 /// \\ \param t The reference into which the new propositional_variable_instantiation is constructed. 
 template <class... ARGUMENTS>
-inline void make_propositional_variable_instantiation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_propositional_variable_instantiation(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PropVarInst(), args...);
 }
@@ -195,7 +195,7 @@ typedef std::vector<propositional_variable_instantiation>    propositional_varia
 /// \\param x A term
 /// \\return True if \\a x is a propositional_variable_instantiation expression
 inline
-bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x)
+bool is_propositional_variable_instantiation(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PropVarInst;
 }
@@ -239,7 +239,7 @@ class not_: public pbes_expression
 
     /// \\brief Constructor.
     explicit not_(const pbes_expression& operand)
-      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), operand))
+      : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESNot(), operand))
     {}
 
     /// Move semantics
@@ -257,7 +257,7 @@ class not_: public pbes_expression
 /// \\brief Make_not_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new not_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_not_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESNot(), args...);
 }
@@ -266,7 +266,7 @@ inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a not expression
 inline
-bool is_not(const atermpp::aterm_appl& x)
+bool is_not(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PBESNot;
 }
@@ -310,7 +310,7 @@ class and_: public pbes_expression
 
     /// \\brief Constructor.
     and_(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), left, right))
+      : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESAnd(), left, right))
     {}
 
     /// Move semantics
@@ -333,7 +333,7 @@ class and_: public pbes_expression
 /// \\brief Make_and_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_and_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESAnd(), args...);
 }
@@ -342,7 +342,7 @@ inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& x)
+bool is_and(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PBESAnd;
 }
@@ -386,7 +386,7 @@ class or_: public pbes_expression
 
     /// \\brief Constructor.
     or_(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), left, right))
+      : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESOr(), left, right))
     {}
 
     /// Move semantics
@@ -409,7 +409,7 @@ class or_: public pbes_expression
 /// \\brief Make_or_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_or_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESOr(), args...);
 }
@@ -418,7 +418,7 @@ inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& x)
+bool is_or(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PBESOr;
 }
@@ -462,7 +462,7 @@ class imp: public pbes_expression
 
     /// \\brief Constructor.
     imp(const pbes_expression& left, const pbes_expression& right)
-      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), left, right))
+      : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESImp(), left, right))
     {}
 
     /// Move semantics
@@ -485,7 +485,7 @@ class imp: public pbes_expression
 /// \\brief Make_imp constructs a new term into a given address.
 /// \\ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
-inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_imp(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESImp(), args...);
 }
@@ -494,7 +494,7 @@ inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& x)
+bool is_imp(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PBESImp;
 }
@@ -538,7 +538,7 @@ class forall: public pbes_expression
 
     /// \\brief Constructor.
     forall(const data::variable_list& variables, const pbes_expression& body)
-      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), variables, body))
+      : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESForall(), variables, body))
     {}
 
     /// Move semantics
@@ -561,7 +561,7 @@ class forall: public pbes_expression
 /// \\brief Make_forall constructs a new term into a given address.
 /// \\ \param t The reference into which the new forall is constructed. 
 template <class... ARGUMENTS>
-inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_forall(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESForall(), args...);
 }
@@ -570,7 +570,7 @@ inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a forall expression
 inline
-bool is_forall(const atermpp::aterm_appl& x)
+bool is_forall(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PBESForall;
 }
@@ -614,7 +614,7 @@ class exists: public pbes_expression
 
     /// \\brief Constructor.
     exists(const data::variable_list& variables, const pbes_expression& body)
-      : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), variables, body))
+      : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESExists(), variables, body))
     {}
 
     /// Move semantics
@@ -637,7 +637,7 @@ class exists: public pbes_expression
 /// \\brief Make_exists constructs a new term into a given address.
 /// \\ \param t The reference into which the new exists is constructed. 
 template <class... ARGUMENTS>
-inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_exists(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PBESExists(), args...);
 }
@@ -646,7 +646,7 @@ inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a exists expression
 inline
-bool is_exists(const atermpp::aterm_appl& x)
+bool is_exists(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PBESExists;
 }
@@ -930,7 +930,7 @@ pbes_expression make_forall_(const data::variable_list& l, const pbes_expression
   {
     return p;
   }
-  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), l, p));
+  return pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESForall(), l, p));
 }
 
 /// \brief Make an existential quantification. It checks for an empty variable list,
@@ -945,7 +945,7 @@ pbes_expression make_exists_(const data::variable_list& l, const pbes_expression
   {
     return p;
   }
-  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), l, p));
+  return pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESExists(), l, p));
 }
 
 /// \brief Make a negation

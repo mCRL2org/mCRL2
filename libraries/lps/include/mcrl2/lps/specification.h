@@ -29,7 +29,7 @@ namespace lps
 // prototype definitions
 template <typename Object> bool check_well_typedness(const Object& o);
 template <typename LinearProcess, typename InitialProcessExpression> class specification_base;
-template <typename LinearProcess, typename InitialProcessExpression> atermpp::aterm_appl specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec);
+template <typename LinearProcess, typename InitialProcessExpression> atermpp::aterm specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec);
 class specification;
 void complete_data_specification(specification& spec);
 
@@ -41,7 +41,7 @@ void normalize_sorts(lps::specification& x, const data::sort_specification& sort
 /// \param x A term
 /// \return True if \a x is a specification expression
 inline
-bool is_specification(const atermpp::aterm_appl& x)
+bool is_specification(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::LinProcSpec;
 }
@@ -222,15 +222,15 @@ std::set<data::function_symbol> find_function_symbols(const lps::specification& 
 std::set<core::identifier_string> find_identifiers(const lps::specification& x);
 std::set<process::action_label> find_action_labels(const lps::specification& x);
 
-/// \brief Conversion to aterm_appl.
+/// \brief Conversion to aterm.
 /// \return The specification converted to aterm_core format.
 template <typename LinearProcess, typename InitialProcessExpression>
-atermpp::aterm_appl specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec)
+atermpp::aterm specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec)
 {
-  return atermpp::aterm_appl(core::detail::function_symbol_LinProcSpec(),
+  return atermpp::aterm(core::detail::function_symbol_LinProcSpec(),
            data::detail::data_specification_to_aterm(spec.data()),
-           atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
-           atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
+           atermpp::aterm(core::detail::function_symbol_ActSpec(), spec.action_labels()),
+           atermpp::aterm(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
            linear_process_to_aterm(spec.process()),
            spec.initial_process()
          );

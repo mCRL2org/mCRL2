@@ -22,25 +22,25 @@ namespace process
 
 //--- start generated class action_name_multiset ---//
 /// \\brief A multiset of action names
-class action_name_multiset: public atermpp::aterm_appl
+class action_name_multiset: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     action_name_multiset()
-      : atermpp::aterm_appl(core::detail::default_values::MultActName)
+      : atermpp::aterm(core::detail::default_values::MultActName)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit action_name_multiset(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_MultActName(*this));
     }
 
     /// \\brief Constructor.
     explicit action_name_multiset(const core::identifier_string_list& names)
-      : atermpp::aterm_appl(core::detail::function_symbol_MultActName(), names)
+      : atermpp::aterm(core::detail::function_symbol_MultActName(), names)
     {}
 
     /// Move semantics
@@ -58,7 +58,7 @@ class action_name_multiset: public atermpp::aterm_appl
 /// \\brief Make_action_name_multiset constructs a new term into a given address.
 /// \\ \param t The reference into which the new action_name_multiset is constructed. 
 template <class... ARGUMENTS>
-inline void make_action_name_multiset(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_action_name_multiset(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_MultActName(), args...);
 }
@@ -73,7 +73,7 @@ typedef std::vector<action_name_multiset>    action_name_multiset_vector;
 /// \\param x A term
 /// \\return True if \\a x is a action_name_multiset expression
 inline
-bool is_action_name_multiset(const atermpp::aterm_appl& x)
+bool is_action_name_multiset(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::MultActName;
 }

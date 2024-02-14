@@ -22,20 +22,20 @@ BOOST_AUTO_TEST_CASE(test_aterm_function)
   function_symbol sym("f", 1);
   atermpp::aterm_core x ( read_term_from_string("x"));
 
-  aterm_appl a(sym, x);
+  aterm a(sym, x);
   BOOST_CHECK(pp(a) == "f(x)");
   BOOST_CHECK(a.function() == sym);
 
   std::string s = pp(a);
-  aterm_appl b ( read_appl_from_string(s));
+  aterm b ( read_appl_from_string(s));
   BOOST_CHECK(pp(a) == "f(x)");
   BOOST_CHECK(b.function() == sym); 
 
-  aterm_appl c (read_appl_from_string(s));
+  aterm c (read_appl_from_string(s));
   BOOST_CHECK(pp(c) == "f(x)");
   BOOST_CHECK(c.function() == sym); 
 
-  aterm_appl f ( read_appl_from_string("f(g(a,b),c)"));
-  aterm_appl g ( read_appl_from_string("g(a,b)"));
+  aterm f ( read_appl_from_string("f(g(a,b),c)"));
+  aterm g ( read_appl_from_string("g(a,b)"));
   BOOST_CHECK(f[0] == g);
 }

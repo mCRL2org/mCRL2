@@ -29,31 +29,31 @@ function_symbol const& true_();
 
 //--- start generated class data_equation ---//
 /// \\brief A data equation
-class data_equation: public atermpp::aterm_appl
+class data_equation: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     data_equation()
-      : atermpp::aterm_appl(core::detail::default_values::DataEqn)
+      : atermpp::aterm(core::detail::default_values::DataEqn)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit data_equation(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_DataEqn(*this));
     }
 
     /// \\brief Constructor.
     data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs)
-      : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variables, condition, lhs, rhs)
+      : atermpp::aterm(core::detail::function_symbol_DataEqn(), variables, condition, lhs, rhs)
     {}
 
     /// \\brief Constructor.
     template <typename Container>
     data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = nullptr)
-      : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
+      : atermpp::aterm(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
     {}
 
     /// Move semantics
@@ -94,7 +94,7 @@ class data_equation: public atermpp::aterm_appl
                   const data_expression& lhs,
                   const data_expression& rhs,
                   typename atermpp::enable_if_container< Container, variable >::type* = nullptr)
-      : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs)
+      : atermpp::aterm(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs)
     {}
 
     /// \brief Constructor.
@@ -105,7 +105,7 @@ class data_equation: public atermpp::aterm_appl
     ///       variables, and condition true
     data_equation(const data_expression& lhs,
                   const data_expression& rhs)
-      : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(), sort_bool::true_(), lhs, rhs)
+      : atermpp::aterm(core::detail::function_symbol_DataEqn(), variable_list(), sort_bool::true_(), lhs, rhs)
     {}
 //--- end user section data_equation ---//
 };
@@ -113,7 +113,7 @@ class data_equation: public atermpp::aterm_appl
 /// \\brief Make_data_equation constructs a new term into a given address.
 /// \\ \param t The reference into which the new data_equation is constructed. 
 template <class... ARGUMENTS>
-inline void make_data_equation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_data_equation(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_DataEqn(), args...);
 }
@@ -147,7 +147,7 @@ inline void swap(data_equation& t1, data_equation& t2)
 /// \brief Recognizer function.
 /// \param[in] t A aterm_core appl of which it is checked whether it is a data_equation.
 /// \returns True if the provided argument is a data_equation. 
-inline bool is_data_equation(const atermpp::aterm_appl& t)
+inline bool is_data_equation(const atermpp::aterm& t)
 {
   return t.function()==core::detail::function_symbol_DataEqn();
 }

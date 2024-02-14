@@ -10,13 +10,13 @@
 #ifndef MCRL2_ATERMPP_ATERM_STRING_H
 #define MCRL2_ATERMPP_ATERM_STRING_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {
 
 /// \brief Term containing a string.
-class aterm_string: public aterm_appl
+class aterm_string: public aterm
 {
 public:
   /// \brief Default constructor.
@@ -26,7 +26,7 @@ public:
   /// \brief Constructor.
   /// \param t A term without arguments of type appl. The string is given by the function symbol.
   explicit aterm_string(const aterm_core& t)
-    : aterm_appl(down_cast<aterm_appl>(t))
+    : aterm(down_cast<aterm>(t))
   {
     assert(size() == 0);
   }
@@ -34,7 +34,7 @@ public:
   /// \brief Constructor.
   /// \param f A function symbol with arity 0.
   aterm_string(const function_symbol& f)
-    : aterm_appl(f)
+    : aterm(f)
   {
     assert(f.arity() == 0);
     assert(size() == 0);
@@ -43,7 +43,7 @@ public:
   /// \brief Constructor that allows construction from a string.
   /// \param s A string.
   aterm_string(const std::string& s)
-    : aterm_appl(function_symbol(s,0))
+    : aterm(function_symbol(s,0))
   {
     assert(size() == 0);
   }

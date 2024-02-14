@@ -40,13 +40,13 @@ class function_sort: public sort_expression
 
     /// \\brief Constructor.
     function_sort(const sort_expression_list& domain, const sort_expression& codomain)
-      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), domain, codomain))
+      : sort_expression(atermpp::aterm(core::detail::function_symbol_SortArrow(), domain, codomain))
     {}
 
     /// \\brief Constructor.
     template <typename Container>
     function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
-      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))
+      : sort_expression(atermpp::aterm(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))
     {}
 
     /// Move semantics
@@ -69,7 +69,7 @@ class function_sort: public sort_expression
 /// \\brief Make_function_sort constructs a new term into a given address.
 /// \\ \param t The reference into which the new function_sort is constructed. 
 template <class... ARGUMENTS>
-inline void make_function_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_function_sort(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_SortArrow(), args...);
 }

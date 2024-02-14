@@ -23,35 +23,35 @@ namespace action_formulas
 
 //--- start generated classes ---//
 /// \\brief An action formula
-class action_formula: public atermpp::aterm_appl
+class action_formula: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     action_formula()
-      : atermpp::aterm_appl(core::detail::default_values::ActFrm)
+      : atermpp::aterm(core::detail::default_values::ActFrm)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit action_formula(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_ActFrm(*this));
     }
 
     /// \\brief Constructor.
     action_formula(const data::data_expression& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor.
     action_formula(const data::untyped_data_parameter& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor.
     action_formula(const process::untyped_multi_action& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// Move semantics
@@ -68,22 +68,22 @@ typedef atermpp::term_list<action_formula> action_formula_list;
 typedef std::vector<action_formula>    action_formula_vector;
 
 // prototypes
-inline bool is_true(const atermpp::aterm_appl& x);
-inline bool is_false(const atermpp::aterm_appl& x);
-inline bool is_not(const atermpp::aterm_appl& x);
-inline bool is_and(const atermpp::aterm_appl& x);
-inline bool is_or(const atermpp::aterm_appl& x);
-inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_forall(const atermpp::aterm_appl& x);
-inline bool is_exists(const atermpp::aterm_appl& x);
-inline bool is_at(const atermpp::aterm_appl& x);
-inline bool is_multi_action(const atermpp::aterm_appl& x);
+inline bool is_true(const atermpp::aterm& x);
+inline bool is_false(const atermpp::aterm& x);
+inline bool is_not(const atermpp::aterm& x);
+inline bool is_and(const atermpp::aterm& x);
+inline bool is_or(const atermpp::aterm& x);
+inline bool is_imp(const atermpp::aterm& x);
+inline bool is_forall(const atermpp::aterm& x);
+inline bool is_exists(const atermpp::aterm& x);
+inline bool is_at(const atermpp::aterm& x);
+inline bool is_multi_action(const atermpp::aterm& x);
 
 /// \\brief Test for a action_formula expression
 /// \\param x A term
 /// \\return True if \\a x is a action_formula expression
 inline
-bool is_action_formula(const atermpp::aterm_appl& x)
+bool is_action_formula(const atermpp::aterm& x)
 {
   return data::is_data_expression(x) ||
          data::is_untyped_data_parameter(x) ||
@@ -148,7 +148,7 @@ class true_: public action_formula
 /// \\param x A term
 /// \\return True if \\a x is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& x)
+bool is_true(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActTrue;
 }
@@ -201,7 +201,7 @@ class false_: public action_formula
 /// \\param x A term
 /// \\return True if \\a x is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& x)
+bool is_false(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActFalse;
 }
@@ -245,7 +245,7 @@ class not_: public action_formula
 
     /// \\brief Constructor.
     explicit not_(const action_formula& operand)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActNot(), operand))
+      : action_formula(atermpp::aterm(core::detail::function_symbol_ActNot(), operand))
     {}
 
     /// Move semantics
@@ -263,7 +263,7 @@ class not_: public action_formula
 /// \\brief Make_not_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new not_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_not_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ActNot(), args...);
 }
@@ -272,7 +272,7 @@ inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a not expression
 inline
-bool is_not(const atermpp::aterm_appl& x)
+bool is_not(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActNot;
 }
@@ -316,7 +316,7 @@ class and_: public action_formula
 
     /// \\brief Constructor.
     and_(const action_formula& left, const action_formula& right)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActAnd(), left, right))
+      : action_formula(atermpp::aterm(core::detail::function_symbol_ActAnd(), left, right))
     {}
 
     /// Move semantics
@@ -339,7 +339,7 @@ class and_: public action_formula
 /// \\brief Make_and_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_and_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ActAnd(), args...);
 }
@@ -348,7 +348,7 @@ inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& x)
+bool is_and(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActAnd;
 }
@@ -392,7 +392,7 @@ class or_: public action_formula
 
     /// \\brief Constructor.
     or_(const action_formula& left, const action_formula& right)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActOr(), left, right))
+      : action_formula(atermpp::aterm(core::detail::function_symbol_ActOr(), left, right))
     {}
 
     /// Move semantics
@@ -415,7 +415,7 @@ class or_: public action_formula
 /// \\brief Make_or_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_or_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ActOr(), args...);
 }
@@ -424,7 +424,7 @@ inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& x)
+bool is_or(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActOr;
 }
@@ -468,7 +468,7 @@ class imp: public action_formula
 
     /// \\brief Constructor.
     imp(const action_formula& left, const action_formula& right)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActImp(), left, right))
+      : action_formula(atermpp::aterm(core::detail::function_symbol_ActImp(), left, right))
     {}
 
     /// Move semantics
@@ -491,7 +491,7 @@ class imp: public action_formula
 /// \\brief Make_imp constructs a new term into a given address.
 /// \\ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
-inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_imp(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ActImp(), args...);
 }
@@ -500,7 +500,7 @@ inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& x)
+bool is_imp(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActImp;
 }
@@ -544,7 +544,7 @@ class forall: public action_formula
 
     /// \\brief Constructor.
     forall(const data::variable_list& variables, const action_formula& body)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActForall(), variables, body))
+      : action_formula(atermpp::aterm(core::detail::function_symbol_ActForall(), variables, body))
     {}
 
     /// Move semantics
@@ -567,7 +567,7 @@ class forall: public action_formula
 /// \\brief Make_forall constructs a new term into a given address.
 /// \\ \param t The reference into which the new forall is constructed. 
 template <class... ARGUMENTS>
-inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_forall(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ActForall(), args...);
 }
@@ -576,7 +576,7 @@ inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a forall expression
 inline
-bool is_forall(const atermpp::aterm_appl& x)
+bool is_forall(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActForall;
 }
@@ -620,7 +620,7 @@ class exists: public action_formula
 
     /// \\brief Constructor.
     exists(const data::variable_list& variables, const action_formula& body)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActExists(), variables, body))
+      : action_formula(atermpp::aterm(core::detail::function_symbol_ActExists(), variables, body))
     {}
 
     /// Move semantics
@@ -643,7 +643,7 @@ class exists: public action_formula
 /// \\brief Make_exists constructs a new term into a given address.
 /// \\ \param t The reference into which the new exists is constructed. 
 template <class... ARGUMENTS>
-inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_exists(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ActExists(), args...);
 }
@@ -652,7 +652,7 @@ inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a exists expression
 inline
-bool is_exists(const atermpp::aterm_appl& x)
+bool is_exists(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActExists;
 }
@@ -696,7 +696,7 @@ class at: public action_formula
 
     /// \\brief Constructor.
     at(const action_formula& operand, const data::data_expression& time_stamp)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActAt(), operand, time_stamp))
+      : action_formula(atermpp::aterm(core::detail::function_symbol_ActAt(), operand, time_stamp))
     {}
 
     /// Move semantics
@@ -719,7 +719,7 @@ class at: public action_formula
 /// \\brief Make_at constructs a new term into a given address.
 /// \\ \param t The reference into which the new at is constructed. 
 template <class... ARGUMENTS>
-inline void make_at(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_at(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ActAt(), args...);
 }
@@ -728,7 +728,7 @@ inline void make_at(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a at expression
 inline
-bool is_at(const atermpp::aterm_appl& x)
+bool is_at(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActAt;
 }
@@ -772,7 +772,7 @@ class multi_action: public action_formula
 
     /// \\brief Constructor.
     explicit multi_action(const process::action_list& actions)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActMultAct(), actions))
+      : action_formula(atermpp::aterm(core::detail::function_symbol_ActMultAct(), actions))
     {}
 
     /// Move semantics
@@ -790,7 +790,7 @@ class multi_action: public action_formula
 /// \\brief Make_multi_action constructs a new term into a given address.
 /// \\ \param t The reference into which the new multi_action is constructed. 
 template <class... ARGUMENTS>
-inline void make_multi_action(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_multi_action(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ActMultAct(), args...);
 }
@@ -799,7 +799,7 @@ inline void make_multi_action(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a multi_action expression
 inline
-bool is_multi_action(const atermpp::aterm_appl& x)
+bool is_multi_action(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActMultAct;
 }

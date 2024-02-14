@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_APPL_ITERATOR_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_ITERATOR_H
 
-#include "mcrl2/atermpp/detail/aterm_appl.h"
+#include "mcrl2/atermpp/detail/aterm.h"
 
 namespace atermpp
 {
@@ -21,7 +21,7 @@ namespace atermpp
 template <typename Term>
 class term_appl_iterator
 {
-    friend class aterm_appl;
+    friend class aterm;
 
     template < class Derived, class Base >
     friend term_appl_iterator<Derived> detail::aterm_appl_iterator_cast(term_appl_iterator<Base> a,

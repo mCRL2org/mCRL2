@@ -87,27 +87,27 @@ using namespace atermpp;
 
 // Special terms to indicate the type of the following structure.
 
-static const atermpp::aterm_appl& transition_mark()
+static const atermpp::aterm& transition_mark()
 {
-  static const atermpp::aterm_appl plain_mark(atermpp::function_symbol("transition", 0));
+  static const atermpp::aterm plain_mark(atermpp::function_symbol("transition", 0));
   return plain_mark;
 }
 
-static const atermpp::aterm_appl& probabilistic_transition_mark()
+static const atermpp::aterm& probabilistic_transition_mark()
 {
-  static atermpp::aterm_appl probabilistic_mark(atermpp::function_symbol("probabilistic_transition", 0));
+  static atermpp::aterm probabilistic_mark(atermpp::function_symbol("probabilistic_transition", 0));
   return probabilistic_mark;
 }
 
-static const atermpp::aterm_appl& initial_state_mark()
+static const atermpp::aterm& initial_state_mark()
 {
-  static const atermpp::aterm_appl initial_state_mark(atermpp::function_symbol("initial_state", 0));
+  static const atermpp::aterm initial_state_mark(atermpp::function_symbol("initial_state", 0));
   return initial_state_mark;
 }
 
-static const atermpp::aterm_appl& labelled_transition_system_mark()
+static const atermpp::aterm& labelled_transition_system_mark()
 {
-  static const atermpp::aterm_appl lts_mark(atermpp::function_symbol("labelled_transition_system", 0));
+  static const atermpp::aterm lts_mark(atermpp::function_symbol("labelled_transition_system", 0));
  return lts_mark;
 }
 

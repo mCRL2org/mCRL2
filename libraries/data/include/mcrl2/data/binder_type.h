@@ -23,18 +23,18 @@ namespace data
 
 //--- start generated classes ---//
 /// \\brief Binder
-class binder_type: public atermpp::aterm_appl
+class binder_type: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     binder_type()
-      : atermpp::aterm_appl(core::detail::default_values::BindingOperator)
+      : atermpp::aterm(core::detail::default_values::BindingOperator)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit binder_type(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_BindingOperator(*this));
     }
@@ -100,7 +100,7 @@ class untyped_set_or_bag_comprehension_binder: public binder_type
 /// \\param x A term
 /// \\return True if \\a x is a untyped_set_or_bag_comprehension_binder expression
 inline
-bool is_untyped_set_or_bag_comprehension_binder(const atermpp::aterm_appl& x)
+bool is_untyped_set_or_bag_comprehension_binder(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::UntypedSetBagComp;
 }
@@ -153,7 +153,7 @@ class set_comprehension_binder: public binder_type
 /// \\param x A term
 /// \\return True if \\a x is a set_comprehension_binder expression
 inline
-bool is_set_comprehension_binder(const atermpp::aterm_appl& x)
+bool is_set_comprehension_binder(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SetComp;
 }
@@ -206,7 +206,7 @@ class bag_comprehension_binder: public binder_type
 /// \\param x A term
 /// \\return True if \\a x is a bag_comprehension_binder expression
 inline
-bool is_bag_comprehension_binder(const atermpp::aterm_appl& x)
+bool is_bag_comprehension_binder(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::BagComp;
 }
@@ -259,7 +259,7 @@ class forall_binder: public binder_type
 /// \\param x A term
 /// \\return True if \\a x is a forall_binder expression
 inline
-bool is_forall_binder(const atermpp::aterm_appl& x)
+bool is_forall_binder(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Forall;
 }
@@ -312,7 +312,7 @@ class exists_binder: public binder_type
 /// \\param x A term
 /// \\return True if \\a x is a exists_binder expression
 inline
-bool is_exists_binder(const atermpp::aterm_appl& x)
+bool is_exists_binder(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Exists;
 }
@@ -365,7 +365,7 @@ class lambda_binder: public binder_type
 /// \\param x A term
 /// \\return True if \\a x is a lambda_binder expression
 inline
-bool is_lambda_binder(const atermpp::aterm_appl& x)
+bool is_lambda_binder(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Lambda;
 }

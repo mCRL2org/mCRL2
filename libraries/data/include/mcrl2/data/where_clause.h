@@ -40,13 +40,13 @@ class where_clause: public data_expression
 
     /// \\brief Constructor.
     where_clause(const data_expression& body, const assignment_expression_list& declarations)
-      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, declarations))
+      : data_expression(atermpp::aterm(core::detail::function_symbol_Whr(), body, declarations))
     {}
 
     /// \\brief Constructor.
     template <typename Container>
     where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = nullptr)
-      : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
+      : data_expression(atermpp::aterm(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
     {}
 
     /// Move semantics
@@ -75,7 +75,7 @@ class where_clause: public data_expression
 /// \\brief Make_where_clause constructs a new term into a given address.
 /// \\ \param t The reference into which the new where_clause is constructed. 
 template <class... ARGUMENTS>
-inline void make_where_clause(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_where_clause(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Whr(), args...);
 }

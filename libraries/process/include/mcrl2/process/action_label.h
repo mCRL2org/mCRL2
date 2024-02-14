@@ -22,30 +22,30 @@ namespace process
 
 //--- start generated class action_label ---//
 /// \\brief An action label
-class action_label: public atermpp::aterm_appl
+class action_label: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     action_label()
-      : atermpp::aterm_appl(core::detail::default_values::ActId)
+      : atermpp::aterm(core::detail::default_values::ActId)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit action_label(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_ActId(*this));
     }
 
     /// \\brief Constructor.
     action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)
-      : atermpp::aterm_appl(core::detail::function_symbol_ActId(), name, sorts)
+      : atermpp::aterm(core::detail::function_symbol_ActId(), name, sorts)
     {}
 
     /// \\brief Constructor.
     action_label(const std::string& name, const data::sort_expression_list& sorts)
-      : atermpp::aterm_appl(core::detail::function_symbol_ActId(), core::identifier_string(name), sorts)
+      : atermpp::aterm(core::detail::function_symbol_ActId(), core::identifier_string(name), sorts)
     {}
 
     /// Move semantics
@@ -68,7 +68,7 @@ class action_label: public atermpp::aterm_appl
 /// \\brief Make_action_label constructs a new term into a given address.
 /// \\ \param t The reference into which the new action_label is constructed. 
 template <class... ARGUMENTS>
-inline void make_action_label(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_action_label(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ActId(), args...);
 }
@@ -83,7 +83,7 @@ typedef std::vector<action_label>    action_label_vector;
 /// \\param x A term
 /// \\return True if \\a x is a action_label expression
 inline
-bool is_action_label(const atermpp::aterm_appl& x)
+bool is_action_label(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ActId;
 }

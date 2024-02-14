@@ -22,30 +22,30 @@ namespace process
 
 //--- start generated class communication_expression ---//
 /// \\brief A communication expression
-class communication_expression: public atermpp::aterm_appl
+class communication_expression: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     communication_expression()
-      : atermpp::aterm_appl(core::detail::default_values::CommExpr)
+      : atermpp::aterm(core::detail::default_values::CommExpr)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit communication_expression(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_CommExpr(*this));
     }
 
     /// \\brief Constructor.
     communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)
-      : atermpp::aterm_appl(core::detail::function_symbol_CommExpr(), action_name, name)
+      : atermpp::aterm(core::detail::function_symbol_CommExpr(), action_name, name)
     {}
 
     /// \\brief Constructor.
     communication_expression(const action_name_multiset& action_name, const std::string& name)
-      : atermpp::aterm_appl(core::detail::function_symbol_CommExpr(), action_name, core::identifier_string(name))
+      : atermpp::aterm(core::detail::function_symbol_CommExpr(), action_name, core::identifier_string(name))
     {}
 
     /// Move semantics
@@ -68,7 +68,7 @@ class communication_expression: public atermpp::aterm_appl
 /// \\brief Make_communication_expression constructs a new term into a given address.
 /// \\ \param t The reference into which the new communication_expression is constructed. 
 template <class... ARGUMENTS>
-inline void make_communication_expression(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_communication_expression(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_CommExpr(), args...);
 }
@@ -83,7 +83,7 @@ typedef std::vector<communication_expression>    communication_expression_vector
 /// \\param x A term
 /// \\return True if \\a x is a communication_expression expression
 inline
-bool is_communication_expression(const atermpp::aterm_appl& x)
+bool is_communication_expression(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::CommExpr;
 }

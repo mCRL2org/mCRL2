@@ -14,30 +14,30 @@
 
 using namespace atermpp;
 
-// function object to test if it is an aterm_appl with function symbol "f"
+// function object to test if it is an aterm with function symbol "f"
 struct is_f
 {
   bool operator()(const atermpp::aterm_core& t) const
   {
-    return (t.type_is_appl()) && down_cast<aterm_appl>(t).function().name() == "f";
+    return (t.type_is_appl()) && down_cast<aterm>(t).function().name() == "f";
   }
 };
 
-// function object to test if it is an aterm_appl with function symbol "a" or "b"
+// function object to test if it is an aterm with function symbol "a" or "b"
 struct is_a_or_b
 {
   bool operator()(const atermpp::aterm_core& t) const
   {
     return (t.type_is_appl()) &&
-           (down_cast<aterm_appl>(t).function().name() == "a" || down_cast<aterm_appl>(t).function().name() == "b");
+           (down_cast<aterm>(t).function().name() == "a" || down_cast<aterm>(t).function().name() == "b");
   }
 };
 
 void test_find()
 {
-  aterm_appl a(read_appl_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
+  aterm a(read_appl_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
-  aterm_appl t = find_if(a, is_f());
+  aterm t = find_if(a, is_f());
   assert(t == read_term_from_string("f(y)"));
 
   std::vector<atermpp::aterm_core> v;
@@ -48,8 +48,8 @@ void test_find()
 
 void test_replace()
 {
-  aterm_appl a (read_appl_from_string("f(f(x))"));
-  aterm_appl b = replace(a, read_appl_from_string("f(x)"), read_appl_from_string("x"));
+  aterm a (read_appl_from_string("f(f(x))"));
+  aterm b = replace(a, read_appl_from_string("f(x)"), read_appl_from_string("x"));
   assert(b == read_term_from_string("f(x)"));
 }
 

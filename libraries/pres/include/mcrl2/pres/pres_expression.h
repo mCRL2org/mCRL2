@@ -30,35 +30,35 @@ typedef pbes_system::propositional_variable propositional_variable;
 
 //--- start generated classes ---//
 /// \\brief A pres expression
-class pres_expression: public atermpp::aterm_appl
+class pres_expression: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     pres_expression()
-      : atermpp::aterm_appl(core::detail::default_values::PRExpr)
+      : atermpp::aterm(core::detail::default_values::PRExpr)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit pres_expression(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_PRExpr(*this));
     }
 
     /// \\brief Constructor.
     pres_expression(const data::data_expression& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor.
     pres_expression(const data::variable& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor.
     pres_expression(const data::untyped_data_parameter& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// Move semantics
@@ -75,27 +75,27 @@ typedef atermpp::term_list<pres_expression> pres_expression_list;
 typedef std::vector<pres_expression>    pres_expression_vector;
 
 // prototypes
-inline bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x);
-inline bool is_minus(const atermpp::aterm_appl& x);
-inline bool is_and(const atermpp::aterm_appl& x);
-inline bool is_or(const atermpp::aterm_appl& x);
-inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_plus(const atermpp::aterm_appl& x);
-inline bool is_const_multiply(const atermpp::aterm_appl& x);
-inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
-inline bool is_infimum(const atermpp::aterm_appl& x);
-inline bool is_supremum(const atermpp::aterm_appl& x);
-inline bool is_sum(const atermpp::aterm_appl& x);
-inline bool is_eqinf(const atermpp::aterm_appl& x);
-inline bool is_eqninf(const atermpp::aterm_appl& x);
-inline bool is_condsm(const atermpp::aterm_appl& x);
-inline bool is_condeq(const atermpp::aterm_appl& x);
+inline bool is_propositional_variable_instantiation(const atermpp::aterm& x);
+inline bool is_minus(const atermpp::aterm& x);
+inline bool is_and(const atermpp::aterm& x);
+inline bool is_or(const atermpp::aterm& x);
+inline bool is_imp(const atermpp::aterm& x);
+inline bool is_plus(const atermpp::aterm& x);
+inline bool is_const_multiply(const atermpp::aterm& x);
+inline bool is_const_multiply_alt(const atermpp::aterm& x);
+inline bool is_infimum(const atermpp::aterm& x);
+inline bool is_supremum(const atermpp::aterm& x);
+inline bool is_sum(const atermpp::aterm& x);
+inline bool is_eqinf(const atermpp::aterm& x);
+inline bool is_eqninf(const atermpp::aterm& x);
+inline bool is_condsm(const atermpp::aterm& x);
+inline bool is_condeq(const atermpp::aterm& x);
 
 /// \\brief Test for a pres_expression expression
 /// \\param x A term
 /// \\return True if \\a x is a pres_expression expression
 inline
-bool is_pres_expression(const atermpp::aterm_appl& x)
+bool is_pres_expression(const atermpp::aterm& x)
 {
   return data::is_data_expression(x) ||
          data::is_variable(x) ||
@@ -190,7 +190,7 @@ class propositional_variable_instantiation: public pres_expression
 /// \\brief Make_propositional_variable_instantiation constructs a new term into a given address.
 /// \\ \param t The reference into which the new propositional_variable_instantiation is constructed. 
 template <class... ARGUMENTS>
-inline void make_propositional_variable_instantiation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_propositional_variable_instantiation(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PropVarInst(), args...);
 }
@@ -205,7 +205,7 @@ typedef std::vector<propositional_variable_instantiation>    propositional_varia
 /// \\param x A term
 /// \\return True if \\a x is a propositional_variable_instantiation expression
 inline
-bool is_propositional_variable_instantiation(const atermpp::aterm_appl& x)
+bool is_propositional_variable_instantiation(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PropVarInst;
 }
@@ -249,7 +249,7 @@ class minus: public pres_expression
 
     /// \\brief Constructor.
     explicit minus(const pres_expression& operand)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESMinus(), operand))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESMinus(), operand))
     {}
 
     /// Move semantics
@@ -267,7 +267,7 @@ class minus: public pres_expression
 /// \\brief Make_minus constructs a new term into a given address.
 /// \\ \param t The reference into which the new minus is constructed. 
 template <class... ARGUMENTS>
-inline void make_minus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_minus(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESMinus(), args...);
 }
@@ -276,7 +276,7 @@ inline void make_minus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a minus expression
 inline
-bool is_minus(const atermpp::aterm_appl& x)
+bool is_minus(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESMinus;
 }
@@ -320,7 +320,7 @@ class and_: public pres_expression
 
     /// \\brief Constructor.
     and_(const pres_expression& left, const pres_expression& right)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESAnd(), left, right))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESAnd(), left, right))
     {}
 
     /// Move semantics
@@ -343,7 +343,7 @@ class and_: public pres_expression
 /// \\brief Make_and_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_and_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESAnd(), args...);
 }
@@ -352,7 +352,7 @@ inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& x)
+bool is_and(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESAnd;
 }
@@ -396,7 +396,7 @@ class or_: public pres_expression
 
     /// \\brief Constructor.
     or_(const pres_expression& left, const pres_expression& right)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESOr(), left, right))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESOr(), left, right))
     {}
 
     /// Move semantics
@@ -419,7 +419,7 @@ class or_: public pres_expression
 /// \\brief Make_or_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_or_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESOr(), args...);
 }
@@ -428,7 +428,7 @@ inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& x)
+bool is_or(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESOr;
 }
@@ -472,7 +472,7 @@ class imp: public pres_expression
 
     /// \\brief Constructor.
     imp(const pres_expression& left, const pres_expression& right)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESImp(), left, right))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESImp(), left, right))
     {}
 
     /// Move semantics
@@ -495,7 +495,7 @@ class imp: public pres_expression
 /// \\brief Make_imp constructs a new term into a given address.
 /// \\ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
-inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_imp(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESImp(), args...);
 }
@@ -504,7 +504,7 @@ inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& x)
+bool is_imp(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESImp;
 }
@@ -548,7 +548,7 @@ class plus: public pres_expression
 
     /// \\brief Constructor.
     plus(const pres_expression& left, const pres_expression& right)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESPlus(), left, right))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESPlus(), left, right))
     {}
 
     /// Move semantics
@@ -571,7 +571,7 @@ class plus: public pres_expression
 /// \\brief Make_plus constructs a new term into a given address.
 /// \\ \param t The reference into which the new plus is constructed. 
 template <class... ARGUMENTS>
-inline void make_plus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_plus(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESPlus(), args...);
 }
@@ -580,7 +580,7 @@ inline void make_plus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a plus expression
 inline
-bool is_plus(const atermpp::aterm_appl& x)
+bool is_plus(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESPlus;
 }
@@ -624,7 +624,7 @@ class const_multiply: public pres_expression
 
     /// \\brief Constructor.
     const_multiply(const data::data_expression& left, const pres_expression& right)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESConstantMultiply(), left, right))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESConstantMultiply(), left, right))
     {}
 
     /// Move semantics
@@ -647,7 +647,7 @@ class const_multiply: public pres_expression
 /// \\brief Make_const_multiply constructs a new term into a given address.
 /// \\ \param t The reference into which the new const_multiply is constructed. 
 template <class... ARGUMENTS>
-inline void make_const_multiply(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_const_multiply(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESConstantMultiply(), args...);
 }
@@ -656,7 +656,7 @@ inline void make_const_multiply(atermpp::aterm_appl& t, const ARGUMENTS&... args
 /// \\param x A term
 /// \\return True if \\a x is a const_multiply expression
 inline
-bool is_const_multiply(const atermpp::aterm_appl& x)
+bool is_const_multiply(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESConstantMultiply;
 }
@@ -700,7 +700,7 @@ class const_multiply_alt: public pres_expression
 
     /// \\brief Constructor.
     const_multiply_alt(const pres_expression& left, const data::data_expression& right)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESConstantMultiplyAlt(), left, right))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESConstantMultiplyAlt(), left, right))
     {}
 
     /// Move semantics
@@ -723,7 +723,7 @@ class const_multiply_alt: public pres_expression
 /// \\brief Make_const_multiply_alt constructs a new term into a given address.
 /// \\ \param t The reference into which the new const_multiply_alt is constructed. 
 template <class... ARGUMENTS>
-inline void make_const_multiply_alt(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_const_multiply_alt(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESConstantMultiplyAlt(), args...);
 }
@@ -732,7 +732,7 @@ inline void make_const_multiply_alt(atermpp::aterm_appl& t, const ARGUMENTS&... 
 /// \\param x A term
 /// \\return True if \\a x is a const_multiply_alt expression
 inline
-bool is_const_multiply_alt(const atermpp::aterm_appl& x)
+bool is_const_multiply_alt(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESConstantMultiplyAlt;
 }
@@ -776,7 +776,7 @@ class infimum: public pres_expression
 
     /// \\brief Constructor.
     infimum(const data::variable_list& variables, const pres_expression& body)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESInfimum(), variables, body))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESInfimum(), variables, body))
     {}
 
     /// Move semantics
@@ -799,7 +799,7 @@ class infimum: public pres_expression
 /// \\brief Make_infimum constructs a new term into a given address.
 /// \\ \param t The reference into which the new infimum is constructed. 
 template <class... ARGUMENTS>
-inline void make_infimum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_infimum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESInfimum(), args...);
 }
@@ -808,7 +808,7 @@ inline void make_infimum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a infimum expression
 inline
-bool is_infimum(const atermpp::aterm_appl& x)
+bool is_infimum(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESInfimum;
 }
@@ -852,7 +852,7 @@ class supremum: public pres_expression
 
     /// \\brief Constructor.
     supremum(const data::variable_list& variables, const pres_expression& body)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESSupremum(), variables, body))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESSupremum(), variables, body))
     {}
 
     /// Move semantics
@@ -875,7 +875,7 @@ class supremum: public pres_expression
 /// \\brief Make_supremum constructs a new term into a given address.
 /// \\ \param t The reference into which the new supremum is constructed. 
 template <class... ARGUMENTS>
-inline void make_supremum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_supremum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESSupremum(), args...);
 }
@@ -884,7 +884,7 @@ inline void make_supremum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a supremum expression
 inline
-bool is_supremum(const atermpp::aterm_appl& x)
+bool is_supremum(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESSupremum;
 }
@@ -928,7 +928,7 @@ class sum: public pres_expression
 
     /// \\brief Constructor.
     sum(const data::variable_list& variables, const pres_expression& body)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESSum(), variables, body))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESSum(), variables, body))
     {}
 
     /// Move semantics
@@ -951,7 +951,7 @@ class sum: public pres_expression
 /// \\brief Make_sum constructs a new term into a given address.
 /// \\ \param t The reference into which the new sum is constructed. 
 template <class... ARGUMENTS>
-inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_sum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESSum(), args...);
 }
@@ -960,7 +960,7 @@ inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a sum expression
 inline
-bool is_sum(const atermpp::aterm_appl& x)
+bool is_sum(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESSum;
 }
@@ -1004,7 +1004,7 @@ class eqinf: public pres_expression
 
     /// \\brief Constructor.
     explicit eqinf(const pres_expression& operand)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESEqInf(), operand))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESEqInf(), operand))
     {}
 
     /// Move semantics
@@ -1022,7 +1022,7 @@ class eqinf: public pres_expression
 /// \\brief Make_eqinf constructs a new term into a given address.
 /// \\ \param t The reference into which the new eqinf is constructed. 
 template <class... ARGUMENTS>
-inline void make_eqinf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_eqinf(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESEqInf(), args...);
 }
@@ -1031,7 +1031,7 @@ inline void make_eqinf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a eqinf expression
 inline
-bool is_eqinf(const atermpp::aterm_appl& x)
+bool is_eqinf(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESEqInf;
 }
@@ -1075,7 +1075,7 @@ class eqninf: public pres_expression
 
     /// \\brief Constructor.
     explicit eqninf(const pres_expression& operand)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESEqNInf(), operand))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESEqNInf(), operand))
     {}
 
     /// Move semantics
@@ -1093,7 +1093,7 @@ class eqninf: public pres_expression
 /// \\brief Make_eqninf constructs a new term into a given address.
 /// \\ \param t The reference into which the new eqninf is constructed. 
 template <class... ARGUMENTS>
-inline void make_eqninf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_eqninf(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESEqNInf(), args...);
 }
@@ -1102,7 +1102,7 @@ inline void make_eqninf(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a eqninf expression
 inline
-bool is_eqninf(const atermpp::aterm_appl& x)
+bool is_eqninf(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESEqNInf;
 }
@@ -1146,7 +1146,7 @@ class condsm: public pres_expression
 
     /// \\brief Constructor.
     condsm(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESCondSm(), arg1, arg2, arg3))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESCondSm(), arg1, arg2, arg3))
     {}
 
     /// Move semantics
@@ -1174,7 +1174,7 @@ class condsm: public pres_expression
 /// \\brief Make_condsm constructs a new term into a given address.
 /// \\ \param t The reference into which the new condsm is constructed. 
 template <class... ARGUMENTS>
-inline void make_condsm(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_condsm(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESCondSm(), args...);
 }
@@ -1183,7 +1183,7 @@ inline void make_condsm(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a condsm expression
 inline
-bool is_condsm(const atermpp::aterm_appl& x)
+bool is_condsm(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESCondSm;
 }
@@ -1227,7 +1227,7 @@ class condeq: public pres_expression
 
     /// \\brief Constructor.
     condeq(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)
-      : pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESCondEq(), arg1, arg2, arg3))
+      : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESCondEq(), arg1, arg2, arg3))
     {}
 
     /// Move semantics
@@ -1255,7 +1255,7 @@ class condeq: public pres_expression
 /// \\brief Make_condeq constructs a new term into a given address.
 /// \\ \param t The reference into which the new condeq is constructed. 
 template <class... ARGUMENTS>
-inline void make_condeq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_condeq(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_PRESCondEq(), args...);
 }
@@ -1264,7 +1264,7 @@ inline void make_condeq(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a condeq expression
 inline
-bool is_condeq(const atermpp::aterm_appl& x)
+bool is_condeq(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::PRESCondEq;
 }
@@ -1548,7 +1548,7 @@ pres_expression make_infimum(const data::variable_list& l, const pres_expression
   {
     return p;
   }
-  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESInfimum(), l, p));
+  return pres_expression(atermpp::aterm(core::detail::function_symbol_PRESInfimum(), l, p));
 }
 
 /// \brief Make an generalized maximum. It checks for an empty variable list,
@@ -1563,7 +1563,7 @@ pres_expression make_supremum(const data::variable_list& l, const pres_expressio
   {
     return p;
   }
-  return pres_expression(atermpp::aterm_appl(core::detail::function_symbol_PRESSupremum(), l, p));
+  return pres_expression(atermpp::aterm(core::detail::function_symbol_PRESSupremum(), l, p));
 }
 
 /// \brief Make a negation
@@ -1960,7 +1960,7 @@ data::variable_list free_variables(const pres_expression& x)
 /// \\brief Make_propositional_variable constructs a new term into a given address.
 /// \\ \param t The reference into which the new propositional_variable is constructed. 
 template <class... ARGUMENTS>
-inline void make_propositional_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_propositional_variable(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   mcrl2::pbes_system::make_propositional_variable(t, args...);
 }

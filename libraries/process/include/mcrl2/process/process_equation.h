@@ -22,25 +22,25 @@ namespace process
 
 //--- start generated class process_equation ---//
 /// \\brief A process equation
-class process_equation: public atermpp::aterm_appl
+class process_equation: public atermpp::aterm
 {
   public:
     /// \\brief Default constructor.
     process_equation()
-      : atermpp::aterm_appl(core::detail::default_values::ProcEqn)
+      : atermpp::aterm(core::detail::default_values::ProcEqn)
     {}
 
     /// \\brief Constructor.
     /// \\param term A term
     explicit process_equation(const atermpp::aterm_core& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_ProcEqn(*this));
     }
 
     /// \\brief Constructor.
     process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)
-      : atermpp::aterm_appl(core::detail::function_symbol_ProcEqn(), identifier, formal_parameters, expression)
+      : atermpp::aterm(core::detail::function_symbol_ProcEqn(), identifier, formal_parameters, expression)
     {}
 
     /// Move semantics
@@ -68,7 +68,7 @@ class process_equation: public atermpp::aterm_appl
 /// \\brief Make_process_equation constructs a new term into a given address.
 /// \\ \param t The reference into which the new process_equation is constructed. 
 template <class... ARGUMENTS>
-inline void make_process_equation(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_process_equation(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_ProcEqn(), args...);
 }
@@ -83,7 +83,7 @@ typedef std::vector<process_equation>    process_equation_vector;
 /// \\param x A term
 /// \\return True if \\a x is a process_equation expression
 inline
-bool is_process_equation(const atermpp::aterm_appl& x)
+bool is_process_equation(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::ProcEqn;
 }
