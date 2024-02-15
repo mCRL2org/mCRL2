@@ -129,7 +129,7 @@ void aterm_pool::print_performance_statistics() const
 
   m_appl_dynamic_storage.print_performance_stats("arbitrary_function_application_storage");
 
-  // Print information for the local aterm_core pools.
+  // Print information for the local aterm pools.
   for (const thread_aterm_pool_interface* local : m_thread_pools)
   {
     local->print_local_performance_statistics();

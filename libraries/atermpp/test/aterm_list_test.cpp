@@ -25,7 +25,7 @@ struct counter
     : m_sum(sum)
   {}
 
-  void operator()(const atermpp::aterm_core& t)
+  void operator()(const atermpp::aterm& t)
   {
     m_sum += down_cast<aterm_int>(t).value();
   }
@@ -39,7 +39,7 @@ struct func
   func(int)
   {}
 
-  atermpp::aterm_core operator()(const atermpp::aterm_core& x) const
+  atermpp::aterm operator()(const atermpp::aterm& x) const
   {
     return read_term_from_string("f(" + pp(x) + ")");
   }
@@ -54,10 +54,10 @@ BOOST_AUTO_TEST_CASE(test_aterm_list)
 
   aterm_list r1 = q;
 
-  r1=push_back<aterm_core>(r1,aterm_int(5));
+  r1=push_back<aterm>(r1,aterm_int(5));
   BOOST_CHECK(r1 == read_term_from_string("[1,2,3,4,5]"));
 
-  atermpp::aterm_core f = q.front(); // f == 1
+  atermpp::aterm f = q.front(); // f == 1
   BOOST_CHECK(f == aterm_int(1));
 
   q.push_front(read_term_from_string("[5,6]")); // q == [[5,6],1,2,3,4]
@@ -88,9 +88,9 @@ BOOST_AUTO_TEST_CASE(test_aterm_list)
 
 BOOST_AUTO_TEST_CASE(test_set_operations)
 {
-  atermpp::aterm_core x = read_term_from_string("x");
-  atermpp::aterm_core y = read_term_from_string("y");
-  atermpp::aterm_core z = read_term_from_string("z");
+  atermpp::aterm x = read_term_from_string("x");
+  atermpp::aterm y = read_term_from_string("y");
+  atermpp::aterm z = read_term_from_string("z");
 
   aterm_list l;
   l.push_front(x);
@@ -109,8 +109,8 @@ BOOST_AUTO_TEST_CASE(test_set_operations)
 
 BOOST_AUTO_TEST_CASE(test_initializer_list)
 {
-  atermpp::aterm_core x = read_term_from_string("x");
-  atermpp::aterm_core y = read_term_from_string("y");
+  atermpp::aterm x = read_term_from_string("x");
+  atermpp::aterm y = read_term_from_string("y");
   aterm_list l = { x, y };
 }
 
@@ -147,6 +147,6 @@ BOOST_AUTO_TEST_CASE(test_list_with_apply_filter)
 BOOST_AUTO_TEST_CASE(test_concatenation)
 {
   term_list<aterm_int> l1;
-  term_list<aterm_core> l2;
+  term_list<aterm> l2;
   BOOST_CHECK(l2+l1 == l1+l2);
 }

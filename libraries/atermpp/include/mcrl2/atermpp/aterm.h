@@ -39,10 +39,10 @@ public:
   typedef ptrdiff_t difference_type;
 
   /// Iterator used to iterate through an term_appl.
-  typedef term_appl_iterator<aterm_core> iterator;
+  typedef term_appl_iterator<aterm> iterator;
 
   /// Const iterator used to iterate through an term_appl.
-  typedef term_appl_iterator<aterm_core> const_iterator;
+  typedef term_appl_iterator<aterm> const_iterator;
 
   /// \brief Default constructor.
   aterm():aterm_core()
@@ -184,12 +184,16 @@ public:
   /// \brief Returns the i-th argument.
   /// \param i A positive integer.
   /// \return The argument with the given index.
-  const aterm_core& operator[](const size_type i) const
+  const aterm& operator[](const size_type i) const
   {
     assert(i < size()); // Check the bounds.
     return static_cast<const aterm&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(i));
   }
 };
+
+typedef void(*term_callback)(const aterm&);
+
+extern void add_deletion_hook(const function_symbol&, term_callback);
 
 
 /// \brief Constructor an aterm in a variable based on a function symbol and an forward iterator providing the arguments. 
@@ -213,8 +217,8 @@ void make_term_appl(Term& target,
 {
   detail::g_thread_term_pool().create_appl_dynamic(target, sym, begin, end);
   
-  static_assert((std::is_base_of<aterm_core, Term>::value),"Term must be derived from an aterm_core");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
+  static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
   static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value,
                 "A forward iterator has more requirements than an input iterator.");
   static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value,
@@ -241,8 +245,8 @@ void make_term_appl(Term& target,
 {
   make_term_appl(target, sym, begin, end, [](const Term& term) -> const Term& { return term; } );
 
-  static_assert((std::is_base_of<aterm_core, Term>::value),"Term must be derived from an aterm_core");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
+  static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
   static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
                 "The InputIterator is missing the input iterator tag.");
 }
@@ -269,8 +273,8 @@ void make_term_appl(Term& target,
 {
   detail::g_thread_term_pool().create_appl_dynamic(target, sym, converter, begin, end);
 
-  static_assert(std::is_base_of<aterm_core, Term>::value,"Term must be derived from an aterm_core");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
+  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
   static_assert(!std::is_same<typename InputIterator::iterator_category, std::output_iterator_tag>::value,
                 "The InputIterator has the output iterator tag.");
 }
@@ -284,11 +288,11 @@ void make_term_appl(Term& target,
 {
   detail::g_thread_term_pool().create_term(target, sym);
 
-  static_assert(std::is_base_of<aterm_core, Term>::value,"Term must be derived from an aterm_core");
-  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
+  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
 }
 
-/// \brief Make an aterm_core application for n-arity function application.
+/// \brief Make an aterm application for n-arity function application.
 /// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
 /// \param symbol A function symbol.
 /// \param arguments The arguments of the function application.
@@ -306,13 +310,160 @@ void make_term_appl(Term& target, const function_symbol& symbol, const Terms& ..
 template<class Term,
          class INDEX_TYPE,
          typename ...Terms>
-void make_term_appl_with_index(aterm_core& target, const function_symbol& symbol, const Terms& ...arguments)
+void make_term_appl_with_index(aterm& target, const function_symbol& symbol, const Terms& ...arguments)
 {
   detail::g_thread_term_pool().create_appl_index<Term, INDEX_TYPE>(target, symbol, arguments...);
 }
 
+template <class Term1, class Term2>
+struct is_convertible : public
+    std::conditional<std::is_base_of<aterm, Term1>::value &&
+                     std::is_base_of<aterm, Term2>::value && (
+                     std::is_convertible<Term1, Term2>::value ||
+                     std::is_convertible<Term2, Term1>::value),
+                     std::true_type, std::false_type>::type
+{ };
+
+/// \brief A cheap cast from one aterm based type to another
+///        When casting one aterm based type into another, generally  a new aterm is constructed,
+///        and the old one is destroyed. This can cause undesired overhead, for instance due to
+///        increasing and decreasing of reference counts. This cast changes the type, without
+///        changing the aterm itself. It can only be used if Base and Derived inherit from aterm,
+///        and contain no additional information than a
+///          single aterm.
+/// \param   t A term of a type inheriting from an aterm.
+/// \return  A term of type const Derived&.
+template <class Derived, class Base>
+const Derived& down_cast(const Base& t,
+                         typename std::enable_if<is_convertible<Base, Derived>::value &&
+                                                 !std::is_base_of<Derived, Base>::value>::type* = nullptr)
+{
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast can only be applied ot types derived from aterms where no extra fields are added");
+  assert(Derived(static_cast<const aterm&>(t)) != aterm());
+  return reinterpret_cast<const Derived&>(t);
+}
+
+/// \brief A cast from one aterm based type to another, as a reference, allowing to assign to it.
+//         This can be useful when assigning to a term type that contains the derived term type. 
+/// \param   t A term of a type inheriting from an aterm.
+/// \return  A term of type Derived&.
+template <class Derived, class Base>
+Derived& reference_cast(Base& t,
+                        typename std::enable_if<is_convertible<Base, Derived>::value &&
+                                                !std::is_base_of<Derived, Base>::value >::type* = nullptr)
+{
+  static_assert(sizeof(Base) == sizeof(aterm), 
+                "aterm cast can only be applied to terms directly derived from aterms");
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast can only be applied to types derived from aterms where no extra fields are added");
+  // We do not check types as the content of the term t is likely to be overwritten shortly. 
+  return reinterpret_cast<Derived&>(t);
+}
+
+/// \brief A cast from one aterm based type to another, as a reference, allowing to assign to it.
+//         This can be useful when assigning to a term type that contains the derived term type. 
+//         In case Derived and Base are equal, nothing needs to be done. 
+/// \param   t A term of a type inheriting from an aterm.
+/// \return  A term of type Derived&.
+template <class Derived>
+Derived& reference_cast(Derived& t)
+{
+  static_assert(sizeof(Derived) == sizeof(aterm), 
+                "aterm cast can only be applied to terms directly derived from aterms");
+  // We do not check types as the content of the term t is likely to be overwritten shortly. 
+  return t;
+}
+
+template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
+const DerivedCont& container_cast(const Cont<Base>& t,
+                              typename std::enable_if_t<
+                                is_container<DerivedCont, aterm>::value &&
+                                std::is_same_v<Cont<typename DerivedCont::value_type>, DerivedCont> &&
+                                !std::is_base_of_v<DerivedCont, Cont<Base> > &&
+                                is_convertible<Base, typename DerivedCont::value_type>::value
+                              >* = nullptr)
+{
+  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return typename DerivedCont::value_type(static_cast<const aterm&>(u)) != aterm();} ));
+  return reinterpret_cast<const DerivedCont&>(t);
+}
+
+/// \brief A cast form an aterm derived class to a class that inherits in possibly multiple steps from this class.
+/// \details The derived class is not allowed to contain extra fields. This conversion does not require runtime computation
+///          effort. Also see down_cast.
+/// \param t The term that is converted.
+/// \return A term of type Derived.
+template <class Derived, class Base>
+const Derived& vertical_cast(const Base& t,
+                          typename std::enable_if<is_convertible<Base, Derived>::value>::type* = nullptr)
+{
+  static_assert(sizeof(Derived) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  assert(Derived(static_cast<const aterm&>(t)) != aterm());
+  return reinterpret_cast<const Derived&>(t);
+}
+
+template < typename DerivedCont, typename Base, template <typename Elem> class Cont >
+const DerivedCont& vertical_cast(const Cont<Base>& t,
+                              typename std::enable_if_t<
+                                is_container<DerivedCont, aterm>::value &&
+                                std::is_same_v<Cont<typename DerivedCont::value_type>, DerivedCont> &&
+                                is_convertible<Base, typename DerivedCont::value_type>::value
+                              >* = nullptr)
+{
+  static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added");
+  assert(std::all_of(t.begin(),t.end(),[](const Base& u){ return typename DerivedCont::value_type(static_cast<const aterm&>(u)) != aterm();} ));
+  return reinterpret_cast<const DerivedCont&>(t);
+}
+
+/* namespace detail
+{
+  /// \returns A pointer to the underlying aterm.
+  inline _aterm* address(const unprotected_aterm_core& t)
+  {
+    return const_cast<_aterm*>(t.m_term);
+  }
+} */
+
+/// \brief Send the term in textual form to the ostream.
+/// \param out The stream to which the term is sent. 
+/// \param t   The term that is printed to the stream.
+/// \return The stream to which the term is written.
+std::ostream& operator<<(std::ostream& out, const atermpp::aterm& t);
+
+/// \brief Transform an aterm to an ascii string.
+/// \param t The input aterm.
+/// \return A string representation of the given term derived from an aterm.
+inline std::string pp(const atermpp::aterm& t)
+{
+  std::ostringstream oss;
+  oss << t;
+  return oss.str();
+}
+
 } // namespace atermpp
 
+namespace std
+{
+
+/// \brief Swaps two aterms.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+///          In order to be used in the standard containers, the declaration must
+///          be preceded by an empty template declaration. This swap function is
+///          not used for classes that derive from the aterm class. A specific
+///          swap function must be provided for derived classes.
+/// \param t1 The first term
+/// \param t2 The second term
+template <>
+inline void swap(atermpp::unprotected_aterm_core& t1, atermpp::unprotected_aterm_core& t2) noexcept
+{
+  t1.swap(t2);
+}
+} // namespace std
 namespace std
 {
 

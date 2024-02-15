@@ -724,7 +724,7 @@ class pbesinst_alternative_lazy_algorithm
           const propositional_variable lhs = propositional_variable(renamer(X_e).name(), data::variable_list());
           const pbes_expression rhs = replace_propositional_variables(equation[X_e], renamer);
           result.equations().push_back(pbes_equation(symbol, lhs, rhs));
-          mCRL2log(log::debug) << "BESEquation: " << atermpp::aterm_core(symbol) << " " << lhs << " = " << rhs << std::endl;
+          mCRL2log(log::debug) << "BESEquation: " << atermpp::aterm(symbol) << " " << lhs << " = " << rhs << std::endl;
 
         }
       }

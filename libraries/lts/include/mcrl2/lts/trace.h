@@ -46,7 +46,7 @@ namespace lts
 /// a state can only be added once.
 ///
 /// States can be saved in two formats. A human readable ascii format containging only a
-/// sequence of untimed actions and a more compact aterm_core format also containing time and
+/// sequence of untimed actions and a more compact aterm format also containing time and
 /// state information.
 class trace
 {
@@ -55,7 +55,7 @@ class trace
     //
     /// \brief Formats in which traces can be saved on disk
     /// \details There are several formats for traces.
-    /// The tfMcrl2 format saves a trace as an mCRL2 term in aterm_core internal format.
+    /// The tfMcrl2 format saves a trace as an mCRL2 term in aterm internal format.
     /// This is a compact but unreadable format.
     /// The tfPlain format is an ascii representation of the trace, which is
     /// human readable but only contains the actions and no time or state information.
@@ -65,7 +65,7 @@ class trace
     
     enum trace_format
     {
-      tfMcrl2,  /**< Format is stored as an aterm_core */
+      tfMcrl2,  /**< Format is stored as an aterm */
       tfPlain,  /**< Format is stored in plain text. In this format there are only actions */
       tfLine,   /**< Format is stored in a line of text. In this format there are only actions */
       tfUnknown /**< This value indicates that the format is unknown */
@@ -451,7 +451,7 @@ class trace
         throw runtime_error("Could not read from stream.");
       }
 
-      if (c==0)  // Weak check. A lts in aterm_core format starts with a 0. This is not possible 
+      if (c==0)  // Weak check. A lts in aterm format starts with a 0. This is not possible 
                  // for a trace in textual format. 
       {
         fmt = tfMcrl2;

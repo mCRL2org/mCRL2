@@ -114,7 +114,7 @@ class data_specification: public sort_specification
       }
     };
 
-    ///\brief Builds a specification from aterm_core
+    ///\brief Builds a specification from an aterm
     void build_from_aterm(const atermpp::aterm& term);
     /// \endcond
 
@@ -313,7 +313,7 @@ class data_specification: public sort_specification
     {
     }
 
-    ///\brief Constructor from an aterm_core.
+    ///\brief Constructor from an aterm.
     /// \param[in] t a term adhering to the internal format.
     data_specification(const atermpp::aterm& t)
     {

@@ -122,7 +122,7 @@ class pbes_equation
     }
 
     /// \brief A comparison operator on pbes equations.
-    /// \detail The comparison is on the addresses of aterm_core objects and can therefore differ in every run.
+    /// \detail The comparison is on the addresses of aterm objects and can therefore differ in every run.
     /// \parameter other The variable to compare with. 
     /// \return True if the this argument is smaller than other.
     bool operator<(const pbes_equation& other) const
@@ -177,7 +177,7 @@ operator!=(const pbes_equation& x, const pbes_equation& y)
 }
 
 /// \brief Conversion to atermaPpl.
-/// \return The specification converted to aterm_core format.
+/// \return The specification converted to aterm format.
 inline
 atermpp::aterm pbes_equation_to_aterm(const pbes_equation& eqn)
 {

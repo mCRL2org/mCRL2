@@ -275,7 +275,7 @@ namespace std
 
     std::size_t operator()(const mcrl2::data::subblock& t) const
     {
-      hash< atermpp::aterm_core > hasher1;
+      hash< atermpp::aterm > hasher1;
       hash< mcrl2::data::data_expression > hasher2;
       return mcrl2::utilities::detail::hash_combine(hasher1(t.variable()), hasher2(t.charachteristic_function()));
     }

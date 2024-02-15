@@ -196,7 +196,7 @@ RewriterCompilingJitty::substitution_type& sigma(RewriterCompilingJitty* this_re
 }
 
 static inline
-uintptr_t uint_address(const atermpp::aterm_core& t)
+uintptr_t uint_address(const atermpp::aterm& t)
 {
   return reinterpret_cast<uintptr_t>(atermpp::detail::address(t));
 }

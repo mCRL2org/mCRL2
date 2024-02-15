@@ -70,7 +70,7 @@ struct builder
     }
   }
 
-  // aterm_core set visit
+  // aterm set visit
   template <typename T>
   void update(std::set<T>& x)
   {

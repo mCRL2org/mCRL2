@@ -1072,8 +1072,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else 
     {
       // In this case the term is not well formed, for instance because it contains a "Rewritten@@term" function.
-      // We print the residue as an aterm_core. 
-      derived().print(pp(atermpp::aterm_core(x)));
+      // We print the residue as an aterm. 
+      derived().print(pp(atermpp::aterm(x)));
       return;
     }
 

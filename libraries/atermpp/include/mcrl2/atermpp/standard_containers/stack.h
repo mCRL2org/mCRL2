@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/utilities/shared_mutex.h"
 
-/// \brief The main namespace for the aterm_core++ library.
+/// \brief The main namespace for the aterm++ library.
 namespace atermpp
 {
 

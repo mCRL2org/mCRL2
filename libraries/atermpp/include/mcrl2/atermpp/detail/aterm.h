@@ -140,7 +140,7 @@ public:
   template<typename ForwardIterator>
   T* allocate_args(const function_symbol& symbol, ForwardIterator, ForwardIterator)
   {
-    // We assume that object T contains the _aterm_appl<aterm_core, 1> at the end and reserve extra space for parameters.
+    // We assume that object T contains the _aterm_appl<aterm, 1> at the end and reserve extra space for parameters.
     char* newTerm = m_packed_allocator.allocate(term_appl_size(symbol.arity()));
     return reinterpret_cast<T*>(newTerm);
   }
@@ -149,7 +149,7 @@ public:
   /// \details Assumes that arguments contains symbol.arity() number of terms.
   T* allocate_args(const function_symbol& symbol, unprotected_aterm_core*)
   {
-    // We assume that object T contains the _aterm_appl<aterm_core, 1> at the end and reserve extra space for parameters.
+    // We assume that object T contains the _aterm_appl<aterm, 1> at the end and reserve extra space for parameters.
     char* newTerm = m_packed_allocator.allocate(term_appl_size(symbol.arity()));
     return reinterpret_cast<T*>(newTerm);
   }
@@ -161,7 +161,7 @@ public:
     new (element) T(symbol, begin, end, true);
   }
 
-  /// \brief Specialize destroy for _aterm_appl to only destroy the function symbol. The reference count for the aterm_core does not have to be decreased.
+  /// \brief Specialize destroy for _aterm_appl to only destroy the function symbol. The reference count for the aterm does not have to be decreased.
   void destroy(T* element)
   {
     assert(element != nullptr);
@@ -175,7 +175,7 @@ public:
   {
     assert(element != nullptr);
 
-    // Deallocate the memory of this aterm_core appl.
+    // Deallocate the memory of this aterm.
     _term_appl& term = *element;
     m_packed_allocator.deallocate(reinterpret_cast<char*>(element), term_appl_size(term.function().arity()));
   }
@@ -194,8 +194,8 @@ static_assert(sizeof(_term_appl) == sizeof(_aterm) + sizeof(aterm_core), "Sanity
 template < class Derived, class Base >
 term_appl_iterator<Derived> aterm_appl_iterator_cast(term_appl_iterator<Base> a,
                                                                 typename std::enable_if<
-                                                                     std::is_base_of<aterm_core, Base>::value &&
-                                                                     std::is_base_of<aterm_core, Derived>::value
+                                                                     std::is_base_of<aterm, Base>::value &&
+                                                                     std::is_base_of<aterm, Derived>::value
 >::type* = nullptr);
 
 } // namespace detail

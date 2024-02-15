@@ -93,20 +93,6 @@ class action_rename_rule
     }
 
     /// \brief Constructor.
-    /// \param t1 A term
-    explicit action_rename_rule(const atermpp::aterm_core& t1)
-    {
-      const atermpp::aterm t=atermpp::down_cast<atermpp::aterm>(t1);
-      assert(core::detail::check_rule_ActionRenameRule(t));
-      atermpp::aterm::iterator i = t.begin();
-      m_variables       = atermpp::down_cast<data::variable_list>(*i++);
-      m_condition       = data::data_expression(*i++);
-      m_lhs             = process::action(*i++);
-      m_rhs             = process::process_expression(*i);
-      assert(check_that_rhs_is_tau_delta_or_an_action());
-    }
-
-    /// \brief Constructor.
     action_rename_rule(const data::variable_list&   variables,
                        const data::data_expression& condition,
                        const process::action&       lhs,
@@ -191,11 +177,11 @@ class action_rename_specification
     {
       assert(core::detail::check_rule_ActionRenameSpec(t));
       atermpp::aterm::iterator i = t.begin();
-      m_data            = atermpp::down_cast<atermpp::aterm>(*i++);
-      m_action_labels   = atermpp::down_cast<process::action_label_list>(atermpp::down_cast<atermpp::aterm>(*i++)[0]);
+      m_data            = *i++;
+      m_action_labels   = atermpp::down_cast<process::action_label_list>((*i++)[0]);
 
-      atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>(atermpp::down_cast<atermpp::aterm>(*i)[0]);
-      for (const atermpp::aterm_core& r: rules_list)
+      atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>((*i)[0]);
+      for (const atermpp::aterm& r: rules_list)
       {
         m_rules.push_back(action_rename_rule(r));
       }

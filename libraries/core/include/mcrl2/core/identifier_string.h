@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/identifier_string.h
-/// \brief aterm_core representations of identifier strings.
+/// \brief aterm representations of identifier strings.
 
 #ifndef MCRL2_CORE_IDENTIFIER_STRING_H
 #define MCRL2_CORE_IDENTIFIER_STRING_H
@@ -56,9 +56,9 @@ inline void swap(identifier_string& t1, identifier_string& t2)
 /// \param[in] t A term
 /// \return Whether t is an identifier string.
 inline
-bool is_identifier_string(const atermpp::aterm_core& t)
+bool is_identifier_string(const atermpp::aterm& t)
 {
-  return t.type_is_appl() && atermpp::down_cast<atermpp::aterm>(t).size() == 0;
+  return t.type_is_appl() && t.size() == 0;
 }
 
 /// \brief Provides the empty identifier string.
@@ -82,7 +82,7 @@ struct hash<mcrl2::core::identifier_string>
 {
   std::size_t operator()(const mcrl2::core::identifier_string& x) const
   {
-    return std::hash<atermpp::aterm_core>()(static_cast<const atermpp::aterm_core&>(x));
+    return std::hash<atermpp::aterm>()(x);
   }
 };
 

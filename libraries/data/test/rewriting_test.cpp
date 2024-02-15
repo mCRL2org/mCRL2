@@ -38,9 +38,9 @@ void data_rewrite_test(Rewriter& R, const data_expression& input, const data_exp
               << "expected " << data::pp(expected_output) << std::endl
               << "output " << data::pp(output) << std::endl
               << " -- term representations -- " << std::endl
-              << "input    " << atermpp::aterm_core(input) << std::endl
-              << "expected " << atermpp::aterm_core(expected_output) << std::endl
-              << "R(input) " << atermpp::aterm_core(output) << std::endl;
+              << "input    " << atermpp::aterm(input) << std::endl
+              << "expected " << atermpp::aterm(expected_output) << std::endl
+              << "R(input) " << atermpp::aterm(output) << std::endl;
   }
 }
 

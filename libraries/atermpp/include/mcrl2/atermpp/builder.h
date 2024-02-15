@@ -47,37 +47,37 @@ struct builder
   void apply(T& result, const aterm_list& x)
   {
     derived().enter(x);
-    make_term_list(static_cast<aterm_list&>(result), x.begin(), x.end(), [&](aterm_core& r, const aterm_core& v) { return derived().apply(r, v); } ) ;
+    make_term_list(static_cast<aterm_list&>(result), x.begin(), x.end(), [&](aterm& r, const aterm& v) { return derived().apply(r, v); } ) ;
     derived().leave(x);
 
     // return mcrl2::workaround::return_std_move(result);
   }
+
+  /* template <class T>
+  void apply(T& result, const aterm& x)
+  {
+    derived().enter(x);
+    make_term_appl(result, x.function() , x.begin(), x.end(), [&](aterm& r, const aterm& v) { return derived().apply(r, v); } );
+    derived().leave(x);
+
+    // return mcrl2::workaround::return_std_move(result);
+  } */
 
   template <class T>
   void apply(T& result, const aterm& x)
   {
     derived().enter(x);
-    make_term_appl(result, x.function() , x.begin(), x.end(), [&](aterm_core& r, const aterm_core& v) { return derived().apply(r, v); } );
-    derived().leave(x);
-
-    // return mcrl2::workaround::return_std_move(result);
-  }
-
-  template <class T>
-  void apply(T& result, const aterm_core& x)
-  {
-    derived().enter(x);
-    if (x.type_is_appl())
-    {
-      derived().apply(result, atermpp::down_cast<aterm>(x));
-    }
-    else if (x.type_is_list())
+    if (x.type_is_list())
     {
       derived().apply(result, atermpp::down_cast<aterm_list>(x));
     }
     else if (x.type_is_int())
     {
       derived().apply(result, atermpp::down_cast<aterm_int>(x));
+    }
+    else // It is an application, other than a list or an int. 
+    {
+      make_term_appl(result, x.function() , x.begin(), x.end(), [&](aterm& r, const aterm& v) { return derived().apply(r, v); } );
     }
     derived().leave(x);
   }

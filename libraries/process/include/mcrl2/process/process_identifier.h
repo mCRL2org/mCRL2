@@ -50,7 +50,7 @@ class process_identifier: public atermpp::aterm
 
     /// \brief Constructor.
     /// \param term A term
-    explicit process_identifier(const atermpp::aterm_core& term)
+    explicit process_identifier(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_term_ProcVarId(*this));

@@ -23,11 +23,11 @@ public:
   /// \param newline When true each term is written on a new line.
   text_aterm_ostream(std::ostream& os, bool newline = false);
 
-  void put(const aterm_core &term) override;
+  void put(const aterm& term) override;
 
 private:
   /// \brief Writes a term in textual format on the same line.
-  void write_term_line(const aterm_core& term);
+  void write_term_line(const aterm& term);
 
   std::ostream& m_stream;
 
@@ -40,11 +40,11 @@ class text_aterm_istream final : public aterm_istream
 public:
   text_aterm_istream(std::istream& os);
 
-  void get(aterm_core& t) override;
+  void get(aterm& t) override;
 
 private:
   /// \brief Parse a term from the input stream and return it.
-  aterm_core parse_aterm(int& character);
+  aterm parse_aterm(int& character);
 
   /// \brief Parses an "f"(t0, ..., tn) application as an aterm.
   aterm parse_aterm_appl(const std::string& function_name, int& character);

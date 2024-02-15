@@ -66,18 +66,18 @@ class process_specification
     /// \brief The initial state of the specification
     process_expression m_initial_process;
 
-    /// \brief Initializes the specification with an aterm_core.
+    /// \brief Initializes the specification with an aterm.
     /// \param t A term
     void construct_from_aterm(const atermpp::aterm& t)
     {
       atermpp::aterm::iterator i = t.begin();
-      m_data            = data::data_specification(atermpp::down_cast<atermpp::aterm>(*i++));
-      m_action_labels   = atermpp::down_cast<process::action_label_list>(atermpp::down_cast<atermpp::aterm>(*i++)[0]);
-      data::variable_list global_variables = atermpp::down_cast<data::variable_list>(atermpp::down_cast<atermpp::aterm>(*i++)[0]);
+      m_data            = data::data_specification(*i++);
+      m_action_labels   = atermpp::down_cast<process::action_label_list>((*i++)[0]);
+      data::variable_list global_variables = atermpp::down_cast<data::variable_list>((*i++)[0]);
       m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
-      process_equation_list l = atermpp::down_cast<process_equation_list>(atermpp::down_cast<atermpp::aterm>(*i++)[0]);
-      atermpp::aterm init = atermpp::down_cast<atermpp::aterm>(*i);
-      m_initial_process = process_expression(atermpp::down_cast<atermpp::aterm>(init[0]));
+      process_equation_list l = atermpp::down_cast<process_equation_list>((*i++)[0]);
+      atermpp::aterm init = (*i);
+      m_initial_process = process_expression(init[0]);
       m_equations       = std::vector<process_equation>(l.begin(), l.end());
     }
 
@@ -87,7 +87,7 @@ class process_specification
     {}
 
     /// \brief Constructor.
-    /// \param t A term containing an aterm_core representation of a process specification.
+    /// \param t A term containing an aterm representation of a process specification.
     process_specification(atermpp::aterm t)
     {
       assert(core::detail::check_term_ProcSpec(t));
@@ -214,7 +214,7 @@ void complete_data_specification(process_specification& spec)
 }
 
 /// \brief Conversion to aterm.
-/// \return The specification converted to aterm_core format.
+/// \return The specification converted to aterm format.
 /// \param spec A process specification
 inline
 atermpp::aterm process_specification_to_aterm(const process_specification& spec)

@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(test_aterm_function)
 {
   // create an unquoted function symbol
   function_symbol sym("f", 1);
-  atermpp::aterm_core x ( read_term_from_string("x"));
+  atermpp::aterm x ( read_term_from_string("x"));
 
   aterm a(sym, x);
   BOOST_CHECK(pp(a) == "f(x)");

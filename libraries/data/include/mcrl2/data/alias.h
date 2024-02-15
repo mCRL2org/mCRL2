@@ -32,7 +32,7 @@ class alias: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit alias(const atermpp::aterm_core& term)
+    explicit alias(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_term_SortRef(*this));

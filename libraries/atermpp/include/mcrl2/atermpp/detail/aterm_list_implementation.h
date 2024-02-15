@@ -233,10 +233,10 @@ operator+(const term_list<Term1>& l, const term_list<Term2>& m)
   static_assert(std::is_convertible< Term1, Term2 >::value ||
                 std::is_convertible< Term2, Term1 >::value,
                        "Concatenated lists must be of convertible types. ");
-  static_assert(sizeof(Term1) == sizeof(aterm_core),
-                "aterm_core cast cannot be applied types derived from aterms where extra fields are added. ");
-  static_assert(sizeof(Term2) == sizeof(aterm_core),
-                "aterm_core cast cannot be applied types derived from aterms where extra fields are added. ");
+  static_assert(sizeof(Term1) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added. ");
+  static_assert(sizeof(Term2) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added. ");
   typedef typename std::conditional<std::is_convertible<Term2,Term1>::value,Term1,Term2>::type ResultType;
   typedef typename term_list<Term1>::const_iterator const_iterator;
 
@@ -298,8 +298,8 @@ namespace detail
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
   inline void make_list_backward(term_list<Term>& result, Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
-    static_assert(std::is_base_of<aterm_core, Term>::value,"Term must be derived from an aterm_core");
-    static_assert(sizeof(Term)==sizeof(aterm_core),"Term derived from an aterm_core must not have extra fields");
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     Term t;
     while (first != last)
@@ -314,7 +314,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  inline aterm_core make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  inline aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
     term_list<Term> result_list;
     make_list_backward<Term, Iter, ATermConverter, ATermFilter>(result_list, first, last, convert_to_aterm, aterm_filter);
@@ -324,8 +324,8 @@ namespace detail
   template <class Term, class Iter, class ATermConverter>
   inline void make_list_backward(term_list<Term>& result, Iter first, Iter last, ATermConverter convert_to_aterm)
   {
-    static_assert(std::is_base_of<aterm_core, Term>::value,"Term must be derived from an aterm_core");
-    static_assert(sizeof(Term)==sizeof(aterm_core),"Term derived from an aterm_core must not have extra fields");
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     while (first != last)
     {
@@ -335,7 +335,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter>
-  inline aterm_core make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm)
+  inline aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm)
   {
     term_list<Term> result_list;
     make_list_backward<Term, Iter, ATermConverter>(result_list, first, last, convert_to_aterm);
@@ -347,8 +347,8 @@ namespace detail
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
   inline void make_list_forward(term_list<Term>& result, Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
-    static_assert(std::is_base_of<aterm_core, Term>::value,"Term must be derived from an aterm_core");
-    static_assert(sizeof(Term)==sizeof(aterm_core),"Term derived from an aterm_core must not have extra fields");
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
 
     const std::size_t len = std::distance(first,last);
@@ -400,7 +400,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  inline aterm_core make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
     term_list<Term> result_list;
     make_list_forward<Term, Iter, ATermConverter, ATermFilter>(result_list, first, last, convert_to_aterm, aterm_filter);
@@ -440,8 +440,8 @@ namespace detail
   template <class Term, class Iter, class ATermConverter>
   inline void make_list_forward(term_list<Term>& result, Iter first, Iter last, ATermConverter convert_aterm)
   {
-    static_assert(std::is_base_of<aterm_core, Term>::value,"Term must be derived from an aterm_core");
-    static_assert(sizeof(Term)==sizeof(aterm_core),"Term derived from an aterm_core must not have extra fields");
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     const std::size_t len = std::distance(first,last);
     if (first==last)
@@ -480,7 +480,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter>
-  inline aterm_core make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm)
+  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm)
   {
     term_list<Term> result_list;
     make_list_forward<Term,Iter,ATermConverter>(result_list, first, last, convert_to_aterm);

@@ -28,10 +28,10 @@ class exists: public abstraction
 
     /// Constructor.
     ///
-    /// \param[in] d An aterm_core.
+    /// \param[in] d An aterm.
     /// \pre d has the internal structure of an abstraction.
     /// \pre d is an existential quantification.
-    explicit exists(const aterm_core& d)
+    explicit exists(const aterm& d)
       : abstraction(d)
     {
       assert(is_abstraction(d));
@@ -61,7 +61,7 @@ class exists: public abstraction
 }; // class exists
 
 template <class... ARGUMENTS>
-void make_exists(atermpp::aterm_core& result, ARGUMENTS... arguments)
+void make_exists(atermpp::aterm& result, ARGUMENTS... arguments)
 {
   make_abstraction(result, exists_binder(), arguments...);
 }

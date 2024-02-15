@@ -171,7 +171,7 @@ operator!=(const pres_equation& x, const pres_equation& y)
 }
 
 /// \brief Conversion to atermaPpl.
-/// \return The specification converted to aterm_core format.
+/// \return The specification converted to aterm format.
 inline
 atermpp::aterm pres_equation_to_aterm(const pres_equation& eqn)
 {

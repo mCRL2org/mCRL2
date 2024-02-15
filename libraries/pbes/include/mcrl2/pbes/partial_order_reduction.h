@@ -177,14 +177,14 @@ struct hash<mcrl2::pbes_system::summand_equivalence_key>
 {
   std::size_t operator()(const mcrl2::pbes_system::summand_equivalence_key& x) const
   {
-    std::size_t seed = std::hash<atermpp::aterm_core>()(x.f);
+    std::size_t seed = std::hash<atermpp::aterm>()(x.f);
     if (!x.e.empty())
     {
-      seed = std::hash<atermpp::aterm_core>()(x.e) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed = std::hash<atermpp::aterm>()(x.e) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
     if (!x.g.empty())
     {
-      seed = std::hash<atermpp::aterm_core>()(x.g) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed = std::hash<atermpp::aterm>()(x.g) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
     return seed;
   }

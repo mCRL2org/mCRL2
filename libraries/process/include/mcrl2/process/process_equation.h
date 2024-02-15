@@ -32,7 +32,7 @@ class process_equation: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit process_equation(const atermpp::aterm_core& term)
+    explicit process_equation(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_term_ProcEqn(*this));

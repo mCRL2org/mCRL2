@@ -367,7 +367,7 @@ void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm_core term)
     if (symbol == term.function())
     {
       assert(verify_term(*detail::address(term)));
-      callback(static_cast<const aterm_core&>(term));
+      callback(reinterpret_cast<const aterm&>(term));   // TODO Check whether this cast is OK. It was a static cast. 
     }
   }
 }

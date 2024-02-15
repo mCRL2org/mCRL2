@@ -26,8 +26,8 @@ class term_appl_iterator
     template < class Derived, class Base >
     friend term_appl_iterator<Derived> detail::aterm_appl_iterator_cast(term_appl_iterator<Base> a,
                                                                 typename std::enable_if<
-                                                                     std::is_base_of<aterm_core, Base>::value &&
-                                                                     std::is_base_of<aterm_core, Derived>::value
+                                                                     std::is_base_of<aterm, Base>::value &&
+                                                                     std::is_base_of<aterm, Derived>::value
                                                                 >::type*);
 
 
@@ -224,14 +224,14 @@ namespace detail
   template < class Derived, class Base >
   term_appl_iterator<Derived> aterm_appl_iterator_cast(term_appl_iterator<Base> a,
                                                        typename std::enable_if<
-                                                                     std::is_base_of<aterm_core, Base>::value &&
-                                                                     std::is_base_of<aterm_core, Derived>::value
+                                                                     std::is_base_of<aterm, Base>::value &&
+                                                                     std::is_base_of<aterm, Derived>::value
                                                                 >::type* /* = nullptr */)
   {
-    static_assert(sizeof(Derived) == sizeof(aterm_core),
-                "term_appl_iterator only works on aterm_core classes to which no extra fields are added");
-    static_assert(sizeof(Base) == sizeof(aterm_core),
-                "term_appl_iterator only works on aterm_core classes to which no extra fields are added");
+    static_assert(sizeof(Derived) == sizeof(_aterm*),
+                "term_appl_iterator only works on aterm classes to which no extra fields are added");
+    static_assert(sizeof(Base) == sizeof(_aterm*),
+                "term_appl_iterator only works on aterm classes to which no extra fields are added");
     return term_appl_iterator<Derived>(reinterpret_cast<const Derived*>(a.m_term));
   }
 

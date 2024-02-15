@@ -30,7 +30,7 @@ class untyped_data_parameter: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit untyped_data_parameter(const atermpp::aterm_core& term)
+    explicit untyped_data_parameter(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_term_UntypedDataParameter(*this));

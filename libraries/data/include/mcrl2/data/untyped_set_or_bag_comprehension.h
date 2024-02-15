@@ -26,10 +26,10 @@ class untyped_set_or_bag_comprehension: public abstraction
 
     /// Constructor.
     ///
-    /// \param[in] d An aterm_core. 
+    /// \param[in] d An aterm. 
     /// \pre d has the interal structure of an abstraction.
     /// \pre d is a universal quantification.
-    explicit untyped_set_or_bag_comprehension(const aterm_core& d)
+    explicit untyped_set_or_bag_comprehension(const aterm& d)
       : abstraction(d)
     {
       assert(is_abstraction(d));
@@ -59,7 +59,7 @@ class untyped_set_or_bag_comprehension: public abstraction
 }; // class untyped_set_or_bag_comprehension
 
 template <class... ARGUMENTS>
-void make_untyped_set_or_bag_comprehension(atermpp::aterm_core& result, ARGUMENTS... arguments)
+void make_untyped_set_or_bag_comprehension(atermpp::aterm& result, ARGUMENTS... arguments)
 {
   make_abstraction(result, untyped_set_or_bag_comprehension_binder(), arguments...);
 }

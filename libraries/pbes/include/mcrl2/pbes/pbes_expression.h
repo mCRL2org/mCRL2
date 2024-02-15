@@ -34,7 +34,7 @@ class pbes_expression: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit pbes_expression(const atermpp::aterm_core& term)
+    explicit pbes_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_PBExpr(*this));
@@ -144,7 +144,7 @@ class propositional_variable_instantiation: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    explicit propositional_variable_instantiation(const atermpp::aterm_core& term)
+    explicit propositional_variable_instantiation(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PropVarInst(*this));
@@ -231,7 +231,7 @@ class not_: public pbes_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit not_(const atermpp::aterm_core& term)
+    explicit not_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESNot(*this));
@@ -302,7 +302,7 @@ class and_: public pbes_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit and_(const atermpp::aterm_core& term)
+    explicit and_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESAnd(*this));
@@ -378,7 +378,7 @@ class or_: public pbes_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit or_(const atermpp::aterm_core& term)
+    explicit or_(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESOr(*this));
@@ -454,7 +454,7 @@ class imp: public pbes_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit imp(const atermpp::aterm_core& term)
+    explicit imp(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESImp(*this));
@@ -530,7 +530,7 @@ class forall: public pbes_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit forall(const atermpp::aterm_core& term)
+    explicit forall(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESForall(*this));
@@ -606,7 +606,7 @@ class exists: public pbes_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit exists(const atermpp::aterm_core& term)
+    explicit exists(const atermpp::aterm& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESExists(*this));
@@ -1011,7 +1011,7 @@ void optimized_forall(pbes_expression& result, const data::variable_list& l, con
     result = true_();
     return;
   }
-  make_forall(result, l, p);
+  pbes_system::make_forall(result, l, p);
   return;
 }
 
@@ -1039,7 +1039,7 @@ void optimized_exists(pbes_expression& result, const data::variable_list& l, con
     result = data::sort_bool::true_();
     return;
   }
-  make_exists(result, l, p);
+  pbes_system::make_exists(result, l, p);
   return;
 }
 
@@ -1465,7 +1465,7 @@ namespace std
   {
     std::size_t operator()(const mcrl2::pbes_system::pbes_expression& x) const
     {
-      return hash<atermpp::aterm_core>()(x);
+      return hash<atermpp::aterm>()(x);
     }
   };
 
@@ -1474,7 +1474,7 @@ namespace std
   {
     std::size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
     {
-      return hash<atermpp::aterm_core>()(x);
+      return hash<atermpp::aterm>()(x);
     }
   };
 

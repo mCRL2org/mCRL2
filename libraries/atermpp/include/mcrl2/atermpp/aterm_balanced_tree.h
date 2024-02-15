@@ -10,11 +10,6 @@
 #ifndef MCRL2_ATERMPP_ATERM_BALANCED_TREE_H
 #define MCRL2_ATERMPP_ATERM_BALANCED_TREE_H
 
-/* NOTE: A aterm_balanced_tree is actually not always an aterm, namely when numbers
- *       or lists are stored in it. In that case the balanced tree of size 1 is a number
- *       or a list. So, a proper type for a term_balanced_tree should be "aterm_core" and not
- *       aterm. This ought to be adapted. */
-
 #include "mcrl2/atermpp/aterm.h"
 
 #include <boost/iterator/iterator_facade.hpp>
@@ -58,11 +53,11 @@ class term_balanced_tree : public aterm
     static const aterm& empty_tree() { return g_empty_tree; }
 
     template < typename ForwardTraversalIterator, class Transformer >
-    static void make_tree_helper(aterm_core& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
+    static void make_tree_helper(aterm& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
     {
       assert(size>1);
       make_term_appl(result, tree_node_function(), 
-                     [&size, &transformer, &p](aterm_core& target)
+                     [&size, &transformer, &p](aterm& target)
                         { 
                           assert(size>1);
                           
@@ -73,7 +68,7 @@ class term_balanced_tree : public aterm
                           }
                           else make_tree_helper(target, p, new_size, transformer);
                         },
-                     [&size, &transformer, &p](aterm_core& target)
+                     [&size, &transformer, &p](aterm& target)
                         { 
                           assert(size>1);
                           
@@ -87,7 +82,7 @@ class term_balanced_tree : public aterm
     }
 
     template < typename ForwardTraversalIterator, class Transformer >
-    static void make_tree(aterm_core& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
+    static void make_tree(aterm& result, ForwardTraversalIterator& p, const std::size_t size, Transformer transformer)
     {
       if (size==0)
       {
@@ -96,7 +91,7 @@ class term_balanced_tree : public aterm
       else if (size==1)
       {
         make_term_appl(result, tree_single_node_function(),
-          [&transformer,&p](aterm_core& target) 
+          [&transformer,&p](aterm& target) 
             {
               transformer(reinterpret_cast<Term&>(target), *(p++));
             });
@@ -148,12 +143,12 @@ class term_balanced_tree : public aterm
     /// \brief Move assign operator.
     term_balanced_tree& operator=(term_balanced_tree&&) noexcept = default;
 
-    /// \brief Construction from aterm_core.
-    explicit term_balanced_tree(const aterm_core& tree) 
+    /// \brief Construction from aterm.
+    explicit term_balanced_tree(const aterm& tree) 
        : aterm(tree.function() == tree_empty_function() ||
                     tree.function() == tree_single_node_function() ||
                     tree.function() == tree_node_function()?
-                down_cast<aterm>(tree):
+                tree:
                 aterm(tree_single_node_function(),tree))
     {
       assert(function() == tree_empty_function() ||
@@ -184,7 +179,7 @@ class term_balanced_tree : public aterm
     /// \brief Get the left branch of the tree
     /// \details It is assumed that the tree is a node with a left branch.
     /// \return A reference t the left subtree of the current tree
-    const aterm_core& left_branch() const
+    const aterm& left_branch() const
     {
       assert(is_node());
       return aterm::operator[](0);
@@ -193,7 +188,7 @@ class term_balanced_tree : public aterm
     /// \brief Get the left branch of the tree
     /// \details It is assumed that the tree is a node with a left branch.
     /// \return A reference t the left subtree of the current tree
-    const aterm_core& right_branch() const
+    const aterm& right_branch() const
     {
       assert(is_node());
       return aterm::operator[](1);
@@ -227,7 +222,7 @@ class term_balanced_tree : public aterm
 
         if (position < left_size)
         {
-          const aterm_core& left(left_branch());
+          const aterm& left(left_branch());
           if (left.function() == tree_node_function())
           {
             return down_cast<term_balanced_tree<Term>>(left_branch()).element_at(position, left_size);
@@ -240,7 +235,7 @@ class term_balanced_tree : public aterm
         else 
         {
           // down_cast<term_balanced_tree<Term>>(right_branch()).element_at(position-left_size, size - left_size);
-          const aterm_core& right(right_branch());
+          const aterm& right(right_branch());
           if (right.function() == tree_node_function())
           {
             return down_cast<term_balanced_tree<Term>>(right_branch()).element_at(position-left_size, size-left_size);
@@ -262,9 +257,9 @@ class term_balanced_tree : public aterm
     {
       if (is_node())
       {
-        const aterm_core& left=left_branch();
+        const aterm& left=left_branch();
         std::size_t result = (left.function() == tree_node_function()?down_cast<term_balanced_tree<Term>>(left).size():1);
-        const aterm_core& right=right_branch();
+        const aterm& right=right_branch();
         return result + (right.function() == tree_node_function()?down_cast<term_balanced_tree<Term>>(right).size():1);
       }
       return (empty()) ? 0 : 1;
@@ -427,8 +422,8 @@ void make_term_balanced_tree(term_balanced_tree<Term>& result,
   term_balanced_tree<Term>::make_tree(result, p, size, transformer);
 }
 
-/// \brief A term_balanced_tree with elements of type aterm_core.
-typedef term_balanced_tree<aterm_core> aterm_balanced_tree;
+/// \brief A term_balanced_tree with elements of type aterm.
+typedef term_balanced_tree<aterm> aterm_balanced_tree;
 
 
 inline bool is_aterm_balanced_tree(const aterm& t)
@@ -473,7 +468,7 @@ struct hash<atermpp::term_balanced_tree<T> >
 {
   std::size_t operator()(const atermpp::term_balanced_tree<T>& t) const
   {
-    return std::hash<atermpp::aterm_core>()(t);
+    return std::hash<atermpp::aterm>()(t);
   }
 };
 } // namespace std

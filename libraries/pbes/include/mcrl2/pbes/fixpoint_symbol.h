@@ -32,7 +32,7 @@ class fixpoint_symbol: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit fixpoint_symbol(const atermpp::aterm_core& term)
+    explicit fixpoint_symbol(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_FixPoint(*this));

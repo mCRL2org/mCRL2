@@ -193,7 +193,7 @@ void test1()
 
   data::data_specification dataspec = data::parse_data_specification(dataspec_text);
 
-  atermpp::aterm_core t = atermpp::read_term_from_string(expression_text);
+  atermpp::aterm t = atermpp::read_term_from_string(expression_text);
   t = data::detail::remove_index(t);
   t = data::detail::add_index(t);
   const data::data_expression& d = atermpp::down_cast<data::data_expression>(t);

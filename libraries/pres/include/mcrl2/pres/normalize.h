@@ -175,7 +175,7 @@ bool is_normalized(const T& x)
 /// \param x an object containing pres expressions
 template <typename T>
 void normalize(T& x,
-               typename std::enable_if< !std::is_base_of< atermpp::aterm_core, T >::value>::type* = nullptr
+               typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
               )
 {
   normalize_builder f;
@@ -187,7 +187,7 @@ void normalize(T& x,
 /// \param x an object containing pres expressions
 template <typename T>
 T normalize(const T& x,
-            typename std::enable_if< std::is_base_of< atermpp::aterm_core, T >::value>::type* = nullptr
+            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
            )
 {
   T result;

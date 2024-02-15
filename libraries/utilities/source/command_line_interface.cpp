@@ -842,7 +842,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
         }
         catch (std::runtime_error&)   // parse error
         {
-          if (argument.substr(1, 3) == "at-")   // does not match option pattern for aterm_core library
+          if (argument.substr(1, 3) == "at-")   // does not match option pattern for aterm library
           {
             continue;
           }

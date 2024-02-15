@@ -226,7 +226,7 @@ inline atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes_e
   return stream;
 }
 
-atermpp::aterm_core pbes_marker()
+atermpp::aterm pbes_marker()
 {
   return atermpp::aterm(atermpp::function_symbol("parameterised_boolean_equation_system", 0));
 }
@@ -251,7 +251,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes& pbes)
 
   try
   {
-    atermpp::aterm_core marker;
+    atermpp::aterm marker;
     stream >> marker;
 
     if (marker != pbes_marker())
@@ -324,7 +324,7 @@ void save_pbes(const pbes& pbesspec, const std::string& filename)
 } // namespace detail
 
 /// \brief Conversion to atermappl.
-/// \return The PBES converted to aterm_core format.
+/// \return The PBES converted to aterm format.
 atermpp::aterm pbes_to_aterm(const pbes& p)
 {
   atermpp::aterm global_variables = atermpp::aterm(core::detail::function_symbol_GlobVarSpec(),
@@ -335,7 +335,7 @@ atermpp::aterm pbes_to_aterm(const pbes& p)
   const std::vector<pbes_equation>& eqn = p.equations();
   for (auto i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
-    atermpp::aterm_core a = pbes_equation_to_aterm(*i);
+    atermpp::aterm a = pbes_equation_to_aterm(*i);
     eqn_list.push_front(a);
   }
   atermpp::aterm equations = atermpp::aterm(core::detail::function_symbol_PBEqnSpec(), eqn_list);

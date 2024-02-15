@@ -24,7 +24,7 @@ using namespace mcrl2;
 namespace mcrl2::lps
 {
 
-static atermpp::aterm_core symbolic_labelled_transition_system_mark()
+static atermpp::aterm symbolic_labelled_transition_system_mark()
 {
   return atermpp::aterm(atermpp::function_symbol("symbolic_labelled_transition_system", 0));
 }
@@ -95,7 +95,7 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
   // We set the transformer for all other elements (transitions, state labels and the initial state).
   aterm_stream >> data::detail::add_index_impl;
 
-  atermpp::aterm_core marker;
+  atermpp::aterm marker;
   aterm_stream >> marker;
 
   if (marker != symbolic_labelled_transition_system_mark())

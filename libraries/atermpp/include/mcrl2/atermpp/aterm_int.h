@@ -36,8 +36,8 @@ public:
     detail::g_thread_term_pool().create_int(*this, value);
   }
 
-  /// \brief Constructs an integer term from an aterm_core.
-  explicit aterm_int(const aterm_core& t)
+  /// \brief Constructs an integer term from an aterm.
+  explicit aterm_int(const aterm& t)
    : aterm(t)
   {
     assert(type_is_int() || !defined());
@@ -49,7 +49,7 @@ public:
   aterm_int(aterm_int&& other) noexcept = default;
   aterm_int& operator=(aterm_int&& other) noexcept = default;
 
-  /// \brief Provide the value stored in an aterm_core. 
+  /// \brief Provide the value stored in an aterm. 
   /// \returns The value of the integer term.
   std::size_t value() const noexcept
   {
@@ -60,7 +60,7 @@ public:
   /// \param t The term that is swapped with the current term. 
   void swap(aterm_int& t) noexcept
   {
-    aterm_core::swap(t);
+    aterm::swap(t);
   }
 };
 

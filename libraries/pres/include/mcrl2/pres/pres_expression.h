@@ -40,7 +40,7 @@ class pres_expression: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit pres_expression(const atermpp::aterm_core& term)
+    explicit pres_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_PRExpr(*this));
@@ -166,7 +166,7 @@ class propositional_variable_instantiation: public pres_expression
 
     /// \brief Constructor.
     /// \param term A term
-    explicit propositional_variable_instantiation(const atermpp::aterm_core& term)
+    explicit propositional_variable_instantiation(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PropVarInst(*this));
@@ -241,7 +241,7 @@ class minus: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit minus(const atermpp::aterm_core& term)
+    explicit minus(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESMinus(*this));
@@ -312,7 +312,7 @@ class and_: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit and_(const atermpp::aterm_core& term)
+    explicit and_(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESAnd(*this));
@@ -388,7 +388,7 @@ class or_: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit or_(const atermpp::aterm_core& term)
+    explicit or_(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESOr(*this));
@@ -464,7 +464,7 @@ class imp: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit imp(const atermpp::aterm_core& term)
+    explicit imp(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESImp(*this));
@@ -540,7 +540,7 @@ class plus: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit plus(const atermpp::aterm_core& term)
+    explicit plus(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESPlus(*this));
@@ -616,7 +616,7 @@ class const_multiply: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit const_multiply(const atermpp::aterm_core& term)
+    explicit const_multiply(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESConstantMultiply(*this));
@@ -692,7 +692,7 @@ class const_multiply_alt: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit const_multiply_alt(const atermpp::aterm_core& term)
+    explicit const_multiply_alt(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESConstantMultiplyAlt(*this));
@@ -768,7 +768,7 @@ class infimum: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit infimum(const atermpp::aterm_core& term)
+    explicit infimum(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESInfimum(*this));
@@ -844,7 +844,7 @@ class supremum: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit supremum(const atermpp::aterm_core& term)
+    explicit supremum(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESSupremum(*this));
@@ -920,7 +920,7 @@ class sum: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit sum(const atermpp::aterm_core& term)
+    explicit sum(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESSum(*this));
@@ -996,7 +996,7 @@ class eqinf: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit eqinf(const atermpp::aterm_core& term)
+    explicit eqinf(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESEqInf(*this));
@@ -1067,7 +1067,7 @@ class eqninf: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit eqninf(const atermpp::aterm_core& term)
+    explicit eqninf(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESEqNInf(*this));
@@ -1138,7 +1138,7 @@ class condsm: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit condsm(const atermpp::aterm_core& term)
+    explicit condsm(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESCondSm(*this));
@@ -1219,7 +1219,7 @@ class condeq: public pres_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit condeq(const atermpp::aterm_core& term)
+    explicit condeq(const atermpp::aterm& term)
       : pres_expression(term)
     {
       assert(core::detail::check_term_PRESCondEq(*this));
@@ -2456,7 +2456,7 @@ namespace std
   {
     std::size_t operator()(const mcrl2::pres_system::pres_expression& x) const
     {
-      return hash<atermpp::aterm_core>()(x);
+      return hash<atermpp::aterm>()(x);
     }
   };
 
@@ -2465,7 +2465,7 @@ namespace std
   {
     std::size_t operator()(const mcrl2::pres_system::propositional_variable_instantiation& x) const
     {
-      return hash<atermpp::aterm_core>()(x);
+      return hash<atermpp::aterm>()(x);
     }
   };
 

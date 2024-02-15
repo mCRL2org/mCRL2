@@ -38,7 +38,7 @@ class variable: public aterm
     {}
 };
 
-void on_delete_variable(const aterm_core&)
+void on_delete_variable(const aterm&)
 {
   variable_count--;
 }

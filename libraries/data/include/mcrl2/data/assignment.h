@@ -33,7 +33,7 @@ class assignment_expression: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit assignment_expression(const atermpp::aterm_core& term)
+    explicit assignment_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_WhrDecl(*this));
@@ -97,7 +97,7 @@ class assignment: public assignment_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit assignment(const atermpp::aterm_core& term)
+    explicit assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
       assert(core::detail::check_term_DataVarIdInit(*this));
@@ -188,7 +188,7 @@ class untyped_identifier_assignment: public assignment_expression
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit untyped_identifier_assignment(const atermpp::aterm_core& term)
+    explicit untyped_identifier_assignment(const atermpp::aterm& term)
       : assignment_expression(term)
     {
       assert(core::detail::check_term_UntypedIdentifierAssignment(*this));

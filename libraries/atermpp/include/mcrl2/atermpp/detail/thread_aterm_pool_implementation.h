@@ -75,7 +75,7 @@ void thread_aterm_pool::create_appl_index(aterm_core& term, const function_symbo
   {
     /* Code below is more elegant than succeeding code, but it unnecessarily copies and protects a term.
         m_pool.create_int(term, atermpp::detail::index_traits<Term, INDEX_TYPE, 1>::
-            insert(static_cast<INDEX_TYPE>(static_cast<aterm_core>(address(argument_array[0]))))); */
+            insert(static_cast<INDEX_TYPE>(static_cast<aterm>(address(argument_array[0]))))); */
     m_pool.create_int(term, 
                       atermpp::detail::index_traits<Term, INDEX_TYPE, 1>::
                                 insert(*reinterpret_cast<INDEX_TYPE*>(&(argument_array[0]))));
@@ -87,8 +87,8 @@ void thread_aterm_pool::create_appl_index(aterm_core& term, const function_symbo
         m_pool.create_int(
           term,
           atermpp::detail::index_traits<Term, INDEX_TYPE, 2>::
-            insert(std::make_pair(static_cast<typename INDEX_TYPE::first_type>(static_cast<aterm_core>(address(argument_array[0]))),
-                                  static_cast<typename INDEX_TYPE::second_type>(static_cast<aterm_core>(address(argument_array[1])))))); */
+            insert(std::make_pair(static_cast<typename INDEX_TYPE::first_type>(static_cast<aterm>(address(argument_array[0]))),
+                                  static_cast<typename INDEX_TYPE::second_type>(static_cast<aterm>(address(argument_array[1])))))); */
     m_pool.create_int(term,
                       atermpp::detail::index_traits<Term, INDEX_TYPE, 2>::
                                 insert(*reinterpret_cast<INDEX_TYPE*>(&argument_array[0])));

@@ -33,7 +33,7 @@ std::string file_source(const std::string& filename)
 
 } // namespace detail
 
-/// \brief Attempts to read an aterm_core from a stream.
+/// \brief Attempts to read an aterm from a stream.
 /// \param[in] stream The stream from which the term is read.
 /// \param[in] binary A boolean indicating whether the stream is in binary of textual format.
 /// \param[in] format The format that is being read (for example "LPS" or "PBES").
@@ -41,13 +41,13 @@ std::string file_source(const std::string& filename)
 /// \param[in] transformer A funtion that is applied to every subterm of the read term.
 /// \exception Throws a mcrl2 runtime error when an error occurs when reading the term.
 inline
-atermpp::aterm_core load_aterm(std::istream& stream,
+atermpp::aterm load_aterm(std::istream& stream,
   bool binary = true,
-  const std::string& format = "aterm_core",
+  const std::string& format = "aterm",
   const std::string& source = "",
   atermpp::aterm_transformer transformer = atermpp::identity)
 {
-  atermpp::aterm_core result;
+  atermpp::aterm result;
   try
   {
     if (binary)

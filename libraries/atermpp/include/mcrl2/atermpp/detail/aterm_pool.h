@@ -31,7 +31,7 @@ using arbitrary_function_application_storage = aterm_pool_storage<_aterm_appl<1>
 template<std::size_t N>
 using function_application_storage = aterm_pool_storage<_aterm_appl<N>, aterm_hasher_finite<N>, aterm_equals_finite<N>, N>;
 
-/// \brief A thread specific aterm_core pool that provides a local interface to the global term pool.
+/// \brief A thread specific aterm pool that provides a local interface to the global term pool.
 ///        Ensures that terms created by this thread are protected during garbage collection.
 class thread_aterm_pool_interface
 {
@@ -71,11 +71,11 @@ public:
   /// \see function_symbol_pool.
   inline function_symbol create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
-  /// \brief Register a thread specific aterm_core pool.
+  /// \brief Register a thread specific aterm pool.
   /// \details threadsafe
   inline void register_thread_aterm_pool(thread_aterm_pool_interface& pool);
 
-  /// \brief Remove thread specific aterm_core pool.
+  /// \brief Remove thread specific aterm pool.
   /// \details threadsafe
   inline void remove_thread_aterm_pool(thread_aterm_pool_interface& pool);
 
@@ -89,7 +89,7 @@ public:
   inline void print_performance_statistics() const;
 
   /// \returns A global term that indicates the empty list.
-  aterm_core& empty_list() noexcept { return m_empty_list; }
+  aterm& empty_list() noexcept { return reinterpret_cast<aterm&>(m_empty_list); }  // TODO remove this reinterpret cast by letting m_empty_list become an aterm.
 
   /// \returns The function symbol used by integral terms.
   const function_symbol& as_int() noexcept { return m_function_symbol_pool.as_int(); }
@@ -108,7 +108,7 @@ public:
 
   inline function_symbol_pool& get_symbol_pool() { return m_function_symbol_pool; }
 
-  // These functions of the aterm_core pool should be called through a thread_aterm_pool.
+  // These functions of the aterm pool should be called through a thread_aterm_pool.
 private:
   /// \brief Force garbage collection on all storages.
   /// \details threadsafe
@@ -162,7 +162,7 @@ private:
   /// \returns The total number of term variables residing in the protection sets.
   inline std::size_t protection_set_size() const;
 
-  /// \brief The set of local aterm_core pools.
+  /// \brief The set of local aterm pools.
   std::vector<thread_aterm_pool_interface* > m_thread_pools;
 
   /// \brief Storage for the function symbols.

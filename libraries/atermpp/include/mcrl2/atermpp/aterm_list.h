@@ -18,7 +18,7 @@
 namespace atermpp
 {
 
-/// \brief A list of aterm_core objects.
+/// \brief A list of aterm objects.
 template <typename Term>
 class term_list: public aterm
 {
@@ -62,13 +62,13 @@ public:
     : aterm(detail::g_term_pool().empty_list())
   {}
 
-  /// \brief Constructor from an aterm_core.
+  /// \brief Constructor from an aterm.
   /// \param t A list.
-  explicit term_list(const aterm_core& t) noexcept
+  explicit term_list(const aterm& t) noexcept
     : aterm(t)
   {
     // assert(!defined() || type_is_list());
-    assert(type_is_list());  // A list should not be a default aterm_core. 
+    assert(type_is_list());  // A list should not be a default aterm. 
   }
 
   /// \brief Copy constructor.
@@ -493,8 +493,8 @@ public:
 /// \endcond
 
 
-/// \brief A term_list with elements of type aterm_core.
-typedef term_list<aterm_core> aterm_list;
+/// \brief A term_list with elements of type aterm.
+typedef term_list<aterm> aterm_list;
 
 
 /// \brief Returns the list with the elements in reversed order.
@@ -583,7 +583,7 @@ struct hash<atermpp::term_list<Term> >
   /// \return A hash value for l.
   std::size_t operator()(const atermpp::term_list<Term>& l) const
   {
-    std::hash<atermpp::aterm_core> hasher;
+    std::hash<atermpp::aterm> hasher;
     return hasher(l);
   }
 };

@@ -138,9 +138,9 @@ struct cached_bottom_up_replace_aterm_builder: public Builder<cached_bottom_up_r
   using super::derived;
 
   ReplaceFunction f;
-  std::unordered_map<aterm, aterm_core>& cache;
+  std::unordered_map<aterm, aterm>& cache;
 
-  cached_bottom_up_replace_aterm_builder(ReplaceFunction f_, std::unordered_map<aterm, aterm_core>& cache_)
+  cached_bottom_up_replace_aterm_builder(ReplaceFunction f_, std::unordered_map<aterm, aterm>& cache_)
     : f(f_), cache(cache_)
   {}
 
@@ -153,16 +153,16 @@ struct cached_bottom_up_replace_aterm_builder: public Builder<cached_bottom_up_r
       result = i->second;
       return;
     }
-    aterm_core t;
+    aterm t;
     super::apply(t, x);
-    result = f(down_cast<aterm>(t));
+    result = f(t);
     cache[x] = result;
   }
 };
 
 template <template <class> class Builder, class ReplaceFunction>
 cached_bottom_up_replace_aterm_builder<Builder, ReplaceFunction>
-make_cached_bottom_up_replace_aterm_builder(ReplaceFunction f, std::unordered_map<aterm, aterm_core>& cache)
+make_cached_bottom_up_replace_aterm_builder(ReplaceFunction f, std::unordered_map<aterm, aterm>& cache)
 {
   return cached_bottom_up_replace_aterm_builder<Builder, ReplaceFunction>(f, cache);
 }
@@ -258,9 +258,9 @@ Term replace(const Term& t, ReplaceFunction r)
 /// \param new_value The value that will be substituted.
 /// \return The result of the replacement.
 template <typename Term>
-Term replace(const Term& t, const aterm_core& old_value, const aterm_core& new_value)
+Term replace(const Term& t, const aterm& old_value, const aterm& new_value)
 {
-  return replace(t, [&](const aterm_core& t) { return t == old_value ? new_value : t; });
+  return replace(t, [&](const aterm& t) { return t == old_value ? new_value : t; });
 }
 
 /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
@@ -290,7 +290,7 @@ Term bottom_up_replace(Term t, ReplaceFunction r)
 template <typename Term>
 Term bottom_up_replace(Term t, const aterm& old_value, const aterm& new_value)
 {
-  return bottom_up_replace(t, [&](const aterm_core& t) { return t == old_value ? new_value : t; });
+  return bottom_up_replace(t, [&](const aterm& t) { return t == old_value ? new_value : t; });
 }
 
 /// \brief Replaces subterms x of t by r(x). The replace function r returns an
@@ -323,7 +323,7 @@ Term partial_replace(Term t, ReplaceFunction r)
 /// \param cache A cache for the result of aterm terms.
 /// \return The result of the replacement.
 template <typename Term, typename ReplaceFunction>
-Term bottom_up_replace(Term t, ReplaceFunction r, std::unordered_map<aterm, aterm_core>& cache)
+Term bottom_up_replace(Term t, ReplaceFunction r, std::unordered_map<aterm, aterm>& cache)
 {
   Term result;
   detail::make_cached_bottom_up_replace_aterm_builder<atermpp::builder>(r, cache).apply(result, t);

@@ -33,7 +33,7 @@ class binder_type: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit binder_type(const atermpp::aterm_core& term)
+    explicit binder_type(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_BindingOperator(*this));
@@ -83,7 +83,7 @@ class untyped_set_or_bag_comprehension_binder: public binder_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit untyped_set_or_bag_comprehension_binder(const atermpp::aterm_core& term)
+    explicit untyped_set_or_bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_UntypedSetBagComp(*this));
@@ -136,7 +136,7 @@ class set_comprehension_binder: public binder_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit set_comprehension_binder(const atermpp::aterm_core& term)
+    explicit set_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_SetComp(*this));
@@ -189,7 +189,7 @@ class bag_comprehension_binder: public binder_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit bag_comprehension_binder(const atermpp::aterm_core& term)
+    explicit bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_BagComp(*this));
@@ -242,7 +242,7 @@ class forall_binder: public binder_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit forall_binder(const atermpp::aterm_core& term)
+    explicit forall_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_Forall(*this));
@@ -295,7 +295,7 @@ class exists_binder: public binder_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit exists_binder(const atermpp::aterm_core& term)
+    explicit exists_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_Exists(*this));
@@ -348,7 +348,7 @@ class lambda_binder: public binder_type
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit lambda_binder(const atermpp::aterm_core& term)
+    explicit lambda_binder(const atermpp::aterm& term)
       : binder_type(term)
     {
       assert(core::detail::check_term_Lambda(*this));

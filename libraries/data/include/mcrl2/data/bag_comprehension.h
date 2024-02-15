@@ -26,10 +26,10 @@ class bag_comprehension: public abstraction
 
     /// Constructor.
     ///
-    /// \param[in] d An aterm_core.
+    /// \param[in] d An aterm.
     /// \pre d has the interal structure of an abstraction.
     /// \pre d is a universal quantification.
-    explicit bag_comprehension(const aterm_core& d)
+    explicit bag_comprehension(const aterm& d)
       : abstraction(d)
     {
       assert(is_abstraction(d));
@@ -59,7 +59,7 @@ class bag_comprehension: public abstraction
 }; // class bag_comprehension
 
 template <class... ARGUMENTS>
-void make_bag_comprehension(atermpp::aterm_core& result, ARGUMENTS... arguments)
+void make_bag_comprehension(atermpp::aterm& result, ARGUMENTS... arguments)
 {
   make_abstraction(result, bag_comprehension_binder(), arguments...);
 }

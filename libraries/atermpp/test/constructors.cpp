@@ -18,8 +18,8 @@ using namespace atermpp;
 BOOST_AUTO_TEST_CASE(test_main)
 {
   aterm_int i(10);
-  atermpp::aterm_core x=aterm(function_symbol("x",0));
-  atermpp::aterm_core y=aterm(function_symbol("y",0));
+  atermpp::aterm x=aterm(function_symbol("x",0));
+  atermpp::aterm y=aterm(function_symbol("y",0));
   aterm f(function_symbol("f", 2), x, y);
   BOOST_CHECK(pp(f) == "f(x,y)");
   aterm f1(function_symbol("f", 0));

@@ -205,7 +205,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
   {
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
 
-    // TODO: this code contains too much conversion between vectors and aterm_core lists
+    // TODO: this code contains too much conversion between vectors and aterm lists
     std::vector<data::data_expression> finite_parameters;
     std::vector<data::data_expression> infinite_parameters;
     split_parameters(x, m_index_map, finite_parameters, infinite_parameters);

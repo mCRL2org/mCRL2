@@ -19,8 +19,8 @@
 namespace atermpp
 {
 
-/// \brief Writes terms in a streamable binary aterm_core format to an output stream.
-/// \details The streamable aterm_core format:
+/// \brief Writes terms in a streamable binary aterm format to an output stream.
+/// \details The streamable aterm format:
 ///
 ///          Aterms (and function symbols) are written as packets (with an identifier in the header) and their
 ///          indices are derived from the number of aterms, resp. symbols, that occur before them in this stream. For each term
@@ -40,9 +40,9 @@ public:
 
   ~binary_aterm_ostream() override;
 
-  /// \brief Writes an aterm_core in a compact binary format where subterms are shared. The term that is
+  /// \brief Writes an aterm in a compact binary format where subterms are shared. The term that is
   ///        written itself is not shared whenever it occurs as the argument of another term.
-  void put(const aterm_core &term) override;
+  void put(const aterm &term) override;
 
 private:
   /// \brief Write a function symbol to the output stream.
@@ -59,11 +59,11 @@ private:
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
 
-  atermpp::indexed_set<aterm_core> m_terms; ///< An index of already written terms.
+  atermpp::indexed_set<aterm> m_terms; ///< An index of already written terms.
   mcrl2::utilities::indexed_set<function_symbol> m_function_symbols; ///< An index of already written function symbols.
 };
 
-/// \brief Reads terms from a stream in the steamable binary aterm_core format.
+/// \brief Reads terms from a stream in the steamable binary aterm format.
 class binary_aterm_istream final : public aterm_istream
 {
 public:
@@ -71,7 +71,7 @@ public:
   binary_aterm_istream(std::istream& is);
   binary_aterm_istream(std::shared_ptr<mcrl2::utilities::ibitstream> stream);
 
-  void get(aterm_core& t) override;
+  void get(aterm& t) override;
 
 private:
   /// \returns The number of bits needed to index terms.
@@ -85,7 +85,7 @@ private:
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
 
-  atermpp::deque<aterm_core> m_terms; ///< An index of read terms.
+  atermpp::deque<aterm> m_terms; ///< An index of read terms.
   std::deque<function_symbol> m_function_symbols; ///< An index of read function symbols.
 };
 

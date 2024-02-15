@@ -437,7 +437,7 @@ class parity_game_generator
       else
       {
         std::ostringstream out;
-        out << "Error in parity_game_generator: unexpected expression " << psi << "\n" << atermpp::aterm_core(psi);
+        out << "Error in parity_game_generator: unexpected expression " << psi << "\n" << atermpp::aterm(psi);
         throw(std::runtime_error(out.str()));
       }
       mCRL2log(log::debug) << print_bes_equation(index, result);

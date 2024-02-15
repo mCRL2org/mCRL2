@@ -25,7 +25,7 @@ using aterm_transformer = aterm(const aterm&);
 /// \brief The default transformer that maps each term to itself.
 inline aterm identity(const aterm& x) { return x; }
 
-/// \brief The general aterm_core stream interface, which enables the use of a transformer to
+/// \brief The general aterm stream interface, which enables the use of a transformer to
 ///        change the written/read terms.
 class aterm_stream
 {
@@ -42,7 +42,7 @@ protected:
   aterm_transformer* m_transformer = identity;
 };
 
-/// \brief The interface for a class that writes aterm_core to a stream.
+/// \brief The interface for a class that writes aterm to a stream.
 ///        Every written term is retrieved by the corresponding aterm_istream::get() call.
 class aterm_ostream : public aterm_stream
 {
@@ -50,18 +50,18 @@ public:
   virtual ~aterm_ostream();
 
   /// \brief Write the given term to the stream.
-  virtual void put(const aterm_core& term) = 0;
+  virtual void put(const aterm& term) = 0;
 };
 
-/// \brief The interface for a class that reads aterm_core from a stream.
-///        The default constructed term aterm_core() indicates the end of the stream.
+/// \brief The interface for a class that reads aterm from a stream.
+///        The default constructed term aterm() indicates the end of the stream.
 class aterm_istream : public aterm_stream
 {
 public:
   virtual ~aterm_istream();
 
-  /// \brief Reads an aterm_core from this stream.
-  virtual void get(aterm_core& t) = 0;
+  /// \brief Reads an aterm from this stream.
+  virtual void get(aterm& t) = 0;
 };
 
 // These free functions provide input/output operators for these streams.
@@ -71,10 +71,10 @@ inline aterm_istream& operator>>(aterm_istream& stream, aterm_transformer transf
 inline aterm_ostream& operator<<(aterm_ostream& stream, aterm_transformer transformer) { stream.set_transformer(transformer); return stream; }
 
 /// \brief Write the given term to the stream.
-inline aterm_ostream& operator<<(aterm_ostream& stream, const aterm_core& term) { stream.put(term); return stream; }
+inline aterm_ostream& operator<<(aterm_ostream& stream, const aterm& term) { stream.put(term); return stream; }
 
 /// \brief Read the given term from the stream, but for aterm_list we want to use a specific one that performs validation (defined below).
-inline aterm_istream& operator>>(aterm_istream& stream, aterm_core& term) { stream.get(term); return stream; }
+inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { stream.get(term); return stream; }
 
 // Utility functions
 
@@ -99,10 +99,10 @@ private:
   aterm_transformer* m_transformer;
 };
 
-/// \brief Write any container (that is not an aterm_core itself) to the stream.
+/// \brief Write any container (that is not an aterm itself) to the stream.
 template<typename T,
   typename std::enable_if_t<mcrl2::utilities::is_iterable_v<T>, int> = 0,
-  typename std::enable_if_t<!std::is_base_of<aterm_core, T>::value, int> = 0>
+  typename std::enable_if_t<!std::is_base_of<aterm, T>::value, int> = 0>
 inline aterm_ostream& operator<<(aterm_ostream& stream, const T& container)
 {
   // Write the number of elements, followed by each element in the container.
@@ -116,10 +116,10 @@ inline aterm_ostream& operator<<(aterm_ostream& stream, const T& container)
   return stream;
 }
 
-/// \brief Read any container (that is not an aterm_core itself) from the stream.
+/// \brief Read any container (that is not an aterm itself) from the stream.
 template<typename T,
   typename std::enable_if_t<mcrl2::utilities::is_iterable_v<T>, int> = 0,
-  typename std::enable_if_t<!std::is_base_of<aterm_core, T>::value, int> = 0>
+  typename std::enable_if_t<!std::is_base_of<aterm, T>::value, int> = 0>
 inline aterm_istream& operator>>(aterm_istream& stream, T& container)
 {
   // Insert the next nof_elements into the container.
@@ -161,23 +161,23 @@ inline const std::string& pp(const function_symbol& f)
   return f.name();
 }
 
-/// \brief Writes term t to a stream in binary aterm_core format.
-void write_term_to_binary_stream(const aterm_core& t, std::ostream& os);
+/// \brief Writes term t to a stream in binary aterm format.
+void write_term_to_binary_stream(const aterm& t, std::ostream& os);
 
-/// \brief Reads a term from a stream in binary aterm_core format.
-void read_term_from_binary_stream(std::istream& is, aterm_core& t);
+/// \brief Reads a term from a stream in binary aterm format.
+void read_term_from_binary_stream(std::istream& is, aterm& t);
 
 /// \brief Writes term t to a stream in textual format.
-void write_term_to_text_stream(const aterm_core& t, std::ostream& os);
+void write_term_to_text_stream(const aterm& t, std::ostream& os);
 
 /// \brief Reads a term from a stream which contains the term in textual format.
-void read_term_from_text_stream(std::istream& is, aterm_core& t);
+void read_term_from_text_stream(std::istream& is, aterm& t);
 
-/// \brief Reads an aterm_core from a string. The string can be in either binary or text format.
-aterm_core read_term_from_string(const std::string& s);
+/// \brief Reads an aterm from a string. The string can be in either binary or text format.
+aterm read_term_from_string(const std::string& s);
 
 /// \brief Reads an aterm_list from a string. The string can be in either binary or text format.
-/// \details If the input is not a string, an aterm_core is returned of the wrong type.
+/// \details If the input is not a string, an aterm is returned of the wrong type.
 /// \return The term corresponding to the string.
 inline aterm_list read_list_from_string(const std::string& s)
 {
@@ -187,7 +187,7 @@ inline aterm_list read_list_from_string(const std::string& s)
 }
 
 /// \brief Reads an aterm_int from a string. The string can be in either binary or text format.
-/// \details If the input is not an int, an aterm_core is returned of the wrong type.
+/// \details If the input is not an int, an aterm is returned of the wrong type.
 /// \return The aterm_int corresponding to the string.
 inline aterm_int read_int_from_string(const std::string& s)
 {
@@ -197,11 +197,11 @@ inline aterm_int read_int_from_string(const std::string& s)
 }
 
 /// \brief Reads an aterm from a string. The string can be in either binary or text format.
-/// \details If the input is not an aterm, an aterm_core is returned of the wrong type.
+/// \details If the input is not an aterm, an aterm is returned of the wrong type.
 /// \return The term corresponding to the string.
 inline aterm read_appl_from_string(const std::string& s)
 {
-  const aterm a = down_cast<aterm>(read_term_from_string(s));
+  const aterm a = read_term_from_string(s);
   assert(a.type_is_appl());
   return a;
 }

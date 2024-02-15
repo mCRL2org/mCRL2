@@ -36,11 +36,11 @@ class process_initializer: public atermpp::aterm
     /// \brief Constructor.
     /// \param term A term.
     /// \param check_distribution Check whether the initial state is plain or a state distribution.
-    explicit process_initializer(const atermpp::aterm_core& term, bool check_distribution = true)
-      : atermpp::aterm(atermpp::down_cast<atermpp::aterm>(term))
+    explicit process_initializer(const atermpp::aterm& term, bool check_distribution = true)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_LinearProcessInit(*this));
-      const lps::stochastic_distribution& dist = atermpp::down_cast<lps::stochastic_distribution>(atermpp::down_cast<atermpp::aterm>(term)[1]);
+      const lps::stochastic_distribution& dist = atermpp::down_cast<lps::stochastic_distribution>(term[1]);
       if (check_distribution && dist.is_defined())
       {
         throw mcrl2::runtime_error("initial state with non-empty stochastic distribution encountered");

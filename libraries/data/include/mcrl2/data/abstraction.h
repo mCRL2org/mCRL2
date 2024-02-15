@@ -32,7 +32,7 @@ class abstraction: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    explicit abstraction(const atermpp::aterm_core& term)
+    explicit abstraction(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Binder(*this));
@@ -72,12 +72,12 @@ class abstraction: public data_expression
 };
 
 template <class... ARGUMENTS>
-void make_abstraction(atermpp::aterm_core& result, ARGUMENTS... arguments)
+void make_abstraction(atermpp::aterm& result, ARGUMENTS... arguments)
 {
   make_term_appl(result, core::detail::function_symbol_Binder(), arguments...);
 }
 
-/* inline void make_abstraction(atermpp::aterm_core& result, const binder_type& binding_operator, const variable_list& variables, const data_expression& body)
+/* inline void make_abstraction(atermpp::aterm& result, const binder_type& binding_operator, const variable_list& variables, const data_expression& body)
 {
   make_term_appl(result, core::detail::function_symbol_Binder(), binding_operator, variables, body);
 } */

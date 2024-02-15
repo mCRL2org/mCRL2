@@ -217,11 +217,11 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     apply(body, x.body());
     if (m_negated)
     {
-      make_exists(result, x.variables(), body); 
+      state_formulas::make_exists(result, x.variables(), body); 
     }
     else
     {
-      make_forall(result, x.variables(), body);
+      state_formulas::make_forall(result, x.variables(), body);
     }
   }
 
@@ -232,11 +232,11 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     apply(body, x.body());
     if (m_negated)
     {
-      make_forall(result, x.variables(), body); 
+      state_formulas::make_forall(result, x.variables(), body); 
     }
     else
     {
-      make_exists(result, x.variables(), body);
+      state_formulas::make_exists(result, x.variables(), body);
     }
   }
 
@@ -413,7 +413,7 @@ bool is_normalized(const T& x)
 /// \param quantitative Indication whether the formula is a quantitative boolean formula.
 /// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
-void normalize(T& x, bool quantitative = false, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm_core, T >::value>::type* = nullptr)
+void normalize(T& x, bool quantitative = false, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
 {
   normalize_builder f(quantitative, negated);
   f.update(x);
@@ -425,7 +425,7 @@ void normalize(T& x, bool quantitative = false, bool negated = false, typename s
 /// \param quantitative Indication whether the formula is a quantitative boolean formula.
 /// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
-T normalize(const T& x, bool quantitative = false, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm_core, T >::value>::type* = nullptr)
+T normalize(const T& x, bool quantitative = false, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
 {
   T result;
   normalize_builder f(quantitative, negated);

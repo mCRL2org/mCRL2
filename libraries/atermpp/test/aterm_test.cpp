@@ -19,14 +19,14 @@ using namespace atermpp;
 
 BOOST_AUTO_TEST_CASE(test_aterm)
 {
-  atermpp::aterm_core a = read_term_from_string("f(x)");
-  atermpp::aterm_core label = read_term_from_string("label");
+  atermpp::aterm a = read_term_from_string("f(x)");
+  atermpp::aterm label = read_term_from_string("label");
 
   atermpp::aterm_int d = aterm_int(10);
   BOOST_CHECK(aterm_int(d).value() == 10);
 
-  atermpp::aterm_core e = atermpp::aterm_core();
-  BOOST_CHECK(e==atermpp::aterm_core());
+  atermpp::aterm e = atermpp::aterm();
+  BOOST_CHECK(e==atermpp::aterm());
 }
 
 BOOST_AUTO_TEST_CASE(test_aterm_string)
@@ -39,15 +39,15 @@ BOOST_AUTO_TEST_CASE(test_aterm_string)
 
 void test_aterm_io(const std::string& input_string)
 {
-  const aterm_core input=read_term_from_string(input_string);
+  const aterm input=read_term_from_string(input_string);
   std::ostringstream out;
   write_term_to_text_stream(input, out);
   std::istringstream in(out.str());
-  aterm_core text_output;
+  aterm text_output;
   read_term_from_text_stream(in, text_output);
   if (input!=text_output)
   {
-    std::cerr << "Expected the following terms to be the same (aterm_core textual save and load):\n";
+    std::cerr << "Expected the following terms to be the same (aterm textual save and load):\n";
     std::cerr << "Input " << input << "\n";
     std::cerr << "Output " << text_output << "\n";
     std::cerr << "----------------------------------------------------------------- (textual save/load)\n";
@@ -57,11 +57,11 @@ void test_aterm_io(const std::string& input_string)
   std::stringbuf buf;
   std::iostream binary_stream(&buf);
   write_term_to_binary_stream(input, binary_stream);
-  aterm_core binary_output;
+  aterm binary_output;
   read_term_from_binary_stream(binary_stream, binary_output);
   if (input!=binary_output)
   {
-    std::cerr << "Expected the following terms to be the same (aterm_core binary save and load):\n";
+    std::cerr << "Expected the following terms to be the same (aterm binary save and load):\n";
     std::cerr << "Input " << input << "\n";
     std::cerr << "Output " << binary_output << "\n";
     std::cerr << "----------------------------------------------------------------- (binary save/load)\n";

@@ -52,8 +52,8 @@ class Info
     }
 
     Compare_Result compare_address(
-              const atermpp::aterm_core& term1,
-              const atermpp::aterm_core& term2) const
+              const atermpp::aterm& term1,
+              const atermpp::aterm& term2) const
     {
       if (term1 < term2)
       {

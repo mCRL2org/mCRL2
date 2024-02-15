@@ -199,13 +199,12 @@ bool %(check_name)s(const Term& t)
 
 '''
     CHECK_TERM_TYPE = '''  // check the type of the term
-  const atermpp::aterm_core& term(t);
+  const atermpp::aterm& term(t);
   if (!term.type_is_appl())
   {
     return false;
   }
-  const atermpp::aterm& a = atermpp::down_cast<atermpp::aterm>(term);
-  if (a.function() != core::detail::function_symbols::%(name)s)
+  if (term.function() != core::detail::function_symbols::%(name)s)
   {
     return false;
   }
@@ -213,7 +212,7 @@ bool %(check_name)s(const Term& t)
 '''
 
     CHECK_TERM_CHILDREN = '''  // check the children
-  if (a.size() != %(arity)d)
+  if (term.size() != %(arity)d)
   {
     return false;
   }
@@ -254,11 +253,11 @@ bool %(check_name)s(const Term& t)
             for i in range(arity):
                 arg = f.arguments[i]
                 if arg.repetitions == '':
-                    body = body + '  if (!check_term_argument(a[%d], %s<atermpp::aterm_core>))\n'    % (i, arg.check_name())
+                    body = body + '  if (!check_term_argument(term[%d], %s<atermpp::aterm>))\n'    % (i, arg.check_name())
                 elif arg.repetitions == '*':
-                    body = body + '  if (!check_list_argument(a[%d], %s<atermpp::aterm_core>, 0))\n' % (i, arg.check_name())
+                    body = body + '  if (!check_list_argument(term[%d], %s<atermpp::aterm>, 0))\n' % (i, arg.check_name())
                 elif arg.repetitions == '+':
-                    body = body + '  if (!check_list_argument(a[%d], %s<atermpp::aterm_core>, 1))\n' % (i, arg.check_name())
+                    body = body + '  if (!check_list_argument(term[%d], %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
                 body = body + '  {\n'
                 body = body + '    mCRL2log(log::debug) << "%s" << std::endl;\n'                % (arg.check_name())
                 body = body + '    return false;\n'

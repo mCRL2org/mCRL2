@@ -32,7 +32,7 @@ class action_name_multiset: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit action_name_multiset(const atermpp::aterm_core& term)
+    explicit action_name_multiset(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_term_MultActName(*this));

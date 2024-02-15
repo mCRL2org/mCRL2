@@ -54,7 +54,7 @@ const atermpp::aterm_list& default_value_List()
 
 // List
 inline
-atermpp::aterm_list default_value_List(const atermpp::aterm_core& t)
+atermpp::aterm_list default_value_List(const atermpp::aterm& t)
 {
   atermpp::aterm_list result;
   result.push_front(t);

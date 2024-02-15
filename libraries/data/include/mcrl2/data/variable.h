@@ -52,7 +52,7 @@ class variable: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    explicit variable(const atermpp::aterm_core& term)
+    explicit variable(const atermpp::aterm& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_DataVarId(*this));
@@ -135,7 +135,7 @@ struct hash<mcrl2::data::variable>
   
     std::size_t operator()(const mcrl2::data::variable& v) const
     {
-      const hash<atermpp::aterm_core> hasher; 
+      const hash<atermpp::aterm> hasher; 
       return hasher(v);
     }
 };

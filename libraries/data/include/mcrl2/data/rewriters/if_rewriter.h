@@ -110,7 +110,7 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
         {
           return apply_if(b, u1, t2);
         }
-        else if (b > c) // use the aterm_core pointer comparison
+        else if (b > c) // use the aterm pointer comparison
         {
           assert(is_simple(c));
           return apply_if(c, apply_if(b, u1, t2), apply_if(b, u2, t2));
@@ -130,7 +130,7 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
         {
           return apply_if(b, t1, u2);
         }
-        else if (b > c) // use the aterm_core pointer comparison
+        else if (b > c) // use the aterm pointer comparison
         {
           assert(is_simple(c));
           return apply_if(c, apply_if(b, t1, u1), apply_if(b, t1, u2));
@@ -217,13 +217,13 @@ struct if_rewriter
 };
 
 template <typename T>
-void if_rewrite(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm_core, T >::value>::type* = 0)
+void if_rewrite(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
 {
   core::make_update_apply_builder<data::data_expression_builder>(if_rewriter()).update(x);
 }
 
 template <typename T>
-T if_rewrite(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm_core, T >::value>::type* = 0)
+T if_rewrite(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
 {
   T result;
   core::make_update_apply_builder<data::data_expression_builder>(if_rewriter()).apply(result, x);

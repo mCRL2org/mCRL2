@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_pbes)
   std::string filename = "write_term_to_text_stream.pbes";
   try
   {
-    atermpp::aterm_core t = atermpp::read_term_from_string("f(x)");
+    atermpp::aterm t = atermpp::read_term_from_string("f(x)");
     std::ofstream os;
     os.open(filename.c_str());
     atermpp::write_term_to_text_stream(t, os);

@@ -21,8 +21,8 @@ namespace regular_formulas {
 namespace detail {
 
 /** \brief     Translate regular formulas in terms of state and action formulas.
- *  \param[in] state_frm An aterm_core representation of a state formula according
- *             to the internal aterm_core structure after the data implementation
+ *  \param[in] state_frm An aterm representation of a state formula according
+ *             to the internal aterm structure after the data implementation
  *             phase.
  *  \return    state_frm in which all regular formulas are translated in
  *             terms of state and action formulas.

@@ -779,13 +779,13 @@ void data_specification::build_from_aterm(const atermpp::aterm& term)
 
   // Note backwards compatibility measure: alias is no longer a sort_expression
   const atermpp::term_list<atermpp::aterm> term_sorts=
-                 atermpp::down_cast<atermpp::term_list<atermpp::aterm> >(atermpp::down_cast<atermpp::aterm>(term[0])[0]);
+                 atermpp::down_cast<atermpp::term_list<atermpp::aterm> >(term[0][0]);
   const data::function_symbol_list term_constructors=
-                 atermpp::down_cast<data::function_symbol_list>(atermpp::down_cast<atermpp::aterm>(term[1])[0]);
+                 atermpp::down_cast<data::function_symbol_list>(term[1][0]);
   const data::function_symbol_list term_mappings=
-                 atermpp::down_cast<data::function_symbol_list>(atermpp::down_cast<atermpp::aterm>(term[2])[0]);
+                 atermpp::down_cast<data::function_symbol_list>(term[2][0]);
   const data::data_equation_list term_equations=
-                 atermpp::down_cast<data::data_equation_list>(atermpp::down_cast<atermpp::aterm>(term[3])[0]);
+                 atermpp::down_cast<data::data_equation_list>(term[3][0]);
 
   // Store the sorts and aliases.
   for(const atermpp::aterm& t: term_sorts)

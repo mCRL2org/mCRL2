@@ -34,12 +34,12 @@ inline data_expression& real_one()
   return real_one;
 }
 
-inline bool is_zero(const atermpp::aterm_core& e)
+inline bool is_zero(const atermpp::aterm& e)
 {
   return (e==real_zero());
 }
 
-inline bool is_one(const atermpp::aterm_core& e)
+inline bool is_one(const atermpp::aterm& e)
 {
   return (e==real_one());
 }

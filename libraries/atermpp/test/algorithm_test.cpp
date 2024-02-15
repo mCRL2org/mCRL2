@@ -51,11 +51,12 @@ struct for_each_proc
     : m_names(names)
   {}
 
-  bool operator()(const aterm_core& t)
+  bool operator()(const aterm& t)
   {
     if(t.type_is_appl())
     {
-      return (*this)(down_cast<aterm>(t));
+      m_names.insert(t.function().name());
+      return true;
     }
     else
     {
@@ -63,11 +64,6 @@ struct for_each_proc
     }
   }
 
-  bool operator()(const aterm& t)
-  {
-    m_names.insert(t.function().name());
-    return true;
-  }
 };
 
 BOOST_AUTO_TEST_CASE(test_for_each)

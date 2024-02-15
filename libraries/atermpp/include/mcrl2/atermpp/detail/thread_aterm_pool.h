@@ -22,7 +22,7 @@ namespace atermpp
 namespace detail
 {
 
-/// \brief This is a thread's specific access to the global aterm_core pool which ensures that
+/// \brief This is a thread's specific access to the global aterm pool which ensures that
 ///        garbage collection and hash table resizing can proceed.
 class thread_aterm_pool final : public thread_aterm_pool_interface, mcrl2::utilities::noncopyable
 {
@@ -51,7 +51,7 @@ public:
 
     if (!m_is_main_thread)
     {
-      // We leak values for the global aterm_core pool since they contain global variables (for which initialisation order is undefined).
+      // We leak values for the global aterm pool since they contain global variables (for which initialisation order is undefined).
       delete m_variables;
       delete m_containers;
     }
@@ -109,7 +109,7 @@ public:
   inline void print_local_performance_statistics() const override;
   inline std::size_t protection_set_size() const override;
 
-  /// Acquire a shared lock on this thread aterm_core pool.
+  /// Acquire a shared lock on this thread aterm pool.
   inline mcrl2::utilities::shared_guard lock_shared() { return m_shared_mutex.lock_shared(); }
 
   /// Acquire an exclusive lock
@@ -124,7 +124,7 @@ public:
 private:
   aterm_pool& m_pool;
 
-  /// Keeps track of pointers to all existing aterm_core variables and containers.
+  /// Keeps track of pointers to all existing aterm variables and containers.
   mcrl2::utilities::shared_mutex m_shared_mutex;
   mcrl2::utilities::hashtable<aterm_core*>* m_variables;
   mcrl2::utilities::hashtable<detail::_aterm_container*>* m_containers;

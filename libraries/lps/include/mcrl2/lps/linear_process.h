@@ -99,10 +99,10 @@ class linear_process_base
       assert(core::detail::check_term_LinearProcess(lps));
       m_process_parameters = down_cast<data::variable_list>(lps[0]);
       const auto& summands = atermpp::down_cast<atermpp::aterm_list>(lps[1]);
-      for (const atermpp::aterm_core& summand: summands)
+      for (const atermpp::aterm& summand: summands)
       {
         assert(core::detail::check_rule_LinearProcessSummand(summand));
-        const auto& t = down_cast<atermpp::aterm>(summand);
+        const atermpp::aterm& t = summand;
 
         const auto& summation_variables = down_cast<data::variable_list>(t[0]);
         const auto& condition = down_cast<data::data_expression>(t[1]);
@@ -113,14 +113,14 @@ class linear_process_base
         {
           throw mcrl2::runtime_error("Summand with stochastic distribution encountered, while this tool is not yet able to deal with stochastic distributions.");
         }
-        if (down_cast<atermpp::aterm>(t[2]).function() == core::detail::function_symbols::Delta)
+        if ((t[2]).function() == core::detail::function_symbols::Delta)
         {
           m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));
         }
         else
         {
-          assert(lps::is_multi_action(down_cast<atermpp::aterm>(t[2])));
-          const auto& actions = down_cast<process::action_list>(down_cast<atermpp::aterm>(t[2])[0]);
+          assert(lps::is_multi_action(t[2]));
+          const auto& actions = down_cast<process::action_list>(t[2][0]);
           m_action_summands.push_back(detail::make_action_summand<ActionSummand>(summation_variables, condition, multi_action(actions, time), assignments, distribution));
         }
       }
@@ -222,7 +222,7 @@ class linear_process: public linear_process_base<action_summand>
 };
 
 /// \brief Conversion to aterm.
-/// \return The action summand converted to aterm_core format.
+/// \return The action summand converted to aterm format.
 template <typename ActionSummand>
 atermpp::aterm linear_process_to_aterm(const linear_process_base<ActionSummand>& p)
 {

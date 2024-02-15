@@ -33,7 +33,7 @@ class rename_expression: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit rename_expression(const atermpp::aterm_core& term)
+    explicit rename_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_term_RenameExpr(*this));

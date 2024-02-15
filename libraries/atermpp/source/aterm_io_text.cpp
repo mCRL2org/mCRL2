@@ -76,7 +76,7 @@ text_aterm_ostream::text_aterm_ostream(std::ostream& os, bool newline)
     m_newline(newline)
 {}
 
-void text_aterm_ostream::put(const aterm_core& term)
+void text_aterm_ostream::put(const aterm& term)
 {
   write_term_line(term);
 
@@ -92,7 +92,7 @@ text_aterm_istream::text_aterm_istream(std::istream& is)
   character = next_char();
 }
 
-void text_aterm_istream::get(aterm_core& term)
+void text_aterm_istream::get(aterm& term)
 {
   try
   {
@@ -115,7 +115,7 @@ void text_aterm_istream::get(aterm_core& term)
 
 // Private functions
 
-void text_aterm_ostream::write_term_line(const aterm_core& t)
+void text_aterm_ostream::write_term_line(const aterm& t)
 {
   if (t.type_is_int())
   {
@@ -143,7 +143,7 @@ void text_aterm_ostream::write_term_line(const aterm_core& t)
     // An aterm f(t0, ..., tn) is written as f(t0, ..., tn)
     assert(t.type_is_appl());
 
-    aterm appl = m_transformer(down_cast<aterm>(t));
+    aterm appl = m_transformer(t);
 
     write_string_with_escape_symbols(appl.function().name(), m_stream);
 
@@ -161,7 +161,7 @@ void text_aterm_ostream::write_term_line(const aterm_core& t)
   }
 }
 
-aterm_core text_aterm_istream::parse_aterm(int& character)
+aterm text_aterm_istream::parse_aterm(int& character)
 {
   // Parse the term.
   switch (character)
@@ -372,26 +372,26 @@ std::string text_aterm_istream::parse_unquoted_string(int& character)
   return string;
 }
 
-void write_term_to_text_stream(const aterm_core& term, std::ostream& os)
+void write_term_to_text_stream(const aterm& term, std::ostream& os)
 {
   text_aterm_ostream(os) << term;
 }
 
-aterm_core read_term_from_string(const std::string& s)
+aterm read_term_from_string(const std::string& s)
 {
   std::stringstream ss(s);
-  aterm_core t;
+  aterm t;
   read_term_from_text_stream(ss, t);
   return t;
 }
 
-void read_term_from_text_stream(std::istream& is, aterm_core& t)
+void read_term_from_text_stream(std::istream& is, aterm& t)
 {
   text_aterm_istream(is).get(t);
 }
 
 
-std::ostream& operator<<(std::ostream& os, const aterm_core& term)
+std::ostream& operator<<(std::ostream& os, const aterm& term)
 {
   text_aterm_ostream(os) << term;
   return os;

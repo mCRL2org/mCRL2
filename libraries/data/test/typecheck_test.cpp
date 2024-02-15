@@ -63,7 +63,7 @@ data::sort_expression parse_sort_expression(const std::string& de_in)
     std::string de_out = data::pp(result);
     if (de_in != de_out)
     {
-      std::clog << "aterm_core : " << result << std::endl;
+      std::clog << "aterm : " << result << std::endl;
       std::clog << "de_in : " << de_in << std::endl;
       std::clog << "de_out: " << de_out << std::endl;
       std::clog << "The following sort expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
@@ -86,7 +86,7 @@ data::data_expression parse_data_expression(const std::string& de_in)
     std::string de_out = data::pp(result);
     if (de_in != de_out)
     {
-      std::clog << "aterm_core : " << result << std::endl;
+      std::clog << "aterm : " << result << std::endl;
       std::clog << "de_in : " << de_in << std::endl;
       std::clog << "de_out: " << de_out << std::endl;
       std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
@@ -112,7 +112,7 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
     std::string output = utilities::trim_copy(de_out);
     if (input != output)
     {
-      std::clog << "aterm_core : " << data::detail::data_specification_to_aterm(result) << std::endl;
+      std::clog << "aterm : " << data::detail::data_specification_to_aterm(result) << std::endl;
       std::clog << "de_in : " << de_in << std::endl;
       std::clog << "de_out: " << de_out << std::endl;
       std::clog << "The following data specifications should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;

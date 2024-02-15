@@ -9,22 +9,22 @@
 /// \file mcrl2/core/builder_msvc.inc.h
 /// \brief add your file description here.
 /*
-// aterm_core traversal
+// aterm traversal
 template <typename T>
 T operator()(const T& x,
-             typename std::enable_if< std::is_base_of< atermpp::aterm_core, T >::value>::type* = 0
+             typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
             )
 {
-  core::msg("aterm_core traversal");
+  core::msg("aterm traversal");
   throw mcrl2::runtime_error("unknown type encountered in builder function!");
   return x;
 }
 
-// aterm_core list traversal
+// aterm list traversal
 template <typename T>
 atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 {
-  core::msg("aterm_core list traversal");
+  core::msg("aterm list traversal");
   std::vector<T> result;
   for (auto i = x.begin(); i != x.end(); ++i)
   {
@@ -36,7 +36,7 @@ atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 // Container traversal
 template <typename T>
 void operator()(T& x,
-                typename std::enable_if< !std::is_base_of< atermpp::aterm_core, T >::value>::type* = 0,
+                typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0,
                 typename atermpp::enable_if_container<T>::type* = 0
                )
 {
@@ -47,11 +47,11 @@ void operator()(T& x,
   }
 }
 
-// aterm_core set traversal
+// aterm set traversal
 template <typename T>
 void operator()(std::set<T>& x)
 {
-  core::msg("aterm_core set traversal");
+  core::msg("aterm set traversal");
   std::set<T> result;
   for (auto i = x.begin(); i != x.end(); ++i)
   {

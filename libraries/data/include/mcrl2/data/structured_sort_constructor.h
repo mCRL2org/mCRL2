@@ -35,7 +35,7 @@ class structured_sort_constructor: public atermpp::aterm
 
     /// \\brief Constructor.
     /// \\param term A term
-    explicit structured_sort_constructor(const atermpp::aterm_core& term)
+    explicit structured_sort_constructor(const atermpp::aterm& term)
       : atermpp::aterm(term)
     {
       assert(core::detail::check_term_StructCons(*this));
