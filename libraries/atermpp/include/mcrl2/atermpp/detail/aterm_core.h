@@ -43,7 +43,7 @@ using is_term_or_function = std::disjunction<std::is_convertible<Term, unprotect
 template<typename ...Terms>
 using are_terms_or_functions = mcrl2::utilities::forall<is_term_or_function<Terms>...>;
 
-/// \brief This is the class to which an aterm_core points.
+/// \brief This is the class to which an aterm points.
 class _aterm : public mcrl2::utilities::noncopyable
 {
 public:

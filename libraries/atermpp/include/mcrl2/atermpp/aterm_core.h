@@ -16,7 +16,7 @@
 #include "mcrl2/atermpp/detail/aterm_core.h"
 #include "mcrl2/atermpp/type_traits.h"
 
-/// \brief The main namespace for the aterm_core++ library.
+/// \brief The main namespace for the aterm++ library.
 namespace atermpp
 {
 
@@ -137,7 +137,7 @@ public:
   ///        the default constructor of aterms, aterm_appls and aterm_int.
   /// \details The default constructor of a term_list<T> is the empty list, on which
   ///          the operator defined yields true. This operation is more efficient
-  ///          than comparing the current term with an aterm_core(), aterm() or an
+  ///          than comparing the current term with an aterm(), aterm_list() or an
   ///          aterm_int().
   /// \return A boolean indicating whether this term equals the default constructor.
   bool defined() const
@@ -154,7 +154,7 @@ public:
     std::swap(m_term, t.m_term);
   }
 
-  /// \brief Yields the function symbol in an aterm_core.
+  /// \brief Yields the function symbol in an aterm.
   /// \returns The function symbol of the term, which can also be an AS_EMPTY_LIST,
   ///          AS_INT and AS_LIST.
   /// \details This is for internal use only.

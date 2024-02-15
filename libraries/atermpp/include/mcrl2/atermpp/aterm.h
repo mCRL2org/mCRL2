@@ -48,11 +48,11 @@ public:
   aterm():aterm_core()
   {}
 
-  /// \brief Explicit constructor from an aterm_core.
+  /* /// \brief Explicit constructor from an aterm_core.
   /// \param t The aterm_core from which the term is constructed.
   explicit aterm(const aterm_core& t) 
    : aterm_core(t)
-  {} 
+  {} */
 
   /// This class has user-declared copy constructor so declare default copy and move operators.
   aterm(const aterm& other) noexcept = default;
