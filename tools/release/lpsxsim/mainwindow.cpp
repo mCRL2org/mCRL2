@@ -197,6 +197,12 @@ void MainWindow::setPlayDelay()
 void MainWindow::updateSimulation()
 {
   assert(m_simulation);
+  if (update_simulation_is_running)  // Some activities, such as changing a selection, can be activated within updateSimulation.
+                                     // While the simulation is being updated, it should not be updated again.
+  {
+    return;
+  }
+  update_simulation_is_running=true;
 
   int selectedState = static_cast<long long>(m_selected_state) < m_trace.size() ? m_selected_state : m_trace.size() - 1;
 
@@ -251,6 +257,7 @@ void MainWindow::updateSimulation()
       m_ui.stateTable->item(i, 1)->setText(m_trace[selectedState].state[i]);
     }
   }
+  update_simulation_is_running=false;
 }
 
 void MainWindow::stateSelected()
