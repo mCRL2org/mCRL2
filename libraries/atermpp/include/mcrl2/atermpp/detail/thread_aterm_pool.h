@@ -64,29 +64,29 @@ public:
   inline function_symbol create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
   /// \details threadsafe
-  inline void create_int(aterm_core& term, std::size_t val);
+  inline void create_int(aterm& term, std::size_t val);
 
   /// \details threadsafe
-  inline void create_term(aterm_core& term, const function_symbol& sym);
+  inline void create_term(aterm& term, const function_symbol& sym);
 
   /// \details threadsafe
   template<class ...Terms>
-  inline void create_appl(aterm_core& term, const function_symbol& sym, const Terms&... arguments);
+  inline void create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments);
 
   /// \details threadsafe
   template<class Term, class INDEX_TYPE, class ...Terms>
-  inline void create_appl_index(aterm_core& term, const function_symbol& sym, const Terms&... arguments);
+  inline void create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments);
 
   /// \details threadsafe
   template<typename ForwardIterator>
-  inline void create_appl_dynamic(aterm_core& term,
+  inline void create_appl_dynamic(aterm& term,
       const function_symbol& sym,
       ForwardIterator begin,
       ForwardIterator end);
 
   /// \threadsafe
   template<typename InputIterator, typename ATermConverter>
-  inline void create_appl_dynamic(aterm_core& term,
+  inline void create_appl_dynamic(aterm& term,
       const function_symbol& sym,
       ATermConverter convert_to_aterm,
       InputIterator begin,

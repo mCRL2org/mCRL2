@@ -44,7 +44,7 @@ aterm_pool::aterm_pool() :
   }
 
   // Initialize the empty list.
-  create_appl(m_empty_list, m_function_symbol_pool.as_empty_list());
+  create_appl(reinterpret_cast<aterm&>(m_empty_list), m_function_symbol_pool.as_empty_list());
 }
 
 void aterm_pool::add_deletion_hook(function_symbol sym, term_callback callback)
@@ -289,18 +289,18 @@ function_symbol aterm_pool::create_function_symbol(std::string&& name, const std
   return m_function_symbol_pool.create(std::forward<std::string>(name), arity, check_for_registered_functions);
 }
 
-bool aterm_pool::create_int(aterm_core& term, size_t val)
+bool aterm_pool::create_int(aterm& term, size_t val)
 {
   return m_int_storage.create_int(term, val);
 }
 
-bool aterm_pool::create_term(aterm_core& term, const atermpp::function_symbol& sym)
+bool aterm_pool::create_term(aterm& term, const atermpp::function_symbol& sym)
 {
   return std::get<0>(m_appl_storage).create_term(term, sym);
 }
 
 template<class ...Terms>
-bool aterm_pool::create_appl(aterm_core& term, const function_symbol& sym, const Terms&... arguments)
+bool aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
   if constexpr (sizeof...(Terms) <= 7)
   {
@@ -315,7 +315,7 @@ bool aterm_pool::create_appl(aterm_core& term, const function_symbol& sym, const
 }
 
 template<typename ForwardIterator>
-bool aterm_pool::create_appl_dynamic(aterm_core& term,
+bool aterm_pool::create_appl_dynamic(aterm& term,
                             const function_symbol& sym,
                             ForwardIterator begin,
                             ForwardIterator end)
@@ -346,7 +346,7 @@ bool aterm_pool::create_appl_dynamic(aterm_core& term,
 }
 
 template<typename InputIterator, typename ATermConverter>
-bool aterm_pool::create_appl_dynamic(aterm_core& term,
+bool aterm_pool::create_appl_dynamic(aterm& term,
                             const function_symbol& sym,
                             ATermConverter converter,
                             InputIterator begin,

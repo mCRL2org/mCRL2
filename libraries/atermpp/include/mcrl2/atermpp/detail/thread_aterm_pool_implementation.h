@@ -35,7 +35,7 @@ function_symbol thread_aterm_pool::create_function_symbol(const std::string& nam
   return create_function_symbol(std::move(name_copy), arity, check_for_registered_functions);
 }
 
-void thread_aterm_pool::create_int(aterm_core& term, size_t val)
+void thread_aterm_pool::create_int(aterm& term, size_t val)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   bool added = m_pool.create_int(term, val);
@@ -44,7 +44,7 @@ void thread_aterm_pool::create_int(aterm_core& term, size_t val)
   if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
 }
 
-void thread_aterm_pool::create_term(aterm_core& term, const atermpp::function_symbol& sym)
+void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol& sym)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   bool added = m_pool.create_term(term, sym);
@@ -54,7 +54,7 @@ void thread_aterm_pool::create_term(aterm_core& term, const atermpp::function_sy
 }
 
 template<class ...Terms>
-void thread_aterm_pool::create_appl(aterm_core& term, const function_symbol& sym, const Terms&... arguments)
+void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   bool added = m_pool.create_appl(term, sym, arguments...);
@@ -64,7 +64,7 @@ void thread_aterm_pool::create_appl(aterm_core& term, const function_symbol& sym
 }
 
 template<class Term, class INDEX_TYPE, class ...Terms>
-void thread_aterm_pool::create_appl_index(aterm_core& term, const function_symbol& sym, const Terms&... arguments)
+void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   std::array<unprotected_aterm_core, sizeof...(arguments)> argument_array;
@@ -100,7 +100,7 @@ void thread_aterm_pool::create_appl_index(aterm_core& term, const function_symbo
 }
 
 template<typename InputIterator>
-void thread_aterm_pool::create_appl_dynamic(aterm_core& term,
+void thread_aterm_pool::create_appl_dynamic(aterm& term,
                             const function_symbol& sym,
                             InputIterator begin,
                             InputIterator end)
@@ -113,7 +113,7 @@ void thread_aterm_pool::create_appl_dynamic(aterm_core& term,
 }
 
 template<typename InputIterator, typename ATermConverter>
-void thread_aterm_pool::create_appl_dynamic(aterm_core& term,
+void thread_aterm_pool::create_appl_dynamic(aterm& term,
                             const function_symbol& sym,
                             ATermConverter convert_to_aterm,
                             InputIterator begin,

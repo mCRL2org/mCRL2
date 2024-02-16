@@ -125,20 +125,20 @@ private:
   inline void collect_impl(mcrl2::utilities::shared_mutex& mutex);
 
   /// \brief Creates a integral term with the given value.
-  inline bool create_int(aterm_core& term, std::size_t val);
+  inline bool create_int(aterm& term, std::size_t val);
 
   /// \brief Creates a term with the given function symbol.
-  inline bool create_term(aterm_core& term, const function_symbol& sym);
+  inline bool create_term(aterm& term, const function_symbol& sym);
 
   /// \brief Creates a function application with the given function symbol and arguments.
   template<class ...Terms>
-  inline bool create_appl(aterm_core& term, const function_symbol& sym, const Terms&... arguments);
+  inline bool create_appl(aterm& term, const function_symbol& sym, const Terms&... arguments);
 
   /// \brief Creates a function application with the given function symbol and the arguments
   ///       as provided by the given iterator. This function assumes that the arity of the
   ///       function symbol is equal to the number of elements in the iterator.
   template<typename ForwardIterator>
-  bool create_appl_dynamic(aterm_core& term,
+  bool create_appl_dynamic(aterm& term,
       const function_symbol& sym,
       ForwardIterator begin,
       ForwardIterator end);
@@ -147,7 +147,7 @@ private:
   ///       as provided by the given iterator. This function assumes that the arity of the
   ///       function symbol is equal to the number of elements in the iterator.
   template<typename InputIterator, typename ATermConverter>
-  bool create_appl_dynamic(aterm_core& term,
+  bool create_appl_dynamic(aterm& term,
       const function_symbol& sym,
       ATermConverter convert_to_aterm,
       InputIterator begin,

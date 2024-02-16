@@ -139,16 +139,16 @@ void ATERM_POOL_STORAGE::add_deletion_hook(function_symbol sym, term_callback ca
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
-bool ATERM_POOL_STORAGE::create_int(aterm_core& term, std::size_t value)
+bool ATERM_POOL_STORAGE::create_int(aterm& term, std::size_t value)
 {
-  return emplace(term, value);
+  return emplace(reinterpret_cast<aterm_core&>(term), value);   // TODO: remove reinterpret_cast<aterm_core&>
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
-bool ATERM_POOL_STORAGE::create_term(aterm_core& term, const function_symbol& symbol)
+bool ATERM_POOL_STORAGE::create_term(aterm& term, const function_symbol& symbol)
 {
   assert(symbol.arity() == 0);
-  return emplace(term, symbol);
+  return emplace(reinterpret_cast<aterm_core&>(term), symbol);  // TODO: remove reinterpret_cast
 }
 
 template <std::size_t N>
@@ -192,12 +192,12 @@ void store_in_argument_array(std::array<unprotected_aterm_core, N>& argument_arr
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<class ...Terms>
-bool ATERM_POOL_STORAGE::create_appl(aterm_core& term, const function_symbol& symbol, const Terms&... arguments)
+bool ATERM_POOL_STORAGE::create_appl(aterm& term, const function_symbol& symbol, const Terms&... arguments)
 {
   assert(symbol.arity() == sizeof...(arguments));
   if constexpr (detail::are_terms<Terms...>::value)
   {
-    return emplace(term, symbol, arguments...);
+    return emplace(reinterpret_cast<aterm_core&>(term), symbol, arguments...); // TODO remove reinterpret_cast.
   }
   else 
   {
@@ -212,7 +212,7 @@ bool ATERM_POOL_STORAGE::create_appl(aterm_core& term, const function_symbol& sy
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<typename ForwardIterator>
-bool ATERM_POOL_STORAGE::create_appl_iterator(aterm_core& term,
+bool ATERM_POOL_STORAGE::create_appl_iterator(aterm& term,
                                         const function_symbol& symbol,
                                         ForwardIterator begin,
                                         ForwardIterator end)
@@ -222,7 +222,7 @@ bool ATERM_POOL_STORAGE::create_appl_iterator(aterm_core& term,
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<typename InputIterator, typename TermConverter>
-bool ATERM_POOL_STORAGE::create_appl_iterator(aterm_core& term,
+bool ATERM_POOL_STORAGE::create_appl_iterator(aterm& term,
                                         const function_symbol& symbol,
                                         TermConverter converter,
                                         InputIterator begin,
@@ -234,7 +234,7 @@ bool ATERM_POOL_STORAGE::create_appl_iterator(aterm_core& term,
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<typename ForwardIterator>
-bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm_core& term,
+bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
                                         const function_symbol& symbol,
                                         ForwardIterator begin,
                                         ForwardIterator end)
@@ -248,7 +248,7 @@ template<typename InputIterator,
          typename std::enable_if<std::is_convertible<
                                     typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
                                     aterm_core>::value, void>::type*>
-bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm_core& term,
+bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
                                         const function_symbol& symbol,
                                         TermConverter converter,
                                         InputIterator it,
@@ -278,7 +278,7 @@ template<typename InputIterator,
                                                                 typename InputIterator::value_type&,
                                                                 typename InputIterator::value_type>::type,
                                     void>::value, void>::type*>
-bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm_core& term,
+bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
                                              const function_symbol& symbol,
                                              TermConverter converter,
                                              InputIterator it,
