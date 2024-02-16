@@ -31,7 +31,7 @@ identifier_string() : public atermpp::aterm_string | SC | String | An identifier
 '''
 
 CONTAINER_TYPES = r'''
-container_type() : public atermpp::aterm  | XCO | SortConsType | Container type
+container_type() : public atermpp::aterm       | XCO | SortConsType | Container type
 list_container() : public data::container_type | EIO | SortList     | Container type for lists
 set_container()  : public data::container_type | EIO | SortSet      | Container type for sets
 bag_container()  : public data::container_type | EIO | SortBag      | Container type for bags
@@ -45,7 +45,7 @@ structured_sort_constructor(const core::identifier_string& name, const structure
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-sort_expression()                                                                         : public atermpp::aterm   | XOCU | SortExpr             | A sort expression
+sort_expression()                                                                         : public atermpp::aterm        | XOCU | SortExpr             | A sort expression
 basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO   | SortId               | A basic sort
 container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO   | SortCons             | A container sort
 structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | CEOU | SortStruct           | A structured sort
@@ -56,7 +56,7 @@ untyped_sort_variable(const atermpp::aterm_int& value)                          
 '''
 
 BINDER_TYPES = r'''
-binder_type()                             : public atermpp::aterm  | XCO | BindingOperator   | Binder
+binder_type()                             : public atermpp::aterm       | XCO | BindingOperator   | Binder
 untyped_set_or_bag_comprehension_binder() : public data::binder_type    | EIO | UntypedSetBagComp | Binder for untyped set or bag comprehension
 set_comprehension_binder()                : public data::binder_type    | EIO | SetComp           | Binder for set comprehension
 bag_comprehension_binder()                : public data::binder_type    | EIO | BagComp           | Binder for bag comprehension
@@ -66,13 +66,13 @@ lambda_binder()                           : public data::binder_type    | EIO | 
 '''
 
 ASSIGNMENT_EXPRESSION_CLASSES = r'''
-assignment_expression()                                                               : public atermpp::aterm                 | XIOC  | WhrDecl                     | Assignment expression
+assignment_expression()                                                               : public atermpp::aterm                      | XIOC  | WhrDecl                     | Assignment expression
 assignment(const variable& lhs, const data_expression& rhs)                           : public data::assignment_expression         | EIOUC | DataVarIdInit               | Assignment of a data expression to a variable
 untyped_identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs) : public data::assignment_expression | EIOUC | UntypedIdentifierAssignment | Assignment of a data expression to a string
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm   | XCU    | DataExpr          | A data expression
+data_expression()                                                                                             : public atermpp::aterm        | XCU    | DataExpr          | A data expression
 variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOCUs  | DataVarId         | A data variable
 function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOCUsN | OpId              | A function symbol
 application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUSW  | DataAppl          | An application of a data expression to a number of arguments
@@ -99,7 +99,7 @@ untyped_data_parameter(const core::identifier_string& name, const data_expressio
 '''
 
 STATE_FORMULA_CLASSES = r'''
-state_formula()                                                                                                 : public atermpp::aterm           | XICU | StateFrm                 | A state formula
+state_formula()                                                                                                 : public atermpp::aterm                | XICU | StateFrm                 | A state formula
 true_()                                                                                                         : public state_formulas::state_formula | EI   | StateTrue                | The value true for state formulas
 false_()                                                                                                        : public state_formulas::state_formula | EI   | StateFalse               | The value false for state formulas
 not_(const state_formula& operand)                                                                              : public state_formulas::state_formula | EI   | StateNot                 | The not operator for state formulas
@@ -126,7 +126,7 @@ mu(const core::identifier_string& name, const data::assignment_list& assignments
 '''
 
 REGULAR_FORMULA_CLASSES = r'''
-regular_formula()                                                                                                       : public atermpp::aterm               | XIC | RegFrm        | A regular formula
+regular_formula()                                                                                                       : public atermpp::aterm                    | XIC | RegFrm        | A regular formula
 seq(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EI  | RegSeq        | The seq operator for regular formulas
 alt(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EI  | RegAlt        | The alt operator for regular formulas
 trans(const regular_formula& operand)                                                                                   : public regular_formulas::regular_formula | EI  | RegTrans      | The trans operator for regular formulas
@@ -135,7 +135,7 @@ untyped_regular_formula(const core::identifier_string& name, const regular_formu
 '''
 
 ACTION_FORMULA_CLASSES = r'''
-action_formula()                                                            : public atermpp::aterm             | XIC  | ActFrm            | An action formula
+action_formula()                                                            : public atermpp::aterm                  | XIC  | ActFrm            | An action formula
 true_()                                                                     : public action_formulas::action_formula | EI   | ActTrue           | The value true for action formulas
 false_()                                                                    : public action_formulas::action_formula | EI   | ActFalse          | The value false for action formulas
 not_(const action_formula& operand)                                         : public action_formulas::action_formula | EI   | ActNot            | The not operator for action formulas
@@ -155,13 +155,13 @@ state_formula_specification(const data::data_specification& data, const process:
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
 deadlock(const data::data_expression& time)                                                                                                                                                                                                                   | CMS  | None              | A deadlock
-multi_action(const process::action_list& actions, const data::data_expression& time)                                                                                                                                             : public atermpp::aterm | CIUs | TimedMultAct      | A timed multi-action
+multi_action(const process::action_list& actions, const data::data_expression& time)                                                                                                                                             : public atermpp::aterm      | CIUs | TimedMultAct      | A timed multi-action
 deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                       | CMS  | None              | A deadlock summand
 action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                       | CMS  | None              | An action summand
-process_initializer(const data::data_expression_list& expressions)                                                                                                                                                               : public atermpp::aterm | CIUS | LinearProcessInit | A process initializer
+process_initializer(const data::data_expression_list& expressions)                                                                                                                                                               : public atermpp::aterm      | CIUS | LinearProcessInit | A process initializer
 linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                                 | MSW  | LinearProcess     | A linear process
 specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | MSW  | LinProcSpec       | A linear process specification
-stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)                                                                                                                         : public atermpp::aterm | CIU  | Distribution | A stochastic distribution
+stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)                                                                                                                         : public atermpp::aterm      | CIU  | Distribution | A stochastic distribution
 stochastic_action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments, const stochastic_distribution& distribution) : public lps::action_summand | CMS  | None              | A stochastic action summand
 stochastic_linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const stochastic_action_summand_vector& action_summands) : public linear_process      | MSW  | LinearProcess     | A stochastic linear process
 stochastic_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const stochastic_linear_process& process, const process_initializer& initial_process) : public lps::specification       | MSW  | LinProcSpec       | A stochastic linear process specification
@@ -180,7 +180,7 @@ untyped_multi_action(const data::untyped_data_parameter_list& actions)          
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''
-process_expression()                                                                                                                    : public atermpp::aterm         | XIC | ProcExpr                 | A process expression
+process_expression()                                                                                                                    : public atermpp::aterm              | XIC | ProcExpr                 | A process expression
 action(const action_label& label, const data::data_expression_list& arguments)                                                          : public process::process_expression | EIC | Action                   | An action
 process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)                             : public process::process_expression | EI  | Process                  | A process
 process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)                             : public process::process_expression | EI  | ProcessAssignment        | A process assignment
@@ -208,12 +208,12 @@ untyped_process_assignment(const core::identifier_string& name, const data::unty
 PBES_CLASSES = r'''
 fixpoint_symbol()                                                                                                                                                                                                            : public atermpp::aterm | XCU | FixPoint    | A fixpoint symbol
 propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)                                                                                                                           : public atermpp::aterm | CIU | PropVarDecl | A propositional variable declaration
-pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                      | SMC | PBEqn       | A PBES equation
-pbes(const data::data_specification& data, const std::set<data::variable>& global_variables, const std::vector<pbes_system::pbes_equation>& equations, const propositional_variable_instantiation& initial_state)                                         | SMW | PBES        | A PBES
+pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula)                                                                                                                                 | SMC | PBEqn       | A PBES equation
+pbes(const data::data_specification& data, const std::set<data::variable>& global_variables, const std::vector<pbes_system::pbes_equation>& equations, const propositional_variable_instantiation& initial_state)                                    | SMW | PBES        | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
-pbes_expression()                                                                                                       : public atermpp::aterm          | XCI   | PBExpr            | A pbes expression
+pbes_expression()                                                                                                       : public atermpp::aterm               | XCI   | PBExpr            | A pbes expression
 propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECIUs | PropVarInst       | A propositional variable instantiation
 not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | EI    | PBESNot           | The not operator for pbes expressions
 and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | EI    | PBESAnd           | The and operator for pbes expressions
@@ -229,7 +229,7 @@ pres(const data::data_specification& data, const std::set<data::variable>& globa
 '''
 
 PRES_EXPRESSION_CLASSES = r'''
-pres_expression()                                                                                                       : public atermpp::aterm          | XCI   | PRExpr                  | A pres expression
+pres_expression()                                                                                                       : public atermpp::aterm               | XCI   | PRExpr                  | A pres expression
 propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pres_system::pres_expression | ECIUs | PropVarInst             | A propositional variable instantiation
 minus(const pres_expression& operand)                                                                                   : public pres_system::pres_expression | EI    | PRESMinus               | The not operator for pres expressions
 and_(const pres_expression& left, const pres_expression& right)                                                         : public pres_system::pres_expression | EI    | PRESAnd                 | The and operator for pres expressions

@@ -31,7 +31,7 @@ template<std::size_t N,
          typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value, void>::type* = nullptr,
          typename std::enable_if<std::is_convertible<
                                     typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
-                                    aterm_core>::value, void>::type* = nullptr>
+                                    aterm>::value, void>::type* = nullptr>
 inline std::array<unprotected_aterm_core, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
 {
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
@@ -141,7 +141,7 @@ void ATERM_POOL_STORAGE::add_deletion_hook(function_symbol sym, term_callback ca
 ATERM_POOL_STORAGE_TEMPLATES
 bool ATERM_POOL_STORAGE::create_int(aterm& term, std::size_t value)
 {
-  return emplace(reinterpret_cast<aterm_core&>(term), value);   // TODO: remove reinterpret_cast<aterm_core&>
+  return emplace(reinterpret_cast<aterm_core&>(term), value);   // TODO: remove reinterpret_cast
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -161,11 +161,11 @@ void store_in_argument_array_(std::size_t i,
                               FUNCTION_OR_TERM_TYPE& function_or_term, 
                               const Args&... args)
 {
-  if constexpr (std::is_convertible<FUNCTION_OR_TERM_TYPE,atermpp::aterm_core>::value)
+  if constexpr (std::is_convertible<FUNCTION_OR_TERM_TYPE,atermpp::aterm>::value)
   {
     argument_array[i]=function_or_term;
   }
-  // check whether the function_or_term invoked on an empty argument yields an aterm_core.
+  // check whether the function_or_term invoked on an empty argument yields an aterm.
   else if constexpr (mcrl2::utilities::is_applicable< FUNCTION_OR_TERM_TYPE, void>::value)
   {
     argument_array[i]=function_or_term();
@@ -247,7 +247,7 @@ template<typename InputIterator,
          typename TermConverter,
          typename std::enable_if<std::is_convertible<
                                     typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
-                                    aterm_core>::value, void>::type*>
+                                    aterm>::value, void>::type*>
 bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
                                         const function_symbol& symbol,
                                         TermConverter converter,

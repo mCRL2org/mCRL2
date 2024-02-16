@@ -113,7 +113,7 @@ public:
            typename TermConverter,
            typename std::enable_if<!std::is_convertible<
                                     typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
-                                    aterm_core>::value, void>::type* = nullptr>
+                                    aterm>::value, void>::type* = nullptr>
   bool create_appl_dynamic(aterm& term,
                            const function_symbol& sym,
                            TermConverter converter,
@@ -126,7 +126,7 @@ public:
            typename TermConverter,
            typename std::enable_if<std::is_convertible<
                                     typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
-                                    aterm_core>::value, void>::type* = nullptr>
+                                    aterm>::value, void>::type* = nullptr>
   bool create_appl_dynamic(aterm& term,
                            const function_symbol& sym,
                            TermConverter converter,
