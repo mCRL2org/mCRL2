@@ -62,12 +62,12 @@ inline bool is_untyped_possible_sorts(const atermpp::aterm& x)
 class sort_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     sort_expression()
       : atermpp::aterm(core::detail::default_values::SortExpr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit sort_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)

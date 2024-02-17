@@ -26,12 +26,12 @@ namespace pbes_system
 class propositional_variable: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     propositional_variable()
       : atermpp::aterm(core::detail::default_values::PropVarDecl)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit propositional_variable(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -39,12 +39,12 @@ class propositional_variable: public atermpp::aterm
       assert(core::detail::check_term_PropVarDecl(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)
       : atermpp::aterm(core::detail::function_symbol_PropVarDecl(), name, parameters)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z1.
     propositional_variable(const std::string& name, const data::variable_list& parameters)
       : atermpp::aterm(core::detail::function_symbol_PropVarDecl(), core::identifier_string(name), parameters)
     {}

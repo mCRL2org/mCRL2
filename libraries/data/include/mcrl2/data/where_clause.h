@@ -25,12 +25,12 @@ namespace data
 class where_clause: public data_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     where_clause()
       : data_expression(core::detail::default_values::Whr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit where_clause(const atermpp::aterm& term)
       : data_expression(term)
@@ -38,12 +38,12 @@ class where_clause: public data_expression
       assert(core::detail::check_term_Whr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     where_clause(const data_expression& body, const assignment_expression_list& declarations)
       : data_expression(atermpp::aterm(core::detail::function_symbol_Whr(), body, declarations))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     template <typename Container>
     where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = nullptr)
       : data_expression(atermpp::aterm(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))

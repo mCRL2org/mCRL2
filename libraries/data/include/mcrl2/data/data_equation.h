@@ -32,12 +32,12 @@ function_symbol const& true_();
 class data_equation: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     data_equation()
       : atermpp::aterm(core::detail::default_values::DataEqn)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit data_equation(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -45,12 +45,12 @@ class data_equation: public atermpp::aterm
       assert(core::detail::check_term_DataEqn(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs)
       : atermpp::aterm(core::detail::function_symbol_DataEqn(), variables, condition, lhs, rhs)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z1.
     template <typename Container>
     data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = nullptr)
       : atermpp::aterm(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)

@@ -23,12 +23,12 @@ namespace data {
 class untyped_possible_sorts: public sort_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_possible_sorts()
       : sort_expression(core::detail::default_values::UntypedSortsPossible)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_possible_sorts(const atermpp::aterm& term)
       : sort_expression(term)
@@ -36,12 +36,12 @@ class untyped_possible_sorts: public sort_expression
       assert(core::detail::check_term_UntypedSortsPossible(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit untyped_possible_sorts(const sort_expression_list& sorts)
       : sort_expression(atermpp::aterm(core::detail::function_symbol_UntypedSortsPossible(), sorts))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     template <typename Container>
     untyped_possible_sorts(const Container& sorts, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
       : sort_expression(atermpp::aterm(core::detail::function_symbol_UntypedSortsPossible(), sort_expression_list(sorts.begin(), sorts.end())))

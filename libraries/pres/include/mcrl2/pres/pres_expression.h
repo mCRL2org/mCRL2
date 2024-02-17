@@ -33,12 +33,12 @@ typedef pbes_system::propositional_variable propositional_variable;
 class pres_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     pres_expression()
       : atermpp::aterm(core::detail::default_values::PRExpr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit pres_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -46,17 +46,17 @@ class pres_expression: public atermpp::aterm
       assert(core::detail::check_rule_PRExpr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     pres_expression(const data::data_expression& x)
       : atermpp::aterm(x)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     pres_expression(const data::variable& x)
       : atermpp::aterm(x)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     pres_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
@@ -234,12 +234,12 @@ inline void swap(propositional_variable_instantiation& t1, propositional_variabl
 class minus: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     minus()
       : pres_expression(core::detail::default_values::PRESMinus)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit minus(const atermpp::aterm& term)
       : pres_expression(term)
@@ -247,7 +247,7 @@ class minus: public pres_expression
       assert(core::detail::check_term_PRESMinus(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit minus(const pres_expression& operand)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESMinus(), operand))
     {}
@@ -305,12 +305,12 @@ inline void swap(minus& t1, minus& t2)
 class and_: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     and_()
       : pres_expression(core::detail::default_values::PRESAnd)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit and_(const atermpp::aterm& term)
       : pres_expression(term)
@@ -318,7 +318,7 @@ class and_: public pres_expression
       assert(core::detail::check_term_PRESAnd(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     and_(const pres_expression& left, const pres_expression& right)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESAnd(), left, right))
     {}
@@ -381,12 +381,12 @@ inline void swap(and_& t1, and_& t2)
 class or_: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     or_()
       : pres_expression(core::detail::default_values::PRESOr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit or_(const atermpp::aterm& term)
       : pres_expression(term)
@@ -394,7 +394,7 @@ class or_: public pres_expression
       assert(core::detail::check_term_PRESOr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     or_(const pres_expression& left, const pres_expression& right)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESOr(), left, right))
     {}
@@ -457,12 +457,12 @@ inline void swap(or_& t1, or_& t2)
 class imp: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     imp()
       : pres_expression(core::detail::default_values::PRESImp)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit imp(const atermpp::aterm& term)
       : pres_expression(term)
@@ -470,7 +470,7 @@ class imp: public pres_expression
       assert(core::detail::check_term_PRESImp(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     imp(const pres_expression& left, const pres_expression& right)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESImp(), left, right))
     {}
@@ -533,12 +533,12 @@ inline void swap(imp& t1, imp& t2)
 class plus: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     plus()
       : pres_expression(core::detail::default_values::PRESPlus)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit plus(const atermpp::aterm& term)
       : pres_expression(term)
@@ -546,7 +546,7 @@ class plus: public pres_expression
       assert(core::detail::check_term_PRESPlus(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     plus(const pres_expression& left, const pres_expression& right)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESPlus(), left, right))
     {}
@@ -609,12 +609,12 @@ inline void swap(plus& t1, plus& t2)
 class const_multiply: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     const_multiply()
       : pres_expression(core::detail::default_values::PRESConstantMultiply)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit const_multiply(const atermpp::aterm& term)
       : pres_expression(term)
@@ -622,7 +622,7 @@ class const_multiply: public pres_expression
       assert(core::detail::check_term_PRESConstantMultiply(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     const_multiply(const data::data_expression& left, const pres_expression& right)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESConstantMultiply(), left, right))
     {}
@@ -685,12 +685,12 @@ inline void swap(const_multiply& t1, const_multiply& t2)
 class const_multiply_alt: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     const_multiply_alt()
       : pres_expression(core::detail::default_values::PRESConstantMultiplyAlt)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit const_multiply_alt(const atermpp::aterm& term)
       : pres_expression(term)
@@ -698,7 +698,7 @@ class const_multiply_alt: public pres_expression
       assert(core::detail::check_term_PRESConstantMultiplyAlt(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     const_multiply_alt(const pres_expression& left, const data::data_expression& right)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESConstantMultiplyAlt(), left, right))
     {}
@@ -761,12 +761,12 @@ inline void swap(const_multiply_alt& t1, const_multiply_alt& t2)
 class infimum: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     infimum()
       : pres_expression(core::detail::default_values::PRESInfimum)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit infimum(const atermpp::aterm& term)
       : pres_expression(term)
@@ -774,7 +774,7 @@ class infimum: public pres_expression
       assert(core::detail::check_term_PRESInfimum(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     infimum(const data::variable_list& variables, const pres_expression& body)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESInfimum(), variables, body))
     {}
@@ -837,12 +837,12 @@ inline void swap(infimum& t1, infimum& t2)
 class supremum: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     supremum()
       : pres_expression(core::detail::default_values::PRESSupremum)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit supremum(const atermpp::aterm& term)
       : pres_expression(term)
@@ -850,7 +850,7 @@ class supremum: public pres_expression
       assert(core::detail::check_term_PRESSupremum(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     supremum(const data::variable_list& variables, const pres_expression& body)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESSupremum(), variables, body))
     {}
@@ -913,12 +913,12 @@ inline void swap(supremum& t1, supremum& t2)
 class sum: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     sum()
       : pres_expression(core::detail::default_values::PRESSum)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit sum(const atermpp::aterm& term)
       : pres_expression(term)
@@ -926,7 +926,7 @@ class sum: public pres_expression
       assert(core::detail::check_term_PRESSum(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     sum(const data::variable_list& variables, const pres_expression& body)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESSum(), variables, body))
     {}
@@ -989,12 +989,12 @@ inline void swap(sum& t1, sum& t2)
 class eqinf: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     eqinf()
       : pres_expression(core::detail::default_values::PRESEqInf)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit eqinf(const atermpp::aterm& term)
       : pres_expression(term)
@@ -1002,7 +1002,7 @@ class eqinf: public pres_expression
       assert(core::detail::check_term_PRESEqInf(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit eqinf(const pres_expression& operand)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESEqInf(), operand))
     {}
@@ -1060,12 +1060,12 @@ inline void swap(eqinf& t1, eqinf& t2)
 class eqninf: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     eqninf()
       : pres_expression(core::detail::default_values::PRESEqNInf)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit eqninf(const atermpp::aterm& term)
       : pres_expression(term)
@@ -1073,7 +1073,7 @@ class eqninf: public pres_expression
       assert(core::detail::check_term_PRESEqNInf(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit eqninf(const pres_expression& operand)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESEqNInf(), operand))
     {}
@@ -1131,12 +1131,12 @@ inline void swap(eqninf& t1, eqninf& t2)
 class condsm: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     condsm()
       : pres_expression(core::detail::default_values::PRESCondSm)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit condsm(const atermpp::aterm& term)
       : pres_expression(term)
@@ -1144,7 +1144,7 @@ class condsm: public pres_expression
       assert(core::detail::check_term_PRESCondSm(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     condsm(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESCondSm(), arg1, arg2, arg3))
     {}
@@ -1212,12 +1212,12 @@ inline void swap(condsm& t1, condsm& t2)
 class condeq: public pres_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     condeq()
       : pres_expression(core::detail::default_values::PRESCondEq)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit condeq(const atermpp::aterm& term)
       : pres_expression(term)
@@ -1225,7 +1225,7 @@ class condeq: public pres_expression
       assert(core::detail::check_term_PRESCondEq(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     condeq(const pres_expression& arg1, const pres_expression& arg2, const pres_expression& arg3)
       : pres_expression(atermpp::aterm(core::detail::function_symbol_PRESCondEq(), arg1, arg2, arg3))
     {}

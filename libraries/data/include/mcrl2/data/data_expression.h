@@ -64,16 +64,22 @@ inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm& x)
   return is_abstraction(x) && x[0].function() == core::detail::function_symbols::UntypedSetBagComp;
 }
 
-/// \brief Returns true if the term t is a function symbol
+/// \brief Returns true if the term t is a function symbol.
 inline bool is_function_symbol(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::OpId;
 }
 
-/// \brief Returns true if the term t is a variable
+/// \brief Returns true if the term t is a variable.
 inline bool is_variable(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::DataVarId;
+}
+
+/// \brief Returns true if the term t is a machine_number.
+inline bool is_machine_number(const atermpp::aterm& x)
+{
+  return x.type_is_int();
 }
 
 /// \brief Returns true if the term t is an application
@@ -124,12 +130,12 @@ class application; // prototype
 class data_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     data_expression()
       : atermpp::aterm(core::detail::default_values::DataExpr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit data_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)

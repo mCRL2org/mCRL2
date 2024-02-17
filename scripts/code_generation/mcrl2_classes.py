@@ -25,6 +25,7 @@ import string
 # X = it is an expression super class
 # W = do not generate swap overload
 # N = term has an additional index as last argument  TODO: Constructors must still be adapted. 
+# i = this class can be cast to an aterm_int.
 
 CORE_CLASSES = r'''
 identifier_string() : public atermpp::aterm_string | SC | String | An identifier
@@ -78,6 +79,7 @@ function_symbol(const core::identifier_string& name, const sort_expression& sort
 application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUSW  | DataAppl          | An application of a data expression to a number of arguments
 where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU    | Whr               | A where expression
 abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO     | Binder            | An abstraction expression
+machine_number(std::size_t value)                                                                             : public data::data_expression | EOCi   | Number            | A machine number
 untyped_identifier(const core::identifier_string& name)                                                       : public data::data_expression | EO     | UntypedIdentifier | An untyped identifier
 '''
 
@@ -317,7 +319,7 @@ class Parameter:
             elif '&' in self.modifiers_:
                 postfix = '&'
             else:
-                postfix = '*'
+                postfix = ''
             return '%s%s%s' % (prefix, type1, postfix)
         return type1
 
@@ -424,8 +426,9 @@ class FunctionDeclaration:
 
 # Represents a class member function
 class MemberFunction:
-    def __init__(self, classname, return_type, name, arg):
+    def __init__(self, classname, modifiers, return_type, name, arg):
         self.classname = classname
+        self.modifiers = modifiers
         self.return_type = return_type
         self.name = name
         self.arg  = arg
@@ -438,7 +441,13 @@ class MemberFunction:
         return text
 
     def inline_definition(self):
-        text = '''    const <RETURN_TYPE>& <NAME>() const
+        if 'i' in self.modifiers:
+           text = '''    <RETURN_TYPE> <NAME>() const
+    {
+      return atermpp::down_cast<atermpp::aterm_int>(static_cast<const atermpp::aterm&>(*this)).value();
+    }'''
+        else:
+           text = '''    const <RETURN_TYPE>& <NAME>() const
     {
       return atermpp::down_cast<<RETURN_TYPE>>((*this)[<ARG>]);
     }'''
@@ -461,8 +470,9 @@ class MemberFunction:
 
 # Represents a class constructor
 class Constructor:
-    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+    def __init__(self, classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
+        self.modifiers           = modifiers
         self.arguments           = arguments
         self.superclass          = superclass
         self.namespace           = namespace
@@ -487,30 +497,40 @@ class Constructor:
 
     def inline_definition(self):
         if self.superclass == 'atermpp::aterm':
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Constructor Z12.
     <EXPLICIT><CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
+        elif 'i' in self.modifiers:
+            text = r'''    /// \\\\brief Constructor Z13.
+    <CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(atermpp::aterm_int(<PARAMETERS>))
+    {}'''
         else:
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Constructor Z14.
     <EXPLICIT><CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         return self.expand_text(text)
 
     def declaration(self):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor Z15.
     <CLASSNAME>(<ARGUMENTS>);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
         if self.superclass == 'atermpp::aterm':
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Constructor Z16.
     <EXPLICIT><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
+        elif 'i' in self.modifiers:
+            text = r'''    /// \\\\brief Constructor Z17.
+    <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(atermpp::aterm_int(<PARAMETERS>))
+    {}'''
         else:
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Constructor Z18.
     <EXPLICIT><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
@@ -522,8 +542,9 @@ class Constructor:
 
 # Represents a default class constructor
 class DefaultConstructor(Constructor):
-    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+    def __init__(self, classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
+        self.modifiers           = modifiers
         self.arguments           = arguments
         self.superclass          = superclass
         self.namespace           = namespace
@@ -533,19 +554,25 @@ class DefaultConstructor(Constructor):
         self.template_parameters = template_parameters
 
     def inline_definition(self):
-        text = r'''    /// \\\\brief Default constructor.
+        if 'i' in self.modifiers:
+          text = r'''    /// \\\\brief Default constructor X2.
+    <CLASSNAME>()
+      : <SUPERCLASS>(atermpp::aterm_int(std::size_t(0)))
+    {}'''
+        else:
+          text = r'''    /// \\\\brief Default constructor X3.
     <CLASSNAME>()
       : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::default_values::<ATERM>)
     {}'''
         return self.expand_text(text)
 
     def declaration(self):
-        text = r'''    /// \\\\brief Default constructor.
+        text = r'''    /// \\\\brief Default constructor X4.
     <CLASSNAME>();'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = r'''    /// \\\\brief Default constructor.
+        text = r'''    /// \\\\brief Default constructor X5.
     <INLINE><CLASSNAME>::<CLASSNAME>()
       : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::default_values::<ATERM>)
     {}'''
@@ -557,8 +584,9 @@ class DefaultConstructor(Constructor):
 
 # Represents an overloaded class constructor
 class OverloadedConstructor(Constructor):
-    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+    def __init__(self, classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
+        self.modifiers           = modifiers
         self.arguments           = arguments
         self.superclass          = superclass
         self.namespace           = namespace
@@ -569,30 +597,35 @@ class OverloadedConstructor(Constructor):
 
     def inline_definition(self):
         if self.superclass == 'atermpp::aterm':
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Constructor Z1.
     <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
         else:
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Constructor Z2.
     <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         return self.expand_text(text)
 
     def declaration(self):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor Z3.
     <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        if self.superclass == 'atermpp::aterm':
-            text = r'''    /// \\\\brief Constructor.
+        if 'i' in self.modifiers:
+             text = r'''    /// \\\\brief Default constructor X1.
+      <INLINE><CLASSNAME>::<CLASSNAME>()
+        : <SUPERCLASS>(atermpp::aterm_int(std::size_t(0)))
+      {}'''
+        elif self.superclass == 'atermpp::aterm':
+            text = r'''    /// \\\\brief Constructor Z4.
     <TEMPLATE_PARAMETERS><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
         else:
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Constructor Z5.
     <TEMPLATE_PARAMETERS><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
@@ -610,14 +643,14 @@ class AdditionalConstructor(Constructor):
         self.superclass           = superclass
 
     def inline_definition(self):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor Z6.
     <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
       : <SUPERCLASS>(x)
     {}'''
         return self.expand_text(text)
 
     def declaration(self):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor Z7.
     <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x);'''
         return self.expand_text(text)
 
@@ -628,7 +661,7 @@ class AdditionalConstructor(Constructor):
         return text
 
     def definition(self, inline = False):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor Z8.
     /// \\\\param term A term
     <INLINE><CLASSNAME>::<CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
       : <SUPERCLASS>(x)
@@ -641,8 +674,9 @@ class AdditionalConstructor(Constructor):
 
 # Represents a class constructor taking an aterm as argument
 class ATermConstructor(Constructor):
-    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+    def __init__(self, classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
+        self.modifiers           = modifiers
         self.arguments           = arguments
         self.superclass          = superclass
         self.namespace           = namespace
@@ -652,7 +686,16 @@ class ATermConstructor(Constructor):
         self.template_parameters = template_parameters
 
     def inline_definition(self):
-        text = r'''    /// \\\\brief Constructor.
+        if 'i' in self.modifiers:
+           text = r'''    /// \\\\brief Constructor based on an aterm.
+    /// \\param term A term
+    explicit <CLASSNAME>(const atermpp::aterm& term)
+      : <SUPERCLASS>(term)
+    {
+      assert(this->type_is_int());
+    }'''
+        else:
+          text = r'''    /// \\\\brief Constructor Z9.
     /// \\\\param term A term
     explicit <CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
@@ -662,13 +705,22 @@ class ATermConstructor(Constructor):
         return self.expand_text(text)
 
     def declaration(self):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor Z10.
     /// \\\\param term A term
     explicit <CLASSNAME>(const atermpp::aterm& term);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = r'''    /// \\\\brief Constructor.
+        if 'i' in self.modifiers:
+          text = r'''    /// \\\\brief Constructor based on an aterm.
+    /// \\param term A term
+    explicit <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
+      : <SUPERCLASS>(term)
+    {
+      assert(this->type_is_int());
+    }'''
+        else:
+          text = r'''    /// \\\\brief Constructor Z11.
     /// \\\\param term A term
     explicit <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
@@ -768,6 +820,7 @@ class Class:
         add_string_overload_constructor = add_constructor_overloads,
         add_container_overload_constructor = add_constructor_overloads
         classname = self.classname()
+        modifiers = self.modifiers()
         arguments = self.constructor.argument_text()
         superclass = self.superclass()
         superclass_namespace = self.superclass_namespace()
@@ -786,7 +839,7 @@ class Class:
 
         for i, p in enumerate(self.constructor.parameters()):
             parameters.append(p.name())
-            arguments.append('%s %s' % (p.type(), p.name()))
+            arguments.append('%s %s' % (p.type(not 'i' in self.modifiers()), p.name()))
             if p.type(False) == 'core::identifier_string' and add_string_overload_constructor:
                 parameters1.append('core::identifier_string(%s)' % p.name())
                 arguments1.append('const std::string& %s' % p.name())
@@ -817,12 +870,12 @@ class Class:
             superclass = 'atermpp::aterm'
 
         constructors = []
-        constructors.append(DefaultConstructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
-        constructors.append(ATermConstructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
+        constructors.append(DefaultConstructor(classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters))
+        constructors.append(ATermConstructor(classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters))
         if len(self.constructor.parameters()) > 0:
-            constructors.append(Constructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
+            constructors.append(Constructor(classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters))
         if len(self.constructor.parameters()) > 0 and (add_string_overload_constructor or add_container_overload_constructor) and (parameters != parameters1):
-            constructors.append(OverloadedConstructor(classname, arguments1, superclass, namespace, aterm, parameters1, template_parameters))
+            constructors.append(OverloadedConstructor(classname, modifiers, arguments1, superclass, namespace, aterm, parameters1, template_parameters))
         if self.classname(True) in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES:
             for additional_classname in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES[self.classname(True)]:
                 constructors.append(AdditionalConstructor(classname, additional_classname, superclass, additional_classname))
@@ -867,7 +920,7 @@ inline void swap(<CLASSNAME>& t1, <CLASSNAME>& t2)
             name = p[2].strip()
             arg = str(n - 1)
             if not name in skip:
-                result.append(MemberFunction(self.classname(), return_type, name, arg))
+                result.append(MemberFunction(self.classname(), self.modifiers(), return_type, name, arg))
         return result
 
     def move_semantics_text(self):
@@ -908,7 +961,16 @@ inline void swap(<CLASSNAME>& t1, <CLASSNAME>& t2)
 
     # Generate the make_...  functions that allow the construction of a class member in situ. 
     def make_function(self):
-        text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
+        if 'i' in self.modifiers():
+          text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
+/// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
+template <class... ARGUMENTS>
+inline void make_<CLASSNAME>(atermpp::aterm& t, size_t n)
+{
+  atermpp::make_aterm_int(reinterpret_cast<atermpp::aterm_int&>(t), n);
+}'''
+        else:
+          text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
 /// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
 template <class... ARGUMENTS>
 inline void make_<CLASSNAME>(atermpp::aterm& t, const ARGUMENTS&... args)

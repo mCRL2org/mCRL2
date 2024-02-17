@@ -23,12 +23,12 @@ namespace data {
 class untyped_data_parameter: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_data_parameter()
       : atermpp::aterm(core::detail::default_values::UntypedDataParameter)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_data_parameter(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -36,12 +36,12 @@ class untyped_data_parameter: public atermpp::aterm
       assert(core::detail::check_term_UntypedDataParameter(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     untyped_data_parameter(const core::identifier_string& name, const data_expression_list& arguments)
       : atermpp::aterm(core::detail::function_symbol_UntypedDataParameter(), name, arguments)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z1.
     untyped_data_parameter(const std::string& name, const data_expression_list& arguments)
       : atermpp::aterm(core::detail::function_symbol_UntypedDataParameter(), core::identifier_string(name), arguments)
     {}

@@ -28,12 +28,12 @@ class structured_sort;
 class structured_sort_constructor: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     structured_sort_constructor()
       : atermpp::aterm(core::detail::default_values::StructCons)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit structured_sort_constructor(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -41,12 +41,12 @@ class structured_sort_constructor: public atermpp::aterm
       assert(core::detail::check_term_StructCons(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     structured_sort_constructor(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser)
       : atermpp::aterm(core::detail::function_symbol_StructCons(), name, arguments, recogniser)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z1.
     template <typename Container>
     structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = nullptr)
       : atermpp::aterm(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))

@@ -23,12 +23,12 @@ namespace data {
 class untyped_identifier: public data_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_identifier()
       : data_expression(core::detail::default_values::UntypedIdentifier)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_identifier(const atermpp::aterm& term)
       : data_expression(term)
@@ -36,12 +36,12 @@ class untyped_identifier: public data_expression
       assert(core::detail::check_term_UntypedIdentifier(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit untyped_identifier(const core::identifier_string& name)
       : data_expression(atermpp::aterm(core::detail::function_symbol_UntypedIdentifier(), name))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     untyped_identifier(const std::string& name)
       : data_expression(atermpp::aterm(core::detail::function_symbol_UntypedIdentifier(), core::identifier_string(name)))
     {}

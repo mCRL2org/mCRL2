@@ -23,12 +23,12 @@ namespace lps {
 class stochastic_distribution: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     stochastic_distribution()
       : atermpp::aterm(core::detail::default_values::Distribution)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit stochastic_distribution(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -36,7 +36,7 @@ class stochastic_distribution: public atermpp::aterm
       assert(core::detail::check_term_Distribution(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)
       : atermpp::aterm(core::detail::function_symbol_Distribution(), variables, distribution)
     {}

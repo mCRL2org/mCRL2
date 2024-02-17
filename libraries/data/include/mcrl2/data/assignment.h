@@ -26,12 +26,12 @@ namespace data
 class assignment_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     assignment_expression()
       : atermpp::aterm(core::detail::default_values::WhrDecl)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit assignment_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -90,12 +90,12 @@ inline void swap(assignment_expression& t1, assignment_expression& t2)
 class assignment: public assignment_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     assignment()
       : assignment_expression(core::detail::default_values::DataVarIdInit)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit assignment(const atermpp::aterm& term)
       : assignment_expression(term)
@@ -103,7 +103,7 @@ class assignment: public assignment_expression
       assert(core::detail::check_term_DataVarIdInit(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     assignment(const variable& lhs, const data_expression& rhs)
       : assignment_expression(atermpp::aterm(core::detail::function_symbol_DataVarIdInit(), lhs, rhs))
     {}
@@ -181,12 +181,12 @@ inline void swap(assignment& t1, assignment& t2)
 class untyped_identifier_assignment: public assignment_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_identifier_assignment()
       : assignment_expression(core::detail::default_values::UntypedIdentifierAssignment)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_identifier_assignment(const atermpp::aterm& term)
       : assignment_expression(term)
@@ -194,12 +194,12 @@ class untyped_identifier_assignment: public assignment_expression
       assert(core::detail::check_term_UntypedIdentifierAssignment(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     untyped_identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs)
       : assignment_expression(atermpp::aterm(core::detail::function_symbol_UntypedIdentifierAssignment(), lhs, rhs))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     untyped_identifier_assignment(const std::string& lhs, const data_expression& rhs)
       : assignment_expression(atermpp::aterm(core::detail::function_symbol_UntypedIdentifierAssignment(), core::identifier_string(lhs), rhs))
     {}

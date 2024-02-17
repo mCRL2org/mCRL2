@@ -25,12 +25,12 @@ namespace process
 class action_label: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     action_label()
       : atermpp::aterm(core::detail::default_values::ActId)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit action_label(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -38,12 +38,12 @@ class action_label: public atermpp::aterm
       assert(core::detail::check_term_ActId(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)
       : atermpp::aterm(core::detail::function_symbol_ActId(), name, sorts)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z1.
     action_label(const std::string& name, const data::sort_expression_list& sorts)
       : atermpp::aterm(core::detail::function_symbol_ActId(), core::identifier_string(name), sorts)
     {}

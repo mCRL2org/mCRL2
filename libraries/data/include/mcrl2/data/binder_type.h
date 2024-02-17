@@ -26,12 +26,12 @@ namespace data
 class binder_type: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     binder_type()
       : atermpp::aterm(core::detail::default_values::BindingOperator)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit binder_type(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -76,12 +76,12 @@ inline void swap(binder_type& t1, binder_type& t2)
 class untyped_set_or_bag_comprehension_binder: public binder_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_set_or_bag_comprehension_binder()
       : binder_type(core::detail::default_values::UntypedSetBagComp)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_set_or_bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
@@ -129,12 +129,12 @@ inline void swap(untyped_set_or_bag_comprehension_binder& t1, untyped_set_or_bag
 class set_comprehension_binder: public binder_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     set_comprehension_binder()
       : binder_type(core::detail::default_values::SetComp)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit set_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
@@ -182,12 +182,12 @@ inline void swap(set_comprehension_binder& t1, set_comprehension_binder& t2)
 class bag_comprehension_binder: public binder_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     bag_comprehension_binder()
       : binder_type(core::detail::default_values::BagComp)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit bag_comprehension_binder(const atermpp::aterm& term)
       : binder_type(term)
@@ -235,12 +235,12 @@ inline void swap(bag_comprehension_binder& t1, bag_comprehension_binder& t2)
 class forall_binder: public binder_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     forall_binder()
       : binder_type(core::detail::default_values::Forall)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit forall_binder(const atermpp::aterm& term)
       : binder_type(term)
@@ -288,12 +288,12 @@ inline void swap(forall_binder& t1, forall_binder& t2)
 class exists_binder: public binder_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     exists_binder()
       : binder_type(core::detail::default_values::Exists)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit exists_binder(const atermpp::aterm& term)
       : binder_type(term)
@@ -341,12 +341,12 @@ inline void swap(exists_binder& t1, exists_binder& t2)
 class lambda_binder: public binder_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     lambda_binder()
       : binder_type(core::detail::default_values::Lambda)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit lambda_binder(const atermpp::aterm& term)
       : binder_type(term)

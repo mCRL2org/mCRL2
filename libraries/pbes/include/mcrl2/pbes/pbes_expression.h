@@ -27,12 +27,12 @@ namespace pbes_system
 class pbes_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     pbes_expression()
       : atermpp::aterm(core::detail::default_values::PBExpr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit pbes_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -40,17 +40,17 @@ class pbes_expression: public atermpp::aterm
       assert(core::detail::check_rule_PBExpr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     pbes_expression(const data::data_expression& x)
       : atermpp::aterm(x)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     pbes_expression(const data::variable& x)
       : atermpp::aterm(x)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     pbes_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
@@ -224,12 +224,12 @@ inline void swap(propositional_variable_instantiation& t1, propositional_variabl
 class not_: public pbes_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     not_()
       : pbes_expression(core::detail::default_values::PBESNot)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit not_(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -237,7 +237,7 @@ class not_: public pbes_expression
       assert(core::detail::check_term_PBESNot(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit not_(const pbes_expression& operand)
       : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESNot(), operand))
     {}
@@ -295,12 +295,12 @@ inline void swap(not_& t1, not_& t2)
 class and_: public pbes_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     and_()
       : pbes_expression(core::detail::default_values::PBESAnd)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit and_(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -308,7 +308,7 @@ class and_: public pbes_expression
       assert(core::detail::check_term_PBESAnd(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     and_(const pbes_expression& left, const pbes_expression& right)
       : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESAnd(), left, right))
     {}
@@ -371,12 +371,12 @@ inline void swap(and_& t1, and_& t2)
 class or_: public pbes_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     or_()
       : pbes_expression(core::detail::default_values::PBESOr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit or_(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -384,7 +384,7 @@ class or_: public pbes_expression
       assert(core::detail::check_term_PBESOr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     or_(const pbes_expression& left, const pbes_expression& right)
       : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESOr(), left, right))
     {}
@@ -447,12 +447,12 @@ inline void swap(or_& t1, or_& t2)
 class imp: public pbes_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     imp()
       : pbes_expression(core::detail::default_values::PBESImp)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit imp(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -460,7 +460,7 @@ class imp: public pbes_expression
       assert(core::detail::check_term_PBESImp(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     imp(const pbes_expression& left, const pbes_expression& right)
       : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESImp(), left, right))
     {}
@@ -523,12 +523,12 @@ inline void swap(imp& t1, imp& t2)
 class forall: public pbes_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     forall()
       : pbes_expression(core::detail::default_values::PBESForall)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit forall(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -536,7 +536,7 @@ class forall: public pbes_expression
       assert(core::detail::check_term_PBESForall(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     forall(const data::variable_list& variables, const pbes_expression& body)
       : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESForall(), variables, body))
     {}
@@ -599,12 +599,12 @@ inline void swap(forall& t1, forall& t2)
 class exists: public pbes_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     exists()
       : pbes_expression(core::detail::default_values::PBESExists)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit exists(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -612,7 +612,7 @@ class exists: public pbes_expression
       assert(core::detail::check_term_PBESExists(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     exists(const data::variable_list& variables, const pbes_expression& body)
       : pbes_expression(atermpp::aterm(core::detail::function_symbol_PBESExists(), variables, body))
     {}

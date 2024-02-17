@@ -26,12 +26,12 @@ namespace process
 class rename_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     rename_expression()
       : atermpp::aterm(core::detail::default_values::RenameExpr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit rename_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -39,12 +39,12 @@ class rename_expression: public atermpp::aterm
       assert(core::detail::check_term_RenameExpr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     rename_expression(core::identifier_string& source, core::identifier_string& target)
       : atermpp::aterm(core::detail::function_symbol_RenameExpr(), source, target)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z1.
     rename_expression(const std::string& source, const std::string& target)
       : atermpp::aterm(core::detail::function_symbol_RenameExpr(), core::identifier_string(source), core::identifier_string(target))
     {}

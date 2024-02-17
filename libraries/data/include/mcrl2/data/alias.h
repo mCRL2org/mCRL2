@@ -25,12 +25,12 @@ namespace data
 class alias: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     alias()
       : atermpp::aterm(core::detail::default_values::SortRef)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit alias(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -38,7 +38,7 @@ class alias: public atermpp::aterm
       assert(core::detail::check_term_SortRef(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     alias(const basic_sort& name, const sort_expression& reference)
       : atermpp::aterm(core::detail::function_symbol_SortRef(), name, reference)
     {}

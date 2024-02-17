@@ -26,12 +26,12 @@ namespace data
 class container_sort: public sort_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     container_sort()
       : sort_expression(core::detail::default_values::SortCons)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit container_sort(const atermpp::aterm& term)
       : sort_expression(term)
@@ -39,7 +39,7 @@ class container_sort: public sort_expression
       assert(core::detail::check_term_SortCons(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     container_sort(const container_type& container_name, const sort_expression& element_sort)
       : sort_expression(atermpp::aterm(core::detail::function_symbol_SortCons(), container_name, element_sort))
     {}

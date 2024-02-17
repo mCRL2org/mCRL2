@@ -25,12 +25,12 @@ namespace pbes_system
 class fixpoint_symbol: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     fixpoint_symbol()
       : atermpp::aterm(core::detail::default_values::FixPoint)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit fixpoint_symbol(const atermpp::aterm& term)
       : atermpp::aterm(term)

@@ -25,12 +25,12 @@ namespace process
 class process_equation: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     process_equation()
       : atermpp::aterm(core::detail::default_values::ProcEqn)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit process_equation(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -38,7 +38,7 @@ class process_equation: public atermpp::aterm
       assert(core::detail::check_term_ProcEqn(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)
       : atermpp::aterm(core::detail::function_symbol_ProcEqn(), identifier, formal_parameters, expression)
     {}

@@ -25,12 +25,12 @@ namespace data
 class function_sort: public sort_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     function_sort()
       : sort_expression(core::detail::default_values::SortArrow)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit function_sort(const atermpp::aterm& term)
       : sort_expression(term)
@@ -38,12 +38,12 @@ class function_sort: public sort_expression
       assert(core::detail::check_term_SortArrow(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     function_sort(const sort_expression_list& domain, const sort_expression& codomain)
       : sort_expression(atermpp::aterm(core::detail::function_symbol_SortArrow(), domain, codomain))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     template <typename Container>
     function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
       : sort_expression(atermpp::aterm(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))

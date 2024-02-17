@@ -23,12 +23,12 @@ namespace data {
 class untyped_sort_variable: public sort_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_sort_variable()
       : sort_expression(core::detail::default_values::UntypedSortVariable)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_sort_variable(const atermpp::aterm& term)
       : sort_expression(term)
@@ -36,7 +36,7 @@ class untyped_sort_variable: public sort_expression
       assert(core::detail::check_term_UntypedSortVariable(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit untyped_sort_variable(const atermpp::aterm_int& value)
       : sort_expression(atermpp::aterm(core::detail::function_symbol_UntypedSortVariable(), value))
     {}

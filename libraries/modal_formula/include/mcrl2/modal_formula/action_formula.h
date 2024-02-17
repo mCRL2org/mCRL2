@@ -26,12 +26,12 @@ namespace action_formulas
 class action_formula: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     action_formula()
       : atermpp::aterm(core::detail::default_values::ActFrm)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit action_formula(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -39,17 +39,17 @@ class action_formula: public atermpp::aterm
       assert(core::detail::check_rule_ActFrm(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     action_formula(const data::data_expression& x)
       : atermpp::aterm(x)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     action_formula(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     action_formula(const process::untyped_multi_action& x)
       : atermpp::aterm(x)
     {}
@@ -124,12 +124,12 @@ inline void swap(action_formula& t1, action_formula& t2)
 class true_: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     true_()
       : action_formula(core::detail::default_values::ActTrue)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit true_(const atermpp::aterm& term)
       : action_formula(term)
@@ -177,12 +177,12 @@ inline void swap(true_& t1, true_& t2)
 class false_: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     false_()
       : action_formula(core::detail::default_values::ActFalse)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit false_(const atermpp::aterm& term)
       : action_formula(term)
@@ -230,12 +230,12 @@ inline void swap(false_& t1, false_& t2)
 class not_: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     not_()
       : action_formula(core::detail::default_values::ActNot)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit not_(const atermpp::aterm& term)
       : action_formula(term)
@@ -243,7 +243,7 @@ class not_: public action_formula
       assert(core::detail::check_term_ActNot(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit not_(const action_formula& operand)
       : action_formula(atermpp::aterm(core::detail::function_symbol_ActNot(), operand))
     {}
@@ -301,12 +301,12 @@ inline void swap(not_& t1, not_& t2)
 class and_: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     and_()
       : action_formula(core::detail::default_values::ActAnd)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit and_(const atermpp::aterm& term)
       : action_formula(term)
@@ -314,7 +314,7 @@ class and_: public action_formula
       assert(core::detail::check_term_ActAnd(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     and_(const action_formula& left, const action_formula& right)
       : action_formula(atermpp::aterm(core::detail::function_symbol_ActAnd(), left, right))
     {}
@@ -377,12 +377,12 @@ inline void swap(and_& t1, and_& t2)
 class or_: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     or_()
       : action_formula(core::detail::default_values::ActOr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit or_(const atermpp::aterm& term)
       : action_formula(term)
@@ -390,7 +390,7 @@ class or_: public action_formula
       assert(core::detail::check_term_ActOr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     or_(const action_formula& left, const action_formula& right)
       : action_formula(atermpp::aterm(core::detail::function_symbol_ActOr(), left, right))
     {}
@@ -453,12 +453,12 @@ inline void swap(or_& t1, or_& t2)
 class imp: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     imp()
       : action_formula(core::detail::default_values::ActImp)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit imp(const atermpp::aterm& term)
       : action_formula(term)
@@ -466,7 +466,7 @@ class imp: public action_formula
       assert(core::detail::check_term_ActImp(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     imp(const action_formula& left, const action_formula& right)
       : action_formula(atermpp::aterm(core::detail::function_symbol_ActImp(), left, right))
     {}
@@ -529,12 +529,12 @@ inline void swap(imp& t1, imp& t2)
 class forall: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     forall()
       : action_formula(core::detail::default_values::ActForall)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit forall(const atermpp::aterm& term)
       : action_formula(term)
@@ -542,7 +542,7 @@ class forall: public action_formula
       assert(core::detail::check_term_ActForall(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     forall(const data::variable_list& variables, const action_formula& body)
       : action_formula(atermpp::aterm(core::detail::function_symbol_ActForall(), variables, body))
     {}
@@ -605,12 +605,12 @@ inline void swap(forall& t1, forall& t2)
 class exists: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     exists()
       : action_formula(core::detail::default_values::ActExists)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit exists(const atermpp::aterm& term)
       : action_formula(term)
@@ -618,7 +618,7 @@ class exists: public action_formula
       assert(core::detail::check_term_ActExists(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     exists(const data::variable_list& variables, const action_formula& body)
       : action_formula(atermpp::aterm(core::detail::function_symbol_ActExists(), variables, body))
     {}
@@ -681,12 +681,12 @@ inline void swap(exists& t1, exists& t2)
 class at: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     at()
       : action_formula(core::detail::default_values::ActAt)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit at(const atermpp::aterm& term)
       : action_formula(term)
@@ -694,7 +694,7 @@ class at: public action_formula
       assert(core::detail::check_term_ActAt(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     at(const action_formula& operand, const data::data_expression& time_stamp)
       : action_formula(atermpp::aterm(core::detail::function_symbol_ActAt(), operand, time_stamp))
     {}
@@ -757,12 +757,12 @@ inline void swap(at& t1, at& t2)
 class multi_action: public action_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     multi_action()
       : action_formula(core::detail::default_values::ActMultAct)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit multi_action(const atermpp::aterm& term)
       : action_formula(term)
@@ -770,7 +770,7 @@ class multi_action: public action_formula
       assert(core::detail::check_term_ActMultAct(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit multi_action(const process::action_list& actions)
       : action_formula(atermpp::aterm(core::detail::function_symbol_ActMultAct(), actions))
     {}

@@ -324,7 +324,7 @@ def parse_ebnf(filename):
 #---------------------------------------------------------------#
 def main():
     result = True
-    filename = MCRL2_ROOT + 'doc/specs/mcrl2.internal.txt'
+    filename = MCRL2_ROOT + 'scripts/code_generation/mcrl2.internal.txt'
     rules = parse_ebnf(filename)
 
     # elements in this list are skipped during generation

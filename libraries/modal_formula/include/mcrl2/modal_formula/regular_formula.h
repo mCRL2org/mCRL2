@@ -25,12 +25,12 @@ namespace regular_formulas
 class regular_formula: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     regular_formula()
       : atermpp::aterm(core::detail::default_values::RegFrm)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit regular_formula(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -38,12 +38,12 @@ class regular_formula: public atermpp::aterm
       assert(core::detail::check_rule_RegFrm(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     regular_formula(const action_formulas::action_formula& x)
       : atermpp::aterm(x)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     regular_formula(const data::data_expression& x)
       : atermpp::aterm(x)
     {}
@@ -107,12 +107,12 @@ inline void swap(regular_formula& t1, regular_formula& t2)
 class seq: public regular_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     seq()
       : regular_formula(core::detail::default_values::RegSeq)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit seq(const atermpp::aterm& term)
       : regular_formula(term)
@@ -120,7 +120,7 @@ class seq: public regular_formula
       assert(core::detail::check_term_RegSeq(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     seq(const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm(core::detail::function_symbol_RegSeq(), left, right))
     {}
@@ -183,12 +183,12 @@ inline void swap(seq& t1, seq& t2)
 class alt: public regular_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     alt()
       : regular_formula(core::detail::default_values::RegAlt)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit alt(const atermpp::aterm& term)
       : regular_formula(term)
@@ -196,7 +196,7 @@ class alt: public regular_formula
       assert(core::detail::check_term_RegAlt(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     alt(const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm(core::detail::function_symbol_RegAlt(), left, right))
     {}
@@ -259,12 +259,12 @@ inline void swap(alt& t1, alt& t2)
 class trans: public regular_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     trans()
       : regular_formula(core::detail::default_values::RegTrans)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit trans(const atermpp::aterm& term)
       : regular_formula(term)
@@ -272,7 +272,7 @@ class trans: public regular_formula
       assert(core::detail::check_term_RegTrans(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit trans(const regular_formula& operand)
       : regular_formula(atermpp::aterm(core::detail::function_symbol_RegTrans(), operand))
     {}
@@ -330,12 +330,12 @@ inline void swap(trans& t1, trans& t2)
 class trans_or_nil: public regular_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     trans_or_nil()
       : regular_formula(core::detail::default_values::RegTransOrNil)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit trans_or_nil(const atermpp::aterm& term)
       : regular_formula(term)
@@ -343,7 +343,7 @@ class trans_or_nil: public regular_formula
       assert(core::detail::check_term_RegTransOrNil(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit trans_or_nil(const regular_formula& operand)
       : regular_formula(atermpp::aterm(core::detail::function_symbol_RegTransOrNil(), operand))
     {}
@@ -401,12 +401,12 @@ inline void swap(trans_or_nil& t1, trans_or_nil& t2)
 class untyped_regular_formula: public regular_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_regular_formula()
       : regular_formula(core::detail::default_values::UntypedRegFrm)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_regular_formula(const atermpp::aterm& term)
       : regular_formula(term)
@@ -414,12 +414,12 @@ class untyped_regular_formula: public regular_formula
       assert(core::detail::check_term_UntypedRegFrm(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm(core::detail::function_symbol_UntypedRegFrm(), name, left, right))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     untyped_regular_formula(const std::string& name, const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm(core::detail::function_symbol_UntypedRegFrm(), core::identifier_string(name), left, right))
     {}

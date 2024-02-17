@@ -25,12 +25,12 @@ namespace data
 class structured_sort_constructor_argument: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     structured_sort_constructor_argument()
       : atermpp::aterm(core::detail::default_values::StructProj)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit structured_sort_constructor_argument(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -38,12 +38,12 @@ class structured_sort_constructor_argument: public atermpp::aterm
       assert(core::detail::check_term_StructProj(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)
       : atermpp::aterm(core::detail::function_symbol_StructProj(), name, sort)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z1.
     structured_sort_constructor_argument(const std::string& name, const sort_expression& sort)
       : atermpp::aterm(core::detail::function_symbol_StructProj(), core::identifier_string(name), sort)
     {}

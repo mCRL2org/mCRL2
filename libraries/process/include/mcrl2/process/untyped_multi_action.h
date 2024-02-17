@@ -23,12 +23,12 @@ namespace process {
 class untyped_multi_action: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_multi_action()
       : atermpp::aterm(core::detail::default_values::UntypedMultiAction)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_multi_action(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -36,7 +36,7 @@ class untyped_multi_action: public atermpp::aterm
       assert(core::detail::check_term_UntypedMultiAction(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     explicit untyped_multi_action(const data::untyped_data_parameter_list& actions)
       : atermpp::aterm(core::detail::function_symbol_UntypedMultiAction(), actions)
     {}

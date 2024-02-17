@@ -25,12 +25,12 @@ namespace process
 class action_name_multiset: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     action_name_multiset()
       : atermpp::aterm(core::detail::default_values::MultActName)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit action_name_multiset(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -38,7 +38,7 @@ class action_name_multiset: public atermpp::aterm
       assert(core::detail::check_term_MultActName(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     explicit action_name_multiset(const core::identifier_string_list& names)
       : atermpp::aterm(core::detail::function_symbol_MultActName(), names)
     {}

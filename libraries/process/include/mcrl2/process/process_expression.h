@@ -30,12 +30,12 @@ namespace process
 class process_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     process_expression()
       : atermpp::aterm(core::detail::default_values::ProcExpr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit process_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -43,7 +43,7 @@ class process_expression: public atermpp::aterm
       assert(core::detail::check_rule_ProcExpr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     process_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
@@ -140,12 +140,12 @@ inline void swap(process_expression& t1, process_expression& t2)
 class action: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     action()
       : process_expression(core::detail::default_values::Action)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit action(const atermpp::aterm& term)
       : process_expression(term)
@@ -153,7 +153,7 @@ class action: public process_expression
       assert(core::detail::check_term_Action(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     action(const action_label& label, const data::data_expression_list& arguments)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Action(), label, arguments))
     {}
@@ -222,12 +222,12 @@ inline void swap(action& t1, action& t2)
 class process_instance: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     process_instance()
       : process_expression(core::detail::default_values::Process)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit process_instance(const atermpp::aterm& term)
       : process_expression(term)
@@ -235,7 +235,7 @@ class process_instance: public process_expression
       assert(core::detail::check_term_Process(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Process(), identifier, actual_parameters))
     {}
@@ -298,12 +298,12 @@ inline void swap(process_instance& t1, process_instance& t2)
 class process_instance_assignment: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     process_instance_assignment()
       : process_expression(core::detail::default_values::ProcessAssignment)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit process_instance_assignment(const atermpp::aterm& term)
       : process_expression(term)
@@ -311,7 +311,7 @@ class process_instance_assignment: public process_expression
       assert(core::detail::check_term_ProcessAssignment(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)
       : process_expression(atermpp::aterm(core::detail::function_symbol_ProcessAssignment(), identifier, assignments))
     {}
@@ -374,12 +374,12 @@ inline void swap(process_instance_assignment& t1, process_instance_assignment& t
 class delta: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     delta()
       : process_expression(core::detail::default_values::Delta)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit delta(const atermpp::aterm& term)
       : process_expression(term)
@@ -427,12 +427,12 @@ inline void swap(delta& t1, delta& t2)
 class tau: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     tau()
       : process_expression(core::detail::default_values::Tau)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit tau(const atermpp::aterm& term)
       : process_expression(term)
@@ -480,12 +480,12 @@ inline void swap(tau& t1, tau& t2)
 class sum: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     sum()
       : process_expression(core::detail::default_values::Sum)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit sum(const atermpp::aterm& term)
       : process_expression(term)
@@ -493,7 +493,7 @@ class sum: public process_expression
       assert(core::detail::check_term_Sum(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     sum(const data::variable_list& variables, const process_expression& operand)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Sum(), variables, operand))
     {}
@@ -556,12 +556,12 @@ inline void swap(sum& t1, sum& t2)
 class block: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     block()
       : process_expression(core::detail::default_values::Block)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit block(const atermpp::aterm& term)
       : process_expression(term)
@@ -569,7 +569,7 @@ class block: public process_expression
       assert(core::detail::check_term_Block(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     block(const core::identifier_string_list& block_set, const process_expression& operand)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Block(), block_set, operand))
     {}
@@ -632,12 +632,12 @@ inline void swap(block& t1, block& t2)
 class hide: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     hide()
       : process_expression(core::detail::default_values::Hide)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit hide(const atermpp::aterm& term)
       : process_expression(term)
@@ -645,7 +645,7 @@ class hide: public process_expression
       assert(core::detail::check_term_Hide(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     hide(const core::identifier_string_list& hide_set, const process_expression& operand)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Hide(), hide_set, operand))
     {}
@@ -708,12 +708,12 @@ inline void swap(hide& t1, hide& t2)
 class rename: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     rename()
       : process_expression(core::detail::default_values::Rename)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit rename(const atermpp::aterm& term)
       : process_expression(term)
@@ -721,7 +721,7 @@ class rename: public process_expression
       assert(core::detail::check_term_Rename(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     rename(const rename_expression_list& rename_set, const process_expression& operand)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Rename(), rename_set, operand))
     {}
@@ -784,12 +784,12 @@ inline void swap(rename& t1, rename& t2)
 class comm: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     comm()
       : process_expression(core::detail::default_values::Comm)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit comm(const atermpp::aterm& term)
       : process_expression(term)
@@ -797,7 +797,7 @@ class comm: public process_expression
       assert(core::detail::check_term_Comm(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     comm(const communication_expression_list& comm_set, const process_expression& operand)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Comm(), comm_set, operand))
     {}
@@ -860,12 +860,12 @@ inline void swap(comm& t1, comm& t2)
 class allow: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     allow()
       : process_expression(core::detail::default_values::Allow)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit allow(const atermpp::aterm& term)
       : process_expression(term)
@@ -873,7 +873,7 @@ class allow: public process_expression
       assert(core::detail::check_term_Allow(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     allow(const action_name_multiset_list& allow_set, const process_expression& operand)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Allow(), allow_set, operand))
     {}
@@ -936,12 +936,12 @@ inline void swap(allow& t1, allow& t2)
 class sync: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     sync()
       : process_expression(core::detail::default_values::Sync)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit sync(const atermpp::aterm& term)
       : process_expression(term)
@@ -949,7 +949,7 @@ class sync: public process_expression
       assert(core::detail::check_term_Sync(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     sync(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Sync(), left, right))
     {}
@@ -1012,12 +1012,12 @@ inline void swap(sync& t1, sync& t2)
 class at: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     at()
       : process_expression(core::detail::default_values::AtTime)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit at(const atermpp::aterm& term)
       : process_expression(term)
@@ -1025,7 +1025,7 @@ class at: public process_expression
       assert(core::detail::check_term_AtTime(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     at(const process_expression& operand, const data::data_expression& time_stamp)
       : process_expression(atermpp::aterm(core::detail::function_symbol_AtTime(), operand, time_stamp))
     {}
@@ -1088,12 +1088,12 @@ inline void swap(at& t1, at& t2)
 class seq: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     seq()
       : process_expression(core::detail::default_values::Seq)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit seq(const atermpp::aterm& term)
       : process_expression(term)
@@ -1101,7 +1101,7 @@ class seq: public process_expression
       assert(core::detail::check_term_Seq(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     seq(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Seq(), left, right))
     {}
@@ -1164,12 +1164,12 @@ inline void swap(seq& t1, seq& t2)
 class if_then: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     if_then()
       : process_expression(core::detail::default_values::IfThen)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit if_then(const atermpp::aterm& term)
       : process_expression(term)
@@ -1177,7 +1177,7 @@ class if_then: public process_expression
       assert(core::detail::check_term_IfThen(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     if_then(const data::data_expression& condition, const process_expression& then_case)
       : process_expression(atermpp::aterm(core::detail::function_symbol_IfThen(), condition, then_case))
     {}
@@ -1240,12 +1240,12 @@ inline void swap(if_then& t1, if_then& t2)
 class if_then_else: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     if_then_else()
       : process_expression(core::detail::default_values::IfThenElse)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit if_then_else(const atermpp::aterm& term)
       : process_expression(term)
@@ -1253,7 +1253,7 @@ class if_then_else: public process_expression
       assert(core::detail::check_term_IfThenElse(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case)
       : process_expression(atermpp::aterm(core::detail::function_symbol_IfThenElse(), condition, then_case, else_case))
     {}
@@ -1321,12 +1321,12 @@ inline void swap(if_then_else& t1, if_then_else& t2)
 class bounded_init: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     bounded_init()
       : process_expression(core::detail::default_values::BInit)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit bounded_init(const atermpp::aterm& term)
       : process_expression(term)
@@ -1334,7 +1334,7 @@ class bounded_init: public process_expression
       assert(core::detail::check_term_BInit(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     bounded_init(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm(core::detail::function_symbol_BInit(), left, right))
     {}
@@ -1397,12 +1397,12 @@ inline void swap(bounded_init& t1, bounded_init& t2)
 class merge: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     merge()
       : process_expression(core::detail::default_values::Merge)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit merge(const atermpp::aterm& term)
       : process_expression(term)
@@ -1410,7 +1410,7 @@ class merge: public process_expression
       assert(core::detail::check_term_Merge(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     merge(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Merge(), left, right))
     {}
@@ -1473,12 +1473,12 @@ inline void swap(merge& t1, merge& t2)
 class left_merge: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     left_merge()
       : process_expression(core::detail::default_values::LMerge)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit left_merge(const atermpp::aterm& term)
       : process_expression(term)
@@ -1486,7 +1486,7 @@ class left_merge: public process_expression
       assert(core::detail::check_term_LMerge(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     left_merge(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm(core::detail::function_symbol_LMerge(), left, right))
     {}
@@ -1549,12 +1549,12 @@ inline void swap(left_merge& t1, left_merge& t2)
 class choice: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     choice()
       : process_expression(core::detail::default_values::Choice)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit choice(const atermpp::aterm& term)
       : process_expression(term)
@@ -1562,7 +1562,7 @@ class choice: public process_expression
       assert(core::detail::check_term_Choice(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     choice(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm(core::detail::function_symbol_Choice(), left, right))
     {}
@@ -1625,12 +1625,12 @@ inline void swap(choice& t1, choice& t2)
 class stochastic_operator: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     stochastic_operator()
       : process_expression(core::detail::default_values::StochasticOperator)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit stochastic_operator(const atermpp::aterm& term)
       : process_expression(term)
@@ -1638,7 +1638,7 @@ class stochastic_operator: public process_expression
       assert(core::detail::check_term_StochasticOperator(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     stochastic_operator(const data::variable_list& variables, const data::data_expression& distribution, const process_expression& operand)
       : process_expression(atermpp::aterm(core::detail::function_symbol_StochasticOperator(), variables, distribution, operand))
     {}
@@ -1706,12 +1706,12 @@ inline void swap(stochastic_operator& t1, stochastic_operator& t2)
 class untyped_process_assignment: public process_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_process_assignment()
       : process_expression(core::detail::default_values::UntypedProcessAssignment)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_process_assignment(const atermpp::aterm& term)
       : process_expression(term)
@@ -1719,12 +1719,12 @@ class untyped_process_assignment: public process_expression
       assert(core::detail::check_term_UntypedProcessAssignment(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     untyped_process_assignment(const core::identifier_string& name, const data::untyped_identifier_assignment_list& assignments)
       : process_expression(atermpp::aterm(core::detail::function_symbol_UntypedProcessAssignment(), name, assignments))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     untyped_process_assignment(const std::string& name, const data::untyped_identifier_assignment_list& assignments)
       : process_expression(atermpp::aterm(core::detail::function_symbol_UntypedProcessAssignment(), core::identifier_string(name), assignments))
     {}

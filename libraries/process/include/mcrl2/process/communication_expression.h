@@ -25,12 +25,12 @@ namespace process
 class communication_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     communication_expression()
       : atermpp::aterm(core::detail::default_values::CommExpr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit communication_expression(const atermpp::aterm& term)
       : atermpp::aterm(term)
@@ -38,12 +38,12 @@ class communication_expression: public atermpp::aterm
       assert(core::detail::check_term_CommExpr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)
       : atermpp::aterm(core::detail::function_symbol_CommExpr(), action_name, name)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z1.
     communication_expression(const action_name_multiset& action_name, const std::string& name)
       : atermpp::aterm(core::detail::function_symbol_CommExpr(), action_name, core::identifier_string(name))
     {}
