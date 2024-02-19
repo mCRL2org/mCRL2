@@ -463,13 +463,6 @@ public:
      }))
   {}
 
-  // Assignment is fine since the left-hand side is already registered.
-  generic_aterm_container& operator=(const generic_aterm_container& other) {
-
-  };
-
-  generic_aterm_container& operator=(generic_aterm_container&& other) = default;
-
 protected:
   aterm_container m_container;
 };
