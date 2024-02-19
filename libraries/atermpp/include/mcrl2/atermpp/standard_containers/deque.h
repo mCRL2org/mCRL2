@@ -30,13 +30,12 @@ namespace atermpp
 
 /// \brief A deque class in which aterms can be stored. 
 template < class T, class Alloc = std::allocator<detail::reference_aterm<T> > > 
-class deque : public std::deque< detail::reference_aterm<T>, Alloc >,
-              protected detail::generic_aterm_container<std::deque<detail::reference_aterm<T>, Alloc> > 
-              
+class deque : public std::deque< detail::reference_aterm<T>, Alloc >              
 {
 protected:
   typedef std::deque< detail::reference_aterm<T>, Alloc > super;
-  typedef detail::generic_aterm_container<std::deque<detail::reference_aterm<T>, Alloc> > container_wrapper;
+  
+  detail::generic_aterm_container<std::deque<detail::reference_aterm<T>, Alloc>> container_wrapper;
 
 public:
   
@@ -51,62 +50,62 @@ public:
   /// \brief Default constructor.
   deque()
    : super(),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   explicit deque (const allocator_type& alloc)
    : super::deque(alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   explicit deque (size_type n, const allocator_type& alloc = allocator_type())
    : super::deque(n, alloc),
-     container_wrapper(*this, true)
+     container_wrapper(*this)
   {}
 
   /// \brief Constructor.
   deque(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
    : super::deque(n, detail::reference_aterm(val), alloc),
-     container_wrapper(*this, true)    
+     container_wrapper(*this)    
   {}
 
   /// \brief Constructor.
   template <class InputIterator>
   deque(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
    : super::deque(first, last, alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
     
   /// \brief Constructor.
   deque(const deque& x)
    : super::deque(x),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   deque(const deque& x, const allocator_type& alloc)
    : super::deque(x, alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
   
   /// \brief Constructor.
   deque(deque&& x)
    : super::deque(std::move(x)),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   deque(deque&& x, const allocator_type& alloc)
    : super::deque(std::move(x), alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor. 
   deque(std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
     : super::deque(il.begin(), il.end(), alloc),
-      container_wrapper(*this, true)      
+      container_wrapper(*this)      
   {}
 
   /// \brief Copy assignment operator.
@@ -237,7 +236,7 @@ public:
     super::resize(count, value);
   }
 
-  std::size_t size() const override
+  std::size_t size() const
   {
     return super::size();
   }
