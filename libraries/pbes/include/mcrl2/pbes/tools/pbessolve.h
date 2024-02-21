@@ -359,7 +359,7 @@ class pbessolve_tool
       
       // Perform the second instantiation given the proof graph.      
       timer().start("second-instantiation");
-      second_instantiate.run(boost::make_optional(std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>(initial_G, result, W_alpha)));
+      second_instantiate.run(boost::make_optional(std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>(initial_G, !result, W_alpha)));
       timer().finish("second-instantiation");
 
       mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
