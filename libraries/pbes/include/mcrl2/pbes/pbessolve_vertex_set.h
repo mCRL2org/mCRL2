@@ -492,6 +492,10 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
     }
   }
   mCRL2log(log::debug) << "Extracted minimal structure graph " << core::detail::print_set(done) << std::endl;
+  for (const auto& index : done) {
+    mCRL2log(log::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
+  }
+
   return done;
 }
 
@@ -550,6 +554,10 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(
     }
   }
   mCRL2log(log::debug) << "\nExtracted minimal structure graph " << core::detail::print_set(done) << std::endl;
+  for (const auto& index : done) {
+    mCRL2log(log::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
+  }
+
   return done;
 }
 
