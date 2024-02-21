@@ -115,7 +115,7 @@ public:
   deque& operator=(deque&& other) = default;
 
   /// \brief Standard destructor.
-  ~deque()=default;
+  ~deque() = default;
 
   void shrink_to_fit()
   {

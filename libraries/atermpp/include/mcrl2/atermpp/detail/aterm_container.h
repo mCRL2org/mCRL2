@@ -39,7 +39,7 @@ namespace detail
 /// 
 /// \details Can not be inherited since it is being registered during construction and the 
 ///          vptr is being updated by inherited classes otherwise.
-class aterm_container final
+class aterm_container final : private mcrl2::utilities::noncopyable
 {
 public:
   aterm_container(std::function<void(term_mark_stack&)> mark_func, std::function<std::size_t()> size_func);
@@ -440,7 +440,7 @@ class generic_aterm_container
 public:
   /// \brief Constructor
   generic_aterm_container(const Container& container)
-   : m_container(std::bind([container](term_mark_stack& todo) {   
+   : m_container(std::bind([&container](term_mark_stack& todo) {   
       // Marking contained terms.       
       for (const typename Container::value_type& element: container) 
       {
@@ -457,11 +457,26 @@ public:
         }
       }        
      }, std::placeholders::_1),
-     std::bind([container]() -> std::size_t {  
+     std::bind([&container]() -> std::size_t {  
       // Return the number of elements in the container.
-      return std::distance(container.begin(), container.end());
+      return container.size();
      }))
   {}
+
+  // Container is a reference so unclear what to do in these cases.
+  generic_aterm_container(const generic_aterm_container&) = delete;
+  generic_aterm_container(generic_aterm_container&&) = delete;
+
+  // It is fine here if the container gets updated, but the functions stay the same.
+  generic_aterm_container& operator=(const generic_aterm_container& other) 
+  {
+    return *this;
+  };
+
+  generic_aterm_container& operator=(generic_aterm_container& other) 
+  {
+    return *this;
+  }
 
 protected:
   aterm_container m_container;
