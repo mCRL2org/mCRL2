@@ -345,7 +345,7 @@ class pbessolve_tool
 
       // Solve the initial pbes and obtain the strategies in G.
       timer().start("first-solving");
-      auto [result, W_alpha] = solve_structure_graph(initial_G);
+      auto [result, W_alpha] = solve_structure_graph(initial_G, true);
       timer().finish("first-solving");
       std::cout << (result ? "true" : "false") << std::endl;
 
