@@ -283,6 +283,8 @@ class pbesinst_lazy_algorithm
       std::smatch match;
 
       // Now we need to find all reachable X --> Y, following vertices that are not ranked.
+      mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
+
       std::set<pbes_expression> Ys;
       
       // If X is won by player alpha, i.e. in the winning set W.
@@ -329,23 +331,36 @@ class pbesinst_lazy_algorithm
           if (std::regex_match(static_cast<const std::string&>(Y.name()), match, re))
           {
             // If Y in L return Y
+            mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
             return Y;
           }
           else
           {
             if (mcrl2::utilities::detail::contains(Ys, Y))
             {
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
               return Y;
             }
             else 
             {
-              // If Y is not reachable, replace it by false
-              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
-              return false_();
+              changed = true;
+              if (alpha == 0) 
+              {
+                // If Y is not reachable, replace it by false
+                mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
+                return false_();
+              }
+              else
+              {
+                // If Y is not reachable, replace it by true
+                mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
+                return true_();
+              }
             }
           }
         }
       );
+
       if (changed)
       {
         simplify_rewriter simplify;
@@ -353,6 +368,7 @@ class pbesinst_lazy_algorithm
         simplify(result, result1);
       }
 
+       mCRL2log(log::debug) << "result = " << psi << std::endl;
     }
 
     data::rewriter construct_rewriter(const pbes& pbesspec)
@@ -438,13 +454,12 @@ class pbesinst_lazy_algorithm
       {
         auto& [G, alpha, W] = proof_graph.value();
         rewrite_star(result, G, alpha, W, symbol, X, psi);
-      }
-      
+      }      
       if (m_options.optimization >= 1)
       {
         rewrite_true_false(result, symbol, X, psi);
       }
-      else
+      else if (!proof_graph)
       {
         result = psi;
       }
