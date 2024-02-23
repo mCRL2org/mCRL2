@@ -22,32 +22,36 @@ using namespace sylvan::ldds;
 using namespace sylvan::bdds;
 using mcrl2::log::log_level_t;
 
-std::uint32_t compute_highest_action_rec(ldd set, ldd meta, mcrl2::utilities::unordered_set<ldd>& cache)
+/// Visited is used to avoid recursion through already visited nodes.
+std::uint32_t compute_highest_action_rec(ldd set, ldd meta, mcrl2::utilities::unordered_set<ldd>& visited)
 {
-    if (set == empty_set() || set == empty_list()) return 0;
+    if (set == empty_set() || set == empty_list()) 
+    {
+      return 0;
+    }
 
-    if (cache.count(set) != 0) {
+    if (visited.count(set) != 0) {
         return 0; // Can return zero since this value will be returned somewhere else, and we are interested in the max.
     }
 
     std::uint32_t highest = 0;
-    highest = std::max(highest, compute_highest_action_rec(set.right(), meta, cache));
+    highest = std::max(highest, compute_highest_action_rec(set.right(), meta, visited));
 
     if (meta.value() == 5)
     {
-        highest = std::max(highest, set.value() + 1); // Count zero as additional value 
+        highest = std::max(highest, set.value() + 1); // This is the action index, so add one.
     }
     else if (meta.value() == 0)
     {
         // Not in the relation, so don't move down in set.
-        highest = std::max(highest, compute_highest_action_rec(set, meta.down(), cache));
+        highest = std::max(highest, compute_highest_action_rec(set, meta.down(), visited));
     }
     else
     {
-        highest = std::max(highest, compute_highest_action_rec(set.down(), meta.down(), cache));
+        highest = std::max(highest, compute_highest_action_rec(set.down(), meta.down(), visited));
     }
-
-    cache.emplace(set);
+    
+    visited.emplace(set);
     return highest;
 }
 
@@ -120,7 +124,7 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
 
   // Includes the number of bits required to store the action label.
   m_bits_action_label = base_two_bits(highest_action);
-  mCRL2log(log_level_t::debug) << "Bits for action label:" << m_bits_action_label << std::endl;
+  mCRL2log(log_level_t::debug) << "Bits for action label: " << m_bits_action_label << std::endl;
   
   // Compute the variable names for each level.
   std::vector<uint32_t> variables;
@@ -157,6 +161,7 @@ symbolic_lts_bdd::symbolic_lts_bdd(const symbolic_lts& lts)
   
   m_action_label_variables = sylvan::bdds::cube(action_variables);
 
+  mCRL2log(log_level_t::debug) << "Convert transition relations from LDD to BDD..." << std::endl;
   auto variables_vector = bdd_variables(m_action_label_variables, m_action_label_variables);
   assert(variables_vector.size() == 1); // Should be a singleton
 

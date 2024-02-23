@@ -119,9 +119,11 @@ std::string print_partition(const std::vector<data_expression_index>& data_index
 
     std::uint32_t block_number = bits_to_value_lsb(solution, bits_for_block, offset);
 
-    vectors.emplace_back(mcrl2::core::detail::print_list(ldd2state(data_index, result)) + " -> " + std::to_string(block_number));
+    vectors.emplace_back( std::to_string(block_number) + ": " + mcrl2::core::detail::print_list(ldd2state(data_index, result)));
   }
 
+  // Sort lexicographically for easier inspection.
+  std::sort(vectors.begin(), vectors.end());
   return print_container_multiline(vectors, [](const auto& container) { return container; });
 }
 
@@ -184,7 +186,8 @@ mcrl2::lps::symbolic_lts_bdd sigref_algorithm::run(const mcrl2::lps::symbolic_lt
   mCRL2log(log_level_t::debug) << "transition relation size " << print_size(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables(), prime_variables), lts.action_label_variables()), true, true) << std::endl;
 
   mCRL2log(log_level_t::debug) << "transition relation = " << std::endl;     
-  mCRL2log(log_level_t::debug) << print_vectors(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables(), prime_variables), lts.action_label_variables())) << std::endl;
+  // mCRL2log(log_level_t::debug) << "transition relation = " << std::endl;     
+  // mCRL2log(log_level_t::debug) << print_vectors(new_transition_relations[0], bdd_and(bdd_and(lts.state_variables(), prime_variables), lts.action_label_variables())) << std::endl;
 
   // There are at most |states| blocks since every state can be in a unique block.
   double number_of_states = satcount(lts.states(), lts.state_variables());
@@ -228,7 +231,6 @@ mcrl2::lps::symbolic_lts_bdd sigref_algorithm::run(const mcrl2::lps::symbolic_lt
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
 
     sylvan::cache_clear(); // Clear the cache between iterations.
-    m_block_signature.clear(); // Clear the block table.
   }
 
   mCRL2log(log_level_t::verbose) << "There are " << num_of_blocks << " equivalence classes." << std::endl;  

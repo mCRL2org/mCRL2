@@ -85,7 +85,7 @@ private:
     {
         if (m_next_block + 1 % 10000 == 0)
         {
-            std::cerr << "Created " << m_next_block + 1 << " blocks" << std::endl;
+            mCRL2log(mcrl2::log::verbose) << "Created " << m_next_block + 1 << " blocks" << std::endl;
         }
 
         return m_next_block++;
