@@ -43,6 +43,7 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
   get_filename_component(MCRL2_FILENAME ${benchmark} NAME)
   string(REPLACE ".mcrl2" "" NAME ${MCRL2_FILENAME})
 
+  set(SYM_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.sym")
   set(LPS_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.lps")
   set(LTS_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.lts")
   set(NODEADLOCK_PBES_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.nodeadlock.pbes")
@@ -132,7 +133,7 @@ if (MCRL2_ENABLE_EXPERIMENTAL AND MCRL2_ENABLE_SYLVAN)
     set(NODEADLOCK_PBES_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.nodeadlock.pbes")
 
     # Benchmark symbolic statespace generation.
-    add_tool_benchmark("${NAME}" lpsreach "${LPS_FILENAME}" "")
+    add_tool_benchmark("${NAME}" lpsreach "${LPS_FILENAME}" "${SYM_FILENAME}")
 
     # Benchmark solving PBES symbolically.
     add_tool_benchmark("${NAME}" pbessolvesymbolic "${NODEADLOCK_PBES_FILENAME}" "" "-Q0")
