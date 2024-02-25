@@ -8,8 +8,8 @@
 //
 /// \file ./lpsparunfold.cpp
 
-#define NAME "lpsparunfold"
-#define AUTHOR "Frank Stappers"
+#define TOOLNAME "lpsparunfold"
+#define AUTHORS "Frank Stappers, Jeroen Keiren, Thomas Neele"
 
 // C++
 #include <climits>
@@ -128,8 +128,8 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
     lpsparunfold_tool()
       : super(
-        "lpsparunfold",
-        "Frank Stappers",
+        TOOLNAME,
+        AUTHORS,
         "unfolds process parameter of an LPS",
         "Unfolds a set of given process parameters of the linear process specification (LPS) "
         "in INFILE and writes the result to OUTFILE. If INFILE is not present, stdin is "
