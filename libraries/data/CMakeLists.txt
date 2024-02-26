@@ -7,6 +7,7 @@ mcrl2_add_library(mcrl2_data
     source/data.cpp
     source/data_io.cpp
     source/data_specification.cpp
+    source/machine_word.cpp
     source/typecheck.cpp
     source/detail/prover/smt_lib_solver.cpp
     source/detail/rewrite/jitty.cpp

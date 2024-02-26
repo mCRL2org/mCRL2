@@ -12,11 +12,20 @@
 #ifndef MCRL2_DATA_DETAIL_PRINT_UTILITY_H
 #define MCRL2_DATA_DETAIL_PRINT_UTILITY_H
 
+#include "mcrl2/utilities/unused.h"
 #include "mcrl2/core/detail/print_utility.h"
+
+#include "mcrl2/data/data_configuration.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/bag64.h"
+#include "mcrl2/data/list64.h"
+#else
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/list.h"
+#endif
+
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/lambda.h"
-#include "mcrl2/data/list.h"
 #include "mcrl2/data/standard_numbers_utility.h"
 
 namespace mcrl2 {
@@ -29,15 +38,19 @@ namespace detail {
 //     Real.
 /// \return if(BoolExpr, 1, 0) of sort SortExpr
 inline
-data::data_expression bool_to_numeric(data::data_expression const& e, data::sort_expression const& s)
+data::data_expression bool_to_numeric(const data::data_expression& e, const data::sort_expression& s)
 {
   // TODO Maybe enforce that SortExpr is a PNIR sort
   return data::if_(e, data::function_symbol("1", s), data::function_symbol("0", s));
 }
 
 inline
-data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>& result)
+data_expression reconstruct_pos_mult(const data_expression& x, const std::vector<char>& result)
 {
+#ifdef Enable64bitNumbers
+  utilities::mcrl2_unused(result); // Maybe this part of this printing utility may have to be written. 
+  return x;
+#else
   data_expression reconstruction_result;
   if (data::sort_pos::is_c1_function_symbol(x))
   {
@@ -89,6 +102,7 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
     }
   }
   return reconstruction_result;
+#endif
 }
 
 } // namespace detail

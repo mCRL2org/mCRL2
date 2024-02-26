@@ -29,6 +29,7 @@
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/enumerator.h" 
+#include "mcrl2/data/real_utilities.h"
 
 // linear process libraries.
 #include "mcrl2/lps/detail/ultimate_delay.h"
@@ -254,7 +255,7 @@ class specification_basic_type
     }
 
   private:
-    data_expression real_zero()
+    /* data_expression real_zero()
     {
       static data_expression zero=sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1());
       return zero;
@@ -264,19 +265,19 @@ class specification_basic_type
     {
       static data_expression one=sort_real::creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1());
       return one;
-    }
+    } */
 
     data_expression real_times_optimized(const data_expression& r1, const data_expression& r2)
     {
-      if (r1==real_zero() || r2==real_zero())
+      if (r1==sort_real::real_zero() || r2==sort_real::real_zero())
       {
-        return real_zero();
+        return sort_real::real_zero();
       }
-      if (r1==real_one())
+      if (r1==sort_real::real_one())
       {
         return r2;
       }
-      if (r2==real_one())
+      if (r2==sort_real::real_one())
       {
         return r1;
       }
@@ -285,7 +286,7 @@ class specification_basic_type
 
     process_expression delta_at_zero(void)
     {
-      return at(delta(), data::sort_real::real_(0));
+      return at(delta(), sort_real::real_(0));
     }
 
     bool isDeltaAtZero(const process_expression& t)
@@ -298,7 +299,7 @@ class specification_basic_type
       {
         return false;
       }
-      return RewriteTerm(at(t).time_stamp())==data::sort_real::real_(0);
+      return RewriteTerm(at(t).time_stamp())==sort_real::real_one();
     }
 
     /***************** temporary helper function to compare substitutions ******************/
@@ -1292,6 +1293,11 @@ class specification_basic_type
       }
 
       if (is_function_symbol(t))
+      {
+        return;
+      }
+
+      if (is_machine_number(t))
       {
         return;
       }
@@ -3002,7 +3008,7 @@ class specification_basic_type
         if (result_defined)
         {
           resulting_body=choice(resulting_body, d1);
-          resulting_distribution=data::sort_real::times(resulting_distribution,new_distribution);
+          resulting_distribution=sort_real::times(resulting_distribution,new_distribution);
           resulting_stochastic_variables=resulting_stochastic_variables + vl;
         }
         else
@@ -3054,7 +3060,7 @@ class specification_basic_type
         const data_expression new_distribution=replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
         return distribute_sum_over_a_stochastic_operator(sumvars, 
                                                          stochastic_variables + inner_stoch_vars, 
-                                                         data::sort_real::times(distribution,new_distribution), new_body);
+                                                         sort_real::times(distribution,new_distribution), new_body);
       }
 
       throw mcrl2::runtime_error("Internal error. Unexpected process format in distribute_sum " + process::pp(body) +".");
@@ -4218,7 +4224,7 @@ class specification_basic_type
       }
       else
       {
-        initial_stochastic_distribution = stochastic_distribution(variable_list(), real_one());
+        initial_stochastic_distribution = stochastic_distribution(variable_list(), sort_real::real_one());
       }
 
       return result;
@@ -4683,6 +4689,11 @@ class specification_basic_type
       const variable_list& stochastic_variables)
     {
       if (is_function_symbol(t))
+      {
+        return t;
+      }
+
+      if (is_machine_number(t))
       {
         return t;
       }
@@ -5341,7 +5352,7 @@ class specification_basic_type
         condition1=correctstatecond(procId,pCRLprocs,stack,regular);
       }
 
-      stochastic_distribution cumulative_distribution(variable_list(),real_one());
+      stochastic_distribution cumulative_distribution(variable_list(),sort_real::real_one());
 
       /* The conditions are collected for use. The stochastic operators before the action are ignored */
       for (; (is_if_then(summandterm)||is_stochastic_operator(summandterm)) ;)
@@ -5405,7 +5416,7 @@ class specification_basic_type
           multiAction=to_action_list(t1);
         }
 
-        stochastic_distribution distribution(variable_list(),real_one());
+        stochastic_distribution distribution(variable_list(),sort_real::real_one());
         process_expression t2_new=t2;
         if (is_stochastic_operator(t2))
         {
@@ -5485,7 +5496,7 @@ class specification_basic_type
                        condition1,
                        multiAction,
                        atTime,
-                       stochastic_distribution(variable_list(),real_one()),
+                       stochastic_distribution(variable_list(),sort_real::real_one()),
                        dummyparameterlist(stack,singlestate),
                        has_time,
                        is_delta_summand);
@@ -5502,7 +5513,7 @@ class specification_basic_type
                 condition1,
                 multiAction,
                 atTime,
-                stochastic_distribution(variable_list(),real_one()),   // TODO: UNLIKELY THAT THIS IS CORRECT.
+                stochastic_distribution(variable_list(),sort_real::real_one()),   // TODO: UNLIKELY THAT THIS IS CORRECT.
                 procargs,
                 has_time,
                 is_delta_summand);
@@ -6511,7 +6522,7 @@ class specification_basic_type
       variable_list resulting_stochastic_variables;
       std::vector < variable_list > stochastic_rename_list_pars;
       std::vector < data_expression_list > stochastic_rename_list_args;
-      data_expression resulting_distribution=real_one();
+      data_expression resulting_distribution=sort_real::real_one();
       {
         data_expression_list stochastic_conditionlist;
         for (const stochastic_action_summand& smmnd: action_summands)
@@ -6607,7 +6618,7 @@ class specification_basic_type
               else
               {
                 resulting_distribution=real_times_optimized(
-                                                  if_(stochastic_conditionlist.front(),real_one(),real_zero()),
+                                                  if_(stochastic_conditionlist.front(),sort_real::real_one(),sort_real::real_zero()),
                                                   equalterm);
               }
             }
@@ -6619,8 +6630,8 @@ class specification_basic_type
                                 if_(application(
                                       find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                                       temp_stochastic_conditionlist),
-                                      real_one(),
-                                      real_zero()),
+                                      sort_real::real_one(),
+                                      sort_real::real_zero()),
                                 equalterm);
             }
           }
@@ -6636,13 +6647,13 @@ class specification_basic_type
               if (stochastic_conditionlist.front()==sort_bool::true_())
               {
                resulting_distribution=real_times_optimized(
-                                                 if_(stochastic_conditionlist.front(),real_one(),real_zero()),
+                                                 if_(stochastic_conditionlist.front(),sort_real::real_one(),sort_real::real_zero()),
                                                  resulting_distribution);
               }
               else
               {
                resulting_distribution=real_times_optimized(
-                                                 if_(stochastic_conditionlist.front(),real_one(),real_zero()),
+                                                 if_(stochastic_conditionlist.front(),sort_real::real_one(),sort_real::real_zero()),
                                                  resulting_distribution);
               }
             }
@@ -6654,8 +6665,8 @@ class specification_basic_type
                               if_(application(
                                      find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                                      temp_stochastic_conditionlist),
-                                  real_one(),
-                                  real_zero()),
+                                  sort_real::real_one(),
+                                  sort_real::real_zero()),
                               resulting_distribution);
             }
           }
@@ -9181,7 +9192,7 @@ class specification_basic_type
       init_result=init1 + init2;
       initial_stochastic_distribution=stochastic_distribution(
                                           initial_stochastic_distribution1.variables()+initial_stochastic_distribution2.variables(),
-                                          data::sort_real::times(initial_stochastic_distribution1.distribution(),
+                                          sort_real::times(initial_stochastic_distribution1.distribution(),
                                                                  initial_stochastic_distribution2.distribution()));
       if (!options.ignore_time)
       {
@@ -9424,7 +9435,7 @@ class specification_basic_type
         alphaconvert(stochvars,sigma,pars + initial_stochastic_distribution.variables(), data_expression_list());
         initial_stochastic_distribution=stochastic_distribution(
                                           stochvars+initial_stochastic_distribution.variables(),
-                                          data::sort_real::times(replace_variables_capture_avoiding_alt(
+                                          sort_real::times(replace_variables_capture_avoiding_alt(
                                                                                     sto.distribution(), sigma),
                                                                  initial_stochastic_distribution.distribution()));
         /* Reset the bound variables in the initial_stochastic_distribution, to avoid erroneous renaming in the body of the process */
@@ -9981,7 +9992,7 @@ class specification_basic_type
         {
           const stochastic_operator& r_=down_cast<const stochastic_operator>(r);
           return stochastic_operator(r_.variables(),
-                                     if_(t_.condition(),r_.distribution(),if_(variables_are_equal_to_default_values(r_.variables()),real_one(),real_zero())),
+                                     if_(t_.condition(),r_.distribution(),if_(variables_are_equal_to_default_values(r_.variables()),sort_real::real_one(),sort_real::real_zero())),
                                      if_then(t_.condition(),r_.operand()));
         }
         return if_then(t_.condition(),r);
@@ -10018,7 +10029,7 @@ class specification_basic_type
           /* r1 is and r2_ is not a stochastic operator */
           return stochastic_operator(r1.variables(),
                                      if_(t_.condition(),r1.distribution(),
-                                               if_(variables_are_equal_to_default_values(r1.variables()),real_one(),real_zero())),
+                                               if_(variables_are_equal_to_default_values(r1.variables()),sort_real::real_one(),sort_real::real_zero())),
                                      if_then_else(if_then_else(t).condition(),r1.operand(),r2_));
         }
         if (is_stochastic_operator(r2_))
@@ -10027,7 +10038,7 @@ class specification_basic_type
           const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
           return stochastic_operator(r2.variables(),
                                      if_(t_.condition(),
-                                         if_(variables_are_equal_to_default_values(r2.variables()),real_one(),real_zero()),
+                                         if_(variables_are_equal_to_default_values(r2.variables()),sort_real::real_one(),sort_real::real_zero()),
                                          r2.distribution()),
                                      if_then_else(t_.condition(),r1_,r2.operand()));
         }
@@ -10176,7 +10187,7 @@ class specification_basic_type
           const if_then& t_if_then=atermpp::down_cast<if_then>(t);
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
           return stochastic_operator(r.variables(),
-                                     if_(t_if_then.condition(),r.distribution(),if_(variables_are_equal_to_default_values(r.variables()),real_one(),real_zero())),
+                                     if_(t_if_then.condition(),r.distribution(),if_(variables_are_equal_to_default_values(r.variables()),sort_real::real_one(),sort_real::real_zero())),
                                      if_then(t_if_then.condition(),r.operand()));
         }
         return t;
@@ -10212,7 +10223,7 @@ class specification_basic_type
           /* r1 is and r2_ is not a stochastic operator */
           return stochastic_operator(r1.variables(),
                                      if_(if_then_else(t).condition(),r1.distribution(),
-                                               if_(variables_are_equal_to_default_values(r1.variables()),real_one(),real_zero())),
+                                               if_(variables_are_equal_to_default_values(r1.variables()),sort_real::real_one(),sort_real::real_zero())),
                                      if_then_else(if_then_else(t).condition(),r1.operand(),r2_));
         }
         if (is_stochastic_operator(r2_))
@@ -10221,7 +10232,7 @@ class specification_basic_type
           const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
           return stochastic_operator(r2.variables(),
                                      if_(if_then_else(t).condition(),
-                                         if_(variables_are_equal_to_default_values(r2.variables()),real_one(),real_zero()),
+                                         if_(variables_are_equal_to_default_values(r2.variables()),sort_real::real_one(),sort_real::real_zero()),
                                          r2.distribution()),
                                      if_then_else(if_then_else(t).condition(),r1_,r2.operand()));
         }
@@ -11287,7 +11298,7 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   deadlock_summand_vector deadlock_summands;
   stochastic_distribution initial_distribution(
                               variable_list(),
-                              sort_real::creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1()));
+                              sort_real::real_one());
   spec.transform(init,action_summands,deadlock_summands,parameters,initial_state,initial_distribution);
 
   // compute global variables

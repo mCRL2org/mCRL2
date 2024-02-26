@@ -14,7 +14,14 @@
 
 #include "mcrl2/core/builder.h"
 #include "mcrl2/data/alias.h"
+
+#include "mcrl2/data/data_configuration.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/bag64.h"
+#else
 #include "mcrl2/data/bag.h"
+#endif
+
 #include "mcrl2/data/bag_comprehension.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"

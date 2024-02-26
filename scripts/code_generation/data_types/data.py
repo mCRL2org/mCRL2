@@ -717,7 +717,7 @@ ${cases}
 ''')
 
         formal_sort_params = ['const sort_expression& {0}'.format(fcode(x, spec)) for x in sort_params]
-        formal_data_params = ['const data_expression& {0}'.format(fcode(x, spec)) for x in data_params]
+        # In the code  below data_params are used, but it is not declared nor defined... Long live Python.
         domain_params = ['{0}.sort()'.format(x) for x in data_params] if polymorphic else []
         return CODE_TEMPLATE.substitute(
           namestring = escape(fullname),
@@ -2288,7 +2288,7 @@ class specification():
     res.append(str(self.equation_specification))
     return "\n".join(res)
 
-  def code(self):
+  def code(self, infilename):
     # Add structured sorts to constructor declarations
     self.function_specification = self.sort_specification.merge_structured_sorts(self.function_specification)
     code  = ""
@@ -2306,8 +2306,8 @@ class specification():
     code += "/// This file was generated from the data sort specification\n"
     code += "/// mcrl2/data/build/%s.spec.\n" % (remove_underscore(self.get_namespace()))
     code += "\n"
-    code += "#ifndef MCRL2_DATA_%s_H\n" % (self.get_namespace().upper())
-    code += "#define MCRL2_DATA_%s_H\n\n" % (self.get_namespace().upper())
+    code += "#ifndef MCRL2_DATA_%s_H\n" % (infilename.removesuffix(".spec").upper())
+    code += "#define MCRL2_DATA_%s_H\n\n" % (infilename.removesuffix(".spec").upper())
     code += "#include \"functional\"    // std::function\n"
     code += "#include \"mcrl2/utilities/exception.h\"\n"
     code += "#include \"mcrl2/data/basic_sort.h\"\n"
@@ -2349,7 +2349,7 @@ class specification():
     code += "} // namespace mcrl2\n\n"
     code += ("#include \"mcrl2/data/detail/%s.h\" // This file contains the manual implementations of rewrite functions.\n" % (remove_underscore(self.get_namespace()))
                  if self.has_cplusplus_implementable_code() else "")
-    code += "#endif // MCRL2_DATA_%s_H\n" % (self.get_namespace().upper())
+    code += "#endif // MCRL2_DATA_%s_H\n" % (infilename.removesuffix(".spec").upper())
     code = code.replace("__", "_")
     p = re.compile('sort_([A-Za-z0-9]*)_([ ]|:)')
     code = p.sub(r'sort_\1\2', code)

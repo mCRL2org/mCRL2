@@ -12,6 +12,7 @@
 #define BOOST_TEST_MODULE data_specification_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/data/data_io.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/parse.h"
@@ -189,7 +190,12 @@ void test_constructors()
 
   function_symbol_vector constructors(spec.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl);
+std::cerr << "#constructors " << spec.constructors().size() << "\n";
+#ifdef Enable64bitNumbers
+  BOOST_CHECK(constructors.size() == 9); // f,g,h, true, false.
+#else
   BOOST_CHECK(constructors.size() == 7); // f,g,h, true, false.
+#endif
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), f) != constructors.end());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), g) != constructors.end());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), h) != constructors.end());
@@ -243,7 +249,11 @@ void test_functions()
   std::for_each(fghl.begin(), fghl.end(), [&spec1](const function_symbol& f){ spec1.add_mapping(f); } );
 
 std::cerr << "#mappings " << spec.mappings().size() << "\n";
+#ifdef Enable64bitNumbers
+  BOOST_CHECK(spec.mappings().size() == 107);
+#else
   BOOST_CHECK(spec.mappings().size() == 54);
+#endif
 
   function_symbol_vector mappings(spec.mappings());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) != mappings.end());
@@ -915,9 +925,19 @@ void test_standard_sorts_mappings_functions()
    data_specification spec;
    spec.get_system_defined_sorts_constructors_and_mappings(sorts, constructors, mappings);
 
+std::cerr << "#sorts " << sorts.size() << "\n";
+std::cerr << "#constructorss " << constructors.size() << "\n";
+std::cerr << "#mappings " << mappings.size() << "\n";
+
+#ifdef Enable64bitNumbers
+   BOOST_CHECK(sorts.size()==11);
+   BOOST_CHECK(constructors.size()==19);
+   BOOST_CHECK(mappings.size()==314);
+#else
    BOOST_CHECK(sorts.size()==10);
    BOOST_CHECK(constructors.size()==17);
    BOOST_CHECK(mappings.size()==225);
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(test_main)

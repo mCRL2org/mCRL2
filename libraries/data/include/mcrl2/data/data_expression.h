@@ -170,8 +170,20 @@ class data_expression: public atermpp::aterm
                            const data_expression& e3,
                            const data_expression& e4) const;
 
-    /// \brief Returns the sort of the data expression
+    application operator()(const data_expression& e1,
+                           const data_expression& e2,
+                           const data_expression& e3,
+                           const data_expression& e4,
+                           const data_expression& e5) const;
 
+    application operator()(const data_expression& e1,
+                           const data_expression& e2,
+                           const data_expression& e3,
+                           const data_expression& e4,
+                           const data_expression& e5,
+                           const data_expression& e6) const;
+
+    /// \brief Returns the sort of the data expression
     sort_expression sort() const;
 
     private:
@@ -220,7 +232,8 @@ inline void make_data_expression(data_expression& result)
 inline
 bool is_data_expression(const atermpp::aterm& x)
 {
-  return is_lambda(x)                           ||
+  return is_machine_number(x)                   ||
+         is_lambda(x)                           ||
          is_forall(x)                           ||
          is_exists(x)                           ||
          is_set_comprehension(x)                ||
@@ -285,7 +298,8 @@ namespace data
 /// \param t The variable that is checked. 
 inline bool is_application(const data_expression& t)
 {
-  return !(is_function_symbol(t) ||
+  return !(is_machine_number(t) ||
+           is_function_symbol(t) ||
            is_variable(t) ||
            is_where_clause(t) ||
            is_abstraction(t) ||
@@ -306,25 +320,40 @@ application data_expression::operator()(const data_expression& e) const
   return application(*this, e);
 }
 
-/// \brief Apply data expression to two data expressions
+/// \brief Apply a data expression to two data expressions
 inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2) const
 {
   return application(*this, e1, e2);
 }
 
-/// \brief Apply data expression to three data expressions
+/// \brief Apply a data expression to three data expressions
 inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3) const
 {
   return application(*this, e1, e2, e3);
 }
 
-/// \brief Apply data expression to four data expressions
+/// \brief Apply a data expression to four data expressions
 inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4) const
 {
   return application(*this, e1, e2, e3, e4);
+}
+
+/// \brief Apply a data expression to five data expressions
+inline
+application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4, const data_expression& e5) const
+{
+  return application(*this, e1, e2, e3, e4, e5);
+}
+
+/// \brief Apply a data expression to six data expressions
+inline
+application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, 
+                                        const data_expression& e4, const data_expression& e5, const data_expression& e6) const
+{
+  return application(*this, e1, e2, e3, e4, e5, e6);
 }
 
 } // namespace data

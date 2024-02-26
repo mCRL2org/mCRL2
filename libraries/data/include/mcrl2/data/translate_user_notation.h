@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/standard_container_utility.h"
+#include "mcrl2/data/standard_utility.h"
 
 namespace mcrl2
 {
@@ -73,11 +74,14 @@ public:
   void apply(T& result, const function_symbol& x)
   {
     derived().enter(x);
-    result = x;
-    std::string name(x.name());
+    const std::string& name(x.name());
     if (is_system_defined(x.sort()) && (name.find_first_not_of("-/0123456789") == std::string::npos)) // crude but efficient
     {
       result = number(x.sort(), name);
+    }
+    else 
+    {
+      result=x;
     }
     derived().leave(x);
   }
@@ -125,6 +129,16 @@ public:
                                            [&](const data_expression& t) { data_expression r;  derived().apply(r, t); return r;} ));
         return;
       }
+#ifdef Enable64bitNumbers
+      else if (head.name() == sort_nat::pos2nat_name())
+      {
+        // convert pos2nat(number) to a natural number. 
+        data_expression n;
+        derived().apply(n, x[0]);
+        assert(n.sort()==sort_pos::pos());
+        result=sort_nat::transform_positive_number_to_nat(n);
+      }
+#endif
     }
    
     make_application(result,

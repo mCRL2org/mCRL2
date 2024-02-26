@@ -37,6 +37,11 @@ namespace detail
 
 data_expression RewriterJitty::remove_normal_form_function(const data_expression& t)
 {
+  if (is_machine_number(t))
+  {
+    return t;
+  }
+
   if (is_variable(t))
   {
     return t;
@@ -208,6 +213,11 @@ void RewriterJitty::subst_values(
             const data_expression& t,
             data::enumerator_identifier_generator& generator) // This generator is used for the generation of fresh variable names.
 {
+  if (is_machine_number(t))
+  {
+    result=t; 
+    return;
+  }
   if (is_function_symbol(t))
   {
     // result=t;  The following is more efficient as it avoids a call to thread local variables. Should be removed in due time. 
@@ -325,7 +335,11 @@ static bool match_jitty(
                     jitty_assignments_for_a_rewrite_rule& assignments,
                     const bool term_context_guarantees_normal_form)
 {
-  if (is_function_symbol(p))
+  if (is_machine_number(p))
+  {
+    return p==t;
+  }
+  else if (is_function_symbol(p))
   {
     return p==t;
   }
@@ -350,7 +364,7 @@ static bool match_jitty(
   }
   else
   {
-    if (is_function_symbol(t) || is_variable(t) || is_abstraction(t) || is_where_clause(t))
+    if (is_machine_number(t) || is_function_symbol(t) || is_variable(t) || is_abstraction(t) || is_where_clause(t))
     {
       return false;
     }
@@ -518,6 +532,12 @@ void RewriterJitty::rewrite_aux(
     sigma.apply(atermpp::down_cast<variable>(term),result, *m_thread_aterm_pool);
     return;
   }
+  if (is_machine_number(term))
+  {
+    result=term;
+    return;
+  }
+
   if (is_where_clause(term))
   {
     const where_clause& w = atermpp::down_cast<where_clause>(term);
@@ -549,7 +569,6 @@ void RewriterJitty::rewrite_aux_function_symbol(
                       const application& term,
                       substitution_type& sigma)
 {
-  // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
   assert(is_function_sort(op.sort()));
 
   const std::size_t arity=detail::recursive_number_of_args(term);

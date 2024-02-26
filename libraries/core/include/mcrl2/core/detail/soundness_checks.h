@@ -109,6 +109,10 @@ bool check_term_DataAppl(const Term& t)
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
   const atermpp::aterm& term(t);
+  if (term.type_is_int())
+  {
+    return true;
+  }
   if (!term.type_is_appl())
   {
     return false;
@@ -118,7 +122,7 @@ bool check_term_DataAppl(const Term& t)
     return false;
   }
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  for (const auto& child : term)
+  for (const atermpp::aterm& child : term)
   {
     if (!check_term_argument(child, check_rule_DataExpr<atermpp::aterm>))
     {

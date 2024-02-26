@@ -37,7 +37,7 @@ void enumerate(const data_specification& dataspec,
 {
   typedef enumerator_list_element_with_substitution<> enumerator_element;
   typedef enumerator_algorithm_with_iterator<> enumerator_type;
-
+  std::cout << "ENUMERATE " << pp(variables) << " satisfying " << expression << "\n";
   data::enumerator_identifier_generator id_generator;
   rewriter rewr(dataspec);
   enumerator_type enumerator(rewr, dataspec, rewr, id_generator);
@@ -184,6 +184,30 @@ BOOST_AUTO_TEST_CASE(test_ticket_1486)
   std::string variable_text = "y : Nat;";
   std::string expression_text = "y + 20 == 25";
   std::string free_variable_text = "y : Nat;";
+  std::size_t number_of_solutions = 1;
+  bool more_solutions_possible = false;
+  enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
+}
+
+// The previous ticket, but then with the order of variables reversed.
+BOOST_AUTO_TEST_CASE(test_ticket_1486a)  
+{
+  std::string dataspec_text = "sort L = Int;";
+  std::string variable_text = "y : Nat;";
+  std::string expression_text = "25 == 20 + y";
+  std::string free_variable_text = "y : Nat;";
+  std::size_t number_of_solutions = 1;
+  bool more_solutions_possible = false;
+  enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
+}
+
+// The previous ticket, but now with a variable y of sort Pos.
+BOOST_AUTO_TEST_CASE(test_ticket_1486b)  
+{
+  std::string dataspec_text = "sort L = Int;";
+  std::string variable_text = "y : Pos;";
+  std::string expression_text = "25 == 20 + y";
+  std::string free_variable_text = "y : Pos;";
   std::size_t number_of_solutions = 1;
   bool more_solutions_possible = false;
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);

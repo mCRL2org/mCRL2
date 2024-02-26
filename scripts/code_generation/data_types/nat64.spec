@@ -10,7 +10,7 @@
 
 #include machine_word.spec
 #include bool.spec
-#include pos.spec
+#include pos64.spec
 #supertypeof Pos
 
 sort Nat <"nat">;
@@ -98,6 +98,8 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
 
 var  b:Bool;
      p:Pos;
+     p1:Pos;
+     p2:Pos;
      n:Nat;
      n1:Nat;
      n2:Nat;
@@ -242,6 +244,10 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 % The rules below are useful in solving expressions with plus and quantifiers.
      +(@succ_nat(n1),n2) = @succ_nat(+(n1,n2));
      +(n1,@succ_nat(n2)) = @succ_nat(+(n1,n2));
+     +(@succ_nat(n1),p2) = @succ_pos(+(n1,p2));
+     +(n1,@succ_pos(p2)) = @succ_pos(+(n1,p2));
+     +(@succ_pos(p1),n2) = @succ_pos(+(p1,n2));
+     +(p1,@succ_nat(n2)) = @succ_pos(+(p1,n2));
 
      @plus_nat(n1,n2) = +(n1,n2);
  
@@ -562,18 +568,6 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                       @swap_zero(n1, @monus(@swap_zero(n1, m1), m2))),
                                  @swap_zero(@monus(n1,n2),@monus(@swap_zero(n1,m1), @swap_zero(n2,m2)))));
 
-% TODO:
-%     sqrt(@c0) = @c0;
-%     sqrt(@cNat(p)) = @sqrt_nat(@cNat(p),@c0,@powerlog2(p));
-%     @sqrt_nat(n,m,@c1) = if(<=(n,m),@c0,@cNat(@c1));
-%     @sqrt_nat(n,m,@cDub(b,p)) =
-%               if(>(*(+(@cNat(@cDub(b,p)),m),@cNat(@cDub(b,p))),n),
-%                    @sqrt_nat(n,m,p),
-%                    +(@cNat(@cDub(b,p)),@sqrt_nat(@monus(n,*(+(@cNat(@cDub(b,p)),m),@cNat(@cDub(b,p)))),+(m,@cNat(@cDub(false,@cDub(b,p)))),p)));
-
-%sort Nat64_pair = struct pair(first_:Nat64,last_:Nat64);
-%map  sqrt_pair: Nat64->Nat64_pair;
-%
      sqrt(@most_significant_digitNat(w)) = @most_significant_digitNat(@sqrt_word(w));
      sqrt(@concat_digit(@most_significant_digitNat(w1),w2)) = @most_significant_digitNat(@sqrt_doubleword(w1,w2));
      sqrt(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3)) = @sqrt_whr1(w1,w2,w3,@sqrt_tripleword_overflow(w1,w2,w3));

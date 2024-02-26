@@ -12,9 +12,9 @@
 #ifndef MCRL2_CORE_PRINT_H
 #define MCRL2_CORE_PRINT_H
 
+#include <cctype>
 #include "mcrl2/core/print_format.h"
 #include "mcrl2/core/traverser.h"
-#include <cctype>
 
 namespace mcrl2
 {

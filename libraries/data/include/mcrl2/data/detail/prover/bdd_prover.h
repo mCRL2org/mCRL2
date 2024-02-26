@@ -335,6 +335,10 @@ class BDD_Prover: protected rewriter
     /// \brief Returns the smallest guard in the formula formula.
     bool smallest(const data_expression& formula, data_expression& result)
     {
+      if (is_machine_number(formula))
+      {
+        return false;
+      }
       if (is_variable(formula))
       {
         if (formula.sort()==sort_bool::bool_())

@@ -13,6 +13,7 @@
 
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/data/machine_number.h"
 
 namespace mcrl2
 {
@@ -88,6 +89,12 @@ class match_tree:public atermpp::aterm
       return afunF;
     }
 
+    atermpp::function_symbol afunMachineNumber() const
+    {
+      static atermpp::function_symbol afunNumber("@@MachineNumber",3); // Match function ( match_function, true_tree, false_tree )
+      return afunNumber;
+    } 
+    
     atermpp::function_symbol afunN() const
     {
       static atermpp::function_symbol afunN("@@N",1); // Go to next parameter ( result_tree )
@@ -290,7 +297,7 @@ class match_tree_M:public match_tree
 };
 
 // Match function ( match_function, true_tree, false_tree )
-class match_tree_F:public match_tree
+class match_tree_F: public match_tree
 {
   public:
     match_tree_F()
@@ -321,6 +328,40 @@ class match_tree_F:public match_tree
       return atermpp::down_cast<const match_tree>((*this)[2]);
     }
 };
+
+// Match function ( match_function, true_tree, false_tree )
+class match_tree_MachineNumber: public match_tree
+{
+  public:
+    match_tree_MachineNumber()
+    {}
+
+    match_tree_MachineNumber(const atermpp::aterm& t):
+          match_tree(t)
+    {
+      assert(is_machine_number(t));
+    }
+    
+    match_tree_MachineNumber(const data::machine_number& mn, const match_tree& true_tree, const match_tree& false_tree):
+          match_tree(atermpp::aterm(afunMachineNumber(),mn,true_tree,false_tree))
+    {}
+    
+    const data::machine_number& number() const
+    {
+      return atermpp::down_cast<const data::machine_number>((*this)[0]);
+    }
+
+    const match_tree& true_tree() const
+    {
+      return atermpp::down_cast<const match_tree>((*this)[1]);
+    } 
+
+    const match_tree& false_tree() const
+    {
+      return atermpp::down_cast<const match_tree>((*this)[2]);
+    }
+};
+
 
 // Go to next parameter ( result_tree )
 class match_tree_N:public match_tree

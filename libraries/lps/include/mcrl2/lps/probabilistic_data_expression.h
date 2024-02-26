@@ -17,6 +17,7 @@
 #ifndef MCRL2_LPS_PROBABILISTIC_DATA_EXPRESSION_H
 #define MCRL2_LPS_PROBABILISTIC_DATA_EXPRESSION_H
 
+#include "mcrl2/data/real_utilities.h"
 #include "mcrl2/data/rewriter.h"
 
 
@@ -92,7 +93,7 @@ class probabilistic_data_expression: public data::data_expression
     static probabilistic_data_expression zero()
     {
       using namespace data;
-      static probabilistic_data_expression zero(sort_real::creal(data::sort_int::cint(sort_nat::c0()),sort_pos::c1()));
+      static probabilistic_data_expression zero(data::sort_real::real_zero());
       return zero;
     }
 
@@ -100,7 +101,7 @@ class probabilistic_data_expression: public data::data_expression
     static probabilistic_data_expression one()
     {
       using namespace data;
-      static probabilistic_data_expression one(sort_real::creal(data::sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1()));
+      static probabilistic_data_expression one(data::sort_real::real_one());
       return one;
     }
 

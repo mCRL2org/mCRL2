@@ -15,7 +15,11 @@
 #ifndef MCRL2_DATA_BOUND_H
 #define MCRL2_DATA_BOUND_H
 
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/real64.h"
+#else
 #include "mcrl2/data/real.h"
+#endif
 #include "inequality.h"
 
 namespace mcrl2 {
