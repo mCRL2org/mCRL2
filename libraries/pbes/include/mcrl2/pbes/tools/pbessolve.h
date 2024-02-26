@@ -315,7 +315,7 @@ class pbessolve_tool
       PbesInstAlgorithm instantiate(options, pbesspec, G);
 
       timer().start("instantiation");
-      instantiate.run(boost::none);
+      instantiate.run();
       timer().finish("instantiation");
 
       run_solve(pbesspec, sigma, G, instantiate.equation_index());
@@ -337,7 +337,7 @@ class pbessolve_tool
       PbesInstAlgorithm first_instantiate(options, pbesspec_without_counterexample, initial_G);
 
       timer().start("first-instantiation");
-      first_instantiate.run(boost::none);
+      first_instantiate.run();
       timer().finish("first-instantiation");
 
       mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
@@ -359,7 +359,7 @@ class pbessolve_tool
       
       // Perform the second instantiation given the proof graph.      
       timer().start("second-instantiation");
-      second_instantiate.run(boost::make_optional(std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>(initial_G, !result, W_alpha)));
+      second_instantiate.run(std::make_optional(std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>(initial_G, !result, W_alpha)));
       timer().finish("second-instantiation");
 
       mCRL2log(log::verbose) << "Number of vertices in the structure graph: "

@@ -512,7 +512,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     // Optimization 2 is implemented by overriding the function rewrite_psi.
     void rewrite_psi(const std::size_t thread_index,
-                     boost::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
+                     std::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
                      pbes_expression& result,
                      const fixpoint_symbol& symbol,
                      const propositional_variable_instantiation& X,
