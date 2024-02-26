@@ -43,7 +43,6 @@ foreach(benchmark ${STATESPACE_BENCHMARKS} ${GAME_BENCHMARKS})
   get_filename_component(MCRL2_FILENAME ${benchmark} NAME)
   string(REPLACE ".mcrl2" "" NAME ${MCRL2_FILENAME})
 
-  set(SYM_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.sym")
   set(LPS_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.lps")
   set(LTS_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.lts")
   set(NODEADLOCK_PBES_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.nodeadlock.pbes")
@@ -120,7 +119,7 @@ foreach(benchmark ${LTS_BENCHMARKS})
 endforeach()
 
 # Only add the symbolic benchmarks when the tools are part of the build, i.e., experimental tools enabled and Sylvan can be compiled.
-if (MCRL2_ENABLE_EXPERIMENTAL AND MCRL2_ENABLE_SYLVAN)
+if (MCRL2_ENABLE_SYLVAN)
 
   add_dependencies(benchmarks lpsreach pbessolvesymbolic)
 
@@ -130,6 +129,7 @@ if (MCRL2_ENABLE_EXPERIMENTAL AND MCRL2_ENABLE_SYLVAN)
     string(REPLACE ".mcrl2" "" NAME ${MCRL2_FILENAME})
 
     set(LPS_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.lps")
+    set(SYM_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.sym")
     set(NODEADLOCK_PBES_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.nodeadlock.pbes")
 
     # Benchmark symbolic statespace generation.

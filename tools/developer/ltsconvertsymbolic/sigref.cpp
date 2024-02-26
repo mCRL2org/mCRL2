@@ -231,6 +231,7 @@ mcrl2::lps::symbolic_lts_bdd sigref_algorithm::run(const mcrl2::lps::symbolic_lt
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
 
     sylvan::cache_clear(); // Clear the cache between iterations.
+    m_block_signature.clear();
   }
 
   mCRL2log(log_level_t::verbose) << "There are " << num_of_blocks << " equivalence classes." << std::endl;  
