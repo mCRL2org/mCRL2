@@ -26,7 +26,7 @@
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/pbes/transformations.h"
-#include "mcrl2\utilities\detail\container_utility.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 #ifndef MCRL2_PBES_PBESINST_LAZY_H
 #define MCRL2_PBES_PBESINST_LAZY_H
