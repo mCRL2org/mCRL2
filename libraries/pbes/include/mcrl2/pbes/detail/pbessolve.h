@@ -15,6 +15,7 @@
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
+#include <optional>
 
 namespace mcrl2 {
 
@@ -30,7 +31,7 @@ bool pbessolve(const pbes& p)
   structure_graph G;
   pbesinst_structure_graph_algorithm algorithm(options, pbesspec, G);
   algorithm.run();
-  return solve_structure_graph(G);
+  return solve_structure_graph(G).first;
 }
 
 } // namespace detail
