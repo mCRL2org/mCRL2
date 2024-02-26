@@ -9,8 +9,13 @@
 /// \file mcrl2/pbes/pbesinst_lazy_algorithm.h
 /// \brief A lazy algorithm for instantiating a PBES, ported from bes_deprecated.h.
 
+#ifndef MCRL2_PBES_PBESINST_LAZY_H
+#define MCRL2_PBES_PBESINST_LAZY_H
+
 #include <thread>
 #include <mutex>
+#include <functional>
+#include <regex>
 
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
@@ -24,12 +29,11 @@
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
+#include "mcrl2/pbes/structure_graph.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/pbes/transformations.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
-#ifndef MCRL2_PBES_PBESINST_LAZY_H
-#define MCRL2_PBES_PBESINST_LAZY_H
 
 namespace mcrl2
 {
@@ -443,7 +447,7 @@ class pbesinst_lazy_algorithm
 
     // rewrite the right hand side of the equation X = psi
     virtual void rewrite_psi(const std::size_t /* thread_index */,
-                             boost::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
+                             std::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
                              pbes_expression& result,
                              const fixpoint_symbol& symbol,
                              const propositional_variable_instantiation& X,
@@ -471,7 +475,7 @@ class pbesinst_lazy_algorithm
     }
 
     virtual void run_thread(const std::size_t thread_index,
-                            boost::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
+                            std::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
                             pbesinst_lazy_todo& todo,
                             std::atomic<std::size_t>& number_of_active_processes,
                             data::mutable_indexed_substitution<> sigma,
@@ -549,7 +553,7 @@ class pbesinst_lazy_algorithm
     }
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    virtual void run(boost::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph)
+    virtual void run(std::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph)
     {
       m_iteration_count = 0;
 
