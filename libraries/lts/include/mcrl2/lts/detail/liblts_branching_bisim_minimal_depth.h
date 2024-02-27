@@ -42,8 +42,8 @@ public:
    *  \param init_l2 reference to the initial state of lts2.
    */
   branching_bisim_partitioner_minimal_depth(LTS_TYPE& l, const std::size_t init_l2)
-      : initial_l2(init_l2),
-        m_lts(l)
+      : m_lts(l),
+        initial_l2(init_l2)
   {
     // Initialize data structures
     std::map<state_type, std::size_t> state2num_silent_in;
@@ -200,6 +200,20 @@ private:
       std::swap(b.parent_block_index, parent_block_index);
       std::swap(b.level, level);
     }
+
+    bool operator==(const block& other) 
+    {
+      return state_index == other.state_index 
+        && block_index == other.block_index 
+        && parent_block_index == other.parent_block_index 
+        && level == other.level 
+        && sig == other.sig;
+    }
+
+    bool operator!=(const block& other)
+    {
+      return !(*this == other);
+    }
   };
   std::vector<block> blocks;
 
@@ -241,6 +255,8 @@ private:
     // Compute signatures in order of bottom states and reachability order.
     // Debug info for frontier
     int num_added_to_frontier = 0;
+
+    mcrl2::utilities::mcrl2_unused(num_added_to_frontier);
     while (!frontier.empty())
     {
       state_type state = frontier.front();
