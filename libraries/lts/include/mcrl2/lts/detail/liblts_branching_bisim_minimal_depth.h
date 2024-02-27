@@ -275,7 +275,6 @@ private:
         }
       }
     }
-    mCRL2log(mcrl2::log::info) << "Added " << num_added_to_frontier << " states to the frontier." << std::endl;
     // Now we have computed the new blocks, we can redefine the partition.
     state2block = state2block_new;
     return num_blocks_created;
@@ -298,6 +297,7 @@ private:
     // Add the observation to the formula
     std::pair<block_index_type, block_index_type> liftedB1B2 = min_split_blockpair(B1, B2);
     level_type split_level = blocks[liftedB1B2.first].level;
+
     mcrl2::state_formulas::state_formula phi = dist_formula(liftedB1B2.first, liftedB1B2.second);
     std::set<block_index_type> truths_new;
     for (block_index_type b_og : truths)
@@ -321,7 +321,6 @@ private:
   // Precondition is that the blocks are not the same, are on the same level and have the same parent block.
   mcrl2::state_formulas::state_formula dist_formula(block_index_type block_index1, block_index_type block_index2)
   {
-    mCRL2log(mcrl2::log::info) << "Starting constructing formula \n";
     assert(block_index1 != block_index2);
     if (blockpair2formula.find(std::make_pair(block_index1, block_index2)) != blockpair2formula.end())
     {
@@ -371,16 +370,35 @@ private:
     block_index_type B1 = std::get<0>(dist_obs);
     block_index_type B2 = std::get<2>(dist_obs);
     
-    std::set<std::pair<block_index_type, block_index_type>> T;
+    std::vector<std::pair<block_index_type, block_index_type>> T;
+
     for (auto path : dt)
     {
       if (std::get<1>(path) == dist_label)
       {
         // TODO: Maybe check if tau and not inert,
         // we might have B_1 -\tau -> B_1, I don't think its a problem.
-        T.insert(std::make_pair(std::get<0>(path), std::get<2>(path)));
+        T.push_back(std::make_pair(std::get<0>(path), std::get<2>(path)));
       }
     }
+
+    // Sort T, such that the block with the highest distlevel in s'' get dealt with first.
+    // This is heuristic, no idea if it can be improved
+    std::sort(T.begin(), T.end(), 
+      [this, B2](std::pair<block_index_type, block_index_type> a, std::pair<block_index_type, block_index_type> b)
+        { 
+        if (a.second == B2) {
+          return false;
+        } 
+        if (b.second == B2)
+        {
+          return true;
+        }
+        auto alift = min_split_blockpair(a.second, B2);
+        auto blift = min_split_blockpair(b.second, B2);
+        return blocks[alift.first].level < blocks[blift.first].level;
+      });
+
     // <tau*>(<dist_label> phi1 && phi2)
     std::vector<mcrl2::state_formulas::state_formula> Phi1;
     std::vector<mcrl2::state_formulas::state_formula> Phi2;
@@ -391,9 +409,8 @@ private:
 
     while (!T.empty())
     {
-      std::pair<block_index_type, block_index_type> Bt1_Bt2 = *T.begin();
-      
-      T.erase(Bt1_Bt2);
+      std::pair<block_index_type, block_index_type> Bt1_Bt2 = T.back();
+      // We could pop_back here on T, but the computation of the truth also handles this.
       if (Bt1_Bt2.second != B2)
       {
         // Add the observation to the formula, this will also update the truth values by reference.
@@ -404,13 +421,13 @@ private:
         Phi2.push_back(split_and_intersect(B1, Bt1_Bt2.first, Truths2));
       }
       // Remove observations (Bt1, Bt2) from  T of which Bt2 is not in phi1 or Bt1 is not in phi2
-      std::set<std::pair<block_index_type, block_index_type>> T_new;
+      std::vector<std::pair<block_index_type, block_index_type>> T_new;
       for (auto bt1_bt2 : T)
       {
         // T_new only consists stuch that both Bt1 and Bt2 are still not distinguished.
         if (Truths1.find(bt1_bt2.second) != Truths1.end() && Truths2.find(bt1_bt2.first) != Truths2.end())
         {
-          T_new.insert(bt1_bt2);
+          T_new.push_back(bt1_bt2);
         }
       }
       T = T_new;
@@ -447,9 +464,8 @@ private:
     }
 
     blockpair2formula[std::make_pair(block1.block_index, block2.block_index)]
-        = mcrl2::state_formulas::may(mcrl2::regular_formulas::regular_formula(mcrl2::regular_formulas::trans_or_nil(
-                                         create_regular_formula(m_lts.action_label(0)))),
-            returnPhi);
+        = mcrl2::state_formulas::may(mcrl2::regular_formulas::trans_or_nil(
+            create_regular_formula(m_lts.action_label(0))), returnPhi);
     return blockpair2formula[std::make_pair(block1.block_index, block2.block_index)];
   }
   
