@@ -468,12 +468,12 @@ public:
   generic_aterm_container(generic_aterm_container&&) = delete;
 
   // It is fine here if the container gets updated, but the functions stay the same.
-  generic_aterm_container& operator=(const generic_aterm_container& other) 
+  generic_aterm_container& operator=(const generic_aterm_container&) 
   {
     return *this;
   };
 
-  generic_aterm_container& operator=(generic_aterm_container& other) 
+  generic_aterm_container& operator=(generic_aterm_container&) 
   {
     return *this;
   }
