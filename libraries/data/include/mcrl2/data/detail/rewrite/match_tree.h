@@ -52,7 +52,7 @@ class match_tree:public atermpp::aterm
     match_tree(const atermpp::aterm& t):
       atermpp::aterm(t)
     {
-      assert(!is_defined() || isS() || isA() || isM() || isF() || 
+      assert(!is_defined() || isS() || isA() || isM() || isF() || isMachineNumber() ||
              isN() || isD() || isR () || isC() || isX() || isRe() || 
              isCRe() || isMe());
     }
@@ -167,6 +167,11 @@ class match_tree:public atermpp::aterm
     bool isF() const
     {
       return this->function()==afunF();
+    }
+
+    bool isMachineNumber() const
+    {
+      return this->function()==afunMachineNumber();
     }
       
     bool isN() const
@@ -339,7 +344,7 @@ class match_tree_MachineNumber: public match_tree
     match_tree_MachineNumber(const atermpp::aterm& t):
           match_tree(t)
     {
-      assert(is_machine_number(t));
+      assert(isMachineNumber());
     }
     
     match_tree_MachineNumber(const data::machine_number& mn, const match_tree& true_tree, const match_tree& false_tree):
@@ -640,6 +645,12 @@ std::ostream& operator<<(std::ostream& s, const match_tree& t)
     const match_tree_F& tF = down_cast<match_tree_F>(t);
     s << "@@F(" << tF.function() << ", " << tF.true_tree() << ", " << tF.false_tree() << ")";
   }
+  else
+  if (t.isMachineNumber())
+  { 
+    const match_tree_MachineNumber& tM = down_cast<match_tree_MachineNumber>(t);
+    s << "@@MachineNumber(" << tM.function() << ", " << tM.true_tree() << ", " << tM.false_tree() << ")";
+  }       
   else
   if (t.isN())
   {

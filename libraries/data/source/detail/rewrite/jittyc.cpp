@@ -399,6 +399,10 @@ static void add_to_build_pars(build_pars& pars, const match_tree_list_list& seqs
     {
       pars.Flist.push_front(e);
     }
+    else if (e.front().isMachineNumber())
+    {
+      pars.Flist.push_front(e);
+    }
     else if (e.front().isRe())
     {
       r = e.front();
@@ -651,10 +655,15 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
     {
       return true_tree;
     }
-    else
+    else if (F.front().isF())
     {
       return match_tree_F(match_tree_F(F.front()).function(),true_tree,false_tree);
     }
+    else 
+    {
+      assert(F.front().isMachineNumber());
+      return match_tree_MachineNumber(match_tree_MachineNumber(F.front()).number(),true_tree,false_tree);
+    } 
   }
   else if (!pars.upstack.empty())
   {
@@ -1774,6 +1783,10 @@ class RewriterCompilingJitty::ImplementTree
     else if (tree.isF())
     {
       implement_treeF(m_stream, atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
+    }
+    else if (tree.isMachineNumber())
+    { 
+      implement_treeMachineNumber(m_stream, atermpp::down_cast<match_tree_MachineNumber>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments,  type_of_code_variables);
     }
     else if (tree.isD())
     {
