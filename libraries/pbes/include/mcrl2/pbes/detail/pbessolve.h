@@ -31,7 +31,7 @@ bool pbessolve(const pbes& p)
   structure_graph G;
   pbesinst_structure_graph_algorithm algorithm(options, pbesspec, G);
   algorithm.run();
-  return solve_structure_graph(G).first;
+  return solve_structure_graph(G);
 }
 
 } // namespace detail
