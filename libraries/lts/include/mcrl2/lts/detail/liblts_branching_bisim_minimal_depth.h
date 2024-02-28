@@ -96,7 +96,7 @@ public:
     blocks[0].parent_block_index = 0;
     blocks[0].level = 0;
     level2blocksidx[0].insert(0);
-    
+
     // Now we can start refining the partition.
     std::size_t num_old_blocks = 0;
     std::size_t num_blocks_created = 1;
@@ -110,36 +110,9 @@ public:
       assert(level2blocksidx[level].size() == num_blocks_created);
       state2sig = std::map<state_type, signature_type>();
       mCRL2log(mcrl2::log::info) << "Refined partition to " << num_blocks_created
-                                 << " blocks on level " << level << "."
-                                 << std::endl;
+        << " blocks on level " << level << "."
+        << std::endl;
     }
-  }
-
-  /**
-   * \brief conjunction Creates a conjunction of state formulas
-   * \param terms The terms of the conjunction
-   * \return The conjunctive state formula
-   */
-  mcrl2::state_formulas::state_formula conjunction(std::vector<mcrl2::state_formulas::state_formula>& conjunctions)
-  {
-    return utilities::detail::join<mcrl2::state_formulas::state_formula>(
-        conjunctions.begin(),
-        conjunctions.end(),
-        [](mcrl2::state_formulas::state_formula a, mcrl2::state_formulas::state_formula b)
-        { return mcrl2::state_formulas::and_(a, b); },
-        mcrl2::state_formulas::true_());
-  }
-
-  /**
-   * \brief create_regular_formula Creates a regular formula that represents action a
-   * \details In case the action comes from an LTS in the aut or fsm format.
-   * \param a The action for which to create a regular formula
-   * \return The created regular formula
-   */
-  regular_formulas::regular_formula create_regular_formula(const mcrl2::lts::action_label_string& a) const
-  {
-    return mcrl2::regular_formulas::regular_formula(mcrl2::action_formulas::multi_action(
-        process::action_list({process::action(process::action_label(a, {}), {})})));
   }
 
   /** \brief Creates a state formula that distinguishes state s from state t.
@@ -307,6 +280,51 @@ private:
     return std::make_pair(b1, b2);
   }
 
+    /**
+   * \brief conjunction Creates a conjunction of state formulas
+   * \param terms The terms of the conjunction
+   * \return The conjunctive state formula
+   */
+  mcrl2::state_formulas::state_formula conjunction(std::vector<mcrl2::state_formulas::state_formula>& conjunctions)
+  {
+    return utilities::detail::join<mcrl2::state_formulas::state_formula>(
+        conjunctions.begin(),
+        conjunctions.end(),
+        [](mcrl2::state_formulas::state_formula a, mcrl2::state_formulas::state_formula b)
+        { return mcrl2::state_formulas::and_(a, b); },
+        mcrl2::state_formulas::true_());
+  }
+
+  regular_formulas::regular_formula make_tau_hat(regular_formulas::regular_formula& f)
+  {
+    return regular_formulas::alt(f,
+        regular_formulas::trans_or_nil(regular_formulas::regular_formula(action_formulas::false_())));
+  }
+
+  /**
+   * \brief create_regular_formula Creates a regular formula that represents action a
+   * \details In case the action comes from an LTS in the lts format.
+   * \param a The action for which to create a regular formula
+   * \return The created regular formula
+   */
+  regular_formulas::regular_formula create_regular_formula(const mcrl2::lts::action_label_string& a) const
+  {
+    // Copied from Olav no idea what it exactly does.
+    return mcrl2::regular_formulas::regular_formula(mcrl2::action_formulas::multi_action(
+        process::action_list({process::action(process::action_label(a, {}), {})})));
+  }
+
+  /**
+   * \brief create_regular_formula Creates a regular formula that represents action a
+   * \details In case the action comes from an LTS in the lts format.
+   * \param a The action for which to create a regular formula
+   * \return The created regular formula
+   */
+  regular_formulas::regular_formula create_regular_formula(const mcrl2::lps::multi_action& a) const
+  {
+    return regular_formulas::regular_formula(action_formulas::multi_action(a.actions()));
+  }
+
   // Returns a distinguishing formula for pair, and updates the truths values accordingly
   mcrl2::state_formulas::state_formula split_and_intersect(block_index_type B1, block_index_type B2,
       std::set<block_index_type>& truths) {
@@ -471,9 +489,17 @@ private:
 
     // Construct the final formula using Phi1 and Phi2
     mcrl2::state_formulas::state_formula phi2 = conjunction(Phi2);
+    
+    // Consruct the regular formula for the diamond operator
+    mcrl2::regular_formulas::regular_formula diamond = create_regular_formula(m_lts.action_label(dist_label));
+    // If the action is tau, we need to add the tau_hat operator.
+    if (m_lts.is_tau(m_lts.apply_hidden_label_map(dist_label)))
+    {
+      // we mimic <\hat{tau}> phi := <tau> phi || phi , by <tau+false*> phi.
+      diamond = make_tau_hat(diamond);
+    }
     // diamond formula <dist_label> phi1
-    mcrl2::state_formulas::state_formula returnPhi
-        = mcrl2::state_formulas::may(create_regular_formula(m_lts.action_label(dist_label)), conjunction(Phi1));
+    mcrl2::state_formulas::state_formula returnPhi = mcrl2::state_formulas::may(diamond , conjunction(Phi1));
     if (!Phi2.empty())
     {
       returnPhi = mcrl2::state_formulas::and_(returnPhi, phi2);
@@ -484,17 +510,7 @@ private:
             create_regular_formula(m_lts.action_label(0))), returnPhi);
     return blockpair2formula[std::make_pair(block1.block_index, block2.block_index)];
   }
-  
-    /**
-     * \brief create_regular_formula Creates a regular formula that represents action a
-     * \details In case the action comes from an LTS in the lts format.
-     * \param a The action for which to create a regular formula
-     * \return The created regular formula
-     */
-    mcrl2::regular_formulas::regular_formula create_regular_formula(const mcrl2::lps::multi_action& a) const
-    {
-      return regular_formulas::regular_formula(action_formulas::multi_action(a.actions()));
-    }
+ 
 };
 
 template <class LTS_TYPE>
