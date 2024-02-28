@@ -629,8 +629,7 @@ template < class LTS_TYPE>
 bool destructive_bisimulation_compare_minimal_depth(
     LTS_TYPE & l1,
     LTS_TYPE & l2,
-    const std::string & counter_example_file /*= ""*/,
-    const bool /*structured_output = false */)
+    const std::string & counter_example_file)
 {
     std::size_t init_l2 = l2.initial_state() + l1.num_states();
     mcrl2::lts::detail::merge(l1, l2);
@@ -640,6 +639,7 @@ bool destructive_bisimulation_compare_minimal_depth(
     {
         return true; 
     }
+    
     // LTSs are not bisimilar, we can create a counter example. 
     std::string filename = "Counterexample.mcf";
     if (!counter_example_file.empty()) {
