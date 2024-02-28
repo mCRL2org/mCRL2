@@ -45,49 +45,28 @@ public:
       : m_lts(l),
         initial_l2(init_l2)
   {
-    // Initialize data structures
-    std::map<state_type, std::size_t> state2num_silent_in;
-    std::map<state_type, std::size_t> state2num_silent_out;
-    std::map<state_type, std::size_t> state2num_trans_out;
-
-    for (state_type s = 0; s < m_lts.num_states(); s++)
-    {
-      state2block[s] = 0;
-      state2num_touched[s] = 0;
-      state2num_silent_in[s] = 0;
-      state2num_silent_out[s] = 0;
-      state2num_trans_out[s] = 0;
-    }
-
-    for (transition trans : m_lts.get_transitions())
-    {
-      state2num_trans_out[trans.from()] += 1;
-      if (m_lts.is_tau(m_lts.apply_hidden_label_map(trans.label())))
-      {
-        state2num_silent_in[trans.to()] += 1;
-        state2num_silent_out[trans.from()] += 1;
-      }
-    }
-    for (state_type s = 0; s < m_lts.num_states(); s++)
-    {
-      if (state2num_silent_out[s] == 0)
-      {
-        bottom_states.push_back(s);
-      }
-      trans_out[s] = std::vector<observation>(state2num_trans_out[s]);
-      silent_out[s] = std::set<state_type>();
-      silent_in[s] = std::set<state_type>();
-    }
 
     for (transition trans : m_lts.get_transitions())
     {
       trans_out[trans.from()].push_back(std::make_pair(trans.label(), trans.to()));
-      if (m_lts.is_tau(m_lts.apply_hidden_label_map(trans.label())))
+      if (is_tau(trans.label()))
       {
         silent_out[trans.from()].insert(trans.to());
         silent_in[trans.to()].insert(trans.from());
       }
     }
+
+    for (state_type s = 0; s < m_lts.num_states(); s++)
+    {
+      state2block[s] = 0;
+
+      if (silent_out[s].size() == 0)
+      {
+        bottom_states.push_back(s);
+      }
+    }
+
+
 
     // Initialize the partition with a single block.
     blocks.push_back(block());
@@ -109,7 +88,7 @@ public:
       num_blocks_created = refine_partition();
       assert(level2blocksidx[level].size() == num_blocks_created);
       state2sig = std::map<state_type, signature_type>();
-      mCRL2log(mcrl2::log::info) << "Refined partition to " << num_blocks_created
+      mCRL2log(mcrl2::log::verbose) << "Refined partition to " << num_blocks_created
         << " blocks on level " << level << "."
         << std::endl;
     }
@@ -185,21 +164,27 @@ private:
     }
   };
   std::vector<block> blocks;
+  
+  /*
+  * Auxiliary function that computes whether a label is a tau index.
+  */
+  bool is_tau(label_type l)
+  { 
+    return m_lts.is_tau(m_lts.apply_hidden_label_map(l)); 
+  }
 
   signature_type get_signature(state_type s)
   {
     signature_type sig;
     // Add the block index of the state to the signature.
-    sig.insert(std::make_tuple(state2block[s], m_lts.tau_label_index(), state2block[s]));
-
+    // sig.insert(std::make_tuple(state2block[s], m_lts.tau_label_index(), state2block[s]));
     for (state_type target : silent_out[s])
     {
       sig.insert(state2sig[target].begin(), state2sig[target].end());
     }
-
     for (observation t : trans_out[s])
     {
-      if (t.first != m_lts.tau_label_index() || state2block[s] != state2block[t.second])
+      if (!is_tau(t.first) || state2block[s] != state2block[t.second])
       {
         sig.insert(std::make_tuple(state2block[s], t.first, state2block[t.second]));
       }
@@ -222,10 +207,6 @@ private:
     std::map<state_type, block_index_type> state2block_new;
     std::size_t num_blocks_created = 0;
     // Compute signatures in order of bottom states and reachability order.
-    // Debug info for frontier
-    int num_added_to_frontier = 0;
-
-    mcrl2::utilities::mcrl2_unused(num_added_to_frontier);
     while (!frontier.empty())
     {
       state_type state = frontier.front();
@@ -255,7 +236,6 @@ private:
         state2num_touched[backward] += 1;
         if (state2num_touched[backward] == max_out)
         {
-          num_added_to_frontier += 1;
           frontier.push(backward);
         }
       }
@@ -367,16 +347,20 @@ private:
     
     signature_type ds = block1.sig;
     signature_type dt = block2.sig;
+
     // Find a distinguishing observation s- tau ->> s' -a-> s''
     std::tuple<block_index_type, label_type, block_index_type> dist_obs;
     bool found_obs = false;
     for (auto path : ds)
     {
-      if (dt.find(path) == dt.end())
+      if (!is_tau(std::get<1>(path)) or std::get<0>(path) != std::get<2>(path))
       {
-        dist_obs = path;
-        found_obs = true;
-        break;
+        if (dt.find(path) == dt.end())
+        {
+          dist_obs = path;
+          found_obs = true;
+          break;
+        }
       }
     }
     // If no such observation exists, we flip the blocks.
@@ -394,23 +378,34 @@ private:
               blockpair2truths[std::make_pair(block1.block_index, block2.block_index)].begin()));
       return phi;
     }
+    
 
     // We have a distinguishing observation, start constructing the formula.
     label_type dist_label = std::get<1>(dist_obs);
     block_index_type B1 = std::get<0>(dist_obs);
     block_index_type B2 = std::get<2>(dist_obs);
-    
+    // Log the observation for debugging purposes.
     std::vector<std::pair<block_index_type, block_index_type>> T;
 
     for (auto path : dt)
     {
-      if (std::get<1>(path) == dist_label)
+      if (std::get<1>(path) == dist_label and (!is_tau(dist_label) or std::get<0>(path) != std::get<2>(path)))
       {
-        // TODO: Maybe check if tau and not inert,
         // we might have B_1 -\tau -> B_1, I don't think its a problem.
         T.push_back(std::make_pair(std::get<0>(path), std::get<2>(path)));
+        if (is_tau(dist_label))
+        {
+          // the observation block2 -\tau->> path2 -(tau)-> path2 (or tauhat).
+          T.push_back(std::make_pair(std::get<2>(path), std::get<2>(path)));
+        }
       }
     }
+    if (is_tau(dist_label))
+    {
+      // the observation block2 -\tau->> path2 -(tau)-> path2 (or tauhat).
+      T.push_back(std::make_pair(block2.parent_block_index, block2.parent_block_index));
+    }
+
 
     // Sort T, such that the block with the highest distlevel in s'' get dealt with first.
     // This is heuristic, no idea if it can be improved
@@ -489,11 +484,12 @@ private:
     // Consruct the regular formula for the diamond operator
     mcrl2::regular_formulas::regular_formula diamond = create_regular_formula(m_lts.action_label(dist_label));
     // If the action is tau, we need to add the tau_hat operator.
-    if (m_lts.is_tau(m_lts.apply_hidden_label_map(dist_label)))
+    if (is_tau(dist_label))
     {
       // we mimic <\hat{tau}> phi := <tau> phi || phi , by <tau+false*> phi.
       diamond = make_tau_hat(diamond);
     }
+
     // diamond formula <dist_label> phi1
     mcrl2::state_formulas::state_formula returnPhi = mcrl2::state_formulas::may(diamond , conjunction(Phi1));
     if (!Phi2.empty())
@@ -538,7 +534,6 @@ bool destructive_branching_bisimulation_compare_minimal_depth(LTS_TYPE& l1,
   }
 
   // Log that we continue to the slower partition refinement.
-  mCRL2log(mcrl2::log::info) << "Starting minimal depth partition refinement." << std::endl;
 
   branching_bisim_partitioner_minimal_depth<LTS_TYPE> branching_bisim_min(l1, init_l2);
 
