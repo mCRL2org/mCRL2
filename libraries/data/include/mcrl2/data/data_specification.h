@@ -47,7 +47,7 @@ bool is_data_specification(const atermpp::aterm& x)
 class data_specification: public sort_specification
 {
   public:
-    typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+    typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
 
   private:
 
@@ -242,7 +242,7 @@ class data_specification: public sort_specification
 
     void add_normalised_cpp_implemented_functions(const implementation_map& c) const
     {
-      typedef std::pair < function_symbol, std::pair<std::function<data_expression(const data_expression&)>, std::string> > map_result_type;
+      typedef std::pair < function_symbol, std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > map_result_type;
       for(const map_result_type f: c)
       {
         const function_symbol g(normalize_sorts(f.first,*this));

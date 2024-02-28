@@ -198,13 +198,14 @@ inline std::size_t pred_word(const std::size_t n)
   return n-1;
 }
 
-inline const data_expression& rightmost_bit(const std::size_t n)
+inline void rightmost_bit(data_expression& result, const std::size_t n)
 {
   if ((n & 1) == 1)
   {
-    return sort_bool::true_();
+    result=sort_bool::true_();
+    return;
   }
-  return sort_bool::false_();
+  result=sort_bool::false_();
 }
 
 inline std::size_t shift_right(const data_expression& e1, const std::size_t n)
@@ -220,379 +221,423 @@ inline std::size_t shift_right(const data_expression& e1, const std::size_t n)
 } // end namespace detail 
 
 /// \brief The machine number representing 0.
+/// \param result The data_expression into which the created object is stored.
 /// \return The machine number 0.
-inline const data_expression& zero_word_manual_implementation()
+inline void zero_word_manual_implementation(data_expression& result)
 {
-  return detail::zero_word();
+  result=detail::zero_word();
 }
 
 /// \brief The machine number representing 1.
+/// \param result The data_expression into which the created object is stored.
 /// \return The machine number 1.
-inline const data_expression& one_word_manual_implementation()
+inline void one_word_manual_implementation(data_expression& result)
 {
-  return detail::one_word();
+  result=detail::one_word();
 }
 
 /// \brief The machine number representing 2.
+/// \param result The data_expression into which the created object is stored.
 /// \return The machine number 2.
-inline const data_expression& two_word_manual_implementation()
+inline void two_word_manual_implementation(data_expression& result)
 {
-  return detail::two_word();
+  result=detail::two_word();
 }
 
 /// \brief The machine number representing 3.
+/// \param result The data_expression into which the created object is stored.
 /// \return The machine number 3.
-inline const data_expression& three_word_manual_implementation()
+inline void three_word_manual_implementation(data_expression& result)
 {
-  return detail::three_word();
+  result=detail::three_word();
 }
 
 /// \brief The machine number representing 4.
+/// \param result The data_expression into which the created object is stored.
 /// \return The machine number 4.
-inline const data_expression& four_word_manual_implementation()
+inline void four_word_manual_implementation(data_expression& result)
 {
-  return detail::four_word();
+  result=detail::four_word();
 }
 
 /// \brief The largest representable machine number.
+/// \param result The data_expression into which the created object is stored.
 /// \return The largest number a machine word can hold. 
-inline const data_expression& max_word_manual_implementation()
+inline void max_word_manual_implementation(data_expression& result)
 {
-  return detail::max_word();
+  result=detail::max_word();
 }
 
 /// \brief Checks whether the argument is equal to 0.
 /// \param e 
+/// \param result The data_expression into which the created object is stored.
 /// \return True if e equals 0, otherwise false.
-inline data_expression equals_zero_word_manual_implementation(const data_expression& e)
+inline void equals_zero_word_manual_implementation(data_expression& result, const data_expression& e)
 {
   assert(is_machine_number(e));
   if (detail::equals_zero_word(atermpp::down_cast<machine_number>(e).value()))
   {
-    return sort_bool::true_();
+    result=sort_bool::true_();
+    return;
   }
-  return sort_bool::false_();
+  result=sort_bool::false_();
+  return;
 }
 
 /// \brief Checks whether the argument is not equal to 0.
 /// \param e 
+/// \param result The data_expression into which the created object is stored.
 /// \return True if e equals 0, otherwise false.
-inline data_expression not_equals_zero_word_manual_implementation(const data_expression& e)
+inline void not_equals_zero_word_manual_implementation(data_expression& result, const data_expression& e)
 {
   assert(is_machine_number(e));
   if (detail::equals_zero_word(atermpp::down_cast<machine_number>(e).value()))
   {
-    return sort_bool::false_();
+    result=sort_bool::false_();
+    return;
   }
-  return sort_bool::true_();
+  result=sort_bool::true_();
+  return;
 }
 
 /// \brief Checks whether the argument is equal to 1.
 /// \param e 
+/// \param result The data_expression into which the created object is stored.
 /// \return True if e equals 0, otherwise false.
-inline data_expression equals_one_word_manual_implementation(const data_expression& e)
+inline void equals_one_word_manual_implementation(data_expression& result, const data_expression& e)
 {
   assert(is_machine_number(e));
   if (detail::equals_one_word(atermpp::down_cast<machine_number>(e).value()))
   {
-    return sort_bool::true_();
+    result=sort_bool::true_();
+    return;
   }
-  return sort_bool::false_();
+  result=sort_bool::false_();
+  return;
 }
 
 /// \brief Checks whether the argument is equal to the largest 64 bit number.
 /// \param e 
+/// \param result The data_expression into which the created object is stored.
 /// \return True if e equals the largest 64 number, otherwise false.
-inline data_expression equals_max_word_manual_implementation(const data_expression& e)
+inline void equals_max_word_manual_implementation(data_expression& result, const data_expression& e)
 {
   assert(is_machine_number(e));
   if (detail::equals_max_word(atermpp::down_cast<machine_number>(e).value()))
   {
-    return sort_bool::true_();
+    result=sort_bool::true_();
+    return;
   }
-  return sort_bool::false_();
+  result=sort_bool::false_();
+  return;
 }
 
 /// \brief The successor function on a machine numbers, that wraps around.
+/// \param result The data_expression into which the created object is stored.
 /// \param e 
 /// \return e+1, or zero if n is the maximum number.
-inline data_expression succ_word_manual_implementation(const data_expression& e)
+inline void succ_word_manual_implementation(data_expression& result, const data_expression& e)
 {
   assert(is_machine_number(e));
-  return machine_number(detail::succ_word(atermpp::down_cast<machine_number>(e).value()));
+  make_machine_number(result, detail::succ_word(atermpp::down_cast<machine_number>(e).value()));
 }
 
 /// \brief The equality function on two machine words. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1==e2.
-inline data_expression equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void equal_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   const bool b=detail::equal_word(
                             atermpp::down_cast<machine_number>(e1).value(),
                             atermpp::down_cast<machine_number>(e2).value());
-  return (b? sort_bool::true_(): sort_bool::false_());
+  result=(b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The non equality function on two machine words. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1!=e2.
-inline data_expression not_equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void not_equal_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   const bool b=detail::equal_word(
                           atermpp::down_cast<machine_number>(e1).value(),
                           atermpp::down_cast<machine_number>(e2).value());
-  return (b? sort_bool::false_(): sort_bool::true_());
+  result=(b? sort_bool::false_(): sort_bool::true_());
 }
 
 /// \brief The less than function on two machine words. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1<e2.
-inline data_expression less_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void less_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   const bool b=detail::less_word(atermpp::down_cast<machine_number>(e1).value(),atermpp::down_cast<machine_number>(e2).value());
-  return (b? sort_bool::true_(): sort_bool::false_());
+  result=(b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The less than or equal function on two machine words. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1<=e2.
-inline data_expression less_equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void less_equal_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   const bool b=detail::less_equal_word(atermpp::down_cast<machine_number>(e1).value(),atermpp::down_cast<machine_number>(e2).value());
-  return (b? sort_bool::true_(): sort_bool::false_());
+  result=(b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The greater than function on two machine words. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1>e2.
-inline data_expression greater_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void greater_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   const bool b=detail::less_word(atermpp::down_cast<machine_number>(e2).value(),atermpp::down_cast<machine_number>(e1).value());
-  return (b? sort_bool::true_(): sort_bool::false_());
+  result=(b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The greater than or equal function on two machine words. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1>=e2.
-inline data_expression greater_equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void greater_equal_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   const bool b=detail::less_equal_word(atermpp::down_cast<machine_number>(e2).value(),atermpp::down_cast<machine_number>(e1).value());
-  return (b? sort_bool::true_(): sort_bool::false_());
+  result=(b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The result of adding two words modulo the maximal representable machine word plus 1.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1+e2 modulo the machine word. 
-inline data_expression add_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void add_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::add_word(
+  make_machine_number(result, detail::add_word(
                               atermpp::down_cast<machine_number>(e1).value(),
                               atermpp::down_cast<machine_number>(e2).value()));
 }
 
 /// \brief The result of adding two words plus 1 modulo the maximal representable machine word plus 1.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1+e2+1 modulo the machine word. 
-inline data_expression add_with_carry_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void add_with_carry_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::add_with_carry_word(
+  make_machine_number(result, detail::add_with_carry_word(
                               atermpp::down_cast<machine_number>(e1).value(),
                               atermpp::down_cast<machine_number>(e2).value()));
 }
 
 /// \brief An indication whether an overflow occurs when e1 and e2 are added. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return If e1+e2 is larger than a machine word, then true, else false. 
-inline data_expression add_overflow_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void add_overflow_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   if (detail::add_overflow_word(
                               atermpp::down_cast<machine_number>(e1).value(),
                               atermpp::down_cast<machine_number>(e2).value()))
   {
-    return sort_bool::true_();
+    result=sort_bool::true_();
+    return;
   }
-  return sort_bool::false_();
+  result=sort_bool::false_();
 }
 
 /// \brief An indication whether an overflow occurs when e1 and e2 are added. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return If e1+e2+1 is larger than a machine word, then true, else false. 
-inline data_expression add_with_carry_overflow_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void add_with_carry_overflow_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   if (detail::add_with_carry_overflow_word(
                               atermpp::down_cast<machine_number>(e1).value(),
                               atermpp::down_cast<machine_number>(e2).value()))
   {
-    return sort_bool::true_();
+    result=sort_bool::true_();
+    return;
   }
-  return sort_bool::false_();
+  result=sort_bool::false_();
 }
 
 /// \brief The result of multiplying two words modulo the maximal representable machine word plus 1.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1*e2 modulo the machine word. 
-inline data_expression times_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void times_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::times_word(
+  make_machine_number(result, detail::times_word(
                               atermpp::down_cast<machine_number>(e1).value(),
                               atermpp::down_cast<machine_number>(e2).value()));
 }
 
 /// \brief The result of multiplying two words and adding the third modulo the maximal representable machine word plus 1.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1*e2+e3 modulo the machine word. 
-inline data_expression times_with_carry_word_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3)
+inline void times_with_carry_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2, const data_expression& e3)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3));
-  return machine_number(detail::times_with_carry_word(
+  make_machine_number(result, detail::times_with_carry_word(
                               atermpp::down_cast<machine_number>(e1).value(),
                               atermpp::down_cast<machine_number>(e2).value(),
                               atermpp::down_cast<machine_number>(e3).value()));
 }
 
 /// \brief The result of multiplying two words divided by the maximal representable machine word plus 1.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1*e2 div the maximal machine word+1. 
-inline data_expression times_overflow_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void times_overflow_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::times_overflow_word(
-                                atermpp::down_cast<machine_number>(e1).value(),
-                                atermpp::down_cast<machine_number>(e2).value()));
+  make_machine_number(result, detail::times_overflow_word(
+                              atermpp::down_cast<machine_number>(e1).value(),
+                              atermpp::down_cast<machine_number>(e2).value()));
 }
 
 /// \brief The result of multiplying two words and adding a third divided by the maximal representable machine word plus 1.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1*e2 div the maximal machine word+1. 
-inline data_expression times_with_carry_overflow_word_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3)
+inline void times_with_carry_overflow_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2, const data_expression& e3)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3));
-  return machine_number(detail::times_with_carry_overflow_word(
-                                atermpp::down_cast<machine_number>(e1).value(),
-                                atermpp::down_cast<machine_number>(e2).value(),
-                                atermpp::down_cast<machine_number>(e3).value()));
+  make_machine_number(result, detail::times_with_carry_overflow_word(
+                              atermpp::down_cast<machine_number>(e1).value(),
+                              atermpp::down_cast<machine_number>(e2).value(),
+                              atermpp::down_cast<machine_number>(e3).value()));
 }
 
 /// \brief The result of subtracting two words modulo the maximal representable machine word plus 1.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1-e2 modulo the machine word. 
-inline data_expression minus_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void minus_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::minus_word(
-                               atermpp::down_cast<machine_number>(e1).value(),
-                               atermpp::down_cast<machine_number>(e2).value()));
+  make_machine_number(result, detail::minus_word(
+                              atermpp::down_cast<machine_number>(e1).value(),
+                              atermpp::down_cast<machine_number>(e2).value()));
 }
 
 /// \brief The result of subtracting two words. If the result is negative 0 is returned. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return max(0,e1-e2).
-inline data_expression monus_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void monus_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::minus_word(
-                               atermpp::down_cast<machine_number>(e1).value(),
-                               atermpp::down_cast<machine_number>(e2).value()));
+  make_machine_number(result, detail::minus_word(
+                              atermpp::down_cast<machine_number>(e1).value(),
+                              atermpp::down_cast<machine_number>(e2).value()));
 }
 
 /// \brief Calculates the division of the first word by the second. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1/e2.
-inline data_expression div_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void div_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::div_word(
-                                atermpp::down_cast<machine_number>(e1).value(),
-                                atermpp::down_cast<machine_number>(e2).value()));
+  make_machine_number(result, detail::div_word(
+                              atermpp::down_cast<machine_number>(e1).value(),
+                              atermpp::down_cast<machine_number>(e2).value()));
 }
 
 /// \brief Calculates e1 modulo e2.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return e1 modulo e2. 
-inline data_expression mod_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void mod_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::mod_word(
-                                atermpp::down_cast<machine_number>(e1).value(), 
-                                atermpp::down_cast<machine_number>(e2).value()));
+  make_machine_number(result, detail::mod_word(
+                              atermpp::down_cast<machine_number>(e1).value(), 
+                              atermpp::down_cast<machine_number>(e2).value()));
 }
 
 /// \brief The square root of e, rounded down to a machine word. 
+/// \param result The data_expression into which the created object is stored.
 /// \param e The argument.
 /// \return The square root of e rounded down. 
-inline data_expression sqrt_word_manual_implementation(const data_expression& e)
+inline void sqrt_word_manual_implementation(data_expression& result, const data_expression& e)
 {
   assert(is_machine_number(e));
-  return machine_number(detail::sqrt_word(atermpp::down_cast<machine_number>(e).value()));
+  make_machine_number(result, detail::sqrt_word(atermpp::down_cast<machine_number>(e).value()));
 }
 
 /// \brief Calculates (base*e1 + e2) div e3.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \param e3 The third argument. 
 /// \return (base*e1 + e2) div e3
-inline data_expression div_doubleword_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3)
+inline void div_doubleword_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2, const data_expression& e3)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3));
-  return machine_number(detail::div_doubleword(
-                                 atermpp::down_cast<machine_number>(e1).value(), 
-                                 atermpp::down_cast<machine_number>(e2).value(), 
-                                 atermpp::down_cast<machine_number>(e3).value()));
+  make_machine_number(result, detail::div_doubleword(
+                              atermpp::down_cast<machine_number>(e1).value(), 
+                              atermpp::down_cast<machine_number>(e2).value(), 
+                              atermpp::down_cast<machine_number>(e3).value()));
 }
 
 /// \brief Calculates (base*e1 + e2) div (base*e3 + e4).
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \param e3 The third argument. 
 /// \param e4 The fourth argument. 
 /// \return (base*e1 + e2) div (base*e3 + e4)
-inline data_expression div_double_doubleword_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4)
+inline void div_double_doubleword_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3) && is_machine_number(e4));
-  return machine_number(detail::div_double_doubleword(
-                                 atermpp::down_cast<machine_number>(e1).value(), 
-                                 atermpp::down_cast<machine_number>(e2).value(), 
-                                 atermpp::down_cast<machine_number>(e3).value(), 
-                                 atermpp::down_cast<machine_number>(e4).value()));
+  make_machine_number(result, detail::div_double_doubleword(
+                              atermpp::down_cast<machine_number>(e1).value(), 
+                              atermpp::down_cast<machine_number>(e2).value(), 
+                              atermpp::down_cast<machine_number>(e3).value(), 
+                              atermpp::down_cast<machine_number>(e4).value()));
 }
 
 /// \brief Calculates (base*(base*e1 + e2)+e3) div (base*e4 + e5).
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \param e3 The third argument. 
 /// \param e4 The fourth argument. 
 /// \param e5 The fifth argument. 
 /// \return (base*(base*e1 + e2)+e3) div (base*e4 + e5)
-inline data_expression div_triple_doubleword_manual_implementation(
+inline void div_triple_doubleword_manual_implementation(
+                        data_expression& result, 
                         const data_expression& e1, 
                         const data_expression& e2, 
                         const data_expression& e3, 
@@ -600,7 +645,7 @@ inline data_expression div_triple_doubleword_manual_implementation(
                         const data_expression& e5)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3) && is_machine_number(e4) && is_machine_number(e5));
-  return machine_number(detail::div_triple_doubleword(
+  make_machine_number(result, detail::div_triple_doubleword(
                                  atermpp::down_cast<machine_number>(e1).value(), 
                                  atermpp::down_cast<machine_number>(e2).value(), 
                                  atermpp::down_cast<machine_number>(e3).value(), 
@@ -609,139 +654,151 @@ inline data_expression div_triple_doubleword_manual_implementation(
 }
 
 /// \brief Calculates (base*e1 + e2) mod (base*e3 + e4).
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \param e3 The third argument. 
 /// \param e4 The fourth argument. 
 /// \return (base*e1 + e2) mod (base*e3 + e4)
-inline data_expression mod_double_doubleword_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4)
+inline void mod_double_doubleword_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3) && is_machine_number(e4));
-  return machine_number(detail::mod_double_doubleword(
-                                 atermpp::down_cast<machine_number>(e1).value(), 
-                                 atermpp::down_cast<machine_number>(e2).value(), 
-                                 atermpp::down_cast<machine_number>(e3).value(), 
-                                 atermpp::down_cast<machine_number>(e4).value()));
+  make_machine_number(result, detail::mod_double_doubleword(
+                              atermpp::down_cast<machine_number>(e1).value(), 
+                              atermpp::down_cast<machine_number>(e2).value(), 
+                              atermpp::down_cast<machine_number>(e3).value(), 
+                              atermpp::down_cast<machine_number>(e4).value()));
 }
 
 /// \brief The square root of base*e1+e2 rounded down.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \return The square root of base*e1+e2 rounded down.
-inline data_expression sqrt_doubleword_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void sqrt_doubleword_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::sqrt_doubleword(
-                                 atermpp::down_cast<machine_number>(e1).value(),
-                                 atermpp::down_cast<machine_number>(e2).value()));
+  make_machine_number(result, detail::sqrt_doubleword(
+                              atermpp::down_cast<machine_number>(e1).value(),
+                              atermpp::down_cast<machine_number>(e2).value()));
 }
 
 /// \brief Calculates (base*e1 + e2) mod e3. The result fits in one word.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \param e3 The third argument. 
 /// \return (base*e1 + e2) mod e3
-inline data_expression mod_doubleword_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3)
+inline void mod_doubleword_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2, const data_expression& e3)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3));
-  return machine_number(detail::mod_doubleword(
-                                 atermpp::down_cast<machine_number>(e1).value(), 
-                                 atermpp::down_cast<machine_number>(e2).value(), 
-                                 atermpp::down_cast<machine_number>(e3).value()));
+  make_machine_number(result, detail::mod_doubleword(
+                              atermpp::down_cast<machine_number>(e1).value(), 
+                              atermpp::down_cast<machine_number>(e2).value(), 
+                              atermpp::down_cast<machine_number>(e3).value()));
 }
 
 /// \brief Calculates the least significant word of the square root of base*(base*e1+e2)+e3.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \param e3 The third argument. 
 /// \return the least significant word of the square root of base*(base*e1+e2)+e3.
-inline data_expression sqrt_tripleword_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3)
+inline void sqrt_tripleword_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2, const data_expression& e3)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3));
-  return machine_number(detail::sqrt_tripleword(
-                                 atermpp::down_cast<machine_number>(e1).value(), 
-                                 atermpp::down_cast<machine_number>(e2).value(), 
-                                 atermpp::down_cast<machine_number>(e3).value()));
+  make_machine_number(result, detail::sqrt_tripleword(
+                              atermpp::down_cast<machine_number>(e1).value(), 
+                              atermpp::down_cast<machine_number>(e2).value(), 
+                              atermpp::down_cast<machine_number>(e3).value()));
 }
 
 /// \brief Calculates the most significant word of the square root of base*(base*e1+e2)+e3.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \param e3 The third argument. 
 /// \return the most significant word of the square root of base*(base*e1+e2)+e3.
-inline data_expression sqrt_tripleword_overflow_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3)
+inline void sqrt_tripleword_overflow_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2, const data_expression& e3)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3));
-  return machine_number(detail::sqrt_tripleword_overflow(
-                                 atermpp::down_cast<machine_number>(e1).value(), 
-                                 atermpp::down_cast<machine_number>(e2).value(), 
-                                 atermpp::down_cast<machine_number>(e3).value()));
+  make_machine_number(result, detail::sqrt_tripleword_overflow(
+                              atermpp::down_cast<machine_number>(e1).value(), 
+                              atermpp::down_cast<machine_number>(e2).value(), 
+                              atermpp::down_cast<machine_number>(e3).value()));
 }
 
 /// \brief Calculates the least significant word of the square root of base*(base*(base*e1+e2)+e3)+e4.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \param e3 The third argument. 
 /// \param e4 The fourth argument. 
 /// \return The least significant word of the square root of base*(base*(base*e1+e2)+e3)+e4.
-inline data_expression sqrt_quadrupleword_manual_implementation(
+inline void sqrt_quadrupleword_manual_implementation(
+                                      data_expression& result, 
                                       const data_expression& e1, 
                                       const data_expression& e2, 
                                       const data_expression& e3, 
                                       const data_expression& e4)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3) && is_machine_number(e4));
-  return machine_number(detail::sqrt_quadrupleword(
-                                 atermpp::down_cast<machine_number>(e1).value(), 
-                                 atermpp::down_cast<machine_number>(e2).value(), 
-                                 atermpp::down_cast<machine_number>(e3).value(), 
-                                 atermpp::down_cast<machine_number>(e4).value()));
+  make_machine_number(result, detail::sqrt_quadrupleword(
+                              atermpp::down_cast<machine_number>(e1).value(), 
+                              atermpp::down_cast<machine_number>(e2).value(), 
+                              atermpp::down_cast<machine_number>(e3).value(), 
+                              atermpp::down_cast<machine_number>(e4).value()));
 }
 
 /// \brief Calculates the most significant word of the square root of base*(base*(base*e1+e2)+e3)+e4.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
 /// \param e3 The third argument. 
 /// \param e4 The fourth argument. 
 /// \return The most significant word of the square root of base*(base*(base*e1+e2)+e3)+e4.
-inline data_expression sqrt_quadrupleword_overflow_manual_implementation(
-                                               const data_expression& e1, 
-                                               const data_expression& e2, 
-                                               const data_expression& e3, 
-                                               const data_expression& e4)
+inline void sqrt_quadrupleword_overflow_manual_implementation(
+                                      data_expression& result, 
+                                      const data_expression& e1, 
+                                      const data_expression& e2, 
+                                      const data_expression& e3, 
+                                      const data_expression& e4)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3) && is_machine_number(e4));
-  return machine_number(detail::sqrt_quadrupleword_overflow(
-                                 atermpp::down_cast<machine_number>(e1).value(), 
-                                 atermpp::down_cast<machine_number>(e2).value(), 
-                                 atermpp::down_cast<machine_number>(e3).value(), 
-                                 atermpp::down_cast<machine_number>(e4).value()));
+  make_machine_number(result, detail::sqrt_quadrupleword_overflow(
+                              atermpp::down_cast<machine_number>(e1).value(), 
+                              atermpp::down_cast<machine_number>(e2).value(), 
+                              atermpp::down_cast<machine_number>(e3).value(), 
+                              atermpp::down_cast<machine_number>(e4).value()));
 }
 
 /// \brief The predecessor function on a machine numbers, that wraps around.
+/// \param result The data_expression into which the created object is stored.
 /// \param e 
 /// \return e-1, or maxword if e is zero.
-inline data_expression pred_word_manual_implementation(const data_expression& e)
+inline void pred_word_manual_implementation(data_expression& result, const data_expression& e)
 {
-  return machine_number(detail::pred_word(atermpp::down_cast<machine_number>(e).value())); 
+  make_machine_number(result, detail::pred_word(atermpp::down_cast<machine_number>(e).value())); 
 }
 
 /// \brief The right most bit of a machine number.
+/// \param result The data_expression into which the created object is stored.
 /// \param e 
 /// \return true if the rightmost bit is 1.
-inline data_expression rightmost_bit_manual_implementation(const data_expression& e)
+inline void rightmost_bit_manual_implementation(data_expression& result, const data_expression& e)
 {
-  return detail::rightmost_bit(atermpp::down_cast<machine_number>(e).value()); 
+  detail::rightmost_bit(result, atermpp::down_cast<machine_number>(e).value()); 
 }
 
 /// \brief The machine word shifted one position to the right.
+/// \param result The data_expression into which the created object is stored.
 /// \param e1 A boolean indicating what the left most bit must be.  
 /// \param e2 The value shifted to the right. 
 /// \return The machine number e2 divided by 2 prepended with a bit 1 if e1 is true. 
-inline data_expression shift_right_manual_implementation(const data_expression& e1, const data_expression& e2)
+inline void shift_right_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(e1==sort_bool::true_() || e1==sort_bool::false_());
-  return machine_number(detail::shift_right(e1, atermpp::down_cast<machine_number>(e2).value())); 
+  make_machine_number(result, detail::shift_right(e1, atermpp::down_cast<machine_number>(e2).value())); 
 }
 
 

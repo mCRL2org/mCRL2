@@ -2348,45 +2348,57 @@ public:
              << m_padding << "this_rewriter->m_rewrite_stack.increase(1);\n"
              << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.top();\n"; */
 
-    m_stream << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.new_stack_position();\n";
 
     const std::string cplusplus_function_name = data_spec.cpp_implemented_functions().find(opid)->second.second;
 
     // First calculate the core function, which may be surrounded by extra applications. 
-    std::stringstream ss;
-    ss << cplusplus_function_name << "(";
-    
-    for(size_t i=0; i<get_direct_arity(opid); ++i)
-    {
-      ss << (i>0?",":"");
-      ss << "local_rewrite(arg_not_nf" << i << ")";
-    }
-    ss << ")";
 
     if (arity==get_direct_arity(opid))
     {
       if (target_for_output.empty())
       {
-        m_stream << ss.str();
+        assert(0);
+        // m_stream << ss.str();
       }
       else
       {
         // m_stream << m_padding << target_for_output << " = " << ss.str() << ";\n";
-        m_stream << m_padding << target_for_output << ".assign(" << ss.str() 
-                 << ", *this_rewriter->m_thread_aterm_pool);\n";
+        // m_stream << m_padding << target_for_output << ".assign(" << ss.str() 
+        //          << ", *this_rewriter->m_thread_aterm_pool);\n";
+        std::stringstream ss1;
+        m_stream << m_padding << cplusplus_function_name << "(" << target_for_output;
+        
+        for(size_t i=0; i<get_direct_arity(opid); ++i)
+        {
+          ss1 << ", local_rewrite(arg_not_nf" << i << ")";
+        }
+        ss1 << ")";
+
+        m_stream << m_padding << ss1.str() << ";\n";
       }
       return;
     }
+    m_stream << m_padding << "data_expression& local_store1=this_rewriter->m_rewrite_stack.new_stack_position();\n";
+    std::stringstream ss;
+
+    m_stream << m_padding << cplusplus_function_name << "(local_store1";
+        
+    for(size_t i=0; i<get_direct_arity(opid); ++i)
+    {
+      m_stream << ", local_rewrite(arg_not_nf" << i << ")";
+    }
+    m_stream << ");\n";
     // else it is a higher order function, and it must be surrounded by "application"s. 
+    m_stream << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.new_stack_position();\n";
     assert(arity>get_direct_arity(opid));
     std::size_t used_arguments = get_direct_arity(opid);
     std::string result="local_store";
-    m_stream << m_padding << implement_body_of_cplusplus_defined_function(
+    m_stream << implement_body_of_cplusplus_defined_function(
                                          arity,
                                          result,
-                                         ss.str(), 
+                                         "local_store1", 
                                          down_cast<function_sort>(down_cast<function_sort>(opid.sort()).codomain()),
-                                         used_arguments) << ";\n";
+                                         used_arguments);
     assert(used_arguments == arity);
    
     // If there applications surrounding the term, it may not be a normalform anymore, but its arguments
@@ -2418,6 +2430,7 @@ public:
       implement_a_cplusplus_defined_function(m_stream, "result", arity, opid, data_spec);
       return;
     }
+    m_stream << m_padding << "std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";
     bool added_new_parameters_in_brackets=false;
     m_used=nfs_array(arity); // This vector maintains which arguments are in normal form.
     // m_nnfvars=variable_or_number_list();
@@ -2470,6 +2483,7 @@ public:
       brackets.current_data_parameters.pop();
       brackets.current_data_arguments.pop();
     }
+    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n";
   }
 
   std::string get_heads(const sort_expression& s, const std::string& base_string, const std::size_t number_of_arguments)
@@ -2705,12 +2719,12 @@ public:
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     rewr_function_signature(m_stream, index, arity, brackets);
     m_stream << m_padding << "{\n"
-             << m_padding << "  mcrl2::utilities::mcrl2_unused(this_rewriter); // Suppress warning\n"
-             << m_padding << "  std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";
+             << m_padding << "  mcrl2::utilities::mcrl2_unused(this_rewriter); // Suppress warning\n";
+//              << m_padding << "  std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";    
     m_padding.indent();
     implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments,data_spec);
-    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n"
-             << m_padding << "return;\n";
+//    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n"
+      m_stream << m_padding << "return;\n";
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 

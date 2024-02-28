@@ -265,7 +265,7 @@ class function_declaration():
         extra_parameters.append(self.sort_expression.domain.code(spec))
       except:
         pass # in case sort_expression has no domain
-    return "        result[{0}({1})]=std::pair<std::function<data_expression(const data_expression&)>, std::string>({0}_application,".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters), data_parameters) + \
+    return "        result[{0}({1})]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>({0}_application,".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters), data_parameters) + \
                     "\"{0}_manual_implementation\");\n".format(add_namespace(self.label, self.namespace))
 
 
@@ -703,16 +703,16 @@ ${cases}
       /// \\details This function is to be implemented manually. \
       /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
       inline
-      const data_expression& ${functionname}_manual_implementation();
+      void ${functionname}_manual_implementation(data_expression& result);
 
       /// \\brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      data_expression ${functionname}_application(const data_expression& a)
+      void ${functionname}_application(data_expression& result, const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==${functionname}());
-        return ${functionname}_manual_implementation(${domain_parameters});
+        ${functionname}_manual_implementation(result${domain_parameters});
       }\n
 ''')
 
@@ -724,7 +724,7 @@ ${cases}
           sortparameterstring = '' if sort_params == '' else '\n      '.join(['/// \\param {0} A sort expression.'.format(fcode(x, spec)) for x in sort_params]),
           functionname = name,
           actsortparameters = ', '.join([fcode(x, spec) for x in sort_params + domain_params]),
-          domain_parameters = ''.join([fcode(x, spec) + ', ' for x in domain_params]),
+          domain_parameters = ', '.join([fcode(x, spec) + ', ' for x in domain_params]),
           parameters = ', '.join(formal_sort_params),
         )
 
@@ -737,16 +737,16 @@ ${cases}
       ${dataparameterstring}
       /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
       inline
-      data_expression ${functionname}_manual_implementation(${parameters});\n
+      void ${functionname}_manual_implementation(data_expression& result, ${parameters});\n
 
       /// \\brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression ${functionname}_application(const data_expression& a1)
+      void ${functionname}_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==${functionname}());
-        return ${functionname}_manual_implementation(${domain_parameters}${aaparameters});
+        ${functionname}_manual_implementation(result, ${domain_parameters}${aaparameters});
       }\n
 ''')
 
@@ -1983,7 +1983,7 @@ class mapping_specification():
       code += "      }\n"
       code += "\n\n"
       code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
-      code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;\n"
+      code += "      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;\n"
       code += "      /// \\brief Give all system defined mappings that are to be implemented in C++ code for %s\n" % (escape(namespace_string))
       for s in self.declarations.sort_parameters(spec):
         code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
@@ -2076,7 +2076,7 @@ class constructor_specification():
     code += "      }\n"
 
     code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
-    code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;\n"
+    code += "      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;\n"
     code += "      /// \\brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for %s.\n" % (escape(namespace_string))
     for s in self.declarations.sort_parameters(spec):
       code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))

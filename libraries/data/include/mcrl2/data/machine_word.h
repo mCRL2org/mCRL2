@@ -97,16 +97,16 @@ namespace mcrl2 {
       /// \brief The data expression of an application of the constant symbol \@zero_word.
       /// \details This function is to be implemented manually.       /// \return The data expression corresponding to an application of \@zero_word to a number of arguments.
       inline
-      const data_expression& zero_word_manual_implementation();
+      void zero_word_manual_implementation(data_expression& result);
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      data_expression zero_word_application(const data_expression& a)
+      void zero_word_application(data_expression& result, const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==zero_word());
-        return zero_word_manual_implementation();
+        zero_word_manual_implementation(result);
       }
 
 
@@ -177,17 +177,17 @@ namespace mcrl2 {
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@succ_word to a number of arguments.
       inline
-      data_expression succ_word_manual_implementation(const data_expression& arg0);
+      void succ_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression succ_word_application(const data_expression& a1)
+      void succ_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==succ_word());
-        return succ_word_manual_implementation(a[0]);
+        succ_word_manual_implementation(result, a[0]);
       }
 
       /// \brief Give all system defined constructors for machine_word.
@@ -213,15 +213,15 @@ namespace mcrl2 {
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for machine_word.
       /// \return All system defined constructors that are to be implemented in C++ for machine_word.
       inline
       implementation_map machine_word_cpp_implementable_constructors()
       {
         implementation_map result;
-        result[sort_machine_word::zero_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::zero_word_application,"sort_machine_word::zero_word_manual_implementation");
-        result[sort_machine_word::succ_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::succ_word_application,"sort_machine_word::succ_word_manual_implementation");
+        result[sort_machine_word::zero_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::zero_word_application,"sort_machine_word::zero_word_manual_implementation");
+        result[sort_machine_word::succ_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::succ_word_application,"sort_machine_word::succ_word_manual_implementation");
 
         return result;
       }
@@ -261,16 +261,16 @@ namespace mcrl2 {
       /// \brief The data expression of an application of the constant symbol \@one_word.
       /// \details This function is to be implemented manually.       /// \return The data expression corresponding to an application of \@one_word to a number of arguments.
       inline
-      const data_expression& one_word_manual_implementation();
+      void one_word_manual_implementation(data_expression& result);
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      data_expression one_word_application(const data_expression& a)
+      void one_word_application(data_expression& result, const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==one_word());
-        return one_word_manual_implementation();
+        one_word_manual_implementation(result);
       }
 
 
@@ -309,16 +309,16 @@ namespace mcrl2 {
       /// \brief The data expression of an application of the constant symbol \@two_word.
       /// \details This function is to be implemented manually.       /// \return The data expression corresponding to an application of \@two_word to a number of arguments.
       inline
-      const data_expression& two_word_manual_implementation();
+      void two_word_manual_implementation(data_expression& result);
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      data_expression two_word_application(const data_expression& a)
+      void two_word_application(data_expression& result, const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==two_word());
-        return two_word_manual_implementation();
+        two_word_manual_implementation(result);
       }
 
 
@@ -357,16 +357,16 @@ namespace mcrl2 {
       /// \brief The data expression of an application of the constant symbol \@three_word.
       /// \details This function is to be implemented manually.       /// \return The data expression corresponding to an application of \@three_word to a number of arguments.
       inline
-      const data_expression& three_word_manual_implementation();
+      void three_word_manual_implementation(data_expression& result);
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      data_expression three_word_application(const data_expression& a)
+      void three_word_application(data_expression& result, const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==three_word());
-        return three_word_manual_implementation();
+        three_word_manual_implementation(result);
       }
 
 
@@ -405,16 +405,16 @@ namespace mcrl2 {
       /// \brief The data expression of an application of the constant symbol \@four_word.
       /// \details This function is to be implemented manually.       /// \return The data expression corresponding to an application of \@four_word to a number of arguments.
       inline
-      const data_expression& four_word_manual_implementation();
+      void four_word_manual_implementation(data_expression& result);
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      data_expression four_word_application(const data_expression& a)
+      void four_word_application(data_expression& result, const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==four_word());
-        return four_word_manual_implementation();
+        four_word_manual_implementation(result);
       }
 
 
@@ -453,16 +453,16 @@ namespace mcrl2 {
       /// \brief The data expression of an application of the constant symbol \@max_word.
       /// \details This function is to be implemented manually.       /// \return The data expression corresponding to an application of \@max_word to a number of arguments.
       inline
-      const data_expression& max_word_manual_implementation();
+      void max_word_manual_implementation(data_expression& result);
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      data_expression max_word_application(const data_expression& a)
+      void max_word_application(data_expression& result, const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==max_word());
-        return max_word_manual_implementation();
+        max_word_manual_implementation(result);
       }
 
 
@@ -533,17 +533,17 @@ namespace mcrl2 {
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@equals_zero_word to a number of arguments.
       inline
-      data_expression equals_zero_word_manual_implementation(const data_expression& arg0);
+      void equals_zero_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression equals_zero_word_application(const data_expression& a1)
+      void equals_zero_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==equals_zero_word());
-        return equals_zero_word_manual_implementation(a[0]);
+        equals_zero_word_manual_implementation(result, a[0]);
       }
 
 
@@ -614,17 +614,17 @@ namespace mcrl2 {
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@not_equals_zero_word to a number of arguments.
       inline
-      data_expression not_equals_zero_word_manual_implementation(const data_expression& arg0);
+      void not_equals_zero_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression not_equals_zero_word_application(const data_expression& a1)
+      void not_equals_zero_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==not_equals_zero_word());
-        return not_equals_zero_word_manual_implementation(a[0]);
+        not_equals_zero_word_manual_implementation(result, a[0]);
       }
 
 
@@ -695,17 +695,17 @@ namespace mcrl2 {
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@equals_one_word to a number of arguments.
       inline
-      data_expression equals_one_word_manual_implementation(const data_expression& arg0);
+      void equals_one_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression equals_one_word_application(const data_expression& a1)
+      void equals_one_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==equals_one_word());
-        return equals_one_word_manual_implementation(a[0]);
+        equals_one_word_manual_implementation(result, a[0]);
       }
 
 
@@ -776,17 +776,17 @@ namespace mcrl2 {
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@equals_max_word to a number of arguments.
       inline
-      data_expression equals_max_word_manual_implementation(const data_expression& arg0);
+      void equals_max_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression equals_max_word_application(const data_expression& a1)
+      void equals_max_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==equals_max_word());
-        return equals_max_word_manual_implementation(a[0]);
+        equals_max_word_manual_implementation(result, a[0]);
       }
 
 
@@ -860,17 +860,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_word to a number of arguments.
       inline
-      data_expression add_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void add_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression add_word_application(const data_expression& a1)
+      void add_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==add_word());
-        return add_word_manual_implementation(a[0], a[1]);
+        add_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -944,17 +944,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_with_carry_word to a number of arguments.
       inline
-      data_expression add_with_carry_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void add_with_carry_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression add_with_carry_word_application(const data_expression& a1)
+      void add_with_carry_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==add_with_carry_word());
-        return add_with_carry_word_manual_implementation(a[0], a[1]);
+        add_with_carry_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -1028,17 +1028,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_overflow_word to a number of arguments.
       inline
-      data_expression add_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void add_overflow_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression add_overflow_word_application(const data_expression& a1)
+      void add_overflow_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==add_overflow_word());
-        return add_overflow_word_manual_implementation(a[0], a[1]);
+        add_overflow_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -1112,17 +1112,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_with_carry_overflow_word to a number of arguments.
       inline
-      data_expression add_with_carry_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void add_with_carry_overflow_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression add_with_carry_overflow_word_application(const data_expression& a1)
+      void add_with_carry_overflow_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==add_with_carry_overflow_word());
-        return add_with_carry_overflow_word_manual_implementation(a[0], a[1]);
+        add_with_carry_overflow_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -1196,17 +1196,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@times_word to a number of arguments.
       inline
-      data_expression times_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void times_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression times_word_application(const data_expression& a1)
+      void times_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==times_word());
-        return times_word_manual_implementation(a[0], a[1]);
+        times_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -1283,17 +1283,17 @@ namespace mcrl2 {
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@times_with_carry_word to a number of arguments.
       inline
-      data_expression times_with_carry_word_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+      void times_with_carry_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression times_with_carry_word_application(const data_expression& a1)
+      void times_with_carry_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==times_with_carry_word());
-        return times_with_carry_word_manual_implementation(a[0], a[1], a[2]);
+        times_with_carry_word_manual_implementation(result, a[0], a[1], a[2]);
       }
 
 
@@ -1367,17 +1367,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@times_overflow_word to a number of arguments.
       inline
-      data_expression times_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void times_overflow_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression times_overflow_word_application(const data_expression& a1)
+      void times_overflow_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==times_overflow_word());
-        return times_overflow_word_manual_implementation(a[0], a[1]);
+        times_overflow_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -1454,17 +1454,17 @@ namespace mcrl2 {
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@times_with_carry_overflow_word to a number of arguments.
       inline
-      data_expression times_with_carry_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+      void times_with_carry_overflow_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression times_with_carry_overflow_word_application(const data_expression& a1)
+      void times_with_carry_overflow_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==times_with_carry_overflow_word());
-        return times_with_carry_overflow_word_manual_implementation(a[0], a[1], a[2]);
+        times_with_carry_overflow_word_manual_implementation(result, a[0], a[1], a[2]);
       }
 
 
@@ -1538,17 +1538,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@minus_word to a number of arguments.
       inline
-      data_expression minus_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void minus_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression minus_word_application(const data_expression& a1)
+      void minus_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==minus_word());
-        return minus_word_manual_implementation(a[0], a[1]);
+        minus_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -1622,17 +1622,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@monus_word to a number of arguments.
       inline
-      data_expression monus_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void monus_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression monus_word_application(const data_expression& a1)
+      void monus_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==monus_word());
-        return monus_word_manual_implementation(a[0], a[1]);
+        monus_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -1706,17 +1706,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@div_word to a number of arguments.
       inline
-      data_expression div_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void div_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression div_word_application(const data_expression& a1)
+      void div_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==div_word());
-        return div_word_manual_implementation(a[0], a[1]);
+        div_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -1790,17 +1790,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@mod_word to a number of arguments.
       inline
-      data_expression mod_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void mod_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression mod_word_application(const data_expression& a1)
+      void mod_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==mod_word());
-        return mod_word_manual_implementation(a[0], a[1]);
+        mod_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -1871,17 +1871,17 @@ namespace mcrl2 {
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_word to a number of arguments.
       inline
-      data_expression sqrt_word_manual_implementation(const data_expression& arg0);
+      void sqrt_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression sqrt_word_application(const data_expression& a1)
+      void sqrt_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==sqrt_word());
-        return sqrt_word_manual_implementation(a[0]);
+        sqrt_word_manual_implementation(result, a[0]);
       }
 
 
@@ -1958,17 +1958,17 @@ namespace mcrl2 {
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@div_doubleword to a number of arguments.
       inline
-      data_expression div_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+      void div_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression div_doubleword_application(const data_expression& a1)
+      void div_doubleword_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==div_doubleword());
-        return div_doubleword_manual_implementation(a[0], a[1], a[2]);
+        div_doubleword_manual_implementation(result, a[0], a[1], a[2]);
       }
 
 
@@ -2048,17 +2048,17 @@ namespace mcrl2 {
       /// \param arg3 A data expression.
       /// \return The data expression corresponding to an application of \@div_double_doubleword to a number of arguments.
       inline
-      data_expression div_double_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
+      void div_double_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression div_double_doubleword_application(const data_expression& a1)
+      void div_double_doubleword_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==div_double_doubleword());
-        return div_double_doubleword_manual_implementation(a[0], a[1], a[2], a[3]);
+        div_double_doubleword_manual_implementation(result, a[0], a[1], a[2], a[3]);
       }
 
 
@@ -2141,17 +2141,17 @@ namespace mcrl2 {
       /// \param arg4 A data expression.
       /// \return The data expression corresponding to an application of \@div_triple_doubleword to a number of arguments.
       inline
-      data_expression div_triple_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4);
+      void div_triple_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression div_triple_doubleword_application(const data_expression& a1)
+      void div_triple_doubleword_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==div_triple_doubleword());
-        return div_triple_doubleword_manual_implementation(a[0], a[1], a[2], a[3], a[4]);
+        div_triple_doubleword_manual_implementation(result, a[0], a[1], a[2], a[3], a[4]);
       }
 
 
@@ -2228,17 +2228,17 @@ namespace mcrl2 {
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@mod_doubleword to a number of arguments.
       inline
-      data_expression mod_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+      void mod_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression mod_doubleword_application(const data_expression& a1)
+      void mod_doubleword_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==mod_doubleword());
-        return mod_doubleword_manual_implementation(a[0], a[1], a[2]);
+        mod_doubleword_manual_implementation(result, a[0], a[1], a[2]);
       }
 
 
@@ -2312,17 +2312,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_doubleword to a number of arguments.
       inline
-      data_expression sqrt_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void sqrt_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression sqrt_doubleword_application(const data_expression& a1)
+      void sqrt_doubleword_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==sqrt_doubleword());
-        return sqrt_doubleword_manual_implementation(a[0], a[1]);
+        sqrt_doubleword_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -2399,17 +2399,17 @@ namespace mcrl2 {
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_tripleword to a number of arguments.
       inline
-      data_expression sqrt_tripleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+      void sqrt_tripleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression sqrt_tripleword_application(const data_expression& a1)
+      void sqrt_tripleword_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==sqrt_tripleword());
-        return sqrt_tripleword_manual_implementation(a[0], a[1], a[2]);
+        sqrt_tripleword_manual_implementation(result, a[0], a[1], a[2]);
       }
 
 
@@ -2486,17 +2486,17 @@ namespace mcrl2 {
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_tripleword_overflow to a number of arguments.
       inline
-      data_expression sqrt_tripleword_overflow_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+      void sqrt_tripleword_overflow_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression sqrt_tripleword_overflow_application(const data_expression& a1)
+      void sqrt_tripleword_overflow_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==sqrt_tripleword_overflow());
-        return sqrt_tripleword_overflow_manual_implementation(a[0], a[1], a[2]);
+        sqrt_tripleword_overflow_manual_implementation(result, a[0], a[1], a[2]);
       }
 
 
@@ -2576,17 +2576,17 @@ namespace mcrl2 {
       /// \param arg3 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_quadrupleword to a number of arguments.
       inline
-      data_expression sqrt_quadrupleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
+      void sqrt_quadrupleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression sqrt_quadrupleword_application(const data_expression& a1)
+      void sqrt_quadrupleword_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==sqrt_quadrupleword());
-        return sqrt_quadrupleword_manual_implementation(a[0], a[1], a[2], a[3]);
+        sqrt_quadrupleword_manual_implementation(result, a[0], a[1], a[2], a[3]);
       }
 
 
@@ -2666,17 +2666,17 @@ namespace mcrl2 {
       /// \param arg3 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_quadrupleword_overflow to a number of arguments.
       inline
-      data_expression sqrt_quadrupleword_overflow_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
+      void sqrt_quadrupleword_overflow_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression sqrt_quadrupleword_overflow_application(const data_expression& a1)
+      void sqrt_quadrupleword_overflow_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==sqrt_quadrupleword_overflow());
-        return sqrt_quadrupleword_overflow_manual_implementation(a[0], a[1], a[2], a[3]);
+        sqrt_quadrupleword_overflow_manual_implementation(result, a[0], a[1], a[2], a[3]);
       }
 
 
@@ -2747,17 +2747,17 @@ namespace mcrl2 {
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@pred_word to a number of arguments.
       inline
-      data_expression pred_word_manual_implementation(const data_expression& arg0);
+      void pred_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression pred_word_application(const data_expression& a1)
+      void pred_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==pred_word());
-        return pred_word_manual_implementation(a[0]);
+        pred_word_manual_implementation(result, a[0]);
       }
 
 
@@ -2831,17 +2831,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@equal to a number of arguments.
       inline
-      data_expression equal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void equal_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression equal_word_application(const data_expression& a1)
+      void equal_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==equal_word());
-        return equal_word_manual_implementation(a[0], a[1]);
+        equal_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -2915,17 +2915,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@not_equal to a number of arguments.
       inline
-      data_expression not_equal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void not_equal_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression not_equal_word_application(const data_expression& a1)
+      void not_equal_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==not_equal_word());
-        return not_equal_word_manual_implementation(a[0], a[1]);
+        not_equal_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -2999,17 +2999,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@less to a number of arguments.
       inline
-      data_expression less_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void less_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression less_word_application(const data_expression& a1)
+      void less_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==less_word());
-        return less_word_manual_implementation(a[0], a[1]);
+        less_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -3083,17 +3083,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@less_equal to a number of arguments.
       inline
-      data_expression less_equal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void less_equal_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression less_equal_word_application(const data_expression& a1)
+      void less_equal_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==less_equal_word());
-        return less_equal_word_manual_implementation(a[0], a[1]);
+        less_equal_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -3167,17 +3167,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@greater to a number of arguments.
       inline
-      data_expression greater_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void greater_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression greater_word_application(const data_expression& a1)
+      void greater_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==greater_word());
-        return greater_word_manual_implementation(a[0], a[1]);
+        greater_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -3251,17 +3251,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@greater_equal to a number of arguments.
       inline
-      data_expression greater_equal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void greater_equal_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression greater_equal_word_application(const data_expression& a1)
+      void greater_equal_word_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==greater_equal_word());
-        return greater_equal_word_manual_implementation(a[0], a[1]);
+        greater_equal_word_manual_implementation(result, a[0], a[1]);
       }
 
 
@@ -3332,17 +3332,17 @@ namespace mcrl2 {
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@rightmost_bit to a number of arguments.
       inline
-      data_expression rightmost_bit_manual_implementation(const data_expression& arg0);
+      void rightmost_bit_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression rightmost_bit_application(const data_expression& a1)
+      void rightmost_bit_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==rightmost_bit());
-        return rightmost_bit_manual_implementation(a[0]);
+        rightmost_bit_manual_implementation(result, a[0]);
       }
 
 
@@ -3416,17 +3416,17 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@shift_right to a number of arguments.
       inline
-      data_expression shift_right_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      void shift_right_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression shift_right_application(const data_expression& a1)
+      void shift_right_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==shift_right());
-        return shift_right_manual_implementation(a[0], a[1]);
+        shift_right_manual_implementation(result, a[0], a[1]);
       }
 
       /// \brief Give all system defined mappings for machine_word
@@ -3542,53 +3542,53 @@ namespace mcrl2 {
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for machine_word
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for machine_word
       inline
       implementation_map machine_word_cpp_implementable_mappings()
       {
         implementation_map result;
-        result[sort_machine_word::one_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::one_word_application,"sort_machine_word::one_word_manual_implementation");
-        result[sort_machine_word::two_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::two_word_application,"sort_machine_word::two_word_manual_implementation");
-        result[sort_machine_word::three_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::three_word_application,"sort_machine_word::three_word_manual_implementation");
-        result[sort_machine_word::four_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::four_word_application,"sort_machine_word::four_word_manual_implementation");
-        result[sort_machine_word::max_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word_manual_implementation");
-        result[sort_machine_word::equals_zero_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equals_zero_word_application,"sort_machine_word::equals_zero_word_manual_implementation");
-        result[sort_machine_word::not_equals_zero_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::not_equals_zero_word_application,"sort_machine_word::not_equals_zero_word_manual_implementation");
-        result[sort_machine_word::equals_one_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equals_one_word_application,"sort_machine_word::equals_one_word_manual_implementation");
-        result[sort_machine_word::equals_max_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equals_max_word_application,"sort_machine_word::equals_max_word_manual_implementation");
-        result[sort_machine_word::add_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word_manual_implementation");
-        result[sort_machine_word::add_with_carry_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_with_carry_word_application,"sort_machine_word::add_with_carry_word_manual_implementation");
-        result[sort_machine_word::add_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_overflow_word_application,"sort_machine_word::add_overflow_word_manual_implementation");
-        result[sort_machine_word::add_with_carry_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_with_carry_overflow_word_application,"sort_machine_word::add_with_carry_overflow_word_manual_implementation");
-        result[sort_machine_word::times_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_word_application,"sort_machine_word::times_word_manual_implementation");
-        result[sort_machine_word::times_with_carry_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_with_carry_word_application,"sort_machine_word::times_with_carry_word_manual_implementation");
-        result[sort_machine_word::times_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_overflow_word_application,"sort_machine_word::times_overflow_word_manual_implementation");
-        result[sort_machine_word::times_with_carry_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_with_carry_overflow_word_application,"sort_machine_word::times_with_carry_overflow_word_manual_implementation");
-        result[sort_machine_word::minus_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::minus_word_application,"sort_machine_word::minus_word_manual_implementation");
-        result[sort_machine_word::monus_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::monus_word_application,"sort_machine_word::monus_word_manual_implementation");
-        result[sort_machine_word::div_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_word_application,"sort_machine_word::div_word_manual_implementation");
-        result[sort_machine_word::mod_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::mod_word_application,"sort_machine_word::mod_word_manual_implementation");
-        result[sort_machine_word::sqrt_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_word_application,"sort_machine_word::sqrt_word_manual_implementation");
-        result[sort_machine_word::div_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_doubleword_application,"sort_machine_word::div_doubleword_manual_implementation");
-        result[sort_machine_word::div_double_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_double_doubleword_application,"sort_machine_word::div_double_doubleword_manual_implementation");
-        result[sort_machine_word::div_triple_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_triple_doubleword_application,"sort_machine_word::div_triple_doubleword_manual_implementation");
-        result[sort_machine_word::mod_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::mod_doubleword_application,"sort_machine_word::mod_doubleword_manual_implementation");
-        result[sort_machine_word::sqrt_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_doubleword_application,"sort_machine_word::sqrt_doubleword_manual_implementation");
-        result[sort_machine_word::sqrt_tripleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_application,"sort_machine_word::sqrt_tripleword_manual_implementation");
-        result[sort_machine_word::sqrt_tripleword_overflow()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_overflow_application,"sort_machine_word::sqrt_tripleword_overflow_manual_implementation");
-        result[sort_machine_word::sqrt_quadrupleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_application,"sort_machine_word::sqrt_quadrupleword_manual_implementation");
-        result[sort_machine_word::sqrt_quadrupleword_overflow()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_overflow_application,"sort_machine_word::sqrt_quadrupleword_overflow_manual_implementation");
-        result[sort_machine_word::pred_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::pred_word_application,"sort_machine_word::pred_word_manual_implementation");
-        result[sort_machine_word::equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equal_word_application,"sort_machine_word::equal_word_manual_implementation");
-        result[sort_machine_word::not_equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::not_equal_word_application,"sort_machine_word::not_equal_word_manual_implementation");
-        result[sort_machine_word::less_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::less_word_application,"sort_machine_word::less_word_manual_implementation");
-        result[sort_machine_word::less_equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::less_equal_word_application,"sort_machine_word::less_equal_word_manual_implementation");
-        result[sort_machine_word::greater_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::greater_word_application,"sort_machine_word::greater_word_manual_implementation");
-        result[sort_machine_word::greater_equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::greater_equal_word_application,"sort_machine_word::greater_equal_word_manual_implementation");
-        result[sort_machine_word::rightmost_bit()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::rightmost_bit_application,"sort_machine_word::rightmost_bit_manual_implementation");
-        result[sort_machine_word::shift_right()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::shift_right_application,"sort_machine_word::shift_right_manual_implementation");
+        result[sort_machine_word::one_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::one_word_application,"sort_machine_word::one_word_manual_implementation");
+        result[sort_machine_word::two_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::two_word_application,"sort_machine_word::two_word_manual_implementation");
+        result[sort_machine_word::three_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::three_word_application,"sort_machine_word::three_word_manual_implementation");
+        result[sort_machine_word::four_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::four_word_application,"sort_machine_word::four_word_manual_implementation");
+        result[sort_machine_word::max_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word_manual_implementation");
+        result[sort_machine_word::equals_zero_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::equals_zero_word_application,"sort_machine_word::equals_zero_word_manual_implementation");
+        result[sort_machine_word::not_equals_zero_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::not_equals_zero_word_application,"sort_machine_word::not_equals_zero_word_manual_implementation");
+        result[sort_machine_word::equals_one_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::equals_one_word_application,"sort_machine_word::equals_one_word_manual_implementation");
+        result[sort_machine_word::equals_max_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::equals_max_word_application,"sort_machine_word::equals_max_word_manual_implementation");
+        result[sort_machine_word::add_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word_manual_implementation");
+        result[sort_machine_word::add_with_carry_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::add_with_carry_word_application,"sort_machine_word::add_with_carry_word_manual_implementation");
+        result[sort_machine_word::add_overflow_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::add_overflow_word_application,"sort_machine_word::add_overflow_word_manual_implementation");
+        result[sort_machine_word::add_with_carry_overflow_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::add_with_carry_overflow_word_application,"sort_machine_word::add_with_carry_overflow_word_manual_implementation");
+        result[sort_machine_word::times_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::times_word_application,"sort_machine_word::times_word_manual_implementation");
+        result[sort_machine_word::times_with_carry_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::times_with_carry_word_application,"sort_machine_word::times_with_carry_word_manual_implementation");
+        result[sort_machine_word::times_overflow_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::times_overflow_word_application,"sort_machine_word::times_overflow_word_manual_implementation");
+        result[sort_machine_word::times_with_carry_overflow_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::times_with_carry_overflow_word_application,"sort_machine_word::times_with_carry_overflow_word_manual_implementation");
+        result[sort_machine_word::minus_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::minus_word_application,"sort_machine_word::minus_word_manual_implementation");
+        result[sort_machine_word::monus_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::monus_word_application,"sort_machine_word::monus_word_manual_implementation");
+        result[sort_machine_word::div_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::div_word_application,"sort_machine_word::div_word_manual_implementation");
+        result[sort_machine_word::mod_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::mod_word_application,"sort_machine_word::mod_word_manual_implementation");
+        result[sort_machine_word::sqrt_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::sqrt_word_application,"sort_machine_word::sqrt_word_manual_implementation");
+        result[sort_machine_word::div_doubleword()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::div_doubleword_application,"sort_machine_word::div_doubleword_manual_implementation");
+        result[sort_machine_word::div_double_doubleword()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::div_double_doubleword_application,"sort_machine_word::div_double_doubleword_manual_implementation");
+        result[sort_machine_word::div_triple_doubleword()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::div_triple_doubleword_application,"sort_machine_word::div_triple_doubleword_manual_implementation");
+        result[sort_machine_word::mod_doubleword()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::mod_doubleword_application,"sort_machine_word::mod_doubleword_manual_implementation");
+        result[sort_machine_word::sqrt_doubleword()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::sqrt_doubleword_application,"sort_machine_word::sqrt_doubleword_manual_implementation");
+        result[sort_machine_word::sqrt_tripleword()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_application,"sort_machine_word::sqrt_tripleword_manual_implementation");
+        result[sort_machine_word::sqrt_tripleword_overflow()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_overflow_application,"sort_machine_word::sqrt_tripleword_overflow_manual_implementation");
+        result[sort_machine_word::sqrt_quadrupleword()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_application,"sort_machine_word::sqrt_quadrupleword_manual_implementation");
+        result[sort_machine_word::sqrt_quadrupleword_overflow()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_overflow_application,"sort_machine_word::sqrt_quadrupleword_overflow_manual_implementation");
+        result[sort_machine_word::pred_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::pred_word_application,"sort_machine_word::pred_word_manual_implementation");
+        result[sort_machine_word::equal_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::equal_word_application,"sort_machine_word::equal_word_manual_implementation");
+        result[sort_machine_word::not_equal_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::not_equal_word_application,"sort_machine_word::not_equal_word_manual_implementation");
+        result[sort_machine_word::less_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::less_word_application,"sort_machine_word::less_word_manual_implementation");
+        result[sort_machine_word::less_equal_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::less_equal_word_application,"sort_machine_word::less_equal_word_manual_implementation");
+        result[sort_machine_word::greater_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::greater_word_application,"sort_machine_word::greater_word_manual_implementation");
+        result[sort_machine_word::greater_equal_word()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::greater_equal_word_application,"sort_machine_word::greater_equal_word_manual_implementation");
+        result[sort_machine_word::rightmost_bit()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::rightmost_bit_application,"sort_machine_word::rightmost_bit_manual_implementation");
+        result[sort_machine_word::shift_right()]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(sort_machine_word::shift_right_application,"sort_machine_word::shift_right_manual_implementation");
         return result;
       }
       ///\brief Function for projecting out argument.

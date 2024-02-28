@@ -46,7 +46,7 @@ namespace mcrl2 {
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for function_update.
       /// \return All system defined constructors that are to be implemented in C++ for function_update.
       inline
@@ -264,17 +264,17 @@ namespace mcrl2 {
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@is_not_an_update to a number of arguments.
       inline
-      data_expression is_not_a_function_update_manual_implementation(const data_expression& arg0);
+      void is_not_a_function_update_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression is_not_a_function_update_application(const data_expression& a1)
+      void is_not_a_function_update_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==is_not_a_function_update());
-        return is_not_a_function_update_manual_implementation(a[0]);
+        is_not_a_function_update_manual_implementation(result, a[0]);
       }
 
 
@@ -354,17 +354,17 @@ namespace mcrl2 {
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@if_always_else to a number of arguments.
       inline
-      data_expression if_always_else_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+      void if_always_else_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression if_always_else_application(const data_expression& a1)
+      void if_always_else_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==if_always_else());
-        return if_always_else_manual_implementation(a[0], a[1], a[2]);
+        if_always_else_manual_implementation(result, a[0], a[1], a[2]);
       }
 
       /// \brief Give all system defined mappings for function_update
@@ -414,7 +414,7 @@ namespace mcrl2 {
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for function_update
       /// \param s A sort expression
       /// \param t A sort expression
@@ -423,8 +423,8 @@ namespace mcrl2 {
       implementation_map function_update_cpp_implementable_mappings(const sort_expression& s, const sort_expression& t)
       {
         implementation_map result;
-        result[is_not_a_function_update(s, t)]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(is_not_a_function_update_application,"is_not_a_function_update_manual_implementation");
-        result[if_always_else(s, t)]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(if_always_else_application,"if_always_else_manual_implementation");
+        result[is_not_a_function_update(s, t)]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(is_not_a_function_update_application,"is_not_a_function_update_manual_implementation");
+        result[if_always_else(s, t)]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>(if_always_else_application,"if_always_else_manual_implementation");
         return result;
       }
       ///\brief Function for projecting out argument.

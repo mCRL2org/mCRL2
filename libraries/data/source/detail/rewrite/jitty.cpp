@@ -404,15 +404,16 @@ template <class ITERATOR>
 void RewriterJitty::apply_cpp_code_to_higher_order_term(
                   data_expression& result,
                   const application& t,
-                  const std::function<data_expression(const data_expression&)> rewrite_cpp_code,
+                  const std::function<void(data_expression&, const data_expression&)> rewrite_cpp_code,
                   ITERATOR begin,
                   ITERATOR end,
                   substitution_type& sigma)
 {
   if (is_function_symbol(t.head()))
   {
-    make_application(result, t.head(), begin, end);
-    result=rewrite_cpp_code(result);
+    data_expression intermediate;
+    make_application(intermediate, t.head(), begin, end);
+    rewrite_cpp_code(result, intermediate);
     return;
   }
 
@@ -625,7 +626,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
           assert(m_rewrite_stack.stack_size()>=arity+1);
           application rewriteable_term(op, m_rewrite_stack.stack_iterator(0,arity+1),
                                            m_rewrite_stack.stack_iterator(arity,arity+1)); /* TODO Optimize */
-          result=rule.rewrite_cpp_code()(rewriteable_term);
+          rule.rewrite_cpp_code()(result, rewriteable_term);
           m_rewrite_stack.decrease(arity+1);
           return;
         }
@@ -828,7 +829,7 @@ void RewriterJitty::rewrite_aux_const_function_symbol(
     }
     else if (rule.is_cpp_code())
     {
-      result=rule.rewrite_cpp_code()(op);  /* TODO Optimize */
+      rule.rewrite_cpp_code()(result, op);
       rhs_for_constants_cache[op_value]=result;
       return;
     }
