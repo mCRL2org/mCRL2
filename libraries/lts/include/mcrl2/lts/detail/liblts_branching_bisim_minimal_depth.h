@@ -176,11 +176,7 @@ private:
 
     bool operator==(const block& other) 
     {
-      return state_index == other.state_index 
-        && block_index == other.block_index 
-        && parent_block_index == other.parent_block_index 
-        && level == other.level 
-        && sig == other.sig;
+      return block_index == other.block_index;
     }
 
     bool operator!=(const block& other)
