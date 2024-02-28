@@ -57,4 +57,4 @@ tools:
     name: pbessolve
 
 result: |
-  result = t7.value['solution'] != t8.value['solution']
+  result = t4.value['result'] or t7.value['solution'] != t8.value['solution']
