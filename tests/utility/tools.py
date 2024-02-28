@@ -281,7 +281,7 @@ class LtscompareTool(Tool):
 
         # counter example generation
         if len(self.output_nodes) > 0:
-            args[2] = '--evidence-file={}'.format(args[2])
+            args[2] = '--counter-example-file={}'.format(args[2])
         return args
 
 class ToolFactory(object):

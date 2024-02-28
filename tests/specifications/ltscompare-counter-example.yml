@@ -36,12 +36,12 @@ tools:
     args: [-c]
     name: ltscompare
   t5:
-    input: [l5, l3]
+    input: [l3, l5]
     output: [l6]
     args: []
     name: lts2pbes
   t6:
-    input: [l5, l4]
+    input: [l4, l5]
     output: [l7]
     args: []
     name: lts2pbes
@@ -57,4 +57,4 @@ tools:
     name: pbessolve
 
 result: |
-  t7.value['result'] != t8.value['result']
+  result = t7.value['solution'] != t8.value['solution']
