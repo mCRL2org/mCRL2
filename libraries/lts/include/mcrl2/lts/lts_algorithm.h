@@ -82,7 +82,7 @@ bool destructive_compare(LTS_TYPE& l1,
       if (generate_counter_examples)
       {
         mCRL2log(mcrl2::log::warning) << "A slower partition refinement algorithm is used to generate minimal-depth counter examples.\n";
-        return detail::destructive_bisimulation_compare_minimal_depth(l1, l2, counter_example_file, structured_output);
+        return detail::destructive_bisimulation_compare_minimal_depth(l1, l2, counter_example_file);
       }
       return detail::destructive_bisimulation_compare_dnj(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
@@ -99,7 +99,7 @@ bool destructive_compare(LTS_TYPE& l1,
       if (generate_counter_examples)
       {
         mCRL2log(mcrl2::log::warning) << "The default branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
-        return detail::destructive_branching_bisimulation_compare_minimal_depth(l1, l2, counter_example_file, structured_output);
+        return detail::destructive_branching_bisimulation_compare_minimal_depth(l1, l2, counter_example_file);
       }
       return detail::destructive_bisimulation_compare_dnj(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
     }
@@ -177,19 +177,19 @@ bool destructive_compare(LTS_TYPE& l1,
     case lts_eq_trace:
     {
       // Determinise first LTS
-      detail::bisimulation_reduce_dnj(l1,false);
+      detail::bisimulation_reduce_dnj(l1, false);
       determinise(l1);
 
       // Determinise second LTS
-      detail::bisimulation_reduce_dnj(l2,false);
+      detail::bisimulation_reduce_dnj(l2, false);
       determinise(l2);
 
       // Trace equivalence now corresponds to bisimilarity
       if (generate_counter_examples) 
       {
-        return detail::destructive_bisimulation_compare_minimal_depth(l1, l2, counter_example_file, structured_output);
+        return detail::destructive_bisimulation_compare_minimal_depth(l1, l2, counter_example_file);
       }
-      return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples,counter_example_file,structured_output);
+      return detail::destructive_bisimulation_compare(l1, l2, false, false, generate_counter_examples, counter_example_file, structured_output);
     }
     case lts_eq_weak_trace:
     {
