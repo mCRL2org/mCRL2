@@ -153,6 +153,11 @@ class LtscompareCounterexampleTest(ProcessTauTest):
         super(LtscompareCounterexampleTest, self).__init__(name, ymlfile('ltscompare-counter-example'), settings)
         self.add_command_line_options('t4', ['-e' + equivalence_type])
 
+    def create_inputfiles(self, runpath = '.'):
+        super(LtscompareCounterexampleTest, self).create_inputfiles(runpath)
+        # This is a hack to ensure that the counter example formula always exists for the further steps.
+        filename = runpath + '/l5.mcf'
+        write_text(filename, "true")
 
 class StochasticLtscompareTest(StochasticProcessTest):
     def __init__(self, name, settings):
@@ -217,13 +222,13 @@ class Lts2pbesTest(ProcessTest):
     def __init__(self, name, settings):
         super(Lts2pbesTest, self).__init__(name, ymlfile('lts2pbes'), settings)
 
-    def create_inputfiles(self, runpath = '.'):
-        super(Lts2pbesTest, self).create_inputfiles(runpath)
-        self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
-
 class LtsconvertsymbolicTest(ProcessTest):
     def __init__(self, name, settings):
         super(LtsconvertsymbolicTest, self).__init__(name, ymlfile('ltsconvertsymbolic'), settings)
+
+    def LtsconvertsymbolicTest(self, runpath = '.'):
+        super(Lts2pbesTest, self).create_outputfiles(runpath)
+        self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
 
 class PbesTest(RandomTest):
     def __init__(self, name, ymlfile, settings):
