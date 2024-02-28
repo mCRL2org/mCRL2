@@ -147,6 +147,13 @@ class LtscompareTest(ProcessTauTest):
         self.add_command_line_options('t3', ['-e' + equivalence_type])
         self.add_command_line_options('t4', ['-e' + equivalence_type])
 
+class LtscompareCounterexampleTest(ProcessTauTest):
+    def __init__(self, name, equivalence_type, settings):
+        assert equivalence_type in ['bisim', 'branching-bisim', 'trace']
+        super(LtscompareCounterexampleTest, self).__init__(name, ymlfile('ltscompare-counter-example'), settings)
+        self.add_command_line_options('t4', ['-e' + equivalence_type])
+
+
 class StochasticLtscompareTest(StochasticProcessTest):
     def __init__(self, name, settings):
         super(StochasticLtscompareTest, self).__init__(name, ymlfile('stochastic-ltscompare'), settings)
@@ -373,15 +380,17 @@ available_tests = {
     'lpsconfcheck-trivial'                        : lambda name, settings: LpsConfcheckTest(name, 'trivial', settings)                                 ,
     'lpsconstelm'                                 : lambda name, settings: LpsConstelmTest(name, settings)                                             ,
     'lpsbinary'                                   : lambda name, settings: LpsBinaryTest(name, settings)                                               ,
-    'lps2lts-algorithms'                          : lambda name, settings: Lps2ltsAlgorithmsTest(name, settings)                                      ,
-    'lps2lts-parallel'                            : lambda name, settings: Lps2ltsParallelTest(name, settings)                                       ,
+    'lps2lts-algorithms'                          : lambda name, settings: Lps2ltsAlgorithmsTest(name, settings)                                       ,
+    'lps2lts-parallel'                            : lambda name, settings: Lps2ltsParallelTest(name, settings)                                         ,
     'lps2pbes'                                    : lambda name, settings: Lps2pbesTest(name, settings)                                                ,
     'lpsstategraph'                               : lambda name, settings: LpsstategraphTest(name, settings)                                           ,
     'lts2pbes'                                    : lambda name, settings: Lts2pbesTest(name, settings)                                                ,
     'ltscompare-bisim'                            : lambda name, settings: LtscompareTest(name, 'bisim', settings)                                     ,
+    'ltscompare-bisim-counter-example'            : lambda name, settings: LtscompareCounterexampleTest(name, 'bisim', settings)                       ,
     'ltscompare-bisim-gv'                         : lambda name, settings: LtscompareTest(name, 'bisim-gv', settings)                                  ,
     'ltscompare-bisim-gjkw'                       : lambda name, settings: LtscompareTest(name, 'bisim-gjkw', settings)                                ,
     'ltscompare-branching-bisim'                  : lambda name, settings: LtscompareTest(name, 'branching-bisim', settings)                           ,
+    'ltscompare-branching-bisim-counter-example'  : lambda name, settings: LtscompareCounterexampleTest(name, 'branching-bisim', settings)             ,
     'ltscompare-branching-bisim-gv'               : lambda name, settings: LtscompareTest(name, 'branching-bisim-gv', settings)                        ,
     'ltscompare-branching-bisim-gjkw'             : lambda name, settings: LtscompareTest(name, 'branching-bisim-gjkw', settings)                      ,
     'ltscompare-dpbranching-bisim'                : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim', settings)                         ,
@@ -392,6 +401,7 @@ available_tests = {
     'ltscompare-sim'                              : lambda name, settings: LtscompareTest(name, 'sim', settings)                                       ,
     'ltscompare-ready-sim'                        : lambda name, settings: LtscompareTest(name, 'ready-sim', settings)                                 ,
     'ltscompare-trace'                            : lambda name, settings: LtscompareTest(name, 'trace', settings)                                     ,
+    'ltscompare-trace-counter-example'            : lambda name, settings: LtscompareCounterexampleTest(name, 'trace', settings)                       ,
     'ltscompare-weak-trace'                       : lambda name, settings: LtscompareTest(name, 'weak-trace', settings)                                ,
     'bisimulation-bisim'                          : lambda name, settings: BisimulationTest(name, 'bisim', settings)                                   ,
     'bisimulation-bisim-gv'                       : lambda name, settings: BisimulationTest(name, 'bisim-gv', settings)                                ,
