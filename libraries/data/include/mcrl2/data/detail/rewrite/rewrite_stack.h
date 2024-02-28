@@ -50,6 +50,9 @@ class rewrite_stack : protected atermpp::vector<data_expression>
 {
   protected:
     std::size_t m_stack_size;
+    std::size_t m_reserved_stack_size; // This is equal to the size() of the underlying stack.
+                                       // Access of "size()" expensive as it is surrounded by a mutex. 
+
 
   public:
 
@@ -63,12 +66,13 @@ class rewrite_stack : protected atermpp::vector<data_expression>
     void reserve_more_space() 
     {
       resize(std::max(2*size(),static_cast<std::size_t>(128)));
+      m_reserved_stack_size=size();
       m_stack_size=0;
     }
 
     void increase(std::size_t distance)
     { 
-      if (m_stack_size+distance>=size())
+      if (m_stack_size+distance>=m_reserved_stack_size)
       { 
         throw recalculate_term_as_stack_is_too_small();
       }
@@ -83,7 +87,7 @@ class rewrite_stack : protected atermpp::vector<data_expression>
 
     data_expression& new_stack_position()
     { 
-      if (m_stack_size+1>=size())
+      if (m_stack_size+1>=m_reserved_stack_size)
       { 
         throw recalculate_term_as_stack_is_too_small();
       }
