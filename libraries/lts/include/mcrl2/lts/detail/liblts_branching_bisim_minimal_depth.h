@@ -508,8 +508,7 @@ private:
 template <class LTS_TYPE>
 bool destructive_branching_bisimulation_compare_minimal_depth(LTS_TYPE& l1,
     LTS_TYPE& l2,
-    const std::string& counter_example_file /*= ""*/,
-    const bool /*structured_output = false */)
+    const std::string& counter_example_file)
 {
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1, l2);
