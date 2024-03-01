@@ -54,3 +54,10 @@ Selecting which parameter to unfold can be done with the :option:`--sort` or :op
 There are also a few advanced options. First, there is :option:`--alt-case`, which nests the newly introduced mapping ``C_Sort`` (where ``Sort`` is the sort to unfold) at a higher level, potentially allowing more rewriting. For example, when unfolding ``l : List(Nat)``, the expression ``l != []`` becomes ``C_ListNat(stack_pp, false, true)`` instead of ``!(C_ListNat(stack_pp, [], stack_pp1 |> stack_pp2) == [])``. In some corner cases, this may create exponentially large expressions with the number of unfoldings.
 
 Second, the option :option:`--no-pattern` disables using rewrite rules defined with pattern matching to manipulate state update expressions. Using this option makes the state update expressions smaller, but reduces opportunity for rewriting and simplifying the LPS. Finally, there is the option :option:`--possibly-inconsistent`, which adds an additional rewrite rule ``C_Sort(x, d_1, ..., d_n) = (d_1 && x == c_1) || (c_2 && x == c_2) || .... (d_n && x == c_n)`` (where ``d_1,..,d_n`` are of sort ``Bool``) when unfolding ``Sort`` and rewrite rules for equality on the sort that is newly introduced. This can enable some simplifications, but may also make the data specification *inconsistent*, which means that it is possible to derive ``true == false``.
+
+Background
+----------
+
+All theoretic background can be found in the paper
+
+  A\. Stramaglia, J.J.A. Keiren, T. Neele. *Simplifying Process Parameters by Unfolding Algebraic Data Types*. ICTAC 2023. LNCS vol. 14446, pp. 399-416. `(DOI) <https://doi.org/10.1007/978-3-031-47963-2_24>`__
