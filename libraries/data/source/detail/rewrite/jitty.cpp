@@ -435,7 +435,50 @@ void RewriterJitty::rewrite_aux(
                       const data_expression& term,
                       substitution_type& sigma)
 {
-  if (is_application(term))
+  if (is_function_symbol(term))
+  {
+    assert(term!=this_term_is_in_normal_form());
+    rewrite_aux_const_function_symbol(result,atermpp::down_cast<const function_symbol>(term),sigma);
+    return;
+  }
+  if (is_variable(term))
+  {
+    sigma.apply(atermpp::down_cast<variable>(term),result, *m_thread_aterm_pool);
+    return;
+  }
+  if (is_machine_number(term))
+  {
+    result=term;
+    return;
+  }
+
+  if (is_where_clause(term))
+  {
+    const where_clause& w = atermpp::down_cast<where_clause>(term);
+    rewrite_where(result,w,sigma);
+    return;
+  }
+
+  if (is_abstraction(term))
+  { 
+    const abstraction& ta=atermpp::down_cast<abstraction>(term);
+    if (is_exists(ta))
+    {
+      existential_quantifier_enumeration(result,ta,sigma);
+      return;
+    }
+    if (is_forall(ta))
+    {
+      universal_quantifier_enumeration(result,ta,sigma);
+      return;
+    }
+    assert(is_lambda(ta));
+    rewrite_single_lambda(result,ta.variables(),ta.body(),false,sigma);
+    return;
+  }
+
+  // Here term must have the shape appl(t1,...,tn)
+  assert(is_application(term));
   {
     const application& terma=atermpp::down_cast<application>(term);
     if (terma.head()==this_term_is_in_normal_form())
@@ -519,47 +562,6 @@ void RewriterJitty::rewrite_aux(
     assert(term.size()==1);
     universal_quantifier_enumeration(result,ta,sigma);
     m_rewrite_stack.decrease(2);
-    return;
-  }
-  // Here term does not have the shape appl(t1,...,tn)
-  if (is_function_symbol(term))
-  {
-    assert(term!=this_term_is_in_normal_form());
-    rewrite_aux_const_function_symbol(result,atermpp::down_cast<const function_symbol>(term),sigma);
-    return;
-  }
-  if (is_variable(term))
-  {
-    sigma.apply(atermpp::down_cast<variable>(term),result, *m_thread_aterm_pool);
-    return;
-  }
-  if (is_machine_number(term))
-  {
-    result=term;
-    return;
-  }
-
-  if (is_where_clause(term))
-  {
-    const where_clause& w = atermpp::down_cast<where_clause>(term);
-    rewrite_where(result,w,sigma);
-    return;
-  }
-
-  { 
-    const abstraction& ta=atermpp::down_cast<abstraction>(term);
-    if (is_exists(ta))
-    {
-      existential_quantifier_enumeration(result,ta,sigma);
-      return;
-    }
-    if (is_forall(ta))
-    {
-      universal_quantifier_enumeration(result,ta,sigma);
-      return;
-    }
-    assert(is_lambda(ta));
-    rewrite_single_lambda(result,ta.variables(),ta.body(),false,sigma);
     return;
   }
 }
