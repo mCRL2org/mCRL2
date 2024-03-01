@@ -1815,30 +1815,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
 
 #ifdef Enable64bitNumbers
+   if (data::sort_nat::is_natural_constant(x))
+   {
+     derived().print(data::sort_nat::natural_constant_as_string(x));
+   }
     else if (sort_nat::is_most_significant_digit_nat_application(x))
     {
-      if (data::sort_nat::is_natural_constant(x))
-      {
-        derived().print(data::sort_nat::natural_constant_as_string(x));
-      }
-      else
-      {
-        derived().apply(sort_nat::arg(x));
-      } 
+      derived().apply(sort_nat::arg(x));
     }   
     else if (sort_nat::is_concat_digit_application(x))
     { 
-      if (data::sort_nat::is_natural_constant(x))
-      {
-        derived().print(data::sort_nat::natural_constant_as_string(x));
-      }
-      else
-      {
-        derived().print("(" + max_machine_number_string() + "*");
-        derived().apply(sort_nat::arg1(x));
-        derived().print(") + ");
-        derived().apply(sort_nat::arg2(x));
-      }
+      derived().print("(" + max_machine_number_string() + "*");
+      derived().apply(sort_nat::arg1(x));
+      derived().print(") + ");
+      derived().apply(sort_nat::arg2(x));
     } 
 #else
     else if (sort_nat::is_cnat_application(x))

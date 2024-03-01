@@ -363,7 +363,7 @@ inline bool is_positive_constant(const data_expression& n)
   return (sort_pos::is_most_significant_digit_application(n) &&
           is_machine_number(sort_pos::arg(n)))   ||
          (sort_pos::is_concat_digit_application(n) &&
-          sort_pos::is_positive_constant(sort_pos::arg2(n))
+          sort_pos::is_positive_constant(sort_pos::arg1(n))
          );
 #else
   return sort_pos::is_c1_function_symbol(n) ||
@@ -521,7 +521,7 @@ inline bool is_natural_constant(const data_expression& n)
           is_machine_number(sort_nat::arg(n))) 
          ||
          (sort_nat::is_concat_digit_application(n) &&
-          sort_nat::is_natural_constant(sort_nat::arg2(n))
+          sort_nat::is_natural_constant(sort_nat::arg1(n))
          );
 #else
   return sort_nat::is_c0_function_symbol(n) ||
