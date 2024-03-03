@@ -124,6 +124,7 @@ private:
   typedef std::tuple<block_index_type, label_type, block_index_type> branching_observation_type;
   typedef std::set<branching_observation_type> signature_type;
   typedef std::pair<label_type, state_type> observation;
+  typedef std::pair<block_index_type, block_index_type> blockpair_type;
 
   std::map<state_type, std::set<state_type>> silent_in;
   std::map<state_type, std::set<state_type>> silent_out;
@@ -301,14 +302,12 @@ private:
     return regular_formulas::regular_formula(action_formulas::multi_action(a.actions()));
   }
 
-  // Returns a distinguishing formula for pair, and updates the truths values accordingly
-  mcrl2::state_formulas::state_formula split_and_intersect(block_index_type B1, block_index_type B2,
-      std::set<block_index_type>& truths) {
+  // Updates the truths values according the dist formula and the information in blockpair2truths.
+  void split_and_intersect(std::set<block_index_type>& truths, std::pair<block_index_type, block_index_type> liftedB1B2)
+  {
     // Add the observation to the formula
-    std::pair<block_index_type, block_index_type> liftedB1B2 = min_split_blockpair(B1, B2);
     level_type split_level = blocks[liftedB1B2.first].level;
 
-    mcrl2::state_formulas::state_formula phi = dist_formula(liftedB1B2.first, liftedB1B2.second);
     std::set<block_index_type> truths_new;
     for (block_index_type b_og : truths)
     {
@@ -324,7 +323,77 @@ private:
       }
     }
     truths = truths_new; 
-    return phi;
+  }
+  
+  /**
+   * \brief is_dist Checks if a given conjunction correctly exludes a set of blocks.
+   * \param dist_blockpairs The blockpairs that were used to generate the conjuncts.
+   * \param to_dist The set of blocks that should be excluded by the conjunction, forall b\in to_dist.
+   * b\not\in\sem{phi_dist_blockpairs}. \return True if the conjunction correctly excludes the set of blocks, false
+   * otherwise.
+   */
+  bool is_dist(std::set<blockpair_type>& dist_blockpairs,
+    std::set<block_index_type>& to_dist)
+  { 
+    if (to_dist.empty())
+    {
+      return true;
+    }
+    std::set<block_index_type> truths = level2blocksidx[blocks[*to_dist.begin()].level];
+    return is_dist(dist_blockpairs, to_dist, truths);
+  }
+
+
+  /**
+  * \brief is_dist overloaded to also maintain the truth values computed at the end.
+  */
+  bool is_dist(const std::set<blockpair_type>& dist_blockpairs,const std::set<block_index_type>& to_dist, std::set<block_index_type>& truths)
+  {
+    if (to_dist.empty())
+    {
+      return true;
+    }
+
+    truths = level2blocksidx[blocks[*to_dist.begin()].level];
+    for (blockpair_type b1_b2 : dist_blockpairs)
+    {
+      split_and_intersect(truths, b1_b2);
+    }
+    for (block_index_type b : to_dist)
+    {
+      if (truths.find(b) != truths.end())
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+
+  std::vector<mcrl2::state_formulas::state_formula> filtered_dist_conjunction(
+    std::map<blockpair_type, mcrl2::state_formulas::state_formula>& Phi, 
+    std::set<block_index_type>& Tdist,
+    std::set<block_index_type>& Truths)
+  {
+    std::vector<mcrl2::state_formulas::state_formula> returnPhi;
+    std::set<blockpair_type> phi_pairs_og;
+    for (auto& phi_pair : Phi) {
+      phi_pairs_og.insert(phi_pair.first);
+    }
+
+    for (auto& phi_pair : Phi) {
+      // Remove the phi_pair from the formula.
+      phi_pairs_og.erase(phi_pair.first);
+      // Only add conjunct, if it wouldn't be distinguishing without.
+      if (!is_dist(phi_pairs_og, Tdist))
+      {
+        phi_pairs_og.insert(phi_pair.first);
+        returnPhi.push_back(phi_pair.second);
+      }
+    }
+    is_dist(phi_pairs_og, Tdist, Truths);
+
+    return returnPhi;
   }
 
   // This function computes the distinguishing state formula for two blocks.
@@ -366,10 +435,9 @@ private:
     // If no such observation exists, we flip the blocks.
     if (!found_obs)
     {
-      // We should compute the truth values of the blocks here...
       auto phi = mcrl2::state_formulas::not_(dist_formula(block2.block_index, block1.block_index));
       blockpair2formula[std::make_pair(block1.block_index, block2.block_index)] = phi;
-
+      // Compute the truth values \sem{!\phi} = lvl2blocksidx[lvl] - \sem{\phi}
       std::set_difference(level2blocksidx[block1.level].begin(),
           level2blocksidx[block1.level].end(),
           blockpair2truths[std::make_pair(block2.block_index, block1.block_index)].begin(),
@@ -395,20 +463,27 @@ private:
         T.push_back(std::make_pair(std::get<0>(path), std::get<2>(path)));
         if (is_tau(dist_label))
         {
-          // the observation block2 -\tau->> path2 -(tau)-> path2 (or tauhat).
+          // the following observation: block2 -\tau->> path2 -(tau)-> path2.
           T.push_back(std::make_pair(std::get<2>(path), std::get<2>(path)));
         }
       }
     }
     if (is_tau(dist_label))
     {
-      // the observation block2 -\tau->> path2 -(tau)-> path2 (or tauhat).
+      // the following observation: block2 -\tau->> path2 -(tau)-> path2.
       T.push_back(std::make_pair(block2.parent_block_index, block2.parent_block_index));
     }
+    
+    //Keep a copy of T for backwards filtering in postprocessing.
+    std::set<blockpair_type> T_og;
+    for (auto t : T)
+    {
+      T_og.insert(t);
+    }
 
-
+    // TODO: Remove this part and make T a set.
     // Sort T, such that the block with the highest distlevel in s'' get dealt with first.
-    // This is heuristic, no idea if it can be improved
+    // This is a heuristic, no idea if it improves much or can be improved
     std::sort(T.begin(), T.end(), 
       [this, B2](std::pair<block_index_type, block_index_type> a, std::pair<block_index_type, block_index_type> b)
         { 
@@ -424,9 +499,10 @@ private:
         return blocks[alift.first].level < blocks[blift.first].level;
       });
 
-    // <tau*>(<dist_label> phi1 && phi2)
-    std::vector<mcrl2::state_formulas::state_formula> Phi1;
-    std::vector<mcrl2::state_formulas::state_formula> Phi2;
+    // <tau*>(<dist_label> phi1 && phi2), We remember the original keys for truth values and backwards filtering.
+    std::map<blockpair_type, mcrl2::state_formulas::state_formula> Phi1;
+    std::map<blockpair_type, mcrl2::state_formulas::state_formula> Phi2;
+
     // Track truth values for the formula s -\tau -> Truths2 [phi2] -dist_label-> Truths1 [phi1]
     // This is a bit confusing, we flip order here in the path to the formula.
     std::set<block_index_type> Truths1 = level2blocksidx[block1.level - 1];
@@ -438,12 +514,17 @@ private:
       // We could pop_back here on T, but the computation of the truth also handles this.
       if (Bt1_Bt2.second != B2)
       {
-        // Add the observation to the formula, this will also update the truth values by reference.
-        Phi1.push_back(split_and_intersect(B2, Bt1_Bt2.second, Truths1));
+        std::pair<block_index_type, block_index_type> liftedPair = min_split_blockpair(B2, Bt1_Bt2.second);
+        Phi1[liftedPair] = dist_formula(liftedPair.first, liftedPair.second);
+        // Update truthvalues for the formula <(dist_label)> phi1. 
+        split_and_intersect(Truths1, liftedPair);
       }
       else
       {
-        Phi2.push_back(split_and_intersect(B1, Bt1_Bt2.first, Truths2));
+        std::pair<block_index_type, block_index_type> liftedPair = min_split_blockpair(B1, Bt1_Bt2.first);
+        Phi2[liftedPair] = dist_formula(B1, Bt1_Bt2.first);
+        // Update truthvalues for the formula phi2.
+        split_and_intersect(Truths2, liftedPair);
       }
       // Remove observations (Bt1, Bt2) from  T of which Bt2 is not in phi1 or Bt1 is not in phi2
       std::vector<std::pair<block_index_type, block_index_type>> T_new;
@@ -457,6 +538,30 @@ private:
       }
       T = T_new;
     }
+
+    // Backwards filtering, remove each formula and see if it is still distinguishing, starting with Phi2.
+    std::set<block_index_type> Tset;
+    //We assume Phi2.
+    for (auto B_Bp : T_og)
+    {
+      if (Truths2.find(B_Bp.first) != Truths2.end()) {
+        Tset.insert(B_Bp.second);
+      }
+    }
+
+    std::vector<mcrl2::state_formulas::state_formula> returnPhi1 = filtered_dist_conjunction(Phi1, Tset, Truths1); 
+
+
+    Tset.clear();
+    //Now we assume phi1.
+    for (auto B_Bp : T_og)
+    {
+      if (Truths1.find(B_Bp.second) != Truths1.end()) {
+        Tset.insert(B_Bp.first);
+      }
+    }
+    std::vector<mcrl2::state_formulas::state_formula> returnPhi2 = filtered_dist_conjunction(Phi2, Tset, Truths2);
+
     //Done with formula, set the truth values for the formula.
     // Initialize the truth values for the formula
     blockpair2truths[std::make_pair(block_index1, block_index2)] = std::set<block_index_type>();
@@ -478,9 +583,6 @@ private:
       }
     }
 
-    // Construct the final formula using Phi1 and Phi2
-    mcrl2::state_formulas::state_formula phi2 = conjunction(Phi2);
-    
     // Consruct the regular formula for the diamond operator
     mcrl2::regular_formulas::regular_formula diamond = create_regular_formula(m_lts.action_label(dist_label));
     // If the action is tau, we need to add the tau_hat operator.
@@ -491,12 +593,14 @@ private:
     }
 
     // diamond formula <dist_label> phi1
-    mcrl2::state_formulas::state_formula returnPhi = mcrl2::state_formulas::may(diamond , conjunction(Phi1));
-    if (!Phi2.empty())
+    mcrl2::state_formulas::state_formula returnPhi = mcrl2::state_formulas::may(diamond , conjunction(returnPhi1));
+    // diamond formula: <dist_label>phi1 && phi2
+    if (!returnPhi2.empty())
     {
-      returnPhi = mcrl2::state_formulas::and_(returnPhi, phi2);
+      returnPhi = mcrl2::state_formulas::and_(returnPhi, conjunction(returnPhi2));
     }
 
+    // <tau*> (<dist_label> phi1 && phi2)
     blockpair2formula[std::make_pair(block1.block_index, block2.block_index)]
         = mcrl2::state_formulas::may(mcrl2::regular_formulas::trans_or_nil(
             create_regular_formula(m_lts.action_label(0))), returnPhi);
