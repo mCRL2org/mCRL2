@@ -244,10 +244,20 @@ void CodeEditor::setFontSize(int pixelSize)
   codeFont.setPixelSize(pixelSize);
   this->setFont(codeFont);
   lineNumberFont.setPixelSize(pixelSize);
+  
+  int big_number = 1000; // arbitrary big number.
+  const QString test_string(" ");
 
-  /* set the tab width to 4 characters */
+  // compute the size of a char in double-precision, needed because maxWidth and
+  // averageCharWidth only return integer values. However, the width of a monospaced
+  // character apparently does not have to be an exact pixel width. Various attempts with
+  // setStrategy and the like did not yield satisfying results.
   QFontMetrics codeFontMetrics = QFontMetrics(codeFont);
-  this->setTabStopDistance(codeFontMetrics.averageCharWidth() * 4);
+  const int many_char_width = codeFontMetrics.horizontalAdvance(test_string.repeated(big_number));
+  const double single_char_width_double = many_char_width / double(big_number);
+
+  // set the tab width to 4 characters
+  this->setTabStopDistance(single_char_width_double * 4);
 }
 
 void CodeEditor::changeHighlightingRules()
