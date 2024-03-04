@@ -103,7 +103,7 @@ void lts_dot_t::save(std::ostream& os) const
   detail::translate_to_probabilistic_lts
             <state_label_dot,
              action_label_string,
-             probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
+             probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>,
              detail::lts_dot_base>(*this,l);
   l.save(os);
 }

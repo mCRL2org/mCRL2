@@ -95,7 +95,7 @@ struct fsm_writer
       assert(probabilistic_state.size()>1);
       out << "[";
       bool first=true;
-      for(const lps::state_probability_pair< std::size_t, probabilistic_arbitrary_precision_fraction>& p: probabilistic_state)
+      for(const lps::state_probability_pair< std::size_t, utilities::probabilistic_arbitrary_precision_fraction>& p: probabilistic_state)
       {
         if (first)
         {

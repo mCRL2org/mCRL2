@@ -444,9 +444,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_binary_data_operation(const application& x, const data_expression& x1, const data_expression& x2, const std::string& op)
   {
-    auto p = precedence(x);
-    auto p1 = precedence(x1);
-    auto p2 = precedence(x2);
+    const int p = precedence(x);
+    const int p1 = precedence(x1);
+    const int p2 = precedence(x2);
     print_expression(x1, (p1 < p) || (p1 == p && !is_left_associative(x)));
     derived().print(op);
     print_expression(x2, (p2 < p) || (p2 == p && !is_right_associative(x)));
@@ -454,8 +454,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_binary_data_operation(const application& x, const std::string& op)
   {
-    const auto& x1 = x[0];
-    const auto& x2 = x[1];
+    const data_expression& x1 = x[0];
+    const data_expression& x2 = x[1];
     print_binary_data_operation(x, x1, x2, op);
   }
 
@@ -1672,30 +1672,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
 
 #ifdef Enable64bitNumbers
+    else if (data::sort_pos::is_positive_constant(x))
+    {
+      derived().print(data::sort_pos::positive_constant_as_string(x));
+    }
     else if (sort_pos::is_most_significant_digit_application(x))
     {
-      if (data::sort_pos::is_positive_constant(x))
-      {
-        derived().print(data::sort_pos::positive_constant_as_string(x));
-      }
-      else
-      {
-        derived().apply(sort_pos::arg(x));
-      }
+      derived().apply(sort_pos::arg(x));
     }
     else if (sort_pos::is_concat_digit_application(x))
     {
-      if (data::sort_pos::is_positive_constant(x))
-      {
-        derived().print(data::sort_pos::positive_constant_as_string(x));
-      }
-      else
-      {
-        derived().print(max_machine_number_string() + "* (");
-        derived().apply(sort_pos::arg1(x));
-        derived().print(") + ");
-        derived().apply(sort_pos::arg2(x));
-      }
+      derived().print(max_machine_number_string() + "* (");
+      derived().apply(sort_pos::arg1(x));
+      derived().print(") + ");
+      derived().apply(sort_pos::arg2(x));
     }
 #else
     else if (sort_pos::is_cdub_application(x))
@@ -1815,10 +1805,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
 
 #ifdef Enable64bitNumbers
-   if (data::sort_nat::is_natural_constant(x))
-   {
-     derived().print(data::sort_nat::natural_constant_as_string(x));
-   }
+    else if (data::sort_nat::is_natural_constant(x))
+    {
+      derived().print(data::sort_nat::natural_constant_as_string(x));
+    }
     else if (sort_nat::is_most_significant_digit_nat_application(x))
     {
       derived().apply(sort_nat::arg(x));
@@ -1881,7 +1871,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_int::is_pos2int_application(x))
     {
-      derived().apply(*x.begin());
+      derived().apply(sort_int::arg(x));
     }
     else if (sort_int::is_negate_application(x))
     {
@@ -1922,7 +1912,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else
       {
-        derived().apply(sort_real::divides(numerator, sort_int::pos2int(denominator)));
+        print_binary_data_operation(x, " / ");
       }
     }
     else if (sort_real::is_pos2real_application(x))

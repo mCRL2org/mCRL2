@@ -636,7 +636,7 @@ int_(T t)
   return sort_int::cint(sort_nat::nat(t));
 }
 
-/// \brief Constructs expression of type pos from an integral type
+/// \brief Constructs expression of type pos from an integral type.
 template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value && std::is_signed< T >::value, data_expression >::type
 int_(T t)
@@ -648,9 +648,9 @@ int_(T t)
   return sort_int::cint(sort_nat::nat(typename std::make_unsigned<T>::type(t)));
 }
 
-/// \brief Constructs expression of type Int from a string
-/// \param n A string
-/// \pre n is of the form ([-]?[0...9][0...9]+)([0...9]+)
+/// \brief Constructs expression of type Int from a string.
+/// \param n A string.
+/// \pre n is of the form ([-]?[0...9][0...9]+)([0...9]+).
 inline data_expression int_(const std::string& n)
 {
   if (n[0] == '-')
@@ -660,8 +660,8 @@ inline data_expression int_(const std::string& n)
   return sort_int::cint(sort_nat::nat(n));
 }
 
-/// \brief Determines whether n is an integer constant
-/// \param n A data expression
+/// \brief Determines whether n is an integer constant.
+/// \param n A data expression.
 inline bool is_integer_constant(const data_expression& n)
 {
   return (sort_int::is_cint_application(n) &&
@@ -671,10 +671,10 @@ inline bool is_integer_constant(const data_expression& n)
          );
 }
 
-/// \brief Return the string representation of an integer number
-/// \param n A data expression
-/// \pre is_integer_constant(n)
-/// \return String representation of n
+/// \brief Return the string representation of an integer number.
+/// \param n A data expression.
+/// \pre is_integer_constant(n).
+/// \return String representation of n.
 inline std::string integer_constant_as_string(const data_expression& n)
 {
   assert(is_integer_constant(n));
@@ -688,10 +688,10 @@ inline std::string integer_constant_as_string(const data_expression& n)
   }
 }
 
-/// \brief Return the NUMERIC_VALUE representation of an integer number
-/// \param n A data expression
-/// \pre is_integer_constant(n)
-/// \return NUMERIC_VALUE representation of n
+/// \brief Return the NUMERIC_VALUE representation of an integer number.
+/// \param n A data expression.
+/// \pre is_integer_constant(n).
+/// \return NUMERIC_VALUE representation of n.
 template <class NUMERIC_VALUE>
 inline NUMERIC_VALUE integer_constant_to_value(const data_expression& n)
 {
@@ -709,8 +709,8 @@ inline NUMERIC_VALUE integer_constant_to_value(const data_expression& n)
 
 namespace sort_real
 {
-/// \brief Constructs expression of type pos from an integral type
-/// \param t An expression of type T
+/// \brief Constructs expression of type Real from an integral type
+/// \param t An expression of type T.
 template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 real_(T t)
@@ -722,12 +722,21 @@ real_(T t)
 #endif
 }
 
-/// \brief Constructs expression of type pos from an integral type
-/// \param numerator numerator
-/// \param denominator denominator
+/// \brief Constructs expression of type Real from an integral type
+/// \param numerator numerator.
+/// \param denominator denominator.
 template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 real_(T numerator, T denominator)
+{
+  return sort_real::creal(sort_int::int_(numerator), sort_pos::pos(denominator));
+}
+
+/// \brief Constructs expression of type Real from two number strings.
+/// \param numerator numerator.
+/// \param denominator denominator.
+/// \return numerator / denominator.
+inline data_expression real_(const std::string& numerator, const std::string& denominator)
 {
   return sort_real::creal(sort_int::int_(numerator), sort_pos::pos(denominator));
 }

@@ -17,15 +17,15 @@
  */
 
 
-#ifndef MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
-#define MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
+#ifndef MCRL2_UTILITIES_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
+#define MCRL2_UTILITIES_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
 
 #include "mcrl2/utilities/big_numbers.h"
 
 
 namespace mcrl2
 {
-namespace lts
+namespace utilities
 {
 
 /** \brief This class contains labels for probabilistic transistions, consisting of a numerator and a denominator
@@ -313,7 +313,7 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_arbitrary_precis
   return out << pp(x);
 }
 
-} // namespace lts
+} // namespace utilities
 } // namespace mcrl2
 
 namespace std
@@ -321,9 +321,9 @@ namespace std
 
 /// \brief specialization of the standard std::hash function.
 template <>
-struct hash< mcrl2::lts::probabilistic_arbitrary_precision_fraction >
+struct hash< mcrl2::utilities::probabilistic_arbitrary_precision_fraction >
 {
-  std::size_t operator()(const mcrl2::lts::probabilistic_arbitrary_precision_fraction& p) const
+  std::size_t operator()(const mcrl2::utilities::probabilistic_arbitrary_precision_fraction& p) const
   {
     hash<mcrl2::utilities::big_natural_number> hasher;
     return mcrl2::utilities::detail::hash_combine(hasher(p.enumerator()), hasher(p.denominator()));
@@ -332,6 +332,6 @@ struct hash< mcrl2::lts::probabilistic_arbitrary_precision_fraction >
 
 } // namespace std
 
-#endif // MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
+#endif // MCRL2_UTILITIES_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
 
 

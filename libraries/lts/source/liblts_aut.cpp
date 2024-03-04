@@ -134,7 +134,7 @@ static void read_probabilistic_state(
   }
   bool ready=false;
 
-  mcrl2::lts::probabilistic_arbitrary_precision_fraction remainder=mcrl2::lts::probabilistic_arbitrary_precision_fraction::one();
+  mcrl2::utilities::probabilistic_arbitrary_precision_fraction remainder=mcrl2::utilities::probabilistic_arbitrary_precision_fraction::one();
   while (is.good() && !ready)
   {
     // Now read a probabilities followed by the next state.
@@ -149,7 +149,7 @@ static void read_probabilistic_state(
 
     std::string denominator;
     read_natural_number_to_string(is,denominator,line_no);
-    mcrl2::lts::probabilistic_arbitrary_precision_fraction frac(enumerator,denominator);
+    mcrl2::utilities::probabilistic_arbitrary_precision_fraction frac(enumerator,denominator);
     remainder=remainder-frac;
     result.add(state, frac);
     
@@ -474,7 +474,7 @@ static void read_from_aut(lts_aut_t& l, std::istream& is)
 
 static void write_probabilistic_state(const mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& prob_state, std::ostream& os)
 {
-  mcrl2::lts::probabilistic_arbitrary_precision_fraction previous_probability;
+  mcrl2::utilities::probabilistic_arbitrary_precision_fraction previous_probability;
   bool first_element=true;
   if (prob_state.size()<=1) // This is a simple probabilistic state. 
   {
