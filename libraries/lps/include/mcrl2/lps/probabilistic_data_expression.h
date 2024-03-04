@@ -104,6 +104,33 @@ namespace detail
     return result;
   }
 
+  // An algorithm to calculate the greatest common divisor
+  inline std::size_t greatest_common_divisor(std::size_t x, std::size_t y)
+  {
+    if (x==0) return y;
+    if (y==0) return x;
+    if (x>y)
+    {
+      const std::size_t temp=x; x=y; y=temp; // swap(x,y)
+    }
+
+    std::size_t remainder=y % x;
+    while (remainder!=0)
+    {
+      y=x;
+      x=remainder;
+      remainder=y % x;
+    }
+    return x;
+  }
+
+  inline void remove_common_factors(std::size_t& enumerator, std::size_t& denominator)
+  {
+    std::size_t gcd=greatest_common_divisor(enumerator,denominator);
+    enumerator=enumerator/gcd;
+    denominator=denominator/gcd;
+  }
+
 }
 #endif
 
@@ -138,36 +165,6 @@ class probabilistic_data_expression: public data::data_expression
       return std::stoul(s);
     }
 
-    // An algorithm to calculate the greatest common divisor
-    static std::size_t greatest_common_divisor(std::size_t x, std::size_t y)
-    {
-      if (x==0) return y;
-      if (y==0) return x;
-      if (x>y)
-      {
-        const std::size_t temp=x; x=y; y=temp; // swap(x,y)
-      }
-
-      std::size_t remainder=y % x;
-      while (remainder!=0)
-      {
-        y=x;
-        x=remainder;
-        remainder=y % x;
-      }
-      return x;
-    }
-
-    void remove_common_factors(std::size_t& enumerator, std::size_t& denominator)
-    {
-      std::size_t gcd=greatest_common_divisor(enumerator,denominator);
-      while (gcd!=1)
-      {
-        enumerator=enumerator/gcd;
-        denominator=denominator/gcd;
-      }
-    }
-
 #ifdef Enable64bitNumbers
     probabilistic_data_expression calculate_plus_minus(const data_expression& other, const bool is_minus) const
     {
@@ -198,6 +195,13 @@ class probabilistic_data_expression: public data::data_expression
         std::size_t n_other_enumerator=atermpp::down_cast<data::machine_number>(data::sort_nat::arg(other_enumerator_arg)).value();
         std::size_t n_this_denominator=atermpp::down_cast<data::machine_number>(data::sort_pos::arg(this_denominator)).value();
         std::size_t n_other_denominator=atermpp::down_cast<data::machine_number>(data::sort_pos::arg(other_denominator)).value();
+        //
+        // Removing the common denominators makes the multiplication slightly smaller, keeping the
+        // numbers hopefully slightly more often in the 64 bit boundary of digits. 
+        std::size_t gcd = detail::greatest_common_divisor(n_this_denominator, n_other_denominator);
+        std::size_t n_this_denominator_with_gcd=n_this_denominator;
+        n_this_denominator =  n_this_denominator / gcd;        
+        n_other_denominator =  n_other_denominator / gcd;        
 
         std::size_t left_carry=0;
         std::size_t right_carry=0;
@@ -205,7 +209,7 @@ class probabilistic_data_expression: public data::data_expression
 
         std::size_t left_result=utilities::detail::multiply_single_number(n_this_enumerator,n_other_denominator, left_carry);
         std::size_t right_result=utilities::detail::multiply_single_number(n_other_enumerator,n_this_denominator, right_carry);
-        std::size_t new_denominator=utilities::detail::multiply_single_number(n_other_denominator,n_this_denominator, denominator_carry);
+        std::size_t new_denominator=utilities::detail::multiply_single_number(n_other_denominator,n_this_denominator_with_gcd, denominator_carry);
 
         std::size_t new_enumerator_carry=0;        
         std::size_t new_enumerator=0;
@@ -348,7 +352,7 @@ class probabilistic_data_expression: public data::data_expression
     probabilistic_data_expression(std::size_t enumerator, std::size_t denominator)
     {
       assert(denominator!=0);
-      remove_common_factors(enumerator,denominator);
+      detail::remove_common_factors(enumerator,denominator);
       *this = lps::probabilistic_data_expression(data::sort_real::creal(data::sort_int::int_(enumerator),data::sort_pos::pos(denominator)));
     }
 
