@@ -127,7 +127,7 @@ class GLWidget : public QOpenGLWidget
    * @param color The desired color.
    */
   void setPaint(const QColor& color);
-
+  
   /**
    * @brief Gets the paint color.
    */
@@ -233,6 +233,7 @@ class GLWidget : public QOpenGLWidget
     m_scene.setDrawInitialMarking(show);
     update();
   }
+
   void toggleFog(bool enabled)
   {
     m_scene.setDrawFog(enabled);
@@ -244,16 +245,23 @@ class GLWidget : public QOpenGLWidget
     m_scene.setNodeSize(size);
     update();
   }
+
   void setFontSize(int size)
   {
     m_scene.setFontSize(size);
     update();
   }
+
   void setFogDensity(int value)
   {
     m_scene.setFogDistance(value);
     update();
   }
+
+  /**
+   * Paints all the deadlocks in the graph with the selected color. 
+   */
+  void paintDeadlocks();
 
   private:
   GLWidgetUi* m_ui = nullptr; ///< The user interface of the class.

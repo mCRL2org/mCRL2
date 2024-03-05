@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>248</width>
-    <height>345</height>
+    <width>314</width>
+    <height>493</height>
    </rect>
   </property>
   <property name="font">
@@ -32,6 +32,9 @@
       </property>
       <item>
        <widget class="QPushButton" name="btnPaint">
+        <property name="toolTip">
+         <string>Enables painting mode, click states to paint them.</string>
+        </property>
         <property name="text">
          <string>Enable painting</string>
         </property>
@@ -40,6 +43,16 @@
         </property>
         <property name="checked">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnPaintDeadlocks">
+        <property name="toolTip">
+         <string>Paints the deadlock states in the currently selected color</string>
+        </property>
+        <property name="text">
+         <string>Mark deadlocks</string>
         </property>
        </widget>
       </item>
@@ -57,6 +70,22 @@
        </widget>
       </item>
      </layout>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>0</width>
+        <height>5</height>
+       </size>
+      </property>
+     </spacer>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
