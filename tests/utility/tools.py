@@ -43,6 +43,7 @@ class Tool(object):
         self.input_nodes = input_nodes
         self.output_nodes = output_nodes
         self.args = args
+        self.stderr = ""
         self.executed = False
         self.value = {}
 
