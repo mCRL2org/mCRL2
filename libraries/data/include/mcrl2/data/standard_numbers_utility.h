@@ -432,7 +432,7 @@ std::string positive_constant_as_string(const data_expression& n_in)
 /// the decimal representation of n.
 template <class NUMERIC_TYPE>
 inline
-NUMERIC_TYPE positive_constant_to_value(const data_expression& n)
+NUMERIC_TYPE positive_constant_to_value(const data_expression& n, typename std::enable_if<std::is_integral<NUMERIC_TYPE>::value>::type* = nullptr)
 {
 #ifdef Enable64bitNumbers
   if (is_concat_digit_application(n))
@@ -440,7 +440,7 @@ NUMERIC_TYPE positive_constant_to_value(const data_expression& n)
     mcrl2::runtime_error("Number " + pp(n) + " is too large to transform to a machine number.");
   }
   assert(is_most_significant_digit_application(n));
-  return atermpp::down_cast<machine_number>(arg(n)).value();
+  return atermpp::down_cast<machine_number>(sort_pos::arg(n)).value();
 #else
   if (sort_pos::is_cdub_application(n))
   {
@@ -457,6 +457,45 @@ NUMERIC_TYPE positive_constant_to_value(const data_expression& n)
   return static_cast<NUMERIC_TYPE>(1);
 #endif
 }
+
+/// \brief Returns the NUMERIC_TYPE representation of a positive number
+/// \param n_in A data expression
+/// \pre is_positive_constant(n)
+/// \return Representation of n as sort NUMERIC_TYPE
+/// Transforms a positive constant n into number of sort NUMERIC_TYPE. Throws an exception when it does not fit. 
+/// the decimal representation of n.
+template <class NUMERIC_TYPE>
+inline
+NUMERIC_TYPE positive_constant_to_value(const data_expression& n, typename std::enable_if<std::is_floating_point<NUMERIC_TYPE>::value>::type* = nullptr)
+{
+#ifdef Enable64bitNumbers
+  data_expression m=n;
+  NUMERIC_TYPE result=0;
+  while (is_concat_digit_application(m))
+  {
+    result=result*pow(2.0,64)+atermpp::down_cast<machine_number>(sort_pos::arg2(m)).value();
+    m=sort_pos::arg1(m);
+  }
+  assert(is_most_significant_digit_application(n));
+  return result*pow(2.0,64)+atermpp::down_cast<machine_number>(sort_pos::arg(n)).value();
+#else
+  if (sort_pos::is_cdub_application(n))
+  {
+    NUMERIC_TYPE result = 2*positive_constant_to_value<NUMERIC_TYPE>(sort_pos::right(n));
+    if (sort_bool::is_true_function_symbol(sort_pos::left(n)))
+    {
+      result=result+1;
+    }
+    return result;
+  }
+
+  assert(sort_pos::is_c1_function_symbol(n));
+
+  return static_cast<NUMERIC_TYPE>(1);
+#endif
+}
+
+
 
 } // namespace sort_pos
 
@@ -576,6 +615,14 @@ inline std::string natural_constant_as_string(const data_expression& n_in)
 template <class NUMERIC_VALUE>
 inline NUMERIC_VALUE natural_constant_to_value(const data_expression& n)
 {
+#ifdef Enable64bitNumbers
+  if (is_concat_digit_application(n))
+  {
+    mcrl2::runtime_error("Number " + pp(n) + " is too large to transform to a machine number.");
+  }
+  assert(is_most_significant_digit_nat_application(n));
+  return atermpp::down_cast<machine_number>(sort_nat::arg(n)).value();
+#else
   assert(is_natural_constant(n));
   if (sort_nat::is_c0_function_symbol(n))
   {
@@ -585,6 +632,7 @@ inline NUMERIC_VALUE natural_constant_to_value(const data_expression& n)
   {
     return sort_pos::positive_constant_to_value<NUMERIC_VALUE>(sort_nat::arg(n));
   }
+#endif
 }
 
 #ifdef Enable64bitNumbers
@@ -755,13 +803,14 @@ inline data_expression real_(const std::string& n)
 
 /// \brief Yields the real value of a data expression.
 /// \param r A data expression of sort real in normal form.
-inline double value(const data_expression& r)
+template <class NUMERIC_TYPE>
+inline NUMERIC_TYPE value(const data_expression& r, typename std::enable_if<std::is_floating_point<NUMERIC_TYPE>::value>::type* = nullptr)
 {
   if (is_creal_application(r))
   {
     const application& a = atermpp::down_cast<application>(r);
-    return sort_int::integer_constant_to_value<double>(a[0]) / 
-           sort_pos::positive_constant_to_value<double>(a[1]);
+    return sort_int::integer_constant_to_value<NUMERIC_TYPE>(a[0]) / 
+           sort_pos::positive_constant_to_value<NUMERIC_TYPE>(a[1]);
   }
   throw runtime_error("Expected a term of the shape @cReal(r1, r2) " + pp(r) + ".");
 }

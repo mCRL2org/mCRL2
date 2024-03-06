@@ -658,7 +658,7 @@ protected:
     {
       if (data::sort_real::is_creal_application(data_result) && !data::sort_real::is_zero(data_result))
       {
-        assert(data::sort_real::value(data_result)>0);
+        assert(data::sort_real::value<double>(data_result)>0);
         // return result.
         return;
       }

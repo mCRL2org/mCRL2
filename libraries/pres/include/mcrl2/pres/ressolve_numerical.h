@@ -70,7 +70,7 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
     double r;
     if (i==value_cache.end())
     {
-      r=data::sort_real::value(pleft);
+      r=data::sort_real::value<double>(pleft);
       value_cache[pleft]=r;
     }
     else 
@@ -87,7 +87,7 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
     {
       if (data::sort_real::real_() == pp.sort())
       {
-        double r=data::sort_real::value(pp);
+        double r=data::sort_real::value<double>(pp);
         value_cache[pp]=r;
         return r;
       }
