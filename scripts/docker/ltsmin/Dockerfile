@@ -1,4 +1,4 @@
-FROM fedora:38
+FROM fedora:39
 
 # Install packages needed for compiling and testing the tools.
 RUN dnf install -y \
@@ -8,6 +8,8 @@ RUN dnf install -y \
  git \
  make \
  which \
+# Required to apply the patch file
+ dos2unix \
 # Dependencies for sylvan.
  gmp-devel \
 # Dependencies for ltsmin.
@@ -53,7 +55,9 @@ RUN cd ~/ && git clone https://github.com/utwente-fmt/ltsmin.git ltsmin
 RUN cd ~/ltsmin && git checkout 3499bb5afb06c5e955d0df5bb3220eb7b654f3da
 
 # This step is necessary according to the 'Building from a Git Repository' section of the readme.
-RUN cd ~/ltsmin && git submodule update --init
+RUN cd ~/ltsmin && git submodule update --init \
+    && dos2unix /root/mcrl2/scripts/docker/ltsmin/ltsmin.patch \
+    && git apply /root/mcrl2/scripts/docker/ltsmin/ltsmin.patch
 
 # Fix issues with the ltl2ba submodule, use a more recent version
 RUN cd ~/ltsmin/ltl2ba && git checkout ea33bb2091a34f6af8dba8e26978fecb969aa93b

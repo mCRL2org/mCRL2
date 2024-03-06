@@ -538,7 +538,7 @@ substituted.
      - | ``Nat # Pos -> Nat``
        | ``Int # Pos -> Nat``
      - Remainder of :samp:`{a}` divided by :samp:`{b}`.
-   * - ``exp({a}, {b})``
+   * - :samp:`exp({a}, {b})`
      - | ``Pos # Nat -> Pos``
        | ``Nat # Nat -> Nat``
        | ``Int # Nat -> Int``

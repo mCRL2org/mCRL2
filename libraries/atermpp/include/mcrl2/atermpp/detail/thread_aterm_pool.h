@@ -99,10 +99,10 @@ public:
   inline void deregister_variable(aterm_core* variable);
 
   /// \brief Consider the given container when marking underlying terms.
-  inline void register_container(_aterm_container* variable);
+  inline void register_container(aterm_container* variable);
 
   /// \brief Removes the given container from the active variables.
-  inline void deregister_container(_aterm_container* variable);
+  inline void deregister_container(aterm_container* variable);
 
   // Implementation of thread_aterm_pool_interface
   inline void mark() override;
@@ -125,9 +125,9 @@ private:
   aterm_pool& m_pool;
 
   /// Keeps track of pointers to all existing aterm variables and containers.
-  mcrl2::utilities::shared_mutex m_shared_mutex;
+  mcrl2::utilities::shared_mutex m_shared_mutex;  
   mcrl2::utilities::hashtable<aterm_core*>* m_variables;
-  mcrl2::utilities::hashtable<detail::_aterm_container*>* m_containers;
+  mcrl2::utilities::hashtable<detail::aterm_container*>* m_containers;
 
   std::size_t m_variable_insertions = 0;
   std::size_t m_container_insertions = 0;

@@ -44,24 +44,18 @@ namespace detail
     m_allocator.deallocate(p, n);
   }
 
-  _aterm_container::_aterm_container()
+  inline
+  aterm_container::aterm_container(std::function<void(term_mark_stack&)> mark_func, std::function<std::size_t()> size_func)
+    : mark_func(mark_func),
+      size_func(size_func)
   {
     g_thread_term_pool().register_container(this);
   }
 
-  _aterm_container::~_aterm_container()
+  inline
+  aterm_container::~aterm_container()
   {
     g_thread_term_pool().deregister_container(this);
-  }
-
-  _aterm_container::_aterm_container(const _aterm_container&)
-  { 
-    g_thread_term_pool().register_container(this);
-  }
-  
-  _aterm_container::_aterm_container(_aterm_container&&)
-  { 
-    g_thread_term_pool().register_container(this);
   }
 }
 

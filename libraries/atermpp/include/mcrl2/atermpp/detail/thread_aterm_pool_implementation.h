@@ -152,7 +152,7 @@ void thread_aterm_pool::deregister_variable(aterm_core* variable)
   m_variables->erase(variable);
 }
 
-void thread_aterm_pool::register_container(_aterm_container* container)
+void thread_aterm_pool::register_container(aterm_container* container)
 {
   if constexpr (EnableVariableRegistrationMetrics) { ++m_container_insertions; }
 
@@ -169,7 +169,7 @@ void thread_aterm_pool::register_container(_aterm_container* container)
   mcrl2::utilities::mcrl2_unused(inserted);
 }
 
-void thread_aterm_pool::deregister_container(_aterm_container* container)
+void thread_aterm_pool::deregister_container(aterm_container* container)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   m_containers->erase(container);
@@ -191,7 +191,7 @@ void thread_aterm_pool::mark()
     }
   }
 
-  for (const _aterm_container* container : *m_containers)
+  for (const aterm_container* container : *m_containers)
   {
     if (container != nullptr)
     {

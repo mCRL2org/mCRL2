@@ -633,6 +633,25 @@ void GLWidget::setPaint(const QColor& color)
   m_paintcolor = QVector3D(color.redF(), color.greenF(), color.blueF());
 }
 
+void GLWidget::paintDeadlocks()
+{  
+  // Some adhoc deadlock detection algorithm with an awful graph interface, ignores exploration mode.
+  std::vector<bool> deadlocked(m_graph.nodeCount(), true);
+  for (std::size_t i = 0; i < m_graph.edgeCount(); ++i)
+  {
+    Graph::Edge e = m_graph.edge(i);
+    deadlocked[e.from()] = false;
+  }
+  
+  for (std::size_t i = 0; i < deadlocked.size(); ++i)
+  {
+    if (deadlocked[i])
+    {
+      m_graph.node(i).color() = m_paintcolor;
+    }
+  }
+}
+
 const QVector3D& GLWidget::getPaint() const
 {
   return m_paintcolor;
@@ -700,6 +719,9 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
   connect(m_ui.btnPaint, SIGNAL(toggled(bool)), this, SLOT(setPaintMode(bool)));
   connect(m_ui.btnPaint, SIGNAL(toggled(bool)), parentWidget(),
           SLOT(updateStatusBar()));
+  
+  connect(m_ui.btnPaintDeadlocks, SIGNAL(clicked()), &m_widget, SLOT(paintDeadlocks()));
+
   connect(m_ui.btnSelectColor, SIGNAL(clicked()), m_colordialog, SLOT(exec()));
   connect(m_ui.cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget,
           SLOT(toggleTransitionLabels(bool)));

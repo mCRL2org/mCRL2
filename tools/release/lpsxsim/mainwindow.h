@@ -78,6 +78,7 @@ class MainWindow : public QMainWindow
     bool m_randomAnimation;
     bool m_animationDisabled;
     const bool m_do_not_use_dummies;
+    bool update_simulation_is_running=false;  
 
     mcrl2::gui::qt::PersistentFileDialog m_fileDialog;
 };

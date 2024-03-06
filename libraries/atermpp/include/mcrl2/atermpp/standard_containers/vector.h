@@ -30,12 +30,12 @@ namespace atermpp
 
 /// \brief A vector class in which aterms can be stored. 
 template < class T, class Alloc = std::allocator<detail::reference_aterm<T> >, bool ThreadSafe = false > 
-class vector : public std::vector< detail::reference_aterm<T>, Alloc >,
-               protected detail::generic_aterm_container<std::vector<detail::reference_aterm<T>, Alloc> >
+class vector : public std::vector< detail::reference_aterm<T>, Alloc >
 {
 protected:
   typedef std::vector< detail::reference_aterm<T>, Alloc > super;
-  typedef detail::generic_aterm_container<std::vector<detail::reference_aterm<T>, Alloc> > container_wrapper;
+
+  detail::generic_aterm_container<std::vector<detail::reference_aterm<T>, Alloc>> container_wrapper;
 
 public: 
   /// Standard typedefs.
@@ -49,72 +49,71 @@ public:
   /// \brief Default constructor.
   vector()
    : super(),
-     container_wrapper(*this, true)
+     container_wrapper(*this)
   {}
 
   /// \brief Constructor.
   explicit vector (const allocator_type& alloc)
    : super::vector(alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   explicit vector (size_type n, const allocator_type& alloc = allocator_type())
    : super::vector(n, alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   vector (size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
    : super::vector(n, detail::reference_aterm(val), alloc),
-     container_wrapper(*this, true)
+     container_wrapper(*this)
   {}
 
   /// \brief Constructor.
   template <class InputIterator>
   vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
    : super::vector(first, last, alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   vector (const vector& x)
    : super::vector(x),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   vector (const vector& x, const allocator_type& alloc)
    : super::vector(x, alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
   
   /// \brief Constructor.
   vector (vector&& x)
    : super::vector(std::move(x)),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   vector (vector&& x, const allocator_type& alloc)
    : super::vector(std::move(x), alloc),
-     container_wrapper(*this, true)
+     container_wrapper(*this)
   {}
 
   /// \brief Constructor. To be done later....
   vector (std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
     : super::vector(il, alloc),
-      container_wrapper(*this, true)      
+      container_wrapper(*this)      
   {}
 
   /// \brief Assignment operator.
-  vector& operator= (const vector& x) = default;
+  vector& operator=(const vector& x) = default;
   
   /// \brief Move assignment operator
   vector& operator=(vector&& x) = default;
 
   /// \brief Standard destructor.
-  ~vector()
-  {}
+  ~vector() {}
   
   void shrink_to_fit()
   {
@@ -327,7 +326,7 @@ public:
     }
   }
 
-  std::size_t size() const override
+  std::size_t size() const
   {
     // Concurrent read/write on the size.
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();

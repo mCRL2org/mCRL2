@@ -2,5 +2,6 @@
 .vscode/
 .vs/
 benchmarks/
-script/docker/
+scripts/docker/
+!scripts/docker/ltsmin/ltsmin.patch
 build/

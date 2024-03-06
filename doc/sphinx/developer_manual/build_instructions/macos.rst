@@ -22,6 +22,9 @@ provided websites to acquire them individually.
     properly, whereas earlier versions of Qt do not properly adapt the color schemes
     leading to unreadable (white on white) text in some tools.
 
+.. note::
+
+    If Qt cannot be found automaticall, for example when it is installed using the official installer, then the cmake variable ``Qt6_DIR`` must be set to the install directory followed by ``/lib/cmake/Qt6``.
 
 A user-friendly command-line interface is provided by the ``ccmake``
 executable. Example usage is as follows (from the directory

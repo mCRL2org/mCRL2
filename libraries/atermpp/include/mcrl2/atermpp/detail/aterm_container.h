@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm_core.h"
 #include "mcrl2/atermpp/detail/aterm_core.h"
 #include "mcrl2/atermpp/detail/aterm_pool_storage_implementation.h"
-
+#include "mcrl2/utilities/noncopyable.h"
 
 namespace atermpp
 {
@@ -36,47 +36,29 @@ namespace detail
 
 /// \brief Provides safe storage of unprotected_aterm_core instances in a container by marking
 ///        them during garbage collection.
-class _aterm_container
+/// 
+/// \details Can not be inherited since it is being registered during construction and the 
+///          vptr is being updated by inherited classes otherwise.
+class aterm_container final : private mcrl2::utilities::noncopyable
 {
 public:
-  inline _aterm_container();
-  virtual inline ~_aterm_container();
+  aterm_container(std::function<void(term_mark_stack&)> mark_func, std::function<std::size_t()> size_func);
+  ~aterm_container();
 
   /// \brief Ensure that all the terms in the containers.
-  virtual inline void mark(std::stack<std::reference_wrapper<detail::_aterm>>& /* todo*/) const
+  void mark(term_mark_stack& todo) const
   {
-    // Nothing needs to be done, as this container is not yet in use, 
-    // as otherwise an override would be called. 
+    mark_func(todo);
   }
 
-  virtual inline std::size_t size() const 
+  inline std::size_t size() const 
   {
-    // When _aterm_container the size() might immediately be called, before the inheriting container
-    // actually finishes construction. At this point the vtable still points to _aterm_container. Under
-    // platforms where pointer assignments are essentially atomic (no half writes) this might work fine.
-    // It is also not clear how to resolve this. All container initialisations must be done within the 
-    // aterm_pool shared mutex otherwise.
-    return 0;
+    return size_func();
   }
 
-  /// \brief Copy constructor
-  inline _aterm_container(const _aterm_container& c);
-
-  /// \brief Move constructor
-  inline _aterm_container(_aterm_container&& c);
-
-  /// \brief Assignment This may have to be redefined in due time. 
-  _aterm_container& operator=(const _aterm_container& )
-  {
-    return *this;
-  }
-
-  /// \brief Move assignment
-  _aterm_container& operator=(_aterm_container&& ) noexcept
-  {
-    return *this;
-  } 
-
+private:
+  std::function<void(term_mark_stack&)> mark_func;
+  std::function<std::size_t()> size_func;
 };
 
 template<class T, typename Type = void >  
@@ -254,7 +236,6 @@ public:
   }
 
   const reference_aterm& operator=(const unprotected_aterm_core& other) noexcept;
-
   const reference_aterm& operator=(unprotected_aterm_core&& other) noexcept;
 
   /// Converts implicitly to a protected term of type T.
@@ -344,7 +325,6 @@ public:
   {
     *this = other;
   }
-
 
   reference_aterm(const std_pair& other)
     : super(reference_aterm_pair_constructor_helper(other))
@@ -455,48 +435,51 @@ private:
 };
 
 template<typename Container>
-class generic_aterm_container : public _aterm_container
+class generic_aterm_container
 {
 public:
   /// \brief Constructor
-  generic_aterm_container(const Container& container, bool)
-   : m_container(container)
+  generic_aterm_container(const Container& container)
+   : m_container(std::bind([&container](term_mark_stack& todo) {   
+      // Marking contained terms.       
+      for (const typename Container::value_type& element: container) 
+      {
+        static_assert(is_reference_aterm<reference_aterm<typename Container::value_type> >::value);
+        if constexpr (is_reference_aterm<typename Container::value_type>::value)
+        {
+          static_assert(is_reference_aterm<typename Container::value_type >::value);
+          element.mark(todo);
+        }
+        else
+        {
+          static_assert(!is_reference_aterm<typename Container::value_type >::value);
+          reference_aterm<typename Container::value_type>(element).mark(todo);
+        }
+      }        
+     }, std::placeholders::_1),
+     std::bind([&container]() -> std::size_t {  
+      // Return the number of elements in the container.
+      return container.size();
+     }))
   {}
 
-  /// \brief Assignment operator
-  generic_aterm_container& operator=(const generic_aterm_container& )
+  // Container is a reference so unclear what to do in these cases.
+  generic_aterm_container(const generic_aterm_container&) = delete;
+  generic_aterm_container(generic_aterm_container&&) = delete;
+
+  // It is fine here if the container gets updated, but the functions stay the same.
+  generic_aterm_container& operator=(const generic_aterm_container&) 
   {
-    // m_container is not replaced. It refers automatically to the newly copied container. 
+    return *this;
+  };
+
+  generic_aterm_container& operator=(generic_aterm_container&) 
+  {
     return *this;
   }
 
-  /// \brief Assignment move operator
-  generic_aterm_container& operator=(generic_aterm_container&& ) = default;
-
-  /// \brief Provides access to the underlying container.
-  // Container& container() { return m_container; }
-  // const Container& container() const { return m_container; }
-
-  virtual void inline mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const override
-  {
-    for (const typename Container::value_type& element: m_container) 
-    {
-      static_assert(is_reference_aterm<reference_aterm<typename Container::value_type> >::value);
-      if constexpr (is_reference_aterm<typename Container::value_type>::value)
-      {
-        static_assert(is_reference_aterm<typename Container::value_type >::value);
-        element.mark(todo);
-      }
-      else
-      {
-        static_assert(!is_reference_aterm<typename Container::value_type >::value);
-        reference_aterm<typename Container::value_type>(element).mark(todo);
-      }
-    }
-  }
-
 protected:
-  const Container& m_container;
+  aterm_container m_container;
 };
 
 } // namespace detail

@@ -34,14 +34,12 @@ template < class Key,
            class Pred = std::equal_to<detail::reference_aterm<Key> >,
            class Alloc = std::allocator< std::pair<const detail::reference_aterm<Key>, detail::reference_aterm<T> > > >
 
-class unordered_map : public std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc >,
-                        protected detail::generic_aterm_container<
-                                     std::unordered_map<detail::reference_aterm<Key>, 
-                                     detail::reference_aterm<T>, Hash, Pred, Alloc> >
+class unordered_map : public std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc >
 {
 protected:
   typedef std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc > super;
-  typedef detail::generic_aterm_container<std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc > > container_wrapper;
+
+  detail::generic_aterm_container<std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc > > container_wrapper;
 
 public:
   
@@ -58,62 +56,62 @@ public:
   /// \brief Default constructor.
   unordered_map()
    : super(),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   explicit unordered_map (const allocator_type& alloc)
    : super::unordered_map(alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   explicit unordered_map (size_type n, const allocator_type& alloc = allocator_type())
    : super::unordered_map(n, alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   unordered_map (size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
    : super::unordered_map(n, detail::reference_aterm(val), alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   template <class InputIterator>
   unordered_map (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
    : super::unordered_map(first, last, alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
     
   /// \brief Constructor.
   unordered_map (const unordered_map& x)
    : super::unordered_map(x),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
   /// \brief Constructor.
   unordered_map (const unordered_map& x, const allocator_type& alloc)
    : super::unordered_map(x, alloc),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
   
   /// \brief Constructor.
   unordered_map (unordered_map&& x)
    : super::unordered_map(std::move(x)),
-     container_wrapper(*this, true)     
+     container_wrapper(*this)     
   {}
 
 
   /// \brief Constructor.
   unordered_map (unordered_map&& x, const allocator_type& alloc)
    : super::unordered_map(std::move(x), alloc),
-     container_wrapper(*this, true)
+     container_wrapper(*this)
   {}
 
   /// \brief Constructor. To be done later....
   unordered_map (std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
     : super::unordered_map(il, alloc),
-      container_wrapper(*this, true)      
+      container_wrapper(*this)      
   {}
 
   /// \brief Standard assignment.
@@ -203,7 +201,7 @@ public:
   template<class H2, class P2>
   void merge( std::unordered_multimap<Key, T, H2, P2, allocator_type>&& source );
 
-  std::size_t size() const override
+  std::size_t size() const
   {
     return super::size();
   }
@@ -220,14 +218,12 @@ template < class Key,
   bool ThreadSafe = false >
 
 class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, 
-                                                              detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false >,
-                      protected detail::generic_aterm_container< mcrl2::utilities::unordered_map<detail::reference_aterm<Key>,
-                                                                                                 detail::reference_aterm<T>, 
-                                                                                                 Hash, Pred, Alloc, ThreadSafe, false > >
+                                                              detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false >
 {
   protected:
     typedef mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false > super;
-    typedef detail::generic_aterm_container<mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false > > container_wrapper;
+
+    detail::generic_aterm_container<mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false > > container_wrapper;
 
   public:
 
@@ -242,62 +238,61 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     /// \brief Default constructor.
     unordered_map()
       : super(),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
 
     /// \brief Constructor.
     explicit unordered_map(const allocator_type& alloc)
       : super::unordered_map(alloc),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
 
     /// \brief Constructor.
     explicit unordered_map(size_type n, const allocator_type& alloc = allocator_type())
       : super::unordered_map(n, alloc),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
 
     unordered_map(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
       : super::unordered_map(n, detail::reference_aterm(val), alloc),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
 
     /// \brief Constructor.
     template <class InputIterator>
     unordered_map(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
       : super::unordered_map(first, last, alloc),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
 
     /// \brief Constructor.
     unordered_map(const unordered_map& x)
       : super::unordered_map(x),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
 
     /// \brief Constructor.
     unordered_map(const unordered_map& x, const allocator_type& alloc)
       : super::unordered_map(x, alloc),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
 
     /// \brief Constructor.
     unordered_map(unordered_map&& x)
       : super::unordered_map(std::move(x)),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
-
 
     /// \brief Constructor.
     unordered_map(unordered_map&& x, const allocator_type& alloc)
       : super::unordered_map(std::move(x), alloc),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
 
     /// \brief Constructor. To be done later....
     unordered_map(std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type())
       : super::unordered_map(il, alloc),
-      container_wrapper(*this, true)
+      container_wrapper(*this)
     {}
 
     /// \brief Standard assignment.
@@ -400,7 +395,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     void merge(std::unordered_multimap<Key, T, H2, P2, allocator_type>&& source);
     */
 
-    std::size_t size() const override
+    std::size_t size() const
     {
       return super::size();
     }

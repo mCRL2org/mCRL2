@@ -288,7 +288,7 @@ class lpsreach_algorithm
 
         std::tie(visited, todo, deadlocks) = step(visited, todo, true, m_options.detect_deadlocks);
 
-        mCRL2log(log::verbose) << "explored " << std::setw(12) << print_size(visited) << " states after "
+        mCRL2log(log::verbose) << "explored " << std::setw(12) << print_size(union_(visited, todo)) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
         if (m_options.detect_deadlocks)

@@ -471,7 +471,7 @@ class pbesreach_algorithm
           m_deadlocks = union_(m_deadlocks, deadlocks);
         }
 
-        mCRL2log(log::verbose) << "generated " << std::setw(12) << print_size(m_visited) << " BES equations after "
+        mCRL2log(log::verbose) << "generated " << std::setw(12) << print_size(union_(m_visited, m_todo)) << " BES equations after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
 

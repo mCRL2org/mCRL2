@@ -124,3 +124,19 @@ BOOST_AUTO_TEST_CASE(renaming_of_initial_stochastic_variables)
   run_linearisation_test_case(spec,true);
 }
 
+// Conditions must be incorporated in distributions when distributed over them.
+// Problem indicated by Tim Willemse.
+BOOST_AUTO_TEST_CASE(distribution_of_conditions_over_dist_operator)
+{
+  const std::string spec =
+    "act a:Nat;\n"
+    "\n"
+    "proc P(m:Nat)=\n"
+    "         (m==2) -> dist n:Nat[if(n<m,1/2,0)].a(n).P(m+1);\n"
+    "\n"
+    "init P(2);\n";
+
+  run_linearisation_test_case(spec,true);
+}   
+
+
