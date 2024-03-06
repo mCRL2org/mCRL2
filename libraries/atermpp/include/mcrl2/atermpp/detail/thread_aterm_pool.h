@@ -40,7 +40,7 @@ public:
     }
     
     m_variables = new mcrl2::utilities::hashtable<aterm_core*>();
-    m_containers = new mcrl2::utilities::hashtable<detail::_aterm_container*>();
+    m_containers = new mcrl2::utilities::hashtable<detail::aterm_container*>();
     
     m_pool.register_thread_aterm_pool(*this);
   }
