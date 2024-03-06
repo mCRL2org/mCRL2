@@ -281,7 +281,7 @@ class lpsreach_algorithm
 
       while (todo != empty_set() && (m_options.max_iterations == 0 || iteration_count < m_options.max_iterations))
       {
-        stopwatch loop_start;
+        mcrl2::utilities::stopwatch loop_start;
         iteration_count++;
         mCRL2log(log::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
         mCRL2log(log::trace) << "todo = " << print_states(m_lts.data_index, todo) << std::endl;

@@ -322,7 +322,7 @@ class symbolic_parity_game
       const ldd& I = sylvan::ldds::empty_set(),
       const ldd& T = sylvan::ldds::empty_set()) const
     {
-      stopwatch attractor_watch;
+      mcrl2::utilities::stopwatch attractor_watch;
       mCRL2log(log::debug) << "start attractor set computation\n";
 
       using namespace sylvan::ldds;
@@ -342,7 +342,7 @@ class symbolic_parity_game
 
         mCRL2log(log::trace) << "todo = " << print_nodes(todo) << std::endl;
         mCRL2log(log::trace) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
-        stopwatch iter_start;
+        mcrl2::utilities::stopwatch iter_start;
 
         todo = minus(safe_control_predecessors_impl(alpha, todo, Zoutside, Zoutside, V, Vplayer, I), Z);
         Z = union_(Z, todo);
@@ -372,7 +372,7 @@ class symbolic_parity_game
     {
       using namespace sylvan::ldds;
 
-      stopwatch attractor_watch;
+      mcrl2::utilities::stopwatch attractor_watch;
       mCRL2log(log::debug) << "start monotone attractor set computation\n";
 
       using namespace sylvan::ldds;
@@ -403,7 +403,7 @@ class symbolic_parity_game
 
         mCRL2log(log::trace) << "todo = " << print_nodes(todo) << std::endl;
         mCRL2log(log::trace) << "Zoutside = " << print_nodes(Zoutside) << std::endl;
-        stopwatch iter_start;
+        mcrl2::utilities::stopwatch iter_start;
 
         todo = intersect(Vc, minus(safe_control_predecessors_impl(alpha, union_(todo, U), V, minus(Zoutside, U), Vc, Vplayer, I), Z));
         Z = union_(Z, todo);
@@ -519,7 +519,7 @@ class symbolic_parity_game
       {
         const symbolic::summand_group& group = m_summand_groups[i];
 
-        stopwatch watch;
+        mcrl2::utilities::stopwatch watch;
         result = union_(result, predecessors(U, V, group));
         mCRL2log(log::trace) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
@@ -566,7 +566,7 @@ private:
       {
         const symbolic::summand_group& group = m_summand_groups[i];
 
-        stopwatch watch;
+        mcrl2::utilities::stopwatch watch;
         ldd todo1 = predecessors(U, todo, group);
         mCRL2log(log::trace) << "added predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
@@ -598,7 +598,7 @@ private:
       {
         const symbolic::summand_group& group = m_summand_groups[i];
 
-        stopwatch watch;
+        mcrl2::utilities::stopwatch watch;
         Pforced = minus(Pforced, predecessors(Pforced, outside, group));
 
         mCRL2log(log::trace) << "removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
