@@ -222,6 +222,11 @@ class Lts2pbesTest(ProcessTest):
     def __init__(self, name, settings):
         super(Lts2pbesTest, self).__init__(name, ymlfile('lts2pbes'), settings)
 
+    def create_inputfiles(self, runpath = '.'):
+        super(Lts2pbesTest, self).create_inputfiles(runpath)
+        # Use the nodeadlock property to generate the PBES.
+        self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
+
 class LtsconvertsymbolicTest(ProcessTest):
     def __init__(self, name, settings):
         super(LtsconvertsymbolicTest, self).__init__(name, ymlfile('ltsconvertsymbolic'), settings)
