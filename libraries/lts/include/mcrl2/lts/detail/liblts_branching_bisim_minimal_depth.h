@@ -642,8 +642,6 @@ bool destructive_branching_bisimulation_compare_minimal_depth(LTS_TYPE& l1,
 
   if (branching_bisim_min.in_same_class(l1.initial_state(), init_l2))
   {
-    assert(false);
-    // This should should not have happened.
     return true;
   }
 
