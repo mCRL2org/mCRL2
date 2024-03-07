@@ -219,7 +219,6 @@ struct vertex_set
     void sort()
     {
       std::sort(m_vertices.begin(), m_vertices.end());
-      m_include = boost::dynamic_bitset<>(m_include.size());
       assert(self_check());
     }
 
