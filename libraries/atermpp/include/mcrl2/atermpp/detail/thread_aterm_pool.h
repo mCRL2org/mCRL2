@@ -24,12 +24,15 @@ namespace detail
 
 /// \brief This is a thread's specific access to the global aterm pool which ensures that
 ///        garbage collection and hash table resizing can proceed.
-class thread_aterm_pool final : public thread_aterm_pool_interface, mcrl2::utilities::noncopyable
+class thread_aterm_pool final : public mcrl2::utilities::noncopyable
 {
 public:
   thread_aterm_pool(aterm_pool& global_pool)
     : m_pool(global_pool),
-      m_shared_mutex(global_pool.shared_mutex())
+      m_shared_mutex(global_pool.shared_mutex()),
+      m_variables(new mcrl2::utilities::hashtable<aterm*>()),
+      m_containers(new mcrl2::utilities::hashtable<detail::aterm_container*>()),
+      m_thread_interface(global_pool, std::bind(&thread_aterm_pool::mark, this), std::bind(&thread_aterm_pool::print_local_performance_statistics, this), std::bind(&thread_aterm_pool::protection_set_size, this))
   {
     /// Identify the first constructor call as the main thread.
     static bool is_main_thread = true;
@@ -38,17 +41,10 @@ public:
       m_is_main_thread = true;
       is_main_thread = false;
     }
-    
-    m_variables = new mcrl2::utilities::hashtable<aterm*>();
-    m_containers = new mcrl2::utilities::hashtable<detail::aterm_container*>();
-    
-    m_pool.register_thread_aterm_pool(*this);
   }
 
-  ~thread_aterm_pool() override
+  ~thread_aterm_pool() 
   {
-    m_pool.remove_thread_aterm_pool(*this);
-
     if (!m_is_main_thread)
     {
       // We leak values for the global aterm pool since they contain global variables (for which initialisation order is undefined).
@@ -105,9 +101,9 @@ public:
   inline void deregister_container(aterm_container* variable);
 
   // Implementation of thread_aterm_pool_interface
-  inline void mark() override;
-  inline void print_local_performance_statistics() const override;
-  inline std::size_t protection_set_size() const override;
+  inline void mark();
+  inline void print_local_performance_statistics() const;
+  inline std::size_t protection_set_size() const;
 
   /// Acquire a shared lock on this thread aterm pool.
   inline mcrl2::utilities::shared_guard lock_shared() { return m_shared_mutex.lock_shared(); }
@@ -134,6 +130,8 @@ private:
   std::stack<std::reference_wrapper<_aterm>> m_todo; ///< A reusable todo stack.
 
   bool m_is_main_thread = false;
+
+  thread_aterm_pool_interface m_thread_interface; ///< The registered thread aterm pool.
 };
 
 /// \brief A reference to the thread local term pool storage
