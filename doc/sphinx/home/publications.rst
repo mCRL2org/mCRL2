@@ -30,6 +30,7 @@ Research
 --------
 
 .. [SKN23] A\. Stramaglia, J.J.A. Keiren, T. Neele. Simplifying Process Parameters by Unfolding Algebraic Data Types. ICTAC 2023. LNCS vol. 14446, pp. 399-416. `(DOI) <https://doi.org/10.1007/978-3-031-47963-2_24>`__
+.. [MG23] J.J.M. Martens and J.F. Groote. Computing Minimal Distinguishing Hennessy-Milner Formulas is NP-Hard, but Variants are Tractable. CONCUR 2023, LIPIcs vol. 279. `(DOI) <https://doi.org/10.4230/LIPIcs.CONCUR.2023.32>`__
 .. [JGKW20] D.N. Jansen, J.F. Groote, J.J.A. Keiren, A. Wijs. An O(m log n) algorithm for branching bisimilarity on labelled transition systems. TACAS 2020, LNCS vol. 12079, pp. 3-20. `(DOI) <https://doi.org/10.1007/978-3-030-45237-7_1>`__
 .. [NWW20] T\. Neele, W. Wesselink, T.A.C. Willemse. Partial-Order Reduction for Parity Games with an Application on Parameterised Boolean Equation Systems. TACAS 2020, LNCS vol. 12079, pp. 307-324. `(DOI) <https://doi.org/10.1007/978-3-030-45237-7_19>`__
 .. [NWG20] T\. Neele, T.A.C. Willemse and J.F. Groote. Finding compact proofs for infinite-data parameterised Boolean equation systems. Science of Computer Programming (FACS 2018 special issue), vol. 188, pp. 102389. `(DOI) <https://doi.org/10.1016/j.scico.2019.102389>`__
