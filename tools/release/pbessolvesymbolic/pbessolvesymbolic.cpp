@@ -48,7 +48,7 @@ public:
     if (time_solving * 10 < (time_solving + time_exploring) || m_options.aggressive)
     {
       mCRL2log(log::verbose) << "start partial solving\n";
-      stopwatch timer;
+      mcrl2::utilities::stopwatch timer;
 
       // Store the set of won states to keep track of whether new states have been solved.
       std::array<sylvan::ldds::ldd, 2> Vwon = m_Vwon;
@@ -127,7 +127,7 @@ private:
 
   double time_solving = 0.0;
   double time_exploring = 0.0;
-  stopwatch explore_timer;
+  mcrl2::utilities::stopwatch explore_timer;
 };
 
 } // namespace mcrl2::pbes_system
