@@ -43,6 +43,7 @@ class Tool(object):
         self.input_nodes = input_nodes
         self.output_nodes = output_nodes
         self.args = args
+        self.stderr = ""
         self.executed = False
         self.value = {}
 
@@ -271,6 +272,18 @@ class PbesSolveTool(Tool):
         # mark the evidence file as executed
         if len(self.output_nodes) == 1:
             self.output_nodes[0].value = 'executed'
+            
+class LtscompareTool(Tool):
+    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
+        super(LtscompareTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
+
+    def arguments(self, working_directory = None, no_paths = False):
+        args = super(LtscompareTool, self).arguments(working_directory, no_paths)
+
+        # counter example generation
+        if len(self.output_nodes) > 0:
+            args[2] = '--counter-example-file={}'.format(args[2])
+        return args
 
 class ToolFactory(object):
     def create_tool(self, label, name, toolpath, input_nodes, output_nodes, args):
@@ -286,4 +299,6 @@ class ToolFactory(object):
             return SolveTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['pbes2bool', 'pbessolve', 'pbessolvesymbolic', 'pbessymbolicbisim']:
             return PbesSolveTool(label, name, toolpath, input_nodes, output_nodes, args)
+        elif name == 'ltscompare':
+            return LtscompareTool(label, name, toolpath, input_nodes, output_nodes, args)
         return Tool(label, name, toolpath, input_nodes, output_nodes, args)

@@ -1,0 +1,60 @@
+nodes:
+  l1:
+    type: mcrl2
+  l2:
+    type: lps
+  l3:
+    type: lts
+  l4:
+    type: lts
+  l5:
+    type: mcf
+  l6:
+    type: pbes
+  l7:
+    type: pbes
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-n]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lps2lts
+  t3:
+    input: [l3]
+    output: [l4]
+    args: [-etrace]
+    name: ltsconvert
+  t4:
+    input: [l3, l4]
+    output: [l5]
+    args: [-c]
+    name: ltscompare
+  t5:
+    input: [l3, l5]
+    output: [l6]
+    args: []
+    name: lts2pbes
+  t6:
+    input: [l4, l5]
+    output: [l7]
+    args: []
+    name: lts2pbes
+  t7:
+    input: [l6]
+    output: []
+    args: []
+    name: pbessolve
+  t8:
+    input: [l7]
+    output: []
+    args: []
+    name: pbessolve
+
+result: |
+  result = t4.value['result'] or t7.value['solution'] != t8.value['solution']
