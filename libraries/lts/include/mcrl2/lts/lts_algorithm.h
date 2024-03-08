@@ -98,7 +98,7 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(mcrl2::log::warning) << "The default branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
+        mCRL2log(mcrl2::log::warning) << "The default branching bisimulation comparison algorithm cannot generate counter examples. A slower partition refinement algorithm (Martens/Groote 2024) is used instead.\n";
         return detail::destructive_branching_bisimulation_compare_minimal_depth(l1, l2, counter_example_file);
       }
       return detail::destructive_bisimulation_compare_dnj(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
