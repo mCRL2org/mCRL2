@@ -265,6 +265,20 @@ namespace atermpp::utilities {
     }
   }
 
+  
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  inline void unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::rehash_if_needed()
+  {
+    // These functions are not thread safe.
+    mcrl2::utilities::lock_guard guard = detail::g_thread_term_pool().lock();
+    std::size_t count = super::bucket_count();
+    if (super::load_factor() >= super::max_load_factor())
+    {
+      guard.unlock();
+      rehash(count* 2);
+    }
+  }
+
   template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
   void unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::clear() noexcept
   {
