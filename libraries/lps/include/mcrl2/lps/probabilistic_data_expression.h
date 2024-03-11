@@ -29,9 +29,9 @@ namespace mcrl2
 namespace lps
 {
 
-#ifdef Enable64bitNumbers
 namespace detail
 {
+#ifdef Enable64bitNumbers
   inline utilities::big_natural_number make_bnn_nat(const data::data_expression& n)
   {
     utilities::big_natural_number result;
@@ -103,6 +103,7 @@ namespace detail
     }
     return result;
   }
+#endif
 
   // An algorithm to calculate the greatest common divisor
   inline std::size_t greatest_common_divisor(std::size_t x, std::size_t y)
@@ -124,7 +125,7 @@ namespace detail
     return x;
   }
 
-  inline void remove_common_factors(std::size_t& enumerator, std::size_t& denominator)
+  inline void remove_common_divisor(std::size_t& enumerator, std::size_t& denominator)
   {
     std::size_t gcd=greatest_common_divisor(enumerator,denominator);
     enumerator=enumerator/gcd;
@@ -132,7 +133,6 @@ namespace detail
   }
 
 }
-#endif
 
 /** \brief This class contains labels for probabilistic transistions, consisting of a numerator and a denumerator.
  *  \details This class provides a number of operators to calculate with real constants (actually fractions). 
@@ -352,7 +352,7 @@ class probabilistic_data_expression: public data::data_expression
     probabilistic_data_expression(std::size_t enumerator, std::size_t denominator)
     {
       assert(denominator!=0);
-      detail::remove_common_factors(enumerator,denominator);
+      detail::remove_common_divisor(enumerator,denominator);
       *this = lps::probabilistic_data_expression(data::sort_real::creal(data::sort_int::int_(enumerator),data::sort_pos::pos(denominator)));
     }
 
