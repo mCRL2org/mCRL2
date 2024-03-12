@@ -694,7 +694,7 @@ struct state_space_generator
 
   // Explore the specification passed via the constructor, and put the results in builder.
   template <typename LTSBuilder>
-  void explore(LTSBuilder& builder)
+  bool explore(LTSBuilder& builder)
   {
     std::vector<aligned_bool> has_outgoing_transitions(options.number_of_threads+1); // thread indices start at 1. 
     const lps::state* source = nullptr;
@@ -817,7 +817,10 @@ struct state_space_generator
         detail::save_trace(tr, filename);
       }
       mCRL2log(log::info) << ".\n";
+      return false;
     }
+
+    return true;
   }
 };
 

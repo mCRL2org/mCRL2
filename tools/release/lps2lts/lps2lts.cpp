@@ -333,12 +333,14 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
     }
 
     template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
-    void generate_state_space(const Specification& lpsspec, LTSBuilder& builder)
+    bool generate_state_space(const Specification& lpsspec, LTSBuilder& builder)
     {
       lts::state_space_generator<Stochastic, Timed, Specification> generator(lpsspec, options);
       current_explorer = &generator.explorer;
-      generator.explore(builder);
+      
+      bool result = generator.explore(builder);
       builder.save(output_filename());
+      return result;
     }
 
     bool run() override
@@ -352,17 +354,18 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         parse_trace_multiactions(stochastic_lpsspec.data(), stochastic_lpsspec.action_labels());
       }
       bool is_timed = stochastic_lpsspec.process().has_time();
+      bool result = true;
 
       if (lps::is_stochastic(stochastic_lpsspec))
       {
         auto builder = create_stochastic_lts_builder(stochastic_lpsspec, options, output_format);
         if (is_timed)
         {
-          generate_state_space<true, true>(stochastic_lpsspec, *builder);
+          result = generate_state_space<true, true>(stochastic_lpsspec, *builder);
         }
         else
         {
-          generate_state_space<true, false>(stochastic_lpsspec, *builder);
+          result = generate_state_space<true, false>(stochastic_lpsspec, *builder);
         }
       }
       else
@@ -371,14 +374,15 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         auto builder = create_lts_builder(lpsspec, options, output_format, output_filename());
         if (is_timed)
         {
-          generate_state_space<false, true>(lpsspec, *builder);
+          result = generate_state_space<false, true>(lpsspec, *builder);
         }
         else
         {
-          generate_state_space<false, false>(lpsspec, *builder);
+          result = generate_state_space<false, false>(lpsspec, *builder);
         }
       }
-      return true;
+
+      return result;
     }
 
     void abort()
