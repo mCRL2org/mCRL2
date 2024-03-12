@@ -9,6 +9,7 @@ import os
 import os.path
 import random
 import re
+import shutil
 import sys
 import traceback
 
