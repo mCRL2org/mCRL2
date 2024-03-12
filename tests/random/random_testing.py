@@ -436,7 +436,7 @@ available_tests = {
     'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }
 
-if shutil.which("Z3") is not None:
+if shutil.which("z3") is not None:
     available_tests.update({'pbessymbolicbisim' : lambda name, settings: PbessymbolicbisimTest(name, settings)})
 
 # These test do not work on Windows due to dependencies.
