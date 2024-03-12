@@ -213,7 +213,10 @@ parse_node parser::parse(const std::string& text, unsigned int start_symbol_inde
   m_parser->partial_parses = partial_parses ? 1 : 0;
   D_ParseNode* result = dparse(m_parser, const_cast<char*>(text.c_str()), static_cast<int>(text.size()));
   if (!result || m_parser->syntax_errors)
-  {
+  {    
+    if (result != nullptr) {
+      free_D_ParseNode(m_parser, result);
+    }
     throw mcrl2::runtime_error("syntax error");
   }
   return parse_node(result, m_parser);
