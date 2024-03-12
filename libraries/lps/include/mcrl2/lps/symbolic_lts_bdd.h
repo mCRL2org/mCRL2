@@ -10,7 +10,6 @@
 #ifndef MCRL2_LPS_SYMBOLIC_LTS_BDD_H
 #define MCRL2_LPS_SYMBOLIC_LTS_BDD_H
 
-#include "mcrl2/utilities/platform.h"
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "mcrl2/lps/symbolic_lts.h"

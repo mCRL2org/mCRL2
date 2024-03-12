@@ -7,8 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/utilities/platform.h"
-
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "mcrl2/lps/symbolic_lts_io.h"

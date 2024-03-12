@@ -7,6 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/lps/symbolic_lts_bdd.h"
 
 #include "mcrl2/symbolic/print.h"
@@ -208,3 +211,5 @@ symbolic_lts_bdd::symbolic_lts_bdd(data::data_specification data_spec,
 {
   //assert(m_process_parameters.size() == )
 }
+
+#endif // MCRL2_ENABLE_SYLVAN

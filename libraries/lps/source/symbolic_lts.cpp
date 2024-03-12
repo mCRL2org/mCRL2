@@ -7,11 +7,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+
+#ifdef MCRL2_ENABLE_SYLVAN
+
 #include "mcrl2/lps/symbolic_lts.h"
 
 #include "mcrl2/lps/symbolic_lts_bdd.h"
-
-#ifdef MCRL2_ENABLE_SYLVAN
 
 using namespace mcrl2::data;
 using namespace mcrl2::utilities;
