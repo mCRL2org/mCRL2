@@ -44,7 +44,7 @@ class rewriter_tool: public Tool
       utilities::interface_description::enum_argument<data::rewrite_strategy> rewriter_option("NAME");
       rewriter_option.add_value(data::jitty, true);
       rewriter_option.add_value(data::innermost);
-#ifdef MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_ENABLE_JITTYC
       rewriter_option.add_value(data::jitty_compiling);
 #endif
       if (!suppress_jittyp)
