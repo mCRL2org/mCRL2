@@ -1,10 +1,19 @@
 \documentclass{article}
 \usepackage{fullpage}
+\usepackage{tikz}
+\usepackage{ stmaryrd }
+\usepackage{algpseudocode}
+
+\usetikzlibrary{automata, positioning, arrows}
+
 \usepackage{amsfonts}
 \newcommand{\pijl}[1]{\stackrel{#1}{\longrightarrow}}
 \newcommand{\notpijl}[1]{\stackrel{#1}{\not\longrightarrow}}
+\newcommand{\sem}[1]{\llbracket #1 \rrbracket}
+
 \title{Notes on the bisimulation partitioner}
-\author{Jan Friso Groote}
+% Original by Jan Friso, Jan added information on distinguishing formulas.
+\author{Jan Friso Groote and Jan Martens}
 \begin{document}
 \section{Introduction}
 This document describes the algorithm for branching bisimulation reduction,
@@ -32,53 +41,110 @@ partitioned into blocks. Initially, all states are put in one block. Repeatedly,
 a block is split in two blocks until the partitioning has become stable. For
 details see \cite{GV90}.
 
-Furthermore, there is an option to obtain counter traces or counter formulas
-for two non bisimilar state. The algorithm for this is inspired by \cite{C90,K91}.
+Furthermore, there is an option to obtain counter formulas for two non bisimilar
+state. The algorithm for this is inspired by \cite{C90,K91}.
 
 Given two non bisimilar states $s,t\in S$, where $S$ is the set of all states. A
-{\it distinguishing formula} is a formula $\phi$ in Hennessy-Milner logic such that
-$s\models\phi$ and $t\not\models\phi$. A {\it counter trace} is a trace $\sigma a$ such
-that $s\pijl{\sigma}s'\pijl{a}$ for some state $s'$, and $t\pijl{\sigma}t'\notpijl{a}$ for
-some $t'$, or vice versa. For two states there is always a distinghuishing formula iff these states
-are not bisimilar. For counter traces, the situation is not as straightforward.
-There are bisimilar states for which counter traces exist, e.g.\ $a{\cdot}b+a{\cdot}c$
-has counter traces $a\,b$ and $a\,c$ for its initial state. Also, the set of all counter
-traces for non bisimilar states can be the same as the set of counter traces between
-two non bisimilar processes. E.g.\ comparing $a{\cdot}b+a{\cdot}c$ with itself yields
-the same countertraces as comparing it with $a{\cdot}b+a{\cdot}c+a{\cdot}(b+c)$. Yet,
-countertraces might be useful, as they provide some hint as why two states may not
-be bisimilar in situations where Hennessy-Milner formulas cannot be used.
+{\it distinguishing formula} is a formula $\phi$ in Hennessy-Milner logic such
+that $s\models\phi$ and $t\not\models\phi$. For branching bisimulation there is
+always a distinguishing formula in the Hennessy-Milner logic extended with the
+regular $\langle \tau^* \rangle$, and using the regular formula $\langle \tau +
+\mathit{nil} \rangle \phi := \langle\tau\rangle \phi \vee \phi $. 
 
-Following \cite{C90,K91} we extend the algorithm in \cite{GV90} as follows. 
-Each $B$ block that is split is annotated with its parents block $B'$ and 
-with the pair $\langle a,B''\rangle$ that was used to split it. 
+Following \cite{M23, M24} we implement the computation of minimal depth
+distinguishing formulas. In the implementation two things can be noted different
+from the references with the theoretical background.
 
-Given two non-bisimilar states $s$ and $t$ first the smallest block is found
-that contains both $s$ and $t$. Initially, it is known which stable block $s$ and
-$t$ are in. By traversing the parent relation of the blocks, the common block $B_C$ is 
-found (in time proportional to the length of the parent relation, which is bounded
-by the number of blocks, which again is bounded by the number of states). Block
-$B_C$ is split by $\langle a,B''\rangle$
-into a block $B_s$ containing $s$ and a different block $B_t$ containing $t$.
+\paragraph*{Filtering}
+\begin{figure}[b]
+  \begin{center}
+  \begin{tikzpicture}[node distance=2.5cm]
+      % States
+      \node[state]   (s)                      {$s$};
+      \node[state]   (s1)  [below of=s] {$s_1$};
+      \node[state]   (t)  [right= 5cm of s] {$t$};
+      \node[state]   (t1)  [below of=t] {$t_1$};
+      \node[state]   (t2)  [ right of=t1] {$t_2$};
+      % Transitions
+      \path[->]
+        (s)  edge node[left] {$a$} (s1)
+        (t) edge node[left] {$a$} (t1)
+        (t) edge node[right] {$a$} (t2)
+        (s1) edge[loop below] node[below] {$a,b$} (s1)
+        (t2) edge [loop below] node [below] {$a$} (t2);
+  \end{tikzpicture}
+  \end{center}
+  \caption{Two LTSs with initial state $s$ and $t$ respectively.\label{fig:filtering}}
+  \end{figure}
 
-Now construct four sets of states:
-\[\begin{array}{l}
-B^s_{\it reacha}=\{s'|s\pijl{a}s'~{\rm and}~s'\in B''\}\\
-B^s_{\it nonreacha}=\{s'|s\pijl{a}s'~{\rm and}~s'\in B''\}\\
-B^t_{\it reacha}=\{t'|t\pijl{a}t'~{\rm and}~t'\in B''\}\\
-B^t_{\it nonreacha}=\{t'|t\pijl{a}t'~{\rm and}~t'\in B''\}
-\end{array}\]
-As $B''$ was a splitter for $B_C$, exactly one of $B^s_{\it reacha}$ and $B^t_{\it reacha}$ is
-empty, while the other is not empty. Assume without loss of generality that $B^s_{\it reacha}$ is
-not empty. If $B^t_{\it nonreacha}$ is empty, the counter trace is $a$. If $B^t_{\it nonreacha}$
-is not empty construct a set of counter traces $\sigma b$ for each pair of state $\langle u,u'\rangle
-\in B^s_{\it reacha}\times B^t_{\it nonreacha}$. The counter traces
-for $\langle s,t\rangle$ are the traces $a\sigma b$ obtained in this way.
+There is one post-processing step we call backwards filtering. It deals with the
+following scenario. 
+
+Consider the transition systems depicted in Figure~\ref{fig:filtering}. We
+consider the scenario of computing a distinguishing formula $\phi(s,t)$ for the
+states $s$ and $t$. By the partitioning algorithm we know that the transition
+$s\pijl{a}s_1$ is a distinguishing observation. The algorithm has to recursively
+find the distinguishing formula $\phi'$ such that $s_1 \in \sem{\phi'}$ and
+$t_1,t_2 \not\in \sem{\phi'}$. This way $s\in\sem{\langle a\rangle \phi'}$ and
+$t\not\in\sem{\langle a \rangle \phi'}$.
+
+The algorithm starts by recursively computing a distinguishing formula for $s_1$
+and $t_1$. It might compute $\phi(s_1, t_1) = \langle a \rangle \mathrm{true}$.
+Since $t_2 \in \sem{ \langle a \rangle \mathrm{true}}$, it also computes the
+distinguishing formula $\phi(s_1,t_2) = \langle b\rangle \mathrm{true}$. This
+results in the formula $\phi(s,t) = \langle a \rangle (\langle a \rangle
+\mathrm{true} \wedge \langle b \rangle \mathrm{true})$. We see that the addition
+of the conjunct $\phi(s_1, t_2) = \langle b \rangle \mathrm{true}$ made the
+first conjunct $\phi(s_1, t_1)$ obsolete (since $t_1\not\in\sem{\langle b\rangle
+\mathrm{true}}$). This scenario is very hard to prevent a priori.  
+
+To prevent a distinguishing formula with unnecessary conjuncts each conjunct is
+reconsidered in a FIFO style. We compute the semantics of all other conjuncts
+and see if it still achieves the goal. If this is the case, we can safely remove
+that specific conjunct.
+
+\paragraph*{Minimal depth partitioning for branching bisimulation}
+According to~\cite{M24} we compute the partitions conform the correct $k$-depth
+relations. Given the partition $\pi_i$ on level $i$ we want to construct
+$\pi_{i{+}1}$ such that it stable w.r.t. the following signatures.
+
+\[
+  \mathit{sig}(s, \pi_i) := \{(B, a, B') \mid s \pijl{\tau^*} s' \pijl{a} s''
+  , \textrm{where } s'\in B\in \pi_i, s''\in B'\in \pi_i\textrm{ and } (B \neq B' \vee a \neq \tau) \}  
+\]
+
+Performing this partitioning step efficiently is not obvious. We implemented the
+following algorithm. This algorithm only works since we removed strongly
+connected $\tau$ components in the preprocessing, hence there are no $\tau$
+cycles.
+
+\begin{algorithmic}[1]
+  \State $\textit{frontier} := \{s \mid s\notpijl{\tau}\}$\;
+  \State $\textit{done} := \emptyset$\;
+  \While{$\textit{frontier} \neq \emptyset$}
+  \State $s := \textit{frontier.pop\_front}()$\;
+  \State $\textit{signature} := \{(B, a, B') \mid s\pijl{a} s' \textrm{ s.t. } s\in B, s'\in B',\textrm{ and }  B, B'\in \pi_i \textrm{ and } (a \neq \tau \vee B \neq B')\}$\;
+  \ForAll{$s\pijl{\tau} s'$}
+    \State $\textit{signature} := \textit{signature} \cup sigs[s']$\;
+  \EndFor 
+  \State $\textit{sigs}[s] := signature$\;
+  \State $\textit{done} := \textit{done} \cup \{s\}$\:
+  \ForAll{$s_p \pijl{\tau} s$} 
+    \If{$\{s' \mid s_p \pijl{\tau} s'\} \setminus \textit{done} = \emptyset$}
+      \State $\textit{frontier.push\_back}(s_p)$\;
+    \EndIf
+  \EndFor
+  
+
+  \EndWhile
+\end{algorithmic}  
+
+
 
 \begin{thebibliography}{10}
 \bibitem{C90}
 R.~Cleaveland. On automatically explaining bisimulation inequivalence.
-In E.M.~Clarke and R.P.~Kurshan, editiors, {\it Computer Aided Verification (CAV'90)}, volume
+In E.M.~Clarke and R.P.~Kurshan, editors, {\it Computer Aided Verification (CAV'90)}, volume
 531 of {\it Lecture Notes in Computer Science}, Springer-Verlag, pages 364--372, 1990.
 
 \bibitem{GV90}
@@ -90,6 +156,15 @@ pages 626-638. Springer-Verlag, 1990.
 H.~Korver. Computing distinguishing formulas for branching bisimulation.
 In K.G.~Larsen and A.~Skou, editors, {\it Computer Aided Verification (CAV'91)}, volume 575 of
 {\it Lecture Notes in Computer Science}, Springer-Verlag, pages 13--23, 1991.
+
+\bibitem{M23}
+J.J.M.~Martens and J.F.~Groote. Computing Minimal Distinguishing Hennessy-Milner Formulas is NP-Hard, but Variants are Tractable.
+In G.-A.~P'erez and J.-F. Raskin, editors, {\it CONCUR '23}, Volume 279 of
+{\it LIPIcs}, Schloss Dagstuhl –- Leibniz-Zentrum für Informatik, pages 32:1--32:17, 2023.
+
+\bibitem {M24}
+J.J.M.~Martens and J.F.~Groote. Minimal Depth Distinguishing Formulas without Until for Branching Bisimulation. 
+to appear in LNCS 2024
 
 \end{thebibliography}
 \end{document}
