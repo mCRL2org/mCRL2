@@ -433,7 +433,7 @@ available_tests = {
     'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
     # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
-    #'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
+    'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }
 
 # These test do not work on Windows due to dependencies.
