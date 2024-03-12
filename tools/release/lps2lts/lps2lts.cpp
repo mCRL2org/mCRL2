@@ -311,19 +311,15 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         parser.error("Option '--no-info' requires that the output is in .lts format.");
       }
       if (options.number_of_threads>1)
-      { 
-         /* if (options.detect_divergence)
-         {
-           parser.error("Option 'divergence' can only be used in single thread mode.");
-         } */
+      {
          if (options.save_error_trace)
          {
            parser.error("Option 'error-trace' can only be used in single thread mode.");
          }
-         /* if (parser.has_option("multiaction"))
+         if (parser.has_option("confluence"))
          {
-           parser.error("Option 'multiaction' can only be used in single thread mode.");
-         } */
+           parser.error("Option 'confluence' can only be used in single thread mode.");
+         }
          if (options.generate_traces)
          {
            parser.error("Option 'trace' can only be used in single thread mode.");
