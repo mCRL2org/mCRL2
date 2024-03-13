@@ -20,6 +20,11 @@ In TeamCity there are two top-level projects that are of importance:
   Nightly also builds the website including the documentation from the Sphinx sources.
   When all builds pass, the website, documentation and nightly packages are uploaded to `<http://mcrl2.org>`_.
 
+Code coverage
+---------------------
+
+The Teamcity builds also report code coverage on the following `page <https://mcrl2.org/web/coverage/>`_.
+
 Setup
 =====
 

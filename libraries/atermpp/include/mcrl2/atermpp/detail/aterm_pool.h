@@ -31,21 +31,40 @@ using arbitrary_function_application_storage = aterm_pool_storage<_aterm_appl<1>
 template<std::size_t N>
 using function_application_storage = aterm_pool_storage<_aterm_appl<N>, aterm_hasher_finite<N>, aterm_equals_finite<N>, N>;
 
+// There are some annoying circular dependencies between a aterm_pool and the contained thread_aterm_pool_interfaces
+class aterm_pool;
+
 /// \brief A thread specific aterm pool that provides a local interface to the global term pool.
 ///        Ensures that terms created by this thread are protected during garbage collection.
-class thread_aterm_pool_interface
+class thread_aterm_pool_interface final
 {
 public:
-  virtual ~thread_aterm_pool_interface() {}
+  thread_aterm_pool_interface(aterm_pool& pool, std::function<void()> mark_function, std::function<void()> print_function, std::function<std::size_t()> protection_set_size_function);
+  ~thread_aterm_pool_interface();
 
   /// \brief Mark the terms created by this thread to prevent them being garbage collected.
-  virtual void mark() = 0;
+  void mark()
+  {
+    m_mark_function();
+  }
 
   /// \brief Print performance statistics for data stored for this thread.
-  virtual void print_local_performance_statistics() const = 0;
+  void print_local_performance_statistics() const
+  {
+    m_print_function();
+  }
 
   /// \returns The total number of terms residing in the pool.
-  virtual std::size_t protection_set_size() const = 0;
+  std::size_t protection_set_size() const 
+  {
+    return m_protection_set_size_function();
+  }
+
+private:
+  aterm_pool& m_pool;
+  std::function<void()> m_mark_function;
+  std::function<void()> m_print_function;
+  std::function<std::size_t()> m_protection_set_size_function;
 };
 
 class thread_aterm_pool;
@@ -198,6 +217,19 @@ private:
   /// Represents an empty list.
   aterm_core m_empty_list;
 };
+
+inline
+thread_aterm_pool_interface::thread_aterm_pool_interface(aterm_pool& pool, std::function<void()> mark_function, std::function<void()> print_function, std::function<std::size_t()> protection_set_size_function)
+  : m_pool(pool), m_mark_function(mark_function), m_print_function(print_function), m_protection_set_size_function(protection_set_size_function)
+{
+  m_pool.register_thread_aterm_pool(*this);
+}
+
+inline
+thread_aterm_pool_interface::~thread_aterm_pool_interface()
+{
+  m_pool.remove_thread_aterm_pool(*this);
+}
 
 } // namespace detail
 } // namespace atermpp

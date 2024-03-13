@@ -405,14 +405,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     /// Function below is implemented in a .cpp file. 
     void rehash(std::size_t /* new_size */);
   
-    void rehash_if_needed()
-    {
-      if (super::load_factor() >= super::max_load_factor())
-      {
-        rehash(super::bucket_count() * 2);
-      }
-    }
-
+    void rehash_if_needed();
 };
 }
 

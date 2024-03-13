@@ -9,6 +9,7 @@ import os
 import os.path
 import random
 import re
+import shutil
 import sys
 import traceback
 
@@ -431,10 +432,12 @@ available_tests = {
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     'pbes-unify-parameters'                       : lambda name, settings: Pbes_unify_parametersTest(name, settings)                                   ,
     'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
-    # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
-    #'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
+    'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }
+
+if shutil.which("z3") is not None:
+    available_tests.update({'pbessymbolicbisim' : lambda name, settings: PbessymbolicbisimTest(name, settings)})
 
 # These test do not work on Windows due to dependencies.
 if os.name != 'nt':

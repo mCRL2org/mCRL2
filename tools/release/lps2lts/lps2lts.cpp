@@ -311,19 +311,15 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         parser.error("Option '--no-info' requires that the output is in .lts format.");
       }
       if (options.number_of_threads>1)
-      { 
-         /* if (options.detect_divergence)
-         {
-           parser.error("Option 'divergence' can only be used in single thread mode.");
-         } */
+      {
          if (options.save_error_trace)
          {
            parser.error("Option 'error-trace' can only be used in single thread mode.");
          }
-         /* if (parser.has_option("multiaction"))
+         if (parser.has_option("confluence"))
          {
-           parser.error("Option 'multiaction' can only be used in single thread mode.");
-         } */
+           parser.error("Option 'confluence' can only be used in single thread mode.");
+         }
          if (options.generate_traces)
          {
            parser.error("Option 'trace' can only be used in single thread mode.");
@@ -337,12 +333,14 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
     }
 
     template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
-    void generate_state_space(const Specification& lpsspec, LTSBuilder& builder)
+    bool generate_state_space(const Specification& lpsspec, LTSBuilder& builder)
     {
       lts::state_space_generator<Stochastic, Timed, Specification> generator(lpsspec, options);
       current_explorer = &generator.explorer;
-      generator.explore(builder);
+      
+      bool result = generator.explore(builder);
       builder.save(output_filename());
+      return result;
     }
 
     bool run() override
@@ -356,17 +354,18 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         parse_trace_multiactions(stochastic_lpsspec.data(), stochastic_lpsspec.action_labels());
       }
       bool is_timed = stochastic_lpsspec.process().has_time();
+      bool result = true;
 
       if (lps::is_stochastic(stochastic_lpsspec))
       {
         auto builder = create_stochastic_lts_builder(stochastic_lpsspec, options, output_format);
         if (is_timed)
         {
-          generate_state_space<true, true>(stochastic_lpsspec, *builder);
+          result = generate_state_space<true, true>(stochastic_lpsspec, *builder);
         }
         else
         {
-          generate_state_space<true, false>(stochastic_lpsspec, *builder);
+          result = generate_state_space<true, false>(stochastic_lpsspec, *builder);
         }
       }
       else
@@ -375,14 +374,15 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         auto builder = create_lts_builder(lpsspec, options, output_format, output_filename());
         if (is_timed)
         {
-          generate_state_space<false, true>(lpsspec, *builder);
+          result = generate_state_space<false, true>(lpsspec, *builder);
         }
         else
         {
-          generate_state_space<false, false>(lpsspec, *builder);
+          result = generate_state_space<false, false>(lpsspec, *builder);
         }
       }
-      return true;
+
+      return result;
     }
 
     void abort()
