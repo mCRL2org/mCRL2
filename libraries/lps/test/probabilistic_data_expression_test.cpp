@@ -14,6 +14,7 @@
 #define BOOST_TEST_MODULE probabilistic_data_expression_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/lps/probabilistic_data_expression.h"
 
 using namespace mcrl2;
@@ -24,6 +25,32 @@ using namespace mcrl2::data::sort_pos;
 using namespace mcrl2::data::sort_int;
 using namespace mcrl2::lps;
 
+BOOST_AUTO_TEST_CASE(test_very_few_digits)
+{
+  probabilistic_data_expression r1(real_("79","842"));
+  probabilistic_data_expression r2(real_("6398","87493"));
+  probabilistic_data_expression zero;
+  BOOST_CHECK(r1>zero);
+  BOOST_CHECK(r1+r2>zero);
+  BOOST_CHECK(r1-r2>zero);
+  BOOST_CHECK(r2>zero);
+  BOOST_CHECK(r2<r1);
+  BOOST_CHECK(r2<r1+r2);
+}
+
+#ifdef Enable64bitNumbers
+BOOST_AUTO_TEST_CASE(test_few_digits)
+{
+  probabilistic_data_expression r1(real_("7979","84298"));
+  probabilistic_data_expression r2(real_("63984264","8749379236"));
+  probabilistic_data_expression zero;
+  BOOST_CHECK(r1>zero);
+  BOOST_CHECK(r1+r2>zero);
+  BOOST_CHECK(r1-r2>zero);
+  BOOST_CHECK(r2>zero);
+  BOOST_CHECK(r2<r1);
+  BOOST_CHECK(r2<r1+r2);
+}
 
 BOOST_AUTO_TEST_CASE(test_many_digits)
 {
@@ -34,19 +61,6 @@ BOOST_AUTO_TEST_CASE(test_many_digits)
   BOOST_CHECK(r1+r2>zero);
   BOOST_CHECK(r1-r2>zero);
   BOOST_CHECK(r2-r1<zero);
-  BOOST_CHECK(r2>zero);
-  BOOST_CHECK(r2<r1);
-  BOOST_CHECK(r2<r1+r2);
-}
-
-BOOST_AUTO_TEST_CASE(test_few_digits)
-{
-  probabilistic_data_expression r1(real_("7979","84298"));
-  probabilistic_data_expression r2(real_("63984264","8749379236"));
-  probabilistic_data_expression zero;
-  BOOST_CHECK(r1>zero);
-  BOOST_CHECK(r1+r2>zero);
-  BOOST_CHECK(r1-r2>zero);
   BOOST_CHECK(r2>zero);
   BOOST_CHECK(r2<r1);
   BOOST_CHECK(r2<r1+r2);
@@ -77,5 +91,6 @@ BOOST_AUTO_TEST_CASE(test_many_digits_few_versus_many)
   BOOST_CHECK(r2<r1);
   BOOST_CHECK(r2<r1+r2);
 }
+#endif
 
   
