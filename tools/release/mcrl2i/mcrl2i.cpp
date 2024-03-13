@@ -339,6 +339,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         try
         {
           std::string s=read_input_command(done);
+           mCRL2log(log::debug) << "Starting evaluating command.\n";          
           if (match_and_remove(s,"q") || match_and_remove(s,"quit"))
           {
             handle_quit(done);
@@ -386,6 +387,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         {
           std::cout << e.what() << std::endl;
         }
+        mCRL2log(log::debug) << "Finished evaluating command.\n";          
       }
 
       return true;
