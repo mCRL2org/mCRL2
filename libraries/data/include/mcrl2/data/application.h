@@ -504,14 +504,14 @@ class application: public data_expression
     /// \brief Get the function at the head of this expression.
     const data_expression& head() const
     {
-      return atermpp::down_cast<const data_expression>(atermpp::aterm_appl::operator[](0));
+      return atermpp::down_cast<data_expression>(atermpp::aterm_appl::operator[](0));
     }
 
     /// \brief Get the i-th argument of this expression.
     const data_expression& operator[](std::size_t index) const
     {
       assert(index<size());
-      return atermpp::down_cast<const data_expression>(atermpp::aterm_appl::operator[](index+1));
+      return atermpp::down_cast<data_expression>(atermpp::aterm_appl::operator[](index+1));
     }
 
     /// \brief Returns an iterator pointing to the first argument of the
