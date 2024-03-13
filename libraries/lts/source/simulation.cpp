@@ -76,7 +76,7 @@ void simulation::randomly_select_state()
   {
     // Generate a random size_t with random distribution. 
     double random_value=static_cast<double>(m_distrib(m_gen))/static_cast<double>(std::numeric_limits<std::size_t>::max()); 
-    random_value=random_value-data::sort_real::value(state.source_state.probabilities[state_number]);
+    random_value=random_value-data::sort_real::value<double>(state.source_state.probabilities[state_number]);
     while (random_value>0)
     {
       state_number++;

@@ -30,7 +30,7 @@ public:
   thread_aterm_pool(aterm_pool& global_pool)
     : m_pool(global_pool),
       m_shared_mutex(global_pool.shared_mutex()),
-      m_variables(new mcrl2::utilities::hashtable<aterm*>()),
+      m_variables(new mcrl2::utilities::hashtable<aterm_core*>()),
       m_containers(new mcrl2::utilities::hashtable<detail::aterm_container*>()),
       m_thread_interface(global_pool, std::bind(&thread_aterm_pool::mark, this), std::bind(&thread_aterm_pool::print_local_performance_statistics, this), std::bind(&thread_aterm_pool::protection_set_size, this))
   {
