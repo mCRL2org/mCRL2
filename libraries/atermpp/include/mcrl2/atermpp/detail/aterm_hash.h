@@ -258,12 +258,21 @@ std::size_t aterm_hasher_finite<N>::operator()(const function_symbol& symbol, co
 
 std::size_t aterm_int_hasher::operator()(const _aterm_int& term) const noexcept
 {
-  return term.value();
+  return aterm_int_hasher()(term.value());
+}
+
+// The size_t hashfunction below has been taken from a note on stackoverflow
+// by Wolfgang Brehm. 
+static inline std::size_t xorshift(const std::size_t n, const std::size_t i)
+{
+  return n^(n>>i);
 }
 
 std::size_t aterm_int_hasher::operator()(std::size_t value) const noexcept
 {
-  return value;
+  const std::size_t p = 0x5555555555555555ull; // pattern of alternating 0 and 1
+  const std::size_t c = 17316035218449499591ull;// random odd integer constant; 
+  return c*xorshift(p*xorshift(value,32),32);
 }
 
 template<std::size_t N>
