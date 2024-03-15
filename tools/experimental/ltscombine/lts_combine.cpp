@@ -81,54 +81,22 @@ size_t get_sync(std::vector<std::pair<std::string, std::vector<std::string>>>& s
 }
 
 /// <summary>
-/// Checks if the given action list matches one of the blocked multi-actions.
-/// A match also occurs when a blocked multi-action is contained in the given
-/// list of actions.
+/// Checks if the given action list contains one of the blocked actions.
 /// </summary>
-/// <param name="blocks">The list of blocked multi-actions.</param>
-/// <param name="actions">The list of actions to be matched.</param>
-/// <returns>Whether the list of actions is matched by a blocked multi-action
-/// from the blocks list.</returns>
-bool is_blocked(std::vector<std::vector<std::string>> blocks, process::action_list actions)
+/// <param name="blocks">The list of blocked actions.</param>
+/// <param name="actions">The list of actions to be checked.</param>
+/// <returns>Whether the list of actions contains a blocked action.</returns>
+bool is_blocked(std::vector<std::string> blocks, process::action_list actions)
 {
-  // Loop through list of blocked multi-actions
-  for (std::vector<std::string> block : blocks)
+  for (const process::action& action : actions)
   {
-    // All of the actions in the blocked multi-action must be contained
-    // in the given list of actions
-    if (block.size() > actions.size())
+    if (std::find(blocks.begin(), blocks.end(), std::string(action.label().name())) != blocks.end())
     {
-      continue;
-    }
-
-    // Boolean vector for each action in the blocked multi-action
-    std::vector<bool> blocked(block.size(), false);
-
-    for (const process::action& action : actions)
-    {
-      // Find the action in the multi-action
-      std::vector<std::string>::iterator iter = block.begin();
-      while ((iter = std::find(iter, block.end(), std::string(action.label().name()))) !=  block.end())
-      {
-        int index = iter - block.begin();
-        // Check if the found action is not already used
-        if (!blocked[index])
-        {
-          blocked[index] = true;
-          break;
-        }
-        iter++;
-      }
-    }
-
-    if (std::all_of(blocked.begin(), blocked.end(), [](bool v) { return v; }))
-    {
-      // All blocked actions can be matched by an action from the action list
       return true;
     }
   }
 
-  // No matching blocked multi-action could be found
+  // No matching blocked action could be found
   return false;
 }
 
@@ -223,7 +191,7 @@ bool can_sync(const lts::action_label_lts& label)
 // Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
 void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   std::vector<std::pair<std::string, std::vector<std::string>>>& syncs,
-  std::vector<std::vector<std::string>> blocks,
+  std::vector<std::string> blocks,
   std::vector<std::string> hiden,
   std::vector<std::vector<std::string>> allow,
   std::ostream& stream)

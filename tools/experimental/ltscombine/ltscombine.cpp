@@ -148,36 +148,22 @@ protected:
     {
       std::string filename = parser.option_argument("block");
       mCRL2log(log::debug) << "Reading blocked actions from file " << filename << std::endl;
-      std::ifstream blocks_input(filename.c_str());
+      std::ifstream block_input(filename.c_str());
       std::string action_label;
-      
-      // Read list of multi-actions seperated by commas
-      while (std::getline(blocks_input, action_label, ','))
+
+      // Read list of blocked actions seperated by commas
+      while (std::getline(block_input, action_label, ','))
       {
-        std::istringstream iss(action_label);
-        std::vector<std::string> labels{};
-        std::string label;
-        std::size_t delim = action_label.find('|');
-        std::size_t prev_delim = 0;
-
-        // Read all actions seperated by bars
-        while (delim != std::string::npos)
+        if (action_label.find('|') != std::string::npos)
         {
-          label = action_label.substr(prev_delim, delim - prev_delim);
-          trim(label);
-          labels.push_back(label);
-
-          prev_delim = delim + 1;
-          delim = action_label.find('|', delim + 1);
+          // Syntax error, multi-actions cannot be blocked
+          mCRL2log(log::error) << "List of blocked action contains multi-action '" << action_label << "'." << std::endl;
+          throw mcrl2::runtime_error("Could not parse file " + filename + ".");
         }
 
-        // Read last action of multi-action
-        label = action_label.substr(prev_delim);
-        trim(label);
-        labels.push_back(label);
-
-        // Add multi-action to the list of blocked actions
-        blocks.push_back(labels);
+        // Trim action and add to list of blocked actions
+        trim(action_label);
+        blocks.push_back(action_label);
       }
     }
 
@@ -231,7 +217,7 @@ protected:
         if (action_label.find('|') != std::string::npos)
         {
           // Syntax error, multi-actions cannot be hiden
-          mCRL2log(log::error) << "List of hide action contains multi-action." << std::endl;
+          mCRL2log(log::error) << "List of hide action contains multi-action '" << action_label << "'." << std::endl;
           throw mcrl2::runtime_error("Could not parse file " + filename + ".");
         }
         
@@ -262,7 +248,7 @@ private:
     ltrim(s);
   }
 
-  std::vector<std::vector<std::string>> blocks;
+  std::vector<std::string> blocks;
   std::vector<std::vector<std::string>> allow;
   std::vector<std::string> hiden;
   std::vector<std::pair<std::string, std::vector<std::string>>> syncs{};

@@ -1,5 +1,5 @@
 
-// Author(s): Maurice Laveaux
+// Author(s): Willem Rietdijk
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -21,7 +21,7 @@ namespace mcrl2
 void combine_lts(
   std::vector<lts::lts_lts_t>& ltss,
   std::vector<std::pair<std::string, std::vector<std::string>>>& syncs,
-  std::vector<std::vector<std::string>> blocks,
+  std::vector<std::string> blocks,
   std::vector<std::string> hiden,
   std::vector<std::vector<std::string>> allow, 
   std::ostream& stream);
