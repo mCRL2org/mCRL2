@@ -713,7 +713,6 @@ class prob_bisim_partitioner_bem
         }
 
       }
-std::cerr << "BBBB " << state_partition.size() << "\n";
     }
   }
 

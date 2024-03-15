@@ -402,7 +402,6 @@ static void read_from_aut(probabilistic_lts_aut_t& l, std::istream& is)
   mcrl2::utilities::unordered_map < action_label_string, std::size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
   l.set_initial_probabilistic_state(initial_probabilistic_state); 
-  add_probablistic_state(initial_probabilistic_state, l, indices_of_single_probabilistic_states, indices_of_multiple_probabilistic_states);
 
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t probabilistic_target_state;
   std::size_t from;
