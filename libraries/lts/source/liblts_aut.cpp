@@ -340,6 +340,39 @@ static bool read_aut_transition(
   return true;
 }
 
+static size_t add_probablistic_state(
+                    mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& probabilistic_state,
+                    probabilistic_lts_aut_t& l,
+                    mcrl2::utilities::unordered_map < std::size_t, std::size_t>& indices_of_single_probabilistic_states,
+                    mcrl2::utilities::unordered_map < mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t, std::size_t>& 
+                                              indices_of_multiple_probabilistic_states) 
+{
+  std::size_t fresh_index = indices_of_single_probabilistic_states.size()+indices_of_multiple_probabilistic_states.size();
+  std::size_t index;
+  // Check whether probabilistic states exists. 
+  if (probabilistic_state.size()<=1)
+  {
+    index = indices_of_single_probabilistic_states.insert(
+                     std::pair< std::size_t, std::size_t>
+                     (probabilistic_state.get(),fresh_index)).first->second;
+  }
+  else
+  {
+    assert(probabilistic_state.size()>1);
+    index = indices_of_multiple_probabilistic_states.insert(
+                     std::pair< mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t, std::size_t>
+                     (probabilistic_state,fresh_index)).first->second;
+  }
+ 
+  if (index==fresh_index)
+  {
+    std::size_t probabilistic_state_index=l.add_and_reset_probabilistic_state(probabilistic_state);
+    assert(probabilistic_state_index==index);
+    (void)probabilistic_state_index; // Avoid unused variable warning.
+  }
+  return index;
+}
+
 
 static void read_from_aut(probabilistic_lts_aut_t& l, std::istream& is)
 {
@@ -369,6 +402,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, std::istream& is)
   mcrl2::utilities::unordered_map < action_label_string, std::size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
   l.set_initial_probabilistic_state(initial_probabilistic_state); 
+  add_probablistic_state(initial_probabilistic_state, l, indices_of_single_probabilistic_states, indices_of_multiple_probabilistic_states);
 
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t probabilistic_target_state;
   std::size_t from;
@@ -387,29 +421,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, std::istream& is)
 
     check_state(from, nstate, line_no);
     check_states(probabilistic_target_state, nstate, line_no);
-    // Check whether probabilistic states exists. 
-    std::size_t fresh_index = indices_of_single_probabilistic_states.size()+indices_of_multiple_probabilistic_states.size();
-    std::size_t index;
-    if (probabilistic_target_state.size()<=1)
-    {
-      index = indices_of_single_probabilistic_states.insert(
-                       std::pair< std::size_t, std::size_t>
-                       (probabilistic_target_state.get(),fresh_index)).first->second;
-    }
-    else
-    {
-      assert(probabilistic_target_state.size()>1);
-      index = indices_of_multiple_probabilistic_states.insert(
-                       std::pair< mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t, std::size_t>
-                       (probabilistic_target_state,fresh_index)).first->second;
-    }
-    
-    if (index==fresh_index) 
-    {
-      std::size_t probabilistic_state_index=l.add_and_reset_probabilistic_state(probabilistic_target_state);
-      assert(probabilistic_state_index==index);
-      (void)probabilistic_state_index; // Avoid unused variable warning.
-    }
+    std::size_t index = add_probablistic_state(probabilistic_target_state, l, indices_of_single_probabilistic_states, indices_of_multiple_probabilistic_states);
 
     l.add_transition(transition(from,find_label_index(s,action_labels,l),index));
   }

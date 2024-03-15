@@ -488,7 +488,8 @@ class prob_bisim_partitioner_bem
     std::list<block_type*> state_partition_old;
 
     // Repeat until no new blocks in front of the partition lists
-    while (state_partition.front()->is_in_new_blocks == true || step_partition.front()->is_in_new_step_classes == true)
+    while (state_partition.front()->is_in_new_blocks == true || 
+           (step_partition.size()>0 && step_partition.front()->is_in_new_step_classes == true))
     { 
       // Phase 1: Splitting of step_partition via split(M,C)
       if (state_partition.front()->is_in_new_blocks == true)
@@ -712,6 +713,7 @@ class prob_bisim_partitioner_bem
         }
 
       }
+std::cerr << "BBBB " << state_partition.size() << "\n";
     }
   }
 
