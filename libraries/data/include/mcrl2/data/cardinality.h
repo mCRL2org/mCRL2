@@ -65,14 +65,14 @@ class cardinality_calculator
     /// \param s The sort expression to be determined.
     std::size_t operator()(const sort_expression& s) const
     {
-      if (!m_specification.is_certainly_finite(s))
-      {
-        return 0;
-      }
       if (s==sort_bool::bool_()) // Special case that occurs often. 
       {
         return 2;
       }
+      /* if (!m_specification.is_certainly_finite(s))
+      {
+        return 0;
+      } */
       std::vector<data_expression> found_elements(enumerate_expressions(s, m_specification, m_rewriter));
       std::vector<data_expression> unique_found_elements;  
      

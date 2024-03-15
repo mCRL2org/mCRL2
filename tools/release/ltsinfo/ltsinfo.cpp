@@ -130,7 +130,7 @@ class ltsinfo_tool : public ltsinfo_base
         // The initial state can be probabilistic, so it is added separately. 
         mCRL2log(info) << "This lts has " << l.num_probabilistic_states()+1 << " probabilistic states.\n";
         mCRL2log(info) << "Out of these " << count_non_trivial_probabilistic_states << " contain" << ((count_non_trivial_probabilistic_states<2)?"s":"") 
-                       << " a non trivial probability distribution.\n";
+                       << " a non-trivial probability distribution.\n";
         mCRL2log(info) << "The initial state is " << ((l.initial_probabilistic_state().size()>1)?"":"not ") << "probabilistic.\n";
       }
       else

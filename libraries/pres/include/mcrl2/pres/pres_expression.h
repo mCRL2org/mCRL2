@@ -1733,15 +1733,18 @@ void optimized_sum(pres_expression& result,
   {
     if (free_variables.find(v)==free_variables.end()) // not found.
     {
-      // Determine the c
-      std::size_t c = cardinality(v.sort());
-      if (c==0) // This means the cardinality is infinite or cannot be determined.
+      if (!is_true(p) && !is_false(p) && !data::sort_real::is_zero(p))
       {
-        new_l.push_front(v);
-      }
-      else
-      {
-        factor=factor*c;
+        // Determine the cardinality. 
+        std::size_t c = cardinality(v.sort());
+        if (c==0) // This means the cardinality is infinite or cannot be determined.
+        {
+          new_l.push_front(v);
+        }
+        else
+        {
+          factor=factor*c;
+        }
       }
     }
     else

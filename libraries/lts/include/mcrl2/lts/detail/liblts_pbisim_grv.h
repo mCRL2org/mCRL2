@@ -103,8 +103,11 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       // get the equivalent probabilistic state of each probabilistic block and add it to aut
       for (probabilistic_block_type& prob_block : probabilistic_blocks)
       {
-        typename LTS_TYPE::probabilistic_state_t equivalent_ps = calculate_equivalent_probabilistic_state(prob_block);
-        new_probabilistic_states.push_back(equivalent_ps);
+        if (prob_block.states.size()>0)
+        {
+          typename LTS_TYPE::probabilistic_state_t equivalent_ps = calculate_equivalent_probabilistic_state(prob_block);
+          new_probabilistic_states.push_back(equivalent_ps);
+        }
       }
 
       /* Remove old probabilistic states */
@@ -402,8 +405,6 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
       for(const probabilistic_block_type& b: probabilistic_blocks)
       {
-        assert(b.states.size()>0); // Probabilistic block contains no states.
-
         assert(b.marking==nullptr); // Probabilistic block's marking must be a null ptr.
       }
 
@@ -558,7 +559,6 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
         non_trivial_action_constellations.push(&initial_action_const);
       }
 
-// print_structure("After init");
       assert(check_data_structure());
     }
 
@@ -1304,19 +1304,22 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
     typename LTS_TYPE::probabilistic_state_t calculate_equivalent_probabilistic_state(probabilistic_block_type& pb)
     {
-      typename LTS_TYPE::probabilistic_state_t equivalent_prob_state;
-
       // Select the first probabilistic state of the probabilistic block.
+      assert(pb.states.size()>0);
       const probabilistic_state_type& s = pb.states.front();
 
-      // Take the an incoming transition to know the key of the state
-      state_key_type s_key = s.incoming_transitions.back()->to;
+      if (s.incoming_transitions.size()>0)
+      {
+        // Take an incoming transition to know the key of the state
+        state_key_type s_key = s.incoming_transitions.back()->to;
 
-      const typename LTS_TYPE::probabilistic_state_t& old_prob_state = aut.probabilistic_state(s_key);
+        const typename LTS_TYPE::probabilistic_state_t& old_prob_state = aut.probabilistic_state(s_key);
 
-      equivalent_prob_state = calculate_new_probabilistic_state(old_prob_state);
+        return calculate_new_probabilistic_state(old_prob_state);
+      }
+      // else it is the initial proabilistic state.
+      return calculate_new_probabilistic_state(aut.initial_probabilistic_state());
 
-      return equivalent_prob_state;
     }
 };
 
