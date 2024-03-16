@@ -27,6 +27,7 @@ Visualizer::Visualizer(
   setMinimumSize(10,10);
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   setFocusPolicy(Qt::ClickFocus);
+  setUpdateBehavior(QOpenGLWidget::PartialUpdate);
   clearColor = Qt::white;
 
   initMouse();
@@ -41,15 +42,17 @@ Visualizer::Visualizer(
 }
 
 void Visualizer::updateSelection() {
-    QOpenGLFramebufferObject selectionBuffer(width() * devicePixelRatio(), height() * devicePixelRatio());
-    if (!selectionBuffer.isValid())
-    {
-      throw mcrl2::runtime_error("Failed to create frame buffer for selection handling.");
-    }
+  makeCurrent();
+  QOpenGLFramebufferObject selectionBuffer(width() * devicePixelRatio(), height() * devicePixelRatio());
+  if (!selectionBuffer.isValid())
+  {
+    throw mcrl2::runtime_error("Failed to create frame buffer for selection handling.");
+  }
 
-    selectionBuffer.bind();
-    mark();
-    selectionBuffer.release();
+  selectionBuffer.bind();
+  mark();
+  selectionBuffer.release();
+  doneCurrent();
 }
 
 void Visualizer::initializeGL() 
