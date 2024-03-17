@@ -1765,12 +1765,14 @@ sylvan_sat_one_bdd(BDD bdd)
 BDD
 sylvan_cube(BDDSET vars, uint8_t *cube)
 {
-    if (sylvan_set_isempty(vars)) return sylvan_true;
+    if (sylvan_set_isempty(vars)) {
+        return sylvan_true;
+    } 
 
     bddnode_t n = MTBDD_GETNODE(vars);
     BDDVAR v = bddnode_getvariable(n);
     vars = node_high(vars, n);
-
+    
     BDD result = sylvan_cube(vars, cube+1);
     if (*cube == 0) {
         result = sylvan_makenode(v, result, sylvan_false);

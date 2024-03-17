@@ -20,6 +20,9 @@
  * Include this file for access to internals.
  */
 
+#ifndef SYLVAN_INT_H
+#define SYLVAN_INT_H
+
 #include <sylvan.h>
 
 #ifdef __cplusplus
@@ -33,9 +36,6 @@ namespace sylvan {
 #include <sylvan_cache.h>
 #include <sylvan_table.h>
 #include <sylvan_hash.h>
-
-#ifndef SYLVAN_INT_H
-#define SYLVAN_INT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -112,4 +112,4 @@ static const uint64_t CACHE_MTBDD_EVAL_COMPOSE      = (56LL<<40);
 } /* namespace */
 #endif
 
-#endif
+#endif // SYLVAN_INT_H

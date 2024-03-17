@@ -3,10 +3,10 @@ if(MCRL2_ENABLE_SYLVAN)
   mcrl2_add_tool(ltsconvertsymbolic
     SOURCES
       ltsconvertsymbolic.cpp
+      sigref.cpp
     DEPENDS
       mcrl2_lps
       mcrl2_lts
-      sylvan
   )
 
-  endif()
+endif()

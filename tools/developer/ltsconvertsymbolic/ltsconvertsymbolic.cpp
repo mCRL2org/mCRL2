@@ -9,15 +9,18 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 
-#include "mcrl2/lps/symbolic_lts_io.h"
+#include "mcrl2/lps/symbolic_lts_bdd.h"
 #include "mcrl2/lps/symbolic_lts_bisim.h"
+#include "mcrl2/lps/symbolic_lts_io.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/state_space_generator.h"
+#include "mcrl2/symbolic/bdd_util.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "convert_concrete_lts.h"
+#include "sigref.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lts;
@@ -32,7 +35,8 @@ using mcrl2::utilities::tools::input_output_tool;
 enum class symbolic_lts_equivalence
 {
   none,
-  bisim
+  bisim,
+  bisim_sigref
 };
 
 // \overload
@@ -49,6 +53,9 @@ std::istream& operator>>(std::istream& is, symbolic_lts_equivalence& eq)
     }
     else if (s == "bisim") {
       eq = symbolic_lts_equivalence::bisim;
+    }
+    else if (s == "bisim-sigref") {
+      eq = symbolic_lts_equivalence::bisim_sigref;
     }
   }
   catch(mcrl2::runtime_error&)
@@ -74,6 +81,12 @@ std::ostream& operator<<(std::ostream& os, const symbolic_lts_equivalence eq)
       os << "bisim";
       break;
     }
+    case symbolic_lts_equivalence::bisim_sigref:
+    {
+      os << "bisim-sigref";
+      break;
+    }
+    default: throw mcrl2::runtime_error("Unknown equivalence type");
   }
 
   return os;
@@ -87,8 +100,10 @@ inline std::string description(const symbolic_lts_equivalence eq)
       return "identity equivalence to concrete LTS";
     case symbolic_lts_equivalence::bisim:
       return "naive symbolic strong bisimilarity algorithm requiring O(n^2) symbolic operations.";
+    case symbolic_lts_equivalence::bisim_sigref:
+      return "signature-based refinement based symbolic strong bisimilarity algorithm.";
     default:
-      std::abort();
+      throw mcrl2::runtime_error("Unknown equivalence type");
   }
 }
 
@@ -120,13 +135,16 @@ class ltsconvert_tool : public input_output_tool
       desc.add_option("equivalence", 
         make_enum_argument<symbolic_lts_equivalence>("NAME")
           .add_value(symbolic_lts_equivalence::none, true)
-          .add_value(symbolic_lts_equivalence::bisim),
+          .add_value(symbolic_lts_equivalence::bisim)
+          .add_value(symbolic_lts_equivalence::bisim_sigref),
           "generate an equivalent LTS, preserving equivalence NAME:",
           'e');
       desc.add_option("lace-workers", utilities::make_optional_argument("NUM", "1"), "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
       desc.add_option("lace-dqsize", utilities::make_optional_argument("NUM", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
       desc.add_option("lace-stacksize", utilities::make_optional_argument("NUM", "0"), "set size of program stack in kilobytes (0=default stack size)");
       desc.add_option("memory-limit", utilities::make_optional_argument("NUM", "3"), "Sylvan memory limit in gigabytes (default 3)", 'm');
+      desc.add_option("initial-ratio", utilities::make_optional_argument("NUM", "16"), "power-of-two ratio of initial and maximum table size (default 16)");
+      desc.add_option("table-ratio", utilities::make_optional_argument("NUM", "16"), "power-of-two ratio of node table and cache table (default 1)");
 
       desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "use FORMAT as the output format.", 'o');
     }
@@ -198,6 +216,8 @@ class ltsconvert_tool : public input_output_tool
       sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
+      sylvan::sylvan_init_mtbdd();
+      sylvan::ldds::init_bdd_util();
 
       if (input_filename().empty() || input_filename() == "-")
       {
@@ -233,9 +253,50 @@ class ltsconvert_tool : public input_output_tool
         algorithm.run();
         algorithm.save(output_filename());
       }
-      else
+      else if (m_equivalence == symbolic_lts_equivalence::bisim)
       {
         bisim(m_input);
+      }
+      else if (m_equivalence == symbolic_lts_equivalence::bisim_sigref)
+      {        
+        for (const auto& group : m_input.summand_groups())
+        {
+          if (group.summands.size() > 1)
+          {
+            throw mcrl2::runtime_error("Cannot use bisim-sigref on a symbolic LTS with non-trivial transition groups");
+          }
+        }
+
+        // Convert the LDD symbolic LTS to a BDD representation.
+        mCRL2log(verbose) << "Converting LDD representation to a BDD representation..." << std::endl;
+        mcrl2::lps::symbolic_lts_bdd bdd_lts(m_input);
+
+        sylvan::bdds::cache_encode_block_id = sylvan::cache_next_opid();
+        sylvan::bdds::cache_decode_block_id = sylvan::cache_next_opid();
+        sylvan::bdds::cache_swap_prime_id = sylvan::cache_next_opid();
+        sylvan::bdds::cache_refine_id = sylvan::cache_next_opid();
+
+        sigref_algorithm algorithm;
+        mcrl2::lps::symbolic_lts_bdd quotient = algorithm.run(bdd_lts);
+
+        // Save the resulting bdd as an LDD.
+        mCRL2log(log_level_t::verbose) << "Converting BDD to LDD representation..." << std::endl;  
+        mcrl2::lps::symbolic_lts quotient_ldd(quotient);
+
+        if (!output_filename().empty())
+        {
+          std::ofstream to(output_filename(), std::ofstream::out | std::ofstream::binary);
+          if (!to.good())
+          {
+            throw mcrl2::runtime_error("Could not write to filename " + output_filename());
+          }
+
+          to << quotient_ldd;
+        }
+      }
+      else
+      {
+        throw mcrl2::runtime_error("Forgotten to handle equivalence type");
       }
 
       sylvan::sylvan_quit();

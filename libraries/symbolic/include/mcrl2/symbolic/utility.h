@@ -19,6 +19,22 @@
 
 #include <sylvan_ldd.hpp>
 
+namespace std
+{
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<sylvan::ldds::ldd>
+{
+  std::size_t operator()(const sylvan::ldds::ldd& ldd) const
+  {
+    std::hash<std::uint64_t> hasher;
+    return hasher(ldd.get());
+  }
+};
+
+} // namespace std
+
 namespace mcrl2::symbolic
 {
 
