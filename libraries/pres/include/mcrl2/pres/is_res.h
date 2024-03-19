@@ -29,26 +29,54 @@ struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
   using super::apply;
 
   bool result;
+  std::string error_message;
+
+  std::string get_error_message() const
+  {
+    assert(result==false);
+    return error_message;
+  }
 
   is_res_traverser()
     : result(true)
   {}
 
-  void enter(const infimum& /* x */)
+  void enter(const infimum& x)
   {
     result = false;
+    if (error_message.empty())
+    {
+      error_message="Infimum not allowed in RES: " + pp(x);
+    }
   }
 
-  void enter(const supremum& /* x */)
+  void enter(const supremum& x)
   {
     result = false;
+    if (error_message.empty())
+    {
+      error_message="Supremum not allowed in RES: " + pp(x);
+    }
+  }
+
+  void enter(const sum& x)
+  {
+    result = false;
+    if (error_message.empty())
+    {
+      error_message="Supremum not allowed in RES: " + pp(x);
+    }
   }
 
   void enter(const data::data_expression& x)
   {
-    if (x != data::true_() && x != data::false_())
+    if (x != data::true_() && x != data::false_() && x.sort()!=data::sort_real::real_())
     {
       result = false;
+      if (error_message.empty())
+      {
+        error_message="Expression in a RES can only be true, false or a real number: " + pp(x);
+      }
     }
   }
 
@@ -57,6 +85,10 @@ struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
     if (result)
     {
       result = x.parameters().empty();
+      if (error_message.empty())
+      {
+        error_message="A propositional variable in a RES cannot have arguments: " + pp(x);
+      }
     }
   }
 
@@ -65,6 +97,10 @@ struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
     if (result)
     {
       result = x.variable().parameters().empty();
+      if (error_message.empty())
+      {
+        error_message="The defined variable in a RES equation cannot have arguments: " + pres_system::pp(x.variable());
+      }
     }
   }
 };
@@ -77,6 +113,17 @@ bool is_res(const T& x)
 {
   is_res_traverser f;
   f.apply(x);
+  return f.result;
+}
+
+/// \brief Returns true if a PRES object is in BES form.
+/// \param x a PRES object
+template <typename T>
+bool is_res(const T& x, std::string& error_message)
+{
+  is_res_traverser f;
+  f.apply(x);
+  error_message=f.error_message;
   return f.result;
 }
 

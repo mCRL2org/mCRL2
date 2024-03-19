@@ -754,7 +754,6 @@ pres_expression disjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
   {
     if (eq.f_j_term_present)
     {
-// std::cerr << "SHALLOW LINE " << eq.c_j << "     " << eq.f_j << "\n";
       data::data_expression constant = data::sort_real::divides(data::sort_real::real_one(),
                                                                 data::sort_real::minus(data::sort_real::real_one(), eq.c_j));
       if (result_defined)
@@ -783,7 +782,7 @@ pres_expression conjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
                                                                 data::sort_real::minus(data::sort_real::real_one(), eq.c_j));
       if (result_defined)
       {
-        result = or_(result, const_multiply(constant, eq.f_j));
+        result = and_(result, const_multiply(constant, eq.f_j));
       }
       else
       {
@@ -902,7 +901,6 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
   {
     pres_expression U;
     optimized_or(U, m, disjunction_cj_fj(shallow_lines));
-// std::cerr << "U MIN " << U << "\n";
     pres_expression cond1 = disjunction_fj_cj(steep_lines, U, rewriter);
     pres_expression cond2 = disjunction_infinity_cj_prime(shallow_lines, steep_lines, flat_lines);
 // std::cerr << "cond1 " << cond1 << "\n";

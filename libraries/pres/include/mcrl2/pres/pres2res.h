@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pres/pressolve_options.h"
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pres/is_res.h"
 
 namespace mcrl2 {
 
@@ -71,7 +72,7 @@ class pres2res_algorithm
          const pressolve_options& options,
          const pres& input_pres,
          enumerate_quantifiers_rewriter& R)
-    : m_options(options),
+     : m_options(options),
        m_input_pres(input_pres),
        m_equation_index(input_pres),
        fresh_identifier_generator("X"),
@@ -98,6 +99,11 @@ class pres2res_algorithm
         data::add_assignments(m_sigma, eqn.variable().parameters(), X_e.parameters());
         pres_expression psi_e;
         m_R(psi_e, phi, m_sigma);
+        std::string error_message;
+        if (is_res(phi, error_message))
+        {
+          throw mcrl2::runtime_error("Generation of RES failed. " + error_message);
+        }
         m_R.clear_identifier_generator();
         data::remove_assignments(m_sigma, eqn.variable().parameters());
 
