@@ -22,6 +22,7 @@ Visualizer::Visualizer(
   Graph *graph_)
   : QOpenGLWidget(parent),
     m_lastMouseEvent(std::make_unique<QMouseEvent>(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier)),
+    m_selectionBuffer(1, 1),
     m_graph(graph_)
 {
   setMinimumSize(10,10);
@@ -43,15 +44,9 @@ Visualizer::Visualizer(
 
 void Visualizer::updateSelection() {
   makeCurrent();
-  QOpenGLFramebufferObject selectionBuffer(width() * devicePixelRatio(), height() * devicePixelRatio());
-  if (!selectionBuffer.isValid())
-  {
-    throw mcrl2::runtime_error("Failed to create frame buffer for selection handling.");
-  }
-
-  selectionBuffer.bind();
+  m_selectionBuffer.bind();
   mark();
-  selectionBuffer.release();
+  m_selectionBuffer.release();
   doneCurrent();
 }
 
@@ -76,6 +71,10 @@ void Visualizer::initializeGL()
     {
       qDebug() << "QOpenGLDebugLogger initialisation failed\n";
     }
+  }
+  if (!m_selectionBuffer.isValid())
+  {
+    throw mcrl2::runtime_error("Failed to create framebuffer for selection handling.");
   }
 }
 

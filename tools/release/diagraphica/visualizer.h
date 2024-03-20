@@ -92,6 +92,7 @@ class Visualizer : public QOpenGLWidget
     void genCushTex();
 
     // -- hit detection ---------------------------------------------
+    QOpenGLFramebufferObject m_selectionBuffer;
     virtual void processHits(
       GLint hits,
       GLuint buffer[]) = 0;
