@@ -296,6 +296,10 @@ class pbesinst_lazy_algorithm
       {
         if (G.find_vertex(index).formula() == X)
         {
+          // We know that X itself (if it can be reached by a self loop) is in W
+          // (the initial vertex is in W and every reachable one).
+          Ys.insert(X);
+
           std::set<structure_graph::index_type> todo = { index };
           std::set<structure_graph::index_type> done;
 
@@ -306,7 +310,7 @@ class pbesinst_lazy_algorithm
             done.insert(u);
 
             // Explore all outgoing edges.
-            for (structure_graph::index_type v: G.successors(u))
+            for (structure_graph::index_type v: G.all_successors(u))
             {
               if (!mcrl2::utilities::detail::contains(done, v))
               {
@@ -317,10 +321,13 @@ class pbesinst_lazy_algorithm
                 }
                 else if (mcrl2::utilities::detail::contains(W, v))
                 {
+                  // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
                   Ys.insert(G.find_vertex(v).formula());
                 }
               }
             }
+
+            break;
           }
         }
       }
