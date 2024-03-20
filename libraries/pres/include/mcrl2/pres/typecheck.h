@@ -46,7 +46,21 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = m_data_type_checker.typecheck_data_expression(x, data::bool_(), m_variable_context);
+    try 
+    {
+      result = m_data_type_checker.typecheck_data_expression(x, data::bool_(), m_variable_context);
+    }
+    catch (mcrl2::runtime_error& )
+    {
+      try 
+      {
+         result = m_data_type_checker.typecheck_data_expression(x, data::sort_real::real_(), m_variable_context);
+      }
+      catch  (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string("Fail to cast data_expression to type bool or real.\n") + e.what());
+      }
+    }
   }
 
   template <class T>
@@ -70,6 +84,25 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
 
   template <class T>
   void apply(T& result, const supremum& x)
+  {
+    try
+    {
+      data::detail::check_duplicate_variable_names(x.variables(), "quantifier variable");
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
+      pres_expression body;
+      (*this).apply(body, x.body());
+      m_variable_context = m_variable_context_copy;
+      result = supremum(x.variables(), body);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pres_system::pp(x));
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const sum& x)
   {
     try
     {
