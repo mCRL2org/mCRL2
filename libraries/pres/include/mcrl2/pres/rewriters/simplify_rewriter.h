@@ -62,7 +62,6 @@ protected:
         return;
       }
       assert(d.sort()==data::sort_bool::bool_());
-      // return result
       return;
     }
 
@@ -74,7 +73,6 @@ protected:
     }
     if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
     {
-      // return result.
       return;
     }
 
@@ -620,11 +618,14 @@ protected:
       data::data_expression data_result1;
       const const_multiply& result_cm=atermpp::down_cast<const_multiply>(result);
       apply(data_result1, data::sort_real::times(data_result, result_cm.left()));
-
       assert(!data::sort_real::is_zero(data_result1));
       if (!data::sort_real::is_one(data_result1))
       {
         make_const_multiply(result, data_result1, result_cm.right());
+      }
+      else 
+      {
+        result = result_cm.right();
       }
       return;
     }
@@ -650,7 +651,6 @@ protected:
       else 
       {
         assert(d.sort()==data::sort_bool::bool_());
-        // return result;
         return;
       }
     }
@@ -659,7 +659,6 @@ protected:
       if (data::sort_real::is_creal_application(data_result) && !data::sort_real::is_zero(data_result))
       {
         assert(data::sort_real::value<double>(data_result)>0);
-        // return result.
         return;
       }
       make_const_multiply(result, data_result, result);
