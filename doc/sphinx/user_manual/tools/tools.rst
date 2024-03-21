@@ -57,7 +57,6 @@ This page lists all file formats supported by the mCRL2 toolset.
   FSM          .fsm        textual  labelled transition system in the :ref:`language-fsm-lts`
   trace        .trc        binary   trace for simulation
   DOT          .dot        textual  `DOT file format <http://www.graphviz.org/doc/info/lang.html>`_ (subgraphs as nodes are not supported)
-  μCRL         .mcrl       textual  `μCRL specification <http://homepages.cwi.nl/~mcrl/>`_
   ===========  =========   =======  ===========
 
 .. toctree::

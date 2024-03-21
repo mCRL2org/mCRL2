@@ -221,8 +221,8 @@ The mCRL2 can be used as a language front-end for the
 `LTSmin toolset <http://fmt.cs.utwente.nl/tools/ltsmin/>`_. Furthermore,
 a number of textual file formats are available, that facilitate easy
 integration with other tools. Examples are the :ref:`language-aut-lts` for labelled
-transition systems, that is, e.g., supported by `μCRL <http://homepages.cwi.nl/~mcrl/>`_
-and `CADP <http://cadp.inria.fr/>`_. The CWI
+transition systems, that is, e.g., supported by 
+`CADP <http://cadp.inria.fr/>`_. The CWI
 format for Boolean equation systems, and finally, the GM file format,
 which is supported by the `PGSolver <https://github.com/oliverfriedmann/pgsolver>`_
 tools.
