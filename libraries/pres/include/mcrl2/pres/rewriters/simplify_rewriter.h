@@ -71,7 +71,8 @@ protected:
       apply(result, const_multiply(data::sort_real::times(f, cm.left()), cm.right()));
       return;
     }
-    if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
+    if ((is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result)) &&
+        data::sort_real::is_larger_zero(f))
     {
       return;
     }
@@ -648,7 +649,7 @@ protected:
 
         return;
       }
-      else 
+      else if (data::sort_real::is_larger_zero(data_result))
       {
         assert(d.sort()==data::sort_bool::bool_());
         return;
@@ -656,7 +657,7 @@ protected:
     }
     if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
     {
-      if (data::sort_real::is_creal_application(data_result) && !data::sort_real::is_zero(data_result))
+      if (data::sort_real::is_larger_zero(data_result))
       {
         assert(data::sort_real::value<double>(data_result)>0);
         return;
