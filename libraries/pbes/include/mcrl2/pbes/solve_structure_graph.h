@@ -362,8 +362,28 @@ class solve_structure_graph_algorithm
         use_toms_optimization(use_toms_optimization_)
     {}
 
+    /// Returns the winning player (alpha)
     inline
     bool solve(structure_graph& G)
+    {
+      auto W = solve_partitions(G);
+
+      bool is_disjunctive;
+      if (W.first.contains(G.initial_vertex()))
+      {
+        is_disjunctive = true;
+      }
+      else
+      {
+        is_disjunctive = false;
+      }
+
+      return is_disjunctive;
+    }
+
+    /// Returns the winning partition
+    inline
+    std::pair<vertex_set, vertex_set> solve_partitions(structure_graph& G)
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
       mCRL2log(log::debug) << G << std::endl;
@@ -383,11 +403,13 @@ class solve_structure_graph_algorithm
       {
         throw mcrl2::runtime_error("No solution found!!!");
       }
+
       if (check_strategy)
       {
         check_solve_recursive_solution(G, is_disjunctive, W.first, W.second);
       }
-      return is_disjunctive;
+
+      return W;
     }
 };
 
@@ -438,7 +460,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
               condition.push_back(data::equal_to(d1[i], e1[i]));
               next_state_assignments.emplace_back(d1[i], e1[n + m + i]);
             }
-
+              
             process::action_vector actions;
             std::size_t index = 0;
             for (const process::action& a: summand.multi_action().actions())
@@ -570,6 +592,38 @@ bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
   bool use_toms_optimization = !check_strategy;
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
   return algorithm.solve(G);
+}
+
+inline
+std::pair<bool, std::set<structure_graph::index_type>> solve_structure_graph_minimal_winning_set(structure_graph& G, bool check_strategy = false)
+{
+  bool use_toms_optimization = !check_strategy;
+  solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
+  auto W = algorithm.solve_partitions(G);
+  
+  std::set<structure_graph::index_type> minimal_set = extract_minimal_structure_graph(G, G.initial_vertex(), W.first, W.second);
+
+  bool is_disjunctive;
+  if (W.first.contains(G.initial_vertex()))
+  {
+    is_disjunctive = true;
+  }
+  else
+  {
+    is_disjunctive = false;
+  }
+
+  // Sorting is necessary for the set intersection computed below.
+  auto& W_alpha = is_disjunctive ? W.first : W.second;
+  W_alpha.sort();
+  std::set<structure_graph::index_type> W_minimal;
+  std::set_intersection(minimal_set.begin(), minimal_set.end(), W_alpha.vertices().begin(), W_alpha.vertices().end(), std::inserter(W_minimal, W_minimal.begin()));
+  mCRL2log(log::debug) << "\nExtracted minimal set W " << core::detail::print_set(W_minimal) << std::endl;
+  for (const auto& index : W_minimal) {
+    mCRL2log(log::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
+  }
+
+  return { is_disjunctive, W_minimal };
 }
 
 inline
