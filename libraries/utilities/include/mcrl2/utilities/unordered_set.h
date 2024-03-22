@@ -372,7 +372,7 @@ private:
   std::conditional_t<ThreadSafe, std::atomic<size_type>, size_type> m_number_of_elements = 0;
 
   /// \brief Always equal to m_buckets.size() - 1.
-  std::conditional_t<ThreadSafe, std::atomic<size_type>, size_type> m_buckets_mask;
+  std::conditional_t<ThreadSafe, std::atomic<size_type>, size_type> m_buckets_mask = 0;
 
   std::vector<bucket_type> m_buckets;
   std::vector<std::mutex> m_bucket_mutexes;
