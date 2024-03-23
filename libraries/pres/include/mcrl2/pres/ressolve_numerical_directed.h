@@ -256,6 +256,8 @@ double evaluate_directed(const internal_res_expression* p, const std::vector<dou
       return p->value() * evaluate_directed(p->right(), solution);
     }
   }
+  assert(0);
+  return 0;
 }
 
 } // namespace detail
