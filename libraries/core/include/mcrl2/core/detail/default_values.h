@@ -152,6 +152,7 @@ const atermpp::aterm_appl& default_value_StateForall();
 const atermpp::aterm_appl& default_value_StateExists();
 const atermpp::aterm_appl& default_value_StateInfimum();
 const atermpp::aterm_appl& default_value_StateSupremum();
+const atermpp::aterm_appl& default_value_StateSum();
 const atermpp::aterm_appl& default_value_StateMust();
 const atermpp::aterm_appl& default_value_StateMay();
 const atermpp::aterm_appl& default_value_StateYaled();
@@ -954,6 +955,14 @@ const atermpp::aterm_appl& default_value_StateSupremum()
   return t;
 }
 
+// StateSum
+inline
+const atermpp::aterm_appl& default_value_StateSum()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateSum(), default_value_List(default_value_DataVarId()), default_value_StateFrm());
+  return t;
+}
+
 // StateMust
 inline
 const atermpp::aterm_appl& default_value_StateMust()
@@ -1683,6 +1692,7 @@ static const atermpp::aterm_appl SortCons;
   static const atermpp::aterm_appl StateExists;
   static const atermpp::aterm_appl StateInfimum;
   static const atermpp::aterm_appl StateSupremum;
+  static const atermpp::aterm_appl StateSum;
   static const atermpp::aterm_appl StateMust;
   static const atermpp::aterm_appl StateMay;
   static const atermpp::aterm_appl StateYaled;

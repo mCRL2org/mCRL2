@@ -250,6 +250,15 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
     derived().leave(x);
   }
 
+  void apply(const state_formulas::sum& x)
+  {
+    derived().enter(x);
+    push_variables(x.variables());
+    derived().apply(x.body());
+    tr::make_sum(top(), x.variables(), top());
+    derived().leave(x);
+  }
+
   // This function is overridden in the structured variant of the algorithm
   template <typename MustMayExpression>
   pres_expression apply_may_must_rhs(const MustMayExpression& x)
