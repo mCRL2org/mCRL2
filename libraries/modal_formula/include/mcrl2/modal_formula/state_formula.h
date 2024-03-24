@@ -67,30 +67,30 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 typedef std::vector<state_formula>    state_formula_vector;
 
 // prototypes
-inline bool is_true(const atermpp::aterm_appl& x);
-inline bool is_false(const atermpp::aterm_appl& x);
-inline bool is_not(const atermpp::aterm_appl& x);
-inline bool is_minus(const atermpp::aterm_appl& x);
-inline bool is_and(const atermpp::aterm_appl& x);
-inline bool is_or(const atermpp::aterm_appl& x);
-inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_plus(const atermpp::aterm_appl& x);
-inline bool is_const_multiply(const atermpp::aterm_appl& x);
-inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
-inline bool is_forall(const atermpp::aterm_appl& x);
-inline bool is_exists(const atermpp::aterm_appl& x);
-inline bool is_infimum(const atermpp::aterm_appl& x);
-inline bool is_supremum(const atermpp::aterm_appl& x);
-inline bool is_sum(const atermpp::aterm_appl& x);
-inline bool is_must(const atermpp::aterm_appl& x);
-inline bool is_may(const atermpp::aterm_appl& x);
-inline bool is_yaled(const atermpp::aterm_appl& x);
-inline bool is_yaled_timed(const atermpp::aterm_appl& x);
-inline bool is_delay(const atermpp::aterm_appl& x);
-inline bool is_delay_timed(const atermpp::aterm_appl& x);
-inline bool is_variable(const atermpp::aterm_appl& x);
-inline bool is_nu(const atermpp::aterm_appl& x);
-inline bool is_mu(const atermpp::aterm_appl& x);
+inline bool is_true(const atermpp::aterm& x);
+inline bool is_false(const atermpp::aterm& x);
+inline bool is_not(const atermpp::aterm& x);
+inline bool is_minus(const atermpp::aterm& x);
+inline bool is_and(const atermpp::aterm& x);
+inline bool is_or(const atermpp::aterm& x);
+inline bool is_imp(const atermpp::aterm& x);
+inline bool is_plus(const atermpp::aterm& x);
+inline bool is_const_multiply(const atermpp::aterm& x);
+inline bool is_const_multiply_alt(const atermpp::aterm& x);
+inline bool is_forall(const atermpp::aterm& x);
+inline bool is_exists(const atermpp::aterm& x);
+inline bool is_infimum(const atermpp::aterm& x);
+inline bool is_supremum(const atermpp::aterm& x);
+inline bool is_sum(const atermpp::aterm& x);
+inline bool is_must(const atermpp::aterm& x);
+inline bool is_may(const atermpp::aterm& x);
+inline bool is_yaled(const atermpp::aterm& x);
+inline bool is_yaled_timed(const atermpp::aterm& x);
+inline bool is_delay(const atermpp::aterm& x);
+inline bool is_delay_timed(const atermpp::aterm& x);
+inline bool is_variable(const atermpp::aterm& x);
+inline bool is_nu(const atermpp::aterm& x);
+inline bool is_mu(const atermpp::aterm& x);
 
 /// \\brief Test for a state_formula expression
 /// \\param x A term
@@ -1158,12 +1158,12 @@ inline void swap(supremum& t1, supremum& t2)
 class sum: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     sum()
       : state_formula(core::detail::default_values::StateSum)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit sum(const atermpp::aterm& term)
       : state_formula(term)
@@ -1171,9 +1171,9 @@ class sum: public state_formula
       assert(core::detail::check_term_StateSum(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     sum(const data::variable_list& variables, const state_formula& body)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateSum(), variables, body))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateSum(), variables, body))
     {}
 
     /// Move semantics
@@ -1196,7 +1196,7 @@ class sum: public state_formula
 /// \\brief Make_sum constructs a new term into a given address.
 /// \\ \param t The reference into which the new sum is constructed. 
 template <class... ARGUMENTS>
-inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_sum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateSum(), args...);
 }
@@ -1205,7 +1205,7 @@ inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a sum expression
 inline
-bool is_sum(const atermpp::aterm_appl& x)
+bool is_sum(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateSum;
 }

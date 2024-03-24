@@ -4510,24 +4510,23 @@ bool check_term_StateSum(const Term& t)
   {
     return false;
   }
-  const atermpp::aterm_appl& a = atermpp::down_cast<atermpp::aterm_appl>(term);
-  if (a.function() != core::detail::function_symbols::StateSum)
+  if (term.function() != core::detail::function_symbols::StateSum)
   {
     return false;
   }
 
   // check the children
-  if (a.size() != 2)
+  if (term.size() != 2)
   {
     return false;
   }
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a[0], check_rule_DataVarId<atermpp::aterm>, 1))
+  if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
     mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
-  if (!check_term_argument(a[1], check_rule_StateFrm<atermpp::aterm>))
+  if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
     mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
     return false;
