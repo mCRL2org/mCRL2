@@ -1182,6 +1182,14 @@ const atermpp::function_symbol& function_symbol_StatePlus()
   return function_symbol_StatePlus;
 }
 
+// StateSum
+inline
+const atermpp::function_symbol& function_symbol_StateSum()
+{
+  static const atermpp::global_function_symbol function_symbol_StateSum("StateSum", 2);
+  return function_symbol_StateSum;
+}
+
 // StateSupremum
 inline
 const atermpp::function_symbol& function_symbol_StateSupremum()
@@ -1464,6 +1472,7 @@ static const atermpp::function_symbol SortCons;
   static const atermpp::function_symbol StateExists;
   static const atermpp::function_symbol StateInfimum;
   static const atermpp::function_symbol StateSupremum;
+  static const atermpp::function_symbol StateSum;
   static const atermpp::function_symbol StateMust;
   static const atermpp::function_symbol StateMay;
   static const atermpp::function_symbol StateYaled;

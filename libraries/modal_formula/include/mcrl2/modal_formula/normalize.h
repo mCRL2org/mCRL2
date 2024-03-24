@@ -271,6 +271,14 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   }
 
   template <class T>
+  void apply(T& result, const sum& x)
+  {
+    state_formula body;
+    apply(body, x.body());
+    make_sum(result, x.variables(), body);
+  }
+
+  template <class T>
   void apply(T& result, const variable& x)
   {
     if (m_negated)

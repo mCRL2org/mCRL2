@@ -67,29 +67,30 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 typedef std::vector<state_formula>    state_formula_vector;
 
 // prototypes
-inline bool is_true(const atermpp::aterm& x);
-inline bool is_false(const atermpp::aterm& x);
-inline bool is_not(const atermpp::aterm& x);
-inline bool is_minus(const atermpp::aterm& x);
-inline bool is_and(const atermpp::aterm& x);
-inline bool is_or(const atermpp::aterm& x);
-inline bool is_imp(const atermpp::aterm& x);
-inline bool is_plus(const atermpp::aterm& x);
-inline bool is_const_multiply(const atermpp::aterm& x);
-inline bool is_const_multiply_alt(const atermpp::aterm& x);
-inline bool is_forall(const atermpp::aterm& x);
-inline bool is_exists(const atermpp::aterm& x);
-inline bool is_infimum(const atermpp::aterm& x);
-inline bool is_supremum(const atermpp::aterm& x);
-inline bool is_must(const atermpp::aterm& x);
-inline bool is_may(const atermpp::aterm& x);
-inline bool is_yaled(const atermpp::aterm& x);
-inline bool is_yaled_timed(const atermpp::aterm& x);
-inline bool is_delay(const atermpp::aterm& x);
-inline bool is_delay_timed(const atermpp::aterm& x);
-inline bool is_variable(const atermpp::aterm& x);
-inline bool is_nu(const atermpp::aterm& x);
-inline bool is_mu(const atermpp::aterm& x);
+inline bool is_true(const atermpp::aterm_appl& x);
+inline bool is_false(const atermpp::aterm_appl& x);
+inline bool is_not(const atermpp::aterm_appl& x);
+inline bool is_minus(const atermpp::aterm_appl& x);
+inline bool is_and(const atermpp::aterm_appl& x);
+inline bool is_or(const atermpp::aterm_appl& x);
+inline bool is_imp(const atermpp::aterm_appl& x);
+inline bool is_plus(const atermpp::aterm_appl& x);
+inline bool is_const_multiply(const atermpp::aterm_appl& x);
+inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
+inline bool is_forall(const atermpp::aterm_appl& x);
+inline bool is_exists(const atermpp::aterm_appl& x);
+inline bool is_infimum(const atermpp::aterm_appl& x);
+inline bool is_supremum(const atermpp::aterm_appl& x);
+inline bool is_sum(const atermpp::aterm_appl& x);
+inline bool is_must(const atermpp::aterm_appl& x);
+inline bool is_may(const atermpp::aterm_appl& x);
+inline bool is_yaled(const atermpp::aterm_appl& x);
+inline bool is_yaled_timed(const atermpp::aterm_appl& x);
+inline bool is_delay(const atermpp::aterm_appl& x);
+inline bool is_delay_timed(const atermpp::aterm_appl& x);
+inline bool is_variable(const atermpp::aterm_appl& x);
+inline bool is_nu(const atermpp::aterm_appl& x);
+inline bool is_mu(const atermpp::aterm_appl& x);
 
 /// \\brief Test for a state_formula expression
 /// \\param x A term
@@ -113,6 +114,7 @@ bool is_state_formula(const atermpp::aterm& x)
          state_formulas::is_exists(x) ||
          state_formulas::is_infimum(x) ||
          state_formulas::is_supremum(x) ||
+         state_formulas::is_sum(x) ||
          state_formulas::is_must(x) ||
          state_formulas::is_may(x) ||
          state_formulas::is_yaled(x) ||
@@ -1147,6 +1149,82 @@ std::ostream& operator<<(std::ostream& out, const supremum& x)
 
 /// \\brief swap overload
 inline void swap(supremum& t1, supremum& t2)
+{
+  t1.swap(t2);
+}
+
+
+/// \\brief The sum over a data type for state formulas
+class sum: public state_formula
+{
+  public:
+    /// \\brief Default constructor.
+    sum()
+      : state_formula(core::detail::default_values::StateSum)
+    {}
+
+    /// \\brief Constructor.
+    /// \\param term A term
+    explicit sum(const atermpp::aterm& term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateSum(*this));
+    }
+
+    /// \\brief Constructor.
+    sum(const data::variable_list& variables, const state_formula& body)
+      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateSum(), variables, body))
+    {}
+
+    /// Move semantics
+    sum(const sum&) noexcept = default;
+    sum(sum&&) noexcept = default;
+    sum& operator=(const sum&) noexcept = default;
+    sum& operator=(sum&&) noexcept = default;
+
+    const data::variable_list& variables() const
+    {
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
+    }
+
+    const state_formula& body() const
+    {
+      return atermpp::down_cast<state_formula>((*this)[1]);
+    }
+};
+
+/// \\brief Make_sum constructs a new term into a given address.
+/// \\ \param t The reference into which the new sum is constructed. 
+template <class... ARGUMENTS>
+inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_StateSum(), args...);
+}
+
+/// \\brief Test for a sum expression
+/// \\param x A term
+/// \\return True if \\a x is a sum expression
+inline
+bool is_sum(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::StateSum;
+}
+
+// prototype declaration
+std::string pp(const sum& x);
+
+/// \\brief Outputs the object to a stream
+/// \\param out An output stream
+/// \\param x Object x
+/// \\return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const sum& x)
+{
+  return out << state_formulas::pp(x);
+}
+
+/// \\brief swap overload
+inline void swap(sum& t1, sum& t2)
 {
   t1.swap(t2);
 }

@@ -428,6 +428,34 @@ BOOST_AUTO_TEST_CASE(parse_state_formula_with_supremum_specification_test)
   BOOST_CHECK_EQUAL(utilities::remove_whitespace(text), utilities::remove_whitespace(text1));
 }
 
+BOOST_AUTO_TEST_CASE(parse_state_formula_with_sum_specification_test)
+{
+  const std::string text =
+    "sort S;                       \n"
+    "cons s0: S;                   \n"
+    "act a: S;                     \n"
+    "form sum s: S. val(1 / 2) * [a(s)]false; \n"
+    ;
+  state_formula_specification x = parse_state_formula_specification(text, true);
+  std::string text1 = state_formulas::pp(x);
+  std::cout << text1 << std::endl;
+  BOOST_CHECK_EQUAL(utilities::remove_whitespace(text), utilities::remove_whitespace(text1));
+}
+
+BOOST_AUTO_TEST_CASE(parse_state_formula_with_const_multiply_alt_specification_test)
+{
+  const std::string text =
+    "sort S;                       \n"
+    "cons s0: S;                   \n"
+    "act a: S;                     \n"
+    "form inf s: S. [a(s)]false * val(1/5); \n"
+    ;
+  state_formula_specification x = parse_state_formula_specification(text, true);
+  std::string text1 = state_formulas::pp(x);
+  std::cout << text1 << std::endl;
+  BOOST_CHECK_EQUAL(utilities::remove_whitespace(text), utilities::remove_whitespace(text1));
+}
+
 BOOST_AUTO_TEST_CASE(parse_state_formula_with_infimum_specification_test)
 {
   const std::string text =

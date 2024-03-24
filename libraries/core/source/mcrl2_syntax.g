@@ -412,19 +412,19 @@ StateFrm
   | 'nu' StateVarDecl '.' StateFrm             $unary_right 41   // Maximal fixed point
   | 'forall' VarsDeclList '.' StateFrm         $unary_right 42   // Universal quantification
   | 'exists' VarsDeclList '.' StateFrm         $unary_right 42   // Existential quantification
-  | 'inf' VarsDeclList '.' StateFrm            $unary_right 42   // The infimum operator
-  | 'sup' VarsDeclList '.' StateFrm            $unary_right 42   // The supremum operator
-  | StateFrm ('+' $binary_op_right 43) StateFrm                  // Addition
-  | DataValExpr ('*' $binary_op_right 44) StateFrm               // Left constant multiply
-  | StateFrm ('*' $binary_op_right 44) DataValExpr               // Right constant multiply
+  | 'inf' VarsDeclList '.' StateFrm            $unary_right 42   // The infimum operator (for quantitative formulas)
+  | 'sup' VarsDeclList '.' StateFrm            $unary_right 42   // The supremum operator (for quantitative formulas)
+  | 'sum' VarsDeclList '.' StateFrm            $unary_right 42   // The sum operator (for quantitative formulas)
+  | StateFrm ('+' $binary_op_right 43) StateFrm                  // Addition (for quantitative formulas)
+  | DataValExpr '*' StateFrm                   $unary_right 47   // Left constant multiply (for quantitative formulas)
+  | StateFrm '*' DataValExpr                   $unary_right 47   // Right constant multiply (for quantitative formulas)
   | StateFrm ('=>' $binary_op_right 45) StateFrm                 // Implication
   | StateFrm ('||' $binary_op_right 46) StateFrm                 // Disjunction, and max
   | StateFrm ('&&' $binary_op_right 47) StateFrm                 // Conjunction, and min
   | '[' RegFrm ']' StateFrm                    $unary_right 48   // Box modality
   | '<' RegFrm '>' StateFrm                    $unary_right 48   // Diamond modality
-  | '-' StateFrm                               $unary_right 48   // Unary minus. 
+  | '-' StateFrm                               $unary_right 48   // Unary minus (for quantitative formulas)
   | '!' StateFrm                               $unary_right 48   // Negation
-  | DataValExpr '*' StateFrm                   $unary_right 49   // Multiplication with a positive constant
   ;
 
 StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;           // PBES variable declaration

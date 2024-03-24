@@ -476,7 +476,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
   {
     if (!m_formula_is_quantitative)
     {
-      throw mcrl2::runtime_error("Supremum is not allowed in an ordinary, non  quantitative modal formula " + state_formulas::pp(x) + ". Use exists instead. ");
+      throw mcrl2::runtime_error("Supremum is not allowed in an ordinary, non quantitative modal formula " + state_formulas::pp(x) + ". Use exists instead. ");
     }
     else 
     {
@@ -488,6 +488,31 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
         (*this).apply(body, x.body());
         m_variable_context = m_variable_context_copy;
         result = supremum(x.variables(), body);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
+      }
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const state_formulas::sum& x)
+  {
+    if (!m_formula_is_quantitative)
+    {
+      throw mcrl2::runtime_error("Sum is not allowed in an ordinary, non quantitative modal formula " + state_formulas::pp(x) + ". ");
+    }
+    else
+    {
+      try
+      {
+        auto m_variable_context_copy = m_variable_context;
+        m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
+        state_formula body;
+        (*this).apply(body, x.body());
+        m_variable_context = m_variable_context_copy;
+        result = sum(x.variables(), body);
       }
       catch (mcrl2::runtime_error& e)
       {

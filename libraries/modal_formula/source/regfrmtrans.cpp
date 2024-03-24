@@ -210,6 +210,11 @@ inline state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
     part = mcrl2::state_formulas::supremum(mcrl2::state_formulas::supremum(part).variables(),
                   translate_reg_frms_appl(mcrl2::state_formulas::supremum(part).body(),xyz_generator));
   }
+  else if (state_formulas::is_sum(part))
+  {
+    part = mcrl2::state_formulas::sum(mcrl2::state_formulas::sum(part).variables(),
+                  translate_reg_frms_appl(mcrl2::state_formulas::sum(part).body(),xyz_generator));
+  }
   else if (state_formulas::is_nu(part))
   {
     const nu nu_part(part);
