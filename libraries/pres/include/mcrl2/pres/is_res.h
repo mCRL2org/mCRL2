@@ -28,7 +28,7 @@ struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result=true;
   std::string error_message;
 
   std::string get_error_message() const
@@ -38,69 +38,41 @@ struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
   }
 
   is_res_traverser()
-    : result(true)
   {}
 
   void enter(const infimum& x)
   {
-    result = false;
-    if (error_message.empty())
+    if (result)
     {
+      result = false;
       error_message="Infimum not allowed in RES: " + pp(x);
     }
   }
 
   void enter(const supremum& x)
   {
-    result = false;
-    if (error_message.empty())
+    if (result)
     {
+      result = false;
       error_message="Supremum not allowed in RES: " + pp(x);
     }
   }
 
   void enter(const sum& x)
   {
-    result = false;
-    if (error_message.empty())
-    {
-      error_message="Supremum not allowed in RES: " + pp(x);
+    if (result)
+    { 
+      result = false;
+      error_message="Sum not allowed in RES: " + pp(x);
     }
   }
 
   void enter(const data::data_expression& x)
   {
-    if (x != data::true_() && x != data::false_() && x.sort()!=data::sort_real::real_())
+    if (result && x != data::true_() && x != data::false_() && x.sort()!=data::sort_real::real_())
     {
       result = false;
-      if (error_message.empty())
-      {
-        error_message="Expression in a RES can only be true, false or a real number: " + pp(x);
-      }
-    }
-  }
-
-  void enter(const propositional_variable_instantiation& x)
-  {
-    if (result)
-    {
-      result = x.parameters().empty();
-      if (error_message.empty())
-      {
-        error_message="A propositional variable in a RES cannot have arguments: " + pp(x);
-      }
-    }
-  }
-
-  void enter(const pres_equation& x)
-  {
-    if (result)
-    {
-      result = x.variable().parameters().empty();
-      if (error_message.empty())
-      {
-        error_message="The defined variable in a RES equation cannot have arguments: " + pres_system::pp(x.variable());
-      }
+      error_message="Expression in a RES can only be true, false or a real number: " + pp(x);
     }
   }
 };
@@ -123,7 +95,7 @@ bool is_res(const T& x, std::string& error_message)
 {
   is_res_traverser f;
   f.apply(x);
-  error_message=f.error_message;
+  error_message=f.get_error_message();
   return f.result;
 }
 

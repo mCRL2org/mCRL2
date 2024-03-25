@@ -100,7 +100,7 @@ class pres2res_algorithm
         pres_expression psi_e;
         m_R(psi_e, phi, m_sigma);
         std::string error_message;
-        if (is_res(phi, error_message))
+        if (!is_res(psi_e, error_message))
         {
           throw mcrl2::runtime_error("Generation of RES failed. " + error_message);
         }
