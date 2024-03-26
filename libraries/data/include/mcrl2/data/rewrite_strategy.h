@@ -13,6 +13,7 @@ namespace data
 enum rewrite_strategy
 {
   jitty,                      /** \brief JITty */
+  innermost,                  /** \brief Innermost rewriter */
 #ifdef MCRL2_ENABLE_JITTYC
   jitty_compiling,            /** \brief Compiling JITty */
   jitty_prover,               /** \brief JITty + Prover */
@@ -26,6 +27,8 @@ enum rewrite_strategy
 inline
 rewrite_strategy parse_rewrite_strategy(const std::string& s)
 {
+  if(s == "innermost")
+    return innermost;
   if(s == "jitty")
     return jitty;
   else if (s == "jittyp")
@@ -64,6 +67,7 @@ inline std::string pp(const rewrite_strategy s)
 {
   switch (s)
   {
+    case innermost: return "innermost";
     case jitty: return "jitty";
 #ifdef MCRL2_ENABLE_JITTYC
     case jitty_compiling: return "jittyc";
@@ -88,6 +92,7 @@ inline std::string description(const rewrite_strategy s)
 {
   switch (s)
   {
+    case innermost: return "innermost rewriting";
     case jitty: return "jitty rewriting";
 #ifdef MCRL2_ENABLE_JITTYC
     case jitty_compiling: return "compiled jitty rewriting";

@@ -450,7 +450,7 @@ class pbesreach_algorithm
 
       mCRL2log(log::trace) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
-      stopwatch timer;
+      mcrl2::utilities::stopwatch timer;
       m_initial_vertex = initial_state();
       m_visited = empty_set();
       m_todo = m_initial_vertex;
@@ -458,7 +458,7 @@ class pbesreach_algorithm
 
       while (m_todo != empty_set() && !solution_found() && (m_options.max_iterations == 0 || iteration_count < m_options.max_iterations))
       {
-        stopwatch loop_start;
+        mcrl2::utilities::stopwatch loop_start;
         iteration_count++;
         mCRL2log(log::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
         mCRL2log(log::trace) << "todo = " << print_states(m_data_index, m_todo) << std::endl;

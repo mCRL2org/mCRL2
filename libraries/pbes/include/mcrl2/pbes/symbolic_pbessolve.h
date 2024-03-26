@@ -39,7 +39,7 @@ class symbolic_pbessolve_algorithm
         return { empty_set(), empty_set() };
       }
 
-      stopwatch timer;
+      mcrl2::utilities::stopwatch timer;
       mCRL2log(log::debug) << "start zielonka recursion\n";
       auto [m, U] = m_G.get_min_rank(V);
 
@@ -90,7 +90,7 @@ class symbolic_pbessolve_algorithm
         const ldd& W1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
-      stopwatch timer;
+      mcrl2::utilities::stopwatch timer;
       
       std::array<ldd, 2> winning = { W0, W1 };
       ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
@@ -207,7 +207,7 @@ class symbolic_pbessolve_algorithm
         std::size_t iter = 0;
         while (U != Unext)
         {
-          stopwatch timer;
+          mcrl2::utilities::stopwatch timer;
           U = Unext;
           Unext = m_G.predecessors(U, U);
 
@@ -287,7 +287,7 @@ class symbolic_pbessolve_algorithm
         std::size_t iter = 0;
         while (U != Unext)
         {
-          stopwatch timer;
+          mcrl2::utilities::stopwatch timer;
           U = Unext;
           if (safe_variant)
           {
@@ -331,7 +331,7 @@ class symbolic_pbessolve_algorithm
         const ldd& W1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
-      stopwatch timer;
+      mcrl2::utilities::stopwatch timer;
 
       std::array<ldd, 2> winning = { W0, W1 };
       ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);

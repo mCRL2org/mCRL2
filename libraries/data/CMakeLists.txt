@@ -9,9 +9,12 @@ mcrl2_add_library(mcrl2_data
     source/data_specification.cpp
     source/typecheck.cpp
     source/detail/prover/smt_lib_solver.cpp
+    source/detail/rewrite/innermost.cpp
     source/detail/rewrite/jitty.cpp
     source/detail/rewrite/rewrite.cpp
     source/detail/rewrite/strategy.cpp
+    source/detail/match/naive_matcher.cpp
+    source/detail/match/adaptive_matcher.cpp
     ${COMPILING_REWRITER_SRC}
   EXCLUDE_HEADERTEST
     mcrl2/data/detail/rewrite/jittycpreamble.h

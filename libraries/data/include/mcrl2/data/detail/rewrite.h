@@ -15,6 +15,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/utilities/noncopyable.h"
 
 namespace mcrl2
 {
@@ -101,7 +102,6 @@ class Rewriter
      * \brief Provide the rewriter with a () operator, such that it can also
      *        rewrite terms using this operator.
      **/
-
     data_expression operator() (const data_expression& term, substitution_type& sigma)
     {
       return rewrite(term,sigma);
