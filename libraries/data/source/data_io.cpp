@@ -16,17 +16,17 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 
 static
-atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
+atermpp::aterm remove_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_OpId())
   {
-    return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
+    return atermpp::aterm(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
   }
   return x;
 }
 
 static
-atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
+atermpp::aterm add_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())  // Obsolete. Remove in say 2025. 
   {
@@ -41,14 +41,14 @@ atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
   return x;
 }
 
-atermpp::aterm_appl detail::data_specification_to_aterm(const data_specification& s)
+atermpp::aterm detail::data_specification_to_aterm(const data_specification& s)
 {
-  return atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
-           atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.user_defined_sorts().begin(),s.user_defined_sorts().end()) +
+  return atermpp::aterm(core::detail::function_symbol_DataSpec(),
+           atermpp::aterm(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.user_defined_sorts().begin(),s.user_defined_sorts().end()) +
                               atermpp::aterm_list(s.user_defined_aliases().begin(),s.user_defined_aliases().end())),
-           atermpp::aterm_appl(core::detail::function_symbol_ConsSpec(), atermpp::aterm_list(s.user_defined_constructors().begin(),s.user_defined_constructors().end())),
-           atermpp::aterm_appl(core::detail::function_symbol_MapSpec(), atermpp::aterm_list(s.user_defined_mappings().begin(),s.user_defined_mappings().end())),
-           atermpp::aterm_appl(core::detail::function_symbol_DataEqnSpec(), atermpp::aterm_list(s.user_defined_equations().begin(),s.user_defined_equations().end())));
+           atermpp::aterm(core::detail::function_symbol_ConsSpec(), atermpp::aterm_list(s.user_defined_constructors().begin(),s.user_defined_constructors().end())),
+           atermpp::aterm(core::detail::function_symbol_MapSpec(), atermpp::aterm_list(s.user_defined_mappings().begin(),s.user_defined_mappings().end())),
+           atermpp::aterm(core::detail::function_symbol_DataEqnSpec(), atermpp::aterm_list(s.user_defined_equations().begin(),s.user_defined_equations().end())));
 }
 
 inline

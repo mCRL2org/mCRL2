@@ -12,7 +12,7 @@
 #pragma once
 
 #include <type_traits>
-#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
 #include "mcrl2/utilities/exception.h"

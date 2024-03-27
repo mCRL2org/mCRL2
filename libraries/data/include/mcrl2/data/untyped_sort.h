@@ -23,12 +23,12 @@ namespace data {
 class untyped_sort: public sort_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_sort()
       : sort_expression(core::detail::default_values::UntypedSortUnknown)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_sort(const atermpp::aterm& term)
       : sort_expression(term)

@@ -13,7 +13,12 @@
 #define MCRL2_DATA_DETAIL_DATA_CONSTRUCTION_H
 
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/data_configuration.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/set64.h"
+#else
 #include "mcrl2/data/set.h"
+#endif
 
 namespace mcrl2 {
 

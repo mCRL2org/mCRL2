@@ -27,10 +27,15 @@ void parser_test()
   data::data_specification spec(data::parse_data_specification(text));
 
   std::cerr << "number of sorts " << spec.sorts().size() << "\n";
-  BOOST_CHECK(spec.sorts().size() == 7); // Bool, Pos, S, List(S), S->List(S), Nat, @NatPair.
-  BOOST_CHECK(spec.constructors(data::basic_sort("S")).size() == 1);
   std::cerr << "number of functions " << spec.mappings().size() << "\n";
+#ifdef Enable64bitNumbers
+  BOOST_CHECK(spec.sorts().size() == 7); // Bool, Pos, S, List(S), S->List(S), Nat, @NatPair.
+  BOOST_CHECK(spec.mappings().size() == 189);
+#else
+  BOOST_CHECK(spec.sorts().size() == 7); // Bool, Pos, S, List(S), S->List(S), Nat, @NatPair.
   BOOST_CHECK(spec.mappings().size() == 107);
+#endif
+  BOOST_CHECK(spec.constructors(data::basic_sort("S")).size() == 1);
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
   BOOST_CHECK(data::parse_data_expression("0") == data::sort_nat::nat(0));

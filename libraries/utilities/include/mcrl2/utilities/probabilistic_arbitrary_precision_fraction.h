@@ -17,15 +17,15 @@
  */
 
 
-#ifndef MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
-#define MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
+#ifndef MCRL2_UTILITIES_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
+#define MCRL2_UTILITIES_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
 
 #include "mcrl2/utilities/big_numbers.h"
 
 
 namespace mcrl2
 {
-namespace lts
+namespace utilities
 {
 
 /** \brief This class contains labels for probabilistic transistions, consisting of a numerator and a denominator
@@ -41,19 +41,19 @@ class probabilistic_arbitrary_precision_fraction
     // consuming. 
     static utilities::big_natural_number& buffer1()
     {
-      static utilities::big_natural_number buffer;
+      thread_local utilities::big_natural_number buffer;
       return buffer;
     }
 
     static utilities::big_natural_number& buffer2()
     {
-      static utilities::big_natural_number buffer;
+      thread_local utilities::big_natural_number buffer;
       return buffer;
     }
 
     static utilities::big_natural_number& buffer3()
     {
-      static utilities::big_natural_number buffer;
+      thread_local utilities::big_natural_number buffer;
       return buffer;
     }
 
@@ -274,7 +274,7 @@ class probabilistic_arbitrary_precision_fraction
     // The arguments are intentionally passed by value. That means this routine is not very efficient as it copies two vectors.
     static utilities::big_natural_number greatest_common_divisor(utilities::big_natural_number x, utilities::big_natural_number y)
     {
-      static utilities::big_natural_number buffer1, buffer2, buffer3;
+      thread_local utilities::big_natural_number buffer1, buffer2, buffer3;
       greatest_common_divisor_destructive(x,y,buffer1,buffer2,buffer3);
       return x;
     } 
@@ -286,7 +286,7 @@ class probabilistic_arbitrary_precision_fraction
       denominator=denominator/gcd;
       assert(greatest_common_divisor(enumerator,denominator).is_number(1)); */
 
-      static utilities::big_natural_number enumerator_copy, denominator_copy, gcd, buffer1, buffer2,buffer3;
+      thread_local utilities::big_natural_number enumerator_copy, denominator_copy, gcd, buffer1, buffer2,buffer3;
       gcd=enumerator;
       enumerator_copy=enumerator;
       denominator_copy=denominator;
@@ -313,7 +313,7 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_arbitrary_precis
   return out << pp(x);
 }
 
-} // namespace lts
+} // namespace utilities
 } // namespace mcrl2
 
 namespace std
@@ -321,9 +321,9 @@ namespace std
 
 /// \brief specialization of the standard std::hash function.
 template <>
-struct hash< mcrl2::lts::probabilistic_arbitrary_precision_fraction >
+struct hash< mcrl2::utilities::probabilistic_arbitrary_precision_fraction >
 {
-  std::size_t operator()(const mcrl2::lts::probabilistic_arbitrary_precision_fraction& p) const
+  std::size_t operator()(const mcrl2::utilities::probabilistic_arbitrary_precision_fraction& p) const
   {
     hash<mcrl2::utilities::big_natural_number> hasher;
     return mcrl2::utilities::detail::hash_combine(hasher(p.enumerator()), hasher(p.denominator()));
@@ -332,6 +332,6 @@ struct hash< mcrl2::lts::probabilistic_arbitrary_precision_fraction >
 
 } // namespace std
 
-#endif // MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
+#endif // MCRL2_UTILITIES_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
 
 

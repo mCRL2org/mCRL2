@@ -301,7 +301,7 @@ struct data_specification_actions: public data_expression_actions
     : data_expression_actions(parser_)
   {}
 
-  bool callback_SortDecl(const core::parse_node& node, std::vector<atermpp::aterm_appl>& result) const
+  bool callback_SortDecl(const core::parse_node& node, std::vector<atermpp::aterm>& result) const
   {
     if (symbol_name(node) == "SortDecl")
     {
@@ -326,14 +326,14 @@ struct data_specification_actions: public data_expression_actions
     return false;
   }
 
-  std::vector<atermpp::aterm_appl> parse_SortDeclList(const core::parse_node& node) const
+  std::vector<atermpp::aterm> parse_SortDeclList(const core::parse_node& node) const
   {
-    std::vector<atermpp::aterm_appl> result;
+    std::vector<atermpp::aterm> result;
     traverse(node, [&](const core::parse_node& node) { return callback_SortDecl(node, result); });
     return result;
   }
 
-  std::vector<atermpp::aterm_appl> parse_SortSpec(const core::parse_node& node) const
+  std::vector<atermpp::aterm> parse_SortSpec(const core::parse_node& node) const
   {
     return parse_SortDeclList(node.child(1));
   }
@@ -414,8 +414,8 @@ struct data_specification_actions: public data_expression_actions
   {
     if (symbol_name(node) == "SortSpec")
     {
-      std::vector<atermpp::aterm_appl> sorts = parse_SortSpec(node);
-      for (const atermpp::aterm_appl& t: sorts)
+      std::vector<atermpp::aterm> sorts = parse_SortSpec(node);
+      for (const atermpp::aterm& t: sorts)
       {
         if (is_alias(t))
         {

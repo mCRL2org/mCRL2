@@ -12,8 +12,8 @@
 
 #include <stack>
 #include <type_traits>
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/detail/aterm.h"
+#include "mcrl2/atermpp/aterm_core.h"
+#include "mcrl2/atermpp/detail/aterm_core.h"
 #include "mcrl2/atermpp/detail/aterm_pool_storage_implementation.h"
 #include "mcrl2/utilities/noncopyable.h"
 
@@ -22,7 +22,7 @@ namespace atermpp
 
 typedef std::stack<std::reference_wrapper<detail::_aterm>> term_mark_stack;
 
-inline void mark_term(const aterm& t, term_mark_stack& todo)
+inline void mark_term(const aterm_core& t, term_mark_stack& todo)
 {
   if (t.defined())
   {
@@ -34,7 +34,7 @@ inline void mark_term(const aterm& t, term_mark_stack& todo)
 namespace detail
 {
 
-/// \brief Provides safe storage of unprotected_aterm instances in a container by marking
+/// \brief Provides safe storage of unprotected_aterm_core instances in a container by marking
 ///        them during garbage collection.
 /// 
 /// \details Can not be inherited since it is being registered during construction and the 
@@ -119,14 +119,14 @@ public:
 
   const reference_aterm& operator=(const T_type& other) noexcept
   {
-    static_assert(std::is_base_of<aterm, T_type>::value);
+    static_assert(std::is_base_of<aterm_core, T_type>::value);
     m_t=other;
     return m_t;
   }
 
   const reference_aterm& operator=(T_type&& other) noexcept
   {
-    static_assert(std::is_base_of<aterm, T_type>::value);
+    static_assert(std::is_base_of<aterm_core, T_type>::value);
     m_t = std::forward(other);
     return m_t;
   }
@@ -142,9 +142,9 @@ public:
     return m_t;
   }
 
-  /// For types that are not a std::pair, or a type convertible to an aterm
+  /// For types that are not a std::pair, or a type convertible to an aterm_core
   /// it is necessary that a dedicated mark function is provided that calls mark_term
-  /// on all aterm types in the class T, when this class is stored in an atermpp container.
+  /// on all aterm_core types in the class T, when this class is stored in an atermpp container.
   /// See below for an example, where the code is given for pairs, aterms and built in types.
   /// The container is traversed during garbage collection, such that all terms in these
   /// containers are protected individually, without putting them all explicitly in 
@@ -156,7 +156,7 @@ public:
 
 };
 
-/// \brief A reference aterm applied to fundamental types, such as int, bool. Nothing needs to happen with such
+/// \brief A reference aterm_core applied to fundamental types, such as int, bool. Nothing needs to happen with such
 ///       terms. But a special class is needed, because such types are not classes, and we cannot derive from it.
 template<class T>
 class reference_aterm < T, typename std::enable_if<std::is_fundamental<typename std::decay<T>::type>::value>::type >
@@ -215,41 +215,41 @@ public:
 
 /// \brief An unprotected term that is stored inside an aterm_container.
 template<typename T>
-class reference_aterm<T, typename std::enable_if<std::is_base_of<aterm, T>::value>::type> : public unprotected_aterm
+class reference_aterm<T, typename std::enable_if<std::is_base_of<aterm_core, T>::value>::type> : public unprotected_aterm_core
 {
 public:
   /// \brief Default constructor.
   reference_aterm() noexcept = default;
 
-  explicit reference_aterm(const unprotected_aterm& other) noexcept
+  explicit reference_aterm(const unprotected_aterm_core& other) noexcept
   {
     m_term = detail::address(other);
   }
 
   reference_aterm(const T& other) noexcept
-   : unprotected_aterm(detail::address(other))
+   : unprotected_aterm_core(detail::address(other))
   { }
 
-  reference_aterm(unprotected_aterm&& other) noexcept
-   : unprotected_aterm(detail::address(other))
+  reference_aterm(unprotected_aterm_core&& other) noexcept
+   : unprotected_aterm_core(detail::address(other))
   {
   }
 
-  const reference_aterm& operator=(const unprotected_aterm& other) noexcept;
-  const reference_aterm& operator=(unprotected_aterm&& other) noexcept;
+  const reference_aterm& operator=(const unprotected_aterm_core& other) noexcept;
+  const reference_aterm& operator=(unprotected_aterm_core&& other) noexcept;
 
   /// Converts implicitly to a protected term of type T.
   operator T&()
   {
-    static_assert(std::is_base_of<aterm, T>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(T)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+    static_assert(std::is_base_of<aterm_core, T>::value,"Term must be derived from an aterm_core");
+    static_assert(sizeof(T)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
     return reinterpret_cast<T&>(*this);
   }
 
   operator const T&() const
   {
-    static_assert(std::is_base_of<aterm, T>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(T)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+    static_assert(std::is_base_of<aterm_core, T>::value,"Term must be derived from an aterm_core");
+    static_assert(sizeof(T)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
     return reinterpret_cast<const T&>(*this);
 
   }
@@ -297,7 +297,7 @@ reference_aterm_pair_constructor_helper(const T& other)
 
 
 /// \brief A pair that is stored into an atermpp container. This class takes care that all aterms that occur (recursively) inside
-///        such a pair are marked, whears non-aterm types are not marked. 
+///        such a pair are marked, whears non-aterm_core types are not marked. 
 template<typename T>
 class reference_aterm<T, typename std::enable_if<is_pair<T>::value>::type > : 
                          public std::pair<typename std::conditional<is_reference_aterm<typename T::first_type>::value,

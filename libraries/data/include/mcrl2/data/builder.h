@@ -14,12 +14,20 @@
 
 #include "mcrl2/core/builder.h"
 #include "mcrl2/data/alias.h"
+
+#include "mcrl2/data/data_configuration.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/bag64.h"
+#else
 #include "mcrl2/data/bag.h"
+#endif
+
 #include "mcrl2/data/bag_comprehension.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/set_comprehension.h"
 #include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/machine_number.h"
 #include "mcrl2/data/untyped_data_parameter.h"
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/untyped_set_or_bag_comprehension.h"
@@ -82,6 +90,17 @@ struct add_sort_expressions: public Builder<Derived>
     static_cast<Derived&>(*this).enter(x);
     data::make_where_clause(result, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); }, [&](assignment_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.declarations()); });
     static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const data::machine_number& x)
+  { 
+    
+    result = x;
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    result = x;
   }
 
   template <class T>
@@ -306,6 +325,10 @@ struct add_sort_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::where_clause>(x));
     }
+    else if (data::is_machine_number(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::machine_number>(x));
+    }
     else if (data::is_untyped_identifier(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_identifier>(x));
@@ -462,6 +485,17 @@ struct add_data_expressions: public Builder<Derived>
   }
 
   template <class T>
+  void apply(T& result, const data::machine_number& x)
+  { 
+    
+    result = x;
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    result = x;
+  }
+
+  template <class T>
   void apply(T& result, const data::untyped_identifier& x)
   { 
     
@@ -587,6 +621,10 @@ struct add_data_expressions: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::where_clause>(x));
     }
+    else if (data::is_machine_number(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::machine_number>(x));
+    }
     else if (data::is_untyped_identifier(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_identifier>(x));
@@ -703,6 +741,17 @@ struct add_variables: public Builder<Derived>
     static_cast<Derived&>(*this).enter(x);
     data::make_where_clause(result, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); }, [&](assignment_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.declarations()); });
     static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <class T>
+  void apply(T& result, const data::machine_number& x)
+  { 
+    
+    result = x;
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    result = x;
   }
 
   template <class T>
@@ -830,6 +879,10 @@ struct add_variables: public Builder<Derived>
     else if (data::is_where_clause(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::where_clause>(x));
+    }
+    else if (data::is_machine_number(x))
+    {
+      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::machine_number>(x));
     }
     else if (data::is_untyped_identifier(x))
     {

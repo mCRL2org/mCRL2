@@ -13,6 +13,7 @@
 
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/data/machine_number.h"
 
 namespace mcrl2
 {
@@ -39,19 +40,19 @@ class variable_or_number: public atermpp::aterm
 
 typedef atermpp::term_list<variable_or_number> variable_or_number_list;
 
-class match_tree:public atermpp::aterm_appl
+class match_tree:public atermpp::aterm
 {
   public:
     /// Default constructor
     match_tree()
-     : atermpp::aterm_appl(afunUndefined())
+     : atermpp::aterm(afunUndefined())
     {}
 
     /// Constructor based on an aterm.
     match_tree(const atermpp::aterm& t):
-      atermpp::aterm_appl(t)
+      atermpp::aterm(t)
     {
-      assert(!is_defined() || isS() || isA() || isM() || isF() || 
+      assert(!is_defined() || isS() || isA() || isM() || isF() || isMachineNumber() ||
              isN() || isD() || isR () || isC() || isX() || isRe() || 
              isCRe() || isMe());
     }
@@ -88,6 +89,12 @@ class match_tree:public atermpp::aterm_appl
       return afunF;
     }
 
+    atermpp::function_symbol afunMachineNumber() const
+    {
+      static atermpp::function_symbol afunNumber("@@MachineNumber",3); // Match function ( match_function, true_tree, false_tree )
+      return afunNumber;
+    } 
+    
     atermpp::function_symbol afunN() const
     {
       static atermpp::function_symbol afunN("@@N",1); // Go to next parameter ( result_tree )
@@ -161,6 +168,11 @@ class match_tree:public atermpp::aterm_appl
     {
       return this->function()==afunF();
     }
+
+    bool isMachineNumber() const
+    {
+      return this->function()==afunMachineNumber();
+    }
       
     bool isN() const
     {
@@ -217,7 +229,7 @@ class match_tree_S:public match_tree
     }
     
     match_tree_S(const variable& target_variable, const match_tree& result_tree)
-     : match_tree(atermpp::aterm_appl(afunS(),target_variable,result_tree))
+     : match_tree(atermpp::aterm(afunS(),target_variable,result_tree))
     {}
 
     const variable& target_variable() const
@@ -246,7 +258,7 @@ class match_tree_A:public match_tree
     }
 
     match_tree_A(const std::size_t n)
-     : match_tree(atermpp::aterm_appl(afunA(),atermpp::aterm_int(n)))
+     : match_tree(atermpp::aterm(afunA(),atermpp::aterm_int(n)))
     {}
 
     std::size_t variable_index() const
@@ -270,7 +282,7 @@ class match_tree_M:public match_tree
     }
     
     match_tree_M(const variable& match_variable, const match_tree& true_tree, const match_tree& false_tree)
-     : match_tree(atermpp::aterm_appl(afunM(),match_variable,true_tree,false_tree))
+     : match_tree(atermpp::aterm(afunM(),match_variable,true_tree,false_tree))
     {}
 
     const variable& match_variable() const
@@ -290,7 +302,7 @@ class match_tree_M:public match_tree
 };
 
 // Match function ( match_function, true_tree, false_tree )
-class match_tree_F:public match_tree
+class match_tree_F: public match_tree
 {
   public:
     match_tree_F()
@@ -303,7 +315,7 @@ class match_tree_F:public match_tree
     }
     
     match_tree_F(const data::function_symbol& function, const match_tree& true_tree, const match_tree& false_tree)
-     : match_tree(atermpp::aterm_appl(afunF(),function,true_tree,false_tree))
+     : match_tree(atermpp::aterm(afunF(),function,true_tree,false_tree))
     {}
 
     const data::function_symbol& function() const
@@ -322,6 +334,40 @@ class match_tree_F:public match_tree
     }
 };
 
+// Match function ( match_function, true_tree, false_tree )
+class match_tree_MachineNumber: public match_tree
+{
+  public:
+    match_tree_MachineNumber()
+    {}
+
+    match_tree_MachineNumber(const atermpp::aterm& t):
+          match_tree(t)
+    {
+      assert(isMachineNumber());
+    }
+    
+    match_tree_MachineNumber(const data::machine_number& mn, const match_tree& true_tree, const match_tree& false_tree):
+          match_tree(atermpp::aterm(afunMachineNumber(),mn,true_tree,false_tree))
+    {}
+    
+    const data::machine_number& number() const
+    {
+      return atermpp::down_cast<const data::machine_number>((*this)[0]);
+    }
+
+    const match_tree& true_tree() const
+    {
+      return atermpp::down_cast<const match_tree>((*this)[1]);
+    } 
+
+    const match_tree& false_tree() const
+    {
+      return atermpp::down_cast<const match_tree>((*this)[2]);
+    }
+};
+
+
 // Go to next parameter ( result_tree )
 class match_tree_N:public match_tree
 {
@@ -339,7 +385,7 @@ class match_tree_N:public match_tree
     /// The extra non-used std::size_t is provided, to distinghuish this
     /// constructor from the default copy constructor.
     match_tree_N(const match_tree& result_tree, std::size_t)
-     : match_tree(atermpp::aterm_appl(afunN(),result_tree))
+     : match_tree(atermpp::aterm(afunN(),result_tree))
     {}
 
     const match_tree& subtree() const
@@ -365,7 +411,7 @@ class match_tree_D:public match_tree
     /// The extra non-used std::size_t is provided, to distinghuish this
     /// constructor from the default copy constructor.
     match_tree_D(const match_tree& result_tree, std::size_t)
-     : match_tree(atermpp::aterm_appl(afunD(),result_tree))
+     : match_tree(atermpp::aterm(afunD(),result_tree))
     {}
 
     const match_tree& subtree() const
@@ -389,7 +435,7 @@ class match_tree_R:public match_tree
     }
     
     match_tree_R(const data_expression& e)
-     : match_tree(atermpp::aterm_appl(afunR(),e))
+     : match_tree(atermpp::aterm(afunR(),e))
     {}
 
     const data_expression& result() const
@@ -412,7 +458,7 @@ class match_tree_C:public match_tree
     }
     
     match_tree_C(const data_expression& condition, const match_tree& true_tree, const match_tree& false_tree)
-     : match_tree(atermpp::aterm_appl(afunC(),condition,true_tree,false_tree))
+     : match_tree(atermpp::aterm(afunC(),condition,true_tree,false_tree))
     {}
 
     const data_expression& condition() const
@@ -442,7 +488,7 @@ class match_tree_X:public match_tree
     }
     
     match_tree_X()
-     : match_tree(atermpp::aterm_appl(afunX()))
+     : match_tree(atermpp::aterm(afunX()))
     {}
 };
 
@@ -461,7 +507,7 @@ class match_tree_Re:public match_tree
     }
     
     match_tree_Re(const data_expression& result, const variable_or_number_list& vars)
-     : match_tree(atermpp::aterm_appl(afunRe(),result,vars))
+     : match_tree(atermpp::aterm(afunRe(),result,vars))
     {}
 
     const data_expression& result() const
@@ -490,7 +536,7 @@ class match_tree_CRe:public match_tree
     }
     
     match_tree_CRe(const data_expression& condition, const data_expression& result, const variable_or_number_list& vars_condition, const variable_or_number_list& vars_rule)
-     : match_tree(atermpp::aterm_appl(afunCRe(),condition,result,vars_condition,vars_rule))
+     : match_tree(atermpp::aterm(afunCRe(),condition,result,vars_condition,vars_rule))
     {}
 
     const data_expression& condition() const
@@ -528,7 +574,7 @@ class match_tree_Me:public match_tree
     }
     
     match_tree_Me(const variable& match_variable, const std::size_t variable_index)
-     : match_tree(atermpp::aterm_appl(afunMe(),match_variable,atermpp::aterm_int(variable_index)))
+     : match_tree(atermpp::aterm(afunMe(),match_variable,atermpp::aterm_int(variable_index)))
     {}
 
     const variable& match_variable() const
@@ -599,6 +645,12 @@ std::ostream& operator<<(std::ostream& s, const match_tree& t)
     const match_tree_F& tF = down_cast<match_tree_F>(t);
     s << "@@F(" << tF.function() << ", " << tF.true_tree() << ", " << tF.false_tree() << ")";
   }
+  else
+  if (t.isMachineNumber())
+  { 
+    const match_tree_MachineNumber& tM = down_cast<match_tree_MachineNumber>(t);
+    s << "@@MachineNumber(" << tM.function() << ", " << tM.true_tree() << ", " << tM.false_tree() << ")";
+  }       
   else
   if (t.isN())
   {

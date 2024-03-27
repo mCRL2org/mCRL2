@@ -19,6 +19,11 @@
 
 namespace atermpp
 {
+
+typedef void(*term_callback)(const aterm&);
+
+extern void add_deletion_hook(const function_symbol&, term_callback);
+
 namespace detail
 {
 
@@ -175,14 +180,14 @@ private:
 
   /// \brief Calls the deletion hook attached to the function symbol of this term.
   /// \threadsafe
-  void call_deletion_hook(unprotected_aterm term);
+  void call_deletion_hook(unprotected_aterm_core term);
 
   /// \brief Removes an element from the unordered set and deallocates it.
   iterator destroy(iterator it);
 
   /// \brief Inserts a term constructed by the given arguments, checks for existing term.
   template<typename ...Args>
-  bool emplace(aterm& term, Args&&... args);
+  bool emplace(aterm_core& term, Args&&... args);
 
   /// \returns True if and only if this term storage can store term applications with a dynamic
   ///          number of arguments.

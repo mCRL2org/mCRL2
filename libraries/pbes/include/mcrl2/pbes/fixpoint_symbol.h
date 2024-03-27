@@ -22,18 +22,18 @@ namespace pbes_system
 
 //--- start generated class fixpoint_symbol ---//
 /// \\brief A fixpoint symbol
-class fixpoint_symbol: public atermpp::aterm_appl
+class fixpoint_symbol: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     fixpoint_symbol()
-      : atermpp::aterm_appl(core::detail::default_values::FixPoint)
+      : atermpp::aterm(core::detail::default_values::FixPoint)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit fixpoint_symbol(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_FixPoint(*this));
     }
@@ -48,14 +48,14 @@ class fixpoint_symbol: public atermpp::aterm_appl
     /// \return The mu symbol.
     static fixpoint_symbol mu()
     {
-      return fixpoint_symbol(atermpp::aterm_appl(core::detail::function_symbol_Mu()));
+      return fixpoint_symbol(atermpp::aterm(core::detail::function_symbol_Mu()));
     }
 
     /// \brief Returns the nu symbol.
     /// \return The nu symbol.
     static fixpoint_symbol nu()
     {
-      return fixpoint_symbol(atermpp::aterm_appl(core::detail::function_symbol_Nu()));
+      return fixpoint_symbol(atermpp::aterm(core::detail::function_symbol_Nu()));
     }
 
     /// \brief Returns true if the symbol is mu.

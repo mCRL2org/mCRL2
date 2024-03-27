@@ -22,7 +22,7 @@ namespace detail
 {
 
 // Component that helps applying the Singleton design pattern
-template < typename Derived, typename Expression = atermpp::aterm_appl >
+template < typename Derived, typename Expression = atermpp::aterm >
 class singleton_expression 
 {
   public:

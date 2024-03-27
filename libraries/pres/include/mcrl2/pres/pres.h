@@ -49,7 +49,7 @@ bool is_well_typed_pres(const std::set<data::sort_expression>& declared_sorts,
                         const data::data_specification& data_spec
                        );
 
-atermpp::aterm_appl pres_to_aterm(const pres& p);
+atermpp::aterm pres_to_aterm(const pres& p);
 
 /// \brief parameterized boolean equation system
 // <PRES>         ::= PRES(<DataSpec>, <GlobVarSpec>, <PREqnSpec>, <PRInit>)

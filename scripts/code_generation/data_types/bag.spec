@@ -54,8 +54,6 @@ var b: FBag(S);
     s: FSet(S);
     x: Bag(S);
     y: Bag(S);
-    f: S -> Nat;
-    g: S -> Nat;
 
 eqn @bagfbag(b)  =  @bag(@zero_, b);
     @bagcomp(f)  =  @bag(f, {:});

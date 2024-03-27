@@ -25,12 +25,12 @@ namespace data
 class basic_sort: public sort_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     basic_sort()
       : sort_expression(core::detail::default_values::SortId)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit basic_sort(const atermpp::aterm& term)
       : sort_expression(term)
@@ -38,14 +38,14 @@ class basic_sort: public sort_expression
       assert(core::detail::check_term_SortId(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit basic_sort(const core::identifier_string& name)
-      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), name))
+      : sort_expression(atermpp::aterm(core::detail::function_symbol_SortId(), name))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     basic_sort(const std::string& name)
-      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), core::identifier_string(name)))
+      : sort_expression(atermpp::aterm(core::detail::function_symbol_SortId(), core::identifier_string(name)))
     {}
 
     /// Move semantics
@@ -63,7 +63,7 @@ class basic_sort: public sort_expression
 /// \\brief Make_basic_sort constructs a new term into a given address.
 /// \\ \param t The reference into which the new basic_sort is constructed. 
 template <class... ARGUMENTS>
-inline void make_basic_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_basic_sort(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_SortId(), args...);
 }

@@ -187,7 +187,7 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
     return true;
   }
 
-  if (data::is_function_symbol(d)||is_variable(d))
+  if (data::is_function_symbol(d)||is_variable(d)||is_machine_number(d))
   {
     return true;
   }
@@ -272,7 +272,11 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
+#ifdef Enable64bitNumbers
+      Par=sort_nat::transform_positive_number_to_nat(Par);
+#else
       Par=application(sort_nat::cnat(),Par);
+#endif
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -292,7 +296,11 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
+#ifdef Enable64bitNumbers
+      Par=application(sort_int::cint(),sort_nat::transform_positive_number_to_nat(Par));
+#else
       Par=application(sort_int::cint(),application(sort_nat::cnat(),Par));
+#endif
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -323,9 +331,15 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
+#ifdef Enable64bitNumbers
+      Par=application(sort_real::creal(),
+                              application(sort_int::cint(), sort_nat::transform_positive_number_to_nat(Par)),
+                              sort_pos::pos(1));
+#else
       Par=application(sort_real::creal(),
                               application(sort_int::cint(), application(sort_nat::cnat(),Par)),
                               sort_pos::c1());
+#endif
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -2657,7 +2671,11 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       else if (TypeMatchA(sort_pos::pos(),ResType,temp))
       {
         NewType=sort_bag::bag(sort_expression(element_sort));
+#ifdef Enable64bitNumbers
+        Data=sort_nat::transform_positive_number_to_nat(Data);
+#else
         Data=application(sort_nat::cnat(),Data);
+#endif
         DataTerm = abstraction(bag_comprehension_binder(),comprehension_variables,Data);
       }
       else
@@ -3458,6 +3476,13 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     }
   }
 
+#ifdef Enable64bitNumbers
+  if (is_machine_number(DataTerm))
+  {
+    return sort_machine_word::machine_word();
+  }
+#endif
+
   throw mcrl2::runtime_error("Internal type checking error: " + data::pp(DataTerm) + " does not match any type checking case." );
 }
 
@@ -3850,7 +3875,11 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
                                          // It adds it and then typechecks the terms containing this function. 
   add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_constructors());
   add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_mappings());
+#ifdef Enable64bitNumbers
+  assert(system_functions.find(sort_nat::pos2nat().name())!=system_functions.end());   
+#else
   assert(system_functions.find(sort_nat::cnat().name())!=system_functions.end());   
+#endif
                                          // This function is explicitly required by the typechecker. 
                                          // It adds it and then typechecks the terms containing this function. 
   add_system_constants_and_functions(sort_int::int_mCRL2_usable_constructors());

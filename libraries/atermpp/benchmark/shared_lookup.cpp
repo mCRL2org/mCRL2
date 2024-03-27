@@ -24,12 +24,12 @@ int main(int argc, char* argv[])
 
   std::size_t size = 400000;
   std::size_t iterations = 1000;
-  aterm_appl f = create_nested_function<2>("f", "c", size);
+  aterm f = create_nested_function<2>("f", "c", size);
 
   // Define a function that repeatedly creates nested function applications.
   auto nested_function = [&](std::size_t) -> void
     {
-      aterm_appl f;
+      aterm f;
       for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
       {
         f = create_nested_function<2>("f", "c", size);

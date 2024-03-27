@@ -37,6 +37,11 @@ namespace detail
 
 data_expression RewriterJitty::remove_normal_form_function(const data_expression& t)
 {
+  if (is_machine_number(t))
+  {
+    return t;
+  }
+
   if (is_variable(t))
   {
     return t;
@@ -208,6 +213,11 @@ void RewriterJitty::subst_values(
             const data_expression& t,
             data::enumerator_identifier_generator& generator) // This generator is used for the generation of fresh variable names.
 {
+  if (is_machine_number(t))
+  {
+    result=t; 
+    return;
+  }
   if (is_function_symbol(t))
   {
     // result=t;  The following is more efficient as it avoids a call to thread local variables. Should be removed in due time. 
@@ -325,7 +335,11 @@ static bool match_jitty(
                     jitty_assignments_for_a_rewrite_rule& assignments,
                     const bool term_context_guarantees_normal_form)
 {
-  if (is_function_symbol(p))
+  if (is_machine_number(p))
+  {
+    return p==t;
+  }
+  else if (is_function_symbol(p))
   {
     return p==t;
   }
@@ -350,7 +364,7 @@ static bool match_jitty(
   }
   else
   {
-    if (is_function_symbol(t) || is_variable(t) || is_abstraction(t) || is_where_clause(t))
+    if (is_machine_number(t) || is_function_symbol(t) || is_variable(t) || is_abstraction(t) || is_where_clause(t))
     {
       return false;
     }
@@ -390,15 +404,16 @@ template <class ITERATOR>
 void RewriterJitty::apply_cpp_code_to_higher_order_term(
                   data_expression& result,
                   const application& t,
-                  const std::function<data_expression(const data_expression&)> rewrite_cpp_code,
+                  const std::function<void(data_expression&, const data_expression&)> rewrite_cpp_code,
                   ITERATOR begin,
                   ITERATOR end,
                   substitution_type& sigma)
 {
   if (is_function_symbol(t.head()))
   {
-    make_application(result, t.head(), begin, end);
-    result=rewrite_cpp_code(result);
+    data_expression intermediate;
+    make_application(intermediate, t.head(), begin, end);
+    rewrite_cpp_code(result, intermediate);
     return;
   }
 
@@ -420,7 +435,50 @@ void RewriterJitty::rewrite_aux(
                       const data_expression& term,
                       substitution_type& sigma)
 {
-  if (is_application(term))
+  if (is_function_symbol(term))
+  {
+    assert(term!=this_term_is_in_normal_form());
+    rewrite_aux_const_function_symbol(result,atermpp::down_cast<const function_symbol>(term),sigma);
+    return;
+  }
+  if (is_variable(term))
+  {
+    sigma.apply(atermpp::down_cast<variable>(term),result, *m_thread_aterm_pool);
+    return;
+  }
+  if (is_machine_number(term))
+  {
+    result=term;
+    return;
+  }
+
+  if (is_where_clause(term))
+  {
+    const where_clause& w = atermpp::down_cast<where_clause>(term);
+    rewrite_where(result,w,sigma);
+    return;
+  }
+
+  if (is_abstraction(term))
+  { 
+    const abstraction& ta=atermpp::down_cast<abstraction>(term);
+    if (is_exists(ta))
+    {
+      existential_quantifier_enumeration(result,ta,sigma);
+      return;
+    }
+    if (is_forall(ta))
+    {
+      universal_quantifier_enumeration(result,ta,sigma);
+      return;
+    }
+    assert(is_lambda(ta));
+    rewrite_single_lambda(result,ta.variables(),ta.body(),false,sigma);
+    return;
+  }
+
+  // Here term must have the shape appl(t1,...,tn)
+  assert(is_application(term));
   {
     const application& terma=atermpp::down_cast<application>(term);
     if (terma.head()==this_term_is_in_normal_form())
@@ -506,41 +564,6 @@ void RewriterJitty::rewrite_aux(
     m_rewrite_stack.decrease(2);
     return;
   }
-  // Here term does not have the shape appl(t1,...,tn)
-  if (is_function_symbol(term))
-  {
-    assert(term!=this_term_is_in_normal_form());
-    rewrite_aux_const_function_symbol(result,atermpp::down_cast<const function_symbol>(term),sigma);
-    return;
-  }
-  if (is_variable(term))
-  {
-    sigma.apply(atermpp::down_cast<variable>(term),result, *m_thread_aterm_pool);
-    return;
-  }
-  if (is_where_clause(term))
-  {
-    const where_clause& w = atermpp::down_cast<where_clause>(term);
-    rewrite_where(result,w,sigma);
-    return;
-  }
-
-  { 
-    const abstraction& ta=atermpp::down_cast<abstraction>(term);
-    if (is_exists(ta))
-    {
-      existential_quantifier_enumeration(result,ta,sigma);
-      return;
-    }
-    if (is_forall(ta))
-    {
-      universal_quantifier_enumeration(result,ta,sigma);
-      return;
-    }
-    assert(is_lambda(ta));
-    rewrite_single_lambda(result,ta.variables(),ta.body(),false,sigma);
-    return;
-  }
 }
 
 void RewriterJitty::rewrite_aux_function_symbol(
@@ -549,7 +572,6 @@ void RewriterJitty::rewrite_aux_function_symbol(
                       const application& term,
                       substitution_type& sigma)
 {
-  // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
   assert(is_function_sort(op.sort()));
 
   const std::size_t arity=detail::recursive_number_of_args(term);
@@ -606,7 +628,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
           assert(m_rewrite_stack.stack_size()>=arity+1);
           application rewriteable_term(op, m_rewrite_stack.stack_iterator(0,arity+1),
                                            m_rewrite_stack.stack_iterator(arity,arity+1)); /* TODO Optimize */
-          result=rule.rewrite_cpp_code()(rewriteable_term);
+          rule.rewrite_cpp_code()(result, rewriteable_term);
           m_rewrite_stack.decrease(arity+1);
           return;
         }
@@ -809,7 +831,7 @@ void RewriterJitty::rewrite_aux_const_function_symbol(
     }
     else if (rule.is_cpp_code())
     {
-      result=rule.rewrite_cpp_code()(op);  /* TODO Optimize */
+      rule.rewrite_cpp_code()(result, op);
       rhs_for_constants_cache[op_value]=result;
       return;
     }

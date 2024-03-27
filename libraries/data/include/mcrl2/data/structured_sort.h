@@ -55,12 +55,12 @@ data_equation_vector fbag_generate_equations_code(const sort_expression&);
 class structured_sort: public sort_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     structured_sort()
       : sort_expression(core::detail::default_values::SortStruct)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit structured_sort(const atermpp::aterm& term)
       : sort_expression(term)
@@ -68,15 +68,15 @@ class structured_sort: public sort_expression
       assert(core::detail::check_term_SortStruct(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit structured_sort(const structured_sort_constructor_list& constructors)
-      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), constructors))
+      : sort_expression(atermpp::aterm(core::detail::function_symbol_SortStruct(), constructors))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     template <typename Container>
     structured_sort(const Container& constructors, typename atermpp::enable_if_container<Container, structured_sort_constructor>::type* = nullptr)
-      : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
+      : sort_expression(atermpp::aterm(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
     {}
 
     /// Move semantics
@@ -436,7 +436,7 @@ public:
 /// \\brief Make_structured_sort constructs a new term into a given address.
 /// \\ \param t The reference into which the new structured_sort is constructed. 
 template <class... ARGUMENTS>
-inline void make_structured_sort(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_structured_sort(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_SortStruct(), args...);
 }

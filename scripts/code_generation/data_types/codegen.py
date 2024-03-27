@@ -940,7 +940,7 @@ def main():
 
         # Parse specification in infilename and write the code to outfile
         parse_spec(infilename)
-        outputcode = context.code()
+        outputcode = context.code(infilename)
         outfile.write(outputcode)
 
     else:

@@ -52,8 +52,7 @@ class rewrite_stack : protected atermpp::vector<data_expression>
     std::size_t m_stack_size;
     std::size_t m_reserved_stack_size; // This is equal to the size() of the underlying stack.
                                        // Access of "size()" expensive as it is surrounded by a mutex. 
-
-
+                                       
   public:
 
     /// \brief Constructor

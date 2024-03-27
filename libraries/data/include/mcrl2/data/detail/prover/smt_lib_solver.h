@@ -351,6 +351,7 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         translate_add_c(a_clause);
       }
+#ifndef Enable64bitNumbers
       else if (sort_nat::is_cnat_application(a_clause))
       {
         translate_c_nat(a_clause);
@@ -359,6 +360,7 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         translate_c_int(a_clause);
       }
+#endif
       else if (sort_int::is_integer_constant(a_clause))
       {
         translate_int_constant(a_clause);
@@ -621,6 +623,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + "))";
     }
 
+#ifndef Enable64bitNumbers
     void translate_c_nat(const data_expression& a_clause)
     {
       const data_expression v_clause = arg(a_clause);
@@ -632,6 +635,7 @@ class SMT_LIB_Solver: public SMT_Solver
       const data_expression v_clause = arg(a_clause);
       translate_clause(v_clause, false);
     }
+#endif
 
     void translate_unknown_operator(const data_expression& a_clause)
     {

@@ -36,7 +36,7 @@ class BDD2Dot
     std::ofstream f_dot_file;
 
     /// \brief A table containing all the visited nodes. It maps these nodes to the corresponding node numbers.
-    std::map < atermpp::aterm_appl, atermpp::aterm_int> f_visited;
+    std::map < atermpp::aterm, atermpp::aterm_int> f_visited;
 
     /// \brief A class that gives information about the structure of BDDs.
     BDD_Info f_bdd_info;

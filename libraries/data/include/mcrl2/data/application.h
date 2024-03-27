@@ -354,7 +354,7 @@ class application: public data_expression
   public:
     /// \brief Default constructor.
     application()
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(0)))
+      : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(0)))
     {}
 
     /// \brief Constructor.
@@ -364,7 +364,7 @@ class application: public data_expression
                 const data_expression& arg1,
                 const Terms& ...other_arguments
                )
-      : data_expression(atermpp::term_appl<aterm>(
+      : data_expression(atermpp::aterm(
               core::detail::function_symbol_DataAppl(sizeof...(Terms)+2),head,arg1,other_arguments...))
     {
       assert(detail::check_whether_sorts_match(head, detail::get_arguments(arg1, other_arguments...)));
@@ -383,7 +383,7 @@ class application: public data_expression
     application(const data_expression& head,
                 const Container& arguments,
                 typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
+      : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(arguments.size() + 1),
                                          detail::term_appl_prepend_iterator<typename Container::const_iterator>(arguments.begin(), &head),
                                          detail::term_appl_prepend_iterator<typename Container::const_iterator>(arguments.end())))
     {
@@ -393,7 +393,7 @@ class application: public data_expression
 
   private:
     // forbid the use of iterator, which is silently inherited from
-    // aterm_appl. Modifying the arguments of an application through the iterator
+    // aterm. Modifying the arguments of an application through the iterator
     // is not allowed!
     typedef data_expression::iterator iterator;
 
@@ -401,12 +401,12 @@ class application: public data_expression
 
     /// \brief An iterator to traverse the arguments of an application.
     /// \details There is a subtle difference with the arguments of an iterator on
-    ///          the arguments of an aterm_appl from which an application is derived.
+    ///          the arguments of an aterm from which an application is derived.
     ///          As an application has a head as its first argument, the iterator
-    ///          of the aterm_appl starts at this head, where the iterator of the
+    ///          of the aterm starts at this head, where the iterator of the
     ///          application starts at the first argument. This also means that
     ///          t[n] for t an application is equal to t[n+1] if t is interpreted as an
-    ///          aterm_appl.
+    ///          aterm.
     typedef atermpp::term_appl_iterator<data_expression> const_iterator;
 
     /// \brief Constructor.
@@ -415,7 +415,7 @@ class application: public data_expression
                 FwdIter first,
                 FwdIter last,
                 typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
+      : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
                                          detail::term_appl_prepend_iterator<FwdIter>(first, &head),
                                          detail::term_appl_prepend_iterator<FwdIter>(last)))
     {
@@ -430,7 +430,7 @@ class application: public data_expression
                 FwdIter first,
                 FwdIter last,
                 typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0)
-      : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arity + 1),
+      : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(arity + 1),
                                          detail::term_appl_prepend_iterator<FwdIter>(first, &head),
                                          detail::term_appl_prepend_iterator<FwdIter>(last)))
     {
@@ -457,7 +457,7 @@ class application: public data_expression
                 typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr,
                 typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = nullptr )
                 // typename std::enable_if< std::is_convertible<typename std::invoke_result<ArgumentConverter,typename FwdIter::value_type>::type, data_expression>::value>::type* = nullptr)
-      : data_expression(atermpp::term_appl<aterm>(
+      : data_expression(atermpp::aterm(
                                  core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
                                  detail::term_appl_prepend_iterator<FwdIter>(first, &head),
                                  detail::term_appl_prepend_iterator<FwdIter>(last),
@@ -485,7 +485,7 @@ class application: public data_expression
                 typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = nullptr,
                 typename std::enable_if<std::is_same<typename std::invoke_result<ArgumentConverter,data_expression&,typename FwdIter::value_type>::type, void>::value>::type* = nullptr)
  
-      : data_expression(atermpp::term_appl<aterm>(
+      : data_expression(atermpp::aterm(
                                  core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
                                  detail::term_appl_prepend_iterator<FwdIter>(first, &head),
                                  detail::term_appl_prepend_iterator<FwdIter>(last),
@@ -504,34 +504,34 @@ class application: public data_expression
     /// \brief Get the function at the head of this expression.
     const data_expression& head() const
     {
-      return atermpp::down_cast<data_expression>(atermpp::aterm_appl::operator[](0));
+      return atermpp::down_cast<data_expression>(atermpp::aterm::operator[](0));
     }
 
     /// \brief Get the i-th argument of this expression.
     const data_expression& operator[](std::size_t index) const
     {
       assert(index<size());
-      return atermpp::down_cast<data_expression>(atermpp::aterm_appl::operator[](index+1));
+      return atermpp::down_cast<data_expression>(atermpp::aterm::operator[](index+1));
     }
 
     /// \brief Returns an iterator pointing to the first argument of the
     ///        application.
     const_iterator begin() const
     {
-      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::aterm_appl::begin()+1);
+      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::aterm::begin()+1);
     }
 
     /// \brief Returns an iterator pointing past the last argument of the
     ///        application.
     const_iterator end() const
     {
-      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::aterm_appl::end());
+      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::aterm::end());
     }
 
     /// \return The number of arguments of this application.
     std::size_t size() const
     {
-      return atermpp::aterm_appl::size() - 1;
+      return atermpp::aterm::size() - 1;
     }
 };
 

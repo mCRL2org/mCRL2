@@ -217,11 +217,11 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     apply(body, x.body());
     if (m_negated)
     {
-      make_exists(result, x.variables(), body); 
+      state_formulas::make_exists(result, x.variables(), body); 
     }
     else
     {
-      make_forall(result, x.variables(), body);
+      state_formulas::make_forall(result, x.variables(), body);
     }
   }
 
@@ -232,11 +232,11 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
     apply(body, x.body());
     if (m_negated)
     {
-      make_forall(result, x.variables(), body); 
+      state_formulas::make_forall(result, x.variables(), body); 
     }
     else
     {
-      make_exists(result, x.variables(), body);
+      state_formulas::make_exists(result, x.variables(), body);
     }
   }
 

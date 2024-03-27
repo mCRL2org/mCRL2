@@ -77,7 +77,11 @@ inline
 void Disjointness_Checker::process_data_expression(std::size_t n, const data::data_expression& x)
 {
   // This should probably once be replaced by a visitor.
-  if (data::is_variable(x))
+  if (data::is_machine_number(x))
+  {
+    // Do nothing.
+  }
+  else if (data::is_variable(x))
   {
     f_used_parameters_per_summand[n].insert(data::variable(x));
   }

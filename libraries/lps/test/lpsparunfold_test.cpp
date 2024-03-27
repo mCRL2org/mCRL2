@@ -13,6 +13,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/lps/lpsparunfoldlib.h"
 #include "mcrl2/lps/parse.h"
 
@@ -71,6 +72,15 @@ BOOST_AUTO_TEST_CASE(test_main)
     lpsparunfold lpsparunfold(s0, unfold_cache);
     lpsparunfold.algorithm(0);
     variable_list p1 = s0.process().process_parameters();
+#ifdef Enable64bitNumbers
+    if (p1.size() != 2)
+    {
+      std::clog << "--- failed test ---" << std::endl;
+      std::clog << case_1 << std::endl;
+      std::clog << "expected result to have 2 process parameters" << std::endl;
+      std::clog << "computed " << p1.size() << " process parameters" << std::endl;
+    }
+#else
     if (p1.size() != 3)
     {
       std::clog << "--- failed test ---" << std::endl;
@@ -78,6 +88,7 @@ BOOST_AUTO_TEST_CASE(test_main)
       std::clog << "expected result to have 3 process parameters" << std::endl;
       std::clog << "computed " << p1.size() << " process parameters" << std::endl;
     }
+#endif
 
     for (variable_list::iterator i = p1.begin(); i != p1.end(); ++i)
     {
@@ -88,8 +99,11 @@ BOOST_AUTO_TEST_CASE(test_main)
         std::clog << "expected 2nd process parameter to be of type Bool" << std::endl;
         std::clog << "computed process parameter of type "  << data::pp(i->sort()) << std::endl;
       }
+#ifdef Enable64bitNumbers
+      BOOST_CHECK(!(std::distance(p1.begin(), i) == 1 && data::pp(i->sort()).compare("Bool") == 0));
+#else
       BOOST_CHECK(!(std::distance(p1.begin(), i) == 1 && data::pp(i->sort()).compare("Bool") != 0));
-
+#endif
       if (std::distance(p1.begin(), i) == 2 && data::pp(i->sort()).compare("Pos") != 0)
       {
         std::clog << "--- failed test ---" << std::endl;

@@ -13,7 +13,7 @@
 #define BOOST_TEST_MODULE lts_pbisim_test
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
+#include "mcrl2/utilities/probabilistic_arbitrary_precision_fraction.h"
 #include "mcrl2/lts/detail/liblts_pbisim_bem.h"
 #include "mcrl2/lts/detail/liblts_pbisim_grv.h"
 
@@ -401,10 +401,10 @@ BOOST_AUTO_TEST_CASE(hash_and_equality_test)
   std::hash<prob_state> hasher;
   BOOST_CHECK(hasher(s1)==hasher(s2));
 
-  typedef probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> prob_state_alt;
+  typedef probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> prob_state_alt;
   prob_state_alt s3(1);
   prob_state_alt s4;
-  s4.add(1,mcrl2::lts::probabilistic_arbitrary_precision_fraction::one());
+  s4.add(1,mcrl2::utilities::probabilistic_arbitrary_precision_fraction::one());
   BOOST_CHECK(s3==s4);
   std::hash<prob_state_alt> hasher_alt;
   BOOST_CHECK(hasher_alt(s3)==hasher_alt(s4));

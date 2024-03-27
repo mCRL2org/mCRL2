@@ -82,13 +82,13 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
   }
   else if (pbes_system::is_not(x))
   {
-    pbes_expression phi = pbes_system::not_(atermpp::aterm_appl(x)).operand();
+    pbes_expression phi = pbes_system::not_(atermpp::aterm(x)).operand();
     return data::optimized_not(guard_impl(X, phi));
   }
   else if (pbes_system::is_and(x))
   {
-    pbes_expression phi = pbes_system::and_(atermpp::aterm_appl(x)).left();
-    pbes_expression psi = pbes_system::and_(atermpp::aterm_appl(x)).right();
+    pbes_expression phi = pbes_system::and_(atermpp::aterm(x)).left();
+    pbes_expression psi = pbes_system::and_(atermpp::aterm(x)).right();
     if (has_propositional_variable(psi, X))
     {
       return data::optimized_and(guard_s(phi), guard_impl(X, psi));
@@ -100,8 +100,8 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
   }
   else if (pbes_system::is_or(x))
   {
-    pbes_expression phi = pbes_system::or_(atermpp::aterm_appl(x)).left();
-    pbes_expression psi = pbes_system::or_(atermpp::aterm_appl(x)).right();
+    pbes_expression phi = pbes_system::or_(atermpp::aterm(x)).left();
+    pbes_expression psi = pbes_system::or_(atermpp::aterm(x)).right();
     if (has_propositional_variable(psi, X))
     {
       return data::optimized_and(guard_n(phi), guard_impl(X, psi));
@@ -113,18 +113,18 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
   }
   else if (pbes_system::is_imp(x))
   {
-    pbes_expression phi = pbes_system::imp(atermpp::aterm_appl(x)).left();
-    pbes_expression psi = pbes_system::imp(atermpp::aterm_appl(x)).right();
+    pbes_expression phi = pbes_system::imp(atermpp::aterm(x)).left();
+    pbes_expression psi = pbes_system::imp(atermpp::aterm(x)).right();
     return guard_impl(X, or_(not_(phi), psi));
   }
   else if (pbes_system::is_forall(x))
   {
-    pbes_expression phi = pbes_system::forall(atermpp::aterm_appl(x)).body();
+    pbes_expression phi = pbes_system::forall(atermpp::aterm(x)).body();
     return guard_impl(X, phi);
   }
   else if (pbes_system::is_exists(x))
   {
-    pbes_expression phi = pbes_system::exists(atermpp::aterm_appl(x)).body();
+    pbes_expression phi = pbes_system::exists(atermpp::aterm(x)).body();
     return guard_impl(X, phi);
   }
   throw mcrl2::runtime_error("guard_impl: unknown term " + pbes_system::pp(x));

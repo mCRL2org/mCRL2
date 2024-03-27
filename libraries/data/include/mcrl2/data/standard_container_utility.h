@@ -13,8 +13,15 @@
 #define MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 
 #include "mcrl2/utilities/detail/join.h"
+
+#include "mcrl2/data/data_configuration.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/bag64.h"
+#include "mcrl2/data/list64.h"
+#else
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
+#endif
 
 namespace mcrl2
 {
@@ -70,7 +77,7 @@ function_symbol list_enumeration(const sort_expression& s)
 /// \param e A data expression
 /// \return true iff e is the function symbol matching list_enumeration
 inline
-bool is_list_enumeration_function_symbol(const atermpp::aterm_appl& e)
+bool is_list_enumeration_function_symbol(const atermpp::aterm& e)
 {
   if (is_function_symbol(e))
   {
@@ -128,7 +135,7 @@ data_expression list_enumeration(const sort_expression& s, data_expression_list 
 /// \return true iff e is an application of function symbol
 ///         list_enumeration to a number of arguments
 inline
-bool is_list_enumeration_application(const atermpp::aterm_appl& e)
+bool is_list_enumeration_application(const atermpp::aterm& e)
 {
   if (is_application(e))
   {
@@ -163,7 +170,7 @@ function_symbol set_enumeration(const sort_expression& s)
 /// \param e A data expression
 /// \return true iff e is the function symbol matching set_enumeration
 inline
-bool is_set_enumeration_function_symbol(const atermpp::aterm_appl& e)
+bool is_set_enumeration_function_symbol(const atermpp::aterm& e)
 {
   if (is_function_symbol(e))
   {
@@ -222,7 +229,7 @@ data_expression set_enumeration(const sort_expression& s,
 /// \return true iff e is an application of function symbol
 ///         set_enumeration to a number of arguments
 inline
-bool is_set_enumeration_application(const atermpp::aterm_appl& e)
+bool is_set_enumeration_application(const atermpp::aterm& e)
 {
   if (is_application(e))
   {
@@ -297,7 +304,7 @@ function_symbol bag_enumeration(const sort_expression& s)
 /// \param e A data expression
 /// \return true iff e is the function symbol matching bag_enumeration
 inline
-bool is_bag_enumeration_function_symbol(const atermpp::aterm_appl& e)
+bool is_bag_enumeration_function_symbol(const atermpp::aterm& e)
 {
   if (is_function_symbol(e))
   {
@@ -373,7 +380,7 @@ data_expression bag_enumeration(const sort_expression& s,
 /// \return true iff e is an application of function symbol
 ///         bag_enumeration to a number of arguments
 inline
-bool is_bag_enumeration_application(const atermpp::aterm_appl& e)
+bool is_bag_enumeration_application(const atermpp::aterm& e)
 {
   if (is_application(e))
   {

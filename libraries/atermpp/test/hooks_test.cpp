@@ -26,15 +26,15 @@ const function_symbol& function_symbol_DataVarId()
   return function_symbol_DataVarId;
 }
 
-class variable: public aterm_appl
+class variable: public aterm
 {
   public:
     variable(const std::string& name)
-      : aterm_appl(function_symbol_DataVarId(), aterm_string(name))
+      : aterm(function_symbol_DataVarId(), aterm_string(name))
     {}
 
     variable(const aterm_string& name)
-      : aterm_appl(function_symbol_DataVarId(), name)
+      : aterm(function_symbol_DataVarId(), name)
     {}
 };
 
@@ -53,10 +53,10 @@ void f()
   BOOST_CHECK(variable_count == 2);
 }
 
-aterm_appl g()
+aterm g()
 {
   variable w("w");
-  return aterm_appl(function_symbol("f", 1), w);
+  return aterm(function_symbol("f", 1), w);
 }
 
 BOOST_AUTO_TEST_CASE(test_hooks)
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_hooks)
   BOOST_CHECK_EQUAL(variable_count, 2);
   detail::g_thread_term_pool().collect();
   BOOST_CHECK_EQUAL(variable_count, 1);
-  aterm_appl a = g();
+  aterm a = g();
   variable_count++;
   BOOST_CHECK_EQUAL(variable_count, 2);
   detail::g_thread_term_pool().collect();

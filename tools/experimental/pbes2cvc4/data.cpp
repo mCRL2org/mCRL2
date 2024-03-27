@@ -13,11 +13,19 @@
 #include "mcrl2/utilities/exception.h"
 
 #include "mcrl2/data/bool.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/int64.h"
+#include "mcrl2/data/nat64.h"
+#include "mcrl2/data/pos64.h"
+#include "mcrl2/data/real64.h"
+#include "mcrl2/data/list64.h"
+#else
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/list.h"
+#endif
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"
 
@@ -126,10 +134,14 @@ std::string translate_expression(data_expression expression, const std::map<vari
 		return "(- " + result + ")";
 	} else if (sort_nat::is_c0_function_symbol(expression)) {
 		return "0";
+#ifndef Enable64bitNumbers
 	} else if (sort_nat::is_cnat_application(expression)) {
 		application a(expression);
 		return translate_expression(*a.begin(), bound_variables, translation);
-	} else if (sort_pos::is_c1_function_symbol(expression) || sort_pos::is_cdub_application(expression)) {
+	} else if (sort_pos::is_cdub_application(expression)) {
+		return data::pp(expression);
+#endif
+	} else if (sort_pos::is_c1_function_symbol(expression)) {
 		return data::pp(expression);
 	}
 	
@@ -212,9 +224,15 @@ static std::string mangle_sort_name(sort_expression sort)
 
 static bool is_structured_sort(const mcrl2::data::data_specification &data, mcrl2::data::sort_expression sort)
 {
+#ifdef Enable64bitNumbers
+	if (sort == sort_nat::nnpair()) {
+		return true;
+	}
+#else
 	if (sort == sort_nat::natpair()) {
 		return true;
 	}
+#endif
 	if (sort_list::is_list(sort)) {
 		return true;
 	}
@@ -379,7 +397,9 @@ static std::map<mcrl2::data::function_symbol, function_definition> builtin_funct
 	output[sort_pos::plus()] = "+";
 	output[sort_pos::times()] = "*";
 	output[sort_pos::succ()] = data_equation(variable_list({p}), sort_pos::succ(p), sort_pos::plus(p, pos_one));
+#ifndef Enable64bitNumbers
 	output[sort_pos::add_with_carry()] = data_equation(variable_list({b, p, p2}), sort_pos::add_with_carry(b, p, p2), if_(b, sort_pos::succ(sort_pos::plus(p, p2)), sort_pos::plus(p, p2)));
+#endif
 	
 	
 	function_symbol nat_zero("zero", nat);

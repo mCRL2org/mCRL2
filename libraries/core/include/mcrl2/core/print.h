@@ -12,9 +12,9 @@
 #ifndef MCRL2_CORE_PRINT_H
 #define MCRL2_CORE_PRINT_H
 
+#include <cctype>
 #include "mcrl2/core/print_format.h"
 #include "mcrl2/core/traverser.h"
-#include <cctype>
 
 namespace mcrl2
 {
@@ -131,14 +131,6 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
-  void apply(const atermpp::term_appl<T>& x)
-  {
-    derived().enter(x);
-    derived().print(utilities::to_string(x));
-    derived().leave(x);
-  }
-
-  template <typename T>
   void apply(const std::list<T>& x)
   {
     derived().enter(x);
@@ -176,13 +168,6 @@ struct printer: public core::traverser<Derived>
     derived().leave(x);
   }
 
-  void apply(const atermpp::aterm& x)
-  {
-    derived().enter(x);
-    derived().print(utilities::to_string(x));
-    derived().leave(x);
-  }
-
   void apply(const atermpp::aterm_list& x)
   {
     derived().enter(x);
@@ -190,7 +175,7 @@ struct printer: public core::traverser<Derived>
     derived().leave(x);
   }
 
-  void apply(const atermpp::aterm_appl& x)
+  void apply(const atermpp::aterm& x)
   {
     derived().enter(x);
     derived().print(utilities::to_string(x));

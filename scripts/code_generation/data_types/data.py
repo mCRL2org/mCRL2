@@ -265,7 +265,7 @@ class function_declaration():
         extra_parameters.append(self.sort_expression.domain.code(spec))
       except:
         pass # in case sort_expression has no domain
-    return "        result[{0}({1})]=std::pair<std::function<data_expression(const data_expression&)>, std::string>({0}_application,".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters), data_parameters) + \
+    return "        result[{0}({1})]=std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>({0}_application,".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters), data_parameters) + \
                     "\"{0}_manual_implementation\");\n".format(add_namespace(self.label, self.namespace))
 
 
@@ -607,7 +607,7 @@ ${cases}
       /// \\param e A data expression.
       /// \\return true iff e is the function symbol matching ${namestring}.
       inline
-      bool is_${functionname}_function_symbol(const atermpp::aterm_appl& e)
+      bool is_${functionname}_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -630,7 +630,7 @@ ${cases}
       /// \\param e A data expression.
       /// \\return true iff e is the function symbol matching ${namestring}.
       inline
-      bool is_${functionname}_function_symbol(const atermpp::aterm_appl& e)
+      bool is_${functionname}_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -703,28 +703,28 @@ ${cases}
       /// \\details This function is to be implemented manually. \
       /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
       inline
-      const data_expression& ${functionname}_manual_implementation();
+      void ${functionname}_manual_implementation(data_expression& result);
 
       /// \\brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      data_expression ${functionname}_application(const data_expression& a)
+      void ${functionname}_application(data_expression& result, const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==${functionname}());
-        return ${functionname}_manual_implementation(${domain_parameters});
+        ${functionname}_manual_implementation(result${domain_parameters});
       }\n
 ''')
 
         formal_sort_params = ['const sort_expression& {0}'.format(fcode(x, spec)) for x in sort_params]
-        formal_data_params = ['const data_expression& {0}'.format(fcode(x, spec)) for x in data_params]
+        # In the code  below data_params are used, but it is not declared nor defined... Long live Python.
         domain_params = ['{0}.sort()'.format(x) for x in data_params] if polymorphic else []
         return CODE_TEMPLATE.substitute(
           namestring = escape(fullname),
           sortparameterstring = '' if sort_params == '' else '\n      '.join(['/// \\param {0} A sort expression.'.format(fcode(x, spec)) for x in sort_params]),
           functionname = name,
           actsortparameters = ', '.join([fcode(x, spec) for x in sort_params + domain_params]),
-          domain_parameters = ''.join([fcode(x, spec) + ', ' for x in domain_params]),
+          domain_parameters = ', '.join([fcode(x, spec) + ', ' for x in domain_params]),
           parameters = ', '.join(formal_sort_params),
         )
 
@@ -737,16 +737,16 @@ ${cases}
       ${dataparameterstring}
       /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
       inline
-      data_expression ${functionname}_manual_implementation(${parameters});\n
+      void ${functionname}_manual_implementation(data_expression& result, ${parameters});\n
 
       /// \\brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
       inline
-      data_expression ${functionname}_application(const data_expression& a1)
+      void ${functionname}_application(data_expression& result, const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
         // assert(a.head()==${functionname}());
-        return ${functionname}_manual_implementation(${domain_parameters}${aaparameters});
+        ${functionname}_manual_implementation(result, ${domain_parameters}${aaparameters});
       }\n
 ''')
 
@@ -771,7 +771,7 @@ ${cases}
       /// \\return true iff e is an application of function symbol ${functionname} to a
       ///     number of arguments.
       inline
-      bool is_${functionname}_application(const atermpp::aterm_appl& e)
+      bool is_${functionname}_application(const atermpp::aterm& e)
       {
         return is_application(e) && is_${functionname}_function_symbol(atermpp::down_cast<application>(e).head());
       }
@@ -1983,7 +1983,7 @@ class mapping_specification():
       code += "      }\n"
       code += "\n\n"
       code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
-      code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;\n"
+      code += "      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;\n"
       code += "      /// \\brief Give all system defined mappings that are to be implemented in C++ code for %s\n" % (escape(namespace_string))
       for s in self.declarations.sort_parameters(spec):
         code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
@@ -2076,7 +2076,7 @@ class constructor_specification():
     code += "      }\n"
 
     code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
-    code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;\n"
+    code += "      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;\n"
     code += "      /// \\brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for %s.\n" % (escape(namespace_string))
     for s in self.declarations.sort_parameters(spec):
       code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
@@ -2288,7 +2288,7 @@ class specification():
     res.append(str(self.equation_specification))
     return "\n".join(res)
 
-  def code(self):
+  def code(self, infilename):
     # Add structured sorts to constructor declarations
     self.function_specification = self.sort_specification.merge_structured_sorts(self.function_specification)
     code  = ""
@@ -2306,8 +2306,8 @@ class specification():
     code += "/// This file was generated from the data sort specification\n"
     code += "/// mcrl2/data/build/%s.spec.\n" % (remove_underscore(self.get_namespace()))
     code += "\n"
-    code += "#ifndef MCRL2_DATA_%s_H\n" % (self.get_namespace().upper())
-    code += "#define MCRL2_DATA_%s_H\n\n" % (self.get_namespace().upper())
+    code += "#ifndef MCRL2_DATA_%s_H\n" % (infilename.removesuffix(".spec").upper())
+    code += "#define MCRL2_DATA_%s_H\n\n" % (infilename.removesuffix(".spec").upper())
     code += "#include \"functional\"    // std::function\n"
     code += "#include \"mcrl2/utilities/exception.h\"\n"
     code += "#include \"mcrl2/data/basic_sort.h\"\n"
@@ -2349,7 +2349,7 @@ class specification():
     code += "} // namespace mcrl2\n\n"
     code += ("#include \"mcrl2/data/detail/%s.h\" // This file contains the manual implementations of rewrite functions.\n" % (remove_underscore(self.get_namespace()))
                  if self.has_cplusplus_implementable_code() else "")
-    code += "#endif // MCRL2_DATA_%s_H\n" % (self.get_namespace().upper())
+    code += "#endif // MCRL2_DATA_%s_H\n" % (infilename.removesuffix(".spec").upper())
     code = code.replace("__", "_")
     p = re.compile('sort_([A-Za-z0-9]*)_([ ]|:)')
     code = p.sub(r'sort_\1\2', code)

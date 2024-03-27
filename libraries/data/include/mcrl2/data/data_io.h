@@ -21,7 +21,7 @@ class data_specification;
 namespace detail
 {
   /// \returns A term that represetns this data_specification.
-  atermpp::aterm_appl data_specification_to_aterm(const data_specification& s);
+  atermpp::aterm data_specification_to_aterm(const data_specification& s);
 }
 
 /// \brief Transforms DataVarId to DataVarIdNoIndex and transforms OpId to OpIdNoIndex

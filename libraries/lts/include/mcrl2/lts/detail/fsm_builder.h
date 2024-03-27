@@ -71,7 +71,7 @@ inline lts_fsm_base::probabilistic_state parse_distribution(const std::string& d
     }
     std::string enumerator = split_string_until(s,"/");
     std::string denominator = split_string_until(s," ","]");
-    result.emplace_back(state_number - 1, probabilistic_arbitrary_precision_fraction(enumerator,denominator));
+    result.emplace_back(state_number - 1, utilities::probabilistic_arbitrary_precision_fraction(enumerator,denominator));
   }
   return lts_fsm_base::probabilistic_state(result.begin(), result.end());
 }

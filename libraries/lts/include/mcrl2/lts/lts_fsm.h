@@ -19,7 +19,7 @@
 #ifndef MCRL2_LTS_LTS_FSM_H
 #define MCRL2_LTS_LTS_FSM_H
 
-#include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
+#include "mcrl2/utilities/probabilistic_arbitrary_precision_fraction.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/action_label_string.h"
 
@@ -83,8 +83,8 @@ namespace detail
 class lts_fsm_base
 {
   public:
-    typedef mcrl2::lts::probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> probabilistic_state;
-    typedef mcrl2::lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> state_probability_pair;
+    typedef mcrl2::lts::probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> probabilistic_state;
+    typedef mcrl2::lps::state_probability_pair<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> state_probability_pair;
 
   protected:
 
@@ -271,7 +271,7 @@ class lts_fsm_t : public lts< state_label_fsm, action_label_string, detail::lts_
 class probabilistic_lts_fsm_t : 
         public probabilistic_lts< state_label_fsm, 
                                   action_label_string, 
-                                  probabilistic_state< std::size_t, probabilistic_arbitrary_precision_fraction >,
+                                  probabilistic_state< std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction >,
                                   detail::lts_fsm_base >
 {
   public:

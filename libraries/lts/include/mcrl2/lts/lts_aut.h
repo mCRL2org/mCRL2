@@ -19,7 +19,7 @@
 #ifndef MCRL2_LTS_LTS_AUT_H
 #define MCRL2_LTS_LTS_AUT_H
 
-#include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
+#include "mcrl2/utilities/probabilistic_arbitrary_precision_fraction.h"
 #include "mcrl2/lts/state_label_empty.h"
 #include "mcrl2/lts/action_label_string.h"
 #include "mcrl2/lts/probabilistic_lts.h"
@@ -98,7 +98,7 @@ class lts_aut_t : public lts< state_label_empty, action_label_string, detail::lt
 class probabilistic_lts_aut_t : 
             public probabilistic_lts< state_label_empty, 
                                       action_label_string, 
-                                      mcrl2::lts::probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
+                                      mcrl2::lts::probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>,
                                       detail::lts_aut_base>
 {
   public:

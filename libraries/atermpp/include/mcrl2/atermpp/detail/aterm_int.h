@@ -10,7 +10,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_INT_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_INT_H
 
-#include "mcrl2/atermpp/detail/aterm.h"
+#include "mcrl2/atermpp/detail/aterm_core.h"
 
 namespace atermpp
 {

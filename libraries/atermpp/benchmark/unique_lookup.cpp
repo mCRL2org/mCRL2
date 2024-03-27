@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
   std::size_t size = 400000;
   std::size_t iterations = 1000;
 
-  std::vector<aterm_appl> terms;
+  std::vector<aterm> terms;
   for (std::size_t id = 0; id < number_of_threads; ++id)
   {
     terms.push_back(create_nested_function<2>("f", std::to_string(id), size));
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   // Define a function that repeatedly creates nested function applications.
   auto nested_function = [&](int id) -> void
     {
-      aterm_appl f;
+      aterm f;
       for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
       {
         f = create_nested_function<2>("f", std::to_string(id), size);

@@ -32,13 +32,13 @@ template<std::size_t N,
          typename std::enable_if<std::is_convertible<
                                     typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
                                     aterm>::value, void>::type* = nullptr>
-inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
+inline std::array<unprotected_aterm_core, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
 {
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
   mcrl2::utilities::mcrl2_unused(end);
  
   // Copy the arguments into this array.
-  std::array<unprotected_aterm, N> arguments;
+  std::array<unprotected_aterm_core, N> arguments;
   for (size_t i = 0; i < N; ++i)
   {
     assert(it != end);
@@ -62,13 +62,13 @@ template<std::size_t N,
                                                                 typename InputIterator::value_type&,
                                                                 typename InputIterator::value_type>::type,
                                     void>::value, void>::type* = nullptr>
-inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
+inline std::array<unprotected_aterm_core, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
 {
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
   mcrl2::utilities::mcrl2_unused(end);
  
   // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
-  std::array<unprotected_aterm, N> arguments;
+  std::array<unprotected_aterm_core, N> arguments;
   for (size_t i = 0; i < N; ++i)
   {
     assert(it != end);
@@ -141,23 +141,23 @@ void ATERM_POOL_STORAGE::add_deletion_hook(function_symbol sym, term_callback ca
 ATERM_POOL_STORAGE_TEMPLATES
 bool ATERM_POOL_STORAGE::create_int(aterm& term, std::size_t value)
 {
-  return emplace(term, value);
+  return emplace(reinterpret_cast<aterm_core&>(term), value);   // TODO: remove reinterpret_cast
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
 bool ATERM_POOL_STORAGE::create_term(aterm& term, const function_symbol& symbol)
 {
   assert(symbol.arity() == 0);
-  return emplace(term, symbol);
+  return emplace(reinterpret_cast<aterm_core&>(term), symbol);  // TODO: remove reinterpret_cast
 }
 
 template <std::size_t N>
-void store_in_argument_array_(std::size_t , std::array<unprotected_aterm, N>& )
+void store_in_argument_array_(std::size_t , std::array<unprotected_aterm_core, N>& )
 {}
 
 template <std::size_t N, class FUNCTION_OR_TERM_TYPE, typename... Args>
 void store_in_argument_array_(std::size_t i, 
-                              std::array<unprotected_aterm, N>& argument_array, 
+                              std::array<unprotected_aterm_core, N>& argument_array, 
                               FUNCTION_OR_TERM_TYPE& function_or_term, 
                               const Args&... args)
 {
@@ -182,7 +182,7 @@ void store_in_argument_array_(std::size_t i,
 }
 
 template <std::size_t N, typename... Args>
-void store_in_argument_array(std::array<unprotected_aterm, N>& argument_array,
+void store_in_argument_array(std::array<unprotected_aterm_core, N>& argument_array,
                              const Args&... args)
 {
   store_in_argument_array_(0, argument_array, args...);
@@ -197,11 +197,11 @@ bool ATERM_POOL_STORAGE::create_appl(aterm& term, const function_symbol& symbol,
   assert(symbol.arity() == sizeof...(arguments));
   if constexpr (detail::are_terms<Terms...>::value)
   {
-    return emplace(term, symbol, arguments...);
+    return emplace(reinterpret_cast<aterm_core&>(term), symbol, arguments...); // TODO remove reinterpret_cast.
   }
   else 
   {
-    std::array<unprotected_aterm, N> argument_array;
+    std::array<unprotected_aterm_core, N> argument_array;
     
     // Evaluate the functions or terms and put the result in "argument_array".
     store_in_argument_array(argument_array, arguments...);
@@ -228,7 +228,7 @@ bool ATERM_POOL_STORAGE::create_appl_iterator(aterm& term,
                                         InputIterator begin,
                                         InputIterator end)
 {
-  std::array<unprotected_aterm, N> arguments = construct_arguments<N>(begin, end, converter);
+  std::array<unprotected_aterm_core, N> arguments = construct_arguments<N>(begin, end, converter);
   return emplace(term, symbol, arguments);
 }
 
@@ -257,7 +257,7 @@ bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
   mcrl2::utilities::mcrl2_unused(end);
  
-  MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm, symbol.arity());
+  MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm_core, symbol.arity());
   for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
     assert(it != end);
@@ -287,7 +287,7 @@ bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
   // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
   mcrl2::utilities::mcrl2_unused(end);
  
-  MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm, symbol.arity());
+  MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm_core, symbol.arity());
   for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
     assert(it != end);
@@ -360,14 +360,14 @@ void ATERM_POOL_STORAGE::resize_if_needed()
 /// PRIVATE FUNCTIONS
 
 ATERM_POOL_STORAGE_TEMPLATES
-void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm term)
+void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm_core term)
 {
   for (const auto& [symbol, callback] : m_deletion_hooks)
   {
     if (symbol == term.function())
     {
       assert(verify_term(*detail::address(term)));
-      callback(static_cast<const aterm&>(term));
+      callback(reinterpret_cast<const aterm&>(term));   // TODO Check whether this cast is OK. It was a static cast. 
     }
   }
 }
@@ -420,10 +420,10 @@ typename ATERM_POOL_STORAGE::iterator ATERM_POOL_STORAGE::destroy(iterator it)
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<typename ...Args>
-bool ATERM_POOL_STORAGE::emplace(aterm& term, Args&&... args)
+bool ATERM_POOL_STORAGE::emplace(aterm_core& term, Args&&... args)
 {
   auto [it, added] = m_term_set.emplace(std::forward<Args>(args)...);
-  new (&term) atermpp::unprotected_aterm(&*it); 
+  new (&term) atermpp::unprotected_aterm_core(&*it); 
 
   if (added)
   {

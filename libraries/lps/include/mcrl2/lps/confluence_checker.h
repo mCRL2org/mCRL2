@@ -135,7 +135,7 @@ namespace detail
  **/
 inline process::action_label make_ctau_act_id()
 {
-  static atermpp::aterm_appl ctau_act_id = atermpp::aterm_appl(core::detail::function_symbol_ActId(), atermpp::aterm_appl(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
+  static atermpp::aterm ctau_act_id = atermpp::aterm(core::detail::function_symbol_ActId(), atermpp::aterm(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
 
   assert(atermpp::detail::address(ctau_act_id));
 
@@ -147,7 +147,7 @@ inline process::action_label make_ctau_act_id()
  **/
 inline process::action make_ctau_action()
 {
-  static atermpp::aterm_appl ctau_action = atermpp::aterm_appl(core::detail::function_symbol_Action(), make_ctau_act_id(), atermpp::aterm_list());
+  static atermpp::aterm ctau_action = atermpp::aterm(core::detail::function_symbol_Action(), make_ctau_act_id(), atermpp::aterm_list());
 
   assert(atermpp::detail::address(ctau_action));
 
@@ -267,7 +267,7 @@ class Confluence_Checker
 
 // Auxiliary functions ----------------------------------------------------------------------------
 
-static
+static inline
 data::mutable_map_substitution<> get_substitutions_from_assignments(const data::assignment_list& a_assignments)
 {
   data::mutable_map_substitution<> v_substitutions;
@@ -280,7 +280,7 @@ data::mutable_map_substitution<> get_substitutions_from_assignments(const data::
 }
 
 // ----------------------------------------------------------------------------------------------
-static
+static inline
 data::data_expression get_subst_equation_from_assignments(
   const data::variable_list& a_variables,
   data::assignment_list a_assignments_1,
@@ -347,7 +347,7 @@ data::data_expression get_subst_equation_from_assignments(
 
 // ----------------------------------------------------------------------------------------------
 
-static
+static inline
 data::data_expression get_equation_from_assignments(
   const data::variable_list& a_variables,
   data::assignment_list a_assignments_1,
@@ -411,7 +411,7 @@ data::data_expression get_subst_equation_from_actions(
 
 // ----------------------------------------------------------------------------------------------
 
-static data::assignment_list get_full_assignment_list(
+static inline data::assignment_list get_full_assignment_list(
   data::assignment_list a_assignment_list,
   const data::variable_list& a_variables)
 {

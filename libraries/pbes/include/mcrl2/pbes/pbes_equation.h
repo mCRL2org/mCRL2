@@ -23,7 +23,7 @@ namespace pbes_system
 {
 
 class pbes_equation;
-atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
+atermpp::aterm pbes_equation_to_aterm(const pbes_equation& eqn);
 bool is_well_typed(const pbes_equation& eqn);
 bool has_propositional_variables(const pbes_expression& x);
 
@@ -179,9 +179,9 @@ operator!=(const pbes_equation& x, const pbes_equation& y)
 /// \brief Conversion to atermaPpl.
 /// \return The specification converted to aterm format.
 inline
-atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
+atermpp::aterm pbes_equation_to_aterm(const pbes_equation& eqn)
 {
-  return atermpp::aterm_appl(core::detail::function_symbol_PBEqn(), eqn.symbol(), eqn.variable(), eqn.formula());
+  return atermpp::aterm(core::detail::function_symbol_PBEqn(), eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
 // template function overloads

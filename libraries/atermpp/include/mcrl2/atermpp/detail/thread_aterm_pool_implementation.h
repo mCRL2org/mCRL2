@@ -67,7 +67,7 @@ template<class Term, class INDEX_TYPE, class ...Terms>
 void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sym, const Terms&... arguments)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
-  std::array<unprotected_aterm, sizeof...(arguments)> argument_array;
+  std::array<unprotected_aterm_core, sizeof...(arguments)> argument_array;
   store_in_argument_array(argument_array, arguments...);
 
   bool added;
@@ -126,7 +126,7 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
   if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
 }
 
-void thread_aterm_pool::register_variable(aterm* variable)
+void thread_aterm_pool::register_variable(aterm_core* variable)
 {
   if constexpr (EnableVariableRegistrationMetrics) { ++m_variable_insertions; }
 
@@ -146,7 +146,7 @@ void thread_aterm_pool::register_variable(aterm* variable)
   mcrl2::utilities::mcrl2_unused(inserted);
 }
 
-void thread_aterm_pool::deregister_variable(aterm* variable)
+void thread_aterm_pool::deregister_variable(aterm_core* variable)
 {
   mcrl2::utilities::shared_guard guard = m_shared_mutex.lock_shared();
   m_variables->erase(variable);
@@ -177,7 +177,7 @@ void thread_aterm_pool::deregister_container(aterm_container* container)
 
 void thread_aterm_pool::mark()
 {
-  for (const aterm* variable : *m_variables) 
+  for (const aterm_core* variable : *m_variables) 
   {
     if (variable != nullptr)
     {

@@ -18,20 +18,20 @@ using namespace atermpp;
 BOOST_AUTO_TEST_CASE(test_main)
 {
   aterm_int i(10);
-  atermpp::aterm x=aterm_appl(function_symbol("x",0));
-  atermpp::aterm y=aterm_appl(function_symbol("y",0));
-  aterm_appl f(function_symbol("f", 2), x, y);
+  atermpp::aterm x=aterm(function_symbol("x",0));
+  atermpp::aterm y=aterm(function_symbol("y",0));
+  aterm f(function_symbol("f", 2), x, y);
   BOOST_CHECK(pp(f) == "f(x,y)");
-  aterm_appl f1(function_symbol("f", 0));
+  aterm f1(function_symbol("f", 0));
   BOOST_CHECK(pp(f1) == "f");
 
   function_symbol f2("f2", 8);
   aterm_int d(1);
-  aterm_appl long_term(f2,d,d,d,d,d,d,d,d);
+  aterm long_term(f2,d,d,d,d,d,d,d,d);
   BOOST_CHECK(pp(long_term) == "f2(1,1,1,1,1,1,1,1)");
 
   function_symbol f3("f2", 16);
-  aterm_appl very_long_term(f3,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d);
+  aterm very_long_term(f3,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d);
   BOOST_CHECK(pp(very_long_term) == "f2(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)");
 
   atermpp::aterm_string s("s"); // g++ 3.4.4 complains if atermpp:: is removed :-(

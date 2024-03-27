@@ -181,7 +181,7 @@ class Info
     // Perform an occur check of expression t2 in expression t1.
     static bool occurs(const data_expression& t1, const data_expression& t2)
     {
-      return atermpp::find_if(t1,[&](const atermpp::aterm_appl& t){return t == t2;}) != atermpp::aterm_appl();
+      return atermpp::find_if(t1,[&](const atermpp::aterm& t){return t == t2;}) != atermpp::aterm();
     }
 
     /// \brief Compares two guards.
@@ -209,6 +209,22 @@ class Info
                 ),
                 compare_address(term1, term2)
              );
+    }
+
+    /// \brief Returns the number of arguments of the main operator of a term.
+    /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
+    /// \return 0, if \c aterm is a constant or a variable.
+    ///         The number of arguments of the main operator, otherwise.
+    std::size_t get_number_of_arguments(const data_expression& a_term) const
+    {
+      if (!is_variable(a_term) && !is_function_symbol(a_term) && !is_abstraction(a_term) && !is_machine_number(a_term))
+      {
+        return atermpp::down_cast<application>(a_term).size();
+      }
+      else
+      {
+        return 0;
+      }
     }
 
     /// \brief Returns the main operator of the term \c term;

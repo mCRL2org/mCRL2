@@ -84,13 +84,13 @@ inline state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
     }
     else if (regular_formulas::is_trans(reg_frm))
     {
-      const regular_formula R = trans(atermpp::aterm_appl(reg_frm)).operand();
+      const regular_formula R = trans(atermpp::aterm(reg_frm)).operand();
       //red([R+]phi) -> red([R.R*]phi)
       part = translate_reg_frms_appl(must(seq(R,trans_or_nil(R)),phi),xyz_generator);
     }
     else if (regular_formulas::is_trans_or_nil(reg_frm))
     {
-      const regular_formula R = trans_or_nil(atermpp::aterm_appl(reg_frm)).operand();
+      const regular_formula R = trans_or_nil(atermpp::aterm(reg_frm)).operand();
       //red([R*]phi) -> nu X. red(phi) && red([R]X),
       //where X does not occur free in phi and R
       const identifier_string X = xyz_generator("X");
@@ -129,13 +129,13 @@ inline state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
     }
     else if (regular_formulas::is_trans(reg_frm))
     {
-      const regular_formula R = trans(atermpp::aterm_appl(reg_frm)).operand();
+      const regular_formula R = trans(atermpp::aterm(reg_frm)).operand();
       //red(<R+>phi) -> red(<R.R*>phi)
       part = translate_reg_frms_appl(may(seq(R,trans_or_nil(R)),phi),xyz_generator);
     }
     else if (regular_formulas::is_trans_or_nil(reg_frm))
     {
-      const regular_formula R = trans_or_nil(atermpp::aterm_appl(reg_frm)).operand();
+      const regular_formula R = trans_or_nil(atermpp::aterm(reg_frm)).operand();
       //red(<R*>phi) -> mu X. red(phi) || red(<R>X),
       //where X does not occur free in phi and R
       const identifier_string X =xyz_generator("X");

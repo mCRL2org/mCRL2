@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_APPL_ITERATOR_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_ITERATOR_H
 
-#include "mcrl2/atermpp/detail/aterm_appl.h"
+#include "mcrl2/atermpp/detail/aterm.h"
 
 namespace atermpp
 {
@@ -21,8 +21,7 @@ namespace atermpp
 template <typename Term>
 class term_appl_iterator
 {
-    template <class T>
-    friend class term_appl;
+    friend class aterm;
 
     template < class Derived, class Base >
     friend term_appl_iterator<Derived> detail::aterm_appl_iterator_cast(term_appl_iterator<Base> a,
@@ -229,9 +228,9 @@ namespace detail
                                                                      std::is_base_of<aterm, Derived>::value
                                                                 >::type* /* = nullptr */)
   {
-    static_assert(sizeof(Derived) == sizeof(aterm),
+    static_assert(sizeof(Derived) == sizeof(_aterm*),
                 "term_appl_iterator only works on aterm classes to which no extra fields are added");
-    static_assert(sizeof(Base) == sizeof(aterm),
+    static_assert(sizeof(Base) == sizeof(_aterm*),
                 "term_appl_iterator only works on aterm classes to which no extra fields are added");
     return term_appl_iterator<Derived>(reinterpret_cast<const Derived*>(a.m_term));
   }

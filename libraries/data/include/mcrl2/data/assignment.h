@@ -23,18 +23,18 @@ namespace data
 
 //--- start generated classes ---//
 /// \\brief Assignment expression
-class assignment_expression: public atermpp::aterm_appl
+class assignment_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     assignment_expression()
-      : atermpp::aterm_appl(core::detail::default_values::WhrDecl)
+      : atermpp::aterm(core::detail::default_values::WhrDecl)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit assignment_expression(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_WhrDecl(*this));
     }
@@ -53,14 +53,14 @@ typedef atermpp::term_list<assignment_expression> assignment_expression_list;
 typedef std::vector<assignment_expression>    assignment_expression_vector;
 
 // prototypes
-inline bool is_assignment(const atermpp::aterm_appl& x);
-inline bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x);
+inline bool is_assignment(const atermpp::aterm& x);
+inline bool is_untyped_identifier_assignment(const atermpp::aterm& x);
 
 /// \\brief Test for a assignment_expression expression
 /// \\param x A term
 /// \\return True if \\a x is a assignment_expression expression
 inline
-bool is_assignment_expression(const atermpp::aterm_appl& x)
+bool is_assignment_expression(const atermpp::aterm& x)
 {
   return data::is_assignment(x) ||
          data::is_untyped_identifier_assignment(x);
@@ -90,12 +90,12 @@ inline void swap(assignment_expression& t1, assignment_expression& t2)
 class assignment: public assignment_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     assignment()
       : assignment_expression(core::detail::default_values::DataVarIdInit)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit assignment(const atermpp::aterm& term)
       : assignment_expression(term)
@@ -103,9 +103,9 @@ class assignment: public assignment_expression
       assert(core::detail::check_term_DataVarIdInit(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     assignment(const variable& lhs, const data_expression& rhs)
-      : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), lhs, rhs))
+      : assignment_expression(atermpp::aterm(core::detail::function_symbol_DataVarIdInit(), lhs, rhs))
     {}
 
     /// Move semantics
@@ -137,7 +137,7 @@ class assignment: public assignment_expression
 /// \\brief Make_assignment constructs a new term into a given address.
 /// \\ \param t The reference into which the new assignment is constructed. 
 template <class... ARGUMENTS>
-inline void make_assignment(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_DataVarIdInit(), args...);
 }
@@ -152,7 +152,7 @@ typedef std::vector<assignment>    assignment_vector;
 /// \\param x A term
 /// \\return True if \\a x is a assignment expression
 inline
-bool is_assignment(const atermpp::aterm_appl& x)
+bool is_assignment(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::DataVarIdInit;
 }
@@ -181,12 +181,12 @@ inline void swap(assignment& t1, assignment& t2)
 class untyped_identifier_assignment: public assignment_expression
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_identifier_assignment()
       : assignment_expression(core::detail::default_values::UntypedIdentifierAssignment)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_identifier_assignment(const atermpp::aterm& term)
       : assignment_expression(term)
@@ -194,14 +194,14 @@ class untyped_identifier_assignment: public assignment_expression
       assert(core::detail::check_term_UntypedIdentifierAssignment(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     untyped_identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs)
-      : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), lhs, rhs))
+      : assignment_expression(atermpp::aterm(core::detail::function_symbol_UntypedIdentifierAssignment(), lhs, rhs))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     untyped_identifier_assignment(const std::string& lhs, const data_expression& rhs)
-      : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), core::identifier_string(lhs), rhs))
+      : assignment_expression(atermpp::aterm(core::detail::function_symbol_UntypedIdentifierAssignment(), core::identifier_string(lhs), rhs))
     {}
 
     /// Move semantics
@@ -233,7 +233,7 @@ class untyped_identifier_assignment: public assignment_expression
 /// \\brief Make_untyped_identifier_assignment constructs a new term into a given address.
 /// \\ \param t The reference into which the new untyped_identifier_assignment is constructed. 
 template <class... ARGUMENTS>
-inline void make_untyped_identifier_assignment(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_untyped_identifier_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedIdentifierAssignment(), args...);
 }
@@ -248,7 +248,7 @@ typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignm
 /// \\param x A term
 /// \\return True if \\a x is a untyped_identifier_assignment expression
 inline
-bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
+bool is_untyped_identifier_assignment(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::UntypedIdentifierAssignment;
 }

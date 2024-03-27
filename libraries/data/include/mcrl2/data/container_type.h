@@ -23,18 +23,18 @@ namespace data
 
 //--- start generated classes ---//
 /// \\brief Container type
-class container_type: public atermpp::aterm_appl
+class container_type: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     container_type()
-      : atermpp::aterm_appl(core::detail::default_values::SortConsType)
+      : atermpp::aterm(core::detail::default_values::SortConsType)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit container_type(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_SortConsType(*this));
     }
@@ -76,12 +76,12 @@ inline void swap(container_type& t1, container_type& t2)
 class list_container: public container_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     list_container()
       : container_type(core::detail::default_values::SortList)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit list_container(const atermpp::aterm& term)
       : container_type(term)
@@ -100,7 +100,7 @@ class list_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a list_container expression
 inline
-bool is_list_container(const atermpp::aterm_appl& x)
+bool is_list_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortList;
 }
@@ -129,12 +129,12 @@ inline void swap(list_container& t1, list_container& t2)
 class set_container: public container_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     set_container()
       : container_type(core::detail::default_values::SortSet)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit set_container(const atermpp::aterm& term)
       : container_type(term)
@@ -153,7 +153,7 @@ class set_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a set_container expression
 inline
-bool is_set_container(const atermpp::aterm_appl& x)
+bool is_set_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortSet;
 }
@@ -182,12 +182,12 @@ inline void swap(set_container& t1, set_container& t2)
 class bag_container: public container_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     bag_container()
       : container_type(core::detail::default_values::SortBag)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit bag_container(const atermpp::aterm& term)
       : container_type(term)
@@ -206,7 +206,7 @@ class bag_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a bag_container expression
 inline
-bool is_bag_container(const atermpp::aterm_appl& x)
+bool is_bag_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortBag;
 }
@@ -235,12 +235,12 @@ inline void swap(bag_container& t1, bag_container& t2)
 class fset_container: public container_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     fset_container()
       : container_type(core::detail::default_values::SortFSet)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit fset_container(const atermpp::aterm& term)
       : container_type(term)
@@ -259,7 +259,7 @@ class fset_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a fset_container expression
 inline
-bool is_fset_container(const atermpp::aterm_appl& x)
+bool is_fset_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortFSet;
 }
@@ -288,12 +288,12 @@ inline void swap(fset_container& t1, fset_container& t2)
 class fbag_container: public container_type
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     fbag_container()
       : container_type(core::detail::default_values::SortFBag)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit fbag_container(const atermpp::aterm& term)
       : container_type(term)
@@ -312,7 +312,7 @@ class fbag_container: public container_type
 /// \\param x A term
 /// \\return True if \\a x is a fbag_container expression
 inline
-bool is_fbag_container(const atermpp::aterm_appl& x)
+bool is_fbag_container(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortFBag;
 }

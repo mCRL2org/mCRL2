@@ -52,7 +52,7 @@ struct compare_sort
     : s(s_)
   {}
 
-  bool operator()(const atermpp::aterm_appl& t) const
+  bool operator()(const atermpp::aterm& t) const
   {
     return is_sort_expression(t) && s == t;
   }

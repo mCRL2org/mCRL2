@@ -100,7 +100,7 @@ class RewriterJitty: public Rewriter
     void apply_cpp_code_to_higher_order_term(
                   data_expression& result,
                   const application& t,
-                  const std::function<data_expression(const data_expression&)> rewrite_cpp_code,
+                  const std::function<void(data_expression&, const data_expression&)> rewrite_cpp_code,
                   ITERATOR begin,
                   ITERATOR end,
                   substitution_type& sigma);

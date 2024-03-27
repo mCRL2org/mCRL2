@@ -14,8 +14,12 @@
 
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/fset.h"
 
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/fset64.h"
+#else
+#include "mcrl2/data/fset.h"
+#endif
 namespace mcrl2
 {
 

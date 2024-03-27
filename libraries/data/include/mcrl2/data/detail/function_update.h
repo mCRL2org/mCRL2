@@ -25,7 +25,7 @@ inline function_symbol function_update(const sort_expression& s, const sort_expr
 inline function_symbol function_update_stable(const sort_expression& s, const sort_expression& t);
 
 
-inline data_expression is_not_a_function_update_manual_implementation(const data_expression& f)
+inline void is_not_a_function_update_manual_implementation(data_expression& result, const data_expression& f)
 {
   function_sort sort=atermpp::down_cast<function_sort>(f.sort());
   assert(sort.domain().front().size()==1);
@@ -37,19 +37,23 @@ inline data_expression is_not_a_function_update_manual_implementation(const data
     std::set<variable> variable_set = find_free_variables(f);
     if (variable_set.size()==0)
     {
-      return sort_bool::true_();
+      result=sort_bool::true_();
+      return;
     }
   }
-  return sort_bool::false_();
+  result=sort_bool::false_();
+  return;
 }
 
-inline data_expression if_always_else_manual_implementation(const data_expression& b, const data_expression& e1, const data_expression& e2)
+inline void if_always_else_manual_implementation(data_expression& result, const data_expression& b, const data_expression& e1, const data_expression& e2)
 {
   if (b==sort_bool::true_())
   {
-    return e1;
+    result=e1;
+    return;
   }
-  return e2;
+  result=e2;
+  return;
 }
 
 } // namespace data

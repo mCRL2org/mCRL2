@@ -40,8 +40,8 @@ namespace state_formulas {
 inline
 state_formula translate_regular_formulas(const state_formula& x)
 {
-  atermpp::aterm_appl result = regular_formulas::detail::translate_reg_frms(x);
-  if (result == atermpp::aterm_appl())
+  atermpp::aterm result = regular_formulas::detail::translate_reg_frms(x);
+  if (result == atermpp::aterm())
   {
     throw mcrl2::runtime_error("regular formula translation error");
   }

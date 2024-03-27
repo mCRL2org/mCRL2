@@ -20,25 +20,25 @@ namespace lps {
 
 //--- start generated class stochastic_distribution ---//
 /// \\brief A stochastic distribution
-class stochastic_distribution: public atermpp::aterm_appl
+class stochastic_distribution: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     stochastic_distribution()
-      : atermpp::aterm_appl(core::detail::default_values::Distribution)
+      : atermpp::aterm(core::detail::default_values::Distribution)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit stochastic_distribution(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_Distribution(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)
-      : atermpp::aterm_appl(core::detail::function_symbol_Distribution(), variables, distribution)
+      : atermpp::aterm(core::detail::function_symbol_Distribution(), variables, distribution)
     {}
 
     /// Move semantics
@@ -69,7 +69,7 @@ class stochastic_distribution: public atermpp::aterm_appl
 /// \\brief Make_stochastic_distribution constructs a new term into a given address.
 /// \\ \param t The reference into which the new stochastic_distribution is constructed. 
 template <class... ARGUMENTS>
-inline void make_stochastic_distribution(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_stochastic_distribution(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Distribution(), args...);
 }
@@ -84,7 +84,7 @@ typedef std::vector<stochastic_distribution>    stochastic_distribution_vector;
 /// \\param x A term
 /// \\return True if \\a x is a stochastic_distribution expression
 inline
-bool is_stochastic_distribution(const atermpp::aterm_appl& x)
+bool is_stochastic_distribution(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Distribution;
 }
