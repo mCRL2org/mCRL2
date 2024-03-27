@@ -240,9 +240,13 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         }
       }
 
-      if (output_format == lts::lts_none && !output_filename().empty())
+      if (output_format == lts::lts_none)
       {
-        output_format = lts::detail::guess_format(output_filename());
+        if (!output_filename().empty())
+        {
+          output_format = lts::detail::guess_format(output_filename());
+        }
+
         if (output_format == lts::lts_none)
         {
           mCRL2log(log::warning) << "No output format set or detected; using default (lts)." << std::endl;
