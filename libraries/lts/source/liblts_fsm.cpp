@@ -142,7 +142,7 @@ struct fsm_writer
 
 void probabilistic_lts_fsm_t::load(const std::string& filename)
 {
-  if (filename.empty())
+  if (filename.empty() || filename=="-")
   {
     try
     {
@@ -175,7 +175,7 @@ void probabilistic_lts_fsm_t::load(const std::string& filename)
 
 void probabilistic_lts_fsm_t::save(const std::string& filename) const
 {
-  if (filename=="")
+  if (filename.empty() || filename=="-")
   {
     fsm_writer(std::cout, *this).write();
   }
