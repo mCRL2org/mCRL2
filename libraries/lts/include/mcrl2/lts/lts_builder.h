@@ -127,8 +127,7 @@ class lts_aut_disk_builder: public lts_builder
       out.open(filename.c_str());
       if (!out.is_open())
       {
-        mCRL2log(log::error) << "cannot open '" << filename << "' for writing" << std::endl;
-        std::exit(EXIT_FAILURE);
+        throw mcrl2::runtime_error("cannot open '" + filename + "' for writing");
       }
       out << "des                                                \n"; // write a dummy header that will be overwritten
     }
@@ -144,8 +143,13 @@ class lts_aut_disk_builder: public lts_builder
     // Add actions and states to the LTS
     void finalize(const indexed_set_for_states_type& state_map, bool /* timed */) override
     {
+      assert(!out.fail());
       out.flush();
       out.seekp(0);
+      if (out.fail())
+      {
+        throw mcrl2::runtime_error("seeking is not supported by the output stream");
+      }
       out << "des (0," << m_transition_count << "," << state_map.size() << ")";
       out.close();
     }
@@ -240,7 +244,8 @@ class lts_lts_disk_builder: public lts_builder
     )
      : m_discard_state_labels(discard_state_labels)
     {
-      if (!filename.empty())
+      bool to_stdout = filename.empty() || filename == "-";
+      if (!to_stdout)
       {
         fstream.open(filename, std::ofstream::out | std::ofstream::binary);
         if (fstream.fail())
@@ -250,7 +255,7 @@ class lts_lts_disk_builder: public lts_builder
 
         mCRL2log(log::verbose) << "writing state space in LTS format to '" << filename << "'." << std::endl;
       }
-      stream = std::make_unique<atermpp::binary_aterm_ostream>(filename.empty() ? std::cout : fstream);
+      stream = std::make_unique<atermpp::binary_aterm_ostream>(to_stdout ? std::cout : fstream);
 
       mcrl2::lts::write_lts_header(*stream, dataspec, process_parameters, action_labels);
     }
