@@ -43,6 +43,12 @@ struct find_quantifier_variables_traverser: public pres_expression_traverser<fin
     auto const& v = x.variables();
     result.insert(v.begin(), v.end());
   }
+
+  void enter(const sum& x)
+  {
+    auto const& v = x.variables();
+    result.insert(v.begin(), v.end());
+  }
 };
 
 inline
@@ -136,6 +142,16 @@ struct has_quantifier_name_clashes_traverser: public pres_expression_traverser<h
   }
 
   void leave(const supremum&)
+  {
+    pop();
+  }
+ 
+  void enter(const sum& x)
+  {
+    push(x.variables());
+  }
+
+  void leave(const sum&)
   {
     pop();
   }

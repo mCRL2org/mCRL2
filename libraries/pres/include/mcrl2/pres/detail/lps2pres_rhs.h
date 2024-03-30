@@ -552,6 +552,20 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Param
     }
   }
 
+  void enter(const state_formulas::sum& x)
+  {
+    const data::variable_list& v = x.variables();
+    variables.insert(v.begin(), v.end());
+  }
+
+  void leave(const state_formulas::sum& x)
+  {
+    for (const data::variable& var: x.variables())
+    {
+      variables.erase(var);
+    }
+  }
+
   // override
   template <typename MustMayExpression>
   pres_expression apply_may_must_rhs(const MustMayExpression& x)

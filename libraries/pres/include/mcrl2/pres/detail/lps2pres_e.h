@@ -148,6 +148,11 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     // skip
   }
 
+  void leave(const state_formulas::sum&)
+  {
+    // skip
+  }
+
   void leave(const state_formulas::must&)
   {
     // skip

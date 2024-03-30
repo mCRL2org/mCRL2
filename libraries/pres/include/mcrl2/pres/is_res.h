@@ -95,7 +95,7 @@ bool is_res(const T& x, std::string& error_message)
 {
   is_res_traverser f;
   f.apply(x);
-  error_message=f.get_error_message();
+  if (!f.result) error_message=f.get_error_message();
   return f.result;
 }
 

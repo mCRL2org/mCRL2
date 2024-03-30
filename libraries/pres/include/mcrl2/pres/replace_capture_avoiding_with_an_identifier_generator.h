@@ -55,6 +55,16 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator
     update_sigma.pop(v);
   }
 
+  template <class T>
+  void apply(T& result, const sum& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    pres_expression body;
+    apply(body, x.body());
+    make_sum(result, v, apply(x.body()));
+    update_sigma.pop(v);
+  }
+
   void update(pres_equation& x)
   {
     data::variable_list v = update_sigma.push(x.variable().parameters());
