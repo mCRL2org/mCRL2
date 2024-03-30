@@ -63,6 +63,26 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
     pop();
   }
 
+  // N.B. Use apply here, to avoid going into the recursion.
+  void apply(const plus&)
+  {
+    push(data::detail::find_equalities_expression());
+  }
+
+  // N.B. Use apply here, to avoid going into the recursion.
+  // It might be that equations can still be extracted from a const_multiply, but
+  // that requires careful investigation. 
+  void apply(const const_multiply&)
+  {
+    push(data::detail::find_equalities_expression());
+  }
+
+  // N.B. Use apply here, to avoid going into the recursion
+  void apply(const const_multiply_alt&)
+  {
+    push(data::detail::find_equalities_expression());
+  }
+
   void leave(const minus&)
   {
     top().swap();
@@ -79,7 +99,7 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
   }
 
   // N.B. Use apply here, to avoid going into the recursion
-  void apply(const sum& )
+  void apply(const sum&)
   {
     push(data::detail::find_equalities_expression());
   }
