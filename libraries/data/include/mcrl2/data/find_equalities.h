@@ -299,12 +299,13 @@ struct find_equalities_traverser: public Traverser<Derived>
     return result;
   }
 
+
   void apply(const data::application& x)
   {
     if (data::is_equal_to_application(x))
     {
-      auto const& left = binary_left(x);
-      auto const& right = binary_right(x);
+      const data_expression& left = binary_left(x);
+      const data_expression& right = binary_right(x);
       if (is_variable(left) && !search_free_variable(right, atermpp::down_cast<variable>(left)))
       {
         push(find_equalities_expression(atermpp::down_cast<variable>(left), right, true));
@@ -320,8 +321,8 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
     else if (data::is_not_equal_to_application(x))
     {
-      auto const& left = binary_left(x);
-      auto const& right = binary_right(x);
+      const data_expression& left = binary_left(x);
+      const data_expression& right = binary_right(x);
       if (is_variable(left) && !search_free_variable(right, atermpp::down_cast<variable>(left)))
       {
         push(find_equalities_expression(atermpp::down_cast<variable>(left), right, false));
@@ -344,8 +345,8 @@ struct find_equalities_traverser: public Traverser<Derived>
     {
       derived().apply(binary_left(x));
       derived().apply(binary_right(x));
-      auto& left = below_top();
-      auto const& right = top();
+      find_equalities_expression& left = below_top();
+      const find_equalities_expression& right = top();
       left.join_and(right);
       pop();
     }
@@ -353,8 +354,8 @@ struct find_equalities_traverser: public Traverser<Derived>
     {
       derived().apply(binary_left(x));
       derived().apply(binary_right(x));
-      auto& left = below_top();
-      auto const& right = top();
+      find_equalities_expression& left = below_top();
+      const find_equalities_expression& right = top();
       left.join_or(right);
       pop();
     }
@@ -362,8 +363,8 @@ struct find_equalities_traverser: public Traverser<Derived>
     {
       derived().apply(binary_left(x));
       derived().apply(binary_right(x));
-      auto& left = below_top();
-      auto const& right = top();
+      find_equalities_expression& left = below_top();
+      const find_equalities_expression& right = top();
       left.swap();
       left.join_or(right);
       pop();
@@ -373,9 +374,9 @@ struct find_equalities_traverser: public Traverser<Derived>
       derived().apply(x[1]);
       derived().apply(x[2]);
       derived().apply(x[0]);
-      auto& then = two_below_top();
-      auto& else_ = below_top();
-      const auto& cond = top();
+      find_equalities_expression& then = two_below_top();
+      find_equalities_expression& else_ = below_top();
+      const find_equalities_expression& cond = top();
       
       then.equalities.union_(cond.equalities);
       else_.equalities.union_(cond.inequalities);
