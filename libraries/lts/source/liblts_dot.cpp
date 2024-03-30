@@ -110,13 +110,20 @@ void lts_dot_t::save(std::ostream& os) const
 
 void lts_dot_t::save(const std::string& filename) const
 {
-  std::ofstream os(filename.c_str());
-  if (!os.is_open())
+  if (filename.empty() || filename=="-")
   {
-    throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for writing.");
+    save(std::cout);
   }
-  save(os);
-  os.close();
+  else
+  {
+    std::ofstream os(filename.c_str());
+    if (!os.is_open())
+    {
+      throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for writing.");
+    }
+    save(os);
+    os.close();
+  }
 }
 
 }

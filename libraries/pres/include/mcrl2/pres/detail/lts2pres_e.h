@@ -116,12 +116,17 @@ struct e_lts2pres_traverser: public state_formulas::state_formula_traverser<Deri
     throw mcrl2::runtime_error("e_lts2pres_traverser: implication is not supported!");
   }
 
+  void leave(const state_formulas::infimum&)
+  {
+    // skip
+  }
+
   void leave(const state_formulas::supremum&)
   {
     // skip
   }
 
-  void leave(const state_formulas::infimum&)
+  void leave(const state_formulas::sum&)
   {
     // skip
   }

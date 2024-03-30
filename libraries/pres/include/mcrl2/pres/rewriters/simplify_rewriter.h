@@ -303,6 +303,14 @@ public:
   }
 
   template <class T>
+  void apply(T& result, const sum& x)
+  {
+    pres_expression body;
+    apply(body, x.body());
+    make_sum(result, x.variables(), result);
+  }
+
+  template <class T>
   void apply(T& result, const const_multiply& x)
   {
     const_multiply_helper(result, x.left(), x.right());
@@ -312,14 +320,6 @@ public:
   void apply(T& result, const const_multiply_alt& x)
   {
     const_multiply_helper(result, x.right(), x.left());
-  }
-
-  template <class T>
-  void apply(T& result, const sum& x)
-  {
-    pres_expression body;
-    apply(body, x.body());
-    make_sum(result, x.variables(), result);
   }
 
   template <class T>
