@@ -22,14 +22,12 @@ Visualizer::Visualizer(
   Graph *graph_)
   : QOpenGLWidget(parent),
     m_lastMouseEvent(std::make_unique<QMouseEvent>(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier)),
-    m_selectionBuffer(1, 1),
     m_graph(graph_)
 {
   setMinimumSize(10,10);
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   setFocusPolicy(Qt::ClickFocus);
   setUpdateBehavior(QOpenGLWidget::PartialUpdate);
-  clearColor = Qt::white;
 
   initMouse();
 
@@ -43,11 +41,60 @@ Visualizer::Visualizer(
 }
 
 void Visualizer::updateSelection() {
+  const auto selections = getSelection();
+  if (selections.empty())
+    handleSelection({});
+  else
+    handleSelection(selections.back());
+}
+
+std::list<Visualizer::Selection> Visualizer::getSelection(qreal width, qreal height)
+{
   makeCurrent();
-  m_selectionBuffer.bind();
+  m_selectionBuffer->bind();
+
+  GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+
+  constexpr std::size_t buffer_size = 4096;
+  GLuint buffer[buffer_size];
+  glSelectBuffer(buffer_size, buffer);
+  glRenderMode(GL_SELECT);
+  glInitNames();
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  const qreal x = m_lastMouseEvent->position().x() * devicePixelRatio();
+  const qreal y = m_lastMouseEvent->position().y() * devicePixelRatio();
+  gluPickMatrix(x, viewport[3] - y, width, height, viewport);
+  GLdouble scale = std::min(widthC(), heightC());
+  gluOrtho2D(-widthC() / scale, widthC() / scale, -heightC() / scale, heightC() / scale);
+
+  glMatrixMode(GL_MODELVIEW);
   mark();
-  m_selectionBuffer.release();
+
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+
+  GLint hits = glRenderMode(GL_RENDER);
+  std::list<Selection> selections;
+  GLuint* hit = buffer;
+  while (hits--)
+  {
+    const size_t size = *hit++;
+    hit += 2; // skip depth values
+    selections.emplace_back(size);
+    for (size_t i = 0; i < size; ++i)
+    {
+      selections.back()[i] = *hit++;
+    }
+  }
+
+  m_selectionBuffer->release();
   doneCurrent();
+
+  return selections;
 }
 
 void Visualizer::initializeGL() 
@@ -72,7 +119,8 @@ void Visualizer::initializeGL()
       qDebug() << "QOpenGLDebugLogger initialisation failed\n";
     }
   }
-  if (!m_selectionBuffer.isValid())
+  m_selectionBuffer = std::make_unique<QOpenGLFramebufferObject>(1, 1);
+  if (!m_selectionBuffer->isValid())
   {
     throw mcrl2::runtime_error("Failed to create framebuffer for selection handling.");
   }
@@ -85,23 +133,15 @@ void Visualizer::logMessage(const QOpenGLDebugMessage& debugMessage)
 
 void Visualizer::paintGL()
 {
+  updateGeometry(); // TODO: move this
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-
-  GLdouble aspect = (GLdouble)width() / (GLdouble)height();
-  if (aspect > 1)
-  {
-    gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
-  }
-  else
-  {
-    gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
-  }
+  GLdouble scale = std::min(widthC(), heightC());
+  gluOrtho2D(-widthC() / scale, widthC() / scale, -heightC() / scale, heightC() / scale);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glViewport(0, 0, width()*devicePixelRatio(), height()*devicePixelRatio());
-
+  glViewport(0, 0, widthC(), heightC());
   visualize();
 }
 
@@ -135,15 +175,6 @@ QPointF Visualizer::worldCoordinate(QPointF deviceCoordinate)
   double pixel = pixelSize();
   return QPointF(-0.5 * size.width() + deviceCoordinate.x() * pixel * devicePixelRatio(), 
                   0.5 * size.height() - deviceCoordinate.y() * pixel * devicePixelRatio());
-}
-
-
-void Visualizer::setClearColor(
-  const double& r,
-  const double& g,
-  const double& b)
-{
-  clearColor = QColor::fromRgbF(r, g, b);
 }
 
 
@@ -206,7 +237,7 @@ void Visualizer::handleKeyEvent(QKeyEvent* e)
 
 void Visualizer::clear()
 {
-  VisUtils::clear(clearColor);
+  VisUtils::clear(Qt::white);
 }
 
 
@@ -215,64 +246,6 @@ void Visualizer::initMouse()
   m_lastMouseEvent = std::make_unique<QMouseEvent>(QEvent::None, QPoint(0,0), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
   m_mouseDrag = false;
   m_mouseDragStart = QPoint(0,0);
-}
-
-
-void Visualizer::startSelectMode(
-  GLint /*hits*/,
-  GLuint selectBuf[],
-  double pickWth,
-  double pickHgt)
-{
-  GLint viewport[4];
-
-  // ( x, y, width, height )
-  glGetIntegerv(GL_VIEWPORT, viewport);
-
-  glSelectBuffer(512, selectBuf);
-  // selection mode
-  (void) glRenderMode(GL_SELECT);
-
-  glInitNames();
-
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-
-  gluPickMatrix(m_lastMouseEvent->position().x()*devicePixelRatio(), // center x
-          viewport[3] - m_lastMouseEvent->position().y()*devicePixelRatio(), // center y
-          pickWth,    // picking width
-          pickHgt,    // picking height
-          viewport);
-
-  // casting to GLdouble ensures smooth transitions
-  GLdouble aspect = (GLdouble)width() / (GLdouble)height();
-
-  // specify clipping rectangle ( left, right, bottom, top )
-  if (aspect > 1)
-    // width > height
-  {
-    gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
-  }
-  else
-    // height >= width
-  {
-    gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
-  }
-
-  glMatrixMode(GL_MODELVIEW);
-}
-
-
-void Visualizer::finishSelectMode(
-  GLint hits,
-  GLuint selectBuf[])
-{
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-
-  hits = glRenderMode(GL_RENDER);
-  processHits(hits, selectBuf);
 }
 
 
@@ -292,3 +265,10 @@ void Visualizer::genCushTex()
     texCush);
   texCushOK = true;
 }
+
+void Visualizer::updateGeometry()
+{
+  m_canvas_width = width() * devicePixelRatio();
+  m_canvas_height = height() * devicePixelRatio();
+}
+

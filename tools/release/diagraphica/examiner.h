@@ -87,9 +87,7 @@ class Examiner : public Visualizer
     void handleIconPlay();
     */
     void handleIconRgt();
-    void processHits(
-      GLint hits,
-      GLuint buffer[]);
+    virtual void handleSelection(const Selection&) override;
 
     // -- utility drawing functions ---------------------------------
     void clear();

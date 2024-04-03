@@ -331,13 +331,7 @@ template <Visualizer::Mode mode> void ColorChooser::draw()
 {
   if constexpr (mode == Marking)
   {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(hits, selectBuf, 2.0, 2.0);
-
     drawPoints<mode>();
-
-    finishSelectMode(hits, selectBuf);
   }
   else
   {
@@ -402,47 +396,12 @@ void ColorChooser::handleDrag()
 }
 
 
-void ColorChooser::processHits(
-  GLint hits,
-  GLuint buffer[])
+void ColorChooser::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  std::vector< int > ids;
-
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
+  if (!selection.empty())
   {
-    // if necassary, advance to closest hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    int number = *ptr;
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    for (int i = 0; i < number; ++i)
-    {
-      ids.push_back(*ptr);
-      ++ptr;
-    }
-
-    handleHits(ids);
+    std::vector<int> hits(selection.begin(), selection.end());
+    handleHits(hits);
   }
-
-  ptr = 0;
 }
+

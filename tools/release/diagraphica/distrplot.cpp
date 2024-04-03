@@ -216,25 +216,11 @@ template <Visualizer::Mode mode> void DistrPlot::draw()
   // visualize
   if constexpr (mode == Marking)
   {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
-
-    //setScalingTransf();
     drawPlot<mode>();
-
-    finishSelectMode(
-      hits,
-      selectBuf);
   }
   else
   {
     clear();
-    //setScalingTransf();
     drawPlot<mode>();
     drawAxes<mode>();
     drawLabels<mode>();
@@ -413,48 +399,17 @@ void DistrPlot::clearPositions()
 
 // -- hit detection -------------------------------------------------
 
-
-void DistrPlot::processHits(
-  GLint hits,
-  GLuint buffer[])
+void DistrPlot::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
-  {
-    // if necassary advance to last hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    int name = *ptr;
-
-    displTooltip(name);
-  }
-  else
+  if (selection.empty())
   {
     QToolTip::hideText();
     showDgrm = false;
   }
-
-  ptr = 0;
+  else
+  {
+    displTooltip(selection[0]);
+  }
 }
 
 

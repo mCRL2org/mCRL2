@@ -902,24 +902,12 @@ template <Visualizer::Mode mode> void ArcDiagram::draw()
   {
     QSizeF size = worldSize();
 
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-          hits,
-          selectBuf,
-          2.0,
-          2.0);
-
     glPushName(ID_CANVAS);
     VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
 
     drawParts<mode>();
 
     glPopName();
-
-    finishSelectMode(
-          hits,
-          selectBuf);
   }
   // rendering mode
   else
@@ -1989,49 +1977,12 @@ void ArcDiagram::hideDiagram(const std::size_t& dgrmIdx)
 
 
 // -- hit detection -------------------------------------------------
-
-
-void ArcDiagram::processHits(
-    GLint hits,
-    GLuint buffer[])
+void ArcDiagram::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  std::vector< int > ids;
-
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
+  if (!selection.empty())
   {
-    // if necassary, advance to closest hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    int number = *ptr;
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    for (int i = 0; i < number; ++i)
-    {
-      ids.push_back(*ptr);
-      ++ptr;
-    }
-
-    handleHits(ids);
+    std::vector<int> hits(selection.begin(), selection.end());
+    handleHits(hits);
   }
-
-  ptr = 0;
 }
+

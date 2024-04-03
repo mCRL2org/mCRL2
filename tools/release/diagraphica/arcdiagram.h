@@ -128,9 +128,7 @@ class ArcDiagram : public Visualizer
     void hideDiagram(const std::size_t& dgrmIdx);
 
     // -- hit detection ---------------------------------------------
-    void processHits(
-        GLint hits,
-        GLuint buffer[]);
+    virtual void handleSelection(const Selection&) override;
 
     // -- static variables ------------------------------------------
     // -- data members ----------------------------------------------

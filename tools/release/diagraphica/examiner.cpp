@@ -556,53 +556,17 @@ void Examiner::handleIconRgt()
 }
 
 
-void Examiner::processHits(
-  GLint hits,
-  GLuint buffer[])
+void Examiner::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  std::vector< int > ids;
-
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
-  {
-    // if necassary, advance to closest hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    int number = *ptr;
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    for (int i = 0; i < number; ++i)
-    {
-      ids.push_back(*ptr);
-      ++ptr;
-    }
-
-    handleHits(ids);
-  }
-  else
+  if (selection.empty())
   {
     QToolTip::hideText();
   }
-
-  ptr = 0;
+  else
+  {
+    std::vector<int> hits(selection.begin(), selection.end());
+    handleHits(hits);
+  }
 }
 
 
@@ -1054,14 +1018,6 @@ template <Visualizer::Mode mode> void Examiner::draw()
 
   if constexpr (mode == Marking)
   {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
-
     if (diagram != 0)
     {
       drawFrame<mode>();
@@ -1072,10 +1028,6 @@ template <Visualizer::Mode mode> void Examiner::draw()
         drawControls<mode>();
       }
     }
-
-    finishSelectMode(
-      hits,
-      selectBuf);
   }
   else
   {

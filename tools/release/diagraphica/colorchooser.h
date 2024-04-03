@@ -47,7 +47,7 @@ class ColorChooser : public Visualizer
     void handleHits(const std::vector<int> &ids);
     void handleDrag();
 
-    void processHits(GLint hits, GLuint buffer[]);
+    virtual void handleSelection(const Selection&) override;
 
     DOF *m_dof;
     QList<double> *m_yCoordinates;

@@ -24,10 +24,6 @@ DiagramEditor::DiagramEditor(
     Graph* g):
   Visualizer(parent, g)
 {
-  //setClearColor( 0.44, 0.59, 0.85 );
-  setClearColor(0.65, 0.79, 0.94);
-
-
   m_diagram     = new Diagram(this);
   m_editMode    = EDIT_MODE_SELECT;
   m_currentSelectedShapeId = -1;
@@ -97,24 +93,9 @@ void DiagramEditor::deselectAll()
 
 void DiagramEditor::mark()
 {
-  // set up picking
-  GLint hits = 0;
-  GLuint selectBuf[512];
-  startSelectMode(
-        hits,
-        selectBuf,
-        2.0,
-        2.0);
-
-  // render in select mode
   glPushName(0);
   m_diagram->draw<Marking>(pixelSize());
   glPopName();
-
-  // finish up picking
-  finishSelectMode(
-        hits,
-        selectBuf);
 }
 
 
@@ -474,6 +455,11 @@ void DiagramEditor::sendBackward()
     }
   }
   update();
+}
+
+void DiagramEditor::clear()
+{
+  VisUtils::clear(QColor(255 * 0.65, 255 * 0.79, 255 * 0.94));
 }
 
 double DiagramEditor::snapIfNeeded(double input)
@@ -1093,51 +1079,13 @@ void DiagramEditor::handleDragDOFAglEnd(Shape* s)
 
 
 // -- hit detection -------------------------------------------------
-
-
-void DiagramEditor::processHits(
-    GLint hits,
-    GLuint buffer[])
+void DiagramEditor::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  std::vector< int > ids;
-
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
+  if (!selection.empty())
   {
-    // if necassary, advance to closest hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    int number = *ptr;
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    for (int i = 0; i < number; ++i)
-    {
-      ids.push_back(*ptr);
-      ++ptr;
-    }
-
-    handleHits(ids);
+    std::vector<int> hits(selection.begin(), selection.end());
+    handleHits(hits);
   }
-
-  ptr = 0;
 }
 
 

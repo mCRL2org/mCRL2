@@ -87,9 +87,7 @@ class Simulator : public Visualizer
 
     // -- hit detection ---------------------------------------------
     void handleHits(const std::vector< int > &ids);
-    void processHits(
-      GLint hits,
-      GLuint buffer[]);
+    virtual void handleSelection(const Selection&) override;
 
     // -- utility drawing functions ---------------------------------
     void clear();

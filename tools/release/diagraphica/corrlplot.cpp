@@ -227,26 +227,11 @@ template <Visualizer::Mode mode> void CorrlPlot::draw()
   // visualize
   if constexpr (mode == Marking)
   {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
-
-    //setScalingTransf();
-    //drawNumberPlot( inSelectMode );
     drawPlot<mode>();
-
-    finishSelectMode(
-      hits,
-      selectBuf);
   }
   else
   {
     clear();
-    //setScalingTransf();
     drawAxes<mode>();
     drawLabels<mode>();
     drawPlot<mode>();
@@ -479,51 +464,17 @@ void CorrlPlot::clearPositions()
 
 
 // -- hit detection -------------------------------------------------
-
-
-void CorrlPlot::processHits(
-  GLint hits,
-  GLuint buffer[])
+void CorrlPlot::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
-  {
-    // if necassary advance to last hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    int name1 = *ptr;
-    ++ptr; // name1
-    int name2 = *ptr;
-
-    displTooltip(name1, name2);
-  }
-  else
+  if (selection.size() < 2)
   {
     QToolTip::hideText();
     showDgrm = false;
   }
-
-  ptr = 0;
+  else
+  {
+    displTooltip(selection[0], selection[1]);
+  }
 }
 
 

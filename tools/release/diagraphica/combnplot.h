@@ -67,9 +67,7 @@ class CombnPlot : public Visualizer
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits(
-      GLint hits,
-      GLuint buffer[]);
+    virtual void handleSelection(const Selection&) override;
 
     // -- data members ----------------------------------------------
 
