@@ -39,9 +39,21 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
   }
   else if (is_plus(p))
   {
+    // Take care that inf + -inf and -inf + inf yield inf. 
+    // Floating points arithmetic gives nan, which is incorrect. 
     const plus& pp = atermpp::down_cast<plus>(p);
     {
-      return evaluate(pp.left(), solution) + evaluate(pp.right(), solution);
+      double left=evaluate(pp.left(), solution);
+      if (std::isinf(left))
+      {
+        return left;
+      }
+      double right=evaluate(pp.right(), solution);
+      if (std::isinf(right))
+      {
+        return right;
+      }
+      return left+right;
     }
   }
   else if (is_true(p))
@@ -76,6 +88,10 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
     else 
     {
       r=i->second;
+    }
+    if (r==0.0)
+    {
+      return r;
     }
     return r * evaluate(pp.right(), solution);
   }

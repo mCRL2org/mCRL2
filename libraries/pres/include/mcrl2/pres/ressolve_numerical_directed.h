@@ -241,7 +241,19 @@ double evaluate_directed(const internal_res_expression* p, const std::vector<dou
     }
     case internal_res_expression_type::plus:
     {
-      return evaluate_directed(p->left(), solution) + evaluate_directed(p->right(), solution);
+      // Take care that inf + -inf and -inf + inf yield inf. 
+      // Floating points arithmetic gives nan, which is incorrect. 
+      double left=evaluate_directed(p->left(), solution);
+      if (std::isinf(left))
+      {
+        return left;
+      }
+      double right=evaluate_directed(p->right(), solution);
+      if (std::isinf(right))
+      {
+        return right;
+      }
+      return left+right;
     }
     case internal_res_expression_type::and_:
     {
