@@ -320,7 +320,9 @@ inline
 void complete_data_specification(pres& p)
 {
   std::set<data::sort_expression> s = pres_system::find_sort_expressions(p);
-  p.data().add_context_sorts(s);
+  data::data_specification d=p.data();
+  d.add_context_sorts(s);
+  p.set_data(d);
 }
 
 /// \brief Equality operator on PRESs
