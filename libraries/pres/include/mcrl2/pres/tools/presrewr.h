@@ -14,9 +14,6 @@
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
-// #include "mcrl2/pres/detail/bqnf_traverser.h"
-// #include "mcrl2/pres/detail/ppg_rewriter.h"
-// #include "mcrl2/pres/detail/ppg_traverser.h"
 #include "mcrl2/pres/io.h"
 #include "mcrl2/pres/normalize.h"
 #include "mcrl2/pres/pres_rewriter_type.h"

@@ -267,7 +267,7 @@ class parity_game_generator
       :
       m_initialized(false),
       m_pbes(p),
-      datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
+      datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables(), false), rewrite_strategy),
       R(datar, p.data()),
       m_true_false_dependencies(true_false_dependencies),
       m_is_min_parity_game(is_min_parity)
