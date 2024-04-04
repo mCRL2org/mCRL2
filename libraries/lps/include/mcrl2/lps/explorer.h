@@ -953,7 +953,7 @@ class explorer: public abortable
       if (remove_unused_rewrite_rules)
       {
         return data::rewriter(lpsspec.data(),
-          data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables()),
+          data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables(), false),
           m_options.rewrite_strategy);
       }
       else

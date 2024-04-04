@@ -302,8 +302,9 @@ class pres_type_checker
       presspec.initial_state() = initial_state;
 
       // typecheck the data specification
-      presspec.data() = m_data_type_checker.typechecked_data_specification();
-      presspec.data().translate_user_notation();
+      data::data_specification d = m_data_type_checker.typechecked_data_specification();
+      d.translate_user_notation();
+      presspec.set_data(d);
     }
 
      /** \brief     Type check a process expression.

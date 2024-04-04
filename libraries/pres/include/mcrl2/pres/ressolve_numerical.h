@@ -195,24 +195,17 @@ class ressolve_by_numerical_iteration
 
     data::rewriter construct_rewriter(const pres& presspec)
     {
-      if (m_options.remove_unused_rewrite_rules)
-      {
-        std::set<data::function_symbol> used_functions = pres_system::find_function_symbols(presspec);
-        used_functions.insert(data::less(data::sort_real::real_()));
-        used_functions.insert(data::sort_real::divides(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::times(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::plus(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::minus(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::minimum(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::maximum(data::sort_real::real_(),data::sort_real::real_()));
-        return data::rewriter(presspec.data(),
-                              data::used_data_equation_selector(presspec.data(), used_functions, presspec.global_variables()),
-                              m_options.rewrite_strategy);
-      }
-      else
-      {
-        return data::rewriter(presspec.data(), m_options.rewrite_strategy);
-      }
+      std::set<data::function_symbol> used_functions = pres_system::find_function_symbols(presspec);
+      used_functions.insert(data::less(data::sort_real::real_()));
+      used_functions.insert(data::sort_real::divides(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::times(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::plus(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::minus(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::minimum(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::maximum(data::sort_real::real_(),data::sort_real::real_()));
+      return data::rewriter(presspec.data(),
+                            data::used_data_equation_selector(presspec.data(), used_functions, presspec.global_variables(), !m_options.remove_unused_rewrite_rules),
+                            m_options.rewrite_strategy);
     } 
 
 

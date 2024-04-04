@@ -89,7 +89,7 @@ data::rewriter construct_rewriter(const data::data_specification& dataspec, data
   if (remove_unused_rewrite_rules)
   {
     return data::rewriter(dataspec,
-                          data::used_data_equation_selector(dataspec, add_real_operators(function_symbols), std::set<data::variable>()),
+                          data::used_data_equation_selector(dataspec, add_real_operators(function_symbols), std::set<data::variable>(), false),
                           rewrite_strategy);
   }
   else

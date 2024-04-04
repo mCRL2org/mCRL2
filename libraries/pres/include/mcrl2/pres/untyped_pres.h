@@ -29,7 +29,9 @@ struct untyped_pres
   pres construct_pres() const
   {
     pres result;
-    result.data() = dataspec.construct_data_specification();
+    data::data_specification d=dataspec.construct_data_specification();
+    d.add_context_sort(data::sort_real::real_());
+    result.set_data(d);
     result.global_variables() = std::set<data::variable>(global_variables.begin(), global_variables.end());
     result.equations() = equations;
     result.initial_state() = initial_state;

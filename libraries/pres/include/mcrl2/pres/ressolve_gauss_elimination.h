@@ -991,21 +991,21 @@ const pres_expression solve_single_equation(const fixpoint_symbol& f,
     
     return condeq(new_condition, solution_arg2, solution_arg3);
   }
-  if (is_condeq(t) && f==pbes_system::fixpoint_symbol::nu())
+  else if (is_condeq(t) && f==pbes_system::fixpoint_symbol::nu())
   { 
     const condeq tc = atermpp::down_cast<condeq>(t);
-    pres_expression solution_arg2 = solve_single_equation(f, v, tc.arg2(), dataspec, rewriter);
+    pres_expression solution_arg3 = solve_single_equation(f, v, tc.arg3(), dataspec, rewriter);
     
     const bool conjunctive_normal_form = false;
     push_and_inside(aux, tc.arg2(), tc.arg3(), conjunctive_normal_form);
 
-    pres_expression solution_arg2_or_arg3 = solve_single_equation(f, v, aux, dataspec, rewriter);
+    pres_expression solution_arg2_and_arg3 = solve_single_equation(f, v, aux, dataspec, rewriter);
     
     pres_expression new_condition;
-    substitute_pres_equation_builder variable_substituter(v, solution_arg2);
+    substitute_pres_equation_builder variable_substituter(v, solution_arg3);
     variable_substituter.apply(new_condition, tc.arg1());
     
-    return condeq(new_condition, solution_arg2, solution_arg2_or_arg3);
+    return condeq(new_condition, solution_arg2_and_arg3, solution_arg3);
   }
   else if (is_and(t) && f==pbes_system::fixpoint_symbol::mu())
   {
@@ -1171,24 +1171,17 @@ class ressolve_by_gauss_elimination_algorithm
 
     data::rewriter construct_rewriter(const pres& presspec)
     {
-      if (m_options.remove_unused_rewrite_rules)
-      {
-        std::set<data::function_symbol> used_functions = pres_system::find_function_symbols(presspec);
-        used_functions.insert(data::less(data::sort_real::real_()));
-        used_functions.insert(data::sort_real::divides(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::times(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::plus(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::minus(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::minimum(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::maximum(data::sort_real::real_(),data::sort_real::real_()));
-        return data::rewriter(presspec.data(),
-                              data::used_data_equation_selector(presspec.data(), used_functions, presspec.global_variables()),
-                              m_options.rewrite_strategy);
-      }
-      else
-      {
-        return data::rewriter(presspec.data(), m_options.rewrite_strategy);
-      }
+      std::set<data::function_symbol> used_functions = pres_system::find_function_symbols(presspec);
+      used_functions.insert(data::less(data::sort_real::real_()));
+      used_functions.insert(data::sort_real::divides(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::times(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::plus(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::minus(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::minimum(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::maximum(data::sort_real::real_(),data::sort_real::real_()));
+      return data::rewriter(presspec.data(),
+                            data::used_data_equation_selector(presspec.data(), used_functions, presspec.global_variables(), !m_options.remove_unused_rewrite_rules),
+                            m_options.rewrite_strategy);
     }
 
   public:

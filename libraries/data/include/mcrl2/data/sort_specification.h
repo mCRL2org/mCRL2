@@ -125,8 +125,6 @@ class sort_specification
     void add_system_defined_sort(const sort_expression& s)
     {
       import_system_defined_sort(s);
-      // const sort_expression normalised(normalize_sorts(s,*this));
-      // m_normalised_sorts.insert(normalised);
     }
 
     ///\brief Adds the sort s to the context sorts
