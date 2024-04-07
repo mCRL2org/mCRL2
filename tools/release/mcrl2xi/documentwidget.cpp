@@ -7,9 +7,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "documentwidget.h"
-
 #include <QFile>
+#include "documentwidget.h"
+#include "mcrl2/utilities/text_utility.h"
+
 
 DocumentWidget::DocumentWidget(QWidget *parent, QThread *atermThread, mcrl2::data::rewrite_strategy strategy) :
   mcrl2::gui::qt::CodeEditor(parent),
@@ -35,10 +36,18 @@ void DocumentWidget::openFile(QString fileName)
 
   if (file.open(QFile::ReadOnly | QFile::Text))
   {
-    setPlainText(file.readAll());
+    QByteArray data_array=file.readAll();
+    if (!mcrl2::utilities::contains_only_ascii_symbols(data_array))
+    {
+       mCRL2log(mcrl2::log::warning) << "The input is not plain text. mcrl2xi requires a textual process or data specification as input.\n";
+    }
+    else
+    {
+      setPlainText(data_array);
+      m_filename = fileName;
+      document()->setModified(false);
+    }
     file.close();
-    m_filename = fileName;
-    document()->setModified(false);
   }
 }
 
