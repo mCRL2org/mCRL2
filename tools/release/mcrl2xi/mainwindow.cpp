@@ -74,7 +74,7 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
   connect(m_ui.documentManager, SIGNAL(documentCreated(DocumentWidget*)), this, SLOT(formatDocument(DocumentWidget*)));
   connect(m_ui.documentManager, SIGNAL(documentChanged(DocumentWidget*)), this, SLOT(changeDocument(DocumentWidget*)));
 
-  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QDateTime, QString, QString)));
 
   m_state = saveState();
   QSettings settings("mCRL2", "mCRL2xi");
