@@ -1,0 +1,15 @@
+map max_turns:Nat;
+eqn max_turns=100;
+
+form mu X(gain:Int=0, turns:Nat=0).
+            val(turns==max_turns) && val(gain/turns) ||
+            val(turns<max_turns) &&
+               ( <true><win> X(gain+1,turns+1) ||
+                 <true><lose> X(gain-1, turns+1)
+               );
+            
+
+
+%form nu X.val(200) && (<true>(<win>(val(1)+X)||<lose>(val(-1)+X)));
+%form mu X.val(300) && (<true>(<win>(val(1)+X)||<lose>(val(-1)+X)));
+

@@ -1,0 +1,11 @@
+sort Symbol = struct star | grapes | orange;
+
+act win, lose;
+    display: Symbol;
+
+proc Play =
+     dist s:Symbol [1/3].display(s).
+             ((s==star) -> win. Play +
+              (s==grapes || s==orange) -> lose. Play);
+
+init Play;

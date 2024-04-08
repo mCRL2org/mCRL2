@@ -1,0 +1,5 @@
+mcrl22lps reels_game_spec.mcrl2 -v scratch/temp.lps &&
+lpssuminst scratch/temp.lps -v | lpsconstelm -v > scratch/temp1.lps &&
+lps2pres -v scratch/temp1.lps -fexpected_gain_max_alt.mcf scratch/temp.pres &&
+presrewr scratch/temp.pres | presrewr -pquantifier-inside | presrewr -v -pquantifier-one-point | presrewr -pquantifier-all | presrewr -psimplify  > scratch/temp1.pres &&
+pressolve -am scratch/temp1.pres -v -rjittyc -p30 --timings

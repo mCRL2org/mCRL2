@@ -1,0 +1,53 @@
+sort Symbol = struct orange | grapes | pear | melon | blueberry | strawberry | bell | seven | star ;
+
+map check: Symbol#Symbol#Symbol#Symbol -> Nat;
+    checkwin4, checkwin3, checkwin2: Symbol#Symbol#Symbol#Symbol -> Bool;
+
+var s1, s2, s3, s4: Symbol;
+eqn check(s1, s2, s3, s4) = 
+        if(checkwin4(s1,s2,s3,s4), if((s1==star && s2==star && s3==star && s4==star), 200, 
+                                   if((s1==grapes || s1==melon || s1==strawberry || s1==seven), 64, 20)), 
+        if(checkwin3(s1,s2,s3,s4), if((s1==star && s2==star && s3==star), 100, 
+                                   if((s1==grapes || s1==melon || s1==strawberry || s1==seven), 16, 8)),
+        if(checkwin2(s1,s2,s3,s4), if((s1==star && s2==star), 8, 
+                                   if((s1==grapes || s1==melon || s1==strawberry || s1==seven), 4, 2)), 0)));
+ 
+    checkwin4(s1, s2, s3, s4) = 
+           ((s1==s2 && s2==s3 && s3==s4) || 
+                (s1==star && s2==orange && s3==orange && s4==orange) || 
+	        (s1==pear && s2==star && s3==pear && s4==pear) || 
+                (s1==blueberry && s2==blueberry && s3==star && s4==blueberry) ||
+                (s1==bell && s2==bell && s3==bell && s4==star));
+    checkwin3(s1, s2, s3, s4) = 
+           ((s1==s2 && s2==s3) || 
+                (s1==star && s2==orange && s3==orange) || 
+	        (s1==pear && s2==star && s3==pear) || 
+                (s1==blueberry && s2==blueberry && s3==star));
+    checkwin2(s1, s2, s3, s4) = 
+           ((s1==s2) || 
+                (s1==star && s2==orange) || 
+                (s1==pear && s2==star));
+		
+
+act play: Bool#Bool#Bool#Bool;
+    points:Nat;
+
+glob dc:Symbol;
+proc Play(hold1, hold2, hold3, hold4:Bool, i1, i2, i3, i4: Symbol) =
+    play(hold1, hold2, hold3, hold4).
+      dist s1:Symbol[if(hold1, if(i1==s1, 1, 0), if(s1==star,1/24, if(s1==orange,3/24,if(s1==grapes,2/24,if(s1==pear,4/24,if(s1==melon,2/24,
+          if(s1==blueberry,4/24,if(s1==strawberry,2/24,if(s1==bell,4/24,if(s1==seven,2/24, 0))))))))))].
+      dist s2:Symbol[if(hold2, if(i2==s2, 1, 0), if(s2==star,1/24, if(s2==orange,4/24,if(s2==grapes,2/24,if(s2==pear,3/24,if(s2==melon,2/24,
+          if(s2==blueberry,4/24,if(s2==strawberry,2/24,if(s2==bell,4/24,if(s2==seven,2/24, 0))))))))))].
+      dist s3:Symbol[if(hold3, if(i3==s3, 1, 0), if(s3==star,1/24, if(s3==orange,4/24,if(s3==grapes,2/24,if(s3==pear,4/24,if(s3==melon,2/24,
+          if(s3==blueberry,3/24,if(s3==strawberry,2/24,if(s3==bell,4/24,if(s3==seven,2/24, 0))))))))))].
+      dist s4:Symbol[if(hold4, if(i4==s4, 1, 0), if(s4==star,1/24, if(s4==orange,4/24,if(s4==grapes,2/24,if(s4==pear,4/24,if(s4==melon,2/24,
+          if(s4==blueberry,4/24,if(s4==strawberry,2/24,if(s4==bell,3/24,if(s4==seven,2/24, 0))))))))))].
+    ( (checkwin4(s1,s2,s3,s4) || checkwin3(s1,s2,s3,s4) || checkwin2(s1,s2,s3,s4)) 
+       -> 
+           (points(check(s1,s2,s3,s4)).
+           Play(false, false, false, false, dc, dc, dc, dc))
+       <>
+           (points(check(s1,s2,s3,s4)).
+           sum b1, b2, b3, b4: Bool.Play(b1, b2, b3, b4, s1, s2, s3, s4)));
+init Play(false, false, false, false, dc, dc, dc, dc);
