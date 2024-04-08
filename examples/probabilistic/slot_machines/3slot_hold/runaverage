@@ -1,0 +1,3 @@
+~/MCRL2-base/mCRL2.app/Contents/bin/mcrl22lps 3slot_hold_spec.mcrl2 -v scratch/temp.lps &&
+~/MCRL2-base/mCRL2.app/Contents/bin/lps2pres -v scratch/temp.lps -fexpected_probability_average.mcf scratch/temp.pres &&
+~/MCRL2-base/mCRL2.app/Contents/bin/pressolve -rjittyc -am scratch/temp.pres -v -p30

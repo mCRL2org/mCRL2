@@ -1,0 +1,4 @@
+~/MCRL2/mCRL2.app/Contents/bin/mcrl22lps 1slot_spec.mcrl2 -v scratch/temp.lps &&
+~/MCRL2/mCRL2.app/Contents/bin/lps2pres -v scratch/temp.lps -fexpected_time_to_star.mcf scratch/temp.pres &&
+~/MCRL2/mCRL2.app/Contents/bin/pressolve -ag scratch/temp.pres -d 
+# ~/MCRL2/mCRL2.app/Contents/bin/pressolve -am scratch/temp.pres -d -p10

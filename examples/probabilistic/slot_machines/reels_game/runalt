@@ -1,0 +1,6 @@
+~/MCRL2-base/mCRL2.app/Contents/bin/mcrl22lps reels_game_spec.mcrl2 -v scratch/temp.lps &&
+~/MCRL2-base/mCRL2.app/Contents/bin/lpssuminst scratch/temp.lps -v | ~/MCRL2-base/mCRL2.app/Contents/bin/lpsconstelm -v > scratch/temp1.lps &&
+~/MCRL2-base/mCRL2.app/Contents/bin/lps2pres -v scratch/temp1.lps -fexpected_gain_max_alt.mcf scratch/temp.pres &&
+# ~/MCRL2-base/mCRL2.app/Contents/bin/presrewr scratch/temp.pres | ~/MCRL2-base/mCRL2.app/Contents/bin/presrewr -pquantifier-one-point > scratch/temp1.pres &&
+~/MCRL2-base/mCRL2.app/Contents/bin/presrewr scratch/temp.pres | ~/MCRL2-base/mCRL2.app/Contents/bin/presrewr -pquantifier-inside | ~/MCRL2-base/mCRL2.app/Contents/bin/presrewr -v -pquantifier-one-point | ~/MCRL2-base/mCRL2.app/Contents/bin/presrewr -pquantifier-all |~/MCRL2-base/mCRL2.app/Contents/bin/presrewr -psimplify  > scratch/temp1.pres &&
+~/MCRL2-base/mCRL2.app/Contents/bin/pressolve -am scratch/temp1.pres -v -rjittyc -p30 --timings

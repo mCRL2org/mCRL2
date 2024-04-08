@@ -1,0 +1,1 @@
+form mu X.sup s:Symbol.<display(s)>((val(s==star) && val(1)) || (val(s!=star) && <true>(X+val(1))) || val(0));
