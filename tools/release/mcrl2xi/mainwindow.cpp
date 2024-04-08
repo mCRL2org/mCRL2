@@ -192,7 +192,7 @@ bool MainWindow::onCloseRequest(int index)
   return true;
 }
 
-void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString message, QString /*formattedMessage*/)
+void MainWindow::onLogOutput(QString /*level*/, QDateTime /*timestamp*/, QString message, QString /*formattedMessage*/)
 {
   findErrorPosition(message);
   m_ui.statusBar->showMessage(message, 5000);
