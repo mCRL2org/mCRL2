@@ -274,7 +274,7 @@ class pbesinst_lazy_algorithm
       if (m_options.remove_unused_rewrite_rules)
       {
         return data::rewriter(pbesspec.data(),
-                              data::used_data_equation_selector(pbesspec.data(), pbes_system::find_function_symbols(pbesspec), pbesspec.global_variables()),
+                              data::used_data_equation_selector(pbesspec.data(), pbes_system::find_function_symbols(pbesspec), pbesspec.global_variables(), false),
                               m_options.rewrite_strategy);
       }
       else

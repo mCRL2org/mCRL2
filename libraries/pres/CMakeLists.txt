@@ -26,7 +26,7 @@ if(MCRL2_ENABLE_TESTS)
   file(GLOB all_tests "test/*.cpp")
   foreach(test ${all_tests})
     get_filename_component(base ${test} NAME_WE)
-    target_link_libraries(librarytest_mcrl2_pres_${base} mcrl2_pbes mcrl2_res)
+    target_link_libraries(librarytest_mcrl2_pres_${base} mcrl2_pbes)
   endforeach()
 endif()
 

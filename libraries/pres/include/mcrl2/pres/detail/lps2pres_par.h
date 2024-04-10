@@ -92,9 +92,24 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
     join();
   }
 
+  void leave(const state_formulas::plus&)
+  {
+    join();
+  }
+
   void leave(const state_formulas::imp&)
   {
     join();
+  }
+
+  void leave(const state_formulas::const_multiply&)
+  {
+    // skip
+  }
+
+  void leave(const state_formulas::const_multiply_alt&)
+  {
+    // skip
   }
 
   void apply(const state_formulas::forall& x)
@@ -113,6 +128,11 @@ struct par_traverser: public state_formulas::state_formula_traverser<par_travers
   }
 
   void apply(const state_formulas::supremum& x)
+  {
+    push(Par(X, l + x.variables(), x.body()));
+  }
+
+  void apply(const state_formulas::sum& x)
   {
     push(Par(X, l + x.variables(), x.body()));
   }
@@ -182,6 +202,7 @@ data::variable_list Par(const core::identifier_string& X, const data::variable_l
 {
   par_traverser f(X, l);
   f.apply(x);
+  assert(f.result_stack.size()==1);
   return f.top();
 }
 

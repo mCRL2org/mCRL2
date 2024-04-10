@@ -12,6 +12,7 @@
 #ifndef MCRL2_PRES_PRES_H
 #define MCRL2_PRES_PRES_H
 
+#include <algorithm>
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/pres/pres_equation.h"
 
@@ -121,6 +122,7 @@ class pres
       m_equations(equations),
       m_initial_state(initial_state)
     {
+      m_data.add_context_sort(data::sort_real::real_());
       m_global_variables = pres_system::find_free_variables(*this);
       assert(core::detail::check_rule_PRES(pres_to_aterm(*this)));
       assert(is_well_typed());
@@ -141,6 +143,7 @@ class pres
       m_global_variables(global_variables),
       m_initial_state(initial_state)
     {
+      m_data.add_context_sort(data::sort_real::real_());
       assert(core::detail::check_rule_PRES(pres_to_aterm(*this)));
       assert(is_well_typed());
     }
@@ -152,11 +155,14 @@ class pres
       return m_data;
     }
 
-    /// \brief Returns the data specification.
-    /// \return The data specification of the pres
-    data::data_specification& data()
+    /// \brief Allows to set the data specification of a pres.
+    void set_data(const data::data_specification& d)
     {
-      return m_data;
+      m_data=d;
+      if (std::find(m_data.context_sorts().begin(), m_data.context_sorts().end(),data::sort_real::real_())==m_data.context_sorts().end())
+      {
+        m_data.add_context_sort(data::sort_real::real_());
+      }
     }
 
     /// \brief Returns the equations.
@@ -314,7 +320,9 @@ inline
 void complete_data_specification(pres& p)
 {
   std::set<data::sort_expression> s = pres_system::find_sort_expressions(p);
-  p.data().add_context_sorts(s);
+  data::data_specification d=p.data();
+  d.add_context_sorts(s);
+  p.set_data(d);
 }
 
 /// \brief Equality operator on PRESs

@@ -591,7 +591,7 @@ void probabilistic_lts_aut_t::save(std::string const& filename) const
 
 void lts_aut_t::load(const std::string& filename)
 {
-  if (filename=="" || filename=="-")
+  if (filename.empty() || filename=="-")
   {
     read_from_aut(*this, std::cin);
   }
@@ -616,7 +616,7 @@ void lts_aut_t::load(std::istream& is)
 
 void lts_aut_t::save(std::string const& filename) const
 {
-  if (filename=="" || filename=="-")
+  if (filename.empty() || filename=="-")
   {
     write_to_aut(*this, std::cout);
   }

@@ -238,6 +238,7 @@
                  | StateExists(<DataVarId>+, <StateFrm>)
                  | StateInfimum(<DataVarId>+, <StateFrm>)
                  | StateSupremum(<DataVarId>+, <StateFrm>)
+                 | StateSum(<DataVarId>+, <StateFrm>)
                  | StateMust(<RegFrm>, <StateFrm>)
                  | StateMay(<RegFrm>, <StateFrm>)
                  | StateYaled

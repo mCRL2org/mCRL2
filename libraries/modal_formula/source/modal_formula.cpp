@@ -108,6 +108,7 @@ std::string pp(const state_formulas::or_& x) { return state_formulas::pp< state_
 std::string pp(const state_formulas::plus& x) { return state_formulas::pp< state_formulas::plus >(x); }
 std::string pp(const state_formulas::state_formula& x) { return state_formulas::pp< state_formulas::state_formula >(x); }
 std::string pp(const state_formulas::state_formula_specification& x) { return state_formulas::pp< state_formulas::state_formula_specification >(x); }
+std::string pp(const state_formulas::sum& x) { return state_formulas::pp< state_formulas::sum >(x); }
 std::string pp(const state_formulas::supremum& x) { return state_formulas::pp< state_formulas::supremum >(x); }
 std::string pp(const state_formulas::true_& x) { return state_formulas::pp< state_formulas::true_ >(x); }
 std::string pp(const state_formulas::variable& x) { return state_formulas::pp< state_formulas::variable >(x); }

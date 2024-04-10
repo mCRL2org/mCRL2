@@ -46,7 +46,21 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = m_data_type_checker.typecheck_data_expression(x, data::bool_(), m_variable_context);
+    try 
+    {
+      result = m_data_type_checker.typecheck_data_expression(x, data::bool_(), m_variable_context);
+    }
+    catch (mcrl2::runtime_error& )
+    {
+      try 
+      {
+         result = m_data_type_checker.typecheck_data_expression(x, data::sort_real::real_(), m_variable_context);
+      }
+      catch  (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string("Fail to cast data_expression to type bool or real.\n") + e.what());
+      }
+    }
   }
 
   template <class T>
@@ -88,6 +102,56 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
   }
 
   template <class T>
+  void apply(T& result, const sum& x)
+  {
+    try
+    {
+      data::detail::check_duplicate_variable_names(x.variables(), "sum variable");
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
+      pres_expression body;
+      (*this).apply(body, x.body());
+      m_variable_context = m_variable_context_copy;
+      result = supremum(x.variables(), body);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pres_system::pp(x));
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const const_multiply& x)
+  {
+    try
+    {
+      data::data_expression factor = m_data_type_checker.typecheck_data_expression(x.left(), data::sort_real::real_(), m_variable_context);
+      this->apply(result, x.right());
+      make_const_multiply(result, factor, result);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pres_system::pp(x));
+    }
+  }
+
+  template <class T>
+  void apply(T& result, const const_multiply_alt& x)
+  {
+    try
+    {
+      data::data_expression factor = m_data_type_checker.typecheck_data_expression(x.right(), data::sort_real::real_(), m_variable_context);
+      this->apply(result, x.left());
+      make_const_multiply_alt(result, result, factor);
+    }
+    catch (mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pres_system::pp(x));
+    }
+  }
+
+
+  template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
     const core::identifier_string& name = x.name();
@@ -114,7 +178,8 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
       }
       catch (mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(*xi) + " as type " + data::pp(*ei) + " (while typechecking " + pres_system::pp(x) + ")");
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(*xi) + 
+                                        " as type " + data::pp(*ei) + " (while typechecking " + pres_system::pp(x) + ")");
       }
     }
     make_propositional_variable_instantiation(result, name, data::data_expression_list(x_parameters.begin(), x_parameters.end()));
@@ -237,8 +302,9 @@ class pres_type_checker
       presspec.initial_state() = initial_state;
 
       // typecheck the data specification
-      presspec.data() = m_data_type_checker.typechecked_data_specification();
-      presspec.data().translate_user_notation();
+      data::data_specification d = m_data_type_checker.typechecked_data_specification();
+      d.translate_user_notation();
+      presspec.set_data(d);
     }
 
      /** \brief     Type check a process expression.

@@ -481,7 +481,7 @@ inline double value(const data_expression& r)
     return sort_int::integer_constant_to_value<double>(a[0]) / 
            sort_pos::positive_constant_to_value<double>(a[1]);
   }
-  throw runtime_error("Expected a term of the shape @cReal(r1, r2) " + pp(r) + ".");
+  throw runtime_error("Expected a closed term of type real " + pp(r) + ".");
 }
 
 } // namespace sort_real

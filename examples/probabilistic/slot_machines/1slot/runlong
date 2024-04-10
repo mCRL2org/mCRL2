@@ -1,0 +1,3 @@
+mcrl22lps 1slot_spec.mcrl2 -v scratch/temp.lps &&
+lps2pres -v scratch/temp.lps -fexpected_gain_long_run.mcf scratch/temp.pres &&
+pressolve -am scratch/temp.pres -v -p10

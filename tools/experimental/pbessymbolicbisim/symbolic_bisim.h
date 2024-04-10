@@ -55,7 +55,7 @@ protected:
         used_functions.insert(f);
       }
     }
-    return rewriter(dataspec, used_data_equation_selector(dataspec, used_functions, spec.global_variables()), st);
+    return rewriter(dataspec, used_data_equation_selector(dataspec, used_functions, spec.global_variables(), false), st);
   }
 
 public:

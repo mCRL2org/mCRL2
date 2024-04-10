@@ -40,8 +40,8 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
               "Wieger Wesselink",
               "generates an LTS from an LPS",
               "Transforms the LPS in INFILE and writes a corresponding LTS "
-              " to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not "
-              " present, stdin is used."
+              " to OUTFILE. If OUTFILE is not present or '-' and an output format is specified, stdout is used. "
+              "If INFILE is not present or '-', stdin is used."
              )
     {}
 
@@ -217,6 +217,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       options.discard_lts_state_labels              = parser.has_option("no-info");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
       options.number_of_threads = number_of_threads();
+      bool to_stdout = output_filename().empty() || output_filename() == "-";
       // highway search
       if (parser.has_option("todo-max"))
       {
@@ -240,7 +241,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         }
       }
 
-      if (output_format == lts::lts_none && !output_filename().empty())
+      if (output_format == lts::lts_none && !to_stdout)
       {
         output_format = lts::detail::guess_format(output_filename());
         if (output_format == lts::lts_none)
@@ -301,12 +302,19 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 
       options.rewrite_strategy = rewrite_strategy();
 
-      if (options.save_at_end && (output_filename().empty() || (output_format != lts::lts_aut && output_format != lts::lts_lts)))
+      if (options.save_at_end && (output_format != lts::lts_aut && output_format != lts::lts_lts))
       {
         parser.error("Option '--save-at-end' requires that the output is in .aut or .lts format.");
       }
 
-      if (options.discard_lts_state_labels && (output_filename().empty() || output_format != lts::lts_lts))
+      if (output_format == lts::lts_aut && to_stdout && !options.save_at_end)
+      {
+        // The aut file contains the total number of states and transition in the header.
+        // We cannot stream it to an output stream which does not support seeking as we do not know this beforehand.
+        parser.error("The .aut output format requires option '--save-at-end' to be set for stdout.");
+      }
+
+      if (options.discard_lts_state_labels && (to_stdout || output_format != lts::lts_lts))
       {
         parser.error("Option '--no-info' requires that the output is in .lts format.");
       }

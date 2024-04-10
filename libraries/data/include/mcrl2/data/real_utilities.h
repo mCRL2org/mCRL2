@@ -44,6 +44,20 @@ inline bool is_one(const atermpp::aterm& e)
   return (e==real_one());
 }
 
+/// \brief Functions that returns true if e is a closed real number larger than zero.
+inline bool is_larger_zero(const atermpp::aterm_appl& e)
+{
+  if (sort_real::is_creal_application(e))
+  { 
+    const application& ea=atermpp::down_cast<application>(e);
+    return sort_int::is_cint_application(ea[0]) && 
+           sort_nat::is_natural_constant(atermpp::down_cast<application>(ea[0])[0]) && 
+           e!=real_zero();
+  }
+  return false;
+}
+
+
 } // namespace real
 } // namespace data
 

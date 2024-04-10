@@ -78,7 +78,7 @@ struct significant_variables_traverser: public pres_expression_traverser<signifi
     join();
   }
 
-  void leave(const supremum& x)
+  void leave(const infimum& x)
   {
     for (const data::variable& v: x.variables())
     {
@@ -86,7 +86,7 @@ struct significant_variables_traverser: public pres_expression_traverser<signifi
     }
   }
 
-  void leave(const infimum& x)
+  void leave(const supremum& x)
   {
     for (const data::variable& v: x.variables())
     {

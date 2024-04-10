@@ -306,7 +306,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   }
 
   // N.B. This function has been added to make this class operate well with the enumerator.
-  pres_expression operator()(const pres_expression& x, MutableSubstitution& sigma)
+  pres_expression operator()(const pres_expression& x, MutableSubstitution& )
   {
     pres_expression result;
     derived().apply(result, x);

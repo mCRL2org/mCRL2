@@ -397,8 +397,9 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
                 std::is_same<LTS_TRANSITION_SYSTEM,lts_lts_t>::value,
                 "Function write_to_lts can only be applied to a (probabilistic) lts. ");
 
+  bool to_stdout = filename.empty() || filename == "-";
   std::ofstream fstream;
-  if (!filename.empty())
+  if (!to_stdout)
   {
     fstream.open(filename, std::ofstream::out | std::ofstream::binary);
     if (fstream.fail())
@@ -409,7 +410,7 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
 
   try
   {
-    atermpp::binary_aterm_ostream stream(filename.empty() ? std::cout : fstream);
+    atermpp::binary_aterm_ostream stream(to_stdout ? std::cout : fstream);
     stream << lts;
   }
   catch (const std::exception& ex)

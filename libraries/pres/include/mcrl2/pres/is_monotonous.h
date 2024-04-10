@@ -48,51 +48,51 @@ bool is_monotonous(pres_expression f)
     }
     else if (is_and(f))
     {
-      const auto& left = atermpp::down_cast<and_>(f).left();
-      const auto& right = atermpp::down_cast<and_>(f).right();
+      const pres_expression& left = atermpp::down_cast<and_>(f).left();
+      const pres_expression& right = atermpp::down_cast<and_>(f).right();
       return is_monotonous(minus(left)) && is_monotonous(minus(right));
     }
     else if (is_or(f))
     {
-      const auto& left = atermpp::down_cast<or_>(f).left();
-      const auto& right = atermpp::down_cast<or_>(f).right();
+      const pres_expression& left = atermpp::down_cast<or_>(f).left();
+      const pres_expression& right = atermpp::down_cast<or_>(f).right();
       return is_monotonous(minus(left)) && is_monotonous(minus(right));
     }
     else if (is_imp(f))
     {
-      const auto& left = atermpp::down_cast<imp>(f).left();
-      const auto& right = atermpp::down_cast<imp>(f).right();
+      const pres_expression& left = atermpp::down_cast<imp>(f).left();
+      const pres_expression& right = atermpp::down_cast<imp>(f).right();
       return is_monotonous(left) && is_monotonous(minus(right));
     }
     else if (is_plus(f))
     {
-      const auto& left = atermpp::down_cast<plus>(f).left();
-      const auto& right = atermpp::down_cast<plus>(f).right();
+      const pres_expression& left = atermpp::down_cast<plus>(f).left();
+      const pres_expression& right = atermpp::down_cast<plus>(f).right();
       return is_monotonous(minus(left)) && is_monotonous(minus(right));
     }
     else if (is_const_multiply(f))
     {
-      const auto& right = atermpp::down_cast<const_multiply>(f).right();
+      const pres_expression& right = atermpp::down_cast<const_multiply>(f).right();
       return is_monotonous(minus(right));
     }
     else if (is_const_multiply_alt(f))
     {
-      const auto& left = atermpp::down_cast<const_multiply_alt>(f).left();
+      const pres_expression& left = atermpp::down_cast<const_multiply_alt>(f).left();
       return is_monotonous(minus(left));
     }
     else if (is_infimum(f))
     {
-      const auto& body = atermpp::down_cast<infimum>(f).body();
-      return is_monotonous(minus(body));
-    }
-    else if (is_sum(f))
-    {
-      const auto& body = atermpp::down_cast<sum>(f).body();
+      const pres_expression& body = atermpp::down_cast<infimum>(f).body();
       return is_monotonous(minus(body));
     }
     else if (is_supremum(f))
     {
-      const auto& body = atermpp::down_cast<supremum>(f).body();
+      const pres_expression& body = atermpp::down_cast<supremum>(f).body();
+      return is_monotonous(minus(body));
+    }
+    else if (is_sum(f))
+    {
+      const pres_expression& body = atermpp::down_cast<sum>(f).body();
       return is_monotonous(minus(body));
     }
     else if (is_propositional_variable_instantiation(f))
@@ -116,51 +116,51 @@ bool is_monotonous(pres_expression f)
   }
   else if (is_and(f))
   {
-    const auto& left = atermpp::down_cast<and_>(f).left();
-    const auto& right = atermpp::down_cast<and_>(f).right();
+    const pres_expression& left = atermpp::down_cast<and_>(f).left();
+    const pres_expression& right = atermpp::down_cast<and_>(f).right();
     return is_monotonous(left) && is_monotonous(right);
   }
   else if (is_or(f))
   {
-    const auto& left = atermpp::down_cast<or_>(f).left();
-    const auto& right = atermpp::down_cast<or_>(f).right();
+    const pres_expression& left = atermpp::down_cast<or_>(f).left();
+    const pres_expression& right = atermpp::down_cast<or_>(f).right();
     return is_monotonous(left) && is_monotonous(right);
   }
   else if (is_imp(f))
   {
-    const auto& left = atermpp::down_cast<imp>(f).left();
-    const auto& right = atermpp::down_cast<imp>(f).right();
+    const pres_expression& left = atermpp::down_cast<imp>(f).left();
+    const pres_expression& right = atermpp::down_cast<imp>(f).right();
     return is_monotonous(minus(left)) && is_monotonous(right);
   }
   else if (is_plus(f))
   {
-    const auto& left = atermpp::down_cast<plus>(f).left();
-    const auto& right = atermpp::down_cast<plus>(f).right();
+    const pres_expression& left = atermpp::down_cast<plus>(f).left();
+    const pres_expression& right = atermpp::down_cast<plus>(f).right();
     return is_monotonous(left) && is_monotonous(right);
   }
   else if (is_const_multiply(f))
   {
-    const auto& right = atermpp::down_cast<const_multiply>(f).right();
+    const pres_expression& right = atermpp::down_cast<const_multiply>(f).right();
     return is_monotonous(right);
   }
   else if (is_const_multiply_alt(f))
   {
-    const auto& left = atermpp::down_cast<const_multiply_alt>(f).left();
+    const pres_expression& left = atermpp::down_cast<const_multiply_alt>(f).left();
     return is_monotonous(left);
   }
   else if (is_infimum(f))
   {
-    const auto& body = atermpp::down_cast<infimum>(f).body();
+    const pres_expression& body = atermpp::down_cast<infimum>(f).body();
     return is_monotonous(body);
   }
   else if (is_supremum(f))
   {
-    const auto& body = atermpp::down_cast<supremum>(f).body();
+    const pres_expression& body = atermpp::down_cast<supremum>(f).body();
     return is_monotonous(body);
   }
   else if (is_sum(f))
   {
-    const auto& body = atermpp::down_cast<sum>(f).body();
+    const pres_expression& body = atermpp::down_cast<sum>(f).body();
     return is_monotonous(body);
   }
   else if (is_propositional_variable_instantiation(f))

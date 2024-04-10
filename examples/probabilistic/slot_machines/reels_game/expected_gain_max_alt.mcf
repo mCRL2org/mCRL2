@@ -1,0 +1,8 @@
+map max_turns:Nat;
+eqn max_turns=2;
+
+form val(1/max_turns)*mu X(turns:Nat=0).
+            (val(turns==max_turns) && val(0) ||
+             val(turns<max_turns) &&
+               ( <true>sup n:Nat.<points(n)> (val(n-1)+X(turns+1))
+               ));

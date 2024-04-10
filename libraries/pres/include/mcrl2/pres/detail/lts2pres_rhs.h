@@ -194,6 +194,12 @@ struct rhs_lts2pres_traverser: public state_formulas::state_formula_traverser<De
     top() = supremum(x.variables(), top());
   }
 
+  void apply(const state_formulas::sum& x)
+  {
+    derived().apply(x.body());
+    top() = sum(x.variables(), top());
+  }
+
   void apply(const state_formulas::must& x)
   {
     const auto& lts1 = parameters.lts1;

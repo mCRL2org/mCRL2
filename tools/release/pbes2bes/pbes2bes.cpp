@@ -182,7 +182,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
                   inserter(function_symbol_set,function_symbol_set.begin()));
       rewriter datar=(m_data_elm) ?
                         rewriter(p.data(),
-                             used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()),
+                             used_data_equation_selector( p.data(), function_symbol_set, p.global_variables(), false),
                              m_rewrite_strategy) :
                         rewriter(p.data(), rewrite_strategy());
 
