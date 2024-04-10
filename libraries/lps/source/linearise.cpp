@@ -11251,7 +11251,7 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
   mcrl2::lps::t_lin_options lin_options)
 {
-  mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_options.lin_method << " ' method.\n";
+  mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_options.lin_method << "' method.\n";
   mcrl2::process::process_specification input_process=type_checked_spec;
   data_specification data_spec=input_process.data();
 
