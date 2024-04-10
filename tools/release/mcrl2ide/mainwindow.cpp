@@ -228,14 +228,17 @@ void MainWindow::setDocksToDefault()
 
   propertiesDock->setFloating(false);
   consoleDock->setFloating(false);
+  rewriteExpressionDock->setFloating(true);
 
   propertiesDock->show();
   consoleDock->show();
+  rewriteExpressionDock->hide();
 
   // Workaround for QTBUG-65592.
   propertiesDock->setObjectName("PropertiesDockObject");
   consoleDock->setObjectName("ConsoleDockObject");
   toolbar->setObjectName("ToolbarObject");
+  rewriteExpressionDock->setObjectName("RewriteExpressionDockObject");
   QByteArray array = saveState();
   restoreState(array);
 
@@ -249,10 +252,12 @@ void MainWindow::setupDocks()
   propertiesDock =
       new PropertiesDock(processSystem, fileSystem, findAndReplaceDialog, this);
   consoleDock = new ConsoleDock(this);
+  rewriteExpressionDock = new RewriteExpressionDock(specificationEditor, this);
 
   /* add toggleable option in the view menu for each dock */
   viewMenu->addAction(propertiesDock->toggleViewAction());
   viewMenu->addAction(consoleDock->toggleViewAction());
+  viewMenu->addAction(rewriteExpressionDock->toggleViewAction());
 
   /* place the docks in the default dock layout */
   setDocksToDefault();
