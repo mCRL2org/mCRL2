@@ -239,6 +239,7 @@ class MainWindow : public QMainWindow
   mcrl2::gui::qt::CodeEditor* specificationEditor;
   PropertiesDock* propertiesDock;
   ConsoleDock* consoleDock;
+  RewriteExpressionDock* rewriteExpressionDock;
 
   FindAndReplaceDialog* findAndReplaceDialog;
   AddEditPropertyDialog* addPropertyDialog;
