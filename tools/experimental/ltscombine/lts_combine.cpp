@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux
+// Author(s): Willem Rietdijk
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+// \file lts_combine.cpp
 
 #include "lts_combine.h"
 
@@ -19,14 +20,12 @@ using state_t = std::size_t;
 
 using namespace mcrl2;
 
-/// <summary>
-/// Utility function that returns the index of the synchronisation for which
-/// the action_list actions matches the list of strings in syncs.second.
-/// </summary>
-/// <param name="syncs">The list of synchronisations.</param>
-/// <param name="actions">The list of actions to be matched.</param>
-/// <returns>The index of the matching synchronisation,
-/// or -1 when no matching synchronisation is found.</returns>
+/// \brief Utility function that returns the index of the synchronisation for which
+///        the action_list actions matches the list of strings in syncs.second.
+///
+/// \param syncs The list of synchronisations
+/// \param actions The list of actions to be matched.
+/// \returns The index of the matching synchronisation, or -1 when no matching synchronisation is found.
 size_t get_sync(std::vector<std::pair<std::string, std::vector<std::string>>>& syncs, process::action_list actions)
 {
   // Loop through possible synchronisations
@@ -80,12 +79,11 @@ size_t get_sync(std::vector<std::pair<std::string, std::vector<std::string>>>& s
   return -1;
 }
 
-/// <summary>
-/// Checks if the given action list contains one of the blocked actions.
-/// </summary>
-/// <param name="blocks">The list of blocked actions.</param>
-/// <param name="actions">The list of actions to be checked.</param>
-/// <returns>Whether the list of actions contains a blocked action.</returns>
+/// \brief Checks if the given action list contains one of the blocked actions.
+///
+/// \param blocks The list of blocked actions.
+/// \param actions The list of actions to be checked.
+/// \returns Whether the list of actions contains a blocked action.
 bool is_blocked(std::vector<std::string> blocks, process::action_list actions)
 {
   for (const process::action& action : actions)
@@ -100,15 +98,14 @@ bool is_blocked(std::vector<std::string> blocks, process::action_list actions)
   return false;
 }
 
-/// <summary>
-/// Checks if the given action list matches one of the allowed multi-actions.
-/// A match can only occur when the list of actions and allowed multi-action 
-/// are equal. If the list is empty, all actions are allowed.
-/// </summary>
-/// <param name="allowed">The list of allowed multi-actions.</param>
-/// <param name="actions">The list of actions to be matched.</param>
-/// <returns>Whether the list of actions is matched by an allowed multi-action
-/// from the list of allowed multi-actions.</returns>
+/// \brief Checks if the given action list matches one of the allowed
+/// multi-actions. A match can only occur when the list of actions and allowed
+/// multi-action are equal. If the list is empty, all actions are allowed.
+///
+/// \param allowed The list of allowed multi-actions.
+/// \param actions The list of actions to be matched.
+/// \returns Whether the list of actions is matched by an allowed multi-action
+///          from the list of allowed multi-actions.
 bool is_allowed(const std::vector<std::vector<std::string>> allowed, process::action_list actions)
 {
   // If the list is empty, all actions are allowed
@@ -167,13 +164,12 @@ bool is_allowed(const std::vector<std::vector<std::string>> allowed, process::ac
   return false;
 }
 
-/// <summary>
-/// Checks whether the arguments of each of the actions of the
-/// action_label are equal.
-/// </summary>
-/// <param name="label">The label to check.</param>
-/// <returns>Whether all arguments of each action of the label
-/// are equal.</returns>
+/// \brief Checks whether the arguments of each of the actions of the
+///        action_label are equal.
+///
+/// \param label The label to check.
+/// \returns Whether all arguments of each action of the label
+///          are equal.
 bool can_sync(const lts::action_label_lts& label)
 {
   // Check if each action's arguments are equal to the first action's arguments
@@ -188,7 +184,6 @@ bool can_sync(const lts::action_label_lts& label)
   return true;
 }
 
-// Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
 void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   std::vector<std::pair<std::string, std::vector<std::string>>>& syncs,
   std::vector<std::string> blocks,

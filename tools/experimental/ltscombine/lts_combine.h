@@ -16,8 +16,8 @@
 namespace mcrl2
 {
 
-// Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
-// The input LTSs are modified during the process.
+/// \brief Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
+/// \details The input LTSs are modified during the process.
 void combine_lts(
   std::vector<lts::lts_lts_t>& ltss,
   std::vector<std::pair<std::string, std::vector<std::string>>>& syncs,

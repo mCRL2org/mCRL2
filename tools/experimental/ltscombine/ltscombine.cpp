@@ -18,7 +18,6 @@
 namespace mcrl2
 {
 
-using log::log_level_t;
 using mcrl2::utilities::tools::xinput_output_tool;
 
 class ltscombine_tool : public xinput_output_tool
@@ -30,9 +29,9 @@ public:
       "ltscombine",
       "Willem Rietdijk",
       "Combines LTSs",
-      "Combines multiple labelled transition systems (LTS)"
-      "in the INFILES and writes the resulting LTS to OUTFILE."
-      "Communication, blocking, allowing and hiding are applied"
+      "Combines multiple labelled transition systems (LTS) "
+      "in the INFILES and writes the resulting LTS to OUTFILE. "
+      "Communication, blocking, allowing and hiding are applied "
       "afterwards in that order.",
       2, 0)
   {}
@@ -70,7 +69,7 @@ protected:
 
     desc.add_option("allow",
         utilities::make_file_argument("FILE"),
-        "The file containing the list of"
+        "The file containing the list of "
         "allowed multi-actions.",
         'a');
     desc.add_option("block",
@@ -85,7 +84,7 @@ protected:
         't');
     desc.add_option("comm",
         utilities::make_file_argument("FILE"),
-        "The file containing the list of"
+        "The file containing the list of "
         "synchronising actions.",
         'c');
   }
@@ -207,7 +206,7 @@ protected:
     if (parser.options.count("hide") > 0)
     {
       std::string filename = parser.option_argument("hide");
-      mCRL2log(log::debug) << "Reading hiden actions from file " << filename << std::endl;
+      mCRL2log(log::debug) << "Reading hidden actions from file " << filename << std::endl;
       std::ifstream hide_input(filename.c_str());
       std::string action_label;
 
@@ -217,7 +216,7 @@ protected:
         if (action_label.find('|') != std::string::npos)
         {
           // Syntax error, multi-actions cannot be hiden
-          mCRL2log(log::error) << "List of hide action contains multi-action '" << action_label << "'." << std::endl;
+          mCRL2log(log::error) << "List of hide actions contains multi-action '" << action_label << "'." << std::endl;
           throw mcrl2::runtime_error("Could not parse file " + filename + ".");
         }
         
