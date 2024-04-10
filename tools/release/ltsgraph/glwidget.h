@@ -272,7 +272,7 @@ class GLWidget : public QOpenGLWidget
   GLScene::Selection
       m_hover;         ///< The current object (if any) which is pointed at.
   public:              /// TODO: Expose nicely
-  DragMode m_dragmode; ///< The current drag mode.
+  DragMode m_dragmode = dm_none; ///< The current drag mode.
   private:
   MoveRecord* m_dragnode = nullptr; ///< The current node (if any) which is being dragged.
   QPoint m_dragstart;     ///< The coordinate at which the dragging started.
