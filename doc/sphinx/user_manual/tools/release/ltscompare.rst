@@ -13,12 +13,13 @@ The transition systems can either be compared using an equivalence relation
 (option ``--equivalence``) or a preorder (option ``--preorder``). The list of
 available equivalences is provided below.
 
-There are two useful options. One allows to generate counter examples in the form
-of a trace (option ``--counter-example``). These counter examples are useful for
-trace based equivalences. They can also be generated for some variants of bisimulation,
-but in this case they can also point to states where the two transition systems are
-nondeterministic.
+There are two useful options. One allows to generate counter examples (option
+``--counter-example``). The counter example consist of a Hennessy-Milner formula
+which is true in the first input LTS and false in the second. Counter-examples
+are implemented and tested for the `bisim`, `branching-bisim` and `trace`
+equivalence options. 
 
 The second useful option is to hide some actions while doing the comparisons
 (option ``--tau=`` followed by a comma separated list of actions). Counter examples
-are provided without applying hiding.
+will only be distinguishing for the input transition systems with the hiding operation
+applied.
