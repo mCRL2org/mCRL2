@@ -51,8 +51,8 @@ static size_t encode_variablesize_int(int_t value, uint8_t* output)
 
 /// \brief Decodes an unsigned variable-length integer using the MSB algorithm.
 /// \param stream The stream from which the bytes for this value are read.
-/// \details Implementation taken from https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/, but converted to a streaming
-///          method.
+/// \details Implementation taken from https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/, 
+///          but converted to a streaming method.
 template<typename int_t = std::size_t>
 int_t decode_variablesize_int(ibitstream& stream)
 {
@@ -70,7 +70,7 @@ int_t decode_variablesize_int(ibitstream& stream)
       // If the next-byte flag is not set then we are finished.
       break;
     }
-    else if (i == sizeof(int_t))
+    else if (7*i >= 8*sizeof(int_t))
     {
       // The next-byte flag was set, but we cannot represent it using int_t.
       throw std::runtime_error("Fail to read an int from the input");
