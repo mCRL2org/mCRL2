@@ -1,0 +1,6 @@
+nu X(inPSV: Bool = false) .
+[emitMode(PSV)]X(true) &&
+[(exists m: OperationMode . emitMode(m)) && !emitMode(PSV)]X(false) &&
+[!(exists m: OperationMode . emitMode(m))]X(inPSV) &&
+(val(inPSV) => ([apneaLag] (nu Y . (!<emitMode(PCV)>true => [true]Y) &&
+    	<!emitMode(PCV)*.emitMode(PCV)>true)))

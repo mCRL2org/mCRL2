@@ -1,0 +1,8 @@
+<!powerOn* . powerOn
+. !emitMode_c(StartUp)* . emitMode_c(StartUp)
+. !startUpSuccessful* . startUpSuccessful
+. !emitMode_c(SelfTest)* . emitMode_c(SelfTest)
+. !resumeVentilation_c* . resumeVentilation_c
+. !emitMode_c(VentilationOff)* . emitMode_c(VentilationOff)
+ . !((exists m: OperationMode . startPCV_c|controller_Mode_c(m)) || (exists m: OperationMode . startPSV_c|controller_Mode_c(m)))*>
+(<(exists m: OperationMode . startPCV_c|controller_Mode_c(m))>true && <(exists m: OperationMode . startPSV_c|controller_Mode_c(m))>true)

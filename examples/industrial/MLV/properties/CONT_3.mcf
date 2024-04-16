@@ -1,0 +1,9 @@
+% CONT.3: The transition from Start-up mode to self test mode shall occur once
+% the configurations have been loaded and the internal checking is terminsated.
+nu X(inStartUp: Bool = false, configLoaded: Bool = false, internalCheckingDone: Bool = false) .
+  [emitMode(StartUp)]X(true, configLoaded, internalCheckingDone) &&
+  [(exists m: OperationMode . emitMode(m)) && !emitMode(StartUp)]X(false, configLoaded, internalCheckingDone) &&
+  [loadConfiguration]X(inStartUp, true, internalCheckingDone) &&
+  [internalCheckingComplete]X(inStartUp, configLoaded, true) &&
+  [!((exists m: OperationMode . emitMode(m)) || loadConfiguration || internalCheckingComplete)]X(inStartUp, configLoaded, internalCheckingDone) &&
+(val(inStartUp && configLoaded && internalCheckingDone) => (mu Y. (<emitMode(SelfTest)>true || ([!exists m: OperationMode . emitMode(m)]Y && <true>true))))

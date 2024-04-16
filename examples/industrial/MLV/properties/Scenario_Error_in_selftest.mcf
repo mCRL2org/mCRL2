@@ -1,0 +1,8 @@
+<!powerOn* . powerOn
+. !emitMode_c(StartUp)* . emitMode_c(StartUp)
+. !startUpSuccessful* . startUpSuccessful
+. !emitMode_c(SelfTest)* . emitMode_c(SelfTest)
+. !error* . error
+. !emitMode_c(FailSafe)* . emitMode_c(FailSafe)>
+[!(emitMode_c(PCV) || emitMode_c(PSV) || emitMode_c(Stop))*
+. (emitMode_c(PCV) || emitMode_c(PSV))]false

@@ -1,0 +1,7 @@
+nu X(isInStartUp: Bool = false, tries: Int = 0).
+[emitMode(StartUp)]X(true, 0) &&
+[(exists m: OperationMode . val(m != StartUp) &&  emitMode(m))]X(false, tries) &&
+[getSensorState_c(GasBlenderPressure, sFaulty)]X(isInStartUp, tries + 1) &&
+[!((exists m: OperationMode. emitMode(m)) || getSensorState_c(GasBlenderPressure, sFaulty))]X(isInStartUp, tries) &&
+val(!(isInStartUp && tries > 5)) &&
+(val(isInStartUp && tries == 5) => (mu Y.[emitMode(FailSafe)]Y && <true>true))

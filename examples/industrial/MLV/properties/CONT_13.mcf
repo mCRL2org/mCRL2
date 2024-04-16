@@ -1,0 +1,11 @@
+% In this requirement we really need to keep track of whether we enter a
+% particular Mode or not, instead of looking at the self-loops for the current
+% mode.
+
+nu X(isInStartUp: Bool = false, checkedSensors: Set(SensorId) = {}, checkedValves: Set(ValveId) = {}) .
+  [emitMode_c(StartUp)]X(true, {}, {}) &&
+  [(exists m: OperationMode . emitMode_c(m)) && !emitMode_c(StartUp)]X(false, checkedSensors, checkedValves) &&
+  (val(isInStartUp) => (forall sid: SensorId . val(!(sid in checkedSensors )) => [exists s: SensorState . getSensorState_c(sid, s)]X(isInStartUp, checkedSensors + {sid}, checkedValves))) &&
+  (val(isInStartUp) => (forall vid: ValveId . val(!(vid in checkedValves )) => [exists v: ValveState . getValveState_c(vid, v)]X(isInStartUp, checkedSensors, checkedValves + {vid}))) &&
+  [!((exists m: OperationMode . emitMode_c(m)) || (exists sid: SensorId . exists s: SensorState . getSensorState_c(sid, s))  || (exists vid: ValveId . exists v: ValveState . getValveState_c(vid, v))) && !(exists vid: ValveId . getValveState_c(vid, Faulty))]X(isInStartUp, checkedSensors, checkedValves) &&
+  (val(isInStartUp && !((forall sid: SensorId . sid in checkedSensors) && (forall vid: ValveId . vid in checkedValves))) => (forall m: OperationMode .  val(m != FailSafe && m != StartUp && m != Stop) => [emitMode(m)]false))

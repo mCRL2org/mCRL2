@@ -1,0 +1,4 @@
+%SAV.22
+[true*]
+  [apneaLag][!(snooze_alarm_c(High) || HighAlarm)*]<true*.HighAlarm>true %  mu X. (([true]X && <true>true) || <HighAlarm>true))
+

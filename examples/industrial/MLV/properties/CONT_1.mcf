@@ -1,0 +1,2 @@
+forall m: OperationMode .
+<true* . emitMode(m)>true

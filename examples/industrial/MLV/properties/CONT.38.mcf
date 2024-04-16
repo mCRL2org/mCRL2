@@ -1,0 +1,2 @@
+%CONT.38
+[true*](<emitMode(VentilationOff) || emitMode(StartUp)>true => [emitValveState(In,Open) || emitValveState(Out,Closed)] false)
