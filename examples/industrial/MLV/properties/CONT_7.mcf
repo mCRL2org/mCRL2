@@ -1,0 +1,9 @@
+nu X(inPCV: Bool = false, currPhase: BreathingPhase = Inspiration, oldPhase: BreathingPhase = Inspiration, psvRequested: Bool = false) .
+  [emitMode(PCV)]X(true, currPhase, oldPhase, psvRequested) &&
+  [(exists m: OperationMode . emitMode(m)) && !emitMode(PCV)]X(false, currPhase, oldPhase, false) &&
+(forall b: BreathingPhase . [emitPhase(b)]X(inPCV, b, currPhase, psvRequested)) &&
+  [exists m: OperationMode . startPSV_c|controller_Mode_c(m)]X(inPCV, currPhase, oldPhase, psvRequested) &&
+  [!((exists m: OperationMode . emitMode(m)) || (exists b: BreathingPhase . emitPhase(b)) || exists m: OperationMode . startPSV_c|controller_Mode_c(m))]X(inPCV, currPhase, oldPhase, psvRequested) &&
+  (val(inPCV && oldPhase == Inspiration && currPhase != Inspiration && psvRequested) =>
+     (nu Y . (!<emitMode(PSV)>true => [true]Y) &&
+  	  <!emitMode(PSV)*.emitMode(PSV)>true))

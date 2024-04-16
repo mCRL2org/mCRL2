@@ -1,0 +1,7 @@
+nu X(inStandby : Bool = false) .
+  [emitMode(VentilationOff)]X(true) &&
+  [(exists m: OperationMode . emitMode(m)) && !emitMode(VentilationOff)]X(false) &&
+  [!(exists m: OperationMode . emitMode(m))]X(inStandby) &&
+  (val(inStandby) => [exists m: OperationMode . startPCV_c|controller_Mode_c(m)]
+    (nu Y . (!<emitMode(PCV)>true => [true]Y) &&
+    	<!emitMode(PCV)*.emitMode(PCV)>true))

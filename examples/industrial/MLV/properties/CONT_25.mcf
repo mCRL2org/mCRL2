@@ -1,0 +1,7 @@
+nu X(inPCV: Bool = false, inExpiration: Bool = false) .
+  [emitMode_c(PCV)]X(true, false) &&
+  [(exists m: OperationMode . emitMode_c(m)) && !emitMode_c(PCV)]X(false, inExpiration) &&
+  [emitPhase(Expiration)]X(inPCV, true) &&
+  [(exists b: BreathingPhase . emitPhase(b)) && !emitPhase(Expiration)]X(inPCV, false) &&
+  [!((exists m: OperationMode . emitMode_c(m)) || (exists b: BreathingPhase . emitPhase(b)))]X(inPCV, inExpiration) &&
+  (val(inPCV && inExpiration) => ([(exists b: BreathingPhase . emitPhase(b)) && !(emitPhase(Expiration) || emitPhase(Inspiration))]false))

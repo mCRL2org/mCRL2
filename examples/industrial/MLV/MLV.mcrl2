@@ -1,0 +1,1165 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% mCRL2 model of the Mechanical Lung Ventilator case study for ABZ 2024.
+% The model and its verification are described in the paper
+% D. van Dortmont, J.J.A. Keiren and T.A.C. Willemse. Modelling and Analysing
+% a Mechanical Lung Ventilator in mCRL2. Proceedings of ABZ 2024. 2024.
+%
+% The model is based on the description and requirements in
+% Bonfanti, S. and Gargantini, A. (2023) ‘Mechanical Lung Ventilator’ (version 5).
+% Available at: https://github.com/foselab/abz2024_casestudy_MLV/blob/main/Mechanical_Lung_Ventilator%201_5.pdf
+% (Accessed: 13 February 2024).
+%
+% Model is based on an earlier version by Danny van Dortmont prepared for the
+% FSA seminar, and was extended to include additional details regarding, e.g.,
+% GUI and alarms by Jeroen Keiren and Tim Willemse.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sensor Handler
+sort
+  SensorId = struct GasBlenderPressure|FlowIndicator1|FlowIndicator2|InPressure|ExpPressure|Oxygen;
+  SensorState = struct Working | Error | sFaulty;
+
+% Breathing mode
+  BreathingPhase = struct Inspiration | InspirationPause | RecruitmentManoever | Expiration | ExpirationPause | ApneaTriggerWindow;
+
+% Valve Handler
+  ValveId = struct In | Out | GasBlenderFlow | PEEPvalve;
+  ValveState = struct Open | Closed | Faulty | At ? isAt;
+
+% Visual Alarm levels
+  AlarmLevels = struct Low | Medium | High;
+
+% Requirements describe the following:
+% Cont.1: controller shall implement following modes
+% Cont 1.1: Startup mode
+% Cont 1.2: Self-test mode
+% Cont 1.3: VentilationOff
+% Cont 1.4: Pressure controlled ventilation mode (PCV)
+% Cont 1.5: Pressure support ventilation mode (PSV)
+% Cont 1.6: Fail-safe.
+%
+% Note that Cont 11 refers to "Stop Mode", which is the mode where the machine
+% Is turned off.
+  OperationMode = struct Stop?IsStop
+                       | StartUp?IsStartUp
+                       | SelfTest?IsSelfTest
+                       | VentilationOff?IsVentilationOff
+                       | PSV?IsPSV
+                       | PCV?IsPCV
+                       | FailSafe?IsFailSafe;
+
+  VentilationModes = struct Real_Time_Data
+                          | Settings
+                          | Frozen_View
+                          | Alarm_Settings;
+
+  OperationModeGUI = struct StartUp_GUI?IsStartUpGUI
+                          | Start_GUI?IsStartGUI
+                          | Stop_GUI?IsStopGUI
+                          | Menu_GUI?IsMenuGUI
+                          | SelfTest_GUI?IsSelfTestGUI
+                          | Ventilation_GUI?IsVentilationGUI
+                          | PSV_GUI?IsPSVGUI
+                          | PCV_GUI?IsPCVGUI
+                          | Settings_GUI?IsSettingsGUI
+                          | Settings_via_Menu_GUI?IsSettings_via_MenuGUI
+                          | Settings_via_PSV_GUI?IsSettings_via_PSVGUI
+                          | Settings_via_PCV_GUI?IsSettings_via_PCVGUI;
+
+% Data types to collect connected sensors and valves in startup phase.
+  ConnectedSensors = struct CS(GB: Bool, FI1: Bool, FI2: Bool, IP: Bool, EP: Bool, O2: Bool);
+  ConnectedValves = struct CV(IN: Bool, OUT: Bool);
+
+% The following mappings are used to update the connected sensors and valves
+% during startup, and to checker whether all sensors and valves are connected
+% and thus startup is complete.
+map
+  StartUpComplete: ConnectedSensors # ConnectedValves # Bool -> Bool;
+  SensorChecked: ConnectedSensors # SensorId  -> Bool;
+  ValveChecked: ConnectedValves # ValveId  -> Bool;
+  UpdateSensorStatus: ConnectedSensors # SensorId # Bool -> ConnectedSensors;
+  UpdateValveStatus: ConnectedValves # ValveId # Bool -> ConnectedValves;
+  InitialSensorStatus: ConnectedSensors;
+  InitialValveStatus: ConnectedValves;
+var
+  cs: ConnectedSensors;
+  cv: ConnectedValves;
+  sid: SensorId;
+  vid: ValveId;
+  cl,b: Bool;
+eqn
+  StartUpComplete(cs,cv,cl) =  (cs == CS(true,true,true,true,true,true))
+                            && (cv == CV(true,true))
+                            && cl;
+  InitialSensorStatus = CS(false,false,false,false,false,false);
+  InitialValveStatus = CV(false,false);
+  SensorChecked(cs,GasBlenderPressure) = GB(cs);
+  SensorChecked(cs,FlowIndicator1) = FI1(cs);
+  SensorChecked(cs,FlowIndicator2) = FI2(cs);
+  SensorChecked(cs,InPressure) = IP(cs);
+  SensorChecked(cs,ExpPressure) = EP(cs);
+  SensorChecked(cs,Oxygen) = O2(cs);
+
+  ValveChecked(cv,In) = IN(cv);
+  ValveChecked(cv,Out) = OUT(cv);
+
+  UpdateSensorStatus(cs,GasBlenderPressure,b) = CS(b,FI1(cs),FI2(cs),IP(cs),EP(cs),O2(cs));
+  UpdateSensorStatus(cs,FlowIndicator1,b) = CS(GB(cs),b,FI2(cs),IP(cs),EP(cs),O2(cs));
+  UpdateSensorStatus(cs,FlowIndicator2,b) = CS(GB(cs),FI1(cs),b,IP(cs),EP(cs),O2(cs));
+  UpdateSensorStatus(cs,InPressure,b) = CS(GB(cs),FI1(cs),FI2(cs),b,EP(cs),O2(cs));
+  UpdateSensorStatus(cs,ExpPressure,b) = CS(GB(cs),FI1(cs),FI2(cs),IP(cs),b,O2(cs));
+  UpdateSensorStatus(cs,Oxygen,b) = CS(GB(cs),FI1(cs),FI2(cs),IP(cs),EP(cs),b);
+
+  UpdateValveStatus(cv,In,b) = CV(b,OUT(cv));
+  UpdateValveStatus(cv,Out,b) = CV(IN(cv),b);
+
+% Action declarations to be used in the processes.
+act
+	% Sensors
+	getSensorValue_s, getSensorValue_r, getSensorValue_c: SensorId # Int;
+	getSensorState_s, getSensorState_r, getSensorState_c: SensorId # SensorState;
+  break;   % sensor physically breaks
+	error;   % error in sensor
+  recover; % sensor recovers from an error
+  updateSensorValue: SensorId # Int;
+
+  % Alarms
+  LowAlarm;
+  MediumAlarm;
+  HighAlarm;
+  alarm_r, alarm_s, alarm_c: AlarmLevels;
+  snooze_alarm_r, snooze_alarm_s, snooze_alarm_c: AlarmLevels;
+
+	% Valves
+	setValveState_s, setValveState_r, setValveState_c: ValveId # ValveState;
+	getValveState_s, getValveState_r, getValveState_c: ValveId # ValveState;
+  setValveValue_s, setValveValue_r, setValveValue_c, setValveValue: ValveId # Int;
+  getValveValue_s, getValveValue_r, getValveValue_c: ValveId # Int;
+  emitValveState: ValveId # ValveState;
+
+  % GUI
+  initialise_GUI_parameters;
+  new_patient;
+  timeout;
+  selfTestFailed;
+  selectMode: VentilationModes;
+  changeVentilationSettings;
+  saveVentilationSettings;
+  return;
+
+	% Controller
+	loadConfiguration;
+  timeout: SensorId;
+  timeout: ValveId;
+	internalCheckingComplete;
+	startUpSuccessful;
+	powerOn;
+	powerOff;
+  runningSelfTest;
+	moveToPSV;
+	apneaLag;
+	storeParameters;
+  error_r, error_s, error_c;
+	startSelfTest_r, startSelfTest_s, startSelfTest_c;
+	selfTestPassed_r, selfTestPassed_s, selfTestPassed_c;
+	resumeVentilation_r, resumeVentilation_s, resumeVentilation_c;
+  interrupt_selfTest_r, interrupt_selfTest_s, interrupt_selfTest_c;
+	startPCV_r,startPCV_s,startPCV_c;
+	startPSV_r,startPSV_s, startPSV_c;
+	stopVentilation_r,stopVentilation_s,stopVentilation_c;
+  controller_Mode_r, controller_Mode_s, controller_Mode_c: OperationMode;
+	emitMode_r,emitMode_s,emitMode_c: OperationMode;
+  emitMode: OperationMode;
+	emitPhase: BreathingPhase;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GUI
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc
+
+GUI
+=
+  GUI_Stop
+;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% System is shut down, ready to power up
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+GUI_Stop
+=
+  powerOn . GUISwitcher(StartUp_GUI)
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% In START-UP mode the GUI initializes itself with default configuration parameters.
+% Start-up mode is completed once start-up parameter validation and initialization have been completed.
+%
+% Assumption: the parameters are read in Ventilation_GUI mode; but maybe some should be read from memory here?
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+GUI_StartUp
+=
+  initialise_GUI_parameters .
+    ( sum mode: OperationMode. (mode == PSV || mode == PCV) -> controller_Mode_r(mode). GUISwitcher(Ventilation_GUI)
+    + sum mode: OperationMode. (mode != PSV && mode != PCV) -> controller_Mode_r(mode). GUISwitcher(Start_GUI)
+    )
++ powerOff. GUISwitcher(Stop_GUI)
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% In START mode the user can resume ventilation or start the ventilation for a new patient.
+% GUI.5: The transition from Start to Menu shall occur if the doctor decides to resume ventilation and the
+%        system has not been powered off for more than 15 minutes.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+GUI_Start
+=
+  resumeVentilation_s. GUISwitcher(Menu_GUI)           % only available if the controller is in the SelfTest mode
++ new_patient. GUISwitcher(SelfTest_GUI)
++ timeout. GUI_Start_timedout                          % timeout to model the 15 minutes; alternatively, maybe this happens in the controller instead?
++ powerOff. GUISwitcher(Stop_GUI)
+;
+
+GUI_Start_timedout                                     % Like GUI_start, except for the 15 minutes timout has happened
+=
+  new_patient. GUISwitcher(SelfTest_GUI)
++ powerOff. GUISwitcher(Stop_GUI)
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SELFTEST mode allows the user to perform a sequence of tests
+% GUI.9: The transition from Self Test to Menu shall occur if the test passes.
+% GUI.10: If the Self Test fails, the GUI is blocked with a message, and the user shall obtain a replacement of
+%         the unit and tag the problematic unit for a maintenance inspection.
+% GUI.112: The GUI shall remain in Self-Test mode if the user interrupts the self-test procedure.
+% GUI.113: The GUI shall remain in Self-Test mode if the self-test has been interrupted and the user runs
+%          again the self-test procedure.
+%
+% N.B.   if an error happens, then the system should crash, not just the GUI
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+GUI_SelfTest
+=
+  startSelfTest_s .
+    (
+      selfTestPassed_r. GUISwitcher(Menu_GUI)
+    + error_r. selfTestFailed. delta
+    + interrupt_selfTest_s. GUI_SelfTest
+    )
++ powerOff. GUISwitcher(Stop_GUI)
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% In MENU mode the user can select different activities
+% GUI.7: The transition from Menu to Ventilation shall occur when the Self-test is passed
+%        if required (new patient connected), and the clinician wants to proceed with the ventilation.
+% GUI.8: The transition from Menu to Settings shall occur when the Self-test is passed if required
+%        (new patient connected), and the clinician wants to change the settings for the ventilation.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+GUI_Menu
+=
+  sum m:OperationMode. (m != PCV) -> startPCV_s|controller_Mode_c(m). GUISwitcher(PCV_GUI)
++ sum m:OperationMode. (m != PSV) -> startPSV_s|controller_Mode_c(m). GUISwitcher(PSV_GUI)
++ changeVentilationSettings|controller_Mode_c(VentilationOff). GUISwitcher(Settings_via_Menu_GUI)
++ powerOff. GUISwitcher(Stop_GUI)
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% In VENTILATION mode the patient is ventilated.
+% The Ventilation mode shall implement the following modes (see Figure 3.1):
+% 1. Show Real Time Data Mode: display health parameters (default mode)                        % partly implemented
+% 2. Settings Mode: update and display setting parameters                                      % not yet implemented
+% 3. Frozen view Mode: allow the user to freeze the screen and analyse waveforms in detailed   % not yet implemented
+% 4. Alarm Settings Mode: allow the user to perform a sequence of tests                        % not yet implemented
+%
+% GUI.54: The user shall be able to snooze an alarms when they have been raised.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+GUI_Ventilation__Real_Time_Data_Mode
+=
+  selectMode(Settings). GUI_Ventilation__Settings_Mode
++ selectMode(Frozen_View). GUI_Ventilation__Frozen_View_Mode
++ selectMode(Alarm_Settings). GUI_Ventilation__Alarm_Settings_Mode
++ powerOff. GUISwitcher(Stop_GUI)
++ stopVentilation_s. GUISwitcher(Menu_GUI)
++ startPCV_s|controller_Mode_r(PSV). GUI_Ventilation__Real_Time_Data_Mode            % 'read' the controller mode as last known
++ startPSV_s|controller_Mode_r(PCV). GUI_Ventilation__Real_Time_Data_Mode            % 'read' the controller mode as last known
++ changeVentilationSettings|controller_Mode_r(PSV). GUISwitcher(Settings_via_PSV_GUI)
++ changeVentilationSettings|controller_Mode_r(PCV). GUISwitcher(Settings_via_PCV_GUI)
++ sum alarmLevel: AlarmLevels. snooze_alarm_s(alarmLevel). GUI_Ventilation__Real_Time_Data_Mode
+;
+
+GUI_Ventilation__Settings_Mode
+=
+  selectMode(Real_Time_Data). GUI_Ventilation__Real_Time_Data_Mode
++ selectMode(Frozen_View). GUI_Ventilation__Frozen_View_Mode
++ selectMode(Alarm_Settings). GUI_Ventilation__Alarm_Settings_Mode
++ controller_Mode_r(PCV). GUI_Ventilation__Settings_Mode
++ load_defaults_s. GUI_Ventilation__Settings_Mode
++ changeVentilationSettings | controller_Mode_r(PSV). GUISwitcher(Settings_via_PSV_GUI)
++ sum n:Nat. (set_RR_PCV_s(n) | controller_Mode_r(PCV)) . GUISwitcher(Settings_via_PCV_GUI)
++ sum n:Nat. (set_P_insp_PSV_s(n) | controller_Mode_r(PSV)). GUISwitcher(Settings_via_PCV_GUI)
++ sum n:Nat. (set_P_insp_PCV_s(n) | controller_Mode_r(PSV)). GUISwitcher(Settings_via_PCV_GUI)
+%+ sum n:Ratio. (set_I'E_PCV_s(n) | controller_Mode_r(PCV)) . GUISwitcher(Settings_via_PCV_GUI)  % Note: reading this breaks the state space generation in newer mCRL2 toolset versions
++ sum n:Nat. (set_Min_V_E_s(n)). GUISwitcher(Settings_via_PCV_GUI)                               % needed to trigger high alarm AL.22
++ sum n:Nat. (set_Max_V_E_s(n)). GUISwitcher(Settings_via_PCV_GUI)                               % needed to trigger high alarm AL.24
++ sum alarmLevel: AlarmLevels. snooze_alarm_s(alarmLevel). GUI_Ventilation__Settings_Mode
++ sum n:Nat. set_RR_AP_s(n) . GUISwitcher(Settings_via_Menu_GUI)  % set the RR_AP to an arbitrary value; always allowed
++ powerOff. GUISwitcher(Stop_GUI)
+;
+
+GUI_Ventilation__Frozen_View_Mode
+=
+  selectMode(Real_Time_Data). GUI_Ventilation__Real_Time_Data_Mode
++ selectMode(Settings). GUI_Ventilation__Settings_Mode
++ selectMode(Alarm_Settings). GUI_Ventilation__Alarm_Settings_Mode
++ controller_Mode_r(PCV). GUI_Ventilation__Frozen_View_Mode
++ changeVentilationSettings | controller_Mode_r(PSV). GUISwitcher(Settings_via_PSV_GUI)
++ changeVentilationSettings | controller_Mode_r(PCV). GUISwitcher(Settings_via_PCV_GUI)
++ sum alarmLevel: AlarmLevels. snooze_alarm_s(alarmLevel). GUI_Ventilation__Frozen_View_Mode
++ powerOff. GUISwitcher(Stop_GUI)
+;
+
+GUI_Ventilation__Alarm_Settings_Mode
+=
+  selectMode(Real_Time_Data). GUI_Ventilation__Real_Time_Data_Mode
++ selectMode(Settings). GUI_Ventilation__Settings_Mode
++ selectMode(Frozen_View). GUI_Ventilation__Frozen_View_Mode
++ controller_Mode_r(PCV). GUI_Ventilation__Frozen_View_Mode
++ changeVentilationSettings | controller_Mode_r(PSV). GUISwitcher(Settings_via_PSV_GUI)
++ changeVentilationSettings | controller_Mode_r(PCV). GUISwitcher(Settings_via_PCV_GUI)
++ sum alarmLevel: AlarmLevels. snooze_alarm_s(alarmLevel). GUI_Ventilation__Alarm_Settings_Mode
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% In SETTINGS mode the the operator can change the parameters of the ventilation and of the alarms.
+% GUI.109: The transition from Settings to Ventilation shall occur if the ventilator is ventilating and
+%          the operator has finished setting the parameters.
+% GUI.110: The transition from Settings to Menu shall occur if the ventilation is off and the operator
+%          has finished setting the parameters.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+GUI_Settings(mode: OperationModeGUI)
+=
+  saveVentilationSettings. GUISwitcher(mode)
++ return. GUISwitcher(mode)
++ load_defaults_s. GUI_Settings()
++ sum n:Nat. set_RR_AP_s(n) . GUISwitcher(Settings_via_Menu_GUI)                       % set the RR_AP to an arbitrary value
++ sum n:Nat. (set_Min_V_E_s(n)). GUISwitcher(Settings_via_PCV_GUI)                     % needed to trigger high alarm AL.22
++ sum n:Nat. (set_Max_V_E_s(n)). GUISwitcher(Settings_via_PCV_GUI)                     % needed to trigger high alarm AL.24
++ sum alarmLevel: AlarmLevels. snooze_alarm_s(alarmLevel). GUI_Settings()
++ powerOff. GUISwitcher(Stop_GUI)
+;
+
+GUISwitcher(mode: OperationModeGUI) =
+  (mode == StartUp_GUI) -> GUI_StartUp
++ (mode == Start_GUI) -> GUI_Start
++ (mode == Stop_GUI) -> GUI_Stop
++ (mode == Menu_GUI) -> GUI_Menu
++ (mode == SelfTest_GUI) -> GUI_SelfTest
++ (mode == PCV_GUI || mode == PSV_GUI) -> GUI_Ventilation__Real_Time_Data_Mode
++ (mode == Settings_via_Menu_GUI) -> GUI_Settings(Menu_GUI)
++ (mode == Settings_via_PCV_GUI) -> GUI_Settings(PCV_GUI)
++ (mode == Settings_via_PSV_GUI) -> GUI_Settings(PSV_GUI)
+;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CONTROLLER
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% System is shut down, ready to power up
+% "Final State (Stop Mode): In Final State the machine is turned off"
+%
+% Cont 11: Final State shall be reached by pushing the power button located on the back side of the
+%   ventilator unit to turn it off.
+%   Rationale: the ventilator is turned off when the user pushes the power button on the ventilator unit.
+% Const 11.1: During Final state, all parameters (if any) are to be safely stored before the final state
+%   is complete and the unit is de-energized.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+proc
+Controller
+=
+  Controller_Stop || ExposeControllerMode(Stop)
+;
+
+Controller_Stop =
+  powerOn
+. ControllerSwitcher(StartUp)
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cont 1.1 Start-Up: In start-up mode the controller initialises itself with default configuration parameters (if any),
+% checks the system memory and the communication of the
+% controller with the sensors and valves, as well as between
+% the controller and the GUI. Start-up mode is completed
+% once the required activities have been completed.
+%
+% Cont 2: The transition to Start-up Mode shall be allowed by pushing the power button located on
+% the back side of the ventilator unit to turn it on.
+% Cont 3: The transition from Start-up Mode to Self test Mode shall occur once the configurations
+% have been loaded and the internal checking is terminated.
+%   Rationale: At this point, the monitoring module is able to carry out the assigned functionality.
+%
+% Cont 12: A set of default values for all parameters shall be provided and loaded from a configuration file on
+%   the machine when it is turned on. The parameters are listed in Section 3.1.1.
+% Cont 13: The controller shall check the communication of the controller with the sensors and valves.
+% Cont 14: The controller shall check the communication of the controller with GUI.
+% Cont 15: If the pressure sensor fails to connect or reports an error condition after a
+%   fixed number of retries (maximum 5), the controller shall transition to the fail-safe mode.
+% Cont 16: If the external ADC fails to initialize or reports an error condition after a
+%   fixed number of retries (maximum 5), the controller shall transition to the fail-safe mode.
+% JK: ADC hardly mentioned in requirements, unclear how to incorporate.
+%
+% Cont 38: When the ventilator is in Start-up or VentilationOff mode, the in valve pressure shall be set to close and the out valve shall be open.
+%   Rationale: if the machine is not ventilating the valves are in a secure configuration state, in valve is closed and out valve is opened.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Controller_StartUp_Setup =
+  powerOff . ControllerSwitcher(Stop)
++ setValveState_s(Out, Open) . setValveState_s(In, Closed) . emitMode_s(StartUp). Controller_StartUp(InitialSensorStatus, InitialValveStatus, 0, 0, true)
+;
+
+Controller_StartUp(cs: ConnectedSensors, cv: ConnectedValves, PS_retries, ADC_retries: Int, configLoaded: Bool)
+=
+  (PS_retries < 5 && ADC_retries < 5) ->
+      (
+	powerOff . ControllerSwitcher(Stop)
+      + StartUpComplete(cs,cv,configLoaded) -> startUpSuccessful . ControllerSwitcher(SelfTest)
+      +	!configLoaded -> load_defaults_s . Controller_StartUp(configLoaded = true)
+      + (!GB(cs)) -> (
+            (getSensorState_s(GasBlenderPressure, Error) . Controller_StartUp(PS_retries = PS_retries + 1))
+          + (timeout(GasBlenderPressure) . Controller_StartUp(PS_retries = PS_retries + 1))
+	)
+      + sum sID: SensorId, s: SensorState. (!SensorChecked(cs,sID) && (sID == GasBlenderPressure => s == Working)) -> getSensorState_s(sID, s)
+                                                                                                            . Controller_StartUp(cs =UpdateSensorStatus(cs,sID,true))
+      + sum vID: ValveId, v: ValveState . (!ValveChecked(cv,vID)) -> getValveState_s(vID,v)
+                                                                   . Controller_StartUp(cv =UpdateValveStatus(cv,vID,true))
+      )
+  <>
+    ControllerSwitcher(FailSafe);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cont 1.2 Self-Test: in the Self Test mode the controller allows the GUI to do all the operations necessary to perform
+% the self-test.
+%
+% From the documentation, it is not clear whether4.1 and 4.2 are AND or OR?
+% Cont 4: The transition from Self-Test Mode to VentilationOff Mode shall occur:
+% Cont 4.1: When the self-test procedure has successfully been completed
+% Cont 4.2: When the GUI asks for resuming ventilation
+%
+% Cont 17: During the self test mode the controller shall allow the GUI to perform all the self-test specified in the FUN.6.
+% Cont 18: During the self test mode the controller shall perform the self-test specified in the FUN.6
+% Cont 19: If the SelfTest fails, the controller shall not be able to proceed to ventilation; conflicting with 4.2?
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Controller_SelfTest =
+  powerOff . ControllerSwitcher(Stop)
++ resumeVentilation_r . ControllerSwitcher(VentilationOff)
++ startSelfTest_r. Controller_SelfTestRunning
+;
+
+Controller_SelfTestRunning =
+  powerOff . ControllerSwitcher(Stop)
++ runningSelfTest. error_s . delta     % GUI.10 indicates the whole system should be replaced
++ runningSelfTest. selfTestPassed_s . ControllerSwitcher(VentilationOff)
++ interrupt_selfTest_r. Controller_SelfTest
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cont 1.3 VentilationOff: In ventilation off, the machine does not
+% ventilate, the in valve is closed and the out valve is opened.
+%
+% Cont 5: The transition from VentilationOff to PSV shall occur if the change mode command is received from the GUI.
+%   Rationale: the ventilation starts in PCV mode when the user selects the start command from the GUI.
+% Cont 6: The transition from VentilationOff to PCV mode shall occur if the change mode command is received from the GUI.
+%   Rationale: the ventilation starts in PSV mode when the user selects the start command from the GUI.
+%
+% Cont 38: When the ventilator is in Start-up or VentilationOff mode, the in valve pressure shall be set to close and the out valve shall be open.
+%   Rationale: if the machine is not ventilating the valves are in a secure configuration state, in valve is closed and out valve is opened.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Controller_VentilationOff_Setup =
+  powerOff . ControllerSwitcher(Stop)
++ setValveState_s(In, Closed) . setValveState_s(Out, Open) . emitMode_s(VentilationOff). Controller_VentilationOff
+;
+
+Controller_VentilationOff =
+  powerOff . ControllerSwitcher(Stop)
++ startPCV_r . ControllerSwitcher(PCV)
++ startPSV_r . ControllerSwitcher(PSV)
++ sum sensorId: SensorId .
+    (sum sensorState: SensorState . (sensorState == Error) -> getSensorState_s(sensorId, sensorState) . ControllerSwitcher(FailSafe)
+                                                           <> getSensorState_s(sensorId, sensorState) . Controller_VentilationOff)
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cont 1.4 PCV: Pressure Controlled Ventilation mode is used when patients have no
+% spontaneous respiration.
+%
+% Cont 7: The transition from PCV to PSV shall occur if ventilation is on, the transition from
+%   PCV to PSV shall occur at the end of a PCV inspiratory time if the change mode command has
+%   been received from the GUI.
+%   Rationale: the doctor decides when the patient has some ability to breathe spontaneously.
+% Cont 8: The transition from PCV to VentilationOff shall occur if the user stops
+%   the ventilation in PCV mode. (JK: from the GUI)
+%   Rationale: the ventilation stops when the user selects the stop command from the GUI.
+%
+% Cont 20: In PCV mode the breathing cycle shall be defined by inspiratory pressure Pinsp P CV relative to atmosphere, respiratory rate (RRP CV ) and the ratio between the inspiratory and expiratory times (I:EP CV ).
+%   Rationale: this is the most appropriate procedure for COVID-19 patients as it allows the immediate reopening of the alveoli and is strongly recommended by the doctors and nurses in the COVID-19 wards, rather than the constant flow procedure. These characteristics of the ventilator pressure transient during the inspiratory cycle are crucial to avoid barotrauma and to minimise long term fatigue of muscles and alveoli induced by forced mechanical ventilation.
+% Cont 21: The breath cycle shall start with the inspiration phase.
+% Cont 22: The cycle starts with the inspiration phase that lasts an Inspiratory time I = 60 x I:E_{PCV} /(RR_{PCV} x (1 + I:E_{PCV} )) seconds. After that the expiration phase begins.
+% Cont 23: At the end of an inspiration phase, if the Inspiratory Pause is set by the GUI, an Inspiratory Pause shall start (see CONT.41).
+% Cont 24: At the end of an inspiration phase, if inspiratory pause is not required and the Recruitment Maneuver (RM) is set by the GUI, a Recruitment Maneuver shall start (see CONT.43).
+% Cont 25: When in the expiration phase, a new inspiration shall be initiated either after a breathing cycle is over, or when a spontaneous breath is detected. The maximum duration of the expiration phase (i.e., the Expiratory time) yields E = 60 / (RR_{PCV} x (1 + I:E_{PCV} ))
+%   Rationale: While the main mode of PCV is mandatory breathing control with constant rate, clinical advice is that the patient also needs to be able to trigger a breath spontaneously.
+% Cont 26: Within the trigger window during the expiratory phase, in the case of spontaneous breathing, the ventilator shall trigger a new breathing cycle (i.e., it goes in inspiration phase) when it detects a sudden drop in pressure above the inhale trigger sensitivity (i.e., it yields the condition drop(PAW) > ITS_{PCV} )). Note that drop is positive if the pressure drops.
+%   Rationale: In a pressure-regulated ventilator, the intensity of pressure drops initiated by the patient is the easiest way to detect the spontaneous breathing attempt as per ventilator experts
+% Cont 27: If the controller is in the expiration phase, and it does not detect a spontaneous breath (i.e., the condition drop(PAW) > ITS_{PCV} is false), within the expiration time, if the Expiratory Pause start is set by the GUI, an Expiratory Pause shall start (see CONT.42).
+% Cont 28: The target inspiratory pressure level shall be controlled by the Inspiratory Pressure parameter (P_{insp\_PCV} ) and it is kept constant.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Controller_PCV(currPhase: BreathingPhase, oldPhase: BreathingPhase, PSVrequested: Bool) =
+(PSVrequested && currPhase != Inspiration && oldPhase == Inspiration)
+  -> ControllerSwitcher(PSV)
+  <> (
+       powerOff . ControllerSwitcher(Stop)       % added powerOff since it is also included in the diagram
+     + stopVentilation_r . setValveState_s(Out, Open) . setValveState_s(In, Closed) .  ControllerSwitcher(VentilationOff)  % if ventilation is stopped, change valves
+     + startPSV_r . Controller_PCV(PSVrequested = true)
+     + sum sensorId: SensorId . (
+       	(sum sensorState: SensorState . ((sensorState == sFaulty) -> getSensorState_s(sensorId, sensorState) . ControllerSwitcher(FailSafe)
+                                                                  <> getSensorState_s(sensorId, sensorState) .Controller_PCV()))
+       + (sum v: Int . (sensorId != FlowIndicator1 && sensorId != Oxygen) -> getSensorValue_s(sensorId, v) . Controller_PCV())
+       + (sum v:Int, w: Nat . (v < w) -> getSensorValue_s(FlowIndicator1, v)|get_Min_V_E_s(w) . alarm_s(High) .  Controller_PCV())   % AL.22
+       + (sum v:Int, w: Nat . (v >= w) -> getSensorValue_s(FlowIndicator1, v)|get_Min_V_E_s(w) . Controller_PCV())                   % AL.22
+       + (sum v:Int, w: Nat . (v > w) -> getSensorValue_s(FlowIndicator1, v)|get_Max_V_E_s(w) . alarm_s(Medium) .  Controller_PCV())   % AL.25
+       + (sum v:Int, w: Nat . (v <= w) -> getSensorValue_s(FlowIndicator1, v)|get_Max_V_E_s(w) . Controller_PCV())                   % AL.25
+       + (sum v:Int, w: Int . (100*v > 103*w || 100*v < 97*w) -> getSensorValue_s(Oxygen, v)|getValveValue_s(GasBlenderFlow,w) . alarm_s(Medium). Controller_PCV())  % AL.23 + AL.24
+       + (sum v:Int, w: Int . (100*v <= 103*w && 100*v >= 97*w) -> getSensorValue_s(Oxygen, v)|getValveValue_s(GasBlenderFlow,w) . Controller_PCV())  % AL.23 + AL.24
+       )
+     + (currPhase == Inspiration) -> (
+         sum phase: BreathingPhase. (phase in [InspirationPause, RecruitmentManoever, Expiration]) ->
+              (phase == Expiration) -> (
+                  emitPhase(phase)
+                . setValveState_s(Out, Open)                                      % CONT.40;
+                . setValveState_s(In, Closed)                                     % CONT.40
+                . Controller_PCV(currPhase = phase, oldPhase = currPhase)
+              ) <>
+                  emitPhase(phase)
+                . Controller_PCV(currPhase = phase, oldPhase = currPhase)
+       )
+     + (currPhase == InspirationPause) -> (
+         sum phase: BreathingPhase. (phase in [RecruitmentManoever, Expiration]) ->
+              (phase == Expiration) -> (
+                  emitPhase(phase)
+                . setValveState_s(Out, Open)                                      % CONT.40;
+                . setValveState_s(In, Closed)                                     % CONT.40
+                . Controller_PCV(currPhase = phase, oldPhase = currPhase)
+              ) <>
+                  emitPhase(phase)
+                . Controller_PCV(currPhase = phase, oldPhase = currPhase)
+       )
+     + (currPhase == RecruitmentManoever) ->
+          emitPhase(Expiration)
+        . setValveState_s(Out, Open)                                              % CONT.40;
+        . setValveState_s(In, Closed)                                             % CONT.40
+        . Controller_PCV(currPhase = Expiration, oldPhase = currPhase)
+     + (currPhase == Expiration) -> (
+          emitPhase(Inspiration)
+        . setValveState_s(In, Open)                                               % CONT.39; (implicit)
+        . setValveState_s(Out, Closed)                                            % CONT.40
+        . sum n:Nat. (get_P_insp_PCV_s(n) | setValveValue_s(In,n) )               % set the valve to the P_insp_PCV value
+        . Controller_PCV(currPhase = Inspiration, oldPhase = currPhase)
+       )
+  )
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cont 1.5 PSV: Pressure Support Ventilation mode is used when the patients are able to
+% initiate every breath and the machine supports them.
+%
+% Cont 9: The transition from PSV to PCV shall occur if the patient does not trigger a breath
+%   within the time of the apnea trigger window. The switch shall occur with respiratory rate,
+%   target inspiratory pressure and I:E defined for the apnea backup mode.
+%   Rationale: the patient is not able to breathe
+% Cont 10: The transition from PSV to VentilationOff shall occur if the user stops the ventilation
+%   in PSV mode.
+%   Rationale: the ventilation stops when the user selects the stop command from the GUI.
+%
+% Cont 29: The Pressure Support Ventilation (PSV) mode shall support the breathing of the patient with positive pressure up to a peak value of P_{insp\_PSV} while the patient triggers every breath and maintains control of the respiratory rate.
+%   Rationale: PSV is not suitable for patients unable to initiate breaths on their own.
+% Cont 30: The breath cycle shall start with the inspiration phase.
+% Cont 31: The target inspiratory pressure level shall be controlled by the Inspiratory Pressure parameter (P_{insp\_PSV} ).
+% Cont 32: The inspiration phase lasts until the inspiration peak is reached but no later than the max_insp_time_psv is over. After that the expiration phase begins.
+%   Rationale: In PSV mode, the ventilator supports the patient who is supposed to breathe spontaneously. In case a spontaneous expiration is not triggered, the ventilator forces the expiration phase after a suitable timeout (around 7 sec) to wait for a spontaneous breath.
+% Cont 33: When the inspiratory flow (V_E) drops below a fraction of the peak flow (Expiratory Trigger Setting (ETS)) of a given breath (i.e., it yields the condition V_E<ETS*PeakV_E), the ventilator shall stop providing pressure allowing exhalation.
+% Cont 34: At the end of an inspiration phase, if the Inspiratory Pause is set by the GUI, an Inspiratory Pause shall start (see CONT.41).
+% Cont 35: At the end of an inspiration phase if no inspiration pause is required and the Recruitment Maneuver (RM) is set by the GUI, a Recruitment Maneuver shall start (see CONT.43).
+% Cont 36: If the patient is in expiration phase:
+% Cont 36.1: A new inspiration shall be initiated by a sudden drop in pressure above the inhale trigger sensitivity (ITS_{PSV} ), which shall be set by the user (i.e., it yields the condition drop(PAW) > ITS_{PSV} )).
+%   Rationale: In a pressure-regulated ventilator, the speed of pressure drop initiated by the patient is the easiest way to detect the spontaneous breathing attempt as per ventilator experts.
+% Cont 36.2: If the controller is in expiration phase and a spontaneous breath is not detected (i.e., the condition drop(PAW) > ITS_{PSV} ) is false), within the interval [min_exp_time_psv : apnea lag], if the Expiratory Pause is set by the GUI, an Expiratory Pause shall start (see CONT.42).
+% Cont 36.3: min_exp_time_psv shall be the half of the last inspiration time. min_exp_time_psv shall be in the interval [0.4 : 2] sec.
+%   Rationale: The min exp time psv prevents moving immediately to inspiration allowing the patient to expirate.
+% Cont 37: If the patient does not trigger a breath within the time of the apnea trigger window (apnea lag) the ventilator shall switch to PCV mode (apnea backup ventilation) with respiratory rate RR_{AP} , inspiratory pressure P_{insp\_AP} , and the ratio between inspiratory time and Expiratory time I:E_{AP}.
+%   Rationale: Need to ensure patients continue to receive breaths. The operator needs to set the apnea backup PCV setting before starting the ventilation in PSV mode, otherwise the ventilator will not start operating.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Controller_PSV(currPhase: BreathingPhase) =
+  stopVentilation_r . setValveState_s(Out, Open) . setValveState_s(In, Closed) .  ControllerSwitcher(VentilationOff)  % if ventilation is stopped, change valves
++ powerOff . ControllerSwitcher(Stop)                            % added powerOff since it is also included in the diagram
++ sum sensorId: SensorId . (
+    (sum sensorState: SensorState . (sensorState == sFaulty) -> getSensorState_s(sensorId, sensorState) . ControllerSwitcher(FailSafe)
+                                                             <> getSensorState_s(sensorId, sensorState) . Controller_PSV(currPhase))
+  + (sum v: Int . (sensorId != FlowIndicator1 && sensorId != Oxygen) -> getSensorValue_s(sensorId, v) . Controller_PSV())
+  + (sum v:Int, w: Nat . (v < w) -> getSensorValue_s(FlowIndicator1, v)|get_Min_V_E_s(w) . alarm_s(High) .  Controller_PSV()) % AL.22
+  + (sum v:Int, w: Nat . (v >= w) -> getSensorValue_s(FlowIndicator1, v)|get_Min_V_E_s(w) . Controller_PSV())                 % AL.22
+  + (sum v:Int, w: Nat . (v > w) -> getSensorValue_s(FlowIndicator1, v)|get_Max_V_E_s(w) . alarm_s(Medium) .  Controller_PSV())   % AL.25
+  + (sum v:Int, w: Nat . (v <= w) -> getSensorValue_s(FlowIndicator1, v)|get_Max_V_E_s(w) . Controller_PSV())                   % AL.25
+  + (sum v:Int, w: Int . (100*v > 103*w || 100*v < 97*w) -> getSensorValue_s(Oxygen, v)|getValveValue_s(GasBlenderFlow,w) . alarm_s(Medium). Controller_PSV())  % AL.23 + AL.24
+  + (sum v:Int, w: Int . (100*v <= 103*w && 100*v >= 97*w) -> getSensorValue_s(Oxygen, v)|getValveValue_s(GasBlenderFlow,w) . Controller_PSV())  % AL.23 + AL.24
+  )
++ (currPhase == Inspiration) -> (
+          emitPhase(Expiration)
+        . setValveState_s(Out, Open)                                     % CONT.40;
+        . setValveState_s(In, Closed)                                    % CONT.40
+        . Controller_PSV(Expiration)
+  )
++ (currPhase == Expiration) -> (
+          emitPhase(ApneaTriggerWindow) . Controller_PSV(ApneaTriggerWindow)
+  )
++ (currPhase == ApneaTriggerWindow) -> (
+    apneaLag . alarm_s(High) . ControllerSwitcher(PCV)                  % raise a high priority alarm
+  + (  emitPhase(Inspiration)
+     . setValveState_s(In, Open)                                        % CONT.39; (implicit)
+     . setValveState_s(Out, Closed)                                     % CONT.39
+     . sum n:Nat. (get_P_insp_PSV_s(n) | setValveValue_s(In,n) )        % set the valve to the P_insp_PSV value
+     . Controller_PSV(Inspiration)
+    )
+  )
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cont 1.6 Fail-safe: the controller forces input and output valves
+% to their de-energized states (in valve close and out valve open)
+%
+% Cont 46: The controller cannot return from fail-safe mode to any other mode without a power cycle
+%   (turn off and then turn on the machine).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Controller_FailSafe =
+  powerOff . ControllerSwitcher(Stop)
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Switching modes
+% also using the emitMode to synchronise with a process that keeps track of in which mode the controller is
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ControllerSwitcher(mode: OperationMode) =
+  (mode == Stop) -> (storeParameters . emitMode_s(mode) . Controller_Stop) +
+  (mode == StartUp) -> (Controller_StartUp_Setup) +
+  (mode == SelfTest) -> (emitMode_s(mode) . Controller_SelfTest) +
+  (mode == VentilationOff) -> (emitMode_s(mode) . Controller_VentilationOff_Setup) +
+  (mode == PSV) -> (emitMode_s(mode) . Controller_PSV(ApneaTriggerWindow)) +
+  (mode == PCV) -> (emitMode_s(mode) . emitPhase(Inspiration) . Controller_PCV(Inspiration, Inspiration, false)) +
+  (mode == FailSafe) -> (emitMode_s(mode) . Controller_FailSafe)
+;
+
+ExposeControllerMode(mode: OperationMode) =
+  sum m: OperationMode. emitMode_r(m). ExposeControllerMode(mode = m)
++ controller_Mode_s(mode). ExposeControllerMode()
++ emitMode(mode). ExposeControllerMode()   % for verification purposes
+;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Alarm model
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+proc LEDs
+=
+  VisualAlarms(false,false,false)
+;
+
+proc VisualAlarms(low,medium,high: Bool)
+=
+  alarm_r(Low). VisualAlarms(low = true)
++ alarm_r(Medium). VisualAlarms(medium = true)
++ alarm_r(High). VisualAlarms(high = true)
++ snooze_alarm_r(Low). VisualAlarms(low = false)
++ snooze_alarm_r(Medium). VisualAlarms(medium = false)
++ snooze_alarm_r(High). VisualAlarms(high = false)
++ low -> LowAlarm. VisualAlarms()
++ medium -> MediumAlarm. VisualAlarms()
++ high -> HighAlarm. VisualAlarms()
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Valve model
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Valves
+=
+   ManualValve(GasBlenderFlow, FIO2target, [FIO2target]) % Gas blender also has desired FiO2 setting that is set manually this is reported on the GUI (PER.2).
+          % We model the value reported to the gui as a sensor with a single value (the manually set value).
+|| ManualValve(PEEPvalve, PEEPvalue, [PEEPvalue]) % PER.1 expiratory pressure valve is adjusted by hand to set the desired PEEP value
+|| InValve(In, 15, Closed) % can have state closed when pressure is set to 0, state open when pressure is set to Pinsp
+          % PER 6: Default 15 cm H20
+|| OutValve(Out, Open) % can be closed or open.
+;
+
+
+InValve(id: ValveId, targetPressure: Int, state: ValveState) =
+  sum s: ValveState . setValveState_r(id, s) . InValve(state = s)
++ sum p: Int . setValveValue_r(id, p) . InValve(targetPressure = p)
++ getValveState_r(id, state) . InValve()
++ emitValveState(id, state) . InValve()
+;
+
+OutValve(id: ValveId, state: ValveState) =
+  sum s: ValveState . setValveState_r(id, s) . OutValve(state = s)
++ getValveState_r(id, state) . OutValve()
++ emitValveState(id, state) . OutValve()
+;
+
+ManualValve(id: ValveId, value: Int, validValues: List(Int)) =
+  sum v: Int . (v in validValues) -> setValveValue(id, v) . ManualValve(value = v)
++ getValveValue_r(id, value) . ManualValve();
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Sensor model
+% The controller shall get the values from the following sensors (HW):
+% INT.49 The digital spirometer flow sensor (FI1). (Percentages: 21-100%)
+% INT.50 The electronic oxygen sensor (0% - 100%) (OS).
+% INT.51 The differential pressure sensor to measure the flow to the patient (FI2).
+% INT.52 The sensor that measures the expiratory pressure near the patient (PEEP) (PS exp).
+%   Positive End Expiratory Pressure: the measured respiratory pressure at the end of an expiratory phase
+%   FUN.45 Positive end expiratory pressure (PEEP) measured (in cmH2O) for the most recent breath.
+%   PER.1 Range 5-20 cm H_2O, continuous
+% INT.53 The sensor that measures inspiratory pressure provided by the ventilator (PS ins).
+% INT.54 The sensor that measures the supply gas pressure to the ventilator (GB).
+% INT.55-58: Omitted
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Sensors
+=
+   Sensor(GasBlenderPressure, Working, 4500, [4500]) % GB pressure sensor. Should be between 3800 cmH2O and 5300 cmH2O (AL28,AL29).
+
+|| Sensor(FlowIndicator1, Working, 20, [15,20,25]) % Unclear from the documentation. It seems this is measuring V_E, range 2-80 step 1.
+|| Sensor(FlowIndicator2, Working, 20, [15,20,25]) % Unclear from the documentation. It seems this is measuring V_E, range 2-80 step 1.
+|| Sensor(InPressure, Working, 15, [5,15,25,35,45,50]) % PS_ins; default 15 cmH2O, range 2-50
+|| Sensor(ExpPressure, Working, 10, [5,10,15,20]) % PS_exp; 5-20cm H2O, continuous
+|| Sensor(Oxygen, Working, FIO2target, [FIO2target-4,FIO2target-3,FIO2target,FIO2target+3,FIO2target+4]) % Int.50: OS, values 0-100% should be within 3% of the set FIO2target. I here use boundary values as an abstraction of the entire range.
+;
+
+Sensor(id: SensorId, state: SensorState, currVal: Int, validValues: List(Int)) =
+  (state != sFaulty) -> getSensorState_r(id, state) . Sensor()
++ sum value: Int . (value in validValues && state == Working) -> updateSensorValue(id, value) . Sensor(currVal = value)
++ (state == Working) -> error. Sensor(state=Error)
++ (state == Error) -> recover. Sensor(state=Working)
++ (state != sFaulty) -> break. Sensor(state=sFaulty)
++ (state != sFaulty) -> getSensorValue_r(id, currVal) . Sensor()
+;
+
+%%%%
+% Configuration parameters
+%%%%
+sort
+  Ratio = struct ratio(pi1: Nat, pi2: Real);
+
+act
+  load_defaults_r, load_defaults_s, load_defaults_c;
+  set_RR_PCV_s, set_RR_PCV_r, set_RR_PCV_c: Nat;
+  get_RR_PCV_s, get_RR_PCV_r, get_RR_PCV_c: Nat;
+  set_I'E_PCV_s, set_I'E_PCV_r, set_I'E_PCV_c: Ratio;
+  get_I'E_PCV_s, get_I'E_PCV_r, get_I'E_PCV_c: Ratio;
+  set_P_insp_PCV_s, set_P_insp_PCV_r, set_P_insp_PCV_c: Nat;
+  get_P_insp_PCV_s, get_P_insp_PCV_r, get_P_insp_PCV_c: Nat;
+  set_ITS_PCV_s, set_ITS_PCV_r, set_ITS_PCV_c: Nat;
+  get_ITS_PCV_s, get_ITS_PCV_r, get_ITS_PCV_c: Nat;
+  set_P_insp_PSV_s, set_P_insp_PSV_r, set_P_insp_PSV_c: Nat;
+  get_P_insp_PSV_s, get_P_insp_PSV_r, get_P_insp_PSV_c: Nat;
+  set_ITS_PSV_s, set_ITS_PSV_r, set_ITS_PSV_c: Nat;
+  get_ITS_PSV_s, get_ITS_PSV_r, get_ITS_PSV_c: Nat;
+  set_ETS_s, set_ETS_r, set_ETS_c: Nat;
+  get_ETS_s, get_ETS_r, get_ETS_c: Nat;
+  set_ApneaLag_s, set_ApneaLag_r, set_ApneaLag_c: Nat;
+  get_ApneaLag_s, get_ApneaLag_r, get_ApneaLag_c: Nat;
+  set_RR_AP_s, set_RR_AP_r, set_RR_AP_c: Nat;
+  get_RR_AP_s, get_RR_AP_r, get_RR_AP_c: Nat;
+  set_I'E_AP_s, set_I'E_AP_r, set_I'E_AP_c: Ratio;
+  get_I'E_AP_s, get_I'E_AP_r, get_I'E_AP_c: Ratio;
+  set_P_insp_AP_s, set_P_insp_AP_r, set_P_insp_AP_c: Nat;
+  get_P_insp_AP_s, get_P_insp_AP_r, get_P_insp_AP_c: Nat;
+  set_MaxP_insp_s, set_MaxP_insp_r, set_MaxP_insp_c: Nat;
+  get_MaxP_insp_s, get_MaxP_insp_r, get_MaxP_insp_c: Nat;
+  set_MinP_insp_s, set_MinP_insp_r, set_MinP_insp_c: Nat;
+  get_MinP_insp_s, get_MinP_insp_r, get_MinP_insp_c: Nat;
+  set_MaxV_tidal_exp_s, set_MaxV_tidal_exp_r, set_MaxV_tidal_exp_c: Nat;
+  get_MaxV_tidal_exp_s, get_MaxV_tidal_exp_r, get_MaxV_tidal_exp_c: Nat;
+  set_MinV_tidal_exp_s, set_MinV_tidal_exp_r, set_MinV_tidal_exp_c: Nat;
+  get_MinV_tidal_exp_s, get_MinV_tidal_exp_r, get_MinV_tidal_exp_c: Nat;
+  set_MaxV_tidal_insp_s, set_MaxV_tidal_insp_r, set_MaxV_tidal_insp_c: Nat;
+  get_MaxV_tidal_insp_s, get_MaxV_tidal_insp_r, get_MaxV_tidal_insp_c: Nat;
+  set_MinV_tidal_insp_s, set_MinV_tidal_insp_r, set_MinV_tidal_insp_c: Nat;
+  get_MinV_tidal_insp_s, get_MinV_tidal_insp_r, get_MinV_tidal_insp_c: Nat;
+  set_Min_V_E_s, set_Min_V_E_r, set_Min_V_E_c: Nat;
+  get_Min_V_E_s, get_Min_V_E_r, get_Min_V_E_c: Nat;
+  set_Max_V_E_s, set_Max_V_E_r, set_Max_V_E_c: Nat;
+  get_Max_V_E_s, get_Max_V_E_r, get_Max_V_E_c: Nat;
+  set_Min_RR_s, set_Min_RR_r, set_Min_RR_c: Nat;
+  get_Min_RR_s, get_Min_RR_r, get_Min_RR_c: Nat;
+  set_Max_RR_s, set_Max_RR_r, set_Max_RR_c: Nat;
+  get_Max_RR_s, get_Max_RR_r, get_Max_RR_c: Nat;
+  set_Min_PEEP_s, set_Min_PEEP_r, set_Min_PEEP_c: Nat;
+  get_Min_PEEP_s, get_Min_PEEP_r, get_Min_PEEP_c: Nat;
+  set_Max_PEEP_s, set_Max_PEEP_r, set_Max_PEEP_c: Nat;
+  get_Max_PEEP_s, get_Max_PEEP_r, get_Max_PEEP_c: Nat;
+  set_PRM_s, set_PRM_r, set_PRM_c: Nat;
+  get_PRM_s, get_PRM_r, get_PRM_c: Nat;
+  set_timerRM_s, set_timerRM_r, set_timerRM_c: Nat;
+  get_timerRM_s, get_timerRM_r, get_timerRM_c: Nat;
+  set_MaxDurationInspPause_s, set_MaxDurationInspPause_r, set_MaxDurationInspPause_c: Nat;
+  get_MaxDurationInspPause_s, get_MaxDurationInspPause_r, get_MaxDurationInspPause_c: Nat;
+  set_MaxDurationExpPause_s, set_MaxDurationExpPause_r, set_MaxDurationExpPause_c: Nat;
+  get_MaxDurationExpPause_s, get_MaxDurationExpPause_r, get_MaxDurationExpPause_c: Nat;
+  set_triggerWindowDelay_s, set_triggerWindowDelay_r, set_triggerWindowDelay_c: Real;
+  get_triggerWindowDelay_s, get_triggerWindowDelay_r, get_triggerWindowDelay_c: Real;
+  set_max_insp_time_psv_s, set_max_insp_time_psv_r, set_max_insp_time_psv_c: Nat;
+  get_max_insp_time_psv_s, get_max_insp_time_psv_r, get_max_insp_time_psv_c: Nat;
+
+
+proc
+Memory
+=  ConfigurationMemory(12, ratio(1,2), 15, 3, 15, 3, 30, 30, 0, ratio(1,2), 0, 40, 50, 990, 10, 990, 10, 2, 0, 4, 50, 0, 0, 20, 10, 60, 40, 7/10, 7);
+
+ConfigurationMemory(RR_PCV: Nat, %12 b/min; range 4-50 b/min; step 1.
+                    I'E_PCV: Ratio, %1:2; range 1:1 - 1:4; step 0.1 in E
+                    P_insp_PCV: Nat, %15 cm H2O, range 2-50; step 1
+                    ITS_PCV: Nat, % 3cm H2O/sec^2, range 1-9, step 1
+                    P_insp_PSV: Nat, %15 cm H2O, range 2-50; step 1
+                    ITS_PSV: Nat, % 3cm H2O/sec^2, range 1-9, step 1
+                    ETS: Nat, % 30%, range 5-60% of peak flow, step 1
+                    ApneaLag: Nat, % 30 sec, range 10-60 sec; step 1
+                    RR_AP: Nat, % no default, range 4-50b/min; step 1
+                    I'E_AP: Ratio, %default 1:2, no range/step size
+                    P_insp_AP: Nat, % 0 cm H2O, range 2-50, step 1
+                    MaxP_insp: Nat, % 40 cm H20, range 10-80, step 1
+                    MinP_insp: Nat, % 50% of Pinsp, range 10-100, step 10
+                    MaxV_tidal_exp: Nat, % 990mL, range 50-1500, step 50
+                    MinV_tidal_exp: Nat, % 10mL, range 10-1500, step 10
+                    MaxV_tidal_insp: Nat, % Not defined in table with default values; see Int27,28,29,30
+                    MinV_tidal_insp: Nat,
+                    Min_V_E: Nat, % 2 slpm, range 2-80, step 1
+                    Max_V_E: Nat, % 0slpm, range 2-80, step 1
+                    Min_RR: Nat, % 4 b/min, range 4-50, step 1
+                    Max_RR: Nat, % 50 b/min, ragne 4-50, step 1
+                    Min_PEEP: Nat, % no default, range 0-20 cm H2O, step 1
+                    Max_PEEP: Nat, % no default, range 3-23 cm H2O, step 1
+                    PRM: Nat, % 20 cm H2O, range 0-50, step +/- 1
+                    timerRM: Nat, % 10 sec, range 1-30 sec, step +/- 1
+                    MaxDurationInspPause: Nat, % 60 seconds (constant)
+                    MaxDurationExpPause: Nat, % 40 seconds (constant)
+                    triggerWindowDelay: Real, % 0.7 seconds (constant)
+                    max_insp_time_psv: Nat % 7 seconds (constant)
+                    )
+  =
+    load_defaults_r . Memory
+  % Getters
+  + get_RR_PCV_r(RR_PCV) . ConfigurationMemory()
+  + get_I'E_PCV_r(I'E_PCV) . ConfigurationMemory()
+  + get_P_insp_PCV_r(P_insp_PCV) . ConfigurationMemory()
+  + get_ITS_PCV_r(ITS_PCV) . ConfigurationMemory()
+  + get_P_insp_PSV_r(P_insp_PSV) . ConfigurationMemory()
+  + get_ITS_PSV_r(ITS_PSV) . ConfigurationMemory()
+  + get_ETS_r(ETS) . ConfigurationMemory()
+  + get_ApneaLag_r(ApneaLag) . ConfigurationMemory()
+  + get_RR_AP_r(RR_AP) . ConfigurationMemory()
+  + get_I'E_AP_r(I'E_AP) . ConfigurationMemory()
+  + get_P_insp_AP_r(P_insp_AP) . ConfigurationMemory()
+  + get_MaxP_insp_r(MaxP_insp) . ConfigurationMemory()
+  + get_MinP_insp_r(MinP_insp) . ConfigurationMemory()
+  + get_MaxV_tidal_exp_r(MaxV_tidal_exp) . ConfigurationMemory()
+  + get_MinV_tidal_exp_r(MinV_tidal_exp) . ConfigurationMemory()
+  + get_MaxV_tidal_insp_r(MaxV_tidal_insp) . ConfigurationMemory()
+  + get_MinV_tidal_insp_r(MinV_tidal_insp) . ConfigurationMemory()
+  + get_Min_V_E_r(Min_V_E) . ConfigurationMemory()
+  + get_Max_V_E_r(Max_V_E) . ConfigurationMemory()
+  + get_Min_RR_r(Min_RR) . ConfigurationMemory()
+  + get_Max_RR_r(Max_RR) . ConfigurationMemory()
+  + get_Min_PEEP_r(Min_PEEP) . ConfigurationMemory()
+  + get_Max_PEEP_r(Max_PEEP) . ConfigurationMemory()
+  + get_PRM_r(PRM) . ConfigurationMemory()
+  + get_timerRM_r(timerRM) . ConfigurationMemory()
+  + get_MaxDurationInspPause_r(MaxDurationInspPause) . ConfigurationMemory()
+  + get_MaxDurationExpPause_r(MaxDurationExpPause) . ConfigurationMemory()
+  + get_triggerWindowDelay_r(triggerWindowDelay) . ConfigurationMemory()
+  + get_max_insp_time_psv_r(max_insp_time_psv) . ConfigurationMemory()
+
+  % Setters
+  % We here restrict the values to those indicated as valid values
+  % Alternative would be to guard this where we call the setters, but
+  % communication only succeeds for valid values if we model the use of setters
+  % appropriately.
+  + sum v: Nat . (4 <= v && v <= 50) -> set_RR_PCV_r(v) . ConfigurationMemory(RR_PCV = v)
+  + sum e: Nat, v: Ratio . (10 <= e && e <= 40 && v == ratio(1,e/10)) -> set_I'E_PCV_r(v) . ConfigurationMemory(I'E_PCV = v)
+  + sum v: Nat . (2 <= v && v <= 50) -> set_P_insp_PCV_r(v) . ConfigurationMemory(P_insp_PCV = v)
+  + sum v: Nat . (1 <= v && v <= 9) -> set_ITS_PCV_r(v) . ConfigurationMemory(ITS_PCV = v)
+  + sum v: Nat . (2 <= v && v <= 50) -> set_P_insp_PSV_r(v) . ConfigurationMemory(P_insp_PSV = v)
+  + sum v: Nat . (1 <= v && v <= 9) -> set_ITS_PSV_r(v) . ConfigurationMemory(ITS_PSV = v)
+  + sum v: Nat . (5 <= v && v <= 60) -> set_ETS_r(v) . ConfigurationMemory(ETS = v)
+  + sum v: Nat . (10 <= v && v <= 60) -> set_ApneaLag_r(v) . ConfigurationMemory(ApneaLag = v)
+  + sum v: Nat . (4 <= v && v <= 50) -> set_RR_AP_r(v) . ConfigurationMemory(RR_AP = v)
+  + sum v: Ratio . (v == ratio(1,2)) -> set_I'E_AP_r(v) . ConfigurationMemory(I'E_AP = v)
+  + sum v: Nat . (2 <= v && v <= 50) -> set_P_insp_AP_r(v) . ConfigurationMemory(P_insp_AP = v)
+  + sum v: Nat . (10 <= v && v <= 80) -> set_MaxP_insp_r(v) . ConfigurationMemory(MaxP_insp = v)
+  + sum v: Nat . (v mod 10 == 0 && 10 <= v && v <= 100) -> set_MinP_insp_r(v) . ConfigurationMemory(MinP_insp = v)
+  + sum v: Nat . (v mod 50 == 0 && 50 <= v && v <= 1500) -> set_MaxV_tidal_exp_r(v) . ConfigurationMemory(MaxV_tidal_exp = v)
+  + sum v: Nat . (v mod 10 == 0 && 10 <= v && v <= 1500) -> set_MinV_tidal_exp_r(v) . ConfigurationMemory(MinV_tidal_exp = v)
+  + sum v: Nat . (v mod 50 == 0 && 50 <= v && v <= 1500) -> set_MaxV_tidal_insp_r(v) . ConfigurationMemory(MaxV_tidal_insp = v)
+  + sum v: Nat . (v mod 10 == 0 && 10 <= v && v <= 1500) -> set_MinV_tidal_insp_r(v) . ConfigurationMemory(MinV_tidal_insp = v)
+  + sum v: Nat . (2 <= v && v <= 80) -> set_Min_V_E_r(v) . ConfigurationMemory(Min_V_E = v)
+  + sum v: Nat . (2 <= v && v <= 80) -> set_Max_V_E_r(v) . ConfigurationMemory(Max_V_E = v)
+  + sum v: Nat . (4 <= v && v <= 50) -> set_Min_RR_r(v) . ConfigurationMemory(Min_RR = v)
+  + sum v: Nat . (4 <= v && v <= 50) -> set_Max_RR_r(v) . ConfigurationMemory(Max_RR = v)
+  + sum v: Nat . (0 <= v && v <= 20) -> set_Min_PEEP_r(v) . ConfigurationMemory(Min_PEEP = v)
+  + sum v: Nat . (3 <= v && v <= 23) -> set_Max_PEEP_r(v) . ConfigurationMemory(Max_PEEP = v)
+  + sum v: Nat . (0 <= v && v <= 50) -> set_PRM_r(v) . ConfigurationMemory(PRM = v)
+  + sum v: Nat . (1 <= v && v <= 30) -> set_timerRM_r(v) . ConfigurationMemory(timerRM = v)
+  % The following are constant, so setting them is not allowed.
+  %+ sum v: Nat . set_MaxDurationInspPause_r(v) . ConfigurationMemory(MaxDurationInspPause = v)
+  %+ sum v: Nat . set_MaxDurationExpPause_r(v) . ConfigurationMemory(MaxDurationExpPause = v)
+  %+ sum v: Real . set_triggerWindowDelay_r(v) . ConfigurationMemory(triggerWindowDelay = v)
+  %+ sum v: Nat . set_max_insp_time_psv_r(v) . ConfigurationMemory(max_insp_time_psv = v)
+  ;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Architectural model
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Constants
+map FIO2target: Int;
+eqn FIO2target = 50; % Set manually in GBflow
+map PEEPvalue: Int;
+eqn PEEPvalue = 10;
+
+init
+  % Actions allowed at architectural level. These are the local actions that
+  % do not communicate, and the results of communication between different
+  % components.
+	allow(
+			{
+        % Sensors
+				break,    % disable these four actions below to test the core logic of Controller || GUI
+				error,
+				recover,
+        updateSensorValue,
+        getSensorValue_c,
+				getSensorState_c,
+
+				% Alarms
+        LowAlarm,
+        MediumAlarm,
+        HighAlarm,
+        alarm_c,
+        snooze_alarm_c,
+
+				% Valves
+				emitValveState,   % for verification purposes
+        setValveValue,
+        setValveState_c,
+				getValveState_c,
+				setValveValue_c,
+        getValveValue_c,
+        getSensorValue_c|getValveValue_c,
+
+        % GUI
+        initialise_GUI_parameters,
+        new_patient,
+        selectMode,
+        selfTestFailed,
+        saveVentilationSettings,
+        return,
+        controller_Mode_c,
+        interrupt_selfTest_c,
+        controller_Mode_c|changeVentilationSettings,
+
+				% Controller
+				loadConfiguration,
+				internalCheckingComplete,
+				startUpSuccessful,
+				powerOn,
+				powerOff,
+				timeout,
+        runningSelfTest,
+				emitMode,
+        emitPhase,
+        moveToPSV,
+				apneaLag,
+				storeParameters,
+        selfTestPassed_c,
+				resumeVentilation_c,
+				startPCV_c|controller_Mode_c,
+				startPSV_c|controller_Mode_c,
+				stopVentilation_c,
+				emitMode_c,
+        error_c,
+        startSelfTest_c,
+
+        % Memory
+        load_defaults_c,
+        set_RR_PCV_c|controller_Mode_c,
+        get_RR_PCV_c,
+        set_I'E_PCV_c|controller_Mode_c,
+        get_I'E_PCV_c,
+        set_P_insp_PCV_c|controller_Mode_c,
+        get_P_insp_PCV_c|setValveValue_c,
+        set_ITS_PCV_c,
+        get_ITS_PCV_c,
+        set_P_insp_PSV_c|controller_Mode_c,
+        get_P_insp_PSV_c|setValveValue_c,
+        set_ITS_PSV_c,
+        get_ITS_PSV_c,
+        set_ETS_c,
+        get_ETS_c,
+        set_ApneaLag_c,
+        get_ApneaLag_c,
+        set_RR_AP_c,
+        get_RR_AP_c,
+        set_I'E_AP_c,
+        get_I'E_AP_c,
+        set_P_insp_AP_c,
+        get_P_insp_AP_c,
+        set_MaxP_insp_c,
+        get_MaxP_insp_c,
+        set_MinP_insp_c,
+        get_MinP_insp_c,
+        set_MaxV_tidal_exp_c,
+        get_MaxV_tidal_exp_c,
+        set_MinV_tidal_exp_c,
+        get_MinV_tidal_exp_c,
+        set_MaxV_tidal_insp_c,
+        get_MaxV_tidal_insp_c,
+        set_MinV_tidal_insp_c,
+        get_MinV_tidal_insp_c,
+        set_Min_V_E_c,
+        getSensorValue_c|get_Min_V_E_c,
+        set_Max_V_E_c,
+        getSensorValue_c|get_Max_V_E_c,
+        set_Min_RR_c,
+        get_Min_RR_c,
+        set_Max_RR_c,
+        get_Max_RR_c,
+        set_Min_PEEP_c,
+        get_Min_PEEP_c,
+        set_Max_PEEP_c,
+        get_Max_PEEP_c,
+        set_PRM_c,
+        get_PRM_c,
+        set_timerRM_c,
+        get_timerRM_c,
+        set_MaxDurationInspPause_c,
+        get_MaxDurationInspPause_c,
+        set_MaxDurationExpPause_c,
+        get_MaxDurationExpPause_c,
+        set_triggerWindowDelay_c,
+        get_triggerWindowDelay_c,
+        set_max_insp_time_psv_c,
+        get_max_insp_time_psv_c
+
+			},
+      % Model the synchronisation between different components.
+      % _r and _s are the receiving and sending part of the synchronisation,
+      % whereas the actions with suffix _c model the result of successful
+      % synchronisation.
+			comm(
+				{
+					% Sensors
+					getSensorValue_s | getSensorValue_r -> getSensorValue_c,
+					getSensorState_s | getSensorState_r -> getSensorState_c,
+
+					% Valves
+					setValveState_s | setValveState_r -> setValveState_c,
+					getValveState_s | getValveState_r -> getValveState_c,
+          setValveValue_s | setValveValue_r -> setValveValue_c,
+					getValveValue_s | getValveValue_r -> getValveValue_c,
+
+					% Alarms
+          alarm_r | alarm_s -> alarm_c,
+          snooze_alarm_r | snooze_alarm_s -> snooze_alarm_c,
+
+          % GUI
+          controller_Mode_r | controller_Mode_s -> controller_Mode_c,
+          interrupt_selfTest_r | interrupt_selfTest_s -> interrupt_selfTest_c,
+          startPSV_r | startPSV_s -> startPSV_c,
+          startPCV_r | startPCV_s -> startPCV_c,
+          stopVentilation_r | stopVentilation_s -> stopVentilation_c,
+          startSelfTest_r | startSelfTest_s -> startSelfTest_c,
+          selfTestPassed_r | selfTestPassed_s -> selfTestPassed_c,
+          error_r | error_s -> error_c,
+
+          % CONTROLLER
+          emitMode_r | emitMode_s -> emitMode_c,
+          resumeVentilation_r | resumeVentilation_s -> resumeVentilation_c,
+
+          % Memory
+          load_defaults_r|load_defaults_s -> load_defaults_c,
+          set_RR_PCV_r|set_RR_PCV_s -> set_RR_PCV_c,
+          get_RR_PCV_r|get_RR_PCV_s -> get_RR_PCV_c,
+          set_I'E_PCV_r|set_I'E_PCV_s -> set_I'E_PCV_c,
+          get_I'E_PCV_r|get_I'E_PCV_s -> get_I'E_PCV_c,
+          set_P_insp_PCV_r|set_P_insp_PCV_s -> set_P_insp_PCV_c,
+          get_P_insp_PCV_r|get_P_insp_PCV_s -> get_P_insp_PCV_c,
+          set_ITS_PCV_r|set_ITS_PCV_s -> set_ITS_PCV_c,
+          get_ITS_PCV_r|get_ITS_PCV_s -> get_ITS_PCV_c,
+          set_P_insp_PSV_r|set_P_insp_PSV_s -> set_P_insp_PSV_c,
+          get_P_insp_PSV_r|get_P_insp_PSV_s -> get_P_insp_PSV_c,
+          set_ITS_PSV_r|set_ITS_PSV_s -> set_ITS_PSV_c,
+          get_ITS_PSV_r|get_ITS_PSV_s -> get_ITS_PSV_c,
+          set_ETS_r|set_ETS_s -> set_ETS_c,
+          get_ETS_r|get_ETS_s -> get_ETS_c,
+          set_ApneaLag_r|set_ApneaLag_s -> set_ApneaLag_c,
+          get_ApneaLag_r|get_ApneaLag_s -> get_ApneaLag_c,
+          set_RR_AP_r|set_RR_AP_s -> set_RR_AP_c,
+          get_RR_AP_r|get_RR_AP_s -> get_RR_AP_c,
+          set_I'E_AP_r|set_I'E_AP_s -> set_I'E_AP_c,
+          get_I'E_AP_r|get_I'E_AP_s -> get_I'E_AP_c,
+          set_P_insp_AP_r|set_P_insp_AP_s -> set_P_insp_AP_c,
+          get_P_insp_AP_r|get_P_insp_AP_s -> get_P_insp_AP_c,
+          set_MaxP_insp_r|set_MaxP_insp_s -> set_MaxP_insp_c,
+          get_MaxP_insp_r|get_MaxP_insp_s -> get_MaxP_insp_c,
+          set_MinP_insp_r|set_MinP_insp_s -> set_MinP_insp_c,
+          get_MinP_insp_r|get_MinP_insp_s -> get_MinP_insp_c,
+          set_MaxV_tidal_exp_r|set_MaxV_tidal_exp_s -> set_MaxV_tidal_exp_c,
+          get_MaxV_tidal_exp_r|get_MaxV_tidal_exp_s -> get_MaxV_tidal_exp_c,
+          set_MinV_tidal_exp_r|set_MinV_tidal_exp_s -> set_MinV_tidal_exp_c,
+          get_MinV_tidal_exp_r|get_MinV_tidal_exp_s -> get_MinV_tidal_exp_c,
+          set_MaxV_tidal_insp_r|set_MaxV_tidal_insp_s -> set_MaxV_tidal_insp_c,
+          get_MaxV_tidal_insp_r|get_MaxV_tidal_insp_s -> get_MaxV_tidal_insp_c,
+          set_MinV_tidal_insp_r|set_MinV_tidal_insp_s -> set_MinV_tidal_insp_c,
+          get_MinV_tidal_insp_r|get_MinV_tidal_insp_s -> get_MinV_tidal_insp_c,
+          set_Min_V_E_r|set_Min_V_E_s -> set_Min_V_E_c,
+          get_Min_V_E_r|get_Min_V_E_s -> get_Min_V_E_c,
+          set_Max_V_E_r|set_Max_V_E_s -> set_Max_V_E_c,
+          get_Max_V_E_r|get_Max_V_E_s -> get_Max_V_E_c,
+          set_Min_RR_r|set_Min_RR_s -> set_Min_RR_c,
+          get_Min_RR_r|get_Min_RR_s -> get_Min_RR_c,
+          set_Max_RR_r|set_Max_RR_s -> set_Max_RR_c,
+          get_Max_RR_r|get_Max_RR_s -> get_Max_RR_c,
+          set_Min_PEEP_r|set_Min_PEEP_s -> set_Min_PEEP_c,
+          get_Min_PEEP_r|get_Min_PEEP_s -> get_Min_PEEP_c,
+          set_Max_PEEP_r|set_Max_PEEP_s -> set_Max_PEEP_c,
+          get_Max_PEEP_r|get_Max_PEEP_s -> get_Max_PEEP_c,
+          set_PRM_r|set_PRM_s -> set_PRM_c,
+          get_PRM_r|get_PRM_s -> get_PRM_c,
+          set_timerRM_r|set_timerRM_s -> set_timerRM_c,
+          get_timerRM_r|get_timerRM_s -> get_timerRM_c,
+          set_MaxDurationInspPause_r|set_MaxDurationInspPause_s -> set_MaxDurationInspPause_c,
+          get_MaxDurationInspPause_r|get_MaxDurationInspPause_s -> get_MaxDurationInspPause_c,
+          set_MaxDurationExpPause_r|set_MaxDurationExpPause_s -> set_MaxDurationExpPause_c,
+          get_MaxDurationExpPause_r|get_MaxDurationExpPause_s -> get_MaxDurationExpPause_c,
+          set_triggerWindowDelay_r|set_triggerWindowDelay_s -> set_triggerWindowDelay_c,
+          get_triggerWindowDelay_r|get_triggerWindowDelay_s -> get_triggerWindowDelay_c,
+          set_max_insp_time_psv_r|set_max_insp_time_psv_s -> set_max_insp_time_psv_c,
+          get_max_insp_time_psv_r|get_max_insp_time_psv_s -> get_max_insp_time_psv_c
+
+				},
+        % Initialise the parallel components in the architecture.
+				Controller
+        || Sensors
+        || Valves
+        || GUI
+        || LEDs
+        || Memory
+			)
+		);
