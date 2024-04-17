@@ -1515,7 +1515,8 @@ void ArcDiagram::clustersChanged()
     attrsTree.insert(attrsTree.begin(), cluster->getAttribute());
   }
 
-  setDataChanged(true);
+  geomChanged = true;
+  dataChanged = true;
   update();
 }
 

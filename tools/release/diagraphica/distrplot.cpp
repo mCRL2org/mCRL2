@@ -268,21 +268,6 @@ void DistrPlot::calcMaxNumber()
 
 // -- utility drawing functions ---------------------------------
 
-// ***
-/*
-void DistrPlot::clear()
-{
-    VisUtils::clear( clearColor );
-}
-*/
-
-void DistrPlot::setScalingTransf()
-{
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-}
-
-
 void DistrPlot::displTooltip(const std::size_t& posIdx)
 {
   if (posIdx < number.size())

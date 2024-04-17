@@ -49,7 +49,6 @@ class CorrlPlot : public Visualizer
     template <Mode> void drawDiagram();
     template <Mode> void draw();
 
-    void setScalingTransf();
     void displTooltip(
       const int& xIdx,
       const int& yIdx);

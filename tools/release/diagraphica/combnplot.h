@@ -58,7 +58,6 @@ class CombnPlot : public Visualizer
     template <Mode> void drawDiagram();
     template <Mode> void draw();
 
-    void setScalingTransf();
     void displTooltip(const std::size_t& posIdx);
 
     void calcPositions();

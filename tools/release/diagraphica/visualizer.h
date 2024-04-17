@@ -44,8 +44,6 @@ class Visualizer : public QOpenGLWidget
     enum Mode { Visualizing, Marking };
 
     virtual void visualize() = 0;
-    virtual void setGeomChanged(const bool& flag);
-    virtual void setDataChanged(const bool& flag);
 
     // -- selection functions ---------------------------------------
     using Selection = std::vector<GLuint>;

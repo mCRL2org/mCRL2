@@ -331,21 +331,6 @@ void CorrlPlot::calcMaxNumber()
 
 // -- utility drawing functions -------------------------------------
 
-// ***
-/*
-void CorrlPlot::clear()
-{
-    VisUtils::clear( clearColor );
-}
-*/
-
-void CorrlPlot::setScalingTransf()
-{
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-}
-
-
 void CorrlPlot::displTooltip(
   const int& xIdx,
   const int& yIdx)

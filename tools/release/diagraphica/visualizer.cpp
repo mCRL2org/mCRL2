@@ -181,17 +181,6 @@ QPointF Visualizer::worldCoordinate(QPointF deviceCoordinate)
 // -- visualization functions ---------------------------------------
 
 
-void Visualizer::setGeomChanged(const bool& flag)
-{
-  geomChanged = flag;
-}
-
-
-void Visualizer::setDataChanged(const bool& flag)
-{
-  geomChanged = flag;
-  dataChanged = flag;
-}
 
 
 // -- event handlers ------------------------------------------------

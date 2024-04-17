@@ -534,21 +534,6 @@ void CombnPlot::calcMaxNumberPerComb()
 
 // -- utility drawing functions -------------------------------------
 
-// ***
-/*
-void CombnPlot::clear()
-{
-    VisUtils::clear( clearColor );
-}
-*/
-
-void CombnPlot::setScalingTransf()
-{
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-}
-
-
 void CombnPlot::displTooltip(const std::size_t& posIdx)
 {
   if (posIdx < combinations.size())
