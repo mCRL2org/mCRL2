@@ -476,8 +476,8 @@ NUMERIC_TYPE positive_constant_to_value(const data_expression& n, typename std::
     result=result*pow(2.0,64)+atermpp::down_cast<machine_number>(sort_pos::arg2(m)).value();
     m=sort_pos::arg1(m);
   }
-  assert(is_most_significant_digit_application(n));
-  return result*pow(2.0,64)+atermpp::down_cast<machine_number>(sort_pos::arg(n)).value();
+  assert(is_most_significant_digit_application(m));
+  return result*pow(2.0,64)+atermpp::down_cast<machine_number>(sort_pos::arg(m)).value();
 #else
   if (sort_pos::is_cdub_application(n))
   {
@@ -612,21 +612,36 @@ inline std::string natural_constant_as_string(const data_expression& n_in)
 /// \param n A data expression
 /// \pre is_natural_constant(n)
 /// \return NUMERIC_VALUE representation of n
-template <class NUMERIC_VALUE>
-inline NUMERIC_VALUE natural_constant_to_value(const data_expression& n)
+template <class NUMERIC_TYPE>
+inline NUMERIC_TYPE natural_constant_to_value(const data_expression& n)
 {
 #ifdef Enable64bitNumbers
-  if (is_concat_digit_application(n))
+  if constexpr (std::is_integral<NUMERIC_TYPE>::value)
   {
-    mcrl2::runtime_error("Number " + pp(n) + " is too large to transform to a machine number.");
+    if (is_concat_digit_application(n))
+    {
+      mcrl2::runtime_error("Number " + pp(n) + " is too large to transform to a machine number.");
+    }
+    assert(is_most_significant_digit_nat_application(n));
+    return atermpp::down_cast<machine_number>(sort_nat::arg(n)).value();
   }
-  assert(is_most_significant_digit_nat_application(n));
-  return atermpp::down_cast<machine_number>(sort_nat::arg(n)).value();
+  else
+  {
+    data_expression m=n;
+    NUMERIC_TYPE result=0;
+    while (is_concat_digit_application(m))
+    {
+      result=result*pow(2.0,64)+atermpp::down_cast<machine_number>(sort_nat::arg2(m)).value();
+      m=sort_nat::arg1(m);
+    }
+    assert(is_most_significant_digit_nat_application(m));
+    return result*pow(2.0,64)+atermpp::down_cast<machine_number>(sort_nat::arg(m)).value();
+  }
 #else
   assert(is_natural_constant(n));
   if (sort_nat::is_c0_function_symbol(n))
   {
-    return static_cast<NUMERIC_VALUE>(0);
+    return static_cast<NUMERIC_TYPE>(0);
   }
   else
   {
