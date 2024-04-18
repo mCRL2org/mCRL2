@@ -1,0 +1,9 @@
+% Note: when switching from PCV to PSV, the power can be switched off or
+% ventilation can be stopped before the switch is made.
+nu X(inStandby : Bool = false) .
+  [emitMode(VentilationOff)]X(true) &&
+  [(exists m: OperationMode . emitMode(m)) && !emitMode(VentilationOff)]X(false) &&
+  [!(exists m: OperationMode . emitMode(m))]X(inStandby) &&
+  (val(inStandby) => [exists m: OperationMode . startPSV_c|controller_Mode_c(m)]
+    (nu Y . (!<emitMode(PSV)>true => [!(powerOff || stopVentilation_c)]Y) &&
+  	  <!emitMode(PSV)*.emitMode(PSV)>true))

@@ -462,11 +462,18 @@ void MainWindow::actionShowReducedLts()
               SLOT(accept()));
       connect(&buttonBox, SIGNAL(rejected()), &reductionDialog, SLOT(reject()));
 
+      if (last_equivalence)
+      {
+        reductionBox.setSelectedEquivalence(last_equivalence.value());
+      }
+
       /* execute the dialog */
       if (reductionDialog.exec())
       {
         mcrl2::lts::lts_equivalence reduction =
             reductionBox.getSelectedEquivalence();
+
+        last_equivalence = reduction;
 
         lastLtsHasReduction = true;
         processSystem->showLts(reduction);

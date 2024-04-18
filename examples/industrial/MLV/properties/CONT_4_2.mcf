@@ -1,0 +1,12 @@
+% CONT 4.2. The transition from Self-Test mode to VentilationOff mode
+% shall occur when the GUI asks for resuming ventilation.
+%
+% We check a slightly weaker property
+
+nu X(inSelfTest : Bool = false) .
+  [emitMode(SelfTest)]X(true) &&
+  [(exists m: OperationMode . val(m != SelfTest)  && emitMode(m))]X(false) &&
+  [!(exists m: OperationMode . emitMode(m))]X(inSelfTest) &&
+  (val(inSelfTest) => [resumeVentilation_c]
+    (nu Y . (!<emitMode(VentilationOff)>true => [true]Y) &&
+  	  <!emitMode(VentilationOff)*.emitMode(VentilationOff)>true))

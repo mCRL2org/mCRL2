@@ -70,7 +70,7 @@ int_t decode_variablesize_int(ibitstream& stream)
       // If the next-byte flag is not set then we are finished.
       break;
     }
-    else if (7*i >= 8*sizeof(int_t))
+    else if (i >= integer_encoding_size<int_t>() - 1)
     {
       // The next-byte flag was set, but we cannot represent it using int_t.
       throw std::runtime_error("Fail to read an int from the input");

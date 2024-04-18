@@ -28,6 +28,8 @@ BOOST_AUTO_TEST_CASE(fixed_sequence_test)
 
     input.write_string("function_symbol");
     input.write_integer(5);
+    
+    input.write_integer(std::size_t(1) << 63);
 
     // The buffer is flushed here.
   }
@@ -42,4 +44,6 @@ BOOST_AUTO_TEST_CASE(fixed_sequence_test)
 
   BOOST_CHECK_EQUAL(strcmp(output.read_string(), "function_symbol"), 0);
   BOOST_CHECK_EQUAL(output.read_integer(), 5);
+  
+  BOOST_CHECK_EQUAL(output.read_integer(), std::size_t(1) << 63);
 }

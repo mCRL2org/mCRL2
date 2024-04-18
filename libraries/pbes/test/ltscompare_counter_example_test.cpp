@@ -85,7 +85,7 @@ void compare(const char* s1, const char* s2, const char* counterexample_name)
 
 BOOST_AUTO_TEST_CASE(ltscompare_br_hard_test)
 {
-    auto br_hard1 = R"""(des (0,9,7)
+    auto br_hard1 = R"(des (0,9,7)
         (0,"tau",1)
         (6, "tau", 1)
         (1, "tau", 2)
@@ -95,10 +95,10 @@ BOOST_AUTO_TEST_CASE(ltscompare_br_hard_test)
         (0, "tau", 3)
         (4, a, 4)
         (5, b, 5)
-        )""";
+    )";
 
     
-    auto br_hard2 = R"""(des (6,9,7)
+    auto br_hard2 = R"(des (6,9,7)
         (0,"tau",1)
         (6, "tau", 1)
         (1, "tau", 2)
@@ -108,25 +108,25 @@ BOOST_AUTO_TEST_CASE(ltscompare_br_hard_test)
         (0, "tau", 3)
         (4, a, 4)
         (5, b, 5)
-        )""";
+    )";
 
     compare(br_hard1, br_hard2, "br_hard_counterexample.mcf");
 }
 
 BOOST_AUTO_TEST_CASE(ltscompare_tau_dist_test)
 {
-    auto tau_dist1 = R"""(des (0,3,2)
+    auto tau_dist1 = R"(des (0,3,2)
         (0,"tau",1)
         (0,"a",1)
-        (0,"b",1))""";
-
+        (0,"b",1)
+    )";
     
-    auto tau_dist2 = R"""(des (0,4,3)
+    auto tau_dist2 = R"(des (0,4,3)
         (0,"a",2)
         (0,"b",2)
         (0, "tau",1)
         (1,"b",2)
-        )""";
+    )";
 
     compare(tau_dist1, tau_dist2, "tau_dist_counterexample.mcf");
 }
