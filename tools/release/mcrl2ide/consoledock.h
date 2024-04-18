@@ -23,7 +23,8 @@ enum class ProcessType
   Parsing,
   Simulation,
   LtsCreation,
-  Verification
+  Verification,
+  Rewriting,
 };
 
 Q_DECLARE_METATYPE(ProcessType)
@@ -33,8 +34,12 @@ Q_DECLARE_METATYPE(ProcessType)
  *   iterated over
  */
 const std::vector<ProcessType> PROCESSTYPES = {
-    ProcessType::Parsing, ProcessType::Simulation, ProcessType::LtsCreation,
-    ProcessType::Verification};
+    ProcessType::Parsing, 
+    ProcessType::Simulation, 
+    ProcessType::LtsCreation,
+    ProcessType::Verification,
+    ProcessType::Rewriting
+};
 
 /**
  * @brief PROCESSTYPENAMES Defines a name for each process type to show in the
@@ -44,7 +49,9 @@ const std::map<ProcessType, QString> PROCESSTYPENAMES = {
     {ProcessType::Parsing, "Parsing"},
     {ProcessType::Simulation, "Simulation"},
     {ProcessType::LtsCreation, "State Space Generation"},
-    {ProcessType::Verification, "Verification"}};
+    {ProcessType::Verification, "Verification"},
+    {ProcessType::Rewriting, "Rewriting"}
+};
 
 /**
  * @brief The ConsoleWidget class defines a widget used to show console output
@@ -132,6 +139,11 @@ class ConsoleDock : public QDockWidget
    * @brief logToVerificationConsole Write output in the verification console
    */
   void logToVerificationConsole();
+
+  /**
+   * @brief logToVerificationConsole Write output in the rewrite console
+   */
+  void logToRewriteConsole();
 
   private:
   QTabWidget* consoleTabs;

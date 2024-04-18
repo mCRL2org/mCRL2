@@ -11,19 +11,24 @@
 
 #include "ui_RewriteExpressionDock.h"
 
-RewriteExpressionDock::RewriteExpressionDock(mcrl2::gui::qt::CodeEditor* specificationEditor, QWidget* parent)
+RewriteExpressionDock::RewriteExpressionDock(mcrl2::gui::qt::CodeEditor* specificationEditor, ProcessSystem* processSystem, QWidget* parent)
   : QDockWidget(parent),
     ui(new Ui::RewriteExpressionDock()),
-    m_specificationEditor(specificationEditor)
+    m_specificationEditor(specificationEditor),
+    m_processSystem(processSystem)
 {
   ui->setupUi(this);
   
-  connect(ui->rewriteButton, SIGNAL(click()), this,
+  connect(ui->rewriteButton, SIGNAL(clicked()), this,
           SLOT(rewriteExpression()));
 }
 
 void RewriteExpressionDock::rewriteExpression()
 {
+  m_processId = m_processSystem->rewriteExpression(ui->inputEdit->text().toStdString());
+}
 
-
+void RewriteExpressionDock::cancelRewrite()
+{
+  m_processSystem->abortProcess(m_processId);
 }
