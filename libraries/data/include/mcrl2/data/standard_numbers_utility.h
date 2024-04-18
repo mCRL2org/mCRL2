@@ -432,7 +432,7 @@ std::string positive_constant_as_string(const data_expression& n_in)
 /// the decimal representation of n.
 template <class NUMERIC_TYPE>
 inline
-NUMERIC_TYPE positive_constant_to_value(const data_expression& n, typename std::enable_if<std::is_integral<NUMERIC_TYPE>::value>::type* = nullptr)
+NUMERIC_TYPE positive_constant_to_value(const data_expression& n)
 {
 #ifdef Enable64bitNumbers
   if constexpr (std::is_integral<NUMERIC_TYPE>::value)
