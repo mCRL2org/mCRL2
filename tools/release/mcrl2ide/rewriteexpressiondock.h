@@ -13,6 +13,7 @@
 #include <QDockWidget>
 
 #include "mcrl2/gui/codeeditor.h"
+#include "processsystem.h"
 
 namespace Ui
 {
@@ -28,7 +29,7 @@ class RewriteExpressionDock : public QDockWidget
   Q_OBJECT
 
 public:
-    RewriteExpressionDock(mcrl2::gui::qt::CodeEditor* specificationEditor, QWidget* parent);
+    RewriteExpressionDock(mcrl2::gui::qt::CodeEditor* specificationEditor, ProcessSystem* processSystem, QWidget* parent);
 
 
 private slots:
@@ -37,10 +38,17 @@ private slots:
    */
   void rewriteExpression();
 
+  /**
+   * Cancels the rewriting of an expression.
+   */
+  void cancelRewrite();
+
 private:
   Ui::RewriteExpressionDock* ui;
 
-  mcrl2::gui::qt::CodeEditor* m_specificationEditor;
+  mcrl2::gui::qt::CodeEditor* m_specificationEditor = nullptr;
+  ProcessSystem* m_processSystem = nullptr;
+  int m_processId = 0;
 };
 
 #endif // REWRITEEXPRESSION_H

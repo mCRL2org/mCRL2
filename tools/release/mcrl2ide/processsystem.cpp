@@ -118,7 +118,8 @@ void ProcessSystem::testExecutableExistence()
       QString::fromStdString(mcrl2::utilities::get_toolset_version());
 
   QStringList tools = {"mcrl22lps",  "lpsxsim",  "lps2lts",  "ltsconvert",
-                       "ltscompare", "ltsgraph", "lps2pbes", "pbessolve"};
+                       "ltscompare", "ltsgraph", "lps2pbes", "pbessolve",
+                       "mcrl2i"};
 
   /* for each necessary executable, check if it exists by trying to run it and
    *   compare its version with mcrl2ide's version */
@@ -170,7 +171,7 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
                                 mcrl2::lts::lts_equivalence equivalence)
 {
   return createSubprocess(subprocessType, processid, subprocessIndex,
-                          Property(), false, equivalence, SpecType::Main);
+                          Property(), QString(), false, equivalence, SpecType::Main);
 }
 
 QProcess*
@@ -178,7 +179,7 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
                                 int subprocessIndex, const Property& property,
                                 mcrl2::lts::lts_equivalence equivalence)
 {
-  return createSubprocess(subprocessType, processid, subprocessIndex, property,
+  return createSubprocess(subprocessType, processid, subprocessIndex, property, QString(), 
                           false, equivalence, SpecType::Main);
 }
 
@@ -187,14 +188,19 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
                                           const Property& property,
                                           SpecType specType)
 {
-  return createSubprocess(subprocessType, processid, subprocessIndex, property,
+  return createSubprocess(subprocessType, processid, subprocessIndex, property, QString(), 
                           false, mcrl2::lts::lts_eq_none, specType);
 }
 
 QProcess* ProcessSystem::createSubprocess(
-    SubprocessType subprocessType, int processid, int subprocessIndex,
-    const Property& property, bool evidence,
-    mcrl2::lts::lts_equivalence equivalence, SpecType specType)
+    SubprocessType subprocessType, 
+    int processid, 
+    int subprocessIndex,
+    const Property& property,
+    const QString& expression,
+    bool evidence,
+    mcrl2::lts::lts_equivalence equivalence, 
+    SpecType specType)
 {
   QProcess* subprocess = new QProcess();
   ProcessType processType = processTypes[processid];
@@ -225,6 +231,10 @@ QProcess* ProcessSystem::createSubprocess(
     case ProcessType::Verification:
       connect(subprocess, SIGNAL(readyReadStandardError()), consoleDock,
               SLOT(logToVerificationConsole()));
+      break;
+    case ProcessType::Rewriting:
+      connect(subprocess, SIGNAL(readyReadStandardError()), consoleDock,
+              SLOT(logToRewriteConsole()));
       break;
     default:
       break;
@@ -362,6 +372,13 @@ QProcess* ProcessSystem::createSubprocess(
     }
     break;
 
+  case SubprocessType::Mcrl2i:
+    program = "mcrl2i";
+    inputFile = fileSystem->lpsFilePath();
+    arguments << inputFile << "-e" << expression;
+
+    break;
+
   default:
     break;
   }
@@ -415,6 +432,27 @@ int ProcessSystem::simulate()
     return processid;
   }
   return -1;
+}
+
+int ProcessSystem::rewriteExpression(std::string expression)
+{
+    /* create the subprocesses */
+    int processid = pid++;
+    ProcessType processType = ProcessType::Rewriting;
+    processTypes[processid] = processType;
+    consoleDock->setConsoleTab(processType);
+
+    processes[processid] = {
+        createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
+        createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
+        createSubprocess(SubprocessType::Mcrl2i, processid, 2)
+    };
+
+    processQueues[processType]->enqueue(processid);
+    
+    emit newProcessQueued(processType);
+
+    return processid;
 }
 
 int ProcessSystem::showLts(mcrl2::lts::lts_equivalence reduction)
@@ -551,11 +589,11 @@ int ProcessSystem::showEvidence(const Property& property)
         createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
         createSubprocess(SubprocessType::ParseMcf, processid, 2, property),
         createSubprocess(SubprocessType::Lps2pbes, processid, 3, property,
+                         QString(), true),
+        createSubprocess(SubprocessType::Pbessolve, processid, 4, property, QString(),
                          true),
-        createSubprocess(SubprocessType::Pbessolve, processid, 4, property,
-                         true),
-        createSubprocess(SubprocessType::Lps2lts, processid, 5, property, true),
-        createSubprocess(SubprocessType::Ltsgraph, processid, 6, property,
+        createSubprocess(SubprocessType::Lps2lts, processid, 5, property, QString(),true),
+        createSubprocess(SubprocessType::Ltsgraph, processid, 6, property, QString(),
                          true)};
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
@@ -749,6 +787,9 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
                                     "Up to date evidence LPS already exists\n");
       }
       break;
+
+    case SubprocessType::Mcrl2i:
+      consoleDock->writeToConsole(processType, "##### REWRITING EXPRESSION #####\n");
 
     default:
       break;

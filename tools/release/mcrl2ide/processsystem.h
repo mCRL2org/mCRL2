@@ -30,7 +30,8 @@ enum class SubprocessType
   Ltsgraph = 6,
   ParseMcf = 7,
   Lps2pbes = 8,
-  Pbessolve = 9
+  Pbessolve = 9,
+  Mcrl2i = 10,
 };
 
 /**
@@ -41,7 +42,7 @@ class ProcessThread : public QThread
 {
   Q_OBJECT
 
-  public:
+public:
   /**
    * @brief ProcessThread Constructor
    * @param processQueue The queue this thread needs to take the processes from
@@ -124,7 +125,7 @@ class ProcessSystem : public QObject
 {
   Q_OBJECT
 
-  public:
+public:
   /**
    * @brief ProcessSystem Constructor
    * @param fileSystem The file system
@@ -172,6 +173,11 @@ class ProcessSystem : public QObject
    * @return The process id of the simulation process
    */
   int simulate();
+
+  /**
+   * Rewrites the given data expression in the context of the g
+   */
+  int rewriteExpression(std::string expression);
 
   /**
    * @brief showLts Creates and visualizes the lts of the current specification
@@ -276,9 +282,10 @@ class ProcessSystem : public QObject
    *   process
    * @param equivalence An equivalence
    */
-  QProcess* createSubprocess(SubprocessType subprocessType, int processid,
-                             int subprocessIndex,
-                             mcrl2::lts::lts_equivalence equivalence);
+  QProcess* createSubprocess(SubprocessType subprocessType, 
+    int processid,
+    int subprocessIndex,
+    mcrl2::lts::lts_equivalence equivalence);
 
   /**
    * @brief createSubprocess Creates a subprocess (overload: for verifying
@@ -290,9 +297,11 @@ class ProcessSystem : public QObject
    * @param property A property
    * @param equivalence An equivalence
    */
-  QProcess* createSubprocess(SubprocessType subprocessType, int processid,
-                             int subprocessIndex, const Property& property,
-                             mcrl2::lts::lts_equivalence equivalence);
+  QProcess* createSubprocess(SubprocessType subprocessType, 
+    int processid,
+    int subprocessIndex, 
+    const Property& property,
+    mcrl2::lts::lts_equivalence equivalence);
 
   /**
    * @brief createSubprocess Creates a subprocess (overload: for handling
@@ -304,9 +313,11 @@ class ProcessSystem : public QObject
    * @param property A property
    * @param specType The type of the specification that the process uses
    */
-  QProcess* createSubprocess(SubprocessType subprocessType, int processid,
-                             int subprocessIndex, const Property& property,
-                             SpecType specType);
+  QProcess* createSubprocess(SubprocessType subprocessType, 
+    int processid,    
+    int subprocessIndex, 
+    const Property& property,
+    SpecType specType);
 
   /**
    * @brief createSubprocess Creates a subprocess
@@ -321,10 +332,14 @@ class ProcessSystem : public QObject
    *   needed)
    */
   QProcess* createSubprocess(
-      SubprocessType subprocessType, int processid, int subprocessIndex,
-      const Property& property = Property(), bool evidence = false,
-      mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
-      SpecType specType = SpecType::Main);
+    SubprocessType subprocessType, 
+    int processid, 
+    int subprocessIndex,
+    const Property& property = Property(), 
+    const QString& expression = QString(), 
+    bool evidence = false,
+    mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
+    SpecType specType = SpecType::Main);
 
   private slots:
   /**

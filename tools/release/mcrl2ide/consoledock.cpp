@@ -86,6 +86,11 @@ void ConsoleDock::logToVerificationConsole()
   logToConsole(ProcessType::Verification, qobject_cast<QProcess*>(sender()));
 }
 
+void ConsoleDock::logToRewriteConsole()
+{
+  logToConsole(ProcessType::Rewriting, qobject_cast<QProcess*>(sender()));
+}
+
 void ConsoleDock::logToConsole(ProcessType processType, QProcess* process)
 {
   writeToConsole(processType, process->readAllStandardError());
