@@ -28,7 +28,7 @@
 
 #ifdef MCRL2_PLATFORM_WINDOWS
 #include <windows.h>
-#endif MCRL2_PLATFORM_WINDOWS
+#endif // MCRL2_PLATFORM_WINDOWS
 
 namespace mcrl2
 {
