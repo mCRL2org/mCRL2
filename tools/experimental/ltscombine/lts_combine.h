@@ -20,10 +20,10 @@ namespace mcrl2
 // The input LTSs are modified during the process.
 void combine_lts(
   std::vector<lts::lts_lts_t>& ltss,
-  std::vector<std::pair<std::string, std::vector<std::string>>>& syncs,
-  std::vector<std::string> blocks,
-  std::vector<std::string> hiden,
-  std::vector<std::vector<std::string>> allow, 
+  std::vector<std::pair<core::identifier_string, std::vector<core::identifier_string>>>& syncs,
+  std::vector<core::identifier_string> blocks,
+  std::vector<core::identifier_string> hiden,
+  std::vector<std::vector<core::identifier_string>> allow, 
   std::ostream& stream);
 }
 

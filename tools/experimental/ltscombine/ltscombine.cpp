@@ -112,7 +112,7 @@ protected:
       while (std::getline(*syncs_inputs, line, ','))
       {
         std::istringstream iss(line);
-        std::vector<std::string> labels{};
+        std::vector<core::identifier_string> labels{};
         std::string label;
         std::size_t delim = line.find('|');
         std::size_t prev_delim = 0;
@@ -203,7 +203,7 @@ protected:
       while (std::getline(*allow_input, action_label, ','))
       {
         std::istringstream iss(action_label);
-        std::vector<std::string> labels{};
+        std::vector<core::identifier_string> labels{};
         std::string label;
         std::size_t delim = action_label.find('|');
         std::size_t prev_delim = 0;
@@ -280,10 +280,10 @@ private:
     ltrim(s);
   }
 
-  std::vector<std::string> blocks;
-  std::vector<std::vector<std::string>> allow;
-  std::vector<std::string> hiden;
-  std::vector<std::pair<std::string, std::vector<std::string>>> syncs{};
+  std::vector<core::identifier_string> blocks;
+  std::vector<std::vector<core::identifier_string>> allow;
+  std::vector<core::identifier_string> hiden;
+  std::vector<std::pair<core::identifier_string, std::vector<core::identifier_string>>> syncs{};
 
 };
 
