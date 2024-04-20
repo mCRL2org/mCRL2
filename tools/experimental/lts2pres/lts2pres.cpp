@@ -129,8 +129,11 @@ class lts2pres_tool : public pres_output_tool<input_output_tool>
       state_formulas::state_formula_specification formspec = state_formulas::parse_state_formula_specification(from, lpsspec, formula_is_quantitative);
       check_lts2pres_actions(formspec.formula(), ltsspec);
       from.close();
-      lpsspec.data() = data::merge_data_specifications(lpsspec.data(), formspec.data());
-      lpsspec.action_labels() = lpsspec.action_labels() + formspec.action_labels();
+      ltsspec.set_data(data::merge_data_specifications(ltsspec.data(), formspec.data()));
+      if (!formspec.action_labels().empty())
+      {
+        mCRL2log(log::warning) << "The modal formula contains action declarations. These are ignored.\n";
+      }
       pres_system::pres result = pres_system::lts2pres(ltsspec, formspec, preprocess_modal_operators);
 
       //save the result
