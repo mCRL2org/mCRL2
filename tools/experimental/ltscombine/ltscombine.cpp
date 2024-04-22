@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "mcrl2/atermpp/aterm_list.h"
 
 #include "lts_combine.h"
 
@@ -52,12 +53,12 @@ public:
     // Generate and output resulting LTS
     if (output_filename().empty())
     {
-      combine_lts(lts, syncs, blocks, hiden, allow, std::cout);
+      combine_lts(lts, syncs, blocks, hiden, allow, std::cout, "");
     }
     else
     {
       std::ofstream file(output_filename(), std::ios_base::binary);
-      combine_lts(lts, syncs, blocks, hiden, allow, file);
+      combine_lts(lts, syncs, blocks, hiden, allow, file, output_filename());
     }
 
     return true;
@@ -224,8 +225,10 @@ protected:
         trim(label);
         labels.push_back(label);
 
+        std::sort(labels.begin(), labels.end(), [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
+
         // Add multi-action to the list of allowed actions
-        allow.push_back(labels);
+        allow.push_back(core::identifier_string_list::term_list(labels.begin(), labels.end()));
       }
     }
 
@@ -281,7 +284,7 @@ private:
   }
 
   std::vector<core::identifier_string> blocks;
-  std::vector<std::vector<core::identifier_string>> allow;
+  std::vector<core::identifier_string_list> allow;
   std::vector<core::identifier_string> hiden;
   std::vector<std::pair<core::identifier_string, std::vector<core::identifier_string>>> syncs{};
 

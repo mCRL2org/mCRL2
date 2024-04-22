@@ -11,9 +11,12 @@
 
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/state_space_generator.h"
+#include "mcrl2/atermpp/aterm_list.h"
 
 #include <queue>
+#include <chrono>
 
 using state_t = std::size_t;
 
@@ -30,6 +33,24 @@ class identifier_string_compare
     { 
       return str == m_str;
     }
+};
+
+class identifier_string_list_compare
+{
+  core::identifier_string m_str_list;
+
+public:
+  identifier_string_list_compare(core::identifier_string_list str_list)
+      : m_str_list(str_list)
+  {}
+
+  bool operator()(core::identifier_string_list str_list) { return str_list == m_str_list; }
+};
+
+class action_list_to_identifier_list
+{
+public:
+  core::identifier_string operator()(process::action action) { return action.label().name(); }
 };
 
 /// <summary>
@@ -120,6 +141,10 @@ bool is_blocked(std::vector<core::identifier_string> blocks, process::action_lis
   return false;
 }
 
+core::identifier_string action_name(const process::action& action) {
+  return action.label().name();
+}
+
 /// <summary>
 /// Checks if the given action list matches one of the allowed multi-actions.
 /// A match can only occur when the list of actions and allowed multi-action 
@@ -129,7 +154,7 @@ bool is_blocked(std::vector<core::identifier_string> blocks, process::action_lis
 /// <param name="actions">The list of actions to be matched.</param>
 /// <returns>Whether the list of actions is matched by an allowed multi-action
 /// from the list of allowed multi-actions.</returns>
-bool is_allowed(const std::vector<std::vector<core::identifier_string>> allowed, process::action_list actions)
+bool is_allowed(const std::vector<core::identifier_string_list> allowed, process::action_list actions)
 {
   // If the list is empty, all actions are allowed
   // tau actions are always allowed
@@ -138,53 +163,17 @@ bool is_allowed(const std::vector<std::vector<core::identifier_string>> allowed,
     return true;
   }
 
-  // Loop through list of allowed multi-actions
-  for (std::vector<core::identifier_string> allow : allowed)
+  std::vector<core::identifier_string> names(actions.size());
+  std::transform(actions.begin(), actions.end(), names.begin(), action_name);
+  std::sort(names.begin(), names.end(), [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
+
+  core::identifier_string_list action_names = core::identifier_string_list::term_list(names.begin(), names.end());
+
+  if (std::find_if(allowed.begin(), allowed.end(), identifier_string_list_compare(action_names)) != allowed.end())
   {
-    if (allow.size() != actions.size())
-    {
-      // Multi-action must exactly match the list of actions
-      continue;
-    }
-
-    // Boolean vector for each action in the multi-action, and one
-    // extra to signal that an action could not be found in the multi-action
-    std::vector<bool> synced(allow.size() + 1, false);
-    synced[0] = true;
-
-    for (const process::action& action : actions)
-    {
-      // Find action in the multi-action
-      std::vector<core::identifier_string>::iterator iter = allow.begin();
-      while ((iter = std::find_if(iter, allow.end(), identifier_string_compare(action.label().name()))) != allow.end())
-      {
-        int index = iter - allow.begin() + 1;
-        // Check if found action is not already used
-        if (!synced[index])
-        {
-          synced[index] = true;
-          break;
-        }
-        iter++;
-      }
-
-      if (iter == allow.end())
-      {
-        // Action could not be found, or all were already in use
-        synced[0] = false;
-        break;
-      }
-    }
-
-    if (synced[0])
-    {
-      // Because all actions are found and the multi-action and
-      // action list are of equal length, they must be equal
-      return true;
-    }
+    return true;
   }
 
-  // No matching allowed multi-action could be found, and the list is not empty
   return false;
 }
 
@@ -231,13 +220,36 @@ bool can_sync(const lts::action_label_lts& label)
   return true;
 }
 
+class combined_lts_builder : public lts::lts_lts_builder
+{
+public:
+  combined_lts_builder(
+    const data::data_specification& dataspec,
+    const process::action_label_list& action_labels,
+    const data::variable_list& process_parameters)
+      : lts_lts_builder(dataspec, action_labels, process_parameters, true)
+  { }
+
+  void finalize(size_t states) {
+    // add actions
+    m_lts.set_num_action_labels(m_actions.size());
+    for (const auto& p : m_actions)
+    {
+      m_lts.set_action_label(p.second, lts::action_label_lts(lps::multi_action(p.first.actions(), p.first.time())));
+    }
+
+    m_lts.set_num_states(states, true);
+    m_lts.set_initial_state(0);
+  }
+};
+
 // Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
 void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   std::vector<std::pair<core::identifier_string, std::vector<core::identifier_string>>>& syncs,
   std::vector<core::identifier_string> blocks,
   std::vector<core::identifier_string> hiden,
-  std::vector<std::vector<core::identifier_string>> allow,
-  std::ostream& stream)
+  std::vector<core::identifier_string_list> allow,
+  std::ostream& stream, std::string filename)
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
@@ -263,8 +275,10 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   lts::detail::progress_monitor progress_monitor(lps::exploration_strategy::es_breadth);
 
   // Start writing the LTS.
-  atermpp::binary_aterm_ostream output(stream);
-  lts::write_lts_header(output, lts[0].data(), lts[0].process_parameters(), lts[0].action_label_declarations());
+  //atermpp::binary_aterm_ostream output(stream);
+  //lts::write_lts_header(output, lts[0].data(), lts[0].process_parameters(), lts[0].action_label_declarations());
+
+  combined_lts_builder lts_builder(lts[0].data(), lts[0].action_label_declarations(), lts[0].process_parameters());
 
   while (!queue.empty())
   {
@@ -397,7 +411,9 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
 
         // Add the transition with the remaining actions
         progress_monitor.examine_transition();
-        lts::write_transition(output, state_index, new_label, new_state);
+        
+        //lts::write_transition(output, state_index, new_label, new_state);
+        lts_builder.add_transition(state_index, new_label, new_state, 1);
       }
       else {
         // Normal multi-action
@@ -422,7 +438,9 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
 
         // Add the transition with the remaining actions
         progress_monitor.examine_transition();
-        lts::write_transition(output, state_index, combo.first, new_state);
+        
+        //lts::write_transition(output, state_index, combo.first, new_state);
+        lts_builder.add_transition(state_index, combo.first, new_state, 1);
       }
     }
 
@@ -432,5 +450,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   progress_monitor.finish_exploration(states.size(), 1);
 
   // Write the initial state and the state labels.
-  lts::write_initial_state(output, 0);
+  //lts::write_initial_state(output, 0);
+  lts_builder.finalize(states.size());
+  lts_builder.save(filename);
 }

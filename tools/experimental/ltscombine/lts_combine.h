@@ -23,8 +23,8 @@ void combine_lts(
   std::vector<std::pair<core::identifier_string, std::vector<core::identifier_string>>>& syncs,
   std::vector<core::identifier_string> blocks,
   std::vector<core::identifier_string> hiden,
-  std::vector<std::vector<core::identifier_string>> allow, 
-  std::ostream& stream);
+  std::vector<core::identifier_string_list> allow, 
+  std::ostream& stream, std::string filename);
 }
 
 #endif // MCRL2_LTS_COMBINE_H_
