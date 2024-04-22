@@ -53,6 +53,11 @@ public:
   core::identifier_string operator()(process::action action) { return action.label().name(); }
 };
 
+core::identifier_string action_name(const process::action& action)
+{
+  return action.label().name();
+}
+
 /// <summary>
 /// Utility function that returns the index of the synchronisation for which
 /// the action_list actions matches the list of strings in syncs.second.
@@ -61,58 +66,37 @@ public:
 /// <param name="actions">The list of actions to be matched.</param>
 /// <returns>The index of the matching synchronisation,
 /// or -1 when no matching synchronisation is found.</returns>
-size_t get_sync(std::vector<std::pair<core::identifier_string, std::vector<core::identifier_string>>>& syncs,
-    process::action_list actions)
+size_t get_sync(std::vector<core::identifier_string_list>& syncs, core::identifier_string_list& action_names)
 {
-  // Loop through possible synchronisations
-  for (size_t i = 0; i < syncs.size(); i++)
+  // A synchronising action must consist of two or more action labels
+  if (action_names.size() < 2)
   {
-    auto& sync = syncs[i];
-    if (actions.size() != sync.second.size())
-    {
-      // Multi-action must exactly match the list of actions
-      continue;
-    }
-    
-    // Boolean vector for each action in the multi-action, and one
-    // extra to signal that an action could not be found in the multi-action
-    std::vector<bool> synced(sync.second.size() + 1, false);
-    synced[0] = true;
-
-    for (const process::action& action : actions)
-    {
-      // Find action in the multi-action
-      std::vector<core::identifier_string>::iterator iter = sync.second.begin();
-      while ((iter = std::find_if(iter, sync.second.end(), identifier_string_compare(action.label().name()))) != sync.second.end())
-      {
-        int index = iter - sync.second.begin() + 1;
-        // Check if found action is not already used
-        if (!synced[index])
-        {
-          synced[index] = true;
-          break;
-        }
-        iter++;
-      }
-
-      if (iter == sync.second.end())
-      {
-        // Action could not be found, or all were already in use
-        synced[0] = false;
-        break;
-      }
-    }
-
-    if (synced[0])
-    {
-      // Because all actions are found and the multi-action and
-      // action list are of equal length, they must be equal
-      return i;
-    }
+    return -1;
   }
 
-  // No matching synchronisation was found
-  return -1;
+  std::vector<core::identifier_string_list>::iterator iter
+      = std::find_if(syncs.begin(), syncs.end(), identifier_string_list_compare(action_names));
+  if (iter == syncs.end())
+  {
+    return -1;
+  }
+
+  return iter - syncs.begin();
+}
+
+/// <summary>
+/// Convert and sort an action_list to an identifier_string_list of names
+/// of the actions in the list.
+/// </summary>
+/// <param name="actions">The input list of actions.</param>
+/// <returns>The sorted list of identifier strings.</returns>
+core::identifier_string_list sorted_action_name_list(const process::action_list& actions)
+{
+  std::vector<core::identifier_string> names(actions.size());
+  std::transform(actions.begin(), actions.end(), names.begin(), action_name);
+  std::sort(names.begin(), names.end(), [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
+
+  return core::identifier_string_list::term_list(names.begin(), names.end());
 }
 
 /// <summary>
@@ -141,10 +125,6 @@ bool is_blocked(std::vector<core::identifier_string> blocks, process::action_lis
   return false;
 }
 
-core::identifier_string action_name(const process::action& action) {
-  return action.label().name();
-}
-
 /// <summary>
 /// Checks if the given action list matches one of the allowed multi-actions.
 /// A match can only occur when the list of actions and allowed multi-action 
@@ -154,20 +134,14 @@ core::identifier_string action_name(const process::action& action) {
 /// <param name="actions">The list of actions to be matched.</param>
 /// <returns>Whether the list of actions is matched by an allowed multi-action
 /// from the list of allowed multi-actions.</returns>
-bool is_allowed(const std::vector<core::identifier_string_list> allowed, process::action_list actions)
+bool is_allowed(const std::vector<core::identifier_string_list> allowed, core::identifier_string_list action_names)
 {
   // If the list is empty, all actions are allowed
   // tau actions are always allowed
-  if (allowed.empty() || actions.empty())
+  if (allowed.empty() || action_names.empty())
   {
     return true;
   }
-
-  std::vector<core::identifier_string> names(actions.size());
-  std::transform(actions.begin(), actions.end(), names.begin(), action_name);
-  std::sort(names.begin(), names.end(), [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
-
-  core::identifier_string_list action_names = core::identifier_string_list::term_list(names.begin(), names.end());
 
   if (std::find_if(allowed.begin(), allowed.end(), identifier_string_list_compare(action_names)) != allowed.end())
   {
@@ -245,10 +219,11 @@ public:
 
 // Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
 void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
-  std::vector<std::pair<core::identifier_string, std::vector<core::identifier_string>>>& syncs,
-  std::vector<core::identifier_string> blocks,
-  std::vector<core::identifier_string> hiden,
-  std::vector<core::identifier_string_list> allow,
+  std::vector<core::identifier_string_list>& syncs,
+  std::vector<core::identifier_string>& resulting_actions,
+  std::vector<core::identifier_string>& blocks,
+  std::vector<core::identifier_string>& hiden,
+  std::vector<core::identifier_string_list>& allow,
   std::ostream& stream, std::string filename)
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
@@ -279,6 +254,9 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   //lts::write_lts_header(output, lts[0].data(), lts[0].process_parameters(), lts[0].action_label_declarations());
 
   combined_lts_builder lts_builder(lts[0].data(), lts[0].action_label_declarations(), lts[0].process_parameters());
+
+  int nr_states = 0;
+  auto start_time = std::chrono::high_resolution_clock::now();
 
   while (!queue.empty())
   {
@@ -374,10 +352,12 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
       mCRL2log(log::debug) << lts::pp(combo.first) << std::endl;
 
       size_t sync_index;
-      if (can_sync(combo.first) && (sync_index = get_sync(syncs, combo.first.actions())) != -1)
+      core::identifier_string_list action_names = sorted_action_name_list(combo.first.actions());
+      if (can_sync(combo.first) && (sync_index = get_sync(syncs, action_names)) != -1)
       {
         // Synchronise
-        mCRL2log(log::debug) << "Sync: " << syncs[sync_index].first << std::endl;
+        core::identifier_string result_action = resulting_actions[sync_index];
+        mCRL2log(log::debug) << "Sync: " << result_action << std::endl;
         
         data::data_expression_list arguments;
         data::sort_expression_list sorts;
@@ -390,10 +370,10 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
 
         // Create new label from the synchronisation
         lts::action_label_lts new_label(
-            lps::multi_action(process::action(process::action_label(syncs[sync_index].first, sorts), arguments)));
+            lps::multi_action(process::action(process::action_label(result_action, sorts), arguments)));
 
         // Check if new transition is blocked or not allowed
-        if (is_blocked(blocks, new_label.actions()) || !is_allowed(allow, new_label.actions()))
+        if (is_blocked(blocks, new_label.actions()) || !is_allowed(allow, sorted_action_name_list(new_label.actions())))
         {
           mCRL2log(log::debug) << "Blocked or not allowed: " << lts::pp(combo.first) << std::endl;
           continue;
@@ -420,7 +400,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
         mCRL2log(log::debug) << "Multi action" << std::endl;
 
         // Check if the transition is blocked or not allowed
-        if (is_blocked(blocks, combo.first.actions()) || !is_allowed(allow, combo.first.actions()))
+        if (is_blocked(blocks, combo.first.actions()) || !is_allowed(allow, action_names))
         {
           mCRL2log(log::debug) << "Blocked or not allowed: " << lts::pp(combo.first) << std::endl;
           continue;
@@ -445,7 +425,14 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
     }
 
     progress_monitor.finish_state(states.size(), queue.size(), 1);
+    nr_states++;
   }
+
+  auto stop_time = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop_time - start_time);
+
+  std::cout << "Avg state computation time: " << duration.count() / nr_states << std::endl;
+  std::cout << "Total duration: " << duration.count() << std::endl;
 
   progress_monitor.finish_exploration(states.size(), 1);
 

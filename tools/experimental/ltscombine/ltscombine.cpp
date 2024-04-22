@@ -53,12 +53,12 @@ public:
     // Generate and output resulting LTS
     if (output_filename().empty())
     {
-      combine_lts(lts, syncs, blocks, hiden, allow, std::cout, "");
+      combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, std::cout, "");
     }
     else
     {
       std::ofstream file(output_filename(), std::ios_base::binary);
-      combine_lts(lts, syncs, blocks, hiden, allow, file, output_filename());
+      combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, file, output_filename());
     }
 
     return true;
@@ -138,10 +138,20 @@ protected:
           trim(label);
           labels.push_back(label);
 
+          if (labels.size() < 2)
+          {
+            // Syntax error, communication must contain two or more action labels
+            mCRL2log(log::error) << "Syntax error in communications, left hand size must contain two or more action labels: '" << line << "'." << std::endl;
+            throw mcrl2::runtime_error("Could not parse file " + filename + ".");
+          }
+
+          std::sort(labels.begin(), labels.end(), [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
+          syncs.push_back(core::identifier_string_list::term_list(labels.begin(), labels.end()));
+
           // Add multi-action and resulting action to list of sychronisations
           label = line.substr(delim + 2);
           trim(label);
-          syncs.push_back(std::make_pair(label, labels));
+          resulting_actions.push_back(label);
         }
         else
         {
@@ -286,7 +296,8 @@ private:
   std::vector<core::identifier_string> blocks;
   std::vector<core::identifier_string_list> allow;
   std::vector<core::identifier_string> hiden;
-  std::vector<std::pair<core::identifier_string, std::vector<core::identifier_string>>> syncs{};
+  std::vector<core::identifier_string_list> syncs;
+  std::vector<core::identifier_string> resulting_actions;
 
 };
 
