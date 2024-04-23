@@ -85,11 +85,11 @@ class xinput_output_tool: public xinput_tool
                 const std::string& author,
                 const std::string& what_is,
                 const std::string& tool_description,
+                std::string known_issues = "",
                 uint16_t min = 0,
-                uint16_t max = 0,
-                std::string known_issues = ""
+                uint16_t max = 0
               )
-      : xinput_tool(name, author, what_is, tool_description, min, max, known_issues)
+        : xinput_tool(name, author, what_is, tool_description, known_issues, min, max)
     {
     }
 

@@ -93,9 +93,9 @@ class xinput_tool: public tool
                 const std::string& author,
                 const std::string& what_is,
                 const std::string& tool_description,
+                std::string known_issues = "",
                 uint16_t min = 0,
-                uint16_t max = 0,
-                std::string known_issues = ""
+                uint16_t max = 0
               )
       : tool(name, author, what_is, tool_description, known_issues)
     {

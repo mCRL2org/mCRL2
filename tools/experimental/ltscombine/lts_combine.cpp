@@ -217,54 +217,102 @@ public:
   }
 };
 
-// Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
-void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
-  std::vector<core::identifier_string_list>& syncs,
-  std::vector<core::identifier_string>& resulting_actions,
-  std::vector<core::identifier_string>& blocks,
-  std::vector<core::identifier_string>& hiden,
-  std::vector<core::identifier_string_list>& allow,
-  std::ostream& stream, std::string filename)
+class state_thread
 {
-  // Calculate which states can be reached in a single outgoing step for both LTSs.
-  std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
-  for (size_t i = 0; i < lts.size(); i++)
+public:
+  state_thread(std::vector<lts::lts_lts_t>& lts,
+    std::vector<core::identifier_string_list>& syncs,
+    std::vector<core::identifier_string>& resulting_actions,
+    std::vector<core::identifier_string>& blocks,
+    std::vector<core::identifier_string>& hiden,
+    std::vector<core::identifier_string_list>& allow,
+    std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
+      : lts(lts),
+        syncs(syncs),
+        resulting_actions(resulting_actions),
+        blocks(blocks),
+        hiden(hiden),
+        allow(allow),
+        outgoing_transitions(outgoing_transitions)
   {
-    outgoing_transitions.push_back(lts::outgoing_transitions_per_state_t(lts[i].get_transitions(), lts[i].num_states(), true));
+
   }
 
-  // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).
-  mcrl2::utilities::indexed_set<std::vector<state_t>> states;
-  std::vector<state_t> initial_states;
-  for (auto& lts : lts)
+  void operator()(combined_lts_builder* lts_builder,
+    std::queue<std::size_t>* queue,
+    lts::detail::progress_monitor* progress_monitor,
+    mcrl2::utilities::indexed_set<std::vector<state_t>>* states,
+    std::size_t* number_of_threads,
+    std::mutex* lts_builder_mutex,
+    std::mutex* queue_mutex,
+    std::mutex* progress_mutex,
+    std::mutex* states_mutex)
   {
-    initial_states.push_back(lts.initial_state());
+    bool done = false;
+    while (true)
+    {
+      if (compute_state(lts_builder,
+        queue,
+        progress_monitor,
+        states,
+        number_of_threads,
+        lts_builder_mutex,
+        queue_mutex,
+        progress_mutex,
+        states_mutex))
+      {
+        progress_mutex->lock();
+        progress_monitor->finish_state(states->size(), queue->size(), *number_of_threads);
+        progress_mutex->unlock();
+      }
+      else
+      {
+        if (done)
+        {
+          break;
+        }
+        done = true;
+        // Wait for other threads to finish first run to prevent early shutdown
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      }
+    }
   }
-  const auto [initial, found] = states.insert(initial_states);
 
-  // The todo queue containing new found states.
-  std::queue<std::size_t> queue;
-  queue.push(initial);
+private: 
+  std::vector<lts::lts_lts_t>& lts;
+  std::vector<core::identifier_string_list>& syncs;
+  std::vector<core::identifier_string>& resulting_actions;
+  std::vector<core::identifier_string>& blocks;
+  std::vector<core::identifier_string>& hiden;
+  std::vector<core::identifier_string_list>& allow;
+  std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
 
-  // Progress monitor.
-  lts::detail::progress_monitor progress_monitor(lps::exploration_strategy::es_breadth);
-
-  // Start writing the LTS.
-  //atermpp::binary_aterm_ostream output(stream);
-  //lts::write_lts_header(output, lts[0].data(), lts[0].process_parameters(), lts[0].action_label_declarations());
-
-  combined_lts_builder lts_builder(lts[0].data(), lts[0].action_label_declarations(), lts[0].process_parameters());
-
-  int nr_states = 0;
-  auto start_time = std::chrono::high_resolution_clock::now();
-
-  while (!queue.empty())
+  bool compute_state(
+      combined_lts_builder* lts_builder,
+      std::queue<std::size_t>* queue,
+      lts::detail::progress_monitor* progress_monitor,
+      mcrl2::utilities::indexed_set<std::vector<state_t>>* states,
+      std::size_t* number_of_threads,
+      std::mutex* lts_builder_mutex,
+      std::mutex* queue_mutex,
+      std::mutex* progress_mutex,
+      std::mutex* states_mutex)
   {
+    queue_mutex->lock();
+    if (queue->empty())
+    {
+      queue_mutex->unlock();
+      return false;
+    }
+
     // Take the next pair from the queue.
-    std::size_t state_index = queue.front();
-    std::vector<state_t> state = states[state_index];
+    //std::cout << "oops" << std::endl;
+    std::size_t state_index = queue->front();
+    std::vector<state_t> state = (*states)[state_index];
 
-    queue.pop();
+    queue->pop();
+    queue_mutex->unlock();
+    //std::cout << "huts" << std::endl;
 
     // List of new outgoing transitions from this state, combined from the states
     // state[0] to state[i]
@@ -275,7 +323,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
     {
       state_t old_state = state[i];
 
-      // Seperate new transitions from this state such that transitions from this state 
+      // Seperate new transitions from this state such that transitions from this state
       // don't combine with other transitions from this state
       std::vector<std::pair<lts::action_label_lts, std::vector<state_t>>> new_combos;
 
@@ -300,7 +348,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
         for (auto& combo : combos)
         {
           // The new state of the combo already contains this state
-          if (combo.second.size() >= i+1)
+          if (combo.second.size() >= i + 1)
           {
             continue;
           }
@@ -358,7 +406,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
         // Synchronise
         core::identifier_string result_action = resulting_actions[sync_index];
         mCRL2log(log::debug) << "Sync: " << result_action << std::endl;
-        
+
         data::data_expression_list arguments;
         data::sort_expression_list sorts;
         if (!combo.first.actions().empty())
@@ -382,20 +430,29 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
         // Hide actions in transition label
         hide_actions(hiden, &new_label);
 
+        states_mutex->lock();
         // Add new state
-        const auto [new_state, inserted] = states.insert(combo.second);
+        const auto [new_state, inserted] = states->insert(combo.second);
+        states_mutex->unlock();
         if (inserted)
         {
-          queue.push(new_state);
+          queue_mutex->lock();
+          queue->push(new_state);
+          queue_mutex->unlock();
         }
 
         // Add the transition with the remaining actions
-        progress_monitor.examine_transition();
-        
-        //lts::write_transition(output, state_index, new_label, new_state);
-        lts_builder.add_transition(state_index, new_label, new_state, 1);
+        progress_mutex->lock();
+        progress_monitor->examine_transition();
+        progress_mutex->unlock();
+
+        // lts::write_transition(output, state_index, new_label, new_state);
+        lts_builder_mutex->lock();
+        lts_builder->add_transition(state_index, new_label, new_state, *number_of_threads);
+        lts_builder_mutex->unlock();
       }
-      else {
+      else
+      {
         // Normal multi-action
         mCRL2log(log::debug) << "Multi action" << std::endl;
 
@@ -410,31 +467,106 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
         hide_actions(hiden, &combo.first);
 
         // Add new state
-        const auto [new_state, inserted] = states.insert(combo.second);
+        states_mutex->lock();
+        const auto [new_state, inserted] = states->insert(combo.second);
+        states_mutex->unlock();
         if (inserted)
         {
-          queue.push(new_state);
+          queue_mutex->lock();
+          queue->push(new_state);
+          queue_mutex->unlock();
         }
 
         // Add the transition with the remaining actions
-        progress_monitor.examine_transition();
-        
-        //lts::write_transition(output, state_index, combo.first, new_state);
-        lts_builder.add_transition(state_index, combo.first, new_state, 1);
+        progress_mutex->lock();
+        progress_monitor->examine_transition();
+        progress_mutex->unlock();
+
+        // lts::write_transition(output, state_index, combo.first, new_state);
+        lts_builder_mutex->lock();
+        lts_builder->add_transition(state_index, combo.first, new_state, *number_of_threads);
+        lts_builder_mutex->unlock();
       }
     }
 
-    progress_monitor.finish_state(states.size(), queue.size(), 1);
-    nr_states++;
+    return true;
+  }
+};
+
+// Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
+void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
+  std::vector<core::identifier_string_list>& syncs,
+  std::vector<core::identifier_string>& resulting_actions,
+  std::vector<core::identifier_string>& blocks,
+  std::vector<core::identifier_string>& hiden,
+  std::vector<core::identifier_string_list>& allow,
+  std::string filename, std::size_t nr_of_threads)
+{
+  // Calculate which states can be reached in a single outgoing step for both LTSs.
+  std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
+  for (size_t i = 0; i < lts.size(); i++)
+  {
+    outgoing_transitions.push_back(lts::outgoing_transitions_per_state_t(lts[i].get_transitions(), lts[i].num_states(), true));
+  }
+
+  // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).
+  mcrl2::utilities::indexed_set<std::vector<state_t>> states;
+  std::vector<state_t> initial_states;
+  for (auto& lts : lts)
+  {
+    initial_states.push_back(lts.initial_state());
+  }
+  const auto [initial, found] = states.insert(initial_states);
+
+  // The todo queue containing new found states.
+  std::queue<std::size_t> queue;
+  queue.push(initial);
+
+  // Progress monitor.
+  lts::detail::progress_monitor progress_monitor(lps::exploration_strategy::es_breadth);
+
+  // Start writing the LTS.
+  //atermpp::binary_aterm_ostream output(stream);
+  //lts::write_lts_header(output, lts[0].data(), lts[0].process_parameters(), lts[0].action_label_declarations());
+
+  combined_lts_builder lts_builder(lts[0].data(), lts[0].action_label_declarations(), lts[0].process_parameters());
+
+  std::mutex builder_mutex;
+  std::mutex queue_mutex;
+  std::mutex progress_mutex;
+  std::mutex states_mutex;
+
+  //int nr_states = 0;
+  auto start_time = std::chrono::high_resolution_clock::now();
+  std::vector<std::thread> threads;
+
+  for (size_t i = 0; i < nr_of_threads; i++)
+  {
+    state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow, outgoing_transitions);
+    threads.emplace_back(std::thread(thread,
+        &lts_builder,
+        &queue,
+        &progress_monitor,
+        &states,
+        &nr_of_threads,
+        &builder_mutex,
+        &queue_mutex,
+        &progress_mutex,
+        &states_mutex));
+  }
+
+  for (size_t i = 0; i < nr_of_threads; i++)
+  {
+    threads[i].join();
   }
 
   auto stop_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop_time - start_time);
 
-  std::cout << "Avg state computation time: " << duration.count() / nr_states << std::endl;
+  //std::cout << "Avg state computation time: " << duration.count() / nr_states << std::endl;
   std::cout << "Total duration: " << duration.count() << std::endl;
 
-  progress_monitor.finish_exploration(states.size(), 1);
+  progress_monitor.finish_exploration(states.size(), nr_of_threads);
 
   // Write the initial state and the state labels.
   //lts::write_initial_state(output, 0);

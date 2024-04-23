@@ -15,16 +15,18 @@
 #include "lts_combine.h"
 
 #include "mcrl2/utilities/xinput_output_tool.h"
+#include "mcrl2/utilities/parallel_tool.h"
 
 namespace mcrl2
 {
 
 using log::log_level_t;
 using mcrl2::utilities::tools::xinput_output_tool;
+using mcrl2::utilities::tools::parallel_tool;
 
-class ltscombine_tool : public xinput_output_tool
+class ltscombine_tool : public parallel_tool<xinput_output_tool>
 {
-  typedef xinput_output_tool super;
+  typedef parallel_tool<xinput_output_tool> super;
 
 public:
   ltscombine_tool() : super(
@@ -34,9 +36,11 @@ public:
       "Combines multiple labelled transition systems (LTS)"
       "in the INFILES and writes the resulting LTS to OUTFILE."
       "Communication, blocking, allowing and hiding are applied"
-      "afterwards in that order.",
-      2, 0)
-  {}
+      "afterwards in that order.")
+  {
+    min_input_files = 2;
+    max_input_files = 0;
+  }
 
   bool run() override
   {
@@ -51,15 +55,7 @@ public:
     }
 
     // Generate and output resulting LTS
-    if (output_filename().empty())
-    {
-      combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, std::cout, "");
-    }
-    else
-    {
-      std::ofstream file(output_filename(), std::ios_base::binary);
-      combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, file, output_filename());
-    }
+    combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, output_filename(), number_of_threads());
 
     return true;
   }

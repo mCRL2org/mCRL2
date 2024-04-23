@@ -25,7 +25,7 @@ void combine_lts(
   std::vector<core::identifier_string>& blocks,
   std::vector<core::identifier_string>& hiden,
   std::vector<core::identifier_string_list>& allow, 
-  std::ostream& stream, std::string filename);
+  std::string filename, std::size_t nr_of_threads = 1);
 }
 
 #endif // MCRL2_LTS_COMBINE_H_
