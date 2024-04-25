@@ -205,6 +205,27 @@ public:
   {
     return super::size();
   }
+
+  /// \returns An iterator over all keys.
+  inline
+  iterator begin();
+
+  inline
+  iterator end();
+
+  /// \returns A const iterator over all keys.
+  const_iterator begin() const;
+  const_iterator end() const;
+
+  /// \returns A const iterator over all keys.
+  const_iterator cbegin() const;
+  const_iterator cend() const;
+
+  /// \returns True iff the set is empty.
+  bool empty() const noexcept;
+
+  /// \returns The amount of elements stored in this set.
+  size_type max_size() const noexcept;
 };
 
 namespace utilities
@@ -399,6 +420,24 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     {
       return super::size();
     }
+
+    /// \returns An iterator over all keys.
+    iterator begin();
+    iterator end();
+
+    /// \returns A const iterator over all keys.
+    const_iterator begin() const;
+    const_iterator end() const;
+
+    /// \returns A const iterator over all keys.
+    const_iterator cbegin() const;
+    const_iterator cend() const;
+
+    /// \returns True iff the set is empty.
+    bool empty() const noexcept;
+
+    /// \returns The amount of elements stored in this set.
+    size_type max_size() const noexcept;
 
   protected:
 

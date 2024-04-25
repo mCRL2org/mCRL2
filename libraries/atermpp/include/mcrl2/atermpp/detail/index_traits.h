@@ -13,6 +13,7 @@
 
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/atermpp/standard_containers/unordered_map.h"
+#include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 
 namespace atermpp {
 
