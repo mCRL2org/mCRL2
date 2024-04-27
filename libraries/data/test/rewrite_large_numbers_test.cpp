@@ -10,7 +10,7 @@
 /// \brief Tests whether terms representing large positive and integer numbers are evaluated well. 
 
 #include <iostream>
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/utilities/text_utility.h"
 
