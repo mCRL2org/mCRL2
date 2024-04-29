@@ -306,6 +306,10 @@ class pbessolve_tool
             "use the"
             " --counter-example option when generating the PBES?"
           << std::endl;
+
+      // Avoid writing the counterexample information.
+      lpsfile = "";
+      ltsfile = "";
     }
 
     // When the original has counter example information we remove it and store the provided pbes.
