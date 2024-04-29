@@ -1,0 +1,48 @@
+% This model is described in Groote and Willemse. On Woolhouse's Cotton-Spinning Problem. Festschrift Joost-Pieter Katoen.
+
+sort Thread = struct fine | broken;
+
+map  N, initial_position, width: Nat;
+     count_broken_threads, lbt, rbt: List(Thread)->Nat; %rbt: rightmost_broken_thread; lbt: leftmost_broken_thread.
+     no_broken_thread: List(Thread)->Bool;
+     binomial: Nat#Nat->Real;
+     fac: Nat->Nat;
+
+eqn  width=10;
+     N=4;
+     initial_position=5;
+
+var  n,m:Nat;
+eqn  fac(0)=1;
+     n>0 -> fac(n)=fac(max(0,n-1))*n;
+     binomial(n,m)=fac(n)/(fac(Int2Nat(n-m))*fac(m));
+
+var  
+     l: List(Thread);
+eqn  lbt([])=0;
+     lbt(fine|>l)=1+lbt(l);
+     lbt(broken|>l)=0;
+     rbt(fine|>l)=1+rbt(l);
+     rbt(broken|>l)=if(no_broken_thread(l),0,1+rbt(l));
+     no_broken_thread([])=true;
+     no_broken_thread(fine|>l)=no_broken_thread(l);
+     no_broken_thread(broken|>l)=false;
+     count_broken_threads([])=0;
+     count_broken_threads(fine |> l)=count_broken_threads(l);
+     count_broken_threads(broken |> l)=1+count_broken_threads(l);
+
+                             
+act  threads: List(Thread);
+     walk:Int;
+
+proc Mule(pos:Nat)=
+       dist l: List(Thread)[if(#l==width && count_broken_threads(l)==N, 
+                              1/binomial(width,N),0)].
+            threads(l).
+            ((pos<=lbt(l))  ->  walk(rbt(l)-pos).Mule(rbt(l)) +
+             (pos>=rbt(l)) ->  walk(pos-lbt(l)).Mule(lbt(l)) +
+             (lbt(l)<pos && pos < rbt(l)) ->
+               (walk(pos+rbt(l)-2*lbt(l)).Mule(rbt(l)) +
+                walk(2*rbt(l)-pos-lbt(l)).Mule(lbt(l))));
+
+init Mule(initial_position);

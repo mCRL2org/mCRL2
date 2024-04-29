@@ -1,0 +1,43 @@
+% This model is described in Groote and Willemse. On Woolhouse's Cotton-Spinning Problem. Festschrift Joost-Pieter Katoen. 
+
+sort Thread = struct fine | broken;
+
+map  prob: Real;
+     width: Pos; 
+     initial_position: Nat;
+     count_broken_threads, lbt, rbt: List(Thread)->Nat; %rbt: rightmost_broken_thread; lbt: leftmost_broken_thread.
+     no_broken_thread: List(Thread)->Bool;
+     probability: List(Thread)->Real;
+
+eqn  prob=1/10;
+     width=10;
+     initial_position=0;
+
+var  l: List(Thread);
+eqn  probability([])=1;
+     probability(fine |> l)=(1-prob)*probability(l);
+     probability(broken |> l)=prob*probability(l);
+     lbt([])=0;
+     lbt(fine|>l)=1+lbt(l);
+     lbt(broken|>l)=0;
+     rbt(fine|>l)=1+rbt(l);
+     rbt(broken|>l)=if(no_broken_thread(l),0,1+rbt(l));
+     no_broken_thread([])=true;
+     no_broken_thread(fine|>l)=no_broken_thread(l);
+     no_broken_thread(broken|>l)=false;
+
+act  threads: List(Thread);
+     walk:Int;
+
+proc Mule(pos:Nat)=
+       dist l: List(Thread)[if(#l==width, probability(l),0)].
+            threads(l).
+            (no_broken_thread(l) )
+            -> walk(0).Mule(pos)
+            <> ((pos<=lbt(l))  ->  walk(rbt(l)-pos).Mule(rbt(l)) +
+                (pos>=rbt(l)) ->  walk(pos-lbt(l)).Mule(lbt(l)) +
+                (lbt(l)<pos && pos < rbt(l)) ->
+                 (walk(pos+rbt(l)-2*lbt(l)).Mule(rbt(l)) +
+                  walk(2*rbt(l)-pos-lbt(l)).Mule(lbt(l))));
+
+init hide({threads},Mule(initial_position));

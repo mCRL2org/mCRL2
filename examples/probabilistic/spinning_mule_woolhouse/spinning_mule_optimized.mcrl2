@@ -1,0 +1,37 @@
+% This model is described in Groote and Willemse. On Woolhouse's Cotton-Spinning Problem. Festschrift Joost-Pieter Katoen.
+
+% This is description of a spinning mule where we only calculate what is the position of the leftmost
+% broken thread l and the rightmost broken thread r. The probability for this to occur is
+% (1-p)^(l-1+M-r)*p^2 when l<r. The probability that l=r, i.e., only one thread is broken at position l
+% is (1-p)^(M-1)*p. The probability that no thread breaks is (1-p)^M. M is here the width of the spinning mule
+% and p is the probability for one yarn to break per minute. Below M is denoted as width, and p as prob. 
+%
+sort Thread = struct fine | broken;
+
+map  prob: Real;
+     width: Pos; 
+     initial_position: Nat;
+     probability: Nat#Nat->Real;
+
+eqn  prob=7/10;
+     width=50;
+     initial_position=0;
+
+var  l,r: Nat;
+eqn  probability(l,r)=if(l<width && r < width,
+                           if(l<r, exp(1-prob,l-1+width-r)*prob*prob,
+                           if(l==r,exp(1-prob,width-1)*prob,
+                           if(l+1==width && r==0,exp(1-prob,width),0))),0);
+
+act  threads: Nat#Nat; % Fabric with leftmost and rightmost broken threads. If not thread is broken l=width and r=1. 
+     walk:Int;
+
+proc Mule(pos:Nat)=
+       dist l,r: Nat[probability(l,r)].
+            threads(l,r).
+               ((l>r) -> walk(0).Mule(pos) +
+                (l<=r && pos<=l) -> walk(r-pos).Mule(r) +
+                (l<=r && l<pos && pos<r) -> (walk(pos+r-2*l).Mule(r) + walk(2*r-pos-l).Mule(l)) +
+                (l<=r && pos>=r) -> walk(pos-l).Mule(l));
+
+init hide({threads},Mule(initial_position));
