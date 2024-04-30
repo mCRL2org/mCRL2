@@ -1,0 +1,14 @@
+% This model is described in Groote and Willemse. On Woolhouse's Cotton-Spinning Problem. Festschrift Joost-Pieter Katoen.
+
+% This formula provides the minimal expected distance a piecer is supposed to walk to
+% fix broken yarns of a spinning mule, where the calculation of the expected value is 
+% calculated by iterating strokes of the spinning mules Max times. 
+
+map Max: Pos;
+eqn Max=2;
+
+form val(1/(Max*width))*
+       nu X(n:Nat=0).
+            (val(n==Max) && val(0)) ||
+            (val(n<Max) && 
+                [true] inf d:Int.[walk(d)](val(d) + X(n+1)));

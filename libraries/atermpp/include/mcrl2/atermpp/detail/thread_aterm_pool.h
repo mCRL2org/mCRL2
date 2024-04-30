@@ -45,9 +45,11 @@ public:
 
   ~thread_aterm_pool() 
   {
+      // We leak values for the global aterm pool since they contain global variables (for which initialisation order is undefined).
     if (!m_is_main_thread)
     {
-      // We leak values for the global aterm pool since they contain global variables (for which initialisation order is undefined).
+      // We need to prematurely unregister this thread pool since we are going to delete reference variables.
+      m_thread_interface.unregister();
       delete m_variables;
       delete m_containers;
     }
@@ -131,7 +133,8 @@ private:
 
   bool m_is_main_thread = false;
 
-  thread_aterm_pool_interface m_thread_interface; ///< The registered thread aterm pool.
+  /// The registered thread aterm pool.
+  thread_aterm_pool_interface m_thread_interface; 
 };
 
 /// \brief A reference to the thread local term pool storage
