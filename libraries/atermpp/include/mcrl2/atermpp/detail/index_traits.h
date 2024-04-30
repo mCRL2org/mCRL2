@@ -7,13 +7,15 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+// By putting this outside the definition of MCRL2_ATERMPP_INDEX_TRAITS_H a failing header test is avoided.
+#include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
+
 #ifndef MCRL2_ATERMPP_INDEX_TRAITS_H
 #define MCRL2_ATERMPP_INDEX_TRAITS_H
 #pragma once
 
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/atermpp/standard_containers/unordered_map.h"
-#include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 
 namespace atermpp {
 
