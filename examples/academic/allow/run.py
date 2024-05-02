@@ -1,18 +1,17 @@
-import os
+#!/usr/bin/env', 'python3
 
-os.system('mcrl22lps -v allow.mcrl2 allow.lps')
+import subprocess
 
-os.system('lps2pbes -v -f nodeadlock.mcf allow.lps allow.nodeadlock.pbes')
-os.system('pbes2bool -v allow.nodeadlock.pbes')
-# The above shows that there is a deadlock in the specification.
-# Let's investigate
+subprocess.run(['mcrl22lps', '-v', 'allow.mcrl2', 'allow.lps'], shell=True, check=True)
 
-# The following creates state space, and stores trace to deadlock.
-os.system('lps2lts -v -Dt allow.lps allow.aut')
-# Print the trace and find out what's wrong:
-os.system('tracepp allow.lps_dlk_0.trc')
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'allow.lps', 'allow.nodeadlock.pbes'], shell=True, check=True)
+subprocess.run(['pbes2bool', '-v', 'allow.nodeadlock.pbes'], shell=True, check=True)
+# The above shows that there is a deadlock in the specification, let's investigate.
 
-# The same is also immediately clear if we visualise the state space
-os.system('ltsgraph allow.aut')
+# The following command creates the state space, and stores trace to the deadlock
+subprocess.run(['lps2lts', '-v', '-Dt', 'allow.lps', 'allow.aut'], shell=True, check=True)
+print('Print the trace and find out what\'s wrong: ')
+subprocess.run(['tracepp', 'allow.lps_dlk_0.trc'], shell=True, check=True)
 
-
+# The same is also immediately clear if we visualise the state space, uncomment the following line.
+# subprocess.run(['ltsgraph', 'allow.aut'], shell=True, check=True)

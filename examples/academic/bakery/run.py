@@ -1,21 +1,41 @@
-import os
-# Not all of the below terminate!
-os.system('mcrl22lps -v bakery.mcrl2 bakery.lps')
+#!/usr/bin/env', 'python3
 
-os.system('lps2pbes -v -f nodeadlock.mcf bakery.lps bakery.nodeadlock.pbes')
-# os.system('pbes2bool -v -s2 -rjitty bakery.nodeadlock.pbes')  Does not terminate.
+import subprocess
 
-os.system('lps2pbes -v -f request_can_eventually_enter.mcf bakery.lps bakery.request_can_eventually_enter.pbes')
-# os.system('pbes2bool -v -s3 -rjitty bakery.request_can_eventually_enter.pbes') Does not terminate.
+mcrl22lps = subprocess.run(['mcrl22lps', '-v', '-f', '-D', '-n', '-w', 'bakery.mcrl2'], stdout=subprocess.PIPE, shell=True, check=True)
+lpsconstelm = subprocess.run(['lpsconstelm'], input=mcrl22lps.stdout, stdout=subprocess.PIPE, shell=True, check=True)
+subprocess.run(['lpsparelm', '-', 'bakery.lps'], input=lpsconstelm.stdout,  shell=True, check=True)
 
-os.system('lps2pbes -v -f request_must_eventually_enter.mcf bakery.lps bakery.request_must_eventually_enter.pbes')
-# os.system('pbes2bool -v -s3 -rjitty bakery.request_must_eventually_enter.pbes') Does not terminate.
+for formula in [
+    'nodeadlock',
+    'request_can_eventually_enter',
+    'request_must_eventually_enter',
+    'mutual_exclusion',
+    'always_can_get_number',
+    'get_at_least_number_circulating',
+]:
+    lps2pbes = subprocess.run(['lps2pbes', '-v', '-f', f'{formula}.mcf', 'bakery.lps'], stdout=subprocess.PIPE, shell=True, check=True)
+    pbesrewr = subprocess.run(['pbesrewr', '-psimplify'], input=lps2pbes.stdout, stdout=subprocess.PIPE, shell=True, check=True)
+    pbesconstelm = subprocess.run(['pbesconstelm'], input=pbesrewr.stdout, stdout=subprocess.PIPE, shell=True, check=True)
+    subprocess.run(['pbesparelm', '-', f'bakery.{formula}.pbes'], input=pbesconstelm.stdout, stdout=subprocess.PIPE, shell=True, check=True)
+    
+    # Does not terminate since the statespace is infinite
+    #subprocess.run(['pbes2bool', '-v', '-s3', '-rjitty', f'bakery.{formula}.pbes'], shell=True, check=True)
 
-os.system('lps2pbes -v -f mutual_exclusion.mcf bakery.lps bakery.mutual_exclusion.pbes')
-# os.system('pbes2bool -v -s3 -rjitty bakery.mutual_exclusion.pbes') Does not terminate.
+    # Instead we can abstract the data types to obtain over and underapproximations. These use the partial solvers of pbes2bool to terminate early.
+    print('Answer by under-approximation: ')
+    subprocess.run(['pbesabsinthe', '-sunder', '-a', 'abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], shell=True, check=True)
+    subprocess.run(['pbes2bool', '-v', '-s3', '-rjitty', f'bakery.{formula}.absinthe.pbes'], shell=True, check=True)
 
-os.system('lps2pbes -v -f always_can_get_number.mcf bakery.lps bakery.always_can_get_number.pbes')
-#os.system('pbes2bool -v -s3 -rjitty bakery.always_can_get_number.pbes') Does not terminate.
+    print('Answer by over-approximation: ')
+    subprocess.run(['pbesabsinthe', '-sover', '-a', 'abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], shell=True, check=True)
+    subprocess.run(['pbes2bool', '-v', '-s3', '-rjitty', f'bakery.{formula}.absinthe.pbes'], shell=True, check=True)
 
-os.system('lps2pbes -v -f get_at_least_number_circulating.mcf bakery.lps bakery.get_at_least_number_circulating.pbes')
-# os.system('pbes2bool -v -s3 -rjitty bakery.get_at_least_number_circulating.pbes')  Does not terminate.
+    # Alternatively, we can abstract more aggressive to ensure that the parity game is finite.
+    print('Answer by under-approximation: ')
+    subprocess.run(['pbesabsinthe', '-sunder', '-a', 'aggressive_abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], shell=True, check=True)
+    subprocess.run(['pbes2bool', '-v', '-rjitty', f'bakery.{formula}.absinthe.pbes'], shell=True, check=True)
+
+    print('Answer by over-approximation: ')
+    subprocess.run(['pbesabsinthe', '-sover', '-a', 'aggressive_abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], shell=True, check=True)
+    subprocess.run(['pbes2bool', '-v', '-rjitty', f'bakery.{formula}.absinthe.pbes'], shell=True, check=True)
