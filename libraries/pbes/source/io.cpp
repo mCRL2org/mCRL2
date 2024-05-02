@@ -123,7 +123,7 @@ void save_pbes(const pbes& pbes, const std::string& filename,
     format = guess_format(filename);
   }
 
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     save_pbes(pbes, std::cout, format);
   }
@@ -153,7 +153,7 @@ void load_pbes(pbes& pbes,
   {
     format = guess_format(filename);
   }
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     load_pbes(pbes, std::cin, format);
   }
