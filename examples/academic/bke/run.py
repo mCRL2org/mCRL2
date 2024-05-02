@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import subprocess
 
 subprocess.run(['mcrl22lps', '-v', 'bke.mcrl2', 'bke.lps'], shell=True, check=True)

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import subprocess
 
 subprocess.run(['mcrl22lps', 'block.mcrl2', 'block.lps'], shell=True, check=True)

@@ -1,23 +1,21 @@
-import os
+import subprocess
 
-def run_dining(specification_version = "dining3"):
-  os.system('mcrl22lps -v %s.mcrl2 %s.lps' % (specification_version, specification_version))
+for name in [
+    'dining3',
+    'dining3_cs',
+    'dining3_cs_seq',
+    'dining3_ns',
+    'dining3_ns_seq',
+    'dining3_schedule',
+    'dining3_schedule_seq'
+]:
+    subprocess.run(['mcrl22lps', '-v', f'{name}.mcrl2', f'{name}.lps'], shell=True, check=True)
 
-  os.system('lps2pbes -v -f nodeadlock.mcf %s.lps %s.nodeadlock.pbes' % (specification_version, specification_version))
-  os.system('pbes2bool -v %s.nodeadlock.pbes' % (specification_version))
+    subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', f'{name}.lps', f'{name}.nodeadlock.pbes'], shell=True, check=True)
+    subprocess.run(['pbes2bool', '-v', f'{name}.nodeadlock.pbes'], shell=True, check=True)
+  
+    subprocess.run(['lps2pbes', '-v', '-f', 'nostuffing.mcf', f'{name}.lps', f'{name}.nostuffing.pbes'], shell=True, check=True)
+    subprocess.run(['pbes2bool', '-v', f'{name}.nostuffing.pbes'], shell=True, check=True)
 
-  os.system('lps2pbes -v -f nostuffing.mcf %s.lps %s.nostuffing.pbes' % (specification_version, specification_version))
-  os.system('pbes2bool -v %s.nostuffing.pbes' % (specification_version))
-
-  os.system('lps2pbes -v -f nostarvation.mcf %s.lps %s.nostarvation.pbes' % (specification_version, specification_version))
-  os.system('pbes2bool -v %s.nostarvation.pbes' % (specification_version))
-
-run_dining("dining3")
-run_dining("dining3_cs")
-run_dining("dining3_cs_seq")
-run_dining("dining3_ns")
-run_dining("dining3_ns_seq")
-run_dining("dining3_schedule")
-run_dining("dining3_schedule_seq")
-
-
+    subprocess.run(['lps2pbes', '-v', '-f', 'nostarvation.mcf', f'{name}.lps', f'{name}.nostarvation.pbes'], shell=True, check=True)
+    subprocess.run(['pbes2bool', '-v', f'{name}.nostarvation.pbes'], shell=True, check=True)
