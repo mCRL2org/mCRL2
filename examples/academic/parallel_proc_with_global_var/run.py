@@ -1,8 +1,7 @@
-import os
+#!/usr/bin/env python3
 
-os.system('mcrl22lps -vnf parallel_counting.mcrl2 temp.lps')
-os.system('lps2pbes -v -fparallel_counting.mcf temp.lps temp.pbes')
-os.system('pbes2bool -v -rjittyc -s2 temp.pbes')
-os.system('rm -f temp.lps temp.pbes')
+import subprocess
 
-
+subprocess.run(['mcrl22lps', '-vnf', 'parallel_counting.mcrl2', 'temp.lps'], check=True)
+subprocess.run(['lps2pbes', '-v', '-fparallel_counting.mcf', 'temp.lps', 'temp.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', '-rjittyc', '-s2', 'temp.pbes'], check=True)
