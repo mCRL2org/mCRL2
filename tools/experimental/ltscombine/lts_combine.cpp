@@ -9,14 +9,16 @@
 
 #include "lts_combine.h"
 
-#include "mcrl2/lts/lts_algorithm.h"
-#include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/lts_builder.h"
-#include "mcrl2/lts/state_space_generator.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/data/merge_data_specifications.h"
+#include "mcrl2/lts/lts_algorithm.h"
+#include "mcrl2/lts/lts_builder.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/state_space_generator.h"
+#include "mcrl2/process/merge_action_specifications.h"
 
-#include <queue>
 #include <chrono>
+#include <queue>
 
 using state_t = std::size_t;
 
@@ -26,13 +28,12 @@ class identifier_string_compare
 {
   core::identifier_string m_str;
 
-  public:
-    identifier_string_compare(core::identifier_string str) : m_str(str) { }
+public:
+  identifier_string_compare(core::identifier_string str)
+      : m_str(str)
+  {}
 
-    bool operator()(core::identifier_string str)
-    { 
-      return str == m_str;
-    }
+  bool operator()(core::identifier_string str) { return str == m_str; }
 };
 
 class identifier_string_list_compare
@@ -127,7 +128,7 @@ bool is_blocked(std::vector<core::identifier_string> blocks, process::action_lis
 
 /// <summary>
 /// Checks if the given action list matches one of the allowed multi-actions.
-/// A match can only occur when the list of actions and allowed multi-action 
+/// A match can only occur when the list of actions and allowed multi-action
 /// are equal. If the list is empty, all actions are allowed.
 /// </summary>
 /// <param name="allowed">The list of allowed multi-actions.</param>
@@ -194,17 +195,22 @@ bool can_sync(const lts::action_label_lts& label)
   return true;
 }
 
-class combined_lts_builder : public lts::lts_lts_builder
+struct combined_lts_builder
+{
+  virtual void finalize(size_t states) = 0;
+};
+
+class combined_lts_lts_builder : public lts::lts_lts_builder, public combined_lts_builder
 {
 public:
-  combined_lts_builder(
-    const data::data_specification& dataspec,
-    const process::action_label_list& action_labels,
-    const data::variable_list& process_parameters)
+  combined_lts_lts_builder(const data::data_specification& dataspec,
+      const process::action_label_list& action_labels,
+      const data::variable_list& process_parameters)
       : lts_lts_builder(dataspec, action_labels, process_parameters, true)
-  { }
+  {}
 
-  void finalize(size_t states) {
+  void finalize(size_t states) override
+  {
     // add actions
     m_lts.set_num_action_labels(m_actions.size());
     for (const auto& p : m_actions)
@@ -217,16 +223,33 @@ public:
   }
 };
 
+class combined_lts_disk_builder : public lts::lts_lts_disk_builder, public combined_lts_builder
+{
+public:
+  combined_lts_disk_builder(const std::string& filename,
+      const data::data_specification& dataspec,
+      const process::action_label_list& action_labels,
+      const data::variable_list& process_parameters)
+      : lts_lts_disk_builder(filename, dataspec, action_labels, process_parameters)
+  {}
+
+  void finalize(size_t states) override
+  {
+    // Write the initial state.
+    lts::write_initial_state(*stream, 0);
+  }
+};
+
 class state_thread
 {
 public:
   state_thread(std::vector<lts::lts_lts_t>& lts,
-    std::vector<core::identifier_string_list>& syncs,
-    std::vector<core::identifier_string>& resulting_actions,
-    std::vector<core::identifier_string>& blocks,
-    std::vector<core::identifier_string>& hiden,
-    std::vector<core::identifier_string_list>& allow,
-    std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
+      std::vector<core::identifier_string_list>& syncs,
+      std::vector<core::identifier_string>& resulting_actions,
+      std::vector<core::identifier_string>& blocks,
+      std::vector<core::identifier_string>& hiden,
+      std::vector<core::identifier_string_list>& allow,
+      std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
       : lts(lts),
         syncs(syncs),
         resulting_actions(resulting_actions),
@@ -234,32 +257,30 @@ public:
         hiden(hiden),
         allow(allow),
         outgoing_transitions(outgoing_transitions)
-  {
+  {}
 
-  }
-
-  void operator()(combined_lts_builder* lts_builder,
-    std::queue<std::size_t>* queue,
-    lts::detail::progress_monitor* progress_monitor,
-    mcrl2::utilities::indexed_set<std::vector<state_t>>* states,
-    std::size_t* number_of_threads,
-    std::mutex* lts_builder_mutex,
-    std::mutex* queue_mutex,
-    std::mutex* progress_mutex,
-    std::mutex* states_mutex)
+  void operator()(lts::lts_builder* lts_builder,
+      std::queue<std::size_t>* queue,
+      lts::detail::progress_monitor* progress_monitor,
+      mcrl2::utilities::indexed_set<std::vector<state_t>>* states,
+      std::size_t* number_of_threads,
+      std::mutex* lts_builder_mutex,
+      std::mutex* queue_mutex,
+      std::mutex* progress_mutex,
+      std::mutex* states_mutex)
   {
     bool done = false;
     while (true)
     {
       if (compute_state(lts_builder,
-        queue,
-        progress_monitor,
-        states,
-        number_of_threads,
-        lts_builder_mutex,
-        queue_mutex,
-        progress_mutex,
-        states_mutex))
+              queue,
+              progress_monitor,
+              states,
+              number_of_threads,
+              lts_builder_mutex,
+              queue_mutex,
+              progress_mutex,
+              states_mutex))
       {
         progress_mutex->lock();
         progress_monitor->finish_state(states->size(), queue->size(), *number_of_threads);
@@ -278,7 +299,7 @@ public:
     }
   }
 
-private: 
+private:
   std::vector<lts::lts_lts_t>& lts;
   std::vector<core::identifier_string_list>& syncs;
   std::vector<core::identifier_string>& resulting_actions;
@@ -287,8 +308,7 @@ private:
   std::vector<core::identifier_string_list>& allow;
   std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
 
-  bool compute_state(
-      combined_lts_builder* lts_builder,
+  bool compute_state(lts::lts_builder* lts_builder,
       std::queue<std::size_t>* queue,
       lts::detail::progress_monitor* progress_monitor,
       mcrl2::utilities::indexed_set<std::vector<state_t>>* states,
@@ -306,13 +326,13 @@ private:
     }
 
     // Take the next pair from the queue.
-    //std::cout << "oops" << std::endl;
+    // std::cout << "oops" << std::endl;
     std::size_t state_index = queue->front();
     std::vector<state_t> state = (*states)[state_index];
 
     queue->pop();
     queue_mutex->unlock();
-    //std::cout << "huts" << std::endl;
+    // std::cout << "huts" << std::endl;
 
     // List of new outgoing transitions from this state, combined from the states
     // state[0] to state[i]
@@ -328,7 +348,8 @@ private:
       std::vector<std::pair<lts::action_label_lts, std::vector<state_t>>> new_combos;
 
       // Loop over the outgoing transitions from the old state
-      for (state_t t = outgoing_transitions[i].lowerbound(old_state); t < outgoing_transitions[i].upperbound(old_state); ++t)
+      for (state_t t = outgoing_transitions[i].lowerbound(old_state); t < outgoing_transitions[i].upperbound(old_state);
+           ++t)
       {
         const lts::outgoing_pair_t& transition = outgoing_transitions[i].get_transitions()[t];
         const lts::action_label_lts& label = lts[i].action_label(lts::label(transition));
@@ -353,23 +374,20 @@ private:
             continue;
           }
 
-          if (!is_blocked(blocks, label.actions() + combo.first.actions()))
+          // Copy states from combo to new state list
+          std::vector<state_t> new_states;
+          for (state_t s : combo.second)
           {
-            // Copy states from combo to new state list
-            std::vector<state_t> new_states;
-            for (state_t s : combo.second)
-            {
-              new_states.push_back(s);
-            }
-
-            // Add new state for state i
-            new_states.push_back(lts::to(transition));
-
-            // Create new action label from multi-action of combo and transition t
-            lts::action_label_lts new_label(lps::multi_action(label.actions() + combo.first.actions()));
-
-            new_combos.push_back(std::make_pair(new_label, new_states));
+            new_states.push_back(s);
           }
+
+          // Add new state for state i
+          new_states.push_back(lts::to(transition));
+
+          // Create new action label from multi-action of combo and transition t
+          lts::action_label_lts new_label(lps::multi_action(label.actions() + combo.first.actions()));
+
+          new_combos.push_back(std::make_pair(new_label, new_states));
         }
       }
 
@@ -446,7 +464,6 @@ private:
         progress_monitor->examine_transition();
         progress_mutex->unlock();
 
-        // lts::write_transition(output, state_index, new_label, new_state);
         lts_builder_mutex->lock();
         lts_builder->add_transition(state_index, new_label, new_state, *number_of_threads);
         lts_builder_mutex->unlock();
@@ -482,7 +499,6 @@ private:
         progress_monitor->examine_transition();
         progress_mutex->unlock();
 
-        // lts::write_transition(output, state_index, combo.first, new_state);
         lts_builder_mutex->lock();
         lts_builder->add_transition(state_index, combo.first, new_state, *number_of_threads);
         lts_builder_mutex->unlock();
@@ -495,26 +511,35 @@ private:
 
 // Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
 void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
-  std::vector<core::identifier_string_list>& syncs,
-  std::vector<core::identifier_string>& resulting_actions,
-  std::vector<core::identifier_string>& blocks,
-  std::vector<core::identifier_string>& hiden,
-  std::vector<core::identifier_string_list>& allow,
-  std::string filename, std::size_t nr_of_threads)
+    std::vector<core::identifier_string_list>& syncs,
+    std::vector<core::identifier_string>& resulting_actions,
+    std::vector<core::identifier_string>& blocks,
+    std::vector<core::identifier_string>& hiden,
+    std::vector<core::identifier_string_list>& allow,
+    std::string filename,
+    bool save_at_end,
+    std::size_t nr_of_threads)
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
   for (size_t i = 0; i < lts.size(); i++)
   {
-    outgoing_transitions.push_back(lts::outgoing_transitions_per_state_t(lts[i].get_transitions(), lts[i].num_states(), true));
+    outgoing_transitions.push_back(
+        lts::outgoing_transitions_per_state_t(lts[i].get_transitions(), lts[i].num_states(), true));
   }
 
   // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).
   mcrl2::utilities::indexed_set<std::vector<state_t>> states;
   std::vector<state_t> initial_states;
+  process::action_label_list action_decls;
+  data::data_specification data_spec;
+  data::variable_list proc_params;
   for (auto& lts : lts)
   {
     initial_states.push_back(lts.initial_state());
+    action_decls = process::merge_action_specifications(action_decls, lts.action_label_declarations());
+    data_spec = data::merge_data_specifications(data_spec, lts.data());
+    proc_params = proc_params + lts.process_parameters();
   }
   const auto [initial, found] = states.insert(initial_states);
 
@@ -525,26 +550,34 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   // Progress monitor.
   lts::detail::progress_monitor progress_monitor(lps::exploration_strategy::es_breadth);
 
-  // Start writing the LTS.
-  //atermpp::binary_aterm_ostream output(stream);
-  //lts::write_lts_header(output, lts[0].data(), lts[0].process_parameters(), lts[0].action_label_declarations());
-
-  combined_lts_builder lts_builder(lts[0].data(), lts[0].action_label_declarations(), lts[0].process_parameters());
+  combined_lts_builder* combined_lts_builder;
+  lts::lts_builder* lts_builder;
+  if (save_at_end)
+  {
+    combined_lts_lts_builder* lts_lts_builder = new combined_lts_lts_builder(data_spec, action_decls, proc_params);
+    lts_builder = lts_lts_builder;
+    combined_lts_builder = lts_lts_builder;
+  }
+  else
+  {
+    combined_lts_disk_builder* lts_disk_builder
+        = new combined_lts_disk_builder(filename, data_spec, action_decls, proc_params);
+    lts_builder = lts_disk_builder;
+    combined_lts_builder = lts_disk_builder;
+  }
 
   std::mutex builder_mutex;
   std::mutex queue_mutex;
   std::mutex progress_mutex;
   std::mutex states_mutex;
 
-  //int nr_states = 0;
-  auto start_time = std::chrono::high_resolution_clock::now();
   std::vector<std::thread> threads;
 
   for (size_t i = 0; i < nr_of_threads; i++)
   {
     state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow, outgoing_transitions);
     threads.emplace_back(std::thread(thread,
-        &lts_builder,
+        lts_builder,
         &queue,
         &progress_monitor,
         &states,
@@ -560,16 +593,10 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
     threads[i].join();
   }
 
-  auto stop_time = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop_time - start_time);
-
-  //std::cout << "Avg state computation time: " << duration.count() / nr_states << std::endl;
-  std::cout << "Total duration: " << duration.count() << std::endl;
-
   progress_monitor.finish_exploration(states.size(), nr_of_threads);
 
   // Write the initial state and the state labels.
-  //lts::write_initial_state(output, 0);
-  lts_builder.finalize(states.size());
-  lts_builder.save(filename);
+  combined_lts_builder->finalize(states.size());
+  lts_builder->save(filename);
+  delete lts_builder;
 }

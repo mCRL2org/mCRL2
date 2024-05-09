@@ -7,36 +7,36 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <iostream>
-#include <fstream>
-#include <string>
 #include "mcrl2/atermpp/aterm_list.h"
+#include <fstream>
+#include <iostream>
+#include <string>
 
 #include "lts_combine.h"
 
-#include "mcrl2/utilities/xinput_output_tool.h"
 #include "mcrl2/utilities/parallel_tool.h"
+#include "mcrl2/utilities/xinput_output_tool.h"
 
 namespace mcrl2
 {
 
 using log::log_level_t;
-using mcrl2::utilities::tools::xinput_output_tool;
 using mcrl2::utilities::tools::parallel_tool;
+using mcrl2::utilities::tools::xinput_output_tool;
 
 class ltscombine_tool : public parallel_tool<xinput_output_tool>
 {
   typedef parallel_tool<xinput_output_tool> super;
 
 public:
-  ltscombine_tool() : super(
-      "ltscombine",
-      "Willem Rietdijk",
-      "Combines LTSs",
-      "Combines multiple labelled transition systems (LTS)"
-      "in the INFILES and writes the resulting LTS to OUTFILE."
-      "Communication, blocking, allowing and hiding are applied"
-      "afterwards in that order.")
+  ltscombine_tool()
+      : super("ltscombine",
+          "Willem Rietdijk",
+          "Combines LTSs",
+          "Combines multiple labelled transition systems (LTS)"
+          "in the INFILES and writes the resulting LTS to OUTFILE."
+          "Communication, blocking, allowing and hiding are applied"
+          "afterwards in that order.")
   {
     min_input_files = 2;
     max_input_files = 0;
@@ -55,7 +55,7 @@ public:
     }
 
     // Generate and output resulting LTS
-    combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, output_filename(), number_of_threads());
+    combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, output_filename(), save_at_end, nr_of_threads);
 
     return true;
   }
@@ -85,11 +85,17 @@ protected:
         "The file containing the list of"
         "synchronising actions.",
         'c');
+    desc.add_option("save-at-end",
+        "delay saving of the generated LTS until the end. "
+        "This option only applies to .aut and .lts files, which are by default saved on the fly.");
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
   {
     super::parse_options(parser);
+
+    save_at_end = parser.has_option("save-at-end");
+    nr_of_threads = number_of_threads();
 
     if (parser.options.count("comm") > 0)
     {
@@ -126,7 +132,7 @@ protected:
         }
 
         // Find ->, which signals the resulting action
-        delim = line.find('-', prev_delim+1);
+        delim = line.find('-', prev_delim + 1);
         if (delim != std::string::npos && line[delim + 1] == '>')
         {
           // Add last action of multi-action to list
@@ -137,11 +143,15 @@ protected:
           if (labels.size() < 2)
           {
             // Syntax error, communication must contain two or more action labels
-            mCRL2log(log::error) << "Syntax error in communications, left hand size must contain two or more action labels: '" << line << "'." << std::endl;
+            mCRL2log(log::error)
+                << "Syntax error in communications, left hand size must contain two or more action labels: '" << line
+                << "'." << std::endl;
             throw mcrl2::runtime_error("Could not parse file " + filename + ".");
           }
 
-          std::sort(labels.begin(), labels.end(), [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
+          std::sort(labels.begin(),
+              labels.end(),
+              [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
           syncs.push_back(core::identifier_string_list::term_list(labels.begin(), labels.end()));
 
           // Add multi-action and resulting action to list of sychronisations
@@ -231,7 +241,9 @@ protected:
         trim(label);
         labels.push_back(label);
 
-        std::sort(labels.begin(), labels.end(), [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
+        std::sort(labels.begin(),
+            labels.end(),
+            [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
 
         // Add multi-action to the list of allowed actions
         allow.push_back(core::identifier_string_list::term_list(labels.begin(), labels.end()));
@@ -261,7 +273,7 @@ protected:
           mCRL2log(log::error) << "List of hide action contains multi-action '" << action_label << "'." << std::endl;
           throw mcrl2::runtime_error("Could not parse file " + filename + ".");
         }
-        
+
         // Trim action and add to list of hiden actions
         trim(action_label);
         hiden.push_back(action_label);
@@ -295,6 +307,8 @@ private:
   std::vector<core::identifier_string_list> syncs;
   std::vector<core::identifier_string> resulting_actions;
 
+  bool save_at_end;
+  std::size_t nr_of_threads;
 };
 
 } // namespace mcrl2

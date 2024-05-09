@@ -18,14 +18,15 @@ namespace mcrl2
 
 // Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
 // The input LTSs are modified during the process.
-void combine_lts(
-  std::vector<lts::lts_lts_t>& ltss,
-  std::vector<core::identifier_string_list>& syncs,
-  std::vector<core::identifier_string>& resulting_actions,
-  std::vector<core::identifier_string>& blocks,
-  std::vector<core::identifier_string>& hiden,
-  std::vector<core::identifier_string_list>& allow, 
-  std::string filename, std::size_t nr_of_threads = 1);
-}
+void combine_lts(std::vector<lts::lts_lts_t>& ltss,
+    std::vector<core::identifier_string_list>& syncs,
+    std::vector<core::identifier_string>& resulting_actions,
+    std::vector<core::identifier_string>& blocks,
+    std::vector<core::identifier_string>& hiden,
+    std::vector<core::identifier_string_list>& allow,
+    std::string filename,
+    bool save_at_end,
+    std::size_t nr_of_threads = 1);
+} // namespace mcrl2
 
 #endif // MCRL2_LTS_COMBINE_H_
