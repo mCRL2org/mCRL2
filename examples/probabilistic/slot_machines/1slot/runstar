@@ -1,0 +1,3 @@
+mcrl22lps 1slot_spec.mcrl2 -v scratch/temp.lps &&
+lps2pres -v scratch/temp.lps -fexpected_time_to_star.mcf scratch/temp.pres &&
+pressolve -ag scratch/temp.pres -d 

@@ -300,7 +300,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         try
         {
           // Try to read a linear specification
-          mcrl2::lps::specification p;
+          mcrl2::lps::stochastic_specification p;
           load_lps(p, input_filename());
           context_variables = p.global_variables();
           return p.data();

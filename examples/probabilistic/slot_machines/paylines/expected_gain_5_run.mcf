@@ -1,0 +1,2 @@
+form sup n:Nat.<display(n)>val(n-5);
+

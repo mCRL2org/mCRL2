@@ -21,6 +21,7 @@ namespace pres_system {
 
 constexpr inline int precedence(const infimum&)  { return 21; }
 constexpr inline int precedence(const supremum&) { return 21; }
+constexpr inline int precedence(const sum&)      { return 21; }
 constexpr inline int precedence(const plus&)     { return 22; }
 constexpr inline int precedence(const imp&)      { return 23; }
 constexpr inline int precedence(const or_&)      { return 24; }
@@ -30,12 +31,13 @@ constexpr inline int precedence(const const_multiply&) { return 26; }
 constexpr inline int precedence(const const_multiply_alt&) { return 26; }
 inline int precedence(const pres_expression& x)
 {
-  if      (is_infimum(x))            { return precedence(atermpp::down_cast<infimum>(x)); }
-  else if (is_supremum(x))            { return precedence(atermpp::down_cast<supremum>(x)); }
+  if      (is_infimum(x))           { return precedence(atermpp::down_cast<infimum>(x)); }
+  else if (is_supremum(x))          { return precedence(atermpp::down_cast<supremum>(x)); }
+  else if (is_sum(x))               { return precedence(atermpp::down_cast<sum>(x)); }
   else if (is_imp(x))               { return precedence(atermpp::down_cast<imp>(x)); }
   else if (is_or(x))                { return precedence(atermpp::down_cast<or_>(x)); }
   else if (is_and(x))               { return precedence(atermpp::down_cast<and_>(x)); }
-  else if (is_plus(x))               { return precedence(atermpp::down_cast<plus>(x)); }
+  else if (is_plus(x))              { return precedence(atermpp::down_cast<plus>(x)); }
   else if (is_const_multiply(x))    { return precedence(atermpp::down_cast<const_multiply>(x)); }
   else if (is_const_multiply_alt(x)){ return precedence(atermpp::down_cast<const_multiply_alt>(x)); }
   else if (is_minus(x))             { return precedence(atermpp::down_cast<minus>(x)); }

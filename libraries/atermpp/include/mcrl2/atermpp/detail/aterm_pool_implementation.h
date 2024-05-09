@@ -387,6 +387,7 @@ void aterm_pool::resize_if_needed(mcrl2::utilities::shared_mutex& mutex)
 
   auto timestamp = std::chrono::system_clock::now();
   std::size_t old_capacity = capacity();
+  std::size_t old_symbols_capacity = m_function_symbol_pool.capacity();
 
   // Attempt to resize all storages.
   m_function_symbol_pool.resize_if_needed();
@@ -405,7 +406,7 @@ void aterm_pool::resize_if_needed(mcrl2::utilities::shared_mutex& mutex)
   // Attempt to resize ever so often.
   m_count_until_resize = 10000;
 
-  if (EnableGarbageCollectionMetrics && old_capacity != capacity())
+  if (EnableGarbageCollectionMetrics && (old_capacity != capacity() || old_symbols_capacity != m_function_symbol_pool.capacity()))
   {
     // Only print if a resize actually took place.
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();

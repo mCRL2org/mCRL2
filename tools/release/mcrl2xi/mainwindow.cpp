@@ -74,7 +74,7 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
   connect(m_ui.documentManager, SIGNAL(documentCreated(DocumentWidget*)), this, SLOT(formatDocument(DocumentWidget*)));
   connect(m_ui.documentManager, SIGNAL(documentChanged(DocumentWidget*)), this, SLOT(changeDocument(DocumentWidget*)));
 
-  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
+  connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QDateTime, QString, QString)));
 
   m_state = saveState();
   QSettings settings("mCRL2", "mCRL2xi");
@@ -84,7 +84,6 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
   m_ui.actionRewriter->setChecked(!m_ui.dockRewriter->isHidden());
   m_ui.actionSolver->setChecked(!m_ui.dockSolver->isHidden());
   m_ui.actionOutput->setChecked(!m_ui.dockOutput->isHidden());
-
 }
 
 bool MainWindow::saveDocument()
@@ -96,11 +95,13 @@ bool MainWindow::saveDocument(int index)
 {
   DocumentWidget* document = m_ui.documentManager->getDocument(index);
   QString fileName = document->getFileName();
-  if (fileName.isNull()) {
+  if (fileName.isNull()) 
+  {
     fileName = m_fileDialog.getSaveFileName(tr("Save file"),
                                             tr("mCRL2 specification (*.mcrl2 *.txt )"));
   }
-  if (!fileName.isNull()) {
+  if (!fileName.isNull()) 
+  {
     m_ui.documentManager->saveFile(index, fileName);
     m_ui.statusBar->showMessage(QString("Saved %1.").arg(fileName), 5000);
     return true;
@@ -110,7 +111,8 @@ bool MainWindow::saveDocument(int index)
 
 void MainWindow::openDocument(QString fileName)
 {
-  if (!fileName.isNull()) {
+  if (!fileName.isNull()) 
+  {
     m_ui.documentManager->openFile(fileName);
   }
 }
@@ -190,7 +192,7 @@ bool MainWindow::onCloseRequest(int index)
   return true;
 }
 
-void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString message, QString /*formattedMessage*/)
+void MainWindow::onLogOutput(QString /*level*/, QDateTime /*timestamp*/, QString message, QString /*formattedMessage*/)
 {
   findErrorPosition(message);
   m_ui.statusBar->showMessage(message, 5000);

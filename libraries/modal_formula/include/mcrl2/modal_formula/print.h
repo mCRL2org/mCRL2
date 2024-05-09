@@ -301,6 +301,7 @@ constexpr inline int precedence(const forall&)             { return 42; }
 constexpr inline int precedence(const exists&)             { return 42; }
 constexpr inline int precedence(const infimum&)            { return 42; }
 constexpr inline int precedence(const supremum&)           { return 42; }
+constexpr inline int precedence(const sum&)                { return 42; }
 constexpr inline int precedence(const imp&)                { return 45; }
 constexpr inline int precedence(const or_&)                { return 46; }
 constexpr inline int precedence(const and_&)               { return 47; }
@@ -310,6 +311,7 @@ constexpr inline int precedence(const const_multiply_alt&) { return 44; }
 constexpr inline int precedence(const must&)               { return 48; }
 constexpr inline int precedence(const may&)                { return 48; }
 constexpr inline int precedence(const not_&)               { return 50; }
+constexpr inline int precedence(const minus&)              { return 50; }
 inline int precedence(const state_formula& x)
 {
   if      (is_mu(x))                 { return precedence(atermpp::down_cast<mu>(x)); }
@@ -318,6 +320,7 @@ inline int precedence(const state_formula& x)
   else if (is_exists(x))             { return precedence(atermpp::down_cast<exists>(x)); }
   else if (is_infimum(x))            { return precedence(atermpp::down_cast<infimum>(x)); }
   else if (is_supremum(x))           { return precedence(atermpp::down_cast<supremum>(x)); }
+  else if (is_sum(x))                { return precedence(atermpp::down_cast<sum>(x)); }
   else if (is_imp(x))                { return precedence(atermpp::down_cast<imp>(x)); }
   else if (is_or(x))                 { return precedence(atermpp::down_cast<or_>(x)); }
   else if (is_and(x))                { return precedence(atermpp::down_cast<and_>(x)); }
@@ -327,6 +330,7 @@ inline int precedence(const state_formula& x)
   else if (is_must(x))               { return precedence(atermpp::down_cast<must>(x)); }
   else if (is_may(x))                { return precedence(atermpp::down_cast<may>(x)); }
   else if (is_not(x))                { return precedence(atermpp::down_cast<not_>(x)); }
+  else if (is_minus(x))                { return precedence(atermpp::down_cast<minus>(x)); }
   return core::detail::max_precedence;
 }
 
@@ -478,7 +482,9 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   void apply(const state_formulas::const_multiply& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " * ");
+    derived().apply(x.left());
+    derived().print("*"); 
+    derived().apply(x.right());
     derived().leave(x);
   }
 
@@ -488,7 +494,6 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().apply(x.left());
     derived().print("*"); 
     derived().apply(x.right());
-    // print_expression(x.right(), false);
     derived().leave(x);
   }
 
@@ -517,6 +522,13 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   {
     derived().enter(x);
     print_abstraction(x, "sup");
+    derived().leave(x);
+  }
+
+  void apply(const state_formulas::sum& x)
+  {
+    derived().enter(x);
+    print_abstraction(x, "sum");
     derived().leave(x);
   }
 

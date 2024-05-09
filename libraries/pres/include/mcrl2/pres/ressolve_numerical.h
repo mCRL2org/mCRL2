@@ -39,9 +39,21 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
   }
   else if (is_plus(p))
   {
+    // Take care that inf + -inf and -inf + inf yield inf. 
+    // Floating points arithmetic gives nan, which is incorrect. 
     const plus& pp = atermpp::down_cast<plus>(p);
     {
-      return evaluate(pp.left(), solution) + evaluate(pp.right(), solution);
+      double left=evaluate(pp.left(), solution);
+      if (std::isinf(left))
+      {
+        return left;
+      }
+      double right=evaluate(pp.right(), solution);
+      if (std::isinf(right))
+      {
+        return right;
+      }
+      return left+right;
     }
   }
   else if (is_true(p))
@@ -76,6 +88,10 @@ double evaluate(const pres_expression& p, const std::unordered_map<core::identif
     else 
     {
       r=i->second;
+    }
+    if (r==0.0)
+    {
+      return r;
     }
     return r * evaluate(pp.right(), solution);
   }
@@ -179,24 +195,17 @@ class ressolve_by_numerical_iteration
 
     data::rewriter construct_rewriter(const pres& presspec)
     {
-      if (m_options.remove_unused_rewrite_rules)
-      {
-        std::set<data::function_symbol> used_functions = pres_system::find_function_symbols(presspec);
-        used_functions.insert(data::less(data::sort_real::real_()));
-        used_functions.insert(data::sort_real::divides(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::times(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::plus(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::minus(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::minimum(data::sort_real::real_(),data::sort_real::real_()));
-        used_functions.insert(data::sort_real::maximum(data::sort_real::real_(),data::sort_real::real_()));
-        return data::rewriter(presspec.data(),
-                              data::used_data_equation_selector(presspec.data(), used_functions, presspec.global_variables()),
-                              m_options.rewrite_strategy);
-      }
-      else
-      {
-        return data::rewriter(presspec.data(), m_options.rewrite_strategy);
-      }
+      std::set<data::function_symbol> used_functions = pres_system::find_function_symbols(presspec);
+      used_functions.insert(data::less(data::sort_real::real_()));
+      used_functions.insert(data::sort_real::divides(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::times(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::plus(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::minus(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::minimum(data::sort_real::real_(),data::sort_real::real_()));
+      used_functions.insert(data::sort_real::maximum(data::sort_real::real_(),data::sort_real::real_()));
+      return data::rewriter(presspec.data(),
+                            data::used_data_equation_selector(presspec.data(), used_functions, presspec.global_variables(), !m_options.remove_unused_rewrite_rules),
+                            m_options.rewrite_strategy);
     } 
 
 

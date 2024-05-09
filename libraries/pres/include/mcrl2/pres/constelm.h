@@ -219,6 +219,11 @@ struct edge_condition_traverser: public pres_expression_traverser<edge_condition
     quantified_context.push_back(x);
   }
 
+  void enter(const sum& x)
+  {
+    quantified_context.push_back(x);
+  }
+
   // leave functions, mostly used to build conditions and gather free variables
   void leave(const data::data_expression& x)
   {
@@ -355,6 +360,11 @@ struct edge_condition_traverser: public pres_expression_traverser<edge_condition
     {
       quantified_context.pop_back();
     }
+  }
+
+  void leave(const sum& )
+  {
+std::cerr << "MUST STILL BE DONE\n";
   }
 
   void leave(const propositional_variable_instantiation& x)

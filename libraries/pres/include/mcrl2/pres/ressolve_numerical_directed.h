@@ -241,7 +241,19 @@ double evaluate_directed(const internal_res_expression* p, const std::vector<dou
     }
     case internal_res_expression_type::plus:
     {
-      return evaluate_directed(p->left(), solution) + evaluate_directed(p->right(), solution);
+      // Take care that inf + -inf and -inf + inf yield inf. 
+      // Floating points arithmetic gives nan, which is incorrect. 
+      double left=evaluate_directed(p->left(), solution);
+      if (std::isinf(left))
+      {
+        return left;
+      }
+      double right=evaluate_directed(p->right(), solution);
+      if (std::isinf(right))
+      {
+        return right;
+      }
+      return left+right;
     }
     case internal_res_expression_type::and_:
     {
@@ -256,6 +268,8 @@ double evaluate_directed(const internal_res_expression* p, const std::vector<dou
       return p->value() * evaluate_directed(p->right(), solution);
     }
   }
+  assert(0);
+  return 0;
 }
 
 } // namespace detail
@@ -487,8 +501,6 @@ class ressolve_by_numerical_iteration_directed
        variable_occurrences(m_input_pres.equations().size()),
        m_new_solution(m_input_pres.equations().size()),
        m_previous_solution(m_input_pres.equations().size())
-       // m_datar(construct_rewriter(input_pres)),
-       // m_R(m_datar,input_pres.data())
     {}
 
     double run()

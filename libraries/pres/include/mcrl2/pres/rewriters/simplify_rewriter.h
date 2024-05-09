@@ -62,7 +62,6 @@ protected:
         return;
       }
       assert(d.sort()==data::sort_bool::bool_());
-      // return result
       return;
     }
 
@@ -72,9 +71,9 @@ protected:
       apply(result, const_multiply(data::sort_real::times(f, cm.left()), cm.right()));
       return;
     }
-    if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
+    if ((is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result)) &&
+        data::sort_real::is_larger_zero(f))
     {
-      // return result.
       return;
     }
 
@@ -304,6 +303,14 @@ public:
   }
 
   template <class T>
+  void apply(T& result, const sum& x)
+  {
+    pres_expression body;
+    apply(body, x.body());
+    make_sum(result, x.variables(), result);
+  }
+
+  template <class T>
   void apply(T& result, const const_multiply& x)
   {
     const_multiply_helper(result, x.left(), x.right());
@@ -313,14 +320,6 @@ public:
   void apply(T& result, const const_multiply_alt& x)
   {
     const_multiply_helper(result, x.right(), x.left());
-  }
-
-  template <class T>
-  void apply(T& result, const sum& x)
-  {
-    pres_expression body;
-    apply(body, x.body());
-    make_sum(result, x.variables(), result);
   }
 
   template <class T>
@@ -620,11 +619,14 @@ protected:
       data::data_expression data_result1;
       const const_multiply& result_cm=atermpp::down_cast<const_multiply>(result);
       apply(data_result1, data::sort_real::times(data_result, result_cm.left()));
-
       assert(!data::sort_real::is_zero(data_result1));
       if (!data::sort_real::is_one(data_result1))
       {
         make_const_multiply(result, data_result1, result_cm.right());
+      }
+      else 
+      {
+        result = result_cm.right();
       }
       return;
     }
@@ -647,19 +649,17 @@ protected:
 
         return;
       }
-      else 
+      else if (data::sort_real::is_larger_zero(data_result))
       {
         assert(d.sort()==data::sort_bool::bool_());
-        // return result;
         return;
       }
     }
     if (is_true(result) || is_false(result) || is_eqinf(result) || is_eqninf(result))
     {
-      if (data::sort_real::is_creal_application(data_result) && !data::sort_real::is_zero(data_result))
+      if (data::sort_real::is_larger_zero(data_result))
       {
         assert(data::sort_real::value(data_result)>0);
-        // return result.
         return;
       }
       make_const_multiply(result, data_result, result);

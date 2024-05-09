@@ -1,0 +1,24 @@
+sort Symbol = struct star | grapes | orange;
+
+map distribution: Bool#Symbol#Symbol->Real;
+
+var b: Bool;
+    r, s: Symbol;
+eqn distribution(b, r, s) = if(b, if(r==s, 1, 0), 1/3);
+
+act win, lose;
+    display:Symbol#Symbol#Symbol;
+    hold:Bool#Bool#Bool;
+
+proc Play(hold1, hold2, hold3:Bool, r1, r2, r3: Symbol) =
+       dist s1,s2,s3:Symbol[distribution(hold1, r1, s1)*
+                            distribution(hold2, r2, s2)*
+                            distribution(hold3, r3, s3)].
+       display(s1,s2,s3).
+       (s1==s2 && s2==s3) 
+          -> win.Play(false, false, false,s1,s2,s3)
+          <> ( lose.
+               sum b1, b2, b3: Bool.
+               hold(b1,b2,b3).Play(b1, b2, b3, s1, s2, s3));
+
+init Play(false, false, false, star, star, star);

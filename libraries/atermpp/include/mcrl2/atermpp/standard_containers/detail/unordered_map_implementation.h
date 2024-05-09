@@ -16,6 +16,7 @@
 
 #include "mcrl2/atermpp/standard_containers/unordered_map.h"
 #include "mcrl2/atermpp/detail/thread_aterm_pool.h"
+#include "mcrl2/utilities/shared_mutex.h"
 
 namespace atermpp
 {
@@ -270,11 +271,11 @@ namespace atermpp::utilities {
   inline void unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::rehash_if_needed()
   {
     // These functions are not thread safe.
-    mcrl2::utilities::lock_guard guard = detail::g_thread_term_pool().lock();
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     std::size_t count = super::bucket_count();
     if (super::load_factor() >= super::max_load_factor())
     {
-      guard.unlock();
+      guard.unlock_shared();
       rehash(count* 2);
     }
   }

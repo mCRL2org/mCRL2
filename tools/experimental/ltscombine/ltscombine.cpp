@@ -7,15 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/atermpp/aterm_list.h"
-#include <fstream>
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include "lts_combine.h"
 
-#include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/xinput_output_tool.h"
+#include "mcrl2/utilities/parallel_tool.h"
 
 namespace mcrl2
 {
@@ -33,9 +32,9 @@ public:
       : super("ltscombine",
           "Willem Rietdijk",
           "Combines LTSs",
-          "Combines multiple labelled transition systems (LTS)"
-          "in the INFILES and writes the resulting LTS to OUTFILE."
-          "Communication, blocking, allowing and hiding are applied"
+          "Combines multiple labelled transition systems (LTS) "
+          "in the INFILES and writes the resulting LTS to OUTFILE. "
+          "Communication, blocking, allowing and hiding are applied "
           "afterwards in that order.")
   {
     min_input_files = 2;
@@ -67,7 +66,7 @@ protected:
 
     desc.add_option("allow",
         utilities::make_file_argument("FILE"),
-        "The file containing the list of"
+        "The file containing the list of "
         "allowed multi-actions.",
         'a');
     desc.add_option("block",
@@ -82,7 +81,7 @@ protected:
         't');
     desc.add_option("comm",
         utilities::make_file_argument("FILE"),
-        "The file containing the list of"
+        "The file containing the list of "
         "synchronising actions.",
         'c');
     desc.add_option("save-at-end",
@@ -254,7 +253,7 @@ protected:
     {
       std::string filename = parser.option_argument("hide");
       std::stringstream stringstream(filename);
-      mCRL2log(log::debug) << "Reading hiden actions from file " << filename << std::endl;
+      mCRL2log(log::debug) << "Reading hidden actions from file " << filename << std::endl;
       std::ifstream file_input(filename.c_str());
       std::istream* hide_input = &file_input;
       if (!file_input.good())
@@ -270,7 +269,7 @@ protected:
         if (action_label.find('|') != std::string::npos)
         {
           // Syntax error, multi-actions cannot be hiden
-          mCRL2log(log::error) << "List of hide action contains multi-action '" << action_label << "'." << std::endl;
+          mCRL2log(log::error) << "List of hide actions contains multi-action '" << action_label << "'." << std::endl;
           throw mcrl2::runtime_error("Could not parse file " + filename + ".");
         }
 

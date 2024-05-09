@@ -174,6 +174,9 @@ public:
   {
     if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
     {
+      // Shared and exclusive sections MUST be disjoint.
+      assert(!m_busy_flag);
+      
       // Only one thread can halt everything.
       m_shared->mutex.lock();
 

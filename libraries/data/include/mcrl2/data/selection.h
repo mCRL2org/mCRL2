@@ -164,8 +164,9 @@ class used_data_equation_selector
 
     used_data_equation_selector(const data_specification& specification,
                                 const std::set<function_symbol>& function_symbols,
-                                const std::set<data::variable>& global_variables
-                               ):add_all(false)
+                                const std::set<data::variable>& global_variables,
+                                const bool do_not_remove_function_symbols
+                               ):add_all(do_not_remove_function_symbols)
     {
       // Compensate for symbols that could be used as part of an instantiation of free variables
       for (const variable& global_variable: global_variables)

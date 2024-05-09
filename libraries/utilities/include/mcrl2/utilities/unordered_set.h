@@ -317,7 +317,7 @@ public:
   const_local_iterator cend(size_type n) const { return m_buckets[n].end(); }
 
   /// \returns The number of buckets.
-  size_type bucket_count() const noexcept { return m_buckets.size(); }
+  size_type bucket_count() const noexcept { return m_buckets_mask + 1; }
   size_type max_bucket_count() const noexcept { return m_buckets.max_size(); }
 
   size_type bucket_size(size_type n) const noexcept { return std::distance(m_buckets[n].begin(), m_buckets[n].end()); }
@@ -372,7 +372,7 @@ private:
   std::conditional_t<ThreadSafe, std::atomic<size_type>, size_type> m_number_of_elements = 0;
 
   /// \brief Always equal to m_buckets.size() - 1.
-  size_type m_buckets_mask;
+  std::conditional_t<ThreadSafe, std::atomic<size_type>, size_type> m_buckets_mask = 0;
 
   std::vector<bucket_type> m_buckets;
   std::vector<std::mutex> m_bucket_mutexes;

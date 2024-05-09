@@ -1,0 +1,3 @@
+form mu X.sup s1,s2,s3:Symbol.<display(s1,s2,s3)>
+           ((val(s1==s2 && s2==s3) && val(1)) || 
+            (val(s1!=s2 || s2!=s3) && <true>(X+val(1))) || val(0));

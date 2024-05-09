@@ -46,7 +46,7 @@ struct one_point_rule_rewrite_builder: public pres_system::pres_expression_build
   void apply(T& result, const infimum& x)
   {
     pres_expression body;
-    derived().apply(body, infimum(x).body());
+    derived().apply(body, x.body());
 
     std::map<data::variable, std::set<data::data_expression> > inequalities = find_inequalities(body);
     mCRL2log(log::debug) << "x = " << x << std::endl;
@@ -80,7 +80,7 @@ struct one_point_rule_rewrite_builder: public pres_system::pres_expression_build
   void apply(T& result, const supremum& x)
   {
     pres_expression body;
-    derived().apply(body, supremum(x).body());
+    derived().apply(body, x.body());
 
     std::map<data::variable, std::set<data::data_expression> > equalities = find_equalities(body);
     mCRL2log(log::debug) << "x = " << body << "\nequalities(x) = " << data::print_inequalities(equalities) << std::endl;
@@ -107,6 +107,39 @@ struct one_point_rule_rewrite_builder: public pres_system::pres_expression_build
       }
     }
     make_supremum(result, x.variables(), body);
+  }
+
+  template <class T>
+  void apply(T& result, const sum& x)
+  {
+    pres_expression body;
+    derived().apply(body, x.body());
+
+    std::map<data::variable, std::set<data::data_expression> > equalities = find_equalities(body);
+    mCRL2log(log::debug) << "x = " << body << "\nequalities(x) = " << data::print_inequalities(equalities) << std::endl;
+    if (!equalities.empty())
+    {
+      auto p = data::make_one_point_rule_substitution(equalities, x.variables());
+      data::mutable_map_substitution<>& sigma = p.first;
+      const std::vector<data::variable>& remaining_variables = p.second;
+      if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
+      {
+        mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
+        body = pres_system::replace_variables_capture_avoiding(body, sigma);
+        mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
+        if (remaining_variables.empty())
+        {
+          mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
+          result = body;
+          return;
+        }
+        data::variable_list v(remaining_variables.begin(), remaining_variables.end());
+        mCRL2log(log::debug) << "Replaced " << x << "\nwith " << sum(v, body) << std::endl;
+        make_sum(result, v, body);
+        return;
+      }
+    }
+    make_sum(result, x.variables(), body);
   }
 
   // TODO: This case was added to prevent a data not to be transformed into a PRES not.

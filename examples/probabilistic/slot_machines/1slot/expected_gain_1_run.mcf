@@ -1,0 +1,4 @@
+%form inf s:Symbol.<display(s)>(<win>val(1) || val(0));
+form <true>(<win>val(1) || val(0));
+%form <true*>(<win>val(1) || val(0));
+

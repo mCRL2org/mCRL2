@@ -1,0 +1,58 @@
+sort Symbol = struct orange | grapes | pear | melon | blueberry | strawberry | bell | seven | star;
+     Reel = List(Symbol);
+
+map  N: Pos;
+     r1, r2, r3, r4: Reel;
+     get1, get2, get3, get4: Nat -> Symbol;
+
+var  i: Nat;
+eqn  r1 = [orange,orange,star,  orange,grapes,grapes,pear,pear,pear,pear, melon,melon,blueberry,blueberry,blueberry,blueberry, strawberry,strawberry,bell,bell,bell,bell, seven,seven];
+     r2 = [orange,orange,orange,grapes,orange,grapes,pear,star,pear,melon,pear, melon,blueberry,blueberry,blueberry,strawberry,blueberry, strawberry,bell,bell,bell,seven,bell, seven];
+     r3 = [orange,orange,orange,orange,grapes,grapes,pear,pear,pear,pear, melon,melon,blueberry,blueberry,star,     blueberry, strawberry,strawberry,bell,bell,bell,bell, seven,seven];
+     r4 = [orange,orange,orange,orange,grapes,grapes,pear,pear,pear,pear, melon,melon,blueberry,blueberry,blueberry,blueberry, strawberry,strawberry,bell,bell,star,bell,seven, seven];
+     N=Nat2Pos(#r1);
+     distribution(i) = if(i<N, 1/N, 0);
+     get1(i)=r1.(i mod N);
+     get2(i)=r2.(i mod N);
+     get3(i)=r3.(i mod N);
+     get4(i)=r4.(i mod N);
+
+map  distribution: Nat -> Real;
+     price: Nat#Symbol#Symbol#Symbol -> Nat;
+     reward: Nat#Nat#Nat#Nat -> Nat;
+var  n, i1, i2, i3, i4: Nat;
+     s1, s2, s3: Symbol;
+eqn  price(n, s1,s2,s3)=if(s1==s2 && s2==s3, 
+                           if(s1==star, 200,
+                           if(s1 in { seven, melon, grapes, strawberry }, 80,
+                           if(s1 in { bell, pear, blueberry, orange }, 40, 0))),
+                        if(n==1, 
+                           if(s1==star && s2==orange && s3==orange, 40,
+                           if(s1==pear && s2==star && s3==pear, 40,
+                           if(s1==blueberry && s2==blueberry && s3==star, 40, 0))),
+                        if(s1==star && s2==pear && s3==pear, 40,
+                        if(s1==blueberry && s2==star && s3==blueberry, 40,
+                        if(s1==bell && s2==bell && s3==star, 40, 0)))));
+
+     reward(i1,i2,i3,i4) = price(1, get1(i1+1), get2(i2+1), get3(i3+1)) +        %line  1
+                           price(1, get1(i1+2), get2(i2+2), get3(i3+2)) +        %line  2
+                           price(1, get1(i1), get2(i2), get3(i3)) +              %line  3
+                           price(1, get1(i1), get2(i2+1), get3(i3+2)) +          %line  4
+                           price(1, get1(i1+2), get2(i2+1), get3(i3)) +          %line  5
+                           price(2, get2(i2+1), get3(i3+1), get4(i4+1)) +        %line  6
+                           price(2, get2(i2+2), get3(i3+2), get4(i4+2)) +        %line  7
+                           price(2, get2(i2), get3(i3), get4(i4)) +              %line  8
+                           price(2, get2(i2), get3(i3+1), get4(i4+2)) +          %line  9
+                           price(2, get2(i2+2), get3(i3+1), get4(i4));           %line 10
+
+act  display: Nat;
+
+proc Play =
+    %distributions for each column
+    dist i1,i2,i3,i4: Nat[distribution(i1)*distribution(i2)*distribution(i3)*distribution(i4)].
+
+    %number of points
+    display(reward(i1,i2,i3,i4)).delta;
+
+init Play;
+

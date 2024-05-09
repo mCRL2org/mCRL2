@@ -134,54 +134,11 @@ struct add_simplify_quantifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const sum& x)
   {
-std::cerr << "WARNING. REWRITING THE SUM IN PRESs does not work correctly here.\n";
     pres_expression body;
     super::apply(body, x.body());
     const data::variable_list& variables = x.variables();
-    
-    /*if (variables.empty())
-    {
-      result = false_();
-    }
-    else if (is_minus(body))
-    {
-      data::optimized_sum(result, variables, atermpp::down_cast<minus>(body).operand(), true);
-      data::optimized_not(result, result);
-    }
-    if (is_or(body))
-    {
-      auto const& left = atermpp::down_cast<or_>(body).left();
-      auto const& right = atermpp::down_cast<or_>(body).right();
-      data::optimized_sum(result, variables, left, true);
-      pres_expression result_right;
-      data::optimized_sum(result_right, variables, right, true);
-      data::optimized_or(result, result, result_right);
-    }
-    else if (is_and(body))
-    {
-      auto const& left = atermpp::down_cast<and_>(body).left();
-      auto const& right = atermpp::down_cast<and_>(body).right();
-      data::variable_list lv = data::detail::set_intersection(variables, free_variables(left));
-      data::variable_list rv = data::detail::set_intersection(variables, free_variables(right));
-      if (lv.empty())
-      {
-        data::optimized_sum_no_empty_domain(result, rv, right, true);
-        data::optimized_and(result, left, result);
-      }
-      else if (rv.empty())
-      {
-        data::optimized_sum_no_empty_domain(result, lv, left, true);
-        data::optimized_and(result, right, result);
-      }
-      else
-      {
-        data::optimized_sum(result, variables, body, true);
-      }
-    }
-    else */
-    {
-      make_sum(result, variables, body);
-    }
+    // TODO: This could be optimised. 
+    make_sum(result, variables, body);
   }
 
 };

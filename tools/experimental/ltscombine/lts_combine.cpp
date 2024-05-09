@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux
+// Author(s): Willem Rietdijk
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+// \file lts_combine.cpp
 
 #include "lts_combine.h"
 
@@ -59,14 +60,12 @@ core::identifier_string action_name(const process::action& action)
   return action.label().name();
 }
 
-/// <summary>
-/// Utility function that returns the index of the synchronisation for which
-/// the action_list actions matches the list of strings in syncs.second.
-/// </summary>
-/// <param name="syncs">The list of synchronisations.</param>
-/// <param name="actions">The list of actions to be matched.</param>
-/// <returns>The index of the matching synchronisation,
-/// or -1 when no matching synchronisation is found.</returns>
+/// \brief Utility function that returns the index of the synchronisation for which
+///        the action_list actions matches the list of strings in syncs.second.
+///
+/// \param syncs The list of synchronisations
+/// \param actions The list of actions to be matched.
+/// \returns The index of the matching synchronisation, or -1 when no matching synchronisation is found.
 size_t get_sync(std::vector<core::identifier_string_list>& syncs, core::identifier_string_list& action_names)
 {
   // A synchronising action must consist of two or more action labels
@@ -85,12 +84,11 @@ size_t get_sync(std::vector<core::identifier_string_list>& syncs, core::identifi
   return iter - syncs.begin();
 }
 
-/// <summary>
-/// Convert and sort an action_list to an identifier_string_list of names
-/// of the actions in the list.
-/// </summary>
-/// <param name="actions">The input list of actions.</param>
-/// <returns>The sorted list of identifier strings.</returns>
+/// \brief Convert and sort an action_list to an 
+/// identifier_string_list of names of the actions in the list.
+/// 
+/// \param actions The input list of actions.
+/// \returns The sorted list of identifier strings.
 core::identifier_string_list sorted_action_name_list(const process::action_list& actions)
 {
   std::vector<core::identifier_string> names(actions.size());
@@ -100,12 +98,11 @@ core::identifier_string_list sorted_action_name_list(const process::action_list&
   return core::identifier_string_list::term_list(names.begin(), names.end());
 }
 
-/// <summary>
-/// Checks if the given action list contains one of the blocked actions.
-/// </summary>
-/// <param name="blocks">The list of blocked actions.</param>
-/// <param name="actions">The list of actions to be checked.</param>
-/// <returns>Whether the list of actions contains a blocked action.</returns>
+/// \brief Checks if the given action list contains one of the blocked actions.
+///
+/// \param blocks The list of blocked actions.
+/// \param actions The list of actions to be checked.
+/// \returns Whether the list of actions contains a blocked action.
 bool is_blocked(std::vector<core::identifier_string> blocks, process::action_list actions)
 {
   // tau actions can not be blocked
@@ -126,15 +123,14 @@ bool is_blocked(std::vector<core::identifier_string> blocks, process::action_lis
   return false;
 }
 
-/// <summary>
-/// Checks if the given action list matches one of the allowed multi-actions.
-/// A match can only occur when the list of actions and allowed multi-action
-/// are equal. If the list is empty, all actions are allowed.
-/// </summary>
-/// <param name="allowed">The list of allowed multi-actions.</param>
-/// <param name="actions">The list of actions to be matched.</param>
-/// <returns>Whether the list of actions is matched by an allowed multi-action
-/// from the list of allowed multi-actions.</returns>
+/// \brief Checks if the given action list matches one of the allowed
+/// multi-actions. A match can only occur when the list of actions and allowed
+/// multi-action are equal. If the list is empty, all actions are allowed.
+///
+/// \param allowed The list of allowed multi-actions.
+/// \param actions The list of actions to be matched.
+/// \returns Whether the list of actions is matched by an allowed multi-action
+///          from the list of allowed multi-actions.
 bool is_allowed(const std::vector<core::identifier_string_list> allowed, core::identifier_string_list action_names)
 {
   // If the list is empty, all actions are allowed
@@ -152,11 +148,11 @@ bool is_allowed(const std::vector<core::identifier_string_list> allowed, core::i
   return false;
 }
 
-/// <summary>
-/// Returns a new action label for which the given actions are hidden.
-/// </summary>
-/// <param name="tau_actions">The action names to be hidden.</param>
-/// <param name="label">The existing action label.</param>
+/// \brief Returns a new action label for which 
+/// the given actions are hidden.
+/// 
+/// \param tau_actions The action names to be hidden.
+/// \param label The existing action label.
 void hide_actions(const std::vector<core::identifier_string>& tau_actions, lts::action_label_lts* label)
 {
   process::action_vector new_multi_action;
@@ -174,13 +170,12 @@ void hide_actions(const std::vector<core::identifier_string>& tau_actions, lts::
       lps::multi_action(process::action_list(new_multi_action.begin(), new_multi_action.end())));
 }
 
-/// <summary>
-/// Checks whether the arguments of each of the actions of the
-/// action_label are equal.
-/// </summary>
-/// <param name="label">The label to check.</param>
-/// <returns>Whether all arguments of each action of the label
-/// are equal.</returns>
+/// \brief Checks whether the arguments of each of the actions of the
+///        action_label are equal.
+///
+/// \param label The label to check.
+/// \returns Whether all arguments of each action of the label
+///          are equal.
 bool can_sync(const lts::action_label_lts& label)
 {
   // Check if each action's arguments are equal to the first action's arguments
@@ -509,7 +504,6 @@ private:
   }
 };
 
-// Combine two LTSs resulting from the state space exploration of LPSs of lpscleave into a single LTS.
 void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
     std::vector<core::identifier_string_list>& syncs,
     std::vector<core::identifier_string>& resulting_actions,

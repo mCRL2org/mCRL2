@@ -28,43 +28,51 @@ struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result=true;
+  std::string error_message;
 
-  is_res_traverser()
-    : result(true)
-  {}
-
-  void enter(const infimum& /* x */)
+  std::string get_error_message() const
   {
-    result = false;
+    assert(result==false);
+    return error_message;
   }
 
-  void enter(const supremum& /* x */)
+  is_res_traverser()
+  {}
+
+  void enter(const infimum& x)
   {
-    result = false;
+    if (result)
+    {
+      result = false;
+      error_message="Infimum not allowed in RES: " + pp(x);
+    }
+  }
+
+  void enter(const supremum& x)
+  {
+    if (result)
+    {
+      result = false;
+      error_message="Supremum not allowed in RES: " + pp(x);
+    }
+  }
+
+  void enter(const sum& x)
+  {
+    if (result)
+    { 
+      result = false;
+      error_message="Sum not allowed in RES: " + pp(x);
+    }
   }
 
   void enter(const data::data_expression& x)
   {
-    if (x != data::true_() && x != data::false_())
+    if (result && x != data::true_() && x != data::false_() && x.sort()!=data::sort_real::real_())
     {
       result = false;
-    }
-  }
-
-  void enter(const propositional_variable_instantiation& x)
-  {
-    if (result)
-    {
-      result = x.parameters().empty();
-    }
-  }
-
-  void enter(const pres_equation& x)
-  {
-    if (result)
-    {
-      result = x.variable().parameters().empty();
+      error_message="Expression in a RES can only be true, false or a real number: " + pp(x);
     }
   }
 };
@@ -77,6 +85,17 @@ bool is_res(const T& x)
 {
   is_res_traverser f;
   f.apply(x);
+  return f.result;
+}
+
+/// \brief Returns true if a PRES object is in BES form.
+/// \param x a PRES object
+template <typename T>
+bool is_res(const T& x, std::string& error_message)
+{
+  is_res_traverser f;
+  f.apply(x);
+  if (!f.result) error_message=f.get_error_message();
   return f.result;
 }
 

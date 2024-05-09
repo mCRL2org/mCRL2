@@ -291,7 +291,6 @@ void sort_specification::add_predefined_basic_sorts()
 
 void sort_specification::import_system_defined_sort(const sort_expression& sort)
 {
-
   if (is_untyped_sort(sort) || is_untyped_possible_sorts(sort))
   {
     mCRL2log(mcrl2::log::debug) << "Erroneous attempt to insert an untyped sort into the a sort specification\n";

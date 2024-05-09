@@ -66,6 +66,9 @@ public:
 
   /// \returns The number of function symbols stored in this pool.
   std::size_t size() const noexcept { return m_symbol_set.size(); }
+  
+  /// \returns The maximum number of function symbols stored in this pool.
+  std::size_t capacity() const noexcept { return m_symbol_set.capacity(); }
 
 private:
   using unordered_set = mcrl2::utilities::unordered_set<

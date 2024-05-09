@@ -1733,15 +1733,18 @@ void optimized_sum(pres_expression& result,
   {
     if (free_variables.find(v)==free_variables.end()) // not found.
     {
-      // Determine the c
-      std::size_t c = cardinality(v.sort());
-      if (c==0) // This means the cardinality is infinite or cannot be determined.
+      if (!is_true(p) && !is_false(p) && !data::sort_real::is_zero(p))
       {
-        new_l.push_front(v);
-      }
-      else
-      {
-        factor=factor*c;
+        // Determine the cardinality. 
+        std::size_t c = cardinality(v.sort());
+        if (c==0) // This means the cardinality is infinite or cannot be determined.
+        {
+          new_l.push_front(v);
+        }
+        else
+        {
+          factor=factor*c;
+        }
       }
     }
     else
@@ -1893,15 +1896,14 @@ void optimized_eqninf(pres_expression& result, const pres_expression& p)
 inline
 void optimized_const_multiply(pres_expression& result, const data::data_expression& d, const pres_expression& p)
 {
-  if (p==false_())
+  if (data::sort_real::is_zero(d))
   {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = p;
+    result = d;
     return;
   }
-  else if (p==true_())
+  if (data::sort_real::is_larger_zero(d) && 
+      (p==false_() || p==true_() || is_eqinf(p) || is_eqninf(d)))
   {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
     result = p;
     return;
   }
@@ -1915,15 +1917,14 @@ void optimized_const_multiply(pres_expression& result, const data::data_expressi
 inline
 void optimized_const_multiply_alt(pres_expression& result, const data::data_expression& d, const pres_expression& p)
 {
-  if (p==false_())
-  {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = p;
+  if (data::sort_real::is_zero(d))
+  { 
+    result = d;
     return;
   }
-  else if (p==true_())
-  {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
+  if (data::sort_real::is_larger_zero(d) && 
+      (p==false_() || p==true_() || is_eqinf(p) || is_eqninf(d)))
+  { 
     result = p;
     return;
   }
@@ -2390,8 +2391,8 @@ struct term_traits<pres_system::pres_expression>
   {
     // Forall and exists are not fully supported by the data library
     assert(!data::is_data_expression(t) || (!data::is_abstraction(t)
-                                        || (!data::is_forall(data::abstraction(t)) && !data::is_exists(data::abstraction(t)))));
-    assert(data::is_exists(t) || data::is_forall(t));
+                                        || (!is_infimum(data::abstraction(t)) && !is_supremum(data::abstraction(t)))));
+    assert(is_supremum(t) || is_infimum(t));
 
     return atermpp::down_cast<variable_sequence_type>(t[0]);
   }
