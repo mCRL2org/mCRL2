@@ -7,14 +7,15 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
+#include <unordered_set>
 
 #include "lts_combine.h"
 
-#include "mcrl2/utilities/xinput_output_tool.h"
 #include "mcrl2/utilities/parallel_tool.h"
+#include "mcrl2/utilities/xinput_output_tool.h"
 
 namespace mcrl2
 {
@@ -114,7 +115,7 @@ protected:
       while (std::getline(*syncs_inputs, line, ','))
       {
         std::istringstream iss(line);
-        std::vector<core::identifier_string> labels{};
+        std::multiset<core::identifier_string> labels{};
         std::string label;
         std::size_t delim = line.find('|');
         std::size_t prev_delim = 0;
@@ -124,7 +125,7 @@ protected:
         {
           label = line.substr(prev_delim, delim - prev_delim);
           trim(label);
-          labels.push_back(label);
+          labels.insert(label);
 
           prev_delim = delim + 1;
           delim = line.find('|', prev_delim);
@@ -137,7 +138,7 @@ protected:
           // Add last action of multi-action to list
           label = line.substr(prev_delim, delim - prev_delim);
           trim(label);
-          labels.push_back(label);
+          labels.insert(label);
 
           if (labels.size() < 2)
           {
@@ -148,10 +149,7 @@ protected:
             throw mcrl2::runtime_error("Could not parse file " + filename + ".");
           }
 
-          std::sort(labels.begin(),
-              labels.end(),
-              [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
-          syncs.push_back(core::identifier_string_list::term_list(labels.begin(), labels.end()));
+          syncs.push_back(core::identifier_string_list(labels.begin(), labels.end()));
 
           // Add multi-action and resulting action to list of sychronisations
           label = line.substr(delim + 2);
@@ -219,7 +217,7 @@ protected:
       while (std::getline(*allow_input, action_label, ','))
       {
         std::istringstream iss(action_label);
-        std::vector<core::identifier_string> labels{};
+        std::multiset<core::identifier_string> labels;
         std::string label;
         std::size_t delim = action_label.find('|');
         std::size_t prev_delim = 0;
@@ -229,7 +227,7 @@ protected:
         {
           label = action_label.substr(prev_delim, delim - prev_delim);
           trim(label);
-          labels.push_back(label);
+          labels.insert(label);
 
           prev_delim = delim + 1;
           delim = action_label.find('|', delim + 1);
@@ -238,14 +236,10 @@ protected:
         // Read last action of multi-action
         label = action_label.substr(prev_delim);
         trim(label);
-        labels.push_back(label);
-
-        std::sort(labels.begin(),
-            labels.end(),
-            [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
+        labels.insert(label);
 
         // Add multi-action to the list of allowed actions
-        allow.push_back(core::identifier_string_list::term_list(labels.begin(), labels.end()));
+        allow.push_back(core::identifier_string_list(labels.begin(), labels.end()));
       }
     }
 
@@ -301,6 +295,7 @@ private:
   }
 
   std::vector<core::identifier_string> blocks;
+  std::unordered_set<core::identifier_string_list> allow_set;
   std::vector<core::identifier_string_list> allow;
   std::vector<core::identifier_string> hiden;
   std::vector<core::identifier_string_list> syncs;

@@ -1,4 +1,3 @@
-
 // Author(s): Willem Rietdijk
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -7,6 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+/// \file lts_combine.h
+/// \brief The combine_lts function combines two LTSs and applies 
+/// the comm, block, allow and hide operators in that order.
 
 #ifndef MCRL2_LTS_COMBINE_H_
 #define MCRL2_LTS_COMBINE_H_
@@ -16,7 +18,7 @@
 namespace mcrl2
 {
 
-  /// \brief Combine two LTSs and apply the comm, block, allow and hide operators.
+/// \brief Combine two LTSs and apply the comm, block, allow and hide operators.
 void combine_lts(std::vector<lts::lts_lts_t>& ltss,
     std::vector<core::identifier_string_list>& syncs,
     std::vector<core::identifier_string>& resulting_actions,

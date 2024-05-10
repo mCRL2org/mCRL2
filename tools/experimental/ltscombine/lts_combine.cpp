@@ -37,29 +37,6 @@ public:
   bool operator()(core::identifier_string str) { return str == m_str; }
 };
 
-class identifier_string_list_compare
-{
-  core::identifier_string m_str_list;
-
-public:
-  identifier_string_list_compare(core::identifier_string_list str_list)
-      : m_str_list(str_list)
-  {}
-
-  bool operator()(core::identifier_string_list str_list) { return str_list == m_str_list; }
-};
-
-class action_list_to_identifier_list
-{
-public:
-  core::identifier_string operator()(process::action action) { return action.label().name(); }
-};
-
-core::identifier_string action_name(const process::action& action)
-{
-  return action.label().name();
-}
-
 /// \brief Utility function that returns the index of the synchronisation for which
 ///        the action_list actions matches the list of strings in syncs.second.
 ///
@@ -74,26 +51,29 @@ size_t get_sync(std::vector<core::identifier_string_list>& syncs, core::identifi
     return -1;
   }
 
-  std::vector<core::identifier_string_list>::iterator iter
-      = std::find_if(syncs.begin(), syncs.end(), identifier_string_list_compare(action_names));
-  if (iter == syncs.end())
+  for (auto it = syncs.begin(); it != syncs.end(); it++)
   {
-    return -1;
+    if (*it == action_names)
+    {
+      return it - syncs.begin();
+    }
   }
 
-  return iter - syncs.begin();
+  return -1;
 }
 
-/// \brief Convert and sort an action_list to an 
+/// \brief Convert and sort an action_list to an
 /// identifier_string_list of names of the actions in the list.
-/// 
+///
 /// \param actions The input list of actions.
 /// \returns The sorted list of identifier strings.
 core::identifier_string_list sorted_action_name_list(const process::action_list& actions)
 {
-  std::vector<core::identifier_string> names(actions.size());
-  std::transform(actions.begin(), actions.end(), names.begin(), action_name);
-  std::sort(names.begin(), names.end(), [](core::identifier_string a1, core::identifier_string a2) { return a1 < a2; });
+  std::multiset<core::identifier_string> names;
+  for (auto& action : actions)
+  {
+    names.insert(action.label().name());
+  }
 
   return core::identifier_string_list::term_list(names.begin(), names.end());
 }
@@ -106,16 +86,21 @@ core::identifier_string_list sorted_action_name_list(const process::action_list&
 bool is_blocked(std::vector<core::identifier_string> blocks, process::action_list actions)
 {
   // tau actions can not be blocked
-  if (actions.empty())
+  if (actions.empty() || blocks.empty())
   {
     return false;
   }
 
   for (const process::action& action : actions)
   {
-    if (std::find_if(blocks.begin(), blocks.end(), identifier_string_compare(action.label().name())) != blocks.end())
+    core::identifier_string action_name = action.label().name();
+
+    for (const auto& it : blocks)
     {
-      return true;
+      if (it == action_name)
+      {
+        return true;
+      }
     }
   }
 
@@ -131,7 +116,7 @@ bool is_blocked(std::vector<core::identifier_string> blocks, process::action_lis
 /// \param actions The list of actions to be matched.
 /// \returns Whether the list of actions is matched by an allowed multi-action
 ///          from the list of allowed multi-actions.
-bool is_allowed(const std::vector<core::identifier_string_list> allowed, core::identifier_string_list action_names)
+bool is_allowed(const std::vector<core::identifier_string_list>& allowed, core::identifier_string_list& action_names)
 {
   // If the list is empty, all actions are allowed
   // tau actions are always allowed
@@ -140,20 +125,23 @@ bool is_allowed(const std::vector<core::identifier_string_list> allowed, core::i
     return true;
   }
 
-  if (std::find_if(allowed.begin(), allowed.end(), identifier_string_list_compare(action_names)) != allowed.end())
+  for (const auto& it : allowed)
   {
-    return true;
+    if (it == action_names)
+    {
+      return true;
+    }
   }
 
   return false;
 }
 
-/// \brief Returns a new action label for which 
+/// \brief Returns a new action label for which
 /// the given actions are hidden.
-/// 
+///
 /// \param tau_actions The action names to be hidden.
 /// \param label The existing action label.
-void hide_actions(const std::vector<core::identifier_string>& tau_actions, lts::action_label_lts* label)
+void hide_actions(const std::vector<core::identifier_string>& tau_actions, lps::multi_action* label)
 {
   process::action_vector new_multi_action;
   for (const process::action& a : label->actions())
@@ -166,8 +154,7 @@ void hide_actions(const std::vector<core::identifier_string>& tau_actions, lts::
       new_multi_action.push_back(a);
     }
   }
-  *label = lts::action_label_lts(
-      lps::multi_action(process::action_list(new_multi_action.begin(), new_multi_action.end())));
+  *label = lps::multi_action(process::action_list(new_multi_action.begin(), new_multi_action.end()));
 }
 
 /// \brief Checks whether the arguments of each of the actions of the
@@ -176,7 +163,7 @@ void hide_actions(const std::vector<core::identifier_string>& tau_actions, lts::
 /// \param label The label to check.
 /// \returns Whether all arguments of each action of the label
 ///          are equal.
-bool can_sync(const lts::action_label_lts& label)
+bool can_sync(const lps::multi_action& label)
 {
   // Check if each action's arguments are equal to the first action's arguments
   for (auto& action : label.actions())
@@ -331,7 +318,7 @@ private:
 
     // List of new outgoing transitions from this state, combined from the states
     // state[0] to state[i]
-    std::vector<std::pair<lts::action_label_lts, std::vector<state_t>>> combos;
+    std::vector<std::pair<lps::multi_action, std::vector<state_t>>> combos;
 
     // Loop over the old states contained in the new state
     for (size_t i = 0; i < state.size(); ++i)
@@ -340,7 +327,7 @@ private:
 
       // Seperate new transitions from this state such that transitions from this state
       // don't combine with other transitions from this state
-      std::vector<std::pair<lts::action_label_lts, std::vector<state_t>>> new_combos;
+      std::vector<std::pair<lps::multi_action, std::vector<state_t>>> new_combos;
 
       // Loop over the outgoing transitions from the old state
       for (state_t t = outgoing_transitions[i].lowerbound(old_state); t < outgoing_transitions[i].upperbound(old_state);
@@ -380,9 +367,9 @@ private:
           new_states.push_back(lts::to(transition));
 
           // Create new action label from multi-action of combo and transition t
-          lts::action_label_lts new_label(lps::multi_action(label.actions() + combo.first.actions()));
+          // lts::action_label_lts new_label(lps::multi_action(label.actions() + combo.first.actions()));
 
-          new_combos.push_back(std::make_pair(new_label, new_states));
+          new_combos.push_back(std::make_pair(label + combo.first, new_states));
         }
       }
 
@@ -410,10 +397,13 @@ private:
     // Finished generating all new transitions, add them to the LTS
     for (auto& combo : combos)
     {
-      mCRL2log(log::debug) << lts::pp(combo.first) << std::endl;
+      mCRL2log(log::debug) << lps::pp(combo.first) << std::endl;
 
       size_t sync_index;
       core::identifier_string_list action_names = sorted_action_name_list(combo.first.actions());
+
+      mCRL2log(log::debug) << core::pp(action_names) << std::endl;
+
       if (can_sync(combo.first) && (sync_index = get_sync(syncs, action_names)) != -1)
       {
         // Synchronise
@@ -434,9 +424,10 @@ private:
             lps::multi_action(process::action(process::action_label(result_action, sorts), arguments)));
 
         // Check if new transition is blocked or not allowed
-        if (is_blocked(blocks, new_label.actions()) || !is_allowed(allow, sorted_action_name_list(new_label.actions())))
+        core::identifier_string_list new_action_names = sorted_action_name_list(new_label.actions());
+        if (is_blocked(blocks, new_label.actions()) || !is_allowed(allow, new_action_names))
         {
-          mCRL2log(log::debug) << "Blocked or not allowed: " << lts::pp(combo.first) << std::endl;
+          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
           continue;
         }
 
@@ -471,7 +462,7 @@ private:
         // Check if the transition is blocked or not allowed
         if (is_blocked(blocks, combo.first.actions()) || !is_allowed(allow, action_names))
         {
-          mCRL2log(log::debug) << "Blocked or not allowed: " << lts::pp(combo.first) << std::endl;
+          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
           continue;
         }
 
