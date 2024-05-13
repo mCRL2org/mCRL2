@@ -1,0 +1,5 @@
+% This formula expresses that red has a winning strategy in the game "four in a row"
+% as specified in four_in_a_row.mcrl2. Note that red does not win if yellow cannot do a move
+% at the end of the game. This is enforced by the clause exists y:Pos.<YellowMoves(y)>true.
+
+mu X.(<RedMoves>(<RedWins>true || ((<YellowMoves>true) && [YellowMoves](X && [YellowWins]false))))
