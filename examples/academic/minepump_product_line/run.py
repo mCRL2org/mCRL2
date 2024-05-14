@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 import subprocess
+import os
+
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 for experiment in ['family_based_experiments', 'product_based_experiments']:
     for nr in range(1, 13):
