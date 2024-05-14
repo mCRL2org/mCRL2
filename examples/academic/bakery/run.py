@@ -1,6 +1,10 @@
 #!/usr/bin/env', 'python3
 
 import subprocess
+import os
+
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 mcrl22lps = subprocess.run(['mcrl22lps', '-f', '-D', '-n', '-w', 'bakery.mcrl2'], stdout=subprocess.PIPE, check=True)
 lpsconstelm = subprocess.run(['lpsconstelm'], input=mcrl22lps.stdout, stdout=subprocess.PIPE, check=True)

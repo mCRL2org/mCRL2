@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 import subprocess
+import os
+
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 subprocess.run(['mcrl22lps', '-v', 'abp_bw.mcrl2', 'abp_bw.lps'], check=True)
 subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'abp_bw.lps', 'abp_bw.nodeadlock.pbes'], check=True)
