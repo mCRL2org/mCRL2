@@ -2,6 +2,12 @@
 
 import subprocess
 import shutil
+import os
+
+from sys import argv
+
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 subprocess.run(['mcrl22lps', '-v', 'swp_lists.mcrl2', 'swp_lists.lps'], check=True)
 subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'swp_lists.lps', 'swp_lists.nodeadlock.pbes'], check=True)
@@ -39,17 +45,17 @@ subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'swp_with_tanenbaums_b
 # leads to a state space that is too large for the explicit tools. However, the
 # symbolic tools (which are only available on linux and macos) are able to at
 # least show the state space sizes.
-lpsreach = shutil.which("lpsreach")
-if lpsreach:
+lpsreach = shutil.which('lpsreach')
+if lpsreach and '--long' in argv:
     # number of states = 1.87117e+10 (time = 3762.31s)
-    #subprocess.run([lpsreach, '-v', '--cached', '--chaining', '--saturation', 'swp_with_tanenbaums_bug.lps'], check=True)
-    None
+    subprocess.run([lpsreach, '-v', '--cached', '--chaining', '--saturation', 'swp_with_tanenbaums_bug.lps'], check=True)
 
-
-pbessolvesymbolic = shutil.which("pbessolvesymbolic")
-if pbessolvesymbolic:
-    #subprocess.run([pbessolvesymbolic, '-v', '-c', '--cached', '--chaining', '--saturation', 'swp_with_tanenbaums_bug.nodeadlock.pbes'], check=True)
-    None
+pbessolvesymbolic = shutil.which('pbessolvesymbolic')
+if pbessolvesymbolic and '--long' in argv:
+    # number of BES equations = 5.61351e+10 (time = 5654.58s)
+    # finished solving (time = 13.56s)
+    # true
+    subprocess.run([pbessolvesymbolic, '-v', '-c', '--cached', '--chaining', '--saturation', 'swp_with_tanenbaums_bug.nodeadlock.pbes'], check=True)
 
 # It is possible to generate the state space, while looking for occurrence of
 # error action, because the error action can be found without exploring the

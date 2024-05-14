@@ -63,8 +63,8 @@
 
 sort Piece = struct Red | Yellow | None;
 map N,M,R:Pos;
-eqn N=7;     %Number of columns (default 7)
-    M=6;     %Number of rows (default 6)
+eqn N=4;     %Number of columns (default 7)
+    M=5;     %Number of rows (default 6)
     R=4;     %Length of a winning sequence of the same color (default 4)
 
 sort Row=List(Piece);
@@ -206,12 +206,11 @@ proc FourInaRow(b:Board,WhoMoves:Piece)=
                   
 % Note that the board is reversed. The bottom row is drawn at the top.
 map initial_board:Board;
-eqn initial_board= [[None,  None,  None,  None,  None,  None,  None  ],
-                    [None,  None,  None,  None,  None,  None,  None  ],
-                    [None,  None,  None,  None,  None,  None,  None  ],
-                    [None,  None,  None,  None,  None,  None,  None  ],
-                    [None,  None,  None,  None,  None,  None,  None  ],
-                    [None,  None,  None,  None,  None,  None,  None  ]];
+eqn initial_board= [[None,  None,  None,  None ],
+                    [None,  None,  None,  None ],
+                    [None,  None,  None,  None ],
+                    [None,  None,  None,  None ],
+                    [None,  None,  None,  None ]];
 
 
 init FourInaRow(initial_board,Red);
