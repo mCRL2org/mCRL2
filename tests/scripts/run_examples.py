@@ -3,6 +3,7 @@
 import argparse
 import os
 import subprocess
+import sys
 import concurrent.futures
 
 
@@ -25,21 +26,11 @@ def main():
 
     os.environ["PATH"] += os.pathsep + args.mcrl2_binpath
 
-    # Ensure that tmp directory exists since the mCRL2 tools cannot make it
-    tmp_directory = "tmp/"
-    try:
-        os.mkdir(tmp_directory)
-    except OSError:
-        print(f"{tmp_directory} already exists")
-
     def run_example(path, index):
         print(f"[{index}] Running {path}")
-        lps_file = os.path.join(tmp_directory, f"temp{index}.lps")
-        lts_file = os.path.join(tmp_directory, f"temp{index}.lts")
 
-        subprocess.check_call(["mcrl22lps", path, lps_file], timeout=60)
-
-        subprocess.check_call(["lps2lts", lps_file, lts_file], timeout=60)
+        result = subprocess.run([sys.executable, path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60, cwd=os.path.dirname(path), check=True)
+        return result.stdout
 
     # Start the linearisation process
     with concurrent.futures.ThreadPoolExecutor(
