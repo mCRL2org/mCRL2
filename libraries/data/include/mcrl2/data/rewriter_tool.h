@@ -61,7 +61,7 @@ class rewriter_tool: public Tool
       desc.add_option(
         "qlimit", 
         utilities::make_mandatory_argument("NUM"),
-        "limit enumeration of quantifiers to NUM iterations (default NUM=" + 
+        "limit enumeration of universal and existential quantifiers in data expressions to NUM iterations (default NUM=" + 
                   std::to_string(data::detail::get_enumerator_iteration_limit()) + ", NUM=0 for unlimited).",
         'Q'
       );
