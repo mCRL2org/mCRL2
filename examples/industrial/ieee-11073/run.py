@@ -1,16 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-def run(mcffile, lpssfile):
-    pbesfile = '{}.{}.pbes'.format(lpsfile[:-4], mcffile[:-4])
-    cmd1 = 'lps2pbes -f {} {} {}'.format(mcffile, lpsfile, pbesfile)
-    cmd2 = 'pbes2bool {}'.format(pbesfile)
-    os.system(cmd1)
-    os.system(cmd2)
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-mcrl2file = '11073.mcrl2'
+def run(mcffile, lpsfile):
+    run = subprocess.run(['lps2pbes', '-f', mcffile, lpsfile], stdout=subprocess.PIPE, check=True)
+    subprocess.run(['pbes2bool'], input=run.stdout, check=True)
+
 lpsfile = '11073.lps'
-os.system('mcrl22lps {} {}'.format(mcrl2file, lpsfile))
+subprocess.run(['mcrl22lps', '11073.mcrl2', lpsfile], check=True)
+
 run('data_can_be_communicated.mcf', lpsfile)
 run('infinite_data_communication_is_possible.mcf', lpsfile)
 run('nodeadlock.mcf', lpsfile)

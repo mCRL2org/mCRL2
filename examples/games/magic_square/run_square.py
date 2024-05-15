@@ -5,5 +5,3 @@ import os
 
 # Change working dir to the script path
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-subprocess.run(['mcrl22lps', '-v', 'magic_square.mcrl2', 'magic_square.lps'], check=True)

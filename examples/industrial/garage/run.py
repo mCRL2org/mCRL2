@@ -1,12 +1,19 @@
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-os.system('mcrl22lps -v garage-ver.mcrl2 garage-ver.lps')
-os.system('lpssuminst -v -f garage-ver.lps | lpssumelm -v > garage-ver1.lps')
+from sys import argv
 
-# The jittyc compiler is not available on windows. In that case use -rjitty.
-os.system('lps2lts -v -rjittyc garage-ver1.lps')
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-os.system('lps2pbes -v -f nodeadlock.mcf garage-ver1.lps garage-ver.nodeadlock.pbes')
-os.system('pbes2bool -v -rjittyc garage-ver.nodeadlock.pbes')
+run = subprocess.run(['mcrl22lps', '-v', 'garage-ver.mcrl2'], stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpssuminst', '-v', ' -f'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+subprocess.run(['lpssumelm', '-v', '-', 'garage-ver1.lps'], input=run.stdout, check=True)
 
+subprocess.run(['lps2pbes', ' -v', ' -f', ' nodeadlock.mcf', ' garage-ver1.lps', ' garage-ver.nodeadlock.pbes'], check=True)
 
+if '-rjittyc' in argv:
+    subprocess.run(['lps2lts', ' -v', ' -rjittyc', ' garage-ver1.lps'], check=True)
+    subprocess.run(['pbes2bool', ' -v', ' -rjittyc', ' garage-ver.nodeadlock.pbes'], check=True)
