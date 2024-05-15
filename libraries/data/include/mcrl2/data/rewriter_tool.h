@@ -61,7 +61,8 @@ class rewriter_tool: public Tool
       desc.add_option(
         "qlimit", 
         utilities::make_mandatory_argument("NUM"),
-        "limit enumeration of quantifiers to NUM iterations (default NUM=1000, NUM=0 for unlimited).",
+        "limit enumeration of quantifiers to NUM iterations (default NUM=" + 
+                  std::to_string(data::detail::get_enumerator_iteration_limit()) + ", NUM=0 for unlimited).",
         'Q'
       );
 
@@ -83,7 +84,7 @@ class rewriter_tool: public Tool
       Tool::parse_options(parser);
       m_rewrite_strategy = parser.option_argument_as< data::rewrite_strategy >("rewriter");
 
-      if(parser.options.count("qlimit"))
+      if (parser.options.count("qlimit"))
       {
         //Set enumerator limit for quantifier enumeration
         std::size_t qlimit = parser.option_argument_as< std::size_t >("qlimit");
