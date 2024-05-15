@@ -1,21 +1,36 @@
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
+from sys import argv
+
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 # Create LPS from mCRL2 specification
-os.system("mcrl22lps -v quoridor.mcrl2 quoridor.lps")
+subprocess.run(['mcrl22lps', '-v', 'quoridor.mcrl2', 'quoridor.lps'], check=True)
 
 # Optimize LPS
-os.system("lpssuminst -v -sBool quoridor.lps | lpsparunfold -v -n5 -sPosition | lpsrewr -v | lpsconstelm -v -c | lpsrewr -v > quoridor-1.lps")
+run = subprocess.run(['lpssuminst', '-v', '-sBool'], stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsparunfold', '-v', '-n5', '-sPosition'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsconstelm', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+subprocess.run(['lpsrewr', '-v', '-', 'quoridor-1.lps'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 
 # Transform LPS into a LTS
-os.system("lps2lts --cached -v -rjittyc --threads=16 quoridor-1.lps quoridor.lts")
+if '-rjittyc' in argv:
+    subprocess.run(['lps2lts', '--cached', '-v', '-rjittyc', '--threads=16', 'quoridor-1.lps', 'quoridor.lts'], check=True)
 
-# Reduce LTS modulo strong bisimulation
-os.system("ltsconvert -v -ebisim quoridor.lts quoridor-1.lts")
+# Reduce the LTS modulo bisimulation
+subprocess.run(['ltsconvert', '-v', '-ebisim', 'quoridor.lts', 'quoridor-1.lts'], check=True)
 
 # Verify whether player 1 has a winning strategy
-os.system('lts2pbes -v -c -p -f"properties/winning_strategy_player_1.mcf" quoridor-1.lts | pbessolve -v --threads=16 -rjittyc '
-          '-s1 --file=quoridor-1.lts --evidence-file=quoridor-player-1-evidence.lts')
+run = subprocess.run(['lts2pbes', '-v', '-c', '-p', '-f"properties/winning_strategy_player_1.mcf"', 'quoridor-1.lts'], stdout=subprocess.PIPE, check=True)
+if '-rjittyc' in argv:
+    subprocess.run(['pbessolve', '-v', '--threads=16', '-rjittyc', '-s1', '--file=quoridor-1.lts', '--evidence-file=quoridor-player-1-evidence.lts'], input=run.stdout, stdout=subprocess.PIPE, check=True) 
 
 # Verify whether player 2 has a winning strategy
-os.system('lts2pbes -v -c -p -f"properties/winning_strategy_player_2.mcf" quoridor-1.lts | pbessolve -v --threads=16 -rjittyc '
-          '-s1 --file=quoridor-1.lts --evidence-file=quoridor-player-2-evidence.lts')
+run = subprocess.run(['lts2pbes', '-v', '-c', '-p', '-f"properties/winning_strategy_player_2.mcf"', 'quoridor-1.lts'], stdout=subprocess.PIPE, check=True)
+if '-rjittyc' in argv:
+    subprocess.run(['pbessolve', '-v', '--threads=16', '-rjittyc', '-s1', '--file=quoridor-1.lts', '--evidence-file=quoridor-player-2-evidence.lts'], input=run.stdout, stdout=subprocess.PIPE, check=True) 

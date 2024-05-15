@@ -1,7 +1,19 @@
-import os
-os.system('mcrl22lps sokoban.mcrl2 -m temp.lps -v')
-os.system('lpssuminst -v temp.lps temp1.lps')
-os.system('lpsparunfold -s Board -n 8 -lv temp1.lps | lpsconstelm -vt >temp2.lps')
-os.system('lpsparunfold -s Row -n 11 -lv temp2.lps | lpsconstelm -vt > temp3.lps')
-os.system('lps2lts -vrjittyc -awin -t1 --todo-max=100000 temp3.lps') 
+#!/usr/bin/env python3
 
+import subprocess
+import os
+
+from sys import argv
+
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+run = subprocess.run(['mcrl22lps', 'sokoban.mcrl2', '-m'], stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpssuminst', '-v', 'temp.lps'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsparunfold', '-s', 'Board', '-n', '8'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsconstelm', '-vt'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run =  subprocess.run(['lpsparunfold', '-s', 'Row', '-n', '11'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsconstelm', '-vt', '-', 'temp.lps'],  input=run.stdout, stdout=subprocess.PIPE, check=True)
+
+if '-rjittyc' in argv:
+    subprocess.run(['lps2lts', '-vrjittyc', '-awin', '-t1', '--todo-max=100000', 'temp.lps'], check=True)

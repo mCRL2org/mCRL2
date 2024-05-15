@@ -27,10 +27,10 @@ for formula in [
     'get_at_least_number_circulating',
 ]:
     print(f'Solving property {formula}')
-    lps2pbes = subprocess.run(['lps2pbes', '-f', f'{formula}.mcf', 'bakery.lps'], stdout=subprocess.PIPE, check=True)
-    pbesrewr = subprocess.run(['pbesrewr', '-psimplify'], input=lps2pbes.stdout, stdout=subprocess.PIPE, check=True)
-    pbesconstelm = subprocess.run(['pbesconstelm'], input=pbesrewr.stdout, stdout=subprocess.PIPE, check=True)
-    subprocess.run(['pbesparelm', '-', f'bakery.{formula}.pbes'], input=pbesconstelm.stdout, stdout=subprocess.PIPE, check=True)
+    run = subprocess.run(['lps2pbes', '-f', f'{formula}.mcf', 'bakery.lps'], stdout=subprocess.PIPE, check=True)
+    run = subprocess.run(['pbesrewr', '-psimplify'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+    run = subprocess.run(['pbesconstelm'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+    subprocess.run(['pbesparelm', '-', f'bakery.{formula}.pbes'], input=run.stdout, stdout=subprocess.PIPE, check=True)
     
     # Does not terminate since the statespace is infinite
     #subprocess.run(['pbes2bool', '-v', '-s3', '-rjitty', f'bakery.{formula}.pbes'], check=True)

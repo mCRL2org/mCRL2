@@ -1,12 +1,26 @@
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-os.system('mcrl22lps -vn peg_solitaire.mcrl2 peg_solitaire.lps')
-os.system('lpssuminst -v peg_solitaire.lps temp1.lps')
-os.system('lpsrewr -v temp1.lps temp2.lps')
-os.system('lpsparunfold -v -l -sBoard temp2.lps | lpsrewr -v > temp3.lps')
-os.system('lpsparunfold  -v -l -sRow temp3.lps |lpsrewr -v > temp4.lps')
-os.system('lpsparelm -v temp4.lps | lpsconstelm -v | lpsrewr -v > temp5.lps')
-os.system('lpsbinary temp5.lps | lpsactionrename -frename.ren | lpsrewr > temp6.lps')
-os.system('lpsconstelm temp6.lps -v temp7.lps')
-os.system('lps2lts -vrjittyc -aready temp7.lps')
+from sys import argv
 
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+subprocess.run(['mcrl22lps', '-vn', 'peg_solitaire.mcrl2', 'peg_solitaire.lps'], check=True)
+
+run = subprocess.run(['lpssuminst', '-v', 'peg_solitaire.lps'], stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsparunfold', '-v', '-l', '-sBoard'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsparunfold', '', '-v', '-l', '-sRow'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsparelm', '-v', 'temp4.lps', '|', 'lpsconstelm', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsbinary', 'temp5.lps', '|', 'lpsactionrename', '-frename.ren'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsconstelm', '-', 'temp.lps'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+
+if '-rjittyc' in argv:
+    subprocess.run(['lps2lts', '-vrjittyc', '-aready', 'temp.lps'], check=True)
