@@ -178,7 +178,7 @@ private:
   {
     signature_type sig;
     // Add the block index of the state to the signature.
-    // sig.insert(std::make_tuple(state2block[s], m_lts.tau_label_index(), state2block[s]));
+    sig.insert(std::make_tuple(state2block[s], m_lts.tau_label_index(), state2block[s]));
     for (state_type target : silent_out[s])
     {
       sig.insert(state2sig[target].begin(), state2sig[target].end());

@@ -8,6 +8,8 @@
 
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
+
 #ifdef MCRL2_ENABLE_JITTYC
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #endif
@@ -27,11 +29,6 @@ namespace data
 {
 namespace detail
 {
-
-static std::size_t npos()
-{
-  return std::size_t(-1);
-}
 
 #ifndef NDEBUG
 // function object to test if it is an aterm with function symbol "f"
@@ -448,10 +445,6 @@ void Rewriter::quantifier_enumeration(
     }
   }
 
-  /* Find A solution*/
-  rewriter_wrapper wrapped_rewriter(this);
-  const std::size_t max_count = sorts_are_finite ? std::numeric_limits<std::size_t>::max() : data::detail::get_enumerator_iteration_limit();
-
   struct is_not
   {
     data_expression m_expr;
@@ -470,6 +463,10 @@ void Rewriter::quantifier_enumeration(
                                              is_not,
                                              rewriter_wrapper,
                                              rewriter_wrapper::substitution_type> enumerator_type;
+
+  /* Find A solution*/
+  rewriter_wrapper wrapped_rewriter(this);
+  const std::size_t max_count = sorts_are_finite ? std::numeric_limits<std::size_t>::max() : data::detail::get_enumerator_iteration_limit();
   try
   {
     enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration,
@@ -478,17 +475,13 @@ void Rewriter::quantifier_enumeration(
     /* Create a list to store solutions */
     data_expression partial_result = identity_element;
 
-    std::size_t loop_upperbound = (sorts_are_finite ? npos() : 10);
     data::enumerator_queue<enumerator_list_element<> > enumerator_solution_deque(enumerator_list_element<>(vl_new_l_enum, t3));
 
     enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
-    for( ; loop_upperbound > 0 &&
-           sol != enumerator.end();
-           ++sol)
+    for( ; sol != enumerator.end(); ++sol)
     {
       partial_result = lazy_op(partial_result, sol->expression());
-      loop_upperbound--;
-      if(partial_result == absorbing_element)
+      if (partial_result == absorbing_element)
       {
         // We found a solution, so prevent the enumerator from doing any unnecessary work
         // Also prevents any further exceptions from the enumerator
@@ -512,12 +505,11 @@ void Rewriter::quantifier_enumeration(
     }
     // One can consider to replace the variables by their original, in order to not show
     // internally generated variables in the output.
-    assert(!sol->is_valid() || loop_upperbound == 0);
   }
   catch(const mcrl2::runtime_error&)
   {
-    // It is not possible to enumerate one of the bound variables, so we just return
-    // the simplified expression
+    // It is not possible to enumerate one of the bound variables, or the enumerator limit of the
+    // iterator is exceeded. So, we just return the original non enumerated, simplified expression.
   }
 
   make_abstraction(result, binder,vl_new_l_enum+vl_new_l_other,rewrite(t3,sigma));

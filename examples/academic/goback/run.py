@@ -1,8 +1,8 @@
-import os
+#!/usr/bin/env python3
 
-os.system('mcrl22lps -v goback.mcrl2 goback.lps')
+import subprocess
 
-os.system('lps2pbes -v -f nodeadlock.mcf goback.lps goback.nodeadlock.pbes')
-os.system('pbes2bool -v goback.nodeadlock.pbes')
+subprocess.run(['mcrl22lps', '-v', 'goback.mcrl2', 'goback.lps'], shell=True, check=True)
 
-
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'goback.lps', 'goback.nodeadlock.pbes'], shell=True, check=True)
+subprocess.run(['pbes2bool', '-v', 'goback.nodeadlock.pbes'], shell=True, check=True)

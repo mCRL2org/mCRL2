@@ -32,8 +32,8 @@ def main():
     except OSError:
         print(f"{tmp_directory} already exists")
 
-    def linearise_process(path, index):
-        print(f"[{index}] Linearising {path}")
+    def run_example(path, index):
+        print(f"[{index}] Running {path}")
         lps_file = os.path.join(tmp_directory, f"temp{index}.lps")
         lts_file = os.path.join(tmp_directory, f"temp{index}.lts")
 
@@ -46,18 +46,18 @@ def main():
         max_workers=args.max_workers
     ) as executor:
         # Collect all .mcrl2 files
-        mcrl2_files = []
+        run_scripts = []
         for root, _, files in os.walk(
             os.path.join(os.path.realpath(os.path.dirname(__file__)), "../../examples/")
         ):
             for file in files:
-                if file.endswith(".mcrl2"):
-                    mcrl2_files.append(os.path.join(root, file))
+                if file == "run.py":
+                    run_scripts.append(os.path.join(root, file))
 
         # Submit the jobs
         futures = {}
-        for index, path in enumerate(mcrl2_files):
-            futures[(executor.submit(linearise_process, path, index))] = path
+        for index, path in enumerate(run_scripts):
+            futures[(executor.submit(run_example, path, index))] = path
 
         # Wait for jobs to finish and show a progress bar.
         finished = 0
@@ -66,12 +66,12 @@ def main():
 
             if future.exception():
                 print(
-                    f"[{finished}/{len(mcrl2_files)}] Example {path} failed with {future.exception()}"
+                    f"[{finished}/{len(run_scripts)}] Example {path} failed with {future.exception()}"
                 )
             if future.cancelled():
-                print(f"[{finished}/{len(mcrl2_files)}] Example {path} was cancelled")
+                print(f"[{finished}/{len(run_scripts)}] Example {path} was cancelled")
             else:
-                print(f"[{finished}/{len(mcrl2_files)}] Finished example {path}")
+                print(f"[{finished}/{len(run_scripts)}] Finished example {path}")
 
             finished += 1
 

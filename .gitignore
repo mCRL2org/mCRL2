@@ -11,3 +11,9 @@ scripts/code_generation/data_types/codegen.pickle
 
 # Ignore the standard build directory
 build/
+
+# Ignore temporary files creates by examples
+*.lts
+*.lps
+*.pbes
+*.trc

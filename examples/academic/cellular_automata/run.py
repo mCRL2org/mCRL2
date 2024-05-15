@@ -1,7 +1,5 @@
-import os
+#!/usr/bin/env python3
 
-os.system('mcrl22lps -v -o cellular_automata.mcrl2 cellular_automata.lps')
+import subprocess
 
-
-
-
+subprocess.run(['mcrl22lps', '-v', '-o', 'cellular_automata.mcrl2', 'cellular_automata.lps'], check=True)

@@ -1,30 +1,29 @@
-import os
+import subprocess
 
-os.system('mcrl22lps -v cabp.mcrl2 cabp.lps')
-os.system('lps2pbes -v -f nodeadlock.mcf cabp.lps cabp.nodeadlock.pbes')
-os.system('pbes2bool -v cabp.nodeadlock.pbes')
+subprocess.run(['mcrl22lps', '-v', 'cabp.mcrl2', 'cabp.lps'], check=True)
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'cabp.lps', 'cabp.nodeadlock.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'cabp.nodeadlock.pbes'], check=True)
 
-os.system('lps2pbes -v -f infinitely_often_enabled_then_infinitely_often_taken.mcf cabp.lps cabp.infinitely_often_enabled_then_infinitely_often_taken.pbes')
-os.system('pbespgsolve -v cabp.infinitely_often_enabled_then_infinitely_often_taken.pbes')
+subprocess.run(['lps2pbes', '-v', '-f', 'infinitely_often_enabled_then_infinitely_often_taken.mcf', 'cabp.lps', 'cabp.infinitely_often_enabled_then_infinitely_often_taken.pbes'], check=True)
+subprocess.run(['pbespgsolve', '-v', 'cabp.infinitely_often_enabled_then_infinitely_often_taken.pbes'], check=True)
 
-os.system('lps2pbes -v -f infinitely_often_lost.mcf cabp.lps cabp.infinitely_often_lost.pbes')
-os.system('pbes2bool -v cabp.infinitely_often_lost.pbes')
+subprocess.run(['lps2pbes', '-v', '-f', 'infinitely_often_lost.mcf', 'cabp.lps', 'cabp.infinitely_often_lost.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'cabp.infinitely_often_lost.pbes'], check=True)
 
-os.system('lps2pbes -v -f infinitely_often_receive_d1.mcf cabp.lps cabp.infinitely_often_receive_d1.pbes')
-os.system('pbespgsolve -v cabp.infinitely_often_receive_d1.pbes')
+subprocess.run(['lps2pbes', '-v', '-f', 'infinitely_often_receive_d1.mcf', 'cabp.lps', 'cabp.infinitely_often_receive_d1.pbes'], check=True)
+subprocess.run(['pbespgsolve', '-v', 'cabp.infinitely_often_receive_d1.pbes'], check=True)
 
-os.system('lps2pbes -v -f infinitely_often_receive_for_all_d.mcf cabp.lps cabp.infinitely_often_receive_for_all_d.pbes')
-os.system('pbespgsolve -v cabp.infinitely_often_receive_for_all_d.pbes')
+subprocess.run(['lps2pbes', '-v', '-f', 'infinitely_often_receive_for_all_d.mcf', 'cabp.lps', 'cabp.infinitely_often_receive_for_all_d.pbes'], check=True)
+subprocess.run(['pbespgsolve', '-v', 'cabp.infinitely_often_receive_for_all_d.pbes'], check=True)
 
-os.system('lps2pbes -v -f read_then_eventually_send.mcf cabp.lps cabp.read_then_eventually_send.pbes')
-os.system('pbes2bool -v cabp.read_then_eventually_send.pbes')
+subprocess.run(['lps2pbes', '-v', '-f', 'read_then_eventually_send.mcf', 'cabp.lps', 'cabp.read_then_eventually_send.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'cabp.read_then_eventually_send.pbes'], check=True)
 
-os.system('lps2pbes -v -f read_then_eventually_send_if_fair.mcf cabp.lps cabp.read_then_eventually_send_if_fair.pbes')
-os.system('pbes2bool -v cabp.read_then_eventually_send_if_fair.pbes')
+subprocess.run(['lps2pbes', '-v', '-f', 'read_then_eventually_send_if_fair.mcf', 'cabp.lps', 'cabp.read_then_eventually_send_if_fair.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'cabp.read_then_eventually_send_if_fair.pbes'], check=True)
 
-os.system('lps2pbes -v -f no_generation_of_messages.mcf cabp.lps cabp.no_generation_of_messages.pbes')
-os.system('pbes2bool -v cabp.no_generation_of_messages.pbes')
+subprocess.run(['lps2pbes', '-v', '-f', 'no_generation_of_messages.mcf', 'cabp.lps', 'cabp.no_generation_of_messages.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'cabp.no_generation_of_messages.pbes'], check=True)
 
-os.system('lps2pbes -v -f no_duplication_of_messages.mcf cabp.lps cabp.no_duplication_of_messages.pbes')
-os.system('pbes2bool -v cabp.no_duplication_of_messages.pbes')
-
+subprocess.run(['lps2pbes', '-v', '-f', 'no_duplication_of_messages.mcf', 'cabp.lps', 'cabp.no_duplication_of_messages.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'cabp.no_duplication_of_messages.pbes'], check=True)

@@ -23,6 +23,7 @@
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/explorer_options.h"
@@ -633,7 +634,7 @@ class explorer: public abortable
         data::remove_assignments(sigma, summand.variables);
         data::data_expression reduced_condition = rewr(summand.condition, sigma);
         throw data::enumerator_error("Condition " + data::pp(reduced_condition) +
-                                     " does not rewrite to true or false. Culprit: "
+                                     " does not rewrite to true or false. \nCulprit: "
                                      + printed_condition.substr(0,300)
                                      + (printed_condition.size() > 300 ? "..." : ""));
       }
