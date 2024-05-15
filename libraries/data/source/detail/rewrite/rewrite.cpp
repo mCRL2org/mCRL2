@@ -8,6 +8,8 @@
 
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
+
 #ifdef MCRL2_ENABLE_JITTYC
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #endif

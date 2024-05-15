@@ -30,7 +30,7 @@ struct enumerator_iteration_limit
 
 // Initialization
 template <class T>
-std::size_t enumerator_iteration_limit<T>::max_enumerator_iterations = 10;
+std::size_t enumerator_iteration_limit<T>::max_enumerator_iterations = 1000;
 
 inline
 void set_enumerator_iteration_limit(std::size_t size)
