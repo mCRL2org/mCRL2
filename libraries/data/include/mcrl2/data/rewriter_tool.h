@@ -61,7 +61,7 @@ class rewriter_tool: public Tool
       desc.add_option(
         "qlimit", 
         utilities::make_mandatory_argument("NUM"),
-        "limit enumeration of quantifiers to NUM iterations. (Default NUM=1000, NUM=0 for unlimited).",
+        "limit enumeration of quantifiers to NUM iterations (default NUM=1000, NUM=0 for unlimited).",
         'Q'
       );
 
