@@ -17,3 +17,5 @@ build/
 *.lps
 *.pbes
 *.trc
+*.sym
+jittyc*

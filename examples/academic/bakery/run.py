@@ -3,6 +3,8 @@
 import subprocess
 import os
 
+from shutil import which
+
 # Change working dir to the script path
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -36,19 +38,21 @@ for formula in [
     #subprocess.run(['pbes2bool', '-v', '-s3', '-rjitty', f'bakery.{formula}.pbes'], check=True)
 
     # Instead we can abstract the data types to obtain over and underapproximations. These use the partial solvers of pbes2bool to terminate early.
-    print('Answer by under-approximation: ')
-    subprocess.run(['pbesabsinthe', '-sunder', '-a', 'abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], check=True)
-    subprocess.run(['pbes2bool', '-s3', '-rjitty', f'bakery.{formula}.absinthe.pbes'], check=True)
+    pbesabsinthe = which('pbesabsinthe')
+    if pbesabsinthe is not None:
+        print('Answer by under-approximation: ')
+        subprocess.run([pbesabsinthe, '-sunder', '-a', 'abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], check=True)
+        subprocess.run(['pbes2bool', '-s3', '-rjitty', f'bakery.{formula}.absinthe.pbes'], check=True)
 
-    print('Answer by over-approximation: ')
-    subprocess.run(['pbesabsinthe', '-sover', '-a', 'abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], check=True)
-    subprocess.run(['pbes2bool', '-s3', '-rjitty', f'bakery.{formula}.absinthe.pbes'], check=True)
+        print('Answer by over-approximation: ')
+        subprocess.run([pbesabsinthe, '-sover', '-a', 'abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], check=True)
+        subprocess.run(['pbes2bool', '-s3', '-rjitty', f'bakery.{formula}.absinthe.pbes'], check=True)
 
-    # Alternatively, we can abstract more aggressive to ensure that the parity game is finite.
-    print('Answer by aggressive under-approximation: ')
-    subprocess.run(['pbesabsinthe', '-sunder', '-a', 'aggressive_abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], check=True)
-    subprocess.run(['pbes2bool', '-rjitty', f'bakery.{formula}.absinthe.pbes'], check=True)
+        # Alternatively, we can abstract more aggressive to ensure that the parity game is finite.
+        print('Answer by aggressive under-approximation: ')
+        subprocess.run([pbesabsinthe, '-sunder', '-a', 'aggressive_abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], check=True)
+        subprocess.run(['pbes2bool', '-rjitty', f'bakery.{formula}.absinthe.pbes'], check=True)
 
-    print('Answer by aggressive over-approximation: ')
-    subprocess.run(['pbesabsinthe', '-sover', '-a', 'aggressive_abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], check=True)
-    subprocess.run(['pbes2bool', '-rjitty', f'bakery.{formula}.absinthe.pbes'], check=True)
+        print('Answer by aggressive over-approximation: ')
+        subprocess.run([pbesabsinthe, '-sover', '-a', 'aggressive_abstraction.txt', f'bakery.{formula}.pbes', f'bakery.{formula}.absinthe.pbes'], check=True)
+        subprocess.run(['pbes2bool', '-rjitty', f'bakery.{formula}.absinthe.pbes'], check=True)

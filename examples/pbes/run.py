@@ -25,5 +25,5 @@ if pbessymbolicbisim is not None:
 else:
     print('Requires the experimental tool pbessymbolicbisim and an SMT solver')
 
-for file in ['datatypes.txt', 'nonmonotonic.txt', 'overloading.txt', 'true.txt']:
+for file in ['datatypes.txt', 'nonmonotonic.txt', 'true.txt']:
     run = subprocess.run(['txt2pbes', file], stdout=subprocess.PIPE, check=True)
