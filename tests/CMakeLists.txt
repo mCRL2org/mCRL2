@@ -63,7 +63,7 @@ add_test(NAME tooltests
 )
 
 # Disabled until the script contains timeouts.
-#add_test(NAME exampletests
-#  COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_examples.py
-#    --toolpath ${MCRL2_TOOL_PATH}
-#)
+add_test(NAME exampletests
+  COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_examples.py
+    --toolpath ${MCRL2_TOOL_PATH}
+)

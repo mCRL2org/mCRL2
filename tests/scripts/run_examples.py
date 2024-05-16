@@ -18,9 +18,12 @@ def main():
     )
 
     parser.add_argument("-m", "--max_workers", action="store", default=1, type=int)
+    parser.add_argument("-r", "--rewriter", action="store", type=str)
     parser.add_argument(
         "-t", "--mcrl2-binpath", action="store", type=str, required=True
     )
+
+
 
     args = parser.parse_args()
 
@@ -29,7 +32,12 @@ def main():
     def run_example(path, index):
         print(f"[{index}] Running {path}")
 
-        result = subprocess.run([sys.executable, path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60, cwd=os.path.dirname(path), check=True)
+        try:
+            result = subprocess.run([sys.executable, path] + ["-rjittyc"] if args.rewriter == "jittyc" else [], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60, cwd=os.path.dirname(path), check=True)
+        except subprocess.TimeoutExpired:
+            # Ignore timeouts, they are not errors.
+            return ""
+
         return result.stdout
 
     # Start the linearisation process
@@ -52,6 +60,7 @@ def main():
 
         # Wait for jobs to finish and show a progress bar.
         finished = 0
+        failed = []
         for future in concurrent.futures.as_completed(futures):
             path = futures[future]
 
@@ -59,6 +68,7 @@ def main():
                 print(
                     f"[{finished}/{len(run_scripts)}] Example {path} failed with {future.exception()}"
                 )
+                failed.append(path)
             if future.cancelled():
                 print(f"[{finished}/{len(run_scripts)}] Example {path} was cancelled")
             else:
@@ -66,6 +76,9 @@ def main():
 
             finished += 1
 
+        print("Failed tests...")
+        for name in failed:
+            print(f"{name} failed")
 
 if __name__ == "__main__":
     main()

@@ -24,9 +24,11 @@
 % State space statistics: 160148696 states 
 %
 % NOTE: The above method takes roughly 50 hours (December 2011); 
-% lps-reach with chaining and/or saturation of the LTSmin toolset is able to take 
+%
+% lpsreach with chaining and/or saturation is able to take 
 % advantage of the asynchronous nature of the state space, allowing the tool to
 % exhaustively explore the state space symbolically in approx. 10 seconds.
+% Furthermore, pbessolvesymbolic can also verify both properties in 10 seconds.
 
 sort Status = struct 
 			Stalled?is_stalled |
