@@ -66,7 +66,7 @@ unfold_cache_element& unfold_data_manager::get_cache_element(const data::sort_ex
   else
   {
     /* Using cache */
-    mCRL2log(log::verbose) << "Update using cache for sort: \"" <<  data::pp(sort)  << "\"..." << std::endl;
+    mCRL2log(log::debug) << "Update using cache for sort: \"" <<  data::pp(sort)  << "\"..." << std::endl;
     return ce->second;
   }
 }
