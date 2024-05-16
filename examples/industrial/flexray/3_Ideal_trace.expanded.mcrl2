@@ -1,4 +1,3 @@
-#!./preprocessor.py
 % CHIRP: 11
 % CAS: 30
 % Frame: 40 (Header) + 16*N (Payload) + 24 (CRC), 0 <= N < 128
@@ -45,23 +44,23 @@ map deaf_node,
     noise_min_backoff,
     noise_max_backoff: Nat;
 var id: Sender;
-eqn ATTEMPTS = ${ATTEMPTS};
-    deaf_node = ${DEAF};      % Which is the deaf node (0 to disable)
-    mute_node = ${MUTE};      % Which is the mute node (0 to disable)
-    reset_node = ${RESET};    % Which is the resetting node (0 to disable)
-    MIN_DELAY = ${MIN_DELAY}; % Min and max delay of delayed nodes
-    MAX_DELAY = ${MAX_DELAY}; 
-    AP_offset = ${AP_OFFSET};
-    SLOT_length = ${SLOT_LENGTH};
-    CHIRP_length = ${CHIRP};  % Lengths (in bits) of CHIRP, NIT, CAS, 
-    NIT_length = ${NIT};      %   frame header and frame
-    length(CAS) = ${CAS}; 
-    length(FRAME_HEADER(id)) = ${HDR}; 
-    length(FRAME(id)) = ${HDR} + ${PAYLOAD}; 
+eqn ATTEMPTS = 3;
+    deaf_node = 0;      % Which is the deaf node (0 to disable)
+    mute_node = 0;      % Which is the mute node (0 to disable)
+    reset_node = 0;    % Which is the resetting node (0 to disable)
+    MIN_DELAY = 0; % Min and max delay of delayed nodes
+    MAX_DELAY = CYCLE_length; 
+    AP_offset = 6;
+    SLOT_length = 24;
+    CHIRP_length = 1;  % Lengths (in bits) of CHIRP, NIT, CAS, 
+    NIT_length = 12;      %   frame header and frame
+    length(CAS) = 3; 
+    length(FRAME_HEADER(id)) = 6; 
+    length(FRAME(id)) = 6 + 9; 
     length(NOTHING) = 0;
-    noise_max_burst = ${NOISE_MAX_BURST};     % Noise model
-    noise_min_backoff = ${NOISE_MIN_BACKOFF};
-    noise_max_backoff = ${NOISE_MAX_BACKOFF};
+    noise_max_burst = 0;     % Noise model
+    noise_min_backoff = 0;
+    noise_max_backoff = 0;
     
 % Model constants and helper functions
 map NODES: Pos;
@@ -160,46 +159,38 @@ proc
 % The CODEC process models the SDL process of the same name. We abstract away
 % from the process of bitstrobing. What remains is the mutually exclusive 
 % sending and receiving of bit patterns.
-proc CODEC = nested(id: Sender)
-{
-  initial state Init() = Receive(0, 0, 0, NONE);
-  
-  state Receive(lastsender: Sender, idle, data: Nat, sig: Signal) =
-    is_idle(idle >= CHIRP_length) . Receive()
-  + bit . Receive()
-  + put(id, NONE) . Receive()
-  + sum S: Symbol . encode(S) . Send(signal(S), 0, length(S))
+proc CODEC(id: Sender) = CODEC'Init(id);
+proc CODEC'Init(id: Sender) = CODEC'Receive(id, 0, 0, 0, NONE);
+proc CODEC'Receive(id: Sender, lastsender: Sender, idle, data: Nat, sig: Signal) = is_idle(idle >= CHIRP_length) . CODEC'Receive(id, lastsender, idle, data, sig)
+  + bit . CODEC'Receive(id, lastsender, idle, data, sig)
+  + put(id, NONE) . CODEC'Receive(id, lastsender, idle, data, sig)
+  + sum S: Symbol . encode(S) . CODEC'Send(id, signal(S), 0, length(S))
   + sum S: Signal . get(id, S) . 
     (
-      isNone(S) -> Receive(0, if(isNone(sig), 
+      isNone(S) -> CODEC'Receive(id, 0, if(isNone(sig), 
                            min(CHIRP_length, idle + 1), 1), 0, S)
-    + isNoise(S) -> Receive(0, 0, 0, S)
-    + isData(S) -> Announce(s_(S), 0, if(lastsender == s_(S), data+1, 0), sig)
-    + isCAS(S) -> Announce(s_(S), 0, if(isCAS(sig), data + 1, 1), S)
-    + (isHeader(S) || isBody(S)) -> Announce(s_(S), 0, 1, S)
+    + isNoise(S) -> CODEC'Receive(id, 0, 0, 0, S)
+    + isData(S) -> CODEC'Announce(id, s_(S), 0, if(lastsender == s_(S), data+1, 0), sig)
+    + isCAS(S) -> CODEC'Announce(id, s_(S), 0, if(isCAS(sig), data + 1, 1), S)
+    + (isHeader(S) || isBody(S)) -> CODEC'Announce(id, s_(S), 0, 1, S)
     );
-  
-  state Announce(lastsender: Sender, idle, data: Nat, sig: Signal) =
-    is_idle(false) . Announce()
+proc CODEC'Announce(id: Sender, lastsender: Sender, idle, data: Nat, sig: Signal) = is_idle(false) . CODEC'Announce(id, lastsender, idle, data, sig)
   + (data > 0 && data == length(symbol(sig))) 
       -> decode(id, symbol(sig)) . 
-         Receive(sig=if(isHeader(sig), FIRST_BODY_BIT(s_(sig)), sig))
-      <> Receive();
-  
-  state Send(sig: Signal, sent, len: Nat) = 
-    is_idle(false) . Send()
-  + bit . Send()
-  + (sent == 0) -> put(id, sig) . Send(sent = 1)
+         CODEC'Receive(id, lastsender, idle, data, if(isHeader(sig), FIRST_BODY_BIT(s_(sig)), sig))
+      <> CODEC'Receive(id, lastsender, idle, data, sig);
+proc CODEC'Send(id: Sender, sig: Signal, sent, len: Nat) = is_idle(false) . CODEC'Send(id, sig, sent, len)
+  + bit . CODEC'Send(id, sig, sent, len)
+  + (sent == 0) -> put(id, sig) . CODEC'Send(id, sig, 1, len)
   + (sent > 0 && sent < len) 
       -> put(id, if(isCAS(sig), sig, DATA_BIT(id))) . 
-         Send(sent = sent + 1)
+         CODEC'Send(id, sig, sent + 1, len)
   + (sent == len && isHeader(sig)) 
       -> put(id, DATA_BIT(id)) . 
-         Send(DATA_BIT(id), sent + 1, length(FRAME(id)))
+         CODEC'Send(id, DATA_BIT(id), sent + 1, length(FRAME(id)))
   + (sent == len && !isHeader(sig)) 
-      -> sum S: Signal . get(id, S) . Receive(0, 0, 0, NONE)
-      <> sum S: Signal . get(id, S) . Send();
-};
+      -> sum S: Signal . get(id, S) . CODEC'Receive(id, 0, 0, 0, NONE)
+      <> sum S: Signal . get(id, S) . CODEC'Send(id, sig, sent, len);
 
 % The MAC process models the SDL process of the same name, and decides when the
 % CODEC process should send data. When it is active, it periodically sends a 
@@ -219,67 +210,48 @@ proc MAC(id: Sender, togo: Int, active: Bool) =
 
 % The DelayedController models a normal POC process that starts after MIN_DELAY 
 % and before MAX_DELAY clock ticks.
-proc DelayedController = nested(id: Sender)
-{
-  initial state Off = Wait(0);  
-  
-  state Wait(counter: Nat) =
-    decode(id, CAS) . Wait()
+proc DelayedController(id: Sender) = DelayedController'Off(id);
+proc DelayedController'Off(id: Sender) = DelayedController'Wait(id, 0);
+proc DelayedController'Wait(id: Sender, counter: Nat) = decode(id, CAS) . DelayedController'Wait(id, counter)
   + sum id': Sender . 
       decode(id, FRAME_HEADER(id')) . 
-      Wait()
+      DelayedController'Wait(id, counter)
   + sum id': Sender . 
       decode(id, FRAME(id')) . 
-      Wait()
+      DelayedController'Wait(id, counter)
 
-  + (counter < MAX_DELAY) -> bit . Wait(counter=counter + 1)
+  + (counter < MAX_DELAY) -> bit . DelayedController'Wait(id, counter + 1)
   + (counter >= MIN_DELAY) -> Controller(id, ATTEMPTS);
-};
 
 % The Controller process models the startup behaviour of the POC SDL process.  
 % Its states correspond directly to the SDL states defined in the FlexRay 
 % specification.
-proc Controller = nested(id: Sender, attempts: Nat)
-{
-  % StartupPrepare is called every time a startup attempt is initiated. If the
-  % number of startup attempts exceeds some maximum (in our case, we choose this
-  % maximum to be 3), then startup is aborted altogether.
-  initial state StartupPrepare =
-    (attempts > 1) -> attempt_startup(id) . ColdstartListen(0, 0)
-                   <> integrating(id) . IntegrationListen();
-
-  % In the IntegrationListen state, the node waits for a frame to be decoded
-  % from the bus (in this case, the clock synchronisation will have started
-  % integration).
-  state IntegrationListen() =
-    decode(id, CAS) . IntegrationListen()
-  + sum id': Sender . decode(id, FRAME_HEADER(id')) . IntegrationListen()
+proc Controller(id: Sender, attempts: Nat) = Controller'StartupPrepare(id, attempts);
+proc Controller'StartupPrepare(id: Sender, attempts: Nat) = (attempts > 1) -> attempt_startup(id) . Controller'ColdstartListen(id, attempts, 0, 0)
+                   <> integrating(id) . Controller'IntegrationListen(id, attempts);
+proc Controller'IntegrationListen(id: Sender, attempts: Nat) = decode(id, CAS) . Controller'IntegrationListen(id, attempts)
+  + sum id': Sender . decode(id, FRAME_HEADER(id')) . Controller'IntegrationListen(id, attempts)
   + sum id': Sender . 
       decode(id, FRAME(id')) . 
       bit . 
       init_sched(id) . 
-      InitialiseSchedule(0, id')
-  + reset(id) . AbortStartup(attempts=ATTEMPTS)
+      Controller'InitialiseSchedule(id, attempts, 0, id')
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS)
 
-  + is_integrating(id) . IntegrationListen()
+  + is_integrating(id) . Controller'IntegrationListen(id, attempts)
 
-  + bit . IntegrationListen();
-  
-  % In the ColdStartListen state, the node waits for communication on the bus.
-  % If no communication is detected, a coldstart is attempted by sending a CAS
-  % symbol (by activating the MAC through a macCAS action).
-  state ColdstartListen(tStartup, tStartupNoise: Nat) =
-  (
-    decode(id, CAS) . ColdstartListen(tStartupNoise=0)
+  + bit . Controller'IntegrationListen(id, attempts);
+proc Controller'ColdstartListen(id: Sender, attempts: Nat, tStartup, tStartupNoise: Nat) = (
+    decode(id, CAS) . Controller'ColdstartListen(id, attempts, tStartup, 0)
   + sum id': Sender . 
       decode(id, FRAME_HEADER(id')) . 
-      ColdstartListen(tStartupNoise=0)
+      Controller'ColdstartListen(id, attempts, tStartup, 0)
   + sum id': Sender . 
       decode(id, FRAME(id')) . 
       bit . 
       init_sched(id) . 
-      InitialiseSchedule(0, id')
-  + reset(id) . AbortStartup(attempts=ATTEMPTS)
+      Controller'InitialiseSchedule(id, attempts, 0, id')
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS)
 
   + bit . 
     (
@@ -287,201 +259,144 @@ proc Controller = nested(id: Sender, attempts: Nat)
        tStartupNoise >= 4 * CYCLE_length - 1)
       -> ( is_idle(true) . 
            macCAS . 
-           ColdstartCollisionResolution(attempts=Int2Nat(attempts-1), timer=-SLOT_length)
+           Controller'ColdstartCollisionResolution(id, Int2Nat(attempts-1), -SLOT_length)
          + is_idle(false) . 
-           ColdstartListen(tStartup=0, 
-                           tStartupNoise=tStartupNoise + 1)
+           Controller'ColdstartListen(id, attempts, 0, tStartupNoise + 1)
          )
     + (tStartup < 2 * CYCLE_length - 1 && 
        tStartupNoise < 4 * CYCLE_length - 1)
       -> ( is_idle(true) . 
-           ColdstartListen(tStartup=tStartup + 1, 
-                           tStartupNoise=tStartupNoise + 1)
+           Controller'ColdstartListen(id, attempts, tStartup + 1, tStartupNoise + 1)
          + is_idle(false) . 
-           ColdstartListen(tStartup=0, 
-                           tStartupNoise=tStartupNoise + 1)
+           Controller'ColdstartListen(id, attempts, 0, tStartupNoise + 1)
          )
     )
   );
-
-  % In InitialiseSchedule, the node waits for the clock synchronisation process
-  % to finish its initialisation. In this model, we abstracted away from clock
-  % synchronisation, and therefore this state can be left as soon as the second
-  % frame of the sender that this node is synchronising on (syncon) is received.
-  state InitialiseSchedule(timer: Nat, syncon: Sender) =
-  (
-    decode(id, CAS) . InitialiseSchedule()
+proc Controller'InitialiseSchedule(id: Sender, attempts: Nat, timer: Nat, syncon: Sender) = (
+    decode(id, CAS) . Controller'InitialiseSchedule(id, attempts, timer, syncon)
   + sum id': Sender . 
       decode(id, FRAME_HEADER(id')) . 
-      InitialiseSchedule()
+      Controller'InitialiseSchedule(id, attempts, timer, syncon)
   + sum id': Sender . 
       decode(id, FRAME(id')) .
       (
         (id' == syncon) 
         -> ((timer == CYCLE_length - 1) 
             -> bit . 
-               IntegrationColdstartCheck(
-                 Int2Nat(FRM_START(syncon) + length(FRAME(id'))), syncon, 
-                 false, false, false, false)
-            <> AbortStartup()
+               Controller'IntegrationColdstartCheck(id, attempts, Int2Nat(FRM_START(syncon) + length(FRAME(id'))), syncon, false, false, false, false)
+            <> Controller'AbortStartup(id, attempts)
            ) 
-        <> InitialiseSchedule()
+        <> Controller'InitialiseSchedule(id, attempts, timer, syncon)
       )
-  + reset(id) . AbortStartup(attempts=ATTEMPTS)
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS)
   
   + bit . 
     (timer > CYCLE_length) 
-    -> AbortStartup() 
-    <> InitialiseSchedule(timer=timer + 1)
+    -> Controller'AbortStartup(id, attempts) 
+    <> Controller'InitialiseSchedule(id, attempts, timer + 1, syncon)
   );
-  
-  % Once a CAS symbol was sent, the ColdStartCollisionResolution state is 
-  % entered to see if any other node is taking on the role of leading coldstart
-  % node. If not, then this node is the leading coldstart node, and the 
-  % ColdstartConsistencyCheck state is entered. Otherwise, startup is aborted.
-  state ColdstartCollisionResolution(timer: Int) =
-  (
-    decode(id, CAS) . AbortStartup()
+proc Controller'ColdstartCollisionResolution(id: Sender, attempts: Nat, timer: Int) = (
+    decode(id, CAS) . Controller'AbortStartup(id, attempts)
   + sum id': Sender . 
       decode(id, FRAME_HEADER(id')) . 
-      AbortStartup()
+      Controller'AbortStartup(id, attempts)
   + sum id': Sender . 
       decode(id, FRAME(id')) . 
-      ColdstartCollisionResolution()
-  + reset(id) . AbortStartup(attempts=ATTEMPTS)
+      Controller'ColdstartCollisionResolution(id, attempts, timer)
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS)
   
   + bit . 
     (timer < CYCLE_length * 4) 
-    -> ColdstartCollisionResolution(timer=timer + 1)
-    <> ColdstartConsistencyCheck(0, false, false)
+    -> Controller'ColdstartCollisionResolution(id, attempts, timer + 1)
+    <> Controller'ColdstartConsistencyCheck(id, attempts, 0, false, false)
   );
-  
-  % During the ColdstartConsistencyCheck, the node checks that during two
-  % consecutive cycles a frame is decoded. If no-one followed, then it is 
-  % assumed that the other nodes were not actve yet, and the ColdStartGap state
-  % is entered. If in the first cycle a frame is decoded, but not in the second,
-  % then it is assumed that something went wrong, and the startup attempt is 
-  % simply aborted. If all went well, normal operation is entered.
-  state ColdstartConsistencyCheck(timer: Nat, ok1, ok2: Bool) =
-  (
-    decode(id, CAS) .  ColdstartConsistencyCheck()
+proc Controller'ColdstartConsistencyCheck(id: Sender, attempts: Nat, timer: Nat, ok1, ok2: Bool) = (
+    decode(id, CAS) .  Controller'ColdstartConsistencyCheck(id, attempts, timer, ok1, ok2)
   + sum id': Sender . 
       decode(id, FRAME_HEADER(id')) . 
-      ColdstartConsistencyCheck()
+      Controller'ColdstartConsistencyCheck(id, attempts, timer, ok1, ok2)
   + sum id': Sender . 
       decode(id, FRAME(id')) . 
-      ColdstartConsistencyCheck(ok1=true, ok2=timer >= CYCLE_length)
-  + reset(id) . AbortStartup(attempts=ATTEMPTS)
+      Controller'ColdstartConsistencyCheck(id, attempts, timer, true, timer >= CYCLE_length)
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS)
   
   + (timer < CYCLE_length * 1 - 1) 
-    -> bit . ColdstartConsistencyCheck(timer=timer + 1)
+    -> bit . Controller'ColdstartConsistencyCheck(id, attempts, timer + 1, ok1, ok2)
   + (timer < CYCLE_length * 2 - 1 && timer >= CYCLE_length * 1 - 1)
-    -> (ok1 -> bit . ColdstartConsistencyCheck(timer=timer + 1)
+    -> (ok1 -> bit . Controller'ColdstartConsistencyCheck(id, attempts, timer + 1, ok1, ok2)
             <> ((attempts > 0) -> macStop . 
-                                  ColdstartGap(attempts=Int2Nat(attempts - 1), timer=0)
-                               <> bit . AbortStartup()))
+                                  Controller'ColdstartGap(id, Int2Nat(attempts - 1), 0)
+                               <> bit . Controller'AbortStartup(id, attempts)))
   + (timer >= CYCLE_length * 2 - 1)
-    -> (ok2 -> bit . enter_operation(id) . NormalOperation()
-            <> AbortStartup())
+    -> (ok2 -> bit . enter_operation(id) . Controller'NormalOperation(id, attempts)
+            <> Controller'AbortStartup(id, attempts))
   );
-  
-  % During the ColdStartGap, no frames are sent for one cycle. After this cycle,
-  % frame sending is recommenced, so that other nodes may follow. Entering the
-  % ColdStartGap state counts as a new coldstart attempt, and can therefore only
-  % be done a limited number of times.
-  state ColdstartGap(timer: Nat) =
-  (
-    decode(id, CAS) .  AbortStartup()
+proc Controller'ColdstartGap(id: Sender, attempts: Nat, timer: Nat) = (
+    decode(id, CAS) .  Controller'AbortStartup(id, attempts)
   + sum id': Sender . 
       decode(id, FRAME_HEADER(id')) . 
-      AbortStartup()
+      Controller'AbortStartup(id, attempts)
   + sum id': Sender . 
       decode(id, FRAME(id')) . 
-      ColdstartGap()
-  + reset(id) . AbortStartup(attempts=ATTEMPTS)
+      Controller'ColdstartGap(id, attempts, timer)
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS)
   
   + (timer < CYCLE_length * 1)
-    -> bit . ColdstartGap(timer + 1)
+    -> bit . Controller'ColdstartGap(id, attempts, timer + 1)
     <> macStart . 
-       ColdstartCollisionResolution(0)
+       Controller'ColdstartCollisionResolution(id, attempts, 0)
   );
-  
-  % The IntegrationColdstartCheck is performed when a node is not the leading
-  % coldstart node. It checks that either the leading coldstart node is still
-  % sending frames as expected, or otherwise at least two other nodes are 
-  % sending frames. If this is not the case, then the coldstart attempt is 
-  % aborted.
-  state IntegrationColdstartCheck(timer: Nat, syncon: Sender, 
-                                  seen1, seen2, ok1, ok2: Bool) =
-  (
-    decode(id, CAS) .  IntegrationColdstartCheck()
-  + reset(id) . AbortStartup(attempts=ATTEMPTS)
+proc Controller'IntegrationColdstartCheck(id: Sender, attempts: Nat, timer: Nat, syncon: Sender, seen1, seen2, ok1, ok2: Bool) = (
+    decode(id, CAS) .  Controller'IntegrationColdstartCheck(id, attempts, timer, syncon, seen1, seen2, ok1, ok2)
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS)
   + sum id': Sender . 
       decode(id, FRAME_HEADER(id')) . 
-      IntegrationColdstartCheck()
+      Controller'IntegrationColdstartCheck(id, attempts, timer, syncon, seen1, seen2, ok1, ok2)
   + sum id': Sender . 
       decode(id, FRAME(id')) . 
-      IntegrationColdstartCheck(
-        seen1=timer >= 1 * CYCLE_length, 
-        ok1=seen1 || (id'==syncon && timer >= 1 * CYCLE_length),
-        seen2=timer >= 2 * CYCLE_length, 
-        ok2=seen2 || (id'==syncon && timer >= 2 * CYCLE_length))
+      Controller'IntegrationColdstartCheck(id, attempts, timer, syncon, timer >= 1 * CYCLE_length, timer >= 2 * CYCLE_length, seen1 || (id'==syncon && timer >= 1 * CYCLE_length), seen2 || (id'==syncon && timer >= 2 * CYCLE_length))
 
   + (timer < 1 * CYCLE_length - 1)
-    -> bit . IntegrationColdstartCheck(timer=timer + 1)
+    -> bit . Controller'IntegrationColdstartCheck(id, attempts, timer + 1, syncon, seen1, seen2, ok1, ok2)
   + (timer < 2 * CYCLE_length - 1 && timer >= 1 * CYCLE_length - 1) 
-    -> bit . IntegrationColdstartCheck(timer=timer + 1)
+    -> bit . Controller'IntegrationColdstartCheck(id, attempts, timer + 1, syncon, seen1, seen2, ok1, ok2)
   + (timer < 3 * CYCLE_length - 1 && timer >= 2 * CYCLE_length - 1) 
-    -> (ok1 -> bit . IntegrationColdstartCheck(timer=timer + 1)
-            <> bit . AbortStartup())
+    -> (ok1 -> bit . Controller'IntegrationColdstartCheck(id, attempts, timer + 1, syncon, seen1, seen2, ok1, ok2)
+            <> bit . Controller'AbortStartup(id, attempts))
   + (timer >= 3 * CYCLE_length - 1)
     -> (ok2 -> macStart . 
-               attempt_startup(id) . ColdstartJoin(0)
-             <> AbortStartup())
+               attempt_startup(id) . Controller'ColdstartJoin(id, attempts, 0)
+             <> Controller'AbortStartup(id, attempts))
   );
-  
-  % During the ColdstartJoin phase, a coldstart node that is not the leading
-  % coldstart node starts sending frames. 
-  state ColdstartJoin(timer: Nat) =
-  (
-    decode(id, CAS) .  ColdstartJoin()
+proc Controller'ColdstartJoin(id: Sender, attempts: Nat, timer: Nat) = (
+    decode(id, CAS) .  Controller'ColdstartJoin(id, attempts, timer)
   + sum id': Sender . 
       decode(id, FRAME_HEADER(id')) . 
-      ColdstartJoin()
+      Controller'ColdstartJoin(id, attempts, timer)
   + sum id': Sender . 
       decode(id, FRAME(id')) .  
-      ColdstartJoin()
-  + reset(id) . AbortStartup(attempts=ATTEMPTS)
+      Controller'ColdstartJoin(id, attempts, timer)
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS)
   
   + bit . (timer < 3 * CYCLE_length)
-    -> ColdstartJoin(timer + 1)
-    <> enter_operation(id) . NormalOperation()
+    -> Controller'ColdstartJoin(id, attempts, timer + 1)
+    <> enter_operation(id) . Controller'NormalOperation(id, attempts)
   );
-  
-  % When a startup attempt is aborted, the MAC is stopped and the StartupPrepare
-  % state is entered again.
-  state AbortStartup() =
-  (
-    decode(id, CAS) . AbortStartup()
+proc Controller'AbortStartup(id: Sender, attempts: Nat) = (
+    decode(id, CAS) . Controller'AbortStartup(id, attempts)
   + sum id': Sender . 
       decode(id, FRAME_HEADER(id')) . 
-      AbortStartup()
+      Controller'AbortStartup(id, attempts)
   + sum id': Sender . 
       decode(id, FRAME(id')) . 
-      AbortStartup()
-  + reset(id) . AbortStartup(attempts=ATTEMPTS)
+      Controller'AbortStartup(id, attempts)
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS)
   
   + macStop . abort(id) . Controller()
   );
-  
-  % During normal operation, there is no more controlling behaviour of the POC.
-  % We must however actively ignore bit and decode actions to avoid deadlock.
-  state NormalOperation() =
-    bit . NormalOperation()
-  + sum s: Symbol . decode(id, s) . NormalOperation()
-  + reset(id) . AbortStartup(attempts=ATTEMPTS);
-
-};
+proc Controller'NormalOperation(id: Sender, attempts: Nat) = bit . Controller'NormalOperation(id, attempts)
+  + sum s: Symbol . decode(id, s) . Controller'NormalOperation(id, attempts)
+  + reset(id) . Controller'AbortStartup(id, ATTEMPTS);
 
 
 % An absent node is modelled explicitly to be able to reuse this specification
@@ -535,7 +450,7 @@ init
          enter_operation, is_integrating|is_integrating, integrating, abort, Reset, attempt_startup},
     comm({get|get'->Get, put|put'->Put, reset|reset->Reset},
       Bus || Noise || Resetter || 
-      ${TYPE1}Node(1) || ${TYPE2}Node(2) || ${TYPE3}Node(3)
+      NormalNode(1) || NormalNode(2) || NormalNode(3)
   ));
 
 % Mappings for the mu-calculus formulae. 
@@ -563,4 +478,5 @@ eqn nextin(s, l) = inornext((s + 1) mod (NODES + 1), l);
     CORRECT_NODES = correct_nodes(0);
     remove(s2 |> l, s) = if(s2 == s, l, s2 |> remove(l, s));
     remove([], s) = [];
+
 

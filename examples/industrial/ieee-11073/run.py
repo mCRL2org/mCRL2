@@ -7,6 +7,8 @@ import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def run(mcffile, lpsfile):
+    print(f'verifying property {os.path.basename(mcffile)}')
+
     run = subprocess.run(['lps2pbes', '-f', mcffile, lpsfile], stdout=subprocess.PIPE, check=True)
     subprocess.run(['pbes2bool'], input=run.stdout, check=True)
 

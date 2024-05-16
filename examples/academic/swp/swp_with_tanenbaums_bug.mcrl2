@@ -54,6 +54,18 @@
 % Translation is revised in May 2007, by removing an error in the translation
 % and by making channels and lists finite, such that a finite state space
 % can be generated.
+&
+% Verifying deadlockfreedom with two data elements and two buffer positions
+% leads to a state space that is too large for the explicit tools. However, the
+% symbolic tools are able to verify the property
+%
+% number of states = 1.87117e+10 (time = 3762.31s)
+%
+% and verify deadlock freedom
+% number of BES equations = 5.61351e+10 (time = 5654.58s)
+% finished solving (time = 13.56s)
+% true
+%
 
 sort CS=struct accept | deliver | error | lost;
 

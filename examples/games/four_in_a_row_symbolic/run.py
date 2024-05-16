@@ -2,6 +2,10 @@
 
 import subprocess
 import shutil
+import os
+
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # We apply various preprocessing steps to eliminate the Board and Row parameters
 # since they are complex data types, in this case lists.
@@ -10,10 +14,10 @@ run = subprocess.run(["lpssuminst", "-v"], input=run.stdout, stdout=subprocess.P
 run = subprocess.run(["lpsparunfold", "-sBoard", "-n6"], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(["lpsparunfold", "-sRow", "-n8"], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(["lpsrewr", "-v"], input=run.stdout, stdout=subprocess.PIPE, check=True)
-subprocess.run(["lpsconstelm", "-v", "-", "temp.lps"], input=run.stdout, stdout=subprocess.PIPE, check=True)
+subprocess.run(["lpsconstelm", "-v", "-", "temp.lps"], input=run.stdout, check=True)
 
 run = subprocess.run(["lps2pbes", "-m", "-f", "red_wins.mcf", "temp.lps"], stdout=subprocess.PIPE, check=True)
-run = subprocess.run(["pbesconstelm", "-v", "-", "temp.red_wins.pbes"], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(["pbesconstelm", "-v", "-", "temp.red_wins.pbes"], input=run.stdout, check=True)
 
 lpsreach = shutil.which("lpsreach")
 if lpsreach:

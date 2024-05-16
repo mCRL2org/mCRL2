@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from re import sub
 import subprocess
 import os
 
@@ -12,13 +13,15 @@ subprocess.run(['mcrl22lps', '-vn', 'peg_solitaire.mcrl2', 'peg_solitaire.lps'],
 
 run = subprocess.run(['lpssuminst', '-v', 'peg_solitaire.lps'], stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
-run = subprocess.run(['lpsparunfold', '-v', '-l', '-sBoard'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsparunfold', '-v', '-sBoard'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
-run = subprocess.run(['lpsparunfold', '', '-v', '-l', '-sRow'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsparunfold', '', '-v', '-sRow'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
-run = subprocess.run(['lpsparelm', '-v', 'temp4.lps', '|', 'lpsconstelm', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsparelm', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsconstelm', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
-run = subprocess.run(['lpsbinary', 'temp5.lps', '|', 'lpsactionrename', '-frename.ren'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsbinary'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpsactionrename', '-frename.ren'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['lpsconstelm', '-', 'temp.lps'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 

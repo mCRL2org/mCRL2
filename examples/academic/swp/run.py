@@ -41,20 +41,12 @@ subprocess.run(['pbes2bool', '-v', 'swp_lists.no_duplication_of_messages.pbes'],
 subprocess.run(['mcrl22lps', '-v', 'swp_with_tanenbaums_bug.mcrl2', 'swp_with_tanenbaums_bug.lps'], check=True)
 subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'swp_with_tanenbaums_bug.lps', 'swp_with_tanenbaums_bug.nodeadlock.pbes'], check=True)
 
-# Verifying deadlockfreedom with two data elements and two buffer positions
-# leads to a state space that is too large for the explicit tools. However, the
-# symbolic tools (which are only available on linux and macos) are able to at
-# least show the state space sizes.
 lpsreach = shutil.which('lpsreach')
 if lpsreach and '--long' in argv:
-    # number of states = 1.87117e+10 (time = 3762.31s)
     subprocess.run([lpsreach, '-v', '--cached', '--chaining', '--saturation', 'swp_with_tanenbaums_bug.lps'], check=True)
 
 pbessolvesymbolic = shutil.which('pbessolvesymbolic')
 if pbessolvesymbolic and '--long' in argv:
-    # number of BES equations = 5.61351e+10 (time = 5654.58s)
-    # finished solving (time = 13.56s)
-    # true
     subprocess.run([pbessolvesymbolic, '-v', '-c', '--cached', '--chaining', '--saturation', 'swp_with_tanenbaums_bug.nodeadlock.pbes'], check=True)
 
 # It is possible to generate the state space, while looking for occurrence of
