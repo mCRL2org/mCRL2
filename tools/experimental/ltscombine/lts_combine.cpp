@@ -75,7 +75,7 @@ core::identifier_string_list sorted_action_name_list(const process::action_list&
     names.insert(action.label().name());
   }
 
-  return core::identifier_string_list::term_list(names.begin(), names.end());
+  return core::identifier_string_list(names.begin(), names.end());
 }
 
 /// \brief Checks if the given action list contains one of the blocked actions.
@@ -179,7 +179,7 @@ bool can_sync(const lps::multi_action& label)
 
 struct combined_lts_builder
 {
-  virtual void finalize(size_t states) = 0;
+  virtual void finalize_combined(size_t states) = 0;
 };
 
 class combined_lts_lts_builder : public lts::lts_lts_builder, public combined_lts_builder
@@ -191,7 +191,7 @@ public:
       : lts_lts_builder(dataspec, action_labels, process_parameters, true)
   {}
 
-  void finalize(size_t states) override
+  void finalize_combined(size_t states) override
   {
     // add actions
     m_lts.set_num_action_labels(m_actions.size());
@@ -215,7 +215,7 @@ public:
       : lts_lts_disk_builder(filename, dataspec, action_labels, process_parameters)
   {}
 
-  void finalize(size_t states) override
+  void finalize_combined(size_t states) override
   {
     // Write the initial state.
     lts::write_initial_state(*stream, 0);
@@ -581,7 +581,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   progress_monitor.finish_exploration(states.size(), nr_of_threads);
 
   // Write the initial state and the state labels.
-  combined_lts_builder->finalize(states.size());
+  combined_lts_builder->finalize_combined(states.size());
   lts_builder->save(filename);
   delete lts_builder;
 }
