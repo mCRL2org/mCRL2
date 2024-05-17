@@ -62,8 +62,14 @@ add_test(NAME tooltests
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
 )
 
-# Disabled until the script contains timeouts.
+set(EXAMPLETEST_ARGS "")
+if(MCRL2_ENABLE_JITTYC)
+  set(EXAMPLETEST_ARGS "${EXAMPLETEST_ARGS};--jittyc")
+endif()
+
 add_test(NAME exampletests
   COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_examples.py
     --toolpath ${MCRL2_TOOL_PATH}
+    ${EXAMPLETEST_ARGS}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
 )

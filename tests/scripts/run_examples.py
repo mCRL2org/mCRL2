@@ -20,7 +20,7 @@ def main():
     parser.add_argument("-m", "--max_workers", action="store", default=1, type=int)
     parser.add_argument("-r", "--rewriter", action="store", type=str)
     parser.add_argument(
-        "-t", "--mcrl2-binpath", action="store", type=str, required=True
+        "-t", "--toolpath", action="store", type=str, required=True
     )
 
 
