@@ -17,7 +17,7 @@
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
 #include "mcrl2/data/detail/rewriter_wrapper.h"
-#include "mcrl2/data/enumerator_with_iterator.h"
+#include "mcrl2/data/enumerator.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -419,7 +419,7 @@ void Rewriter::quantifier_enumeration(
     const variable v = *i;
     if (free_variables.count(v)>0)
     {
-      if(is_enumerable(m_data_specification_for_enumeration, rewriter_wrapper(this), v.sort()))
+      if (is_enumerable(m_data_specification_for_enumeration, rewriter_wrapper(this), v.sort()))
       {
         vl_new_l_enum.push_front(v);
         sorts_are_finite = sorts_are_finite && m_data_specification_for_enumeration.is_certainly_finite(v.sort());
@@ -433,7 +433,7 @@ void Rewriter::quantifier_enumeration(
 
   if (vl_new_l_enum.empty())
   {
-    if(vl_new_l_other.empty())
+    if (vl_new_l_other.empty())
     {
       result=t3;
       return; // No quantified variables are bound.
@@ -458,41 +458,43 @@ void Rewriter::quantifier_enumeration(
     }
   };
 
-  typedef enumerator_algorithm_with_iterator<rewriter_wrapper,
+  /* typedef enumerator_algorithm_with_iterator<rewriter_wrapper,
                                              enumerator_list_element<>,
                                              is_not,
                                              rewriter_wrapper,
-                                             rewriter_wrapper::substitution_type> enumerator_type;
+                                             rewriter_wrapper::substitution_type> enumerator_type; */
+
+  typedef enumerator_algorithm<rewriter_wrapper, rewriter_wrapper > enumerator_type; 
+    typedef data::enumerator_list_element<data_expression> enumerator_element;
+
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  const std::size_t max_count = sorts_are_finite ? std::numeric_limits<std::size_t>::max() : data::detail::get_enumerator_iteration_limit();
+  const std::size_t max_count = sorts_are_finite || data::detail::get_enumerator_iteration_limit()==0? 
+                                         std::numeric_limits<std::size_t>::max() : 
+                                         data::detail::get_enumerator_iteration_limit();
   try
-  {
+  { 
     enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration,
-      wrapped_rewriter, m_generator, max_count, true, is_not(identity_element));
+                               wrapped_rewriter, m_generator, false, max_count);
 
     /* Create a list to store solutions */
     data_expression partial_result = identity_element;
 
-    data::enumerator_queue<enumerator_list_element<> > enumerator_solution_deque(enumerator_list_element<>(vl_new_l_enum, t3));
+    std::size_t count=enumerator.enumerate(enumerator_element(vl_new_l_enum, t3),
+                                           sigma,
+                                           [&](const enumerator_element& p)
+                                           {
+                                             partial_result = lazy_op(partial_result, p.expression());
+                                             return partial_result==absorbing_element;
+                                           },
+                                           [&identity_element](const data_expression& d)->bool { return d==identity_element; },
+                                           [&absorbing_element](const data_expression& d)->bool { return d==absorbing_element; }
+                                          );
 
-    enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
-    for( ; sol != enumerator.end(); ++sol)
+    if (count<=max_count) // Enumeration is successful. If not fall through and return the original, simplified expression.
     {
-      partial_result = lazy_op(partial_result, sol->expression());
-      if (partial_result == absorbing_element)
-      {
-        // We found a solution, so prevent the enumerator from doing any unnecessary work
-        // Also prevents any further exceptions from the enumerator
-        result=absorbing_element;
-        return;
-      }
-    }
-
-    if (sol == enumerator.end())
-    {
-      if(vl_new_l_other.empty())
+      if (vl_new_l_other.empty())
       {
         result=partial_result;
         return;
@@ -503,16 +505,17 @@ void Rewriter::quantifier_enumeration(
         return;
       }
     }
-    // One can consider to replace the variables by their original, in order to not show
-    // internally generated variables in the output.
   }
-  catch(const mcrl2::runtime_error&)
+  catch(const mcrl2::runtime_error& e)
   {
+    // if (max_count==std::numeric_limits<std::size_t>::max()) // No bound on enumeration.
+    // {
+    //   throw e;
+    // }
     // It is not possible to enumerate one of the bound variables, or the enumerator limit of the
     // iterator is exceeded. So, we just return the original non enumerated, simplified expression.
   }
-
-  make_abstraction(result, binder,vl_new_l_enum+vl_new_l_other,rewrite(t3,sigma));
+  make_abstraction(result, binder,vl_new_l_enum+vl_new_l_other,rewrite(t3,sigma)); 
   return;
 }
 
