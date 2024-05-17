@@ -1,0 +1,8 @@
+%SAV.1
+[true*]
+  (forall v,w:Nat. [getSensorValue_c(Oxygen, v)|getValveValue_c(GasBlenderFlow,w)]
+                    (val(100*v > 103*w || 100*v < 97*w) 
+                    => 
+                    [!(snooze_alarm_c(Medium) || MediumAlarm)*]<true*.MediumAlarm>true) %  mu X. (([true]X && <true>true) || <MediumAlarm>true))
+  )
+

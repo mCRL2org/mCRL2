@@ -1,10 +1,15 @@
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-os.system('mcrl22lps -v parallel.mcrl2 parallel.lps')
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-os.system('lps2pbes -v -f nodeadlock.mcf parallel.lps parallel.nodeadlock.pbes')
-os.system('pbes2bool -v parallel.nodeadlock.pbes')
+subprocess.run(['mcrl22lps', '-v', 'parallel.mcrl2', 'parallel.lps'], check=True)
+
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'parallel.lps', 'parallel.nodeadlock.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'parallel.nodeadlock.pbes'], check=True)
 
 # The following creates state space, and stores trace to deadlock.
-os.system('lps2lts -v -Dt parallel.lps parallel.aut')
-
+subprocess.run(['lps2lts', '-v', '-Dt', 'parallel.lps', 'parallel.aut'], check=True)

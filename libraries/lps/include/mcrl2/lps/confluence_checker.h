@@ -267,7 +267,7 @@ class Confluence_Checker
 
 // Auxiliary functions ----------------------------------------------------------------------------
 
-static
+static inline
 data::mutable_map_substitution<> get_substitutions_from_assignments(const data::assignment_list& a_assignments)
 {
   data::mutable_map_substitution<> v_substitutions;
@@ -280,7 +280,7 @@ data::mutable_map_substitution<> get_substitutions_from_assignments(const data::
 }
 
 // ----------------------------------------------------------------------------------------------
-static
+static inline
 data::data_expression get_subst_equation_from_assignments(
   const data::variable_list& a_variables,
   data::assignment_list a_assignments_1,
@@ -347,7 +347,7 @@ data::data_expression get_subst_equation_from_assignments(
 
 // ----------------------------------------------------------------------------------------------
 
-static
+static inline
 data::data_expression get_equation_from_assignments(
   const data::variable_list& a_variables,
   data::assignment_list a_assignments_1,
@@ -411,7 +411,7 @@ data::data_expression get_subst_equation_from_actions(
 
 // ----------------------------------------------------------------------------------------------
 
-static data::assignment_list get_full_assignment_list(
+static inline data::assignment_list get_full_assignment_list(
   data::assignment_list a_assignment_list,
   const data::variable_list& a_variables)
 {

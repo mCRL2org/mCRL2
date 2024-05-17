@@ -23,6 +23,7 @@
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/explorer_options.h"
@@ -633,7 +634,7 @@ class explorer: public abortable
         data::remove_assignments(sigma, summand.variables);
         data::data_expression reduced_condition = rewr(summand.condition, sigma);
         throw data::enumerator_error("Condition " + data::pp(reduced_condition) +
-                                     " does not rewrite to true or false. Culprit: "
+                                     " does not rewrite to true or false. \nCulprit: "
                                      + printed_condition.substr(0,300)
                                      + (printed_condition.size() > 300 ? "..." : ""));
       }
@@ -754,10 +755,14 @@ class explorer: public abortable
       }
       else
       {
-        auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
+        summand_cache_map& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
+        // The result of find is sometimes compared with the "end()" below, where the end() belongs to 
+        // the cache which is resized in the meantime. The lock is needed to avoid this premature resizing. 
+        utilities::shared_guard g=atermpp::detail::g_thread_term_pool().lock_shared();
         summand_cache_map::iterator q = cache.find(detail::cheap_cache_key(sigma, summand.gamma));
         if (q == cache.end())
         {
+          g.unlock_shared();
           rewr(condition, summand.condition, sigma);
           atermpp::term_list<data::data_expression_list> solutions;
           if (!data::is_false(condition))
@@ -776,6 +781,10 @@ class explorer: public abortable
           }
           summand.compute_key(key, sigma);
           q = cache.insert({key, solutions}).first;
+        }
+        else
+        {
+          g.unlock_shared();
         }
 
         for (const data::data_expression_list& e: static_cast<atermpp::term_list<data::data_expression_list>&>(q->second))
@@ -995,7 +1004,7 @@ class explorer: public abortable
       for (std::size_t i = 0; i < lpsspec_summands.size(); i++)
       {
         const auto& summand = lpsspec_summands[i];
-        auto cache_strategy = m_options.cached ? (m_options.global_cache ? lps::caching::global : lps::caching::local) : lps::caching::none;
+        caching cache_strategy = m_options.cached ? (m_options.global_cache ? lps::caching::global : lps::caching::local) : lps::caching::none;
         if (is_confluent_tau(summand.multi_action()))
         {
           m_confluent_summands.emplace_back(summand, i, m_global_lpsspec.process().process_parameters(), cache_strategy);

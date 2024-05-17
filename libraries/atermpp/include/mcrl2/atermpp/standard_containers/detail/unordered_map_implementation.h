@@ -248,6 +248,62 @@ namespace atermpp
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return merge(source);
   }
+      
+  template< class Key, class T, class Hash, class Pred, class Alloc >
+  typename unordered_map<Key,T,Hash,Pred,Alloc>::iterator unordered_map<Key,T,Hash,Pred,Alloc>::begin() 
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::begin();
+  }
+  
+  template< class Key, class T, class Hash, class Pred, class Alloc >
+  typename unordered_map<Key,T,Hash,Pred,Alloc>::iterator unordered_map<Key,T,Hash,Pred,Alloc>::end()
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::end();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc >
+  typename unordered_map<Key,T,Hash,Pred,Alloc>::const_iterator unordered_map<Key,T,Hash,Pred,Alloc>::begin() const
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::begin();
+  }
+  
+  template< class Key, class T, class Hash, class Pred, class Alloc >
+  typename unordered_map<Key,T,Hash,Pred,Alloc>::const_iterator unordered_map<Key,T,Hash,Pred,Alloc>::end() const
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::end();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc >
+  typename unordered_map<Key,T,Hash,Pred,Alloc>::const_iterator unordered_map<Key,T,Hash,Pred,Alloc>::cbegin() const
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::cbegin();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc >
+  typename unordered_map<Key,T,Hash,Pred,Alloc>::const_iterator unordered_map<Key,T,Hash,Pred,Alloc>::cend() const
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::cend();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc >
+  bool unordered_map<Key,T,Hash,Pred,Alloc>::empty() const noexcept
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::empty();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc >
+  typename unordered_map<Key,T,Hash,Pred,Alloc>::size_type unordered_map<Key,T,Hash,Pred,Alloc>::max_size() const noexcept
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::max_size();
+  }
 } // namespace atermpp
 
 namespace atermpp::utilities {  
@@ -503,6 +559,61 @@ namespace atermpp::utilities {
     super::swap(other);
   }
 
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  typename unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::iterator unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::begin() 
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::begin();
+  }
+  
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  typename unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::iterator unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::end()
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::end();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  typename unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::const_iterator unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::begin() const
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::begin();
+  }
+  
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  typename unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::const_iterator unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::end() const
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::end();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  typename unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::const_iterator unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::cbegin() const
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::cbegin();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  typename unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::const_iterator unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::cend() const
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::cend();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  bool unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::empty() const noexcept
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::empty();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  typename unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::size_type unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::max_size() const noexcept
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return super::max_size();
+  }
 } // namespace atermpp::utilities
 
 #endif // MCRL2_ATERMPP_STANDARD_CONTAINER_DETAIL_UNORDERED_MAP_IMPLEMENTATION_H

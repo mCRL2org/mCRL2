@@ -136,7 +136,11 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       state_formulas::state_formula_specification formspec = state_formulas::parse_state_formula_specification(from, lpsspec, formula_is_quantitative);
       check_lts2pbes_actions(formspec.formula(), ltsspec);
       from.close();
-      lpsspec.data() = data::merge_data_specifications(lpsspec.data(), formspec.data());
+      ltsspec.set_data(data::merge_data_specifications(ltsspec.data(), formspec.data()));
+      if (!formspec.action_labels().empty())
+      {
+        mCRL2log(log::warning) << "The modal formula contains action declarations. These are ignored.\n";
+      }
       lpsspec.action_labels() = lpsspec.action_labels() + formspec.action_labels();
       pbes_system::pbes result = pbes_system::lts2pbes(ltsspec, formspec, preprocess_modal_operators, generate_counter_example);
 

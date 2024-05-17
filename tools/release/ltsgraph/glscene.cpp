@@ -669,20 +669,10 @@ void GLScene::render()
         std::size_t n = std::min(m_batch_size, amount_to_render);
         // NB: sizeof(QMatrix4x4) is NOT the same as 16 * sizeof(float)
         m_offsetBuffer.bind();
-        void* buff_ptr1 = m_offsetBuffer.mapRange(0,
-            static_cast<int>(n * 3 * sizeof(float)),
-            QOpenGLBuffer::RangeAccessFlag::RangeWrite);
-
-        // void* buff_ptr =
-        // m_matrixBuffer.map(QOpenGLBuffer::Access::WriteOnly);
-        std::memcpy(buff_ptr1, &di_ptr->offsets[index * 3], n * 3 * sizeof(float));
-        m_offsetBuffer.unmap();
-
-        m_offsetBuffer.release();
+        m_offsetBuffer.write(0, &di_ptr->offsets[index * 3], n * 3 * sizeof(float));
 
         m_colorBuffer.bind();
         m_colorBuffer.write(0, &di_ptr->colors[index * 4], static_cast<int>(n * sizeof(QVector4D)));
-        m_colorBuffer.release();
 
         glDrawArraysInstanced(di_ptr->draw_mode, di_ptr->offset, di_ptr->vertices, static_cast<int>(n));
         index += n;

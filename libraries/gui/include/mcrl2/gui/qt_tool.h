@@ -21,8 +21,14 @@
 #include <QString>
 #include <QUrl>
 #include <QtGlobal>
-#include "mcrl2/utilities/toolset_version.h"
+
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/platform.h"
+#include "mcrl2/utilities/toolset_version.h"
+
+#ifdef MCRL2_PLATFORM_WINDOWS
+#include <windows.h>
+#endif // MCRL2_PLATFORM_WINDOWS
 
 namespace mcrl2
 {
@@ -120,6 +126,17 @@ class qt_tool: public Tool
 
     int execute(int& argc, char** argv)
     {
+#ifdef MCRL2_PLATFORM_WINDOWS
+      if (GetConsoleWindow() == 0)
+      {
+        if (AttachConsole(ATTACH_PARENT_PROCESS) == 0)
+        {
+          // Failed to attach a console, we could spawn one or just ignore it.
+        }
+      }
+#endif // MCRL2_PLATFORM_WINDOWS
+
+
       return Tool::execute(argc, argv);
     }
 

@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE constelm_test
 #include <boost/test/included/unit_test.hpp>
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/remove_equations.h"

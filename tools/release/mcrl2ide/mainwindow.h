@@ -251,6 +251,9 @@ class MainWindow : public QMainWindow
   bool lastLtsHasReduction;
   bool reloadIsBeingHandled = false;
 
+  /// Keeps track of the last equivalence reduction performed, to remember it between interactions
+  std::optional<mcrl2::lts::lts_equivalence> last_equivalence = {};
+
   /**
    * @brief setupMenuBar Creates the menubar, also creates the actions and their
    *   icons and shortcuts (if applicable)

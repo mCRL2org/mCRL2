@@ -1,9 +1,15 @@
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-os.system('mcrl22lps -v chatbox.mcrl2 chatbox.lps')
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-os.system('lps2pbes -v -f nodeadlock.mcf chatbox.lps chatbox.nodeadlock.pbes')
-os.system('pbes2bool -v chatbox.nodeadlock.pbes')
+subprocess.run(['mcrl22lps', '-v', 'chatbox.mcrl2', 'chatbox.lps'], check=True)
 
-os.system('lps2lts -v chatbox.lps chatbox.aut')
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'chatbox.lps', 'chatbox.nodeadlock.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'chatbox.nodeadlock.pbes'], check=True)
+
+subprocess.run(['lps2lts', '-v', 'chatbox.lps', 'chatbox.aut'], check=True)
 

@@ -1,21 +1,26 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-os.system('mcrl22lps -vn lift3-final.mcrl2 lift3-final.lps')
+from sys import argv
 
-os.system('lps2pbes -v -f nodeadlock.mcf lift3-final.lps lift3-final.nodeadlock.pbes')
-os.system('pbes2bool -vrjittyc lift3-final.nodeadlock.pbes')
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-os.system('lps2lts -vrjittyc lift3-final.lps lift3-final.aut')
+subprocess.run(['mcrl22lps', '-vn', 'lift3-final.mcrl2', 'lift3-final.lps'], check=True)
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'lift3-final.lps', 'lift3-final.nodeadlock.pbes'], check=True)
 
-os.system('mcrl22lps -vn lift3-init.mcrl2 lift3-init.lps')
+subprocess.run(['mcrl22lps', '-vn', 'lift3-init.mcrl2', 'lift3-init.lps'], check=True)
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'lift3-init.lps', 'lift3-init.nodeadlock.pbes'], check=True)
 
-os.system('lps2pbes -v -f nodeadlock.mcf lift3-init.lps lift3-init.nodeadlock.pbes')
-os.system('pbes2bool -vrjittyc lift3-init.nodeadlock.pbes')
+if '-rjittyc' in argv:
+    subprocess.run(['lps2lts', '-vrjittyc', 'lift3-final.lps', 'lift3-final.aut'], check=True)
+    subprocess.run(['lps2lts', '-vrjittyc', 'lift3-init.lps', 'lift3-init.aut'], check=True)
 
-os.system('lps2lts -vrjittyc lift3-init.lps lift3-init.aut')
+    subprocess.run(['ltscompare', '-v', '-ebisim', 'lift3-init.aut', 'lift3-final.aut'], check=True)
+    subprocess.run(['lpsbisim2pbes', '-v', '-bstrong-bisim', 'lift3-init.lps', 'lift3-final.lps', 'lift3-bisim.pbes'], check=True)
 
-os.system('ltscompare -vebisim lift3-init.aut lift3-final.aut')
-os.system('lpsbisim2pbes -v -bstrong-bisim lift3-init.lps lift3-final.lps lift3-bisim.pbes')
-os.system('pbes2bool -vrjittyc lift3-bisim.pbes')
-
+    subprocess.run(['pbes2bool', '-vrjittyc', 'lift3-final.nodeadlock.pbes'], check=True)
+    subprocess.run(['pbes2bool', '-vrjittyc', 'lift3-init.nodeadlock.pbes'], check=True)
+    subprocess.run(['pbes2bool', '-vrjittyc', 'lift3-bisim.pbes'], check=True)

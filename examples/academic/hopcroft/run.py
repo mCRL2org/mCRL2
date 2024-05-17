@@ -1,6 +1,11 @@
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-os.system('mcrl22lps -v hopcroft.mcrl2 hopcroft.lps')
-os.system('lps2lts -v hopcroft.lps --no-info hopcroft.lts')
-os.system('ltsconvert -ebisim hopcroft.lts -v hopcroftred.lts')
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+subprocess.run(['mcrl22lps', '-v', 'hopcroft.mcrl2', 'hopcroft.lps'], check=True)
+subprocess.run(['lps2lts', '-v', 'hopcroft.lps', '--no-info', 'hopcroft.lts'], check=True)
+subprocess.run(['ltsconvert', '-ebisim', 'hopcroft.lts', '-v', 'hopcroft.bisim.lts'], check=True)

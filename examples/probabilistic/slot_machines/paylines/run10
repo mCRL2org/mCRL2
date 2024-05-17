@@ -1,3 +1,0 @@
-mcrl22lps 10_paylines_game_spec.mcrl2 -v scratch/temp.lps &&
-lps2pres -v scratch/temp.lps -fexpected_gain_10_run.mcf scratch/temp.pres &&
-pressolve -am scratch/temp.pres -v -rjittyc -p30 --timings

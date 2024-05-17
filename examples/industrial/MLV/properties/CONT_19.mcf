@@ -1,0 +1,6 @@
+nu X(inSelfTest: Bool = false, testFailed: Bool = false) .
+[emitMode_c(SelfTest)]X(true, false) &&
+[(exists m: OperationMode . emitMode_c(m)) && !emitMode_c(SelfTest)]X(false, testFailed) &&
+[error]X(inSelfTest, true) &&
+[!((exists m: OperationMode . emitMode_c(m)) || error)]X(inSelfTest, testFailed) &&
+(val(inSelfTest && testFailed) => [emitMode(VentilationOff) || emitMode(PSV) || emitMode(PCV)]false)

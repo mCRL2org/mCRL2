@@ -1,0 +1,8 @@
+%SAV.17
+[true*]
+  (forall v,w:Nat. [getSensorValue_c(FlowIndicator1,v)|get_Max_V_E_c(w)]
+                    (val(v > w) 
+                    => 
+                    [!(snooze_alarm_c(Medium) || MediumAlarm)*]<true*.MediumAlarm>true) %  mu X. (([true]X && <true>true) || <MediumAlarm>true))
+  )
+

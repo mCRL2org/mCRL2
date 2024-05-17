@@ -35,13 +35,13 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, stochastic_sp
 /// \brief Save an LPS in the format specified.
 /// \param spec The LPS to be stored
 /// \param stream The stream to which the output is written.
-/// \param target A string indicating the target stream, used to print information. 
+/// \param target A string indicating the target stream, used to print information.
 ///        utilities::file_format::unknown() is specified, then a default format is chosen.
 ///
 template <typename Specification>
 void save_lps(const Specification& spec, std::ostream& stream, const std::string& target = "")
 {
-  mCRL2log(log::verbose) << "Saving LPS" << (target.empty()?"":" to " + target) << ".\n";
+  mCRL2log(log::verbose) << "Saving LPS" << (target.empty() ? "" : " to " + target) << ".\n";
   atermpp::binary_aterm_ostream(stream) << spec;
 }
 
@@ -53,13 +53,13 @@ void save_lps(const Specification& spec, std::ostream& stream, const std::string
 template <typename Specification>
 void load_lps(Specification& spec, std::istream& stream, const std::string& source = "")
 {
-  mCRL2log(log::verbose) << "Loading LPS" << (source.empty()?"":" from " + source) << ".\n";
+  mCRL2log(log::verbose) << "Loading LPS" << (source.empty() ? "" : " from " + source) << ".\n";
   atermpp::binary_aterm_istream(stream) >> spec;
 }
 
 /// \brief Saves an LPS to a file.
 /// \param spec The LPS to save.
-/// \param filename The file to save the LPS in. If empty, the file is written to stdout. 
+/// \param filename The file to save the LPS in. If empty, the file is written to stdout.
 template <typename Specification>
 void save_lps(const Specification& spec, const std::string& filename)
 {

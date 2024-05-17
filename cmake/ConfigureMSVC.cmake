@@ -35,6 +35,11 @@ add_compile_definitions(BOOST_ALL_NO_LIB=1) # Tells the config system not to aut
                                             # then the correct library build variant will be automatically selected and linked against, simply by the act of including one of 
                                             # that library's headers. This macro turns that feature off. 
 
+if(MCRL2_ENABLE_ADDRESS_SANITIZER)
+  mcrl2_add_c_flag(/fsanitize=address)
+  mcrl2_add_cxx_flag(/fsanitize=address)
+endif()
+
 if(MCRL2_ENABLE_MSVC_CCACHE)
   # This changes the behaviour of MSVC to include debugging symbols into the object file, instead of generating a pdb file.
   string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")

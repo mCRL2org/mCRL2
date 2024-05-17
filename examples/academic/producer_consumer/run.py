@@ -1,14 +1,18 @@
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-os.system('mcrl22lps -v producer_consumer.mcrl2 producer_consumer.lps')
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-os.system('lps2pbes -v -f nodeadlock.mcf producer_consumer.lps producer_consumer.nodeadlock.pbes')
-os.system('pbes2bool -v producer_consumer.nodeadlock.pbes')
+subprocess.run(['mcrl22lps', '-v', 'producer_consumer.mcrl2', 'producer_consumer.lps'],  check=True)
+
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'producer_consumer.lps', 'producer_consumer.nodeadlock.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'producer_consumer.nodeadlock.pbes'],  check=True)
 
 # The following creates state space, and stores trace to deadlock.
-os.system('lps2lts -v -Dt producer_consumer.lps producer_consumer.aut')
+subprocess.run(['lps2lts', '-v', '-Dt', 'producer_consumer.lps', 'producer_consumer.aut'],  check=True)
 
-# Print trace to deadlock
-os.system('tracepp producer_consumer.lps_dlk_0.trc')
-# The initial state is a deadlock, so the trace is empty
-
+# However, the initial state is a deadlock so the trace is empty.
+subprocess.run(['tracepp', 'producer_consumer.lps_dlk_0.trc'], check=True)

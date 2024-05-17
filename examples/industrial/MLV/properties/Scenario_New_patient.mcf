@@ -1,0 +1,15 @@
+% Scenario: New patient
+< (!powerOn)* . powerOn .
+  (!emitMode(StartUp))* . emitMode(StartUp) .
+  (!new_patient)*. new_patient .
+  (!startUpSuccessful)* . startUpSuccessful .
+  (!emitMode(SelfTest))* . emitMode(SelfTest) .
+  (selfTestPassed_c)* . selfTestPassed_c .
+  (!emitMode(VentilationOff))*. emitMode(VentilationOff) .
+  (!exists m: OperationMode. 
+     (  startPCV_c | controller_Mode_c(m) 
+     || startPSV_c | controller_Mode_c(m) ) )*
+>
+    (  < exists m: OperationMode. startPCV_c | controller_Mode_c(m) > true 
+    && < exists m: OperationMode. startPSV_c | controller_Mode_c(m) > true )
+

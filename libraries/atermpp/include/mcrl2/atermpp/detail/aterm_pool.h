@@ -60,11 +60,15 @@ public:
     return m_protection_set_size_function();
   }
 
+  // Prematurely unregister the thread_aterm_pool_interface.
+  void unregister();
+
 private:
   aterm_pool& m_pool;
   std::function<void()> m_mark_function;
   std::function<void()> m_print_function;
   std::function<std::size_t()> m_protection_set_size_function;
+  bool m_registered = true;
 };
 
 class thread_aterm_pool;
@@ -226,9 +230,19 @@ thread_aterm_pool_interface::thread_aterm_pool_interface(aterm_pool& pool, std::
 }
 
 inline
+void thread_aterm_pool_interface::unregister()
+{
+  if (m_registered)
+  {
+    m_pool.remove_thread_aterm_pool(*this);
+    m_registered = false;
+  }
+}
+
+inline
 thread_aterm_pool_interface::~thread_aterm_pool_interface()
 {
-  m_pool.remove_thread_aterm_pool(*this);
+  unregister();
 }
 
 } // namespace detail

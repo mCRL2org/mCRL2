@@ -1,9 +1,15 @@
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-os.system('mcrl22lps -v alma.mcrl2 alma.lps')
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-os.system('lps2pbes -v -f nodeadlock.mcf alma.lps alma.nodeadlock.pbes')
-os.system('pbes2bool -v alma.nodeadlock.pbes')
+subprocess.run(['mcrl22lps', '-v', 'alma.mcrl2', 'alma.lps'], check=True)
 
-os.system('lps2lts -v alma.lps alma.aut')
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'alma.lps', 'alma.nodeadlock.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', 'alma.nodeadlock.pbes'], check=True)
+
+subprocess.run(['lps2lts', '-v', 'alma.lps', 'alma.aut'], check=True)
 
