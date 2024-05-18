@@ -13,10 +13,7 @@
 
 // -- constructors and destructor -----------------------------------
 
-DistrPlot::DistrPlot(
-  QWidget *parent,
-  Graph* g,
-  int attributeIndex):
+DistrPlot::DistrPlot(QWidget* parent, Graph* g, int attributeIndex):
   Visualizer(parent, g)
 {
   maxNumber    =  0;
@@ -238,15 +235,18 @@ void DistrPlot::mark() { draw<Marking>(); }
 
 // -- input event handlers ------------------------------------------
 
-
-
-void DistrPlot::handleMouseEvent(QMouseEvent* e)
+void DistrPlot::mouseMoveEvent(QMouseEvent* event)
 {
-  Visualizer::handleMouseEvent(e);
-
-  // redraw in select mode
-  updateSelection();
-  // redraw in render mode
+  Visualizer::mouseMoveEvent(event);
+  SelectionList selections = getSelection();
+  if (selections.empty() || selections.back().empty())
+  {
+    hideTooltip();
+  }
+  else
+  {
+    showTooltip(selections.back()[0], event->position());
+  }
   update();
 }
 
@@ -267,47 +267,43 @@ void DistrPlot::calcMaxNumber()
 
 
 // -- utility drawing functions ---------------------------------
-
-void DistrPlot::displTooltip(const std::size_t& posIdx)
+// TODO: merge this function with the corrln and combn plots' version
+void DistrPlot::showTooltip(std::size_t valueIndex, const QPointF& position)
 {
-  if (posIdx < number.size())
+  if (valueIndex < number.size())
   {
-    std::string xLabel   = attribute->name().toStdString();
-    std::string value    = "";
-    if (posIdx < static_cast <std::size_t>(attribute->getSizeCurValues()))
-    {
-      value = attribute->getCurValue(posIdx)->getValue();
-    }
-
     msgDgrm.clear();
 
-    // x-axis label
-    /*
-    msgDgrm.append( xLabel );
-    msgDgrm.append( ": " );
-    msgDgrm.append( value );
-    msgDgrm.append( "\n" );
-    */
+    // Todo: add value labels on a new line, do the same for corrl/combn plots
+    /*if (valueIndex < attribute->getSizeCurValues())
+    {
+      // x-axis label
+      msgDgrm = Utils::abbreviate(attribute->getCurValue(valueIndex)->getValue(), 10);
+    }*/
+
     // y-axis label
-    msgDgrm.append(Utils::size_tToStr(number[posIdx]));
-    msgDgrm.append(" nodes; ");
-    msgDgrm.append(Utils::dblToStr(
-                     Utils::perc((int) number[posIdx], (int) m_graph->getSizeNodes())));
-    msgDgrm.append("%");
+    msgDgrm = Utils::size_tToStr(number[valueIndex]) + " nodes; "
+      + Utils::dblToStr(Utils::perc((int)number[valueIndex], (int)m_graph->getSizeNodes())) + '%';
 
     if (diagram == 0)
     {
-      QToolTip::showText(QCursor::pos(),QString::fromStdString(msgDgrm));
+      QToolTip::showText(QCursor::pos(), QString::fromStdString(msgDgrm));
     }
     else
     {
-      QPointF pos = worldCoordinate(m_lastMouseEvent->position());
+      QPointF pos = worldCoordinate(position);
       posDgrm.x = pos.x() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
-      posDgrm.y = pos.y() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
+      posDgrm.y = pos.y() + (pos.y() < 0 ? 1.0 : -1.0) * scaleDgrm;
       showDgrm = true;
-      attrValIdxDgrm = posIdx;
+      attrValIdxDgrm = valueIndex;
     }
   }
+}
+
+void DistrPlot::hideTooltip()
+{
+  QToolTip::hideText();
+  showDgrm = false;
 }
 
 
@@ -386,15 +382,6 @@ void DistrPlot::clearPositions()
 
 void DistrPlot::handleSelection(const Selection& selection)
 {
-  if (selection.empty())
-  {
-    QToolTip::hideText();
-    showDgrm = false;
-  }
-  else
-  {
-    displTooltip(selection[0]);
-  }
 }
 
 

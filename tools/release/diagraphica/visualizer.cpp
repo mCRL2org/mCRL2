@@ -41,14 +41,14 @@ Visualizer::Visualizer(
 }
 
 void Visualizer::updateSelection() {
-  const auto selections = getSelection();
+  const SelectionList selections = getSelection();
   if (selections.empty())
     handleSelection({});
   else
     handleSelection(selections.back());
 }
 
-std::list<Visualizer::Selection> Visualizer::getSelection(qreal width, qreal height)
+Visualizer::SelectionList Visualizer::getSelection(qreal width, qreal height)
 {
   makeCurrent();
   m_selectionBuffer->bind();

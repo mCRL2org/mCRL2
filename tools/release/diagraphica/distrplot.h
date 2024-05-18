@@ -19,17 +19,9 @@ class DistrPlot : public Visualizer
 
   public:
     // -- constructors and destructor -------------------------------
-    DistrPlot(
-      QWidget *parent,
-      Graph* g,
-      int attributeIndex
-      );
+    DistrPlot(QWidget* parent, Graph*, int attributeIndex);
 
     // -- set data functions ----------------------------------------
-    void setValues(
-      const std::size_t& idx,
-      const std::vector< std::size_t > &num);
-    void clearValues();
 
     void setDiagram(Diagram* dgrm);
 
@@ -38,7 +30,7 @@ class DistrPlot : public Visualizer
     void mark();
 
     // -- input event handlers --------------------------------------
-    void handleMouseEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent*) override;
 
     QSize sizeHint() const { return QSize(400,400); }
 
@@ -53,7 +45,8 @@ class DistrPlot : public Visualizer
     template <Mode> void drawDiagram();
     template <Mode> void draw();
 
-    void displTooltip(const std::size_t& posIdx);
+    void showTooltip(std::size_t valueIndex, const QPointF& position);
+    void hideTooltip();
 
     void calcPositions();
     void clearPositions();

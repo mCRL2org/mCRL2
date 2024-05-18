@@ -13,11 +13,8 @@
 
 // -- constructors and destructor -----------------------------------
 
-CombnPlot::CombnPlot(
-  QWidget *parent,
-  Graph* g,
-  const std::vector<std::size_t> &attributeIndices)
-  : Visualizer(parent, g)
+CombnPlot::CombnPlot(QWidget* parent, Graph* graph, const std::vector<std::size_t> &attributeIndices):
+  Visualizer(parent, graph)
 {
   maxAttrCard      = 0;
   maxNumberPerComb = 0;
@@ -487,15 +484,23 @@ void CombnPlot::mark() { draw<Marking>(); }
 // -- input event handlers ------------------------------------------
 
 
-void CombnPlot::handleMouseEvent(QMouseEvent* e)
+void CombnPlot::mouseMoveEvent(QMouseEvent* event)
 {
-  Visualizer::handleMouseEvent(e);
-
-  // redraw in select mode
-  updateSelection();
-  // redraw in render mode
+  Visualizer::mouseMoveEvent(event);
+  SelectionList selections = getSelection();
+  if (selections.empty() || selections.back().empty())
+  {
+    mouseCombnIdx = NON_EXISTING;
+    hideTooltip();
+  }
+  else
+  {
+    mouseCombnIdx = selections.back()[0];
+    showTooltip(selections.back()[0], event->position());
+  }
   update();
 }
+
 
 // -- utility data functions ----------------------------------------
 
@@ -534,38 +539,38 @@ void CombnPlot::calcMaxNumberPerComb()
 
 // -- utility drawing functions -------------------------------------
 
-void CombnPlot::displTooltip(const std::size_t& posIdx)
+void CombnPlot::showTooltip(const std::size_t& valueIndex, const QPointF& position)
 {
-  if (posIdx < combinations.size())
+  if (valueIndex < combinations.size())
   {
-    msgDgrm.clear();
-    // number
-    msgDgrm.append(Utils::dblToStr(numberPerComb[posIdx]));
-    msgDgrm.append("nodes; ");
-    // percentage
-    msgDgrm.append(Utils::dblToStr(
-                     Utils::perc((double) numberPerComb[posIdx], (double) m_graph->getSizeNodes())));
-    msgDgrm.append("%");
+    msgDgrm = Utils::dblToStr(numberPerComb[valueIndex]) + " nodes; "
+      + Utils::dblToStr(Utils::perc((double) numberPerComb[valueIndex], (double) m_graph->getSizeNodes())) + '%';
 
     if (diagram == 0)
     {
-      // show tooltip
-      QToolTip::showText(QCursor::pos(),QString::fromStdString(msgDgrm));
+      QToolTip::showText(QCursor::pos(), QString::fromStdString(msgDgrm));
     }
     else
     {
-      QPointF pos = worldCoordinate(m_lastMouseEvent->position());
+      QPointF pos = worldCoordinate(position);
       posDgrm.x = pos.x() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
-      posDgrm.y = pos.y() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
+      posDgrm.y = pos.y() + (pos.y() < 0 ? 1.0 : -1.0) * scaleDgrm;
       showDgrm = true;
 
       attrValIdcsDgrm.clear();
       for (std::size_t i = 0; i < attributes.size(); ++i)
       {
-        attrValIdcsDgrm.push_back(combinations[posIdx][i]);
+        attrValIdcsDgrm.push_back(combinations[valueIndex][i]);
       }
     }
   }
+}
+
+
+void CombnPlot::hideTooltip()
+{
+  QToolTip::hideText();
+  showDgrm = false;
 }
 
 
@@ -732,17 +737,6 @@ void CombnPlot::clearPositions()
 // -- hit detection -------------------------------------------------
 void CombnPlot::handleSelection(const Selection& selection)
 {
-  if (selection.empty())
-  {
-    mouseCombnIdx = NON_EXISTING;
-    QToolTip::hideText();
-    showDgrm = false;
-  }
-  else
-  {
-    mouseCombnIdx = selection[0];
-    displTooltip(selection[0]);
-  }
 }
 
 

@@ -47,10 +47,11 @@ class Visualizer : public QOpenGLWidget
 
     // -- selection functions ---------------------------------------
     using Selection = std::vector<GLuint>;
+    using SelectionList = std::list<Selection>;
 
     virtual void mark() = 0;
 
-    std::list<Selection> getSelection(qreal width = 2., qreal height = 2.);
+    SelectionList getSelection(qreal width = 2., qreal height = 2.);
     virtual void handleSelection(const Selection&) {}
 
     // -- event handlers --------------------------------------------
@@ -86,6 +87,7 @@ class Visualizer : public QOpenGLWidget
     std::unique_ptr<QOpenGLFramebufferObject> m_selectionBuffer;
 
     // -- mouse -----------------------------------------------------
+    // Todo: Remove this, the standard Qt event handlers already provide this information, lets use them instead of piling everything on a single handler
     std::unique_ptr<QMouseEvent> m_lastMouseEvent;   // The latest received event
     bool m_mouseDrag;               // The mouse is being dragged
     bool m_mouseDragReleased;       // The cursor was released after dragging

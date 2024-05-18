@@ -19,11 +19,7 @@ class CorrlPlot : public Visualizer
 
   public:
     // -- constructors and destructor -------------------------------
-    CorrlPlot(
-      QWidget *parent,
-      Graph* g,
-      int attributeIndex1,
-      int attributeIndex2);
+    CorrlPlot(QWidget* parent, Graph*, int attributeIndex1, int attributeIndex2);
 
     // -- set data functions ----------------------------------------
     void setDiagram(Diagram* dgrm);
@@ -33,7 +29,7 @@ class CorrlPlot : public Visualizer
     void mark();
 
     // -- input event handlers --------------------------------------
-    void handleMouseEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent*) override;
 
     QSize sizeHint() const { return QSize(400,400); }
 
@@ -49,9 +45,8 @@ class CorrlPlot : public Visualizer
     template <Mode> void drawDiagram();
     template <Mode> void draw();
 
-    void displTooltip(
-      const int& xIdx,
-      const int& yIdx);
+    void showTooltip(std::size_t xIndex, std::size_t yIndex, const QPointF& position);
+    void hideTooltip();
 
     void calcPositions();
     void clearPositions();
