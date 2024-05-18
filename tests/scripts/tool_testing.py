@@ -367,7 +367,7 @@ def main(tests):
     cmdline_parser.add_argument(
         "--pattern", action="store", default="", type=str
     )
-    cmdline_parser.add_argument("--jittyc", action='store_true', help="Enables tests using the -rjittyc flag")
+    cmdline_parser.add_argument("-rjittyc", action='store_true', help="Enables tests using the -rjittyc flag")
     cmdline_parser.add_argument(
         "-cvc3", action='store_true', help="Enables tests using the -zcvc flag, requires CVC3"
     )

@@ -64,7 +64,7 @@ add_test(NAME tooltests
 
 set(EXAMPLETEST_ARGS "")
 if(MCRL2_ENABLE_JITTYC)
-  set(EXAMPLETEST_ARGS "${EXAMPLETEST_ARGS};--jittyc")
+  set(EXAMPLETEST_ARGS "${EXAMPLETEST_ARGS};-rjittyc")
 endif()
 
 add_test(NAME exampletests

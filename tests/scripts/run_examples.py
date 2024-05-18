@@ -25,7 +25,7 @@ def main():
 
     args = parser.parse_args()
 
-    os.environ["PATH"] += os.pathsep + args.toolpath
+    os.environ["PATH"] += os.pathsep # + args.mcrl2_binpath
 
     def run_example(path, index):
         print(f"[{index}] Running {path}")
