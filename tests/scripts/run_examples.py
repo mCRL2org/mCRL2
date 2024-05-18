@@ -18,22 +18,20 @@ def main():
     )
 
     parser.add_argument("-m", "--max_workers", action="store", default=1, type=int)
-    parser.add_argument("-r", "--rewriter", action="store", type=str)
+    parser.add_argument("-r", "--jittyc", action="store_true")
     parser.add_argument(
         "-t", "--toolpath", action="store", type=str, required=True
     )
 
-
-
     args = parser.parse_args()
 
-    os.environ["PATH"] += os.pathsep + args.mcrl2_binpath
+    os.environ["PATH"] += os.pathsep + args.toolpath
 
     def run_example(path, index):
         print(f"[{index}] Running {path}")
 
         try:
-            result = subprocess.run([sys.executable, path] + ["-rjittyc"] if args.rewriter == "jittyc" else [], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60, cwd=os.path.dirname(path), check=True)
+            result = subprocess.run([sys.executable, path] + ["-rjittyc"] if args.jittyc else [], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60, cwd=os.path.dirname(path), check=True)
         except subprocess.TimeoutExpired:
             # Ignore timeouts, they are not errors.
             return ""
