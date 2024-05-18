@@ -12,7 +12,7 @@ def main():
 
     # Parse some configuration options
     parser = argparse.ArgumentParser(
-        prog="test_examples.py",
+        prog="run_examples.py",
         description="Prepares the examples specifications for testing",
         epilog="",
     )
