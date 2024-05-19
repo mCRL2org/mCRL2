@@ -1,3 +1,0 @@
-mcrl22lps 3slot_hold_spec.mcrl2 -v scratch/temp.lps &&
-lps2pres -v scratch/temp.lps -fexpected_probability_min.mcf scratch/temp.pres &&
-pressolve -rjittyc -am scratch/temp.pres -v -p30

@@ -25,7 +25,7 @@ def main():
 
     args = parser.parse_args()
 
-    os.environ["PATH"] += os.pathsep # + args.mcrl2_binpath
+    os.environ["PATH"] += os.pathsep + args.toolpath
 
     def run_example(path, index):
         print(f"[{index}] Running {path}")
@@ -77,6 +77,7 @@ def main():
         print("Failed tests...")
         for name in failed:
             print(f"{name} failed")
+            sys.exit(-1)
 
 if __name__ == "__main__":
     main()
