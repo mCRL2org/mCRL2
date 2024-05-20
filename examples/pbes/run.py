@@ -11,7 +11,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 pbessymbolicbisim = which('pbessymbolicbisim')
 
-if pbessymbolicbisim is not None:
+if pbessymbolicbisim is not None and which('Z3') is not None:
     for file in ['pbes_inst_tr_1.txt', 'pbes_inst_tr_2.txt', 'pbes_inst_tr_3.txt', 'pbes_inst_tr_4.txt', 'pbes_inst_tr_5.txt']:
         name, _ = os.path.splitext(file)
 
