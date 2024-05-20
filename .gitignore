@@ -16,4 +16,7 @@ build/
 *.lts
 *.lps
 *.pbes
+*.pres
 *.trc
+*.sym
+jittyc*

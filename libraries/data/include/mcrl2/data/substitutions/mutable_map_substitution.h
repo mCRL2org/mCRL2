@@ -150,7 +150,7 @@ public:
   }
 
   /// \brief Returns true if the substitution is empty
-  bool empty()
+  bool empty() const
   {
     return m_map.empty();
   }

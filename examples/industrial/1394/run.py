@@ -1,9 +1,15 @@
+#!/usr/bin/env python3
+
+import subprocess
 import os
 
-os.system('mcrl22lps -v 1394-fin.mcrl2 1394-fin.lps')
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-os.system('lps2pbes -v -f nodeadlock.mcf 1394-fin.lps 1394-fin.nodeadlock.pbes')
-os.system('pbes2bool -v 1394-fin.nodeadlock.pbes')
+subprocess.run(['mcrl22lps', '-v', '1394-fin.mcrl2', '1394-fin.lps'], check=True)
 
-os.system('lps2lts -v --cached 1394-fin.lps 1394-fin.aut')
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', '1394-fin.lps', '1394-fin.nodeadlock.pbes'], check=True)
+subprocess.run(['pbes2bool', '-v', '1394-fin.nodeadlock.pbes'], check=True)
+
+subprocess.run(['lps2lts', '-v', '--cached', '1394-fin.lps', '1394-fin.aut'], check=True)
 

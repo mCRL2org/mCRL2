@@ -11164,6 +11164,7 @@ class specification_basic_type
           filter_vars_by_term(smd.multi_action().time(),vars_set,vars_result_set);
         }
         filter_vars_by_term(smd.condition(),vars_set,vars_result_set);
+        filter_vars_by_term(smd.distribution().distribution(),vars_set,vars_result_set);
       }
       variable_list result;
       for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();

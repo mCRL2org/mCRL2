@@ -98,18 +98,25 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
       : V(V_)
   {}
 
-  static pres_expression make_infimum_(const data::variable_list& vars, const pres_expression& body)
+  static void make_infimum_(pres_expression& result, const data::variable_list& vars, const pres_expression& body)
   {
-    return vars.empty() ? body : infimum(vars, body);
+    if (vars.empty())
+    {
+      result=body;
+    }
+    else
+    { 
+      make_infimum(result, vars, body);
+    }
   }
 
   // default case
   template <typename T>
-  pres_expression apply_default(const T& x)
+  void apply_default(pres_expression& result, const T& x)
   {
     using utilities::detail::set_intersection;
     std::set<data::variable> W = set_intersection(V, find_free_variables(x));
-    return make_infimum_(data::variable_list(W.begin(), W.end()), x);
+    make_infimum_(result, data::variable_list(W.begin(), W.end()), x);
   }
 
   template <class T>
@@ -123,7 +130,7 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
   template <class T>
   void apply(T& result, const minus& x)
   {
-    const auto& phi = x.operand();
+    const pres_expression& phi = x.operand();
     result = minus(quantifiers_inside_supremum(V, phi));
   }
 
@@ -147,7 +154,7 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
     const auto [Phi, Psi] = compute_Phi_Psi(X, V, tr::or_, tr::false_());
     if (is_false(Psi))
     {
-      result = make_infimum_(data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
+      make_infimum_(result, data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
       return;
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
@@ -155,7 +162,7 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
     optimized_or(result,
                  quantifiers_inside_infimum(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
                  quantifiers_inside_infimum(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
-    result = make_infimum_(data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
+    make_infimum_(result, data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
                           result);
   }
 
@@ -168,20 +175,20 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    result = apply_default(x);
+    apply_default(result, x);
   }
 
   template <class T>
   void apply(T& result, const supremum& x)
   {
-    result = apply_default(x);
+    apply_default(result, x);
   }
 
   template <class T>
   void apply(T& result, const data::data_expression& x)
-  {
-    result = x; // TODO: Investigate whether a supremum needs to be pushed inside a data-expression. 
-    // result = data::detail::quantifiers_inside_infimum(V, x);
+  { 
+    apply_default(reinterpret_cast<pres_expression&>(result), x);
+    // result=data::detail::quantifiers_inside_infimum(V, x)  XXXX
   }
 };
 
@@ -196,18 +203,25 @@ struct quantifiers_inside_supremum_builder: public pres_expression_builder<quant
       : V(V_)
   {}
 
-  static pres_expression make_supremum_(const data::variable_list& vars, const pres_expression& body)
+  void make_supremum_(pres_expression& result, const data::variable_list& vars, const pres_expression& body)
   {
-    return vars.empty() ? body : supremum(vars, body);
+    if (vars.empty())
+    {
+      result=body;
+    }
+    else 
+    {
+      make_supremum(result, vars, body);
+    }
   }
 
   // default case
   template <typename T>
-  pres_expression apply_default(const T& x)
+  void apply_default(pres_expression& result, const T& x)
   {
     using utilities::detail::set_intersection;
     std::set<data::variable> W = set_intersection(V, find_free_variables(x));
-    return make_supremum_(data::variable_list(W.begin(), W.end()), x);
+    make_supremum_(result, data::variable_list(W.begin(), W.end()), x);
   }
 
   template <class T>
@@ -245,7 +259,7 @@ struct quantifiers_inside_supremum_builder: public pres_expression_builder<quant
     const auto [Phi, Psi] = compute_Phi_Psi(X, V, tr::and_, tr::true_());
     if (is_true(Psi))
     {
-      result = make_supremum_(data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
+      make_supremum_(result, data::detail::make_variable_list(set_intersection(V, find_free_variables(x))), x);
       return;
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
@@ -253,7 +267,7 @@ struct quantifiers_inside_supremum_builder: public pres_expression_builder<quant
     optimized_and(result,
                   quantifiers_inside_supremum(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
                   quantifiers_inside_supremum(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
-    result = make_supremum_(data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
+     make_supremum_(result, data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
                           result);
   }
 
@@ -266,20 +280,19 @@ struct quantifiers_inside_supremum_builder: public pres_expression_builder<quant
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    result = apply_default(x);
+    apply_default(result, x);
   }
 
   template <class T>
   void apply(T& result, const infimum& x)
   {
-    result = apply_default(x);
+    apply_default(result, x);
   }
 
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = x;  // TODO: INvestigate whether supremum needs to be pushed inside a data expression of sort real. 
-    // result = data::detail::quantifiers_inside_supremum(V, x);
+    apply_default(reinterpret_cast<pres_expression&>(result), x);
   }
 };
 

@@ -1,41 +1,49 @@
+#!/usr/bin/env python3
+
+import subprocess
+import shutil
 import os
 
-# SWP_lists
-os.system('mcrl22lps -v swp_lists.mcrl2 swp_lists.lps')
-os.system('lps2pbes -v -f nodeadlock.mcf swp_lists.lps swp_lists.nodeadlock.pbes')
-os.system('pbes2bool -v swp_lists.nodeadlock.pbes')
+from sys import argv
 
-os.system('lps2pbes -v -f infinitely_often_enabled_then_infinitely_often_taken.mcf swp_lists.lps swp_lists.infinitely_often_enabled_then_infinitely_often_taken.pbes')
-os.system('pbes2pgsolve -srecursive -v swp_lists.infinitely_often_enabled_then_infinitely_often_taken.pbes')
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-os.system('lps2pbes -v -f infinitely_often_lost.mcf swp_lists.lps swp_lists.infinitely_often_lost.pbes')
-os.system('pbespgsolve -srecursive -v swp_lists.infinitely_often_lost.pbes')
+subprocess.run(['mcrl22lps', '-v', 'swp_lists.mcrl2', 'swp_lists.lps'], check=True)
 
-os.system('lps2pbes -v -f infinitely_often_receive_d1.mcf swp_lists.lps swp_lists.infinitely_often_receive_d1.pbes')
-os.system('pbespgsolve -srecursive -v swp_lists.infinitely_often_receive_d1.pbes')
+for prop in [
+    'nodeadlock.mcf',
+    'infinitely_often_enabled_then_infinitely_often_taken.mcf', 
+    'infinitely_often_lost.mcf',
+    'infinitely_often_receive_d1.mcf',
+    'infinitely_often_receive_for_all_d.mcf',
+    'read_then_eventually_send.mcf',
+    'read_then_eventually_send_if_fair.mcf',
+    'no_generation_of_messages.mcf',
+    'no_duplication_of_messages.mcf'
+]:
+    path, _ = os.path.splitext(prop)
+    name = os.path.basename(path)
 
-os.system('lps2pbes -v -f infinitely_often_receive_for_all_d.mcf swp_lists.lps swp_lists.infinitely_often_receive_for_all_d.pbes')
-os.system('pbespgsolve -srecursive -v swp_lists.infinitely_often_receive_for_all_d.pbes')
+    print('verifying property {base} for swp_lists.lps')
+    subprocess.run(['lps2pbes', '-v', '-f', prop, 'swp_lists.lps', f'swp_lists.{name}.pbes'], check=True)
+    subprocess.run(['pbes2bool', '-v', f'swp_lists.{name}.pbes'], check=True)
 
-os.system('lps2pbes -v -f read_then_eventually_send.mcf swp_lists.lps swp_lists.read_then_eventually_send.pbes')
-os.system('pbespgsolve -srecursive -v swp_lists.read_then_eventually_send.pbes')
+# SWP with Tanenbaum's bug
+subprocess.run(['mcrl22lps', '-v', 'swp_with_tanenbaums_bug.mcrl2', 'swp_with_tanenbaums_bug.lps'], check=True)
+subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', 'swp_with_tanenbaums_bug.lps', 'swp_with_tanenbaums_bug.nodeadlock.pbes'], check=True)
 
-os.system('lps2pbes -v -f read_then_eventually_send_if_fair.mcf swp_lists.lps swp_lists.read_then_eventually_send_if_fair.pbes')
-os.system('pbespgsolve -srecursive -v swp_lists.read_then_eventually_send_if_fair.pbes')
+lpsreach = shutil.which('lpsreach')
+if lpsreach and '--long' in argv:
+    subprocess.run([lpsreach, '-v', '--cached', '--chaining', '--saturation', 'swp_with_tanenbaums_bug.lps'], check=True)
 
-os.system('lps2pbes -v -f no_generation_of_messages.mcf swp_lists.lps swp_lists.no_generation_of_messages.pbes')
-os.system('pbespgsolve -srecursive -v swp_lists.no_generation_of_messages.pbes')
+pbessolvesymbolic = shutil.which('pbessolvesymbolic')
+if pbessolvesymbolic and '--long' in argv:
+    subprocess.run([pbessolvesymbolic, '-v', '-c', '--cached', '--chaining', '--saturation', 'swp_with_tanenbaums_bug.nodeadlock.pbes'], check=True)
 
-os.system('lps2pbes -v -f no_duplication_of_messages.mcf swp_lists.lps swp_lists.no_duplication_of_messages.pbes')
-os.system('pbes2bool -srecursive -v swp_lists.no_duplication_of_messages.pbes')
-
-# SWP with Tanenbaum's bug (the flag -rjittyc only works on linux and mac, not on windows)
-os.system('mcrl22lps -v swp_with_tanenbaums_bug.mcrl2 swp_with_tanenbaums_bug.lps')
-os.system('lps2pbes -v -f nodeadlock.mcf swp_with_tanenbaums_bug.lps swp_with_tanenbaums_bug.nodeadlock.pbes')
-# Verifying deadlockfreedom with two data elements and two buffer positions leads to a state space that is too large. 
-# os.system('pbes2bool -v -s2 -rjittyc swp_with_tanenbaums_bug.nodeadlock.pbes')
-
-# But it is possible to generate the state space, while looking for occurrence of error action, because the error action
-# can be found without exploring the whole state space. The command below stores trace, and stops generating after finding 
-# a single trace. Removal of --cached leads to less memory requirements, at the expense of a longer running time. 
-os.system('lps2lts -v --cached -aerror -t1 swp_with_tanenbaums_bug.lps')
+# It is possible to generate the state space, while looking for occurrence of
+# error action, because the error action can be found without exploring the
+# whole state space. The command below stores trace, and stops generating after
+# finding a single trace. Removal of --cached leads to less memory requirements,
+# at the expense of a longer running time. 
+subprocess.run(['lps2lts', '-v', '--cached', '-aerror', '-t1', 'swp_with_tanenbaums_bug.lps'], check=True)

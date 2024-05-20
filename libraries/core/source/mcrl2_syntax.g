@@ -358,7 +358,7 @@ PresExpr
 //--- Action formulas
 
 ActFrm
-  : DataValExpr                                                  // Boolean/real data expression
+  : DataExpr                                                     // Boolean/real data expression
   | MultAct                                                      // Multi-action
   | '(' ActFrm ')'                             $left        50   // Brackets
   | 'true'                                     $left        30   // True

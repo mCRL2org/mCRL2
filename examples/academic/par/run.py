@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 import subprocess
+import os
+
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 subprocess.run(['mcrl22lps', '-v', 'par.mcrl2', 'par.lps'], check=True)
 

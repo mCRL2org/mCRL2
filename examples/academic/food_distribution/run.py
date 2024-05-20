@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 
 import subprocess
+import os
 
-subprocess.run(['mcrl22lps', '-v', 'food_package.mcrl2', 'food_package.lps'], shell=True, check=True)
-subprocess.run(['lpssuminst', 'food_package.lps', 'food_package.lpssuminst.lps'], shell=True, check=True)
-subprocess.run(['lps2pbes', '-v', '-f', 'sustained_delivery.mcf', 'food_package.lpssuminst.lps', 'sustained_delivery.pbes'], shell=True, check=True)
-subprocess.run(['pbesconstelm', '-ve', 'sustained_delivery.pbes', 'sustained_delivery.pbesconstelm.pbes'], shell=True, check=True)
+from sys import argv
 
-# We use -rjittyc is used below, which does work on linux and mac, and not on windows.
-# Note that the generated bes is huge.
-subprocess.run(['pbes2bool', '-v', '-zdepth-first', '-s3', 'sustained_delivery.pbesconstelm.pbes'], shell=True, check=True)
+# Change working dir to the script path
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+run = subprocess.run(['mcrl22lps', '-v', 'food_package.mcrl2'], stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lpssuminst'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lps2pbes', '-v', '-f', 'sustained_delivery.mcf'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+subprocess.run(['pbesconstelm', '-ve', '-', 'sustained_delivery.pbesconstelm.pbes'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+
+if '-rjittyc' in argv:
+    # Note that the generated bes is huge.
+    subprocess.run(['pbes2bool', '-v', '-zdepth-first', '-s3', 'sustained_delivery.pbesconstelm.pbes'], shell=True, check=True)
