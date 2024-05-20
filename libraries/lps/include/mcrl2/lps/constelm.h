@@ -40,14 +40,21 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
     /// \brief The rewriter used by the constelm algorithm.
     const DataRewriter& R;
 
-    void LOG_CONSTANT_PARAMETERS(const data::mutable_map_substitution<>& sigma, const std::string& msg = "")
+    void LOG_CONSTANT_PARAMETERS(const data::mutable_map_substitution<>& sigma, const std::string& constant_removed_msg = "", const std::string& nothing_removed_msg = "")
     {
       if (mCRL2logEnabled(log::verbose))
       {
-        mCRL2log(log::verbose) << msg;
-        for (const auto& i : sigma)
+        if (sigma.empty())
         {
-          mCRL2log(log::verbose) << data::pp(i.first) << " := " << data::pp(i.second) << std::endl;
+          mCRL2log(log::verbose) << nothing_removed_msg;
+        }
+        else 
+        {  
+          mCRL2log(log::verbose) << constant_removed_msg;
+          for (const auto& i : sigma)
+          {
+            mCRL2log(log::verbose) << data::pp(i.first) << " := " << data::pp(i.second) << std::endl;
+          }
         }
       }
     }
@@ -226,7 +233,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
     /// \brief Applies the substitution computed by compute_constant_parameters
     void remove_parameters(data::mutable_map_substitution<>& sigma)
     {
-      LOG_CONSTANT_PARAMETERS(sigma, "Removing the following constant parameters:\n");
+      LOG_CONSTANT_PARAMETERS(sigma, "Removing the following constant parameters:\n", "No constant parameters are removed.\n");
 
       // N.B. The order of removing constant parameters and rewriting has been reversed
       // as requested by Jan Friso Groote. This may lead to some gain in performance (13%
