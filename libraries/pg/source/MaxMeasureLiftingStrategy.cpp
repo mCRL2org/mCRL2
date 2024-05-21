@@ -23,13 +23,6 @@ MaxMeasureLiftingStrategy2::MaxMeasureLiftingStrategy2(
     std::fill(&pq_pos_[0], &pq_pos_[game.graph().V()], NO_VERTEX);
 }
 
-MaxMeasureLiftingStrategy2::~MaxMeasureLiftingStrategy2()
-{
-    delete[] insert_id_;
-    delete[] pq_pos_;
-    delete[] pq_;
-}
-
 void MaxMeasureLiftingStrategy2::move_up(verti i)
 {
     // FIXME: this can be implemented with less swapping if I think harder.

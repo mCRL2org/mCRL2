@@ -12,28 +12,31 @@ def main():
 
     # Parse some configuration options
     parser = argparse.ArgumentParser(
-        prog="test_examples.py",
+        prog="run_examples.py",
         description="Prepares the examples specifications for testing",
         epilog="",
     )
 
     parser.add_argument("-m", "--max_workers", action="store", default=1, type=int)
-    parser.add_argument("-r", "--rewriter", action="store", type=str)
+    parser.add_argument("-i", "--timeout", action="store", default=60, type=int)
+    parser.add_argument("-r", "--jittyc", action="store_true")
     parser.add_argument(
         "-t", "--toolpath", action="store", type=str, required=True
     )
 
-
-
     args = parser.parse_args()
 
-    os.environ["PATH"] += os.pathsep + args.mcrl2_binpath
+    os.environ["PATH"] += os.pathsep + args.toolpath
 
     def run_example(path, index):
         print(f"[{index}] Running {path}")
 
         try:
-            result = subprocess.run([sys.executable, path] + ["-rjittyc"] if args.rewriter == "jittyc" else [], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60, cwd=os.path.dirname(path), check=True)
+            execute = [sys.executable, path]
+            if args.jittyc:
+                execute += ["-rjittyc"]
+
+            result = subprocess.run(execute, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=args.timeout, cwd=os.path.dirname(path), check=True)
         except subprocess.TimeoutExpired:
             # Ignore timeouts, they are not errors.
             return ""
@@ -79,6 +82,9 @@ def main():
         print("Failed tests...")
         for name in failed:
             print(f"{name} failed")
+
+        if failed:
+            sys.exit(-1)
 
 if __name__ == "__main__":
     main()

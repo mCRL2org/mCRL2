@@ -23,6 +23,6 @@ for prop in [
     path, _ = os.path.splitext(prop)
     name = os.path.basename(path)
 
-    print('verifying property {name}.mcf for abp.lps')
-    subprocess.run(['lps2pbes', '-v', '-f', prop, 'abp.lps', f'abp.{name}.pbes'], check=True)
-    subprocess.run(['pbes2bool', '-v', f'abp.{name}.pbes'], check=True)
+    print(f'verifying property {name}.mcf for abp.lps')
+    subprocess.run(['lps2pbes', '-f', prop, 'abp.lps', f'abp.{name}.pbes'], check=True)
+    subprocess.run(['pbes2bool', f'abp.{name}.pbes'], check=True)

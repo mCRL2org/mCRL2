@@ -18,14 +18,14 @@ PredecessorLiftingStrategy::PredecessorLiftingStrategy(
 
     // Initialize data
     const verti V = game.graph().V();
-    queue_ = new verti[V];
+    queue_ = std::make_unique<verti[]>(V);
     queue_capacity_ = V;
     queue_begin_ = queue_end_ = queue_size_ = 0;
 
     if (version == 1)
     {
         // v1 API requires explicit tracking of queued vertices.
-        queued_ = new bool[V]();
+        queued_ = std::make_unique<bool[]>(V);
         for (verti v = 0; v < V; ++v)
         {
             if (!spm_.is_top(v))
@@ -40,12 +40,6 @@ PredecessorLiftingStrategy::PredecessorLiftingStrategy(
         assert(version == 2);
         queued_ = NULL;
     }
-}
-
-PredecessorLiftingStrategy::~PredecessorLiftingStrategy()
-{
-    delete[] queue_;
-    delete[] queued_;
 }
 
 void PredecessorLiftingStrategy::push(verti v)

@@ -22,8 +22,8 @@ mu X . [true]X || (
               (val(finite(s')) => [Decode(i, s')]Z))
         ))
      && ([!exists i: Sender, s': Symbol . 
-            (val(i <= NODES && finite(s')) && Decode(i, s')) ||
-            (val(i <= NODES) && is_integrating(i))]Z)
+            (i <= NODES && finite(s') && Decode(i, s')) ||
+            (i <= NODES && is_integrating(i))]Z)
     )
   ||(val(togo == [])
      && Y(remove(CORRECT_NODES, s_(nextsym(s, CORRECT_NODES))), 
