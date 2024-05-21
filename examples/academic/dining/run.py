@@ -15,13 +15,16 @@ for name in [
     'dining3_schedule',
     'dining3_schedule_seq'
 ]:
-    subprocess.run(['mcrl22lps', '-v', f'{name}.mcrl2', f'{name}.lps'], shell=True, check=True)
+    subprocess.run(['mcrl22lps', f'{name}.mcrl2', f'{name}.lps'], check=True)
 
-    subprocess.run(['lps2pbes', '-v', '-f', 'nodeadlock.mcf', f'{name}.lps', f'{name}.nodeadlock.pbes'], shell=True, check=True)
-    subprocess.run(['pbes2bool', '-v', f'{name}.nodeadlock.pbes'], shell=True, check=True)
+    print(f'Checking property nodeadlock.mcf for specification {name}.mcrl2')
+    subprocess.run(['lps2pbes', '-f', 'nodeadlock.mcf', f'{name}.lps', f'{name}.nodeadlock.pbes'], check=True)
+    subprocess.run(['pbes2bool', f'{name}.nodeadlock.pbes'], check=True)
   
-    subprocess.run(['lps2pbes', '-v', '-f', 'nostuffing.mcf', f'{name}.lps', f'{name}.nostuffing.pbes'], shell=True, check=True)
-    subprocess.run(['pbes2bool', '-v', f'{name}.nostuffing.pbes'], shell=True, check=True)
+    print(f'Checking property nostuffing.mcf for specification {name}.mcrl2')
+    subprocess.run(['lps2pbes', '-f', 'nostuffing.mcf', f'{name}.lps', f'{name}.nostuffing.pbes'], check=True)
+    subprocess.run(['pbes2bool', f'{name}.nostuffing.pbes'], check=True)
 
-    subprocess.run(['lps2pbes', '-v', '-f', 'nostarvation.mcf', f'{name}.lps', f'{name}.nostarvation.pbes'], shell=True, check=True)
-    subprocess.run(['pbes2bool', '-v', f'{name}.nostarvation.pbes'], shell=True, check=True)
+    print(f'Checking property nostarvation.mcf for specification {name}.mcrl2')
+    subprocess.run(['lps2pbes', '-f', 'nostarvation.mcf', f'{name}.lps', f'{name}.nostarvation.pbes'], check=True)
+    subprocess.run(['pbes2bool', f'{name}.nostarvation.pbes'], check=True)
