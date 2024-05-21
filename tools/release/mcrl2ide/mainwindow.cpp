@@ -191,7 +191,7 @@ void MainWindow::setupMenuBar()
   for (std::pair<IntermediateFileType, QString> item :
        INTERMEDIATEFILETYPENAMES)
   {
-    QAction* saveFileAction = saveIntermediateFilesMenu->addAction(item.second);
+    QAction* saveFileAction = saveIntermediateFilesMenu->addAction(item.second, QKeySequence(), this, "");
     saveFileAction->setCheckable(true);
     saveFileAction->setProperty("filetype", item.first);
     saveFileAction->setToolTip("Changing this will only have effect on "
@@ -544,10 +544,12 @@ void MainWindow::changeFileButtons(bool specificationOnlyMode)
   if (fileSystem->projectOpened())
   {
     importPropertiesAction->setEnabled(true);
+    rewriteExpressionDock->setEnabled(true);
   }
   else
   {
     importPropertiesAction->setEnabled(false);
+    rewriteExpressionDock->setEnabled(false);
   }
 }
 

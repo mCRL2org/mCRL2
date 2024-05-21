@@ -374,6 +374,12 @@ public:
    * @param previousExitCode The exit code of the previous subprocess
    */
   void verificationResult(int previousExitCode);
+  
+  /**
+   * @brief Extracts and stores the result of the rewrite performed
+   * @param previousExitCode The exit code of the previous subprocess
+   */
+  void rewriteResult(int previousExitCode);
 };
 
 #endif // PROCESSSYSTEM_H

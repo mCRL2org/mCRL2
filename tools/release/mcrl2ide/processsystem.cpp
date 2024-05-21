@@ -377,6 +377,9 @@ QProcess* ProcessSystem::createSubprocess(
     inputFile = fileSystem->lpsFilePath();
     arguments << inputFile << "-e" << expression;
 
+    connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+            SLOT(rewriteResult(int)));
+
     break;
 
   default:
@@ -445,7 +448,7 @@ int ProcessSystem::rewriteExpression(std::string expression)
     processes[processid] = {
         createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
         createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
-        createSubprocess(SubprocessType::Mcrl2i, processid, 2)
+        createSubprocess(SubprocessType::Mcrl2i, processid, 2, Property(), QString::fromStdString(expression))
     };
 
     processQueues[processType]->enqueue(processid);
@@ -920,6 +923,19 @@ void ProcessSystem::verificationResult(int previousExitCode)
               " on this specification evaluates to false\n");
     }
   }
+  emit processFinished(processid);
+}
+
+void ProcessSystem::rewriteResult(int previousExitCode)
+{
+  QProcess* previousProcess = qobject_cast<QProcess*>(sender());
+  int processid = previousProcess->property("processid").toInt();
+
+  if (previousExitCode == 0)
+  {
+    results[processid] = QString(previousProcess->readAllStandardOutput());
+  }
+    
   emit processFinished(processid);
 }
 

@@ -358,14 +358,15 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     bool run()
     {
       spec=read_data_specification();
-      std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
-      // Handle command line arguments.
+      // Handle command line arguments directlyy
       if (m_evaluate_expression.has_value())
       {        
           handle_eval(m_evaluate_expression.value());
           return true;
       }
+      
+      std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
       // Evaluate on the console
       bool done = false;
