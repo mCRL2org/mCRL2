@@ -54,7 +54,7 @@
 % Translation is revised in May 2007, by removing an error in the translation
 % and by making channels and lists finite, such that a finite state space
 % can be generated.
-&
+%
 % Verifying deadlockfreedom with two data elements and two buffer positions
 % leads to a state space that is too large for the explicit tools. However, the
 % symbolic tools are able to verify the property
