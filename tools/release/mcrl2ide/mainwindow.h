@@ -12,6 +12,7 @@
 
 #include "propertiesdock.h"
 #include "findandreplacedialog.h"
+#include "rewriteexpressiondock.h"
 
 #include <QMainWindow>
 

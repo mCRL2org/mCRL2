@@ -252,7 +252,7 @@ void MainWindow::setupDocks()
   propertiesDock =
       new PropertiesDock(processSystem, fileSystem, findAndReplaceDialog, this);
   consoleDock = new ConsoleDock(this);
-  rewriteExpressionDock = new RewriteExpressionDock(specificationEditor, this);
+  rewriteExpressionDock = new RewriteExpressionDock(specificationEditor, processSystem, this);
 
   /* add toggleable option in the view menu for each dock */
   viewMenu->addAction(propertiesDock->toggleViewAction());
