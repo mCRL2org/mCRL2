@@ -58,11 +58,9 @@ class Visualizer : public QOpenGLWidget
     virtual void handleSizeEvent();
 
     virtual void handleMouseEvent(QMouseEvent* e);
-    virtual void handleMouseEnterEvent() { }
     virtual void handleMouseLeaveEvent() { }
     virtual void handleKeyEvent(QKeyEvent* e);
 
-    virtual void enterEvent(QEnterEvent *event) override { handleMouseEnterEvent(); QOpenGLWidget::enterEvent(event); }
     virtual void leaveEvent(QEvent *event) override { handleMouseLeaveEvent(); QOpenGLWidget::leaveEvent(event); }
     virtual void keyPressEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyPressEvent(event); }
     virtual void keyReleaseEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyReleaseEvent(event); }

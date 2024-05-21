@@ -24,9 +24,11 @@ class ColorChooser : public Visualizer
     void visualize();
     void mark();
 
-    void handleMouseEnterEvent();
-    void handleMouseLeaveEvent();
-    void handleMouseEvent(QMouseEvent* e);
+    void enterEvent(QEnterEvent*) override;
+    void leaveEvent(QEvent*) override;
+    void mouseMoveEvent(QMouseEvent*) override;
+    void mousePressEvent(QMouseEvent*) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
 
     QSize sizeHint() const { return QSize(300,100); }
 
@@ -44,10 +46,9 @@ class ColorChooser : public Visualizer
     template <Mode> void drawPoints();
     template <Mode> void draw();
 
-    void handleHits(const std::vector<int> &ids);
-    void handleDrag();
-
-    virtual void handleSelection(const Selection&) override;
+    void appendPoint(const QPointF&);
+    void removePoint(std::size_t index);
+    void movePoint(std::size_t index, const QPointF&);
 
     DOF *m_dof;
     QList<double> *m_yCoordinates;
