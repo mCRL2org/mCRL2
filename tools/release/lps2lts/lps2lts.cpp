@@ -353,7 +353,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 
     bool run() override
     {
-      mCRL2log(log::verbose) << options << std::endl;
+      mCRL2log(log::debug) << options << std::endl;
       options.trace_prefix = input_filename();
       lps::stochastic_specification stochastic_lpsspec;
       lps::load_lps(stochastic_lpsspec, input_filename());
