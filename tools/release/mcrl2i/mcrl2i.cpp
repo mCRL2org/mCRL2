@@ -19,6 +19,8 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/io.h"
 
+#include <optional>
+
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -154,12 +156,16 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
   protected:
     std::set < variable > context_variables;
     std::set < sort_expression > context_sorts;
+    std::optional<std::string> m_evaluate_expression;
+
     bool need_to_rebuild_rewriter=true;
 
     data_specification spec;
     rewriter rewr;
 
     mutable_map_substitution < std::map < variable, data_expression > > assignments;
+
+    using super = rewriter_tool<input_tool>;
 
 
     void handle_quit(bool& done)
@@ -327,12 +333,41 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       return mcrl2::data::data_specification();
     }
 
+    
+    void add_options(mcrl2::utilities::interface_description& desc)
+    {
+      super::add_options(desc);
+      
+      desc.add_option("evaluate",
+                      mcrl2::utilities::make_mandatory_argument("EXPRESSION"),
+                      "evaluates the given expression and prints the result",
+                      'e');
+    }
+    
+    void parse_options(const mcrl2::utilities::command_line_parser& parser)
+    {
+      super::parse_options(parser);
+
+      if (parser.has_option("evaluate"))
+      {
+        m_evaluate_expression = std::make_optional(parser.option_argument("evaluate"));
+      }
+    }
+
     /// Runs the algorithm.
     bool run()
     {
       spec=read_data_specification();
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
+      // Handle command line arguments.
+      if (m_evaluate_expression.has_value())
+      {        
+          handle_eval(m_evaluate_expression.value());
+          return true;
+      }
+
+      // Evaluate on the console
       bool done = false;
       while (!done)
       {
