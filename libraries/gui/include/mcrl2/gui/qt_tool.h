@@ -134,6 +134,9 @@ class qt_tool: public Tool
           // Failed to attach a console, we could spawn one or just ignore it.
         }
       }
+
+      // Disable the dark mode on Windows 11 until the icons have been adapted
+      qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
 #endif // MCRL2_PLATFORM_WINDOWS
 
 
