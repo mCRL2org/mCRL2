@@ -36,13 +36,14 @@ class rewriter_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description.
-    /// \param suppress_jittyp Boolean that if true will prevent showing that jittyp is an option for rewriting. 
+    /// \param suppress_jittyp Boolean that if true will prevent showing that jittyp is an option for rewriting.
     void add_options(utilities::interface_description& desc, bool suppress_jittyp)
     {
       Tool::add_options(desc);
 
       utilities::interface_description::enum_argument<data::rewrite_strategy> rewriter_option("NAME");
       rewriter_option.add_value(data::jitty, true);
+      rewriter_option.add_value(data::innermost);
 #ifdef MCRL2_ENABLE_JITTYC
       rewriter_option.add_value(data::jitty_compiling);
 #endif
@@ -52,33 +53,31 @@ class rewriter_tool: public Tool
       }
 
       desc.add_option(
-        "rewriter", 
+        "rewriter",
         rewriter_option,
         "use rewrite strategy NAME:"
         ,'r'
       );
 
       desc.add_option(
-        "qlimit", 
+        "qlimit",
         utilities::make_mandatory_argument("NUM"),
         "limit enumeration of universal and existential quantifiers in data expressions to NUM iterations (default NUM=10, NUM=0 for unlimited).",
         'Q'
       );
-
     }
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
-      add_options(desc,false);
+      add_options(desc, false);
     }
-
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
       m_rewrite_strategy = parser.option_argument_as< data::rewrite_strategy >("rewriter");

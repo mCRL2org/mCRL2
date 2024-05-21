@@ -137,7 +137,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
 
   // add the assignments corresponding to x to sigma
   // add x to the transition xy
-  stopwatch learn_start;
+  mcrl2::utilities::stopwatch learn_start;
   for (std::size_t j = 0; j < x_size; j++)
   {
     sigma[group.read_parameters[j]] = data_index[group.read[j]][x[j]];

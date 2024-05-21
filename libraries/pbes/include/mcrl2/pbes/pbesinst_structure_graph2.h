@@ -560,7 +560,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     void on_discovered_elements(const std::set<propositional_variable_instantiation>& elements) override
     {
       using utilities::detail::contains;
-      stopwatch timer;
+      mcrl2::utilities::stopwatch timer;
 
       bool report = false;
       if (m_options.optimization == 3)
