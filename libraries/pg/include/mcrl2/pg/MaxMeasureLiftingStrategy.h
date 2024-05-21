@@ -12,6 +12,8 @@
 
 #include "mcrl2/pg/SmallProgressMeasures.h"
 
+#include <memory>
+
 /*! \ingroup LiftingStrategies
 
     A lifting strategy that propagate maximum measures first.
@@ -34,7 +36,6 @@ public:
     MaxMeasureLiftingStrategy2( const ParityGame &game,
                                 const SmallProgressMeasures &spm,
                                 Order order, Metric metric );
-    ~MaxMeasureLiftingStrategy2();
 
     void push(verti v);
     void bump(verti v);
@@ -71,11 +72,11 @@ private:
     const Order order_;                 //!< vertex extraction order
     const Metric metric_;               //!< comparison metric
 
-    uint64_t next_id_;        //!< number of insertions
-    uint64_t * insert_id_;    //!< for each vertex: last insertion time
+    uint64_t next_id_;                         //!< number of insertions
+    std::unique_ptr<uint64_t[]> insert_id_;    //!< for each vertex: last insertion time
 
-    verti * const pq_pos_;      //!< for each vertex: position in the p.q. or -1
-    verti * const pq_;          //!< priority queue of lifted vertices
+    const std::unique_ptr<verti[]> pq_pos_;      //!< for each vertex: position in the p.q. or -1
+    const std::unique_ptr<verti[]> pq_;          //!< priority queue of lifted vertices
     verti pq_size_;             //!< priority queue size
 
     std::vector<verti> bumped_;
