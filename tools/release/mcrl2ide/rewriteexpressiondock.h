@@ -39,6 +39,11 @@ private slots:
   void rewriteExpression();
 
   /**
+   * Rewrites the current expression.
+   */
+  void actionRewriteResult(int processId);
+
+  /**
    * Cancels the rewriting of an expression.
    */
   void cancelRewrite();

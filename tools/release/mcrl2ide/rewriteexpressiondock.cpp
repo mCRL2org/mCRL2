@@ -21,11 +21,20 @@ RewriteExpressionDock::RewriteExpressionDock(mcrl2::gui::qt::CodeEditor* specifi
   
   connect(ui->rewriteButton, SIGNAL(clicked()), this,
           SLOT(rewriteExpression()));
+  connect(ui->cancelButton, SIGNAL(clicked()), this,
+          SLOT(cancelRewrite()));
+  connect(processSystem, SIGNAL(processFinished(int)), this,
+          SLOT(actionRewriteResult(int)));
 }
 
 void RewriteExpressionDock::rewriteExpression()
 {
   m_processId = m_processSystem->rewriteExpression(ui->inputEdit->text().toStdString());
+}
+
+void RewriteExpressionDock::actionRewriteResult(int processId)
+{
+  ui->resultText->setText(m_processSystem->getResult(m_processId));
 }
 
 void RewriteExpressionDock::cancelRewrite()

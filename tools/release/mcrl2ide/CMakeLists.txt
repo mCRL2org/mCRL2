@@ -28,5 +28,5 @@ mcrl2_add_gui_tool(mcrl2ide
 )
 
 if(TARGET mcrl2ide)
-  add_dependencies(mcrl2ide mcrl22lps lpsxsim lps2lts ltsconvert ltscompare ltsgraph lps2pbes pbessolve)
+  add_dependencies(mcrl2ide mcrl22lps mcrl2i lpsxsim lps2lts ltsconvert ltscompare ltsgraph lps2pbes pbessolve mcrl2i)
 endif()
