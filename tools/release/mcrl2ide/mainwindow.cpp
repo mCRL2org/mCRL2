@@ -189,7 +189,7 @@ void MainWindow::setupMenuBar()
   for (std::pair<IntermediateFileType, QString> item :
        INTERMEDIATEFILETYPENAMES)
   {
-    QAction* saveFileAction = saveIntermediateFilesMenu->addAction(item.second, QKeySequence(), this, "");
+    QAction* saveFileAction = saveIntermediateFilesMenu->addAction(item.second, this, "");
     saveFileAction->setCheckable(true);
     saveFileAction->setProperty("filetype", item.first);
     saveFileAction->setToolTip("Changing this will only have effect on "
