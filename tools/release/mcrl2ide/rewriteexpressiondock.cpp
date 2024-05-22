@@ -9,7 +9,7 @@
 
 #include "rewriteexpressiondock.h"
 
-#include "ui_RewriteExpressionDock.h"
+#include "ui_rewriteexpressiondock.h"
 
 RewriteExpressionDock::RewriteExpressionDock(mcrl2::gui::qt::CodeEditor* specificationEditor, ProcessSystem* processSystem, QWidget* parent)
   : QDockWidget(parent),
@@ -19,6 +19,8 @@ RewriteExpressionDock::RewriteExpressionDock(mcrl2::gui::qt::CodeEditor* specifi
 {
   ui->setupUi(this);
   
+  connect(ui->inputEdit, SIGNAL(returnPressed()), this,
+          SLOT(rewriteExpression()));
   connect(ui->rewriteButton, SIGNAL(clicked()), this,
           SLOT(rewriteExpression()));
   connect(ui->cancelButton, SIGNAL(clicked()), this,
