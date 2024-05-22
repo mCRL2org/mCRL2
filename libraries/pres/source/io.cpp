@@ -114,7 +114,7 @@ void save_pres(const pres& pres, const std::string& filename,
     format = guess_format(filename);
   }
 
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     save_pres(pres, std::cout, format);
   }
@@ -144,7 +144,7 @@ void load_pres(pres& pres,
   {
     format = guess_format(filename);
   }
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     load_pres(pres, std::cin, format);
   }
@@ -283,7 +283,7 @@ namespace detail
 pres load_pres(const std::string& filename)
 {
   pres result;
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     atermpp::binary_aterm_istream(std::cin) >> result;
   }
@@ -297,7 +297,7 @@ pres load_pres(const std::string& filename)
 
 void save_pres(const pres& presspec, const std::string& filename)
 {
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     atermpp::binary_aterm_ostream(std::cout) << presspec;
   }

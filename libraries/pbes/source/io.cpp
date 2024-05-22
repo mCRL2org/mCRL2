@@ -292,7 +292,7 @@ namespace detail
 pbes load_pbes(const std::string& filename)
 {
   pbes result;
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     atermpp::binary_aterm_istream(std::cin) >> result;
   }
@@ -306,7 +306,7 @@ pbes load_pbes(const std::string& filename)
 
 void save_pbes(const pbes& pbesspec, const std::string& filename)
 {
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     atermpp::binary_aterm_ostream(std::cout) << pbesspec;
   }
