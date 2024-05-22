@@ -21,6 +21,7 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #endif
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
@@ -47,6 +48,8 @@ void quantifier_expression_test(const std::string& expr1_text, const std::string
 void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
 {
   data_specification dataspec;
+
+  data::detail::set_enumerator_iteration_limit(5);
   rewriter r(dataspec, s);
 
   // tests for Bool
@@ -65,6 +68,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   // tests for Pos / Nat
   dataspec.add_context_sort(sort_nat::nat());
   dataspec.add_context_sort(sort_set::set_(sort_nat::nat()));
+  data::detail::set_enumerator_iteration_limit(50);
   r = rewriter(dataspec, s);
   quantifier_expression_test("1<2", "true",dataspec, r);
   quantifier_expression_test("exists x: Nat. (  x in {1,2,25,600} && 25 == x )", "true", dataspec, r);
@@ -77,6 +81,8 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   quantifier_expression_test("forall x: Nat. x == 3", "false", dataspec, r);
   quantifier_expression_test("exists x: Nat. x == 3", "true", dataspec, r);
   quantifier_expression_test("forall x: Pos. exists y: Pos.x == y+1", "false", dataspec, r);
+
+  data::detail::set_enumerator_iteration_limit(10);
   quantifier_expression_test("forall x: Pos. exists y1,y2:Pos.x==y1+y2", "false", dataspec, r);
   // The rewriter cannot deal with this
   // quantifier_expression_test("forall x: Nat. exists y1,y2:Nat.x==y1+y2", "true", dataspec, r);

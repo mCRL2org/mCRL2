@@ -21,6 +21,7 @@
 #endif
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 
@@ -1536,10 +1537,10 @@ BOOST_AUTO_TEST_CASE(bound_variables_in_set_comprehension)   // The toolset up t
 {             
   std::string s( 
   "map e:Bool;\n"
-//  "eqn e = exists t':Nat. t' in { x: Nat | exists t':Nat.(t'==3+x && x==4) };\n"
   "eqn e = exists t':Nat. t' in { x: Nat | exists t':Nat.(t'==1+x) && x==0};\n"
   );
 
+  data::detail::set_enumerator_iteration_limit(5);
   data_specification specification(parse_data_specification(s));
 
   rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
