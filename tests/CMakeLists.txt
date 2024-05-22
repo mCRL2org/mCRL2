@@ -58,6 +58,7 @@ endif()
 add_test(NAME tooltests
   COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/tool_testing.py
     --toolpath ${MCRL2_TOOL_PATH}
+    -m 4
     ${TOOLTEST_ARGS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
 )
@@ -70,6 +71,8 @@ endif()
 add_test(NAME exampletests
   COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_examples.py
     --toolpath ${MCRL2_TOOL_PATH}
+    --timeout 15
+    -m 4
     ${EXAMPLETEST_ARGS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
 )

@@ -6,7 +6,7 @@ import os
 # Change working dir to the script path
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-subprocess.run(['mcrl22lps', '-v', 'abp_bw.mcrl2', 'abp_bw.lps'], check=True)
+subprocess.run(['mcrl22lps', 'abp_bw.mcrl2', 'abp_bw.lps'], check=True)
 
 for prop in [
     'nodeadlock.mcf',
@@ -22,6 +22,6 @@ for prop in [
     path, _ = os.path.splitext(prop)
     name = os.path.basename(path)
 
-    print('verifying property {name}.mcf for abp_bw.lps')
-    subprocess.run(['lps2pbes', '-v', '-f', prop, 'abp_bw.lps', f'abp_bw.{name}.pbes'], check=True)
-    subprocess.run(['pbes2bool', '-v', f'abp_bw.{name}.pbes'], check=True)
+    print(f'verifying property {name}.mcf for abp_bw.lps')
+    subprocess.run(['lps2pbes', '-f', prop, 'abp_bw.lps', f'abp_bw.{name}.pbes'], check=True)
+    subprocess.run(['pbes2bool', f'abp_bw.{name}.pbes'], check=True)

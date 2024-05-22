@@ -1530,3 +1530,28 @@ BOOST_AUTO_TEST_CASE(Problem_with_recursive_templates_in_jittyc)   // This rewri
     data_rewrite_test(R, e, f);
   }
 }
+
+BOOST_AUTO_TEST_CASE(bound_variables_in_set_comprehension)   // The toolset up to 2024 did not properly rename
+                                                             // variables in a quantification that would be substituted simultaneously.
+{             
+  std::string s( 
+  "map e:Bool;\n"
+//  "eqn e = exists t':Nat. t' in { x: Nat | exists t':Nat.(t'==3+x && x==4) };\n"
+  "eqn e = exists t':Nat. t' in { x: Nat | exists t':Nat.(t'==1+x) && x==0};\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy SET comprehension and exists: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+  
+    data::data_expression e(parse_data_expression("e", specification));
+    data::data_expression f(parse_data_expression("true", specification)); // This typically rewrites to false if the outer t' is substituted for x
+                                                                           // allowing it to be captured by the inner exists.
+    data_rewrite_test(R, e, f);
+  }
+}   
+

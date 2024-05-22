@@ -12,6 +12,8 @@
 
 #include "mcrl2/pg/SmallProgressMeasures.h"
 
+#include <memory>
+
 /*! \ingroup LiftingStrategies
  
     A simple lifting strategy that puts all nodes in a queue, then takes them
@@ -40,7 +42,6 @@ public:
     PredecessorLiftingStrategy(
         const ParityGame &game, const SmallProgressMeasures &spm, bool stack,
         int version );
-    ~PredecessorLiftingStrategy();
 
     bool stack() const { return stack_; }
 
@@ -56,8 +57,8 @@ public:
 private:
     const SmallProgressMeasures &spm_;
     const bool stack_;
-    bool *queued_;
-    verti *queue_;
+    std::unique_ptr<bool[]> queued_;
+    std::unique_ptr<verti[]> queue_;
     std::size_t queue_size_, queue_capacity_, queue_begin_, queue_end_;
 };
 
