@@ -6,6 +6,9 @@ import subprocess
 import sys
 import concurrent.futures
 
+# Makes sure that the script can find the modules when ran directly.
+sys.path.append(os.path.join(os.path.dirname(__file__),'../../'))
+from tests.utility.run_process import RunProcess, TimeExceededError
 
 def main():
     """Finds all the .mcrl2 files in the example directory and tries to parse them with mcrl22lps."""
@@ -29,19 +32,20 @@ def main():
     os.environ["PATH"] += os.pathsep + args.toolpath
 
     def run_example(path, index):
-        print(f"[{index}] Running {path}")
+        print(f"[{index}] Running {path}", flush=True)
 
-        try:
-            execute = [sys.executable, path]
-            if args.jittyc:
-                execute += ["-rjittyc"]
+        arguments = [path]
+        if args.jittyc:
+            arguments += ["-rjittyc"]
+        
+        # Change the working directory to the script path
+        os.chdir(os.path.dirname(path))
 
-            result = subprocess.run(execute, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=args.timeout, cwd=os.path.dirname(path), check=True)
-        except subprocess.TimeoutExpired:
-            # Ignore timeouts, they are not errors.
-            return ""
+        # Strip the extension since the Runprocess adds it again
+        python,_ = os.path.splitext(sys.executable)
 
-        return result.stdout
+        process = RunProcess(python, arguments, 2000, args.timeout)
+        return process.stdout
 
     # Start the linearisation process
     with concurrent.futures.ThreadPoolExecutor(
@@ -68,14 +72,22 @@ def main():
             path = futures[future]
 
             if future.exception():
-                print(
-                    f"[{finished}/{len(run_scripts)}] Example {path} failed with {future.exception()}"
-                )
-                failed.append(path)
+                if isinstance(future.exception(), TimeExceededError):
+                    # Ignore timeouts, they are not errors.
+                    print(
+                        f"[{finished}/{len(run_scripts)}] Example {path} timed out", 
+                        flush=True
+                    )
+                else:
+                    print(
+                        f"[{finished}/{len(run_scripts)}] Example {path} failed with {future.exception()}", 
+                        flush=True
+                    )
+                    failed.append(path)
             if future.cancelled():
-                print(f"[{finished}/{len(run_scripts)}] Example {path} was cancelled")
+                print(f"[{finished}/{len(run_scripts)}] Example {path} was cancelled", flush=True)
             else:
-                print(f"[{finished}/{len(run_scripts)}] Finished example {path}")
+                print(f"[{finished}/{len(run_scripts)}] Finished example {path}", flush=True)
 
             finished += 1
 
