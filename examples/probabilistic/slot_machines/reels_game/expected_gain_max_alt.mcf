@@ -1,8 +1,10 @@
 map max_turns:Nat;
-eqn max_turns=2;
+eqn max_turns=1;
 
 form val(1/max_turns)*mu X(turns:Nat=0).
             (val(turns==max_turns) && val(0) ||
              val(turns<max_turns) &&
-               ( <true>sup n:Nat.<points(n)> (val(n-1)+X(turns+1))
+               (  sup b1,b2,b3,b4:Bool.<play(b1,b2,b3,b4)>
+%                  sup n:Nat.<points(n)> (val(n-if(b1||b2||b3||b4,2,1))+X(turns+1))
+                  sup n:Nat.<points(n)> (val(n-1)+X(turns+1))
                ));

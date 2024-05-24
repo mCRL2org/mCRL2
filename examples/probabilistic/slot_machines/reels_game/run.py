@@ -17,8 +17,8 @@ lps2pres = which('lps2pres')
 pressolve = which('pressolve')
 presrewr = which('presrewr')
 if lps2pres is not None and pressolve is not None and presrewr is not None:
-    for formula in ['expected_gain_max.mcf', 'expected_gain_alt.mcf', 'expected_gain_alt1.mcf']:
-        run = subprocess.run([lps2pres, '-f', 'expected_gain_max.mcf', 'temp.lps'], stdout=subprocess.PIPE, check=True)
+    for formula in ['expected_gain_max_alt.mcf']:
+        run = subprocess.run([lps2pres, '-f', formula, 'temp.lps'], stdout=subprocess.PIPE, check=True)
         run = subprocess.run([presrewr], input=run.stdout, stdout=subprocess.PIPE, check=True)
         run = subprocess.run([presrewr, '-p', 'quantifier-one-point'], input=run.stdout, stdout=subprocess.PIPE, check=True)
         run = subprocess.run([presrewr, '-p', 'quantifier-all'], input=run.stdout, stdout=subprocess.PIPE, check=True)
