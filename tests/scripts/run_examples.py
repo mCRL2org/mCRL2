@@ -84,7 +84,7 @@ def main():
                         flush=True
                     )
                     failed.append(path)
-            if future.cancelled():
+            elif future.cancelled():
                 print(f"[{finished}/{len(run_scripts)}] Example {path} was cancelled", flush=True)
             else:
                 print(f"[{finished}/{len(run_scripts)}] Finished example {path}", flush=True)

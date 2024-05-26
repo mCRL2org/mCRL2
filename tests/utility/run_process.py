@@ -9,6 +9,7 @@ import psutil
 import subprocess
 import platform
 import concurrent.futures
+import signal
 
 class TimeExceededError(Exception):
     def __init__(self, name: str, value: float, max_time: float):
@@ -61,6 +62,20 @@ class ToolRuntimeError(Exception):
     def __str__(self):
         return repr(self.value)
 
+def kill_all(process, sig=signal.SIGTERM):
+    """Kill a process tree (including grandchildren) with signal
+    "sig" and return a (gone, still_alive) tuple.
+    """
+    children = process.children(recursive=True)
+    children.append(process)
+
+    for p in children:
+        try:
+            p.kill()
+        except psutil.NoSuchProcess:
+            pass
+    _, alive = psutil.wait_procs(children)
+    assert not alive
 
 class RunProcess:
     stdout = ""
@@ -111,12 +126,12 @@ class RunProcess:
                             )
 
                             if self._max_memory_used > max_memory:
-                                proc.kill()
+                                kill_all(process)
                                 raise MemoryExceededError(
                                     tool, self._max_memory_used, max_memory
                                 )
                             if self._user_time > max_time:
-                                proc.kill()
+                                kill_all(process)
                                 raise TimeExceededError(tool, self._user_time, max_time)
                             self._user_time += 0.1
                             time.sleep(0.1)
