@@ -43,7 +43,7 @@ struct add_capture_avoiding_replacement
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
     pbes_expression body;
     apply(body, x.body());
-    make_forall(result, v1, body);
+    pbes_system::make_forall(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
   }
 
@@ -53,7 +53,7 @@ struct add_capture_avoiding_replacement
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
     pbes_expression body;
     apply(body, x.body());
-    make_exists(result, v1, body);
+    pbes_system::make_exists(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
   }
 

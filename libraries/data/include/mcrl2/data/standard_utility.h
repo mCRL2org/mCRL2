@@ -12,10 +12,17 @@
 #ifndef MCRL2_DATA_STANDARD_UTILITY_H
 #define MCRL2_DATA_STANDARD_UTILITY_H
 
-#include "mcrl2/utilities/detail/join.h"
-#include "mcrl2/data/real.h"
-
 #include <queue>
+
+#include "mcrl2/utilities/detail/join.h"
+
+#include "mcrl2/data/data_configuration.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/real64.h"
+#else
+#include "mcrl2/data/real.h"
+#endif
+
 
 namespace mcrl2
 {

@@ -57,22 +57,22 @@ class shared_subset
       return node_;
     }
 
-    class bdd_node : public atermpp::aterm_appl
+    class bdd_node : public atermpp::aterm
     {
       public:
         bdd_node()
         {}
 
-        bdd_node(const atermpp::aterm_appl& t)
-          : atermpp::aterm_appl(t)
+        bdd_node(const atermpp::aterm& t)
+          : atermpp::aterm(t)
         {}
 
         bdd_node(bool value)
-          : atermpp::aterm_appl(value ? get_true() : get_false())
+          : atermpp::aterm(value ? get_true() : get_false())
         {}
 
         bdd_node(std::size_t bit, const bdd_node& true_node, const bdd_node& false_node)
-          : atermpp::aterm_appl(get_node(), atermpp::aterm_int(bit), true_node, false_node)
+          : atermpp::aterm(get_node(), atermpp::aterm_int(bit), true_node, false_node)
         {}
 
         bool is_true()
@@ -97,12 +97,12 @@ class shared_subset
 
         bdd_node true_node()
         {
-          return bdd_node(down_cast<aterm_appl>((*this)[1]));
+          return bdd_node(down_cast<aterm>((*this)[1]));
         }
 
         bdd_node false_node()
         {
-          return bdd_node(down_cast<aterm_appl>((*this)[2]));
+          return bdd_node(down_cast<aterm>((*this)[2]));
         }
     };
 

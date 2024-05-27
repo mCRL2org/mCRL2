@@ -71,7 +71,7 @@ static void find_variables_in_the_scope_of_main_function_symbol_in_a_complex_sub
                    const data_expression& e,
                    std::set <variable>& result)
 {
-  if (is_function_symbol(e))
+  if (is_function_symbol(e) || is_machine_number(e))
   {
     return;
   }
@@ -229,6 +229,13 @@ static bool arity_is_allowed(const sort_expression& s, const std::size_t a)
 
 void RewriterCompilingJitty::term2seq(const data_expression& t, match_tree_list& s, std::size_t *var_cnt, const bool omit_head)
 {
+  if (is_machine_number(t))
+  {
+    const machine_number n(t);
+    s.push_front(match_tree_MachineNumber(n,dummy,dummy));
+    s.push_front(match_tree_D(dummy,0));
+    return;
+  }
   if (is_function_symbol(t))
   {
     const function_symbol f(t);
@@ -389,6 +396,10 @@ static void add_to_build_pars(build_pars& pars, const match_tree_list_list& seqs
       pars.Mlist.push_front(e);
     }
     else if (e.front().isF())
+    {
+      pars.Flist.push_front(e);
+    }
+    else if (e.front().isMachineNumber())
     {
       pars.Flist.push_front(e);
     }
@@ -644,10 +655,15 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
     {
       return true_tree;
     }
-    else
+    else if (F.front().isF())
     {
       return match_tree_F(match_tree_F(F.front()).function(),true_tree,false_tree);
     }
+    else 
+    {
+      assert(F.front().isMachineNumber());
+      return match_tree_MachineNumber(match_tree_MachineNumber(F.front()).number(),true_tree,false_tree);
+    } 
   }
   else if (!pars.upstack.empty())
   {
@@ -1090,7 +1106,7 @@ class RewriterCompilingJitty::ImplementTree
   {
     if (arity == 0)
     {
-      return "pass_on";  // This is to avoid confusion with atermpp::aterm_appl on a function symbol and two iterators.
+      return "pass_on";  // This is to avoid confusion with atermpp::aterm on a function symbol and two iterators.
     }
     return "make_application";
   }
@@ -1648,6 +1664,7 @@ class RewriterCompilingJitty::ImplementTree
       return;
     }
     assert(!is_function_symbol(t)); // This will never be reached, as it is dealt with in the if clause above.
+    assert(!is_machine_number(t)); // This will never be reached, as it is dealt with in the if clause above.
     
     if (is_variable(t))
     {
@@ -1767,6 +1784,10 @@ class RewriterCompilingJitty::ImplementTree
     {
       implement_treeF(m_stream, atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     }
+    else if (tree.isMachineNumber())
+    { 
+      implement_treeMachineNumber(m_stream, atermpp::down_cast<match_tree_MachineNumber>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments,  type_of_code_variables);
+    }
     else if (tree.isD())
     {
       implement_treeD(m_stream, atermpp::down_cast<match_tree_D>(tree), level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
@@ -1821,7 +1842,7 @@ class RewriterCompilingJitty::ImplementTree
   {
     const match_tree_S& treeS(tree);
     bool reset_current_data_parameters=false;
-    if (atermpp::find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm_appl()) // treeS.target_variable occurs in treeS.subtree
+    if (atermpp::find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm()) // treeS.target_variable occurs in treeS.subtree
     {
       const std::string parameters = brackets.current_data_parameters.top(); 
       brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& " + (std::string(treeS.target_variable().name()).c_str() + 1));
@@ -1983,6 +2004,91 @@ class RewriterCompilingJitty::ImplementTree
              << "}\n";
     brackets.bracket_nesting_level--;
   }
+
+
+  void implement_treeMachineNumber(
+             std::ostream& m_stream,
+             const match_tree_MachineNumber& tree,
+             std::size_t cur_arg,
+             std::size_t parent,
+             std::size_t level,
+             std::size_t cnt,
+             const std::size_t arity,
+             const function_symbol& opid,
+             bracket_level_data& brackets,
+             std::stack<std::string>& auxiliary_code_fragments,
+             std::map<variable,std::string>& type_of_code_variables)
+  {
+    bool reset_current_data_parameters=false;
+    const void* number = (void*)(atermpp::detail::address(tree.number()));
+    m_stream << m_padding;
+    brackets.bracket_nesting_level++;
+    if (level == 0)
+    {
+      assert(is_machine_number(tree.number()));
+      {
+        m_stream << "if (uint_address(arg" << cur_arg << ") == " << number << ") // MachineNumber (I)\n" << m_padding
+                 << "{\n";
+      }
+      /* else
+      {
+        assert(0);
+        m_stream << "if (uint_address((is_function_symbol(arg" << cur_arg <<  ") ? arg" << cur_arg << " : down_cast<application>(arg" << cur_arg << ").head())) == "
+                 << number << ") // F1\n" << m_padding
+                 << "{\n";
+      } */
+    }
+    else
+    {
+      const char* arg_or_t = level == 1 ? "arg" : "t";
+      // if (!is_function_sort(tree.function().sort()))
+      assert(is_machine_number(tree.number()));
+      {
+        m_stream << "if (uint_address(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]) == "
+                 << number << ") // MachineNumber (II) " << tree.function().name() << "\n" << m_padding
+                 << "{\n" << m_padding
+                 << "  const data_expression& t" << cnt << " = down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "];\n";
+      }
+      /* else
+      {
+        assert(0);
+        m_stream << "if (is_application_no_check(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]) && "
+                 <<     "uint_address(down_cast<application>(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]).head()) == "
+                 << number << ") // F2b " << tree.function().name() << "\n" << m_padding
+                 << "{\n" << m_padding
+                 << "  const data_expression& t" << cnt << " = down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "];\n";
+      } */
+      const std::string parameters = brackets.current_data_parameters.top();
+      brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& t" + std::to_string(cnt));
+      const std::string arguments = brackets.current_data_arguments.top();
+      brackets.current_data_arguments.push(arguments + (arguments.empty()?"t":", t") + std::to_string(cnt));
+
+      reset_current_data_parameters=true;
+    }
+    m_stack.push_back(cur_arg);
+    m_stack.push_back(parent);
+    m_padding.indent();
+    implement_tree(m_stream, tree.true_tree(), 1, level == 0 ? cur_arg : cnt, level + 1, cnt + 1, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
+    if (reset_current_data_parameters)
+    {
+      brackets.current_data_parameters.pop();
+      brackets.current_data_arguments.pop();
+    }
+    m_padding.unindent();
+    m_stack.pop_back();
+    m_stack.pop_back();
+    m_stream << m_padding
+             << "}\n" << m_padding
+             << "else\n" << m_padding
+             << "{\n";
+    m_padding.indent();
+    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
+    m_padding.unindent();
+    m_stream << m_padding
+             << "}\n";
+    brackets.bracket_nesting_level--;
+  }
+
 
   void implement_treeD(
              std::ostream& m_stream, 
@@ -2242,45 +2348,57 @@ public:
              << m_padding << "this_rewriter->m_rewrite_stack.increase(1);\n"
              << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.top();\n"; */
 
-    m_stream << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.new_stack_position();\n";
 
     const std::string cplusplus_function_name = data_spec.cpp_implemented_functions().find(opid)->second.second;
 
     // First calculate the core function, which may be surrounded by extra applications. 
-    std::stringstream ss;
-    ss << cplusplus_function_name << "(";
-    
-    for(size_t i=0; i<get_direct_arity(opid); ++i)
-    {
-      ss << (i>0?",":"");
-      ss << "local_rewrite(arg_not_nf" << i << ")";
-    }
-    ss << ")";
 
     if (arity==get_direct_arity(opid))
     {
       if (target_for_output.empty())
       {
-        m_stream << ss.str();
+        assert(0);
+        // m_stream << ss.str();
       }
       else
       {
         // m_stream << m_padding << target_for_output << " = " << ss.str() << ";\n";
-        m_stream << m_padding << target_for_output << ".assign(" << ss.str() 
-                 << ", *this_rewriter->m_thread_aterm_pool);\n";
+        // m_stream << m_padding << target_for_output << ".assign(" << ss.str() 
+        //          << ", *this_rewriter->m_thread_aterm_pool);\n";
+        std::stringstream ss1;
+        m_stream << m_padding << cplusplus_function_name << "(" << target_for_output;
+        
+        for(size_t i=0; i<get_direct_arity(opid); ++i)
+        {
+          ss1 << ", local_rewrite(arg_not_nf" << i << ")";
+        }
+        ss1 << ")";
+
+        m_stream << m_padding << ss1.str() << ";\n";
       }
       return;
     }
+    m_stream << m_padding << "data_expression& local_store1=this_rewriter->m_rewrite_stack.new_stack_position();\n";
+    std::stringstream ss;
+
+    m_stream << m_padding << cplusplus_function_name << "(local_store1";
+        
+    for(size_t i=0; i<get_direct_arity(opid); ++i)
+    {
+      m_stream << ", local_rewrite(arg_not_nf" << i << ")";
+    }
+    m_stream << ");\n";
     // else it is a higher order function, and it must be surrounded by "application"s. 
+    m_stream << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.new_stack_position();\n";
     assert(arity>get_direct_arity(opid));
     std::size_t used_arguments = get_direct_arity(opid);
     std::string result="local_store";
-    m_stream << m_padding << implement_body_of_cplusplus_defined_function(
+    m_stream << implement_body_of_cplusplus_defined_function(
                                          arity,
                                          result,
-                                         ss.str(), 
+                                         "local_store1", 
                                          down_cast<function_sort>(down_cast<function_sort>(opid.sort()).codomain()),
-                                         used_arguments) << ";\n";
+                                         used_arguments);
     assert(used_arguments == arity);
    
     // If there applications surrounding the term, it may not be a normalform anymore, but its arguments
@@ -2312,6 +2430,7 @@ public:
       implement_a_cplusplus_defined_function(m_stream, "result", arity, opid, data_spec);
       return;
     }
+    m_stream << m_padding << "std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";
     bool added_new_parameters_in_brackets=false;
     m_used=nfs_array(arity); // This vector maintains which arguments are in normal form.
     // m_nnfvars=variable_or_number_list();
@@ -2364,6 +2483,7 @@ public:
       brackets.current_data_parameters.pop();
       brackets.current_data_arguments.pop();
     }
+    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n";
   }
 
   std::string get_heads(const sort_expression& s, const std::string& base_string, const std::size_t number_of_arguments)
@@ -2599,12 +2719,12 @@ public:
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     rewr_function_signature(m_stream, index, arity, brackets);
     m_stream << m_padding << "{\n"
-             << m_padding << "  mcrl2::utilities::mcrl2_unused(this_rewriter); // Suppress warning\n"
-             << m_padding << "  std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";
+             << m_padding << "  mcrl2::utilities::mcrl2_unused(this_rewriter); // Suppress warning\n";
+//              << m_padding << "  std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";    
     m_padding.indent();
     implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments,data_spec);
-    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n"
-             << m_padding << "return;\n";
+//    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n"
+      m_stream << m_padding << "return;\n";
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 
@@ -3077,7 +3197,6 @@ void RewriterCompilingJitty::rewrite(
 #endif
   // Save global sigma and restore it afterwards, as rewriting might be recursive with different
   // substitutions, due to the enumerator.
-// std::cerr << "REWRITE " << term << "\n";
   substitution_type *saved_sigma=global_sigma;
   global_sigma=&sigma;
   if (rewriting_in_progress)
@@ -3099,7 +3218,6 @@ void RewriterCompilingJitty::rewrite(
                                    // resized. References to the stack loose their validity. 
       m_rewrite_stack.reserve_more_space();
       rewrite(result,term,sigma);
-// std::cerr << "REWRITE " << term << " --> " << result << "\n";
       return;
     }
     rewriting_in_progress=false;
@@ -3107,7 +3225,6 @@ void RewriterCompilingJitty::rewrite(
   }
 
   global_sigma=saved_sigma;
-// std::cerr << "REWRITE " << term << " --> " << result << "\n";
   return;
 }
 
@@ -3115,10 +3232,8 @@ data_expression RewriterCompilingJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
-// std::cerr << "REWRITE " << term << "\n";
   data_expression result;
   rewrite(result, term, sigma);
-// std::cerr << "REWRITE " << term << " --> " << result << "\n";
   return result;
 }
 

@@ -659,7 +659,7 @@ protected:
     {
       if (data::sort_real::is_larger_zero(data_result))
       {
-        assert(data::sort_real::value(data_result)>0);
+        assert(data::sort_real::value<double>(data_result)>0);
         return;
       }
       make_const_multiply(result, data_result, result);

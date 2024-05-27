@@ -31,17 +31,17 @@ namespace detail
 {
 
 #ifndef NDEBUG
-// function object to test if it is an aterm_appl with function symbol "f"
+// function object to test if it is an aterm with function symbol "f"
 struct is_a_variable
 {
   bool operator()(const atermpp::aterm& t) const
   {
-    return is_variable(atermpp::down_cast<atermpp::aterm_appl>(t));
+    return is_variable(t);
   }
 };
 
 static
-bool occur_check(const variable& v, const atermpp::aterm_appl& e)
+bool occur_check(const variable& v, const atermpp::aterm& e)
 {
   if (v==e)
   {

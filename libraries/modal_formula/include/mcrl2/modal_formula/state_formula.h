@@ -22,30 +22,30 @@ namespace state_formulas
 
 //--- start generated classes ---//
 /// \\brief A state formula
-class state_formula: public atermpp::aterm_appl
+class state_formula: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     state_formula()
-      : atermpp::aterm_appl(core::detail::default_values::StateFrm)
+      : atermpp::aterm(core::detail::default_values::StateFrm)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit state_formula(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_StateFrm(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     state_formula(const data::data_expression& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z6.
     state_formula(const data::untyped_data_parameter& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// Move semantics
@@ -67,36 +67,36 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 typedef std::vector<state_formula>    state_formula_vector;
 
 // prototypes
-inline bool is_true(const atermpp::aterm_appl& x);
-inline bool is_false(const atermpp::aterm_appl& x);
-inline bool is_not(const atermpp::aterm_appl& x);
-inline bool is_minus(const atermpp::aterm_appl& x);
-inline bool is_and(const atermpp::aterm_appl& x);
-inline bool is_or(const atermpp::aterm_appl& x);
-inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_plus(const atermpp::aterm_appl& x);
-inline bool is_const_multiply(const atermpp::aterm_appl& x);
-inline bool is_const_multiply_alt(const atermpp::aterm_appl& x);
-inline bool is_forall(const atermpp::aterm_appl& x);
-inline bool is_exists(const atermpp::aterm_appl& x);
-inline bool is_infimum(const atermpp::aterm_appl& x);
-inline bool is_supremum(const atermpp::aterm_appl& x);
-inline bool is_sum(const atermpp::aterm_appl& x);
-inline bool is_must(const atermpp::aterm_appl& x);
-inline bool is_may(const atermpp::aterm_appl& x);
-inline bool is_yaled(const atermpp::aterm_appl& x);
-inline bool is_yaled_timed(const atermpp::aterm_appl& x);
-inline bool is_delay(const atermpp::aterm_appl& x);
-inline bool is_delay_timed(const atermpp::aterm_appl& x);
-inline bool is_variable(const atermpp::aterm_appl& x);
-inline bool is_nu(const atermpp::aterm_appl& x);
-inline bool is_mu(const atermpp::aterm_appl& x);
+inline bool is_true(const atermpp::aterm& x);
+inline bool is_false(const atermpp::aterm& x);
+inline bool is_not(const atermpp::aterm& x);
+inline bool is_minus(const atermpp::aterm& x);
+inline bool is_and(const atermpp::aterm& x);
+inline bool is_or(const atermpp::aterm& x);
+inline bool is_imp(const atermpp::aterm& x);
+inline bool is_plus(const atermpp::aterm& x);
+inline bool is_const_multiply(const atermpp::aterm& x);
+inline bool is_const_multiply_alt(const atermpp::aterm& x);
+inline bool is_forall(const atermpp::aterm& x);
+inline bool is_exists(const atermpp::aterm& x);
+inline bool is_infimum(const atermpp::aterm& x);
+inline bool is_supremum(const atermpp::aterm& x);
+inline bool is_sum(const atermpp::aterm& x);
+inline bool is_must(const atermpp::aterm& x);
+inline bool is_may(const atermpp::aterm& x);
+inline bool is_yaled(const atermpp::aterm& x);
+inline bool is_yaled_timed(const atermpp::aterm& x);
+inline bool is_delay(const atermpp::aterm& x);
+inline bool is_delay_timed(const atermpp::aterm& x);
+inline bool is_variable(const atermpp::aterm& x);
+inline bool is_nu(const atermpp::aterm& x);
+inline bool is_mu(const atermpp::aterm& x);
 
 /// \\brief Test for a state_formula expression
 /// \\param x A term
 /// \\return True if \\a x is a state_formula expression
 inline
-bool is_state_formula(const atermpp::aterm_appl& x)
+bool is_state_formula(const atermpp::aterm& x)
 {
   return data::is_data_expression(x) ||
          data::is_untyped_data_parameter(x) ||
@@ -150,12 +150,12 @@ inline void swap(state_formula& t1, state_formula& t2)
 class true_: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     true_()
       : state_formula(core::detail::default_values::StateTrue)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit true_(const atermpp::aterm& term)
       : state_formula(term)
@@ -174,7 +174,7 @@ class true_: public state_formula
 /// \\param x A term
 /// \\return True if \\a x is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& x)
+bool is_true(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateTrue;
 }
@@ -203,12 +203,12 @@ inline void swap(true_& t1, true_& t2)
 class false_: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     false_()
       : state_formula(core::detail::default_values::StateFalse)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit false_(const atermpp::aterm& term)
       : state_formula(term)
@@ -227,7 +227,7 @@ class false_: public state_formula
 /// \\param x A term
 /// \\return True if \\a x is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& x)
+bool is_false(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateFalse;
 }
@@ -256,12 +256,12 @@ inline void swap(false_& t1, false_& t2)
 class not_: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     not_()
       : state_formula(core::detail::default_values::StateNot)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit not_(const atermpp::aterm& term)
       : state_formula(term)
@@ -269,9 +269,9 @@ class not_: public state_formula
       assert(core::detail::check_term_StateNot(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit not_(const state_formula& operand)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNot(), operand))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateNot(), operand))
     {}
 
     /// Move semantics
@@ -289,7 +289,7 @@ class not_: public state_formula
 /// \\brief Make_not_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new not_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_not_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateNot(), args...);
 }
@@ -298,7 +298,7 @@ inline void make_not_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a not expression
 inline
-bool is_not(const atermpp::aterm_appl& x)
+bool is_not(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateNot;
 }
@@ -327,12 +327,12 @@ inline void swap(not_& t1, not_& t2)
 class minus: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     minus()
       : state_formula(core::detail::default_values::StateMinus)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit minus(const atermpp::aterm& term)
       : state_formula(term)
@@ -340,9 +340,9 @@ class minus: public state_formula
       assert(core::detail::check_term_StateMinus(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit minus(const state_formula& operand)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMinus(), operand))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateMinus(), operand))
     {}
 
     /// Move semantics
@@ -360,7 +360,7 @@ class minus: public state_formula
 /// \\brief Make_minus constructs a new term into a given address.
 /// \\ \param t The reference into which the new minus is constructed. 
 template <class... ARGUMENTS>
-inline void make_minus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_minus(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMinus(), args...);
 }
@@ -369,7 +369,7 @@ inline void make_minus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a minus expression
 inline
-bool is_minus(const atermpp::aterm_appl& x)
+bool is_minus(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateMinus;
 }
@@ -398,12 +398,12 @@ inline void swap(minus& t1, minus& t2)
 class and_: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     and_()
       : state_formula(core::detail::default_values::StateAnd)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit and_(const atermpp::aterm& term)
       : state_formula(term)
@@ -411,9 +411,9 @@ class and_: public state_formula
       assert(core::detail::check_term_StateAnd(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     and_(const state_formula& left, const state_formula& right)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateAnd(), left, right))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateAnd(), left, right))
     {}
 
     /// Move semantics
@@ -436,7 +436,7 @@ class and_: public state_formula
 /// \\brief Make_and_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new and_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_and_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateAnd(), args...);
 }
@@ -445,7 +445,7 @@ inline void make_and_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& x)
+bool is_and(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateAnd;
 }
@@ -474,12 +474,12 @@ inline void swap(and_& t1, and_& t2)
 class or_: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     or_()
       : state_formula(core::detail::default_values::StateOr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit or_(const atermpp::aterm& term)
       : state_formula(term)
@@ -487,9 +487,9 @@ class or_: public state_formula
       assert(core::detail::check_term_StateOr(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     or_(const state_formula& left, const state_formula& right)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateOr(), left, right))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateOr(), left, right))
     {}
 
     /// Move semantics
@@ -512,7 +512,7 @@ class or_: public state_formula
 /// \\brief Make_or_ constructs a new term into a given address.
 /// \\ \param t The reference into which the new or_ is constructed. 
 template <class... ARGUMENTS>
-inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_or_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateOr(), args...);
 }
@@ -521,7 +521,7 @@ inline void make_or_(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& x)
+bool is_or(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateOr;
 }
@@ -550,12 +550,12 @@ inline void swap(or_& t1, or_& t2)
 class imp: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     imp()
       : state_formula(core::detail::default_values::StateImp)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit imp(const atermpp::aterm& term)
       : state_formula(term)
@@ -563,9 +563,9 @@ class imp: public state_formula
       assert(core::detail::check_term_StateImp(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     imp(const state_formula& left, const state_formula& right)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateImp(), left, right))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateImp(), left, right))
     {}
 
     /// Move semantics
@@ -588,7 +588,7 @@ class imp: public state_formula
 /// \\brief Make_imp constructs a new term into a given address.
 /// \\ \param t The reference into which the new imp is constructed. 
 template <class... ARGUMENTS>
-inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_imp(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateImp(), args...);
 }
@@ -597,7 +597,7 @@ inline void make_imp(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& x)
+bool is_imp(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateImp;
 }
@@ -626,12 +626,12 @@ inline void swap(imp& t1, imp& t2)
 class plus: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     plus()
       : state_formula(core::detail::default_values::StatePlus)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit plus(const atermpp::aterm& term)
       : state_formula(term)
@@ -639,9 +639,9 @@ class plus: public state_formula
       assert(core::detail::check_term_StatePlus(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     plus(const state_formula& left, const state_formula& right)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StatePlus(), left, right))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StatePlus(), left, right))
     {}
 
     /// Move semantics
@@ -664,7 +664,7 @@ class plus: public state_formula
 /// \\brief Make_plus constructs a new term into a given address.
 /// \\ \param t The reference into which the new plus is constructed. 
 template <class... ARGUMENTS>
-inline void make_plus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_plus(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StatePlus(), args...);
 }
@@ -673,7 +673,7 @@ inline void make_plus(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a plus expression
 inline
-bool is_plus(const atermpp::aterm_appl& x)
+bool is_plus(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StatePlus;
 }
@@ -702,12 +702,12 @@ inline void swap(plus& t1, plus& t2)
 class const_multiply: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     const_multiply()
       : state_formula(core::detail::default_values::StateConstantMultiply)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit const_multiply(const atermpp::aterm& term)
       : state_formula(term)
@@ -715,9 +715,9 @@ class const_multiply: public state_formula
       assert(core::detail::check_term_StateConstantMultiply(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     const_multiply(const data::data_expression& left, const state_formula& right)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateConstantMultiply(), left, right))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateConstantMultiply(), left, right))
     {}
 
     /// Move semantics
@@ -740,7 +740,7 @@ class const_multiply: public state_formula
 /// \\brief Make_const_multiply constructs a new term into a given address.
 /// \\ \param t The reference into which the new const_multiply is constructed. 
 template <class... ARGUMENTS>
-inline void make_const_multiply(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_const_multiply(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateConstantMultiply(), args...);
 }
@@ -749,7 +749,7 @@ inline void make_const_multiply(atermpp::aterm_appl& t, const ARGUMENTS&... args
 /// \\param x A term
 /// \\return True if \\a x is a const_multiply expression
 inline
-bool is_const_multiply(const atermpp::aterm_appl& x)
+bool is_const_multiply(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateConstantMultiply;
 }
@@ -778,12 +778,12 @@ inline void swap(const_multiply& t1, const_multiply& t2)
 class const_multiply_alt: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     const_multiply_alt()
       : state_formula(core::detail::default_values::StateConstantMultiplyAlt)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit const_multiply_alt(const atermpp::aterm& term)
       : state_formula(term)
@@ -791,9 +791,9 @@ class const_multiply_alt: public state_formula
       assert(core::detail::check_term_StateConstantMultiplyAlt(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     const_multiply_alt(const state_formula& left, const data::data_expression& right)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateConstantMultiplyAlt(), left, right))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateConstantMultiplyAlt(), left, right))
     {}
 
     /// Move semantics
@@ -816,7 +816,7 @@ class const_multiply_alt: public state_formula
 /// \\brief Make_const_multiply_alt constructs a new term into a given address.
 /// \\ \param t The reference into which the new const_multiply_alt is constructed. 
 template <class... ARGUMENTS>
-inline void make_const_multiply_alt(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_const_multiply_alt(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateConstantMultiplyAlt(), args...);
 }
@@ -825,7 +825,7 @@ inline void make_const_multiply_alt(atermpp::aterm_appl& t, const ARGUMENTS&... 
 /// \\param x A term
 /// \\return True if \\a x is a const_multiply_alt expression
 inline
-bool is_const_multiply_alt(const atermpp::aterm_appl& x)
+bool is_const_multiply_alt(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateConstantMultiplyAlt;
 }
@@ -854,12 +854,12 @@ inline void swap(const_multiply_alt& t1, const_multiply_alt& t2)
 class forall: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     forall()
       : state_formula(core::detail::default_values::StateForall)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit forall(const atermpp::aterm& term)
       : state_formula(term)
@@ -867,9 +867,9 @@ class forall: public state_formula
       assert(core::detail::check_term_StateForall(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     forall(const data::variable_list& variables, const state_formula& body)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateForall(), variables, body))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateForall(), variables, body))
     {}
 
     /// Move semantics
@@ -892,7 +892,7 @@ class forall: public state_formula
 /// \\brief Make_forall constructs a new term into a given address.
 /// \\ \param t The reference into which the new forall is constructed. 
 template <class... ARGUMENTS>
-inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_forall(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateForall(), args...);
 }
@@ -901,7 +901,7 @@ inline void make_forall(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a forall expression
 inline
-bool is_forall(const atermpp::aterm_appl& x)
+bool is_forall(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateForall;
 }
@@ -930,12 +930,12 @@ inline void swap(forall& t1, forall& t2)
 class exists: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     exists()
       : state_formula(core::detail::default_values::StateExists)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit exists(const atermpp::aterm& term)
       : state_formula(term)
@@ -943,9 +943,9 @@ class exists: public state_formula
       assert(core::detail::check_term_StateExists(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     exists(const data::variable_list& variables, const state_formula& body)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateExists(), variables, body))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateExists(), variables, body))
     {}
 
     /// Move semantics
@@ -968,7 +968,7 @@ class exists: public state_formula
 /// \\brief Make_exists constructs a new term into a given address.
 /// \\ \param t The reference into which the new exists is constructed. 
 template <class... ARGUMENTS>
-inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_exists(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateExists(), args...);
 }
@@ -977,7 +977,7 @@ inline void make_exists(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a exists expression
 inline
-bool is_exists(const atermpp::aterm_appl& x)
+bool is_exists(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateExists;
 }
@@ -1006,12 +1006,12 @@ inline void swap(exists& t1, exists& t2)
 class infimum: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     infimum()
       : state_formula(core::detail::default_values::StateInfimum)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit infimum(const atermpp::aterm& term)
       : state_formula(term)
@@ -1019,9 +1019,9 @@ class infimum: public state_formula
       assert(core::detail::check_term_StateInfimum(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     infimum(const data::variable_list& variables, const state_formula& body)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateInfimum(), variables, body))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateInfimum(), variables, body))
     {}
 
     /// Move semantics
@@ -1044,7 +1044,7 @@ class infimum: public state_formula
 /// \\brief Make_infimum constructs a new term into a given address.
 /// \\ \param t The reference into which the new infimum is constructed. 
 template <class... ARGUMENTS>
-inline void make_infimum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_infimum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateInfimum(), args...);
 }
@@ -1053,7 +1053,7 @@ inline void make_infimum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a infimum expression
 inline
-bool is_infimum(const atermpp::aterm_appl& x)
+bool is_infimum(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateInfimum;
 }
@@ -1082,12 +1082,12 @@ inline void swap(infimum& t1, infimum& t2)
 class supremum: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     supremum()
       : state_formula(core::detail::default_values::StateSupremum)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit supremum(const atermpp::aterm& term)
       : state_formula(term)
@@ -1095,9 +1095,9 @@ class supremum: public state_formula
       assert(core::detail::check_term_StateSupremum(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     supremum(const data::variable_list& variables, const state_formula& body)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateSupremum(), variables, body))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateSupremum(), variables, body))
     {}
 
     /// Move semantics
@@ -1120,7 +1120,7 @@ class supremum: public state_formula
 /// \\brief Make_supremum constructs a new term into a given address.
 /// \\ \param t The reference into which the new supremum is constructed. 
 template <class... ARGUMENTS>
-inline void make_supremum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_supremum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateSupremum(), args...);
 }
@@ -1129,7 +1129,7 @@ inline void make_supremum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a supremum expression
 inline
-bool is_supremum(const atermpp::aterm_appl& x)
+bool is_supremum(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateSupremum;
 }
@@ -1158,12 +1158,12 @@ inline void swap(supremum& t1, supremum& t2)
 class sum: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     sum()
       : state_formula(core::detail::default_values::StateSum)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit sum(const atermpp::aterm& term)
       : state_formula(term)
@@ -1171,9 +1171,9 @@ class sum: public state_formula
       assert(core::detail::check_term_StateSum(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     sum(const data::variable_list& variables, const state_formula& body)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateSum(), variables, body))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateSum(), variables, body))
     {}
 
     /// Move semantics
@@ -1196,7 +1196,7 @@ class sum: public state_formula
 /// \\brief Make_sum constructs a new term into a given address.
 /// \\ \param t The reference into which the new sum is constructed. 
 template <class... ARGUMENTS>
-inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_sum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateSum(), args...);
 }
@@ -1205,7 +1205,7 @@ inline void make_sum(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a sum expression
 inline
-bool is_sum(const atermpp::aterm_appl& x)
+bool is_sum(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateSum;
 }
@@ -1234,12 +1234,12 @@ inline void swap(sum& t1, sum& t2)
 class must: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     must()
       : state_formula(core::detail::default_values::StateMust)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit must(const atermpp::aterm& term)
       : state_formula(term)
@@ -1247,9 +1247,9 @@ class must: public state_formula
       assert(core::detail::check_term_StateMust(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     must(const regular_formulas::regular_formula& formula, const state_formula& operand)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMust(), formula, operand))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateMust(), formula, operand))
     {}
 
     /// Move semantics
@@ -1272,7 +1272,7 @@ class must: public state_formula
 /// \\brief Make_must constructs a new term into a given address.
 /// \\ \param t The reference into which the new must is constructed. 
 template <class... ARGUMENTS>
-inline void make_must(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_must(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMust(), args...);
 }
@@ -1281,7 +1281,7 @@ inline void make_must(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a must expression
 inline
-bool is_must(const atermpp::aterm_appl& x)
+bool is_must(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateMust;
 }
@@ -1310,12 +1310,12 @@ inline void swap(must& t1, must& t2)
 class may: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     may()
       : state_formula(core::detail::default_values::StateMay)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit may(const atermpp::aterm& term)
       : state_formula(term)
@@ -1323,9 +1323,9 @@ class may: public state_formula
       assert(core::detail::check_term_StateMay(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     may(const regular_formulas::regular_formula& formula, const state_formula& operand)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMay(), formula, operand))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateMay(), formula, operand))
     {}
 
     /// Move semantics
@@ -1348,7 +1348,7 @@ class may: public state_formula
 /// \\brief Make_may constructs a new term into a given address.
 /// \\ \param t The reference into which the new may is constructed. 
 template <class... ARGUMENTS>
-inline void make_may(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_may(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMay(), args...);
 }
@@ -1357,7 +1357,7 @@ inline void make_may(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a may expression
 inline
-bool is_may(const atermpp::aterm_appl& x)
+bool is_may(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateMay;
 }
@@ -1386,12 +1386,12 @@ inline void swap(may& t1, may& t2)
 class yaled: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     yaled()
       : state_formula(core::detail::default_values::StateYaled)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit yaled(const atermpp::aterm& term)
       : state_formula(term)
@@ -1410,7 +1410,7 @@ class yaled: public state_formula
 /// \\param x A term
 /// \\return True if \\a x is a yaled expression
 inline
-bool is_yaled(const atermpp::aterm_appl& x)
+bool is_yaled(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateYaled;
 }
@@ -1439,12 +1439,12 @@ inline void swap(yaled& t1, yaled& t2)
 class yaled_timed: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     yaled_timed()
       : state_formula(core::detail::default_values::StateYaledTimed)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit yaled_timed(const atermpp::aterm& term)
       : state_formula(term)
@@ -1452,9 +1452,9 @@ class yaled_timed: public state_formula
       assert(core::detail::check_term_StateYaledTimed(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit yaled_timed(const data::data_expression& time_stamp)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateYaledTimed(), time_stamp))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateYaledTimed(), time_stamp))
     {}
 
     /// Move semantics
@@ -1472,7 +1472,7 @@ class yaled_timed: public state_formula
 /// \\brief Make_yaled_timed constructs a new term into a given address.
 /// \\ \param t The reference into which the new yaled_timed is constructed. 
 template <class... ARGUMENTS>
-inline void make_yaled_timed(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_yaled_timed(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateYaledTimed(), args...);
 }
@@ -1481,7 +1481,7 @@ inline void make_yaled_timed(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a yaled_timed expression
 inline
-bool is_yaled_timed(const atermpp::aterm_appl& x)
+bool is_yaled_timed(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateYaledTimed;
 }
@@ -1510,12 +1510,12 @@ inline void swap(yaled_timed& t1, yaled_timed& t2)
 class delay: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     delay()
       : state_formula(core::detail::default_values::StateDelay)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit delay(const atermpp::aterm& term)
       : state_formula(term)
@@ -1534,7 +1534,7 @@ class delay: public state_formula
 /// \\param x A term
 /// \\return True if \\a x is a delay expression
 inline
-bool is_delay(const atermpp::aterm_appl& x)
+bool is_delay(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateDelay;
 }
@@ -1563,12 +1563,12 @@ inline void swap(delay& t1, delay& t2)
 class delay_timed: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     delay_timed()
       : state_formula(core::detail::default_values::StateDelayTimed)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit delay_timed(const atermpp::aterm& term)
       : state_formula(term)
@@ -1576,9 +1576,9 @@ class delay_timed: public state_formula
       assert(core::detail::check_term_StateDelayTimed(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     explicit delay_timed(const data::data_expression& time_stamp)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateDelayTimed(), time_stamp))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateDelayTimed(), time_stamp))
     {}
 
     /// Move semantics
@@ -1596,7 +1596,7 @@ class delay_timed: public state_formula
 /// \\brief Make_delay_timed constructs a new term into a given address.
 /// \\ \param t The reference into which the new delay_timed is constructed. 
 template <class... ARGUMENTS>
-inline void make_delay_timed(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_delay_timed(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateDelayTimed(), args...);
 }
@@ -1605,7 +1605,7 @@ inline void make_delay_timed(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a delay_timed expression
 inline
-bool is_delay_timed(const atermpp::aterm_appl& x)
+bool is_delay_timed(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateDelayTimed;
 }
@@ -1634,12 +1634,12 @@ inline void swap(delay_timed& t1, delay_timed& t2)
 class variable: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     variable()
       : state_formula(core::detail::default_values::StateVar)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit variable(const atermpp::aterm& term)
       : state_formula(term)
@@ -1647,14 +1647,14 @@ class variable: public state_formula
       assert(core::detail::check_term_StateVar(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     variable(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), name, arguments))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateVar(), name, arguments))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     variable(const std::string& name, const data::data_expression_list& arguments)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), core::identifier_string(name), arguments))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateVar(), core::identifier_string(name), arguments))
     {}
 
     /// Move semantics
@@ -1677,7 +1677,7 @@ class variable: public state_formula
 /// \\brief Make_variable constructs a new term into a given address.
 /// \\ \param t The reference into which the new variable is constructed. 
 template <class... ARGUMENTS>
-inline void make_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_variable(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateVar(), args...);
 }
@@ -1686,7 +1686,7 @@ inline void make_variable(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a variable expression
 inline
-bool is_variable(const atermpp::aterm_appl& x)
+bool is_variable(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateVar;
 }
@@ -1715,12 +1715,12 @@ inline void swap(variable& t1, variable& t2)
 class nu: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     nu()
       : state_formula(core::detail::default_values::StateNu)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit nu(const atermpp::aterm& term)
       : state_formula(term)
@@ -1728,14 +1728,14 @@ class nu: public state_formula
       assert(core::detail::check_term_StateNu(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), name, assignments, operand))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateNu(), name, assignments, operand))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     nu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), core::identifier_string(name), assignments, operand))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateNu(), core::identifier_string(name), assignments, operand))
     {}
 
     /// Move semantics
@@ -1763,7 +1763,7 @@ class nu: public state_formula
 /// \\brief Make_nu constructs a new term into a given address.
 /// \\ \param t The reference into which the new nu is constructed. 
 template <class... ARGUMENTS>
-inline void make_nu(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_nu(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateNu(), args...);
 }
@@ -1772,7 +1772,7 @@ inline void make_nu(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a nu expression
 inline
-bool is_nu(const atermpp::aterm_appl& x)
+bool is_nu(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateNu;
 }
@@ -1801,12 +1801,12 @@ inline void swap(nu& t1, nu& t2)
 class mu: public state_formula
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     mu()
       : state_formula(core::detail::default_values::StateMu)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit mu(const atermpp::aterm& term)
       : state_formula(term)
@@ -1814,14 +1814,14 @@ class mu: public state_formula
       assert(core::detail::check_term_StateMu(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z14.
     mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), name, assignments, operand))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateMu(), name, assignments, operand))
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z2.
     mu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
-      : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), core::identifier_string(name), assignments, operand))
+      : state_formula(atermpp::aterm(core::detail::function_symbol_StateMu(), core::identifier_string(name), assignments, operand))
     {}
 
     /// Move semantics
@@ -1849,7 +1849,7 @@ class mu: public state_formula
 /// \\brief Make_mu constructs a new term into a given address.
 /// \\ \param t The reference into which the new mu is constructed. 
 template <class... ARGUMENTS>
-inline void make_mu(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_mu(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_StateMu(), args...);
 }
@@ -1858,7 +1858,7 @@ inline void make_mu(atermpp::aterm_appl& t, const ARGUMENTS&... args)
 /// \\param x A term
 /// \\return True if \\a x is a mu expression
 inline
-bool is_mu(const atermpp::aterm_appl& x)
+bool is_mu(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::StateMu;
 }

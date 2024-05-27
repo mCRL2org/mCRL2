@@ -42,7 +42,7 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
     action_formula body;
     apply(body, x.body());
-    make_forall(result, v1, body);
+    state_formulas::make_forall(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
   }
 
@@ -52,7 +52,7 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
     data::variable_list v1 = sigma.add_fresh_variable_assignments(x.variables());
     action_formula body;
     apply(body, x.body());
-    make_exists(result, v1, body);
+    state_formulas::make_exists(result, v1, body);
     sigma.remove_fresh_variable_assignments(x.variables());
   }
 };

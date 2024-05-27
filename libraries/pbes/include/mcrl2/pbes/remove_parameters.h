@@ -100,7 +100,7 @@ struct remove_parameters_builder: public pbes_system::pbes_expression_builder<De
 /// \endcond
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
-/// \param x A PBES library object that derives from atermpp::aterm_appl
+/// \param x A PBES library object that derives from atermpp::aterm
 /// \param to_be_removed The indices of parameters that are to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
@@ -115,7 +115,7 @@ T remove_parameters(const T& x,
 }
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
-/// \param x A PBES library object that does not derive from atermpp::aterm_appl
+/// \param x A PBES library object that does not derive from atermpp::aterm
 /// \param to_be_removed The indices of parameters that are to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
@@ -201,7 +201,7 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 /// \endcond
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
-/// \param x A PBES library object that derives from atermpp::aterm_appl
+/// \param x A PBES library object that derives from atermpp::aterm
 /// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
@@ -216,7 +216,7 @@ T remove_parameters(const T& x,
 }
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
-/// \param x A PBES library object that does not derive from atermpp::aterm_appl
+/// \param x A PBES library object that does not derive from atermpp::aterm
 /// \param to_be_removed A mapping that maps propositional variable names to a sorted vector of parameter indices that
 /// need to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
@@ -311,7 +311,7 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 /// \endcond
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
-/// \param x A PBES library object that derives from atermpp::aterm_appl
+/// \param x A PBES library object that derives from atermpp::aterm
 /// \param to_be_removed A set of parameters that are to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
@@ -326,7 +326,7 @@ T remove_parameters(const T& x,
 }
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
-/// \param x A PBES library object that does not derive from atermpp::aterm_appl
+/// \param x A PBES library object that does not derive from atermpp::aterm
 /// \param to_be_removed A set of parameters that are to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>

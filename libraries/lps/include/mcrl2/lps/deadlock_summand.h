@@ -106,12 +106,12 @@ inline void swap(deadlock_summand& t1, deadlock_summand& t2)
 /// \brief Conversion to atermappl.
 /// \return The deadlock summand converted to aterm format.
 inline
-atermpp::aterm_appl deadlock_summand_to_aterm(const deadlock_summand& s)
+atermpp::aterm deadlock_summand_to_aterm(const deadlock_summand& s)
 {
-  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
+  atermpp::aterm result = atermpp::aterm(core::detail::function_symbol_LinearProcessSummand(),
                        s.summation_variables(),
                        s.condition(),
-                       atermpp::aterm_appl(core::detail::function_symbol_Delta()),
+                       atermpp::aterm(core::detail::function_symbol_Delta()),
                        s.deadlock().time(),
                        data::assignment_list(),
                        stochastic_distribution()

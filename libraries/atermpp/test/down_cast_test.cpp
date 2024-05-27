@@ -60,16 +60,16 @@ BOOST_AUTO_TEST_CASE(aterm_down_cast)
   atermpp::function_symbol fs("f",2);
   atermpp::function_symbol x("x",0);
   atermpp::function_symbol y("y",0);
-  atermpp::aterm_appl fxy(fs,atermpp::aterm_appl(x),atermpp::aterm_appl(y));
+  atermpp::aterm fxy(fs,atermpp::aterm(x),atermpp::aterm(y));
   atermpp::aterm fxy_term(fxy);
 
-  const atermpp::aterm_appl& test = atermpp::down_cast<atermpp::aterm_appl>(fxy_term);
+  const atermpp::aterm& test = fxy_term;  // No down_cast required or allowed. Test could be removed or adapted.
   BOOST_CHECK(fxy_term == test);
   BOOST_CHECK(fxy == test);
   BOOST_CHECK(fxy == fxy_term);
 
   const atermpp::aterm& t1(fxy);
-  const atermpp::aterm_appl& t2 = atermpp::down_cast<atermpp::aterm_appl>(t1);
+  const atermpp::aterm& t2 = t1; // See comment above. Test is now useless.
   mcrl2::utilities::mcrl2_unused(t2);
   f(atermpp::down_cast<t3>(t1));
 }

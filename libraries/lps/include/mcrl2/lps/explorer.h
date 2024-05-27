@@ -284,15 +284,15 @@ struct cheap_cache_key
 
 struct cache_equality
 {
-  bool operator()(const atermpp::term_appl<data::data_expression>& key1, const atermpp::term_appl<data::data_expression>& key2) const
+  bool operator()(const atermpp::aterm& key1, const atermpp::aterm& key2) const
   {
     return key1==key2;
   }
 
-  bool operator()(const atermpp::term_appl<data::data_expression>& key1, const cheap_cache_key& key2) const
+  bool operator()(const atermpp::aterm& key1, const cheap_cache_key& key2) const
   {
     std::vector<data::variable>::const_iterator i=key2.m_gamma.begin();
-    for(const data::data_expression& d: key1)
+    for(const atermpp::aterm& d: key1)
     {
       if (d!=key2.m_sigma(*i))
       {
@@ -306,16 +306,16 @@ struct cache_equality
 
 struct cache_hash
 {
-  std::size_t operator()(const std::pair<const atermpp::term_appl<mcrl2::data::data_expression>, 
+  std::size_t operator()(const std::pair<const atermpp::aterm, 
                                          std::list<atermpp::term_list<mcrl2::data::data_expression>>>& pair) const
   {
     return operator()(pair.first);
   }
 
-  std::size_t operator()(const atermpp::term_appl<data::data_expression>& key) const
+  std::size_t operator()(const atermpp::aterm& key) const
   {
     std::size_t hash=0;
-    for(const data::data_expression& d: key)
+    for(const atermpp::aterm& d: key)
     {
       hash=atermpp::detail::combine(hash,d);
     }
@@ -336,11 +336,11 @@ struct cache_hash
 } // end namespace detail
 
 
-typedef atermpp::utilities::unordered_map<atermpp::term_appl<data::data_expression>,
+typedef atermpp::utilities::unordered_map<atermpp::aterm,
                                           atermpp::term_list<data::data_expression_list>,
                                           detail::cache_hash,
                                           detail::cache_equality,
-                                          std::allocator< std::pair<atermpp::term_appl<data::data_expression>, atermpp::term_list<data::data_expression_list>> >,
+                                          std::allocator< std::pair<atermpp::aterm, atermpp::term_list<data::data_expression_list>> >,
                                           true  // Thread_safe.
                                         > summand_cache_map;
 
@@ -394,7 +394,7 @@ struct explorer_summand
     return result;
   }
 
-  void compute_key(atermpp::term_appl<data::data_expression>& key,
+  void compute_key(atermpp::aterm& key,
                    data::mutable_indexed_substitution<>& sigma) const
   {
     if (cache_strategy == caching::global)
@@ -650,7 +650,7 @@ class explorer: public abortable
       data::rewriter& rewr,
       data::data_expression& condition,                // These three variables are passed on such
       state_type& s1,                                  // that they don't have to be declared often.
-      atermpp::term_appl<data::data_expression>& key,  //
+      atermpp::aterm key,
       data::enumerator_algorithm<>& enumerator,
       data::enumerator_identifier_generator& id_generator,
       ReportTransition report_transition = ReportTransition()
@@ -846,7 +846,7 @@ class explorer: public abortable
     {
       data::data_expression condition;   // This variable is used often, and it is time consuming to declare it too often.
       state_type state_;                  // The same holds for this variable. 
-      atermpp::term_appl<data::data_expression> key;  
+      atermpp::aterm key;
       std::list<transition> transitions;
       data::add_assignments(sigma, m_process_parameters, s);
       for (const explorer_summand& summand: regular_summands)
@@ -898,7 +898,7 @@ class explorer: public abortable
     {
       data::data_expression condition; 
       state_type state_;
-      atermpp::term_appl<data::data_expression> key;  
+      atermpp::aterm key;
       std::vector<state> result;
       data::add_assignments(sigma, m_process_parameters, s0);
       for (const explorer_summand& summand: summands)
@@ -1109,7 +1109,7 @@ class explorer: public abortable
       state_type state_;                 // The same holds for state.
       std::vector<state> dummy;
       std::unique_ptr<todo_set> thread_todo=make_todo_set(dummy.begin(),dummy.end()); // The new states for each process are temporarily stored in this vector for each thread. 
-      atermpp::term_appl<data::data_expression> key;  
+      atermpp::aterm key;
 
       if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
       while (number_of_active_processes>0 || !todo->empty())
@@ -1414,7 +1414,7 @@ class explorer: public abortable
       std::vector<std::pair<lps::multi_action, state_type>> result;
       data::add_assignments(sigma, m_process_parameters, d0);
       data::data_expression condition;
-      atermpp::term_appl<data::data_expression> key;
+      atermpp::aterm key;
       state_type state;
       for (const explorer_summand& summand: m_regular_summands)
       {

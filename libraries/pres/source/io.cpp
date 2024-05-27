@@ -162,11 +162,11 @@ void load_pres(pres& pres,
 // transforms DataVarId to DataVarIdNoIndex
 // transforms OpId to OpIdNoIndex
 // transforms PropVarInst to PropVarInstNoIndex
-static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
+static atermpp::aterm remove_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_OpId())
   {
-    return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
+    return atermpp::aterm(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
   }
   return x;
 }
@@ -174,7 +174,7 @@ static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 // transforms DataVarIdNoIndex to DataVarId (obsolete)
 // transforms OpIdNoIndex to OpId
 // transforms PropVarInstNoIndex to PropVarInst (obsolete)
-static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
+static atermpp::aterm add_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())
   {
@@ -219,7 +219,7 @@ inline atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pres_e
 
 atermpp::aterm pres_marker()
 {
-  return atermpp::aterm_appl(atermpp::function_symbol("parameterised_boolean_equation_system", 0));
+  return atermpp::aterm(atermpp::function_symbol("parameterised_boolean_equation_system", 0));
 }
 
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pres& pres)
@@ -316,9 +316,9 @@ void save_pres(const pres& presspec, const std::string& filename)
 
 /// \brief Conversion to atermappl.
 /// \return The PRES converted to aterm format.
-atermpp::aterm_appl pres_to_aterm(const pres& p)
+atermpp::aterm pres_to_aterm(const pres& p)
 {
-  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(),
+  atermpp::aterm global_variables = atermpp::aterm(core::detail::function_symbol_GlobVarSpec(),
                                                              data::variable_list(p.global_variables().begin(),
                                                                                  p.global_variables().end()));
 
@@ -329,11 +329,11 @@ atermpp::aterm_appl pres_to_aterm(const pres& p)
     atermpp::aterm a = pres_equation_to_aterm(*i);
     eqn_list.push_front(a);
   }
-  atermpp::aterm_appl equations = atermpp::aterm_appl(core::detail::function_symbol_PREqnSpec(), eqn_list);
-  atermpp::aterm_appl initial_state = atermpp::aterm_appl(core::detail::function_symbol_PRInit(), p.initial_state());
-  atermpp::aterm_appl result;
+  atermpp::aterm equations = atermpp::aterm(core::detail::function_symbol_PREqnSpec(), eqn_list);
+  atermpp::aterm initial_state = atermpp::aterm(core::detail::function_symbol_PRInit(), p.initial_state());
+  atermpp::aterm result;
 
-  result = atermpp::aterm_appl(core::detail::function_symbol_PRES(),
+  result = atermpp::aterm(core::detail::function_symbol_PRES(),
              data::detail::data_specification_to_aterm(p.data()),
              global_variables,
              equations,

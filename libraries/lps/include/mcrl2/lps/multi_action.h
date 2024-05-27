@@ -22,11 +22,11 @@ namespace lps
 {
 
 // prototype declaration
-bool is_multi_action(const atermpp::aterm_appl& x);
+bool is_multi_action(const atermpp::aterm& x);
 
 //--- start generated class multi_action ---//
 /// \\brief A timed multi-action
-class multi_action: public atermpp::aterm_appl
+class multi_action: public atermpp::aterm
 {
   public:
 
@@ -50,7 +50,7 @@ class multi_action: public atermpp::aterm_appl
     /// \brief Constructor
     explicit multi_action(const process::action_list& actions = process::action_list(), 
                           data::data_expression time = data::undefined_real())
-      : atermpp::aterm_appl(core::detail::function_symbol_TimedMultAct(), actions, time)
+      : atermpp::aterm(core::detail::function_symbol_TimedMultAct(), actions, time)
     {
       assert(data::sort_real::is_real(time.sort()));
     }
@@ -58,7 +58,7 @@ class multi_action: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param term A term
     explicit multi_action(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_TimedMultAct(*this));
     }
@@ -100,7 +100,7 @@ class multi_action: public atermpp::aterm_appl
 /// \\brief Make_multi_action constructs a new term into a given address.
 /// \\ \param t The reference into which the new multi_action is constructed. 
 template <class... ARGUMENTS>
-inline void make_multi_action(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_multi_action(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_TimedMultAct(), args...);
 }
@@ -115,7 +115,7 @@ typedef std::vector<multi_action>    multi_action_vector;
 /// \\param x A term
 /// \\return True if \\a x is a multi_action expression
 inline
-bool is_multi_action(const atermpp::aterm_appl& x)
+bool is_multi_action(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::TimedMultAct;
 }

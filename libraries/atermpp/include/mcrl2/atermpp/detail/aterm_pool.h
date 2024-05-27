@@ -112,7 +112,7 @@ public:
   inline void print_performance_statistics() const;
 
   /// \returns A global term that indicates the empty list.
-  aterm& empty_list() noexcept { return m_empty_list; }
+  aterm& empty_list() noexcept { return reinterpret_cast<aterm&>(m_empty_list); }  // TODO remove this reinterpret cast by letting m_empty_list become an aterm.
 
   /// \returns The function symbol used by integral terms.
   const function_symbol& as_int() noexcept { return m_function_symbol_pool.as_int(); }
@@ -219,7 +219,7 @@ private:
   mcrl2::utilities::shared_mutex m_shared_mutex;
 
   /// Represents an empty list.
-  aterm m_empty_list;
+  aterm_core m_empty_list;
 };
 
 inline

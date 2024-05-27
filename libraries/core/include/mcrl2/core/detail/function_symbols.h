@@ -78,13 +78,13 @@ const atermpp::function_symbol& function_symbol_DataAppl(std::size_t i)
 }
 
 inline
-bool gsIsDataAppl(const atermpp::aterm_appl& Term)
+bool gsIsDataAppl(const atermpp::aterm& Term)
 {
   return Term.function() == function_symbol_DataAppl(Term.function().arity());
 }
 
 inline
-bool gsIsDataAppl_no_check(const atermpp::aterm_appl& Term)
+bool gsIsDataAppl_no_check(const atermpp::aterm& Term)
 {
   if (Term.function().arity() < DataApplFixed) {
     return Term.function() == function_symbols_DataApplFixed[Term.function().arity()];

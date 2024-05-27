@@ -29,51 +29,57 @@ inline bool is_abstraction(const atermpp::aterm& x)
 }
 
 /// \brief Returns true if the term t is a lambda abstraction
-inline bool is_lambda(const atermpp::aterm_appl& x)
+inline bool is_lambda(const atermpp::aterm& x)
 {
-  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Lambda;
+  return is_abstraction(x) && x[0].function() == core::detail::function_symbols::Lambda;
 }
 
 /// \brief Returns true if the term t is a universal quantification
-inline bool is_forall(const atermpp::aterm_appl& x)
+inline bool is_forall(const atermpp::aterm& x)
 {
-  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Forall;
+  return is_abstraction(x) && x[0].function() == core::detail::function_symbols::Forall;
 }
 
 /// \brief Returns true if the term t is an existential quantification
-inline bool is_exists(const atermpp::aterm_appl& x)
+inline bool is_exists(const atermpp::aterm& x)
 {
-  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::Exists;
+  return is_abstraction(x) && x[0].function() == core::detail::function_symbols::Exists;
 }
 
 /// \brief Returns true if the term t is a set comprehension
-inline bool is_set_comprehension(const atermpp::aterm_appl& x)
+inline bool is_set_comprehension(const atermpp::aterm& x)
 {
-  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::SetComp;
+  return is_abstraction(x) && x[0].function() == core::detail::function_symbols::SetComp;
 }
 
 /// \brief Returns true if the term t is a bag comprehension
-inline bool is_bag_comprehension(const atermpp::aterm_appl& x)
+inline bool is_bag_comprehension(const atermpp::aterm& x)
 {
-  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::BagComp;
+  return is_abstraction(x) && x[0].function() == core::detail::function_symbols::BagComp;
 }
 
 /// \brief Returns true if the term t is a set/bag comprehension.
-inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm_appl& x)
+inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm& x)
 {
-  return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(x[0]).function() == core::detail::function_symbols::UntypedSetBagComp;
+  return is_abstraction(x) && x[0].function() == core::detail::function_symbols::UntypedSetBagComp;
 }
 
-/// \brief Returns true if the term t is a function symbol
-inline bool is_function_symbol(const atermpp::aterm_appl& x)
+/// \brief Returns true if the term t is a function symbol.
+inline bool is_function_symbol(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::OpId;
 }
 
-/// \brief Returns true if the term t is a variable
+/// \brief Returns true if the term t is a variable.
 inline bool is_variable(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::DataVarId;
+}
+
+/// \brief Returns true if the term t is a machine_number.
+inline bool is_machine_number(const atermpp::aterm& x)
+{
+  return x.type_is_int();
 }
 
 /// \brief Returns true if the term t is an application
@@ -81,7 +87,7 @@ inline bool is_variable(const atermpp::aterm& x)
 ///          be determined and an inspection must take place in an 
 ///          array of function symbols. Therefore, there is an more efficient overload
 ///          is_application(const data_expression& x).
-inline bool is_application(const atermpp::aterm_appl& x)
+inline bool is_application(const atermpp::aterm& x)
 {
   return core::detail::gsIsDataAppl(x);
 }
@@ -89,19 +95,19 @@ inline bool is_application(const atermpp::aterm_appl& x)
 /// \brief Returns true if the term t is an application, but it does not check
 ///        whether an application symbol of sufficient arity exists, assuming
 ///        this is ok.
-inline bool is_application_no_check(const atermpp::aterm_appl& x)
+inline bool is_application_no_check(const atermpp::aterm& x)
 {
   return core::detail::gsIsDataAppl_no_check(x);
 }
 
 /// \brief Returns true if the term t is a where clause
-inline bool is_where_clause(const atermpp::aterm_appl& x)
+inline bool is_where_clause(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::Whr;
 }
 
 /// \brief Returns true if the term t is an identifier
-inline bool is_untyped_identifier(const atermpp::aterm_appl& x)
+inline bool is_untyped_identifier(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::UntypedIdentifier;
 }
@@ -121,18 +127,18 @@ class application; // prototype
 
 //--- start generated class data_expression ---//
 /// \\brief A data expression
-class data_expression: public atermpp::aterm_appl
+class data_expression: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     data_expression()
-      : atermpp::aterm_appl(core::detail::default_values::DataExpr)
+      : atermpp::aterm(core::detail::default_values::DataExpr)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit data_expression(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_DataExpr(*this));
     }
@@ -164,8 +170,20 @@ class data_expression: public atermpp::aterm_appl
                            const data_expression& e3,
                            const data_expression& e4) const;
 
-    /// \brief Returns the sort of the data expression
+    application operator()(const data_expression& e1,
+                           const data_expression& e2,
+                           const data_expression& e3,
+                           const data_expression& e4,
+                           const data_expression& e5) const;
 
+    application operator()(const data_expression& e1,
+                           const data_expression& e2,
+                           const data_expression& e3,
+                           const data_expression& e4,
+                           const data_expression& e5,
+                           const data_expression& e6) const;
+
+    /// \brief Returns the sort of the data expression
     sort_expression sort() const;
 
     private:
@@ -205,16 +223,17 @@ inline void swap(data_expression& t1, data_expression& t2)
 
 inline void make_data_expression(data_expression& result)
 {
-  static_cast<atermpp::aterm_appl&>(result)=core::detail::default_values::DataExpr;
+  static_cast<atermpp::aterm&>(result)=core::detail::default_values::DataExpr;
 }
 
 /// \brief Test for a data_expression expression
 /// \param x A term
 /// \return True if it is a data_expression expression
 inline
-bool is_data_expression(const atermpp::aterm_appl& x)
+bool is_data_expression(const atermpp::aterm& x)
 {
-  return is_lambda(x)                           ||
+  return is_machine_number(x)                   ||
+         is_lambda(x)                           ||
          is_forall(x)                           ||
          is_exists(x)                           ||
          is_set_comprehension(x)                ||
@@ -279,7 +298,8 @@ namespace data
 /// \param t The variable that is checked. 
 inline bool is_application(const data_expression& t)
 {
-  return !(is_function_symbol(t) ||
+  return !(is_machine_number(t) ||
+           is_function_symbol(t) ||
            is_variable(t) ||
            is_where_clause(t) ||
            is_abstraction(t) ||
@@ -300,25 +320,40 @@ application data_expression::operator()(const data_expression& e) const
   return application(*this, e);
 }
 
-/// \brief Apply data expression to two data expressions
+/// \brief Apply a data expression to two data expressions
 inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2) const
 {
   return application(*this, e1, e2);
 }
 
-/// \brief Apply data expression to three data expressions
+/// \brief Apply a data expression to three data expressions
 inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3) const
 {
   return application(*this, e1, e2, e3);
 }
 
-/// \brief Apply data expression to four data expressions
+/// \brief Apply a data expression to four data expressions
 inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4) const
 {
   return application(*this, e1, e2, e3, e4);
+}
+
+/// \brief Apply a data expression to five data expressions
+inline
+application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4, const data_expression& e5) const
+{
+  return application(*this, e1, e2, e3, e4, e5);
+}
+
+/// \brief Apply a data expression to six data expressions
+inline
+application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, 
+                                        const data_expression& e4, const data_expression& e5, const data_expression& e6) const
+{
+  return application(*this, e1, e2, e3, e4, e5, e6);
 }
 
 } // namespace data

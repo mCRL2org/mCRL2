@@ -77,7 +77,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching less
       inline
-      bool is_lt_function_symbol(const atermpp::aterm_appl& e)
+      bool is_lt_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -109,7 +109,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching less_equal
       inline
-      bool is_le_function_symbol(const atermpp::aterm_appl& e)
+      bool is_le_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -152,7 +152,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching id
       inline
-      bool is_id_function_symbol(const atermpp::aterm_appl& e)
+      bool is_id_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {

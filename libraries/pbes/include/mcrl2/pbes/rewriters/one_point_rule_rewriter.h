@@ -69,11 +69,11 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         }
         data::variable_list v(remaining_variables.begin(), remaining_variables.end());
         mCRL2log(log::debug) << "Replaced " << x << "\nwith " << forall(v, body) << std::endl;
-        make_forall(result, v, body);
+        pbes_system::make_forall(result, v, body);
         return;
       }
     }
-    make_forall(result, x.variables(), body);
+    pbes_system::make_forall(result, x.variables(), body);
   }
 
   template <class T>
@@ -102,11 +102,11 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
         }
         data::variable_list v(remaining_variables.begin(), remaining_variables.end());
         mCRL2log(log::debug) << "Replaced " << x << "\nwith " << exists(v, body) << std::endl;
-        make_exists(result, v, body);
+        pbes_system::make_exists(result, v, body);
         return;
       }
     }
-    make_exists(result, x.variables(), body);
+    pbes_system::make_exists(result, x.variables(), body);
   }
 
   // TODO: This case was added to prevent a data not to be transformed into a PBES not.

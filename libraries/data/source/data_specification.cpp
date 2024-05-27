@@ -15,8 +15,13 @@
 #include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
 // Predefined datatypes
+#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/data/function_update.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/list64.h"
+#else
 #include "mcrl2/data/list.h"
+#endif
 
 namespace mcrl2
 {
@@ -316,8 +321,18 @@ void sort_specification::import_system_defined_sort(const sort_expression& sort)
   }
   else if (sort == sort_nat::nat())
   {
+#ifdef Enable64bitNumbers
+    import_system_defined_sort(sort_machine_word::machine_word());
+#else
     // Nat requires NatPair.
     import_system_defined_sort(sort_nat::natpair());
+#endif
+  }
+  else if (sort == sort_pos::pos())
+  {
+#ifdef Enable64bitNumbers
+    import_system_defined_sort(sort_machine_word::machine_word());
+#endif
   }
   else if (is_function_sort(sort))
   {
@@ -602,6 +617,24 @@ void data_specification::find_associated_system_defined_data_types_for_a_sort(
       equations.insert(e.begin(),e.end());
     }
   }
+#ifdef Enable64bitNumbers
+  else if (sort == sort_machine_word::machine_word())
+  {
+    function_symbol_vector f(sort_machine_word::machine_word_generate_constructors_code());
+    constructors.insert(f.begin(),f.end());
+    f = sort_machine_word::machine_word_generate_functions_code();
+    mappings.insert(f.begin(),f.end());
+    implementation_map f1 = sort_machine_word::machine_word_cpp_implementable_mappings();
+    cpp_implemented_functions.insert(f1.begin(), f1.end());
+    f1 = sort_machine_word::machine_word_cpp_implementable_constructors();
+    cpp_implemented_functions.insert(f1.begin(), f1.end());
+    if (!skip_equations)
+    {
+      data_equation_vector e(sort_machine_word::machine_word_generate_equations_code());
+      equations.insert(e.begin(),e.end());
+    }
+  }
+#endif
   else if (is_function_sort(sort))
   {
     const sort_expression& t=function_sort(sort).codomain();
@@ -726,6 +759,9 @@ void data_specification::get_system_defined_sorts_constructors_and_mappings(
   implementation_map cpp_implemented_functions;
 
   sorts.insert(sort_bool::bool_());
+#ifdef Enable64bitNumbers
+  sorts.insert(sort_machine_word::machine_word());
+#endif
   sorts.insert(sort_pos::pos());
   sorts.insert(sort_nat::nat());
   sorts.insert(sort_int::int_());
@@ -772,22 +808,22 @@ bool data_specification::is_well_typed() const
 /// The last type must eventually disappear but is unfortunately still in
 /// use in a substantial amount of source code.
 /// Note, all sorts with name prefix \@legacy_ are eliminated
-void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
+void data_specification::build_from_aterm(const atermpp::aterm& term)
 {
   assert(core::detail::check_rule_DataSpec(term));
 
   // Note backwards compatibility measure: alias is no longer a sort_expression
-  const atermpp::term_list<atermpp::aterm_appl> term_sorts=
-                 atermpp::down_cast<atermpp::term_list<atermpp::aterm_appl> >(atermpp::down_cast<atermpp::aterm_appl>(term[0])[0]);
+  const atermpp::term_list<atermpp::aterm> term_sorts=
+                 atermpp::down_cast<atermpp::term_list<atermpp::aterm> >(term[0][0]);
   const data::function_symbol_list term_constructors=
-                 atermpp::down_cast<data::function_symbol_list>(atermpp::down_cast<atermpp::aterm_appl>(term[1])[0]);
+                 atermpp::down_cast<data::function_symbol_list>(term[1][0]);
   const data::function_symbol_list term_mappings=
-                 atermpp::down_cast<data::function_symbol_list>(atermpp::down_cast<atermpp::aterm_appl>(term[2])[0]);
+                 atermpp::down_cast<data::function_symbol_list>(term[2][0]);
   const data::data_equation_list term_equations=
-                 atermpp::down_cast<data::data_equation_list>(atermpp::down_cast<atermpp::aterm_appl>(term[3])[0]);
+                 atermpp::down_cast<data::data_equation_list>(term[3][0]);
 
   // Store the sorts and aliases.
-  for(const atermpp::aterm_appl& t: term_sorts)
+  for(const atermpp::aterm& t: term_sorts)
   {
     if (data::is_alias(t)) // Compatibility with legacy code
     {

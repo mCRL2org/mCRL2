@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote, Maurice Laveaux, Wieger Wesselink.
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,236 +6,314 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+/// \file mcrl2/atermpp/aterm.h
+/// \brief The term_appl class represents function application.
 
-#ifndef MCRL2_ATERMPP_ATERM_H
-#define MCRL2_ATERMPP_ATERM_H
+#ifndef MCRL2_ATERMPP_ATERM_APPL_H
+#define MCRL2_ATERMPP_ATERM_APPL_H
 
-#include <algorithm>
-#include <assert.h>
-#include <sstream>
-#include "mcrl2/atermpp/detail/aterm.h"
-#include "mcrl2/atermpp/type_traits.h"
+#include "mcrl2/atermpp/aterm_core.h"
+#include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
+#include "mcrl2/atermpp/detail/aterm_list.h"
+#include "mcrl2/atermpp/detail/global_aterm_pool.h"
+#include "mcrl2/utilities/type_traits.h"
 
-/// \brief The main namespace for the aterm++ library.
 namespace atermpp
 {
+
+class aterm: public aterm_core
+{
+protected:
+  /// \brief Constructor.
+  /// \param t A pointer internal data structure from which the term is constructed.
+  /// \details This function is explicitly protected such that is not used in common code. 
+  explicit aterm(detail::_term_appl *t)
+   : aterm_core(reinterpret_cast<detail::_aterm*>(t))
+  {}
+
+public:
+  /// An unsigned integral type.
+  typedef std::size_t size_type;
+
+  /// A signed integral type.
+  typedef ptrdiff_t difference_type;
+
+  /// Iterator used to iterate through an term_appl.
+  typedef term_appl_iterator<aterm> iterator;
+
+  /// Const iterator used to iterate through an term_appl.
+  typedef term_appl_iterator<aterm> const_iterator;
+
+  /// \brief Default constructor.
+  aterm():aterm_core()
+  {}
+
+  /* /// \brief Explicit constructor from an aterm_core.
+  /// \param t The aterm_core from which the term is constructed.
+  explicit aterm(const aterm_core& t) 
+   : aterm_core(t)
+  {} */
+
+  /// This class has user-declared copy constructor so declare default copy and move operators.
+  aterm(const aterm& other) noexcept = default;
+  aterm& operator=(const aterm& other) noexcept = default;
+  aterm(aterm&& other) noexcept = default;
+  aterm& operator=(aterm&& other) noexcept = default;
+
+  /// \brief Constructor that provides an aterm based on a function symbol and forward iterator providing the arguments. 
+  /// \details The iterator range is traversed more than once. If only one traversal is required
+  ///          use term_appl with a TermConverter argument. But this function
+  ///          is substantially less efficient.
+  ///          The length of the iterator range must match the arity of the function symbol.
+  /// \param sym A function symbol.
+  /// \param begin The start of a range of elements.
+  /// \param end The end of a range of elements.
+  template <class ForwardIterator,
+            typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr,
+            typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr,
+            typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value>::type* = nullptr>
+  aterm(const function_symbol& sym,
+            ForwardIterator begin,
+            ForwardIterator end)
+  {
+    detail::g_thread_term_pool().create_appl_dynamic(*this, sym, begin, end);
+    static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value,
+                  "A forward iterator has more requirements than an input iterator.");
+    static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value,
+                  "A forward iterator has more requirements than an output iterator.");
+  }
+
+  /// \brief Constructor that provides an aterm based on a function symbol and an input iterator providing the arguments. 
+  /// \details The given iterator is traversed only once. So it can be used with an input iterator.
+  ///          This means that the TermConverter is applied exactly once to each element.
+  ///          The length of the iterator range must be equal to the arity of the function symbol.
+  /// \param sym A function symbol.
+  /// \param begin The start of a range of elements.
+  /// \param end The end of a range of elements.
+  template <class InputIterator,
+            typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr,
+            typename std::enable_if<std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr>
+  aterm(const function_symbol& sym,
+            InputIterator begin,
+            InputIterator end)
+    : aterm(sym, begin, end, [](const unprotected_aterm_core& term) -> const unprotected_aterm_core& { return term; } )
+  {
+    static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
+                  "The InputIterator is missing the input iterator tag.");
+  }
+
+  /// \details The given iterator is traversed only once. So it can be used with an input iterator.
+  ///          This means that the TermConverter is applied exactly once to each element.
+  ///          The length of the iterator range must be equal to the arity of the function symbol.
+  /// \param sym A function symbol.
+  /// \param begin The start of a range of elements.
+  /// \param end The end of a range of elements.
+  /// \param converter An class or lambda term containing an operator Term operator()(const Term& t) which is
+  ///        applied to each each element in the iterator range before it becomes an argument of this term.
+  template <class InputIterator,
+            class TermConverter,
+            typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr>
+  aterm(const function_symbol& sym,
+            InputIterator begin,
+            InputIterator end,
+            TermConverter converter)
+  {
+    detail::g_thread_term_pool().create_appl_dynamic(*this, sym, converter, begin, end);
+    static_assert(!std::is_same<typename InputIterator::iterator_category, std::output_iterator_tag>::value,
+                  "The InputIterator has the output iterator tag.");
+  }
+
+  /// \brief Constructor.
+  /// \param sym A function symbol.
+  aterm(const function_symbol& sym)
+  {
+    detail::g_thread_term_pool().create_term(*this, sym);
+  }
+
+  /// \brief Constructor for n-arity function application.
+  /// \param symbol A function symbol.
+  /// \param arguments The arguments of the function application.
+  template<typename ...Terms>
+  aterm(const function_symbol& symbol, const Terms& ...arguments)
+  {
+    detail::g_thread_term_pool().create_appl(*this, symbol, arguments...);
+  }
+
+  /// \brief Returns the function symbol belonging to an aterm.
+  /// \return The function symbol of this term.
+  const function_symbol& function() const
+  {
+    return m_term->function();
+  }
+
+  /// \brief Returns the number of arguments of this term.
+  /// \return The number of arguments of this term.
+  size_type size() const
+  {
+    return m_term->function().arity();
+  }
+
+  /// \brief Returns true if the term has no arguments.
+  /// \return True if this term has no arguments.
+  bool empty() const
+  {
+    return size()==0;
+  }
+
+  /// \brief Returns an iterator pointing to the first argument.
+  /// \return An iterator pointing to the first argument.
+  const_iterator begin() const
+  {
+    return const_iterator(&static_cast<const aterm&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(0)));
+  }
+
+  /// \brief Returns a const_iterator pointing past the last argument.
+  /// \return A const_iterator pointing past the last argument.
+  const_iterator end() const
+  {
+    return const_iterator(&static_cast<const aterm&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(size())));
+  }
+
+  /// \brief Returns the largest possible number of arguments.
+  /// \return The largest possible number of arguments.
+  constexpr size_type max_size() const
+  {
+    return std::numeric_limits<size_type>::max();
+  }
+
+  /// \brief Returns the i-th argument.
+  /// \param i A positive integer.
+  /// \return The argument with the given index.
+  const aterm& operator[](const size_type i) const
+  {
+    assert(i < size()); // Check the bounds.
+    return static_cast<const aterm&>(reinterpret_cast<const detail::_term_appl*>(m_term)->arg(i));
+  }
+};
 
 typedef void(*term_callback)(const aterm&);
 
 extern void add_deletion_hook(const function_symbol&, term_callback);
 
-// Forward declaration
-namespace detail
+
+/// \brief Constructor an aterm in a variable based on a function symbol and an forward iterator providing the arguments. 
+/// \details The iterator range is traversed more than once. If only one traversal is required
+///          use term_appl with a TermConverter argument. But this function
+///          is substantially less efficient.
+///          The length of the iterator range must match the arity of the function symbol.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param sym A function symbol.
+/// \param begin The start of a range of elements.
+/// \param end The end of a range of elements.
+template <class Term,
+          class ForwardIterator,
+          typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr,
+          typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr,
+          typename std::enable_if<!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value>::type* = nullptr>
+void make_term_appl(Term& target,
+                    const function_symbol& sym,
+                    ForwardIterator begin,
+                    ForwardIterator end)
 {
-  class thread_aterm_pool;
+  detail::g_thread_term_pool().create_appl_dynamic(target, sym, begin, end);
+  
+  static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value,
+                "A forward iterator has more requirements than an input iterator.");
+  static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value,
+                "A forward iterator has more requirements than an output iterator.");
 }
 
-/// \brief An unprotected term does not change the reference count of the
-///        shared term when it is copied or moved.
-class unprotected_aterm
+
+/// \brief Constructor an aterm in a variable based on a function symbol and an input iterator providing the arguments. 
+/// \details The given iterator is traversed only once. So it can be used with an input iterator.
+///          This means that the TermConverter is applied exactly once to each element.
+///          The length of the iterator range must be equal to the arity of the function symbol.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param sym A function symbol.
+/// \param begin The start of a range of elements.
+/// \param end The end of a range of elements.
+template <class Term,
+          class InputIterator,
+          typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr,
+          typename std::enable_if<std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr>
+void make_term_appl(Term& target,
+                    const function_symbol& sym,
+                    InputIterator begin,
+                    InputIterator end)
 {
-  friend detail::_aterm* detail::address(const unprotected_aterm& t);
+  make_term_appl(target, sym, begin, end, [](const Term& term) -> const Term& { return term; } );
 
-protected:
-  const detail::_aterm* m_term;
+  static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
+                "The InputIterator is missing the input iterator tag.");
+}
 
-public:
-
-  /// \brief Default constuctor.
-  unprotected_aterm() noexcept
-   : m_term(nullptr)
-  {}
-
-  /// \brief Constructor.
-  /// \param term The term from which the new term is constructed.
-  unprotected_aterm(const detail::_aterm* term) noexcept
-   : m_term(term)
-  {}
-
-  /// \brief Dynamic check whether the term is an aterm_appl.
-  /// \return True iff this term is an term_appl.
-  /// \details This function has constant complexity.
-  ///          It is defined as !type_is_int() && !type_is_list().
-  bool type_is_appl() const noexcept
-  {
-    return !type_is_int() && !type_is_list();
-  }
-
-  /// \brief Dynamic check whether the term is an aterm_int.
-  /// \return True iff this term has internal structure of an aterm_int.
-  /// \details This function has constant complexity.
-  bool type_is_int() const noexcept
-  {
-    const function_symbol& f=m_term->function();
-    return f == detail::g_as_int;
-  }
-
-  /// \brief Dynamic check whether the term is an aterm_list.
-  /// \returns True iff this term has the structure of an term_list
-  /// \details This function has constant complexity.
-  bool type_is_list() const noexcept
-  {
-    const function_symbol& f=m_term->function();
-    return f == detail::g_as_list || f == detail::g_as_empty_list;
-  }
-
-  /// \brief Comparison operator.
-  /// \details Terms are stored in a maximally shared way. This
-  ///         means that this equality operator can be calculated
-  ///         in constant time.
-  /// \return true iff t is equal to the current term.
-  bool operator ==(const unprotected_aterm& t) const
-  {
-    return m_term == t.m_term;
-  }
-
-  /// \brief Inequality operator on two unprotected aterms.
-  /// \details See note at the == operator. This operator requires constant time.
-  /// \param t A term to which the current term is compared.
-  /// \return false iff t is equal to the current term.
-  bool operator !=(const unprotected_aterm& t) const
-  {
-    return m_term!=t.m_term;
-  }
-
-  /// \brief Comparison operator for two unprotected aterms.
-  /// \details This operator requires constant time. It compares
-  ///         the addresses where terms are stored. That means
-  ///         that the outcome of this operator is only stable
-  ///         as long as aterms are not garbage collected.
-  /// \param t A term to which the current term is compared.
-  /// \return True iff the current term is smaller than the argument.
-  bool operator <(const unprotected_aterm& t) const
-  {
-    return m_term<t.m_term;
-  }
-
-  /// \brief Comparison operator for two unprotected aterms.
-  /// \details This operator requires constant time. See note at the operator <.
-  /// \param t A term to which the current term is compared.
-  /// \return True iff the current term is larger than the argument.
-  bool operator >(const unprotected_aterm& t) const
-  {
-    return m_term>t.m_term;
-  }
-
-  /// \brief Comparison operator for two unprotected aterms.
-  /// \details This operator requires constant time. See note at the operator <.
-  /// \param t A term to which the current term is compared.
-  /// \return True iff the current term is smaller or equal than the argument.
-  bool operator <=(const unprotected_aterm& t) const
-  {
-    return m_term<=t.m_term;
-  }
-
-  /// \brief Comparison operator for two unprotected aterms.
-  /// \details This operator requires constant time. See note at the operator <.
-  /// \param t A term to which the current term is compared.
-  /// \return True iff the current term is larger or equalthan the argument.
-  bool operator >=(const unprotected_aterm& t) const
-  {
-    return m_term>=t.m_term;
-  }
-
-  /// \brief Returns true if this term is not equal to the term assigned by
-  ///        the default constructor of aterms, term_appl<T>'s and aterm_int.
-  /// \details The default constructor of a term_list<T> is the empty list, on which
-  ///          the operator defined yields true. This operation is more efficient
-  ///          than comparing the current term with an aterm(), term_appl<T>() or an
-  ///          aterm_int().
-  /// \return A boolean indicating whether this term equals the default constructor.
-  bool defined() const
-  {
-    return m_term != nullptr;
-  }
-
-  /// \brief Swaps this term with its argument.
-  /// \details This operation is more efficient than exchanging terms by an assignment,
-  ///          as swapping does not require to change the protection of terms.
-  /// \param t The term with which this term is swapped.
-  void swap(unprotected_aterm& t) noexcept
-  {
-    std::swap(m_term, t.m_term);
-  }
-
-  /// \brief Yields the function symbol in an aterm.
-  /// \returns The function symbol of the term, which can also be an AS_EMPTY_LIST,
-  ///          AS_INT and AS_LIST.
-  /// \details This is for internal use only.
-  const function_symbol& function() const
-  {
-    return m_term->function();
-  }
-};
-
-/// \brief The aterm base class that provides protection of the underlying shared terms.
-/// \details Terms are protected using one of the following two invariants:
-///          (1) A term that can be accessed is a subterm of a term with a reference count
-///              larger than 0 (when reference counting is used). Or, 
-///          (2) A term that can be accessed if it is a subterm of a term that occurs at
-///              an address which exist in the protection set of a process, or which sits
-///              in an atermpp container, which automatically is a container protection set.
-///              Furthermore, every address in a protection set contains a valid term.
-///          During garbage collection or rehashing, this situation is stable in the sense
-///          that all terms that are protected remain protected until the end of the 
-///          garbage collection or rehashing phase by the same address or term. This means
-///          that during garbage collection no terms can be deleted, for instance in an
-///          assignment, or in a destruct. 
-//               
-class aterm : public unprotected_aterm
+/// \brief Constructor an aterm in a variable based on a function symbol and an forward iterator providing the arguments. 
+/// \details The given iterator is traversed only once. So it can be used with an input iterator.
+///          This means that the TermConverter is applied exactly once to each element.
+///          The length of the iterator range must be equal to the arity of the function symbol.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param sym A function symbol.
+/// \param begin The start of a range of elements.
+/// \param end The end of a range of elements.
+/// \param converter An class or lambda term containing an operator Term operator()(const Term& t) which is
+///        applied to each each element in the iterator range before it becomes an argument of this term.
+template <class Term,
+          class InputIterator,
+          class TermConverter,
+          typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr>
+void make_term_appl(Term& target,
+                    const function_symbol& sym,
+                    InputIterator begin,
+                    InputIterator end,
+                    TermConverter converter)
 {
-public:
+  detail::g_thread_term_pool().create_appl_dynamic(target, sym, converter, begin, end);
 
-  /// \brief Default constructor.
-  aterm() noexcept;
+  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  static_assert(!std::is_same<typename InputIterator::iterator_category, std::output_iterator_tag>::value,
+                "The InputIterator has the output iterator tag.");
+}
 
-  /// \brief Standard destructor.
-  ~aterm() noexcept;
+/// \brief Make an term_appl consisting of a single function symbol. 
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param sym A function symbol.
+template <class Term>
+void make_term_appl(Term& target,
+                    const function_symbol& sym)
+{
+  detail::g_thread_term_pool().create_term(target, sym);
 
-  /// \brief Constructor based on an internal term data structure. This is not for public use.
-  /// \details Takes ownership of the passed underlying term.
-  /// \param t A pointer to an internal aterm data structure.
-  /// \todo Should be protected, but this cannot yet be done due to a problem
-  ///       in the compiling rewriter.
-  explicit aterm(const detail::_aterm *t) noexcept;
+  static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+  static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+}
 
-  /// \brief Copy constructor.
-  /// \param other The aterm that is copied.
-  /// \details  This class has a non-trivial destructor so explicitly define the copy and move operators.
-  aterm(const aterm& other) noexcept;
+/// \brief Make an aterm application for n-arity function application.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param symbol A function symbol.
+/// \param arguments The arguments of the function application.
+template<class Term,
+         typename ...Terms>
+void make_term_appl(Term& target, const function_symbol& symbol, const Terms& ...arguments)
+{
+  detail::g_thread_term_pool().create_appl(target, symbol, arguments...);
+}
 
-  /// \brief Move constructor.
-  /// \param other The aterm that is moved into the new term. This term may have changed after this operation.
-  /// \details This operation does not employ increments and decrements of reference counts and is therefore more
-  ///          efficient than the standard copy construct.
-  aterm(aterm&& other) noexcept;
-
-  /// \brief Assignment operator.
-  /// \param other The aterm that will be assigned.
-  /// \return A reference to the assigned term.
-  aterm& operator=(const aterm& other) noexcept;
-
-  /// \brief Assignment operator, to be used if busy and forbidden flags are explicitly available.
-  //  \detail This can be used as an optimisation, because it avoids getting access to thread local variables,
-  //          which is as it stands relatively expensive. The effect is equal to the assignment operator =. 
-  /// \param other The aterm that will be assigned.
-  aterm& assign(const aterm& other,
-                detail::thread_aterm_pool& pool) noexcept;
-
-  /// \brief Assignment operator, to be used when the busy flags do not need to be set.
-  /// \details This is only safe in the parallel context when the busy flag is already
-  ///          known to be set. This is also checked by an assert. This can be used for
-  ///          instance in a lambda function that is passed in a make_.... function, as
-  ///          this unprotected assign will only be called when a term is constructed. 
-  /// \param other The aterm that will be assigned.
-  template <bool CHECK_BUSY_FLAG=true>
-  aterm& unprotected_assign(const aterm& other) noexcept;
-
-  /// \brief Move assignment operator.
-  /// \param other The aterm that will be assigned.
-  /// \return A reference to the assigned term.
-  aterm& operator=(aterm&& other) noexcept;
-};
+/// \brief Constructor for n-arity function application with an index.
+/// \param target The variable in which the result will be put. This variable may be used for scratch purposes.
+/// \param symbol A function symbol.
+/// \param arguments The arguments of the function application.
+template<class Term,
+         class INDEX_TYPE,
+         typename ...Terms>
+void make_term_appl_with_index(aterm& target, const function_symbol& symbol, const Terms& ...arguments)
+{
+  detail::g_thread_term_pool().create_appl_index<Term, INDEX_TYPE>(target, symbol, arguments...);
+}
 
 template <class Term1, class Term2>
 struct is_convertible : public
@@ -341,14 +419,14 @@ const DerivedCont& vertical_cast(const Cont<Base>& t,
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
-namespace detail
+/* namespace detail
 {
   /// \returns A pointer to the underlying aterm.
-  inline _aterm* address(const unprotected_aterm& t)
+  inline _aterm* address(const unprotected_aterm_core& t)
   {
     return const_cast<_aterm*>(t.m_term);
   }
-}
+} */
 
 /// \brief Send the term in textual form to the ostream.
 /// \param out The stream to which the term is sent. 
@@ -381,10 +459,33 @@ namespace std
 /// \param t1 The first term
 /// \param t2 The second term
 template <>
-inline void swap(atermpp::unprotected_aterm& t1, atermpp::unprotected_aterm& t2) noexcept
+inline void swap(atermpp::unprotected_aterm_core& t1, atermpp::unprotected_aterm_core& t2) noexcept
 {
   t1.swap(t2);
 }
 } // namespace std
+namespace std
+{
 
-#endif // MCRL2_ATERMPP_ATERM_H
+/// \brief Swaps two term_applss.
+/// \details This operation is more efficient than exchanging terms by an assignment,
+///          as swapping does not require to change the protection of terms.
+/// \param t1 The first term.
+/// \param t2 The second term.
+inline void swap(atermpp::aterm& t1, atermpp::aterm& t2) noexcept
+{
+  t1.swap(t2);
+}
+
+/// \brief Standard hash function.
+template<> struct hash<atermpp::aterm>
+{
+  std::size_t operator()(const atermpp::aterm& t) const
+  {
+    return std::hash<atermpp::aterm_core>()(t);
+  }
+};
+
+} // namespace std
+
+#endif // MCRL2_ATERMPP_ATERM_APPL_H

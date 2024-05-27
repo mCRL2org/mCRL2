@@ -22,25 +22,25 @@ namespace data
 
 //--- start generated class alias ---//
 /// \\brief A sort alias
-class alias: public atermpp::aterm_appl
+class alias: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     alias()
-      : atermpp::aterm_appl(core::detail::default_values::SortRef)
+      : atermpp::aterm(core::detail::default_values::SortRef)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit alias(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_SortRef(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     alias(const basic_sort& name, const sort_expression& reference)
-      : atermpp::aterm_appl(core::detail::function_symbol_SortRef(), name, reference)
+      : atermpp::aterm(core::detail::function_symbol_SortRef(), name, reference)
     {}
 
     /// Move semantics
@@ -63,7 +63,7 @@ class alias: public atermpp::aterm_appl
 /// \\brief Make_alias constructs a new term into a given address.
 /// \\ \param t The reference into which the new alias is constructed. 
 template <class... ARGUMENTS>
-inline void make_alias(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_alias(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_SortRef(), args...);
 }
@@ -78,7 +78,7 @@ typedef std::vector<alias>    alias_vector;
 /// \\param x A term
 /// \\return True if \\a x is a alias expression
 inline
-bool is_alias(const atermpp::aterm_appl& x)
+bool is_alias(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::SortRef;
 }

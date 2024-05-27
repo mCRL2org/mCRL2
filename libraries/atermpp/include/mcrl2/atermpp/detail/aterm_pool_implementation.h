@@ -44,7 +44,7 @@ aterm_pool::aterm_pool() :
   }
 
   // Initialize the empty list.
-  create_appl(m_empty_list, m_function_symbol_pool.as_empty_list());
+  create_appl(reinterpret_cast<aterm&>(m_empty_list), m_function_symbol_pool.as_empty_list());
 }
 
 void aterm_pool::add_deletion_hook(function_symbol sym, term_callback callback)
@@ -308,7 +308,7 @@ bool aterm_pool::create_appl(aterm& term, const function_symbol& sym, const Term
   }
   else
   {
-    std::array<unprotected_aterm, sizeof...(Terms)> array;
+    std::array<unprotected_aterm_core, sizeof...(Terms)> array;
     store_in_argument_array(array, arguments...);
     return m_appl_dynamic_storage.create_appl_dynamic(term, sym, array.begin(), array.end());
   }

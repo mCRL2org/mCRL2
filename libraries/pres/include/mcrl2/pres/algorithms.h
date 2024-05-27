@@ -22,13 +22,13 @@ namespace pres_system {
 namespace algorithms {
 
 /// \brief Removes parameters from propositional variable instantiations in a pres expression
-/// \param x A PRES library object that does not derive from atermpp::aterm_appl
+/// \param x A PRES library object that does not derive from atermpp::aterm
 /// \param to_be_removed A set of parameters that are to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 void remove_parameters(pres& x, const std::set<data::variable>& to_be_removed);
 
 /// \brief Removes parameters from propositional variable instantiations in a pres expression
-/// \param x A PRES library object that does not derive from atermpp::aterm_appl
+/// \param x A PRES library object that does not derive from atermpp::aterm
 /// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 void remove_parameters(pres& x, const std::map<core::identifier_string, std::vector<std::size_t> >& to_be_removed);

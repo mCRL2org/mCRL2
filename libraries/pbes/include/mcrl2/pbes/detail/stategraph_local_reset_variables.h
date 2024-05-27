@@ -218,7 +218,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
   void leave(const pbes_system::not_& /* x */)
   {
     pbes_expression operand = pop();
-    push(not_(static_cast<atermpp::aterm_appl>(operand)));
+    push(not_(static_cast<atermpp::aterm>(operand)));
   }
 
   void leave(const pbes_system::and_& /* x */)

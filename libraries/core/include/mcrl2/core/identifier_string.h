@@ -58,7 +58,7 @@ inline void swap(identifier_string& t1, identifier_string& t2)
 inline
 bool is_identifier_string(const atermpp::aterm& t)
 {
-  return t.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(t).size() == 0;
+  return t.type_is_appl() && t.size() == 0;
 }
 
 /// \brief Provides the empty identifier string.
@@ -82,7 +82,7 @@ struct hash<mcrl2::core::identifier_string>
 {
   std::size_t operator()(const mcrl2::core::identifier_string& x) const
   {
-    return std::hash<atermpp::aterm>()(static_cast<const atermpp::aterm&>(x));
+    return std::hash<atermpp::aterm>()(x);
   }
 };
 

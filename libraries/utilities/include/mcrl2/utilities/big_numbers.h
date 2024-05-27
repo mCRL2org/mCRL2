@@ -18,11 +18,11 @@
 #ifndef MCRL2_UTILITIES_BIG_NUMBERS_H
 #define MCRL2_UTILITIES_BIG_NUMBERS_H
 
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/hash_utility.h"
 #include <algorithm>
 #include <limits>
 #include <string>
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/hash_utility.h"
 
 // Prototype.
 namespace mcrl2
@@ -149,9 +149,38 @@ namespace detail
 
     return resultls + (resultms << (no_of_bits_per_digit/2));
   }
+
+  // Calculate the common greates divisor of p and q. 
+  inline std::size_t greatest_common_divisor(std::size_t p, std::size_t q)
+  {
+    if (p==0) { return q; }
+    if (q==0) { return p; }
+    if (p<q)
+    {
+      std::swap(p,q);
+    }
+    // p is the largest.
+    std::size_t remainder=p % q; 
+    while (remainder>0)
+    {
+      p=q; 
+      q=remainder;
+      remainder=p % q;
+    }
+    return q; 
+  }
+
+  inline void remove_common_divisor(std::size_t& p, std::size_t& q)
+  {
+    const std::size_t gcd=greatest_common_divisor(p,q);
+    p = p/gcd;
+    q = q/gcd;
+    assert(greatest_common_divisor(p,q)==1); 
+  }
+
 } // namespace detail
 
-class big_natural_number;
+// class big_natural_number;
 inline std::string pp(const big_natural_number& l);
 
 class big_natural_number
@@ -242,6 +271,12 @@ class big_natural_number
       is_well_defined();
     }
 
+    // Add a digit the this natural number. 
+    void push_back(const std::size_t n)
+    {
+      m_number.push_back(n);
+    }
+
     /** \brief Returns whether this number equals zero.
         \details This is more efficient than checking x==big_natural_number(0).
     */
@@ -288,6 +323,21 @@ class big_natural_number
         return 0;
       }
       return m_number.front();
+    }
+
+    /** \brief Give the number of digits in this big number.
+    */
+    std::size_t size() const
+    {
+      return m_number.size();
+    }
+
+    /** \brief Give the n-th digit where the most significant digit is positioned last. 
+    */
+    std::size_t operator[](const std::size_t n) const
+    {
+      assert(n<m_number.size());
+      return m_number.at(n);
     }
 
     /* \brief Standard comparison operator.

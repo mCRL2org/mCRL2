@@ -10,6 +10,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_LIST_H
 #define MCRL2_ATERMPP_ATERM_LIST_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
 #include "mcrl2/atermpp/type_traits.h"
@@ -23,7 +24,7 @@ class term_list: public aterm
 {
 protected:
   /// \brief Constructor for term lists from internally constructed terms delivered as reference.
-  explicit term_list(detail::_aterm* t) noexcept :aterm(t)
+  explicit term_list(detail::_aterm_appl<>* t) noexcept : aterm(t)
   {
     assert(!defined() || type_is_list());
   }

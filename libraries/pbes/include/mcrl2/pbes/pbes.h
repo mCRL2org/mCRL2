@@ -49,7 +49,7 @@ bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
                         const data::data_specification& data_spec
                        );
 
-atermpp::aterm_appl pbes_to_aterm(const pbes& p);
+atermpp::aterm pbes_to_aterm(const pbes& p);
 
 /// \brief parameterized boolean equation system
 // <PBES>         ::= PBES(<DataSpec>, <GlobVarSpec>, <PBEqnSpec>, <PBInit>)

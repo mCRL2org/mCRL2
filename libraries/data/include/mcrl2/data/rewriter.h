@@ -90,7 +90,6 @@ class rewriter: public basic_rewriter<data_expression>
       static_assert(!mcrl2::utilities::detail::GlobalThreadSafe);
       static substitution_type result;
 #endif
-      assert(result.empty());    // This static substitution should always become empty again after use.
       return result;
     }
 

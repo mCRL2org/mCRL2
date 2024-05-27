@@ -20,30 +20,30 @@ namespace data {
 
 //--- start generated class untyped_data_parameter ---//
 /// \\brief An untyped parameter
-class untyped_data_parameter: public atermpp::aterm_appl
+class untyped_data_parameter: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor.
+    /// \\brief Default constructor X3.
     untyped_data_parameter()
-      : atermpp::aterm_appl(core::detail::default_values::UntypedDataParameter)
+      : atermpp::aterm(core::detail::default_values::UntypedDataParameter)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z9.
     /// \\param term A term
     explicit untyped_data_parameter(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_term_UntypedDataParameter(*this));
     }
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z12.
     untyped_data_parameter(const core::identifier_string& name, const data_expression_list& arguments)
-      : atermpp::aterm_appl(core::detail::function_symbol_UntypedDataParameter(), name, arguments)
+      : atermpp::aterm(core::detail::function_symbol_UntypedDataParameter(), name, arguments)
     {}
 
-    /// \\brief Constructor.
+    /// \\brief Constructor Z1.
     untyped_data_parameter(const std::string& name, const data_expression_list& arguments)
-      : atermpp::aterm_appl(core::detail::function_symbol_UntypedDataParameter(), core::identifier_string(name), arguments)
+      : atermpp::aterm(core::detail::function_symbol_UntypedDataParameter(), core::identifier_string(name), arguments)
     {}
 
     /// Move semantics
@@ -66,7 +66,7 @@ class untyped_data_parameter: public atermpp::aterm_appl
 /// \\brief Make_untyped_data_parameter constructs a new term into a given address.
 /// \\ \param t The reference into which the new untyped_data_parameter is constructed. 
 template <class... ARGUMENTS>
-inline void make_untyped_data_parameter(atermpp::aterm_appl& t, const ARGUMENTS&... args)
+inline void make_untyped_data_parameter(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_UntypedDataParameter(), args...);
 }
@@ -81,7 +81,7 @@ typedef std::vector<untyped_data_parameter>    untyped_data_parameter_vector;
 /// \\param x A term
 /// \\return True if \\a x is a untyped_data_parameter expression
 inline
-bool is_untyped_data_parameter(const atermpp::aterm_appl& x)
+bool is_untyped_data_parameter(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::UntypedDataParameter;
 }

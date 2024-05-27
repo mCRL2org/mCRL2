@@ -34,7 +34,7 @@ namespace detail
 /** \brief Translate a fraction given as a data_expression to a representation
  *         with an arbitrary size fraction */
 
-inline probabilistic_arbitrary_precision_fraction translate_probability_data_to_arbitrary_size_probability(const data::data_expression& d)
+inline utilities::probabilistic_arbitrary_precision_fraction translate_probability_data_to_arbitrary_size_probability(const data::data_expression& d)
 {
   const data::application& da=atermpp::down_cast<data::application>(d);
   if (!(data::sort_int::is_integer_constant(da[0]) && 
@@ -43,7 +43,7 @@ inline probabilistic_arbitrary_precision_fraction translate_probability_data_to_
   {
     throw mcrl2::runtime_error("Cannot convert the probability " + pp(d) + " to an arbitrary size denominator/enumerator pair.");
   }    
-  return probabilistic_arbitrary_precision_fraction(pp(da[0]),pp(da[1]));
+  return utilities::probabilistic_arbitrary_precision_fraction(pp(da[0]),pp(da[1]));
 }
 
 template <class PROBABILISTIC_STATE1, class PROBABILISTIC_STATE2> 
@@ -62,19 +62,19 @@ lts_convert_probabilistic_state<probabilistic_state<std::size_t, lps::probabilis
 }
 
 template <>
-inline probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> 
-lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
-                                probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> >(
-            const probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& state_in) 
+inline probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> 
+lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>,
+                                probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> >(
+            const probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>& state_in) 
 {
   return state_in;
 }
 
 template <>
 inline probabilistic_state<std::size_t, lps::probabilistic_data_expression> 
-lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
+lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>,
                                 probabilistic_state<std::size_t, lps::probabilistic_data_expression> >(
-            const probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& state_in) 
+            const probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>& state_in) 
 {
   if (state_in.size()<=1)  // There is only one state with probability 1.
   {
@@ -82,14 +82,14 @@ lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::lts::pro
   }
   // There are more than one target states all with their own probabilities. 
   std::vector<lps::state_probability_pair<std::size_t, lps::probabilistic_data_expression> > result;
-  for(const lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& p: state_in)
+  for(const lps::state_probability_pair<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>& p: state_in)
   {
     result.emplace_back(p.state(), lps::probabilistic_data_expression(pp(p.probability().enumerator()), pp(p.probability().denominator())));
   }
   return probabilistic_state<std::size_t, lps::probabilistic_data_expression>(result.begin(), result.end());
 }
 
-inline mcrl2::lts::probabilistic_arbitrary_precision_fraction translate_probability_data_prob(const data::data_expression& d)
+inline mcrl2::utilities::probabilistic_arbitrary_precision_fraction translate_probability_data_prob(const data::data_expression& d)
 {
   const data::application& da=atermpp::down_cast<data::application>(d);
   if (!(data::sort_int::is_integer_constant(da[0]) && 
@@ -98,28 +98,28 @@ inline mcrl2::lts::probabilistic_arbitrary_precision_fraction translate_probabil
   {
     throw mcrl2::runtime_error("Cannot convert the probability " + pp(d) + " to an explicit denominator/enumerator pair.");
   }    
-  return mcrl2::lts::probabilistic_arbitrary_precision_fraction(pp(da[0]),pp(da[1]));
+  return mcrl2::utilities::probabilistic_arbitrary_precision_fraction(pp(da[0]),pp(da[1]));
 } 
 
 template <>
-inline probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> 
+inline probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> 
 lts_convert_probabilistic_state<probabilistic_state<std::size_t, lps::probabilistic_data_expression>,
-                                probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> >(
+                                probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> >(
             const probabilistic_state<std::size_t, lps::probabilistic_data_expression>& state_in) 
 {
   if (state_in.size()<=1) // There is only one state with probability 1.
   {
-    return probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>(state_in.get());
+    return probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>(state_in.get());
   }
   // There are more than one target states all with their own probabilities. 
-  std::vector<lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> > result;
+  std::vector<lps::state_probability_pair<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> > result;
   for(const lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>& p: state_in)
   {
-    result.push_back(lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>(
+    result.push_back(lps::state_probability_pair<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>(
                           p.state(),
                           translate_probability_data_prob(p.probability())));
   }
-  return probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>(result.begin(), result.end());
+  return probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>(result.begin(), result.end());
 }
 
 

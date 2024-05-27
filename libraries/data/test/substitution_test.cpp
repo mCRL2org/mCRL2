@@ -12,7 +12,13 @@
 
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/expression_traits.h"
+
+#include "mcrl2/data/data_configuration.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/list64.h"
+#else
 #include "mcrl2/data/list.h"
+#endif
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
