@@ -90,7 +90,7 @@ class ProcessTauTest(ProcessTest):
     def __init__(self, name, testfile, settings):
         super(ProcessTauTest, self).__init__(name, testfile, settings)
         self.actions = ['a', 'b', 'c']
-        self.init = 'hide({a}, allow({a, b, c}, P || Q || R))'
+        self.init = r'hide({a}, allow({a, b, c}, P || Q || R))'
         self.process_expression_generators = {
                                random_process_expression.make_action: 8,
                                random_process_expression.make_delta: 1,
@@ -152,9 +152,11 @@ class LtscompareCounterexampleTest(ProcessTauTest):
         assert equivalence_type in ['bisim', 'branching-bisim', 'trace']
         super(LtscompareCounterexampleTest, self).__init__(name, ymlfile('ltscompare-counter-example'), settings)
         self.add_command_line_options('t4', ['-e' + equivalence_type])
+        self.add_command_line_options('t5', ['-e' + equivalence_type])
 
         if hide_actions:
-            self.add_command_line_options('t4', ['--tau=b,c'])
+            self.add_command_line_options('t4', ['--tau=b'])
+            self.add_command_line_options('t5', ['--tau=b'])
 
     def create_inputfiles(self, runpath = '.'):
         super(LtscompareCounterexampleTest, self).create_inputfiles(runpath)
