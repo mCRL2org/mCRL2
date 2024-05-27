@@ -273,7 +273,6 @@ class YmlTest(object):
         while len(tasks) > 0:
             tool = tasks.pop(0)
             try:
-                commands.append(tool.command())
                 returncode = tool.execute(
                     timeout=self.timeout, memlimit=self.memlimit, verbose=self.verbose
                 )
@@ -301,7 +300,6 @@ class YmlTest(object):
             except (ToolRuntimeError, SegmentationFault) as e:
                 self.dump_file_contents()
                 self.print_commands(no_paths=True)
-                self.cleanup()
                 raise e
 
         if all(tool.executed for tool in self.tools):
@@ -323,8 +321,8 @@ class YmlTest(object):
                             )
                         )
                 self.print_commands(no_paths=True)
-
-            self.cleanup()
+            else:
+                self.cleanup()
             return result
         else:
             not_executed = [tool for tool in self.tools if not tool.executed]
