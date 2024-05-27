@@ -21,7 +21,7 @@ else:
 
 print('Checking minimal_walking_distance.mcf for spinning_mule_optimised.mcrl2')
 run = subprocess.run(['lps2pres', '-fminimal_walking_distance.mcf', 'spinning_mule_optimized.lps'], stdout=subprocess.PIPE, check=True)
-run = subprocess.run(['resrewr', '-pquantifier-inside'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['presrewr', '-pquantifier-inside'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['presrewr', '-pquantifier-one-point'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 subprocess.run(['presrewr', '-pquantifier-all', '-', 'spinning_mule_optimized.pres'], input=run.stdout, check=True)
 
@@ -29,7 +29,7 @@ subprocess.run(['pressolve', '-v', '-am', 'spinning_mule_optimized.pres', '-p30'
 
 print('Checking minimal_walking_distance.mcf for spinning_mule.mcrl2')
 run = subprocess.run(['lps2pres', '-fminimal_walking_distance.mcf', 'spinning_mule.lps'], stdout=subprocess.PIPE, check=True)
-run = subprocess.run(['resrewr', '-pquantifier-inside'], input=run.stdout, stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['presrewr', '-pquantifier-inside'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['presrewr', '-pquantifier-one-point'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 subprocess.run(['presrewr', '-pquantifier-all', '-', 'spinning_mule.pres'], input=run.stdout, check=True)
 
