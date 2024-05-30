@@ -197,7 +197,7 @@ template <Visualizer::Mode mode> void Diagram::drawBorderFlush()
 
 template <Visualizer::Mode mode> void Diagram::drawBorderFlush(const double& opacity)
 {
-  if constexpr (mode == Visualizer::Selecting)
+  if constexpr (mode == Visualizer::Marking)
   {
     VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
   }
