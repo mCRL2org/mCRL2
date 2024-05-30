@@ -8,10 +8,14 @@ nodes:
   l4:
     type: lts
   l5:
-    type: mcf
+    type: lts
   l6:
-    type: pbes
+    type: lts
   l7:
+    type: mcf
+  l8:
+    type: pbes
+  l9:
     type: pbes
 
 tools:
@@ -32,7 +36,7 @@ tools:
     name: ltsconvert
   t4:
     input: [l3, l4]
-    output: [l5]
+    output: [l7]
     args: [-c]
     name: ltscompare
   t5:
@@ -41,25 +45,35 @@ tools:
     args: []
     name: ltscompare
   t6:
-    input: [l3, l5]
-    output: [l6]
-    args: []
-    name: lts2pbes
+    input: [l3]
+    output: [l5]
+    args: [-enone]
+    name: ltsconvert
   t7:
-    input: [l4, l5]
-    output: [l7]
+    input: [l4]
+    output: [l6]
+    args: [-enone]
+    name: ltsconvert
+  t8:
+    input: [l5, l7]
+    output: [l8]
     args: []
     name: lts2pbes
-  t8:
-    input: [l6]
+  t9:
+    input: [l6, l7]
+    output: [l9]
+    args: []
+    name: lts2pbes
+  t10:
+    input: [l8]
     output: []
     args: []
     name: pbessolve
-  t9:
-    input: [l7]
+  t11:
+    input: [l9]
     output: []
     args: []
     name: pbessolve
 
 result: |
-  result = (t4.value['result'] == t5.value['result']) and (t4.value['result'] or t8.value['solution'] != t9.value['solution'])
+  result = (t4.value['result'] == t5.value['result']) and (t4.value['result'] or t10.value['solution'] != t11.value['solution'])

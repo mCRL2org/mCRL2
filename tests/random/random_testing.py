@@ -157,11 +157,13 @@ class LtscompareCounterexampleTest(ProcessTauTest):
         if hide_actions:
             self.add_command_line_options('t4', ['--tau=b'])
             self.add_command_line_options('t5', ['--tau=b'])
+            self.add_command_line_options('t6', ['--tau=b'])
+            self.add_command_line_options('t7', ['--tau=b'])
 
     def create_inputfiles(self, runpath = '.'):
         super(LtscompareCounterexampleTest, self).create_inputfiles(runpath)
         # This is a hack to ensure that the counter example formula always exists for the further steps.
-        filename = runpath + '/l5.mcf'
+        filename = runpath + '/l7.mcf'
         write_text(filename, "true")
 
 class StochasticLtscompareTest(StochasticProcessTest):

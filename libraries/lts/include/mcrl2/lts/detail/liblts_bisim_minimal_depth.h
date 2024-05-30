@@ -36,13 +36,15 @@ class bisim_partitioner_minimal_depth
 public:
   /** \brief Creates a bisimulation partitioner for an LTS.
    *  \details This partitioner is specifically for creating minimal depth counter-examples for strong bisimulation.
-   *           It guarantees stability w.r.t. the old partition before consideren new splitter blocks. This might cause
-   * this implementation to be less efficient than other partitioners. \param l Reference to the LTS. \param init_l2
-   * reference to the initial state of lts2. */
-  bisim_partitioner_minimal_depth(LTS_TYPE &l, const std::size_t init_l2)
+   *           It guarantees stability w.r.t. the old partition before considering new splitter blocks. This might cause
+   *           this implementation to be less efficient than other partitioners.
+   *  \param l Reference to the LTS.
+   *  \param init_l2 reference to the initial state of lts2.
+   */
+  bisim_partitioner_minimal_depth(LTS_TYPE& l, const std::size_t init_l2)
       : initial_l2(init_l2),
         max_state_index(0),
-	aut(l)
+        aut(l)
   {
     to_be_processed.clear();
     block initial_block = block();
@@ -50,8 +52,8 @@ public:
     {
       initial_block.states.push_back(i);
     }
-    sort_transitions(aut.get_transitions(), mcrl2::lts::lbl_tgt_src);
-    const std::vector<transition> &trans = aut.get_transitions();
+    sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::lbl_tgt_src);
+    const std::vector<transition>& trans = aut.get_transitions();
     for (std::vector<transition>::const_iterator r = trans.begin(); r != trans.end(); ++r)
     {
       initial_block.transitions.push_back(*r);
@@ -76,6 +78,7 @@ public:
     {
       splitted = refine_partition(lvl);
       lvl++;
+
       for (typename std::vector<block>::reverse_iterator i = blocks.rbegin();
            i != blocks.rend() && (*i).level == lvl - 1;
            ++i)
@@ -104,12 +107,12 @@ public:
   /** \brief Creates a state formula that distinguishes state s from state t.
    *  \details The states s and t are non bisimilar states. A distinguishign state formula phi is
    *           returned, which has the property that s \in \sem{phi} and  t \not\in\sem{phi}.
-   *           Based on the preprint "Computing minimal distinguishing Hennessey-Milner formulas is NP-hard
-   *           . But variants are tractable", 2023 by Jan Martens and Jan Friso Groote
+   *           Based on the preprint "Computing minimal distinguishing Hennessey-Milner formulas is NP-hard.
+   *           But variants are tractable", 2023 by Jan Martens and Jan Friso Groote
    *  \param[in] s The state number for which the resulting formula should be true
    *  \param[in] t The state number for which the resulting formula should be false
    *  \return A minimal observation depth distinguishing state formula, that is often also minimum negation-depth and
-   * irreducible. */
+   *          irreducible. */
   mcrl2::state_formulas::state_formula dist_formula_mindepth(const std::size_t s, const std::size_t t)
   {
     formula f = distinguish(block_index_of_a_state[s], block_index_of_a_state[t]);
@@ -132,7 +135,7 @@ private:
   state_type initial_l2;
 
   state_type max_state_index;
-  LTS_TYPE &aut;
+  LTS_TYPE& aut;
   std::set<block_index_type> partition;
 
   struct block
@@ -147,7 +150,7 @@ private:
     std::vector<transition> transitions;
     std::set<std::pair<label_type, block_index_type>> outgoing_observations;
 
-    void swap(block &b)
+    void swap(block& b)
     {
       std::swap(b.state_index, state_index);
       std::swap(b.block_index, block_index);
@@ -197,7 +200,7 @@ private:
       block_index_type sourceBlock = block_index_of_a_state[t.from()];
       block_index_type targetBlock = block_index_of_a_state[t.to()];
 
-      blocks[sourceBlock].outgoing_observations.insert(std::make_pair(t.label(), targetBlock));
+      blocks[sourceBlock].outgoing_observations.insert(std::make_pair(aut.apply_hidden_label_map(t.label()), targetBlock));
     }
   }
 
@@ -205,7 +208,7 @@ private:
    *  \details Given the formula f we compute the subset of blocks in which f is true.
    *			 the truthvalues are computed based on the truth values of the different conjuncts and
    *			 the modality which consists of the label and being negated or not. */
-  void set_truths(formula &f)
+  void set_truths(formula& f)
   {
     std::set<block_index_type> image_truths;
     std::set<block_index_type> pre_image_truths;
@@ -229,7 +232,7 @@ private:
     {
       for (transition t : blocks[B].transitions)
       {
-        if (t.label() == f.label && (pre_image_truths.find(block_index_of_a_state[t.from()]) == pre_image_truths.end()))
+        if (aut.apply_hidden_label_map(t.label()) == f.label && (pre_image_truths.find(block_index_of_a_state[t.from()]) == pre_image_truths.end()))
         {
           pre_image_truths.insert(block_index_of_a_state[t.from()]);
         }
@@ -267,8 +270,7 @@ private:
         return true;
       }
 
-      std::vector<transition> transitions_to_process;
-      transitions_to_process = blocks[splitter_index].transitions;
+      std::vector<transition> transitions_to_process = blocks[splitter_index].transitions;
       for (std::vector<transition>::const_iterator i = transitions_to_process.begin();
            i != transitions_to_process.end();
            ++i)
@@ -283,7 +285,7 @@ private:
         }
         // If the label of the next action is different, we must carry out the splitting.
         if ((i != transitions_to_process.end() && next(i) == transitions_to_process.end())
-            || t.label() != (*next(i)).label())
+            || aut.apply_hidden_label_map(t.label()) != aut.apply_hidden_label_map(next(i)->label()))
         {
           split_BL(lvl);
           BL.clear();
@@ -404,7 +406,7 @@ private:
 
         if (BlockLeft.block_index != Bsplit)
         {
-          std::vector<state_type> &reference_to_flagged_states_of_block2 = blocks.back().states;
+          std::vector<state_type>& reference_to_flagged_states_of_block2 = blocks.back().states;
           for (std::vector<state_type>::const_iterator j = reference_to_flagged_states_of_block2.begin();
                j != reference_to_flagged_states_of_block2.end();
                ++j)
@@ -419,7 +421,7 @@ private:
         blocks[Bsplit].states.swap(flagged_states);
       }
       // reset the state flags
-      std::vector<state_type> &flagged_states_to_be_unflagged = blocks[reset_state_flags_block].states;
+      std::vector<state_type>& flagged_states_to_be_unflagged = blocks[reset_state_flags_block].states;
       for (state_type s : flagged_states_to_be_unflagged)
       {
         state_flags[s] = false;
@@ -569,7 +571,7 @@ private:
    * \param a formula f
    * \return a state_formula equivalent to f
    */
-  mcrl2::state_formulas::state_formula convert_formula(formula &f)
+  mcrl2::state_formulas::state_formula convert_formula(formula& f)
   {
     mcrl2::state_formulas::state_formula returnPhi
         = mcrl2::state_formulas::may(create_regular_formula(aut.action_label(f.label)), conjunction(f.conjunctions));
@@ -586,10 +588,10 @@ private:
    * \param terms The terms of the conjunction
    * \return The conjunctive state formula
    */
-  mcrl2::state_formulas::state_formula conjunction(std::vector<formula> &conjunctions)
+  mcrl2::state_formulas::state_formula conjunction(std::vector<formula>& conjunctions)
   {
     std::vector<mcrl2::state_formulas::state_formula> terms;
-    for (formula &f : conjunctions)
+    for (formula& f : conjunctions)
     {
       terms.push_back(convert_formula(f));
     }
@@ -607,7 +609,7 @@ private:
    * \param a The action for which to create a regular formula
    * \return The created regular formula
    */
-  regular_formulas::regular_formula create_regular_formula(const mcrl2::lts::action_label_string &a) const
+  regular_formulas::regular_formula create_regular_formula(const mcrl2::lts::action_label_string& a) const
   {
     return mcrl2::regular_formulas::regular_formula(mcrl2::action_formulas::multi_action(
         process::action_list({process::action(process::action_label(a, {}), {})})));
@@ -619,42 +621,40 @@ private:
    * \param a The action for which to create a regular formula
    * \return The created regular formula
    */
-  regular_formulas::regular_formula create_regular_formula(const mcrl2::lps::multi_action &a) const
+  regular_formulas::regular_formula create_regular_formula(const mcrl2::lps::multi_action& a) const
   {
     return regular_formulas::regular_formula(action_formulas::multi_action(a.actions()));
   }
 };
 
-template < class LTS_TYPE>
-bool destructive_bisimulation_compare_minimal_depth(
-    LTS_TYPE & l1,
-    LTS_TYPE & l2,
-    const std::string & counter_example_file)
+template <class LTS_TYPE>
+bool destructive_bisimulation_compare_minimal_depth(LTS_TYPE& l1, LTS_TYPE& l2, const std::string& counter_example_file)
 {
-    std::size_t init_l2 = l2.initial_state() + l1.num_states();
-    mcrl2::lts::detail::merge(l1, l2);
-    l2.clear(); // No use for l2 anymore.
-    detail::bisim_partitioner_minimal_depth<LTS_TYPE> bisim_partitioner_minimal_depth(l1, init_l2);
-    if (bisim_partitioner_minimal_depth.in_same_class(l1.initial_state(), init_l2))
-    {
-        return true; 
-    }
-    
-    // LTSs are not bisimilar, we can create a counter example. 
-    std::string filename = "Counterexample.mcf";
-    if (!counter_example_file.empty()) {
-        filename = counter_example_file;
-    }
+  std::size_t init_l2 = l2.initial_state() + l1.num_states();
+  mcrl2::lts::detail::merge(l1, l2);
+  l2.clear(); // No use for l2 anymore.
+  detail::bisim_partitioner_minimal_depth<LTS_TYPE> bisim_partitioner_minimal_depth(l1, init_l2);
+  if (bisim_partitioner_minimal_depth.in_same_class(l1.initial_state(), init_l2))
+  {
+    return true;
+  }
 
-    mcrl2::state_formulas::state_formula counter_example_formula = bisim_partitioner_minimal_depth.dist_formula_mindepth(l1.initial_state(), init_l2);
-    
-    std::ofstream counter_file(filename);
-    counter_file << mcrl2::state_formulas::pp(counter_example_formula);
-    counter_file.close();
-    mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
-    return false;
+  // LTSs are not bisimilar, we can create a counter example.
+  std::string filename = "Counterexample.mcf";
+  if (!counter_example_file.empty())
+  {
+    filename = counter_example_file;
+  }
+
+  mcrl2::state_formulas::state_formula counter_example_formula
+      = bisim_partitioner_minimal_depth.dist_formula_mindepth(l1.initial_state(), init_l2);
+
+  std::ofstream counter_file(filename);
+  counter_file << mcrl2::state_formulas::pp(counter_example_formula);
+  counter_file.close();
+  mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
+  return false;
 }
-
 
 } // namespace detail
 } // namespace lts
