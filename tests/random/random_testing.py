@@ -238,10 +238,6 @@ class LtsconvertsymbolicTest(ProcessTest):
     def __init__(self, name, settings):
         super(LtsconvertsymbolicTest, self).__init__(name, ymlfile('ltsconvertsymbolic'), settings)
 
-    def create_inputfiles(self, runpath = '.'):
-        super(LtsconvertsymbolicTest, self).create_inputfiles(runpath)
-        self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
-
 class PbesTest(RandomTest):
     def __init__(self, name, ymlfile, settings):
         super(PbesTest, self).__init__(name, ymlfile, settings)
