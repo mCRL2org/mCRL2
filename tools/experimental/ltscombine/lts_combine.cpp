@@ -265,7 +265,17 @@ public:
               states_mutex))
       {
         progress_mutex->lock();
-        progress_monitor->finish_state(states->size(), queue->size(), *number_of_threads);
+
+        states_mutex->lock();
+        std::size_t state_size = states->size();
+        states_mutex->unlock();
+
+        queue_mutex->lock();
+        std::size_t queue_size = queue->size();
+        queue_mutex->unlock();
+
+
+        progress_monitor->finish_state(state_size, queue_size, *number_of_threads);
         progress_mutex->unlock();
       }
       else
@@ -310,7 +320,10 @@ private:
     // Take the next pair from the queue.
     // std::cout << "oops" << std::endl;
     std::size_t state_index = queue->front();
-    std::vector<state_t> state = (*states)[state_index];
+
+    states_mutex->lock();
+    std::vector<state_t> state = (*states)[state_index];    
+    states_mutex->unlock();
 
     queue->pop();
     queue_mutex->unlock();
