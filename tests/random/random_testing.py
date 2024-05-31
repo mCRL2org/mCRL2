@@ -147,6 +147,19 @@ class LtscompareTest(ProcessTauTest):
         self.add_command_line_options('t3', ['-e' + equivalence_type])
         self.add_command_line_options('t4', ['-e' + equivalence_type])
 
+class LtsCombineTest(ProcessTest):
+    def __init__(self, name, settings):
+        super(LtsCombineTest, self).__init__(name, ymlfile('ltscombine'), settings)
+
+    def create_inputfiles(self, runpath = '.'):
+        super(LtsCombineTest, self).create_inputfiles(runpath)
+
+        # Create a second mCRL2 specification to combine
+        filename = f'{self.name}2.mcrl2'
+        p = random_process_expression.make_process_specification(self.parallel_operator_generators, self.process_expression_generators, self.actions, self.process_identifiers, self.process_size, self.init, self.generate_process_parameters)
+        write_text(filename, str(p))
+        self.inputfiles += [filename]
+
 class LtscompareCounterexampleTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, hide_actions, settings):
         assert equivalence_type in ['bisim', 'branching-bisim', 'trace']
@@ -427,9 +440,7 @@ available_tests = {
     'bisimulation-branching-bisim-gjkw'           : lambda name, settings: BisimulationTest(name, 'branching-bisim-gjkw', settings)                    ,
     'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                              ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
-    'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
-    'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
     'pbesrewr-pfnf'                               : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                                        ,
     'pbesrewr-quantifier-all'                     : lambda name, settings: PbesrewrTest(name, 'quantifier-all', settings)                              ,
@@ -462,8 +473,7 @@ available_tests = {
 }
 
 available_experimental_tests = {
-    'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
-    'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
+    'ltscombine'                                  : lambda name, settings: LtsCombineTest(name, settings)                                              ,
     'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
     'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                
@@ -489,7 +499,7 @@ def matching_tests(tests, pattern):
         return [pattern]
     return matches
 
-def main(tests):
+def main():
     cmdline_parser = argparse.ArgumentParser()
     cmdline_parser.add_argument('-t', '--toolpath', dest='toolpath', help='The path where the mCRL2 tools are installed')
     cmdline_parser.add_argument('-r', '--repetitions', dest='repetitions', metavar='N', default='10', help='Perform N repetitions of each test')
