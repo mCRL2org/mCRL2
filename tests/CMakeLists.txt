@@ -25,16 +25,19 @@ foreach(type "random" "regression")
   string(REPLACE "\r" "" available_tests "${available_tests}")
 
   foreach(testname ${available_tests})
-    set(REPETITIONS "")
+    set(EXTRA_ARGS "")
+    if(MCRL2_ENABLE_EXPERIMENTAL)
+      set(EXTRA_ARGS "${EXTRA_ARGS};--experimental")
+    endif()
     if("${type}" STREQUAL "random")
-      set(REPETITIONS "-r 10")
+      set(EXTRA_ARGS "${EXTRA_ARGS};-r 10")
     endif()
 
     set(targetname "${type}_${testname}")
 
     add_test(NAME ${targetname}
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
-             COMMAND ${Python_EXECUTABLE} ${testrunner} ${REPETITIONS} --toolpath ${MCRL2_TOOL_PATH} --pattern ${testname})
+             COMMAND ${Python_EXECUTABLE} ${testrunner} ${EXTRA_ARGS} --toolpath ${MCRL2_TOOL_PATH} --pattern ${testname})
     set_tests_properties(${targetname} PROPERTIES LABELS ${type})
   endforeach()
 endforeach()
