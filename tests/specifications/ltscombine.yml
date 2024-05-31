@@ -52,7 +52,7 @@ tools:
   t5:
     input: [l5, l6]
     output: [l7]
-    args: [--hide=a, --allow="a b", --comm="a|b->c"]
+    args: [--hide=a, "--allow=a,b", --comm="a|b->c"]
     name: ltscombine
   t6:
     input: [l5, l3]
