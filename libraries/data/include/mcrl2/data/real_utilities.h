@@ -45,7 +45,7 @@ inline bool is_one(const atermpp::aterm& e)
 }
 
 /// \brief Functions that returns true if e is a closed real number larger than zero.
-inline bool is_larger_zero(const atermpp::aterm_appl& e)
+inline bool is_larger_zero(const atermpp::aterm& e)
 {
   if (sort_real::is_creal_application(e))
   { 

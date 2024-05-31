@@ -46,36 +46,22 @@ class Diagram : public QObject
     void removeShape(int index);
 
     // -- vis functions ---------------------------------------------
-    void visualize(
-      const bool& inSelectMode,
-      double pixelSize);
-    void visualize(
-      const bool& inSelectMode,
-      double pixelSize,
-      const std::vector< Attribute* > attrs,
-      const std::vector< double > attrValIdcs,
-      double opacity = 1.0);
+    using Mode = Visualizer::Mode;
 
-  protected:
+    template <Mode> void draw(double pixelSize);
+    template <Mode> void draw(double pixelSize,
+      const std::vector< Attribute* > attrs,
+      const std::vector< double > attrValIdcs, double opacity = 1.0);
+
+  private:
     // -- private utility functions ---------------------------------
 
-    void drawAxes(
-      const bool& inSelectMode,
-      double pixelSize);
-    void drawBorder(
-      const bool& inSelectMode,
-      double pixelSize);
-    void drawBorderFlush(
-      const bool& inSelectMode);
-    void drawBorderFlush(
-      const bool& inSelectMode,
-      const double& opacity);
-    void drawGrid(
-      const bool& inSelectMode,
-      double pixelSize);
-    void drawShapes(
-      const bool& inSelectMode,
-      double pixelSize);
+    template <Mode> void drawAxes(double pixelSize);
+    template <Mode> void drawBorder(double pixelSize);
+    template <Mode> void drawBorderFlush();
+    template <Mode> void drawBorderFlush(const double& opacity);
+    template <Mode> void drawGrid(double pixelSize);
+    template <Mode> void drawShapes(double pixelSize);
 
     // -- data members ----------------------------------------------
     QList<Shape*> m_shapes; // composition

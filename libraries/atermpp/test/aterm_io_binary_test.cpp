@@ -32,15 +32,15 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 {
 
   // The sequence of terms to send.
-  std::vector<aterm_appl> sequence;
+  std::vector<aterm> sequence;
 
-  aterm f = aterm_appl(function_symbol("f", 0));
-  aterm g = aterm_appl(function_symbol("g", 0));
+  aterm f = aterm(function_symbol("f", 0));
+  aterm g = aterm(function_symbol("g", 0));
 
   sequence.emplace_back(function_symbol("test", 2), f, g);
-  sequence.push_back(static_cast<const aterm_appl&>(f));
+  sequence.push_back(static_cast<const aterm&>(f));
   sequence.emplace_back(function_symbol("nested", 2), sequence.front(), g);
-  sequence.push_back(static_cast<const aterm_appl&>(g));
+  sequence.push_back(static_cast<const aterm&>(g));
   sequence.emplace_back(function_symbol("deeply_nested", 3), sequence[3], sequence.front(), sequence[3]);
 
   std::stringstream stream;
@@ -67,11 +67,11 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 
 BOOST_AUTO_TEST_CASE(transitions_test)
 {
-  std::vector<aterm_appl> sequence;
+  std::vector<aterm> sequence;
 
   function_symbol transition("transition", 2);
-  aterm label = aterm_appl(function_symbol("state", 1), aterm_int(0));
-  aterm time = aterm_appl(function_symbol("time", 1), aterm_int(50));
+  aterm label = aterm(function_symbol("state", 1), aterm_int(0));
+  aterm time = aterm(function_symbol("time", 1), aterm_int(50));
 
   aterm_list states;
 

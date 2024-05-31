@@ -1,14 +1,6 @@
 ---
 AlignAfterOpenBracket: DontAlign
 AlignArrayOfStructures: None
-AlignConsecutiveAssignments:
-  Enabled: false
-AlignConsecutiveBitFields:
-  Enabled: false
-AlignConsecutiveDeclarations:
-  Enabled: false
-AlignConsecutiveMacros:
-  Enabled: false
 AlignEscapedNewlines: Left
 AlignOperands: Align
 BreakBeforeBinaryOperators: All
@@ -29,7 +21,6 @@ BinPackArguments: false
 BinPackParameters: false
 BitFieldColonSpacing: After
 BreakBeforeBraces: Custom
-BreakBeforeConceptDeclarations: Always
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
@@ -63,7 +54,6 @@ ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
 IndentAccessModifiers: false
 IndentCaseBlocks: false
-InsertBraces: true
 KeepEmptyLinesAtTheStartOfBlocks: false
 Language: Cpp
 LambdaBodyIndentation: Signature

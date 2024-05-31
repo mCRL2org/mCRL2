@@ -10,9 +10,18 @@
 /// \brief Tests whether terms are correctly rewritten using various rewriters.
 
 #define BOOST_TEST_MODULE rewriting_test
+
+#include "mcrl2/data/data_configuration.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/bag64.h"
+#include "mcrl2/data/list64.h"
+#else
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/data/list.h"
+#endif
+
+#include "mcrl2/data/detail/rewrite_strategies.h"
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 
@@ -447,7 +456,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
 
     // test for a variation on bug #721,
     // see also set_bool_rewrite_test()
-    x = sort_bool::not_(sort_fset::in(sort_nat::nat(), sort_nat::c0(), sort_fset::insert(sort_nat::nat(), sort_nat::cnat(sort_pos::c1()), sort_fset::cons_(sort_nat::nat(), sort_nat::c0(), sort_fset::empty(sort_nat::nat())))));
+    x = sort_bool::not_(sort_fset::in(sort_nat::nat(), sort_nat::c0(), sort_fset::insert(sort_nat::nat(), sort_nat::pos2nat(sort_pos::c1()), sort_fset::cons_(sort_nat::nat(), sort_nat::c0(), sort_fset::empty(sort_nat::nat())))));
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, sort_bool::false_());
   }
@@ -669,7 +678,7 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
     data::rewriter R(specification, *strat);
 
     // test for a variation on bug #721
-    e = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
+    e = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), pos2nat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
     e = normalize_sorts(e,specification);
     data_rewrite_test(R, e, false_());
   }
@@ -695,7 +704,7 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test)
     std::cerr << "  Strategy14: " << *strat << std::endl;
     data::rewriter R(specification, *strat);
 
-    data::data_expression x = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
+    data::data_expression x = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), pos2nat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
   }
@@ -748,11 +757,11 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test_without_alias)
 
     data::data_expression x;
 
-    x = less(cnat(sort_pos::c1()), c0());
+    x = less(pos2nat(sort_pos::c1()), c0());
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
 
-    x = less(c0(), cnat(sort_pos::c1()));
+    x = less(c0(), pos2nat(sort_pos::c1()));
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, true_());
 
@@ -760,15 +769,15 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test_without_alias)
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, true_());
 
-    x = sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())));
+    x = sort_fset::insert(nat(), pos2nat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())));
     x = normalize_sorts(x,specification);
-    data_rewrite_test(R, x, sort_fset::cons_(nat(), c0(), sort_fset::cons_(nat(), cnat(sort_pos::c1()), sort_fset::empty(nat()))));
+    data_rewrite_test(R, x, R(sort_fset::cons_(nat(), c0(), sort_fset::cons_(nat(), pos2nat(sort_pos::c1()), sort_fset::empty(nat())))));
 
-    x = sort_fset::in(nat(), c0(), sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat()))));
+    x = sort_fset::in(nat(), c0(), sort_fset::insert(nat(), pos2nat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat()))));
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, true_());
 
-    x = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), cnat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
+    x = not_(sort_fset::in(nat(), c0(), sort_fset::insert(nat(), pos2nat(sort_pos::c1()), sort_fset::cons_(nat(), c0(), sort_fset::empty(nat())))));
     x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
   }
@@ -783,8 +792,8 @@ BOOST_AUTO_TEST_CASE(regression_test_bug_723)
     "var b0: Bool;\n"
     "    bl: BL;\n"
     "    n: Nat;\n"
-    "eqn initial (1) = [];\n"
-    "    n > 1 -> initial (n) = false |> initial(Int2Nat(n-1));\n"
+    "eqn initial(1) = [];\n"
+    "    n > 1 -> initial(n) = false |> initial(Int2Nat(n-1));\n"
     "    all_false ([]) = true;\n"
     "    all_false (b0 |> bl) = !b0 && all_false(bl);\n"
   );
@@ -1522,3 +1531,28 @@ BOOST_AUTO_TEST_CASE(Problem_with_recursive_templates_in_jittyc)   // This rewri
     data_rewrite_test(R, e, f);
   }
 }
+
+BOOST_AUTO_TEST_CASE(bound_variables_in_set_comprehension)   // The toolset up to 2024 did not properly rename
+                                                             // variables in a quantification that would be substituted simultaneously.
+{             
+  std::string s( 
+  "map e:Bool;\n"
+  "eqn e = exists t':Nat. t' in { x: Nat | exists t':Nat.(t'==1+x) && x==0};\n"
+  );
+
+  data::detail::set_enumerator_iteration_limit(5);
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy SET comprehension and exists: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+  
+    data::data_expression e(parse_data_expression("e", specification));
+    data::data_expression f(parse_data_expression("true", specification)); // This typically rewrites to false if the outer t' is substituted for x
+                                                                           // allowing it to be captured by the inner exists.
+    data_rewrite_test(R, e, f);
+  }
+}   
+

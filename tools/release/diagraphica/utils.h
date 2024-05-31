@@ -35,6 +35,7 @@ class Utils
     static std::string size_tToStr(const std::size_t& i);
     static double strToDbl(const std::string& s);
     static int strToInt(const std::string& s);
+    static std::string abbreviate(const std::string&, size_t length);
 
     // -- trig functions --------------------------------------------
     static double radToDegr(const double& r);

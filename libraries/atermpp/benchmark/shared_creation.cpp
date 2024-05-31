@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
   // Define a function that repeatedly creates nested function applications.
   auto nested_function = [&](std::size_t) -> void
     {
-      aterm_appl f = create_nested_function<2>("f", "c",  size);
+      aterm f = create_nested_function<2>("f", "c",  size);
     };
 
   benchmark_threads(number_of_threads, nested_function);

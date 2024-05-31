@@ -37,7 +37,7 @@ std::string pp(const data::data_specification& x);
 /// \param x A term
 /// \return True if \a x is a data specification expression
 inline
-bool is_data_specification(const atermpp::aterm_appl& x)
+bool is_data_specification(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::DataSpec;
 }
@@ -47,7 +47,7 @@ bool is_data_specification(const atermpp::aterm_appl& x)
 class data_specification: public sort_specification
 {
   public:
-    typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+    typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
 
   private:
 
@@ -114,8 +114,8 @@ class data_specification: public sort_specification
       }
     };
 
-    ///\brief Builds a specification from aterm
-    void build_from_aterm(const atermpp::aterm_appl& term);
+    ///\brief Builds a specification from an aterm
+    void build_from_aterm(const atermpp::aterm& term);
     /// \endcond
 
   protected:
@@ -242,7 +242,7 @@ class data_specification: public sort_specification
 
     void add_normalised_cpp_implemented_functions(const implementation_map& c) const
     {
-      typedef std::pair < function_symbol, std::pair<std::function<data_expression(const data_expression&)>, std::string> > map_result_type;
+      typedef std::pair < function_symbol, std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > map_result_type;
       for(const map_result_type f: c)
       {
         const function_symbol g(normalize_sorts(f.first,*this));
@@ -315,7 +315,7 @@ class data_specification: public sort_specification
 
     ///\brief Constructor from an aterm.
     /// \param[in] t a term adhering to the internal format.
-    data_specification(const atermpp::aterm_appl& t)
+    data_specification(const atermpp::aterm& t)
     {
       build_from_aterm(t);
     }

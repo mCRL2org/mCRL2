@@ -21,11 +21,14 @@ class ColorChooser : public Visualizer
     enum ColorType { HueColor, OpacityColor };
     ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinates, ColorType type);
 
-    void visualize(const bool& inSelectMode);
+    void visualize();
+    void mark();
 
-    void handleMouseEnterEvent();
-    void handleMouseLeaveEvent();
-    void handleMouseEvent(QMouseEvent* e);
+    void enterEvent(QEnterEvent*) override;
+    void leaveEvent(QEvent*) override;
+    void mouseMoveEvent(QMouseEvent*) override;
+    void mousePressEvent(QMouseEvent*) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
 
     QSize sizeHint() const { return QSize(300,100); }
 
@@ -33,21 +36,20 @@ class ColorChooser : public Visualizer
     void activated();
     void deactivated();
 
-  protected:
+  private:
     double xPosition(int index) { return m_dof->value(index) * 2.0 - 1.0; }
     double yPosition(int index) { return (*m_yCoordinates)[index]; }
 
-    void drawColorSpectrum();
-    void drawGrayScale();
-    void drawPath(const bool& inSelectMode);
-    void drawPoints(const bool& inSelectMode);
+    template <Mode> void drawColorSpectrum();
+    template <Mode> void drawGrayScale();
+    template <Mode> void drawPath();
+    template <Mode> void drawPoints();
+    template <Mode> void draw();
 
-    void handleHits(const std::vector<int> &ids);
-    void handleDrag();
+    void appendPoint(const QPointF&);
+    void removePoint(std::size_t index);
+    void movePoint(std::size_t index, const QPointF&);
 
-    void processHits(GLint hits, GLuint buffer[]);
-
-  protected:
     DOF *m_dof;
     QList<double> *m_yCoordinates;
     ColorType m_type;

@@ -14,7 +14,12 @@
 
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/data_configuration.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/set64.h"
+#else
 #include "mcrl2/data/set.h"
+#endif
 
 
 using namespace mcrl2;

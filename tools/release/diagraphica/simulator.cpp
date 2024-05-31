@@ -184,90 +184,6 @@ void Simulator::updateFrameCurr(
 }
 
 
-// -- visualization functions  --------------------------------------
-
-
-void Simulator::visualize(const bool& inSelectMode)
-{
-  // have textures been generated
-  if (!texCharOK)
-  {
-    genCharTex();
-  }
-
-  // check if positions are ok
-  if (geomChanged)
-  {
-    calcSettingsGeomBased();
-  }
-  if (dataChanged)
-  {
-    calcSettingsDataBased();
-  }
-
-  if (inSelectMode)
-  {
-    if (!m_animationTimer.isActive())
-    {
-      QSizeF size = worldSize();
-
-      GLint hits = 0;
-      GLuint selectBuf[512];
-      startSelectMode(
-        hits,
-        selectBuf,
-        2.0,
-        2.0);
-
-      glPushName(ID_CANVAS);
-      VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
-
-      drawBdlLblGridPrev(inSelectMode);
-      drawBdlLblGridNext(inSelectMode);
-      drawBundlesPrev(inSelectMode);
-      drawBundlesNext(inSelectMode);
-      drawFrameCurr(inSelectMode);
-      drawFramesPrev(inSelectMode);
-      drawFramesNext(inSelectMode);
-      if (m_previousFrames.size() > 0 || m_currentFrame != 0 || m_nextFrames.size() > 0)
-      {
-        drawControls(inSelectMode);
-      }
-
-      glPopName();
-
-      finishSelectMode(
-        hits,
-        selectBuf);
-    }
-  }
-  else
-  {
-    clear();
-
-    if (m_animationTimer.isActive())
-    {
-      animate();
-      drawControls(inSelectMode);
-    }
-    else
-    {
-      drawBdlLblGridPrev(inSelectMode);
-      drawBdlLblGridNext(inSelectMode);
-      drawBundlesPrev(inSelectMode);
-      drawBundlesNext(inSelectMode);
-      drawFrameCurr(inSelectMode);
-      drawFramesPrev(inSelectMode);
-      drawFramesNext(inSelectMode);
-      if (m_previousFrames.size() > 0 || m_currentFrame != 0 || m_nextFrames.size() > 0)
-      {
-        drawControls(inSelectMode);
-      }
-    }
-  }
-}
-
-
 // -- event handlers ------------------------------------------------
 
 
@@ -1330,53 +1246,17 @@ void Simulator::handleHits(const std::vector< int > &ids)
 }
 
 
-void Simulator::processHits(
-  GLint hits,
-  GLuint buffer[])
+void Simulator::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  std::vector< int > ids;
-
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
-  {
-    // if necassary, advance to closest hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    int number = *ptr;
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    for (int i = 0; i < number; ++i)
-    {
-      ids.push_back(*ptr);
-      ++ptr;
-    }
-
-    handleHits(ids);
-  }
-  else
+  if (selection.empty())
   {
     QToolTip::hideText();
   }
-
-  ptr = 0;
+  else
+  {
+    std::vector<int> hits(selection.begin(), selection.end());
+    handleHits(hits);
+  }
 }
 
 
@@ -1395,9 +1275,9 @@ QColor Simulator::calcColor(std::size_t iter, std::size_t numr)
 }
 
 
-void Simulator::drawFrameCurr(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Simulator::drawFrameCurr()
 {
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     if (m_currentFrame != 0)
     {
@@ -1480,11 +1360,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
           -1.0+3*pix/m_horizontalFrameScale,  1.0+3*pix/m_horizontalFrameScale,
           1.0-3*pix/m_horizontalFrameScale, -1.0-3*pix/m_horizontalFrameScale);
       }
-      m_diagram->visualize(
-        inSelectMode,
-        pixelSize(),
-        m_attributes,
-        valsFrame);
+      m_diagram->draw<mode>(pixelSize(), m_attributes, valsFrame);
 
       if (m_currentSelection == ID_FRAME_CURR)
       {
@@ -1505,9 +1381,9 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
 }
 
 
-void Simulator::drawFramesPrev(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
 {
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     glPushName(ID_FRAME_PREV);
     for (std::size_t i = 0; i < m_previousFramePositions.size(); ++i)
@@ -1594,11 +1470,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
           attr = 0;
           node = 0;
 
-          m_diagram->visualize(
-            inSelectMode,
-            pixelSize(),
-            m_attributes,
-            valsFrame);
+          m_diagram->draw<mode>(pixelSize(), m_attributes, valsFrame);
         }
         else
         {
@@ -1655,11 +1527,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
         VisUtils::fillRect(
           -1.0+4*pix/m_horizontalFrameScale,  1.0+4*pix/m_horizontalFrameScale,
           1.0-4*pix/m_horizontalFrameScale, -1.0-4*pix/m_horizontalFrameScale);
-        m_diagram->visualize(
-          inSelectMode,
-          pixelSize(),
-          m_attributes,
-          valsFrame);
+        m_diagram->draw<mode>(pixelSize(), m_attributes, valsFrame);
 
         VisUtils::enableLineAntiAlias();
         VisUtils::setColor(SelectColor());
@@ -1677,9 +1545,9 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
 }
 
 
-void Simulator::drawFramesNext(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Simulator::drawFramesNext()
 {
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     glPushName(ID_FRAME_NEXT);
     for (std::size_t i = 0; i < m_nextFramePositions.size(); ++i)
@@ -1764,11 +1632,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
           attr = 0;
           node = 0;
 
-          m_diagram->visualize(
-            inSelectMode,
-            pixelSize(),
-            m_attributes,
-            valsFrame);
+          m_diagram->draw<mode>(pixelSize(), m_attributes, valsFrame);
         }
         else
         {
@@ -1825,11 +1689,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
         VisUtils::fillRect(
           -1.0+4*pix/m_horizontalFrameScale,  1.0+4*pix/m_horizontalFrameScale,
           1.0-4*pix/m_horizontalFrameScale, -1.0-4*pix/m_horizontalFrameScale);
-        m_diagram->visualize(
-          inSelectMode,
-          pixelSize(),
-          m_attributes,
-          valsFrame);
+        m_diagram->draw<mode>(pixelSize(), m_attributes, valsFrame);
 
         VisUtils::enableLineAntiAlias();
         VisUtils::setColor(SelectColor());
@@ -1847,9 +1707,9 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
 }
 
 
-void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Simulator::drawBdlLblGridPrev()
 {
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     double pix = pixelSize();;
     std::string lbl;
@@ -2033,9 +1893,9 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
 }
 
 
-void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Simulator::drawBdlLblGridNext()
 {
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     double pix = pixelSize();;
 
@@ -2218,9 +2078,9 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
 }
 
 
-void Simulator::drawBundlesPrev(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Simulator::drawBundlesPrev()
 {
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     double pix = pixelSize();
 
@@ -2309,9 +2169,9 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
 }
 
 
-void Simulator::drawBundlesNext(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Simulator::drawBundlesNext()
 {
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     double pix = pixelSize();
     double arrowItv;
@@ -2408,7 +2268,7 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
 }
 
 
-void Simulator::drawControls(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Simulator::drawControls()
 {
   QSizeF size = worldSize();
   double pix = pixelSize();
@@ -2416,7 +2276,7 @@ void Simulator::drawControls(const bool& inSelectMode)
   double itvSml = 6.0*pix;
   double itvLrg = 9.0*pix;
 
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     // clear icon
     double x = 0.5*size.width() - itvSml - pix;
@@ -2534,6 +2394,79 @@ void Simulator::drawControls(const bool& inSelectMode)
 }
 
 
+template <Visualizer::Mode mode> void Simulator::draw()
+{
+  // have textures been generated
+  if (!texCharOK)
+  {
+    genCharTex();
+  }
+
+  // check if positions are ok
+  if (geomChanged)
+  {
+    calcSettingsGeomBased();
+  }
+  if (dataChanged)
+  {
+    calcSettingsDataBased();
+  }
+
+  if constexpr (mode == Marking)
+  {
+    if (!m_animationTimer.isActive())
+    {
+      QSizeF size = worldSize();
+
+      glPushName(ID_CANVAS);
+      VisUtils::fillRect(-0.5 * size.width(), 0.5 * size.width(), 0.5 * size.height(), -0.5 * size.height());
+
+      drawBdlLblGridPrev<mode>();
+      drawBdlLblGridNext<mode>();
+      drawBundlesPrev<mode>();
+      drawBundlesNext<mode>();
+      drawFrameCurr<mode>();
+      drawFramesPrev<mode>();
+      drawFramesNext<mode>();
+      if (m_previousFrames.size() > 0 || m_currentFrame != 0 || m_nextFrames.size() > 0)
+      {
+        drawControls<mode>();
+      }
+
+      glPopName();
+    }
+  }
+  else
+  {
+    clear();
+
+    if (m_animationTimer.isActive())
+    {
+      animate();
+      drawControls<mode>();
+    }
+    else
+    {
+      drawBdlLblGridPrev<mode>();
+      drawBdlLblGridNext<mode>();
+      drawBundlesPrev<mode>();
+      drawBundlesNext<mode>();
+      drawFrameCurr<mode>();
+      drawFramesPrev<mode>();
+      drawFramesNext<mode>();
+      if (m_previousFrames.size() > 0 || m_currentFrame != 0 || m_nextFrames.size() > 0)
+      {
+        drawControls<mode>();
+      }
+    }
+  }
+}
+
+
+void Simulator::visualize() { draw<Visualizing>(); }
+void Simulator::mark() { draw<Marking>(); }
+
+
 void Simulator::animate()
 {
   std::vector< double > valsFrame;
@@ -2577,11 +2510,7 @@ void Simulator::animate()
       glTranslatef(x, y, 0.0);
       glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
-      m_diagram->visualize(
-        false,
-        pixelSize(),
-        m_attributes,
-        valsFrame);
+      m_diagram->draw<Visualizing>(pixelSize(), m_attributes, valsFrame);
 
       glPopMatrix();
 
@@ -2620,11 +2549,7 @@ void Simulator::animate()
       glTranslatef(x, y, 0.0);
       glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
-      m_diagram->visualize(
-        false,
-        pixelSize(),
-        m_attributes,
-        valsFrame);
+      m_diagram->draw<Visualizing>(pixelSize(), m_attributes, valsFrame);
 
       glPopMatrix();
     }
@@ -2665,11 +2590,7 @@ void Simulator::animate()
       glTranslatef(x, y, 0.0);
       glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
-      m_diagram->visualize(
-        false,
-        pixelSize(),
-        m_attributes,
-        valsFrame);
+      m_diagram->draw<Visualizing>(pixelSize(), m_attributes, valsFrame);
 
       glPopMatrix();
 
@@ -2708,12 +2629,7 @@ void Simulator::animate()
       glTranslatef(x, y, 0.0);
       glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
 
-      m_diagram->visualize(
-        false,
-        pixelSize(),
-        m_attributes,
-        valsFrame,
-        m_animationNewFrameOpacity);
+      m_diagram->draw<Visualizing>(pixelSize(), m_attributes, valsFrame, m_animationNewFrameOpacity);
 
       glPopMatrix();
     }

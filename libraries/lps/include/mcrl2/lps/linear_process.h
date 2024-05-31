@@ -25,7 +25,7 @@ namespace lps
 namespace detail
 {
 
-// helper function for linear_process_base::linear_process_base(const atermpp::aterm_appl& lps)
+// helper function for linear_process_base::linear_process_base(const atermpp::aterm& lps)
 template <typename Summand>
 Summand make_action_summand(const data::variable_list&,
                             const data::data_expression&,
@@ -93,7 +93,7 @@ class linear_process_base
     /// \brief Constructor.
     /// \param lps A term.
     /// \param stochastic_distributions_allowed True when stochastic processes are allowed
-    explicit linear_process_base(const atermpp::aterm_appl& lps, bool stochastic_distributions_allowed = true)
+    explicit linear_process_base(const atermpp::aterm& lps, bool stochastic_distributions_allowed = true)
     {
       using atermpp::down_cast;
       assert(core::detail::check_term_LinearProcess(lps));
@@ -102,7 +102,7 @@ class linear_process_base
       for (const atermpp::aterm& summand: summands)
       {
         assert(core::detail::check_rule_LinearProcessSummand(summand));
-        const auto& t = down_cast<atermpp::aterm_appl>(summand);
+        const atermpp::aterm& t = summand;
 
         const auto& summation_variables = down_cast<data::variable_list>(t[0]);
         const auto& condition = down_cast<data::data_expression>(t[1]);
@@ -113,14 +113,14 @@ class linear_process_base
         {
           throw mcrl2::runtime_error("Summand with stochastic distribution encountered, while this tool is not yet able to deal with stochastic distributions.");
         }
-        if (down_cast<atermpp::aterm_appl>(t[2]).function() == core::detail::function_symbols::Delta)
+        if ((t[2]).function() == core::detail::function_symbols::Delta)
         {
           m_deadlock_summands.push_back(deadlock_summand(summation_variables, condition, deadlock(time)));
         }
         else
         {
-          assert(lps::is_multi_action(down_cast<atermpp::aterm_appl>(t[2])));
-          const auto& actions = down_cast<process::action_list>(down_cast<atermpp::aterm_appl>(t[2])[0]);
+          assert(lps::is_multi_action(t[2]));
+          const auto& actions = down_cast<process::action_list>(t[2][0]);
           m_action_summands.push_back(detail::make_action_summand<ActionSummand>(summation_variables, condition, multi_action(actions, time), assignments, distribution));
         }
       }
@@ -216,29 +216,29 @@ class linear_process: public linear_process_base<action_summand>
 
     /// \brief Constructor.
     /// \param lps A term
-    explicit linear_process(const atermpp::aterm_appl& lps, bool = false)
+    explicit linear_process(const atermpp::aterm& lps, bool = false)
       : super(lps, false)
     { }
 };
 
-/// \brief Conversion to aterm_appl.
+/// \brief Conversion to aterm.
 /// \return The action summand converted to aterm format.
 template <typename ActionSummand>
-atermpp::aterm_appl linear_process_to_aterm(const linear_process_base<ActionSummand>& p)
+atermpp::aterm linear_process_to_aterm(const linear_process_base<ActionSummand>& p)
 {
-  atermpp::term_list<atermpp::aterm_appl> summands;
+  atermpp::term_list<atermpp::aterm> summands;
   for (auto i = p.deadlock_summands().rbegin(); i != p.deadlock_summands().rend(); ++i)
   {
-    atermpp::aterm_appl s = deadlock_summand_to_aterm(*i);
+    atermpp::aterm s = deadlock_summand_to_aterm(*i);
     summands.push_front(s);
   }
   for (auto i = p.action_summands().rbegin(); i != p.action_summands().rend(); ++i)
   {
-    atermpp::aterm_appl s = action_summand_to_aterm(*i);
+    atermpp::aterm s = action_summand_to_aterm(*i);
     summands.push_front(s);
   }
 
-  return atermpp::aterm_appl(core::detail::function_symbol_LinearProcess(),
+  return atermpp::aterm(core::detail::function_symbol_LinearProcess(),
            p.process_parameters(),
            summands
          );
@@ -263,7 +263,7 @@ std::ostream& operator<<(std::ostream& out, const linear_process& x)
 /// \param x A term
 /// \return True if \a x is a linear process expression
 inline
-bool is_linear_process(const atermpp::aterm_appl& x)
+bool is_linear_process(const atermpp::aterm& x)
 {
   return x.function() == core::detail::function_symbols::LinearProcess;
 }

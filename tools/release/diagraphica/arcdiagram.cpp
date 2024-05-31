@@ -166,97 +166,11 @@ void ArcDiagram::unmarkBundles()
 // -- visualization functions  --------------------------------------
 
 
-void ArcDiagram::visualize(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ArcDiagram::drawBundles()
 {
-  // have textures been generated
-  if (!texCharOK)
-  {
-    genCharTex();
-  }
-
-  // check if positions are ok
-  if (geomChanged)
-  {
-    calcSettingsGeomBased();
-  }
-  if (dataChanged)
-  {
-    calcSettingsDataBased();
-  }
-
-  // selection mode
-  if (inSelectMode)
-  {
-    QSizeF size = worldSize();
-
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-          hits,
-          selectBuf,
-          2.0,
-          2.0);
-
-    glPushName(ID_CANVAS);
-    VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
-
-    visualizeParts(inSelectMode);
-
-    glPopName();
-
-    finishSelectMode(
-          hits,
-          selectBuf);
-  }
-  // rendering mode
-  else
-  {
-    clear();
-    visualizeParts(inSelectMode);
-  }
-}
-
-
-void ArcDiagram::visualizeParts(const bool& inSelectMode)
-{
-  if (settings->showClusterTree.value())
-  {
-    if (settings->annotateClusterTree.value())
-    {
-      drawTreeLvls(inSelectMode);
-    }
-
-    drawTree(inSelectMode);
-  }
-  if (settings->showBarTree.value())
-  {
-    drawBarTree(inSelectMode);
-  }
-  if (settings->showBundles.value())
-  {
-    drawBundles(inSelectMode);
-  }
-  if (settings->showClusters.value())
-  {
-    drawLeaves(inSelectMode);
-    if (!inSelectMode)
-    {
-      drawMarkedLeaves(inSelectMode);
-    }
-  }
-  if (settings->showClusters.value() || !inSelectMode)
-  {
-    drawDiagrams(inSelectMode);
-  }
-}
-
-
-void ArcDiagram::drawBundles(const bool& inSelectMode)
-{
-  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
   int segs = SEGM_HINT;
 
-  if (render == NormalRender)
+  if constexpr (mode == Visualizing)
   {
     VisUtils::enableLineAntiAlias();
     VisUtils::enableBlending();
@@ -271,7 +185,7 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
   for (std::size_t i = 0; i < posBundles.size(); ++i)
   {
 
-    if (render == NormalRender)
+    if constexpr (mode == Visualizing)
     {
       colFill = markBundles[i] ? VisUtils::darkCoolBlue : alpha(settings->bundleColor.value(), settings->arcTransparency.value());
       colFade = alpha(settings->backgroundColor.value(), colFill.alphaF());
@@ -305,7 +219,7 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
   }
   glPopName();
 
-  if (render == NormalRender)
+  if constexpr (mode == Visualizing)
   {
     VisUtils::disableLineAntiAlias();
     VisUtils::disableBlending();
@@ -313,13 +227,12 @@ void ArcDiagram::drawBundles(const bool& inSelectMode)
 }
 
 
-void ArcDiagram::drawLeaves(const bool& inSelectMode)
+template <Visualizer::Mode mode>  void ArcDiagram::drawLeaves()
 {
-  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
   int segs = SEGM_HINT;
   Cluster* clust = 0;
 
-  if (render == NormalRender)
+  if constexpr (mode == Visualizing)
   {
     VisUtils::enableLineAntiAlias();
   }
@@ -332,7 +245,7 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
     double x = posLeaves[i].x;
     double y = posLeaves[i].y;
 
-    if (render == NormalRender)
+    if constexpr (mode == Visualizing)
     {
       clust = m_graph->getLeaf(i);
 
@@ -344,18 +257,18 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
 
     if (clust != 0 && clust->getAttribute() != 0)
       VisUtils::setColor(calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues()));
-    else if (render != HitRender)
+    else if constexpr (mode == Visualizing)
       VisUtils::setColor(Qt::white);
 
     VisUtils::fillEllipse(x, y, radLeaves, radLeaves, segs);
-    if (render != HitRender) VisUtils::setColor(VisUtils::darkGray);
+    if constexpr (mode == Visualizing) VisUtils::setColor(VisUtils::darkGray);
     VisUtils::drawEllipse(x, y, radLeaves, radLeaves, segs);
 
     glPopName();
   }
   glPopName();
 
-  if (render == NormalRender)
+  if constexpr (mode == Visualizing)
   {
     // mark cluster with initial state
     if (idxInitStLeaves != NON_EXISTING)
@@ -375,14 +288,13 @@ void ArcDiagram::drawLeaves(const bool& inSelectMode)
 }
 
 
-void ArcDiagram::drawTree(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ArcDiagram::drawTree()
 {
-  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
   int segs = SEGM_HINT;
   Cluster* clust = 0;
   QColor colFill = Qt::white;
 
-  if (render == NormalRender)
+  if constexpr (mode == Visualizing)
   {
     VisUtils::enableLineAntiAlias();
     VisUtils::enableBlending();
@@ -401,7 +313,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
       double yTop = posTreeTopLft[i][j].y;
       double yBot = posTreeBotRgt[i][j].y;
 
-      if (render == NormalRender)
+      if constexpr (mode == Visualizing)
       {
         // color
         clust   = mapPosToClust[i][j];
@@ -415,7 +327,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
         VisUtils::fillTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot, colFill, VisUtils::lightLightGray, VisUtils::lightLightGray);
       }
 
-      if (render == NormalRender)
+      if constexpr (mode == Visualizing)
       {
         VisUtils::setColor(VisUtils::lightGray);
         VisUtils::drawTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot);
@@ -428,7 +340,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 
       }
 
-      if (render != HitRender)
+      if constexpr (mode == Visualizing)
       {
         // foreground
         VisUtils::setColor(colFill);
@@ -436,7 +348,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 
       VisUtils::fillEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
 
-      if (render != HitRender)
+      if constexpr (mode == Visualizing)
       {
         VisUtils::setColor(VisUtils::darkGray);
         VisUtils::drawEllipse(0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, segs);
@@ -447,7 +359,7 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
   }
   glPopName();
 
-  if (render == NormalRender)
+  if constexpr (mode == Visualizing)
   {
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
@@ -455,11 +367,9 @@ void ArcDiagram::drawTree(const bool& inSelectMode)
 }
 
 
-void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ArcDiagram::drawTreeLvls()
 {
-  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
-
-  if (render == NormalRender)
+  if constexpr (mode == Visualizing)
   {
     double wth = worldSize().width();
     double pix = pixelSize();
@@ -498,16 +408,14 @@ void ArcDiagram::drawTreeLvls(const bool& inSelectMode)
 }
 
 
-void ArcDiagram::drawBarTree(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ArcDiagram::drawBarTree()
 {
   if (posBarTreeTopLft.size() > 1)
   {
-
-    RenderMode render = ( inSelectMode ? HitRender : NormalRender );
     Cluster* clust = 0;
     QColor colFill = Qt::lightGray;
 
-    if (render == NormalRender)
+    if constexpr (mode == Visualizing)
     {
       VisUtils::enableLineAntiAlias();
       VisUtils::enableBlending();
@@ -526,7 +434,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
         double yTop = posBarTreeTopLft[i][j].y;
         double yBot = posBarTreeBotRgt[i][j].y;
 
-        if (render == NormalRender)
+        if constexpr (mode == Visualizing)
         {
           // fill color
           clust   = mapPosToClust[i][j];
@@ -550,8 +458,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
           VisUtils::setColor(VisUtils::lightGray);
           VisUtils::drawRect(xLft, xRgt, yTop, yBot);
         }
-
-        if (render == HitRender)
+        else
         {
           VisUtils::fillRect(xLft, xRgt, yTop, yBot);
         }
@@ -562,7 +469,7 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
     }
     glPopName();
 
-    if (render == NormalRender)
+    if constexpr (mode == Visualizing)
     {
       VisUtils::disableBlending();
       VisUtils::disableLineAntiAlias();
@@ -572,12 +479,10 @@ void ArcDiagram::drawBarTree(const bool& inSelectMode)
 }
 
 
-void ArcDiagram::drawDiagrams(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
 {
-  RenderMode render = ( inSelectMode ? HitRender : NormalRender );
-
   // selection mode
-  if (render == HitRender)
+  if constexpr (mode == Marking)
   {
     glPushName(ID_DIAGRAM);
     for (std::size_t i = 0; i < posDgrm.size(); ++i)
@@ -619,11 +524,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
         attr = 0;
         node = 0;
 
-        diagram->visualize(
-              inSelectMode,
-              pixelSize(),
-              attrsDgrm[i],
-              vals);
+        diagram->draw<mode>(pixelSize(), attrsDgrm[i], vals);
         vals.clear();
 
         // close
@@ -748,11 +649,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
           attr = 0;
           node = 0;
 
-          diagram->visualize(
-                inSelectMode,
-                pixelSize(),
-                attrsDgrm[i],
-                vals);
+          diagram->draw<mode>(pixelSize(), attrsDgrm[i], vals);
           vals.clear();
         }
         else
@@ -784,11 +681,7 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
           attr = 0;
           node = 0;
 
-          diagram->visualize(
-                inSelectMode,
-                pixelSize(),
-                attrsDgrm[i],
-                vals);
+          diagram->draw<mode>(pixelSize(), attrsDgrm[i], vals);
           vals.clear();
         }
 
@@ -899,14 +792,13 @@ void ArcDiagram::drawDiagrams(const bool& inSelectMode)
 }
 
 
-void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ArcDiagram::drawMarkedLeaves()
 {
   if (markLeaves.size() > 0)
   {
-    RenderMode render = ( inSelectMode ? HitRender : NormalRender );
     int segs = SEGM_HINT;
 
-    if (render == NormalRender)
+    if constexpr (mode == Visualizing)
     {
       VisUtils::enableLineAntiAlias();
       double pix  = pixelSize();
@@ -951,6 +843,83 @@ void ArcDiagram::drawMarkedLeaves(const bool& inSelectMode)
     }
   }
 }
+
+
+template <Visualizer::Mode mode> void ArcDiagram::drawParts()
+{
+  if (settings->showClusterTree.value())
+  {
+    if (settings->annotateClusterTree.value())
+    {
+      drawTreeLvls<mode>();
+    }
+
+    drawTree<mode>();
+  }
+  if (settings->showBarTree.value())
+  {
+    drawBarTree<mode>();
+  }
+  if (settings->showBundles.value())
+  {
+    drawBundles<mode>();
+  }
+  if (settings->showClusters.value())
+  {
+    drawLeaves<mode>();
+    if constexpr (mode == Visualizing)
+    {
+      drawMarkedLeaves<mode>();
+    }
+  }
+  if (settings->showClusters.value() || mode == Visualizing)
+  {
+    drawDiagrams<mode>();
+  }
+}
+
+
+template <Visualizer::Mode mode> void ArcDiagram::draw()
+{
+  // have textures been generated
+  if (!texCharOK)
+  {
+    genCharTex();
+  }
+
+  // check if positions are ok
+  if (geomChanged)
+  {
+    calcSettingsGeomBased();
+  }
+  if (dataChanged)
+  {
+    calcSettingsDataBased();
+  }
+
+  // selection mode
+  if constexpr (mode == Marking)
+  {
+    QSizeF size = worldSize();
+
+    glPushName(ID_CANVAS);
+    VisUtils::fillRect(-0.5*size.width(), 0.5*size.width(), 0.5*size.height(), -0.5*size.height());
+
+    drawParts<mode>();
+
+    glPopName();
+  }
+  // rendering mode
+  else
+  {
+    clear();
+    drawParts<mode>();
+  }
+}
+
+
+void ArcDiagram::visualize() { draw<Visualizing>(); }
+void ArcDiagram::mark() { draw<Marking>(); }
 
 
 // -- input event handlers ------------------------------------------
@@ -1546,7 +1515,8 @@ void ArcDiagram::clustersChanged()
     attrsTree.insert(attrsTree.begin(), cluster->getAttribute());
   }
 
-  setDataChanged(true);
+  geomChanged = true;
+  dataChanged = true;
   update();
 }
 
@@ -2008,49 +1978,12 @@ void ArcDiagram::hideDiagram(const std::size_t& dgrmIdx)
 
 
 // -- hit detection -------------------------------------------------
-
-
-void ArcDiagram::processHits(
-    GLint hits,
-    GLuint buffer[])
+void ArcDiagram::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  std::vector< int > ids;
-
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
+  if (!selection.empty())
   {
-    // if necassary, advance to closest hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    int number = *ptr;
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    for (int i = 0; i < number; ++i)
-    {
-      ids.push_back(*ptr);
-      ++ptr;
-    }
-
-    handleHits(ids);
+    std::vector<int> hits(selection.begin(), selection.end());
+    handleHits(hits);
   }
-
-  ptr = 0;
 }
+

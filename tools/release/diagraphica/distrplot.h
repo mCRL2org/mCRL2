@@ -19,29 +19,18 @@ class DistrPlot : public Visualizer
 
   public:
     // -- constructors and destructor -------------------------------
-    DistrPlot(
-      QWidget *parent,
-      Graph* g,
-      int attributeIndex
-      );
+    DistrPlot(QWidget* parent, Graph*, int attributeIndex);
 
     // -- set data functions ----------------------------------------
-    void setValues(
-      const std::size_t& idx,
-      const std::vector< std::size_t > &num);
-    void clearValues();
 
     void setDiagram(Diagram* dgrm);
 
     // -- visualization functions  ----------------------------------
-    void visualize(const bool& inSelectMode);
-    void drawAxes(const bool& inSelectMode);
-    void drawLabels(const bool& inSelectMode);
-    void drawPlot(const bool& inSelectMode);
-    void drawDiagram(const bool& inSelectMode);
+    void visualize();
+    void mark();
 
     // -- input event handlers --------------------------------------
-    void handleMouseEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent*) override;
 
     QSize sizeHint() const { return QSize(400,400); }
 
@@ -50,18 +39,20 @@ class DistrPlot : public Visualizer
     void calcMaxNumber();
 
     // -- utility drawing functions ---------------------------------
-    // ***
-    //void clear();
-    void setScalingTransf();
-    void displTooltip(const std::size_t& posIdx);
+    template <Mode> void drawAxes();
+    template <Mode> void drawLabels();
+    template <Mode> void drawPlot();
+    template <Mode> void drawDiagram();
+    template <Mode> void draw();
+
+    void showTooltip(std::size_t valueIndex, const QPointF& position);
+    void hideTooltip();
 
     void calcPositions();
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits(
-      GLint hits,
-      GLuint buffer[]);
+    virtual void handleSelection(const Selection&) override;
 
     // -- data members ----------------------------------------------
     // data

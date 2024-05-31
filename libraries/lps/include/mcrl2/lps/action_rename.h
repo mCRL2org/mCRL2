@@ -81,24 +81,10 @@ class action_rename_rule
 
     /// \brief Constructor.
     /// \param t A term
-    action_rename_rule(const atermpp::aterm_appl& t)
+    action_rename_rule(const atermpp::aterm& t)
     {
       assert(core::detail::check_rule_ActionRenameRule(t));
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_variables       = atermpp::down_cast<data::variable_list>(*i++);
-      m_condition       = data::data_expression(*i++);
-      m_lhs             = process::action(*i++);
-      m_rhs             = process::process_expression(*i);
-      assert(check_that_rhs_is_tau_delta_or_an_action());
-    }
-
-    /// \brief Constructor.
-    /// \param t1 A term
-    explicit action_rename_rule(const atermpp::aterm& t1)
-    {
-      const atermpp::aterm_appl t=atermpp::down_cast<atermpp::aterm_appl>(t1);
-      assert(core::detail::check_rule_ActionRenameRule(t));
-      atermpp::aterm_appl::iterator i = t.begin();
+      atermpp::aterm::iterator i = t.begin();
       m_variables       = atermpp::down_cast<data::variable_list>(*i++);
       m_condition       = data::data_expression(*i++);
       m_lhs             = process::action(*i++);
@@ -187,14 +173,14 @@ class action_rename_specification
 
     /// \brief Constructor.
     /// \param t A term
-    action_rename_specification(atermpp::aterm_appl t)
+    action_rename_specification(atermpp::aterm t)
     {
       assert(core::detail::check_rule_ActionRenameSpec(t));
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_data            = atermpp::down_cast<atermpp::aterm_appl>(*i++);
-      m_action_labels   = atermpp::down_cast<process::action_label_list>(atermpp::down_cast<atermpp::aterm_appl>(*i++)[0]);
+      atermpp::aterm::iterator i = t.begin();
+      m_data            = *i++;
+      m_action_labels   = atermpp::down_cast<process::action_label_list>((*i++)[0]);
 
-      atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>(atermpp::down_cast<atermpp::aterm_appl>(*i)[0]);
+      atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>((*i)[0]);
       for (const atermpp::aterm& r: rules_list)
       {
         m_rules.push_back(action_rename_rule(r));
@@ -264,23 +250,23 @@ class action_rename_specification
 };
 
 inline
-atermpp::aterm_appl action_rename_rule_to_aterm(const action_rename_rule& rule)
+atermpp::aterm action_rename_rule_to_aterm(const action_rename_rule& rule)
 {
-  return atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRule(), rule.variables(), rule.condition(), rule.lhs(), rule.rhs());
+  return atermpp::aterm(core::detail::function_symbol_ActionRenameRule(), rule.variables(), rule.condition(), rule.lhs(), rule.rhs());
 }
 
 inline
-atermpp::aterm_appl action_rename_specification_to_aterm(const action_rename_specification& spec)
+atermpp::aterm action_rename_specification_to_aterm(const action_rename_specification& spec)
 {
-  std::vector<atermpp::aterm_appl> rules;
+  std::vector<atermpp::aterm> rules;
   for (const action_rename_rule& r: spec.rules())
   {
     rules.push_back(action_rename_rule_to_aterm(r));
   }
-  return atermpp::aterm_appl(core::detail::function_symbol_ActionRenameSpec(),
+  return atermpp::aterm(core::detail::function_symbol_ActionRenameSpec(),
     data::detail::data_specification_to_aterm(spec.data()),
-    atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
-    atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRules(), atermpp::aterm_list(rules.begin(), rules.end()))
+    atermpp::aterm(core::detail::function_symbol_ActSpec(), spec.action_labels()),
+    atermpp::aterm(core::detail::function_symbol_ActionRenameRules(), atermpp::aterm_list(rules.begin(), rules.end()))
   );
 }
 

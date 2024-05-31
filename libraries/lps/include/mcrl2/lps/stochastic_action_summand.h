@@ -113,11 +113,11 @@ bool operator==(const stochastic_action_summand& x, const stochastic_action_summ
   return static_cast<const action_summand&>(x) == static_cast<const action_summand&>(y) && x.distribution() == y.distribution();
 }
 
-/// \brief Conversion to aterm_appl.
+/// \brief Conversion to aterm.
 inline
-atermpp::aterm_appl action_summand_to_aterm(const stochastic_action_summand& s)
+atermpp::aterm action_summand_to_aterm(const stochastic_action_summand& s)
 {
-  atermpp::aterm_appl result = atermpp::aterm_appl(core::detail::function_symbol_LinearProcessSummand(),
+  atermpp::aterm result = atermpp::aterm(core::detail::function_symbol_LinearProcessSummand(),
                        s.summation_variables(),
                        s.condition(),
                        s.multi_action(),

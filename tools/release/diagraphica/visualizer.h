@@ -18,6 +18,9 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLDebugLogger>
 
+#include <list>
+#include <vector>
+
 class Visualizer : public QOpenGLWidget
 {
   Q_OBJECT
@@ -37,31 +40,30 @@ class Visualizer : public QOpenGLWidget
     QPointF worldCoordinate(QPointF deviceCoordinate);
     void logMessage(const QOpenGLDebugMessage& debugMessage);
 
-    // -- set functions ---------------------------------------------
-    virtual void setClearColor(
-      const double& r,
-      const double& g,
-      const double& b);
-
     // -- visualization functions -----------------------------------
-    virtual void visualize(const bool& inSelectMode) = 0;
-    virtual void setGeomChanged(const bool& flag);
-    virtual void setDataChanged(const bool& flag);
+    enum Mode { Visualizing, Marking };
+
+    virtual void visualize() = 0;
+
+    // -- selection functions ---------------------------------------
+    using Selection = std::vector<GLuint>;
+    using SelectionList = std::list<Selection>;
+
+    virtual void mark() = 0;
+
+    SelectionList getSelection(qreal width = 2., qreal height = 2.);
+    virtual void handleSelection(const Selection&) {}
 
     // -- event handlers --------------------------------------------
     virtual void handleSizeEvent();
 
     virtual void handleMouseEvent(QMouseEvent* e);
-    virtual void handleWheelEvent(QWheelEvent* /*e*/) { }
-    virtual void handleMouseEnterEvent() { }
     virtual void handleMouseLeaveEvent() { }
     virtual void handleKeyEvent(QKeyEvent* e);
 
-    virtual void enterEvent(QEnterEvent *event) override { handleMouseEnterEvent(); QOpenGLWidget::enterEvent(event); }
     virtual void leaveEvent(QEvent *event) override { handleMouseLeaveEvent(); QOpenGLWidget::leaveEvent(event); }
     virtual void keyPressEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyPressEvent(event); }
     virtual void keyReleaseEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyReleaseEvent(event); }
-    virtual void wheelEvent(QWheelEvent *event) override { handleWheelEvent(event); QOpenGLWidget::wheelEvent(event); }
     virtual void mouseMoveEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mouseMoveEvent(event); }
     virtual void mousePressEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mousePressEvent(event); }
     virtual void mouseReleaseEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mouseReleaseEvent(event); }
@@ -76,29 +78,14 @@ class Visualizer : public QOpenGLWidget
     virtual void clear();
     virtual void initMouse();
 
-    virtual void startSelectMode(
-      GLint hits,
-      GLuint selectBuf[],
-      double pickWth,
-      double pickHgt);
-    virtual void finishSelectMode(
-      GLint hits,
-      GLuint selectBuf[]);
-
     void genCharTex();
     void genCushTex();
 
     // -- hit detection ---------------------------------------------
-    bool m_gl_initialized = false;
-    QOpenGLFramebufferObject* m_hit_FBO;
-    virtual void processHits(
-      GLint hits,
-      GLuint buffer[]) = 0;
+    std::unique_ptr<QOpenGLFramebufferObject> m_selectionBuffer;
 
     // -- mouse -----------------------------------------------------
-
-    bool m_inSelectMode;
-
+    // Todo: Remove this, the standard Qt event handlers already provide this information, lets use them instead of piling everything on a single handler
     std::unique_ptr<QMouseEvent> m_lastMouseEvent;   // The latest received event
     bool m_mouseDrag;               // The mouse is being dragged
     bool m_mouseDragReleased;       // The cursor was released after dragging
@@ -107,8 +94,6 @@ class Visualizer : public QOpenGLWidget
     Qt::Key m_lastKeyCode;
 
     bool showMenu;
-
-    QColor clearColor;
 
     Graph *m_graph;
 
@@ -124,6 +109,16 @@ class Visualizer : public QOpenGLWidget
     float texCush[CUSHSIZE];
   
     QOpenGLDebugLogger* m_logger; ///< Logs OpenGL debug messages.
+
+  private:
+    qreal m_canvas_width, m_canvas_height;
+    void updateGeometry();
+
+  protected:
+    /// Width of the canvas (width multiplied by the device pixel ratio)
+    constexpr qreal widthC() const { return m_canvas_width; }
+    /// Height of the canvas (height multiplied by the device pixel ratio)
+    constexpr qreal heightC() const { return m_canvas_height; }
 };
 
 #endif

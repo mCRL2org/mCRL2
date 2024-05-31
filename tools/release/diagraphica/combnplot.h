@@ -19,46 +19,43 @@ class CombnPlot : public Visualizer
 
   public:
     // -- constructors and destructor -------------------------------
-    CombnPlot(
-      QWidget *parent,
-      Graph* g,
-      const std::vector<std::size_t> &attributeIndices
-      );
+    CombnPlot(QWidget* parent, Graph*, const std::vector<std::size_t> &attributeIndices);
     // -- set data functions ----------------------------------------
     void setDiagram(Diagram* dgrm);
 
     // -- set vis settings functions --------------------------------
 
     // -- visualization functions  ----------------------------------
-    void visualize(const bool& inSelectMode);
-    void drawAxes(const bool& inSelectMode);
-    void drawAxesBC(const bool& inSelectMode);
-    void drawAxesCP(const bool& inSelectMode);
-    void drawLabels(const bool& inSelectMode);
-    void drawLabelsBC(const bool& inSelectMode);
-    void drawLabelsCP(const bool& inSelectMode);
-    void drawPlot(const bool& inSelectMode);
-    void drawPlotBC(const bool& inSelectMode);
-    void drawPlotCP(const bool& inSelectMode);
-    void drawMousePos(const bool& inSelectMode);
-    void drawDiagram(const bool& inSelectMode);
+    void visualize();
+    void mark();
 
     // -- input event handlers --------------------------------------
-    void handleMouseEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent*) override;
 
     QSize sizeHint() const { return QSize(400,400); }
 
-  protected:
+  private:
     // -- utility data functions ------------------------------------
     void initLabels();
     void calcMaxAttrCard();
     void calcMaxNumberPerComb();
 
     // -- utility drawing functions ---------------------------------
-    // ***
-    //void clear();
-    void setScalingTransf();
-    void displTooltip(const std::size_t& posIdx);
+    template <Mode> void drawAxesBC();
+    template <Mode> void drawAxesCP();
+    template <Mode> void drawAxes();
+    template <Mode> void drawLabelsBC();
+    template <Mode> void drawLabelsCP();
+    template <Mode> void drawLabels();
+    template <Mode> void drawPlotBC();
+    template <Mode> void drawPlotCP();
+    template <Mode> void drawPlot();
+    template <Mode> void drawMousePos();
+    template <Mode> void drawDiagram();
+    template <Mode> void draw();
+
+    void showTooltip(const std::size_t& valueIndex, const QPointF& position);
+    void hideTooltip();
 
     void calcPositions();
     void calcPosBC();
@@ -66,9 +63,7 @@ class CombnPlot : public Visualizer
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits(
-      GLint hits,
-      GLuint buffer[]);
+    virtual void handleSelection(const Selection&) override;
 
     // -- data members ----------------------------------------------
 

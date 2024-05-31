@@ -13,10 +13,17 @@
 #include "mcrl2/utilities/exception.h"
 
 #include "mcrl2/data/bool.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/int64.h"
+#include "mcrl2/data/nat64.h"
+#include "mcrl2/data/pos64.h"
+#include "mcrl2/data/real64.h"
+#else
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/real.h"
+#endif
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/substitutions/data_expression_assignment.h"
@@ -79,9 +86,11 @@ static std::set<data::function_symbol> get_builtin_constructors()
 {
   std::set<data::function_symbol> output;
   output.insert(sort_pos::c1());
+#ifndef Enable64bitNumbers
   output.insert(sort_pos::cdub());
-  output.insert(sort_nat::c0());
   output.insert(sort_nat::cnat());
+#endif
+  output.insert(sort_nat::c0());
   output.insert(sort_int::cint());
   output.insert(sort_int::cneg());
   output.insert(sort_real::creal());
@@ -106,10 +115,14 @@ std::string translate_expression(data_expression expression, const std::map<vari
     }
   } else if (sort_nat::is_c0_function_symbol(expression)) {
     return "0";
+#ifndef Enable64bitNumbers
   } else if (sort_nat::is_cnat_application(expression)) {
     application a(expression);
     return translate_expression(*a.begin(), bound_variables, translation);
-  } else if (sort_pos::is_c1_function_symbol(expression) || sort_pos::is_cdub_application(expression)) {
+  } else if (sort_pos::is_cdub_application(expression)) {
+    return data::pp(expression);
+#endif
+  } else if (sort_pos::is_c1_function_symbol(expression)) {
     return data::pp(expression);
   }
   

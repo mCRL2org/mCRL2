@@ -19,50 +19,40 @@ class CorrlPlot : public Visualizer
 
   public:
     // -- constructors and destructor -------------------------------
-    CorrlPlot(
-      QWidget *parent,
-      Graph* g,
-      int attributeIndex1,
-      int attributeIndex2);
+    CorrlPlot(QWidget* parent, Graph*, int attributeIndex1, int attributeIndex2);
 
     // -- set data functions ----------------------------------------
     void setDiagram(Diagram* dgrm);
 
     // -- visualization functions  ----------------------------------
-    void visualize(const bool& inSelectMode);
-    void drawAxes(
-      const bool& inSelectMode,
-      const std::string& xLbl,
-      const std::string& yLbl);
-    void drawLabels(const bool& inSelectMode);
-    void drawPlot(const bool& inSelectMode);
-    void drawDiagram(const bool& inSelectMode);
+    void visualize();
+    void mark();
 
     // -- input event handlers --------------------------------------
-    void handleMouseEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent*) override;
 
     QSize sizeHint() const { return QSize(400,400); }
 
-  protected:
+  private:
     // -- utility data functions ------------------------------------
     void initLabels();
     void calcMaxNumber();
 
     // -- utility drawing functions ---------------------------------
-    // ***
-    //void clear();
-    void setScalingTransf();
-    void displTooltip(
-      const int& xIdx,
-      const int& yIdx);
+    template <Mode> void drawAxes();
+    template <Mode> void drawLabels();
+    template <Mode> void drawPlot();
+    template <Mode> void drawDiagram();
+    template <Mode> void draw();
+
+    void showTooltip(std::size_t xIndex, std::size_t yIndex, const QPointF& position);
+    void hideTooltip();
 
     void calcPositions();
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits(
-      GLint hits,
-      GLuint buffer[]);
+    virtual void handleSelection(const Selection&) override;
 
     // -- data members ----------------------------------------------
 

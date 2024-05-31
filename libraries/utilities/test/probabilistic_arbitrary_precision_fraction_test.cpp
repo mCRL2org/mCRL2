@@ -11,10 +11,10 @@
 
 #define BOOST_TEST_MODULE probabilistic_arbitrary_precision_fraction_test
 #include <boost/test/included/unit_test.hpp>
-#include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
+#include "mcrl2/utilities/probabilistic_arbitrary_precision_fraction.h"
 
 using namespace mcrl2;
-using namespace mcrl2::lts;
+using namespace mcrl2::utilities;
 
 void test_divide_multiply(const std::string& xs, const std::string& ys)
 { 

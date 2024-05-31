@@ -25,18 +25,18 @@ namespace detail {
 
 // transforms DataVarId to DataVarIdNoIndex
 // transforms OpId to OpIdNoIndex
-inline atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
+inline atermpp::aterm remove_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_OpId())
   {
-    return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
+    return atermpp::aterm(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
   }
   return x;
 }
 
 // transforms DataVarIdNoIndex to DataVarId
 // transforms OpIdNoIndex to OpId
-inline atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
+inline atermpp::aterm add_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())    // Obsolete. Remove in say 2025.
   {

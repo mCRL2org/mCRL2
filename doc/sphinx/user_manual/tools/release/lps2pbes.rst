@@ -42,3 +42,7 @@ transition system.
 Note that there is also an option ``--structured`` which can be used to generate boolean equation systems that
 do not contain both the conjunction and the disjunction operators among PBES variables in the right hand side.
 This flag can lead to a substantially larger number of equation (but linear in the original formula).
+
+Note that the option ``--check-only`` can be used to check whether the passed
+formula is valid w.r.t. parsing and type checking, without actually generating
+the PBES.

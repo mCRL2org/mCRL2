@@ -39,7 +39,7 @@ struct replace_aterm_builder: public Builder<replace_aterm_builder<Builder, Repl
   {}
 
   template <class T>
-  void apply(T& result, const aterm_appl& x)
+  void apply(T& result, const aterm& x)
   {
     const T fx(f(x));
     if (x == fx) 
@@ -76,9 +76,9 @@ struct partial_replace_aterm_builder: public Builder<partial_replace_aterm_build
   {}
 
   template <class T>
-  void apply(T& result, const aterm_appl& x)
+  void apply(T& result, const aterm& x)
   {
-    std::pair<aterm_appl, bool> p = f(x);
+    std::pair<aterm, bool> p = f(x);
     if (p.second)
     { 
       super::apply(result, x);
@@ -113,9 +113,9 @@ struct bottom_up_replace_aterm_builder: public Builder<bottom_up_replace_aterm_b
   {}
 
   template <class T>
-  void apply(T& result, const aterm_appl& x)
+  void apply(T& result, const aterm& x)
   {
-    aterm_appl t;
+    aterm t;
     super::apply(t, x);
     result = static_cast<T>(f(t));
   }
@@ -138,14 +138,14 @@ struct cached_bottom_up_replace_aterm_builder: public Builder<cached_bottom_up_r
   using super::derived;
 
   ReplaceFunction f;
-  std::unordered_map<aterm_appl, aterm>& cache;
+  std::unordered_map<aterm, aterm>& cache;
 
-  cached_bottom_up_replace_aterm_builder(ReplaceFunction f_, std::unordered_map<aterm_appl, aterm>& cache_)
+  cached_bottom_up_replace_aterm_builder(ReplaceFunction f_, std::unordered_map<aterm, aterm>& cache_)
     : f(f_), cache(cache_)
   {}
 
   template <class T>
-  void apply(T& result, const aterm_appl& x)
+  void apply(T& result, const aterm& x)
   {
     auto i = cache.find(x);
     if (i != cache.end())
@@ -155,14 +155,14 @@ struct cached_bottom_up_replace_aterm_builder: public Builder<cached_bottom_up_r
     }
     aterm t;
     super::apply(t, x);
-    result = f(down_cast<aterm_appl>(t));
+    result = f(t);
     cache[x] = result;
   }
 };
 
 template <template <class> class Builder, class ReplaceFunction>
 cached_bottom_up_replace_aterm_builder<Builder, ReplaceFunction>
-make_cached_bottom_up_replace_aterm_builder(ReplaceFunction f, std::unordered_map<aterm_appl, aterm>& cache)
+make_cached_bottom_up_replace_aterm_builder(ReplaceFunction f, std::unordered_map<aterm, aterm>& cache)
 {
   return cached_bottom_up_replace_aterm_builder<Builder, ReplaceFunction>(f, cache);
 }
@@ -173,7 +173,7 @@ make_cached_bottom_up_replace_aterm_builder(ReplaceFunction f, std::unordered_ma
 /// \param t A term
 /// \param op The operation that is applied to subterms
 /// \return a copy of the (internally modified) op.
-/// The function op must have the signature bool op(aterm_appl t).
+/// The function op must have the signature bool op(aterm t).
 /// When op(t) is false, the children of t are skipped.
 template <typename UnaryFunction, typename Term>
 UnaryFunction for_each(Term t, UnaryFunction op)
@@ -184,11 +184,11 @@ UnaryFunction for_each(Term t, UnaryFunction op)
 /// \brief Finds a subterm of t that matches a given predicate.
 /// \param t A term
 /// \param match The predicate that determines if a subterm is a match
-/// \return A subterm that matches the given predicate, or aterm_appl() if none was found.
+/// \return A subterm that matches the given predicate, or aterm() if none was found.
 template <typename Term, typename MatchPredicate>
-aterm_appl find_if(const Term& t, MatchPredicate match)
+aterm find_if(const Term& t, MatchPredicate match)
 {
-  aterm_appl output;
+  aterm output;
   detail::find_if_impl< typename std::add_lvalue_reference< MatchPredicate >::type >(t, match, output);
   return output;
 }
@@ -199,9 +199,9 @@ aterm_appl find_if(const Term& t, MatchPredicate match)
 /// \param t A term
 /// \param match The predicate that determines if a subterm is a match
 /// \param stop The predicate that determines if the recursion should not be continued in a subterm
-/// \return A subterm that matches the given predicate, or aterm_appl() if none was found.
+/// \return A subterm that matches the given predicate, or aterm() if none was found.
 template <typename Term, typename MatchPredicate, typename StopPredicate>
-aterm_appl partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
+aterm partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
 {
   return detail::partial_find_if_impl<typename std::add_lvalue_reference<MatchPredicate>::type>(t, match, stop);
 }
@@ -236,8 +236,8 @@ void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, Outpu
 
 /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
 /// the following signature:
-/// aterm_appl x;
-/// aterm_appl result = r(x);
+/// aterm x;
+/// aterm result = r(x);
 /// The replacements are performed in top down order.
 /// \param t A term
 /// \param r The replace function that is applied to subterms.
@@ -265,8 +265,8 @@ Term replace(const Term& t, const aterm& old_value, const aterm& new_value)
 
 /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
 /// the following signature:
-/// aterm_appl x;
-/// aterm_appl result = r(x);
+/// aterm x;
+/// aterm result = r(x);
 /// The replacements are performed in bottom up order. For example,
 /// replace(f(f(x)), f(x), x) returns x.
 /// \param t A term
@@ -288,7 +288,7 @@ Term bottom_up_replace(Term t, ReplaceFunction r)
 /// \param new_value The value that is substituted.
 /// \return The result of the replacement.
 template <typename Term>
-Term bottom_up_replace(Term t, const aterm_appl& old_value, const aterm_appl& new_value)
+Term bottom_up_replace(Term t, const aterm& old_value, const aterm& new_value)
 {
   return bottom_up_replace(t, [&](const aterm& t) { return t == old_value ? new_value : t; });
 }
@@ -296,8 +296,8 @@ Term bottom_up_replace(Term t, const aterm_appl& old_value, const aterm_appl& ne
 /// \brief Replaces subterms x of t by r(x). The replace function r returns an
 /// additional boolean value. This value is used to prevent further recursion.
 /// The ReplaceFunction r has the following signature:
-/// aterm_appl x;
-/// std::pair<aterm_appl, bool> result = r(x);
+/// aterm x;
+/// std::pair<aterm, bool> result = r(x);
 /// result.first  is the result r(x) of the replacement
 /// result.second denotes if the recursion should be continued
 /// The replacements are performed in top down order.
@@ -314,16 +314,16 @@ Term partial_replace(Term t, ReplaceFunction r)
 
 /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
 /// the following signature:
-/// aterm_appl x;
-/// aterm_appl result = r(x);
+/// aterm x;
+/// aterm result = r(x);
 /// The replacements are performed in bottom up order. For example,
 /// replace(f(f(x)), f(x), x) returns x.
 /// \param t A term
 /// \param r The replace function that is applied to subterms.
-/// \param cache A cache for the result of aterm_appl terms.
+/// \param cache A cache for the result of aterm terms.
 /// \return The result of the replacement.
 template <typename Term, typename ReplaceFunction>
-Term bottom_up_replace(Term t, ReplaceFunction r, std::unordered_map<aterm_appl, aterm>& cache)
+Term bottom_up_replace(Term t, ReplaceFunction r, std::unordered_map<aterm, aterm>& cache)
 {
   Term result;
   detail::make_cached_bottom_up_replace_aterm_builder<atermpp::builder>(r, cache).apply(result, t);

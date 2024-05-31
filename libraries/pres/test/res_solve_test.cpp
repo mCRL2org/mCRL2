@@ -74,7 +74,7 @@ void run_all_algorithms(std::string const& b, double expected_outcome)
     }
     else 
     {
-      result=data::sort_real::value(atermpp::down_cast<data::data_expression>(result_as_pres));
+      result=data::sort_real::value<double>(atermpp::down_cast<data::data_expression>(result_as_pres));
     }
     
     if (result!=expected_outcome)

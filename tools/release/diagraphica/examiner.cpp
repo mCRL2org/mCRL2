@@ -189,64 +189,6 @@ void Examiner::clearData()
 }
 
 
-// -- visualization functions  --------------------------------------
-
-
-void Examiner::visualize(const bool& inSelectMode)
-{
-  clear();
-
-  // check if positions are ok
-  if (geomChanged == true)
-  {
-    calcSettingsGeomBased();
-  }
-  if (dataChanged == true)
-  {
-    calcSettingsDataBased();
-  }
-
-  if (inSelectMode == true)
-  {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
-
-    if (diagram != 0)
-    {
-      drawFrame(inSelectMode);
-
-      if (framesHist.size() > 0)
-      {
-        drawFramesHist(inSelectMode);
-        drawControls(inSelectMode);
-      }
-    }
-
-    finishSelectMode(
-      hits,
-      selectBuf);
-  }
-  else
-  {
-    if (diagram != 0)
-    {
-      drawFrame(inSelectMode);
-
-      if (framesHist.size() > 0)
-      {
-        drawFramesHist(inSelectMode);
-        drawControls(inSelectMode);
-      }
-    }
-  }
-}
-
-
 // -- event handlers ------------------------------------------------
 
 
@@ -614,53 +556,17 @@ void Examiner::handleIconRgt()
 }
 
 
-void Examiner::processHits(
-  GLint hits,
-  GLuint buffer[])
+void Examiner::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  std::vector< int > ids;
-
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
-  {
-    // if necassary, advance to closest hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    int number = *ptr;
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    for (int i = 0; i < number; ++i)
-    {
-      ids.push_back(*ptr);
-      ++ptr;
-    }
-
-    handleHits(ids);
-  }
-  else
+  if (selection.empty())
   {
     QToolTip::hideText();
   }
-
-  ptr = 0;
+  else
+  {
+    std::vector<int> hits(selection.begin(), selection.end());
+    handleHits(hits);
+  }
 }
 
 
@@ -673,11 +579,11 @@ void Examiner::clear()
 }
 
 
-void Examiner::drawFrame(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Examiner::drawFrame()
 {
   double pix = pixelSize();
 
-  if (inSelectMode == true)
+  if constexpr (mode == Marking)
   {
     glPushMatrix();
     glTranslatef(posFrame.x, posFrame.y, 0.0);
@@ -730,11 +636,7 @@ void Examiner::drawFrame(const bool& inSelectMode)
     attr = 0;
     node = 0;
 
-    diagram->visualize(
-      false,
-      pixelSize(),
-      attributes,
-      valsFrame);
+    diagram->draw<mode>(pixelSize(), attributes, valsFrame);
 
     VisUtils::enableLineAntiAlias();
     VisUtils::setColor(colFrm);
@@ -748,9 +650,9 @@ void Examiner::drawFrame(const bool& inSelectMode)
 }
 
 
-void Examiner::drawFramesHist(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Examiner::drawFramesHist()
 {
-  if (inSelectMode == true)
+  if constexpr (mode == Marking)
   {
     glPushName(ID_FRAME_HIST);
     //for ( int i = 0; i < framesHist.size(); ++i )
@@ -824,11 +726,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
           1.0 - 3*pix/scaleFramesHist, -1.0-3*pix/scaleFramesHist);
       }
 
-      diagram->visualize(
-        false,
-        pixelSize(),
-        attrsHist[i],
-        valsFrame);
+      diagram->draw<mode>(pixelSize(), attrsHist[i], valsFrame);
 
       glPopMatrix();
     }
@@ -836,13 +734,13 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
 }
 
 
-void Examiner::drawControls(const bool& inSelectMode)
+template <Visualizer::Mode mode> void Examiner::drawControls()
 {
   double itvHist = hgtHstPix;
 
   double pix = pixelSize();
 
-  if (inSelectMode == true)
+  if constexpr (mode == Marking)
   {
     // clear icon
     double itvSml = 6.0*pix;
@@ -1102,3 +1000,51 @@ void Examiner::drawControls(const bool& inSelectMode)
     }
   }
 }
+
+
+template <Visualizer::Mode mode> void Examiner::draw()
+{
+  clear();
+
+  // check if positions are ok
+  if (geomChanged == true)
+  {
+    calcSettingsGeomBased();
+  }
+  if (dataChanged == true)
+  {
+    calcSettingsDataBased();
+  }
+
+  if constexpr (mode == Marking)
+  {
+    if (diagram != 0)
+    {
+      drawFrame<mode>();
+
+      if (framesHist.size() > 0)
+      {
+        drawFramesHist<mode>();
+        drawControls<mode>();
+      }
+    }
+  }
+  else
+  {
+    if (diagram != 0)
+    {
+      drawFrame<mode>();
+
+      if (framesHist.size() > 0)
+      {
+        drawFramesHist<mode>();
+        drawControls<mode>();
+      }
+    }
+  }
+}
+
+
+void Examiner::visualize() { draw<Visualizing>(); }
+void Examiner::mark() { draw<Marking>(); }
+

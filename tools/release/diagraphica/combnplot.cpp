@@ -13,11 +13,8 @@
 
 // -- constructors and destructor -----------------------------------
 
-CombnPlot::CombnPlot(
-  QWidget *parent,
-  Graph* g,
-  const std::vector<std::size_t> &attributeIndices)
-  : Visualizer(parent, g)
+CombnPlot::CombnPlot(QWidget* parent, Graph* graph, const std::vector<std::size_t> &attributeIndices):
+  Visualizer(parent, graph)
 {
   maxAttrCard      = 0;
   maxNumberPerComb = 0;
@@ -57,66 +54,7 @@ void CombnPlot::setDiagram(Diagram* dgrm)
 // -- visualization functions  --------------------------------------
 
 
-void CombnPlot::visualize(const bool& inSelectMode)
-{
-  // have textures been generated
-  if (!texCharOK)
-  {
-    genCharTex();
-  }
-
-  // check if positions are ok
-  if (geomChanged)
-  {
-    calcPositions();
-  }
-
-  // selection mode
-  if (inSelectMode)
-  {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
-
-    //setScalingTransf();
-    //drawAxes( inSelectMode );
-    drawPlot(inSelectMode);
-
-    finishSelectMode(
-      hits,
-      selectBuf);
-  }
-  // rendering mode
-  else
-  {
-    clear();
-    //setScalingTransf();
-    drawPlot(inSelectMode);
-    drawAxes(inSelectMode);
-    drawLabels(inSelectMode);
-    drawMousePos(inSelectMode);
-    if (showDgrm)
-    {
-      drawDiagram(inSelectMode);
-    }
-  }
-}
-
-
-void CombnPlot::drawAxes(const bool& inSelectMode)
-{
-  // bar chart
-  drawAxesBC(inSelectMode);
-  // combination plot
-  drawAxesCP(inSelectMode);
-}
-
-
-void CombnPlot::drawAxesBC(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CombnPlot::drawAxesBC()
 {
   QSizeF size = worldSize();
   // get size of 1 pixel
@@ -139,7 +77,7 @@ void CombnPlot::drawAxesBC(const bool& inSelectMode)
   }
 
   // rendering mode
-  if (!inSelectMode)
+  if constexpr (mode == Visualizing)
   {
     // draw guides
     VisUtils::setColor(VisUtils::lightGray);
@@ -154,7 +92,7 @@ void CombnPlot::drawAxesBC(const bool& inSelectMode)
 }
 
 
-void CombnPlot::drawAxesCP(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CombnPlot::drawAxesCP()
 {
   QSizeF size = worldSize();
   // get size of 1 pixel
@@ -177,7 +115,7 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
   }
 
   // rendering mode
-  if (!inSelectMode)
+  if constexpr (mode == Visualizing)
   {
     VisUtils::setColor(VisUtils::mediumGray);
 
@@ -206,17 +144,21 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
 }
 
 
-void CombnPlot::drawLabels(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CombnPlot::drawAxes()
 {
   // bar chart
-  drawLabelsBC(inSelectMode);
+  drawAxesBC<mode>();
   // combination plot
-  drawLabelsCP(inSelectMode);
+  drawAxesCP<mode>();
 }
 
 
-void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
+template <Visualizer::Mode mode> void CombnPlot::drawLabelsBC()
 {
+  if constexpr (mode == Marking)
+  {
+    return;
+  }
   QSizeF size = worldSize();
   // get size of 1 pixel
   double pix = pixelSize();
@@ -264,8 +206,12 @@ void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
 }
 
 
-void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
+template <Visualizer::Mode mode> void CombnPlot::drawLabelsCP()
 {
+  if constexpr (mode == Marking)
+  {
+    return;
+  }
   QSizeF size = worldSize();
   // get size of 1 pixel
   double pix = pixelSize();
@@ -314,16 +260,16 @@ void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
 }
 
 
-void CombnPlot::drawPlot(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CombnPlot::drawLabels()
 {
   // bar chart
-  drawPlotBC(inSelectMode);
+  drawLabelsBC<mode>();
   // combination plot
-  drawPlotCP(inSelectMode);
+  drawLabelsCP<mode>();
 }
 
 
-void CombnPlot::drawPlotBC(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CombnPlot::drawPlotBC()
 {
   double hCanv = worldSize().height();
   double pix = pixelSize();
@@ -341,7 +287,7 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
   }
 
   // selection mode
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     for (std::size_t i = 0; i < sizePositions; ++i)
     {
@@ -380,12 +326,12 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
 }
 
 
-void CombnPlot::drawPlotCP(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CombnPlot::drawPlotCP()
 {
   double pix   = pixelSize();
 
   // selection mode
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     for (std::size_t i = 0; i < posLftTop.size(); ++i)
     {
@@ -436,10 +382,19 @@ void CombnPlot::drawPlotCP(const bool& inSelectMode)
 }
 
 
-void CombnPlot::drawMousePos(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CombnPlot::drawPlot()
+{
+  // bar chart
+  drawPlotBC<mode>();
+  // combination plot
+  drawPlotCP<mode>();
+}
+
+
+template <Visualizer::Mode mode> void CombnPlot::drawMousePos()
 {
   // rendering mode
-  if (!inSelectMode)
+  if constexpr (mode == Visualizing)
   {
     if (mouseCombnIdx < combinations.size())
     {
@@ -458,9 +413,9 @@ void CombnPlot::drawMousePos(const bool& inSelectMode)
 }
 
 
-void CombnPlot::drawDiagram(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CombnPlot::drawDiagram()
 {
-  if (!inSelectMode)
+  if constexpr (mode == Visualizing)
   {
     double pix      = pixelSize();
     double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
@@ -477,11 +432,7 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
       1.0 - 4.0*pix/scaleDgrm,
       -1.0 - 4.0*pix/scaleDgrm);
     // diagram
-    diagram->visualize(
-      inSelectMode,
-      pixelSize(),
-      attributes,
-      attrValIdcsDgrm);
+    diagram->draw<mode>(pixelSize(), attributes, attrValIdcsDgrm);
 
     VisUtils::setColor(Qt::black);
     VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
@@ -491,18 +442,65 @@ void CombnPlot::drawDiagram(const bool& inSelectMode)
 }
 
 
+template <Visualizer::Mode mode> void CombnPlot::draw()
+{
+  // have textures been generated
+  if (!texCharOK)
+  {
+    genCharTex();
+  }
+
+  // check if positions are ok
+  if (geomChanged)
+  {
+    calcPositions();
+  }
+
+  // selection mode
+  if constexpr (mode == Marking)
+  {
+    drawPlot<mode>();
+  }
+  // rendering mode
+  else
+  {
+    clear();
+    drawPlot<mode>();
+    drawAxes<mode>();
+    drawLabels<mode>();
+    drawMousePos<mode>();
+    if (showDgrm)
+    {
+      drawDiagram<mode>();
+    }
+  }
+}
+
+
+void CombnPlot::visualize() { draw<Visualizing>(); }
+void CombnPlot::mark() { draw<Marking>(); }
+
+
 // -- input event handlers ------------------------------------------
 
 
-void CombnPlot::handleMouseEvent(QMouseEvent* e)
+void CombnPlot::mouseMoveEvent(QMouseEvent* event)
 {
-  Visualizer::handleMouseEvent(e);
-
-  // redraw in select mode
-  updateSelection();
-  // redraw in render mode
+  Visualizer::mouseMoveEvent(event);
+  SelectionList selections = getSelection();
+  if (selections.empty() || selections.back().empty())
+  {
+    mouseCombnIdx = NON_EXISTING;
+    hideTooltip();
+  }
+  else
+  {
+    mouseCombnIdx = selections.back()[0];
+    showTooltip(selections.back()[0], event->position());
+  }
   update();
 }
+
 
 // -- utility data functions ----------------------------------------
 
@@ -541,53 +539,38 @@ void CombnPlot::calcMaxNumberPerComb()
 
 // -- utility drawing functions -------------------------------------
 
-// ***
-/*
-void CombnPlot::clear()
+void CombnPlot::showTooltip(const std::size_t& valueIndex, const QPointF& position)
 {
-    VisUtils::clear( clearColor );
-}
-*/
-
-void CombnPlot::setScalingTransf()
-{
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-}
-
-
-void CombnPlot::displTooltip(const std::size_t& posIdx)
-{
-  if (posIdx < combinations.size())
+  if (valueIndex < combinations.size())
   {
-    msgDgrm.clear();
-    // number
-    msgDgrm.append(Utils::dblToStr(numberPerComb[posIdx]));
-    msgDgrm.append("nodes; ");
-    // percentage
-    msgDgrm.append(Utils::dblToStr(
-                     Utils::perc((double) numberPerComb[posIdx], (double) m_graph->getSizeNodes())));
-    msgDgrm.append("%");
+    msgDgrm = Utils::dblToStr(numberPerComb[valueIndex]) + " nodes; "
+      + Utils::dblToStr(Utils::perc((double) numberPerComb[valueIndex], (double) m_graph->getSizeNodes())) + '%';
 
     if (diagram == 0)
     {
-      // show tooltip
-      QToolTip::showText(QCursor::pos(),QString::fromStdString(msgDgrm));
+      QToolTip::showText(QCursor::pos(), QString::fromStdString(msgDgrm));
     }
     else
     {
-      QPointF pos = worldCoordinate(m_lastMouseEvent->position());
+      QPointF pos = worldCoordinate(position);
       posDgrm.x = pos.x() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
-      posDgrm.y = pos.y() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
+      posDgrm.y = pos.y() + (pos.y() < 0 ? 1.0 : -1.0) * scaleDgrm;
       showDgrm = true;
 
       attrValIdcsDgrm.clear();
       for (std::size_t i = 0; i < attributes.size(); ++i)
       {
-        attrValIdcsDgrm.push_back(combinations[posIdx][i]);
+        attrValIdcsDgrm.push_back(combinations[valueIndex][i]);
       }
     }
   }
+}
+
+
+void CombnPlot::hideTooltip()
+{
+  QToolTip::hideText();
+  showDgrm = false;
 }
 
 
@@ -752,51 +735,8 @@ void CombnPlot::clearPositions()
 
 
 // -- hit detection -------------------------------------------------
-
-
-void CombnPlot::processHits(
-  GLint hits,
-  GLuint buffer[])
+void CombnPlot::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
-  {
-    // if necassary advance to last hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    int name = *ptr;
-
-    mouseCombnIdx = name;
-    displTooltip(name);
-  }
-  else
-  {
-    mouseCombnIdx = NON_EXISTING;
-    QToolTip::hideText();
-    showDgrm = false;
-  }
-
-  ptr = 0;
 }
 
 

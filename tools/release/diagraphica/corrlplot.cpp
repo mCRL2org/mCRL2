@@ -14,12 +14,8 @@
 // -- constructors and destructor -----------------------------------
 
 
-CorrlPlot::CorrlPlot(
-  QWidget *parent,
-  Graph* g,
-  int attributeIndex1,
-  int attributeIndex2):
-  Visualizer(parent, g)
+CorrlPlot::CorrlPlot(QWidget *parent, Graph* graph, int attributeIndex1, int attributeIndex2):
+  Visualizer(parent, graph)
 {
   minRadHintPx =  5;
   maxRadHintPx = 25;
@@ -54,61 +50,7 @@ void CorrlPlot::setDiagram(Diagram* dgrm)
 // -- visualization functions  --------------------------------------
 
 
-void CorrlPlot::visualize(const bool& inSelectMode)
-{
-  // have textures been generated
-  if (!texCharOK)
-  {
-    genCharTex();
-  }
-
-  // check if positions are ok
-  if (geomChanged)
-  {
-    calcPositions();
-  }
-
-  // visualize
-  if (inSelectMode)
-  {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(
-      hits,
-      selectBuf,
-      2.0,
-      2.0);
-
-    //setScalingTransf();
-    //drawNumberPlot( inSelectMode );
-    drawPlot(inSelectMode);
-
-    finishSelectMode(
-      hits,
-      selectBuf);
-  }
-  else
-  {
-    clear();
-    //setScalingTransf();
-    drawAxes(
-      inSelectMode,
-      "x-label",
-      "y-label");
-    drawLabels(inSelectMode);
-    drawPlot(inSelectMode);
-    if (showDgrm)
-    {
-      drawDiagram(inSelectMode);
-    }
-  }
-}
-
-
-void CorrlPlot::drawAxes(
-  const bool& inSelectMode,
-  const std::string& /*xLbl*/,
-  const std::string& /*yLbl*/)
+template <Visualizer::Mode mode> void CorrlPlot::drawAxes()
 {
   QSizeF size = worldSize();
   double pix = pixelSize();
@@ -120,7 +62,7 @@ void CorrlPlot::drawAxes(
   double yBot = -0.5*size.height()+20*pix;
 
   // rendering mode
-  if (!inSelectMode)
+  if (mode == Visualizing)
   {
     // draw guides
     VisUtils::setColor(VisUtils::lightGray);
@@ -139,8 +81,12 @@ void CorrlPlot::drawAxes(
 }
 
 
-void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
+template <Visualizer::Mode mode> void CorrlPlot::drawLabels()
 {
+  if (mode == Marking)
+  {
+    return;
+  }
   QSizeF size = worldSize();
   double pix = pixelSize();
   // calc scaling to use
@@ -164,10 +110,10 @@ void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
 }
 
 
-void CorrlPlot::drawPlot(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CorrlPlot::drawPlot()
 {
   // selection mode
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     for (std::size_t i = 0; i < positions.size(); ++i)
     {
@@ -222,8 +168,12 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
 }
 
 
-void CorrlPlot::drawDiagram(const bool& inSelectMode)
+template <Visualizer::Mode mode> void CorrlPlot::drawDiagram()
 {
+  if constexpr (mode == Marking)
+  {
+    return;
+  }
   double pix = pixelSize();
   double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
@@ -247,11 +197,7 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
     1.0 - 4.0*pix/scaleDgrm,
     -1.0 - 4.0*pix/scaleDgrm);
   // diagram
-  diagram->visualize(
-    inSelectMode,
-    pixelSize(),
-    attrs,
-    vals);
+  diagram->draw<mode>(pixelSize(), attrs, vals);
 
   VisUtils::setColor(Qt::black);
   VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
@@ -260,16 +206,59 @@ void CorrlPlot::drawDiagram(const bool& inSelectMode)
 }
 
 
+template <Visualizer::Mode mode> void CorrlPlot::draw()
+{
+  // have textures been generated
+  if (!texCharOK)
+  {
+    genCharTex();
+  }
+
+  // check if positions are ok
+  if (geomChanged)
+  {
+    calcPositions();
+  }
+
+  // visualize
+  if constexpr (mode == Marking)
+  {
+    drawPlot<mode>();
+  }
+  else
+  {
+    clear();
+    drawAxes<mode>();
+    drawLabels<mode>();
+    drawPlot<mode>();
+    if (showDgrm)
+    {
+      drawDiagram<mode>();
+    }
+  }
+}
+
+
+void CorrlPlot::visualize() { draw<Visualizing>(); }
+void CorrlPlot::mark() { draw<Marking>(); }
+
+
 // -- input event handlers ------------------------------------------
 
 
-void CorrlPlot::handleMouseEvent(QMouseEvent* e)
+void CorrlPlot::mouseMoveEvent(QMouseEvent* event)
 {
-  Visualizer::handleMouseEvent(e);
-
-  // redraw in select mode
-  updateSelection();
-  // redraw in render mode
+  Visualizer::mouseMoveEvent(event);
+  const SelectionList selections = getSelection();
+  if (selections.empty() || selections.back().size() < 2)
+  {
+    hideTooltip();
+  }
+  else
+  {
+    const Selection& selection = selections.back();
+    showTooltip(selection[0], selection[1], event->position());
+  }
   update();
 }
 
@@ -344,47 +333,31 @@ void CorrlPlot::calcMaxNumber()
 
 // -- utility drawing functions -------------------------------------
 
-// ***
-/*
-void CorrlPlot::clear()
+void CorrlPlot::showTooltip(std::size_t xIndex, std::size_t yIndex, const QPointF& position)
 {
-    VisUtils::clear( clearColor );
-}
-*/
-
-void CorrlPlot::setScalingTransf()
-{
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-}
-
-
-void CorrlPlot::displTooltip(
-  const int& xIdx,
-  const int& yIdx)
-{
-  msgDgrm.clear();
-  // number
-  msgDgrm.append(Utils::dblToStr(number[xIdx][ yIdx ]));
-  msgDgrm.append(" nodes; ");
-  // percentage
-  msgDgrm.append(Utils::dblToStr(
-                   Utils::perc((double) number[xIdx][ yIdx ], (double) m_graph->getSizeNodes())));
-  msgDgrm.append("%");
+  msgDgrm = Utils::dblToStr(number[xIndex][yIndex]) + " nodes; "
+    + Utils::dblToStr(Utils::perc((double) number[xIndex][yIndex], (double) m_graph->getSizeNodes())) + '%';
 
   if (diagram == 0)
   {
-    QToolTip::showText(QCursor::pos(),QString::fromStdString(msgDgrm));
+    QToolTip::showText(QCursor::pos(), QString::fromStdString(msgDgrm));
   }
   else
   {
-    QPointF pos = worldCoordinate(m_lastMouseEvent->position());
+    QPointF pos = worldCoordinate(position);
     posDgrm.x = pos.x() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
-    posDgrm.y = pos.y() + (pos.x() < 0 ? 1.0 : -1.0) * scaleDgrm;
-    showDgrm       = true;
-    attrValIdx1Dgrm = xIdx;
-    attrValIdx2Dgrm = mapXToY[xIdx][yIdx];
+    posDgrm.y = pos.y() + (pos.y() < 0 ? 1.0 : -1.0) * scaleDgrm;
+    showDgrm = true;
+    attrValIdx1Dgrm = xIndex;
+    attrValIdx2Dgrm = mapXToY[xIndex][yIndex];
   }
+}
+
+
+void CorrlPlot::hideTooltip()
+{
+  QToolTip::hideText();
+  showDgrm = false;
 }
 
 
@@ -477,51 +450,8 @@ void CorrlPlot::clearPositions()
 
 
 // -- hit detection -------------------------------------------------
-
-
-void CorrlPlot::processHits(
-  GLint hits,
-  GLuint buffer[])
+void CorrlPlot::handleSelection(const Selection& selection)
 {
-  GLuint* ptr;
-  ptr = (GLuint*) buffer;
-
-  if (hits > 0)
-  {
-    // if necassary advance to last hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    int name1 = *ptr;
-    ++ptr; // name1
-    int name2 = *ptr;
-
-    displTooltip(name1, name2);
-  }
-  else
-  {
-    QToolTip::hideText();
-    showDgrm = false;
-  }
-
-  ptr = 0;
 }
 
 

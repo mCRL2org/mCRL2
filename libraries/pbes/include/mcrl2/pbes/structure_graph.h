@@ -87,7 +87,7 @@ class structure_graph
       }
 
       // Downcast reference aterm
-      inline pbes_expression formula() const
+      inline const pbes_expression& formula() const
       {
         return m_formula;
       }

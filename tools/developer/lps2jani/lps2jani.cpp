@@ -18,10 +18,17 @@
 #include "mcrl2/data/rewriter_tool.h"
 
 #include "mcrl2/data/enumerator.h"
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/pos64.h"
+#include "mcrl2/data/nat64.h"
+#include "mcrl2/data/int64.h"
+#include "mcrl2/data/real64.h"
+#else
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/real.h"
+#endif
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lps/untime.h" // For real_zero. Should be moved to another file. TODO.

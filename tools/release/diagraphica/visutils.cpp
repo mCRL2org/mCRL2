@@ -1930,6 +1930,9 @@ int VisUtils::getCharIdx(const char& c)
       case '~':
         result = 94;
         break;
+      case '\x7f': // for ellipsis
+        result = 95;
+        break;
       default :
         result = 80;
         break;
@@ -2177,9 +2180,9 @@ void VisUtils::drawLabelInBoundBox(
 
   if (numToCrop > 0)
   {
-    std::size_t eraseSize = cropLbl.size() - numToCrop - 2;
+    std::size_t eraseSize = cropLbl.size() - numToCrop - 1;
     cropLbl.erase(eraseSize);
-    cropLbl.append("..");
+    cropLbl += '\x7f'; // ellipsis
   }
 
   if (horizontal)

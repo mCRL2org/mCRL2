@@ -232,10 +232,13 @@ public:
 
   void push_back( const T& value )
   {
-    if constexpr (ThreadSafe) {
+    if constexpr (ThreadSafe) 
+    {
       mcrl2::utilities::lock_guard guard = detail::g_thread_term_pool().lock();
       super::push_back(value);
-    } else {
+    } 
+    else 
+    {
       mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::push_back(value);
     }
@@ -243,10 +246,13 @@ public:
 
   void push_back( T&& value )
   {
-    if constexpr (ThreadSafe) {
+    if constexpr (ThreadSafe) 
+    {
       mcrl2::utilities::lock_guard guard = detail::g_thread_term_pool().lock();
       super::push_back(value);
-    } else {
+    } 
+    else 
+    {
       mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::push_back(value);
     }
@@ -266,10 +272,13 @@ public:
 
   void pop_back()
   {
-    if constexpr (ThreadSafe) {
+    if constexpr (ThreadSafe) 
+    {
       mcrl2::utilities::lock_guard guard = detail::g_thread_term_pool().lock();
       super::pop_back();
-    } else {
+    } 
+    else 
+    {
       mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::pop_back();
     }
@@ -277,10 +286,13 @@ public:
 
   void resize( size_type count )
   {
-    if constexpr (ThreadSafe) {
+    if constexpr (ThreadSafe) 
+    {
       mcrl2::utilities::lock_guard guard = detail::g_thread_term_pool().lock();
       super::resize(count);
-    } else {
+    } 
+    else 
+    {
       mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::resize(count);
     }
@@ -288,10 +300,13 @@ public:
 
   void resize( size_type count, const value_type& value )
   {
-    if constexpr (ThreadSafe) {
+    if constexpr (ThreadSafe) 
+    {
       mcrl2::utilities::lock_guard guard = detail::g_thread_term_pool().lock();
       super::resize(count, value);
-    } else {
+    } 
+    else 
+    {
       mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::resize(count, value);
     }
@@ -299,10 +314,13 @@ public:
 
   void swap( vector& other ) noexcept
   {
-    if constexpr (ThreadSafe) {
+    if constexpr (ThreadSafe) 
+    {
       mcrl2::utilities::lock_guard guard = detail::g_thread_term_pool().lock();
       super::swap(other); // Invalidates end() so must be protected.
-    } else {
+    } 
+    else 
+    {
       mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
       super::swap(other); // Invalidates end() so must be protected.
     }

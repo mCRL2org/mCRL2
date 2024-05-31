@@ -171,11 +171,11 @@ void load_pbes(pbes& pbes,
 // transforms DataVarId to DataVarIdNoIndex
 // transforms OpId to OpIdNoIndex
 // transforms PropVarInst to PropVarInstNoIndex
-static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
+static atermpp::aterm remove_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_OpId())
   {
-    return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
+    return atermpp::aterm(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
   }
   return x;
 }
@@ -183,7 +183,7 @@ static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 // transforms DataVarIdNoIndex to DataVarId (obsolete)
 // transforms OpIdNoIndex to OpId
 // transforms PropVarInstNoIndex to PropVarInst (obsolete)
-static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
+static atermpp::aterm add_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())
   {
@@ -228,7 +228,7 @@ inline atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes_e
 
 atermpp::aterm pbes_marker()
 {
-  return atermpp::aterm_appl(atermpp::function_symbol("parameterised_boolean_equation_system", 0));
+  return atermpp::aterm(atermpp::function_symbol("parameterised_boolean_equation_system", 0));
 }
 
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pbes& pbes)
@@ -292,7 +292,7 @@ namespace detail
 pbes load_pbes(const std::string& filename)
 {
   pbes result;
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     atermpp::binary_aterm_istream(std::cin) >> result;
   }
@@ -306,7 +306,7 @@ pbes load_pbes(const std::string& filename)
 
 void save_pbes(const pbes& pbesspec, const std::string& filename)
 {
-  if (filename.empty())
+  if (filename.empty() || filename == "-")
   {
     atermpp::binary_aterm_ostream(std::cout) << pbesspec;
   }
@@ -325,9 +325,9 @@ void save_pbes(const pbes& pbesspec, const std::string& filename)
 
 /// \brief Conversion to atermappl.
 /// \return The PBES converted to aterm format.
-atermpp::aterm_appl pbes_to_aterm(const pbes& p)
+atermpp::aterm pbes_to_aterm(const pbes& p)
 {
-  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(),
+  atermpp::aterm global_variables = atermpp::aterm(core::detail::function_symbol_GlobVarSpec(),
                                                              data::variable_list(p.global_variables().begin(),
                                                                                  p.global_variables().end()));
 
@@ -338,11 +338,11 @@ atermpp::aterm_appl pbes_to_aterm(const pbes& p)
     atermpp::aterm a = pbes_equation_to_aterm(*i);
     eqn_list.push_front(a);
   }
-  atermpp::aterm_appl equations = atermpp::aterm_appl(core::detail::function_symbol_PBEqnSpec(), eqn_list);
-  atermpp::aterm_appl initial_state = atermpp::aterm_appl(core::detail::function_symbol_PBInit(), p.initial_state());
-  atermpp::aterm_appl result;
+  atermpp::aterm equations = atermpp::aterm(core::detail::function_symbol_PBEqnSpec(), eqn_list);
+  atermpp::aterm initial_state = atermpp::aterm(core::detail::function_symbol_PBInit(), p.initial_state());
+  atermpp::aterm result;
 
-  result = atermpp::aterm_appl(core::detail::function_symbol_PBES(),
+  result = atermpp::aterm(core::detail::function_symbol_PBES(),
              data::detail::data_specification_to_aterm(p.data()),
              global_variables,
              equations,

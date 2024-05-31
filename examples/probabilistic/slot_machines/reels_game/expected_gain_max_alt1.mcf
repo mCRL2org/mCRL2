@@ -1,9 +1,0 @@
-map max_turns,skipped_turns:Nat;
-eqn max_turns=1;
-    skipped_turns=32;
-
-form val(1/max_turns)*mu X(turns:Nat=0).
-            (val(turns==max_turns+skipped_turns) && val(0) ||
-             val(turns<max_turns+skipped_turns) &&
-               ( <true>sup n:Nat.<points(n)> (val(if(turns>=skipped_turns,n-1,0))+X(turns+1))
-               ));

@@ -602,11 +602,6 @@ protected:
       result=data_result;
       return;
     }
-    if (data::sort_real::is_one(data_result))
-    {
-      apply(result, x);
-      return;
-    }
     apply(result, x);
     assert(!is_const_multiply_alt(result));
     assert(!data::sort_real::is_zero(data_result));
@@ -659,20 +654,14 @@ protected:
     {
       if (data::sort_real::is_larger_zero(data_result))
       {
-        assert(data::sort_real::value(data_result)>0);
+        assert(data::sort_real::value<double>(data_result)>0);
         return;
       }
       make_const_multiply(result, data_result, result);
       return;
     }
-    data::data_expression result_f;
-    apply(result_f, f);
-    if (data::sort_real::is_one(result_f))
-    {   
-      return;
-    } 
 
-    make_const_multiply(result, result_f, result);
+    make_const_multiply(result, data_result, result);
     return;  
   }
 

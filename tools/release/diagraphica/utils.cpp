@@ -69,6 +69,13 @@ int Utils::strToInt(const std::string& s)
 }
 
 
+std::string Utils::abbreviate(const std::string& s, size_t length)
+{
+  // where \x7f is the ellipsis character
+  return s.length() <= length ? s : s.substr(0, length - 1) + '\x7f';
+}
+
+
 // -- trig functions ------------------------------------------------
 
 

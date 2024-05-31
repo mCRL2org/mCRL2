@@ -34,7 +34,7 @@ struct Position2D
 
 // -- data for character textures -----------------------------------
 
-const int CHARSETSIZE = 95;
+const int CHARSETSIZE = 96;
 const int CHARWIDTH   = 16;
 const int CHARHEIGHT  = 32;
 

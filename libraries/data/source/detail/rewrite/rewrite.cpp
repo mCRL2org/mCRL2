@@ -31,17 +31,17 @@ namespace detail
 {
 
 #ifndef NDEBUG
-// function object to test if it is an aterm_appl with function symbol "f"
+// function object to test if it is an aterm with function symbol "f"
 struct is_a_variable
 {
   bool operator()(const atermpp::aterm& t) const
   {
-    return is_variable(atermpp::down_cast<atermpp::aterm_appl>(t));
+    return is_variable(t);
   }
 };
 
 static
-bool occur_check(const variable& v, const atermpp::aterm_appl& e)
+bool occur_check(const variable& v, const atermpp::aterm& e)
 {
   if (v==e)
   {
@@ -393,7 +393,7 @@ void Rewriter::quantifier_enumeration(
   variable_vector vl_new_v;
   for(const variable& v: vl)
   {
-    if (sigma(v)!=v)
+    if (sigma(v)!=v ||  sigma.variable_occurs_in_a_rhs(v))
     {
       const variable v_fresh(m_generator(), v.sort());
       variable_renaming[v]=v_fresh;
@@ -444,25 +444,6 @@ void Rewriter::quantifier_enumeration(
       return;
     }
   }
-
-  struct is_not
-  {
-    data_expression m_expr;
-    is_not(const data_expression& expr)
-    : m_expr(expr)
-    {}
-
-    bool operator()(const data_expression& expr)
-    {
-      return expr != m_expr;
-    }
-  };
-
-  /* typedef enumerator_algorithm_with_iterator<rewriter_wrapper,
-                                             enumerator_list_element<>,
-                                             is_not,
-                                             rewriter_wrapper,
-                                             rewriter_wrapper::substitution_type> enumerator_type; */
 
   typedef enumerator_algorithm<rewriter_wrapper, rewriter_wrapper > enumerator_type; 
     typedef data::enumerator_list_element<data_expression> enumerator_element;

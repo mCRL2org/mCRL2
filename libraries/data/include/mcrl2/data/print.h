@@ -25,6 +25,22 @@ namespace data
 
 namespace detail {
 
+// Check that the argument, which must be of sort Pos, represents 1.
+inline 
+bool is_one(const data_expression& x)
+{
+  assert(x.sort() == sort_pos::pos());
+#ifdef Enable64bitNumbers
+  return (sort_pos::is_most_significant_digit_application(x) &&
+          (( is_machine_number(sort_pos::arg(x)) && atermpp::down_cast<machine_number>(sort_pos::arg(x)).value() == 1) ||
+           (  sort_machine_word::is_one_word_function_symbol(sort_pos::arg(x))))
+         ) ||
+         sort_pos::is_c1_function_symbol(x);
+#else
+  return sort_pos::is_c1_function_symbol(x);
+#endif
+}
+
 inline
 bool is_numeric_cast(const data_expression& x)
 {
@@ -34,8 +50,10 @@ bool is_numeric_cast(const data_expression& x)
          || data::sort_int::is_nat2int_application(x)
          || data::sort_real::is_nat2real_application(x)
          || data::sort_real::is_int2real_application(x)
+#ifndef Enable64bitNumbers
          || data::sort_nat::is_cnat_application(x)
          || data::sort_int::is_cint_application(x)
+#endif
          || data::sort_real::is_creal_application(x)
           ;
 }
@@ -101,6 +119,7 @@ bool is_div(const application& x)
                             sort_nat::is_div_application(x); });
 }
 
+#ifndef Enable64bitNumbers
 inline
 bool is_divmod(const application& x)
 {
@@ -109,6 +128,7 @@ bool is_divmod(const application& x)
                 [](const data_expression& x)
                    { return sort_nat::is_divmod_application(x); });
 }
+#endif
 
 inline
 bool is_divides(const application& x)
@@ -280,7 +300,8 @@ int precedence(const application& x)
   {
     const data_expression& numerator = sort_real::left(x);
     const data_expression& denominator = sort_real::right(x);
-    if (sort_pos::is_c1_function_symbol(denominator))
+    // if (sort_pos::is_c1_function_symbol(denominator))
+    if (detail::is_one(denominator))
     {
       return precedence(numerator);
     }
@@ -340,7 +361,9 @@ int precedence(const application& x)
   }
   else if (   detail::is_div(x)
               || detail::is_mod(x)
+#ifndef Enable64bitNumbers
               || detail::is_divmod(x)
+#endif
               || detail::is_divides(x)
           )
   {
@@ -421,9 +444,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_binary_data_operation(const application& x, const data_expression& x1, const data_expression& x2, const std::string& op)
   {
-    auto p = precedence(x);
-    auto p1 = precedence(x1);
-    auto p2 = precedence(x2);
+    const int p = precedence(x);
+    const int p1 = precedence(x1);
+    const int p2 = precedence(x2);
     print_expression(x1, (p1 < p) || (p1 == p && !is_left_associative(x)));
     derived().print(op);
     print_expression(x2, (p2 < p) || (p2 == p && !is_right_associative(x)));
@@ -431,15 +454,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_binary_data_operation(const application& x, const std::string& op)
   {
-    const auto& x1 = x[0];
-    const auto& x2 = x[1];
+    const data_expression& x1 = x[0];
+    const data_expression& x2 = x[1];
     print_binary_data_operation(x, x1, x2, op);
-  }
-
-  // TODO: check if this test is precise enough
-  bool is_one(const data_expression& x) const
-  {
-    return sort_pos::is_c1_function_symbol(x);
   }
 
   bool is_infix_operation(const application& x) const
@@ -1001,7 +1018,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_fbag::is_insert_application(x))
       {
+#ifdef Enable64bitNumbers
+        arguments.emplace_back(sort_fbag::arg1(x), sort_nat::pos2nat(sort_fbag::arg2(x)));
+#else
         arguments.emplace_back(sort_fbag::arg1(x), sort_nat::cnat(sort_fbag::arg2(x)));
+#endif
         x = sort_fbag::arg3(x);
       }
       else // if (sort_fbag::is_fbagcinsert_application(x))
@@ -1228,23 +1249,23 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().enter(x);
     if (data::is_list_container(x))
     {
-      derived().apply(data::list_container(atermpp::aterm_appl(x)));
+      derived().apply(data::list_container(atermpp::aterm(x)));
     }
     else if (data::is_set_container(x))
     {
-      derived().apply(data::set_container(atermpp::aterm_appl(x)));
+      derived().apply(data::set_container(atermpp::aterm(x)));
     }
     else if (data::is_bag_container(x))
     {
-      derived().apply(data::bag_container(atermpp::aterm_appl(x)));
+      derived().apply(data::bag_container(atermpp::aterm(x)));
     }
     else if (data::is_fset_container(x))
     {
-      derived().apply(data::fset_container(atermpp::aterm_appl(x)));
+      derived().apply(data::fset_container(atermpp::aterm(x)));
     }
     else if (data::is_fbag_container(x))
     {
-      derived().apply(data::fbag_container(atermpp::aterm_appl(x)));
+      derived().apply(data::fbag_container(atermpp::aterm(x)));
     }
     derived().leave(x);
   }
@@ -1543,10 +1564,130 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       print_binary_data_operation(x, " >= ");
     }
 
+#ifdef Enable64bitNumbers    
+    //-------------------------------------------------------------------//
+    //                            machine_word
+    //-------------------------------------------------------------------//
+
+    else if (sort_machine_word::is_zero_word_function_symbol(x))
+    {
+      derived().print(std::to_string(sort_machine_word::detail::zero_word().value()));
+    }
+    else if (sort_machine_word::is_one_word_function_symbol(x))
+    {
+      derived().print(std::to_string(sort_machine_word::detail::one_word().value()));
+    }
+    else if (sort_machine_word::is_max_word_function_symbol(x))
+    {
+      derived().print(std::to_string(sort_machine_word::detail::max_word().value()));
+    }
+    else if (sort_machine_word::is_succ_word_application(x))
+    {
+      derived().print("((");
+      derived().apply(sort_machine_word::arg(x));
+      derived().print(" + 1) mod ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    else if (sort_machine_word::is_add_word_application(x))
+    {
+      derived().print("((");
+      derived().apply(sort_machine_word::left(x));
+      derived().print(" + ");
+      derived().apply(sort_machine_word::right(x));
+      derived().print(") mod ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    else if (sort_machine_word::is_add_overflow_word_application(x))
+    {
+      derived().print("((");
+      derived().apply(sort_machine_word::left(x));
+      derived().print(" + ");
+      derived().apply(sort_machine_word::right(x));
+      derived().print(") div ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    else if (sort_machine_word::is_times_word_application(x))
+    {
+      derived().print("((");
+      derived().apply(sort_machine_word::left(x));
+      derived().print(" * ");
+      derived().apply(sort_machine_word::right(x));
+      derived().print(") mod ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    else if (sort_machine_word::is_times_overflow_word_application(x))
+    {
+      derived().print("((");
+      derived().apply(sort_machine_word::left(x));
+      derived().print(" * ");
+      derived().apply(sort_machine_word::right(x));
+      derived().print(") div ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    /* else if (sort_machine_word::is_minus_word_application(x))
+    {
+      derived().print("(if(");
+      derived().print_binary_operation(x, " >= ");
+      derived().print(", ");
+      derived().print_binary_operation(x, " - ");
+      derived().print(", ");
+      derived().print(max_machine_number_string());
+      derived().print(" + ");
+      derived().print_binary_operation(x, " - ");
+      derived().print(")");
+    } 
+    else if (sort_machine_word::is_div_word_application(x))
+    {
+      derived().print_binary_operation(x, " div ");
+    }
+    else if (sort_machine_word::is_mod_word_application(x))
+    {
+      derived().print_binary_operation(x, " mod ");
+    } */
+
+/* TODO: Handle the following cases. 
+ 
+     @div_doubleword <"div_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                                  
+     @div_double_doubleword <"div_double_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word                   
+     @div_triple_doubleword <"div_triple_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> # @word <"arg5"> -> @word  
+     @mod_doubleword <"mod_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                                  
+     @sqrt_doubleword <"sqrt_doubleword">: @word <"arg1"> # @word <"arg2"> -> @word                                                                 
+     @sqrt_tripleword <"sqrt_tripleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                                
+     @sqrt_tripleword_overflow <"sqrt_tripleword_overflow">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                              
+     @sqrt_quadrupleword <"sqrt_quadrupleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word                         
+     @sqrt_quadrupleword_overflow <"sqrt_quadrupleword_overflow">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word       
+     @pred_word <"pred_word">: @word <"arg"> ->@word                                                                                                
+*/
+
+
+#endif
+
     //-------------------------------------------------------------------//
     //                            pos
     //-------------------------------------------------------------------//
 
+#ifdef Enable64bitNumbers
+    else if (data::sort_pos::is_positive_constant(x))
+    {
+      derived().print(data::sort_pos::positive_constant_as_string(x));
+    }
+    else if (sort_pos::is_most_significant_digit_application(x))
+    {
+      derived().apply(sort_pos::arg(x));
+    }
+    else if (sort_pos::is_concat_digit_application(x))
+    {
+      derived().print(max_machine_number_string() + "* (");
+      derived().apply(sort_pos::arg1(x));
+      derived().print(") + ");
+      derived().apply(sort_pos::arg2(x));
+    }
+#else
     else if (sort_pos::is_cdub_application(x))
     {
       if (data::sort_pos::is_positive_constant(x))
@@ -1559,6 +1700,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         derived().apply(detail::reconstruct_pos_mult(x, number));
       }
     }
+#endif
     // TODO: handle @pospred
     else if (sort_pos::is_plus_application(x))
     {
@@ -1566,9 +1708,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_pos::is_add_with_carry_application(x))
     {
-      auto b = sort_pos::arg1(x);
-      auto x1 = sort_pos::arg2(x);
-      auto x2 = sort_pos::arg3(x);
+#ifdef Enable64bitNumbers
+      const data_expression& x1 = sort_pos::left(x);
+      const data_expression& x2 = sort_pos::right(x);
+      derived().apply(sort_pos::plus(x1, x2));
+#else
+      const data_expression& b = sort_pos::arg1(x);
+      const data_expression& x1 = sort_pos::arg2(x);
+      const data_expression& x2 = sort_pos::arg3(x);
       if (b == data::sort_bool::true_())
       {
         derived().apply(sort_pos::succ(sort_pos::plus(x1, x2)));
@@ -1581,6 +1728,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         derived().apply(if_(b, x1, x2));
       }
+#endif
     }
     else if (sort_pos::is_times_application(x))
     {
@@ -1592,10 +1740,42 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            natpair
     //-------------------------------------------------------------------//
 
+#ifdef Enable64bitNumbers
     else if (sort_nat::is_first_application(x))
     {
-    	// TODO: verify if this is the correct way of dealing with first/divmod
-    	const auto& y = atermpp::down_cast<application>(sort_nat::arg(x));
+      // TODO: verify if this is the correct way of dealing with first/divmod
+      data_expression y = sort_nat::arg(x);
+      if (!sort_nat::is_divmod_aux_application(y))
+      {
+        print_function_application(x);
+      }
+      else
+      {
+        print_expression(sort_nat::left(y), true);     // Removed  left_precedence(y) and replaced it with true, which may be undesireable. Happens 3x more below. 
+        derived().print(" div ");
+        print_expression(sort_nat::right(y), true);
+      } 
+    }
+    else if (sort_nat::is_last_application(x))
+    {
+      // TODO: verify if this is the correct way of dealing with last/divmod
+      data_expression y = sort_nat::arg(x);
+      if (!sort_nat::is_divmod_aux_application(y))
+      {
+        print_function_application(x);
+      }
+      else
+      {
+        print_expression(sort_nat::left(y), true);
+        derived().print(" mod ");
+        print_expression(sort_nat::right(y), true);
+      }
+    }
+#else
+    else if (sort_nat::is_first_application(x))
+    {
+        // TODO: verify if this is the correct way of dealing with first/divmod
+        const auto& y = atermpp::down_cast<application>(sort_nat::arg(x));
       if (!sort_nat::is_divmod_application(y))
       {
         print_function_application(x);
@@ -1612,21 +1792,40 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       if (!sort_nat::is_divmod_application(y))
       {
         print_function_application(x);
-      }
-      else
-      {
+      }         
+      else      
+      {            
         print_binary_data_operation(y, " mod ");
-      }
-    }
+      }                     
+    }                       
+#endif
 
     //-------------------------------------------------------------------//
     //                            nat
     //-------------------------------------------------------------------//
 
+#ifdef Enable64bitNumbers
+    else if (data::sort_nat::is_natural_constant(x))
+    {
+      derived().print(data::sort_nat::natural_constant_as_string(x));
+    }
+    else if (sort_nat::is_most_significant_digit_nat_application(x))
+    {
+      derived().apply(sort_nat::arg(x));
+    }   
+    else if (sort_nat::is_concat_digit_application(x))
+    { 
+      derived().print("(" + max_machine_number_string() + "*");
+      derived().apply(sort_nat::arg1(x));
+      derived().print(") + ");
+      derived().apply(sort_nat::arg2(x));
+    } 
+#else
     else if (sort_nat::is_cnat_application(x))
     {
       derived().apply(sort_nat::arg(x));
     }
+#endif
     else if (sort_nat::is_pos2nat_application(x))
     {
       derived().apply(*x.begin());
@@ -1672,7 +1871,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_int::is_pos2int_application(x))
     {
-      derived().apply(*x.begin());
+      derived().apply(sort_int::arg(x));
     }
     else if (sort_int::is_negate_application(x))
     {
@@ -1707,13 +1906,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       data_expression numerator = sort_real::left(x);
       const data_expression& denominator = sort_real::right(x);
-      if (is_one(denominator))
+      if (detail::is_one(denominator))
       {
         derived().apply(numerator);
       }
       else
       {
-        derived().apply(sort_real::divides(numerator, sort_int::pos2int(denominator)));
+        print_binary_data_operation(x, " / ");
       }
     }
     else if (sort_real::is_pos2real_application(x))
@@ -2080,6 +2279,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     derived().leave(x);
   }
+
+  void apply(const machine_number& x)
+  {     
+      derived().print(std::to_string(x.value()));
+  }     
 
   void apply(const data::where_clause& x)
   {

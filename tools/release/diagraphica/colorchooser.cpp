@@ -25,90 +25,79 @@ ColorChooser::ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinate
 }
 
 
-void ColorChooser::visualize(const bool& inSelectMode)
+void ColorChooser::enterEvent(QEnterEvent* event)
 {
-  if (inSelectMode)
-  {
-    GLint hits = 0;
-    GLuint selectBuf[512];
-    startSelectMode(hits, selectBuf, 2.0, 2.0);
-
-    drawPoints(inSelectMode);
-
-    finishSelectMode(hits, selectBuf);
-  }
-  else
-  {
-    clear();
-    if (m_type == HueColor)
-    {
-      drawColorSpectrum();
-    }
-    else
-    {
-      drawGrayScale();
-    }
-    drawPath(inSelectMode);
-    drawPoints(inSelectMode);
-  }
-}
-
-void ColorChooser::handleMouseEnterEvent()
-{
+  Visualizer::enterEvent(event);
   emit activated();
-  // normal mode
   update();
 }
 
-void ColorChooser::handleMouseLeaveEvent()
+
+void ColorChooser::leaveEvent(QEvent* event)
 {
+  Visualizer::leaveEvent(event);
   emit deactivated();
-  // normal mode
   update();
 }
 
 
-void ColorChooser::handleMouseEvent(QMouseEvent* e)
+void ColorChooser::mouseMoveEvent(QMouseEvent* event)
 {
-  Visualizer::handleMouseEvent(e);
-  if (e->type() != QEvent::MouseMove || e->buttons() != Qt::NoButton)
+  Visualizer::mouseMoveEvent(event);
+  setCursor(m_dragIdx != NON_EXISTING ? Qt::ClosedHandCursor :
+    !getSelection().empty() ? Qt::PointingHandCursor :
+    Qt::ArrowCursor);
+  if (event->buttons() == Qt::LeftButton && m_mouseDrag && m_dragIdx != NON_EXISTING)
   {
-    // selection mode
-    updateSelection();
-
-    if (e->button() == Qt::LeftButton)
-    {
-      if (e->type() == QEvent::MouseButtonPress)
-      {
-        if (m_dragIdx == NON_EXISTING)
-        {
-          QPointF pos = worldCoordinate(e->position());
-
-          double xCur = pos.x() / (0.5 * worldSize().width());
-          double yCur = pos.y() / (0.5 * worldSize().height());
-
-          m_dof->addValue((xCur + 1.0) / 2.0);
-          m_yCoordinates->append(yCur);
-        }
-      }
-      if (e->type() == QEvent::MouseButtonRelease)
-      {
-        m_dragIdx = NON_EXISTING;
-      }
-    }
-
-    if (m_mouseDrag && e->buttons() == Qt::LeftButton)
-    {
-      handleDrag();
-    }
-
-    // normal mode
+    movePoint(m_dragIdx, event->position());
     update();
   }
 }
 
-void ColorChooser::drawColorSpectrum()
+
+void ColorChooser::mousePressEvent(QMouseEvent* event)
 {
+  Visualizer::mousePressEvent(event);
+
+  const SelectionList selections = getSelection();
+  if (!selections.empty() && !selections.back().empty())
+  {
+    if (event->button() == Qt::LeftButton)
+    {
+      m_dragIdx = selections.back()[0];
+    }
+    else if (event->button() == Qt::RightButton)
+    {
+      removePoint(selections.back()[0]);
+    }
+  }
+
+  if (event->button() == Qt::LeftButton && m_dragIdx == NON_EXISTING)
+  {
+    appendPoint(event->position());
+    m_dragIdx = m_yCoordinates->size() - 1;
+  }
+  update();
+}
+
+
+void ColorChooser::mouseReleaseEvent(QMouseEvent* event)
+{
+  Visualizer::mouseReleaseEvent(event);
+  if (event->button() == Qt::LeftButton)
+  {
+    m_dragIdx = NON_EXISTING;
+  }
+  update();
+}
+
+
+template <Visualizer::Mode mode> void ColorChooser::drawColorSpectrum()
+{
+  if constexpr (mode == Marking)
+  {
+    return;
+  }
   QSizeF size = worldSize();
 
   // calc size of bounding box
@@ -126,8 +115,12 @@ void ColorChooser::drawColorSpectrum()
 }
 
 
-void ColorChooser::drawGrayScale()
+template <Visualizer::Mode mode> void ColorChooser::drawGrayScale()
 {
+  if constexpr (mode == Marking)
+  {
+    return;
+  }
   QSizeF size = worldSize();
 
   // calc size of bounding box
@@ -149,7 +142,7 @@ void ColorChooser::drawGrayScale()
 }
 
 
-void ColorChooser::drawPath(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ColorChooser::drawPath()
 {
   double xRgt;
   double yTop;
@@ -161,7 +154,7 @@ void ColorChooser::drawPath(const bool& inSelectMode)
   xRgt =  0.5*size.width();
   yTop =  0.5*size.height();
 
-  if (!inSelectMode)
+  if constexpr (mode == Visualizing)
   {
     VisUtils::enableLineAntiAlias();
     for (int i = 0; i < m_yCoordinates->size()-1; ++i)
@@ -181,7 +174,7 @@ void ColorChooser::drawPath(const bool& inSelectMode)
 }
 
 
-void ColorChooser::drawPoints(const bool& inSelectMode)
+template <Visualizer::Mode mode> void ColorChooser::drawPoints()
 {
   double xRgt;
   double yTop;
@@ -202,7 +195,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
   size = m_yCoordinates->size();
 
   // selection mode
-  if (inSelectMode)
+  if constexpr (mode == Marking)
   {
     for (std::size_t i = 0; i < size-1; ++i)
     {
@@ -345,89 +338,60 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
 }
 
 
-void ColorChooser::handleHits(const std::vector< int > &ids)
+template <Visualizer::Mode mode> void ColorChooser::draw()
 {
-  if (m_lastMouseEvent->type() == QEvent::MouseButtonPress)
+  if constexpr (mode == Marking)
   {
-    int id = ids[0];
-    if (m_lastMouseEvent->button() == Qt::LeftButton)
+    drawPoints<mode>();
+  }
+  else
+  {
+    clear();
+    if (m_type == HueColor)
     {
-      if (0 <= id && id < m_yCoordinates->size())
-      {
-        m_dragIdx = id;
-      }
+      drawColorSpectrum<mode>();
     }
-    else if (m_lastMouseEvent->button() == Qt::RightButton)
+    else
     {
-      if (0 <= id && id < m_yCoordinates->size() && m_yCoordinates->size() > 2)
-      {
-        m_dof->removeValue(id);
-        m_yCoordinates->removeAt(id);
-      }
+      drawGrayScale<mode>();
     }
+    drawPath<mode>();
+    drawPoints<mode>();
   }
 }
 
 
-void ColorChooser::handleDrag()
+void ColorChooser::visualize() { draw<Visualizing>(); }
+void ColorChooser::mark() { draw<Marking>(); }
+
+
+void ColorChooser::appendPoint(const QPointF& position)
 {
-  if (m_dragIdx != NON_EXISTING && m_dragIdx < (std::size_t)m_yCoordinates->size())
+  m_dof->addValue(0.);
+  m_yCoordinates->append(0.);
+  movePoint(m_yCoordinates->size() - 1, position);
+}
+
+
+void ColorChooser::removePoint(std::size_t index)
+{
+  if (m_yCoordinates->size() > 2)
   {
-    QSizeF size = worldSize();
-    QPointF pos = worldCoordinate(m_lastMouseEvent->position());
-
-    double xCur = pos.x()/(0.5*size.width());
-    double yCur = pos.y()/(0.5*size.height());
-
-    m_dof->setValue(m_dragIdx, (xCur + 1.0) / 2.0);
-    (*m_yCoordinates)[m_dragIdx] = yCur;
-    updateSelection();
-    update();
+    m_dof->removeValue(index);
+    m_yCoordinates->removeAt(index);
   }
 }
 
 
-void ColorChooser::processHits(
-  GLint hits,
-  GLuint buffer[])
+void ColorChooser::movePoint(std::size_t index, const QPointF& position)
 {
-  GLuint* ptr;
-  std::vector< int > ids;
+  const QSizeF size = worldSize();
+  const QPointF pos = worldCoordinate(position);
 
-  ptr = (GLuint*) buffer;
+  double xCur = pos.x() / (0.5 * size.width());
+  double yCur = pos.y() / (0.5 * size.height());
 
-  if (hits > 0)
-  {
-    // if necassary, advance to closest hit
-    if (hits > 1)
-    {
-      for (int i = 0; i < (hits-1); ++i)
-      {
-        int number = *ptr;
-        ++ptr; // number;
-        ++ptr; // z1
-        ++ptr; // z2
-        for (int j = 0; j < number; ++j)
-        {
-          ++ptr;  // names
-        }
-      }
-    }
-
-    // last hit
-    int number = *ptr;
-    ++ptr; // number
-    ++ptr; // z1
-    ++ptr; // z2
-
-    for (int i = 0; i < number; ++i)
-    {
-      ids.push_back(*ptr);
-      ++ptr;
-    }
-
-    handleHits(ids);
-  }
-
-  ptr = 0;
+  m_dof->setValue(index, (xCur + 1.0) / 2.0);
+  (*m_yCoordinates)[index] = yCur;
 }
+

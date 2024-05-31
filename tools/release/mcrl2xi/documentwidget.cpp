@@ -39,7 +39,7 @@ void DocumentWidget::openFile(QString fileName)
     QByteArray data_array=file.readAll();
     if (!mcrl2::utilities::contains_only_ascii_symbols(data_array))
     {
-       mCRL2log(mcrl2::log::warning) << "The input is not plain text. mcrl2xi requires a textual process or data specification as input.\n";
+       mCRL2log(mcrl2::log::error) << "The input is not plain text. mcrl2xi requires a textual process or data specification as input.\n";
     }
     else
     {

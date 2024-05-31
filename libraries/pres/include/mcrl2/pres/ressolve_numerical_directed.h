@@ -408,7 +408,7 @@ class ressolve_by_numerical_iteration_directed
       else if (is_const_multiply(p))
       {
         const const_multiply& pp = atermpp::down_cast<const_multiply>(p);
-        const double left_argument=data::sort_real::value(pp.left());
+        const double left_argument=data::sort_real::value<double>(pp.left());
         assert(left_argument>0);
         const detail::internal_res_expression& right_argument=translate_to_internal_res_expression(pp.right());
         const_multiply_terms.emplace_back(left_argument,right_argument);
@@ -420,7 +420,7 @@ class ressolve_by_numerical_iteration_directed
         const data::data_expression& pp = atermpp::down_cast<data::data_expression>(p);
         if (data::sort_real::real_() == pp.sort())
         {
-          double r=data::sort_real::value(pp);
+          double r=data::sort_real::value<double>(pp);
           real_constants.emplace_back(r);
           translated_pres_expressions.emplace(p,&real_constants.back());
           return real_constants.back();

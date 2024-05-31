@@ -12,7 +12,11 @@
 #ifndef MCRL2_LPS_SUMMAND_H
 #define MCRL2_LPS_SUMMAND_H
 
+#ifdef Enable64bitNumbers
+#include "mcrl2/data/real64.h"
+#else
 #include "mcrl2/data/real.h"
+#endif
 
 namespace mcrl2
 {

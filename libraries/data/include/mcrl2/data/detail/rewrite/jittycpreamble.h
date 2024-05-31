@@ -322,7 +322,12 @@ template <bool ARGUMENTS_IN_NORMAL_FORM>
 static inline
 void rewrite_aux(data_expression& result, const data_expression& t, RewriterCompilingJitty* this_rewriter)
 {
-// std::cerr << "--- " << t << "\n";
+  if (is_machine_number(t))
+  {
+    result=t;
+    return;
+  }
+  else
   if (is_function_symbol(t))
   {
     const std::size_t index = get_index(down_cast<function_symbol>(t));
