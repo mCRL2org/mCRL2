@@ -148,8 +148,12 @@ class LtscompareTest(ProcessTauTest):
         self.add_command_line_options('t4', ['-e' + equivalence_type])
 
 class LtsCombineTest(ProcessTest):
-    def __init__(self, name, settings):
+    def __init__(self, name, parallel, settings):
         super(LtsCombineTest, self).__init__(name, ymlfile('ltscombine'), settings)
+
+        if parallel:
+            self.add_command_line_options('t5', ['--threads=8'])
+
 
     def create_inputfiles(self, runpath = '.'):
         super(LtsCombineTest, self).create_inputfiles(runpath)
@@ -335,8 +339,17 @@ class PbessolvesymbolicTest(PbesTest):
         super(PbessolvesymbolicTest, self).__init__(name, ymlfile('pbessolvesymbolic'), settings)
         
 class Pbes2boolTest(PbesTest):
-    def __init__(self, name, settings):
+    def __init__(self, name, parallel, settings):
         super(Pbes2boolTest, self).__init__(name, ymlfile('pbessolve'), settings)
+
+        if parallel:            
+            self.add_command_line_options('t2', ["--threads=4"])
+            self.add_command_line_options('t3', ["--threads=4"])
+            self.add_command_line_options('t4', ["--threads=4"])
+            self.add_command_line_options('t5', ["--threads=4"])
+            self.add_command_line_options('t6', ["--threads=4"])
+            self.add_command_line_options('t7', ["--threads=4"])
+            self.add_command_line_options('t8', ["--threads=4"])
 
 class Pbes2boolDepthFirstTest(PbesTest):
     def __init__(self, name, settings):
@@ -456,7 +469,8 @@ available_tests = {
     'pbesinst-alternative_lazy'                   : lambda name, settings: PbesinstTest(name, ['-salternative-lazy'], settings)                        ,
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)                   ,
     'pbespgsolve'                                 : lambda name, settings: PbespgsolveTest(name, settings)                                             ,
-    'pbessolve'                                   : lambda name, settings: Pbes2boolTest(name, settings)                                               ,
+    'pbessolve'                                   : lambda name, settings: Pbes2boolTest(name, False, settings)                                        ,
+    'pbessolve-parallel'                          : lambda name, settings: Pbes2boolTest(name, True, settings)                                         ,
     'pbessolve-depth-first'                       : lambda name, settings: Pbes2boolDepthFirstTest(name, settings)                                     ,
     'pbessolve-counter-example-optimization-0'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 0, settings)                            ,
     'pbessolve-counter-example-optimization-1'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 1, settings)                            ,
@@ -473,7 +487,8 @@ available_tests = {
 }
 
 available_experimental_tests = {
-    'ltscombine'                                  : lambda name, settings: LtsCombineTest(name, settings)                                              ,
+    'ltscombine'                                  : lambda name, settings: LtsCombineTest(name, False, settings)                                       ,
+    'ltscombine-parallel'                         : lambda name, settings: LtsCombineTest(name, True, settings)                                        ,
     'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
     'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                
