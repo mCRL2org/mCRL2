@@ -1,4 +1,4 @@
-FROM fedora:39
+FROM fedora:40
 
 # Install packages needed for compiling and testing the tools.
 RUN dnf install -y \
@@ -7,6 +7,8 @@ RUN dnf install -y \
  gcc-c++ \
  git \
  make \
+ python3-pip \
+ python3 \
  which \
 # Required to apply the patch file
  dos2unix \
@@ -25,6 +27,12 @@ RUN dnf install -y \
  pkgconf \
  popt-devel \
  zlib-devel
+
+# Copy the current source files into the root home directory
+COPY requirements.txt /root/requirements.txt
+
+# Install the required Python packages.
+RUN pip install --user --requirement /root/requirements.txt
 
 # Copy the current source files into the root home directory
 COPY ./ /root/mcrl2/
@@ -48,7 +56,7 @@ RUN cd ~/mcrl2-build && make -j${THREADS} install
 RUN cd ~/ && git clone --depth=1 --branch=v1.5.0 https://github.com/trolando/sylvan.git sylvan
 
 # Disabled a specific warning as error since sylvan cannot be compiled otherwise.
-RUN cd ~/sylvan && cmake -DCMAKE_C_FLAGS="-Wno-error=array-parameter" -DBUILD_SHARED_LIBS=OFF . && make -j${THREADS} install
+RUN cd ~/sylvan && cmake -DCMAKE_C_FLAGS="-Wno-error=array-parameter -Wno-error=calloc-transposed-args" -DBUILD_SHARED_LIBS=OFF . && make -j${THREADS} install
 
 # Clone ltsmin git repository at a specific version.
 RUN cd ~/ && git clone https://github.com/utwente-fmt/ltsmin.git ltsmin
@@ -68,5 +76,10 @@ RUN cd ~/ltsmin \
     && ./configure --disable-dependency-tracking --prefix=/root/ltsmin-build/ \
     && cd ~/ltsmin \
     && make -j${THREADS} install
+
+# Run some preliminary tests to ensure that it works
+RUN mkdir ~/workspace \
+    && cd ~/workspace \
+    && python3 ~/mcrl2/tests/scripts/test_ltsmin.py -t ~/mcrl2-build/stage/bin/ -l ~/ltsmin-build/bin/
 
 # We can now copy the /root/ltsmin-build directory from the resulting image and install the mcrl2 release locally for the shared libraries and jittyc headers.
