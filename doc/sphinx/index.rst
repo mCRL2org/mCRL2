@@ -37,7 +37,7 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 .. note::
 
    Listen to the `Parallel Rhapsody <https://suno.com/song/e90327be-a900-4fc3-82b2-8365cc837cfc>`
-   (thanks to Gert Veltink).
+   (thanks to Frederik Gosewehr and Gert Veltink).
 
 .. note::
 
