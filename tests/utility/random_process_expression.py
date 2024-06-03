@@ -86,7 +86,7 @@ class ProcessSpecification:
 #---------------------------------------------------------------------------#
 
 def remove_postfix(name):
-    return re.sub('\d+$', '', name)
+    return re.sub(r'\d+$', '', name)
 
 # Sum variables have the format 'bN: Bool', with N in [1, 2, ...]
 def make_variable(forbidden_variables):

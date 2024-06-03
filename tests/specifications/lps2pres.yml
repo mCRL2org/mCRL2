@@ -1,0 +1,34 @@
+nodes:
+  l1:
+    type: mcrl2
+  l2:
+    type: lps
+  l4:
+    type: pbes
+  l5:
+    type: mcf
+  l6:
+    type: pbes
+  l8:
+    type: pbes
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-n]
+    name: mcrl22lps
+  t3:
+    input: [l2, l5]
+    output: [l6]
+    args: []
+    name: lps2pbes
+  t4:
+    input: [l6]
+    output: []
+    args: []
+    name: pbes2bool
+
+result: |
+  result = t4.value['solution'] == (not t2.value['has-deadlock'])
+

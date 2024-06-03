@@ -3,8 +3,6 @@ nodes:
     type: mcrl2
   l2:
     type: lps
-  l3:
-    type: lts
   l4:
     type: pbes
   l5:
@@ -20,11 +18,6 @@ tools:
     output: [l2]
     args: [-n]
     name: mcrl22lps
-  t2:
-    input: [l2]
-    output: [l3]
-    args: [-D]
-    name: lps2lts
   t3:
     input: [l2, l5]
     output: [l6]

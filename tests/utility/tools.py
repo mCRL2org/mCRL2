@@ -287,7 +287,7 @@ class LtscompareTool(Tool):
 
 class ToolFactory(object):
     def create_tool(self, label, name, toolpath, input_nodes, output_nodes, args):
-        if name == 'lps2pbes':
+        if name in ['lps2pbes', 'lps2pres']:
             return Lps2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2pbes':
             return Lts2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
