@@ -34,6 +34,7 @@ MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
   findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
   addPropertyDialog = new AddEditPropertyDialog(true, processSystem, fileSystem,
                                                 findAndReplaceDialog, this);
+  toolOptionsDialog = new ToolOptionsDialog(this);
 
   setupMenuBar();
   setupToolbar();
@@ -129,13 +130,10 @@ void MainWindow::setupMenuBar()
       QKeySequence(Qt::ALT | Qt::Key_I));
   importPropertiesAction->setEnabled(false);
 
-// workaround for QTBUG-57687
-#if QT_VERSION > QT_VERSION_CHECK(5, 10, 0) || !defined MCRL2_PLATFORM_WINDOWS
   fileMenu->addSeparator();
 
   openGuiAction =
       fileMenu->addAction("Open mcrl2-gui", this, SLOT(actionOpenMcrl2gui()));
-#endif
 
   fileMenu->addSeparator();
 
@@ -199,6 +197,8 @@ void MainWindow::setupMenuBar()
     connect(saveFileAction, SIGNAL(toggled(bool)), fileSystem,
             SLOT(setSaveIntermediateFilesOptions(bool)));
   }
+
+  optionsMenu->addAction("Tool Options", this, SLOT(actionShowToolOptions()));
 }
 
 void MainWindow::setupToolbar()
@@ -396,6 +396,14 @@ void MainWindow::actionParse()
     {
       processSystem->parseSpecification();
     }
+  }
+}
+
+void MainWindow::actionShowToolOptions()
+{
+  if (assertSpecificationOpened())
+  {
+    toolOptionsDialog->show();
   }
 }
 

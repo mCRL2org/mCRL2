@@ -13,6 +13,7 @@
 #include "propertiesdock.h"
 #include "findandreplacedialog.h"
 #include "rewriteexpressiondock.h"
+#include "tooloptionsdialog.h"
 
 #include <QMainWindow>
 
@@ -25,7 +26,7 @@ class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
-  public:
+public:
   /**
    * @brief MainWindow Constructor
    * @param inputProjectFilePath The file path to a project file to open
@@ -101,6 +102,11 @@ class MainWindow : public QMainWindow
    * @brief actionParse Allows the user to parse the current specification
    */
   void actionParse();
+
+  /**
+   * @brief Opens a dialog to change tool settings.
+   */
+  void actionShowToolOptions();
 
   /**
    * @brief actionSimulate Allows the user to simulate the current specification
@@ -179,7 +185,7 @@ class MainWindow : public QMainWindow
    */
   bool event(QEvent* event) override;
 
-  private:
+private:
   QAction* newProjectAction;
   QAction* openProjectAction;
 
@@ -236,6 +242,7 @@ class MainWindow : public QMainWindow
   QMenu* viewMenu;
   QMenu* editMenu;
   QMenu* saveIntermediateFilesMenu;
+
   QToolBar* toolbar;
   mcrl2::gui::qt::CodeEditor* specificationEditor;
   PropertiesDock* propertiesDock;
@@ -244,6 +251,7 @@ class MainWindow : public QMainWindow
 
   FindAndReplaceDialog* findAndReplaceDialog;
   AddEditPropertyDialog* addPropertyDialog;
+  ToolOptionsDialog* toolOptionsDialog;
 
   FileSystem* fileSystem;
   ProcessSystem* processSystem;
