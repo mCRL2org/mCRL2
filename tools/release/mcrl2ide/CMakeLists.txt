@@ -17,6 +17,8 @@ mcrl2_add_gui_tool(mcrl2ide
     propertywidget.cpp
     rewriteexpressiondock.cpp
     rewriteexpressiondock.ui
+    tooloptionsdialog.cpp
+    tooloptionsdialog.ui
     utilities.cpp
   DEPENDS
     mcrl2_gui
