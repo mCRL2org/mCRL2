@@ -1,9 +1,9 @@
-map max_turns:Nat;
-eqn max_turns=1600;
+map max_rounds:Nat;
+eqn max_rounds=1600;
 
-form mu X(wins:Nat=0, turns:Nat=0).
-            val(turns==max_turns) && val(wins/turns) ||
-            val(turns<max_turns) &&
-               ( <true><win> X(wins+1,turns+1) ||
-                 <true><lose>[true] X(wins, turns+1)
+form mu X(wins:Nat=0, rounds:Nat=0).
+            val(rounds==max_rounds) && val(wins/rounds) ||
+            val(rounds<max_rounds) &&
+               ( <true><win> X(wins+1,rounds+1) ||
+                 <true><lose>[true] X(wins, rounds+1)
                );

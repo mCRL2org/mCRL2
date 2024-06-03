@@ -1,10 +1,10 @@
-map max_turns:Nat;
-eqn max_turns=1;
+map max_rounds:Nat;
+eqn max_rounds=1;
 
-form val(1/max_turns)*mu X(turns:Nat=0).
-            (val(turns==max_turns) && val(0) ||
-             val(turns<max_turns) &&
+form val(1/max_rounds)*mu X(rounds:Nat=0).
+            (val(rounds==max_rounds) && val(0) ||
+             val(rounds<max_rounds) &&
                (  sup b1,b2,b3,b4:Bool.<play(b1,b2,b3,b4)>
-%                  sup n:Nat.<points(n)> (val(n-if(b1||b2||b3||b4,2,1))+X(turns+1))
-                  sup n:Nat.<points(n)> (val(n-1)+X(turns+1))
+%                  sup n:Nat.<points(n)> (val(n-if(b1||b2||b3||b4,2,1))+X(rounds+1))
+                  sup n:Nat.<points(n)> (val(n-1)+X(rounds+1))
                ));
