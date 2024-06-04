@@ -18,7 +18,12 @@ namespace detail
 {
 /// \brief If Enable64bitNumbers is defined, positive and natural numbers in 64 bits representation are used.
 /// \detail If undefined constructors @c0, @c1 and @cDub are used in accordance to the book Modelling and Analysis of Communicating Systems, 2014. 
-#define Enable64bitNumbers = true;
+constexpr bool Enable64bitNumbers = 
+#if MCRL2_ENABLE_MACHINENUMBERS
+    true;
+#else
+    false;
+#endif // MCRL2_ENABLE_MACHINENUMBERS
 
 } // namespace detail
 } // namespace data

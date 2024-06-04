@@ -59,6 +59,10 @@ if(MCRL2_ENABLE_JITTYC)
   endif()
 endif()
 
+if(MCRL2_ENABLE_MACHINENUMBERS)
+  add_compile_definitions(MCRL2_ENABLE_MACHINENUMBERS)
+endif()
+
 if(MCRL2_ENABLE_MULTITHREADING)
   add_compile_definitions(MCRL2_ENABLE_MULTITHREADING)
 endif()
