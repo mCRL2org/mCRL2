@@ -53,22 +53,19 @@ ARG THREADS=8
 RUN cd ~/mcrl2-build && make -j${THREADS} install
 
 # Clone and build the sylvan.
-RUN cd ~/ && git clone --depth=1 --branch=v1.5.0 https://github.com/trolando/sylvan.git sylvan
+RUN cd ~/ && git clone --depth=1 --branch=v1.8.1 https://github.com/trolando/sylvan.git sylvan
 
 # Disabled a specific warning as error since sylvan cannot be compiled otherwise.
 RUN cd ~/sylvan && cmake -DCMAKE_C_FLAGS="-Wno-error=array-parameter -Wno-error=calloc-transposed-args" -DBUILD_SHARED_LIBS=OFF . && make -j${THREADS} install
 
 # Clone ltsmin git repository at a specific version.
 RUN cd ~/ && git clone https://github.com/utwente-fmt/ltsmin.git ltsmin
-RUN cd ~/ltsmin && git checkout 3499bb5afb06c5e955d0df5bb3220eb7b654f3da
+RUN cd ~/ltsmin && git checkout 2c008e111f6a1050099fd59cedd7ca98433d7575
 
 # This step is necessary according to the 'Building from a Git Repository' section of the readme.
 RUN cd ~/ltsmin && git submodule update --init \
     && dos2unix /root/mcrl2/scripts/docker/ltsmin/ltsmin.patch \
     && git apply /root/mcrl2/scripts/docker/ltsmin/ltsmin.patch
-
-# Fix issues with the ltl2ba submodule, use a more recent version
-RUN cd ~/ltsmin/ltl2ba && git checkout ea33bb2091a34f6af8dba8e26978fecb969aa93b
 
 # Build the ltsmin toolset.
 RUN cd ~/ltsmin \
