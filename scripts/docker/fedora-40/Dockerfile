@@ -50,3 +50,13 @@ RUN cd ~/mcrl2-build && make -j${THREADS}
 
 # Package the build
 RUN cd ~/mcrl2-build && cpack -G RPM
+
+# Test the toolset; tests require the experimental tools.
+RUN cd ~/mcrl2-build \
+    && cmake -DMCRL2_ENABLE_EXPERIMENTAL=ON \
+             -DMCRL2_ENABLE_TESTS=ON . \
+    && make -j${THREADS} \
+    && ctest . -j${THREADS}
+
+# Build the documentation
+RUN cd ~/mcrl2-build && make doc
