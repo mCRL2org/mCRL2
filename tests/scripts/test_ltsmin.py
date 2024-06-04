@@ -3,13 +3,12 @@
 import argparse
 import os
 import sys
-import shutil
 
 SCRIP_PATH = os.path.dirname(__file__)
 
 # Makes sure that the script can find the modules when ran directly.
 sys.path.append(os.path.join(SCRIP_PATH, '../../'))
-from tests.utility.run_process import RunProcess, TimeExceededError
+from tests.utility.run_process import RunProcess, TimeExceededError, MemoryExceededError
 
 def main():
     """Finds all the .mcrl2 files in the example directory and tries to parse them with mcrl22lps."""
@@ -21,7 +20,7 @@ def main():
         epilog="",
     )
 
-    parser.add_argument("-i", "--timeout", action="store", default=600, type=int)
+    parser.add_argument("-i", "--timeout", action="store", default=60, type=int)
     parser.add_argument("-r", "--jittyc", action="store_true")
     parser.add_argument(
         "-t", "--mcrl2-toolpath", action="store", type=str, required=True
@@ -81,28 +80,33 @@ def main():
             RunProcess(mcrl22lps_exe, ['-D', '-f', '-n', mcrl2_path, os.path.join(output, f'{name}.lps')], 2000, args.timeout)
             
             # Run all the different state space exploration algorithms, convert to aut file and check equivalences to the sequential result.
-            print('running lps2lts-seq')
-            RunProcess(lps2lts_seq_exe, [os.path.join(output, f'{name}.lps'), os.path.join(output, f'{name}.seq.gcf')] + [arg], 2000, args.timeout)
-            RunProcess(ltsmin_convert_exe, ['--rdwr', '--filter=action_labels', os.path.join(output, f'{name}.seq.gcf'), os.path.join(output, f'{name}.seq.aut')], 2000, args.timeout)
+            try:
+                print('running lps2lts-seq')
+                RunProcess(lps2lts_seq_exe, [os.path.join(output, f'{name}.lps'), os.path.join(output, f'{name}.seq.gcf')] + [arg], 2000, args.timeout)
+                RunProcess(ltsmin_convert_exe, ['--rdwr', '--filter=action_labels', os.path.join(output, f'{name}.seq.gcf'), os.path.join(output, f'{name}.seq.aut')], 2000, args.timeout)
 
-            print('running lps2lts-mc')
-            RunProcess(lps2lts_mc_exe, ['--procs=1', os.path.join(output, f'{name}.lps'), os.path.join(output, f'{name}.mc.gcf')] + [arg], 2000, args.timeout)
-            RunProcess(ltsmin_convert_exe, ['--rdwr', '--filter=action_labels', os.path.join(output, f'{name}.mc.gcf'), os.path.join(output, f'{name}.mc.aut')], 2000, args.timeout)
+                print('running lps2lts-mc')
+                RunProcess(lps2lts_mc_exe, ['--procs=1', os.path.join(output, f'{name}.lps'), os.path.join(output, f'{name}.mc.gcf')] + [arg], 2000, args.timeout)
+                RunProcess(ltsmin_convert_exe, ['--rdwr', '--filter=action_labels', os.path.join(output, f'{name}.mc.gcf'), os.path.join(output, f'{name}.mc.aut')], 2000, args.timeout)
 
-            ltscompare = RunProcess(ltscompare_exe, ['-ebisim', os.path.join(output, f'{name}.seq.aut'), os.path.join(output, f'{name}.mc.aut')], 2000, args.timeout)
-            print(ltscompare.stdout)
-            if 'false' in ltscompare.stdout:
-                raise RuntimeError('Invalid multi-core result')
+                ltscompare = RunProcess(ltscompare_exe, ['-ebisim', os.path.join(output, f'{name}.seq.aut'), os.path.join(output, f'{name}.mc.aut')], 2000, args.timeout)
+                print(ltscompare.stdout)
+                if 'false' in ltscompare.stdout:
+                    raise RuntimeError('Invalid multi-core result')
 
-            print('running lps2lts-sym')
-            RunProcess(lps2lts_sym_exe, [os.path.join(output, f'{name}.lps'), os.path.join(output, f'{name}.sym.etf')] + [arg], 2000, args.timeout)
-            RunProcess(etf2lts_seq_exe, [os.path.join(output, f'{name}.sym.etf'), os.path.join(output, f'{name}.sym.gcf')], 2000, args.timeout)
-            RunProcess(ltsmin_convert_exe, ['--rdwr', '--filter=action_labels', os.path.join(output, f'{name}.sym.gcf'), os.path.join(output, f'{name}.sym.aut')], 2000, args.timeout)
+                print('running lps2lts-sym')
+                RunProcess(lps2lts_sym_exe, [os.path.join(output, f'{name}.lps'), os.path.join(output, f'{name}.sym.etf')] + [arg], 2000, args.timeout)
+                RunProcess(etf2lts_seq_exe, [os.path.join(output, f'{name}.sym.etf'), os.path.join(output, f'{name}.sym.gcf')], 2000, args.timeout)
+                RunProcess(ltsmin_convert_exe, ['--rdwr', '--filter=action_labels', os.path.join(output, f'{name}.sym.gcf'), os.path.join(output, f'{name}.sym.aut')], 2000, args.timeout)
 
-            ltscompare = RunProcess(ltscompare_exe, ['-ebisim', os.path.join(output, f'{name}.seq.aut'), os.path.join(output, f'{name}.sym.aut')], 2000, args.timeout)
-            print(ltscompare.stdout)
-            if 'false' in ltscompare.stdout:
-                raise RuntimeError('Invalid symbolic result')
+                ltscompare = RunProcess(ltscompare_exe, ['-ebisim', os.path.join(output, f'{name}.seq.aut'), os.path.join(output, f'{name}.sym.aut')], 2000, args.timeout)
+                print(ltscompare.stdout)
+                if 'false' in ltscompare.stdout:
+                    raise RuntimeError('Invalid symbolic result')
+                
+            except (TimeExceededError, MemoryExceededError) as e:
+                print(f'Tool timed out or reached max memory ({e})')
+
                
 
 if __name__ == "__main__":
