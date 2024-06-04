@@ -618,7 +618,7 @@ inline NUMERIC_TYPE natural_constant_to_value(const data_expression& n)
   }
   else
   {
-    return sort_pos::positive_constant_to_value<NUMERIC_VALUE>(sort_nat::arg(n));
+    return sort_pos::positive_constant_to_value<NUMERIC_TYPE>(sort_nat::arg(n));
   }
 #endif
 }

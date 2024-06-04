@@ -10,28 +10,29 @@
 /// \brief Tests whether terms representing large positive and integer numbers are evaluated well. 
 
 #include <iostream>
+
+#define BOOST_TEST_MODULE large_numbers
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/utilities/text_utility.h"
 
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite_strategies.h"
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/list64.h"
-#include "mcrl2/data/real64.h"
-#include "mcrl2/data/set64.h"
-static const std::size_t number_of_tests =50;
-#else
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/set.h"
-static const std::size_t number_of_tests =4;
-#endif
+
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/structured_sort.h"
 
+static const std::size_t number_of_tests =
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
+  50;
+#else
+  4;
+#endif
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -140,9 +141,4 @@ BOOST_AUTO_TEST_CASE(square_root_test)
       x = sort_nat::times(x,sort_nat::nat(23+i));
     }
   }
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }
