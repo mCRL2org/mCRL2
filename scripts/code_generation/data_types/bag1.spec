@@ -9,10 +9,10 @@
 % Specification of the Bag data sort.
 
 #using S
-#include nat.spec
-#include fbag.spec
-#include fset.spec
-#include set.spec
+#include nat1.spec
+#include fbag1.spec
+#include fset1.spec
+#include set1.spec
 #supertypeof FBag
 
 sort Bag(S) <"bag">;

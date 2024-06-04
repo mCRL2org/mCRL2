@@ -14,11 +14,7 @@
 
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/set64.h"
-#else
 #include "mcrl2/data/set.h"
-#endif
 
 
 using namespace mcrl2;

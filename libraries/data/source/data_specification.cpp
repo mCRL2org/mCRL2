@@ -16,11 +16,7 @@
 
 // Predefined datatypes
 #include "mcrl2/data/function_update.h"
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/list64.h"
-#else
 #include "mcrl2/data/list.h"
-#endif
 
 namespace mcrl2
 {

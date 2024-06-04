@@ -12,11 +12,7 @@
 #define BOOST_TEST_MODULE list_test
 #include <boost/test/included/unit_test.hpp>
 
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/list64.h"
-#else
 #include "mcrl2/data/list.h"
-#endif
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 

@@ -9,7 +9,7 @@
 % Specification of the Nat data sort.
 
 #include bool.spec
-#include pos.spec
+#include pos1.spec
 #supertypeof Pos
 
 sort Nat <"nat">;

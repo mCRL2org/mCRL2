@@ -9,9 +9,9 @@
 % Specification of the Real data sort.
 
 #include bool.spec
-#include pos.spec
-#include nat.spec
-#include int.spec
+#include pos1.spec
+#include nat1.spec
+#include int1.spec
 #supertypeof Pos
 #supertypeof Nat
 #supertypeof Int

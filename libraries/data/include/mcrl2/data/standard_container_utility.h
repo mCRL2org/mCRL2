@@ -14,13 +14,8 @@
 
 #include "mcrl2/utilities/detail/join.h"
 
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/bag64.h"
-#include "mcrl2/data/list64.h"
-#else
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
-#endif
 
 namespace mcrl2
 {

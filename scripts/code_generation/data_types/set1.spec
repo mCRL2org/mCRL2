@@ -10,7 +10,7 @@
 
 #using S
 #include bool.spec
-#include fset.spec
+#include fset1.spec
 #supertypeof FSet
 
 sort Set(S) <"set_">;

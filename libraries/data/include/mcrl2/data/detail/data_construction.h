@@ -13,11 +13,7 @@
 #define MCRL2_DATA_DETAIL_DATA_CONSTRUCTION_H
 
 #include "mcrl2/data/lambda.h"
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/set64.h"
-#else
 #include "mcrl2/data/set.h"
-#endif
 
 namespace mcrl2 {
 

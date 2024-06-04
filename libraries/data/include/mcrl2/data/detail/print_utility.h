@@ -15,14 +15,8 @@
 #include "mcrl2/utilities/unused.h"
 #include "mcrl2/core/detail/print_utility.h"
 
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/bag64.h"
-#include "mcrl2/data/list64.h"
-#else
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
-#endif
-
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/standard_numbers_utility.h"

@@ -14,14 +14,8 @@
 
 #include <queue>
 
-#include "mcrl2/utilities/detail/join.h"
-
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/real64.h"
-#else
 #include "mcrl2/data/real.h"
-#endif
-
+#include "mcrl2/utilities/detail/join.h"
 
 namespace mcrl2
 {

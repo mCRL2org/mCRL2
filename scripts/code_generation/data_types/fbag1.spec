@@ -25,9 +25,9 @@
 
 #using S
 #include bool.spec
-#include pos.spec
-#include nat.spec
-#include fset.spec
+#include pos1.spec
+#include nat1.spec
+#include fset1.spec
 
 sort FBag(S) <"fbag">;
 

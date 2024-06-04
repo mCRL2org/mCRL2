@@ -9,8 +9,8 @@
 % Specification of the Int data sort.
 
 #include bool.spec
-#include pos.spec
-#include nat.spec
+#include pos1.spec
+#include nat1.spec
 #supertypeof Pos
 #supertypeof Nat
 

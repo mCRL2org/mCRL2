@@ -24,7 +24,7 @@
 
 #using S
 #include bool.spec
-#include nat.spec
+#include nat1.spec
 
 sort FSet(S) <"fset">;
 

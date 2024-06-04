@@ -10,8 +10,8 @@
 
 #using S
 #include bool.spec
-#include pos.spec
-#include nat.spec
+#include pos1.spec
+#include nat1.spec
 
 sort List(S) <"list">;
 
