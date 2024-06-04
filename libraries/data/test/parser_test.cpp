@@ -28,7 +28,7 @@ void parser_test()
 
   std::cerr << "number of sorts " << spec.sorts().size() << "\n";
   std::cerr << "number of functions " << spec.mappings().size() << "\n";
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   BOOST_CHECK(spec.sorts().size() == 7); // Bool, Pos, S, List(S), S->List(S), Nat, @NatPair.
   BOOST_CHECK(spec.mappings().size() == 189);
 #else

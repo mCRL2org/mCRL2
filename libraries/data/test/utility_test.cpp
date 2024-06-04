@@ -93,7 +93,7 @@ void number_test()
   representation_check(R, number(sort_int::int_(), "-1"), R(cneg(sort_pos::c1())),specification);
   representation_check(R, normalize_sorts(number(sort_real::real_(), "1"),specification), R(normalize_sorts(pos2real(sort_pos::c1()),specification)),specification);
 
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
   representation_check(R, pos("11"), cdub(true_(), cdub(true_(), cdub(false_(), c1()))),specification);
   representation_check(R, pos(12), cdub(false_(), cdub(false_(), cdub(true_(), c1()))),specification);
   representation_check(R, nat("18"), R(normalize_sorts(pos2nat(cdub(false_(), cdub(true_(), cdub(false_(), cdub(false_(), c1()))))),specification)),specification);

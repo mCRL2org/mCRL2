@@ -484,7 +484,7 @@ data_equation unfold_pattern_matching(
     detail::rule rule(match_criteria, eq.rhs(), eq.condition(), eq.variables());
     rules.push_back(rule);
   }
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   assert(rules.size() != 0 || sort_pos::is_most_significant_digit_function_symbol(mapping));
 #else 
   assert(rules.size() != 0);

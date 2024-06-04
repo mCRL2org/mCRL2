@@ -15,7 +15,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/find.h"
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/fset64.h"
 #else
 #include "mcrl2/data/fset.h"

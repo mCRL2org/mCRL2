@@ -12,8 +12,7 @@
 #ifndef MCRL2_DATA_UNDEFINED_H
 #define MCRL2_DATA_UNDEFINED_H
 
-#include "mcrl2/data/data_configuration.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/real64.h"
 #else
 #include "mcrl2/data/real.h"

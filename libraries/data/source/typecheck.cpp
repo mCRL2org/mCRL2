@@ -272,7 +272,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       Par=sort_nat::transform_positive_number_to_nat(Par);
 #else
       Par=application(sort_nat::cnat(),Par);
@@ -296,7 +296,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       Par=application(sort_int::cint(),sort_nat::transform_positive_number_to_nat(Par));
 #else
       Par=application(sort_int::cint(),application(sort_nat::cnat(),Par));
@@ -331,7 +331,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       Par=application(sort_real::creal(),
                               application(sort_int::cint(), sort_nat::transform_positive_number_to_nat(Par)),
                               sort_pos::pos(1));
@@ -2671,7 +2671,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       else if (TypeMatchA(sort_pos::pos(),ResType,temp))
       {
         NewType=sort_bag::bag(sort_expression(element_sort));
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
         Data=sort_nat::transform_positive_number_to_nat(Data);
 #else
         Data=application(sort_nat::cnat(),Data);
@@ -3476,7 +3476,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     }
   }
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   if (is_machine_number(DataTerm))
   {
     return sort_machine_word::machine_word();
@@ -3875,7 +3875,7 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
                                          // It adds it and then typechecks the terms containing this function. 
   add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_constructors());
   add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_mappings());
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   assert(system_functions.find(sort_nat::pos2nat().name())!=system_functions.end());   
 #else
   assert(system_functions.find(sort_nat::cnat().name())!=system_functions.end());   

@@ -165,7 +165,7 @@ inline void decimal_number_divide_by_two(std::vector< char >& number)
   number.swap(result);
 }
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 // Check whether a number vector is equal to zero.
 inline bool is_zero_number_vector(const std::vector< std::size_t >& v)
 {
@@ -294,7 +294,7 @@ pos(const T t)
 {
   assert(t>0);
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   static_assert(sizeof(T)<=sizeof(std::size_t),"Can only convert numbers up till a size_t.");
   return sort_pos::most_significant_digit(machine_number(t));
 #else
@@ -321,7 +321,7 @@ pos(const T t)
 /// \param n A string
 inline data_expression pos(const std::string& n)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   std::vector<std::size_t> number_vector= detail::number_string_to_vector_number(n);
 
   assert(!detail::is_zero_number_vector(number_vector));
@@ -359,7 +359,7 @@ inline data_expression pos(const std::string& n)
 /// \param n A data expression
 inline bool is_positive_constant(const data_expression& n)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   return (sort_pos::is_most_significant_digit_application(n) &&
           is_machine_number(sort_pos::arg(n)))   ||
          (sort_pos::is_concat_digit_application(n) &&
@@ -383,7 +383,7 @@ inline bool is_positive_constant(const data_expression& n)
 inline
 std::string positive_constant_as_string(const data_expression& n_in)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   std::vector<std::size_t> number_vector;
   data_expression n=n_in;
 
@@ -434,7 +434,7 @@ template <class NUMERIC_TYPE>
 inline
 NUMERIC_TYPE positive_constant_to_value(const data_expression& n)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   if constexpr (std::is_integral<NUMERIC_TYPE>::value)
   {
     if (is_concat_digit_application(n))
@@ -482,7 +482,7 @@ template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 nat(T t)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   static_assert(sizeof(T)<=sizeof(std::size_t),"Can only convert numbers up till a size_t.");
   return sort_nat::most_significant_digit_nat(machine_number(t));
 #else
@@ -498,7 +498,7 @@ nat(T t)
 /// \param n A string
 inline data_expression nat(const std::string& n)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   std::vector<std::size_t> number_vector= detail::number_string_to_vector_number(n);
 
   if (number_vector.empty())
@@ -530,7 +530,7 @@ inline data_expression nat(const std::string& n)
 /// \param n A data expression
 inline bool is_natural_constant(const data_expression& n)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   return (sort_nat::is_most_significant_digit_nat_application(n) &&
           is_machine_number(sort_nat::arg(n))) 
          ||
@@ -551,7 +551,7 @@ inline bool is_natural_constant(const data_expression& n)
 /// \return String representation of n
 inline std::string natural_constant_as_string(const data_expression& n_in)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   std::vector<std::size_t> number_vector;
   data_expression n=n_in;
   
@@ -590,7 +590,7 @@ inline std::string natural_constant_as_string(const data_expression& n_in)
 template <class NUMERIC_TYPE>
 inline NUMERIC_TYPE natural_constant_to_value(const data_expression& n)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   if constexpr (std::is_integral<NUMERIC_TYPE>::value)
   {
     if (is_concat_digit_application(n))
@@ -623,7 +623,7 @@ inline NUMERIC_TYPE natural_constant_to_value(const data_expression& n)
 #endif
 }
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 /// \brief Translate a positive constant to a natural constant;
 /// \returns A natural constant with the same value as the positive constant;
 inline data_expression transform_positive_constant_to_nat(const data_expression& n)
@@ -751,7 +751,7 @@ template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 real_(T t)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   return sort_real::creal(sort_int::int_(t), sort_pos::pos(1));
 #else
   return sort_real::creal(sort_int::int_(t), sort_pos::c1());
@@ -782,7 +782,7 @@ inline data_expression real_(const std::string& numerator, const std::string& de
 /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
 inline data_expression real_(const std::string& n)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   return sort_real::creal(sort_int::int_(n), sort_pos::pos(1));
 #else
   return sort_real::creal(sort_int::int_(n), sort_pos::c1());

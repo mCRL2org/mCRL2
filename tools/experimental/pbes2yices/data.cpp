@@ -13,7 +13,7 @@
 #include "mcrl2/utilities/exception.h"
 
 #include "mcrl2/data/bool.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/int64.h"
 #include "mcrl2/data/nat64.h"
 #include "mcrl2/data/pos64.h"
@@ -86,7 +86,7 @@ static std::set<data::function_symbol> get_builtin_constructors()
 {
   std::set<data::function_symbol> output;
   output.insert(sort_pos::c1());
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
   output.insert(sort_pos::cdub());
   output.insert(sort_nat::cnat());
 #endif
@@ -115,7 +115,7 @@ std::string translate_expression(data_expression expression, const std::map<vari
     }
   } else if (sort_nat::is_c0_function_symbol(expression)) {
     return "0";
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
   } else if (sort_nat::is_cnat_application(expression)) {
     application a(expression);
     return translate_expression(*a.begin(), bound_variables, translation);

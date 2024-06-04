@@ -18,7 +18,7 @@
 #include "mcrl2/data/rewriter_tool.h"
 
 #include "mcrl2/data/enumerator.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/pos64.h"
 #include "mcrl2/data/nat64.h"
 #include "mcrl2/data/int64.h"

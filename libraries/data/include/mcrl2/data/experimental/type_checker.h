@@ -159,7 +159,7 @@ class type_checker: public sort_type_checker
       add_system_function(greater(data::untyped_sort()));
       //Numbers
       add_system_function(sort_nat::pos2nat());
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
       add_system_function(sort_nat::cnat());
 #endif
       add_system_function(sort_real::pos2real());

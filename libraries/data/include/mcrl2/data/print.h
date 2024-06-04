@@ -30,7 +30,7 @@ inline
 bool is_one(const data_expression& x)
 {
   assert(x.sort() == sort_pos::pos());
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   return (sort_pos::is_most_significant_digit_application(x) &&
           (( is_machine_number(sort_pos::arg(x)) && atermpp::down_cast<machine_number>(sort_pos::arg(x)).value() == 1) ||
            (  sort_machine_word::is_one_word_function_symbol(sort_pos::arg(x))))
@@ -50,7 +50,7 @@ bool is_numeric_cast(const data_expression& x)
          || data::sort_int::is_nat2int_application(x)
          || data::sort_real::is_nat2real_application(x)
          || data::sort_real::is_int2real_application(x)
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
          || data::sort_nat::is_cnat_application(x)
          || data::sort_int::is_cint_application(x)
 #endif
@@ -119,7 +119,7 @@ bool is_div(const application& x)
                             sort_nat::is_div_application(x); });
 }
 
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
 inline
 bool is_divmod(const application& x)
 {
@@ -361,7 +361,7 @@ int precedence(const application& x)
   }
   else if (   detail::is_div(x)
               || detail::is_mod(x)
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
               || detail::is_divmod(x)
 #endif
               || detail::is_divides(x)
@@ -1018,7 +1018,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_fbag::is_insert_application(x))
       {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
         arguments.emplace_back(sort_fbag::arg1(x), sort_nat::pos2nat(sort_fbag::arg2(x)));
 #else
         arguments.emplace_back(sort_fbag::arg1(x), sort_nat::cnat(sort_fbag::arg2(x)));
@@ -1564,7 +1564,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       print_binary_data_operation(x, " >= ");
     }
 
-#ifdef Enable64bitNumbers    
+#ifdef MCRL2_ENABLE_MACHINENUMBERS    
     //-------------------------------------------------------------------//
     //                            machine_word
     //-------------------------------------------------------------------//
@@ -1671,7 +1671,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            pos
     //-------------------------------------------------------------------//
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
     else if (data::sort_pos::is_positive_constant(x))
     {
       derived().print(data::sort_pos::positive_constant_as_string(x));
@@ -1708,7 +1708,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_pos::is_add_with_carry_application(x))
     {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       const data_expression& x1 = sort_pos::left(x);
       const data_expression& x2 = sort_pos::right(x);
       derived().apply(sort_pos::plus(x1, x2));
@@ -1740,7 +1740,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            natpair
     //-------------------------------------------------------------------//
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
     else if (sort_nat::is_first_application(x))
     {
       // TODO: verify if this is the correct way of dealing with first/divmod
@@ -1804,7 +1804,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            nat
     //-------------------------------------------------------------------//
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
     else if (data::sort_nat::is_natural_constant(x))
     {
       derived().print(data::sort_nat::natural_constant_as_string(x));

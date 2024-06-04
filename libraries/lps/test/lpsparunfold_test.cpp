@@ -13,7 +13,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/lps/lpsparunfoldlib.h"
 #include "mcrl2/lps/parse.h"
 
@@ -72,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_main)
     lpsparunfold lpsparunfold(s0, unfold_cache);
     lpsparunfold.algorithm(0);
     variable_list p1 = s0.process().process_parameters();
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
     if (p1.size() != 2)
     {
       std::clog << "--- failed test ---" << std::endl;
@@ -99,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_main)
         std::clog << "expected 2nd process parameter to be of type Bool" << std::endl;
         std::clog << "computed process parameter of type "  << data::pp(i->sort()) << std::endl;
       }
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       BOOST_CHECK(!(std::distance(p1.begin(), i) == 1 && data::pp(i->sort()).compare("Bool") == 0));
 #else
       BOOST_CHECK(!(std::distance(p1.begin(), i) == 1 && data::pp(i->sort()).compare("Bool") != 0));

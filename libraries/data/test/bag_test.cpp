@@ -12,8 +12,7 @@
 #define BOOST_TEST_MODULE bag_test
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/data/data_configuration.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/bag64.h"
 #else
 #include "mcrl2/data/bag.h"
@@ -89,7 +88,7 @@ void bag_expression_test()
   BOOST_CHECK(sort_fbag::is_cons_application(normaliser(e)));
 
   e = parse_data_expression("{10:count(20,b)}", v);
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   BOOST_CHECK(sort_fbag::is_cinsert_application(e));
 #else
   BOOST_CHECK(sort_fbag::is_cinsert_application(normaliser(e)));

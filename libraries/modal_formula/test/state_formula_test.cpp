@@ -14,7 +14,6 @@
 #define BOOST_TEST_MODULE state_formula
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
 #include "mcrl2/modal_formula/maximal_closed_subformula.h"
@@ -155,7 +154,7 @@ BOOST_AUTO_TEST_CASE(test_parse)
   std::cerr << "--- f ---\n" << state_formulas::pp(f) << std::endl;
   std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
   BOOST_CHECK(ids.find(core::identifier_string("1")) == ids.end());
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
   BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());
 #endif
 }

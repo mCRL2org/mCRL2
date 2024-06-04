@@ -129,7 +129,7 @@ public:
                                            [&](const data_expression& t) { data_expression r;  derived().apply(r, t); return r;} ));
         return;
       }
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       else if (head.name() == sort_nat::pos2nat_name())
       {
         // convert pos2nat(number) to a natural number. 

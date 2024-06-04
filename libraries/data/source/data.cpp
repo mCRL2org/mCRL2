@@ -112,7 +112,7 @@ sort_expression data_expression::sort() const
   // is no elegant solution of distributing the implementation of the
   // derived classes (as we need to support requesting the sort of a
   // data_expression we do need to provide an implementation here).
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   if (is_machine_number(*this))
   {
     return sort_machine_word::machine_word();

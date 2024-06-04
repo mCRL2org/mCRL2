@@ -16,8 +16,7 @@
 
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite_strategies.h"
-#include "mcrl2/data/data_configuration.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/list64.h"
 #include "mcrl2/data/real64.h"
 #include "mcrl2/data/set64.h"

@@ -14,7 +14,6 @@
 #define BOOST_TEST_MODULE probabilistic_data_expression_test
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/lps/probabilistic_data_expression.h"
 
 using namespace mcrl2;
@@ -38,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_very_few_digits)
   BOOST_CHECK(r2<r1+r2);
 }
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 BOOST_AUTO_TEST_CASE(test_few_digits)
 {
   probabilistic_data_expression r1(real_("7979","84298"));

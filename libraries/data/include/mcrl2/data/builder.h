@@ -15,8 +15,7 @@
 #include "mcrl2/core/builder.h"
 #include "mcrl2/data/alias.h"
 
-#include "mcrl2/data/data_configuration.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/bag64.h"
 #else
 #include "mcrl2/data/bag.h"

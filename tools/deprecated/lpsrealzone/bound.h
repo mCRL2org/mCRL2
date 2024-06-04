@@ -15,7 +15,7 @@
 #ifndef MCRL2_DATA_BOUND_H
 #define MCRL2_DATA_BOUND_H
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/real64.h"
 #else
 #include "mcrl2/data/real.h"

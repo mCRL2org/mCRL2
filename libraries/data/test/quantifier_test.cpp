@@ -12,9 +12,8 @@
 #define BOOST_TEST_MODULE quantifier_test
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/data/detail/rewrite_strategies.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/list64.h"
 #include "mcrl2/data/set64.h"
 #else

@@ -19,7 +19,6 @@
 
 #include "mcrl2/utilities/big_numbers.h"
 #include "mcrl2/utilities/probabilistic_arbitrary_precision_fraction.h"
-#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/data/rewriter.h"
 
@@ -31,7 +30,7 @@ namespace lps
 
 namespace detail
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   inline utilities::big_natural_number make_bnn_nat(const data::data_expression& n)
   {
     utilities::big_natural_number result;
@@ -165,7 +164,7 @@ class probabilistic_data_expression: public data::data_expression
       return std::stoul(s);
     }
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
     probabilistic_data_expression calculate_plus_minus(const data_expression& other, const bool is_minus) const
     {
       const data_expression& this_enumerator=data::sort_real::left(*this);
@@ -371,7 +370,7 @@ class probabilistic_data_expression: public data::data_expression
     */
     bool operator==(const probabilistic_data_expression& other) const
     {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       if (static_cast<data_expression>(*this)==static_cast<data_expression>(other))
       {
         return true;
@@ -402,7 +401,7 @@ class probabilistic_data_expression: public data::data_expression
     */
     bool operator<(const probabilistic_data_expression& other) const
     {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       const data_expression& this_enumerator=data::sort_real::left(*this);
       const data_expression& this_denominator=data::sort_real::right(*this);
       const data_expression& other_enumerator=data::sort_real::left(other);
@@ -515,7 +514,7 @@ assert(data::sort_bool::false_()==m_rewriter()(data::less(*this,other)));
      */
     probabilistic_data_expression operator+(const probabilistic_data_expression& other) const
     {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       return calculate_plus_minus(other, false);
 #else
       return probabilistic_data_expression(m_rewriter()(data::sort_real::plus(*this,other)));
@@ -527,7 +526,7 @@ assert(data::sort_bool::false_()==m_rewriter()(data::less(*this,other)));
      */
     probabilistic_data_expression operator-(const probabilistic_data_expression& other) const
     {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
       return calculate_plus_minus(other, true);
 #else
       return probabilistic_data_expression(m_rewriter()(data::sort_real::minus(*this,other)));

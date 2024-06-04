@@ -351,7 +351,7 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         translate_add_c(a_clause);
       }
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
       else if (sort_nat::is_cnat_application(a_clause))
       {
         translate_c_nat(a_clause);
@@ -623,7 +623,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + "))";
     }
 
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
     void translate_c_nat(const data_expression& a_clause)
     {
       const data_expression v_clause = arg(a_clause);

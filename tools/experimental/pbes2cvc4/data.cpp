@@ -13,7 +13,7 @@
 #include "mcrl2/utilities/exception.h"
 
 #include "mcrl2/data/bool.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/int64.h"
 #include "mcrl2/data/nat64.h"
 #include "mcrl2/data/pos64.h"
@@ -134,7 +134,7 @@ std::string translate_expression(data_expression expression, const std::map<vari
 		return "(- " + result + ")";
 	} else if (sort_nat::is_c0_function_symbol(expression)) {
 		return "0";
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
 	} else if (sort_nat::is_cnat_application(expression)) {
 		application a(expression);
 		return translate_expression(*a.begin(), bound_variables, translation);
@@ -224,7 +224,7 @@ static std::string mangle_sort_name(sort_expression sort)
 
 static bool is_structured_sort(const mcrl2::data::data_specification &data, mcrl2::data::sort_expression sort)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 	if (sort == sort_nat::nnpair()) {
 		return true;
 	}
@@ -397,7 +397,7 @@ static std::map<mcrl2::data::function_symbol, function_definition> builtin_funct
 	output[sort_pos::plus()] = "+";
 	output[sort_pos::times()] = "*";
 	output[sort_pos::succ()] = data_equation(variable_list({p}), sort_pos::succ(p), sort_pos::plus(p, pos_one));
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
 	output[sort_pos::add_with_carry()] = data_equation(variable_list({b, p, p2}), sort_pos::add_with_carry(b, p, p2), if_(b, sort_pos::succ(sort_pos::plus(p, p2)), sort_pos::plus(p, p2)));
 #endif
 	

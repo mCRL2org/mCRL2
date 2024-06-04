@@ -14,8 +14,7 @@
 
 #include "mcrl2/utilities/detail/join.h"
 
-#include "mcrl2/data/data_configuration.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/bag64.h"
 #include "mcrl2/data/list64.h"
 #else

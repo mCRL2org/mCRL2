@@ -61,7 +61,7 @@ data_specification simplifier::norm_rules_spec()
   ad_hoc_data.add_equation(data_equation(variable_list({vb1, vb2}), sort_bool::not_(sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
 
   // Formulate all linear equalities with positive rhs: -1 * x_P <= -5   !(1 * x_P < 5)
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   ad_hoc_data.add_equation(data_equation(variable_list({vr1, vp1, vp2}),
     less_equal(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
     sort_bool::not_(less(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::pos2nat(vp1)), vp2)))));
@@ -140,7 +140,7 @@ data_specification simplifier::norm_rules_spec()
   ad_hoc_data.add_equation(data_equation(variable_list({vp1}),
     less(vp1, sort_pos::succ(vp1)), sort_bool::true_()));
   // succ(n) < n = false
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   ad_hoc_data.add_equation(data_equation(variable_list({vn1}),
     less(sort_nat::pos2nat(sort_nat::succ(vn1)), vn1), sort_bool::false_()));
   // n < succ(n) = true

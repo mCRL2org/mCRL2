@@ -12,8 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
 #define MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
 
-#include "mcrl2/data/data_configuration.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/list64.h"
 #else
 #include "mcrl2/data/list.h"

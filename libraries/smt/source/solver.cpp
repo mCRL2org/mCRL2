@@ -8,8 +8,7 @@
 //
 /// \file solver.cpp
 
-#include "mcrl2/data/data_configuration.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/list64.h"
 #else
 #include "mcrl2/data/list.h"
@@ -106,7 +105,7 @@ static const native_translation_t reconstruct_divmod = [](const data::data_expre
 {
 utilities::mcrl2_unused(output_func);
 utilities::mcrl2_unused(translate_func);
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
   assert(data::sort_nat::is_first_application(e) || data::sort_nat::is_last_application(e));
   const data::application& a = atermpp::down_cast<data::application>(e);
   if(data::sort_nat::is_divmod_application(a[0]))
@@ -242,7 +241,7 @@ native_translations initialise_native_translation(const data::data_specification
   nt.set_native_definition(sort_bool::or_(), "or");
   nt.set_native_definition(sort_bool::implies());
 
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
   nt.set_native_definition(sort_pos::c1(), pp(sort_pos::c1()));
   nt.set_native_definition(sort_nat::c0(), pp(sort_nat::c0()));
   nt.expressions[sort_pos::cdub()] = pp_translation;
@@ -256,11 +255,11 @@ native_translations initialise_native_translation(const data::data_specification
   nt.special_recogniser[data::sort_bool::true_()] = "@id";
   nt.special_recogniser[data::sort_bool::false_()] = "not";
   nt.special_recogniser[data::sort_pos::c1()] = "= 1";
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
   nt.special_recogniser[data::sort_pos::cdub()] = ">= 2";
 #endif
   nt.special_recogniser[data::sort_nat::c0()] = "= 0";
-#ifndef Enable64bitNumbers
+#ifndef MCRL2_ENABLE_MACHINENUMBERS
   nt.special_recogniser[data::sort_nat::cnat()] = ">= 1";
 #endif
   nt.special_recogniser[data::sort_int::cneg()] = "< 0";

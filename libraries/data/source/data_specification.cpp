@@ -15,9 +15,8 @@
 #include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
 // Predefined datatypes
-#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/data/function_update.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/list64.h"
 #else
 #include "mcrl2/data/list.h"
@@ -321,7 +320,7 @@ void sort_specification::import_system_defined_sort(const sort_expression& sort)
   }
   else if (sort == sort_nat::nat())
   {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
     import_system_defined_sort(sort_machine_word::machine_word());
 #else
     // Nat requires NatPair.
@@ -330,7 +329,7 @@ void sort_specification::import_system_defined_sort(const sort_expression& sort)
   }
   else if (sort == sort_pos::pos())
   {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
     import_system_defined_sort(sort_machine_word::machine_word());
 #endif
   }
@@ -617,7 +616,7 @@ void data_specification::find_associated_system_defined_data_types_for_a_sort(
       equations.insert(e.begin(),e.end());
     }
   }
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   else if (sort == sort_machine_word::machine_word())
   {
     function_symbol_vector f(sort_machine_word::machine_word_generate_constructors_code());
@@ -759,7 +758,7 @@ void data_specification::get_system_defined_sorts_constructors_and_mappings(
   implementation_map cpp_implemented_functions;
 
   sorts.insert(sort_bool::bool_());
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   sorts.insert(sort_machine_word::machine_word());
 #endif
   sorts.insert(sort_pos::pos());

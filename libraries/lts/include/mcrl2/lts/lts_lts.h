@@ -238,7 +238,7 @@ inline action_label_lts parse_lts_action(
       // Translate the sort of time to a real.
       if (time.sort()==data::sort_pos::pos())
       {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
         time = data::sort_nat::pos2nat(time);
 #else
         time = data::sort_nat::cnat(time);

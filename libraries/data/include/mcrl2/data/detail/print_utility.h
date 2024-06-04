@@ -15,8 +15,7 @@
 #include "mcrl2/utilities/unused.h"
 #include "mcrl2/core/detail/print_utility.h"
 
-#include "mcrl2/data/data_configuration.h"
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/bag64.h"
 #include "mcrl2/data/list64.h"
 #else
@@ -47,7 +46,7 @@ data::data_expression bool_to_numeric(const data::data_expression& e, const data
 inline
 data_expression reconstruct_pos_mult(const data_expression& x, const std::vector<char>& result)
 {
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   utilities::mcrl2_unused(result); // Maybe this part of this printing utility may have to be written. 
   return x;
 #else

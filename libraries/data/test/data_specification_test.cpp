@@ -12,7 +12,6 @@
 #define BOOST_TEST_MODULE data_specification_test
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/data/data_configuration.h"
 #include "mcrl2/data/data_io.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/parse.h"
@@ -191,7 +190,7 @@ void test_constructors()
   function_symbol_vector constructors(spec.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl);
 std::cerr << "#constructors " << spec.constructors().size() << "\n";
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   BOOST_CHECK(constructors.size() == 9); // f,g,h, true, false.
 #else
   BOOST_CHECK(constructors.size() == 7); // f,g,h, true, false.
@@ -249,7 +248,7 @@ void test_functions()
   std::for_each(fghl.begin(), fghl.end(), [&spec1](const function_symbol& f){ spec1.add_mapping(f); } );
 
 std::cerr << "#mappings " << spec.mappings().size() << "\n";
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
   BOOST_CHECK(spec.mappings().size() == 107);
 #else
   BOOST_CHECK(spec.mappings().size() == 54);
@@ -929,7 +928,7 @@ std::cerr << "#sorts " << sorts.size() << "\n";
 std::cerr << "#constructorss " << constructors.size() << "\n";
 std::cerr << "#mappings " << mappings.size() << "\n";
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
    BOOST_CHECK(sorts.size()==11);
    BOOST_CHECK(constructors.size()==19);
    BOOST_CHECK(mappings.size()==314);

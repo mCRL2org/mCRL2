@@ -15,7 +15,7 @@
 #ifndef MCRL2_DATA_DBM_H
 #define MCRL2_DATA_DBM_H
 
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
 #include "mcrl2/data/list64.h"
 #else
 #include "mcrl2/data/list.h"
@@ -1985,7 +1985,7 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(variable_list({vd}), close(vd), close1(vd, sort_nat::c0())));
         result.push_back(data_equation(variable_list({vd, vk}), equal_to(vk, N()), close1(vd, vk), vd));
-#ifdef Enable64bitNumbers
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
         result.push_back(data_equation(variable_list({vd, vk}), less(vk, N()), close1(vd, vk), close1(close2(vd, vk, sort_nat::c0()), sort_real::plus(vk, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd, vi, vk}), less(vi, N()), close2(vd, vk, vi), close2(close3(vd, vk, vi, sort_nat::c0()), vk, sort_real::plus(vi, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd, vi, vj, vk}), less(vj, N()), close3(vd, vk, vi, vj), close3(set(vd, vi, vj, sort_bound::min_b(get(vd, vi, vj), sort_bound::add(get(vd, vi, vk), get(vd, vk, vj)))), vk, vi, sort_real::plus(vj, sort_nat::pos2nat(sort_pos::c1())))));
