@@ -41,15 +41,15 @@ class Simulator : public Visualizer
       const Position2D& pos);
 
     // -- visualization functions  ----------------------------------
-    void visualize();
-    void mark();
+    void visualize() override;
+    void mark() override;
 
     // -- event handlers --------------------------------------------
-    void handleMouseEvent(QMouseEvent* e);
-    void handleMouseLeaveEvent();
-    void handleKeyEvent(QKeyEvent* e);
+    void handleMouseEvent(QMouseEvent* e) override;
+    void handleMouseLeaveEvent() override;
+    void handleKeyEvent(QKeyEvent* e) override;
 
-    QSize sizeHint() const { return QSize(600,200); }
+    QSize sizeHint() const override { return QSize(600,200); }
 
   public slots:
 
@@ -90,7 +90,8 @@ class Simulator : public Visualizer
     virtual void handleSelection(const Selection&) override;
 
     // -- utility drawing functions ---------------------------------
-    void clear();
+    void clear() override;
+
     QColor calcColor(std::size_t iter, std::size_t numr);
 
     template <Mode> void drawFrameCurr();

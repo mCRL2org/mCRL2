@@ -747,8 +747,6 @@ void GLScene::renderText(QPainter& painter)
       }
     }
 
-    bool is_2D = (m_graph.getClipMax().z() - m_graph.getClipMin().z() < 0.001f);
-
     // project onto plane
     QVector3D focus_point = center_of_screen
                             + QVector3D::dotProduct(closest_node - center_of_screen, cam_pos - center_of_screen)

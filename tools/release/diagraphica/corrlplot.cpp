@@ -450,7 +450,7 @@ void CorrlPlot::clearPositions()
 
 
 // -- hit detection -------------------------------------------------
-void CorrlPlot::handleSelection(const Selection& selection)
+void CorrlPlot::handleSelection(const Selection&)
 {
 }
 

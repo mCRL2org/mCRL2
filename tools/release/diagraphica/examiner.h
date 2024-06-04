@@ -44,16 +44,16 @@ class Examiner : public Visualizer
       const std::vector< Attribute* > &attrs);
 
     // -- visualization functions  ----------------------------------
-    void visualize();
-    void mark();
+    void visualize() override;
+    void mark() override;
 
     // -- event handlers --------------------------------------------
-    void handleSizeEvent();
+    void handleSizeEvent() override;
 
-    void handleMouseEvent(QMouseEvent* e);
-    void handleKeyEvent(QKeyEvent* e);
+    void handleMouseEvent(QMouseEvent* e) override;
+    void handleKeyEvent(QKeyEvent* e) override;
 
-    QSize sizeHint() const { return QSize(200,200); }
+    QSize sizeHint() const override { return QSize(200,200); }
 
   protected slots:
     void clearData();
@@ -90,7 +90,7 @@ class Examiner : public Visualizer
     virtual void handleSelection(const Selection&) override;
 
     // -- utility drawing functions ---------------------------------
-    void clear();
+    void clear() override; 
 
     template <Mode> void drawFrame();
     template <Mode> void drawFramesHist();

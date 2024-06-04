@@ -37,8 +37,8 @@ class DiagramEditor : public Visualizer
     void deselectAll();
 
     // -- visualization functions  ----------------------------------
-    void visualize();
-    void mark();
+    void visualize() override;
+    void mark() override;
     void generateTextures();
 
     // -- public constants ------------------------------------------
@@ -106,8 +106,8 @@ class DiagramEditor : public Visualizer
     void showContextMenu();
 
     // -- event handlers --------------------------------------------
-    void handleMouseEvent(QMouseEvent* e);
-    void handleKeyEvent(QKeyEvent* e);
+    void handleMouseEvent(QMouseEvent* e) override;
+    void handleKeyEvent(QKeyEvent* e) override;
 
     void handleHits(const std::vector< int > &ids);
 
@@ -125,7 +125,7 @@ class DiagramEditor : public Visualizer
     void handleDragDOFHge(Shape* s);
     void handleDragDOFAglEnd(Shape* s);
 
-    QSize sizeHint() const { return QSize(600,600); }
+    QSize sizeHint() const override { return QSize(600,600); }
 
     // -- hit detection ---------------------------------------------
     virtual void handleSelection(const Selection&) override;

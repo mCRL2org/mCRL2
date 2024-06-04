@@ -26,13 +26,13 @@ class DistrPlot : public Visualizer
     void setDiagram(Diagram* dgrm);
 
     // -- visualization functions  ----------------------------------
-    void visualize();
-    void mark();
+    void visualize() override;
+    void mark() override;
 
     // -- input event handlers --------------------------------------
     void mouseMoveEvent(QMouseEvent*) override;
 
-    QSize sizeHint() const { return QSize(400,400); }
+    QSize sizeHint() const override { return QSize(400,400); }
 
   protected:
     // -- utility data functions ------------------------------------

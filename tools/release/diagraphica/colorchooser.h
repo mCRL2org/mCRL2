@@ -21,8 +21,8 @@ class ColorChooser : public Visualizer
     enum ColorType { HueColor, OpacityColor };
     ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinates, ColorType type);
 
-    void visualize();
-    void mark();
+    void visualize() override;
+    void mark() override;
 
     void enterEvent(QEnterEvent*) override;
     void leaveEvent(QEvent*) override;
@@ -30,7 +30,7 @@ class ColorChooser : public Visualizer
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
 
-    QSize sizeHint() const { return QSize(300,100); }
+    QSize sizeHint() const override { return QSize(300,100); }
 
   signals:
     void activated();

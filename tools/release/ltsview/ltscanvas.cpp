@@ -369,8 +369,8 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
   if (m_activeTool == PanTool)
   {
     m_position += QVector3D(
-      -0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.x() - event->x()),
-       0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->y()),
+      -0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.x() - event->position().x()),
+       0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->position().y()),
        0.0f
     );
     event->accept();
@@ -381,7 +381,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
     m_position += QVector3D(
       0.0f,
       0.0f,
-      0.01f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->y())
+      0.01f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->position().y())
     );
     event->accept();
     update();

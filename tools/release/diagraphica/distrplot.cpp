@@ -380,7 +380,7 @@ void DistrPlot::clearPositions()
 
 // -- hit detection -------------------------------------------------
 
-void DistrPlot::handleSelection(const Selection& selection)
+void DistrPlot::handleSelection(const Selection&)
 {
 }
 

@@ -45,14 +45,14 @@ class ArcDiagram : public Visualizer
     void unmarkBundles();
 
     // -- visualization functions  ----------------------------------
-    void visualize();
-    void mark();
+    void visualize() override;
+    void mark() override;
 
     // -- input event handlers --------------------------------------
 
-    void handleMouseEvent(QMouseEvent* e);
+    void handleMouseEvent(QMouseEvent* e) override;
 
-    QSize sizeHint() const { return QSize(600,600); }
+    QSize sizeHint() const override { return QSize(600,600); }
 
     void updateDiagramData();
 
@@ -73,7 +73,8 @@ class ArcDiagram : public Visualizer
     template <Mode> void drawParts();
     template <Mode> void draw();
 
-    void clear();
+    void clear() override;
+    
     QColor calcColor(std::size_t iter, std::size_t numr);
     void calcSettingsGeomBased();
     void calcSettingsDataBased();

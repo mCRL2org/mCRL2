@@ -735,7 +735,7 @@ void CombnPlot::clearPositions()
 
 
 // -- hit detection -------------------------------------------------
-void CombnPlot::handleSelection(const Selection& selection)
+void CombnPlot::handleSelection(const Selection&)
 {
 }
 
