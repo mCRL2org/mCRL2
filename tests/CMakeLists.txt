@@ -27,13 +27,15 @@ foreach(type "random" "regression")
   foreach(testname ${available_tests})
     set(EXTRA_ARGS "")
     if(MCRL2_ENABLE_EXPERIMENTAL)
-      set(EXTRA_ARGS "${EXTRA_ARGS};--experimental")
+      set(EXTRA_ARGS "--experimental")
     endif()
     if("${type}" STREQUAL "random")
       set(EXTRA_ARGS "${EXTRA_ARGS};-r 10")
     endif()
 
     set(targetname "${type}_${testname}")
+
+    message(STATUS ${testrunner} ${EXTRA_ARGS})
 
     add_test(NAME ${targetname}
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
