@@ -16,10 +16,6 @@
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
 
-#ifdef HAVE_CVC
-#include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
-#endif
-
 #ifndef WIN32
 #include <unistd.h>
 #endif
