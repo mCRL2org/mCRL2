@@ -28,7 +28,6 @@ BOOST_AUTO_TEST_CASE(dummy_test)
 using sylvan::ldds::ldd;
 using namespace mcrl2::symbolic;
 
-/*
 BOOST_AUTO_TEST_CASE(random_test_ldd_stream)
 {
   initialise_sylvan();
@@ -92,8 +91,7 @@ BOOST_AUTO_TEST_CASE(random_test_ldd_stream_sequence)
   }
   
   quit_sylvan();
-}*/
-
+}
 
 BOOST_AUTO_TEST_CASE(random_test_simple_cases)
 {
