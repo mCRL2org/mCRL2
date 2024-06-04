@@ -65,7 +65,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
   endif()
 
   # Try to read build/SourceVersion, and set that version
-  if("${MCRL2_MINOR_VERSION}" STREQUAL "Unknown" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/SourceVersion")
+  if("${MCRL2_MINOR_VERSION}" STREQUAL "Unknown" AND EXISTS "${CMAKE_SOURCE_DIR}/SourceVersion")
     include(${CMAKE_CURRENT_SOURCE_DIR}/SourceVersion)
     if(MCRL2_SOURCE_PACKAGE_REVISION)
       message(WARNING "You are building from a source package; assuming no local modifications.")
