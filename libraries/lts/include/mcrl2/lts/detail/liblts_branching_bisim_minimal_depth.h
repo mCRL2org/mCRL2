@@ -522,7 +522,7 @@ private:
       else
       {
         std::pair<block_index_type, block_index_type> liftedPair = min_split_blockpair(B1, Bt1_Bt2.first);
-        Phi2[liftedPair] = dist_formula(B1, Bt1_Bt2.first);
+        Phi2[liftedPair] = dist_formula(liftedPair.first, liftedPair.second);
         // Update truthvalues for the formula phi2.
         split_and_intersect(Truths2, liftedPair);
       }
