@@ -16,12 +16,17 @@
  * \author Jan Friso Groote, Bas Ploeger, Muck van Weerdenburg
  */
 
+// #define BRANCH_BIS_EXPERIMENT_JFG
+
 #ifndef MCRL2_LTS_LTS_ALGORITHM_H
 #define MCRL2_LTS_LTS_ALGORITHM_H
 
 #include "mcrl2/lts/detail/liblts_bisim.h"
 #include "mcrl2/lts/detail/liblts_bisim_minimal_depth.h"
 #include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+#include "mcrl2/lts/detail/liblts_bisim_gj.h"
+#endif
 #include "mcrl2/lts/detail/liblts_branching_bisim_minimal_depth.h"
 #include "mcrl2/lts/detail/liblts_weak_bisim.h"
 #include "mcrl2/lts/detail/liblts_add_an_action_loop.h"
