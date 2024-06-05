@@ -23,6 +23,7 @@
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/replace_constants_by_variables.h"
@@ -277,7 +278,7 @@ class pbesinst_lazy_algorithm
     static void rewrite_star(pbes_expression& result,
                              const structure_graph& G,
                              bool alpha, 
-                             const std::set<structure_graph::index_type>& W,
+                             const std::unordered_map<pbes_expression, structure_graph::index_type>& W,
                              const fixpoint_symbol& symbol,
                              const propositional_variable_instantiation& X,
                              const pbes_expression& psi)
@@ -292,43 +293,43 @@ class pbesinst_lazy_algorithm
       std::set<pbes_expression> Ys;
       
       // If X is won by player alpha, i.e. in the winning set W.
-      for (const auto& index : W)
+      auto it = W.find(X);
+      if (it != W.end())
       {
-        if (G.find_vertex(index).formula() == X)
+        structure_graph::index_type index = it->second;
+
+        // We know that X itself (if it can be reached by a self loop) is in W
+        // (the initial vertex is in W and every reachable one).
+        Ys.insert(X);
+
+        std::set<structure_graph::index_type> todo = { index };
+        std::set<structure_graph::index_type> done;
+
+        while (!todo.empty())
         {
-          // We know that X itself (if it can be reached by a self loop) is in W
-          // (the initial vertex is in W and every reachable one).
-          Ys.insert(X);
+          structure_graph::index_type u = *todo.begin();
+          todo.erase(todo.begin());
+          done.insert(u);
 
-          std::set<structure_graph::index_type> todo = { index };
-          std::set<structure_graph::index_type> done;
-
-          while (!todo.empty())
+          // Explore all outgoing edges.
+          for (structure_graph::index_type v: G.all_successors(u))
           {
-            structure_graph::index_type u = *todo.begin();
-            todo.erase(todo.begin());
-            done.insert(u);
-
-            // Explore all outgoing edges.
-            for (structure_graph::index_type v: G.all_successors(u))
+            if (!mcrl2::utilities::detail::contains(done, v))
             {
-              if (!mcrl2::utilities::detail::contains(done, v))
+              if (G.rank(v) == undefined_vertex())
               {
-                if (G.rank(v) == undefined_vertex())
-                {
-                  // explore all outgoing edges that are unranked
-                  todo.insert(v);
-                }
-                else if (mcrl2::utilities::detail::contains(W, v))
-                {
-                  // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
-                  Ys.insert(G.find_vertex(v).formula());
-                }
+                // explore all outgoing edges that are unranked
+                todo.insert(v);
+              }
+              else if (W.count(G.find_vertex(v).formula()) != 0)
+              {
+                // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
+                Ys.insert(G.find_vertex(v).formula());
               }
             }
-
-            break;
           }
+
+          break;
         }
       }
 
@@ -454,8 +455,8 @@ class pbesinst_lazy_algorithm
 
     // rewrite the right hand side of the equation X = psi
     virtual void rewrite_psi(const std::size_t /* thread_index */,
-                             std::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
                              pbes_expression& result,
+                             std::optional<std::tuple<const structure_graph&, bool, const std::unordered_map<pbes_expression, structure_graph::index_type>&>> proof_graph,
                              const fixpoint_symbol& symbol,
                              const propositional_variable_instantiation& X,
                              const pbes_expression& psi
@@ -482,7 +483,7 @@ class pbesinst_lazy_algorithm
     }
 
     virtual void run_thread(const std::size_t thread_index,
-                            std::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph,
+                            std::optional<std::tuple<const structure_graph&, bool, const std::unordered_map<pbes_expression, structure_graph::index_type>&>> proof_graph,
                             pbesinst_lazy_todo& todo,
                             std::atomic<std::size_t>& number_of_active_processes,
                             data::mutable_indexed_substitution<> sigma,
@@ -519,7 +520,7 @@ class pbesinst_lazy_algorithm
 
           // optional step
           m_todo_access.lock();
-          rewrite_psi(thread_index, proof_graph, psi_e, eqn.symbol(), X_e, psi_e);
+          rewrite_psi(thread_index, psi_e, proof_graph, eqn.symbol(), X_e, psi_e);
           m_todo_access.unlock();
 
           std::set<propositional_variable_instantiation> occ = find_propositional_variable_instantiations(psi_e);
@@ -560,7 +561,7 @@ class pbesinst_lazy_algorithm
     }
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    virtual void run(std::optional<std::tuple<const structure_graph&, bool, const std::set<structure_graph::index_type>&>> proof_graph)
+    virtual void run(std::optional<std::tuple<const structure_graph&, bool, const std::unordered_map<pbes_expression, structure_graph::index_type>&>> proof_graph)
     {
       m_iteration_count = 0;
 
