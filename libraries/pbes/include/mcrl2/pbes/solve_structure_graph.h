@@ -595,7 +595,7 @@ bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
 }
 
 inline
-std::pair<bool, std::set<structure_graph::index_type>> solve_structure_graph_minimal_winning_set(structure_graph& G, bool check_strategy = false)
+std::pair<bool, std::unordered_map<pbes_expression, structure_graph::index_type>> solve_structure_graph_minimal_winning_set(structure_graph& G, bool check_strategy = false)
 {
   bool use_toms_optimization = !check_strategy;
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
@@ -616,6 +616,7 @@ std::pair<bool, std::set<structure_graph::index_type>> solve_structure_graph_min
   // Sorting is necessary for the set intersection computed below.
   auto& W_alpha = is_disjunctive ? W.first : W.second;
   W_alpha.sort();
+
   std::set<structure_graph::index_type> W_minimal;
   std::set_intersection(minimal_set.begin(), minimal_set.end(), W_alpha.vertices().begin(), W_alpha.vertices().end(), std::inserter(W_minimal, W_minimal.begin()));
   mCRL2log(log::debug) << "\nExtracted minimal set W " << core::detail::print_set(W_minimal) << std::endl;
@@ -623,7 +624,14 @@ std::pair<bool, std::set<structure_graph::index_type>> solve_structure_graph_min
     mCRL2log(log::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
   }
 
-  return { is_disjunctive, W_minimal };
+  // Make a mapping from the formula to the index it belongs to.
+  std::unordered_map<pbes_expression, structure_graph::index_type> mapping;
+
+  for (structure_graph::index_type index : W_alpha.vertices()) {
+    mapping.insert(std::make_pair(G.find_vertex(index).formula(), index));
+  }
+
+  return { is_disjunctive, mapping };
 }
 
 inline
