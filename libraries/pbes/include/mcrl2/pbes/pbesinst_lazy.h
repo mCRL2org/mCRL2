@@ -275,6 +275,7 @@ class pbesinst_lazy_algorithm
       }
     }
 
+    /// Replaces propositional variables in the expression psi that are irrelevant for the given proof_graph.
     static void rewrite_star(pbes_expression& result,
                              const structure_graph& G,
                              bool alpha, 
@@ -284,13 +285,13 @@ class pbesinst_lazy_algorithm
                              const pbes_expression& psi)
     {
       bool changed = false;
-      std::regex re("Z(neg|pos)_(\\d+)_.*");
+      thread_local std::regex re("Z(neg|pos)_(\\d+)_.*");
       std::smatch match;
 
       // Now we need to find all reachable X --> Y, following vertices that are not ranked.
       mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
 
-      std::set<pbes_expression> Ys;
+      std::unordered_set<pbes_expression> Ys;
       
       // If X is won by player alpha, i.e. in the winning set W.
       auto it = W.find(X);
@@ -302,8 +303,8 @@ class pbesinst_lazy_algorithm
         // (the initial vertex is in W and every reachable one).
         Ys.insert(X);
 
-        std::set<structure_graph::index_type> todo = { index };
-        std::set<structure_graph::index_type> done;
+        std::unordered_set<structure_graph::index_type> todo = { index };
+        std::unordered_set<structure_graph::index_type> done;
 
         while (!todo.empty())
         {
