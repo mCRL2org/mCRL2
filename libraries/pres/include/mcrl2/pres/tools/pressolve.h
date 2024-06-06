@@ -178,24 +178,21 @@ class pressolve_tool
 
     if (options.algorithm==gauss_elimination)
     {
-std::cerr << "GAUSS\n";
       ressolve_by_gauss_elimination_algorithm solver(options, resulting_res);
       pres_expression result = solver.run();
-      std::cout << "Solution: " << result << std::endl;
+      std::cout << result << std::endl;
     }
     else if (options.algorithm==numerical)
     { 
-std::cerr << "NUMERICAL PLAIN\n";
       ressolve_by_numerical_iteration solver(options, resulting_res);
       double result = solver.run();
-      std::cout << "Solution: " << std::setprecision(options.precision) << result << std::endl;
+      std::cout << std::setprecision(options.precision) << result << std::endl;
     }  
     else if (options.algorithm==numerical_directed)
     { 
-std::cerr << "NUMERICAL DIRECTED\n";
       ressolve_by_numerical_iteration_directed solver(options, resulting_res);
       double result = solver.run();
-      std::cout << "Solution: " << std::setprecision(options.precision) << result << std::endl;
+      std::cout << std::setprecision(options.precision) << result << std::endl;
     }  
     timer().finish("solving");
     return true;

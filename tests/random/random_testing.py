@@ -231,7 +231,7 @@ class Lps2presTest(ProcessTest):
         super(Lps2presTest, self).__init__(name, ymlfile('lps2pres'), settings)
 
     def create_inputfiles(self, runpath = '.'):
-        super(Lps2pbesTest, self).create_inputfiles(runpath)
+        super(Lps2presTest, self).create_inputfiles(runpath)
         self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
 
 class Lts2pbesTest(ProcessTest):
@@ -333,6 +333,17 @@ class PbessolvesymbolicTest(PbesTest):
 class Pbes2boolTest(PbesTest):
     def __init__(self, name, settings):
         super(Pbes2boolTest, self).__init__(name, ymlfile('pbessolve'), settings)
+
+class Pres2boolTest(ProcessTest):
+    def __init__(self, name, settings):
+        super(Pres2boolTest, self).__init__(name, ymlfile('pressolve'), settings)
+
+    def create_inputfiles(self, runpath = '.'):
+        super(Pres2boolTest, self).create_inputfiles(runpath)
+        filename = f'{self.name}.mcf'
+        formula = random_state_formula_generator.make_modal_formula()
+        write_text(filename, str(formula))
+        self.inputfiles += [filename]
 
 class Pbes2boolDepthFirstTest(PbesTest):
     def __init__(self, name, settings):
@@ -467,7 +478,8 @@ available_tests = {
     'pbessolve-counter-example-optimization-7'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 7, settings)                            ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     'pbes-unify-parameters'                       : lambda name, settings: Pbes_unify_parametersTest(name, settings)                                   ,
-    'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
+    'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                               ,
+    'pressolve'                                   : lambda name, settings: Pres2boolTest(name, settings)                                              ,
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
     'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }

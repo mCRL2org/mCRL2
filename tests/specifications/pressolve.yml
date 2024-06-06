@@ -2,46 +2,49 @@ nodes:
   l1:
     type: mcrl2
   l2:
-    type: lps
-  l3:
-    type: lts
-  l4:
     type: mcf
-  l5:
+  l3:
+    type: lps
+  l4:
     type: pbes
+  l5:
+    type: pres
 
 tools:
   t1:
     input: [l1]
-    output: [l2]
-    args: [-n]
+    output: [l3]
+    args: []
     name: mcrl22lps
   t2:
-    input: [l2]
-    output: [l3]
-    args: [-D]
-    name: lps2lts
+    input: [l3, l2]
+    output: [l4]
+    args: []
+    name: lps2pbes
   t3:
-    input: [l2, l4]
+    input: [l4]
+    output: []
+    args: [--check-strategy]
+    name: pbessolve
+  t4:
+    input: [l3, l2]
     output: [l5]
     args: []
     name: lps2pres
-  t4:
-    input: [l5]
-    output: []
-    args: []
-    name: pressolve
   t5:
     input: [l5]
     output: []
-    args: ['-an']
+    args: []
     name: pressolve
   t6:
     input: [l5]
     output: []
+    args: ['-an']
+    name: pressolve
+  t7:
+    input: [l5]
+    output: []
     args: ['-am']
     name: pressolve
-
 result: |
-  result = t4.value['solution'] == t5.value['solution'] == t6.value['solution'] == (not t2.value['has-deadlock'])
-
+  result = t3.value['solution'] == t5.value['solution'] == t6.value['solution'] == t7.value['solution']

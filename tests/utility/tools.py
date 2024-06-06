@@ -272,7 +272,22 @@ class PbesSolveTool(Tool):
         # mark the evidence file as executed
         if len(self.output_nodes) == 1:
             self.output_nodes[0].value = 'executed'
-            
+  
+class PresSolveTool(Tool):
+    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
+        super(PresSolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
+
+    def assign_outputs(self):
+        text = self.stdout.strip() + self.stderr.strip()
+        # N.B. In verbose mode, the solution may appear at the start.
+        if text.startswith('false') or text.endswith('false') or text.startswith('-inf') or text.endswith('-inf'):
+            value = False
+        elif text.startswith('true') or text.endswith('true') or text.startswith('inf') or text.endswith('inf'):
+            value = True
+        else:
+            value = self.stdout.strip()
+        self.value['solution'] = value
+
 class LtscompareTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         super(LtscompareTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
@@ -299,6 +314,8 @@ class ToolFactory(object):
             return SolveTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['pbes2bool', 'pbessolve', 'pbessolvesymbolic', 'pbessymbolicbisim']:
             return PbesSolveTool(label, name, toolpath, input_nodes, output_nodes, args)
+        elif name in ['pressolve']:
+            return PresSolveTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'ltscompare':
             return LtscompareTool(label, name, toolpath, input_nodes, output_nodes, args)
         return Tool(label, name, toolpath, input_nodes, output_nodes, args)
