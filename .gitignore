@@ -12,6 +12,9 @@ scripts/code_generation/data_types/codegen.pickle
 # Ignore the standard build directory
 build/
 
+# Ignore IDE files
+.vscode
+
 # Ignore the python virtual environment
 .venv/
 
