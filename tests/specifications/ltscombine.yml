@@ -1,0 +1,99 @@
+nodes:
+  l1:
+    type: mcrl2
+  l2:
+    type: mcrl2
+  l3:
+    type: lps
+  l4:
+    type: lps
+  l5:
+    type: lts
+  l6:
+    type: lts
+  l7:
+    type: lts
+  l8:
+    type: lps
+  l9:
+    type: lps
+  l10:
+    type: mcrl2
+  l11:
+    type: mcrl2
+  l12:
+    type: mcrl2
+  l13:
+    type: lps
+  l14:
+    type: lts
+  
+tools:
+  t1:
+    input: [l1]
+    output: [l3]
+    args: [-n]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l4]
+    args: [-n]
+    name: mcrl22lps
+  t3:
+    input: [l3]
+    output: [l5]
+    args: []
+    name: lps2lts
+  t4:
+    input: [l4]
+    output: [l6]
+    args: []
+    name: lps2lts
+  t5:
+    input: [l5, l6]
+    output: [l7]
+    args: [--hide=a, "--allow=a,b", --comm="a|b->c"]
+    name: ltscombine
+  t6:
+    input: [l5, l3]
+    output: [l8]
+    args: []
+    name: lts2lps
+  t7:
+    input: [l6, l3]
+    output: [l9]
+    args: []
+    name: lts2lps
+  t8:
+    input: [l8]
+    output: [l10]
+    args: []
+    name: lpspp
+  t9:
+    input: [l9]
+    output: [l11]
+    args: []
+    name: lpspp
+  t10:
+    input: [l10, l11]
+    output: [l12]
+    args: [--hide=a, "--allow=a,b", --comm=a|b->c]
+    name: ltscombine_naive.py
+  t11:
+    input: [l12]
+    output: [l13]
+    args: []
+    name: mcrl22lps
+  t12:
+    input: [l13]
+    output: [l14]
+    args: []
+    name: lps2lts
+  t13:
+    input: [l7, l14]
+    output: []
+    args: [-ebisim]
+    name: ltscompare
+    
+result: |
+  result = t13.value['result']

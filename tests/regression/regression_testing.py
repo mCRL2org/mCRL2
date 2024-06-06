@@ -93,7 +93,7 @@ regression_tests = {
     'lpsconfcheck1' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18), settings),
     'onepoint1'     : lambda name, settings: PbesrewrTest(name, [abspath('onepoint/1.txt')], 'quantifier-one-point', settings),
     'pbessolve'     : lambda name, settings: YmlTest(name, ymlfile('pbessolve'), [abspath('pbessolve-structure-graph/1.txt')], settings),
-    #'pfnf1'         : lambda name, settings: PbesrewrTest(name, [abspath('pfnf/1.txt')], 'pfnf', settings),
+    'pfnf1'         : lambda name, settings: PbesrewrTest(name, [abspath('pfnf/1.txt')], 'pfnf', settings),
     }
 
 pbessolve_tests       = { 'pbessolve-{}'.format(filename[:-4]) : lambda name, settings: YmlTest(name, ymlfile('pbespgsolve'), [abspath('pbessolve/{}'.format(filename))], settings) for filename in sorted(os.listdir(abspath('pbessolve'))) }
@@ -139,6 +139,8 @@ def main(tests):
     cmdline_parser.add_argument('-n', '--names', dest='names', action='store_true', help='Print the names of the available tests')
     cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
     cmdline_parser.add_argument('-o', '--output', dest='output', metavar='o', action='store', help='Run the tests in the given directory')
+    cmdline_parser.add_argument('-e', '--experimental', dest='experimental', action='store_true', help='Run regression tests using experimental tools.')
+
     args = cmdline_parser.parse_args()
     if args.names:
         print_names(tests)
@@ -169,4 +171,4 @@ if __name__ == '__main__':
     tests.update(pbessolve_tests)
     tests.update(alphabet_reduce_tests)
     main(tests)
-    #main(slow_regression_tests)
+    main(slow_regression_tests)

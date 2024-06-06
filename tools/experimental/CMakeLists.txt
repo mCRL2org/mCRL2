@@ -6,6 +6,7 @@ set(MCRL2_TOOLS
   lpsrealelm
   lpssymbolicbisim
   lts2pres
+  ltscombine
   pbes2cvc4
   pbes2yices
   pbesabsinthe

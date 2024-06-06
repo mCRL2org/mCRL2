@@ -301,4 +301,7 @@ class ToolFactory(object):
             return PbesSolveTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'ltscompare':
             return LtscompareTool(label, name, toolpath, input_nodes, output_nodes, args)
+        elif name == 'ltscombine_naive.py':
+            return Tool(label, name, os.path.join(os.path.abspath(os.path.dirname(__file__)), '../scripts/'), input_nodes, output_nodes, args)
+    
         return Tool(label, name, toolpath, input_nodes, output_nodes, args)
