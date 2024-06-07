@@ -18,7 +18,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'../../'))
 
 import tests.utility.random_process_expression as random_process_expression
 import tests.utility.random_state_formula_generator as random_state_formula_generator
-import tests.utility.random_quantitative_state_formula_generator as random_quantitative_state_formula_generator
 from tests.utility.random_bes_generator import make_bes
 from tests.utility.random_pbes_generator import make_pbes
 from tests.utility.testing import YmlTest
