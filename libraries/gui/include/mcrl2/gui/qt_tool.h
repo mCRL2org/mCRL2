@@ -134,9 +134,6 @@ class qt_tool: public Tool
           // Failed to attach a console, we could spawn one or just ignore it.
         }
       }
-
-      // Disable the dark mode on Windows 11 until the icons have been adapted
-      qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
 #endif // MCRL2_PLATFORM_WINDOWS
 
 
@@ -145,6 +142,11 @@ class qt_tool: public Tool
 
     bool pre_run(int& argc, char** argv)
     {
+#ifdef MCRL2_PLATFORM_WINDOWS
+      // Disable the dark mode on Windows 11 until the icons have been adapted
+      qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
+#endif // MCRL2_PLATFORM_WINDOWS
+
       // The instantiation of QApplication has been postponed
       // to here, since creating it in execute would make it
       // impossible to view the help text in an environment
@@ -152,6 +154,9 @@ class qt_tool: public Tool
       try
       {
         m_application = std::unique_ptr<QApplication>(new QApplication(argc, argv));
+#ifdef MCRL2_PLATFORM_WINDOWS
+        m_application->setStyle("windowsvista");
+#endif // MCRL2_PLATFORM_WINDOWS
       }
       catch (...)
       {
