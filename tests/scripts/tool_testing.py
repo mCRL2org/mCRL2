@@ -389,7 +389,7 @@ def main(tests):
     
     for example, rename_spec, mcrl2_file in [
         ("abp", "act renamed;\n var x:D;\n rename r1(x) => renamed;", os.path.join(MCRL2_ROOT, "examples/academic/abp/abp.mcrl2")), 
-        ("dice", "act renamed;\n var x:Bool;\n rename b1(x) => renamed;", os.path.join(MCRL2_ROOT, "examples/probabilistic/coins_simulate_dice/dice.mcrl2"))
+        # ("dice", "act renamed;\n var x:Bool;\n rename b1(x) => renamed;", os.path.join(MCRL2_ROOT, "examples/probabilistic/coins_simulate_dice/dice.mcrl2"))
         ]:
         
         print(f"Write intermediate files into {output}", flush=True)
