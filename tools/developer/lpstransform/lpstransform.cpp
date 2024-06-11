@@ -33,7 +33,7 @@ struct one_point_rule_rewriter_command : public lps::detail::lps_command
   {
     lps::detail::lps_command::execute();
     lps::one_point_rule_rewrite(lpsspec);
-    lps::detail::save_lps(lpsspec, output_filename);
+    lps::save_lps(lpsspec, output_filename);
   }
 };
 
@@ -47,7 +47,7 @@ struct if_rewriter_command: public lps::detail::lps_command
   {
     lps::detail::lps_command::execute();
     lps::if_rewrite(lpsspec);
-    lps::detail::save_lps(lpsspec, output_filename);
+    lps::save_lps(lpsspec, output_filename);
   }
 };
 
@@ -73,7 +73,7 @@ struct if_rewriter_with_rewriter_command: public lps::detail::lps_rewriter_comma
       f.apply(result, x);
       return result;
     });
-    lps::detail::save_lps(lpsspec, output_filename);
+    lps::save_lps(lpsspec, output_filename);
   }
 };
 

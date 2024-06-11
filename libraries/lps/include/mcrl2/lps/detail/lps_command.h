@@ -13,7 +13,7 @@
 #define MCRL2_LPS_DETAIL_LPS_COMMAND_H
 
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/detail/lps_io.h"
+#include "mcrl2/lps/io.h" 
 #include "mcrl2/utilities/detail/command.h"
 
 namespace mcrl2 {
@@ -36,7 +36,7 @@ struct lps_command: public utilities::detail::command
 
   void execute()
   {
-    lpsspec = lps::detail::load_lps(input_filename);
+    lps::load_lps(lpsspec, input_filename);
   }
 };
 

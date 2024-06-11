@@ -53,46 +53,47 @@ void lps2pbes(const std::string& input_filename,
 {
   if (formula_filename.empty())
   {
-    throw mcrl2::runtime_error("option -f is not specified");
+    throw mcrl2::runtime_error("Option -f is not specified");
   }
   if (input_filename.empty())
   {
-    mCRL2log(log::verbose) << "reading LPS from stdin..." << std::endl;
+    mCRL2log(log::verbose) << "Reading LPS from stdin..." << std::endl;
   }
   else
   {
-    mCRL2log(log::verbose) << "reading LPS from file '" <<  input_filename << "'..." << std::endl;
+    mCRL2log(log::verbose) << "Reading LPS from file '" <<  input_filename << "'..." << std::endl;
   }
-  lps::stochastic_specification lpsspec;
-  load_lps(lpsspec, input_filename);
-  mCRL2log(log::verbose) << "reading input from file '" <<  formula_filename << "'..." << std::endl;
+  lps::specification plain_lpsspec;
+  load_lps(plain_lpsspec, input_filename);  // Read as a non stochastic lps, because lps2pbes cannot handle stochastic lps's.
+  lps::stochastic_specification lpsspec(plain_lpsspec);
+  mCRL2log(log::verbose) << "Reading input from file '" <<  formula_filename << "'..." << std::endl;
   std::ifstream from(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
   if (!from)
   {
-    throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
+    throw mcrl2::runtime_error("Cannot open state formula file: " + formula_filename);
   }
   std::string text = utilities::read_text(from);
   const bool formula_is_quantitative = false;
   state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
   detail::check_lps2pbes_actions(formspec.formula(), lpsspec);
-  mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
+  mCRL2log(log::verbose) << "Converting state formula and LPS to a PBES..." << std::endl;
   pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
 
   if (check_only)
   {
     mCRL2log(mcrl2::log::info)
-      << "the file '" << formula_filename
+      << "The file '" << formula_filename
       << "' contains a well-formed state formula" << std::endl;
     return;
   }
 
   if (output_filename.empty())
   {
-    mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
+    mCRL2log(log::verbose) << "Writing PBES to stdout..." << std::endl;
   }
   else
   {
-    mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename << "'..." << std::endl;
+    mCRL2log(log::verbose) << "Writing PBES to file '" <<  output_filename << "'..." << std::endl;
   }
   save_pbes(result, output_filename, output_format);
 }

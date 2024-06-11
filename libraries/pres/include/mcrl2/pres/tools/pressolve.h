@@ -15,7 +15,7 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/lps/detail/lps_io.h"
+// #include "mcrl2/lps/detail/lps_io.h"
 #include "mcrl2/pres/pres_input_tool.h"
 #include "mcrl2/pres/detail/pres_io.h"
 #include "mcrl2/pres/pressolve_options.h"

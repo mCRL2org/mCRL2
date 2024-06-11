@@ -18,6 +18,8 @@
 #ifndef LIBLTS_BISIM_GJ_H
 #define LIBLTS_BISIM_GJ_H
 
+#include <forward_list>
+#include <deque>
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 // #include "mcrl2/lts/detail/check_complexity.h"
@@ -836,7 +838,7 @@ class bisim_partitioner_gj
         if (t.from()!=current_from_state || t.label()!=current_label)
         {
           m_state_to_constellation_count.emplace_back(1);
-          m_blocks[0].block_to_constellation.push_front(std::list(1,t));
+          m_blocks[0].block_to_constellation.push_front(t);
           current_label=t.label();
         }
         else
@@ -1168,7 +1170,7 @@ class bisim_partitioner_gj
               block_index Bpp=(M_in_bi1, bi1, bi);
               // Algorithm 1, line 1.14 is implicitly done in the call of splitB above.
               // Algorithm 1, line 1.15.
-              XXXXXX
+              // XXXXXX
               
             }
           }

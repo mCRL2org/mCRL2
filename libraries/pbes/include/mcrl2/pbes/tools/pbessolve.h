@@ -17,7 +17,7 @@
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
-#include "mcrl2/lps/detail/lps_io.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/pbesinst_structure_graph2.h"
@@ -251,7 +251,8 @@ class pbessolve_tool
 
     if (!lpsfile.empty())
     {
-      lps::specification lpsspec = lps::detail::load_lps(lpsfile);
+      lps::specification lpsspec;
+      lps::load_lps(lpsspec, lpsfile);
       lps::detail::replace_global_variables(lpsspec, sigma);
 
       bool result;
@@ -265,7 +266,7 @@ class pbessolve_tool
       {
         evidence_file = input_filename() + ".evidence.lps";
       }
-      lps::detail::save_lps(evidence, evidence_file);
+      lps::save_lps(evidence, evidence_file);
       mCRL2log(log::verbose)
           << "Saved " << (result ? "witness" : "counter example") << " in "
           << evidence_file << std::endl;

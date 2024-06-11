@@ -41,7 +41,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, stochastic_sp
 template <typename Specification>
 void save_lps(const Specification& spec, std::ostream& stream, const std::string& target = "")
 {
-  mCRL2log(log::verbose) << "Saving LPS" << (target.empty() ? "" : " to " + target) << ".\n";
+  mCRL2log(log::debug) << "Saving LPS" << (target.empty() ? "" : " to " + target) << ".\n";
   atermpp::binary_aterm_ostream(stream) << spec;
 }
 
@@ -53,8 +53,18 @@ void save_lps(const Specification& spec, std::ostream& stream, const std::string
 template <typename Specification>
 void load_lps(Specification& spec, std::istream& stream, const std::string& source = "")
 {
-  mCRL2log(log::verbose) << "Loading LPS" << (source.empty() ? "" : " from " + source) << ".\n";
-  atermpp::binary_aterm_istream(stream) >> spec;
+  mCRL2log(log::debug) << "Loading LPS" << (source.empty() ? "" : " from " + source) << ".\n";
+
+  if constexpr (std::is_same<Specification, specification>::value)
+  {
+    stochastic_specification stoch_spec;
+    atermpp::binary_aterm_istream(stream) >> stoch_spec;
+    spec=remove_stochastic_operators(stoch_spec);
+  }
+  else
+  {
+    atermpp::binary_aterm_istream(stream) >> spec;
+  }
 }
 
 /// \brief Saves an LPS to a file.
