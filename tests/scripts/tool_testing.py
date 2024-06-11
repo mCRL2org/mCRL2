@@ -389,7 +389,7 @@ def main(tests):
     
     for example, rename_spec, mcrl2_file in [
         ("abp", "act renamed;\n var x:D;\n rename r1(x) => renamed;", os.path.join(MCRL2_ROOT, "examples/academic/abp/abp.mcrl2")), 
-        #("dice", "act renamed;\n var x:Bool;\n rename b1(x) => renamed;", os.path.join(MCRL2_ROOT, "examples/probabilistic/coins_simulate_dice/dice.mcrl2"))
+        ("dice", "act renamed;\n var x:Bool;\n rename b1(x) => renamed;", os.path.join(MCRL2_ROOT, "examples/probabilistic/coins_simulate_dice/dice.mcrl2"))
         ]:
         
         print(f"Write intermediate files into {output}", flush=True)
@@ -464,7 +464,7 @@ def main(tests):
                         if not args.cvc3 and "-zcvc" in argument:
                             print(f"Skipped cvc test {test.toolname} {arguments}")
                             continue
-                        if not args.pattern in test.toolname:
+                        if args.pattern not in test.toolname:
                             print(f"Skipped tool {test.toolname} with does not fit pattern {args.pattern}")
                             continue
                         if not args.experimental and test.toolname in ["besconvert", "pbespareqelm", "lpsrealelm"]:
