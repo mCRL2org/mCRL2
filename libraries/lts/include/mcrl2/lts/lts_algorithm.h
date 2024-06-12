@@ -99,6 +99,12 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+    case lts_eq_bisim_gj:
+    {
+      return detail::destructive_bisimulation_compare_gj(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
+    }
+#endif
     case lts_eq_branching_bisim:
     {
       if (generate_counter_examples)
@@ -116,6 +122,12 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
     }
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+    case lts_eq_branching_bisim_gj:
+    {
+      return detail::destructive_bisimulation_compare_gj(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
+    }
+#endif
     case lts_eq_divergence_preserving_branching_bisim:
     {
       if (generate_counter_examples)
@@ -133,6 +145,12 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
     }
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+    case lts_eq_divergence_preserving_branching_bisim_gj:
+    {
+      return detail::destructive_bisimulation_compare_gj(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
+    }
+#endif
     case lts_eq_weak_bisim:
     {
       if (generate_counter_examples)
@@ -630,6 +648,13 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce_gjkw(l,false,false);
       return;
     }
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+    case lts_eq_bisim_gj:
+    {
+      detail::bisimulation_reduce_gj(l,false,false);
+      return;
+    }
+#endif
     case lts_eq_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s(l);
@@ -651,6 +676,13 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce_gjkw(l,true,false);
       return;
     }
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+    case lts_eq_branching_bisim_gj:
+    {
+      detail::bisimulation_reduce_gj(l,true,false);
+      return;
+    }
+#endif
     case lts_eq_branching_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_branching_bisim<LTS_TYPE> > s(l);
@@ -672,6 +704,13 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce_gjkw(l,true,true);
       return;
     }
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+    case lts_eq_divergence_preserving_branching_bisim_gj:
+    {
+      detail::bisimulation_reduce_gj(l,true,true);
+      return;
+    }
+#endif
     case lts_eq_divergence_preserving_branching_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s(l);
