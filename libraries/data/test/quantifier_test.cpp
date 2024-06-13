@@ -13,13 +13,8 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/list64.h"
-#include "mcrl2/data/set64.h"
-#else
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
-#endif
 #include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"

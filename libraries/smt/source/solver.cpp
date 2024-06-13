@@ -8,11 +8,7 @@
 //
 /// \file solver.cpp
 
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/list64.h"
-#else
 #include "mcrl2/data/list.h"
-#endif
 #include "mcrl2/smt/translate_specification.h"
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/smt/unfold_pattern_matching.h"

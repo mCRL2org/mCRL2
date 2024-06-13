@@ -13,15 +13,8 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
-
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/bag64.h"
-#include "mcrl2/data/list64.h"
-#else
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
-#endif
-
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/where_clause.h"

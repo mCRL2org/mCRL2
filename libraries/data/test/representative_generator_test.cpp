@@ -13,13 +13,8 @@
 
 #include <boost/test/included/unit_test.hpp>
 
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/list64.h"
-#include "mcrl2/data/set64.h"
-#else
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
-#endif
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/representative_generator.h"
 

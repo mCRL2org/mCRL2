@@ -11,13 +11,8 @@
 
 #define BOOST_TEST_MODULE rewriting_test
 
-#ifdef MCRL2_ENABLE_MACHINENUMBERS
-#include "mcrl2/data/bag64.h"
-#include "mcrl2/data/list64.h"
-#else
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
-#endif
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/data/detail/enumerator_iteration_limit.h"
