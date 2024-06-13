@@ -31,7 +31,6 @@
 
 #include <sylvan_ldd.hpp>
 
-#include <chrono>
 #include <iomanip>
 #include <boost/dynamic_bitset.hpp>
 
@@ -54,7 +53,14 @@ class lpsreach_algorithm
     std::vector<boost::dynamic_bitset<>> m_summand_patterns;
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
     std::vector<std::size_t> m_variable_order;
-    symbolic_lts m_lts;
+    
+    data::data_specification data_spec;
+    data::variable_list process_parameters;
+    sylvan::ldds::ldd states;
+    sylvan::ldds::ldd m_initial_state;
+    std::vector<symbolic::data_expression_index> m_data_index;
+    utilities::indexed_set<lps::multi_action> m_action_index;
+    std::vector<lps_summand_group> summand_groups;
     
     /// \brief Rewrites all arguments of the given action.
     template<typename Rewriter, typename Substitution>
@@ -80,7 +86,7 @@ class lpsreach_algorithm
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)
     {
-      mCRL2log(log::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
+      mCRL2log(log::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
@@ -120,7 +126,7 @@ class lpsreach_algorithm
       using utilities::detail::as_vector;
 
       lps::specification lpsspec_ = preprocess(lpsspec);
-      m_lts.process_parameters = lpsspec_.process().process_parameters();
+      process_parameters = lpsspec_.process().process_parameters();
 
       // Rewrite the initial expressions to normal form,
       std::vector<data::data_expression> initial_values;
@@ -134,19 +140,19 @@ class lpsreach_algorithm
       m_summand_patterns = compute_read_write_patterns(lpsspec_);
       symbolic::adjust_read_write_patterns(m_summand_patterns, m_options);
 
-      m_variable_order = symbolic::compute_variable_order(m_options.variable_order, m_lts.process_parameters.size());
+      m_variable_order = symbolic::compute_variable_order(m_options.variable_order, process_parameters.size());
       mCRL2log(log::debug) << "variable order = " << core::detail::print_list(m_variable_order) << std::endl;
       m_summand_patterns = symbolic::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
       mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
 
-      m_lts.process_parameters = symbolic::permute_copy(m_lts.process_parameters, m_variable_order);
-      for (const data::variable& param : m_lts.process_parameters)
+      process_parameters = symbolic::permute_copy(process_parameters, m_variable_order);
+      for (const data::variable& param : process_parameters)
       {
-        m_lts.data_index.push_back(symbolic::data_expression_index(param.sort()));
+        m_data_index.push_back(symbolic::data_expression_index(param.sort()));
       }
 
-      m_lts.initial_state = symbolic::state2ldd(symbolic::permute_copy(initial_state, m_variable_order), m_lts.data_index);
-      mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_lts.process_parameters) << std::endl;
+      m_initial_state = symbolic::state2ldd(symbolic::permute_copy(initial_state, m_variable_order), m_data_index);
+      mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(process_parameters) << std::endl;
 
       std::vector<std::set<std::size_t>> groups = symbolic::compute_summand_groups(m_options.summand_groups, m_summand_patterns);
       for (const auto& group: groups)
@@ -156,12 +162,12 @@ class lpsreach_algorithm
       m_group_patterns = symbolic::compute_summand_group_patterns(m_summand_patterns, groups);
       for (std::size_t j = 0; j < m_group_patterns.size(); j++)
       {
-        m_lts.summand_groups.emplace_back(lpsspec_, m_lts.process_parameters, groups[j], m_group_patterns[j], m_summand_patterns, m_variable_order);
+        summand_groups.emplace_back(lpsspec_, process_parameters, groups[j], m_group_patterns[j], m_summand_patterns, m_variable_order);
       }
 
-      for (std::size_t i = 0; i < m_lts.summand_groups.size(); i++)
+      for (std::size_t i = 0; i < summand_groups.size(); i++)
       {
-        mCRL2log(log::debug) << "=== summand group " << i << " ===\n" << m_lts.summand_groups[i] << std::endl;
+        mCRL2log(log::debug) << "=== summand group " << i << " ===\n" << summand_groups[i] << std::endl;
       }
     }
 
@@ -171,13 +177,13 @@ class lpsreach_algorithm
       if (m_options.no_relprod)
       {
         ldd z = symbolic::alternative_relprod(U, group);
-        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
+        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
         return z;
       }
       else
       {
         ldd z = relprod(U, group.L, group.Ir);
-        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
+        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
         return z;
       }
     }
@@ -187,7 +193,7 @@ class lpsreach_algorithm
     std::tuple<ldd, ldd, ldd> step(const ldd& visited, const ldd& todo, bool learn_transitions = true, bool detect_deadlocks = false)
     {
       using namespace sylvan::ldds;
-      auto& R = m_lts.summand_groups;
+      auto& R = summand_groups;
 
       ldd todo1 = empty_set();
       ldd potential_deadlocks = detect_deadlocks ? todo : empty_set();
@@ -204,7 +210,7 @@ class lpsreach_algorithm
             ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
@@ -228,7 +234,7 @@ class lpsreach_algorithm
             ldd proj = project(todo1, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           // Apply one transition relation repeatedly.
@@ -267,14 +273,13 @@ class lpsreach_algorithm
     ldd run()
     {
       using namespace sylvan::ldds;
-      auto& R = m_lts.summand_groups;
+      auto& R = summand_groups;
       std::size_t iteration_count = 0;
 
-      mCRL2log(log::trace) << "initial state = " << core::detail::print_list(m_lts.initial_state) << std::endl;
+      mCRL2log(log::trace) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
-      auto start = std::chrono::steady_clock::now();
-      ldd x = m_lts.initial_state;
-      std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - start;
+      stopwatch reachability_start;
+      ldd x = m_initial_state;
       ldd visited = empty_set();
       ldd todo = x;
       ldd deadlocks = empty_set();
@@ -284,7 +289,7 @@ class lpsreach_algorithm
         stopwatch loop_start;
         iteration_count++;
         mCRL2log(log::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
-        mCRL2log(log::trace) << "todo = " << print_states(m_lts.data_index, todo) << std::endl;
+        mCRL2log(log::trace) << "todo = " << print_states(m_data_index, todo) << std::endl;
 
         std::tie(visited, todo, deadlocks) = step(visited, todo, true, m_options.detect_deadlocks);
 
@@ -299,8 +304,7 @@ class lpsreach_algorithm
         sylvan::sylvan_stats_report(stderr);
       }
 
-      elapsed_seconds = std::chrono::steady_clock::now() - start;
-      std::cout << "number of states = " << print_size(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
+      std::cout << "number of states = " << print_size(visited) << " (time = " << std::setprecision(2) << std::fixed << reachability_start.seconds() << "s)" << std::endl;
       mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       double total_time = 0.0;
@@ -315,9 +319,9 @@ class lpsreach_algorithm
       mCRL2log(log::verbose) << "learning transitions took " << total_time << "s" << std::endl;
 
       std::size_t i = 0;
-      for (const auto& param : m_lts.process_parameters)
+      for (const auto& param : process_parameters)
       {
-        auto& table = m_lts.data_index[i];
+        auto& table = m_data_index[i];
 
         mCRL2log(log::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values."<< std::endl;
         for (const auto& data : table)
@@ -328,13 +332,13 @@ class lpsreach_algorithm
         ++i;
       }
 
-      mCRL2log(log::verbose) << "There are " << m_lts.action_index.size() << " action labels" << std::endl;
-      for (const auto& action : m_lts.action_index)
+      mCRL2log(log::verbose) << "There are " << m_action_index.size() << " action labels" << std::endl;
+      for (const auto& action : m_action_index)
       {
-          mCRL2log(log::debug) << m_lts.action_index.index(action) << ": " << action << std::endl;
+          mCRL2log(log::debug) << m_action_index.index(action) << ": " << action << std::endl;
       }
 
-      m_lts.states = visited;
+      states = visited;
       return visited;
     }
 
@@ -350,17 +354,17 @@ class lpsreach_algorithm
     
     std::vector<symbolic::data_expression_index>& data_index()
     {
-      return m_lts.data_index;
+      return m_data_index;
     }
 
     utilities::indexed_set<lps::multi_action>& action_index()
     {
-      return m_lts.action_index;
+      return m_action_index;
     }
 
-    const symbolic_lts& get_symbolic_lts()
+    symbolic_lts get_symbolic_lts()
     {
-      return m_lts;
+      return symbolic_lts(data_spec, process_parameters, states, m_initial_state, m_data_index, m_action_index, summand_groups);
     }
 };
 

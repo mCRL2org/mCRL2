@@ -37,4 +37,8 @@
     #define MCRl2_COMPILER_CLANG 1
 #endif
 
+#ifndef MCRL2_ENABLE_SYLVAN
+#define MCRL2_ENABLE_SYLVAN 1
+#endif 
+
 #endif // MCRL2_UTILITIES_PLATFORM_H_
