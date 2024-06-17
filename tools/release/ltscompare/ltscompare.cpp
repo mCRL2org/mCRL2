@@ -219,12 +219,21 @@ class ltscompare_tool : public ltscompare_base
                  .add_value(lts_eq_bisim)
                  .add_value(lts_eq_bisim_gv)
                  .add_value(lts_eq_bisim_gjkw)
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+                 .add_value(lts_eq_bisim_gj)
+#endif    
                  .add_value(lts_eq_branching_bisim)
                  .add_value(lts_eq_branching_bisim_gv)
                  .add_value(lts_eq_branching_bisim_gjkw)
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+                 .add_value(lts_eq_branching_bisim_gj)
+#endif    
                  .add_value(lts_eq_divergence_preserving_branching_bisim)
                  .add_value(lts_eq_divergence_preserving_branching_bisim_gv)
                  .add_value(lts_eq_divergence_preserving_branching_bisim_gjkw)
+#ifdef BRANCH_BIS_EXPERIMENT_JFG
+                 .add_value(lts_eq_divergence_preserving_branching_bisim_gj)
+#endif    
                  .add_value(lts_eq_weak_bisim)
                  .add_value(lts_eq_divergence_preserving_weak_bisim)
                  .add_value(lts_eq_sim)
