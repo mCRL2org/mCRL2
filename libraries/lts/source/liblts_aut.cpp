@@ -87,7 +87,7 @@ static void check_state(std::size_t state, std::size_t number_of_states, std::si
 {
   if (state>=number_of_states)
   {
-    throw mcrl2::runtime_error("The state number " + std::to_string(state) + " is higher than the number of states (" +
+    throw mcrl2::runtime_error("The state number " + std::to_string(state) + " is not below the number of states (" +
                                std::to_string(number_of_states) + ").  Found at line " + std::to_string(line_no) + ".");
   }
 } 
@@ -95,9 +95,16 @@ static void check_state(std::size_t state, std::size_t number_of_states, std::si
 static void check_states(mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& probability_state,
                          std::size_t number_of_states, std::size_t line_no)
 {
-  for(mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t::state_probability_pair& p: probability_state)
+  if (probability_state.size()<=1) // This is a simple probabilistic state. 
   {
-    check_state(p.state(), number_of_states, line_no);
+    check_state(probability_state.get(), number_of_states, line_no);
+  }
+  else // The state consists of a vector of states and probability pairs. 
+  {
+    for(mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t::state_probability_pair& p: probability_state)
+    {
+      check_state(p.state(), number_of_states, line_no);
+    }
   }
 } 
 
