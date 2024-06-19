@@ -456,7 +456,7 @@ void MainWindow::actionShowReducedLts()
       QVBoxLayout vbox;
       QLabel textLabel("Reduction:");
       EquivalenceComboBox reductionBox(&reductionDialog);
-      QDialogButtonBox buttonBox(QDialogButtonBox::Cancel);
+      QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
       vbox.addWidget(&textLabel);
       vbox.addWidget(&reductionBox);
@@ -471,6 +471,7 @@ void MainWindow::actionShowReducedLts()
       if (last_equivalence)
       {
         reductionBox.setSelectedEquivalence(last_equivalence.value());
+        connect(&buttonBox, SIGNAL(accepted()), &reductionDialog, SLOT(accept()));
       }
 
       /* execute the dialog */
