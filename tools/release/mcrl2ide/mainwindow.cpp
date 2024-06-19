@@ -258,6 +258,7 @@ void MainWindow::setupDocks()
   viewMenu->addAction(propertiesDock->toggleViewAction());
   viewMenu->addAction(consoleDock->toggleViewAction());
   viewMenu->addAction(rewriteExpressionDock->toggleViewAction());
+  rewriteExpressionDock->setEnabled(false);
 
   /* place the docks in the default dock layout */
   setDocksToDefault();
@@ -282,6 +283,8 @@ void MainWindow::onNewProjectOpened()
 
   /* change the file buttons */
   changeFileButtons(false);
+
+  rewriteExpressionDock->setEnabled(true);
 }
 
 void MainWindow::onEnterSpecificationOnlyMode()
