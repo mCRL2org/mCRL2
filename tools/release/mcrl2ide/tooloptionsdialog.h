@@ -30,7 +30,14 @@ class ToolOptionsDialog : public QDialog
 public:
     ToolOptionsDialog(QWidget* parent, FileSystem* fileSystem);
 
+public slots:  
+    /**
+     * Updates the tool options when a new project was loaded.
+     */
+    void updateToolOptions();
+
 private slots:
+
     /**
      * Saves the tool options.
      */

@@ -422,7 +422,6 @@ QDomDocument FileSystem::createNewProjectOptions()
   QDomNode linearisationNode = newProjectOptions.createElement("linearisation_method");
   rootElement.appendChild(linearisationNode);
 
-
   return newProjectOptions;
 }
 
@@ -671,7 +670,14 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   QDomElement linearisationElement = newProjectOptions.elementsByTagName("linearisation_method").at(0).toElement();
   if (!linearisationElement.isNull())
   {
-    m_linearisationMethod = mcrl2::lps::parse_lin_method(linearisationElement.text().toStdString());
+    try
+    {
+      m_linearisationMethod = mcrl2::lps::parse_lin_method(linearisationElement.text().toStdString());
+    }
+    catch (std::exception& ex)
+    {
+      // Keep the default linearisation method.
+    }
   }
 
   /* get the path to the specification */
@@ -970,11 +976,42 @@ bool FileSystem::save(bool forceSave)
     }
 
     /* save the tool options */
-    QDomNode jittycNode = projectOptions.elementsByTagName("spec").at(0).toElement();
-    jittycNode.setNodeValue(m_enableJittyc ? "true" : "false");
-        
-    QDomNode linearisationNode = projectOptions.elementsByTagName("linearisation_method").at(0).toElement();
-    linearisationNode.setNodeValue(QString::fromStdString(mcrl2::lps::print_lin_method(m_linearisationMethod)));
+    QDomText jittycValue = projectOptions.createTextNode(m_enableJittyc ? "true" : "false");
+    QDomText linearisationValue = projectOptions.createTextNode(QString::fromStdString(mcrl2::lps::print_lin_method(m_linearisationMethod)));
+
+
+    QDomNode jittycNode = projectOptions.elementsByTagName("jittyc").at(0).toElement();
+    if (jittycNode.isNull())
+    {
+      // Append the jittyc node
+      QDomNode rootNode = projectOptions.elementsByTagName("root").at(0);
+      jittycNode = rootNode.appendChild(projectOptions.createElement("jittyc"));
+    }   
+
+    if (jittycNode.firstChild().isNull())
+    {
+      jittycNode.appendChild(jittycValue);
+    }
+    else
+    {
+      jittycNode.replaceChild(jittycValue, jittycNode.firstChild());
+    }
+            
+    QDomNode linearisationNode = projectOptions.elementsByTagName("linearisation_method").at(0);
+    if (linearisationNode.isNull())
+    {
+      QDomNode rootNode = projectOptions.elementsByTagName("root").at(0);
+      linearisationNode = rootNode.appendChild(projectOptions.createElement("linearisation_method"));
+    }
+
+    if (linearisationNode.firstChild().isNull())
+    {      
+      linearisationNode.appendChild(linearisationValue);
+    }
+    else
+    {
+      linearisationNode.replaceChild(linearisationValue, linearisationNode.firstChild());
+    }
 
     updateProjectFile();
 

@@ -284,6 +284,8 @@ void MainWindow::onNewProjectOpened()
   /* change the file buttons */
   changeFileButtons(false);
 
+  toolOptionsDialog->updateToolOptions();
+
   rewriteExpressionDock->setEnabled(true);
 }
 
