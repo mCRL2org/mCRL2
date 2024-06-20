@@ -18,10 +18,18 @@ ToolOptionsDialog::ToolOptionsDialog(QWidget* parent, FileSystem* fileSystem)
 {
   ui->setupUi(this);
 
-  
-  //connect(ui->cancelButton, SIGNAL(click()), this, SLOT(close()));
-  //connect(ui->saveButton, SIGNAL(click()), this, SLOT(saveToolOptions()));
-  //connect(ui->resetButton, SIGNAL(click()), this, SLOT(resetToolOptions()));
+  updateToolOptions();
+
+  connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
+  connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(saveToolOptions()));
+  connect(ui->resetButton, SIGNAL(clicked()), this, SLOT(resetToolOptions()));
+}
+
+void ToolOptionsDialog::updateToolOptions()
+{
+  // Load the existing tool options
+  ui->enableJittyc->setCheckState(m_fileSystem->enableJittyc() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+  ui->linearsationComboBox->setCurrentText(QString::fromStdString(mcrl2::lps::print_lin_method(m_fileSystem->linearisationMethod())));  
 }
 
 void ToolOptionsDialog::saveToolOptions()
