@@ -10,6 +10,8 @@
 #ifndef TOOLOPTIONSDIALOG_H
 #define TOOLOPTIONSDIALOG_H
 
+#include <filesystem.h>
+
 #include <QDialog>
 
 namespace Ui
@@ -26,11 +28,23 @@ class ToolOptionsDialog : public QDialog
   Q_OBJECT
 
 public:
-    ToolOptionsDialog(QWidget* parent);
+    ToolOptionsDialog(QWidget* parent, FileSystem* fileSystem);
 
+private slots:
+    /**
+     * Saves the tool options.
+     */
+    void saveToolOptions();
+
+    /**
+     * Reset the tool options to their default values.
+     */
+    void resetToolOptions();
 
 private:  
   Ui::ToolOptionsDialog* ui;
+
+  FileSystem* m_fileSystem;
 
 };
 
