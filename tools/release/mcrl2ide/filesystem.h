@@ -10,6 +10,7 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
+#include "mcrl2/lps/linearisation_method.h"
 #include "mcrl2/gui/codeeditor.h"
 #include "utilities.h"
 
@@ -460,6 +461,18 @@ class FileSystem : public QObject
    */
   void removeTemporaryFolder();
 
+  /**
+   * Returns true iff jittyc is enabled in the tool options.
+   */
+  bool enableJittyc() const { return m_enableJittyc; }
+  void setEnableJittyc(bool enabled) { m_enableJittyc = enabled; }
+
+  /**
+   * Returns the linearisation method selected in the tool options;
+   */
+  mcrl2::lps::t_lin_method linearisationMethod() const { return this->m_linearisationMethod; }
+  void setLinearisationMethod(mcrl2::lps::t_lin_method method) { this->m_linearisationMethod = method; }
+
   public slots:
   /**
    * @brief setSaveIntermediateFilesOptions Sets the options on whether
@@ -518,6 +531,11 @@ class FileSystem : public QObject
   QDateTime lastKnownSpecificationModificationTime;
   QDateTime lastKnownProjectFileModificationTime;
   std::map<QString, QDateTime> lastKnownPropertyModificationTime;
+
+  // Settings stored in the project file
+  bool m_enableJittyc = false;
+  mcrl2::lps::t_lin_method m_linearisationMethod = mcrl2::lps::lmRegular;
+
 
   /**
    * @brief makeSureProjectFolderExists Checks whether the properties folder
