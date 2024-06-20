@@ -19,7 +19,9 @@ The main window of the tool shows the labelled transition system described by
 the input file as a directed, labelled graph. The graph can be layed out
 automatically by using the "Automatic layout" option from the "Tools" menu.
 Alternatively, individual states can also be moved by dragging them with the
-mouse. When clicking a state with the right mouse button, its position is fixed.
+mouse. Clicking a state with the right mouse button will anchor it in place,
+preventing it from being moved by the automatic layout. This can also be used
+on handles and labels to perform a manual layout (partially).
 
 The viewpoint can be moved by holding down the "Control" button and dragging with
 the left mouse button. Zooming in or out can be with the scroll wheel or by
