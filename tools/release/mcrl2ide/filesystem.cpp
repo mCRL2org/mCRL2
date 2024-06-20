@@ -415,6 +415,13 @@ QDomDocument FileSystem::createNewProjectOptions()
 
   QDomElement propertiesElement = newProjectOptions.createElement("properties");
   rootElement.appendChild(propertiesElement);
+  
+  QDomNode jittycNode = newProjectOptions.createElement("jittyc");
+  rootElement.appendChild(jittycNode);
+        
+  QDomNode linearisationNode = newProjectOptions.createElement("linearisation_method");
+  rootElement.appendChild(linearisationNode);
+
 
   return newProjectOptions;
 }
@@ -469,6 +476,7 @@ bool FileSystem::newProject(bool forNewProject)
         QDomNode specNode = projectOptions.elementsByTagName("spec").at(0);
         specNode.replaceChild(specPathNode, specNode.firstChild());
       }
+      
       updateProjectFile();
 
       QDir(projectFolderPath).mkdir(propertiesFolderName);
@@ -648,6 +656,22 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
         "specification as value).");
     projectFile.close();
     return;
+  }
+  
+  /** Read the tool options from the file */
+  QDomElement jittycElement = newProjectOptions.elementsByTagName("jittyc").at(0).toElement();
+  if (!jittycElement.isNull())
+  {
+    if (jittycElement.text() == "true")
+    {
+      m_enableJittyc = true;
+    }
+  }
+
+  QDomElement linearisationElement = newProjectOptions.elementsByTagName("linearisation_method").at(0).toElement();
+  if (!linearisationElement.isNull())
+  {
+    m_linearisationMethod = mcrl2::lps::parse_lin_method(linearisationElement.text().toStdString());
   }
 
   /* get the path to the specification */
@@ -944,6 +968,15 @@ bool FileSystem::save(bool forceSave)
         saveProperty(property);
       }
     }
+
+    /* save the tool options */
+    QDomNode jittycNode = projectOptions.elementsByTagName("spec").at(0).toElement();
+    jittycNode.setNodeValue(m_enableJittyc ? "true" : "false");
+        
+    QDomNode linearisationNode = projectOptions.elementsByTagName("linearisation_method").at(0).toElement();
+    linearisationNode.setNodeValue(QString::fromStdString(mcrl2::lps::print_lin_method(m_linearisationMethod)));
+
+    updateProjectFile();
 
     specificationEditor->document()->setModified(false);
     return true;
