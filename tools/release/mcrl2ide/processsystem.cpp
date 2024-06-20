@@ -166,27 +166,31 @@ bool ProcessSystem::isThreadRunning(ProcessType processType)
 }
 
 QProcess*
-ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
-                                int subprocessIndex,
-                                mcrl2::lts::lts_equivalence equivalence)
+ProcessSystem::createSubprocess(SubprocessType subprocessType, 
+  int processid,
+  int subprocessIndex,
+  mcrl2::lts::lts_equivalence equivalence)
 {
   return createSubprocess(subprocessType, processid, subprocessIndex,
                           Property(), QString(), false, equivalence, SpecType::Main);
 }
 
 QProcess*
-ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
-                                int subprocessIndex, const Property& property,
-                                mcrl2::lts::lts_equivalence equivalence)
+ProcessSystem::createSubprocess(SubprocessType subprocessType, 
+  int processid,
+  int subprocessIndex, 
+  const Property& property,
+  mcrl2::lts::lts_equivalence equivalence)
 {
-  return createSubprocess(subprocessType, processid, subprocessIndex, property, QString(), 
+  return createSubprocess(subprocessType, processid, subprocessIndex,  property, QString(), 
                           false, equivalence, SpecType::Main);
 }
 
 QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
-                                          int processid, int subprocessIndex,
-                                          const Property& property,
-                                          SpecType specType)
+  int processid,
+  int subprocessIndex,
+  const Property& property,
+  SpecType specType)
 {
   return createSubprocess(subprocessType, processid, subprocessIndex, property, QString(), 
                           false, mcrl2::lts::lts_eq_none, specType);
@@ -202,6 +206,7 @@ QProcess* ProcessSystem::createSubprocess(
     mcrl2::lts::lts_equivalence equivalence, 
     SpecType specType)
 {
+  // TODO: This function combines all parameters for the different processes, which is confusing.
   QProcess* subprocess = new QProcess();
   ProcessType processType = processTypes[processid];
 
@@ -278,15 +283,28 @@ QProcess* ProcessSystem::createSubprocess(
     program = "mcrl22lps";
     inputFile = fileSystem->specificationFilePath(specType, property.name);
     outputFile = fileSystem->lpsFilePath(specType, property.name, evidence);
-    arguments << inputFile << outputFile << "--lin-method=regular"
-              << "--rewriter=jitty"
-              << "--verbose";
+    arguments << inputFile 
+              << outputFile 
+              << "--verbose"
+              << QString("--lin-method=").append(mcrl2::lps::print_lin_method(fileSystem->linearisationMethod()));
+#ifdef MCRL2_JITTYC_ENABLED
+    if (fileSystem->enableJittyc())
+    {
+      arguments<< "--rewriter=jittyc";
+    }
+#endif // MCRL2_JITTYC_ENABLED
     break;
 
   case SubprocessType::Lpsxsim:
     program = "lpsxsim";
     inputFile = fileSystem->lpsFilePath();
-    arguments << inputFile << "--rewriter=jitty";
+    arguments << inputFile;
+#ifdef MCRL2_JITTYC_ENABLED
+    if (fileSystem->enableJittyc())
+    {
+      arguments<< "--rewriter=jittyc";
+    }
+#endif // MCRL2_JITTYC_ENABLED
     break;
 
   case SubprocessType::Lps2lts:
@@ -349,6 +367,12 @@ QProcess* ProcessSystem::createSubprocess(
     {
       arguments << "--counter-example";
     }
+#ifdef MCRL2_JITTYC_ENABLED
+    if (fileSystem->enableJittyc())
+    {
+      arguments<< "--rewriter=jittyc";
+    }
+#endif // MCRL2_JITTYC_ENABLED
     break;
 
   case SubprocessType::Pbessolve:
@@ -359,6 +383,12 @@ QProcess* ProcessSystem::createSubprocess(
               << "--search-strategy=breadth-first"
               << "--solve-strategy=0"
               << "--verbose";
+#ifdef MCRL2_JITTYC_ENABLED
+    if (fileSystem->enableJittyc())
+    {
+      arguments<< "--rewriter=jittyc";
+    }
+#endif // MCRL2_JITTYC_ENABLED
     if (evidence)
     {
       inputFile2 = fileSystem->lpsFilePath();
@@ -376,6 +406,12 @@ QProcess* ProcessSystem::createSubprocess(
     program = "mcrl2i";
     inputFile = fileSystem->lpsFilePath();
     arguments << inputFile << "-e" << expression;
+#ifdef MCRL2_JITTYC_ENABLED
+    if (fileSystem->enableJittyc())
+    {
+      arguments<< "--rewriter=jittyc";
+    }
+#endif // MCRL2_JITTYC_ENABLED
 
     connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(rewriteResult(int)));
