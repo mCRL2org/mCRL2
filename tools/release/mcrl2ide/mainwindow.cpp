@@ -34,7 +34,7 @@ MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
   findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
   addPropertyDialog = new AddEditPropertyDialog(true, processSystem, fileSystem,
                                                 findAndReplaceDialog, this);
-  toolOptionsDialog = new ToolOptionsDialog(this);
+  toolOptionsDialog = new ToolOptionsDialog(this, fileSystem);
 
   setupMenuBar();
   setupToolbar();
