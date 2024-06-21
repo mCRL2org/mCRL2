@@ -97,6 +97,29 @@ class HelpMenu : public QMenu
     }
 };
 
+inline
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QByteArray localMsg = msg.toLocal8Bit();
+    switch (type) {
+    case QtDebugMsg:
+        fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtInfoMsg:
+        fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        abort();
+    }
+}
+
 template <typename Tool>
 class qt_tool: public Tool
 {
@@ -153,6 +176,7 @@ class qt_tool: public Tool
       // without display server
       try
       {
+        qInstallMessageHandler(myMessageOutput); // Install the handler
         m_application = std::unique_ptr<QApplication>(new QApplication(argc, argv));
 #ifdef MCRL2_PLATFORM_WINDOWS
         m_application->setStyle("windowsvista");

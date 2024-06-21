@@ -286,7 +286,7 @@ QProcess* ProcessSystem::createSubprocess(
     arguments << inputFile 
               << outputFile 
               << "--verbose"
-              << QString("--lin-method=").append(mcrl2::lps::print_lin_method(fileSystem->linearisationMethod()));
+              << QString("--lin-method=").append(QString::fromStdString(mcrl2::lps::print_lin_method(fileSystem->linearisationMethod())));
 #ifdef MCRL2_JITTYC_ENABLED
     if (fileSystem->enableJittyc())
     {

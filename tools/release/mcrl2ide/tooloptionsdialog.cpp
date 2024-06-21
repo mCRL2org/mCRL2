@@ -13,8 +13,8 @@
 
 ToolOptionsDialog::ToolOptionsDialog(QWidget* parent, FileSystem* fileSystem)
   : QDialog(parent),
-    m_fileSystem(fileSystem),
-    ui(new Ui::ToolOptionsDialog())
+    ui(new Ui::ToolOptionsDialog()),
+    m_fileSystem(fileSystem)
 {
   ui->setupUi(this);
 
