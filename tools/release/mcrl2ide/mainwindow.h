@@ -293,6 +293,10 @@ private:
    * @return Whether a specification has been successfully made
    */
   bool assertSpecificationOpened();
+
+private slots:
+  /** Since addAction cannot be called with no slot, we use a placeholder for that. */
+  void nothingSlot() {};
 };
 
 #endif // MAINWINDOW_H
