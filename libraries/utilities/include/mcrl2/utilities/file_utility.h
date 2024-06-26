@@ -36,6 +36,17 @@ bool has_extension(const std::string& filename, const std::string& extension)
   return filename_extension==dotted_extension;
 } 
 
+/// Returns the file extension for the given path.
+inline std::string file_extension(const std::string& filename)
+{
+  auto pos = filename.find_last_of('.');
+  if (pos == std::string::npos)
+  {
+    return "";
+  }
+  return filename.substr(pos + 1);
+}
+
 class file_format
 {
   protected:
