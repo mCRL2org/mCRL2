@@ -31,16 +31,8 @@ using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_tool;
 using utilities::tools::parallel_tool;
 
-// TODO: put this code in the utilities library?
-inline std::string file_extension(const std::string& filename)
-{
-  auto pos = filename.find_last_of('.');
-  if (pos == std::string::npos)
   {
-    return "";
   }
-  return filename.substr(pos + 1);
-}
 
 class pbessolve_tool
     : public parallel_tool<rewriter_tool<pbes_input_tool<input_tool>>>
