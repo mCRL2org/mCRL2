@@ -28,12 +28,11 @@ static void rewrite_star(pbes_expression& result,
     const fixpoint_symbol& symbol,
     const propositional_variable_instantiation& X,
     const pbes_expression& psi,
-    structure_graph& G,
+    const structure_graph& G,
     bool alpha,
     const std::unordered_map<pbes_expression, structure_graph::index_type>& W)
 {
   bool changed = false;
-  thread_local std::regex re("Z(neg|pos)_(\\d+)_.*");
   std::smatch match;
 
   // Now we need to find all reachable X --> Y, following vertices that are not ranked.
@@ -89,7 +88,7 @@ static void rewrite_star(pbes_expression& result,
       psi,
       [&](const propositional_variable_instantiation& Y) -> pbes_expression
       {
-        if (std::regex_match(static_cast<const std::string&>(Y.name()), match, re))
+        if (std::regex_match(static_cast<const std::string&>(Y.name()), match, mcrl2::pbes_system::detail::positive_or_negative))
         {
           // If Y in L return Y
           mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
@@ -138,11 +137,12 @@ public:
   pbesinst_counter_example_structure_graph_algorithm(
     const pbessolve_options& options,
     const pbes& p,
-    structure_graph& _G,
+    const structure_graph& SG,
     bool _alpha,
-    const std::unordered_map<pbes_expression, structure_graph::index_type>& _W)
-    : pbesinst_structure_graph_algorithm(options, p, _G), 
-      G(_G),         
+    const std::unordered_map<pbes_expression, structure_graph::index_type>& _W,
+    structure_graph& G)
+    : pbesinst_structure_graph_algorithm(options, p, G), 
+      G(SG),         
       alpha(_alpha), 
       W(_W)
   {}
@@ -158,7 +158,7 @@ public:
   }    
 
 private:  
-  structure_graph& G;
+  const structure_graph& G;
   bool alpha;
   const std::unordered_map<pbes_expression, structure_graph::index_type>& W;
 };
@@ -169,11 +169,12 @@ class pbesinst_counter_example_structure_graph_algorithm2: public pbesinst_struc
 public:
   pbesinst_counter_example_structure_graph_algorithm2(const pbessolve_options& options,
     const pbes& p,
-    structure_graph& _G,
+    const structure_graph& SG,
     bool _alpha,
-    const std::unordered_map<pbes_expression, structure_graph::index_type>& _W)
-    : pbesinst_structure_graph_algorithm2(options, p, _G), 
-      G(_G),         
+    const std::unordered_map<pbes_expression, structure_graph::index_type>& _W,
+    structure_graph& G)
+    : pbesinst_structure_graph_algorithm2(options, p, G), 
+      G(SG),         
       alpha(_alpha), 
       W(_W)
   {}
@@ -189,7 +190,7 @@ public:
   }
     
 private:  
-  structure_graph& G;
+  const structure_graph& G;
   bool alpha;
   const std::unordered_map<pbes_expression, structure_graph::index_type>& W;
 };
