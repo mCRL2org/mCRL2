@@ -1,0 +1,199 @@
+// Author(s): Maurice Laveaux
+// Copyright: see the accompanying file COPYING or copy at
+// https://github.com/mCRL2org/mCRL2/blob/master/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/pbes/pbesinst_lazy_counter_example.h
+/// \brief A lazy algorithm for instantiating a PBES, ported from bes_deprecated.h.
+
+#ifndef MCRL2_PBES_PBESINST_LAZY_COUNTER_EXAMPLE_H
+#define MCRL2_PBES_PBESINST_LAZY_COUNTER_EXAMPLE_H
+
+#include "mcrl2/pbes/pbesinst_structure_graph.h"
+#include "mcrl2/pbes/pbesinst_structure_graph2.h"
+#include "mcrl2/pbes/structure_graph.h"
+#include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
+
+#include <regex>
+
+namespace mcrl2::pbes_system
+{
+
+/// Replaces propositional variables in the expression psi that are irrelevant for the given proof_graph.
+static void rewrite_star(pbes_expression& result,
+    const fixpoint_symbol& symbol,
+    const propositional_variable_instantiation& X,
+    const pbes_expression& psi,
+    structure_graph& G,
+    bool alpha,
+    const std::unordered_map<pbes_expression, structure_graph::index_type>& W)
+{
+  bool changed = false;
+  thread_local std::regex re("Z(neg|pos)_(\\d+)_.*");
+  std::smatch match;
+
+  // Now we need to find all reachable X --> Y, following vertices that are not ranked.
+  mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
+
+  std::unordered_set<pbes_expression> Ys;
+
+  // If X is won by player alpha, i.e. in the winning set W.
+  auto it = W.find(X);
+  if (it != W.end())
+  {
+    structure_graph::index_type index = it->second;
+
+    // We know that X itself (if it can be reached by a self loop) is in W
+    // (the initial vertex is in W and every reachable one).
+    Ys.insert(X);
+
+    std::unordered_set<structure_graph::index_type> todo = { index };
+    std::unordered_set<structure_graph::index_type> done;
+
+    while (!todo.empty())
+    {
+      structure_graph::index_type u = *todo.begin();
+      todo.erase(todo.begin());
+      done.insert(u);
+
+      // Explore all outgoing edges.
+      for (structure_graph::index_type v: G.all_successors(u))
+      {
+        if (!mcrl2::utilities::detail::contains(done, v))
+        {
+          if (G.rank(v) == undefined_vertex())
+          {
+              // explore all outgoing edges that are unranked
+              todo.insert(v);
+          }
+          else if (W.count(G.find_vertex(v).formula()) != 0)
+          {
+              // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
+              Ys.insert(G.find_vertex(v).formula());
+          }
+        }
+      }
+
+      break;
+    }
+  }
+
+  mCRL2log(log::debug) << "Ys := " << core::detail::print_set(Ys) << std::endl;
+
+  replace_propositional_variables(
+      result,
+      psi,
+      [&](const propositional_variable_instantiation& Y) -> pbes_expression
+      {
+        if (std::regex_match(static_cast<const std::string&>(Y.name()), match, re))
+        {
+          // If Y in L return Y
+          mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
+          return Y;
+        }
+        else
+        {
+          if (mcrl2::utilities::detail::contains(Ys, Y))
+          {
+            mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+            return Y;
+          }
+          else 
+          {
+            changed = true;
+            if (alpha == 0) 
+            {
+              // If Y is not reachable, replace it by false
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
+              return false_();
+            }
+            else
+            {
+              // If Y is not reachable, replace it by true
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
+              return true_();
+            }
+          }
+        }
+      }
+  );
+
+  if (changed)
+  {
+      simplify_rewriter simplify;
+      const pbes_expression result1 = result;
+      simplify(result, result1);
+  }
+
+  mCRL2log(log::debug) << "result = " << psi << std::endl;
+}
+
+class pbesinst_counter_example_structure_graph_algorithm: public pbesinst_structure_graph_algorithm
+{ 
+public:
+  pbesinst_counter_example_structure_graph_algorithm(
+    const pbessolve_options& options,
+    const pbes& p,
+    structure_graph& _G,
+    bool _alpha,
+    const std::unordered_map<pbes_expression, structure_graph::index_type>& _W)
+    : pbesinst_structure_graph_algorithm(options, p, _G), 
+      G(_G),         
+      alpha(_alpha), 
+      W(_W)
+  {}
+
+  void rewrite_psi(const std::size_t thread_index,
+    pbes_expression& result,
+    const fixpoint_symbol& symbol,
+    const propositional_variable_instantiation& X,
+    const pbes_expression& psi) override
+  {
+    rewrite_star(result, symbol, X, psi, G, alpha, W);
+    pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, psi);
+  }    
+
+private:  
+  structure_graph& G;
+  bool alpha;
+  const std::unordered_map<pbes_expression, structure_graph::index_type>& W;
+};
+
+
+class pbesinst_counter_example_structure_graph_algorithm2: public pbesinst_structure_graph_algorithm2
+{ 
+public:
+  pbesinst_counter_example_structure_graph_algorithm2(const pbessolve_options& options,
+    const pbes& p,
+    structure_graph& _G,
+    bool _alpha,
+    const std::unordered_map<pbes_expression, structure_graph::index_type>& _W)
+    : pbesinst_structure_graph_algorithm2(options, p, _G), 
+      G(_G),         
+      alpha(_alpha), 
+      W(_W)
+  {}
+
+  void rewrite_psi(const std::size_t thread_index,
+    pbes_expression& result,
+    const fixpoint_symbol& symbol,
+    const propositional_variable_instantiation& X,
+    const pbes_expression& psi) override
+  {
+    rewrite_star(result, symbol, X, psi, G, alpha, W);
+    pbesinst_structure_graph_algorithm2::rewrite_psi(thread_index, result, symbol, X, psi);
+  }
+    
+private:  
+  structure_graph& G;
+  bool alpha;
+  const std::unordered_map<pbes_expression, structure_graph::index_type>& W;
+};
+
+} // namespace mcrl2::pbes_system
+
+#endif // MCRL2_PBES_PBESINST_LAZY_COUNTER_EXAMPLE_H
