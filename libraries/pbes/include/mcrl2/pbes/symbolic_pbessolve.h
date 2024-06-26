@@ -10,6 +10,7 @@
 #ifndef MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 #define MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 
+#include "sylvan_ldd.hpp"
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "symbolic_parity_game.h"
@@ -89,7 +90,8 @@ class symbolic_pbessolve_algorithm
     /// \brief Solve the given game restricted to V with Zielonka's recursive algorithm as solver.
     ///        The remaining parameters are sinks, vertices won by even and odd respectively.
     ///        Terminates early when initial_vertex has been solved.
-    bool solve(const ldd& initial_vertex,
+    /// \returns The winner and W0, W1, S0, S1. Where S0 and S1 are the strategies.
+    std::tuple<bool, ldd, ldd, ldd, ldd> solve(const ldd& initial_vertex,
         const ldd& V,
         const ldd& Vsinks = sylvan::ldds::empty_set(),
         const ldd& W0 = sylvan::ldds::empty_set(),
@@ -103,12 +105,12 @@ class symbolic_pbessolve_algorithm
       if (includes(winning[0], initial_vertex))
       {
         mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-        return true;
+        return std::make_tuple(true, winning[0], winning[1], empty_set(), empty_set());
       }
       else if (includes(winning[1], initial_vertex))
       {
         mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-        return false;
+        return std::make_tuple(false, winning[0], winning[1], empty_set(), empty_set());
       }
 
       // If the initial vertex has not yet been won then run the zielonka solver as well.
@@ -119,11 +121,11 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solved1) << std::endl;
       if (includes(solved0, initial_vertex))
       {
-        return true;
+        return std::make_tuple(true, solved0, solved1, strategy0, strategy1);
       }
       else if (includes(solved1, initial_vertex))
       {
-        return false;
+        return std::make_tuple(false, solved0, solved1, strategy0, strategy1);
       }
       else
       {
