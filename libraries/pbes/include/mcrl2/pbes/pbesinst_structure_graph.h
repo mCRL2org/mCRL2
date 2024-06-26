@@ -134,9 +134,9 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       SG0(X, psi, k);
     }
 
-    void run(std::optional<std::tuple<const structure_graph&, bool, const std::unordered_map<pbes_expression, structure_graph::index_type>&>> proof_graph = std::nullopt) override
+    void run() override
     {
-      pbesinst_lazy_algorithm::run(proof_graph);
+      pbesinst_lazy_algorithm::run();
       m_graph_builder.finalize();
     }
 };
