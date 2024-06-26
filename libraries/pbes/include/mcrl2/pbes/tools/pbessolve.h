@@ -15,12 +15,14 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/parallel_tool.h"
+#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
+#include "mcrl2/pbes/pbesinst_lazy_counter_example.h"
 #include "mcrl2/pbes/pbesinst_structure_graph2.h"
 
 using namespace mcrl2;
@@ -31,8 +33,68 @@ using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_tool;
 using utilities::tools::parallel_tool;
 
+
+inline
+void run_solve(const pbes_system::pbes& pbesspec, 
+  const data::mutable_map_substitution<>& sigma,
+  structure_graph& G,
+  const pbes_equation_index& equation_index,  
+  pbessolve_options options,
+  const std::string& input_filename,
+  const std::string& lpsfile,
+  const std::string& ltsfile,
+  std::string evidence_file,
+  mcrl2::utilities::execution_timer& timer)
+{  
+  if (!lpsfile.empty())
   {
+    lps::specification lpsspec = lps::detail::load_lps(lpsfile);
+    lps::detail::replace_global_variables(lpsspec, sigma);
+          
+    bool result;
+    lps::specification evidence;
+    timer.start("solving");
+    std::tie(result, evidence) = solve_structure_graph_with_counter_example(
+        G, lpsspec, pbesspec, equation_index);
+    timer.finish("solving");
+
+    std::cout << (result ? "true" : "false") << std::endl;
+    if (evidence_file.empty())
+    {
+      evidence_file = input_filename + ".evidence.lps";
+    }
+    lps::detail::save_lps(evidence, evidence_file);
+    mCRL2log(log::verbose)
+        << "Saved " << (result ? "witness" : "counter example") << " in "
+        << evidence_file << std::endl;
   }
+  else if (!ltsfile.empty())
+  {
+    lts::lts_lts_t ltsspec;
+    ltsspec.load(ltsfile);
+
+    lts::lts_lts_t evidence;
+    timer.start("solving");
+    bool result = solve_structure_graph_with_counter_example(G, ltsspec);
+    timer.finish("solving");
+    std::cout << (result ? "true" : "false") << std::endl;
+    if (evidence_file.empty())
+    {
+      evidence_file = input_filename + ".evidence.lts";
+    }
+    ltsspec.save(evidence_file);
+    mCRL2log(log::verbose)
+        << "Saved " << (result ? "witness" : "counter example") << " in "
+        << evidence_file << std::endl;
+  }
+  else
+  {
+    timer.start("solving");
+    bool result = solve_structure_graph(G, options.check_strategy);
+    timer.finish("solving");
+    std::cout << (result ? "true" : "false") << std::endl;
+  }
+}
 
 class pbessolve_tool
     : public parallel_tool<rewriter_tool<pbes_input_tool<input_tool>>>
@@ -221,62 +283,6 @@ class pbessolve_tool
   {
   }
 
-  void run_solve(pbes_system::pbes& pbesspec, 
-    const data::mutable_map_substitution<>& sigma,
-    structure_graph& G,
-    const pbes_equation_index& equation_index)
-  {  
-    if (!lpsfile.empty())
-    {
-      lps::specification lpsspec;
-      lps::load_lps(lpsspec, lpsfile);
-      lps::detail::replace_global_variables(lpsspec, sigma);
-            
-      bool result;
-      lps::specification evidence;
-      timer().start("solving");
-      std::tie(result, evidence) = solve_structure_graph_with_counter_example(
-          G, lpsspec, pbesspec, equation_index);
-      timer().finish("solving");
-
-      std::cout << (result ? "true" : "false") << std::endl;
-      if (evidence_file.empty())
-      {
-        evidence_file = input_filename() + ".evidence.lps";
-      }
-      lps::save_lps(evidence, evidence_file);
-      mCRL2log(log::verbose)
-          << "Saved " << (result ? "witness" : "counter example") << " in "
-          << evidence_file << std::endl;
-    }
-    else if (!ltsfile.empty())
-    {
-      lts::lts_lts_t ltsspec;
-      ltsspec.load(ltsfile);
-
-      lts::lts_lts_t evidence;
-      timer().start("solving");
-      bool result = solve_structure_graph_with_counter_example(G, ltsspec);
-      timer().finish("solving");
-      std::cout << (result ? "true" : "false") << std::endl;
-      if (evidence_file.empty())
-      {
-        evidence_file = input_filename() + ".evidence.lts";
-      }
-      ltsspec.save(evidence_file);
-      mCRL2log(log::verbose)
-          << "Saved " << (result ? "witness" : "counter example") << " in "
-          << evidence_file << std::endl;
-    }
-    else
-    {
-      timer().start("solving");
-      bool result = solve_structure_graph(G, options.check_strategy);
-      timer().finish("solving");
-      std::cout << (result ? "true" : "false") << std::endl;
-    }
-  }
-
   template <typename PbesInstAlgorithm, typename PbesInstAlgorithmCE>
   void run_algorithm(pbes_system::pbes& pbesspec,
     const data::mutable_map_substitution<>& sigma)
@@ -315,7 +321,7 @@ class pbessolve_tool
       instantiate.run();
       timer().finish("instantiation");
 
-      run_solve(pbesspec, sigma, G, instantiate.equation_index());
+      run_solve(pbesspec, sigma, G, instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
     }
     else
     {
@@ -347,7 +353,7 @@ class pbessolve_tool
       mCRL2log(log::trace) << pbesspec << std::endl;
       
       structure_graph G;
-      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, W_alpha);
+      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, W_alpha, G);
       
       // Perform the second instantiation given the proof graph.      
       timer().start("second-instantiation");
