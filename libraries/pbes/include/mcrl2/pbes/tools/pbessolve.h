@@ -137,7 +137,7 @@ class pbessolve_tool
     if (parser.has_option("file"))
     {
       std::string filename = parser.option_argument("file");
-      if (file_extension(filename) == "lps")
+      if (mcrl2::utilities::file_extension(filename) == "lps")
       {
         lpsfile = filename;
       }
@@ -277,11 +277,11 @@ class pbessolve_tool
     }
   }
 
-  template <typename PbesInstAlgorithm>
+  template <typename PbesInstAlgorithm, typename PbesInstAlgorithmCE>
   void run_algorithm(pbes_system::pbes& pbesspec,
     const data::mutable_map_substitution<>& sigma)
   {
-    bool has_counter_example = has_counter_example_information(pbesspec);
+    bool has_counter_example = detail::has_counter_example_information(pbesspec);
     if (has_counter_example)
     {
       if (lpsfile.empty() && ltsfile.empty())
@@ -347,17 +347,17 @@ class pbessolve_tool
       mCRL2log(log::trace) << pbesspec << std::endl;
       
       structure_graph G;
-      PbesInstAlgorithm second_instantiate(options, pbesspec, G);
+      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, W_alpha);
       
       // Perform the second instantiation given the proof graph.      
       timer().start("second-instantiation");
-      second_instantiate.run(std::make_optional(std::tuple<const structure_graph&, bool, const std::unordered_map<pbes_expression, structure_graph::index_type>&>(initial_G, !result, W_alpha)));
+      second_instantiate.run();
       timer().finish("second-instantiation");
 
       mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
                              << G.all_vertices().size() << std::endl;
       
-      run_solve(pbesspec, sigma, G, second_instantiate.equation_index());
+      run_solve(pbesspec, sigma, G, second_instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
     }
   }
 
@@ -378,11 +378,11 @@ class pbessolve_tool
 
     if (options.optimization <= 1)
     {
-      run_algorithm<pbesinst_structure_graph_algorithm>(pbesspec, sigma);
+      run_algorithm<pbesinst_structure_graph_algorithm, pbesinst_counter_example_structure_graph_algorithm>(pbesspec, sigma);
     }
     else
     {
-      run_algorithm<pbesinst_structure_graph_algorithm2>(pbesspec, sigma);
+      run_algorithm<pbesinst_structure_graph_algorithm2, pbesinst_counter_example_structure_graph_algorithm2>(pbesspec, sigma);
     }
     return true;
   }
