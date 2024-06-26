@@ -22,6 +22,7 @@ namespace mcrl2::pbes_system::detail
   
 static std::regex positive("Zpos_(\\d+)_.*");
 static std::regex negative("Zneg_(\\d+)_.*");
+static std::regex positive_or_negative("Z(neg|pos)_(\\d+)_.*");
 
 /// \brief Guesses if a pbes has counter example information
 inline

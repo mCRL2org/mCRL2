@@ -9,19 +9,26 @@
 /// \file pbessolvesymbolic.cpp
 
 #include <array>
-#include <chrono>
+#include <atomic>
 #include <iomanip>
 #include <sylvan_ldd.hpp>
+
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
+#include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/symbolic_pbessolve.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/power_of_two.h"
+#include "mcrl2/pbes/tools/pbessolve.h"
 
 using namespace mcrl2;
+using namespace mcrl2::pbes_system;
+
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 using utilities::tools::parallel_tool;
@@ -130,6 +137,99 @@ private:
   stopwatch explore_timer;
 };
 
+class pbesinst_symbolic_counter_example_structure_graph_algorithm: public pbesinst_structure_graph_algorithm
+{
+public:
+  pbesinst_symbolic_counter_example_structure_graph_algorithm(structure_graph& G,
+    const pbessolve_options& options,
+    const pbes& p,
+    bool _alpha,
+    const std::unordered_map<core::identifier_string, data::data_expression>& _propvar_map,
+    const std::vector<symbolic::data_expression_index>& _data_index,
+    sylvan::ldds::ldd S)
+    : pbesinst_structure_graph_algorithm(options, p, G),
+      alpha(_alpha),
+      propvar_map(_propvar_map),
+      data_index(_data_index),
+      strategy(S)
+  {}
+
+  /// Removes PBES expressions that are irrelevant w.r.t the given strategy
+  void rewrite_psi(const std::size_t thread_index,
+    pbes_expression& result,
+    const fixpoint_symbol& symbol,
+    const propositional_variable_instantiation& X,
+    const pbes_expression& psi) override
+  {
+    std::vector<std::uint32_t> singleton;
+    bool changed = false;
+    std::smatch match;
+
+    replace_propositional_variables(
+        result,
+        psi,
+        [&](const propositional_variable_instantiation& Y) -> pbes_expression
+        {
+          if (std::regex_match(static_cast<const std::string&>(Y.name()), match, mcrl2::pbes_system::detail::positive_or_negative))
+          {
+            // If Y in L return Y
+            mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
+            return Y;
+          }
+
+          // Determine whether (X, Y) is in the strategy.
+
+          // Add the propositional variables.
+          // TODO: This depends on the encoding used in pbesreach.
+          singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
+          singleton.emplace_back(data_index[0].index(propvar_map.at(Y.name())));
+
+          // Add the interleaved data expressions.
+
+          ldd value = sylvan::ldds::cube(singleton);
+
+          if (sylvan::ldds::includes(strategy, value))
+          {
+            // If Y in E0
+            return Y;
+          }
+          else
+          {
+            changed = true;
+            if (alpha == 0) 
+            {
+              // If Y is not reachable, replace it by false
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
+              return false_();
+            }
+            else
+            {
+              // If Y is not reachable, replace it by true
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
+              return true_();
+            }
+          }
+        }
+    );
+
+    if (changed)
+    {
+        simplify_rewriter simplify;
+        const pbes_expression result1 = result;
+        simplify(result, result1);
+    }
+
+    mCRL2log(log::debug) << "result = " << psi << std::endl;
+    pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, psi);
+  }
+
+private:
+  bool alpha;
+  sylvan::ldds::ldd strategy;  
+  const std::vector<symbolic::data_expression_index>& data_index;
+  const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map;
+};
+
 } // namespace mcrl2::pbes_system
 
 class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_tool>>
@@ -148,6 +248,11 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
     std::size_t memory_limit = 3;
     std::size_t initial_ratio = 16;
     std::size_t table_ratio = 1;
+
+    // Counter example options.
+    std::string lpsfile;
+    std::string ltsfile;
+    std::string evidence_file;
 
     void add_options(utilities::interface_description& desc) override
     {
@@ -192,6 +297,20 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       desc.add_option("strategy", "computes the winning strategy");
       desc.add_option("total", "make the SRF PBES total", 't');
       desc.add_option("reset", "set constant values when introducing parameters");
+
+      desc.add_option("file", utilities::make_file_argument("NAME"),
+                      "The file containing the LPS or LTS that was used to "
+                      "generate the PBES using lps2pbes -c. If this "
+                      "option is set, a counter example or witness for the "
+                      "encoded property will be generated. The "
+                      "extension of the file should be .lps in case of an LPS "
+                      "file, in all other cases it is assumed to "
+                      "be an LTS.",
+                      'f');
+      desc.add_option("evidence-file", utilities::make_file_argument("NAME"),
+                      "The file to which the evidence is written. If not set, a "
+                      "default name will be chosen.");
+
       desc.add_hidden_option("aggressive", "apply on-the-fly solving after every iteration to detect bugs");
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
@@ -291,6 +410,29 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       {
         options.max_iterations = parser.option_argument_as<std::size_t>("max-iterations");
       }
+
+      if (parser.has_option("file"))
+      {
+        std::string filename = parser.option_argument("file");
+        if (mcrl2::utilities::file_extension(filename) == "lps")
+        {
+          lpsfile = filename;
+        }
+        else
+        {
+          ltsfile = filename;
+        }
+      }
+
+      if (parser.has_option("evidence-file"))
+      {
+        if (!parser.has_option("file"))
+        {
+          throw mcrl2::runtime_error(
+              "Option --evidence-file cannot be used without option --file");
+        }
+        evidence_file = parser.option_argument("evidence-file");
+      }
     }
 
   public:
@@ -305,44 +447,92 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
              )
     {}
 
-    void solve(pbes_system::pbesreach_algorithm& reach)
+    template<typename PbesReachAlgorithm, typename PbesInstAlgorithm>
+    void solve(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_)
     {
       using namespace sylvan::ldds;
 
+      bool has_counter_example = mcrl2::pbes_system::detail::has_counter_example_information(pbesspec);
+      if (has_counter_example && options_.solve_strategy != 0)
+      {
+        // TODO: Cannot use the partial solvers.
+        throw mcrl2::runtime_error("Cannot use partial solving with counter example PBES");
+      }
+
+      // If we have counter example information we remove it first.
+      pbes_system::pbes pbesspec_without_counterexample =  mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec);
+
       if (options.info)
       {
+        PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
         std::cout << symbolic::print_read_write_patterns(reach.read_write_group_patterns());
       }
       else
       {
-        timer().start("instantiation");
+        PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
+
+        timer().start("first-instantiation");
         ldd V = reach.run();
-        timer().finish("instantiation");
+        timer().finish("first-instantiation");
 
-        if (reach.solution_found())
+        if (!has_counter_example)
         {
-          std::cout << (includes(reach.W0(), (reach.initial_state())) ? "true" : "false") << std::endl;
-        }
-        else
-        {
-          if (options.max_iterations == 0)
+          if (reach.solution_found())
           {
-            pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining, options.strategy);
-            G.print_information();
-            pbes_system::symbolic_pbessolve_algorithm solver(G);
-
-            mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
-            timer().start("solving");
-            bool result = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
-            timer().finish("solving");
-
-            std::cout << (result ? "true" : "false") << std::endl;
+            std::cout << (includes(reach.W0(), (reach.initial_state())) ? "true" : "false") << std::endl;
           }
           else
           {
-            // TODO: We could actually try to solve the incomplete parity game.
-            std::cout << "Skipped solving since exploration was limited to max-iterations" << std::endl;
+            if (options.max_iterations == 0)
+            {
+              pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining, options.strategy);
+              G.print_information();
+              pbes_system::symbolic_pbessolve_algorithm solver(G);
+
+              mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
+              timer().start("solving");
+              auto [result, _a, _b, _c, _d] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
+              timer().finish("solving");
+
+              std::cout << (result ? "true" : "false") << std::endl;
+            }
+            else
+            {
+              // TODO: We could actually try to solve the incomplete parity game.
+              std::cout << "Skipped solving since exploration was limited to max-iterations" << std::endl;
+            }
           }
+        }
+        else 
+        {
+          // TODO: Check that the PBES is in SRF?.          
+          pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining, true);
+          G.print_information();
+          pbes_system::symbolic_pbessolve_algorithm solver(G);
+
+
+          mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
+          timer().start("first-solving");
+          auto [result, W0, W1, S0, S1] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
+          timer().finish("first-solving");
+          
+          auto pbesspec_simplified = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
+
+          structure_graph SG;
+
+          // TODO: Set options?
+          pbessolve_options pbessolve_options;
+          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec, !result, reach.propvar_map(), reach.data_index(), result ? S0 : S1);
+
+          // Perform the second instantiation given the proof graph.      
+          timer().start("second-instantiation");
+          second_instantiate.run();
+          timer().finish("second-instantiation");
+
+          //mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
+          //                      << G.all_vertices().size() << std::endl;
+          data::mutable_map_substitution<> sigma;
+          run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
         }
 
         if (!options.dot_file.empty())
@@ -369,18 +559,15 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       {
         throw mcrl2::runtime_error("PBESses without parameters are not supported");
       }
-
       else
       {
         if (options.solve_strategy == 0)
         {
-          pbes_system::pbesreach_algorithm reach(pbesspec, options);
-          solve(reach);
+          solve<pbesreach_algorithm, pbesinst_symbolic_counter_example_structure_graph_algorithm>(pbesspec, options);
         }
         else
         {
-          pbes_system::pbesreach_algorithm_partial reach(pbesspec, options);
-          solve(reach);
+          solve<pbesreach_algorithm_partial, pbesinst_symbolic_counter_example_structure_graph_algorithm>(pbesspec, options);
         }
       }
 

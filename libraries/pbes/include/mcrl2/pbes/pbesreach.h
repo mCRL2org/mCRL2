@@ -198,6 +198,7 @@ class pbesreach_algorithm
     data::enumerator_algorithm<> m_enumerator;
     data::variable_list m_process_parameters;
     std::size_t m_n;
+    std::unordered_map<core::identifier_string, data::data_expression> m_propvar_map;
     std::vector<symbolic::data_expression_index> m_data_index;
     std::vector<pbes_summand_group> m_summand_groups;
     data::data_expression_list m_initial_state;
@@ -276,10 +277,9 @@ class pbesreach_algorithm
       }
 
       data::basic_sort propvar_sort("PropositionalVariable"); // todo: choose a unique name
-      std::unordered_map<core::identifier_string, data::data_expression> propvar_map;
       for (const auto& equation: m_pbes.equations())
       {
-        propvar_map[equation.variable().name()] = data::function_symbol(equation.variable().name(), propvar_sort);
+        m_propvar_map[equation.variable().name()] = data::function_symbol(equation.variable().name(), propvar_sort);
       }
 
       m_process_parameters = m_pbes.equations().front().variable().parameters();
@@ -288,7 +288,7 @@ class pbesreach_algorithm
 
       // Rewrite the initial expressions to normal form,
       std::vector<data::data_expression> initial_values;
-      for (const data::data_expression& expression : make_state(m_pbes.initial_state(), propvar_map))
+      for (const data::data_expression& expression : make_state(m_pbes.initial_state(), m_propvar_map))
       {
         initial_values.push_back(m_rewr(expression));
       }
@@ -318,7 +318,7 @@ class pbesreach_algorithm
       m_group_patterns = symbolic::compute_summand_group_patterns(m_summand_patterns, groups);
       for (std::size_t j = 0; j < m_group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(m_pbes, m_process_parameters, propvar_map, groups[j], m_group_patterns[j], m_summand_patterns, m_variable_order);
+        m_summand_groups.emplace_back(m_pbes, m_process_parameters, m_propvar_map, groups[j], m_group_patterns[j], m_summand_patterns, m_variable_order);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
@@ -570,6 +570,11 @@ class pbesreach_algorithm
     const data::variable_list& process_parameters() const
     {
       return m_process_parameters;
+    }
+
+    const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map() const
+    {
+      return m_propvar_map;
     }
 
     const std::vector<symbolic::data_expression_index>& data_index() const
