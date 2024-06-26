@@ -23,6 +23,23 @@ namespace mcrl2::pbes_system::detail
 static std::regex positive("Zpos_(\\d+)_.*");
 static std::regex negative("Zneg_(\\d+)_.*");
 
+/// \brief Guesses if a pbes has counter example information
+inline
+bool has_counter_example_information(const pbes& pbesspec)
+{
+  std::regex re("Z(neg|pos)_(\\d+)_.*");
+  std::smatch match;
+  for (const pbes_equation& eqn: pbesspec.equations())
+  {
+    std::string X = eqn.variable().name();
+    if (std::regex_match(X, match, re))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 struct subsitute_counterexample: public pbes_expression_builder<subsitute_counterexample>
 {
   typedef pbes_expression_builder<subsitute_counterexample> super;
