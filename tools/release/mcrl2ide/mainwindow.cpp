@@ -368,7 +368,7 @@ bool MainWindow::assertProjectOpened()
   {
     executeInformationBox(
         this, "mCRL2 IDE",
-        "To use this tool it is required to create or open a project first");
+        "It is required to create or open a project first");
     return false;
   }
   else

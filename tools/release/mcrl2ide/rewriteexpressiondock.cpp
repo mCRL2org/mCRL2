@@ -31,15 +31,22 @@ RewriteExpressionDock::RewriteExpressionDock(mcrl2::gui::qt::CodeEditor* specifi
 
 void RewriteExpressionDock::rewriteExpression()
 {
+  ui->rewriteButton->setEnabled(false);
+  ui->resultText->setText("Rewrite in progress...");
+
   m_processId = m_processSystem->rewriteExpression(ui->inputEdit->text().toStdString());
 }
 
 void RewriteExpressionDock::actionRewriteResult(int processId)
 {
+  ui->rewriteButton->setEnabled(true);
+  ui->resultText->setText("");
+
   ui->resultText->setText(m_processSystem->getResult(m_processId));
 }
 
 void RewriteExpressionDock::cancelRewrite()
 {
+  ui->rewriteButton->setEnabled(true);
   m_processSystem->abortProcess(m_processId);
 }
