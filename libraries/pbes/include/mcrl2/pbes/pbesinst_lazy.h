@@ -355,7 +355,7 @@ class pbesinst_lazy_algorithm
     {  
       if (m_options.optimization >= 1)
       {
-        rewrite_true_false(result, symbol, X, result);
+        rewrite_true_false(result, symbol, X, psi);
       }
     }
 

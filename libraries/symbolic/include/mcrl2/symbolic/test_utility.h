@@ -91,6 +91,31 @@ sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
     return result;  
 }
 
+/// Returns a random vector set containing at most number_of_insertions vectors of the given length with values in 0..max_value.
+std::set<std::vector<std::uint32_t>> random_vector_set(std::uint32_t length, std::uint32_t max_value, std::uint32_t number_of_insertions)
+{
+  std::set<std::vector<std::uint32_t>> result;
+
+  for (std::size_t i = 0; i < number_of_insertions; ++i)
+  {
+    result.insert(random_vector(length, max_value));
+  }
+
+  return result;
+}
+
+sylvan::ldds::ldd to_ldd(const std::set<std::vector<std::uint32_t>>& vector_set)
+{
+  sylvan::ldds::ldd result;
+
+  for (const auto& value : vector_set)
+  {
+    result = union_cube(result, value);
+  }
+
+  return result;
+}
+
 /// \brief Initialise the Sylvan library.
 void initialise_sylvan()
 {
