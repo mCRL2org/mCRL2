@@ -507,6 +507,10 @@ namespace mcrl2 {
         {
           target_sort = sort_fset::fset(s);
         }
+        else if (s0 == set_(s) && s1 == sort_fset::fset(s))
+        {
+          target_sort = sort_fset::fset(s);
+        }
         else if (s0 == sort_fset::fset(s) && s1 == sort_fset::fset(s))
         {
           target_sort = sort_fset::fset(s);
@@ -1110,6 +1114,7 @@ namespace mcrl2 {
         result.push_back(sort_set::union_(s, set_(s), set_(s)));
         result.push_back(sort_set::intersection(s, set_(s), set_(s)));
         result.push_back(sort_set::intersection(s, sort_fset::fset(s), set_(s)));
+        result.push_back(sort_set::intersection(s, set_(s), sort_fset::fset(s)));
         result.push_back(sort_set::difference(s, set_(s), set_(s)));
         result.push_back(sort_set::difference(s, sort_fset::fset(s), set_(s)));
         result.push_back(sort_set::false_function(s));
@@ -1150,6 +1155,7 @@ namespace mcrl2 {
         result.push_back(sort_set::union_(s, set_(s), set_(s)));
         result.push_back(sort_set::intersection(s, set_(s), set_(s)));
         result.push_back(sort_set::intersection(s, sort_fset::fset(s), set_(s)));
+        result.push_back(sort_set::intersection(s, set_(s), sort_fset::fset(s)));
         result.push_back(sort_set::difference(s, set_(s), set_(s)));
         result.push_back(sort_set::difference(s, sort_fset::fset(s), set_(s)));
         result.push_back(sort_set::false_function(s));
@@ -1297,6 +1303,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vf, vg, vs, vt}), intersection(s, constructor(s, vf, vs), constructor(s, vg, vt)), constructor(s, and_function(s, vf, vg), fset_intersection(s, vf, vg, vs, vt))));
         result.push_back(data_equation(variable_list({vx}), intersection(s, sort_fset::empty(s), vx), sort_fset::empty(s)));
         result.push_back(data_equation(variable_list({vd, vs, vx}), intersection(s, sort_fset::cons_(s, vd, vs), vx), if_(in(s, vd, vx), sort_fset::cons_(s, vd, intersection(s, vs, vx)), intersection(s, vs, vx))));
+        result.push_back(data_equation(variable_list({vs, vx}), intersection(s, vx, vs), intersection(s, vs, vx)));
         result.push_back(data_equation(variable_list({vx, vy}), difference(s, vx, vy), intersection(s, vx, complement(s, vy))));
         result.push_back(data_equation(variable_list({vs, vx}), difference(s, vs, vx), intersection(s, vs, complement(s, vx))));
         result.push_back(data_equation(variable_list({ve}), false_function(s, ve), sort_bool::false_()));
