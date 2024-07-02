@@ -1442,15 +1442,10 @@ bool mcrl2::data::data_type_checker::MatchSetBagOpUnionDiffIntersect(const funct
     return false;
   }
 
-  // If one of the argumenst is an fset/fbag and the other a set/bag, lift it to match the bag/set.
+  // If the left argument is a set/bag and the other an fset/fbag, lift it to match the bag/set.
   if (sort_set::is_set(sort_expression(Arg1)) && sort_fset::is_fset(sort_expression(Arg2)))
   {
     Arg2=sort_set::set_(container_sort(Arg2).element_sort());
-  }
-
-  if (sort_fset::is_fset(sort_expression(Arg1)) && sort_set::is_set(sort_expression(Arg2)))
-  {
-    Arg1=sort_set::set_(container_sort(Arg1).element_sort());
   }
 
   if (sort_bag::is_bag(sort_expression(Arg1)) && sort_fbag::is_fbag(sort_expression(Arg2)))
@@ -1458,9 +1453,34 @@ bool mcrl2::data::data_type_checker::MatchSetBagOpUnionDiffIntersect(const funct
     Arg2=sort_bag::bag(container_sort(Arg2).element_sort());
   }
 
+  // If the left arguments is a FSet/FBag and the right one a Set/Bag,
+  // allow a finite set/bag result if the element types match.
+  if (sort_fset::is_fset(sort_expression(Arg1)) && sort_set::is_set(sort_expression(Arg2)))
+  {
+    sort_expression elem_sort;
+    if (!UnifyMinType(container_sort(Arg1).element_sort(), container_sort(Arg2).element_sort(),elem_sort))
+    {
+      return false;
+    }
+
+    Arg1 = sort_fset::fset(container_sort(elem_sort));
+    Arg2 = sort_set::set_(container_sort(elem_sort));
+    result = function_sort({ Arg1, Arg2 }, Arg1);
+    return true;
+  }
+
   if (sort_fbag::is_fbag(sort_expression(Arg1)) && sort_bag::is_bag(sort_expression(Arg2)))
   {
-    Arg1=sort_bag::bag(container_sort(Arg1).element_sort());
+    sort_expression elem_sort;
+    if (!UnifyMinType(container_sort(Arg1).element_sort(), container_sort(Arg2).element_sort(),elem_sort))
+    {
+      return false;
+    }
+
+    Arg1 = sort_fbag::fbag(container_sort(elem_sort));
+    Arg2 = sort_bag::bag(container_sort(elem_sort));
+    result = function_sort({ Arg1, Arg2 }, Arg1);
+    return true;
   }
 
   sort_expression temp_result;
@@ -3912,8 +3932,10 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_function(sort_set::union_(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
   add_system_function(sort_set::union_(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
   add_system_function(sort_set::difference(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
+  add_system_function(sort_set::difference(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
   add_system_function(sort_set::difference(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
   add_system_function(sort_set::intersection(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_fset::fset(data::untyped_sort())));
+  add_system_function(sort_set::intersection(data::untyped_sort(), sort_fset::fset(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
   add_system_function(sort_set::intersection(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
   // **** add_system_function(sort_bag::set2bag(data::untyped_sort()));
   // add_system_constant(sort_set::empty(data::untyped_sort()));
@@ -3943,8 +3965,10 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_function(sort_bag::union_(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
   add_system_function(sort_bag::union_(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
   add_system_function(sort_bag::difference(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
+  add_system_function(sort_bag::difference(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
   add_system_function(sort_bag::difference(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
   add_system_function(sort_bag::intersection(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_fbag::fbag(data::untyped_sort())));
+  add_system_function(sort_bag::intersection(data::untyped_sort(), sort_fbag::fbag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
   add_system_function(sort_bag::intersection(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
   add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_fbag::fbag(data::untyped_sort())));
   add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_bag::bag(data::untyped_sort())));
