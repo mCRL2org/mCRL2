@@ -25,6 +25,7 @@ map  @bagfbag <"bag_fbag">: FBag(S) <"arg"> -> Bag(S)                           
      + <"union_">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S)                               external defined_by_rewrite_rules;
      * <"intersection">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S)                         external defined_by_rewrite_rules;
      * <"intersection">: FBag(S) <"left"> # Bag(S) <"right"> -> FBag(S)                       external defined_by_rewrite_rules;
+     * <"intersection">: Bag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                       external defined_by_rewrite_rules;
      - <"difference">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S)                           external defined_by_rewrite_rules;
      - <"difference">: FBag(S) <"left"> # Bag(S) <"right"> -> FBag(S)                         external defined_by_rewrite_rules;
      Bag2Set <"bag2set">: Bag(S) <"arg"> -> Set(S)                                            external defined_by_rewrite_rules;
@@ -71,6 +72,7 @@ eqn  @bagfbag(b)  =  @bag(@zero_, b);
      *(@bag(f, b), @bag(g, c))  =  @bag(@min_(f, g), @fbag_inter(f, g, b, c));
      *({:},x) = {:};
      *(@fbag_cons(d, p, b), x) = if(in(d, x), @fbag_cons(d, min(p, Nat2Pos(count(d, x))), *(b, x)), *(b, x));
+     *(x,b) = *(b,x);
      -(@bag(f, b), @bag(g, c))  =  @bag(@monus_(f, g), @fbag_diff(f, g, b, c));
      -({:},x) = {:};
      -(@fbag_cons(d, p, b), x) = if(>(Pos2Nat(p), count(d, x)), @fbag_cons(d, @monus(p, count(d, x)), -(b, x)), -(b, x));
