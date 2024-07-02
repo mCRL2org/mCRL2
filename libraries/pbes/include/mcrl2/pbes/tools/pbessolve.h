@@ -48,7 +48,8 @@ void run_solve(const pbes_system::pbes& pbesspec,
 {  
   if (!lpsfile.empty())
   {
-    lps::specification lpsspec = lps::detail::load_lps(lpsfile);
+    lps::specification lpsspec;
+    lps::load_lps(lpsspec, lpsfile);
     lps::detail::replace_global_variables(lpsspec, sigma);
           
     bool result;
@@ -63,7 +64,7 @@ void run_solve(const pbes_system::pbes& pbesspec,
     {
       evidence_file = input_filename + ".evidence.lps";
     }
-    lps::detail::save_lps(evidence, evidence_file);
+    lps::save_lps(evidence, evidence_file);
     mCRL2log(log::verbose)
         << "Saved " << (result ? "witness" : "counter example") << " in "
         << evidence_file << std::endl;
