@@ -225,7 +225,8 @@ class data_type_checker: public sort_type_checker
     bool MatchListSetBagOpIn(const function_sort& type, sort_expression& result) const;
     bool match_fset_insert(const function_sort& type, sort_expression& result) const;
     bool match_fbag_cinsert(const function_sort& type, sort_expression& result) const;
-    bool MatchSetBagOpUnionDiffIntersect(const function_sort& type, sort_expression& result) const;
+    bool UnifyElementSort(sort_expression& Arg1, sort_expression& Arg2, sort_expression& result) const;
+    bool MatchSetBagOpUnionDiffIntersect(const core::identifier_string& data_term_name, const function_sort& type, sort_expression& result) const;
     bool MatchSetOpSetCompl(const function_sort& type, sort_expression& result) const;
     bool MatchBagOpBag2Set(const function_sort& type, sort_expression& result) const;
     bool MatchBagOpBagCount(const function_sort& type, sort_expression& result) const;
