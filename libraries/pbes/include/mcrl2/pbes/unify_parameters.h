@@ -12,10 +12,12 @@
 #ifndef MCRL2_PBES_UNIFY_PARAMETERS_H
 #define MCRL2_PBES_UNIFY_PARAMETERS_H
 
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/default_expression_generator.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/srf_pbes.h"
+#include <optional>
 
 namespace mcrl2 {
 
@@ -174,6 +176,29 @@ void unify_parameters(srf_pbes& p, bool reset = true)
 
   // update the initial state
   p.initial_state() = replace(p.initial_state());
+}
+
+/// \returns true iff all PBES equations have the same parameter list.
+inline
+bool has_unified_parameters(const pbes& pbes)
+{  
+  std::optional<data::variable_list> parameters;
+  for (const auto& equation : pbes.equations())
+  {
+    if (!parameters.has_value())
+    {
+      parameters = equation.variable().parameters();
+    }
+    else 
+    {
+      if (parameters.value() != equation.variable().parameters())
+      {
+        return false;
+      }    
+    }
+  }
+
+  return true;
 }
 
 } // namespace pbes_system
