@@ -26,6 +26,7 @@ map @setfset <"set_fset"> : FSet(S) <"arg"> -> Set(S)                           
     + <"union_"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S)                              external defined_by_rewrite_rules;
     * <"intersection"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S)                        external defined_by_rewrite_rules;
     * <"intersection"> : FSet(S) <"left"> # Set(S) <"right"> -> FSet(S)                      external defined_by_rewrite_rules;
+    * <"intersection"> : Set(S) <"left"> # FSet(S) <"right"> -> FSet(S)                      external defined_by_rewrite_rules;
     - <"difference"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S)                          external defined_by_rewrite_rules;
     - <"difference"> : FSet(S) <"left"> # Set(S) <"right"> -> FSet(S)                        external defined_by_rewrite_rules;
     @false_ <"false_function"> : S <"arg"> -> Bool                                           internal defined_by_rewrite_rules;
@@ -68,6 +69,7 @@ eqn @setfset(s)  =  @set(@false_, s);
     *(@set(f, s), @set(g, t))  =  @set(@and_(f, g), @fset_inter(f, g, s, t));
     *({},x) = {};
     *(@fset_cons(d, s), x) = if(in(d, x), @fset_cons(d, *(s, x)), *(s, x));
+    *(x,s) = *(s,x);
     -(x, y)  =  *(x, !(y));
     -(s, x) = *(s, !(x));
     @false_(e)  =  false;
