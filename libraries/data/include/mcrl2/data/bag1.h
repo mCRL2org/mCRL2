@@ -515,9 +515,17 @@ namespace mcrl2 {
         {
           target_sort = bag(s);
         }
+        else if (s0 == sort_fbag::fbag(s) && s1 == bag(s))
+        {
+          target_sort = sort_fbag::fbag(s);
+        }
         else if (s0 == sort_set::set_(s) && s1 == sort_set::set_(s))
         {
           target_sort = sort_set::set_(s);
+        }
+        else if (s0 == sort_fset::fset(s) && s1 == sort_set::set_(s))
+        {
+          target_sort = sort_fset::fset(s);
         }
         else if (s0 == sort_fset::fset(s) && s1 == sort_fset::fset(s))
         {
@@ -600,9 +608,17 @@ namespace mcrl2 {
         {
           target_sort = bag(s);
         }
+        else if (s0 == sort_fbag::fbag(s) && s1 == bag(s))
+        {
+          target_sort = sort_fbag::fbag(s);
+        }
         else if (s0 == sort_set::set_(s) && s1 == sort_set::set_(s))
         {
           target_sort = sort_set::set_(s);
+        }
+        else if (s0 == sort_fset::fset(s) && s1 == sort_set::set_(s))
+        {
+          target_sort = sort_fset::fset(s);
         }
         else if (s0 == sort_fset::fset(s) && s1 == sort_fset::fset(s))
         {
@@ -1511,7 +1527,9 @@ namespace mcrl2 {
         result.push_back(sort_bag::in(s, s, bag(s)));
         result.push_back(sort_bag::union_(s, bag(s), bag(s)));
         result.push_back(sort_bag::intersection(s, bag(s), bag(s)));
+        result.push_back(sort_bag::intersection(s, sort_fbag::fbag(s), bag(s)));
         result.push_back(sort_bag::difference(s, bag(s), bag(s)));
+        result.push_back(sort_bag::difference(s, sort_fbag::fbag(s), bag(s)));
         result.push_back(sort_bag::bag2set(s));
         result.push_back(sort_bag::set2bag(s));
         result.push_back(sort_bag::zero_function(s));
@@ -1555,7 +1573,9 @@ namespace mcrl2 {
         result.push_back(sort_bag::in(s, s, bag(s)));
         result.push_back(sort_bag::union_(s, bag(s), bag(s)));
         result.push_back(sort_bag::intersection(s, bag(s), bag(s)));
+        result.push_back(sort_bag::intersection(s, sort_fbag::fbag(s), bag(s)));
         result.push_back(sort_bag::difference(s, bag(s), bag(s)));
+        result.push_back(sort_bag::difference(s, sort_fbag::fbag(s), bag(s)));
         result.push_back(sort_bag::bag2set(s));
         result.push_back(sort_bag::set2bag(s));
         result.push_back(sort_bag::zero_function(s));
@@ -1703,7 +1723,11 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
         result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
         result.push_back(data_equation(variable_list({vb, vc, vf, vg}), intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, min_function(s, vf, vg), fbag_intersect(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vx}), intersection(s, sort_fbag::empty(s), vx), sort_fbag::empty(s)));
+        result.push_back(data_equation(variable_list({vb, vd, vp, vx}), intersection(s, sort_fbag::cons_(s, vd, vp, vb), vx), if_(in(s, vd, vx), sort_fbag::cons_(s, vd, sort_nat::minimum(vp, sort_nat::nat2pos(count(s, vd, vx))), intersection(s, vb, vx)), intersection(s, vb, vx))));
         result.push_back(data_equation(variable_list({vb, vc, vf, vg}), difference(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, monus_function(s, vf, vg), fbag_difference(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vx}), difference(s, sort_fbag::empty(s), vx), sort_fbag::empty(s)));
+        result.push_back(data_equation(variable_list({vb, vd, vp, vx}), difference(s, sort_fbag::cons_(s, vd, vp, vb), vx), if_(greater(sort_nat::pos2nat(vp), count(s, vd, vx)), sort_fbag::cons_(s, vd, sort_nat::monus(vp, count(s, vd, vx)), difference(s, vb, vx)), difference(s, vb, vx))));
         result.push_back(data_equation(variable_list({vb, vf}), bag2set(s, constructor(s, vf, vb)), sort_set::constructor(s, nat2bool_function(s, vf), fbag2fset(s, vf, vb))));
         result.push_back(data_equation(variable_list({vh, vs}), set2bag(s, sort_set::constructor(s, vh, vs)), constructor(s, bool2nat_function(s, vh), sort_fbag::fset2fbag(s, vs))));
         result.push_back(data_equation(variable_list({ve}), zero_function(s, ve), sort_nat::c0()));
