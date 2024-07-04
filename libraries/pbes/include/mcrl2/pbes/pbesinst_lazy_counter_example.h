@@ -25,7 +25,7 @@ namespace mcrl2::pbes_system
 
 /// Replaces propositional variables in the expression psi that are irrelevant for the given proof_graph.
 static void rewrite_star(pbes_expression& result,
-    const fixpoint_symbol& symbol,
+    const fixpoint_symbol& /* symbol */,
     const propositional_variable_instantiation& X,
     const pbes_expression& psi,
     const structure_graph& G,
