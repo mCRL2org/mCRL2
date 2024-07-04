@@ -167,6 +167,8 @@ public:
     bool changed = false;
     std::smatch match;
 
+    mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
+
     replace_propositional_variables(
         result,
         psi,
@@ -183,11 +185,12 @@ public:
 
           // Add the propositional variables.
           // TODO: This depends on the encoding used in pbesreach.
+          singleton.clear();
           singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
           singleton.emplace_back(data_index[0].index(propvar_map.at(Y.name())));
 
           // Add the interleaved data expressions.
-          std::size_t i = 0;
+          std::size_t i = 1;
           auto Y_it = Y.parameters().begin();
           for (auto it = X.parameters().begin(); it != X.parameters().end(); ++it)
           {
@@ -202,6 +205,7 @@ public:
           if (sylvan::ldds::member_cube(strategy, singleton))
           {
             // If Y in E0
+            mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
             return Y;
           }
           else
@@ -231,7 +235,8 @@ public:
     }
 
     mCRL2log(log::debug) << "result = " << psi << std::endl;
-    pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, psi);
+    const pbes_expression result2 = result;
+    pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, result2);
   }
 
 private:
@@ -492,6 +497,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       else
       {
         PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
+        mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
 
         timer().start("first-instantiation");
         ldd V = reach.run();
@@ -526,19 +532,16 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           }
         }
         else 
-        {
-          // TODO: Check that the PBES is in SRF?.          
+        {         
           pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining, true);
           G.print_information();
           pbes_system::symbolic_pbessolve_algorithm solver(G);
 
-
-          mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
           timer().start("first-solving");
           auto [result, W0, W1, S0, S1] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
           timer().finish("first-solving");
 
-          mCRL2log(log::log_level_t::verbose) << (includes(reach.W0(), (reach.initial_state())) ? "true" : "false") << std::endl;
+          mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
           
           auto pbesspec_simplified = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
 
