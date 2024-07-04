@@ -98,6 +98,7 @@ mcrl2::pbes_system::pbes remove_counterexample_info(const pbes_system::pbes& pbe
       pbes_expression expression;
       f.apply(expression, equation.formula());
 
+      // TODO: Technically simplify might result in too much rewriting taking place.
       equations.emplace_back(equation.symbol(), equation.variable(), simplify(expression));
     }
 
