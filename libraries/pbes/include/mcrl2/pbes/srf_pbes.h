@@ -15,8 +15,12 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/join.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_equation.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -426,7 +430,7 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
 
   void apply(const or_& x)
   {
-    if (is_simple_expression(x.left()))
+    if (m_merge_simple_expressions && is_simple_expression(x.left()))
     {
       std::size_t size = summands.size();
       apply(x.right());
@@ -435,7 +439,7 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
         i->add_condition(detail::make_not(x.left()));
       }
     }
-    else if (is_simple_expression(x.right()))
+    else if (m_merge_simple_expressions && is_simple_expression(x.right()))
     {
       std::size_t size = summands.size();
       apply(x.left());
@@ -677,6 +681,12 @@ srf_pbes pbes2srf(const pbes& p, bool merge_simple_expressions)
 }
 
 } // namespace pbes_system
+
+inline
+bool is_srf(const pbes_system::pbes& pbes, bool merge_simple_expressions = true)
+{
+  return pbes_system::pbes2srf(pbes, merge_simple_expressions).equations().size() == pbes.equations().size() + 2;
+}
 
 } // namespace mcrl2
 
