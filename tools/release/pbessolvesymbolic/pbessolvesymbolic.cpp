@@ -19,9 +19,11 @@
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/symbolic_pbessolve.h"
+#include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/pbes/tools/pbessolve.h"
@@ -149,9 +151,9 @@ public:
     sylvan::ldds::ldd S)
     : pbesinst_structure_graph_algorithm(options, p, G),
       alpha(_alpha),
-      propvar_map(_propvar_map),
+      strategy(S),
       data_index(_data_index),
-      strategy(S)
+      propvar_map(_propvar_map)
   {}
 
   /// Removes PBES expressions that are irrelevant w.r.t the given strategy
@@ -185,10 +187,19 @@ public:
           singleton.emplace_back(data_index[0].index(propvar_map.at(Y.name())));
 
           // Add the interleaved data expressions.
+          std::size_t i = 0;
+          auto Y_it = Y.parameters().begin();
+          for (auto it = X.parameters().begin(); it != X.parameters().end(); ++it)
+          {
+            singleton.emplace_back(data_index[i].index(*it));
+            singleton.emplace_back(data_index[i].index(*Y_it));
 
-          ldd value = sylvan::ldds::cube(singleton);
+            ++Y_it;
+            ++i;
+          }
 
-          if (sylvan::ldds::includes(strategy, value))
+
+          if (sylvan::ldds::member_cube(strategy, singleton))
           {
             // If Y in E0
             return Y;
@@ -225,7 +236,7 @@ public:
 
 private:
   bool alpha;
-  sylvan::ldds::ldd strategy;  
+  sylvan::ldds::ldd strategy;
   const std::vector<symbolic::data_expression_index>& data_index;
   const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map;
 };
@@ -462,6 +473,17 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       // If we have counter example information we remove it first.
       pbes_system::pbes pbesspec_without_counterexample =  mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec);
 
+      // Check if the resulting PBES can be used
+      if (has_counter_example && !is_srf(pbesspec_without_counterexample))
+      {
+        throw mcrl2::runtime_error("The PBES after removing counter example information (Zpos and Zneg) is not in SRF form");
+      }
+
+      if (has_counter_example && !has_unified_parameters(pbesspec_without_counterexample))
+      {
+        throw mcrl2::runtime_error("The PBES after removing counter example information does not have unified parameters");
+      }
+
       if (options.info)
       {
         PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
@@ -515,6 +537,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           timer().start("first-solving");
           auto [result, W0, W1, S0, S1] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
           timer().finish("first-solving");
+
+          mCRL2log(log::log_level_t::verbose) << (includes(reach.W0(), (reach.initial_state())) ? "true" : "false") << std::endl;
           
           auto pbesspec_simplified = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
 
