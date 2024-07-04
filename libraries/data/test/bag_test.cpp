@@ -157,7 +157,7 @@ void bag_expression_test()
   test_expression("{true:2} - {true:1}", "{true:1}", normaliser);
   test_expression("{true:2} - {true:2}", "{true:0}", normaliser);
   test_expression("{true:1} - {false:1}", "{true:1}", normaliser);
-return;
+
   test_expression("{false:1} - {true:1}", "{false:1}", normaliser);
   test_expression("{true:2} - {false:1}", "{true:2}", normaliser);
   test_expression("{false:2} - {true:1}", "{false:2}", normaliser);
@@ -179,6 +179,11 @@ return;
                   normaliser);
   test_expression("{true:2, false:2} - {false:2}", "{true:2}", normaliser);
   test_expression("{true:2, false:2} - {false:2}", "{true:2}", normaliser);
+
+  // Test finite bag and bag interaction
+  test_expression("{true:3, false:2} - { b : Bool | 1 }","{true:2, false:1}",normaliser);
+  test_expression("{true:3, false:2} * { b : Bool | 1 }","{true:1, false:1}",normaliser);
+  test_expression("{ b : Bool | 1 } * {true:3, false:2}","{true:1, false:1}",normaliser);
 }
 
 BOOST_AUTO_TEST_CASE(test_main)

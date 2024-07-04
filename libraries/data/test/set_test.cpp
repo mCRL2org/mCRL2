@@ -162,8 +162,10 @@ void set_expression_test()
   test_expression("{false, true} <= {true, false}", "true",normaliser);
   test_expression("{false, false} <= {false}", "true",normaliser);
 
-
-
+  // Test finite set and set interaction
+  test_expression("{true, false} - { b : Bool | b }","{false}",normaliser);
+  test_expression("{true, false} * { b : Bool | b }","{true}",normaliser);
+  test_expression("{ b : Bool | b } * {true, false}","{true}",normaliser);
 }
 
 BOOST_AUTO_TEST_CASE(test_main)
