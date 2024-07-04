@@ -237,7 +237,7 @@ class pbesreach_algorithm
         pbes_system::replace_constants_by_variables(pbesspec, m_rewr, m_sigma);
       }
 
-      pbes_system::srf_pbes result = pbes2srf(pbesspec, false);
+      pbes_system::srf_pbes result = pbes2srf(pbesspec, true);
       if (m_options.split_conditions > 0)
       {
         result = split_conditions(result, m_options.split_conditions);
