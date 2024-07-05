@@ -2888,9 +2888,14 @@ class part_trans_t
             // action_block-slice.)
 
             // extend the bunch
-            new_noninert_bunch = (*new_noninert_block_bunch_ptr)->bunch;        assert(new_action_block_pos == new_noninert_bunch->end ||
-                                                                                                        (nullptr == new_action_block_pos[-1].succ &&
-                                                                                                         new_action_block_pos - 1 == new_noninert_bunch->end));
+            new_noninert_bunch = (*new_noninert_block_bunch_ptr)->bunch;        assert(new_action_block_pos >= new_noninert_bunch->end);
+                                                                                ONLY_IF_DEBUG(
+                                                                                    for (const action_block_entry*temp_action_block_pos=new_action_block_pos ;
+                                                                                                            temp_action_block_pos > new_noninert_bunch->end ; )
+                                                                                    {
+                                                                                        assert(nullptr == (--temp_action_block_pos)->succ);
+                                                                                    }
+                                                                                )
             new_noninert_bunch->end = action_block_inert_begin;
             /* extend the block_bunch-slice                                  */ assert((*new_noninert_block_bunch_ptr)->end == new_block_bunch_pos);
             (*new_noninert_block_bunch_ptr)->end = block_bunch_inert_begin;
@@ -3180,8 +3185,7 @@ class part_trans_t
                                                                                             return;
                                                                                         }
                                                                                         const state_info_entry* source(succ_iter->block_bunch->pred->source);
-                                                                                        mCRL2log(log::debug) << source->debug_id(partitioner)
-                                                                                                                                                      << ":\n";
+                                                                                        mCRL2log(log::debug) << source->debug_id(partitioner) << ":\n";
                                                                                         block_bunch_slice_iter_or_null_t current_out_bunch(
                                                                                                          const_cast<part_trans_t*>(this)->splitter_list.end());
                                                                                         do
@@ -4714,9 +4718,9 @@ class bisim_partitioner_dnj
                                                                                         << block_B->debug_id(*this)
                                                                                         << ',' << splitter_T->debug_id(*this)
                                                                                         << (extend_from_marked_states__add_new_noninert_to_splitter == mode
-                                                                                           ? ",extend_from_marked_states__add_new_noninert_to_splitter,"
+                                                                                           ? ",extend_from_marked_states__add_new_noninert_to_splitter)\n"
                                                                                            : (extend_from_marked_states == mode
-                                                                                             ? ",extend_from_marked_states,"
+                                                                                             ? ",extend_from_marked_states)\n"
                                                                                              : (extend_from_splitter == mode
                                                                                                ? ",extend_from_splitter)\n"
                                                                                                : ",UNKNOWN MODE)\n")));
