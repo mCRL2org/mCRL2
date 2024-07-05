@@ -354,12 +354,19 @@ class PbessolvesymbolicTest(PbesTest):
         if arguments:
             self.add_command_line_options('t3', arguments)
 
-class PbessolvesymbolicCounterexampleTest(PbesTest):
+class PbessolvesymbolicCounterexampleTest(ProcessTest):
     def __init__(self, name, arguments, settings):
         super(PbessolvesymbolicCounterexampleTest, self).__init__(name, ymlfile('pbessolvesymbolic-counter-example'), settings)
 
         if arguments:
             self.add_command_line_options('t3', arguments)
+            
+    def create_inputfiles(self, runpath = '.'):
+        super(PbessolvesymbolicCounterexampleTest, self).create_inputfiles(runpath)
+        filename = f'{self.name}.mcf'
+        formula = random_state_formula_generator.make_srf_modal_formula()
+        write_text(filename, str(formula))
+        self.inputfiles += [filename]
         
 class Pbes2boolTest(PbesTest):
     def __init__(self, name, parallel, settings):

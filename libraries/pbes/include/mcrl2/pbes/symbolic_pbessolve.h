@@ -104,16 +104,26 @@ class symbolic_pbessolve_algorithm
       stopwatch timer;
       
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
+      std::array<ldd, 2> strategy;
+
+      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex))
       {
         mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-        return std::make_tuple(true, winning[0], winning[1], empty_set(), empty_set());
+        mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+        mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+        mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
+        mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
+        return std::make_tuple(true, winning[0], winning[1], strategy[0], strategy[1]);
       }
       else if (includes(winning[1], initial_vertex))
       {
         mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-        return std::make_tuple(false, winning[0], winning[1], empty_set(), empty_set());
+        mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+        mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+        mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
+        mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
+        return std::make_tuple(false, winning[0], winning[1], strategy[0], strategy[1]);
       }
 
       // If the initial vertex has not yet been won then run the zielonka solver as well.
@@ -152,7 +162,8 @@ class symbolic_pbessolve_algorithm
       // Make the game total.
       using namespace sylvan::ldds;
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
+      std::array<ldd, 2> strategy;
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
@@ -184,7 +195,9 @@ class symbolic_pbessolve_algorithm
 
       // Make the game total and removed winning sets.
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
+      std::array<ldd, 2> strategy;
+
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
@@ -264,7 +277,9 @@ class symbolic_pbessolve_algorithm
 
       // Make the game total and removed winning sets.
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
+      std::array<ldd, 2> strategy;
+
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
@@ -348,7 +363,9 @@ class symbolic_pbessolve_algorithm
       stopwatch timer;
 
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
+      std::array<ldd, 2> strategy;
+
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
