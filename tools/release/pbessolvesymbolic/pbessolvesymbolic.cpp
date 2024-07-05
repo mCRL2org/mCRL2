@@ -28,6 +28,7 @@
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/pbes/tools/pbessolve.h"
+#include "mcrl2/utilities/unused.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -488,7 +489,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
     {}
 
     template<typename PbesReachAlgorithm, typename PbesInstAlgorithm>
-    void solve(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_)
+    void solve(pbes_system::pbes pbesspec, const symbolic_reachability_options& options_)
     {
       using namespace sylvan::ldds;
 
@@ -498,6 +499,9 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
         // TODO: Cannot use the partial solvers.
         throw mcrl2::runtime_error("Cannot use partial solving with counter example PBES");
       }
+      
+      data::mutable_map_substitution<> sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
+      pbes_system::detail::replace_global_variables(pbesspec, sigma);
 
       // If we have counter example information we remove it first.
       pbes_system::pbes pbesspec_without_counterexample =  mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec);
@@ -556,7 +560,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           }
         }
         else 
-        {         
+        {
           pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining, true);
           G.print_information();
           pbes_system::symbolic_pbessolve_algorithm solver(G);
@@ -567,23 +571,26 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
           mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
           
+          // Based on the result remove the unnecessary equations related to counter example information. 
+          mCRL2log(log::verbose) << "Removing unnecessary example information for other player." << std::endl;
           auto pbesspec_simplified = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
+          mCRL2log(log::trace) << pbesspec << std::endl;
 
           structure_graph SG;
 
           // TODO: Set options?
           pbessolve_options pbessolve_options;
-          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1);
+          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1);
 
           // Perform the second instantiation given the proof graph.      
           timer().start("second-instantiation");
           second_instantiate.run();
           timer().finish("second-instantiation");
 
-          //mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
-          //                      << G.all_vertices().size() << std::endl;
-          data::mutable_map_substitution<> sigma;
+          mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
+                                << SG.all_vertices().size() << std::endl;
           bool final_result = run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
+          utilities::mcrl2_unused(final_result);
           assert(result == final_result);
         }
 
