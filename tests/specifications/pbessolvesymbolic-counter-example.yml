@@ -10,7 +10,7 @@ nodes:
   l5:
     type: lps
   l6:
-    type: pbes
+    type: lps
   l7:
     type: lts
   l8:
@@ -33,13 +33,8 @@ tools:
     args: []
     name: pbessolvesymbolic
   t4:
-    input: [l5, l2]
+    input: [l4, l3]
     output: [l6]
-    args: []
-    name: lps2pbes
-  t5:
-    input: [l6]
-    output: []
     args: []
     name: pbes2bool
   t6:
@@ -59,4 +54,4 @@ tools:
     name: ltscompare
 
 result: |
-  result = t3.value['solution'] == t5.value['solution'] and t8.value['result']
+  result = (t3.value['solution'] == t4.value['solution']) and t8.value['result']
