@@ -24,11 +24,18 @@ nu X. mu Y. (<a>X || <!b>Y)
 [true*]mu X.[a]X
 [true*](mu Y. ([!a]Y && <true>true))
 ([true*] nu X. mu Y. nu Z. ([a]X && ([a]false || [!a]Y) && [!a]Z))
-[true*] nu X. mu Y. nu Z. ([a]X && ([a]false || [!a]Y) && [!a]Z)
-[true*]<true>true'''
+[true*] nu X. mu Y. nu Z. ([a]X && ([a]false || [!a]Y) && [!a]Z)'''
+
+SRF_FORMULAS = '''[true*]<true>true
+<true*.a>true
+nu X. mu Y. (<a>X || <!a>Y)
+nu X. mu Y. (<a>X || <!b>Y)'''
 
 def make_modal_formula():
-    return random.choice(FORMULAS.split('\n'))
+    return random.choice(FORMULAS.split('\n') + SRF_FORMULAS.split('\n'))
+
+def make_srf_modal_formula():
+    return random.choice(SRF_FORMULAS.split('\n'))
 
 if __name__ == '__main__':
     print(make_modal_formula())
