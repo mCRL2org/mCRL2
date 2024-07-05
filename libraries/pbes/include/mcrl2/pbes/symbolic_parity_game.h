@@ -162,6 +162,71 @@ std::string print_nodes(const ldd& U, const ldd& V)
   return core::detail::print_set(u);
 }
 
+// print the indices of U (subset of V)
+std::string print_strategy(const ldd& S, const ldd& V)
+{
+  using namespace sylvan::ldds;
+
+  auto index = [](const std::vector<ldd>& v, const ldd& x)
+  {
+    auto i = std::find(v.begin(), v.end(), x);
+    if (i == v.end())
+    {
+      throw mcrl2::runtime_error("print_graph: index error");
+    }
+    return i - v.begin();
+  };
+
+  auto values = [](const ldd& X)
+  {
+    std::vector<ldd> result;
+    auto X_elements = ldd_solutions(X);
+    for (const auto& x: X_elements)
+    {
+      result.push_back(cube(x));
+    }
+    return std::make_pair(result, X_elements);
+  };
+
+  auto interleaved_values = [](const ldd& X)
+  {
+    std::vector<std::pair<ldd, ldd>> R;
+    std::vector<std::uint32_t> from;
+    std::vector<std::uint32_t> to;
+
+    auto X_elements = ldd_solutions(X);
+    for (const auto& x: X_elements)
+    {
+      // Take the interleaved strategy and compute two cubes.
+      auto it = x.begin();
+      from.clear();
+      to.clear();
+
+      while (it != x.end())
+      {
+        from.push_back(*it);
+        ++it;
+        to.push_back(*it);
+        ++it;
+      }
+
+      R.emplace_back(cube(from), cube(to));
+    }
+    return std::make_tuple(R, X_elements);
+  };
+
+  auto [V_values, V_solutions] = values(V);
+  auto [R_values, R_solutions] = interleaved_values(S);
+
+  std::vector<std::pair<std::size_t, std::size_t>> u;
+  for (const auto& [from, to]: R_values)
+  {
+    u.emplace_back(index(V_values, from), index(V_values, to));
+  }
+  return core::detail::print_map(u);
+}
+
+
 /// \brief maps proposition variable ldd values to (rank, is_disjunctive)
 std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<symbolic::data_expression_index>& data_index)
 {
@@ -309,6 +374,12 @@ class symbolic_parity_game
     std::string print_nodes(const ldd& V) const
     {
       return detail::print_nodes(V, m_all_nodes);
+    }
+
+    /// \returns A string representing the given strategy in human readable form..
+    std::string print_strategy(const ldd& V) const
+    {
+      return detail::print_strategy(V, m_all_nodes);
     }
 
     /// \returns A string representing the graph restricted to V.
