@@ -63,7 +63,7 @@ class symbolic_pbessolve_algorithm
       {
         W[alpha] = union_(A, W_1[alpha]);
         W[1 - alpha] = empty_set();
-        strategy[alpha] = union_(merge(A_strategy, strategy_1[alpha]), merge(U, V));
+        strategy[alpha] = union_(union_(A_strategy, strategy_1[alpha]), merge(U, V));
         strategy[1 - alpha] = empty_set();
       }
       else
@@ -81,6 +81,9 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::trace) << "\n  --- zielonka solution for ---\n" << m_G.print_graph(V) << std::endl;
       mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(W[0]) << std::endl;
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(W[1]) << std::endl;
+      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
+      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
+
       assert(union_(W[0], W[1]) == V);
       return { W[0], W[1], strategy[0], strategy[1] };
     }
@@ -119,6 +122,9 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solved0) << std::endl;
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solved1) << std::endl;
+      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy0) << std::endl;
+      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy1) << std::endl;
+      // TODO: Print the strategy
       if (includes(solved0, initial_vertex))
       {
         return std::make_tuple(true, solved0, solved1, strategy0, strategy1);
