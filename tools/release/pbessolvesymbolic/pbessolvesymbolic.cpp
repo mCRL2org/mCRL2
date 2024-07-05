@@ -13,11 +13,13 @@
 #include <iomanip>
 #include <sylvan_ldd.hpp>
 
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesreach.h"
+#include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/symbolic_pbessolve.h"
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/exception.h"
@@ -191,17 +193,18 @@ public:
 
           // Add the interleaved data expressions.
           std::size_t i = 1;
-          auto Y_it = Y.parameters().begin();
-          for (auto it = X.parameters().begin(); it != X.parameters().end(); ++it)
-          {
-            singleton.emplace_back(data_index[i].index(*it));
-            singleton.emplace_back(data_index[i].index(*Y_it));
+          auto param_Y_it = Y.parameters().begin();
 
-            ++Y_it;
+
+          for (auto param_X_it = X.parameters().begin(); param_X_it != X.parameters().end(); ++param_X_it)
+          {
+            singleton.emplace_back(data_index[i].index(*param_X_it));
+            singleton.emplace_back(data_index[i].index(*param_Y_it));
+
+            ++param_Y_it;
             ++i;
           }
-
-
+          
           if (sylvan::ldds::member_cube(strategy, singleton))
           {
             // If Y in E0
