@@ -368,6 +368,7 @@ class pbessolve_tool
                              << G.all_vertices().size() << std::endl;
       
       bool final_result = run_solve(pbesspec, sigma, G, second_instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
+      utilities::mcrl2_unused(final_result);
       assert(result == final_result);
     }
   }
