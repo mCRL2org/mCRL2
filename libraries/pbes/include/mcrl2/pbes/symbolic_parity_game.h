@@ -554,7 +554,7 @@ class symbolic_parity_game
     }
 
     /// \brief Removes all winning states (and updates winning partition).
-    ldd compute_total_graph(const ldd& V, const ldd& I, const ldd& Vsinks, std::array<ldd, 2>& winning) const
+    ldd compute_total_graph(const ldd& V, const ldd& I, const ldd& Vsinks, std::array<ldd, 2>& winning, std::array<ldd, 2>& strategy) const
     {
       using namespace sylvan::ldds;
       std::array<const ldd, 2> Vplayer = players(V);
@@ -567,8 +567,8 @@ class symbolic_parity_game
         winning[1] = union_(winning[1], intersect(Vsinks, m_V[0]));
       }
 
-      winning[0] = safe_attractor(winning[0], 0, V, Vplayer, I).first;
-      winning[1] = safe_attractor(winning[1], 1, V, Vplayer, I).first;
+      std::tie(winning[0], strategy[0]) = safe_attractor(winning[0], 0, V, Vplayer, I);
+      std::tie(winning[1], strategy[1]) = safe_attractor(winning[1], 1, V, Vplayer, I);
 
       // After removing the deadlock (winning) states the resulting set of states is a total graph.
       return minus(minus(V, winning[0]), winning[1]);

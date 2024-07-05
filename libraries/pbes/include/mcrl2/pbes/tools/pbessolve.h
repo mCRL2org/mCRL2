@@ -14,6 +14,7 @@
 #define MCRL2_PBES_TOOLS_PBESSOLVE_H
 
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/data/rewriter_tool.h"
@@ -35,7 +36,7 @@ using utilities::tools::parallel_tool;
 
 
 inline
-void run_solve(const pbes_system::pbes& pbesspec, 
+bool run_solve(const pbes_system::pbes& pbesspec, 
   const data::mutable_map_substitution<>& sigma,
   structure_graph& G,
   const pbes_equation_index& equation_index,  
@@ -46,13 +47,13 @@ void run_solve(const pbes_system::pbes& pbesspec,
   std::string evidence_file,
   mcrl2::utilities::execution_timer& timer)
 {  
+  bool result;
   if (!lpsfile.empty())
   {
     lps::specification lpsspec;
     lps::load_lps(lpsspec, lpsfile);
     lps::detail::replace_global_variables(lpsspec, sigma);
           
-    bool result;
     lps::specification evidence;
     timer.start("solving");
     std::tie(result, evidence) = solve_structure_graph_with_counter_example(
@@ -76,7 +77,7 @@ void run_solve(const pbes_system::pbes& pbesspec,
 
     lts::lts_lts_t evidence;
     timer.start("solving");
-    bool result = solve_structure_graph_with_counter_example(G, ltsspec);
+    result = solve_structure_graph_with_counter_example(G, ltsspec);
     timer.finish("solving");
     std::cout << (result ? "true" : "false") << std::endl;
     if (evidence_file.empty())
@@ -91,10 +92,12 @@ void run_solve(const pbes_system::pbes& pbesspec,
   else
   {
     timer.start("solving");
-    bool result = solve_structure_graph(G, options.check_strategy);
+    result = solve_structure_graph(G, options.check_strategy);
     timer.finish("solving");
     std::cout << (result ? "true" : "false") << std::endl;
   }
+
+  return result;
 }
 
 class pbessolve_tool
@@ -346,7 +349,7 @@ class pbessolve_tool
       timer().start("first-solving");
       auto [result, W_alpha] = solve_structure_graph_minimal_winning_set(initial_G, true);
       timer().finish("first-solving");
-      std::cout << (result ? "true" : "false") << std::endl;
+      mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
 
       // Based on the result remove the unnecessary equations related to counter example information. 
       mCRL2log(log::verbose) << "Removing unnecessary example information for other player." << std::endl;
@@ -364,7 +367,8 @@ class pbessolve_tool
       mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
                              << G.all_vertices().size() << std::endl;
       
-      run_solve(pbesspec, sigma, G, second_instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
+      bool final_result = run_solve(pbesspec, sigma, G, second_instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
+      assert(result == final_result);
     }
   }
 

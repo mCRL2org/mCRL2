@@ -9,7 +9,6 @@
 /// \file pbessolvesymbolic.cpp
 
 #include <array>
-#include <atomic>
 #include <iomanip>
 #include <sylvan_ldd.hpp>
 
@@ -150,10 +149,12 @@ public:
     bool _alpha,
     const std::unordered_map<core::identifier_string, data::data_expression>& _propvar_map,
     const std::vector<symbolic::data_expression_index>& _data_index,
-    sylvan::ldds::ldd S)
+    const sylvan::ldds::ldd& _Valpha,
+    const sylvan::ldds::ldd& S)
     : pbesinst_structure_graph_algorithm(options, p, G),
       alpha(_alpha),
       strategy(S),
+      Valpha(_Valpha),
       data_index(_data_index),
       propvar_map(_propvar_map)
   {}
@@ -183,49 +184,68 @@ public:
             return Y;
           }
 
-          // Determine whether (X, Y) is in the strategy.
-
-          // Add the propositional variables.
           // TODO: This depends on the encoding used in pbesreach.
+          // Determine whether X belongs to player alpha
           singleton.clear();
           singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
-          singleton.emplace_back(data_index[0].index(propvar_map.at(Y.name())));
 
-          // Add the interleaved data expressions.
           std::size_t i = 1;
-          auto param_Y_it = Y.parameters().begin();
-
-
-          for (auto param_X_it = X.parameters().begin(); param_X_it != X.parameters().end(); ++param_X_it)
+          for (const auto& param : X.parameters())
           {
-            singleton.emplace_back(data_index[i].index(*param_X_it));
-            singleton.emplace_back(data_index[i].index(*param_Y_it));
-
-            ++param_Y_it;
+            singleton.emplace_back(data_index[i].index(param));
             ++i;
           }
-          
-          if (sylvan::ldds::member_cube(strategy, singleton))
+
+          if (sylvan::ldds::member_cube(Valpha, singleton))
           {
-            // If Y in E0
-            mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
-            return Y;
-          }
-          else
-          {
-            changed = true;
-            if (alpha == 0) 
+            // Determine whether (X, Y) is in the strategy.
+
+            // Add the propositional variables.
+            singleton.clear();
+            singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
+            singleton.emplace_back(data_index[0].index(propvar_map.at(Y.name())));
+
+            // Add the interleaved data expressions.
+            std::size_t i = 1;
+            auto param_Y_it = Y.parameters().begin();
+
+
+            for (auto param_X_it = X.parameters().begin(); param_X_it != X.parameters().end(); ++param_X_it)
             {
-              // If Y is not reachable, replace it by false
-              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
-              return false_();
+              singleton.emplace_back(data_index[i].index(*param_X_it));
+              singleton.emplace_back(data_index[i].index(*param_Y_it));
+
+              ++param_Y_it;
+              ++i;
+            }
+            
+            if (sylvan::ldds::member_cube(strategy, singleton))
+            {
+              // If Y in E0
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+              return Y;
             }
             else
             {
-              // If Y is not reachable, replace it by true
-              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
-              return true_();
+              changed = true;
+              if (alpha == 0) 
+              {
+                // If Y is not reachable, replace it by false
+                mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
+                return false_();
+              }
+              else
+              {
+                // If Y is not reachable, replace it by true
+                mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
+                return true_();
+              }
             }
+          }
+          else
+          {
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+              return Y;
           }
         }
     );
@@ -245,6 +265,7 @@ public:
 private:
   bool alpha;
   sylvan::ldds::ldd strategy;
+  sylvan::ldds::ldd Valpha;
   const std::vector<symbolic::data_expression_index>& data_index;
   const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map;
 };
@@ -552,7 +573,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
           // TODO: Set options?
           pbessolve_options pbessolve_options;
-          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec, !result, reach.propvar_map(), reach.data_index(), result ? S0 : S1);
+          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1);
 
           // Perform the second instantiation given the proof graph.      
           timer().start("second-instantiation");
@@ -562,7 +583,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           //mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
           //                      << G.all_vertices().size() << std::endl;
           data::mutable_map_substitution<> sigma;
-          run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
+          bool final_result = run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
+          assert(result == final_result);
         }
 
         if (!options.dot_file.empty())
