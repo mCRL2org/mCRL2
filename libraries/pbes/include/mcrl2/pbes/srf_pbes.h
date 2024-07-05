@@ -647,7 +647,7 @@ class srf_pbes
 /// \brief Converts a PBES into standard recursive form
 /// \pre The pbes p must be normalized
 inline
-srf_pbes pbes2srf(const pbes& p, bool merge_simple_expressions)
+srf_pbes pbes2srf(const pbes& p, bool merge_simple_expressions = true)
 {
   data::set_identifier_generator id_generator;
   for (const core::identifier_string& id: pbes_system::find_identifiers(p))

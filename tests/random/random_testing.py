@@ -348,8 +348,18 @@ class PbessymbolicbisimTest(PbesTest):
         super(PbessymbolicbisimTest, self).__init__(name, ymlfile('pbessymbolicbisim'), settings)
 
 class PbessolvesymbolicTest(PbesTest):
-    def __init__(self, name, settings):
+    def __init__(self, name, arguments, settings):
         super(PbessolvesymbolicTest, self).__init__(name, ymlfile('pbessolvesymbolic'), settings)
+
+        if arguments:
+            self.add_command_line_options('t3', arguments)
+
+class PbessolvesymbolicCounterexampleTest(PbesTest):
+    def __init__(self, name, arguments, settings):
+        super(PbessolvesymbolicCounterexampleTest, self).__init__(name, ymlfile('pbessolvesymbolic-counter-example'), settings)
+
+        if arguments:
+            self.add_command_line_options('t3', arguments)
         
 class Pbes2boolTest(PbesTest):
     def __init__(self, name, parallel, settings):
@@ -531,8 +541,22 @@ if shutil.which("z3") is not None:
 
 # These test do not work on Windows due to dependencies.
 if os.name != 'nt':
-    available_tests.update({'pbessolvesymbolic' : lambda name, settings: PbessolvesymbolicTest(name, settings) })
-    available_tests.update({'pbessolvesymbolic-partial' : lambda name, settings: PbessolvesymbolicTest(name, settings) })
+    available_tests.update({'pbessolvesymbolic' : lambda name, settings: PbessolvesymbolicTest(name, [], settings) })
+    available_tests.update({'pbessolvesymbolic-total' : lambda name, settings: PbessolvesymbolicTest(name, ['--total'], settings) })
+    available_tests.update({'pbessolvesymbolic-chaining' : lambda name, settings: PbessolvesymbolicTest(name, ['--chaining'], settings) })
+    available_tests.update({'pbessolvesymbolic-total-chaining' : lambda name, settings: PbessolvesymbolicTest(name, ['--total', '--chaining'], settings) })
+    available_tests.update({'pbessolvesymbolic-saturation' : lambda name, settings: PbessolvesymbolicTest(name, ['--total', '--saturation'], settings) })
+    available_tests.update({'pbessolvesymbolic-split' : lambda name, settings: PbessolvesymbolicTest(name, ['--total', '--split-conditions'], settings) })    
+    
+    available_tests.update({'pbessolvesymbolic-partial-s1' : lambda name, settings: PbessolvesymbolicTest(name, ['-s1', '--aggressive'], settings) })
+    available_tests.update({'pbessolvesymbolic-partial-s2' : lambda name, settings: PbessolvesymbolicTest(name, ['-s2', '--aggressive'], settings) })
+    available_tests.update({'pbessolvesymbolic-partial-s3' : lambda name, settings: PbessolvesymbolicTest(name, ['-s3', '--aggressive'], settings) })
+    available_tests.update({'pbessolvesymbolic-partial-s4' : lambda name, settings: PbessolvesymbolicTest(name, ['-s4', '--aggressive'], settings) })
+    available_tests.update({'pbessolvesymbolic-partial-s5' : lambda name, settings: PbessolvesymbolicTest(name, ['-s5', '--aggressive'], settings) })
+    available_tests.update({'pbessolvesymbolic-partial-s6' : lambda name, settings: PbessolvesymbolicTest(name, ['-s6', '--aggressive'], settings) })
+    available_tests.update({'pbessolvesymbolic-partial-s7' : lambda name, settings: PbessolvesymbolicTest(name, ['-s7', '--aggressive'], settings) })
+
+    available_tests.update({'pbessolvesymbolic-counter-example' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, [], settings) })
     available_tests.update({'ltsconvertsymbolic' : lambda name, settings: LtsconvertsymbolicTest(name, settings) })
 
 def print_names(tests):
