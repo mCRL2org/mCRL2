@@ -50,7 +50,7 @@ tools:
   t8:
     input: [l8, l7]
     output: []
-    args: [--equivalence=none, --preorder=trace]
+    args: [--equivalence=none, --preorder=sim]
     name: ltscompare
 
 result: |
