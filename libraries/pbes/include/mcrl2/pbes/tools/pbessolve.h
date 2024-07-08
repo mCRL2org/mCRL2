@@ -297,7 +297,7 @@ class pbessolve_tool
       if (lpsfile.empty() && ltsfile.empty())
       {
         mCRL2log(log::warning)
-            << "Warning: the PBES has counter example information, but no witness will be generated due to lack of --evidence-file"
+            << "Warning: the PBES has counter example information, but no witness will be generated due to lack of --file"
             << std::endl;
       }
     }
