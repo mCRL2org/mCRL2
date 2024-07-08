@@ -30,7 +30,7 @@ tools:
   t3:
     input: [l4, l3]
     output: [l5]
-    args: []
+    args: ['--check-strategy']
     name: pbessolvesymbolic
   t4:
     input: [l4, l3]
