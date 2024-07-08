@@ -48,6 +48,7 @@ data::data_specification construct_propositional_variable_data_specification(con
 
 struct symbolic_reachability_options: public symbolic::symbolic_reachability_options
 {
+  bool check_strategy = false;
   bool make_total = false;
   bool reset_parameters = false;
   bool aggressive = false;
