@@ -65,7 +65,7 @@ public:
       std::array<sylvan::ldds::ldd, 2> Vwon = m_Vwon;
 
       ldd V = union_(m_visited, m_todo);
-      pbes_system::symbolic_parity_game G(pbes(), summand_groups(), data_index(), V, m_options.no_relprod, m_options.chaining, m_options.strategy);
+      pbes_system::symbolic_parity_game G(pbes(), summand_groups(), data_index(), V, m_options.no_relprod, m_options.chaining, m_options.check_strategy);
       G.print_information();
       pbes_system::symbolic_pbessolve_algorithm solver(G);
 
@@ -393,7 +393,6 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       options.info                                  = parser.has_option("info");
       options.summand_groups                        = parser.option_argument("groups");
       options.variable_order                        = parser.option_argument("reorder");
-      options.strategy                              = parser.has_option("strategy");
       options.make_total                            = parser.has_option("total");
       options.reset_parameters                      = parser.has_option("reset");
       if (!options.make_total)
@@ -480,7 +479,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       if (options.check_strategy && options.summand_groups.compare("none") != 0)
       {
         throw mcrl2::runtime_error("Cannot check strategy for merged summand groups");
-      }
+      }    
     }
 
   public:
@@ -505,6 +504,24 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       {
         // TODO: Cannot use the partial solvers.
         throw mcrl2::runtime_error("Cannot use partial solving with counter example PBES");
+      }
+      
+      if (has_counter_example)
+      {
+        if (lpsfile.empty() && ltsfile.empty())
+        {
+          mCRL2log(log::warning)
+              << "Warning: the PBES has counter example information, but no witness will be generated due to lack of --file"
+              << std::endl;
+        }
+      }
+      else if ((!lpsfile.empty() || !ltsfile.empty()))
+      {
+        mCRL2log(log::warning)
+            << "Warning: the PBES has no counter example information. Did you "
+              "use the"
+              " --counter-example option when generating the PBES?"
+            << std::endl;
       }
       
       data::mutable_map_substitution<> sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
@@ -548,7 +565,14 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           {
             if (options.max_iterations == 0)
             {
-              pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining, options.strategy);
+              bool chaining = options.chaining;              
+              if (options.chaining) 
+              {
+                mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while checking the strategy" << std::endl;
+                chaining = false;
+              }
+
+              pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, chaining, options.check_strategy);
               G.print_information();
               pbes_system::symbolic_pbessolve_algorithm solver(G);
 
@@ -568,7 +592,12 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
         }
         else 
         {
-          pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining, true);
+          if (options.chaining) 
+          {
+            mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while computing the strategy" << std::endl;
+          }
+
+          pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, false, true);
           G.print_information();
           pbes_system::symbolic_pbessolve_algorithm solver(G, options.check_strategy);
 

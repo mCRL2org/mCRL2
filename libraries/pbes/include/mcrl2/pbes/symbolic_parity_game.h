@@ -295,13 +295,8 @@ class symbolic_parity_game
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;
-
-      if (strategy && chaining) 
-      {
-        mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while computing the strategy" << std::endl;
-        chaining = false;
-      }
-
+      assert(!(strategy && chaining));
+      
       // Determine priority and owner from the given pbes.
       auto equation_info = detail::compute_equation_info(pbes, data_index);
 
@@ -645,6 +640,8 @@ class symbolic_parity_game
           {
             read_projection.resize(idx + 1);
           }
+
+          read_projection[idx] = 1;
         }
 
         mCRL2log(log::trace) << "L = " << print_relation(m_data_index, group.L, group.read, group.write) << std::endl;
