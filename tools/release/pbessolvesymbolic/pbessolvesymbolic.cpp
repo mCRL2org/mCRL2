@@ -353,6 +353,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
                       "default name will be chosen.");
 
       desc.add_hidden_option("aggressive", "apply on-the-fly solving after every iteration to detect bugs");
+      desc.add_hidden_option("check-strategy",
+                            "do a sanity check on the computed strategy", 'y');
       desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
       desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_hidden_option("no-discard", "do not discard any parameters");
@@ -378,6 +380,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       options.aggressive                            = parser.has_option("aggressive");
       options.cached                                = parser.has_option("cached");
       options.chaining                              = parser.has_option("chaining");
+      options.check_strategy = parser.has_option("check-strategy");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.print_exact                           = parser.has_option("print-exact");
       options.print_nodesize                        = parser.has_option("print-nodesize");
@@ -474,6 +477,11 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
         }
         evidence_file = parser.option_argument("evidence-file");
       }
+
+      if (options.check_strategy && options.summand_groups.compare("none") != 0)
+      {
+        throw mcrl2::runtime_error("Cannot check strategy for merged summand groups");
+      }
     }
 
   public:
@@ -563,7 +571,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
         {
           pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, options.chaining, true);
           G.print_information();
-          pbes_system::symbolic_pbessolve_algorithm solver(G);
+          pbes_system::symbolic_pbessolve_algorithm solver(G, options.check_strategy);
 
           timer().start("first-solving");
           auto [result, W0, W1, S0, S1] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
