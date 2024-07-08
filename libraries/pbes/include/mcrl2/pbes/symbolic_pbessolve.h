@@ -14,6 +14,8 @@
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "symbolic_parity_game.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
@@ -25,10 +27,12 @@ class symbolic_pbessolve_algorithm
 {
   private:
     const symbolic_parity_game& m_G;
+    bool m_check_strategy = false;
 
   public:
-    symbolic_pbessolve_algorithm(const symbolic_parity_game& G) :
-      m_G(G)
+    symbolic_pbessolve_algorithm(const symbolic_parity_game& G, bool check_strategy = false) :
+      m_G(G),
+      m_check_strategy(check_strategy)
     {}
 
     std::tuple<ldd, ldd, ldd, ldd> zielonka(const ldd& V)
@@ -107,6 +111,7 @@ class symbolic_pbessolve_algorithm
       std::array<ldd, 2> strategy;
 
       ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning, strategy);
+
       if (includes(winning[0], initial_vertex))
       {
         mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
@@ -128,19 +133,33 @@ class symbolic_pbessolve_algorithm
 
       // If the initial vertex has not yet been won then run the zielonka solver as well.
       mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(V) << std::endl;
-      auto const& [solved0, solved1, strategy0, strategy1] = zielonka(Vtotal);
+      auto [solved0, solved1, strategy0, strategy1] = zielonka(Vtotal);
+
+      solved0 = union_(solved0, winning[0]);
+      solved1 = union_(solved1, winning[1]);
+      strategy0 = union_(strategy0, strategy[0]);
+      strategy1 = union_(strategy1, strategy[1]);
+
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solved0) << std::endl;
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solved1) << std::endl;
       mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy0) << std::endl;
       mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy1) << std::endl;
-      // TODO: Print the strategy
+
       if (includes(solved0, initial_vertex))
       {
+        if (m_check_strategy)
+        {
+          check_strategy(initial_vertex, V, solved0, solved1, false, strategy0);
+        }
         return std::make_tuple(true, solved0, solved1, strategy0, strategy1);
       }
       else if (includes(solved1, initial_vertex))
       {
+        if (m_check_strategy)
+        {
+          check_strategy(initial_vertex, V, solved0, solved1, true, strategy1);
+        }
         return std::make_tuple(false, solved0, solved1, strategy0, strategy1);
       }
       else
@@ -422,6 +441,28 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
 
       return { winning[0], winning[1] };
+    }
+
+    /// Checks whether the computed strategy is indeed a correct certificate for the winning partition.
+    ///
+    /// Throws an exception when the strategy is invalid.
+    void check_strategy(const ldd& initial_vertex,
+      const ldd& V,
+      const ldd& W0, 
+      const ldd& W1, 
+      bool alpha, 
+      const ldd& strategy)
+    {
+      mCRL2log(log::debug) << "Checking the strategy of the solved parity game..." << std::endl;
+      symbolic_parity_game new_G = m_G.apply_strategy(alpha, strategy);
+
+      symbolic_pbessolve_algorithm check(new_G);
+
+      auto[result, W0_prime, W1_prime, S0, S1] = check.solve(initial_vertex, V);      
+      if (!(W0 == W0_prime && W1 == W1_prime && result != alpha))
+      {
+        throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
+      }
     }
 };
 

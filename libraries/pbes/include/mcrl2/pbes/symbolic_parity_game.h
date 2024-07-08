@@ -17,9 +17,11 @@
 #include "mcrl2/symbolic/alternative_relprod.h"
 #include "mcrl2/symbolic/data_index.h"
 #include "mcrl2/symbolic/print.h"
-#include "mcrl2/symbolic/symbolic_reachability.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/stopwatch.h"
+
+#include "sylvan_ldd.hpp"
 
 namespace mcrl2 {
 
@@ -294,7 +296,7 @@ class symbolic_parity_game
       using namespace sylvan::ldds;
       using utilities::detail::contains;
 
-      if (strategy) 
+      if (strategy && chaining) 
       {
         mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while computing the strategy" << std::endl;
         chaining = false;
@@ -627,7 +629,83 @@ class symbolic_parity_game
     ldd sinks(const ldd& U, const ldd& V) const
     {
       return minus(U, predecessors(U, V));
-    }   
+    }
+
+    /// Returns a symbolic parity game where the strategy has been applied for vertices belonging to player alpha.
+    symbolic_parity_game apply_strategy(bool alpha, const ldd& strategy) const
+    {
+      std::vector<symbolic::summand_group> summand_groups;
+  
+      for (auto group : m_summand_groups)
+      {
+        std::vector<std::uint32_t> read_projection;
+        for (const auto& idx : group.read_pos)
+        {        
+          if (idx + 1 > read_projection.size())
+          {
+            read_projection.resize(idx + 1);
+          }
+        }
+
+        mCRL2log(log::trace) << "L = " << print_relation(m_data_index, group.L, group.read, group.write) << std::endl;
+
+        // Figure out if the group belongs to player alpha.
+        bool is_odd = (sylvan::ldds::intersect(sylvan::ldds::project(group.L, sylvan::ldds::cube(read_projection)), sylvan::ldds::project(m_V[0], group.Ip)) == sylvan::ldds::empty_set());
+        if (is_odd)
+        {
+          mCRL2log(log::trace) << "summand group " << summand_groups.size() << " belongs to player odd" << std::endl;
+        }
+        else
+        {
+          mCRL2log(log::trace) << "summand group " << summand_groups.size() << " belongs to player even" << std::endl;
+        }
+
+        if (is_odd == alpha)
+        {
+          // Compute the projection vector based on the read and write parameters of the summand group.
+          std::vector<std::uint32_t> projection(sylvan::ldds::height(strategy), 0);
+
+          for (const auto& read_idx : group.read)
+          {
+            projection[2*read_idx] = 1;
+          }
+
+          for (const auto& write_idx : group.write)
+          {
+            projection[2*write_idx+1] = 1;
+          }
+
+          ldd projected_strategy = sylvan::ldds::project(strategy, sylvan::ldds::cube(projection));
+
+          group.L = sylvan::ldds::intersect(group.L, projected_strategy);
+        }
+        mCRL2log(log::trace) << "L = " << print_relation(m_data_index, group.L, group.read, group.write) << std::endl;
+          
+        summand_groups.push_back(group);
+      }
+
+      // This conversion is kind of unnecessary.
+      std::vector<ldd> prio;
+      for (const auto& [p, vertices] : m_rank_map)
+      {
+        if (p + 1 > prio.size())
+        {
+          prio.resize(p + 1);
+        }
+
+        prio[p] = vertices;
+      }
+
+      return symbolic_parity_game(
+        summand_groups,
+        m_data_index,
+        m_all_nodes,
+        m_V[0],
+        prio,
+        m_no_relprod,
+        m_chaining        
+      );
+    }
 
 private:
     /// \returns The set { u in U | exists v in V: u -> v }, where -> is described by the given group.
