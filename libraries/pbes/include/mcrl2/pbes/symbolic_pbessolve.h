@@ -135,6 +135,7 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(V) << std::endl;
       auto [solved0, solved1, strategy0, strategy1] = zielonka(Vtotal);
 
+      // Ensure that previously solved sets are included.
       solved0 = union_(solved0, winning[0]);
       solved1 = union_(solved1, winning[1]);
       strategy0 = union_(strategy0, strategy[0]);
