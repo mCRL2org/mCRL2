@@ -931,11 +931,11 @@ std::cerr << "#mappings " << mappings.size() << "\n";
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
    BOOST_CHECK(sorts.size()==11);
    BOOST_CHECK(constructors.size()==19);
-   BOOST_CHECK(mappings.size()==314);
+   BOOST_CHECK(mappings.size()==320);
 #else
    BOOST_CHECK(sorts.size()==10);
    BOOST_CHECK(constructors.size()==17);
-   BOOST_CHECK(mappings.size()==225);
+   BOOST_CHECK(mappings.size()==231);
 #endif
 }
 
