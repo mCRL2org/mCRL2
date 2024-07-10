@@ -29,7 +29,7 @@ def main():
 
     args = parser.parse_args()
 
-    os.environ["PATH"] += os.pathsep + args.toolpath
+    os.environ["PATH"] = args.toolpath + os.pathsep + os.environ["PATH"]
 
     def run_example(path, index):
         print(f"[{index}] Running {path}", flush=True)
