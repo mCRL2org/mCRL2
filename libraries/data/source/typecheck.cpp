@@ -1462,8 +1462,8 @@ bool mcrl2::data::data_type_checker::MatchSetBagOpUnionDiffIntersect(const core:
         return false;
       }
 
-      Arg1 = sort_set::set_(container_sort(temp_result));
-      Arg2 = sort_fset::fset(container_sort(temp_result));
+      Arg1 = sort_set::set_(temp_result);
+      Arg2 = sort_fset::fset(temp_result);
       result = function_sort({ Arg1, Arg2 }, Arg2);
       return true;
     }
@@ -1479,8 +1479,8 @@ bool mcrl2::data::data_type_checker::MatchSetBagOpUnionDiffIntersect(const core:
         return false;
       }
 
-      Arg1 = sort_bag::bag(container_sort(temp_result));
-      Arg2 = sort_fbag::fbag(container_sort(temp_result));
+      Arg1 = sort_bag::bag(temp_result);
+      Arg2 = sort_fbag::fbag(temp_result);
       result = function_sort({ Arg1, Arg2 }, Arg2);
       return true;
     }
@@ -1496,8 +1496,8 @@ bool mcrl2::data::data_type_checker::MatchSetBagOpUnionDiffIntersect(const core:
         return false;
       }
 
-      Arg1 = sort_fset::fset(container_sort(temp_result));
-      Arg2 = sort_set::set_(container_sort(temp_result));
+      Arg1 = sort_fset::fset(temp_result);
+      Arg2 = sort_set::set_(temp_result);
       result = function_sort({ Arg1, Arg2 }, Arg1);
       return true;
     }
@@ -1513,8 +1513,8 @@ bool mcrl2::data::data_type_checker::MatchSetBagOpUnionDiffIntersect(const core:
         return false;
       }
 
-      Arg1 = sort_fbag::fbag(container_sort(temp_result));
-      Arg2 = sort_bag::bag(container_sort(temp_result));
+      Arg1 = sort_fbag::fbag(temp_result);
+      Arg2 = sort_bag::bag(temp_result);
       result = function_sort({ Arg1, Arg2 }, Arg1);
       return true;
     }
