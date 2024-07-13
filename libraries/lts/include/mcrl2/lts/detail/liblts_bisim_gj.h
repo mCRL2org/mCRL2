@@ -275,8 +275,9 @@ class bisim_partitioner_gj
         {           
           assert(ti==m_transitions[m_transitions[ti].next_L_B_C_element].previous_L_B_C_element);
         }       
-        assert(std::find(L_B_C_list_iterator(ti,m_transitions),L_B_C_list_iterator(null_transition,m_transitions),ti)!=
-                          L_B_C_list_iterator(null_transition,m_transitions));
+        // TODO: iterator below does not work properly on Fedora, as it requires more properties of the iterator than it offers.
+        // assert(std::find(L_B_C_list_iterator(ti,m_transitions),L_B_C_list_iterator(null_transition,m_transitions),ti)!=
+        //                  L_B_C_list_iterator(null_transition,m_transitions));
       }
     }
 
