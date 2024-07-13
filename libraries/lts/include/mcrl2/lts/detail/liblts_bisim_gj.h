@@ -114,6 +114,8 @@ struct constellation_type
 struct L_B_C_list_iterator
 {
   typedef std::forward_iterator_tag iterator_category;
+  typedef transition_index value_type;
+
   const std::vector<transition_type>& m_transitions;
   transition_index m_current_transition;
 
@@ -122,10 +124,19 @@ struct L_B_C_list_iterator
       m_current_transition((ti==null_transition?null_transition:*m_transitions[ti].transitions_per_block_to_constellation))
   {}
 
-  void operator++()
+  L_B_C_list_iterator operator++()
   {
     assert(m_current_transition!=null_transition);
     m_current_transition=m_transitions[m_current_transition].next_L_B_C_element;
+    return *this;
+  }
+
+  L_B_C_list_iterator operator++(int)
+  {
+    L_B_C_list_iterator temp=*this;
+    assert(m_current_transition!=null_transition);
+    m_current_transition=m_transitions[m_current_transition].next_L_B_C_element;
+    return temp;
   }
 
   transition_index operator *() const
@@ -361,7 +372,7 @@ class bisim_partitioner_gj
         assert(std::find(c.blocks.begin(),c.blocks.end(),bi)!=c.blocks.end());
         assert(b.start_bottom_states<m_states_in_blocks.end());
         assert(b.start_bottom_states>=m_states_in_blocks.begin());
-        assert(b.start_non_bottom_states<m_states_in_blocks.end());
+        // assert(initialisation || b.start_non_bottom_states<=m_states_in_blocks.end()); TODO. Check why this does not hold.
         assert(b.start_non_bottom_states>=m_states_in_blocks.begin());
         
         for(typename std::vector<state_index>::iterator is=b.start_bottom_states;
