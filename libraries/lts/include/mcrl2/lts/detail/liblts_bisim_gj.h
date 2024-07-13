@@ -20,12 +20,9 @@
 
 #include <forward_list>
 #include <list>
-// #include <deque>
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
-// #include "mcrl2/lts/detail/check_complexity.h"
-// #include "mcrl2/lts/detail/fixed_vector.h"
 
 namespace mcrl2
 {
@@ -57,7 +54,7 @@ struct transition_pointer_pair
 {
   transition_index transition;
   outgoing_transitions_it start_same_saC; // Refers to the last state with the same state, action and constellation,
-                                             // unless it is the last, which refers to the first state.
+                                          // unless it is the last, which refers to the first state.
   transition_pointer_pair(const transition_index &t, const outgoing_transitions_it& sssaC)
    : transition(t),
      start_same_saC(sssaC)
@@ -70,8 +67,6 @@ struct state_type_gj
   block_index block=0;
   std::vector<transition_index>::iterator start_incoming_inert_transitions;
   std::vector<transition_index>::iterator start_incoming_non_inert_transitions;
-  //outgoing_transitions_it start_outgoing_inert_transitions;
-  //outgoing_transitions_it start_outgoing_non_inert_transitions;
   outgoing_transitions_it start_outgoing_transitions;
   std::vector<state_index>::iterator ref_states_in_blocks;
   std::size_t no_of_outgoing_inert_transitions=0;
@@ -84,7 +79,6 @@ struct transition_type
   std::list<transition_index>::iterator transitions_per_block_to_constellation;
   transition_index previous_L_B_C_element=null_transition;
   transition_index next_L_B_C_element=null_transition;
-  // std::deque<std::size_t>::iterator trans_count; Vervangen door m_state_label_constellation_to_transition.
   std::vector<transition_index>::iterator ref_incoming_transitions;
   outgoing_transitions_it ref_outgoing_transitions;
 };
@@ -119,6 +113,7 @@ struct constellation_type
 // The struct below facilitates to walk through a L_B_C_list starting from an arbitrary transition.
 struct L_B_C_list_iterator
 {
+  typedef std::forward_iterator_tag iterator_category;
   const std::vector<transition_type>& m_transitions;
   transition_index m_current_transition;
 
@@ -202,11 +197,8 @@ struct L_B_C_list_state_iterator
 
 using namespace mcrl2::lts::detail::bisimulation_gj;
 
-
-
 /// \class bisim_partitioner_gj
-/// \brief implements the main algorithm for the branching bisimulation
-/// quotient
+/// \brief implements the main algorithm for the branching bisimulation quotient
 template <class LTS_TYPE>
 class bisim_partitioner_gj
 {
@@ -225,50 +217,9 @@ class bisim_partitioner_gj
                       block_label_to_list_iterator_map;
     typedef std::unordered_map<std::pair<label_index, constellation_index>, set_of_states_type> 
                       label_constellation_to_set_of_states_map;
-    typedef std::unordered_map<label_index, std::size_t> label_to_size_t_map;
     typedef std::unordered_map<std::pair<block_index, label_index>, std::size_t> block_label_to_size_t_map;
     typedef std::unordered_map<std::pair<state_index, label_index>, transition_index> state_label_to_transition_map;
 
-    // Dedicated hash function for m_state_label_constellation_to_transition allowing to 
-    // find elements on both a transition and a state, label and constellation triple. 
-    struct state_label_constellation_hash
-    {
-      // using is_transparent=void;
-
-      /* LTS_TYPE& m_aut;
-      std::vector<state_type_gj>& m_states;
-      std::vector<block_type>& m_blocks;
-
-      state_label_constellation_hash(LTS_TYPE& aut, std::vector<state_type_gj>& states, std::vector<block_type>& blocks)
-         : m_aut(aut), m_states(states), m_blocks(blocks)
-      {} */
-
-      typedef std::tuple<const state_index, const label_index, const constellation_index> slc_tuple;
-      std::size_t operator()(const slc_tuple& t) const
-      {
-        return utilities::detail::hash_combine(std::get<0>(t), utilities::detail::hash_combine(std::get<1>(t),std::get<2>(t)));
-      }
-
-      /* std::size_t operator()(const transition_index ti) const
-      {
-        const transition& t=m_aut.get_transitions()[ti];
-        return utilities::detail::hash_combine(t.from(), 
-               utilities::detail::hash_combine(t.label(), 
-                                               m_blocks[m_states[t.to()].block].constellation));
-      } */
-    };
-
-    /* struct state_label_constellation_equality
-    { 
-      using is_transparent=void;
-    }; */
-
-    // The type below is used for a mapping from a state, label and constellation to an index in outgoing transitions. 
-    // TODO: The state, label, constellation tuple is to be replaced by a transition for memory efficiency in due time. 
-    /*typedef std::unordered_map<std::tuple<state_index, transition_index, constellation_index>, 
-                       std::vector<transition_index>::iterator, 
-                       state_label_constellation_hash / *, 
-                       state_label_constellation_equality * / > slc_type; */
     set_of_states_type& empty_state_set()
     {
       static const set_of_states_type s=set_of_states_type();
@@ -283,13 +234,13 @@ class bisim_partitioner_gj
     std::vector<transition_index> m_incoming_transitions;
     std::vector<transition_pointer_pair> m_outgoing_transitions;
     std::vector<transition_type> m_transitions;
-    // std::deque<std::size_t> m_state_to_constellation_count; Vervangen door onderstaande. 
-    // std::stack<std::size_t> m_free_constellation_count_positions;
-    /* slc_type m_state_label_constellation_to_transition; */
     std::vector<state_index> m_states_in_blocks;
     std::vector<block_type> m_blocks;
     std::vector<constellation_type> m_constellations;
     set_of_states_type m_P;
+    /// The following variable contains all non trivial constellations.
+    set_of_constellations_type m_non_trivial_constellations;
+
 
     /// \brief true iff branching (not strong) bisimulation has been requested
     const bool m_branching;
@@ -301,15 +252,10 @@ class bisim_partitioner_gj
     /// bisimulation.
     const bool m_preserve_divergence;
 
-    /// The following variable contains all non trivial constellations.
-    set_of_constellations_type m_non_trivial_constellations;
-
     void check_transitions() const
     {
       for(std::size_t ti=0; ti<m_transitions.size(); ++ti)
       {
-// const transition& t=m_aut.get_transitions()[ti];
-// std::cerr << "Check transition " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
         if (m_transitions[ti].previous_L_B_C_element!=null_transition)
         {
           assert(ti==m_transitions[m_transitions[ti].previous_L_B_C_element].next_L_B_C_element);
@@ -335,7 +281,6 @@ class bisim_partitioner_gj
       {
         const state_type_gj& s=m_states[si];
 
-//std::cerr << "STATE " << si << "    " << s.block << "   " << &*m_blocks[s.block].start_bottom_states << "    " << &*m_blocks[s.block].start_non_bottom_states << "\n";
         assert(m_blocks[s.block].start_bottom_states<m_blocks[s.block].start_non_bottom_states);
         assert(m_blocks[s.block].start_non_bottom_states<=m_blocks[s.block].end_states);
 
@@ -392,7 +337,6 @@ class bisim_partitioner_gj
                      ++it)
         {
           const transition& t=m_aut.get_transitions()[it->transition];
-// std::cerr << "TRANSITION  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
           // Check that if the target constellation, if not new, is equal to the target constellation of the previous outgoing transition.
           if (constellations_seen.count(std::pair(t.label(),m_blocks[m_states[t.to()].block].constellation))>0)
           {
@@ -401,7 +345,6 @@ class bisim_partitioner_gj
                    m_blocks[m_states[t.to()].block].constellation);
           }
           constellations_seen.insert(std::pair(t.label(),m_blocks[m_states[t.to()].block].constellation));
-
         }
       }
       // Check that the elements in m_transitions are well formed. 
@@ -413,10 +356,13 @@ class bisim_partitioner_gj
       set_of_transitions_type all_transitions;
       for(block_index bi=0; bi<m_blocks.size(); ++bi)
       {
-// std::cerr << "BLOCK " << bi << "--------------\n";
         const block_type& b=m_blocks[bi];
         const constellation_type& c=m_constellations[b.constellation];
         assert(std::find(c.blocks.begin(),c.blocks.end(),bi)!=c.blocks.end());
+        assert(b.start_bottom_states<m_states_in_blocks.end());
+        assert(b.start_bottom_states>=m_states_in_blocks.begin());
+        assert(b.start_non_bottom_states<m_states_in_blocks.end());
+        assert(b.start_non_bottom_states>=m_states_in_blocks.begin());
         
         for(typename std::vector<state_index>::iterator is=b.start_bottom_states;
                    is!=b.start_non_bottom_states; ++is)
@@ -438,7 +384,6 @@ class bisim_partitioner_gj
                      ti!=b.block_to_constellation.end(); ti++)
         {
           transition first_transition=m_aut.get_transitions()[*ti];
-// std::cerr << "CU>PRTOD " << count << ":: " << first_transition.from() << " -" << m_aut.action_label(first_transition.label()) << "-> " << first_transition.to() << "\n";
           assert(count==0 || 
                  !(m_states[first_transition.from()].block==m_states[first_transition.to()].block &&
                    m_aut.is_tau(first_transition.label())));
@@ -446,7 +391,6 @@ class bisim_partitioner_gj
           for(L_B_C_list_iterator i(*ti,m_transitions); i!=L_B_C_list_iterator(null_transition,m_transitions); ++i)
           {
             const transition& t=m_aut.get_transitions()[*i];
-// std::cerr << "  SUBTRANS" << "  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
             all_transitions.insert(*i);
             assert(m_states[t.from()].block==bi);
             assert(m_blocks[m_states[t.to()].block].constellation==
@@ -454,7 +398,6 @@ class bisim_partitioner_gj
             assert(t.label()==first_transition.label());
           }
         }
-
       }
       assert(initialisation || all_transitions.size()==m_transitions.size());
 
@@ -469,12 +412,31 @@ class bisim_partitioner_gj
         }
       }
       assert(all_blocks.size()==m_blocks.size());
-      // m_incoming_transitions;
-      // m_outgoing_transitions;
-      // m_state_to_constellation_count;
-      // m_states_in_blocks;
-      // m_P;
 
+      // Check that the states in m_states_in_blocks refer to with ref_states_in_block to the right position.
+      // and that a state is correctly designated as a (non-)bottom state. 
+      for(typename std::vector<state_index>::const_iterator si=m_states_in_blocks.begin(); si!=m_states_in_blocks.end(); ++si)
+      {
+        assert(si==m_states[*si].ref_states_in_blocks);
+      }
+      
+      // Check that the states in m_P are non bottom states.
+      for(const state_index si: m_P)
+      {
+        bool found_inert_outgoing_transition=false;
+        for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions;
+                        it!=m_outgoing_transitions.end() &&
+                        (si+1>=m_states.size() || it!=m_states[si+1].start_outgoing_transitions);
+                     ++it)
+        {
+          const transition& t=m_aut.get_transitions()[it->transition];
+          if (m_aut.is_tau(t.label()) && m_states[t.from()].block==m_states[t.to()].block)
+          {
+            found_inert_outgoing_transition=true;
+          }
+        }
+        assert(!found_inert_outgoing_transition);
+      }
 
       // Check that the non-trivial constellations are non trivial.
       for(const constellation_index ci: m_non_trivial_constellations)
@@ -643,7 +605,6 @@ class bisim_partitioner_gj
       assert(m_branching || !m_preserve_divergence);
       create_initial_partition();        
       refine_partition_until_it_becomes_stable();
-      // print_data_structures("READY");
       assert(check_data_structures("READY"));
     }
 
@@ -689,13 +650,10 @@ class bisim_partitioner_gj
       std::unordered_set<transition> T;
       for(const transition& t: m_aut.get_transitions())
       {
-//std::cerr << "FINALIZE OLD " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
         const transition_index new_from=get_eq_class(t.from());
         const transition_index new_to=get_eq_class(t.to());
-//std::cerr << "FINALIZE NEW " << new_from << " -" << m_aut.action_label(t.label()) << "-> " << new_to << "\n";
         if (!m_aut.is_tau(t.label()) || new_from!=new_to) 
         {
-//std::cerr << "INSERTED\n";
           T.insert(transition(new_from, t.label(), new_to));
         }
       }
@@ -758,15 +716,10 @@ class bisim_partitioner_gj
               typename std::vector<state_index>::iterator pos1, 
               typename std::vector<state_index>::iterator pos2) 
     {
-//std::cerr << "Xpos1 " << std::distance(m_states_in_blocks.begin(),pos1) << 
-//             "  Xpos2 " << std::distance(m_states_in_blocks.begin(),pos2) << "\n";
-//std::cerr << "pos1 " << *pos1 << "  pos2 " << *pos2 << "\n";
-//std::cerr << "STATINBLOCK1 "; for(auto s: m_states_in_blocks){ std::cerr << "- " << s ; }; std::cerr << "\n";
       assert(pos1!=pos2);
       std::swap(*pos1,*pos2);
       m_states[*pos1].ref_states_in_blocks=pos1;
       m_states[*pos2].ref_states_in_blocks=pos2;
-//std::cerr << "STATINBLOCK4 "; for(auto s: m_states_in_blocks){ std::cerr << "- " << s ; }; std::cerr << "\n";
     }
 
     // Move pos1 to pos2, pos2 to pos3 and pos3 to pos1;
@@ -775,10 +728,6 @@ class bisim_partitioner_gj
               typename std::vector<state_index>::iterator pos2, 
               typename std::vector<state_index>::iterator pos3) 
     {
-//std::cerr << "Xpos1 " << std::distance(m_states_in_blocks.begin(),pos1) << 
-//             "  Xpos2 " << std::distance(m_states_in_blocks.begin(),pos2) << "\n";
-//std::cerr << "pos1 " << *pos1 << " -->  pos2 " << *pos2 << " -->  pos3 " << *pos3 << " --> pos1.\n";
-//std::cerr << "STATINBLOCK1Threeswap "; for(auto s: m_states_in_blocks){ std::cerr << "- " << s ; }; std::cerr << "\n";
       assert(pos1!=pos2 && pos2!=pos3 && pos3!=pos1);
       const state_index temp=*pos1;
       *pos1=*pos3;
@@ -788,7 +737,6 @@ class bisim_partitioner_gj
       m_states[*pos1].ref_states_in_blocks=pos1;
       m_states[*pos2].ref_states_in_blocks=pos2;
       m_states[*pos3].ref_states_in_blocks=pos3;
-// std::cerr << "STATINBLOCK4Threeswap "; for(auto s: m_states_in_blocks){ std::cerr << "- " << s ; }; std::cerr << "\n";
     }
 
     // Split the block B by moving the elements in R to the front in m_states, and add a 
@@ -799,15 +747,6 @@ class bisim_partitioner_gj
                      const std::unordered_set<state_index>& R, 
                      std::function<void(const state_index)> update_Ptilde)
     {
-//std::cerr << "Splt block " << B << " by removing \n";
-//for(auto si: R){ std::cerr << " " << si;} std::cerr << "\n"; 
-// std::cerr << "STATES IN BLOCKS: "; for(auto si: m_states_in_blocks){ std::cerr << " " << si ; } std::cerr << "\n";
-// for(std::size_t bi=0; bi<m_blocks.size(); ++bi){
-// std::cerr << "BLOCKS_INB " << bi << "\n"; 
-// for(auto ssi=m_blocks[bi].start_bottom_states; ssi!=m_blocks[bi].start_non_bottom_states; ++ssi){ std::cerr << *ssi << " "; } 
-// std::cerr << " (bottom)\n";
-// for(auto ssi=m_blocks[bi].start_non_bottom_states; ssi!=m_blocks[bi].end_states; ++ssi){ std::cerr << *ssi << " "; } std::cerr << " (non-bottom)\n";}
-
       // Basic administration. Make a new block and add it to the current constellation.
       const block_index B_new=m_blocks.size();
       m_blocks.emplace_back(m_blocks[B].start_bottom_states,m_blocks[B].constellation);
@@ -817,13 +756,11 @@ class bisim_partitioner_gj
       // Carry out the split. 
       for(state_index s: R)
       {
-//std::cerr << "MOVE STATE " << s << " from block " <<  m_states[s].block << " to a new block " << B_new << "\n";
         m_states[s].block=B_new;
         update_Ptilde(s);
         typename std::vector<state_index>::iterator pos=m_states[s].ref_states_in_blocks;
         if (pos>=m_blocks[B].start_non_bottom_states) // the state is a non bottom state.
         {
-//std::cerr << "HANDLE NON BOTTOM STATE " << *pos << "\n";
           // We know that B must have a bottom state.
           assert(m_blocks[B].start_bottom_states!=m_blocks[B].start_non_bottom_states);
           // There are two situations.
@@ -841,12 +778,9 @@ class bisim_partitioner_gj
           m_blocks[B].start_non_bottom_states++;
           m_blocks[B].start_bottom_states++;
           m_blocks[B_new].end_states++;
-assert(m_blocks[B].start_bottom_states<m_blocks[B].start_non_bottom_states);
-assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_states);
         }
         else // the state is a bottom state
         {
-//std::cerr << "HANDLE BOTTOM STATE " << *pos << "\n";
           // Three cases. pos==B_new.start_non_bottom_states
           if (pos==m_blocks[B_new].start_non_bottom_states)
           {
@@ -879,12 +813,7 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
           assert(m_blocks[B].start_bottom_states<=m_blocks[B].start_non_bottom_states);
           assert(m_blocks[B_new].start_bottom_states<m_blocks[B_new].start_non_bottom_states);
         }
-// for(std::size_t bi=0; bi<m_blocks.size(); ++bi){
-// std::cerr << "BLOCKS_OUTB " << bi << "\n"; for(auto ssi=m_blocks[bi].start_bottom_states; ssi!=m_blocks[bi].start_non_bottom_states; ++ssi){ std::cerr << *ssi << " "; } std::cerr << " (bottom)\n";
-
-// for(auto ssi=m_blocks[bi].start_non_bottom_states; ssi!=m_blocks[bi].end_states; ++ssi){ std::cerr << *ssi << " "; } std::cerr << " (non bottom)\n";}
       }
-// std::cerr << "STATES IN BLOCKS2: "; for(auto si: m_states_in_blocks){ std::cerr << " " << si ; } std::cerr << "\n";
       return B_new;
     }
     
@@ -892,10 +821,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                const transition_index ti,
                std::list<transition_index>::iterator position)
     {
-// transition t=m_aut.get_transitions()[ti];
-// std::cerr << "INSERT DOUBLY LINK TRANS " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-// transition tt=m_aut.get_transitions()[*position];
-// std::cerr << "POSITION TRANS " << tt.from() << " -" << m_aut.action_label(tt.label()) << "-> " << tt.to() << "\n";
       transition_index& current_transition_index= *position;
       // insert after current transition.
       m_transitions[ti].previous_L_B_C_element=current_transition_index;
@@ -915,7 +840,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                const transition& t,
                const transition_index ti)
     {
-// std::cerr << "MOVE TO new LBC list: " << index_block_B << "    " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
       assert(m_states[t.to()].block==index_block_B);
 
       std::list<transition_index > :: iterator this_block_to_constellation=
@@ -933,7 +857,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
              m_states[m_aut.get_transitions()[*first_block_to_constellation].to()].block!=index_block_B ||
              m_aut.get_transitions()[*first_block_to_constellation].label()!=t.label())
         { 
-// std::cerr << "MAKE A NEW ENTRY for inert transitions " << ti << "\n";
           // Make a new entry in the list block_to_constellation, at the beginning;
           
           first_block_to_constellation=
@@ -945,7 +868,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         }
         else
         {
-// std::cerr << "INSERT DISISI inert \n";
           insert_in_the_doubly_linked_list_L_B_C_in_blocks(ti, first_block_to_constellation);
         }
       }
@@ -955,7 +877,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
             m_states[m_aut.get_transitions()[*next_block_to_constellation].to()].block!=index_block_B ||
             m_aut.get_transitions()[*next_block_to_constellation].label()!=t.label())
         { 
-// std::cerr << "MAKE A NEW ENTRY " << ti << "\n";
           // Make a new entry in the list next_block_to_constellation, after the current list element.
           next_block_to_constellation=
                   m_blocks[m_states[t.from()].block].block_to_constellation.
@@ -966,14 +887,12 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         }
         else
         {
-// std::cerr << "INSERT DISISI\n";
           insert_in_the_doubly_linked_list_L_B_C_in_blocks(ti, next_block_to_constellation);
         }
       }
       
       if (last_element_removed)
       {
-// std::cerr << "LAST ELEMENT REMOVED \n";
         m_blocks[m_states[t.from()].block].block_to_constellation.erase(this_block_to_constellation);
       }
     }
@@ -990,15 +909,10 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
       const transition& t=m_aut.get_transitions()[ti];
       transition_index remaining_transition=null_transition;
 
-// std::cerr << "UPDATE LBC new block " << old_bi << "   " << new_bi << "   ";
-// std::cerr << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-
       assert(m_states[t.from()].block==new_bi);
       
       std::list<transition_index >::iterator this_block_to_constellation=
                            m_transitions[ti].transitions_per_block_to_constellation;
-      // std::list<transition_index >::iterator next_block_to_constellation=
-      //                     ++std::list<transition_index > :: iterator(this_block_to_constellation);
       std::unordered_map< std::pair <action_index, constellation_index>,
                           std::list< transition_index >::iterator>::iterator it=
                      new_LBC_list_entries.find(std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation));
@@ -1007,7 +921,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
       if (it==new_LBC_list_entries.end())
       { 
         // Make a new entry in the list next_block_to_constellation;
-// std::cerr << "Create a new LBC list entry \n";
         assert(m_states[t.from()].block==new_bi);
         
         // Put inert tau's to the front. Others, 
@@ -1052,7 +965,7 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
 
     // Calculate the states R in block B that can inertly reach M and split
     // B in R and B\R. The complexity is conform the smallest block of R and B\R.
-    // The L_B_C_list, trans_count and bottom states are not updated. 
+    // The L_B_C_list and bottom states are not updated. 
     // Provide the index of the newly created block as a result. This block is the smallest of R and B\R.
     // Return in M_in_bi whether the new block bi is the one containing M.
     template <class MARKED_STATE_ITERATOR, 
@@ -1068,7 +981,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                               std::function<void(const state_index)> update_Ptilde)
     {
       const std::size_t B_size=number_of_states_in_block(B);
-//std::cerr << "SIMPLE SPLIT " << B << "    size " << B_size << "\n";
       std::unordered_set<state_index> U, U_todo;
       std::unordered_set<state_index> R, R_todo;
       typedef enum { initializing, state_checking, aborted } status_type;
@@ -1087,11 +999,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
 
       while (true)
       {
-//std::cerr << "NEW ROUND -------------------\n";
-//for(auto si: U){ std::cerr << "SU: " << si << "\n"; }
-//for(auto si: U_todo){ std::cerr << "SU_todo: " << si << "\n"; }
-//for(auto si: R){ std::cerr << "RU: " << si << "\n"; }
-//for(auto si: R_todo){ std::cerr << "RU_todo: " << si << "\n"; }
         assert(U_status!=aborted || R_status!=aborted);
         // The code for the left co-routine. 
         switch (U_status) 
@@ -1109,7 +1016,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
               M_co_it++;
               if (!unmarked_blocker(si)) 
               {
-//std::cerr << "U_todo insert " << si << "\n";
                 U_todo.insert(si);
               }
             }
@@ -1122,7 +1028,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
             {
               assert(!U.empty());
               // split_block B into U and B\U.
-//std::cerr << "SPlit B and U\n";
               assert(U.size()>0);
               block_index block_index_of_U=split_block_B_into_R_and_BminR(B, U, update_Ptilde);
               M_in_bi = false;
@@ -1131,7 +1036,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
             else
             {
               const state_index s=U_todo.extract(U_todo.begin()).value();
-//std::cerr << "U_todo remove " << s << "\n";
               U.insert(s); 
               count[s]=0;
               // Algorithm 3, line 3.8, left.
@@ -1146,7 +1050,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                    // Algorithm 3, line 3.13, left.
                   if (unmarked_blocker(from))
                   {
-//std::cerr << "UNMARKED BLOCKtrue " << from << "\n";
                     // Algorithm 3, line 3.14, left.
                     count[from]=std::numeric_limits<std::size_t>::max();
                   }
@@ -1154,7 +1057,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                   {
                     // Algorithm 3, line 3.15 and 3.18, left.
                     count[from]=m_states[from].no_of_outgoing_inert_transitions-1;
-//std::cerr << "UNMARKED BLOCKfalse " << from << "   " << count[from] << "\n";
                   }
                 }
                 else
@@ -1163,25 +1065,19 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                   count[from]--;
                 }
                 // Algorithm 3, line 3.19, left.
-//std::cerr << "COUNT " << from << " is " << count[from] << "\n";
                 if (count[from]==0)
                 {
                   if (U.find(from)==U.end())
                   {
                     U_todo.insert(from);
-//std::cerr << "U_todo insert II " << from << "\n";
                   }
                 }
               }
             }
             // Algorithm 3, line 3.10 and line 3.11 left. 
-//std::cerr << "SIZES " << U.size() << "   "   << U_todo.size() << "    " << B_size << "\n";
             if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
                                                       // should not lead to an abort. 
             {
-//std::cerr << "Abort U\n";
-//for(auto si: U){ std::cerr << "SU: " << si << "\n"; }
-//for(auto si: U_todo){ std::cerr << "SU_todo: " << si << "\n"; }
               U_status=aborted;
             }
           }
@@ -1192,7 +1088,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         {
           case initializing:
           {
-//std::cerr << "INITIALISE R\n";
             // Algorithm 3, line 3.3, right.
             if (M_it==M_end)
             {
@@ -1202,10 +1097,8 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
             {
               const state_index si= *M_it;
               ++M_it;
-//std::cerr << "Consider for R_todo " << si << "\n";
               if (!marked_blocker(si)) 
               {
-//std::cerr << "Insert in_todo " << si << "\n";
                 R_todo.insert(si);
               }
             }
@@ -1213,11 +1106,9 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
           }
           case state_checking: 
           {
-//std::cerr << "STATE CHECKING R\n";
             if (R_todo.empty())
             {
               // split_block B into R and B\R.
-//std::cerr << "Split B and R " << R.size() << "\n";
               assert(R.size()>0);
               block_index block_index_of_R=split_block_B_into_R_and_BminR(B, R, update_Ptilde);
               M_in_bi=true;
@@ -1226,7 +1117,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
             else
             {
               const state_index s=R_todo.extract(R_todo.begin()).value();
-//std::cerr << "EXTRACT R: " << s << "\n";
               R.insert(s);
               for(std::vector<transition_index>::iterator it=m_states[s].start_incoming_inert_transitions; 
                                                           it!=m_states[s].start_incoming_non_inert_transitions;
@@ -1255,7 +1145,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
       const transition& t=m_aut.get_transitions()[ti];
       assert(m_aut.is_tau(t.label()));
       assert(m_states[t.to()].block!=m_states[t.from()].block);
-//std::cerr << "MAKE NON INERT TRANS: " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
       // Move the transition indicated by tti to the non inert transitions in m_incoming_transitions.
       state_type_gj& to=m_states[m_aut.get_transitions()[ti].to()];
       to.start_incoming_non_inert_transitions--;
@@ -1263,17 +1152,12 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
       std::vector<transition_index>::iterator current_position1=m_transitions[ti].ref_incoming_transitions;
       if (move_to1!=current_position1)
       {
-// const transition& t1=m_aut.get_transitions()[*current_position1];
-//const transition& t2=m_aut.get_transitions()[*move_to1];
-//std::cerr << "SWAP " << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to() << "   AND    " << t2.from() << " -" << m_aut.action_label(t2.label()) << "-> " << t2.to() << "\n";
         std::swap(*move_to1,*current_position1);
         m_transitions[*move_to1].ref_incoming_transitions=move_to1;
         m_transitions[*current_position1].ref_incoming_transitions=current_position1;
       }
 
       m_states[t.from()].no_of_outgoing_inert_transitions--;
-      
-// for(auto ti: m_outgoing_transitions){ const transition& t=m_aut.get_transitions()[ti.transition];  const transition& t1=m_aut.get_transitions()[(ti.start_same_saC)->transition]; std::cerr << "OUTTRANSOUT " << ti.transition << "   " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "(" << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to() << ")\n"; }
     }
 
     // Split block B in R, being the inert-tau transitive closure of M minus those in marked_blocker contains 
@@ -1299,16 +1183,9 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                                                         [](const state_index){})
     {
       assert(M_begin!=M_end && M_co_begin!=M_co_end);
-//for(auto i=M_begin; i!=M_end; ++i)
-//{ std::cerr << "MARKED   " << *i << (marked_blocker(*i)?" out\n":" in\n"); }
-//for(auto i=M_co_begin; i!=M_co_end; ++i)
-//{ std::cerr << "UNMARKED " << *i << (unmarked_blocker(*i)?" out\n":" in\n") << "unmarked_blocker: " << unmarked_blocker(*i) << "\n"; }
-
       block_index bi=simple_splitB(B, M_begin, M_end, marked_blocker, M_co_begin, M_co_end, unmarked_blocker, M_in_new_block,update_Ptilde);
 
-//std::cerr << "STATES IN BLOCKS4-:  "; for(auto si: m_states_in_blocks){ std::cerr << " " << si ; } std::cerr << "\n";
       // Update the L_B_C_list, and bottom states, and invariant on inert transitions.
-
       // Recall new L_B_C positions.
       std::unordered_map< std::pair <action_index, constellation_index>, 
                             std::list< transition_index >::iterator> new_LBC_list_entries;
@@ -1316,7 +1193,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                                                       ssi!=m_blocks[bi].end_states;
                                                       ++ssi)
       {
-//std::cerr << "Consider state " << *ssi << "\n";
         const state_index si=*ssi;
         state_type_gj& s= m_states[si];
         s.block=bi;
@@ -1327,17 +1203,13 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
           // si is a non_bottom_state in the smallest block containing M..
           bool non_bottom_state_becomes_bottom_state= (ssi>=m_blocks[bi].start_non_bottom_states); 
         
-//std::cerr << "M in new block\n";
           for(outgoing_transitions_it ti=s.start_outgoing_transitions;
                         ti!=m_outgoing_transitions.end() &&
                         ((*ssi)+1>=m_states.size() || ti!=m_states[(*ssi)+1].start_outgoing_transitions);
               ti++)
-/*           for(outgoing_transitions_it ti=s.start_outgoing_inert_transitions; 
-                      ti!=s.start_outgoing_non_inert_transitions;
-             ) */
           {       
             const transition& t=m_aut.get_transitions()[ti->transition];
-            assert(m_states[t.from()].block=bi);
+            assert(m_states[t.from()].block==bi);
             if (m_aut.is_tau(t.label()))
             { 
               if  (m_states[t.to()].block==B)
@@ -1352,11 +1224,9 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
               }
             }
           }
-//std::cerr << "STATES IN BLOCKS4a: "; for(auto si: m_states_in_blocks){ std::cerr << " " << si ; } std::cerr << "\n";
           if (non_bottom_state_becomes_bottom_state)
           {
             // The state at si has become a bottom_state.
-//std::cerr << "NEW BOTTOM STATE1 " << si << "\n";
             m_P.insert(si);
             // Move this former non bottom state to the bottom states.
             if (ssi!=m_blocks[bi].start_non_bottom_states)
@@ -1370,46 +1240,35 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
 
         if (update_L_B_C_list)
         {
-//std::cerr << "UPDATE LBC-list STATE " << si << "\n";
           for(outgoing_transitions_it ti=s.start_outgoing_transitions; 
                       ti!=m_outgoing_transitions.end() &&
                       ((si+1)==m_states.size() || ti!=m_states[si+1].start_outgoing_transitions);
                   ti++)
           {       
-//const transition& t=m_aut.get_transitions()[ti->transition];
-//std::cerr << "UPDATE LBC-list TRANS: " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
             transition_index old_remaining_transition=update_the_doubly_linked_list_L_B_C_new_block(B, bi, ti->transition, new_LBC_list_entries);
             process_transition(ti->transition, old_remaining_transition, B);
             update_block_label_to_cotransition(B, bi, ti->transition, old_remaining_transition);
           }
         }
         
-// std::cerr << "STATES IN BLOCKS4b: "; for(auto si: m_states_in_blocks){ std::cerr << " " << si ; } std::cerr << "\n";
         // Investigate the incoming tau transitions. 
         if (!M_in_new_block)
         {
-// std::cerr << "NOT M in new block\n";
           for(std::vector<transition_index>::iterator ti=s.start_incoming_inert_transitions; 
                       ti!=s.start_incoming_non_inert_transitions; )
           {       
             const transition& t=m_aut.get_transitions()[*ti];
-// std::cerr << "INSPECT INCOMING TRANS: " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-// std::cerr << m_states[t.from()].block << "    " << m_states[t.to()].block << "   " << bi << "\n";
             assert(m_aut.is_tau(t.label()));
             assert(m_states[t.to()].block==bi);
             if (m_states[t.from()].block==B)
             { 
-// std::cerr << "DARO2\n";
               // This transition did become non-inert.
               make_transition_non_inert(*ti);
               
               // Check whether from is a new bottom state.
               const state_index from=t.from();
-// std::cerr << "CHECK FOR NEW BOTTOM STATE " << from << "\n";
-//              if (m_states[from].start_outgoing_inert_transitions==m_states[from].start_outgoing_non_inert_transitions) 
               if (m_states[from].no_of_outgoing_inert_transitions==0)
               {
-//std::cerr << "NEW BOTTOM STATE2 " << from << " is a new bottom state\n";
                 // This state has not outgoing inert transitions. It becomes a bottom state. 
                 m_P.insert(from);
                 // Move this former non bottom state to the bottom states.
@@ -1429,7 +1288,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         }
       }
 
-// std::cerr << "STATES IN BLOCKS5:  "; for(auto si: m_states_in_blocks){ std::cerr << " " << si ; } std::cerr << "\n";
       return bi;
     }
 
@@ -1445,7 +1303,7 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
            << " states and " << m_aut.num_transitions() << " transitions.\n";
       // Initialisation.
     
-      // Initialise m_incoming_(non-)inert-transitions and m_state_to_constellation, m_transitions[t].trans_count.
+      // Initialise m_incoming_(non-)inert-transitions and m_states[si].no_of_outgoing_transitions 
       typedef std::unordered_map<typename LTS_TYPE::states_size_type, set_of_transitions_type> temporary_store_type;
       temporary_store_type temporary_store;
       transition_index transition_count=0;
@@ -1495,10 +1353,8 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         }
       }
       
-      // Initialise m_outgoing_transitions, m_state_to_constellation, and m_transitions[t].trans_count.
+      // Initialise m_outgoing_transitions.
       // initialise m_states_in_blocks, together with start_bottom_states start_non_bottom_states in m_blocks.
-      //typedef std::unordered_multimap<typename std::pair<typename LTS_TYPE::states_size_type, typename LTS_TYPE::labels_size_type>, 
-      //                                transition_index> temporary_store_type;
       temporary_store.clear();
       std::vector<bool> state_has_outgoing_tau(m_aut.num_states(),false);
       transition_count=0;
@@ -1516,7 +1372,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
       m_outgoing_transitions.reserve(m_aut.num_transitions());
       for(state_index si=0; si<m_states.size(); ++si)
       {
-//std::cerr << "EXPLORE STATE " << si << "\n";
         const set_of_transitions_type& transitions_for_si=temporary_store[si];
 
         label_to_transition_set_map.clear();
@@ -1531,34 +1386,18 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
 
         for(const auto& [ai, transition_set]: label_to_transition_set_map)
         {
-//          if (!m_aut.is_tau(ai))
-//          {
-            std::size_t count_down=transition_set.size()-1;
-            outgoing_transitions_it start=m_outgoing_transitions.end();
-            // m_state_to_constellation_count.emplace_back(transition_set.size());
-            assert(!transition_set.empty());
-            // const transition& t=m_aut.get_transitions()[*transition_set.begin()];
-            // m_state_label_constellation_to_transition[std::tuple(t.from(), t.label(), 0)]=m_outgoing_transitions.end();
-            for(const transition_index ti: transition_set)
-            {
-// transition t=m_aut.get_transitions()[ti];
-// std::cerr << "COUNT TRANS act: " << transition_set.size() << "   "  << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-              // m_transitions[ti].trans_count=m_state_to_constellation_count.end()-1;
-              m_outgoing_transitions.emplace_back(ti,count_down==0?start:m_outgoing_transitions.end()+count_down);
-              m_transitions[ti].ref_outgoing_transitions=m_outgoing_transitions.end()-1;
-              count_down--;
-            }
-//          }
+          std::size_t count_down=transition_set.size()-1;
+          outgoing_transitions_it start=m_outgoing_transitions.end();
+          assert(!transition_set.empty());
+          for(const transition_index ti: transition_set)
+          {
+            m_outgoing_transitions.emplace_back(ti,count_down==0?start:m_outgoing_transitions.end()+count_down);
+            m_transitions[ti].ref_outgoing_transitions=m_outgoing_transitions.end()-1;
+            count_down--;
+          }
         }
       }
       temporary_store=temporary_store_type(); // release memory. 
-//  for(const transition_pointer_pair pi: m_outgoing_transitions)
-//  { 
-//    const transition& t=m_aut.get_transitions()[pi.transition];
-//    mCRL2log(log::debug) << "  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to();
-//    const transition& t1=m_aut.get_transitions()[pi.start_same_saC->transition]; 
-//    mCRL2log(log::debug) << "   \t(same saC: " << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to() << ");\n";
-//  }   
 
       m_states_in_blocks.reserve(m_aut.num_states());
       std::size_t i=0;
@@ -1585,7 +1424,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
       }
       m_blocks[0].end_states=m_states_in_blocks.end();
 
-      // print_data_structures("After initial reading before splitting in the initialisation", true);
       assert(check_data_structures("After initial reading before splitting in the initialisation",true));
 
       // The following implements line 1.3 of Algorithm 1. 
@@ -1600,8 +1438,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
 
       for(const auto& [a, M]: states_per_action_label)
       {
-//std::cerr << "Split on " << m_aut.action_label(a)  << " =======================\n";
-//std::cerr << "STATES IN BLOCKS3: "; for(auto si: m_states_in_blocks){ std::cerr << " " << si ; } std::cerr << "\n";
         states_per_block_type Bprime;
         for(const state_index s: M)
         {
@@ -1610,7 +1446,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         
         for(const auto& [block_ind, split_states]: Bprime)
         {
-//std::cerr << "HIER0\n";
           // Check whether the block B, indexed by block_ind, can be split.
           // This means that the bottom states of B are not all in the split_states.
           const set_of_states_type& split_states_=split_states;
@@ -1619,17 +1454,13 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
           for(typename std::vector<state_index>::iterator i= B.start_bottom_states; 
                        !split_is_possible && i< B.start_non_bottom_states; ++i)
           {
-//std::cerr << "HIER split " << *i << "\n";
             if (!(split_states.count(*i)>0))
             {
-//std::cerr << "HIER split possible " << "\n";
               split_is_possible=true;
             }
           }  
           if (split_is_possible)
           { 
-//std::cerr << "HIER actual split block: " << block_ind << "bottom states: ";
-//for(typename std::vector<state_index>::iterator i= B.start_bottom_states; i< B.start_non_bottom_states; ++i){ std::cerr << " " << *i ;} std::cerr << "\n";
             bool dummy=false;
             const bool do_not_split_the_LBC_list=false;
             splitB(block_ind, 
@@ -1693,7 +1524,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
       // Algorithm 1, line 1.4 is implicitly done in the call to splitB above.
       
       // Algorithm 1, line 1.5.
-      // print_data_structures("End initialisation");
       assert(check_data_structures("End initialisation"));
       stabilizeB();
     }
@@ -1706,8 +1536,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
     // and the element is actually not removed.
     bool remove_from_the_doubly_linked_list_L_B_C_in_blocks(const transition_index ti)
     {
-// transition t=m_aut.get_transitions()[ti];
-// std::cerr << "REMOVE DOUBLY LINK TRANS " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
       if (m_transitions[ti].next_L_B_C_element==null_transition &&
           m_transitions[ti].previous_L_B_C_element==null_transition)
       {
@@ -1744,12 +1572,10 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
 
     void stabilizeB()
     {
-//std::cerr << "STABILIZE\n";
       // Algorithm 4, line 4.3.
       std::unordered_map<block_index, set_of_states_type> Phat;
       for(const state_index si: m_P)
       {
-//std::cerr << "STABILIZE FOR FRESH BOTTOM STATE " << si << "\n";
         Phat[m_states[si].block].insert(si);
       }
       m_P.clear();
@@ -1766,7 +1592,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         label_constellation_to_set_of_states_map grouped_transitions;
         for(const state_index si: V)
         {
-//std::cerr << "STABILIZE BOTTOM STATE " << si << " in block " << bi << "\n";
           for(outgoing_transitions_it ti=m_states[si].start_outgoing_transitions;
                         ti!=m_outgoing_transitions.end() &&
                         (si+1>=m_states.size() || ti!=m_states[si+1].start_outgoing_transitions);
@@ -1775,20 +1600,16 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
             transition& t=m_aut.get_transitions()[ti->transition];
             if (!(m_states[t.from()].block==m_states[t.to()].block && m_aut.is_tau(t.label())))
             {
-//std::cerr << "INSERT " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
               grouped_transitions[std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation)].insert(t.from());
             }
           }
         }
-        // std::unordered_map<block_index, label_constellation_to_set_of_states_map> grouped_transitions_per_block;
-        // grouped_transitions_per_block[bi]=grouped_transitions;
 
         std::unordered_map<block_index, set_of_states_type> Ptilde;
         assert(!V.empty());
         Ptilde[bi]=V;
         
         // Algorithm 4, line 4.7.
-        // std::unordered_set<transition_index> Q;
         typedef std::unordered_map< std::pair < block_index, std::pair<label_index, constellation_index > >, transition_index > Qhat_map;
         Qhat_map Qhat;
         for(std::list< transition_index >::iterator ti=m_blocks[bi].block_to_constellation.begin();
@@ -1797,10 +1618,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
           const transition& t=m_aut.get_transitions()[*ti];
           if (!m_aut.is_tau(t.label()) || m_blocks[m_states[t.to()].block].constellation!=m_blocks[bi].constellation)
           {
-//std::cerr << "ADD TO Q  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-//std::cerr << "CONSTELLATION " << m_blocks[m_states[t.to()].block].constellation << "   " << m_blocks[bi].constellation << "\n";
-//std::cerr << "STARTBLOCK " << bi << "     "  << m_states[t.from()].block << "\n";
-            // Q.insert(*ti);
             Qhat[std::pair(bi, std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation))]=*ti;
           }
         }
@@ -1809,39 +1626,27 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         // Algorithm 4, line 4.8.
         while (!Qhat.empty())
         {
-//std::cerr << "REPEAT Q -----------" << Qhat.size() << "\n";
           // Algorithm 4, line 4.9.
           const typename Qhat_map::iterator Qit=Qhat.begin();
           const transition_index t_ind=Qit->second;
           const transition& t=m_aut.get_transitions()[t_ind];
           Qhat.erase(Qit);
-//std::cerr << "REPEAT QA -----------" << Qhat.size() << "\n";
           // Algorithm 4, line 4.10.
-//std::cerr << "TRANS  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
           const block_index bi=m_states[t.from()].block;
-//std::cerr << "PTILDE " << bi << "\n"; for(auto [bi, W]: Ptilde){ std::cerr << "BLOCK " << bi << " { "; for(auto si: W ){ std::cerr << si << ", "; } std::cerr << "}\n";} std::cerr << "----------\n";
           set_of_states_type W=Ptilde[bi];
-//           assert(!W.empty()); Is possible. 
-//std::cerr << "W "; for(auto s:W) { std::cerr << s << "   ";} std::cerr << "\n";
-          // set_of_states_type& aux=grouped_transitions_per_block[bi]
-          //                   [std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation)];
           const set_of_states_type& aux=grouped_transitions[std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation)];
-//std::cerr << "aux "; for(auto s:aux) { std::cerr << s << "   ";} std::cerr << "\n";
           bool W_empty=true;
           for(const state_index si: W) 
           {
-//std::cerr << "REMOVE " << si << " from W\n";
             if (aux.count(si)==0) 
             {
               W_empty=false;
               break;
             }
           }
-//std::cerr << "Wleeg "; for(auto s:W) { std::cerr << s << "   ";} std::cerr << "\n";
           // Algorithm 4, line 4.10.
           if (!W_empty)
           {
-//std::cerr << "ER WORDT GESPLITST\n";
             // Algorithm 4, line 4.11, and implicitly 4.12, 4.13 and 4.18. 
             bool V_in_bi=false;
             splitB(bi, 
@@ -1865,15 +1670,9 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                               m_blocks[m_states[t_local.to()].block].constellation==
                                         m_blocks[m_states[t.to()].block].constellation)
                           {
-// std::cerr << "\nSTABILIZE CHECK NOT IN W true\n";
-// std::cerr << "T  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-// std::cerr << "T_LOCAL  " << t_local.from() << " -" << m_aut.action_label(t_local.label()) << "-> " << t_local.to() << "\n";
-// std::cerr << "CONSTELLATION " << m_blocks[m_states[t_local.to()].block].constellation << "   " << m_blocks[m_states[t.to()].block].constellation << "\n";
-
                             return true;
                           }
                         }
-// std::cerr << "STABILIZE CHECK NOT IN W false\n";
                         return false;
                       },
                    V_in_bi,
@@ -1886,53 +1685,21 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                      { 
                        // Move the new bottom state to its appropriate block.
                        const transition& t=m_aut.get_transitions()[ti];
-//std::cerr << "\nADAPT grouped_transitions_per_block\n";
-//std::cerr << "Trans   " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-//if (remaining_transition!=null_transition)
-//{const transition& t1=m_aut.get_transitions()[remaining_transition];
-//std::cerr << "REPL tr " << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to() << "\n";}
-
-                       /* const constellation_index ci=m_blocks[m_states[t.to()].block].constellation;
-                       const block_index new_bi=m_states[t.from()].block;
-                       assert(bi!=new_bi);
-                       set_of_states_type& set_with_tfrom=grouped_transitions_per_block[bi][std::pair(t.label(), ci)];
-                       typename set_of_states_type::iterator i=set_with_tfrom.find(t.from());
-                       if (i!=set_with_tfrom.end())
-                       {
-                         set_with_tfrom.erase(t.from());
-                         if (remaining_transition!=null_transition)
-                         {
-                           set_with_tfrom.insert(remaining_transition);
-                         }
-                         else if (set_with_tfrom.empty())
-                         {
-                           grouped_transitions_per_block[bi].erase(std::pair(t.label(), ci));
-                         }
-                         grouped_transitions_per_block[new_bi][std::pair(t.label(), ci)].insert(t.from());
-                       }
-                       assert(ti!=remaining_transition); */
  
                        // Check whether this transition represented a label/constellation in the old block. 
                        typename Qhat_map::iterator Qti_it=Qhat.find(std::pair(old_block, std::pair(t.label(),m_blocks[m_states[t.to()].block].constellation)));
-                       if (Qti_it==Qhat.end())  
+                       if (Qti_it!=Qhat.end())  
                        {
-//std::cerr << "ASSERT1 " << old_block << "  " << m_states[t.from()].block << "\n";
-//std::cerr << "ASSERT2 " << m_blocks[m_states[t.from()].block].constellation << "    " << m_blocks[m_states[t.to()].block].constellation << "\n";
-                         // This transition is already investigated, or was inert for the target constellation, and did not need to be investigated.
-                       }
-                       else
-                       {
+                         // This transition is not investigated, or was not inert for the target constellation, and did not need to be investigated.
                          if (Qti_it->second==ti)
                          {
                            // This transition was used a representation. Remove it, and Insert the alternative transition. 
                            if (remaining_transition==null_transition)
                            {
-//std::cerr << "DELETE\n";
                              Qhat.erase(Qti_it);
                            }
                            else
                            {
-//std::cerr << "REPLACE\n";
                              Qti_it->second=remaining_transition;
                            }
                          }
@@ -1943,18 +1710,12 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                          {
                            // Insert this transition as a representation for an outgoing label/constellation pair.
                            Qhat[std::pair(m_states[t.from()].block, std::pair(t.label(),m_blocks[m_states[t.to()].block].constellation))]=ti;
-//std::cerr << "INSERTQ\n";
                          }
                        }
-                   /*    if (Q.count(ti)>0 && remaining_transition!=null_transition)
-                       {
-                         Q.insert(remaining_transition);
-                       }  */
                      },
                      // Algorithm 4, line 4.16 and 4.17.
                     [&Ptilde, bi, this](const state_index si)
                        {
-// std::cerr << "UPDATE Ptilde " << si << "   " << m_states[si].block << "    " << bi << "\n";
                          if (Ptilde[bi].count(si)>0) // if si is a new bottom state, move it. 
                          {  
                            assert(bi!=m_states[si].block);
@@ -1967,21 +1728,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                          }
                        });
 
- /*           for(typename std::vector<state_index>::iterator si=m_blocks[Bpp].start_bottom_states;
-                                                   si!=m_blocks[Bpp].end_states; 
-                                                   ++si)
-            {
-              const typename set_of_states_type::iterator sit=Ptilde[bi].find(*si);
-              if (sit!=Ptilde[bi].end())
-              {
-                Ptilde[bi].erase(*si);
-                Ptilde[Bpp].insert(*si);
-                if (Ptilde[bi].empty())
-                {
-                  Ptilde.erase(bi);
-                }
-              }
-            } */
           }
         }
         Phat.erase(bi);
@@ -2004,18 +1750,10 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                    block_label_to_size_t_map& block_label_to_cotransition,
                    const constellation_index ci) const
     {
-// std::cerr << "MAINTAIN BLOCK LABEL TO CO TRANSITION \n";
-// std::cerr << "old block " << old_block << " new block " << new_block <<  "  constellation " << ci <<"\n";
       const transition& t_move=m_aut.get_transitions()[moved_transition];
-// std::cerr << "MOVEDT   " << t_move.from() << " -" << m_aut.action_label(t_move.label()) << "-> " << t_move.to() << "\n";
-// if (alternative_transition!=null_transition)
-// { const transition& t_alt=m_aut.get_transitions()[alternative_transition];
-// std::cerr << "MOVEDALT " << t_alt.from() << " -" << m_aut.action_label(t_alt.label()) << "-> " << t_alt.to() << "\n"; }
-// else std::cerr << "ALT IS UNDEFINED\n";
       if (m_blocks[m_states[t_move.to()].block].constellation==ci &&
           (!m_aut.is_tau(t_move.label()) || m_blocks[m_states[t_move.from()].block].constellation!=ci))
       { 
-// std::cerr << "MOVEDT IS A RELEVANT TRANSITION\n";
         // This is a transition to the current co-constellation.
         
         typename block_label_to_size_t_map::const_iterator bltc_it=
@@ -2026,7 +1764,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
           {
             // This transition is being moved. Find a replacement in block_label_to_cotransition.
             block_label_to_cotransition[std::pair(old_block,t_move.label())]=alternative_transition;
-// std::cerr << "BLOCK LABEL TO CO TRANSITION1 " << old_block << "     " << t_move.label() << "     " << alternative_transition << "\n";
           }
         }
 
@@ -2036,7 +1773,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         {
           // No such transition exists as yet. Give moved transition this purpose.
           block_label_to_cotransition[std::pair(new_block,t_move.label())]=moved_transition;
-// std::cerr << "BLOCK LABEL TO CO TRANSITION2 " << new_block << "     " << t_move.label() << "     " << moved_transition << "\n";
         }
       }
     }
@@ -2071,33 +1807,26 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
 
     bool state_has_outgoing_co_transition(const transition_index transition_to_bi, const constellation_index old_constellation)
     {
-// std::cerr << "HAS STATE OUTGOING CO-TRANSITION\n";
-// const transition& t=m_aut.get_transitions()[transition_to_bi];
-// std::cerr << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
       // i1 refers to the position of the transition_to_bi;
       outgoing_transitions_it i1=m_transitions[transition_to_bi].ref_outgoing_transitions;
       // i2 refers to the last position, unless i1 is the last, then i2 is the first of all transitions with the same s, a and C.
       outgoing_transitions_it i2=i1->start_same_saC;
       if (i2<=i1) 
       {
-// std::cerr << "HIER1\n";
         // So, i1 is the last element with the same s, a, C.
         i2=i1+1;
       }
       else
       {
-// std::cerr << "HIER2\n";
         // In this case i2 refers to the last element with the same s, a, C.
         i2++;
       }
       if (i2==m_outgoing_transitions.end())
       {
-// std::cerr << "HIER3 false\n";
         return false;
       }
       const transition& t1=m_aut.get_transitions()[transition_to_bi];
       const transition& t2=m_aut.get_transitions()[i2->transition];
-// std::cerr << "HIER4 " << (t1.from()==t2.from()) << "   " << (t1.label()==t2.label()) << "    " << (m_blocks[m_states[t2.to()].block].constellation==old_constellation)  << "\n";
       return t1.from()==t2.from() && t1.label()==t2.label() && m_blocks[m_states[t2.to()].block].constellation==old_constellation;
     }
 
@@ -2109,7 +1838,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
       // Algorithm 1, line 1.6.
       while (!m_non_trivial_constellations.empty())
       {
-        // print_data_structures("MAIN LOOP");
         assert(check_data_structures("MAIN LOOP"));
         const set_of_constellations_type::const_iterator i=m_non_trivial_constellations.begin();
         constellation_index ci= *i;
@@ -2138,11 +1866,9 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         m_constellations.emplace_back(index_block_B);
         const constellation_index old_constellation=m_blocks[index_block_B].constellation;
         const constellation_index new_constellation=m_constellations.size()-1;
-//std::cerr << "SEPARATE CONSTELLATION " << new_constellation << " from " << old_constellation << "\n";
         m_blocks[index_block_B].constellation=new_constellation;
         // Here the variables block_to_constellation and the doubly linked list L_B->C in blocks must be still be updated.
-        // Moreover, the variable m_state_to_constellation_count in transitions requires updating.
-        // This happens below.
+        // This happens further below.
 
         // Algorithm 1, line 1.9.
         states_per_action_label_type calM;
@@ -2173,18 +1899,13 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
             const transition& t=m_aut.get_transitions()[*j];
             transition_that_marked_a_state_per_label[std::pair(t.from(), t.label())]=*j;
             
-//std::cerr << "MOVE TRANSITION TO NEW DATA STRUCTURES  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
             // Add the source state grouped per label in calM, provided the transition is non inert.
             if (!m_aut.is_tau(t.label()) || m_states[t.from()].block!=m_states[t.to()].block)
             {
-// std::cerr << "ADD STATE " << t.from() << " LABELSET ON " << m_aut.action_label(t.label()) << "\n";
               calM[t.label()].insert(t.from());
             }
  
             // Update m_state_label_constellation_to_transition including m_outgoing_transitions. 
-            /* typename slc_type::iterator i=m_state_label_constellation_to_transition.find(
-                        std::tuple(t.from(), t.label(), old_constellation));
-            assert(i!=m_state_label_constellation_to_transition.end()); */
             const outgoing_transitions_it pos1=m_transitions[*j].ref_outgoing_transitions;
             outgoing_transitions_it end_same_saC;
             if (pos1->start_same_saC<pos1)
@@ -2197,31 +1918,16 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
               end_same_saC=pos1->start_same_saC;
             }
             const outgoing_transitions_it pos2=end_same_saC->start_same_saC;
-// const transition& t1=m_aut.get_transitions()[pos1->transition];
-// std::cerr << "MOVED TRANS  " << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to() << "\n";
-// const transition& t2=m_aut.get_transitions()[pos2->transition];
-// std::cerr << "REPRESENTATION  " << t2.from() << " -" << m_aut.action_label(t2.label()) << "-> " << t2.to() << "\n";
-// const transition& t3=m_aut.get_transitions()[pos2->transition];
-// std::cerr << "END SAME SAC  " << t3.from() << " -" << m_aut.action_label(t3.label()) << "-> " << t3.to() << "\n";
             if (pos1!=pos2)
             {
-// std::cerr << "SWAP\n";
               std::swap(pos1->transition,pos2->transition);
               m_transitions[pos1->transition].ref_outgoing_transitions=pos1;
               m_transitions[pos2->transition].ref_outgoing_transitions=pos2;
             }
             if (end_same_saC->start_same_saC<end_same_saC)
             {
-// std::cerr << "Increment\n";
               end_same_saC->start_same_saC++;
             }
-// for(const transition_pointer_pair pi: m_outgoing_transitions)
-// {
-//   const transition& t=m_aut.get_transitions()[pi.transition];
-//   std::cerr << "  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to();
-//   const transition& t1=m_aut.get_transitions()[pi.start_same_saC->transition]; 
-//   std::cerr << "  \t(same saC: " << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to() << ");\n";
-// }
        
             typename repair_pointers_type::iterator rep_it=repair_pointers.find(std::pair(t.from(), t.label()));
             if (rep_it==repair_pointers.end())
@@ -2233,8 +1939,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
               rep_it->second.second=pos2;  // set the end of the items to repair to pos2.
             }
             
-// std::cerr << "BLOCKS " << m_states[t.to()].block << "    " << index_block_B << "\n";
-
             // Update the block_label_to_cotransition map.
             if (block_label_to_cotransition.find(std::pair(m_states[t.from()].block,t.label()))==block_label_to_cotransition.end())
             {
@@ -2250,7 +1954,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                 while (!found && transition_walker!=L_B_C_list_iterator(null_transition,m_transitions))
                 {
                   const transition& tw=m_aut.get_transitions()[*transition_walker];
-// std::cerr << "LABEL TO TRANSITION " << tw.from() << " -" << m_aut.action_label(tw.label()) << "-> " << tw.to() << "  ||  " << m_states[tw.to()].block << "    " << m_blocks[m_states[tw.to()].block].constellation << " =?= " << ci << "\n";
                   if (m_blocks[m_states[tw.to()].block].constellation==ci)
                   {
                     found=true;
@@ -2260,7 +1963,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                     ++transition_walker;
                   }
                 }
-// std::cerr << "BLOCK LABEL TO CO TRANSITION " << m_states[t.from()].block << "     " << m_aut.action_label(t.label()) << "     " << (found?*transition_walker:null_transition) << "\n";
                 block_label_to_cotransition[std::pair(m_states[t.from()].block, t.label())]= (found?*transition_walker:null_transition);
               }
               else 
@@ -2276,47 +1978,32 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         // Repair the start_same_saC links.
         for(typename repair_pointers_type::iterator rep_it=repair_pointers.begin(); rep_it!=repair_pointers.end(); rep_it++)
         {
-// std::cerr << "REPAIR POINTERS " << "\n";
           const outgoing_transitions_it start_repair_pointer=rep_it->second.first;
           const outgoing_transitions_it end_repair_pointer=rep_it->second.second;
-// std::cerr << "REPAIR " << rep_it->first.first << "  " << m_aut.action_label(rep_it->first.second) << "  " << &*start_repair_pointer << "    " << &*end_repair_pointer << "\n";
           for(outgoing_transitions_it i=start_repair_pointer; i!=end_repair_pointer; ++i)
           {
-// std::cerr << "REPIER " << &*i << "\n";
             i->start_same_saC=end_repair_pointer;
           }
           assert(end_repair_pointer!=m_outgoing_transitions.end());
           end_repair_pointer->start_same_saC=start_repair_pointer;
         }
-// for(const transition_pointer_pair pi: m_outgoing_transitions)
-// {
-//   const transition& t=m_aut.get_transitions()[pi.transition];
-//   std::cerr << "  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to();
-//   const transition& t1=m_aut.get_transitions()[pi.start_same_saC->transition];
-//   std::cerr << "  \t(same saC: " << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to() << ");\n";
-// }
 
         // ---------------------------------------------------------------------------------------------
         // First carry out a co-split of B with respect to C\B and an action tau.
-//print_data_structures("Algorithm 1. BEFORE tau c\\B cosplit");
         bool hatU_does_not_cover_B_bottom=false;
         for(typename std::vector<state_index>::iterator si=m_blocks[index_block_B].start_bottom_states;
                           !hatU_does_not_cover_B_bottom &&
                           si!=m_blocks[index_block_B].start_non_bottom_states; 
                         ++si)
         {
-// std::cerr << "STATE " << *si << "\n";
           bool found=false;
           for(outgoing_transitions_it tti=m_states[*si].start_outgoing_transitions;
                                        !found &&
                                        tti!=m_outgoing_transitions.end() &&
                                        ((*si)+1>=m_states.size() || tti!=m_states[(*si)+1].start_outgoing_transitions);
                                        ++tti)
-
           { 
             const transition& t=m_aut.get_transitions()[tti->transition];
-//std::cerr << "TRANSITION " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-//             if (!(m_aut.is_tau(t.label()) && m_blocks[m_states[t.to()].block].constellation==old_constellation))
             if (m_aut.is_tau(t.label()) && m_blocks[m_states[t.to()].block].constellation==old_constellation)
             { 
               found =true;
@@ -2324,7 +2011,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
           }
           if (!found)
           {
-//std::cerr << "SIZE hat U SMALLER\n";
             // This state has notransition to the old constellation. 
             hatU_does_not_cover_B_bottom=true;
           }
@@ -2333,13 +2019,11 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         {
           // Algorithm 1, line 1.10.
           transition_index co_t=find_inert_co_transition_for_block(index_block_B, old_constellation);
-//std::cerr << "ARE WE GOING TO tau->C\\B  CO-SPLIT: " << co_t << "\n";
           if (co_t!=null_transition) 
           {
             // Algorithm 1, line 1.19.
             
             bool dummy=false;
-//std::cerr << "SPLIT tau COCO " << "  BLOCK " << index_block_B << "   " << co_t << "\n";
             splitB(index_block_B, L_B_C_list_state_iterator(co_t,m_transitions, m_aut.get_transitions()), 
                         L_B_C_list_state_iterator(null_transition, m_transitions, m_aut.get_transitions()), 
                         [](const state_index ){ return false; },
@@ -2381,14 +2065,11 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
         // Algorithm 1, line 1.10.
         for(const auto& [a, M]: calM)
         {
-//std::cerr << "INVESTIGATE LABEL " << m_aut.action_label(a) << "\n";
-// print_data_structures("Algorithm 1. Main loop");
           assert(check_data_structures("Main loop"));
           // Algorithm 1, line 1.11.
           states_per_block_type Mleft_map;
           for(const state_index si: M)
           {
-// std::cerr << "INESTIGATE STAETE " << si << "\n";
             Mleft_map[m_states[si].block].insert(si);
           }
           for(const auto& [bi, Mleft]: Mleft_map)
@@ -2400,7 +2081,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                       state_it!=m_blocks[bi].start_non_bottom_states;
                     state_it++)
             {
-//std::cerr << "CHECK INCLUDED ALL BOTTOM " << bi << "    " << *state_it << "\n";
               if (Mleft.count(*state_it)==0)
               {
                 bottom_states_all_included=false;
@@ -2412,7 +2092,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
             {
               // Algorithm 1, line 1.12.
               bool M_in_bi1=true;
-//std::cerr << "SPLIT MAIN " << m_aut.action_label(a) << "  BLOCK " << bi << "\n";
               const set_of_states_type& Mleft_=Mleft;
               block_index bi1=splitB(bi, Mleft.begin(), 
                                          Mleft.end(), 
@@ -2441,7 +2120,6 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
               }
               // Algorithm 1, line 1.14 is implicitly done in the call of splitB above.
             }
-// print_data_structures("BEFORE COSPLIT");
             // Algorithm 1, line 1.17.
             bool size_U_smaller_than_Bpp_bottom=false;
             for(typename std::vector<state_index>::iterator si=m_blocks[Bpp].start_bottom_states;
@@ -2449,14 +2127,9 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
                               si!=m_blocks[Bpp].start_non_bottom_states; 
                             ++si)
             {
-// std::cerr << "OUTGOING COUNT PER LABEL " << *si << "    " << m_aut.action_label(a) << "    " << outgoing_transitions_count_per_label_state[std::pair(a,*si)] << "\n";
-//               if (outgoing_transitions_count_per_label_state[std::pair(a,*si)]==0)
-              /* if (m_state_label_constellation_to_transition.find(std::tuple(*si, a, old_constellation))==
-                        m_state_label_constellation_to_transition.end()) */
               assert(transition_that_marked_a_state_per_label.count(std::pair(*si, a))>0);
               if (!state_has_outgoing_co_transition(transition_that_marked_a_state_per_label[std::pair(*si, a)], old_constellation))
               {
-//std::cerr << "SIZE U SMALLER\n";
                 // This state has notransition to the old constellation. 
                 size_U_smaller_than_Bpp_bottom=true;
               }
@@ -2464,14 +2137,12 @@ assert(m_blocks[B_new].start_bottom_states<=m_blocks[B_new].start_non_bottom_sta
             // Algorithm 1, line 1.18.
             typename block_label_to_size_t_map::const_iterator bltc_it=block_label_to_cotransition.find(std::pair(Bpp,a));
             transition_index co_t=(bltc_it!=block_label_to_cotransition.end()?bltc_it->second:null_transition);
-//std::cerr << "ARE WE GOING TO CO-SPLIT: " << co_t << "   " << m_aut.action_label(a) << "    " << size_U_smaller_than_Bpp_bottom << "\n";
             if (co_t!=null_transition && size_U_smaller_than_Bpp_bottom) 
             {
               // Algorithm 1, line 1.19.
               
               bool dummy=false;
               const label_index& a_=a;
-//std::cerr << "SPLIT COCO " << m_aut.action_label(a) << "  BLOCK " << bi << "   " << co_t << "\n";
               splitB(Bpp, L_B_C_list_state_iterator(co_t,m_transitions, m_aut.get_transitions()), 
                           L_B_C_list_state_iterator(null_transition, m_transitions, m_aut.get_transitions()), 
                           [](const state_index ){ return false; },
@@ -2550,7 +2221,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                 "guaranteed that branching bisimulation minimisation runs in "
                 "time O(m log n).\n";
     }
-    // Line 2.1: Find tau-SCCs and contract each of them to a single state
+    // Line 1.2: Find tau-SCCs and contract each of them to a single state
     if (branching)
     {
         scc_reduce(l, preserve_divergence);
