@@ -48,6 +48,15 @@ typedef std::vector<transition_pointer_pair>::iterator outgoing_transitions_it;
 constexpr transition_index null_transition=-1;
 constexpr action_index null_action=-1;
 constexpr state_index null_state=-1;
+constexpr std::size_t undefined=-1;
+constexpr std::size_t Rmarked=-2;
+
+// The function clear takes care that a container frees memory when it is cleared and it is large. 
+template <class CONTAINER>
+void clear(CONTAINER& c)
+{
+  if (c.size()>1000) { c=CONTAINER(); } else { c.clear(); }
+}
 
 
 struct transition_pointer_pair
@@ -61,6 +70,40 @@ struct transition_pointer_pair
   {}
 };
 
+// The following class packs a number and a boolean marker in in size_t.
+// The boolean is the most significant bit. 
+/* class counter_with_mark
+{
+  constexpr std::size_t m_mask=1<<63;
+  std::size_t m_n=0;
+
+  public:
+    void mark()
+    {
+      m_n=m_n||m_mask;
+    }
+
+    void mark()
+    {
+      m_n=m_n & ~m_mask;
+    }
+
+    bool is_marked() const
+    {
+      return (m_n & m_mask)>0;
+    }
+
+    void set_value(const std::size_t n)
+    {
+      m_n = (m_n & m_mask) | (n & ~m_mask);
+    }
+
+    std::size_t get_value() const
+    {
+      return (m_n & ~m_mask);
+    }
+} */
+
 // Below the four main data structures are listed.
 struct state_type_gj
 {
@@ -70,6 +113,9 @@ struct state_type_gj
   outgoing_transitions_it start_outgoing_transitions;
   std::vector<state_index>::iterator ref_states_in_blocks;
   std::size_t no_of_outgoing_inert_transitions=0;
+  std::size_t counter=undefined; // This field is used to store local information while splitting. While set to -1 (undefined) 
+                                 // it is considered to be undefined.
+                                 // When set to -2 (Rmarked) it is considered to be marked for being in R or R_todo. 
 };
 
 struct transition_type
@@ -300,6 +346,7 @@ class bisim_partitioner_gj
       {
         const state_type_gj& s=m_states[si];
 
+        assert(s.counter==undefined);
         assert(m_blocks[s.block].start_bottom_states<m_blocks[s.block].start_non_bottom_states);
         assert(m_blocks[s.block].start_non_bottom_states<=m_blocks[s.block].end_states);
 
@@ -736,6 +783,9 @@ class bisim_partitioner_gj
               typename std::vector<state_index>::iterator pos1, 
               typename std::vector<state_index>::iterator pos2) 
     {
+//std::cerr << "BLOCK2 "; for(auto s: m_states_in_blocks){ std::cerr << s << " "; } std::cerr << "\n";
+//std::cerr << "POS1 " << *pos1 << "\n";
+//std::cerr << "POS2 " << *pos2 << "\n";
       assert(pos1!=pos2);
       std::swap(*pos1,*pos2);
       m_states[*pos1].ref_states_in_blocks=pos1;
@@ -748,6 +798,10 @@ class bisim_partitioner_gj
               typename std::vector<state_index>::iterator pos2, 
               typename std::vector<state_index>::iterator pos3) 
     {
+//std::cerr << "BLOCK3 "; for(auto s: m_states_in_blocks){ std::cerr << s << " "; } std::cerr << "\n";
+//std::cerr << "POS1 " << *pos1 << "\n";
+//std::cerr << "POS2 " << *pos2 << "\n";
+//std::cerr << "POS3 " << *pos3 << "\n";
       assert(pos1!=pos2 && pos2!=pos3 && pos3!=pos1);
       const state_index temp=*pos1;
       *pos1=*pos3;
@@ -767,6 +821,7 @@ class bisim_partitioner_gj
                      const std::unordered_set<state_index>& R, 
                      std::function<void(const state_index)> update_Ptilde)
     {
+//std::cerr << "SPLIT BLOCK " << B << " by removing "; for(auto s:R){ std::cerr << s << " "; } std::cerr << "\n";
       // Basic administration. Make a new block and add it to the current constellation.
       const block_index B_new=m_blocks.size();
       m_blocks.emplace_back(m_blocks[B].start_bottom_states,m_blocks[B].constellation);
@@ -776,24 +831,40 @@ class bisim_partitioner_gj
       // Carry out the split. 
       for(state_index s: R)
       {
+// std::cerr << "MOVE STATE TO NEW BLOCK: " << s << "\n";
         m_states[s].block=B_new;
         update_Ptilde(s);
         typename std::vector<state_index>::iterator pos=m_states[s].ref_states_in_blocks;
         if (pos>=m_blocks[B].start_non_bottom_states) // the state is a non bottom state.
         {
-          // We know that B must have a bottom state.
-          assert(m_blocks[B].start_bottom_states!=m_blocks[B].start_non_bottom_states);
-          // There are two situations.
-          if (pos==m_blocks[B].start_non_bottom_states)
+          // We know that B must have a bottom state. Not true all bottom states can be removed from B. 
+          // assert(m_blocks[B].start_bottom_states!=m_blocks[B].start_non_bottom_states);
+          if (pos==m_blocks[B].start_bottom_states)
           {
-            // pos is located at the first non-bottom-state of B. 
-            swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states);
+            // There is no bottom state left. pos is a non bottom state. No swap is necessary as it is
+            // already at the right position.
           }
           else
           {
-            // pos is a later non-bottom-state of B. We need to swap:
-            // pos --> B.start_bottom_states --> B.start_non_bottom_states --> pos.
-            swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states, m_blocks[B].start_non_bottom_states);
+            if (pos==m_blocks[B].start_non_bottom_states)
+            {
+              // pos is not also located at the first bottom state, so a swap is needed.
+              // Otherwise no swap is required. 
+              swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states);
+            }
+            else
+            {
+              // pos is a later non-bottom-state of B. We need to swap:
+              // pos --> B.start_bottom_states --> B.start_non_bottom_states --> pos.
+              if (m_blocks[B].start_bottom_states==m_blocks[B].start_non_bottom_states)
+              {
+                swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states);
+              }
+              else
+              {
+                swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states, m_blocks[B].start_non_bottom_states);
+              }
+            }
           }
           m_blocks[B].start_non_bottom_states++;
           m_blocks[B].start_bottom_states++;
@@ -988,28 +1059,63 @@ class bisim_partitioner_gj
     // The LBC_list and bottom states are not updated. 
     // Provide the index of the newly created block as a result. This block is the smallest of R and B\R.
     // Return in M_in_bi whether the new block bi is the one containing M.
-    template <class MARKED_STATE_ITERATOR, 
+    // This algorithm can be executed in 2 variants, numbered 1 and 2.
+    // In variant 1 the marked states are given by the R_todo_vector. M_begin and M_end are 
+    // irrelevant. For the unmarked states it is checked whether they do not occur in R_todo_vector before
+    // adding them to U_todo_vector.
+    // In variant 2 the marked states are given by M_begin to M_end and must be added one by one
+    // in the R_todo_vector. For the unmarked states it is checked whether they do not occur in R_todo_vector
+    // and whether they do not have an outgoing transition with action label a and constellation C. 
+    template <std::size_t VARIANT,
+              class MARKED_STATE_ITERATOR, 
               class UNMARKED_STATE_ITERATOR>
     block_index simple_splitB(const block_index B, 
                               const MARKED_STATE_ITERATOR M_begin, 
                               const MARKED_STATE_ITERATOR M_end, 
                               const UNMARKED_STATE_ITERATOR M_co_begin,
                               const UNMARKED_STATE_ITERATOR M_co_end,
-                              const std::function<bool(state_index)>& unmarked_blocker,
+                              const action_index a,
+                              const constellation_index C,
+                              // const std::function<bool(state_index)>& unmarked_blocker,
                               bool& M_in_bi,
                               std::function<void(const state_index)> update_Ptilde)
     {
       const std::size_t B_size=number_of_states_in_block(B);
       std::unordered_set<state_index> U, U_todo;
       std::unordered_set<state_index> R, R_todo;
-      typedef enum { initializing, state_checking, aborted } status_type;
+      typedef enum { initializing, state_checking, aborted, incoming_inert_transition_checking, outgoing_action_constellation_check,
+                         outgoing_action_constellation_check_during_initialisation } status_type;
       status_type U_status=initializing;
       status_type R_status=initializing;
       MARKED_STATE_ITERATOR M_it=M_begin; 
       UNMARKED_STATE_ITERATOR M_co_it=M_co_begin; 
+      static std::vector<state_index> counter_reset_vector;
+      state_index current_U_incoming_state;
+      std::vector<transition_index>::iterator current_U_incoming_transition_iterator;
+      state_index current_U_outgoing_state=-1;
+      outgoing_transitions_it current_U_outgoing_transition_iterator;
+      state_index current_R_state=-1;
+      std::vector<transition_index>::iterator current_R_incoming_transition_iterator;
+
+      if (VARIANT==1)  // In variant 1 the states must be added to R_todo immediately.
+      {
+        for(MARKED_STATE_ITERATOR si=M_begin; si!=M_end; ++si)
+        { 
+          R_todo.insert(*si);
+//std::cerr << "R_todo0 insert: " << *si << "\n";
+        }
+        if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
+        {
+          R_status=aborted;
+        }
+        else 
+        {
+          R_status=state_checking;
+        }
+      }
 
       // Algorithm 3, line 3.2 left.
-      std::unordered_map<state_index, size_t> count;
+      // std::unordered_map<state_index, size_t> count;
 
 
       // start coroutines. Each co-routine handles one state, and then gives control
@@ -1033,21 +1139,97 @@ class bisim_partitioner_gj
             {
               const state_index si=*M_co_it;
               M_co_it++;
-              if (!unmarked_blocker(si))
+              if (R_todo.count(si)==0 && R.count(si)==0)  
               {
-                U_todo.insert(si);
+                if (VARIANT==2)
+                {
+                  current_U_outgoing_state=si;
+                  current_U_outgoing_transition_iterator=m_states[si].start_outgoing_transitions;
+                  U_status=outgoing_action_constellation_check_during_initialisation;
+                  break;
+                }
+
+                assert(m_states[si].no_of_outgoing_inert_transitions==0);
+                // This is for VARIANT 1.
+                if (m_states[si].counter==undefined)
+                {
+                  m_states[si].counter=0;
+                  U_todo.insert(si);
+//std::cerr << "U_todo1 insert: " << si << "\n";
+                  counter_reset_vector.push_back(si);
+                  // Algorithm 3, line 3.10 and line 3.11 left. 
+                  if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+                                                            // should not lead to an abort. 
+                  {
+                    for(const state_index si: counter_reset_vector)
+                    {
+                      m_states[si].counter=undefined; 
+                    }
+                    clear(counter_reset_vector);
+                    U_status=aborted;
+                  }
+                }
               }
+            }
+            break;
+          }
+          case outgoing_action_constellation_check_during_initialisation:
+          {
+            if (current_U_outgoing_transition_iterator==m_outgoing_transitions.end() ||
+                (current_U_outgoing_state+1<m_states.size() &&
+                    current_U_outgoing_transition_iterator==m_states[current_U_outgoing_state+1].start_outgoing_transitions))
+            {
+              assert(U.find(current_U_outgoing_state)==U.end());
+//std::cerr << "U_todo2 insert: " << current_U_outgoing_state << "\n";
+              U_todo.insert(current_U_outgoing_state);
+              // Algorithm 3, 
+              if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+                                                        // should not lead to an abort. 
+              {
+                for(const state_index si: counter_reset_vector)
+                {
+                  m_states[si].counter=undefined;
+                }
+                clear(counter_reset_vector);
+                U_status=aborted;
+                break;
+              }
+              else
+              {
+                U_status=initializing;
+              }
+              break;
+            }
+            else
+            {
+              const transition& t_local=m_aut.get_transitions()[current_U_outgoing_transition_iterator->transition];
+              if (t_local.label()==a && m_blocks[m_states[t_local.to()].block].constellation==C)
+              {
+                // This state must be blocked.
+                U_status=initializing;
+                m_states[current_U_outgoing_state].counter=undefined;
+                break;
+              }
+              current_U_outgoing_transition_iterator=current_U_outgoing_transition_iterator->start_same_saC; // This is an optimisation.
+              current_U_outgoing_transition_iterator++;
             }
             break;
           }
           case state_checking:
           {
+            
             // Algorithm 3, line 3.23 and line 3.24, left. 
             if (U_todo.empty())
             {
+//std::cerr << "U_todo empty: " << "\n";
               assert(!U.empty());
               // split_block B into U and B\U.
               assert(U.size()>0);
+              for(const state_index si: counter_reset_vector)
+              {
+                m_states[si].counter=undefined;
+              }
+              clear(counter_reset_vector);
               block_index block_index_of_U=split_block_B_into_R_and_BminR(B, U, update_Ptilde);
               M_in_bi = false;
               return block_index_of_U;
@@ -1055,50 +1237,124 @@ class bisim_partitioner_gj
             else
             {
               const state_index s=U_todo.extract(U_todo.begin()).value();
-              U.insert(s); 
-              count[s]=0;
-              // Algorithm 3, line 3.8, left.
-              for(std::vector<transition_index>::iterator it=m_states[s].start_incoming_inert_transitions;
-                                                          it!=m_states[s].start_incoming_non_inert_transitions;
-                                                        it++)
+              U.insert(s);  
+//std::cerr << "U insert/ U_todo_remove: " << s << "\n";
+              current_U_incoming_state=s;
+              current_U_incoming_transition_iterator=m_states[s].start_incoming_inert_transitions;
+              U_status=incoming_inert_transition_checking;
+              break;
+            }
+
+          }
+          case incoming_inert_transition_checking:
+          {
+            // Algorithm 3, line 3.8, left.
+            /* for(std::vector<transition_index>::iterator it=m_states[s].start_incoming_inert_transitions;
+                                                        it!=m_states[s].start_incoming_non_inert_transitions;
+                                                      it++) */
+            if (current_U_incoming_transition_iterator==m_states[current_U_incoming_state].start_incoming_non_inert_transitions)
+            {
+              U_status=state_checking;
+            }
+            else
+            {
+              // Check one incoming transition.
+              // Algorithm 3, line 3.12, left.
+              state_index from=m_aut.get_transitions()[*current_U_incoming_transition_iterator].from();
+              if (m_states[from].counter==undefined) // count(from) is undefined;
               {
-                // Algorithm 3, line 3.12, left.
-                state_index from=m_aut.get_transitions()[*it].from();
-                if (count.find(from)==count.end()) // count(from) is undefined;
+                // Algorithm 3, line 3.13, left.
+                // Algorithm 3, line 3.15 and 3.18, left.
+                  m_states[from].counter=m_states[from].no_of_outgoing_inert_transitions-1;
+                  counter_reset_vector.push_back(from);
+              }
+              else
+              {
+                // Algorithm 3, line 3.18, left.
+                assert(m_states[from].counter>0);
+                m_states[from].counter--;
+              }
+              // Algorithm 3, line 3.19, left.
+              if (m_states[from].counter==0)
+              {
+                if (R.count(from)>0 || R_todo.count(from)>0)  // Do this for  VARIANT 1 and 2. 
                 {
-                   // Algorithm 3, line 3.13, left.
-                  if (unmarked_blocker(from))
-                  {
-                    // Algorithm 3, line 3.14, left.
-                    count[from]=std::numeric_limits<std::size_t>::max();
-                  }
-                  else
-                  {
-                    // Algorithm 3, line 3.15 and 3.18, left.
-                    count[from]=m_states[from].no_of_outgoing_inert_transitions-1;
-                  }
+                  m_states[from].counter=undefined;
+                }
+                else if (VARIANT==2)
+                {
+                  // Start searching for an outgoing transition with action a to constellation C. 
+                  current_U_outgoing_state=from;
+                  current_U_outgoing_transition_iterator=m_states[from].start_outgoing_transitions;
+                  U_status=outgoing_action_constellation_check;
                 }
                 else
                 {
-                  // Algorithm 3, line 3.18, left.
-                  count[from]--;
-                }
-                // Algorithm 3, line 3.19, left.
-                if (count[from]==0)
-                {
-                  if (U.find(from)==U.end())
+                  // VARIANT=1. The state can be added to U_todo. 
+                  assert(U.find(from)==U.end());
+//std::cerr << "U_todo3 insert: " << from << "\n";
+                  U_todo.insert(from);
+                  // Algorithm 3, line 3.10 and line 3.11 left. 
+                  if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+                                                            // should not lead to an abort. 
                   {
-                    U_todo.insert(from);
+                    for(const state_index si: counter_reset_vector)
+                    {
+                      m_states[si].counter=undefined; 
+                    }
+                    clear(counter_reset_vector);
+                    U_status=aborted;
+                    break;
                   }
                 }
               }
+              current_U_incoming_transition_iterator++;
             }
-            // Algorithm 3, line 3.10 and line 3.11 left. 
-            if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
-                                                      // should not lead to an abort. 
+            break;
+          }
+          case outgoing_action_constellation_check:
+          {
+            if (current_U_outgoing_transition_iterator==m_outgoing_transitions.end() ||
+                (current_U_outgoing_state+1<m_states.size() && 
+                    current_U_outgoing_transition_iterator==m_states[current_U_outgoing_state+1].start_outgoing_transitions))
             {
-              U_status=aborted;
+              assert(U.find(current_U_outgoing_state)==U.end());
+//std::cerr << "U_todo4 insert: " << current_U_outgoing_state << "\n";
+              U_todo.insert(current_U_outgoing_state);
+              // Algorithm 3, line 3.10 and line 3.11 left. 
+              if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+                                                        // should not lead to an abort. 
+              {
+                for(const state_index si: counter_reset_vector)
+                {
+                  m_states[si].counter=undefined; 
+                }
+                clear(counter_reset_vector);
+                U_status=aborted;
+                break;
+              }
+              else 
+              {
+                U_status=incoming_inert_transition_checking;
+                m_states[current_U_outgoing_state].counter=undefined;
+              }
+              break;
             }
+            else 
+            {
+              const transition& t_local=m_aut.get_transitions()[current_U_outgoing_transition_iterator->transition];
+              if (t_local.label()==a &&
+                  m_blocks[m_states[t_local.to()].block].constellation==C)
+              {                           
+                // This state must be blocked.
+                U_status=incoming_inert_transition_checking;
+                m_states[current_U_outgoing_state].counter=undefined;
+                break;
+              }
+              current_U_outgoing_transition_iterator=current_U_outgoing_transition_iterator->start_same_saC; // This is an optimisation.
+              current_U_outgoing_transition_iterator++;
+            }
+            break;
           }
           default: break;
         }
@@ -1117,6 +1373,11 @@ class bisim_partitioner_gj
               const state_index si= *M_it;
               ++M_it;
               R_todo.insert(si);
+//std::cerr << "R_todo1 insert: " << si << "\n";
+              if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
+              {
+                R_status=aborted;
+              }
             }
             break;
           }
@@ -1124,8 +1385,13 @@ class bisim_partitioner_gj
           {
             if (R_todo.empty())
             {
+//std::cerr << "R empty: " << "\n";
               // split_block B into R and B\R.
               assert(R.size()>0);
+              for(const state_index si: counter_reset_vector)
+              {
+                m_states[si].counter=undefined;
+              }
               block_index block_index_of_R=split_block_B_into_R_and_BminR(B, R, update_Ptilde);
               M_in_bi=true;
               return block_index_of_R;
@@ -1134,21 +1400,39 @@ class bisim_partitioner_gj
             {
               const state_index s=R_todo.extract(R_todo.begin()).value();
               R.insert(s);
-              for(std::vector<transition_index>::iterator it=m_states[s].start_incoming_inert_transitions; 
-                                                          it!=m_states[s].start_incoming_non_inert_transitions;
-                                                         it++) 
-              { 
-                const transition& tr=m_aut.get_transitions()[*it];
-                if (R.count(tr.from())==0)
+//std::cerr << "R insert: " << s << "\n";
+              R_status=incoming_inert_transition_checking;
+              current_R_state=s;
+              current_R_incoming_transition_iterator=m_states[s].start_incoming_inert_transitions;
+            }
+            break;
+          }
+          case incoming_inert_transition_checking:
+          {
+            /* for(std::vector<transition_index>::iterator it=m_states[s].start_incoming_inert_transitions; 
+                                                        it!=m_states[s].start_incoming_non_inert_transitions;
+                                                       it++) */
+            if (current_R_incoming_transition_iterator==m_states[current_R_state].start_incoming_non_inert_transitions)
+            {
+              R_status=state_checking;
+            }
+            else
+            { 
+              const transition& tr=m_aut.get_transitions()[*current_R_incoming_transition_iterator];
+              if (R.count(tr.from())==0)
+              {
+//std::cerr << "R_todo2 insert: " << tr.from() << "\n";
+                R_todo.insert(tr.from());
+            
+                // Algorithm 3, line 3.10 and line 3.11, right. 
+                if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
                 {
-                  R_todo.insert(tr.from());
+                  R_status=aborted;
+                  break;
                 }
               }
-              // Algorithm 3, line 3.10 and line 3.11, right. 
-              if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
-              {
-                R_status=aborted;
-              }
+              ++current_R_incoming_transition_iterator;
+              break;
             }
           }
           default: break;
@@ -1180,14 +1464,17 @@ class bisim_partitioner_gj
     // states that must be in block, and M\R. M_nonmarked, minus those in unmarked_blocker, are those in the other block. 
     // The splitting is done in time O(min(|R|,|B\R|). Return the block index of the smallest
     // block, which is newly created. Indicate in M_in_new_block whether this new block contains M.
-    template <class MARKED_STATE_ITERATOR,
+    template <std::size_t VARIANT,
+              class MARKED_STATE_ITERATOR,
               class UNMARKED_STATE_ITERATOR>
     block_index splitB(const block_index B, 
                        const MARKED_STATE_ITERATOR M_begin, 
                        const MARKED_STATE_ITERATOR M_end, 
                        const UNMARKED_STATE_ITERATOR M_co_begin,
                        const UNMARKED_STATE_ITERATOR M_co_end,
-                       const std::function<bool(state_index)>& unmarked_blocker,
+                       const action_index a,
+                       const constellation_index C,
+                       // const std::function<bool(state_index)>& unmarked_blocker,
                        bool& M_in_new_block,
                        std::function<void(const block_index, const block_index, const transition_index, const transition_index)> 
                                                  update_block_label_to_cotransition,
@@ -1198,7 +1485,10 @@ class bisim_partitioner_gj
                                                         [](const state_index){})
     {
       assert(M_begin!=M_end && M_co_begin!=M_co_end);
-      block_index bi=simple_splitB(B, M_begin, M_end, M_co_begin, M_co_end, unmarked_blocker, M_in_new_block,update_Ptilde);
+//std::cerr << "MARKED: "; for(auto s=M_begin; s!=M_end; ++s){ std::cerr << *s << " "; } std::cerr << "\n";
+//std::cerr << "UNMARKED: "; for(auto s=M_co_begin; s!=M_co_end; ++s){ std::cerr << *s << " "; } std::cerr << "\n";
+      block_index bi=simple_splitB<VARIANT, MARKED_STATE_ITERATOR, UNMARKED_STATE_ITERATOR>
+                 (B, M_begin, M_end, M_co_begin, M_co_end, a, C, M_in_new_block,update_Ptilde);
 
       // Update the LBC_list, and bottom states, and invariant on inert transitions.
       // Recall new LBC positions.
@@ -1441,6 +1731,7 @@ class bisim_partitioner_gj
       }
       m_blocks[0].end_states=m_states_in_blocks.end();
 
+      // print_data_structures("After initial reading before splitting in the initialisation",true);
       assert(check_data_structures("After initial reading before splitting in the initialisation",true));
 
       // The following implements line 1.3 of Algorithm 1. 
@@ -1465,7 +1756,7 @@ class bisim_partitioner_gj
         {
           // Check whether the block B, indexed by block_ind, can be split.
           // This means that the bottom states of B are not all in the split_states.
-          const set_of_states_type& split_states_=split_states;
+          // const set_of_states_type& split_states_=split_states;
           const block_type& B=m_blocks[block_ind];
           bool split_is_possible=false;
           for(typename std::vector<state_index>::iterator i= B.start_bottom_states; 
@@ -1479,13 +1770,17 @@ class bisim_partitioner_gj
           if (split_is_possible)
           { 
             bool dummy=false;
+            std::size_t dummy_number=-1;
             const bool do_not_split_the_LBC_list=false;
-            splitB(block_ind, 
+            splitB<1>(block_ind, 
                    split_states.begin(),
                    split_states.end(),
                    B.start_bottom_states,
                    B.start_non_bottom_states,
-                   [&split_states_](const state_index si){ return split_states_.count(si)>0; },
+                   dummy_number,   // an unused action index
+                   dummy_number,   // an unused constellation index
+                   // [&split_states_](const state_index si){ return split_states_.count(si)>0; },
+                   //
                    dummy,
                    [](const block_index, const block_index, const transition_index, const transition_index){},
                    do_not_split_the_LBC_list);
@@ -1594,7 +1889,7 @@ class bisim_partitioner_gj
       {
         Phat[m_states[si].block].insert(si);
       }
-      if (m_P.size()<1000) {m_P.clear(); } else {m_P=std::vector<state_index>(); }  // Avoid unnecessary memory usage.
+      clear(m_P);
 
       // Algorithm 4, line 4.4.
       while (!Phat.empty()) 
@@ -1663,14 +1958,18 @@ class bisim_partitioner_gj
           // Algorithm 4, line 4.10.
           if (!W_empty)
           {
+//std::cerr << "PERFORM A NEW BOTTOM STATE SPLIT\n";
+//std::cerr << "PERFORM A NEW BOTTOM STATE SPLIT\n";
             // Algorithm 4, line 4.11, and implicitly 4.12, 4.13 and 4.18. 
             bool V_in_bi=false;
-            splitB(bi, 
+            splitB<2>(bi, 
                    LBC_list_state_iterator(t_ind, m_transitions, m_aut.get_transitions()),
                    LBC_list_state_iterator(null_transition, m_transitions, m_aut.get_transitions()),
                    W.begin(), 
                    W.end(),
-                   [&t, this]
+                   t.label(),
+                   m_blocks[m_states[t.to()].block].constellation,
+                   /* [&t, this]
                       (const state_index si)
                       { // Check whether there is an outgoing transition in si with the same label and target
                         // constellation as the transition it. If so, return true to block this state; 
@@ -1689,7 +1988,7 @@ class bisim_partitioner_gj
                           }
                         }
                         return false;
-                      },
+                      }, */
                    V_in_bi,
                    [](const block_index, const block_index, const transition_index, const transition_index){},
                    true,  // Update LBC-list.
@@ -1752,7 +2051,7 @@ class bisim_partitioner_gj
         {
           Phat[m_states[si].block].insert(si);
         }
-        if (m_P.size()<1000) {m_P.clear(); } else {m_P=std::vector<state_index>(); }  // Avoid unnecessary memory usage.
+        clear(m_P);
 
       }
     }
@@ -1853,6 +2152,7 @@ class bisim_partitioner_gj
       // Algorithm 1, line 1.6.
       while (!m_non_trivial_constellations.empty())
       {
+        // print_data_structures("MAIN LOOP");
         assert(check_data_structures("MAIN LOOP"));
         const set_of_constellations_type::const_iterator i=m_non_trivial_constellations.begin();
         constellation_index ci= *i;
@@ -2038,13 +2338,16 @@ class bisim_partitioner_gj
           {
             // Algorithm 1, line 1.19.
             
+//std::cerr << "DO A TAU CO SPLIT " << old_constellation << "\n";
             bool dummy=false;
-            splitB(index_block_B, 
+            splitB<2>(index_block_B, 
                         LBC_list_state_iterator(co_t,m_transitions, m_aut.get_transitions()), 
                         LBC_list_state_iterator(null_transition, m_transitions, m_aut.get_transitions()), 
                         m_blocks[index_block_B].start_bottom_states, 
                         m_blocks[index_block_B].start_non_bottom_states,
-                        [&](const state_index si)
+                        m_aut.tau_label_index(),
+                        old_constellation,
+                        /* [&](const state_index si)
                           { 
                             const state_type_gj s=m_states[si];
                             for(outgoing_transitions_it tti=s.start_outgoing_transitions;
@@ -2060,7 +2363,7 @@ class bisim_partitioner_gj
                               tti=tti->start_same_saC; // This is an optimisation.
                             }
                             return false;
-                          },
+                          }, */
                         dummy,
                         [&block_label_to_cotransition, ci, this]
                           (const block_index old_block, 
@@ -2080,6 +2383,8 @@ class bisim_partitioner_gj
         // Algorithm 1, line 1.10.
         for(const auto& [a, M]: calM)
         {
+//std::cerr << "ACTION " << m_aut.action_label(a) << " target block " << index_block_B << "\n";
+          // print_data_structures("Main loop");
           assert(check_data_structures("Main loop"));
           // Algorithm 1, line 1.11.
           states_per_block_type Mleft_map;
@@ -2105,14 +2410,18 @@ class bisim_partitioner_gj
             block_index Bpp=bi;
             if (!bottom_states_all_included)
             {
+//std::cerr << "PERFORM A MAIN SPLIT \n";
               // Algorithm 1, line 1.12.
               bool M_in_bi1=true;
-              const set_of_states_type& Mleft_=Mleft;
-              block_index bi1=splitB(bi, Mleft.begin(), 
+              std::size_t dummy_number=0;
+              // const set_of_states_type& Mleft_=Mleft;
+              block_index bi1=splitB<1>(bi, Mleft.begin(), 
                                          Mleft.end(), 
                                          m_blocks[bi].start_bottom_states, 
                                          m_blocks[bi].start_non_bottom_states, 
-                                         [&Mleft_](const state_index si){ return Mleft_.count(si)>0; },
+                                         dummy_number, // unused action index
+                                         dummy_number, ///unused constellation index
+                                         /* [&Mleft_](const state_index si){ return Mleft_.count(si)>0; }, */
                                          M_in_bi1,
                                          [&block_label_to_cotransition, ci, this]
                                            (const block_index old_block, 
@@ -2156,12 +2465,15 @@ class bisim_partitioner_gj
               // Algorithm 1, line 1.19.
               
               bool dummy=false;
-              const label_index& a_=a;
-              splitB(Bpp, LBC_list_state_iterator(co_t,m_transitions, m_aut.get_transitions()), 
+              // const label_index& a_=a;
+//std::cerr << "PERFORM A MAIN CO-SPLIT \n";
+              splitB<2>(Bpp, LBC_list_state_iterator(co_t,m_transitions, m_aut.get_transitions()), 
                           LBC_list_state_iterator(null_transition, m_transitions, m_aut.get_transitions()), 
                           m_blocks[Bpp].start_bottom_states, 
                           m_blocks[Bpp].start_non_bottom_states,
-                          [&](const state_index si)
+                          a,
+                          old_constellation,
+                          /* [&](const state_index si)
                             { 
                               const state_type_gj s=m_states[si];
                               for(outgoing_transitions_it tti=s.start_outgoing_transitions;
@@ -2177,7 +2489,7 @@ class bisim_partitioner_gj
                                 tti=tti->start_same_saC; // This is an optimisation.
                               }
                               return false;
-                            },
+                            }, */
                           dummy,
                           [&block_label_to_cotransition, ci, this]
                             (const block_index old_block, 
