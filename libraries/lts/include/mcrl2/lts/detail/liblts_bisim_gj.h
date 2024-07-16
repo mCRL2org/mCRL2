@@ -104,6 +104,70 @@ struct transition_pointer_pair
     }
 } */
 
+class todo_state_vector
+{
+  std::size_t m_todo_indicator=0;
+  std::vector<state_index> m_vec;
+
+  public:
+    void add_todo(const state_index s)
+    {
+//std::cerr << "ADD TODO " << s << "\n";
+      assert(!find(s));
+      m_vec.push_back(s);
+    }
+
+    // Move a state from the todo part to the definitive vector.
+    state_index move_from_todo()
+    {
+      assert(!todo_is_empty());
+      state_index result=m_vec.at(m_todo_indicator);
+//std::cerr << "MOVE FROM TODO " << result << "\n";
+      m_todo_indicator++;
+      return result;
+    }
+
+    std::size_t size() const
+    {
+      return m_vec.size();
+    }
+
+    std::size_t todo_is_empty() const
+    {
+      return m_vec.size()==m_todo_indicator;
+    }
+
+    std::size_t empty() const
+    {
+      return m_vec.empty();
+    }
+
+    bool find(const state_index s) const
+    {
+      return std::find(m_vec.begin(), m_vec.end(), s)!=m_vec.end();
+    }
+
+    std::vector<state_index>::const_iterator begin() const
+    {
+      assert(todo_is_empty());
+      return m_vec.begin();
+    }
+
+    std::vector<state_index>::const_iterator end() const
+    {
+      assert(todo_is_empty());
+      return m_vec.end();
+    }
+
+    void clear()
+    {
+      m_todo_indicator=0;
+      bisimulation_gj::clear(m_vec);
+    }
+};
+
+
+
 // Below the four main data structures are listed.
 struct state_type_gj
 {
@@ -295,7 +359,11 @@ class bisim_partitioner_gj
     std::vector<block_type> m_blocks;
     std::vector<constellation_type> m_constellations;
     std::vector<state_index> m_P;
-    /// The following variable contains all non trivial constellations.
+    // Below are the two vectors that contain the marked and unmarked states, which 
+    // are internally split in a part for states to be investigated, and a part for
+    // states that belong definitively to this set. 
+    todo_state_vector m_R, m_U;
+    // The following variable contains all non trivial constellations.
     set_of_constellations_type m_non_trivial_constellations;
 
 
@@ -818,7 +886,8 @@ class bisim_partitioner_gj
     // B.start_non_bottom_states and B.end_states, and do the same for B_new. 
     block_index split_block_B_into_R_and_BminR(
                      const block_index B, 
-                     const std::unordered_set<state_index>& R, 
+                     // const std::unordered_set<state_index>& R, 
+                     const todo_state_vector& R, 
                      std::function<void(const state_index)> update_Ptilde)
     {
 //std::cerr << "SPLIT BLOCK " << B << " by removing "; for(auto s:R){ std::cerr << s << " "; } std::cerr << "\n";
@@ -1081,8 +1150,10 @@ class bisim_partitioner_gj
                               std::function<void(const state_index)> update_Ptilde)
     {
       const std::size_t B_size=number_of_states_in_block(B);
-      std::unordered_set<state_index> U, U_todo;
-      std::unordered_set<state_index> R, R_todo;
+      assert(m_R.empty());
+      assert(m_U.empty());
+      // std::unordered_set<state_index> U, U_todo;
+      // std::unordered_set<state_index> R, R_todo;
       typedef enum { initializing, state_checking, aborted, incoming_inert_transition_checking, outgoing_action_constellation_check,
                          outgoing_action_constellation_check_during_initialisation } status_type;
       status_type U_status=initializing;
@@ -1101,10 +1172,17 @@ class bisim_partitioner_gj
       {
         for(MARKED_STATE_ITERATOR si=M_begin; si!=M_end; ++si)
         { 
-          R_todo.insert(*si);
+          // R_todo.insert(*si);
+          if (m_states[*si].counter==undefined)
+          { 
+            m_R.add_todo(*si);
+            m_states[*si].counter=Rmarked;
+            counter_reset_vector.push_back(*si);
+          }
 //std::cerr << "R_todo0 insert: " << *si << "\n";
         }
-        if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
+        // if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
+        if (2*m_R.size()>B_size+1) // See for "+1" remark above. 
         {
           R_status=aborted;
         }
@@ -1125,11 +1203,136 @@ class bisim_partitioner_gj
       while (true)
       {
         assert(U_status!=aborted || R_status!=aborted);
+/* #ifndef NDEBUG
+        for(state_index si=0; si<m_states.size(); ++si)
+        {
+//std::cerr << "CC_R " << si << "   " << m_states[si].counter << "   " << m_R.find(si) << "    " << m_U.find(si) << "\n";
+          assert(m_states[si].counter==undefined && !m_R.find(si) && !m_U.find(si)||
+                 m_states[si].counter==Rmarked && m_R.find(si) ||
+                 m_states[si].counter>=0 && !m_R.find(si));
+        }
+#endif */
+        // The code for the right co-routine. 
+        switch (R_status)
+        {
+          case initializing:
+          {
+            // Algorithm 3, line 3.3, right.
+            if (M_it==M_end)
+            {
+              R_status=state_checking;
+            }
+            else
+            {
+              const state_index si= *M_it;
+              ++M_it;
+              // R_todo.insert(si);
+              if (m_states[si].counter!=Rmarked)
+              {
+                m_R.add_todo(si);
+                if (m_states[si].counter==undefined)
+                {
+                  counter_reset_vector.push_back(si);
+                }
+                m_states[si].counter=Rmarked;
+//std::cerr << "R_todo1 insert: " << si << "\n";
+                // if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
+                if (2*m_R.size()>B_size+1) // See for "+1" remark above. 
+                {
+                  R_status=aborted;
+                }
+              }
+            }
+            break;
+          }
+          case state_checking: 
+          {
+            // if (R_todo.empty())
+            if (m_R.todo_is_empty())
+            {
+//std::cerr << "R empty: " << "\n";
+              // split_block B into R and B\R.
+              // assert(R.size()>0);
+              assert(m_R.size()>0);
+              for(const state_index si: counter_reset_vector)
+              {
+                m_states[si].counter=undefined;
+              }
+              clear(counter_reset_vector);
+              m_U.clear();
+              block_index block_index_of_R=split_block_B_into_R_and_BminR(B, m_R, update_Ptilde);
+              m_R.clear();
+              M_in_bi=true;
+              return block_index_of_R;
+            }
+            else
+            {
+              // const state_index s=R_todo.extract(R_todo.begin()).value();
+              // R.insert(s);
+              const state_index s=m_R.move_from_todo();
+//std::cerr << "R insert: " << s << "\n";
+              R_status=incoming_inert_transition_checking;
+              current_R_state=s;
+              current_R_incoming_transition_iterator=m_states[s].start_incoming_inert_transitions;
+            }
+            break;
+          }
+          case incoming_inert_transition_checking:
+          {
+//std::cerr << "R_incoming_inert_transition_checking "<< current_R_state << "\n";
+            /* for(std::vector<transition_index>::iterator it=m_states[s].start_incoming_inert_transitions; 
+                                                        it!=m_states[s].start_incoming_non_inert_transitions;
+                                                       it++) */
+            if (current_R_incoming_transition_iterator==m_states[current_R_state].start_incoming_non_inert_transitions)
+            {
+              R_status=state_checking;
+            }
+            else
+            { 
+//std::cerr << "DAAR1\n";
+              const transition& tr=m_aut.get_transitions()[*current_R_incoming_transition_iterator];
+              // if (R.count(tr.from())==0)
+              if (m_states[tr.from()].counter!=Rmarked) 
+              {
+//std::cerr << "R_todo2 insert: " << tr.from() << "\n";
+                // R_todo.insert(tr.from());
+                m_R.add_todo(tr.from());
+                if (m_states[tr.from()].counter==undefined)
+                {
+                  counter_reset_vector.push_back(tr.from());
+                }
+                m_states[tr.from()].counter=Rmarked;
+
+                // Algorithm 3, line 3.10 and line 3.11, right. 
+                // if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
+                if (2*m_R.size()>B_size+1) // See for "+1" remark above. 
+                {
+                  R_status=aborted;
+                  break;
+                }
+              }
+              ++current_R_incoming_transition_iterator;
+              break;
+            }
+          }
+          default: break;
+        }
+
+/* #ifndef NDEBUG
+        for(state_index si=0; si<m_states.size(); ++si)
+        {
+//std::cerr << "CC_U " << si << "   " << m_states[si].counter << "   " << m_R.find(si) << "    " << m_U.find(si) << "\n";
+          assert(m_states[si].counter==undefined && !m_R.find(si) && !m_U.find(si)||
+                 m_states[si].counter==Rmarked && m_R.find(si) ||
+                 m_states[si].counter>=0 && !m_R.find(si));
+        }
+#endif */
         // The code for the left co-routine. 
         switch (U_status) 
         {
           case initializing:
           {
+//std::cerr << "U_init\n";
             // Algorithm 3, line 3.3 left.
             if (M_co_it==M_co_end)
             {
@@ -1139,7 +1342,8 @@ class bisim_partitioner_gj
             {
               const state_index si=*M_co_it;
               M_co_it++;
-              if (R_todo.count(si)==0 && R.count(si)==0)  
+              // if (R_todo.count(si)==0 && R.count(si)==0)  
+              if (m_states[si].counter!=Rmarked)
               {
                 if (VARIANT==2)
                 {
@@ -1153,19 +1357,21 @@ class bisim_partitioner_gj
                 // This is for VARIANT 1.
                 if (m_states[si].counter==undefined)
                 {
-                  m_states[si].counter=0;
-                  U_todo.insert(si);
+                  // U_todo.insert(si);
+                  m_U.add_todo(si);
 //std::cerr << "U_todo1 insert: " << si << "\n";
+                  m_states[si].counter=0;
                   counter_reset_vector.push_back(si);
                   // Algorithm 3, line 3.10 and line 3.11 left. 
-                  if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+                  // if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+                  if (2*m_U.size()>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
                                                             // should not lead to an abort. 
                   {
-                    for(const state_index si: counter_reset_vector)
+                    /*for(const state_index si: counter_reset_vector)
                     {
                       m_states[si].counter=undefined; 
                     }
-                    clear(counter_reset_vector);
+                    clear(counter_reset_vector); */
                     U_status=aborted;
                   }
                 }
@@ -1175,23 +1381,28 @@ class bisim_partitioner_gj
           }
           case outgoing_action_constellation_check_during_initialisation:
           {
+//std::cerr << "U_outg_actconstcheckduringit\n";
             if (current_U_outgoing_transition_iterator==m_outgoing_transitions.end() ||
                 (current_U_outgoing_state+1<m_states.size() &&
                     current_U_outgoing_transition_iterator==m_states[current_U_outgoing_state+1].start_outgoing_transitions))
             {
-              assert(U.find(current_U_outgoing_state)==U.end());
+              // assert(U.find(current_U_outgoing_state)==U.end());
+              assert(!m_U.find(current_U_outgoing_state));
 //std::cerr << "U_todo2 insert: " << current_U_outgoing_state << "\n";
-              U_todo.insert(current_U_outgoing_state);
+              // U_todo.insert(current_U_outgoing_state);
+              m_U.add_todo(current_U_outgoing_state);
+              m_states[current_U_outgoing_state].counter=0;
+              counter_reset_vector.push_back(current_U_outgoing_state);
               // Algorithm 3, 
-              if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+              // if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+              if (2*m_U.size()>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
                                                         // should not lead to an abort. 
               {
-                for(const state_index si: counter_reset_vector)
+                /* for(const state_index si: counter_reset_vector)
                 {
                   m_states[si].counter=undefined;
                 }
-                clear(counter_reset_vector);
-                U_status=aborted;
+                U_status=aborted; */
                 break;
               }
               else
@@ -1207,7 +1418,7 @@ class bisim_partitioner_gj
               {
                 // This state must be blocked.
                 U_status=initializing;
-                m_states[current_U_outgoing_state].counter=undefined;
+                // m_states[current_U_outgoing_state].counter=undefined;
                 break;
               }
               current_U_outgoing_transition_iterator=current_U_outgoing_transition_iterator->start_same_saC; // This is an optimisation.
@@ -1217,43 +1428,52 @@ class bisim_partitioner_gj
           }
           case state_checking:
           {
+//std::cerr << "U_state_checking\n";
             
             // Algorithm 3, line 3.23 and line 3.24, left. 
-            if (U_todo.empty())
+            // if (U_todo.empty())
+            if (m_U.todo_is_empty())
             {
 //std::cerr << "U_todo empty: " << "\n";
-              assert(!U.empty());
+              // assert(!U.empty());
+              assert(!m_U.empty());
               // split_block B into U and B\U.
-              assert(U.size()>0);
+              // assert(U.size()>0);
+              assert(m_U.size()>0);
               for(const state_index si: counter_reset_vector)
               {
                 m_states[si].counter=undefined;
               }
               clear(counter_reset_vector);
-              block_index block_index_of_U=split_block_B_into_R_and_BminR(B, U, update_Ptilde);
+              m_R.clear();
+              block_index block_index_of_U=split_block_B_into_R_and_BminR(B, m_U, update_Ptilde);
+              m_U.clear();
               M_in_bi = false;
               return block_index_of_U;
             }
             else
             {
-              const state_index s=U_todo.extract(U_todo.begin()).value();
-              U.insert(s);  
+              // const state_index s=U_todo.extract(U_todo.begin()).value();
+              // U.insert(s);  
+              const state_index s=m_U.move_from_todo();
 //std::cerr << "U insert/ U_todo_remove: " << s << "\n";
               current_U_incoming_state=s;
               current_U_incoming_transition_iterator=m_states[s].start_incoming_inert_transitions;
               U_status=incoming_inert_transition_checking;
               break;
             }
-
           }
           case incoming_inert_transition_checking:
           {
+//std::cerr << "U_incoming_inert_transition_checking\n";
+//std::cerr << "HIER0\n";
             // Algorithm 3, line 3.8, left.
             /* for(std::vector<transition_index>::iterator it=m_states[s].start_incoming_inert_transitions;
                                                         it!=m_states[s].start_incoming_non_inert_transitions;
                                                       it++) */
             if (current_U_incoming_transition_iterator==m_states[current_U_incoming_state].start_incoming_non_inert_transitions)
             {
+//std::cerr << "HIER1\n";
               U_status=state_checking;
             }
             else
@@ -1261,15 +1481,24 @@ class bisim_partitioner_gj
               // Check one incoming transition.
               // Algorithm 3, line 3.12, left.
               state_index from=m_aut.get_transitions()[*current_U_incoming_transition_iterator].from();
+//std::cerr << "FROM " << from << "\n";
               if (m_states[from].counter==undefined) // count(from) is undefined;
               {
+//std::cerr << "HIER2\n";
                 // Algorithm 3, line 3.13, left.
                 // Algorithm 3, line 3.15 and 3.18, left.
-                  m_states[from].counter=m_states[from].no_of_outgoing_inert_transitions-1;
-                  counter_reset_vector.push_back(from);
+                m_states[from].counter=m_states[from].no_of_outgoing_inert_transitions-1;
+//std::cerr << "COUNTER " << m_states[from].counter << "\n";
+                counter_reset_vector.push_back(from);
+              }
+              else  if (m_states[from].counter==Rmarked)
+              {
+//std::cerr << "HIER3\n";
+                // This state does not have to be investigated further. 
               }
               else
               {
+//std::cerr << "HIER4\n";
                 // Algorithm 3, line 3.18, left.
                 assert(m_states[from].counter>0);
                 m_states[from].counter--;
@@ -1277,12 +1506,17 @@ class bisim_partitioner_gj
               // Algorithm 3, line 3.19, left.
               if (m_states[from].counter==0)
               {
-                if (R.count(from)>0 || R_todo.count(from)>0)  // Do this for  VARIANT 1 and 2. 
+//std::cerr << "HIER5\n";
+                // if (R.count(from)>0 || R_todo.count(from)>0)  // Do this for  VARIANT 1 and 2. 
+                /* if (m_states[from].counter==Rmarked) // Do this for  VARIANT 1 and 2. 
                 {
-                  m_states[from].counter=undefined;
+                  // m_states[from].counter=undefined;
+                  // The state at from should not be added to U. It can be skipped. 
                 }
-                else if (VARIANT==2)
+                else */
+                if (VARIANT==2)
                 {
+//std::cerr << "HIER6\n";
                   // Start searching for an outgoing transition with action a to constellation C. 
                   current_U_outgoing_state=from;
                   current_U_outgoing_transition_iterator=m_states[from].start_outgoing_transitions;
@@ -1290,19 +1524,24 @@ class bisim_partitioner_gj
                 }
                 else
                 {
+//std::cerr << "HIER7\n";
                   // VARIANT=1. The state can be added to U_todo. 
-                  assert(U.find(from)==U.end());
+                  // assert(U.find(from)==U.end());
+                  assert(!m_U.find(from));
 //std::cerr << "U_todo3 insert: " << from << "\n";
-                  U_todo.insert(from);
+                  // U_todo.insert(from);
+                  m_U.add_todo(from);
                   // Algorithm 3, line 3.10 and line 3.11 left. 
-                  if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+                  // if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+                  if (2*m_U.size()>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
                                                             // should not lead to an abort. 
                   {
-                    for(const state_index si: counter_reset_vector)
+//std::cerr << "HIER8\n";
+                    /* for(const state_index si: counter_reset_vector)
                     {
                       m_states[si].counter=undefined; 
                     }
-                    clear(counter_reset_vector);
+                    clear(counter_reset_vector); */
                     U_status=aborted;
                     break;
                   }
@@ -1310,33 +1549,38 @@ class bisim_partitioner_gj
               }
               current_U_incoming_transition_iterator++;
             }
+//std::cerr << "HIER9\n";
             break;
           }
           case outgoing_action_constellation_check:
           {
+//std::cerr << "U_outgoing_action_constellation_check\n";
             if (current_U_outgoing_transition_iterator==m_outgoing_transitions.end() ||
                 (current_U_outgoing_state+1<m_states.size() && 
                     current_U_outgoing_transition_iterator==m_states[current_U_outgoing_state+1].start_outgoing_transitions))
             {
-              assert(U.find(current_U_outgoing_state)==U.end());
+              // assert(U.find(current_U_outgoing_state)==U.end());
+              assert(!m_U.find(current_U_outgoing_state));
 //std::cerr << "U_todo4 insert: " << current_U_outgoing_state << "\n";
-              U_todo.insert(current_U_outgoing_state);
+              // U_todo.insert(current_U_outgoing_state);
+              m_U.add_todo(current_U_outgoing_state);
               // Algorithm 3, line 3.10 and line 3.11 left. 
-              if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+              // if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
+              if (2*m_U.size()>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
                                                         // should not lead to an abort. 
               {
-                for(const state_index si: counter_reset_vector)
+                /* for(const state_index si: counter_reset_vector)
                 {
                   m_states[si].counter=undefined; 
                 }
-                clear(counter_reset_vector);
+                clear(counter_reset_vector); */
                 U_status=aborted;
                 break;
               }
               else 
               {
                 U_status=incoming_inert_transition_checking;
-                m_states[current_U_outgoing_state].counter=undefined;
+                // m_states[current_U_outgoing_state].counter=undefined;
               }
               break;
             }
@@ -1348,92 +1592,13 @@ class bisim_partitioner_gj
               {                           
                 // This state must be blocked.
                 U_status=incoming_inert_transition_checking;
-                m_states[current_U_outgoing_state].counter=undefined;
+                // m_states[current_U_outgoing_state].counter=undefined;
                 break;
               }
               current_U_outgoing_transition_iterator=current_U_outgoing_transition_iterator->start_same_saC; // This is an optimisation.
               current_U_outgoing_transition_iterator++;
             }
             break;
-          }
-          default: break;
-        }
-        // The code for the right co-routine. 
-        switch (R_status)
-        {
-          case initializing:
-          {
-            // Algorithm 3, line 3.3, right.
-            if (M_it==M_end)
-            {
-              R_status=state_checking;
-            }
-            else
-            {
-              const state_index si= *M_it;
-              ++M_it;
-              R_todo.insert(si);
-//std::cerr << "R_todo1 insert: " << si << "\n";
-              if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
-              {
-                R_status=aborted;
-              }
-            }
-            break;
-          }
-          case state_checking: 
-          {
-            if (R_todo.empty())
-            {
-//std::cerr << "R empty: " << "\n";
-              // split_block B into R and B\R.
-              assert(R.size()>0);
-              for(const state_index si: counter_reset_vector)
-              {
-                m_states[si].counter=undefined;
-              }
-              block_index block_index_of_R=split_block_B_into_R_and_BminR(B, R, update_Ptilde);
-              M_in_bi=true;
-              return block_index_of_R;
-            }
-            else
-            {
-              const state_index s=R_todo.extract(R_todo.begin()).value();
-              R.insert(s);
-//std::cerr << "R insert: " << s << "\n";
-              R_status=incoming_inert_transition_checking;
-              current_R_state=s;
-              current_R_incoming_transition_iterator=m_states[s].start_incoming_inert_transitions;
-            }
-            break;
-          }
-          case incoming_inert_transition_checking:
-          {
-            /* for(std::vector<transition_index>::iterator it=m_states[s].start_incoming_inert_transitions; 
-                                                        it!=m_states[s].start_incoming_non_inert_transitions;
-                                                       it++) */
-            if (current_R_incoming_transition_iterator==m_states[current_R_state].start_incoming_non_inert_transitions)
-            {
-              R_status=state_checking;
-            }
-            else
-            { 
-              const transition& tr=m_aut.get_transitions()[*current_R_incoming_transition_iterator];
-              if (R.count(tr.from())==0)
-              {
-//std::cerr << "R_todo2 insert: " << tr.from() << "\n";
-                R_todo.insert(tr.from());
-            
-                // Algorithm 3, line 3.10 and line 3.11, right. 
-                if (2*(R.size()+R_todo.size())>B_size+1) // See for "+1" remark above. 
-                {
-                  R_status=aborted;
-                  break;
-                }
-              }
-              ++current_R_incoming_transition_iterator;
-              break;
-            }
           }
           default: break;
         }
@@ -1835,6 +2000,7 @@ class bisim_partitioner_gj
       // Algorithm 1, line 1.4 is implicitly done in the call to splitB above.
       
       // Algorithm 1, line 1.5.
+      // print_data_structures("End initialisation");
       assert(check_data_structures("End initialisation"));
       stabilizeB();
     }
