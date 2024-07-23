@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(reduce_simple_loop)
   expected.states_determinisation=2, expected.transitions_determinisation=2, expected.labels_determinisation=2;
   expected.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Simple loop", SIMPLE_AUT, expected);
+  BOOST_CHECK(reduce_lts_in_various_ways("Simple loop", SIMPLE_AUT, expected));
 }
 
 BOOST_AUTO_TEST_CASE(reduce_simple_loop_with_tau)
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(reduce_simple_loop_with_tau)
   expected.states_determinisation=2, expected.transitions_determinisation=2, expected.labels_determinisation=2;
   expected.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Simple loop with tau", SIMPLE_AUT, expected);
+  BOOST_CHECK(reduce_lts_in_various_ways("Simple loop with tau", SIMPLE_AUT, expected));
 }
 
 /* The example below was encountered by David Jansen. The problem is that
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(tricky_example_for_branching_bisimulation)
   expected.states_determinisation=2, expected.transitions_determinisation=3, expected.labels_determinisation=3;
   expected.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Tricky example for branching bisimulation", TRICKY_BB, expected);
+  BOOST_CHECK(reduce_lts_in_various_ways("Tricky example for branching bisimulation", TRICKY_BB, expected));
 }
 
 
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(reduce_abp)
   expected.states_determinisation=53, expected.transitions_determinisation=66, expected.labels_determinisation=5;
   expected.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Alternating bit protocol", ABP_AUT, expected);
+  BOOST_CHECK(reduce_lts_in_various_ways("Alternating bit protocol", ABP_AUT, expected));
 }
 
 // Peterson's protocol has the interesting property that the number of states modulo branching bisimulation
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(reduce_peterson)
   expected.states_determinisation=40, expected.transitions_determinisation=63, expected.labels_determinisation=7;
   expected.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Peterson protocol", PETERSON_AUT, expected);
+  BOOST_CHECK(reduce_lts_in_various_ways("Peterson protocol", PETERSON_AUT, expected));
 }
 
 BOOST_AUTO_TEST_CASE(test_reachability)

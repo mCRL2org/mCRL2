@@ -32,34 +32,35 @@ class expected_sizes
     bool is_deterministic;
 };
 
-static void test_lts(const std::string& test_description,
+static bool test_lts(const std::string& test_description,
               const lts::lts_aut_t& l,
               std::size_t expected_label_count,
               std::size_t expected_state_count,
               std::size_t expected_transition_count
              )
 {
-  BOOST_CHECK(l.num_action_labels() == expected_label_count);
   if (l.num_action_labels() != expected_label_count)
   {
     std::cerr << "LPS test: " << test_description << " -----------------------------------------------\n";
     std::cerr << "Expected # of labels " << expected_label_count << " Actual # " << l.num_action_labels() << "\n";
+    return false;
   }
-  BOOST_CHECK(l.num_states() == expected_state_count);
   if (l.num_states() != expected_state_count)
   {
     std::cerr << "LPS test: " << test_description << " -----------------------------------------------\n";
     std::cerr << "Expected # of states " << expected_state_count << " Actual # " << l.num_states() << "\n";
+    return false;
   }
-  BOOST_CHECK(l.num_transitions() == expected_transition_count);
   if (l.num_transitions() != expected_transition_count)
   {
     std::cerr << "LPS test: " << test_description << " -----------------------------------------------\n";
     std::cerr << "Expected # of transitions " << expected_transition_count << " Actual # " << l.num_transitions() << "\n";
+    return false;
   }
+  return true;
 }
 
-static void reduce_lts_in_various_ways(const std::string& test_description,
+static bool reduce_lts_in_various_ways(const std::string& test_description,
                                        const std::string& lts,
                                        const expected_sizes& expected)
 {
@@ -67,94 +68,108 @@ static void reduce_lts_in_various_ways(const std::string& test_description,
   std::istringstream is(lts);
   lts::lts_aut_t l_in;
   l_in.load(is);
-  test_lts(test_description + " (plain input)",l_in, expected.labels_plain,expected.states_plain, expected.transitions_plain);
+  if (!test_lts(test_description + " (plain input)",l_in, expected.labels_plain,expected.states_plain, expected.transitions_plain)) return false;
   lts::lts_aut_t l=l_in;
   reduce(l,lts::lts_eq_none);
-  test_lts(test_description + " (no reduction)",l, expected.labels_plain,expected.states_plain, expected.transitions_plain);
+  if (!test_lts(test_description + " (no reduction)",l, expected.labels_plain,expected.states_plain, expected.transitions_plain)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_bisim);
-  test_lts(test_description + " (bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
+  if (!test_lts(test_description + " (bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_bisim_gv);
-  test_lts(test_description + " (bisimulation [Groote/Vaandrager 1990])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
+  if (!test_lts(test_description + " (bisimulation [Groote/Vaandrager 1990])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_bisim_gjkw);
-  test_lts(test_description + " (bisimulation [Groote/Jansen/Keiren/Wijs 2017)",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
+  if (!test_lts(test_description + " (bisimulation [Groote/Jansen/Keiren/Wijs 2017)",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_bisim_sigref);
-  test_lts(test_description + " (bisimulation signature [Blom/Orzan 2003])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
+  if (!test_lts(test_description + " (bisimulation signature [Blom/Orzan 2003])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim);
-  test_lts(test_description + " (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
+  if (!test_lts(test_description + " (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
 #ifdef  BRANCH_BIS_EXPERIMENT_JFG
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gj);
-  test_lts(test_description + " (branching bisimulation [Groote/Jansen 2024 Experimental])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
+  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen 2024 Experimental])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
 #endif
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gv);
-  test_lts(test_description + " (branching bisimulation [Groote/Vaandrager 1990])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
+  if (!test_lts(test_description + " (branching bisimulation [Groote/Vaandrager 1990])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gjkw);
-  test_lts(test_description + " (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
+  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_sigref);
-  test_lts(test_description + " (branching bisimulation signature [Blom/Orzan 2003])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
+  if (!test_lts(test_description + " (branching bisimulation signature [Blom/Orzan 2003])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim);
-  test_lts(test_description + " (divergence-preserving branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,
+  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,
                                       expected.labels_divergence_preserving_branching_bisimulation,
                                       expected.states_divergence_preserving_branching_bisimulation,
-                                      expected.transitions_divergence_preserving_branching_bisimulation);
+                                      expected.transitions_divergence_preserving_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gv);
-  test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Vaandrager 1990])",l,
+  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Vaandrager 1990])",l,
                                       expected.labels_divergence_preserving_branching_bisimulation,
                                       expected.states_divergence_preserving_branching_bisimulation,
-                                      expected.transitions_divergence_preserving_branching_bisimulation);
+                                      expected.transitions_divergence_preserving_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gjkw);
-  test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,
+  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,
                                      expected.labels_divergence_preserving_branching_bisimulation,
                                      expected.states_divergence_preserving_branching_bisimulation,
-                                     expected.transitions_divergence_preserving_branching_bisimulation);
+                                     expected.transitions_divergence_preserving_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_sigref);
-  test_lts(test_description + " (divergence-preserving branching bisimulation signature [Blom/Orzan 2003])",l,
+  if (!test_lts(test_description + " (divergence-preserving branching bisimulation signature [Blom/Orzan 2003])",l,
                                       expected.labels_divergence_preserving_branching_bisimulation,
                                       expected.states_divergence_preserving_branching_bisimulation,
-                                      expected.transitions_divergence_preserving_branching_bisimulation);
+                                      expected.transitions_divergence_preserving_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_weak_bisim);
-  test_lts(test_description + " (weak bisimulation)",l, expected.labels_weak_bisimulation,expected.states_weak_bisimulation, expected.transitions_weak_bisimulation);
+  if (!test_lts(test_description + " (weak bisimulation)",l, expected.labels_weak_bisimulation,expected.states_weak_bisimulation, expected.transitions_weak_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_weak_bisim);
-  test_lts(test_description + " (divergence-preserving weak bisimulation)",l,
+  if (!test_lts(test_description + " (divergence-preserving weak bisimulation)",l,
                                       expected.labels_divergence_preserving_weak_bisimulation,
                                       expected.states_divergence_preserving_weak_bisimulation,
-                                      expected.transitions_divergence_preserving_weak_bisimulation);
+                                      expected.transitions_divergence_preserving_weak_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_sim);
-  test_lts(test_description + " (simulation equivalence)",l, expected.labels_simulation,expected.states_simulation, expected.transitions_simulation);
+  if (!test_lts(test_description + " (simulation equivalence)",l, expected.labels_simulation,expected.states_simulation, expected.transitions_simulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_trace);
-  test_lts(test_description + " (trace equivalence)",l, expected.labels_trace_equivalence,expected.states_trace_equivalence, expected.transitions_trace_equivalence);
+  if (!test_lts(test_description + " (trace equivalence)",l, expected.labels_trace_equivalence,expected.states_trace_equivalence, expected.transitions_trace_equivalence)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_weak_trace);
-  test_lts(test_description + " (weak trace equivalence)",l, expected.labels_weak_trace_equivalence,expected.states_weak_trace_equivalence, expected.transitions_weak_trace_equivalence);
+  if (!test_lts(test_description + " (weak trace equivalence)",l, expected.labels_weak_trace_equivalence,expected.states_weak_trace_equivalence, expected.transitions_weak_trace_equivalence)) return false;
   l=l_in;
   if (expected.is_deterministic)
   {
-    BOOST_CHECK(is_deterministic(l));
+    if (!is_deterministic(l))
+    {
+      std::cerr << "Expect the lts to be deterministic, but it is non-deterministic: " << test_description << " \n";
+      return false;
+    };
   }
   else
   {
-    BOOST_CHECK(!is_deterministic(l));
+    if (is_deterministic(l))
+    {
+      std::cerr << "Expect the lts to be non-deterministic, but it is deterministic: " << test_description << " \n";
+      return false;
+    }
   }
 
   reduce(l,lts::lts_red_determinisation);
-  test_lts(test_description + " (determinisation)",l, expected.labels_determinisation,expected.states_determinisation, expected.transitions_determinisation);
-  BOOST_CHECK(is_deterministic(l));
+  if (!test_lts(test_description + " (determinisation)",l, expected.labels_determinisation,expected.states_determinisation, expected.transitions_determinisation)) return false;
+;
+  if (!is_deterministic(l))
+  {
+    std::cerr << "LTS is non deterministic after deterministation: " << test_description << "\n";
+    return false;
+  }
+  return true;
 }
 
 #endif // MCRL2_LTS_TEST_TEST_REDUCTIONS_H

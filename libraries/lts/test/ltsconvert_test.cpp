@@ -12,7 +12,6 @@
 
 #define BOOST_TEST_MODULE ltsconvert_test
 // #include <iostream>
-
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lts/test/test_reductions.h"
@@ -49,7 +48,7 @@ BOOST_AUTO_TEST_CASE(Test0)
   e.states_determinisation=2, e.transitions_determinisation=2, e.labels_determinisation=1;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test0", test0, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test0", test0, e));
 }
 
 
@@ -75,7 +74,7 @@ BOOST_AUTO_TEST_CASE(Test1)
   e.states_determinisation=2, e.transitions_determinisation=2, e.labels_determinisation=2;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test1", test1, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test1", test1, e));
 }
 
 BOOST_AUTO_TEST_CASE(Test2)
@@ -100,7 +99,7 @@ BOOST_AUTO_TEST_CASE(Test2)
   e.states_determinisation=2, e.transitions_determinisation=2, e.labels_determinisation=3;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test2", test2, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test2", test2, e));
 }
 
 BOOST_AUTO_TEST_CASE(Test3)
@@ -126,7 +125,7 @@ BOOST_AUTO_TEST_CASE(Test3)
   e.states_determinisation=2, e.transitions_determinisation=3, e.labels_determinisation=2;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test3", test3, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test3", test3, e));
 }
 
 // Example below represents a(tau(b+c)+b) which can be reduced to a(b+c).
@@ -155,7 +154,7 @@ BOOST_AUTO_TEST_CASE(Test4)
   e.states_determinisation=6, e.transitions_determinisation=5, e.labels_determinisation=4;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test4", test4, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test4", test4, e));
 }
 
 // Example below is inspired by the rhs of Milner's third tau law, a(tau.b+c)=a(tau.b+c)+a.b
@@ -186,7 +185,7 @@ BOOST_AUTO_TEST_CASE(Test5)
   e.states_determinisation=6, e.transitions_determinisation=5, e.labels_determinisation=4;
   e.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Test5", test5, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test5", test5, e));
 }
 
 // Example below is inspired by Milner's third tau law, a(tau.b+c)=a(tau.b+c)+a.b.
@@ -222,7 +221,7 @@ BOOST_AUTO_TEST_CASE(Test5a)
   e.states_determinisation=5, e.transitions_determinisation=6, e.labels_determinisation=5;
   e.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Test5a", test5a, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test5a", test5a, e));
 }
 
 
@@ -248,7 +247,7 @@ BOOST_AUTO_TEST_CASE(Test6)
   e.states_determinisation=2, e.transitions_determinisation=2, e.labels_determinisation=2;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test6", test6, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test6", test6, e));
 }
 
 // Test whether a mixed up sequence of tau's is properly dealt with.
@@ -280,7 +279,7 @@ BOOST_AUTO_TEST_CASE(Test7)
   e.states_determinisation=7, e.transitions_determinisation=7, e.labels_determinisation=2;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test7", test7, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test7", test7, e));
 }
 
 // Test whether a mixed up sequence of tau's is properly dealt with.
@@ -311,7 +310,7 @@ BOOST_AUTO_TEST_CASE(Test8)
   e.states_determinisation=3, e.transitions_determinisation=3, e.labels_determinisation=1;
   e.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Test8", test8, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test8", test8, e));
 }
 
 // Test whether a tau-loop at the end of a process is correctly dealt with.
@@ -339,7 +338,7 @@ BOOST_AUTO_TEST_CASE(Test9)
   e.states_determinisation=4, e.transitions_determinisation=4, e.labels_determinisation=2;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test9", test9, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test9", test9, e));
 }
 
 // Test whether a tau that does become non inert will act to split blocks.
@@ -370,7 +369,7 @@ BOOST_AUTO_TEST_CASE(Test10)
   e.states_determinisation=5, e.transitions_determinisation=4, e.labels_determinisation=3;
   e.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Test10", test10, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test10", test10, e));
 }
 
 // Test whether tau's can repeatedly become non inert
@@ -399,7 +398,7 @@ BOOST_AUTO_TEST_CASE(Test11)
   e.states_determinisation=5, e.transitions_determinisation=4, e.labels_determinisation=2;
   e.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Test11", test11, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test11", test11, e));
 }
 
 // The test below caused the tau_star reduction to go astray, as there
@@ -431,7 +430,7 @@ BOOST_AUTO_TEST_CASE(Test12)
   e.states_determinisation=4, e.transitions_determinisation=5, e.labels_determinisation=4;
   e.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Test12", test12, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test12", test12, e));
 
   lts_aut_t t12=parse_aut(test12);
   reduce(t12,lts_red_tau_star); //Tau star reduction
@@ -463,7 +462,7 @@ BOOST_AUTO_TEST_CASE(Test13)
   e.states_determinisation=4, e.transitions_determinisation=4, e.labels_determinisation=2;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test13", test13, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test13", test13, e));
 
   lts_aut_t t13=parse_aut(test13);
   reduce(t13,lts_red_tau_star); //Tau star reduction
@@ -493,7 +492,7 @@ BOOST_AUTO_TEST_CASE(Test14)
   e.states_determinisation=1, e.transitions_determinisation=1, e.labels_determinisation=2;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test14", test14, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test14", test14, e));
 }
   
 // Test whether LTSs with one state and more than one essential transitions are reduced
@@ -520,7 +519,7 @@ BOOST_AUTO_TEST_CASE(Test15)
   e.states_determinisation=1, e.transitions_determinisation=2, e.labels_determinisation=3;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test15", test15, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test15", test15, e));
 }
   
 // Tricky test for branching bisimulation. If the co-split is not properly implemented
@@ -550,7 +549,7 @@ BOOST_AUTO_TEST_CASE(Test16)
   e.states_determinisation=3, e.transitions_determinisation=5, e.labels_determinisation=3;
   e.is_deterministic=true;
 
-  reduce_lts_in_various_ways("Test16", test16, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test16", test16, e));
 }
 
 // Another tricky test for branching bisimulation. The tau is non inert, but when state
@@ -584,7 +583,7 @@ BOOST_AUTO_TEST_CASE(Test17)
   e.states_determinisation=3, e.transitions_determinisation=3, e.labels_determinisation=3;
   e.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Test17", test17, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test17", test17, e));
 }
 
 // This example is also interesting as it uses quite a lot of the features of the branching bisimulation 
@@ -623,7 +622,7 @@ BOOST_AUTO_TEST_CASE(Test18)
   e.states_determinisation=4, e.transitions_determinisation=12, e.labels_determinisation=3;
   e.is_deterministic=false;
 
-  reduce_lts_in_various_ways("Test18", test18, e);
+  BOOST_CHECK(reduce_lts_in_various_ways("Test18", test18, e));
 
 }
 
