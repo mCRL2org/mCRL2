@@ -571,7 +571,8 @@ class bisim_partitioner_gj
           assert(!m_aut.is_tau(t.label()) || m_states[t.from()].block!=m_states[t.to()].block);
         }
 
-        const outgoing_transitions_const_it end_it1=(si+1>=m_states.size())?m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
+        const outgoing_transitions_const_it end_it1=(si+1>=m_states.size())?m_outgoing_transitions.end():
+                                       static_cast<outgoing_transitions_const_it>(m_states[si+1].start_outgoing_transitions);
         for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions;
                         it!=end_it1;
                      ++it)
@@ -594,7 +595,8 @@ class bisim_partitioner_gj
         // in the same constellation, and subsequently there are other transitions sorted per block
         // and constellation. 
         std::unordered_set<std::pair<label_index, constellation_index>> constellations_seen;
-        const outgoing_transitions_const_it end_it2=(si+1>=m_states.size())?m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
+        const outgoing_transitions_const_it end_it2=(si+1>=m_states.size())?m_outgoing_transitions.end():
+                                         static_cast<outgoing_transitions_const_it>(m_states[si+1].start_outgoing_transitions);
         for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions; it!=end_it2; ++it)
         {
           const transition& t=m_aut.get_transitions()[it->transition];
@@ -1923,7 +1925,6 @@ mCRL2log(log::verbose) << "Start setting incoming transitions 2\n";
       for(state_index si=0; si<m_states.size(); ++si)
       {
         // Set the m_outgoing_transitions
-        label_to_transition_set_map.clear();
         for(const transition_index ti: outgoing_transitions_per_state.get_set(si))
         {
           const transition& t=m_aut.get_transitions()[ti];
@@ -1976,6 +1977,7 @@ mCRL2log(log::verbose) << "Start setting incoming transitions 2\n";
             count_down--;
           }
         }
+        label_to_transition_set_map.clear();
       }
       outgoing_transitions_per_state.clear_and_shrink(); // Not needed anymore, but can use a lot of memory. 
       incoming_transitions_per_state.clear_and_shrink(); 
