@@ -3559,8 +3559,11 @@ class bisim_partitioner_dnj
         branching(new_branching),
         preserve_divergence(new_preserve_divergence)
     {                                                                           assert(branching || !preserve_divergence);
+
+mCRL2log(log::verbose) << "Start initialisation.\n";
         create_initial_partition();                                             ONLY_IF_DEBUG( part_tr.action_block_orig_inert_begin =
-                                                                                                                            part_tr.action_block_inert_begin; )
+                                                                                                                       part_tr.action_block_inert_begin; )
+mCRL2log(log::verbose) << "Start refining\n";
         refine_partition_until_it_becomes_stable();
     }
 
@@ -5504,6 +5507,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
                 "in time O(m log n).\n";
     }
     // Line 2.1: Find tau-SCCs and contract each of them to a single state
+mCRL2log(log::verbose) << "Start SCC\n";
     if (branching)
     {
         scc_reduce(l, preserve_divergence);
@@ -5512,12 +5516,14 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
         if (1 >= l.num_states())  return;
     }
 
+mCRL2log(log::verbose) << "Start Partitioning\n";
     // Now apply the branching bisimulation reduction algorithm.  If there
     // are no taus, this will automatically yield strong bisimulation.
     bisim_partitioner_dnj<LTS_TYPE> bisim_part(l, branching,
                                                           preserve_divergence);
 
     // Assign the reduced LTS
+mCRL2log(log::verbose) << "Start finalizing\n";
     bisim_part.finalize_minimized_LTS();
 }
 
