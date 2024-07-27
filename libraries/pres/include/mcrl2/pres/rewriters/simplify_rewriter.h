@@ -361,6 +361,11 @@ public:
     pres_expression result2;
     apply(result1, x.arg2());
     apply(result2, x.arg3());
+    if (result1==result2)
+    {
+      result=result1;
+      return;
+    }
     make_condeq(result, result, result1, result2);
   }
 
@@ -404,6 +409,11 @@ public:
     pres_expression result2;
     apply(result1, x.arg2());
     apply(result2, x.arg3());
+    if (result1==result2)
+    {
+      result=result1;
+      return;
+    }
     make_condsm(result, result, result1, result2);
   }
 
@@ -731,6 +741,11 @@ public:
     pres_expression result2;
     apply(result1, x.arg2());
     apply(result2, x.arg3());
+    if (result1==result2)
+    {
+      result=result1;
+      return;
+    }
     make_condeq(result, result, result1, result2);
   }
 
@@ -769,6 +784,17 @@ public:
         }
       }
     } 
+
+    pres_expression result1;
+    pres_expression result2;
+    apply(result1, x.arg2());
+    apply(result2, x.arg3());
+    if (result1==result2)
+    {
+      result=result1;
+      return;
+    }
+    make_condsm(result, result, result1, result2);
   }
 
 };
