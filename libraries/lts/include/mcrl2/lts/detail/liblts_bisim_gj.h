@@ -44,6 +44,7 @@ typedef std::size_t block_index;
 typedef std::size_t label_index;
 typedef std::size_t constellation_index;
 typedef std::vector<transition_pointer_pair>::iterator outgoing_transitions_it;
+typedef std::vector<transition_pointer_pair>::const_iterator outgoing_transitions_const_it;
 
 constexpr transition_index null_transition=-1;
 constexpr std::size_t null_pointer=-1;
@@ -143,11 +144,10 @@ struct linked_list_walker
   }
 };
 
-template <class T>
+template <class T, bool MAINTAIN_FILLED_SETS=true>
 class index_to_set_of_T_map
 {
   protected:
-    // std::vector<std::vector<T>> m_set_per_index;
     std::vector<index_type> m_set_per_index;
     std::vector<index_type> m_filled_sets;
     std::vector<index_type> m_linked_list;  // This list consists of a sequence of a value and a pointer to the next position.
@@ -162,68 +162,40 @@ class index_to_set_of_T_map
 
     void insert(const index_type i, const T n)
     {
-//std::cerr << "INSERT " << n << " at " << i << "\n";
       assert(i<m_set_per_index.size());
       index_type n1=m_set_per_index[i];
-      // assert(std::find(v.begin(), v.end(), n)==v.end());
-      if (n1==null_pointer)
+      if (MAINTAIN_FILLED_SETS && n1==null_pointer)
       {
         m_filled_sets.push_back(i);
       } 
       m_set_per_index[i]=m_linked_list.size();
       m_linked_list.push_back(n);
       m_linked_list.push_back(n1); // link to the next element.
-      
-      /* assert(i<m_set_per_index.size());
-      std::vector<T>& v=m_set_per_index.at(i);
-      assert(std::find(v.begin(), v.end(), n)==v.end());
-      if (v.empty())
-      {
-        m_filled_sets.push_back(i);
-      } 
-      v.push_back(n); */
     }
 
     // Insert element n. It is assumed that if there are multiple insertions of
     // n they come in groups, such that if n is already inserted, it occurs at the end of vector. 
     void insert_unique(const index_type i, const T n)
     {
-//std::cerr << "INSET UNIQUE " << i << "    " << n << "\n";
       assert(i<m_set_per_index.size());
       std::size_t pos=m_set_per_index[i];
       if (pos==null_pointer || m_linked_list[pos]!=n)
       {
         insert(i,n);
       }
-      /* assert(i<m_set_per_index.size());
-      std::vector<T>& v=m_set_per_index.at(i);
-      if (v.empty())
-      {
-        m_filled_sets.push_back(i);
-        v.push_back(n);
-      }
-      else if (n!=v.back())
-      {
-        // Only insert n if it does not occur, and if it occurs it must occur
-        // last. 
-        assert(std::find(v.begin(), v.end(), n)==v.end());
-        v.push_back(n); 
-      } */
     }
 
-    // const std::vector<T>& get_set(const index_type i) const
     const linked_list_walker get_set(const index_type i) const
     {
       assert(i<m_set_per_index.size());
-      // return m_set_per_inde[i];
       return linked_list_walker(m_set_per_index[i], m_linked_list);
     }
 
     void clear()
     {
+      static_assert(MAINTAIN_FILLED_SETS);  
       for(const index_type i: m_filled_sets)
       {
-        // m_set_per_index[i].clear();     // TODO Check if not too large, as it should b
         m_set_per_index[i]=null_pointer;
       }
       m_filled_sets.clear();
@@ -237,13 +209,26 @@ class index_to_set_of_T_map
       m_set_per_index.resize(new_range, null_pointer);
     }
 
+    // Release the vectors in this data structure. 
+    void clear_and_shrink()
+    {
+      m_set_per_index=std::vector<index_type>();
+      m_linked_list=std::vector<index_type>();
+      if (MAINTAIN_FILLED_SETS) 
+      {
+        m_filled_sets=std::vector<index_type>();
+      }
+    }
+
     const std::vector<T>& filled_sets() const
     {
+      static_assert(MAINTAIN_FILLED_SETS);
       return m_filled_sets;
     }
 
     void apply_to_all_rhss(std::function<void(const T)> f) const
     {
+      static_assert(MAINTAIN_FILLED_SETS);
       for(const index_type i: m_filled_sets)
       {
         for(const T t: get_set(i))
@@ -586,11 +571,9 @@ class bisim_partitioner_gj
           assert(!m_aut.is_tau(t.label()) || m_states[t.from()].block!=m_states[t.to()].block);
         }
 
-        const outgoing_transitions end_it=(si+1>=m_states.size())?it!=m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
+        const outgoing_transitions_const_it end_it1=(si+1>=m_states.size())?m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
         for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions;
-                        it!=end_it;
-                        // it!=m_outgoing_transitions.end() &&
-                        // (si+1>=m_states.size() || it!=m_states[si+1].start_outgoing_transitions);
+                        it!=end_it1;
                      ++it)
         {
           const transition& t=m_aut.get_transitions()[it->transition];
@@ -611,8 +594,8 @@ class bisim_partitioner_gj
         // in the same constellation, and subsequently there are other transitions sorted per block
         // and constellation. 
         std::unordered_set<std::pair<label_index, constellation_index>> constellations_seen;
-        const outgoing_transitions end_it=(si+1>=m_states.size())?m_outgoing_transitions.end():it!=m_states[si+1].start_outgoing_transitions;
-        for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions; it!=end_it; ++it)
+        const outgoing_transitions_const_it end_it2=(si+1>=m_states.size())?m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
+        for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions; it!=end_it2; ++it)
         {
           const transition& t=m_aut.get_transitions()[it->transition];
           // Check that if the target constellation, if not new, is equal to the target constellation of the previous outgoing transition.
@@ -702,7 +685,7 @@ class bisim_partitioner_gj
       for(const state_index si: m_P)
       {
         bool found_inert_outgoing_transition=false;
-        const outgoing_transitions_it end_it=(si+1>=m_states.size())? it!=m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
+        const outgoing_transitions_const_it end_it=(si+1>=m_states.size())? m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
         for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions; it!=end_it; ++it)
         {
           const transition& t=m_aut.get_transitions()[it->transition];
@@ -1916,114 +1899,86 @@ mCRL2log(log::verbose) << "Start refining\n";
     
       std::vector<bool> state_has_outgoing_tau(m_aut.num_states(),false);
       transition_index transition_count=0;
+      // Initialise m_incoming_(non-)inert-transitions, m_outgoing_transitions, and m_states[si].no_of_outgoing_transitions 
+mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
+      index_to_set_of_T_map<transition_index, false> outgoing_transitions_per_state(m_aut.num_states(),m_aut.num_transitions());
+      index_to_set_of_T_map<transition_index, false> incoming_transitions_per_state(m_aut.num_states(),m_aut.num_transitions());
+
+      for(const transition& t: m_aut.get_transitions())
       {
-        // Initialise m_incoming_(non-)inert-transitions and m_states[si].no_of_outgoing_transitions 
-mCRL2log(log::verbose) << "Start setting incoming transitions\n";
-        index_to_set_of_T_map<transition_index> transitions_per_state(m_aut.num_states(),m_aut.num_transitions());
-        for(const transition& t: m_aut.get_transitions())
+        outgoing_transitions_per_state.insert(t.to(), transition_count);
+        incoming_transitions_per_state.insert(t.from(),transition_count);
+        transition_count++;
+        if (m_aut.is_tau(t.label()))
         {
-//std::cerr << "HHIER INS " << t.to() << " := " << transition_count << "\n";
-          transitions_per_state.insert(t.to(), transition_count);
-          transition_count++;
-          if (m_aut.is_tau(t.label()))
-          {
-            m_states[t.from()].no_of_outgoing_inert_transitions++;
-          }
+          m_states[t.from()].no_of_outgoing_inert_transitions++;
+          state_has_outgoing_tau[t.from()]=true;
         }
-          
+      }
+        
 mCRL2log(log::verbose) << "Start setting incoming transitions 2\n";
-        // transitions_per_action_label_type label_to_transition_set_map;
-        index_to_set_of_T_map<transition_index> label_to_transition_set_map(m_aut.num_action_labels());
-        m_incoming_transitions.reserve(m_aut.num_transitions());
-        for(state_index si=0; si<m_states.size(); ++si)
+      index_to_set_of_T_map<transition_index> label_to_transition_set_map(m_aut.num_action_labels());
+      m_incoming_transitions.reserve(m_aut.num_transitions());
+      m_outgoing_transitions.reserve(m_aut.num_transitions());
+      for(state_index si=0; si<m_states.size(); ++si)
+      {
+        // Set the m_outgoing_transitions
+        label_to_transition_set_map.clear();
+        for(const transition_index ti: outgoing_transitions_per_state.get_set(si))
         {
-          const linked_list_walker transitions_for_si=transitions_per_state.get_set(si);
+          const transition& t=m_aut.get_transitions()[ti];
+          label_to_transition_set_map.insert(t.label(), ti);
+        }
+        // First get the tau transitions.
+        const linked_list_walker tset=label_to_transition_set_map.get_set(m_aut.tau_label_index());
+        
+        m_states[si].start_incoming_inert_transitions=m_incoming_transitions.end();
+        for(const transition_index ti: tset)
+        {
+          m_transitions[ti].ref_incoming_transitions=m_incoming_transitions.end();
+          m_incoming_transitions.emplace_back(ti);
+        }
 
-          label_to_transition_set_map.clear();
-          for(const transition_index ti: transitions_for_si)
+        // Subsequently, put all the non-tau transitions in incoming transitions. 
+        m_states[si].start_incoming_non_inert_transitions=m_incoming_transitions.end();
+        for (label_index ai: label_to_transition_set_map.filled_sets())
+        {
+          if (!m_aut.is_tau(ai))
           {
-            const transition& t=m_aut.get_transitions()[ti];
-            // label_to_transition_set_map[t.label()].insert(ti);
-            label_to_transition_set_map.insert(t.label(), ti);
-          }
-          // First get the tau transitions.
-          // set_of_transitions_type& tset=label_to_transition_set_map[m_aut.tau_label_index()];
-          // const std::vector<transition_index>& tset=label_to_transition_set_map.get_set(m_aut.tau_label_index());
-          const linked_list_walker tset=label_to_transition_set_map.get_set(m_aut.tau_label_index());
-          
-          m_states[si].start_incoming_inert_transitions=m_incoming_transitions.end();
-          for(const transition_index ti: tset)
-          {
-            m_transitions[ti].ref_incoming_transitions=m_incoming_transitions.end();
-            m_incoming_transitions.emplace_back(ti);
-          }
-
-          // Subsequently, put all the non-tau transitions in incoming transitions. 
-          m_states[si].start_incoming_non_inert_transitions=m_incoming_transitions.end();
-          // for (transition_index ai=0; ai<m_aut.num_action_labels(); ++ai)
-          for (label_index ai: label_to_transition_set_map.filled_sets())
-          {
-            if (!m_aut.is_tau(ai))
+            for(const transition_index ti: label_to_transition_set_map.get_set(ai))
             {
-              for(const transition_index ti: label_to_transition_set_map.get_set(ai))
-              {
-                m_transitions[ti].ref_incoming_transitions=m_incoming_transitions.end();
-                m_incoming_transitions.emplace_back(ti);
-              }
+              m_transitions[ti].ref_incoming_transitions=m_incoming_transitions.end();
+              m_incoming_transitions.emplace_back(ti);
             }
           }
+        }
+      
+        // Set m_incoming_transitions.
+        label_to_transition_set_map.clear();
+        for(const transition_index ti: incoming_transitions_per_state.get_set(si))
+        {
+          const transition& t=m_aut.get_transitions()[ti];
+          label_to_transition_set_map.insert(t.label(),ti);
         }
         
-        // Initialise m_outgoing_transitions.
-        // initialise m_states_in_blocks, together with start_bottom_states start_non_bottom_states in m_blocks.
-mCRL2log(log::verbose) << "Start setting outgoing transitions\n";
-        transitions_per_state.clear();
-        transition_count=0;
-        for(const transition& t: m_aut.get_transitions())
+        // Subsequently, put all the non-tau transitions in outgoing_transitions. 
+        m_states[si].start_outgoing_transitions=m_outgoing_transitions.end();
+
+        for(const label_index ai: label_to_transition_set_map.filled_sets())
         {
-          transitions_per_state.insert(t.from(),transition_count);
-          if (m_aut.is_tau(t.label()))
+          const linked_list_walker transition_set=label_to_transition_set_map.get_set(ai);
+          std::size_t count_down=transition_set.size()-1;
+          outgoing_transitions_it start=m_outgoing_transitions.end();
+          for(const transition_index ti: transition_set)
           {
-            state_has_outgoing_tau[t.from()]=true;
-          }
-          transition_count++;
-        }
-
-        label_to_transition_set_map.clear();
-        m_outgoing_transitions.reserve(m_aut.num_transitions());
-        for(state_index si=0; si<m_states.size(); ++si)
-        {
-          // const std::vector<transition_index>& transitions_for_si=transitions_per_state.get_set(si);
-          const linked_list_walker transitions_for_si=transitions_per_state.get_set(si);
-
-          label_to_transition_set_map.clear();
-          for(const transition_index ti: transitions_for_si)
-          {
-            const transition& t=m_aut.get_transitions()[ti];
-            // label_to_transition_set_map[t.label()].insert(ti);
-            label_to_transition_set_map.insert(t.label(),ti);
-          }
-          
-          // Subsequently, put all the non-tau transitions in outgoing_transitions. 
-          m_states[si].start_outgoing_transitions=m_outgoing_transitions.end();
-
-          //for(label_index ai=0; ai<m_aut.num_action_labels(); ++ai)
-          for(const label_index ai: label_to_transition_set_map.filled_sets())
-          {
-            // const std::vector<transition_index>& transition_set=label_to_transition_set_map.get_set(ai);
-            const linked_list_walker transition_set=label_to_transition_set_map.get_set(ai);
-            std::size_t count_down=transition_set.size()-1;
-            outgoing_transitions_it start=m_outgoing_transitions.end();
-            // assert(!transition_set.empty());
-            for(const transition_index ti: transition_set)
-            {
-              m_outgoing_transitions.emplace_back(ti,count_down==0?start:m_outgoing_transitions.end()+count_down);
-              m_transitions[ti].ref_outgoing_transitions=m_outgoing_transitions.end()-1;
-              count_down--;
-            }
+            m_outgoing_transitions.emplace_back(ti,count_down==0?start:m_outgoing_transitions.end()+count_down);
+            m_transitions[ti].ref_outgoing_transitions=m_outgoing_transitions.end()-1;
+            count_down--;
           }
         }
-      }  // release memory for transitions_per_state.
+      }
+      outgoing_transitions_per_state.clear_and_shrink(); // Not needed anymore, but can use a lot of memory. 
+      incoming_transitions_per_state.clear_and_shrink(); 
 
 mCRL2log(log::verbose) << "Start filling states_in_blocks\n";
       m_states_in_blocks.reserve(m_aut.num_states());
@@ -2056,16 +2011,18 @@ mCRL2log(log::verbose) << "Start filling states_in_blocks\n";
 
       // The following implements line 1.3 of Algorithm 1. 
       // states_per_action_label_type states_per_action_label;
+mCRL2log(log::verbose) << "Start filling states_in_blocks XXXX\n";
       index_to_set_of_T_map<state_index> states_per_action_label(m_aut.num_action_labels()); 
-      // for(const transition& t: m_aut.get_transitions())
-      for(const transition_pointer_pair& tpp: m_outgoing_transitions)  // This can be optimised by using the saC reference TODO TODO
+
+      for(outgoing_transitions_it itpp=m_outgoing_transitions.begin(); itpp!=m_outgoing_transitions.end(); ++itpp) 
       {
-        const transition& t=m_aut.get_transitions()[tpp.transition];
+        const transition& t=m_aut.get_transitions()[itpp->transition];
         if (!m_aut.is_tau(t.label()))
         {
-          // states_per_action_label[t.label()].insert(t.from());
-          states_per_action_label.insert_unique(t.label(),t.from()); // insert, if it does not occur. 
+          states_per_action_label.insert(t.label(),t.from()); // insert, if it does not occur. 
+          // states_per_action_label.insert_unique(t.label(),t.from()); // insert, if it does not occur. 
         }
+        itpp=itpp->start_same_saC;
       }
 
 mCRL2log(log::verbose) << "Start refining in the initialisation\n";
