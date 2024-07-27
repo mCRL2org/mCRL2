@@ -531,7 +531,7 @@ class bisim_partitioner_gj
       }
     }
 
-    bool check_data_structures(const std::string& tag, const bool initialisation=false) const
+    bool check_data_structures(const std::string& tag, const bool initialisation=false)
     {
       mCRL2log(log::debug) << "Check data structures: " << tag << ".\n";
       assert(m_states.size()==m_aut.num_states());
@@ -571,8 +571,7 @@ class bisim_partitioner_gj
           assert(!m_aut.is_tau(t.label()) || m_states[t.from()].block!=m_states[t.to()].block);
         }
 
-        const outgoing_transitions_const_it end_it1=(si+1>=m_states.size())?m_outgoing_transitions.end():
-                                       static_cast<outgoing_transitions_const_it>(m_states[si+1].start_outgoing_transitions);
+        const outgoing_transitions_it end_it1=(si+1>=m_states.size())?m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
         for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions;
                         it!=end_it1;
                      ++it)
@@ -595,8 +594,7 @@ class bisim_partitioner_gj
         // in the same constellation, and subsequently there are other transitions sorted per block
         // and constellation. 
         std::unordered_set<std::pair<label_index, constellation_index>> constellations_seen;
-        const outgoing_transitions_const_it end_it2=(si+1>=m_states.size())?m_outgoing_transitions.end():
-                                         static_cast<outgoing_transitions_const_it>(m_states[si+1].start_outgoing_transitions);
+        const outgoing_transitions_it end_it2=(si+1>=m_states.size())?m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
         for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions; it!=end_it2; ++it)
         {
           const transition& t=m_aut.get_transitions()[it->transition];
@@ -687,7 +685,7 @@ class bisim_partitioner_gj
       for(const state_index si: m_P)
       {
         bool found_inert_outgoing_transition=false;
-        const outgoing_transitions_const_it end_it=(si+1>=m_states.size())? m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
+        const outgoing_transitions_it end_it=(si+1>=m_states.size())? m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
         for(outgoing_transitions_it it=m_states[si].start_outgoing_transitions; it!=end_it; ++it)
         {
           const transition& t=m_aut.get_transitions()[it->transition];
