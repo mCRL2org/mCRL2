@@ -126,6 +126,23 @@ struct linked_list_iterator
   }
 };
 
+template <class T>
+struct from_state_walker_wrapper: public T
+{
+  const std::vector<transition>& m_transitions;
+
+  from_state_walker_wrapper(index_type i, const std::vector<index_type>& linked_list, const std::vector<transition>& transitions)
+   : linked_list_iterator(i, linked_list),
+     m_transitions(transitions)
+  {}
+
+  index_type operator *() const
+  {
+    assert(T::m_i<T::m_linked_list.size());
+    return m_transitions[T::m_linked_list[T::m_i]].from();
+  }
+};
+
 struct linked_list_walker
 {
   std::size_t m_i;
@@ -145,6 +162,16 @@ struct linked_list_walker
     return linked_list_iterator(null_pointer, m_linked_list);
   }
  
+  from_state_walker_wrapper<linked_list_iterator> fbegin(std::vector<transition>& transitions) const
+  {
+    return from_state_walker_wrapper<linked_list_iterator>(m_i, m_linked_list, transitions);
+  }
+
+  from_state_walker_wrapper<linked_list_iterator> fend(std::vector<transition>& transitions) const
+  {
+    return from_state_walker_wrapper<linked_list_iterator>(null_pointer, m_linked_list, transitions);
+  }
+ 
   std::size_t size() const
   {
     std::size_t count=0;
@@ -160,6 +187,8 @@ struct linked_list_walker
     return m_i==null_pointer;
   }
 };
+
+
 
 template <class T, bool MAINTAIN_FILLED_SETS=true>
 class index_to_set_of_T_map
@@ -483,15 +512,23 @@ class bisim_partitioner_gj
     typedef std::unordered_set<transition_index> set_of_transitions_type;
     // typedef std::unordered_set<constellation_index> set_of_constellations_type;
     typedef std::vector<constellation_index> set_of_constellations_type;
-    typedef std::unordered_map<label_index, set_of_states_type > states_per_action_label_type;
-    // typedef std::unordered_map<label_index, set_of_transitions_type > transitions_per_action_label_type;
+
+    struct marked_states_and_co_transition
+    {
+      set_of_states_type states;
+      transition_index co_transition=null_transition;
+    };
+
+    // typedef std::unordered_map<label_index, set_of_states_type > states_per_action_label_type;
+    typedef std::unordered_map<label_index, set_of_transitions_type > transitions_per_action_label_type;
+    // typedef std::unordered_map<label_index, marked_states_and_co_transition > states_and_co_transition_per_action_label_type; // Marked states, and a co-transition.
     typedef std::unordered_map<block_index, set_of_states_type > states_per_block_type;
-    typedef std::unordered_map<std::pair<block_index, label_index>, std::list<transition_index>::iterator >
-                      block_label_to_list_iterator_map;
+    /* typedef std::unordered_map<std::pair<block_index, label_index>, std::list<transition_index>::iterator >
+                      block_label_to_list_iterator_map; */
     typedef std::unordered_map<std::pair<label_index, constellation_index>, set_of_states_type> 
                       label_constellation_to_set_of_states_map;
     typedef std::unordered_map<std::pair<block_index, label_index>, std::size_t> block_label_to_size_t_map;
-    typedef std::unordered_map<std::pair<state_index, label_index>, transition_index> state_label_to_transition_map;
+    // typedef std::unordered_map<std::pair<state_index, label_index>, transition_index> state_label_to_transition_map;
 
     /// \brief automaton that is being reduced
     LTS_TYPE& m_aut;
@@ -558,7 +595,6 @@ class bisim_partitioner_gj
       // Check that the elements in m_states are well formed. 
       for(state_index si=0; si< m_states.size(); si++)
       {
-//std::cerr << "STATE " << si << "\n";
         const state_type_gj& s=m_states[si];
 
         assert(s.counter==undefined);
@@ -583,7 +619,6 @@ class bisim_partitioner_gj
                      ++it)
         {
           const transition& t=m_aut.get_transitions()[*it];
-//std::cerr << "POINTERS " << &*(m_transitions[*it].ref_incoming_transitions) << "    " << &*it << "\n";
           assert(t.to()==si);
           assert(m_transitions[*it].ref_incoming_transitions==it);
           // Check that inert transitions come first. 
@@ -602,7 +637,6 @@ class bisim_partitioner_gj
           for(outgoing_transitions_it itt=it->start_same_saC->start_same_saC; itt<it->start_same_saC; ++itt)
           {
             const transition& t1=m_aut.get_transitions()[itt->transition];
-//std::cerr << "CHECK " << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to() << "\n";
             assert(t1.from()==si);
             assert(t.label()==t1.label());
             assert(m_blocks[m_states[t.to()].block].constellation==m_blocks[m_states[t1.to()].block].constellation);
@@ -755,7 +789,6 @@ class bisim_partitioner_gj
                         (si+1>=m_states.size() || it!=m_states[si+1].start_incoming_inert_transitions);
                      ++it)
         {
-//std::cerr << "LOOP " << si << "    " << &*it << "\n";
            const transition& t=m_aut.get_transitions()[*it];
            mCRL2log(log::debug) << "  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
         }
@@ -1797,12 +1830,12 @@ mCRL2log(log::verbose) << "Start refining\n";
                                                         [](const state_index){})
     {
       assert(M_begin!=M_end && M_co_begin!=M_co_end);
-// std::cerr << "MARKED: "; for(auto s=M_begin; s!=M_end; ++s){ std::cerr << *s << " "; } std::cerr << "\n";
-// std::cerr << "UNMARKED: "; for(auto s=M_co_begin; s!=M_co_end; ++s){ std::cerr << *s << " "; } std::cerr << "\n";
+//std::cerr << "MARKED: "; for(auto s=M_begin; s!=M_end; ++s){ std::cerr << *s << " "; } std::cerr << "\n";
+//std::cerr << "UNMARKED: "; for(auto s=M_co_begin; s!=M_co_end; ++s){ std::cerr << *s << " "; } std::cerr << "\n";
       block_index bi=simple_splitB<VARIANT, MARKED_STATE_ITERATOR, UNMARKED_STATE_ITERATOR>
                  (B, M_begin, M_end, M_co_begin, M_co_end, a, C, M_in_new_block,update_Ptilde);
 
-// std::cerr<<"Split block of size " << number_of_states_in_block(B) + number_of_states_in_block(bi) << " taking away " << number_of_states_in_block(bi) << " states\n";
+//std::cerr<<"Split block of size " << number_of_states_in_block(B) + number_of_states_in_block(bi) << " taking away " << number_of_states_in_block(bi) << " states\n";
       assert(number_of_states_in_block(B)+number_of_states_in_block(bi)+1>=2* number_of_states_in_block(bi));
 
       // Update the LBC_list, and bottom states, and invariant on inert transitions.
@@ -1991,7 +2024,7 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
 
 #define FASTINIT
 #ifdef FASTINIT
-std::cerr << "FAST INIT\n";
+//std::cerr << "FAST INIT\n";
       std::vector<std::size_t> count_outgoing_transitions_per_state(m_aut.num_states(), 0);
       std::vector<std::size_t> count_incoming_transitions_per_state(m_aut.num_states(), 0);
 
@@ -2152,33 +2185,26 @@ mCRL2log(log::verbose) << "Start grouping outgoing transitions on label.\n";
         {
           outgoing_transitions_it saC_start_iterator=ti;
           const transition& t=m_aut.get_transitions()[ti_walker2->transition];
-//std::cerr << "TRANS ACTION GROUP  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-//std::cerr << "CURR LABEL " << m_aut.action_label(*current_label) << "\n";
           if (t.label()==*current_label)
           {
-//std::cerr << "HIER1\n";
             m_transitions[ti_walker2->transition].ref_outgoing_transitions=ti_walker2;
             action_counter[t.label()].label_counter--;
             if (action_counter[*current_label].label_counter>0) 
             {
-//std::cerr << "HIER3\n";
               ti_walker2->start_same_saC=ti_walker2+action_counter[*current_label].label_counter;
             }
             ti_walker2++;
             while (action_counter[*current_label].label_counter==0)
             {
-//std::cerr << "HIER4\n";
               (ti_walker2-1)->start_same_saC=ti+action_counter[*current_label].cumulative_label_counter;
               current_label++;
               if (current_label!=todo_stack.end())
               {
-//std::cerr << "HIER5   " << action_counter[*current_label].cumulative_label_counter << "\n";
                 ti_walker2=ti+action_counter[*current_label].not_investigated; // Jump to the first non investigated action.
                 saC_start_iterator=ti_walker2;
               }
               else
               {
-//std::cerr << "HIER6\n";
                 break; // exit the while loop.
               }
             }
@@ -2186,22 +2212,18 @@ mCRL2log(log::verbose) << "Start grouping outgoing transitions on label.\n";
           else
           {
             // Find the first transition with a different label than t.label to swap with. 
-//std::cerr << "HIER7\n";
             outgoing_transitions_it new_position=ti+action_counter[t.label()].not_investigated;
             while (m_aut.get_transitions()[new_position->transition].label()==t.label())
             {
-//std::cerr << "HIER8\n";
               m_transitions[new_position->transition].ref_outgoing_transitions=new_position;
               action_counter[t.label()].not_investigated++;
               action_counter[t.label()].label_counter--;
               if (action_counter[t.label()].label_counter>0) 
               {
-//std::cerr << "HIER9\n";
                 new_position->start_same_saC=new_position+action_counter[t.label()].label_counter;
               }
               new_position++;
             }
-//std::cerr << "HIERA\n";
             assert(action_counter[t.label()].label_counter>0);
             std::swap(*ti_walker2, *new_position);
             m_transitions[new_position->transition].ref_outgoing_transitions=new_position;
@@ -2209,12 +2231,10 @@ mCRL2log(log::verbose) << "Start grouping outgoing transitions on label.\n";
             action_counter[t.label()].label_counter--;
             if (action_counter[t.label()].label_counter>0) 
             {
-//std::cerr << "HIERB\n";
               new_position->start_same_saC=new_position+action_counter[t.label()].label_counter;
             }
           }
         }
-//std::cerr << "HIERC\n";
         reset_entries(action_counter, todo_stack);
         ti=ti_walker;
 
@@ -2331,7 +2351,7 @@ mCRL2log(log::verbose) << "Start filling states_in_blocks\n";
       }
       m_blocks[0].end_states=m_states_in_blocks.end();
 
-      //print_data_structures("After initial reading before splitting in the initialisation",true);
+      // print_data_structures("After initial reading before splitting in the initialisation",true);
       assert(check_data_structures("After initial reading before splitting in the initialisation",true));
 
       // The following implements line 1.3 of Algorithm 1. 
@@ -2356,7 +2376,7 @@ mCRL2log(log::verbose) << "Start refining in the initialisation\n";
       index_to_set_of_T_map<state_index> Bprime(m_blocks.size());
       for(const label_index a: states_per_action_label.filled_sets())
       {
-// std::cerr << "CONSIDER ACTION " << m_aut.action_label(a) << "\n";
+//std::cerr << "CONSIDER ACTION " << m_aut.action_label(a) << "\n";
         // const std::vector<state_index>& M=states_per_action_label.get_set(a);
         const linked_list_walker M=states_per_action_label.get_set(a);
         // states_per_block_type Bprime;
@@ -2562,7 +2582,7 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
       // Algorithm 1, line 1.4 is implicitly done in the call to splitB above.
       
       // Algorithm 1, line 1.5.
-      //print_data_structures("End initialisation");
+      // print_data_structures("End initialisation");
 mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
       assert(check_data_structures("End initialisation"));
       stabilizeB();
@@ -2869,23 +2889,97 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
       outgoing_transitions_it i1=m_transitions[transition_to_bi].ref_outgoing_transitions;
       // i2 refers to the last position, unless i1 is the last, then i2 is the first of all transitions with the same s, a and C.
       outgoing_transitions_it i2=i1->start_same_saC;
+//std::cerr << "AAA1\n";
       if (i2<=i1) 
       {
+//std::cerr << "AAA2\n";
         // So, i1 is the last element with the same s, a, C.
         i2=i1+1;
       }
       else
       {
+//std::cerr << "AAA3\n";
         // In this case i2 refers to the last element with the same s, a, C.
         i2++;
       }
       if (i2==m_outgoing_transitions.end())
       {
+//std::cerr << "AAA4\n";
         return false;
       }
       const transition& t1=m_aut.get_transitions()[transition_to_bi];
       const transition& t2=m_aut.get_transitions()[i2->transition];
+//std::cerr << "AAA5  " << (t1.from()==t2.from()) << "  " << (t1.label()==t2.label()) << "   " << (m_blocks[m_states[t2.to()].block].constellation==old_constellation) << "\n";;
       return t1.from()==t2.from() && t1.label()==t2.label() && m_blocks[m_states[t2.to()].block].constellation==old_constellation;
+    }
+
+    bool some_bottom_state_has_no_outgoing_co_transition(block_index B, 
+                                                         const linked_list_walker& transitions,
+                                                         const constellation_index old_constellation)
+    {
+      std::size_t number_of_touched_bottom_states=0;
+      for(const transition_index ti: transitions)
+      {
+        const transition& t=m_aut.get_transitions()[ti];
+//std::cerr << "INSPECT TRANSITION  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
+        assert(m_states[t.from()].ref_states_in_blocks>=m_blocks[B].start_bottom_states &&
+                m_states[t.from()].ref_states_in_blocks<m_blocks[B].end_states);
+        if (m_states[t.from()].ref_states_in_blocks<m_blocks[B].start_non_bottom_states &&
+            m_states[t.from()].counter!=Rmarked)
+        {
+          assert(m_states[t.from()].counter==undefined);
+          m_states[t.from()].counter=Rmarked;
+          if (state_has_outgoing_co_transition(ti,old_constellation))
+          {
+            number_of_touched_bottom_states++;
+          }
+        }
+      }
+      // reset the marks. 
+      for(const transition_index ti: transitions)
+      {
+        const transition& t=m_aut.get_transitions()[ti];
+        if (m_states[t.from()].ref_states_in_blocks<m_blocks[B].start_non_bottom_states)
+        {
+          m_states[t.from()].counter=undefined;
+        }
+      }
+      const std::size_t number_of_bottom_states=std::distance(m_blocks[B].start_bottom_states,m_blocks[B].start_non_bottom_states);
+//std::cerr << "BOT " << number_of_bottom_states << " TOUCHED " << number_of_touched_bottom_states << "\n";
+      return  number_of_bottom_states>number_of_touched_bottom_states;
+    }
+
+    // Count the number of touched bottom states by outgoing transitions in Mleft.
+    std::size_t number_of_touched_bottom_states(const block_index bi, const linked_list_walker& Mleft)
+    {
+      long number_of_touched_bottom_states=0;
+      const block_type& B=m_blocks[bi];
+      for(const transition_index ti: Mleft)
+      {           
+        assert(ti<m_transitions.size());
+        const transition& t=m_aut.get_transitions()[ti];
+//std::cerr << "TOUC TRANS " << ti << "  STATE " << t.from() << "\n";
+        if (m_states[t.from()].ref_states_in_blocks<B.start_non_bottom_states &&
+            m_states[t.from()].counter!=Rmarked)
+        {
+//std::cerr << "TOUCHED\n";
+          number_of_touched_bottom_states++;
+          m_states[t.from()].counter=Rmarked;
+        } 
+      }     
+      for(const transition_index ti: Mleft)
+      {           
+        const transition& t=m_aut.get_transitions()[ti];
+//std::cerr << "TOUC TRANS " << ti << "  STATE " << t.from() << "\n";
+        if (m_states[t.from()].ref_states_in_blocks<B.start_non_bottom_states &&
+            m_states[t.from()].counter==Rmarked)
+        {
+//std::cerr << "TOUCHED\n";
+          m_states[t.from()].counter=undefined;
+        } 
+      }     
+//std::cerr << "Number of touched bottom states " << number_of_touched_bottom_states << "\n";
+      return number_of_touched_bottom_states;
     }
 
     // Select a block that is not the largest block in the constellation. 
@@ -2969,11 +3063,11 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
     {
       // This represents the while loop in Algorithm 1 from line 1.6 to 1.25.
 
-      index_to_set_of_T_map<state_index> Mleft_map(m_blocks.size());
+      index_to_set_of_T_map<transition_index> Mleft_map(m_blocks.size());
       // Algorithm 1, line 1.6.
       while (!m_non_trivial_constellations.empty())
       {
-        //print_data_structures("MAIN LOOP");
+        // print_data_structures("MAIN LOOP");
         assert(check_data_structures("MAIN LOOP"));
 
         // Algorithm 1, line 1.7.
@@ -2997,10 +3091,11 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         // This happens further below.
 
         // Algorithm 1, line 1.9.
-        states_per_action_label_type calM;
+        // states_and_co_transition_per_action_label_type calM;
+        transitions_per_action_label_type calM;
         //  state_label_to_size_t_map newly_created_state_to_constellation_count_entry;
         block_label_to_size_t_map block_label_to_cotransition;
-        state_label_to_transition_map transition_that_marks_a_state_per_label; 
+        // state_label_to_transition_map transition_that_marks_a_state_per_label; 
  
         // The following data structure maintains per state and action label from where to where the start_same_saC pointers
         // in m_outgoing_transitions still have to be set. 
@@ -3020,14 +3115,18 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           {
             const transition& t=m_aut.get_transitions()[*j];
 //std::cerr << "INCOMING TRANSITION  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-            // transition_that_marks_a_state_per_label[std::pair(t.from(), t.label())]=*j;
-            transition_that_marks_a_state_per_label.try_emplace({t.from(), t.label()},*j);
             
             // Add the source state grouped per label in calM, provided the transition is non inert.
             if (!m_aut.is_tau(t.label()) || m_states[t.from()].block!=m_states[t.to()].block)
             {
 //std::cerr << "PUT in calM " << m_aut.action_label(t.label()) << "  :=  " << t.from() << "\n";
-              calM[t.label()].emplace(t.from());
+              calM[t.label()].emplace(*j);
+              /* if (calM[t.label()].states.emplace(t.from()).second)
+              {
+                // State was inserted.
+                // transition_that_marks_a_state_per_label.try_emplace({t.from(), t.label()},*j);
+                calM[t.label()].co_transition=*j;
+              } */
             }
  
             // Update the state-action-constellation (saC) references in m_outgoing_transitions. 
@@ -3126,8 +3225,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           const outgoing_transitions_it end_it=((*si)+1>=m_states.size())?m_outgoing_transitions.end():m_states[(*si)+1].start_outgoing_transitions;
           for(outgoing_transitions_it tti=m_states[*si].start_outgoing_transitions;
                                        !found && tti!=end_it;
-                                       //tti!=m_outgoing_transitions.end() &&
-                                       //((*si)+1>=m_states.size() || tti!=m_states[(*si)+1].start_outgoing_transitions);
                                        ++tti)
           { 
             const transition& t=m_aut.get_transitions()[tti->transition];
@@ -3150,7 +3247,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           {
             // Algorithm 1, line 1.19.
             
-// std::cerr << "DO A TAU CO SPLIT " << old_constellation << "\n";
+//std::cerr << "DO A TAU CO SPLIT " << old_constellation << "\n";
             bool dummy=false;
             splitB<2>(index_block_B, 
                         LBC_list_state_iterator(co_t,m_transitions, m_aut.get_transitions()), 
@@ -3193,20 +3290,25 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             }
         }
         // Algorithm 1, line 1.10.
+        // for(const auto& [a, M_and_co_transition]: calM)
         for(const auto& [a, M]: calM)
         {
 //std::cerr << "ACTION " << m_aut.action_label(a) << " target block " << index_block_B << "\n";
-          //print_data_structures("Main loop");
+          // print_data_structures("Main loop");
           assert(check_data_structures("Main loop"));
           // Algorithm 1, line 1.11.
           // states_per_block_type Mleft_map;
           // index_to_set_of_T_map<state_index> Mleft_map(m_blocks.size());
           Mleft_map.clear(m_blocks.size());
-          for(const state_index si: M)
+          assert(!M.empty());
+          // const transition_index co_transition=*M.begin();
+          for(const transition_index ti: M)
           {
-//std::cerr << "INVESTIGATE " << si << "\n";
             // Mleft_map[m_states[si].block].insert(si);
-            Mleft_map.insert(m_states[si].block,si);
+            const transition& t=m_aut.get_transitions()[ti];
+//std::cerr << "INVESTIGATE " << ti << "\n";
+            // Mleft_map.insert(m_states[t.from()].block,t.from());
+            Mleft_map.insert(m_states[t.from()].block,ti);
           }
           // for(const auto& [bi, Mleft]: Mleft_map)
           for(const block_index bi: Mleft_map.filled_sets())
@@ -3215,62 +3317,35 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             // const std::vector<state_index>& Mleft=Mleft_map.get_set(bi);
             const linked_list_walker Mleft=Mleft_map.get_set(bi);
             assert(!Mleft.empty());
-            // Check whether the bottom states of bi are not all included in Mleft. 
-            // bool bottom_states_all_included=true;
-            long number_of_touched_bottom_states=0;
-            const block_type& B=m_blocks[bi];
-            for(const state_index si: Mleft)
-            {           
-//std::cerr << "TOUC STATE " << si << "\n";
-              if (m_states[si].ref_states_in_blocks<B.start_non_bottom_states)
-              {
-//std::cerr << "TOUCHED\n";
-                number_of_touched_bottom_states++;
-              } 
-            }     
-//std::cerr << "Number of touched bottom states " << number_of_touched_bottom_states << "\n";
-            bool split_is_possible=number_of_touched_bottom_states<std::distance(B.start_bottom_states,B.start_non_bottom_states);
-
-            /* for(typename std::vector<state_index>::iterator state_it=m_blocks[bi].start_bottom_states;
-                      state_it!=m_blocks[bi].start_non_bottom_states;
-                    state_it++)
-            {
-              if (Mleft.count(*state_it)==0)
-              {
-                bottom_states_all_included=false;
-                break; // leave the for loop.
-              }
-            } */
             block_index Bpp=bi;
-            // if (!bottom_states_all_included)
-            if (split_is_possible)
+            const block_type& B=m_blocks[bi];
+            // Check whether the bottom states of bi are not all included in Mleft. 
+            if (number_of_touched_bottom_states(bi, Mleft)<std::distance(B.start_bottom_states,B.start_non_bottom_states))
             {
 //std::cerr << "PERFORM A MAIN SPLIT \n";
               // Algorithm 1, line 1.12.
               bool M_in_bi1=true;
               std::size_t dummy_number=0;
-              // const set_of_states_type& Mleft_=Mleft;
-              block_index bi1=splitB<1>(bi, Mleft.begin(), 
-                                         Mleft.end(), 
-                                         m_blocks[bi].start_bottom_states, 
-                                         m_blocks[bi].start_non_bottom_states, 
-                                         dummy_number, // unused action index
-                                         dummy_number, ///unused constellation index
-                                         /* [&Mleft_](const state_index si){ return Mleft_.count(si)>0; }, */
-                                         M_in_bi1,
-                                         [&block_label_to_cotransition, ci, this]
-                                           (const block_index old_block, 
-                                            const block_index new_block,
-                                            const transition_index moved_transition,
-                                            const transition_index alternative_transition)
-                                           {
-                                             maintain_block_label_to_cotransition(
-                                                     old_block,
-                                                     new_block,
-                                                     moved_transition,
-                                                     alternative_transition, block_label_to_cotransition,
-                                                     ci);
-                                           });
+              block_index bi1=splitB<1>(bi, Mleft.fbegin(m_aut.get_transitions()), 
+                                            Mleft.fend(m_aut.get_transitions()), 
+                                            m_blocks[bi].start_bottom_states, 
+                                            m_blocks[bi].start_non_bottom_states, 
+                                            dummy_number, // unused action index
+                                            dummy_number, ///unused constellation index
+                                            M_in_bi1,
+                                            [&block_label_to_cotransition, ci, this]
+                                              (const block_index old_block, 
+                                               const block_index new_block,
+                                               const transition_index moved_transition,
+                                               const transition_index alternative_transition)
+                                              {
+                                                maintain_block_label_to_cotransition(
+                                                        old_block,
+                                                        new_block,
+                                                        moved_transition,
+                                                        alternative_transition, block_label_to_cotransition,
+                                                        ci);
+                                              });
               // Algorithm 1, line 1.13.
               if (M_in_bi1)
               {
@@ -3279,66 +3354,72 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
               // Algorithm 1, line 1.14 is implicitly done in the call of splitB above.
             }
             // Algorithm 1, line 1.17.
-            bool size_U_smaller_than_Bpp_bottom=false;
+            /* bool size_U_smaller_than_Bpp_bottom=false;
             for(typename std::vector<state_index>::iterator si=m_blocks[Bpp].start_bottom_states;
                               !size_U_smaller_than_Bpp_bottom &&
                               si!=m_blocks[Bpp].start_non_bottom_states; 
                             ++si)
             {
-              assert(transition_that_marks_a_state_per_label.count(std::pair(*si, a))>0);
-              if (!state_has_outgoing_co_transition(transition_that_marks_a_state_per_label[std::pair(*si, a)], old_constellation))
+              // assert(transition_that_marks_a_state_per_label.count(std::pair(*si, a))>0);
+              // if (!state_has_outgoing_co_transition(transition_that_marks_a_state_per_label[std::pair(*si, a)], old_constellation))
+              if (!state_has_outgoing_co_transition(co_transition, old_constellation))
               {
+//std::cerr << "HIERXX\n";
                 // This state has notransition to the old constellation. 
                 size_U_smaller_than_Bpp_bottom=true;
               }
-            }
+            } */
             // Algorithm 1, line 1.18.
             typename block_label_to_size_t_map::const_iterator bltc_it=block_label_to_cotransition.find(std::pair(Bpp,a));
             transition_index co_t=(bltc_it!=block_label_to_cotransition.end()?bltc_it->second:null_transition);
-            if (co_t!=null_transition && size_U_smaller_than_Bpp_bottom) 
+            // if (co_t!=null_transition && size_U_smaller_than_Bpp_bottom) 
+            if (co_t!=null_transition && some_bottom_state_has_no_outgoing_co_transition(Bpp, Mleft, old_constellation)) 
             {
+const transition& t=m_aut.get_transitions()[co_t];
+//std::cerr << "CO-TRANSITION  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
               // Algorithm 1, line 1.19.
               
               bool dummy=false;
               // const label_index& a_=a;
 //std::cerr << "PERFORM A MAIN CO-SPLIT \n";
-              splitB<2>(Bpp, LBC_list_state_iterator(co_t,m_transitions, m_aut.get_transitions()), 
-                          LBC_list_state_iterator(null_transition, m_transitions, m_aut.get_transitions()), 
-                          m_blocks[Bpp].start_bottom_states, 
-                          m_blocks[Bpp].start_non_bottom_states,
-                          a,
-                          old_constellation,
-                          /* [&](const state_index si)
-                            { 
-                              const state_type_gj s=m_states[si];
-                              for(outgoing_transitions_it tti=s.start_outgoing_transitions;
-                                   tti!=m_outgoing_transitions.end() &&
-                                   (si+1>=m_states.size() || tti!=m_states[si+1].start_outgoing_transitions);
-                                   ++tti)
-                              {
-                                const transition& t=m_aut.get_transitions()[tti->transition];
-                                if (t.label()==a_ && m_blocks[m_states[t.to()].block].constellation==old_constellation)
-                                {
-                                  return true; // this transition does not pass the filter.
-                                }
-                                tti=tti->start_same_saC; // This is an optimisation.
-                              }
-                              return false;
-                            }, */
-                          dummy,
-                          [&block_label_to_cotransition, ci, this]
-                            (const block_index old_block, 
-                             const block_index new_block,
-                             const transition_index moved_transition,
-                             const transition_index alternative_transition)
+              splitB<2>(Bpp, 
+                        LBC_list_state_iterator(co_t,m_transitions, m_aut.get_transitions()), 
+                        LBC_list_state_iterator(null_transition, m_transitions, m_aut.get_transitions()), 
+                        m_blocks[Bpp].start_bottom_states, 
+                        m_blocks[Bpp].start_non_bottom_states,
+                        a,
+                        old_constellation,
+                        /* [&](const state_index si)
+                          { 
+                            const state_type_gj s=m_states[si];
+                            for(outgoing_transitions_it tti=s.start_outgoing_transitions;
+                                 tti!=m_outgoing_transitions.end() &&
+                                 (si+1>=m_states.size() || tti!=m_states[si+1].start_outgoing_transitions);
+                                 ++tti)
                             {
-                              maintain_block_label_to_cotransition(
-                                      old_block,
-                                      new_block,
-                                      moved_transition,
-                                      alternative_transition, block_label_to_cotransition,
-                                      ci);
-                            });
+                              const transition& t=m_aut.get_transitions()[tti->transition];
+                              if (t.label()==a_ && m_blocks[m_states[t.to()].block].constellation==old_constellation)
+                              {
+                                return true; // this transition does not pass the filter.
+                              }
+                              tti=tti->start_same_saC; // This is an optimisation.
+                            }
+                            return false;
+                          }, */
+                        dummy,
+                        [&block_label_to_cotransition, ci, this]
+                          (const block_index old_block, 
+                           const block_index new_block,
+                           const transition_index moved_transition,
+                           const transition_index alternative_transition)
+                          {
+                            maintain_block_label_to_cotransition(
+                                    old_block,
+                                    new_block,
+                                    moved_transition,
+                                    alternative_transition, block_label_to_cotransition,
+                                    ci);
+                          });
               // Algorithm 1, line 1.20 and 1.21. P is updated implicitly when splitting Bpp.
 
             }
