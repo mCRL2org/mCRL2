@@ -80,11 +80,19 @@ struct transition_pointer_pair
 struct label_count_sum_tuple
 {
   std::size_t label_counter=0;
-  std::size_t cumulative_label_counter=0;
   std::size_t not_investigated=0;
 
   // The default initialiser does not initialize the fields of this struct. 
   label_count_sum_tuple()
+  {}
+};
+
+struct label_count_sum_triple: label_count_sum_tuple
+{
+  std::size_t cumulative_label_counter=0;
+
+  // The default initialiser does not initialize the fields of this struct. 
+  label_count_sum_triple()
   {}
 };
 
@@ -108,7 +116,6 @@ struct linked_list_iterator
 
   linked_list_iterator& operator ++()
   {
-//std::cerr << "INCREMENT " << m_i << "\n";
     assert(m_i!=null_pointer);
     assert(m_i+1<m_linked_list.size());
     m_i=m_linked_list[m_i+1];
@@ -1829,9 +1836,9 @@ mCRL2log(log::verbose) << "Start refining\n";
                        std::function<void(const state_index)> update_Ptilde=
                                                         [](const state_index){})
     {
-      assert(M_begin!=M_end && M_co_begin!=M_co_end);
 //std::cerr << "MARKED: "; for(auto s=M_begin; s!=M_end; ++s){ std::cerr << *s << " "; } std::cerr << "\n";
 //std::cerr << "UNMARKED: "; for(auto s=M_co_begin; s!=M_co_end; ++s){ std::cerr << *s << " "; } std::cerr << "\n";
+      assert(M_begin!=M_end && M_co_begin!=M_co_end);
       block_index bi=simple_splitB<VARIANT, MARKED_STATE_ITERATOR, UNMARKED_STATE_ITERATOR>
                  (B, M_begin, M_end, M_co_begin, M_co_end, a, C, M_in_new_block,update_Ptilde);
 
@@ -1976,25 +1983,31 @@ mCRL2log(log::verbose) << "Start refining\n";
       assert(s==m_aut.num_states());
     }
 
-    // template <bool SET_NOT_INVESTIGATED>
     void accumulate_entries(std::vector<label_count_sum_tuple>& action_counter, 
                             const std::vector<std::size_t>& todo_stack)
     {
       std::size_t sum=0;
       for(std::size_t index: todo_stack)
       {
-        action_counter[index].cumulative_label_counter=sum;
-      //   if (SET_NOT_INVESTIGATED)
-        {
-          action_counter[index].not_investigated=sum;
-        }
+        action_counter[index].not_investigated=sum;
         sum=sum+action_counter[index].label_counter;
-//std::cerr << "SUM " << sum << "\n";
       }
-//std::cerr << "ACCUMULATE ENTRIES\n"; for(auto a:action_counter){ std::cerr << "-- " << a.label_counter << "   " << a.not_investigated << "  " << a.cumulative_label_counter << "\n";} std::cerr << "-----------------------\n";
     }
 
-    void reset_entries(std::vector<label_count_sum_tuple>& action_counter, 
+    void accumulate_entries(std::vector<label_count_sum_triple>& action_counter, 
+                            const std::vector<std::size_t>& todo_stack)
+    {
+      std::size_t sum=0;
+      for(std::size_t index: todo_stack)
+      {
+        action_counter[index].cumulative_label_counter=sum;
+        action_counter[index].not_investigated=sum;
+        sum=sum+action_counter[index].label_counter;
+      }
+    }
+
+    template<class T>
+    void reset_entries(std::vector<T>& action_counter, 
                        std::vector<std::size_t>& todo_stack)
     {
       for(std::size_t index: todo_stack)
@@ -2003,6 +2016,93 @@ mCRL2log(log::verbose) << "Start refining\n";
         action_counter[index].label_counter=0;
       }
       todo_stack.clear();
+    }
+
+    std::size_t accumulate_entries(std::vector<std::size_t>& action_counter)
+    { 
+      std::size_t sum=0;
+      for(std::size_t& c: action_counter)
+      { 
+        std::size_t n=c;
+        c=sum;
+        sum=sum+n; 
+      }
+      return sum;
+    }
+
+    // Group the elements from begin up to end, using a range from [0,domain_size> where
+    // each element pinpointed by the iterator has a value indicated by get_value.
+    // first_element is the first element in the grouping, unless first_element is undefined, i.e. -1. 
+    
+    template <class ITERATOR>
+    void group_in_situ(const ITERATOR& begin, 
+                       const ITERATOR& end, 
+                       std::function<std::size_t(const ITERATOR)> get_value,
+                       std::vector<std::size_t>& todo_stack,
+                       std::vector<label_count_sum_tuple>& value_counter)
+    {
+      // Initialise the action counter.
+      reset_entries(value_counter, todo_stack);
+//std::cerr << "GROUP IN SITU " << &*begin << "   " << &*end << "   " << std::distance(begin,end) << "\n";
+//std::cerr << "VALUE COUNTER IN "; for(auto s:  value_counter){ std::cerr << s.label_counter << "  "; } std::cerr << "\n";
+//std::cerr << "RANGE IN  "; for(auto s=begin; s!=end; s++){ std::cerr << *s << "  "; } std::cerr << "\n";
+      for(ITERATOR i=begin; i!=end; ++i)
+      {
+        std::size_t n=get_value(i);
+//std::cerr << "CONSIDER IN SITU " << &*i << " with value " << n << "\n";
+        if (value_counter[n].label_counter==0)
+        {
+          todo_stack.push_back(n);
+        }
+        value_counter[n].label_counter++;
+      }
+
+      accumulate_entries(value_counter, todo_stack);
+//std::cerr << "VALUE COUNTER1 count  "; for(auto s:  value_counter){ std::cerr << s.label_counter << "  "; } std::cerr << "\n";
+//std::cerr << "VALUE COUNTER1 not_in "; for(auto s:  value_counter){ std::cerr << s.not_investigated << "  "; } std::cerr << "\n";
+
+      std::vector<label_index>::iterator current_value=todo_stack.begin();
+      for(ITERATOR i=begin; i!=end; ) 
+      {
+        std::size_t n=get_value(i);
+        if (n==*current_value)
+        {
+          value_counter[n].label_counter--;
+          value_counter[n].not_investigated++;
+          ++i;
+          while (current_value!=todo_stack.end() && value_counter[*current_value].label_counter==0)
+          {
+            current_value++;
+            if (current_value!=todo_stack.end())
+            {
+              i=begin+value_counter[*current_value].not_investigated; // Jump to the first non investigated action.
+            }
+            else
+            {
+              break; // exit the while loop.
+            }
+          }
+        }
+        else
+        {
+          // Find the first transition with a different label than t.label to swap with. 
+          ITERATOR new_position=begin+value_counter[n].not_investigated;
+          while (get_value(new_position)==n) 
+          {
+            value_counter[n].not_investigated++;
+            value_counter[n].label_counter--;
+            new_position++;
+            assert(new_position!=end);
+          }
+          assert(value_counter[n].label_counter>0);
+          std::swap(*i, *new_position);
+          value_counter[n].not_investigated++;
+          value_counter[n].label_counter--;
+        }
+      }
+//std::cerr << "TODO STACK "; for(auto s:  todo_stack){ std::cerr << s << "  "; } std::cerr << "\n";
+//std::cerr << "VALUE COUNTER2 "; for(auto s:  value_counter){ std::cerr << s.not_investigated << "  "; } std::cerr << "\n";
+//std::cerr << "RANGE OUT  "; for(auto s=begin; s!=end; s++){ std::cerr << *s << "  "; } std::cerr << "\n";
     }
 
 
@@ -2061,21 +2161,19 @@ mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
       count_incoming_transitions_per_state=std::vector<std::size_t>();
 
       // Group the transitions in turn per label for the incoming transitions.
-      std::vector<label_count_sum_tuple> action_counter(m_aut.num_action_labels());
+      std::vector<label_count_sum_triple> action_counter(m_aut.num_action_labels());
       std::vector<label_index> todo_stack;
 mCRL2log(log::verbose) << "Start grouping incoming transitions on label.\n";
 //std::cerr << "INCOMING TRANS1 "; for(auto s:  m_incoming_transitions){ std::cerr << s << "  "; } std::cerr << "\n";
       for(std::vector<transition_index>::iterator ti=m_incoming_transitions.begin(); ti!=m_incoming_transitions.end(); )
       {
         transition& t=m_aut.get_transitions()[*ti];
-//std::cerr << "TRANS  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
         state_index current_state=t.to();
         // Initialise the label counter for the current state.
         std::vector<transition_index>::iterator ti_walker=ti;
         do
         {
           const transition& t_walker=m_aut.get_transitions()[*ti_walker];
-//std::cerr << "TRANSWALKER  " << t_walker.from() << " -" << m_aut.action_label(t_walker.label()) << "-> " << t_walker.to() << "\n";
           if (!m_aut.is_tau(t_walker.label()) && action_counter[t_walker.label()].label_counter==0)
           {
             todo_stack.push_back(t_walker.label());
@@ -2085,37 +2183,30 @@ mCRL2log(log::verbose) << "Start grouping incoming transitions on label.\n";
         }
         while (ti_walker!=m_incoming_transitions.end() && m_aut.get_transitions()[*ti_walker].to()==current_state);
 
-//std::cerr << "DAAR1\n";
         m_states[current_state].start_incoming_non_inert_transitions=ti+action_counter[m_aut.tau_label_index()].label_counter;
 
         // put the tau action in front, if it exists.
         if (action_counter[m_aut.tau_label_index()].label_counter!=0)
         {
-//std::cerr << "DAAR2\n";
           todo_stack.insert(todo_stack.begin(), m_aut.tau_label_index());
         }
         accumulate_entries(action_counter, todo_stack);
 
-//std::cerr << "DAAR3\n";
         // Group the incoming transitions on action labels.
         std::vector<label_index>::iterator current_label=todo_stack.begin();
         for(std::vector<transition_index>::iterator ti_walker2=ti; ti_walker2<ti_walker; )
         {
-//std::cerr << "DAAR4 " << *current_label << "    " << m_aut.action_label(*current_label) << "\n";
           const transition& t=m_aut.get_transitions()[*ti_walker2];
           if (t.label()==*current_label)
           {
-//std::cerr << "DAAR5\n";
             action_counter[t.label()].label_counter--;
             m_transitions[*ti_walker2].ref_incoming_transitions=ti_walker2;
             ti_walker2++;
             while (current_label!=todo_stack.end() && action_counter[*current_label].label_counter==0)
             {
-//std::cerr << "DAAR6\n";
               current_label++;
               if (current_label!=todo_stack.end())
               {
-//std::cerr << "DAAR7 " <<  m_aut.action_label(*current_label) << "     " << action_counter[*current_label].cumulative_label_counter << "\n";
                 ti_walker2=ti+action_counter[*current_label].cumulative_label_counter; // Jump to the first non investigated action.
               }
             }
@@ -2123,17 +2214,14 @@ mCRL2log(log::verbose) << "Start grouping incoming transitions on label.\n";
           else
           {
             // Find the first transition with a different label than t.label to swap with. 
-//std::cerr << "DAAR8\n";
             std::vector<transition_index>::iterator new_position=ti+action_counter[t.label()].cumulative_label_counter;
             while (m_aut.get_transitions()[*new_position].label()==t.label())
             {
-//std::cerr << "DAAR9\n";
               m_transitions[*new_position].ref_incoming_transitions=new_position;
               action_counter[t.label()].cumulative_label_counter++;
               action_counter[t.label()].label_counter--;
               new_position++;
             }
-//std::cerr << "DAARA\n";
             assert(action_counter[t.label()].label_counter>0);
             std::swap(*ti_walker2, *new_position);
             m_transitions[*new_position].ref_incoming_transitions=new_position;
@@ -2141,7 +2229,6 @@ mCRL2log(log::verbose) << "Start grouping incoming transitions on label.\n";
             action_counter[t.label()].label_counter--;
           }
         }
-//std::cerr << "DAARB\n";
         reset_entries(action_counter, todo_stack);
         ti=ti_walker;
 
@@ -2326,29 +2413,27 @@ mCRL2log(log::verbose) << "Start setting incoming transitions 2\n";
 
 
 mCRL2log(log::verbose) << "Start filling states_in_blocks\n";
-      m_states_in_blocks.reserve(m_aut.num_states());
-      std::size_t i=0;
-      for(bool b: state_has_outgoing_tau)
-      {
-        if (!b)
-        {
-          m_states_in_blocks.emplace_back(i);
-          m_states[i].ref_states_in_blocks=m_states_in_blocks.end()-1;
-        }
-        i++;
-      }
-      m_blocks[0].start_bottom_states=m_states_in_blocks.begin();
-      m_blocks[0].start_non_bottom_states=m_states_in_blocks.end();
-      i=0;
+      m_states_in_blocks.resize(m_aut.num_states());
+      std::size_t i=0, lower_i=0, upper_i=m_states_in_blocks.size()-1;;
       for(bool b: state_has_outgoing_tau)
       {
         if (b)
         {
-          m_states_in_blocks.emplace_back(i);
-          m_states[i].ref_states_in_blocks=m_states_in_blocks.end()-1;
+          m_states_in_blocks[upper_i]=i;
+          m_states[i].ref_states_in_blocks=m_states_in_blocks.begin()+upper_i;
+          upper_i--;
+        }
+        else
+        {
+          m_states_in_blocks[lower_i]=i;
+          m_states[i].ref_states_in_blocks=m_states_in_blocks.begin()+lower_i;
+          lower_i++;
         }
         i++;
       }
+      assert(lower_i==upper_i+1);
+      m_blocks[0].start_bottom_states=m_states_in_blocks.begin();
+      m_blocks[0].start_non_bottom_states=m_states_in_blocks.begin()+lower_i;
       m_blocks[0].end_states=m_states_in_blocks.end();
 
       // print_data_structures("After initial reading before splitting in the initialisation",true);
@@ -2357,82 +2442,123 @@ mCRL2log(log::verbose) << "Start filling states_in_blocks\n";
       // The following implements line 1.3 of Algorithm 1. 
       // states_per_action_label_type states_per_action_label;
 mCRL2log(log::verbose) << "Start filling states_in_blocks XXXX\n";
-      index_to_set_of_T_map<state_index> states_per_action_label(m_aut.num_action_labels()); 
+      // index_to_set_of_T_map<state_index> states_per_action_label(m_aut.num_action_labels()); 
 
+      // Count the number of occurring action labels. 
+      std::vector<std::size_t> count_states_per_action(m_aut.num_action_labels(), 0);
       for(outgoing_transitions_it itpp=m_outgoing_transitions.begin(); itpp!=m_outgoing_transitions.end(); ++itpp) 
       {
         const transition& t=m_aut.get_transitions()[itpp->transition];
         if (!m_aut.is_tau(t.label()))
         {
-          states_per_action_label.insert(t.label(),t.from()); // insert, if it does not occur. 
-          // states_per_action_label.insert_unique(t.label(),t.from()); // insert, if it does not occur. 
+          count_states_per_action[t.label()]++;
+        }
+        itpp=itpp->start_same_saC;
+      }
+//std::cerr << "COUNT_STATES PER ACT1    "; for(auto s: count_states_per_action){ std::cerr << s << "  "; } std::cerr << "\n";
+      std::size_t size_of_states_per_action_label=accumulate_entries(count_states_per_action);
+//std::cerr << "COUNT_STATES PER ACT2    "; for(auto s: count_states_per_action){ std::cerr << s << "  "; } std::cerr << "\n";
+
+      std::vector<state_index> states_per_action_label(size_of_states_per_action_label);
+      for(outgoing_transitions_it itpp=m_outgoing_transitions.begin(); itpp!=m_outgoing_transitions.end(); ++itpp) 
+      {
+        const transition& t=m_aut.get_transitions()[itpp->transition];
+        if (!m_aut.is_tau(t.label()))
+        {
+          states_per_action_label[count_states_per_action[t.label()]]=t.from(); // insert, if it does not occur. 
+          count_states_per_action[t.label()]++;
         }
         itpp=itpp->start_same_saC;
       }
 
 mCRL2log(log::verbose) << "Start refining in the initialisation\n";
-      // for(const auto& [a, M]: states_per_action_label)
-      // for(label_index a=0; a<m_aut.num_action_labels(); ++a)
-      index_to_set_of_T_map<state_index> Bprime(m_blocks.size());
-      for(const label_index a: states_per_action_label.filled_sets())
+
+//std::cerr << "COUNT_STATES PER ACT     "; for(auto s: count_states_per_action){ std::cerr << s << "  "; } std::cerr << "\n";
+//std::cerr << "STATES PER ACTION LABEL  "; for(auto s: states_per_action_label){ std::cerr << s << "  "; } std::cerr << "\n";
+//std::cerr << "STATES PER ACTION LABELB "; for(auto s: states_per_action_label){ std::cerr << m_states[s].block << "  "; } std::cerr << "\n";
+      // Now traverse the states per equal label, grouping them first on outgoing block.
+      typename std::vector<state_index>::iterator start_index=states_per_action_label.begin();
+      // index_to_set_of_T_map<state_index> Bprime(m_blocks.size());
+      // for(const label_index a: states_per_action_label.filled_sets())
+      std::vector<label_count_sum_tuple> value_counter(m_blocks.size());
+      
+      for(label_index a=0; a<m_aut.num_action_labels(); ++a)
       {
-//std::cerr << "CONSIDER ACTION " << m_aut.action_label(a) << "\n";
-        // const std::vector<state_index>& M=states_per_action_label.get_set(a);
-        const linked_list_walker M=states_per_action_label.get_set(a);
-        // states_per_block_type Bprime;
-        // index_to_set_of_T_map<state_index> Bprime(m_blocks.size());
-        Bprime.clear(m_blocks.size());
-        for(const state_index s: M)
+        if (count_states_per_action[a]>0)
         {
-          // Bprime[m_states[s].block].insert(s);
-          Bprime.insert(m_states[s].block,s);
-        }
-        
-        // for(const auto& [block_ind, split_states]: Bprime)
-        for(block_index block_ind: Bprime.filled_sets())
-        {
-          // const std::vector<block_index>& split_states=Bprime.get_set(block_ind);
-          const linked_list_walker split_states=Bprime.get_set(block_ind);
-          // Check whether the block B, indexed by block_ind, can be split.
-          // This means that the bottom states of B are not all in the split_states.
-          const block_type& B=m_blocks[block_ind];
-          /* bool split_is_possible=false;
-          for(typename std::vector<state_index>::iterator i= B.start_bottom_states; 
-                       !split_is_possible && i< B.start_non_bottom_states; ++i)
+//std::cerr << "--------------------------------------------------\n";
+//std::cerr << "CONSIDER ACTION " << m_aut.action_label(a) << "   " << count_states_per_action[a] << "\n";
+          typename std::vector<state_index>::iterator end_index=states_per_action_label.begin()+count_states_per_action[a];
+
+          /* const linked_list_walker M=states_per_action_label.get_set(a);
+          // states_per_block_type Bprime;
+          // index_to_set_of_T_map<state_index> Bprime(m_blocks.size());
+          Bprime.clear(m_blocks.size());
+          for(const state_index s: M)
           {
-            if (!(split_states.count(*i)>0))
-            {
-              split_is_possible=true;
-            }
-          }  */
-          // Count the number of state in split_states that are bottom states.
-          long number_of_touched_bottom_states=0;
-          for(const state_index si: split_states)
+            // Bprime[m_states[s].block].insert(s);
+            Bprime.insert(m_states[s].block,s);
+          } */
+          
+          // Group the states per block.
+          value_counter.resize(m_blocks.size());
+          todo_stack.clear();
+          group_in_situ<typename std::vector<state_index>::iterator>(
+                        start_index,
+                        end_index,
+                        [this](const typename std::vector<state_index>::iterator si){ return m_states[*si].block; }, 
+                        todo_stack,
+                        value_counter);
+          // for(const auto& [block_ind, split_states]: Bprime)
+          // for(block_index block_ind: Bprime.filled_sets())
+          typename std::vector<state_index>::iterator start_index_per_block=start_index;
+          for(block_index block_ind: todo_stack)
           {
-            if (m_states[si].ref_states_in_blocks<B.start_non_bottom_states)
+//std::cerr << "INVESTIGATED " << block_ind << "    " << value_counter[block_ind].not_investigated << "\n";
+            typename std::vector<state_index>::iterator end_index_per_block=start_index+value_counter[block_ind].not_investigated;
+//std::cerr << "RANGE " << &*start_index_per_block << "    " << &*end_index_per_block << "\n";
+//std::cerr << "STATES PER ACTION LABEL  "; for(auto s: states_per_action_label){ std::cerr << s << "  "; } std::cerr << "\n";
+            // const std::vector<block_index>& split_states=Bprime.get_set(block_ind);
+            // const linked_list_walker split_states=Bprime.get_set(block_ind);
+            // Check whether the block B, indexed by block_ind, can be split.
+            // This means that the bottom states of B are not all in the split_states.
+            const block_type& B=m_blocks[block_ind];
+
+            // Count the number of state in split_states that are bottom states.
+            // long number_of_touched_bottom_states=0;
+            if (number_of_touched_bottom_states<typename std::vector<state_index>::iterator>
+                    (block_ind, start_index_per_block, end_index_per_block, 
+                        [](const typename std::vector<state_index>::iterator si){ return *si; }) <
+                            static_cast<std::size_t>(std::distance(B.start_bottom_states, B.start_non_bottom_states)))
+            /*for(typename std::vector<state_index>::iterator si=start_index_per_block; si!=end_index_per_block; ++si)
             {
-              number_of_touched_bottom_states++;
+              if (m_states[*si].ref_states_in_blocks<B.start_non_bottom_states)
+              {
+                number_of_touched_bottom_states++;
+              }
             }
+            bool split_is_possible=number_of_touched_bottom_states<std::distance(B.start_bottom_states,B.start_non_bottom_states);
+            if (split_is_possible) */
+            { 
+              bool dummy=false;
+              std::size_t dummy_number=-1;
+              const bool do_not_split_the_LBC_list=false;
+              splitB<1>(block_ind, 
+                        start_index_per_block,
+                        end_index_per_block,
+                        // split_states.begin(),
+                        // split_states.end(),
+                        B.start_bottom_states,
+                        B.start_non_bottom_states,
+                        dummy_number,   // an unused action index
+                        dummy_number,   // an unused constellation index
+                        dummy,
+                        [](const block_index, const block_index, const transition_index, const transition_index){},
+                        do_not_split_the_LBC_list);
+            }
+            start_index_per_block=end_index_per_block;
           }
-          bool split_is_possible=number_of_touched_bottom_states<std::distance(B.start_bottom_states,B.start_non_bottom_states);
-          if (split_is_possible)
-          { 
-            bool dummy=false;
-            std::size_t dummy_number=-1;
-            const bool do_not_split_the_LBC_list=false;
-            splitB<1>(block_ind, 
-                   split_states.begin(),
-                   split_states.end(),
-                   B.start_bottom_states,
-                   B.start_non_bottom_states,
-                   dummy_number,   // an unused action index
-                   dummy_number,   // an unused constellation index
-                   // [&split_states_](const state_index si){ return split_states_.count(si)>0; },
-                   //
-                   dummy,
-                   [](const block_index, const block_index, const transition_index, const transition_index){},
-                   do_not_split_the_LBC_list);
-          }
+          start_index=end_index;
         }
       }
      
@@ -2950,32 +3076,38 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
     }
 
     // Count the number of touched bottom states by outgoing transitions in Mleft.
-    std::size_t number_of_touched_bottom_states(const block_index bi, const linked_list_walker& Mleft)
+    template <class ITERATOR>
+    std::size_t number_of_touched_bottom_states(
+                      const block_index bi, 
+                      const ITERATOR begin,
+                      const ITERATOR end,
+                      const std::function<state_index(ITERATOR)> f)
     {
+// std::cerr << "NUMBER OF TOUCHED BOTTOM STATES " << &*begin << "    " << &*end << "\n";
+//std::cerr << "BOTTOME STATES "; for(auto s=begin; s!=end; ++s) { std::cerr << f(s) << " "; } std::cerr << "\n";
+
       long number_of_touched_bottom_states=0;
       const block_type& B=m_blocks[bi];
-      for(const transition_index ti: Mleft)
+      for(ITERATOR i=begin; i!=end; ++i)
       {           
-        assert(ti<m_transitions.size());
-        const transition& t=m_aut.get_transitions()[ti];
-//std::cerr << "TOUC TRANS " << ti << "  STATE " << t.from() << "\n";
-        if (m_states[t.from()].ref_states_in_blocks<B.start_non_bottom_states &&
-            m_states[t.from()].counter!=Rmarked)
+        state_index s=f(i);
+//std::cerr << "TOUCH STATE " << s << "\n";
+        if (m_states[s].ref_states_in_blocks<B.start_non_bottom_states &&
+            m_states[s].counter!=Rmarked)
         {
 //std::cerr << "TOUCHED\n";
           number_of_touched_bottom_states++;
-          m_states[t.from()].counter=Rmarked;
+          m_states[s].counter=Rmarked;
         } 
       }     
-      for(const transition_index ti: Mleft)
+      
+      for(ITERATOR i=begin; i!=end; ++i)
       {           
-        const transition& t=m_aut.get_transitions()[ti];
-//std::cerr << "TOUC TRANS " << ti << "  STATE " << t.from() << "\n";
-        if (m_states[t.from()].ref_states_in_blocks<B.start_non_bottom_states &&
-            m_states[t.from()].counter==Rmarked)
+        state_index s=f(i);
+        if (m_states[s].ref_states_in_blocks<B.start_non_bottom_states &&
+            m_states[s].counter==Rmarked)
         {
-//std::cerr << "TOUCHED\n";
-          m_states[t.from()].counter=undefined;
+          m_states[s].counter=undefined;
         } 
       }     
 //std::cerr << "Number of touched bottom states " << number_of_touched_bottom_states << "\n";
@@ -3091,11 +3223,8 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         // This happens further below.
 
         // Algorithm 1, line 1.9.
-        // states_and_co_transition_per_action_label_type calM;
         transitions_per_action_label_type calM;
-        //  state_label_to_size_t_map newly_created_state_to_constellation_count_entry;
         block_label_to_size_t_map block_label_to_cotransition;
-        // state_label_to_transition_map transition_that_marks_a_state_per_label; 
  
         // The following data structure maintains per state and action label from where to where the start_same_saC pointers
         // in m_outgoing_transitions still have to be set. 
@@ -3121,12 +3250,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             {
 //std::cerr << "PUT in calM " << m_aut.action_label(t.label()) << "  :=  " << t.from() << "\n";
               calM[t.label()].emplace(*j);
-              /* if (calM[t.label()].states.emplace(t.from()).second)
-              {
-                // State was inserted.
-                // transition_that_marks_a_state_per_label.try_emplace({t.from(), t.label()},*j);
-                calM[t.label()].co_transition=*j;
-              } */
             }
  
             // Update the state-action-constellation (saC) references in m_outgoing_transitions. 
@@ -3181,15 +3304,15 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
                   if (m_blocks[m_states[tw.to()].block].constellation==ci)
                   {
                     found=true;
+                    block_label_to_cotransition[std::pair(m_states[t.from()].block, t.label())]= *transition_walker;
                   }
                   else
                   {
                     ++transition_walker;
                   }
                 }
-                block_label_to_cotransition[std::pair(m_states[t.from()].block, t.label())]= (found?*transition_walker:null_transition);
               }
-              else 
+              if (!found)
               {
                 block_label_to_cotransition[std::pair(m_states[t.from()].block,t.label())]= null_transition;
               }
@@ -3256,23 +3379,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
                         m_blocks[index_block_B].start_non_bottom_states,
                         m_aut.tau_label_index(),
                         old_constellation,
-                        /* [&](const state_index si)
-                          { 
-                            const state_type_gj s=m_states[si];
-                            for(outgoing_transitions_it tti=s.start_outgoing_transitions;
-                                 tti!=m_outgoing_transitions.end() &&
-                                 (si+1>=m_states.size() || tti!=m_states[si+1].start_outgoing_transitions);
-                                 ++tti)
-                            {
-                              const transition& t=m_aut.get_transitions()[tti->transition];
-                              if (m_aut.is_tau(t.label()) && m_blocks[m_states[t.to()].block].constellation==old_constellation)
-                              {
-                                return true; // this transition does not pass the filter.
-                              }
-                              tti=tti->start_same_saC; // This is an optimisation.
-                            }
-                            return false;
-                          }, */
                         dummy,
                         [&block_label_to_cotransition, ci, this]
                           (const block_index old_block, 
@@ -3290,7 +3396,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             }
         }
         // Algorithm 1, line 1.10.
-        // for(const auto& [a, M_and_co_transition]: calM)
         for(const auto& [a, M]: calM)
         {
 //std::cerr << "ACTION " << m_aut.action_label(a) << " target block " << index_block_B << "\n";
@@ -3301,7 +3406,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           // index_to_set_of_T_map<state_index> Mleft_map(m_blocks.size());
           Mleft_map.clear(m_blocks.size());
           assert(!M.empty());
-          // const transition_index co_transition=*M.begin();
           for(const transition_index ti: M)
           {
             // Mleft_map[m_states[si].block].insert(si);
@@ -3320,7 +3424,10 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             block_index Bpp=bi;
             const block_type& B=m_blocks[bi];
             // Check whether the bottom states of bi are not all included in Mleft. 
-            if (number_of_touched_bottom_states(bi, Mleft)<std::distance(B.start_bottom_states,B.start_non_bottom_states))
+            if (number_of_touched_bottom_states<linked_list_iterator>
+                    (bi, Mleft.begin(), Mleft.end(), 
+                     [this]( linked_list_iterator ti){ return m_aut.get_transitions()[*ti].from(); } ) < 
+                static_cast<std::size_t>(std::distance(B.start_bottom_states, B.start_non_bottom_states)))
             {
 //std::cerr << "PERFORM A MAIN SPLIT \n";
               // Algorithm 1, line 1.12.
@@ -3343,7 +3450,8 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
                                                         old_block,
                                                         new_block,
                                                         moved_transition,
-                                                        alternative_transition, block_label_to_cotransition,
+                                                        alternative_transition, 
+                                                        block_label_to_cotransition,
                                                         ci);
                                               });
               // Algorithm 1, line 1.13.
@@ -3353,29 +3461,14 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
               }
               // Algorithm 1, line 1.14 is implicitly done in the call of splitB above.
             }
-            // Algorithm 1, line 1.17.
-            /* bool size_U_smaller_than_Bpp_bottom=false;
-            for(typename std::vector<state_index>::iterator si=m_blocks[Bpp].start_bottom_states;
-                              !size_U_smaller_than_Bpp_bottom &&
-                              si!=m_blocks[Bpp].start_non_bottom_states; 
-                            ++si)
-            {
-              // assert(transition_that_marks_a_state_per_label.count(std::pair(*si, a))>0);
-              // if (!state_has_outgoing_co_transition(transition_that_marks_a_state_per_label[std::pair(*si, a)], old_constellation))
-              if (!state_has_outgoing_co_transition(co_transition, old_constellation))
-              {
-//std::cerr << "HIERXX\n";
-                // This state has notransition to the old constellation. 
-                size_U_smaller_than_Bpp_bottom=true;
-              }
-            } */
-            // Algorithm 1, line 1.18.
+            // Algorithm 1, line 1.17 and line 1.18.
             typename block_label_to_size_t_map::const_iterator bltc_it=block_label_to_cotransition.find(std::pair(Bpp,a));
-            transition_index co_t=(bltc_it!=block_label_to_cotransition.end()?bltc_it->second:null_transition);
-            // if (co_t!=null_transition && size_U_smaller_than_Bpp_bottom) 
-            if (co_t!=null_transition && some_bottom_state_has_no_outgoing_co_transition(Bpp, Mleft, old_constellation)) 
+
+            if (bltc_it!=block_label_to_cotransition.end() && 
+                bltc_it->second!=null_transition &&
+                some_bottom_state_has_no_outgoing_co_transition(Bpp, Mleft, old_constellation)) 
             {
-const transition& t=m_aut.get_transitions()[co_t];
+// const transition& t=m_aut.get_transitions()[bltc_it->second];
 //std::cerr << "CO-TRANSITION  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
               // Algorithm 1, line 1.19.
               
@@ -3383,29 +3476,12 @@ const transition& t=m_aut.get_transitions()[co_t];
               // const label_index& a_=a;
 //std::cerr << "PERFORM A MAIN CO-SPLIT \n";
               splitB<2>(Bpp, 
-                        LBC_list_state_iterator(co_t,m_transitions, m_aut.get_transitions()), 
+                        LBC_list_state_iterator(bltc_it->second, m_transitions, m_aut.get_transitions()), 
                         LBC_list_state_iterator(null_transition, m_transitions, m_aut.get_transitions()), 
                         m_blocks[Bpp].start_bottom_states, 
                         m_blocks[Bpp].start_non_bottom_states,
                         a,
                         old_constellation,
-                        /* [&](const state_index si)
-                          { 
-                            const state_type_gj s=m_states[si];
-                            for(outgoing_transitions_it tti=s.start_outgoing_transitions;
-                                 tti!=m_outgoing_transitions.end() &&
-                                 (si+1>=m_states.size() || tti!=m_states[si+1].start_outgoing_transitions);
-                                 ++tti)
-                            {
-                              const transition& t=m_aut.get_transitions()[tti->transition];
-                              if (t.label()==a_ && m_blocks[m_states[t.to()].block].constellation==old_constellation)
-                              {
-                                return true; // this transition does not pass the filter.
-                              }
-                              tti=tti->start_same_saC; // This is an optimisation.
-                            }
-                            return false;
-                          }, */
                         dummy,
                         [&block_label_to_cotransition, ci, this]
                           (const block_index old_block, 
