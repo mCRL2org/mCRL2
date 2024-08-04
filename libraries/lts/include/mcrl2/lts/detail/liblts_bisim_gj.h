@@ -536,15 +536,8 @@ class bisim_partitioner_gj
     // typedef std::unordered_set<constellation_index> set_of_constellations_type;
     typedef std::vector<constellation_index> set_of_constellations_type;
 
-    struct marked_states_and_co_transition
-    {
-      set_of_states_type states;
-      transition_index co_transition=null_transition;
-    };
-
     // typedef std::unordered_map<label_index, set_of_states_type > states_per_action_label_type;
     typedef std::unordered_map<label_index, set_of_transitions_type > transitions_per_action_label_type;
-    // typedef std::unordered_map<label_index, marked_states_and_co_transition > states_and_co_transition_per_action_label_type; // Marked states, and a co-transition.
     // typedef std::unordered_map<block_index, set_of_states_type > states_per_block_type;
     /* typedef std::unordered_map<std::pair<block_index, label_index>, std::list<transition_index>::iterator >
                       block_label_to_list_iterator_map; */
@@ -3257,9 +3250,9 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
  
         // The following data structure maintains per state and action label from where to where the start_same_saC pointers
         // in m_outgoing_transitions still have to be set. 
-        typedef std::unordered_map < std::pair<state_index, label_index>, std::pair < outgoing_transitions_it, outgoing_transitions_it> >
+        /* typedef std::unordered_map < std::pair<state_index, label_index>, std::pair < outgoing_transitions_it, outgoing_transitions_it> >
                 repair_pointers_type;
-        repair_pointers_type repair_pointers;
+        repair_pointers_type repair_pointers; */
  
         std::vector<std::size_t> todo_stack_labels;
         std::vector<std::size_t> count_transitions_per_label(m_aut.num_action_labels(),0);
@@ -3285,6 +3278,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         }
         std::size_t size_of_states_per_action_label=accumulate_entries(count_transitions_per_label, todo_stack_labels);
         std::vector<transition_index> calM(size_of_states_per_action_label);
+        std::vector<transition_index> transitions_for_which_start_same_saC_must_be_repaired;
 
         // Walk through all states in block B
         for(typename std::vector<state_index>::iterator i=m_blocks[index_block_B].start_bottom_states;
@@ -3332,15 +3326,16 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
               end_same_saC->start_same_saC++;
             }
        
-            typename repair_pointers_type::iterator rep_it=repair_pointers.find(std::pair(t.from(), t.label()));
-            if (rep_it==repair_pointers.end())
+            // typename repair_pointers_type::iterator rep_it=repair_pointers.find(std::pair(t.from(), t.label()));
+            /* if (rep_it==repair_pointers.end())
             {
               repair_pointers[std::pair(t.from(), t.label())]=std::pair(pos2,pos2);
             }
             else
             {
               rep_it->second.second=pos2;  // set the end of the items to repair to pos2.
-            }
+            } */
+            transitions_for_which_start_same_saC_must_be_repaired.push_back(*j);
             
             // Update the block_label_to_cotransition map.
             if (block_label_to_cotransition.find(std::pair(m_states[t.from()].block,t.label()))==block_label_to_cotransition.end())
@@ -3381,7 +3376,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
 //std::cerr << "GROUPED TRANS in calM1 "; for(auto t: calM) { std::cerr << t << "   "; } std::cerr << "\n";
 
         // Repair the start_same_saC links.
-        for(typename repair_pointers_type::iterator rep_it=repair_pointers.begin(); rep_it!=repair_pointers.end(); rep_it++)
+        /* for(typename repair_pointers_type::iterator rep_it=repair_pointers.begin(); rep_it!=repair_pointers.end(); rep_it++)
         {
           const outgoing_transitions_it start_repair_pointer=rep_it->second.first;
           const outgoing_transitions_it end_repair_pointer=rep_it->second.second;
@@ -3391,6 +3386,33 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           }
           assert(end_repair_pointer!=m_outgoing_transitions.end());
           end_repair_pointer->start_same_saC=start_repair_pointer;
+        } */
+
+        while (!transitions_for_which_start_same_saC_must_be_repaired.empty())
+        {
+          transition_index ti=transitions_for_which_start_same_saC_must_be_repaired.back();
+          transitions_for_which_start_same_saC_must_be_repaired.pop_back();
+          const outgoing_transitions_it outgoing_it=m_transitions[ti].ref_outgoing_transitions;
+          const transition& t=m_aut.get_transitions()[ti];
+          if ((outgoing_it+1)!=m_outgoing_transitions.end())
+          {
+            const transition& t_next=m_aut.get_transitions()[(outgoing_it+1)->transition];
+            if (t.from()==t_next.from() && t.label()==t_next.label() && 
+                m_blocks[m_states[t.to()].block].constellation==m_blocks[m_states[t_next.to()].block].constellation)
+            {
+              outgoing_it->start_same_saC=(outgoing_it+1)->start_same_saC;
+              outgoing_it->start_same_saC->start_same_saC=outgoing_it; // let the last transition point to this transitions,
+                                                                       // as this one is first, due to the use of the repair vector as a stack.. 
+            }
+            else 
+            {
+              outgoing_it->start_same_saC=outgoing_it;
+            }
+          }
+          else 
+          {
+            outgoing_it->start_same_saC=outgoing_it;
+          }
         }
 
         // ---------------------------------------------------------------------------------------------
