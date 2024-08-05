@@ -287,24 +287,12 @@ QProcess* ProcessSystem::createSubprocess(
               << outputFile 
               << "--verbose"
               << QString("--lin-method=").append(QString::fromStdString(mcrl2::lps::print_lin_method(fileSystem->linearisationMethod())));
-#ifdef MCRL2_JITTYC_ENABLED
-    if (fileSystem->enableJittyc())
-    {
-      arguments<< "--rewriter=jittyc";
-    }
-#endif // MCRL2_JITTYC_ENABLED
     break;
 
   case SubprocessType::Lpsxsim:
     program = "lpsxsim";
     inputFile = fileSystem->lpsFilePath();
     arguments << inputFile;
-#ifdef MCRL2_JITTYC_ENABLED
-    if (fileSystem->enableJittyc())
-    {
-      arguments<< "--rewriter=jittyc";
-    }
-#endif // MCRL2_JITTYC_ENABLED
     break;
 
   case SubprocessType::Lps2lts:
@@ -312,9 +300,15 @@ QProcess* ProcessSystem::createSubprocess(
     inputFile = fileSystem->lpsFilePath(specType, property.name, evidence);
     outputFile = fileSystem->ltsFilePath(mcrl2::lts::lts_eq_none, specType,
                                          property.name, evidence);
-    arguments << inputFile << outputFile << "--rewriter=jitty"
+    arguments << inputFile << outputFile
               << "--strategy=breadth"
               << "--verbose";
+#ifdef MCRL2_ENABLE_JITTYC
+    if (fileSystem->enableJittyc())
+    {
+      arguments<< "--rewriter=jittyc";
+    }
+#endif // MCRL2_JITTYC_ENABLED
     break;
 
   case SubprocessType::Ltsconvert:
@@ -367,12 +361,6 @@ QProcess* ProcessSystem::createSubprocess(
     {
       arguments << "--counter-example";
     }
-#ifdef MCRL2_JITTYC_ENABLED
-    if (fileSystem->enableJittyc())
-    {
-      arguments<< "--rewriter=jittyc";
-    }
-#endif // MCRL2_JITTYC_ENABLED
     break;
 
   case SubprocessType::Pbessolve:
@@ -383,7 +371,7 @@ QProcess* ProcessSystem::createSubprocess(
               << "--search-strategy=breadth-first"
               << "--solve-strategy=0"
               << "--verbose";
-#ifdef MCRL2_JITTYC_ENABLED
+#ifdef MCRL2_ENABLE_JITTYC
     if (fileSystem->enableJittyc())
     {
       arguments<< "--rewriter=jittyc";
@@ -406,12 +394,6 @@ QProcess* ProcessSystem::createSubprocess(
     program = "mcrl2i";
     inputFile = fileSystem->lpsFilePath();
     arguments << inputFile << "-e" << expression;
-#ifdef MCRL2_JITTYC_ENABLED
-    if (fileSystem->enableJittyc())
-    {
-      arguments<< "--rewriter=jittyc";
-    }
-#endif // MCRL2_JITTYC_ENABLED
 
     connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(rewriteResult(int)));
