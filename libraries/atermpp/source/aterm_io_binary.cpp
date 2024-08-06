@@ -36,7 +36,8 @@ static constexpr std::uint16_t BAF_MAGIC = 0x8baf;
 /// 28 February 2020  : version changed to 0x8306 (added ability to stream aterm_int, implemented structured streaming for all objects)
 /// 24 January 2023   : version changed to 0x8307 (removed NoIndex from Variables, Boolean variables. Made the .lts format more
 ///                                                compact by not storing states with a default probability 1)
-static constexpr std::uint16_t BAF_VERSION = 0x8307;
+/// 6  August 2024    : version changed to 0x8308 (introduced machine numbers)
+static constexpr std::uint16_t BAF_VERSION = 0x8308;
 
 /// \brief Each packet has a header consisting of a type.
 /// \details Either indicates a function symbol, a term (either shared or output) or an arbitrary integer.
