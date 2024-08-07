@@ -416,6 +416,13 @@ struct block_type
 
 struct constellation_type
 {
+// David suggests: group the states not only per block but also per constellation in m_states_in_blocks.
+// Then, a constellation can be a contiguous area in m_states_in_blocks,
+// and we do not need to store a list of block indices to describe a constellation
+// (but only the index of the first and last state in m_states_in_blocks that belongs to the constellation).
+// With that grouping, it is also not necessary to store constellations in a vector
+// or a list; one can allocate each constellation as its own data structure
+// and use a pointer to constellation_type as identifier of a constellation.
   std::forward_list<block_index> blocks;
 
   constellation_type(const block_index bi)
@@ -695,6 +702,9 @@ class bisim_partitioner_gj
         assert(b.start_bottom_states>=m_states_in_blocks.begin());
         assert(b.start_non_bottom_states<=m_states_in_blocks.end()); 
         assert(b.start_non_bottom_states>=m_states_in_blocks.begin());
+// David suggests: assert(b.start_bottom_states <= b.start_non_bottom_states);
+// assert(b.start_non_bottom_states <= b_end_states);
+// assert(b.end_states <= m_states_in_blocks.end());
         
         for(typename std::vector<state_index>::iterator is=b.start_bottom_states;
                    is!=b.start_non_bottom_states; ++is)
@@ -783,6 +793,7 @@ class bisim_partitioner_gj
 
     void print_data_structures(const std::string& header, const bool initialisation=false) const
     {
+      if (!mCRL2logEnabled(log::debug))  return;
       mCRL2log(log::debug) << "========= PRINT DATASTRUCTURE: " << header << " =======================================\n";
       mCRL2log(log::debug) << "++++++++++++++++++++  States     ++++++++++++++++++++++++++++\n";
       for(state_index si=0; si<m_states.size(); ++si)
@@ -980,6 +991,8 @@ mCRL2log(log::verbose) << "Start refining\n";
     /// reference to the LTS was stored in the object by the constructor.
     void finalize_minimized_LTS()
     {
+// David suggests: replace this by a loop that goes through the <block,action,constellation> sets.
+// Every such set produces exactly one transition in the minimized LTS.
       // std::unordered_set<transition> T;
       std::unordered_set<transition> T;
       for(const transition& t: m_aut.get_transitions())
@@ -1062,6 +1075,9 @@ mCRL2log(log::verbose) << "Start refining\n";
               typename std::vector<state_index>::iterator pos2, 
               typename std::vector<state_index>::iterator pos3) 
     {
+// David suggests: actually it is enough to require
+// assert(pos1 != pos2 || pos2 == pos3);
+// (Memory help: pos3 should be between pos1 and pos2.)
       assert(pos1!=pos2 && pos2!=pos3 && pos3!=pos1);
       const state_index temp=*pos1;
       *pos1=*pos3;
@@ -1106,6 +1122,9 @@ mCRL2log(log::verbose) << "Start refining\n";
         typename std::vector<state_index>::iterator pos=m_states[s].ref_states_in_blocks;
         if (pos>=m_blocks[B].start_non_bottom_states) // the state is a non bottom state.
         {
+// David suggests: change the assertion in swap_state_in_states_in_block() so you do not need to distinguish cases here.
+// Doing additional assignments is likely faster than all these branches.
+// (perhaps only distinguish between no swap is needed at all/some swap is needed)
           // We know that B must have a bottom state. Not true all bottom states can be removed from B. 
           // assert(m_blocks[B].start_bottom_states!=m_blocks[B].start_non_bottom_states);
           if (pos==m_blocks[B].start_bottom_states)
@@ -1141,6 +1160,12 @@ mCRL2log(log::verbose) << "Start refining\n";
         }
         else // the state is a bottom state
         {
+// David suggests: change the assertion in swap_state_in_states_in_block() so you do not need to distinguish cases here.
+// Doing additional assignments is likely faster than all these branches.
+// (perhaps only distinguish between no swap is needed at all/some swap is needed)
+// Also, think whether R always starts with bottom states and then continues with nonbottom states;
+// in that case, the iteration over R could be split into two parts, the first part being over bottom states
+// and the second part over nonbottom states. The first part then can assume that B_new does not (yet) contain nonbottom states.
           // Three cases. pos==B_new.start_non_bottom_states
           if (pos==m_blocks[B_new].start_non_bottom_states)
           {
@@ -1205,11 +1230,14 @@ mCRL2log(log::verbose) << "Start refining\n";
       std::list<transition_index > :: iterator this_block_to_constellation=
                            m_transitions[ti].transitions_per_block_to_constellation;
       std::list<transition_index > :: iterator next_block_to_constellation=
+// David suggests: std::next(this_block_to_constellation)
                            ++std::list<transition_index > :: iterator(this_block_to_constellation);
       bool last_element_removed=remove_from_the_doubly_linked_list_LBC_in_blocks(ti);
 
       // if this transition is inert, it is inserted in a block in front. Otherwise, it is inserted after
-      // the current element in the list. 
+      // the current element in the list.
+// David suggests: Does this combine well with divergence preservation?
+// For divergence preservation, tau-self-loops are regarded as noninert.
       if (m_aut.is_tau(t.label()) && m_states[t.from()].block==m_states[t.to()].block)
       {
         std::list<transition_index >::iterator first_block_to_constellation=m_blocks[m_states[t.from()].block].block_to_constellation.begin();
@@ -1576,6 +1604,8 @@ mCRL2log(log::verbose) << "Start refining\n";
             break;
           }
           case outgoing_action_constellation_check_during_initialisation:
+// David suggests: this should not be necessary, because the bottom states can always be split
+// before the two coroutines start.
           {
 //std::cerr << "U_outg_actconstcheckduringit\n";
             if (current_U_outgoing_transition_iterator==m_outgoing_transitions.end() ||
@@ -1593,6 +1623,8 @@ mCRL2log(log::verbose) << "Start refining\n";
               // if (2*(U.size()+U_todo.size())>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
               if (2*m_U.size()>B_size+1)  // Compensate with +1 for division by 2. I.e. if B_size=3, U.size()+U.todo_size() of 2
                                                         // should not lead to an abort. 
+// David suggests: is the +1 really necessary? If B has 3 states, then the block that has 2 states can be aborted.
+// (However, might it be that some states in U.todo will end up in R?)
               {
                 /* for(const state_index si: counter_reset_vector)
                 {
@@ -1711,6 +1743,9 @@ mCRL2log(log::verbose) << "Start refining\n";
                 }
                 else */
                 if (VARIANT==2)
+// David suggests: one can skip the outgoing_action_constellation_check if R has completely initialized.
+// This is the case if R_status==state_checking || R_status==incoming_inert_transition_checking
+// and it might be the case if R_status==aborted as well; so one should add a variable that reports this.
                 {
 //std::cerr << "HIER6\n";
                   // Start searching for an outgoing transition with action a to constellation C. 
