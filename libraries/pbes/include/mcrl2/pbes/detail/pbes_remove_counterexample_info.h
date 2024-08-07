@@ -24,23 +24,38 @@ static std::regex positive("Zpos_(\\d+)_.*");
 static std::regex negative("Zneg_(\\d+)_.*");
 static std::regex positive_or_negative("Z(neg|pos)_(\\d+)_.*");
 
+
+/// \brief Guesses if the PBES equation is a counter example equation
+inline
+bool is_counter_example_equation(const pbes_equation& equation)
+{
+  std::smatch match;
+  std::string X = equation.variable().name();
+  return std::regex_match(X, match, positive_or_negative);
+}
+
+/// \brief Guesses if the PBES variable instantiation is for counter example equation
+inline
+bool is_counter_example_instantiation(const propositional_variable_instantiation& inst)
+{
+  std::smatch match;
+  std::string X = inst.name();
+  return std::regex_match(X, match, positive_or_negative);
+}
+
 /// \brief Guesses if a pbes has counter example information
 inline
 bool has_counter_example_information(const pbes& pbesspec)
 {
-  std::regex re("Z(neg|pos)_(\\d+)_.*");
-  std::smatch match;
   for (const pbes_equation& eqn: pbesspec.equations())
   {
-    std::string X = eqn.variable().name();
-    if (std::regex_match(X, match, re))
+    if (is_counter_example_equation(eqn))
     {
       return true;
     }
   }
   return false;
 }
-
 struct subsitute_counterexample: public pbes_expression_builder<subsitute_counterexample>
 {
   typedef pbes_expression_builder<subsitute_counterexample> super;
