@@ -335,7 +335,6 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       desc.add_option("split-conditions",
                       "split disjunctive conditions to obtain more summands with potentially less dependencies",
                       'c');
-      desc.add_option("strategy", "computes the winning strategy");
       desc.add_option("total", "make the SRF PBES total", 't');
       desc.add_option("reset", "set constant values when introducing parameters");
 
@@ -525,8 +524,12 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             << std::endl;
       }
       
+
       data::mutable_map_substitution<> sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
       pbes_system::detail::replace_global_variables(pbesspec, sigma);
+
+      // Unify the parameters of the original PBES (which has potential counter example information)
+      unify_parameters(pbesspec);
 
       // If we have counter example information we remove it first.
       pbes_system::pbes pbesspec_without_counterexample =  mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec);
