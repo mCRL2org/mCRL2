@@ -14,9 +14,9 @@
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/default_expression_generator.h"
-#include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/srf_pbes.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include <optional>
 
 namespace mcrl2 {
@@ -101,6 +101,11 @@ struct unify_parameters_replace_function
 
   propositional_variable_instantiation operator()(const propositional_variable_instantiation& x) const
   {
+    if (detail::is_counter_example_instantiation(x))
+    {
+      return x;
+    }
+
     const data::variable_list& variables = propositional_variable_parameters.at(x.name());
     const data::data_expression_list& values = x.parameters();
     auto i = variables.begin();
@@ -133,7 +138,11 @@ void unify_parameters(pbes& p)
   std::map<core::identifier_string, data::variable_list> propositional_variable_parameters;
   for (const pbes_equation& eqn: p.equations())
   {
-    propositional_variable_parameters[eqn.variable().name()] = eqn.variable().parameters();
+    // Ignore the counter example equations for the list of parameters.
+    if (!detail::is_counter_example_equation(eqn))
+    {
+      propositional_variable_parameters[eqn.variable().name()] = eqn.variable().parameters();
+    }
   }
 
   unify_parameters_replace_function replace(propositional_variable_parameters, p.data());
@@ -147,8 +156,12 @@ void unify_parameters(pbes& p)
   // update the left hand sides of the equations
   for (pbes_equation& eqn: p.equations())
   {
-    propositional_variable& X = eqn.variable();
-    X = propositional_variable(X.name(), replace.parameters);
+    // Do not replace the counter example equations
+    if (!detail::is_counter_example_equation(eqn))
+    {
+      propositional_variable& X = eqn.variable();
+      X = propositional_variable(X.name(), replace.parameters);
+    }
   }
 }
 
