@@ -20,6 +20,7 @@
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/pbes/replace_capture_avoiding_with_an_identifier_generator.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/utilities/skip.h"
