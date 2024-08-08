@@ -472,6 +472,7 @@ namespace detail
 
       }
 
+      make_term_list(result); // Put the empty list in result.
       for(typename std::vector<Term>::const_reverse_iterator i = buffer.rbegin(); i != buffer.rend(); ++i)
       {
         result.push_front(*i);
