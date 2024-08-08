@@ -952,9 +952,9 @@ class bisim_partitioner_gj
         assert(b.start_bottom_states>=m_states_in_blocks.begin());
         assert(b.start_non_bottom_states<=m_states_in_blocks.end()); 
         assert(b.start_non_bottom_states>=m_states_in_blocks.begin());
-// David suggests: assert(b.start_bottom_states <= b.start_non_bottom_states);
-// assert(b.start_non_bottom_states <= b_end_states);
-// assert(b.end_states <= m_states_in_blocks.end());
+        assert(b.start_bottom_states <= b.start_non_bottom_states);
+        assert(b.start_non_bottom_states <= b_end_states);
+        assert(b.end_states <= m_states_in_blocks.end());
         
         for(typename std::vector<state_index>::iterator is=b.start_bottom_states;
                    is!=b.start_non_bottom_states; ++is)
@@ -1254,7 +1254,6 @@ mCRL2log(log::verbose) << "Start refining\n";
 
 // David suggests: replace this by a loop that goes through the <block,action,constellation> sets.
 // Every such set produces exactly one transition in the minimized LTS.
-      // std::unordered_set<transition> T;
 
       std::unordered_set<transition> T;
       for(const transition& t: m_aut.get_transitions())
