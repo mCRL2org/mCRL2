@@ -187,98 +187,76 @@ struct linked_list
   // Puts a new element after the current element indicated by pos, unless
   // pos==nullptr, in which it is put in front of the list. 
   template <class... Args>
-  // iterator emplace(iterator pos, const T& t)
   iterator emplace(iterator pos, Args&&... args)
   {
-//std::cerr << "emplace " << &*pos << "   " << *T(args...).start_same_BLC << " ** " << *T(args...).end_same_BLC << "\n";
     if (pos==nullptr)
     {
-//std::cerr << "L1\n";
       return emplace_front(args...);
     }
 
     iterator new_position;
     if (m_free_list==nullptr)
     {
-//std::cerr << "L2\n";
       new_position=&m_content.emplace_back(T(args...), pos->next(), pos);
     }
     else
     { 
       // Take an element from the free list. 
-//std::cerr << "L5\n";
       new_position=m_free_list;
       m_free_list=m_free_list->next();
       new_position->prev()=pos;
       new_position->next()=pos->next();;
-//std::cerr << "GVDGVDemplace " << *T(args...).start_same_BLC << " ** " << *T(args...).end_same_BLC << "\n";
-//std::cerr << "WASDANUVOOR " << *new_position->start_same_BLC << " ** " << *new_position->end_same_BLC << "\n";
-      // static_cast<T>(*new_position)=T(args...);
       new_position->content()=T(args...);
-//std::cerr << "WASDANU NA  " << *new_position->start_same_BLC << " ** " << *new_position->end_same_BLC << "\n";
     }
     if (pos->next()!=nullptr)
     {
-//std::cerr << "L6\n";
       pos->next()->prev()=new_position;
     }
     pos->next()=new_position;
 
-//std::cerr << "L8\n";
     return new_position;
   }
 
   template <class... Args>
   iterator emplace_front(Args&&... args)
   {
-//std::cerr << "emplace_front \n";
     iterator new_position;
     if (m_free_list==nullptr)
     {
-//std::cerr << "L21\n";
       new_position=&m_content.emplace_back(T(args...), m_initial_node, nullptr);  // Deliver the address to new position.
     } 
     else
     {
-//std::cerr << "L22\n";
       // Take an element from the free list. 
       new_position=m_free_list;
       m_free_list=m_free_list->next();
-      //static_cast<T>(*new_position)=T(args...);
       new_position->content()=T(args...);
       new_position->next()=m_initial_node;
       new_position->prev()=nullptr;                    
     }       
     if (m_initial_node!=nullptr)
     {
-//std::cerr << "L23\n";
       m_initial_node->prev()=new_position;
     } 
     m_initial_node=new_position;
 
-//std::cerr << "L24\n";
     return new_position;
   }
 
   void erase(iterator pos)
   {
-//std::cerr << "erase " << &*pos << "\n";
     if (pos->next()!=nullptr)
     {
-//std::cerr << "L31\n";
       pos->next()->prev()=pos->prev();
     }
     if (pos->prev()!=nullptr)
     {
-//std::cerr << "L32\n";
       pos->prev()->next()=pos->next();
     }
     else
     {
-//std::cerr << "L33\n";
       m_initial_node=pos->next();
     }
-//std::cerr << "L34\n";
     pos->next()=m_free_list;
     m_free_list=pos;
 #ifndef NDEBUG
@@ -953,7 +931,7 @@ class bisim_partitioner_gj
         assert(b.start_non_bottom_states<=m_states_in_blocks.end()); 
         assert(b.start_non_bottom_states>=m_states_in_blocks.begin());
         assert(b.start_bottom_states <= b.start_non_bottom_states);
-        assert(b.start_non_bottom_states <= b_end_states);
+        assert(b.start_non_bottom_states <= b.end_states);
         assert(b.end_states <= m_states_in_blocks.end());
         
         for(typename std::vector<state_index>::iterator is=b.start_bottom_states;
