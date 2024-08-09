@@ -26,6 +26,7 @@ namespace mcrl2::symbolic
 constexpr std::uint32_t relprod_ignore = std::numeric_limits<std::uint32_t>::max(); // used by alternative_relprod/relprev
 
 // A very inefficient implementation of relprod, that matches the specification closely
+inline
 sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const summand_group& R)
 {
   using namespace sylvan::ldds;
@@ -88,6 +89,7 @@ sylvan::ldds::ldd alternative_relprod(const sylvan::ldds::ldd& todo, const summa
 }
 
 // A very inefficient implementation of relprev, that matches the specification closely
+inline 
 sylvan::ldds::ldd alternative_relprev(const sylvan::ldds::ldd& Y, const summand_group& R, const sylvan::ldds::ldd& X)
 {
   using namespace sylvan::ldds;

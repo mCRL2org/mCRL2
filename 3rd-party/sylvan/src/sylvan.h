@@ -20,6 +20,9 @@
  * Include this file.
  */
 
+#ifndef SYLVAN_H
+#define SYLVAN_H
+
 #include <sylvan_config.h>
 
 #include <assert.h>
@@ -63,3 +66,5 @@ namespace sylvan {
 #ifdef __cplusplus
 }
 #endif
+
+#endif // SYLVAN_H
