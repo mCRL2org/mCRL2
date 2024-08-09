@@ -1441,27 +1441,13 @@ mCRL2log(log::verbose) << "Start refining\n";
       return B_new;
     }
     
-    /* void insert_in_the_doubly_linked_list_LBC_in_blocks(
-               const transition_index ti,
-               std::list<transition_index>::iterator position)
-    {
-      transition_index& current_transition_index= *position;
-      // insert after current transition.
-      m_transitions[ti].previous_LBC=current_transition_index;
-      m_transitions[ti].next_LBC=m_transitions[current_transition_index].next_LBC;
-      m_transitions[ti].transitions_per_block_to_constellation=position;
-      if (m_transitions[current_transition_index].next_LBC!=null_transition)
-      {
-        m_transitions[m_transitions[current_transition_index].next_LBC].previous_LBC=ti;
-      }
-      m_transitions[current_transition_index].next_LBC=ti;
-    } */
-    
+    // It is assumed that the new block is located precisely before the old_block in m_BLC_transitions.
     bool swap_in_the_doubly_linked_list_LBC_in_blocks(
                const transition_index ti,
-               linked_list<BLC_indicators>::iterator old_BLC_block,
-               linked_list<BLC_indicators>::iterator new_BLC_block)
+               linked_list<BLC_indicators>::iterator new_BLC_block,
+               linked_list<BLC_indicators>::iterator old_BLC_block)
     {
+      assert(new_BLC_block->end_same_BLC==old_BLC_block->start_same_BLC);
       std::vector<transition_index>::iterator old_position=m_transitions[ti].ref_BLC_list;
       std::vector<transition_index>::iterator new_position=new_BLC_block->end_same_BLC;
       if (old_position!=new_position)
@@ -1487,16 +1473,15 @@ mCRL2log(log::verbose) << "Start refining\n";
                const transition& t,
                const transition_index ti)
     {
-//std::cerr << "UPDATE BLOCK LBC CONSTELLATION " << index_block_B << "    " << ti << "  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-//std::cerr << "BLC TRANSITIONS1 "; for(auto s: m_BLC_transitions){ std::cerr << s << " "; } std::cerr << "\n";
       assert(m_states[t.to()].block==index_block_B);
       bool last_element_removed;
       linked_list<BLC_indicators>::iterator this_block_to_constellation=
                            m_transitions[ti].transitions_per_block_to_constellation;
-//std::cerr << "THIS LIST HISSIE TRANSITIE " << *(this_block_to_constellation->start_same_BLC) << "\n";
       assert(this_block_to_constellation!= m_blocks[m_states[t.from()].block].block_to_constellation.end());
       // if this transition is inert, it is inserted in a block in front. Otherwise, it is inserted after
       // the current element in the list. 
+// David suggests: Does this combine well with divergence preservation?
+// For divergence preservation, tau-self-loops are regarded as noninert.
       if (m_aut.is_tau(t.label()) && m_states[t.from()].block==m_states[t.to()].block)
       {
         linked_list<BLC_indicators>::iterator first_block_to_constellation=m_blocks[m_states[t.from()].block].block_to_constellation.begin();
@@ -1512,12 +1497,10 @@ mCRL2log(log::verbose) << "Start refining\n";
                                    this_block_to_constellation->start_same_BLC, 
                                    this_block_to_constellation->start_same_BLC);
         }
-        last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, this_block_to_constellation, first_block_to_constellation);
-//std::cerr << "BLC TRANSITIONS2 "; for(auto s: m_BLC_transitions){ std::cerr << s << " "; } std::cerr << "\n";
+        last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti,  first_block_to_constellation, this_block_to_constellation);
       }
       else 
       {
-//std::cerr << "KOEKEOEK\n";
         // std::list<BLC_indicators>::iterator next_block_to_constellation=
         //                     ++std::list<BLC_indicators>::iterator(this_block_to_constellation);
         linked_list<BLC_indicators>::iterator next_block_to_constellation=this_block_to_constellation;
@@ -1527,98 +1510,19 @@ mCRL2log(log::verbose) << "Start refining\n";
             m_aut.get_transitions()[*(next_block_to_constellation->start_same_BLC)].label()!=t.label())
         { 
           // Make a new entry in the list next_block_to_constellation, after the current list element.
-//std::cerr << "EMPLACE1  " << std::distance(m_BLC_transitions.begin(), this_block_to_constellation->start_same_BLC) << "\n";
           next_block_to_constellation=
                   m_blocks[m_states[t.from()].block].block_to_constellation.
-                           // emplace(next_block_to_constellation, 
                            emplace(this_block_to_constellation, 
                                    this_block_to_constellation->start_same_BLC,
                                    this_block_to_constellation->start_same_BLC);
-//std::cerr << "EMPLACE1 CHECK  " << *(this_block_to_constellation->start_same_BLC) << "\n";
         }
-//for(state_index bi=0; bi<m_blocks.size(); ++bi)
-//{
-//  std::cerr << "BLOCKAAAAAAAAAAAAA " << bi << "\n";
-//  display_BLC_list(bi);
-//}                             
-//std::cerr << "BLC TRANSITIONSPRE  "; for(auto s: m_BLC_transitions){ std::cerr << s << " "; } std::cerr << "\n";
-        last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, this_block_to_constellation, next_block_to_constellation);
-//std::cerr << "BLC TRANSITIONSPOST "; for(auto s: m_BLC_transitions){ std::cerr << s << " "; } std::cerr << "\n";
-//for(state_index bi=0; bi<m_blocks.size(); ++bi)
-//{
-//  std::cerr << "BLOCKIIIIIIIIIIIII " << bi << "\n";
-//  display_BLC_list(bi);
-//}
-      }
-      
-      if (last_element_removed)
-      {
-//std::cerr << "ERASE1\n";
-        m_blocks[m_states[t.from()].block].block_to_constellation.erase(this_block_to_constellation);
-      }
-//std::cerr << "BLC TRANSITIONS4 "; for(auto s: m_BLC_transitions){ std::cerr << s << " "; } std::cerr << "\n";
-//for(state_index bi=0; bi<m_blocks.size(); ++bi)
-//{
-//  display_BLC_list(bi);
-//}
-      /* assert(m_states[t.to()].block==index_block_B);
-
-      std::list<transition_index > :: iterator this_block_to_constellation=
-                           m_transitions[ti].transitions_per_block_to_constellation;
-      std::list<transition_index > :: iterator next_block_to_constellation=
-// David suggests: std::next(this_block_to_constellation)
-                           ++std::list<transition_index > :: iterator(this_block_to_constellation);
-      bool last_element_removed=remove_from_the_doubly_linked_list_LBC_in_blocks(ti);
-
-      // if this transition is inert, it is inserted in a block in front. Otherwise, it is inserted after
-      // the current element in the list.
-// David suggests: Does this combine well with divergence preservation?
-// For divergence preservation, tau-self-loops are regarded as noninert.
-      if (m_aut.is_tau(t.label()) && m_states[t.from()].block==m_states[t.to()].block)
-      {
-        std::list<transition_index >::iterator first_block_to_constellation=m_blocks[m_states[t.from()].block].block_to_constellation.begin();
-        if ( first_block_to_constellation==this_block_to_constellation ||
-             m_states[m_aut.get_transitions()[*first_block_to_constellation].to()].block!=index_block_B ||
-             m_aut.get_transitions()[*first_block_to_constellation].label()!=t.label())
-        { 
-          // Make a new entry in the list block_to_constellation, at the beginning;
-          
-          first_block_to_constellation=
-                  m_blocks[m_states[t.from()].block].block_to_constellation.
-                           insert(first_block_to_constellation, ti);
-          m_transitions[ti].transitions_per_block_to_constellation=first_block_to_constellation;
-          m_transitions[ti].previous_LBC=null_transition;
-          m_transitions[ti].next_LBC=null_transition;
-        }
-        else
-        {
-          insert_in_the_doubly_linked_list_LBC_in_blocks(ti, first_block_to_constellation);
-        }
-      }
-      else 
-      {
-        if (next_block_to_constellation==m_blocks[m_states[t.from()].block].block_to_constellation.end() ||
-            m_states[m_aut.get_transitions()[*next_block_to_constellation].to()].block!=index_block_B ||
-            m_aut.get_transitions()[*next_block_to_constellation].label()!=t.label())
-        { 
-          // Make a new entry in the list next_block_to_constellation, after the current list element.
-          next_block_to_constellation=
-                  m_blocks[m_states[t.from()].block].block_to_constellation.
-                           insert(next_block_to_constellation, ti);
-          m_transitions[ti].transitions_per_block_to_constellation=next_block_to_constellation;
-          m_transitions[ti].previous_LBC=null_transition;
-          m_transitions[ti].next_LBC=null_transition;
-        }
-        else
-        {
-          insert_in_the_doubly_linked_list_LBC_in_blocks(ti, next_block_to_constellation);
-        }
+        last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, next_block_to_constellation, this_block_to_constellation);
       }
       
       if (last_element_removed)
       {
         m_blocks[m_states[t.from()].block].block_to_constellation.erase(this_block_to_constellation);
-      } */
+      }
     }
 
     // Update the LBC list of a transition, when the from state of the transition moves
@@ -1626,9 +1530,9 @@ mCRL2log(log::verbose) << "Start refining\n";
     transition_index update_the_doubly_linked_list_LBC_new_block(
                const block_index old_bi,
                const block_index new_bi,
-               const transition_index ti,
-               std::unordered_map< std::pair <label_index, constellation_index>, 
-                            linked_list< BLC_indicators >::iterator>& new_LBC_list_entries)
+               const transition_index ti)
+/*               std::unordered_map< std::pair <label_index, constellation_index>, 
+                            linked_list< BLC_indicators >::iterator>& new_LBC_list_entries)*/
     {
       const transition& t=m_aut.get_transitions()[ti];
       transition_index remaining_transition=null_transition;
@@ -1637,17 +1541,29 @@ mCRL2log(log::verbose) << "Start refining\n";
       
       linked_list<BLC_indicators>::iterator this_block_to_constellation=
                            m_transitions[ti].transitions_per_block_to_constellation;
-      std::unordered_map< std::pair <label_index, constellation_index>,
+      /* std::unordered_map< std::pair <label_index, constellation_index>,
                           linked_list<BLC_indicators>::iterator>::iterator it=
-                     new_LBC_list_entries.find(std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation));
+                     new_LBC_list_entries.find(std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation)); */
+      transition_index co_transition=null_transition;
+      bool co_block_found=false;
+      if (this_block_to_constellation->start_same_BLC!=m_BLC_transitions.begin())
+      {
+        co_transition=*(this_block_to_constellation->start_same_BLC-1);
+        const transition& co_t=m_aut.get_transitions()[co_transition];
+        co_block_found=m_states[co_t.from()].block==new_bi &&
+                       co_t.label()==t.label() &&
+                       m_blocks[m_states[co_t.to()].block].constellation==m_blocks[m_states[t.to()].block].constellation;
+      }
+
       bool last_element_removed;
 
-      if (it==new_LBC_list_entries.end())
+      // if (it==new_LBC_list_entries.end())
+      if (!co_block_found)
       { 
         // Make a new entry in the list next_block_to_constellation;
         assert(m_states[t.from()].block==new_bi);
         
-        // Put inert tau's to the front. Others, 
+        // Put inert tau's to the front. Otherwise, the new block is put after the current block. 
         linked_list<BLC_indicators>::iterator new_position;
         std::vector<transition_index>::iterator old_BLC_start=m_transitions[ti].transitions_per_block_to_constellation->start_same_BLC;
         if (m_blocks[new_bi].block_to_constellation.empty() || 
@@ -1660,29 +1576,22 @@ mCRL2log(log::verbose) << "Start refining\n";
         else 
         {
           new_position=m_blocks[new_bi].block_to_constellation.begin();
-          //++new_position; HOEFT NIET bij user defined list.
-          // new_position= m_blocks[new_bi].block_to_constellation.insert(new_position,BLC_indicators(old_BLC_start, old_BLC_start));
-//std::cerr << "EMPLACE2\n";
           new_position= m_blocks[new_bi].block_to_constellation.emplace(new_position,old_BLC_start, old_BLC_start);
         }
-        new_LBC_list_entries[std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation)]=new_position;
-        /* transition_type& tt=m_transitions[ti];
-        tt.next_LBC=null_transition;
-        tt.previous_LBC=null_transition;
-        tt.transitions_per_block_to_constellation=new_position; */
-        last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, this_block_to_constellation, new_position);
+        // new_LBC_list_entries[std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation)]=new_position;
+        last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, new_position, this_block_to_constellation);
       }
       else
       {
         // Move the current transition to the next list indicated by the iterator it.
-        last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, this_block_to_constellation, it->second);
-        // insert_in_the_doubly_linked_list_LBC_in_blocks(ti, it->second);
+        // last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, it->second, this_block_to_constellation);
+        linked_list<BLC_indicators>::iterator new_BLC_block= m_transitions[co_transition].transitions_per_block_to_constellation;
+        last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, new_BLC_block, this_block_to_constellation);
       }
       
       if (last_element_removed)
       {
         // Remove this element. 
-//std::cerr << "ERASE2\n";
         m_blocks[old_bi].block_to_constellation.erase(this_block_to_constellation);
       }
       else
@@ -2233,8 +2142,8 @@ mCRL2log(log::verbose) << "Start refining\n";
 
       // Update the LBC_list, and bottom states, and invariant on inert transitions.
       // Recall new LBC positions.
-      std::unordered_map< std::pair <label_index, constellation_index>, 
-                            linked_list<BLC_indicators>::iterator> new_LBC_list_entries;
+      // std::unordered_map< std::pair <label_index, constellation_index>, 
+      //                      linked_list<BLC_indicators>::iterator> new_LBC_list_entries;
       for(typename std::vector<state_index>::iterator ssi=m_blocks[bi].start_bottom_states;
                                                       ssi!=m_blocks[bi].end_states;
                                                       ++ssi)
@@ -2288,7 +2197,8 @@ mCRL2log(log::verbose) << "Start refining\n";
           const outgoing_transitions_it end_it=((si+1)==m_states.size())?m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
           for(outgoing_transitions_it ti=s.start_outgoing_transitions; ti!=end_it; ti++)
           {       
-            transition_index old_remaining_transition=update_the_doubly_linked_list_LBC_new_block(B, bi, ti->transition, new_LBC_list_entries);
+            // transition_index old_remaining_transition=update_the_doubly_linked_list_LBC_new_block(B, bi, ti->transition, new_LBC_list_entries);
+            transition_index old_remaining_transition=update_the_doubly_linked_list_LBC_new_block(B, bi, ti->transition);
             process_transition(ti->transition, old_remaining_transition, B);
             update_block_label_to_cotransition(B, bi, ti->transition, old_remaining_transition);
           }
