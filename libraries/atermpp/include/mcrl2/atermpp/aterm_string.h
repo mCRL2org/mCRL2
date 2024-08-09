@@ -66,7 +66,7 @@ public:
 
   /// \brief Conversion operator
   /// \return The term converted to string
-  operator std::string() const
+  operator const std::string&() const
   {
     return function().name();
   }

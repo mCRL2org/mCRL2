@@ -20,8 +20,8 @@ namespace mcrl2
 namespace data
 {
 /// \brief Components for generating an arbitrary element of a sort
-/// \details This component is not deterministic. So, it is not guaranteed
-///          to deliver the same element each time it is run.
+/// \details This component delivers a term based on a lexicographic ordering of
+///          function symbols. It delivers the same element each time it is run.
 ///
 /// A representative is an arbitrary element of a given sort. This
 /// component takes a specification and generates representatives for sorts
@@ -30,7 +30,7 @@ namespace data
 /// that the context -constructors and mappings for the sort- remain
 /// unchanged.
 ///
-/// The general aim is to keep the representative expression as simple. Use of
+/// The general aim is to keep the representative expression simple. Use of
 /// constructors is preferred above mappings and constructors or
 /// mappings representing constants are preferred over those that have
 /// non-empty domain.
@@ -106,6 +106,32 @@ class representative_generator
       return true;
     }
 
+    bool search_for_lexicographically_minimal_symbol(function_symbol& f_result, 
+                                                   const sort_expression& sort,
+                                                   const std::vector<function_symbol>& function_symbols)
+    {
+      bool function_symbol_found=false;
+      for (const function_symbol& f: function_symbols)
+      {
+        if (f.sort()==sort)
+        {
+          if (function_symbol_found) 
+          {
+            if (static_cast<const std::string&>(f.name())<static_cast<const std::string&>(f_result.name()))
+            {
+              f_result=f;
+            }
+          }
+          else
+          {
+            f_result=f;
+            function_symbol_found=true;
+          }
+        }
+      }
+      return function_symbol_found;
+    }
+
     /// \brief Finds a representative element for an arbitrary sort expression
     /// \param[in] sort the sort for which to find the representative
     /// \param[in] visited_sorts A set of sorts for which no representative can be constructed. This is used to prevent 
@@ -136,17 +162,16 @@ class representative_generator
       if (is_function_sort(sort))
       {
         // s is a function sort. 
-        // First check if there is a mapping with sort s (constructors with sort s cannot exist).
+        // First search for a lexicographically minimal mapping with sort s (constructors with sort s cannot exist).
+        function_symbol minimal_f;
         const function_sort& fs=atermpp::down_cast<function_sort>(sort);
-        for (const function_symbol& f: m_specification.mappings(fs.codomain()))
+        if (search_for_lexicographically_minimal_symbol(minimal_f, sort, m_specification.mappings(fs.codomain())))
         {
-          if (f.sort()==sort)
-          {
-            result=f;
-            set_representative(sort, result);
-            return true;
-          }
+           result=minimal_f;
+           set_representative(sort, result);
+           return true;
         }
+
         // If no explicit constant is found of this sort, we know that its shape is "s0#..#sn -> s". 
         // We search a term t of sort s and if found, construct a lambda term of the shape 
         // lambda x0:s0,...,xn:sn.t. Note that this can be strengthened slightly by incorporating
@@ -174,14 +199,12 @@ class representative_generator
         // s is a constant (not a function sort).
         // check if there is a constant constructor for s
 
-        for (const function_symbol& f: m_specification.constructors(sort))
+        function_symbol minimal_c;
+        if (search_for_lexicographically_minimal_symbol(minimal_c, sort, m_specification.constructors(sort)))
         {
-          if (f.sort()==sort)
-          { 
-            result=f;
-            set_representative(sort, result);
-            return true;
-          }
+          result=minimal_c;
+          set_representative(sort, result);
+          return true;
         }
 
         visited_sorts.insert(sort);
@@ -192,6 +215,7 @@ class representative_generator
         
         // recursively traverse constructor functions of the form f:s1#...#sn -> sort.
         // operators with f:s1#...#sn->G where G is a complex sort expression are ignored
+
         for (const function_symbol& f: m_specification.constructors(sort))
         {
           if (find_representative(f, visited_sorts, result))
