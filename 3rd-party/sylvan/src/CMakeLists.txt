@@ -7,6 +7,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 add_library(sylvan
+  STATIC
   lace.c
   sha2.c
   sylvan_bdd.c
