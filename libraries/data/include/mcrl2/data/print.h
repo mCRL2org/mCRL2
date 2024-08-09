@@ -67,6 +67,22 @@ inline bool look_through_numeric_casts(const data_expression& x, std::function<b
   return f(x);
 }
 
+// Check whether this term is an applicatino with a head of the shape "UntypedIdentifier(s)" for
+// the given string s.
+inline bool head_matches_undefined_symbol(const data_expression& x, const core::identifier_string& s)
+{
+  if (is_application(x))
+  {
+    const data_expression& h=atermpp::down_cast<application>(x).head();
+    if (is_untyped_identifier(h))
+    {
+      const untyped_identifier& u=atermpp::down_cast<untyped_identifier>(h);
+      return u.name()==s;
+    }
+  }
+  return false;
+}
+
 /* inline
 data_expression remove_numeric_casts(data_expression x)
 {
@@ -83,10 +99,12 @@ bool is_plus(const application& x)
   return look_through_numeric_casts(
                 x,
                 [](const data_expression& x)
-                   { return sort_int::is_plus_application(x) ||
-                            sort_nat::is_plus_application(x) ||
-                            sort_pos::is_plus_application(x) ||
-                            sort_real::is_plus_application(x); });
+                   { 
+                     return // sort_int::is_plus_application(x)  ||
+                            // sort_nat::is_plus_application(x)  ||
+                            // sort_pos::is_plus_application(x)  ||
+                            sort_real::is_plus_application(x) ||
+                            head_matches_undefined_symbol(x, sort_pos::plus_name()); });
 }
 
 inline
@@ -95,8 +113,9 @@ bool is_minus(const application& x)
   return look_through_numeric_casts(
                 x,
                 [](const data_expression& x)
-                   { return sort_int::is_minus_application(x) ||
-                            sort_real::is_minus_application(x); });
+                   { return // sort_int::is_minus_application(x)  ||
+                            sort_real::is_minus_application(x) ||
+                            head_matches_undefined_symbol(x, sort_int::minus_name()); });
 }
 
 inline
@@ -136,7 +155,8 @@ bool is_divides(const application& x)
   return look_through_numeric_casts(
                 x,
                 [](const data_expression& x)
-                   { return sort_real::is_divides_application(x); });
+                   { return sort_real::is_divides_application(x)  ||
+                            head_matches_undefined_symbol(x, sort_real::divides_name()); });
 }
 
 inline
@@ -229,7 +249,8 @@ bool is_times(const application& x)
   return look_through_numeric_casts(
                 x,
                 [](const data_expression& x)
-                   { return sort_int::is_times_application(x); });
+                   { return sort_int::is_times_application(x) ||
+                            head_matches_undefined_symbol(x, sort_pos::times_name()); });
 }
 
 inline
@@ -708,7 +729,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       return;
     }
     derived().print(opener);
-    for (auto i = container.begin(); i != container.end(); ++i)
+    for (typename Container::iterator i = container.begin(); i != container.end(); ++i)
     {
       if (i != container.begin())
       {
@@ -1194,11 +1215,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       auto i = x.begin();
       data_expression left = *i++;
       data_expression right = *i;
-      print_expression(left, false);
+
+
+      print_expression(left, precedence(left)<precedence(x));
       derived().print(" ");
       derived().apply(x.head());
       derived().print(" ");
-      print_expression(right, false);
+      print_expression(right, precedence(right)<precedence(x));
       return;
     }
 
