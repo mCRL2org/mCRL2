@@ -6,11 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/pbesinst_lazy_algorithm.h
+/// \file mcrl2/pbes/pbesinst_lazyh
 /// \brief A lazy algorithm for instantiating a PBES, ported from bes_deprecated.h.
+
+#ifndef MCRL2_PBES_PBESINST_LAZY_H
+#define MCRL2_PBES_PBESINST_LAZY_H
 
 #include <thread>
 #include <mutex>
+#include <functional>
+#include <regex>
 
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
@@ -18,17 +23,18 @@
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/replace_constants_by_variables.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
+#include "mcrl2/pbes/structure_graph.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/pbes/transformations.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
-#ifndef MCRL2_PBES_PBESINST_LAZY_H
-#define MCRL2_PBES_PBESINST_LAZY_H
 
 namespace mcrl2
 {
@@ -346,14 +352,10 @@ class pbesinst_lazy_algorithm
                              const propositional_variable_instantiation& X,
                              const pbes_expression& psi
                             )
-    {
+    {  
       if (m_options.optimization >= 1)
       {
         rewrite_true_false(result, symbol, X, psi);
-      }
-      else
-      {
-        result = psi;
       }
     }
 

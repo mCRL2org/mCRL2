@@ -52,10 +52,10 @@
 #include <sylvan.h>
 #include <sylvan_table.h>
 #include <sylvan_ldd.h>
-
+#include <sylvan_int.h>
 #include <boost/iterator/iterator_facade.hpp>
 
-extern llmsset_t nodes;
+static uint64_t cache_merge_id = 0;
 
 namespace sylvan::ldds
 {
@@ -370,10 +370,10 @@ inline ldd cube(const std::vector<std::uint32_t>& v)
 }
 
 // member_cube(A,v) = check if cube(v) is in the set A
-inline ldd member_cube(const ldd& A, const std::vector<std::uint32_t>& v)
+inline bool member_cube(const ldd& A, const std::vector<std::uint32_t>& v)
 {
   LACE_ME;
-  return ldd(lddmc_member_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size()));
+  return lddmc_member_cube(A.get(), const_cast<std::uint32_t*>(v.data()), v.size());
 }
 
 // union_cube(A,v) = union_(A,cube(v))
@@ -534,7 +534,7 @@ void ldd_solutions_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, vo
 }
 
 inline
-std::vector<std::vector<std::uint32_t>> ldd_solutions(const sylvan::ldds::ldd& x)
+std::vector<std::vector<std::uint32_t>> ldd_solutions(const ldds::ldd& x)
 {
   std::vector<std::vector<std::uint32_t>> result;
   sat_all_nopar(x, ldd_solutions_callback, &result);
@@ -542,7 +542,7 @@ std::vector<std::vector<std::uint32_t>> ldd_solutions(const sylvan::ldds::ldd& x
 }
 
 inline
-std::string print_ldd(const sylvan::ldds::ldd& x)
+std::string print_ldd(const ldds::ldd& x)
 {
   std::ostringstream out;
   auto solutions = ldd_solutions(x);
@@ -574,9 +574,9 @@ std::string print_ldd(const sylvan::ldds::ldd& x)
 }
 
 inline
-std::ostream& operator<<(std::ostream& out, const sylvan::ldds::ldd& x)
+std::ostream& operator<<(std::ostream& out, const ldds::ldd& x)
 {
-  return out << sylvan::ldds::print_ldd(x);
+  return out << ldds::print_ldd(x);
 }
 
 // Returns { x in X | x[0] = value }
@@ -593,6 +593,50 @@ ldd fix_first_element(const ldd& X, std::uint32_t value)
     }
   }
   return node(value, x.down());
+}
+
+// Initialise caches for custom LDD operations.
+void initialise() {
+  cache_merge_id = cache_next_opid();
+}
+
+/// Returns the height of the LDD assuming that all branches are the same
+/// height, which is an invariant of LDDs.
+std::uint32_t height(ldd a) {
+  assert(a != empty_set());
+  if (a == empty_list())
+  {
+    return 0;
+  }
+
+  return 1 + height(a.down());
+}
+
+/// Computes the cartesian product of a and b in an interleaved fashion.
+///
+/// Requires that a and b are the same height.
+///
+/// merge(A, B) = { a_0b_0a_1b_1... | a in A, b in B }
+ldd merge(ldd a, ldd b) {
+  if (a == ldds::empty_list()) {
+    return b;
+  } else if (b == ldds::empty_list()) {
+    return a;
+  } else if (a == ldds::empty_set() || b == ldds::empty_set()) {
+    return ldds::empty_set();
+  } else {
+    
+    MDD result;
+    if (cache_get(cache_merge_id, a.get(), b.get(), &result)) 
+    {
+      return ldd(result);
+    }
+
+    ldd new_result = node(a.value(), merge(b, a.down()), merge(a.right(), b));
+
+    cache_put(cache_merge_id, a.get(), b.get(), new_result.get());
+    return new_result;
+  }
 }
 
 // Computes the meta for relprod and relprev
@@ -646,9 +690,8 @@ ldd compute_meta(const std::vector<std::size_t>& read, const std::vector<std::si
 
 // Returns true if V is a subset of U
 inline
-bool includes(const sylvan::ldds::ldd& U, const sylvan::ldds::ldd& V)
+bool includes(const ldds::ldd& U, const ldds::ldd& V)
 {
-  using namespace sylvan::ldds;
   return union_(U, V) == U;
 }
 
