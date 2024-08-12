@@ -16,12 +16,12 @@ run = subprocess.run(['lpsrewr', '-v'], input=run.stdout, stdout=subprocess.PIPE
 subprocess.run(['lpsconstelm', '-v', '-t', '-', 'temp.lps'], input=run.stdout, check=True)
 
 
-run = subprocess.run(['lps2pbes', '-fyellow_has_a_winning_strategy.mcf'], stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lps2pbes', '-fyellow_has_a_winning_strategy.mcf', 'temp.lps'], stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['pbesconstelm', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['pbesparelm', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 subprocess.run(['pbesrewr', '-pquantifier-all', '-', 'temp_yellow.pbes'], input=run.stdout, check=True)
 
-run = subprocess.run(['lps2pbes', '-fred_has_a_winning_strategy.mcf'], stdout=subprocess.PIPE, check=True)
+run = subprocess.run(['lps2pbes', '-fred_has_a_winning_strategy.mcf', 'temp.lps'], stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['pbesconstelm', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 run = subprocess.run(['pbesparelm', '-v'], input=run.stdout, stdout=subprocess.PIPE, check=True)
 subprocess.run(['pbesrewr', '-pquantifier-all', '-', 'temp_red.pbes'], input=run.stdout, check=True)
