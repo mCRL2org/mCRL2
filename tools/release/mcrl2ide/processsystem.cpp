@@ -303,12 +303,16 @@ QProcess* ProcessSystem::createSubprocess(
     arguments << inputFile << outputFile
               << "--strategy=breadth"
               << "--verbose";
-#ifdef MCRL2_ENABLE_JITTYC
     if (fileSystem->enableJittyc())
     {
+#ifdef MCRL2_ENABLE_JITTYC
       arguments<< "--rewriter=jittyc";
-    }
+#else    
+      consoleDock->writeToConsole(
+          ProcessType::LtsCreation,
+          "The compiling rewriter (-rjittyc) is not available on this platform, tool option will be ignored!\n");
 #endif // MCRL2_JITTYC_ENABLED
+    }
     break;
 
   case SubprocessType::Ltsconvert:
@@ -372,10 +376,11 @@ QProcess* ProcessSystem::createSubprocess(
               << "--solve-strategy=0"
               << "--verbose";
 #ifdef MCRL2_ENABLE_JITTYC
-    if (fileSystem->enableJittyc())
-    {
       arguments<< "--rewriter=jittyc";
-    }
+#else    
+      consoleDock->writeToConsole(
+          ProcessType::Verification,
+          "The compiling rewriter (-rjittyc) is not available on this platform, tool option will be ignored!\n");
 #endif // MCRL2_JITTYC_ENABLED
     if (evidence)
     {
