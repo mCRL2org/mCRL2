@@ -28,16 +28,16 @@ COPY ./ /root/ppa/mcrl2/
 # Build the mCRL2 release.
 SHELL ["/bin/bash", "-c"] 
 RUN cd ~/ppa \
-    && dos2unix ~/ppa/mcrl2/build/make_release/make_release \
-    && source ~/ppa/mcrl2/build/make_release/make_release \
-    && MCRL2_VERSION=$MCRL2_VERSION build_mcrl2_release
+    && dos2unix ~/ppa/mcrl2/scripts/make_release/make_release \
+    && source ~/ppa/mcrl2/scripts/make_release/make_release \
+    && MCRL2_RELEASE_BRANCH=$MCRL2_RELEASE_BRANCH MCRL2_VERSION=$MCRL2_VERSION build_mcrl2_release
 
 # Package the source package.
 SHELL ["/bin/bash", "-c"] 
 RUN cd ~/ppa \
-    && dos2unix ~/ppa/mcrl2/build/make_release/make_release \
-    && source ~/ppa/mcrl2/build/make_release/make_release \
-    && MCRL2_VERSION=$MCRL2_VERSION build_source_package
+    && dos2unix ~/ppa/mcrl2/scripts/make_release/make_release \
+    && source ~/ppa/mcrl2/scripts/make_release/make_release \
+    && MCRL2_RELEASE_BRANCH=$MCRL2_RELEASE_BRANCH MCRL2_VERSION=$MCRL2_VERSION build_source_package
 
 # Here we have to add the gpg key into the docker image.
 
