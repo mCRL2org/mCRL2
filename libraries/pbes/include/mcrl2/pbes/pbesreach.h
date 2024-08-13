@@ -52,6 +52,7 @@ struct symbolic_reachability_options: public symbolic::symbolic_reachability_opt
   bool make_total = false;
   bool reset_parameters = false;
   bool aggressive = false;
+  bool naive_counter_example_instantiation = false;
   std::size_t solve_strategy = 0;
   std::size_t split_conditions = 0;
   std::string srf;
