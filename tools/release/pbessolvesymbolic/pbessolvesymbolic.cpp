@@ -371,6 +371,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
                       "1 only split disjunctive conditions, same as --split-conditions.\n"
                       "2 also split conjunctive conditions into multiple equations which weakens guards and introduces more reachable BES equations. Note that splitting conditions can lead to expressions that cannot be rewritten if the equations are not sufficiently complete.\n"
                       "3 alternative split for conjunctive conditions where even more states can become reachable.");
+      desc.add_hidden_option("naive-counter-example-instantiation",
+                            "run the naive instantiation algorithm for pbes with counter example information");
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -395,6 +397,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       options.variable_order                        = parser.option_argument("reorder");
       options.make_total                            = parser.has_option("total");
       options.reset_parameters                      = parser.has_option("reset");
+      options.naive_counter_example_instantiation   = parser.has_option("naive-counter-example-instantiation");
       if (!options.make_total)
       {
         options.detect_deadlocks                    = true; // This is a required setting if the pbes is not total.
@@ -524,43 +527,52 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             << std::endl;
       }
       
-
+      // This has to be done consistently with the LPS for the counter examples.
       data::mutable_map_substitution<> sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
       pbes_system::detail::replace_global_variables(pbesspec, sigma);
 
-      // Unify the parameters of the original PBES (which has potential counter example information)
-      unify_parameters(pbesspec);
-
-      // If we have counter example information we remove it first.
-      pbes_system::pbes pbesspec_without_counterexample =  mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec);
+      pbes_system::pbes pbesspec_without_counterexample = pbesspec;
 
       // Check if the resulting PBES can be used
-      if (has_counter_example && !is_srf(pbesspec_without_counterexample))
+      if (!options_.naive_counter_example_instantiation) 
       {
-        throw mcrl2::runtime_error("The PBES after removing counter example information (Zpos and Zneg) is not in SRF form");
+        // Unify the parameters of the original PBES (which has potential counter example information)
+        unify_parameters(pbesspec);
+
+        // If we have counter example information we remove it first.
+        pbesspec_without_counterexample = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec);
+
+        if (has_counter_example && !is_srf(pbesspec_without_counterexample))
+        {
+          throw mcrl2::runtime_error("The PBES after removing counter example information (Zpos and Zneg) is not in SRF form");
+        }
+
+        if (has_counter_example && !has_unified_parameters(pbesspec_without_counterexample))
+        {
+          throw mcrl2::runtime_error("The PBES after removing counter example information does not have unified parameters");
+        }
       }
 
-      if (has_counter_example && !has_unified_parameters(pbesspec_without_counterexample))
-      {
-        throw mcrl2::runtime_error("The PBES after removing counter example information does not have unified parameters");
-      }
-
+      PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
       if (options.info)
       {
-        PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
         std::cout << symbolic::print_read_write_patterns(reach.read_write_group_patterns());
       }
       else
       {
-        PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
         mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
 
-        timer().start("first-instantiation");
-        ldd V = reach.run();
-        timer().finish("first-instantiation");
-
-        if (!has_counter_example)
+        if (!has_counter_example || options_.naive_counter_example_instantiation)
         {
+          PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
+          timer().start("instantiation");
+          ldd V = reach.run();
+          timer().finish("instantiation");
+          if (!options.dot_file.empty())
+          {
+            print_dot(options.dot_file, V);
+          }
+
           if (reach.solution_found())
           {
             std::cout << (includes(reach.W0(), (reach.initial_state())) ? "true" : "false") << std::endl;
@@ -596,6 +608,14 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
         }
         else 
         {
+          timer().start("first-instantiation");
+          ldd V = reach.run();
+          timer().finish("first-instantiation");
+          if (!options.dot_file.empty())
+          {
+            print_dot(options.dot_file, V);
+          }
+
           if (options.chaining) 
           {
             mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while computing the strategy" << std::endl;
@@ -632,11 +652,6 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           bool final_result = run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
           utilities::mcrl2_unused(final_result);
           assert(result == final_result);
-        }
-
-        if (!options.dot_file.empty())
-        {
-          print_dot(options.dot_file, V);
         }
       }
     }
