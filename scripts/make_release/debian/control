@@ -7,10 +7,8 @@ Build-Depends: debhelper (>= 5),
  cmake,
  libboost-dev,
  libgl1-mesa-dev,
- python3-psutil,
- python3-yaml,
- qtbase5-dev,
- libqt5opengl5-dev,
+ libglu1-mesa-dev,
+ qt6-base-dev,
  git
 Standards-Version: 3.9.5
 Homepage: http://www.mcrl2.org/

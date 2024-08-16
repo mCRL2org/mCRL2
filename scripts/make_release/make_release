@@ -12,7 +12,7 @@
 #
 # Before calling the script, do the following steps:
 #
-# * Update the MCRL2_MAJOR_VERSION variable in the file build/cmake/MCRL2Version.cmake".
+# * Update the MCRL2_MAJOR_VERSION variable in the file cmake/MCRL2Version.cmake".
 # * Update the MCRL2_VERSION and UBUNTU_VERSION variables below.
 # * Update the copyright period in the file COPYING."
 # * Make sure that all changes are committed.
@@ -73,7 +73,7 @@ function prepare_debian_packaging
   rm -rf $DEBIAN_PACKAGING_DIR
   mkdir $DEBIAN_PACKAGING_DIR
   mkdir $DEBIAN_PACKAGING_DIR/mcrl2
-  cp -r $MCRL2_ROOT/build/make_release/debian $DEBIAN_PACKAGING_DIR/mcrl2
+  cp -r $MCRL2_ROOT/scripts/make_release/debian $DEBIAN_PACKAGING_DIR/mcrl2
   cp mcrl2-package/mcrl2-$MCRL2_VERSION.tar.gz $DEBIAN_PACKAGING_DIR/mcrl2_$MCRL2_VERSION.orig.tar.gz
 }
 
