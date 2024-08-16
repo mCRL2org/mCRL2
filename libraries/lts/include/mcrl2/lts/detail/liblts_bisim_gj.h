@@ -350,13 +350,11 @@ class todo_state_vector
 
     std::vector<state_index>::const_iterator begin() const
     {
-      assert(todo_is_empty());
       return m_vec.begin();
     }
 
     std::vector<state_index>::const_iterator end() const
     {
-      assert(todo_is_empty());
       return m_vec.end();
     }
 
@@ -466,18 +464,11 @@ class bisim_partitioner_gj
     typedef typename LTS_TYPE::states_size_type state_index;
     typedef std::unordered_set<state_index> set_of_states_type;
     typedef std::unordered_set<transition_index> set_of_transitions_type;
-    // typedef std::unordered_set<constellation_index> set_of_constellations_type;
     typedef std::vector<constellation_index> set_of_constellations_type;
 
-    // typedef std::unordered_map<label_index, set_of_states_type > states_per_action_label_type;
-    // typedef std::unordered_map<label_index, set_of_transitions_type > transitions_per_action_label_type;
-    // typedef std::unordered_map<block_index, set_of_states_type > states_per_block_type;
-    /* typedef std::unordered_map<std::pair<block_index, label_index>, std::list<transition_index>::iterator >
-                      block_label_to_list_iterator_map; */
     typedef std::unordered_map<std::pair<label_index, constellation_index>, set_of_states_type> 
                       label_constellation_to_set_of_states_map;
     typedef std::unordered_map<std::pair<block_index, label_index>, std::size_t> block_label_to_size_t_map;
-    // typedef std::unordered_map<std::pair<state_index, label_index>, transition_index> state_label_to_transition_map;
 
     /// \brief automaton that is being reduced
     LTS_TYPE& m_aut;
@@ -496,7 +487,7 @@ class bisim_partitioner_gj
     // are internally split in a part for states to be investigated, and a part for
     // states that belong definitively to this set. 
     todo_state_vector m_R, m_U;
-    std::vector<state_index> m_counter_reset_vector;
+    std::vector<state_index> m_U_counter_reset_vector;
     // The following variable contains all non trivial constellations.
     set_of_constellations_type m_non_trivial_constellations;
 
@@ -936,26 +927,27 @@ mCRL2log(log::verbose) << "Start refining\n";
     /// reference to the LTS was stored in the object by the constructor.
     void finalize_minimized_LTS()
     {
-
-// David suggests: replace this by a loop that goes through the <block,action,constellation> sets.
-// Every such set produces exactly one transition in the minimized LTS.
-
-      std::unordered_set<transition> T;
-      for(const transition& t: m_aut.get_transitions())
+      // The transitions are most efficiently directly extracted from the block_to_constellation lists in blocks. 
+      std::vector<transition> T;
+      for(block_index bi=0; bi<m_blocks.size(); bi++) 
       {
-        const transition_index new_from=get_eq_class(t.from());
-        const transition_index new_to=get_eq_class(t.to());
-        if (!m_aut.is_tau(t.label()) || new_from!=new_to) 
+        const block_type& B=m_blocks[bi];
+        for(const BLC_indicators blc_ind: B.block_to_constellation)
         {
-          T.emplace(transition(new_from, t.label(), new_to));
+          const transition& t= m_aut.get_transitions()[*blc_ind.start_same_BLC];
+          const transition_index new_to=get_eq_class(t.to());
+          if (!m_aut.is_tau(t.label()) || bi!=new_to) 
+          {
+            T.emplace_back(bi, t.label(), new_to);
+          }
         }
       }
       m_aut.clear_transitions();
-      for (const transition t: T)
+      for (const transition& t: T)
       {
         m_aut.add_transition(t);
-      }
-
+      } 
+      //
       // Merge the states, by setting the state labels of each state to the
       // concatenation of the state labels of its equivalence class.
 
@@ -1307,6 +1299,24 @@ mCRL2log(log::verbose) << "Start refining\n";
       return remaining_transition;
     }
 
+    // Set m_states[s].counter:=undefined for all s in m_R and m_U.
+    void clear_state_counters(bool restrict_to_R=false)
+    {
+      for(const state_index si: m_R)
+      {
+        m_states[si].counter=undefined;
+      }
+      if (restrict_to_R)
+      {
+        return;
+      }
+      for(const state_index si: m_U_counter_reset_vector)
+      {
+        m_states[si].counter=undefined;
+      }
+      clear(m_U_counter_reset_vector);
+    }
+
     // Calculate the states R in block B that can inertly reach M and split
     // B in R and B\R. The complexity is conform the smallest block of R and B\R.
     // The LBC_list and bottom states are not updated. 
@@ -1329,16 +1339,15 @@ mCRL2log(log::verbose) << "Start refining\n";
                               const UNMARKED_STATE_ITERATOR M_co_end,
                               const label_index a,
                               const constellation_index C,
-                              // const std::function<bool(state_index)>& unmarked_blocker,
                               bool& M_in_bi,
                               std::function<void(const state_index)> update_Ptilde)
     {
       const std::size_t B_size=number_of_states_in_block(B);
       assert(VARIANT==1 || m_R.empty());
       assert(m_U.empty());
-      assert(VARIANT==1 || m_counter_reset_vector.empty());
-      typedef enum { initializing, state_checking, aborted, incoming_inert_transition_checking, outgoing_action_constellation_check,
-                         outgoing_action_constellation_check_during_initialisation } status_type;
+      assert(m_U_counter_reset_vector.empty());
+      typedef enum { initializing, state_checking, aborted, aborted_after_initialisation, incoming_inert_transition_checking, outgoing_action_constellation_check,
+                     outgoing_action_constellation_check_during_initialisation } status_type;
       status_type U_status=initializing;
       status_type R_status=initializing;
       MARKED_STATE_TRANSITION_ITERATOR M_it=M_begin; 
@@ -1350,8 +1359,9 @@ mCRL2log(log::verbose) << "Start refining\n";
       std::vector<transition_index>::iterator current_R_incoming_transition_iterator;
       std::vector<transition_index>::iterator current_R_incoming_transition_iterator_end;
 
-      if (VARIANT==1)  // In variant 1 the states must be added to R_todo immediately. This has been done when checking
-                       // whether all bottom states were covered, i.e., whether a split is possible. 
+      if (VARIANT==1)  // In variant 1 the states have been added to R_todo when checking whether a split is possible. 
+                       // In this case it is only necessary whether the state is Rmarked to see whether it has an outgoing
+                       // marking transition. 
       {
         /* for(MARKED_STATE_TRANSITION_ITERATOR ti=M_begin; ti!=M_end; ++ti)
         { 
@@ -1365,7 +1375,7 @@ mCRL2log(log::verbose) << "Start refining\n";
         } */
         if (2*m_R.size()>B_size)
         {
-          R_status=aborted;
+          R_status=aborted_after_initialisation;
         }
         else 
         {
@@ -1381,7 +1391,7 @@ mCRL2log(log::verbose) << "Start refining\n";
 
       while (true)
       {
-        assert(U_status!=aborted || R_status!=aborted);
+        assert(U_status!=aborted || (R_status!=aborted && R_status!=aborted_after_initialisation));
 #ifndef NDEBUG
         for(state_index si=0; si<m_states.size(); ++si)
         {
@@ -1408,10 +1418,10 @@ mCRL2log(log::verbose) << "Start refining\n";
               if (m_states[si].counter!=Rmarked)
               {
                 m_R.add_todo(si);
-                if (m_states[si].counter==undefined)
+                /* if (m_states[si].counter==undefined)
                 {
                   m_counter_reset_vector.push_back(si);
-                }
+                } */
                 m_states[si].counter=Rmarked;
 //std::cerr << "R_todo1 insert: " << si << "\n";
                 if (2*m_R.size()>B_size) 
@@ -1429,11 +1439,12 @@ mCRL2log(log::verbose) << "Start refining\n";
 //std::cerr << "R empty: " << "\n";
               // split_block B into R and B\R.
               assert(m_R.size()>0);
-              for(const state_index si: m_counter_reset_vector)
+              clear_state_counters();
+              /* for(const state_index si: m_counter_reset_vector)
               {
                 m_states[si].counter=undefined;
               }
-              clear(m_counter_reset_vector);
+              clear(m_counter_reset_vector); */
               m_U.clear();
               block_index block_index_of_R=split_block_B_into_R_and_BminR(B, m_R, update_Ptilde);
               m_R.clear();
@@ -1442,7 +1453,6 @@ mCRL2log(log::verbose) << "Start refining\n";
             }
             else
             {
-              // const state_index s=R_todo.extract(R_todo.begin()).value();
               const state_index s=m_R.move_from_todo();
 //std::cerr << "R insert: " << s << "\n";
               R_status=incoming_inert_transition_checking;
@@ -1464,16 +1474,16 @@ mCRL2log(log::verbose) << "Start refining\n";
               {
 //std::cerr << "R_todo2 insert: " << tr.from() << "\n";
                 m_R.add_todo(tr.from());
-                if (m_states[tr.from()].counter==undefined)
+                /* if (m_states[tr.from()].counter==undefined)
                 {
                   m_counter_reset_vector.push_back(tr.from());
-                }
+                } */
                 m_states[tr.from()].counter=Rmarked;
 
                 // Algorithm 3, line 3.10 and line 3.11, right. 
                 if (2*m_R.size()>B_size)
                 {
-                  R_status=aborted;
+                  R_status=aborted_after_initialisation;
                   break;
                 }
               }
@@ -1510,7 +1520,7 @@ mCRL2log(log::verbose) << "Start refining\n";
               M_co_it++;
               if (m_states[si].counter!=Rmarked)
               {
-                if (VARIANT==2)
+                if (VARIANT==2 && !(R_status==state_checking || R_status==incoming_inert_transition_checking || R_status==aborted_after_initialisation))
                 {
                   current_U_outgoing_state=si;
                   current_U_outgoing_transition_iterator=m_states[si].start_outgoing_transitions;
@@ -1525,7 +1535,7 @@ mCRL2log(log::verbose) << "Start refining\n";
                   m_U.add_todo(si);
 //std::cerr << "U_todo1 insert: " << si << "\n";
                   m_states[si].counter=0;
-                  m_counter_reset_vector.push_back(si);
+                  m_U_counter_reset_vector.push_back(si);
                   // Algorithm 3, line 3.10 and line 3.11 left. 
                   if (2*m_U.size()>B_size)
                   {
@@ -1549,7 +1559,7 @@ mCRL2log(log::verbose) << "Start refining\n";
 //std::cerr << "U_todo2 insert: " << current_U_outgoing_state << "\n";
               m_U.add_todo(current_U_outgoing_state);
               m_states[current_U_outgoing_state].counter=0;
-              m_counter_reset_vector.push_back(current_U_outgoing_state);
+              m_U_counter_reset_vector.push_back(current_U_outgoing_state);
               // Algorithm 3, 
               if (2*m_U.size()>B_size)
               {
@@ -1588,11 +1598,12 @@ mCRL2log(log::verbose) << "Start refining\n";
               assert(!m_U.empty());
               // split_block B into U and B\U.
               assert(m_U.size()>0);
-              for(const state_index si: m_counter_reset_vector)
+              clear_state_counters();
+              /* for(const state_index si: m_counter_reset_vector)
               {
                 m_states[si].counter=undefined;
               }
-              clear(m_counter_reset_vector);
+              clear(m_counter_reset_vector); */
               m_R.clear();
               block_index block_index_of_U=split_block_B_into_R_and_BminR(B, m_U, update_Ptilde);
               m_U.clear();
@@ -1630,7 +1641,7 @@ mCRL2log(log::verbose) << "Start refining\n";
                 // Algorithm 3, line 3.15 and 3.18, left.
                 m_states[from].counter=m_states[from].no_of_outgoing_inert_transitions-1;
 //std::cerr << "COUNTER " << m_states[from].counter << "\n";
-                m_counter_reset_vector.push_back(from);
+                m_U_counter_reset_vector.push_back(from);
               }
               else  if (m_states[from].counter==Rmarked)
               {
@@ -1645,10 +1656,7 @@ mCRL2log(log::verbose) << "Start refining\n";
               // Algorithm 3, line 3.19, left.
               if (m_states[from].counter==0)
               {
-                if (VARIANT==2)
-// David suggests: one can skip the outgoing_action_constellation_check if R has completely initialized.
-// This is the case if R_status==state_checking || R_status==incoming_inert_transition_checking
-// and it might be the case if R_status==aborted as well; so one should add a variable that reports this.
+                if (VARIANT==2 && !(R_status==state_checking || R_status==incoming_inert_transition_checking || R_status==aborted_after_initialisation))
                 {
                   // Start searching for an outgoing transition with action a to constellation C. 
                   current_U_outgoing_state=from;
@@ -2258,7 +2266,7 @@ mCRL2log(log::verbose) << "Start refining in the initialisation\n";
               const block_type& B=m_blocks[block_ind];
 
               // Count the number of state in split_states that are bottom states. This function has a side effect if not all bottom states are covered
-              // on m_P, counters in states and m_counter_reset_vector. 
+              // on m_P and counters in states. 
               if (not_all_bottom_states_are_touched<typename std::vector<state_index>::iterator>
                       (block_ind, start_index_per_block, end_index_per_block, 
                           [this](const typename std::vector<transition_index>::iterator ti){ return m_aut.get_transitions()[*ti].from(); }))
@@ -2420,45 +2428,6 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
       stabilizeB();
     }
  
-    // Update the doubly linked list L_B->C in blocks.
-    // First removing and adding a single element are implemented.
-    //
-    // If there is more than one element it is removed.
-    // In that case false is returned. Otherwise, the result is true, 
-    // and the element is actually not removed.
-    bool remove_from_the_doubly_linked_list_LBC_in_blocks(const transition_index ti)
-    {
-      if (m_transitions[ti].next_LBC==null_transition &&
-          m_transitions[ti].previous_LBC==null_transition)
-      {
-        // This is the only element in the list. Leave it alone.
-        return true;
-      }
-      else
-      {
-        // There is more than one element.
-        // If this element is the first element, replace it by the second element in the LBC-List.
-        if (*m_transitions[ti].transitions_per_block_to_constellation==ti)
-        {
-          assert(m_transitions[ti].next_LBC!=null_transition);
-          *m_transitions[ti].transitions_per_block_to_constellation=m_transitions[ti].next_LBC;
-        }
- 
-        if (m_transitions[ti].previous_LBC!=null_transition)
-        {
-          m_transitions[m_transitions[ti].previous_LBC].next_LBC=
-              m_transitions[ti].next_LBC;
-        }
-        if (m_transitions[ti].next_LBC!=null_transition)
-        {
-          m_transitions[m_transitions[ti].next_LBC].previous_LBC=
-              m_transitions[ti].previous_LBC;
-        }
-        return false;
-      }
-    }
-
-
     // Algorithm 4. Stabilize the current partition with respect to the current constellation
     // given that the states in m_P did become new bottom states. 
 
@@ -2484,20 +2453,14 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
         label_constellation_to_set_of_states_map grouped_transitions;
         for(const state_index si: V)
         {
-//std::cerr << "CALC GROUPED TRANS " << si << "\n";
           const outgoing_transitions_it end_it=(si+1>=m_states.size())?m_outgoing_transitions.end():m_states[si+1].start_outgoing_transitions;
           for(outgoing_transitions_it ti=m_states[si].start_outgoing_transitions;
                         ti!=end_it;
-                        // ti!=m_outgoing_transitions.end() &&
-                        // (si+1>=m_states.size() || ti!=m_states[si+1].start_outgoing_transitions);
                     ++ti)
           {
             transition& t=m_aut.get_transitions()[ti->transition];
-//std::cerr << "CONSIDER TRANSItion TO GRUPED TRANS  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
             if (!(m_aut.is_tau(t.label()) && m_states[t.from()].block==m_states[t.to()].block))
             {
-//std::cerr << "ADD TRANSItion tO GRUPED TRANS  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-//std::cerr << "XXXXX " << m_aut.action_label(t.label()) << "    " << m_blocks[m_states[t.to()].block].constellation << "\n";
               grouped_transitions[std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation)].emplace(t.from());
             }
           }
@@ -2763,8 +2726,8 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
 
     // Count the number of touched bottom states by outgoing transitions in Mleft.
     // If all bottom states are touched, reset markers and m_R. Otherwise, if not all
-    // bottom states are touched, leave the touched bottom states in m_R, put them in m_counter_reset_vector and leave them
-    // the markers in m_states[*].counter in place. .
+    // bottom states are touched, leave the touched bottom states in m_R and leave them
+    // the markers in m_states[*].counter in place.
     template <class ITERATOR>
     std::size_t not_all_bottom_states_are_touched(
                       const block_index bi, 
@@ -2785,19 +2748,20 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
           }
           m_R.add_todo(s);
           m_states[s].counter=Rmarked;
-          m_counter_reset_vector.push_back(s);
+          // m_counter_reset_vector.push_back(s);
         } 
       }     
       
       if (no_of_touched_bottom_states==std::distance(B.start_bottom_states, B.start_non_bottom_states))
       {
-        // All bottom states are touched. No splitting is possible. Reset m_R, m_states[s].counter and m_counter_reset_vector.
-        for(const state_index s: m_counter_reset_vector)
+        // All bottom states are touched. No splitting is possible. Reset m_R, m_states[s].counter for s in m_R.
+        clear_state_counters(false);
+        /* for(const state_index s: m_counter_reset_vector)
         {           
           m_states[s].counter=undefined;
-        }     
+        } */    
         m_R.clear();
-        clear(m_counter_reset_vector);
+        // clear(m_counter_reset_vector);
         return false;
       }
       // Not all bottom states are touched. Splitting of block bi must commence. 
