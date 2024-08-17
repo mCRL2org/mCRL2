@@ -136,6 +136,8 @@ namespace detail
                                                                                     #define ONLY_IF_DEBUG(...)
                                                                                 #endif
 /// \brief type used to store label numbers and counts
+/// \details It would be better to define it as LTS_TYPE::labels_size_type, but
+/// that would require most classes to become templates.
 typedef std::size_t label_type;
 
 template <class LTS_TYPE> class bisim_partitioner_dnj;
@@ -978,7 +980,7 @@ class state_info_entry
                                                                                         return "state " + debug_id_short(partitioner);
                                                                                     }
 
-                                                                                    mutable bisim_gjkw::check_complexity::state_dnj_counter_t work_counter;
+                                                                                    mutable check_complexity::state_dnj_counter_t work_counter;
                                                                                 #endif
 };
 
@@ -1206,7 +1208,7 @@ class block_t
                                                                                                                           ") (#" + std::to_string(seqnr) + ")";
                                                                                     }
 
-                                                                                    mutable bisim_gjkw::check_complexity::block_dnj_counter_t work_counter;
+                                                                                    mutable check_complexity::block_dnj_counter_t work_counter;
                                                                                 #endif
 };
 
@@ -1374,8 +1376,8 @@ class part_state_t
                                                                                             assert(partitioner.branching||block->nonbottom_begin==block->end);
                                                                                             assert(0 <= block->seqnr);
                                                                                             assert(block->seqnr < nr_of_blocks);
-                                                                                            unsigned const max_block(bisim_gjkw::check_complexity::log_n -
-                                                                                                           bisim_gjkw::check_complexity::ilog2(block->size()));
+                                                                                            unsigned const max_block(check_complexity::log_n -
+                                                                                                                       check_complexity::ilog2(block->size()));
                                                                                             mCRL2complexity(block, no_temporary_work(max_block), partitioner);
 
                                                                                             // states in the block are consistent:
@@ -1511,9 +1513,9 @@ class succ_entry
                                                                                     /// \param max_value        new value that the counter should get
                                                                                     template <class LTS_TYPE>
                                                                                     static inline void add_work_to_out_slice(
-                                                                                        const bisim_partitioner_dnj<LTS_TYPE>& partitioner,
-                                                                                        const succ_entry* out_slice_begin, enum bisim_gjkw::check_complexity::
-                                                                                                                         counter_type ctr, unsigned max_value);
+                                                                                                  const bisim_partitioner_dnj<LTS_TYPE>& partitioner,
+                                                                                                  const succ_entry* out_slice_begin,
+                                                                                                  enum check_complexity::counter_type ctr, unsigned max_value);
                                                                                 #endif
 };
 
@@ -1577,7 +1579,7 @@ class pred_entry
                                                                                                                                    debug_id_short(partitioner);
                                                                                     }
 
-                                                                                    mutable bisim_gjkw::check_complexity::trans_dnj_counter_t work_counter;
+                                                                                    mutable check_complexity::trans_dnj_counter_t work_counter;
                                                                                 #endif
 };
 
@@ -1766,15 +1768,14 @@ class bunch_t
                                                                                         assert(0 == label || begin < partitioner.action_label[label-1].begin);
                                                                                         if (0 == label || end < partitioner.action_label[label - 1].begin)
                                                                                         {
-                                                                                            assert(bisim_gjkw::check_complexity::ilog2(end - begin) <=
-                                                                                                                          bisim_gjkw::check_complexity::log_n);
-                                                                                            return bisim_gjkw::check_complexity::log_n -
-                                                                                                              bisim_gjkw::check_complexity::ilog2(end - begin);
+                                                                                            assert(check_complexity::ilog2(end - begin) <=
+                                                                                                                                      check_complexity::log_n);
+                                                                                            return check_complexity::log_n-check_complexity::ilog2(end-begin);
                                                                                         }
                                                                                         return 0;
                                                                                     }
 
-                                                                                    mutable bisim_gjkw::check_complexity::bunch_dnj_counter_t work_counter;
+                                                                                    mutable check_complexity::bunch_dnj_counter_t work_counter;
                                                                                 #endif
 };
 
@@ -1908,7 +1909,7 @@ class block_bunch_slice_t
                                                                                     /// \param partitioner  LTS partitioner (to print error messages if
                                                                                     ///                     necessary)
                                                                                     template <class LTS_TYPE>
-                                                                                    bool add_work_to_bottom_transns(enum bisim_gjkw::check_complexity::
+                                                                                    bool add_work_to_bottom_transns(enum check_complexity::
                                                                                                       counter_type const ctr, unsigned const max_value,
                                                                                                       const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {   assert(!empty());
@@ -1926,7 +1927,7 @@ class block_bunch_slice_t
                                                                                             if (source->pos < block->nonbottom_begin /*&&
                                                                                                 // the transition starts in a (new) bottom state
                                                                                                 block_bunch->pred->work_counter.counters[ctr -
-                                                                                                   bisim_gjkw::check_complexity::TRANS_dnj_MIN] != max_value*/)
+                                                                                                               check_complexity::TRANS_dnj_MIN] != max_value*/)
                                                                                             {
                                                                                                 mCRL2complexity(block_bunch->pred, add_work(ctr, max_value),
                                                                                                                                                   partitioner);
@@ -1937,8 +1938,7 @@ class block_bunch_slice_t
                                                                                         return result;
                                                                                     }
 
-                                                                                    mutable bisim_gjkw::check_complexity::block_bunch_dnj_counter_t
-                                                                                                                                                  work_counter;
+                                                                                    mutable check_complexity::block_bunch_dnj_counter_t work_counter;
                                                                                 #endif
 };
 
@@ -1981,8 +1981,8 @@ inline bunch_t* succ_entry::bunch() const
                                                                                     template <class LTS_TYPE>
                                                                                     /* static */ inline void succ_entry::add_work_to_out_slice(
                                                                                         const bisim_partitioner_dnj<LTS_TYPE>& partitioner,
-                                                                                        const succ_entry* out_slice_begin, enum bisim_gjkw::check_complexity::
-                                                                                                              counter_type const ctr, unsigned const max_value)
+                                                                                        const succ_entry* out_slice_begin,
+                                                                                        enum check_complexity::counter_type const ctr,unsigned const max_value)
                                                                                     {
                                                                                         const succ_entry* const out_slice_before_end(
                                                                                                                          out_slice_begin->begin_or_before_end);
@@ -2535,8 +2535,8 @@ class part_trans_t
             ++nr_of_block_bunch_slices;                                         ONLY_IF_DEBUG( new_block_bunch_slice->work_counter =
                                                                                                                          old_block_bunch_slice->work_counter; )
         }
-                                                                                ONLY_IF_DEBUG( unsigned max_counter = bisim_gjkw::check_complexity::log_n -
-                                                                                                      bisim_gjkw::check_complexity::ilog2(new_block->size()); )
+                                                                                ONLY_IF_DEBUG( unsigned max_counter = check_complexity::log_n -
+                                                                                                                  check_complexity::ilog2(new_block->size()); )
         /* move all transitions in this out-slice to the new block_bunch     */ assert(out_slice_begin < out_slice_end);
         do
         {                                                                       assert(old_block_bunch_pos == out_slice_end[-1].block_bunch);
@@ -2544,7 +2544,7 @@ class part_trans_t
                                                                                 assert(source == out_slice_end->block_bunch->pred->source);
             --old_block_bunch_slice_end;                                        // assign work already now because the transition may be moved to several
                                                                                 // places:
-            old_block_bunch_slice_end->slice = new_block_bunch_slice;           mCRL2complexity(old_block_bunch_pos->pred, add_work(bisim_gjkw::
+            old_block_bunch_slice_end->slice = new_block_bunch_slice;           mCRL2complexity(old_block_bunch_pos->pred, add_work(
                                                                                      check_complexity::move_out_slice_to_new_block, max_counter), partitioner);
             if (old_block_bunch_slice->is_stable() || (                         assert(!new_block_bunch_slice->is_stable()),
                  old_block_bunch_slice->marked_begin >
@@ -3166,9 +3166,9 @@ class part_trans_t
                 }
             }
         }                                                                       else  assert(block_bunch_inert_begin == 1 + &block_bunch.back());
-                                                                                mCRL2complexity(new_block, add_work(bisim_gjkw::check_complexity::
-                                                                                    adapt_transitions_for_new_block, bisim_gjkw::check_complexity::log_n -
-                                                                                         bisim_gjkw::check_complexity::ilog2(new_block->size())), partitioner);
+                                                                                mCRL2complexity(new_block, add_work(check_complexity::
+                                                                                    adapt_transitions_for_new_block, check_complexity::log_n -
+                                                                                                     check_complexity::ilog2(new_block->size())), partitioner);
     }
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief print all transitions
@@ -3395,9 +3395,8 @@ inline block_t* block_t::split_off_block(
     {                                                                           assert(s_iter->st->pos == s_iter);
         s_iter->st->bl.ock = new_block;                                         // mCRL2complexity (*s_iter, ...) -- subsumed in the call below
     }
-    while (++s_iter < new_block->end);                                          mCRL2complexity(new_block, add_work(bisim_gjkw::check_complexity::
-                                                                                                    split_off_block, bisim_gjkw::check_complexity::log_n -
-                                                                                                    bisim_gjkw::check_complexity::ilog2(new_block->size())),
+    while (++s_iter < new_block->end);                                          mCRL2complexity(new_block, add_work(check_complexity::split_off_block,
+                                                                                       check_complexity::log_n - check_complexity::ilog2(new_block->size())),
                                                                                                                                                   partitioner);
     return new_block;
 }
@@ -3912,7 +3911,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                      next_action_label_begin->begin_or_before_end = nullptr,
                                              ++next_action_label_begin, true)); assert(next_action_label_begin == part_tr.action_block_inert_begin);
 
-        /* distribute the transitions over the data structures               */ ONLY_IF_DEBUG( bisim_gjkw::check_complexity::init(2 * max_transitions); )
+        /* distribute the transitions over the data structures               */ ONLY_IF_DEBUG( check_complexity::init(2 * max_transitions); )
 
         bisim_dnj::block_bunch_entry*
                             next_block_bunch(1 + &part_tr.block_bunch.front());
@@ -3991,7 +3990,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                 --bunch->end;                                                   assert(bunch->begin < bunch->end);
             }                                                                   assert(nullptr != bunch->end[-1].begin_or_before_end);
 
-            /* Line 2.2: B_vis := { s in S | there exists a visible          */ mCRL2complexity(B, add_work(bisim_gjkw::check_complexity::
+            /* Line 2.2: B_vis := { s in S | there exists a visible          */ mCRL2complexity(B, add_work(check_complexity::
             /*                               transition that is reachable    */                                          create_initial_partition, 1U), *this);
             //                               from s }
             //           B_invis := S \ B_vis
@@ -4060,8 +4059,8 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                         do
                                                                                         {
                                                                                             const bisim_dnj::block_t* const block(perm_iter->st->bl.ock);
-                                                                                            unsigned const max_block(bisim_gjkw::check_complexity::log_n -
-                                                                                                           bisim_gjkw::check_complexity::ilog2(block->size()));
+                                                                                            unsigned const max_block(check_complexity::log_n -
+                                                                                                                       check_complexity::ilog2(block->size()));
                                                                                             // iterators have no predefined hash, so we store pointers:
                                                                                             std::unordered_set<const bisim_dnj::block_bunch_slice_t*>
                                                                                                                                          block_bunch_check_set;
@@ -4134,8 +4133,8 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                                                                             block_bunch_slice);
                                                                                                         }
                                                                                                         mCRL2complexity(out_slice_end->block_bunch->pred,
-                                                                                                            no_temporary_work(max_block, bisim_gjkw::
-                                                                                                                    check_complexity::log_n - bisim_gjkw::
+                                                                                                            no_temporary_work(max_block,
+                                                                                                                    check_complexity::log_n -
                                                                                                                     check_complexity::ilog2(out_slice_end->
                                                                                                                     block_bunch->pred->target->bl.ock->size()),
                                                                                                                     perm_iter < block->nonbottom_begin),*this);
@@ -4187,9 +4186,8 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                                 assert(pred_iter->target->pred_inert.begin <= pred_iter);
                                                                                                 assert(pred_iter->target->pred_inert.begin == pred_iter ||
                                                                                                                     pred_iter[-1].target == pred_iter->target);
-                                                                                                unsigned const max_block(bisim_gjkw::check_complexity::log_n -
-                                                                                                                    bisim_gjkw::check_complexity::ilog2(
-                                                                                                                           pred_iter->target->bl.ock->size()));
+                                                                                                unsigned const max_block(check_complexity::log_n -
+                                                                                                   check_complexity::ilog2(pred_iter->target->bl.ock->size()));
                                                                                                 mCRL2complexity(pred_iter, no_temporary_work(max_block,
                                                                                                                                      max_block, false), *this);
                                                                                             }
@@ -4468,8 +4466,8 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                       bunch_T); // mCRL2complexity(splitter_iter->succ->block_bunch->pred, ...) -- subsumed
             // Line 2.13: end for                                               // in the call below
             }
-            while (++splitter_iter < bunch_T_a_Bprime->end);                    mCRL2complexity(bunch_T_a_Bprime, add_work(bisim_gjkw::check_complexity::
-                                                                                                                    refine_partition_until_stable__find_pred,
+            while (++splitter_iter < bunch_T_a_Bprime->end);                    mCRL2complexity(bunch_T_a_Bprime,
+                                                                                         add_work(check_complexity::refine_partition_until_stable__find_pred,
             /*----------------- stabilise the partition again ---------------*/                                                  max_splitter_counter), *this);
                                                                                 ONLY_IF_DEBUG( bisim_dnj::block_bunch_slice_iter_or_null_t
             /* Line 2.14: for all T'_B--> in the splitter list (in order) do */                                                bbslice_T_a_Bprime_B(nullptr); )
@@ -4485,7 +4483,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                     {
                                                                                         assert(bbslice_T_a_Bprime_B.is_null());
                                                                                         // assign work to this splitter bunch
-                                                                                        mCRL2complexity(splitter_Tprime_B, add_work(bisim_gjkw::
+                                                                                        mCRL2complexity(splitter_Tprime_B, add_work(
                                                                                                 check_complexity::refine_partition_until_stable__stabilize,
                                                                                                                                  max_splitter_counter), *this);
                                                                                     }
@@ -4494,7 +4492,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                         // assign work to this the corresponding block_bunch-slice of
                                                                                         // bunch_T_a_Bprime
                                                                                         mCRL2complexity(bbslice_T_a_Bprime_B,
-                                                                                        add_work(bisim_gjkw::check_complexity::
+                                                                                        add_work(check_complexity::
                                                                                                 refine_partition_until_stable__stabilize_for_large_splitter,
                                                                                                                                  max_splitter_counter), *this);
                                                                                     }
@@ -4503,7 +4501,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                         // This must be a refinement to stabilize for new bottom states.
                                                                                         // assign work to the new bottom states in this block_bunch-slice
                                                                                         add_stabilize_to_bottom_transns_succeeded = splitter_Tprime_B->
-                                                                                            add_work_to_bottom_transns(bisim_gjkw::check_complexity::
+                                                                                            add_work_to_bottom_transns(check_complexity::
                                                                                                 refine_partition_until_stable__stabilize_new_noninert_a_priori,
                                                                                                                                                     1U, *this);
                                                                                     }
@@ -4559,13 +4557,13 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                         // account for work that couldn't be accounted for earlier (because we
                                                                                         // didn't know yet which state would become a new bottom state)
                                                                                         if (!add_stabilize_to_bottom_transns_succeeded)
-                                                                                        {   assert(splitter_Tprime_B->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                        {   assert(splitter_Tprime_B->add_work_to_bottom_transns(
                                                                                             check_complexity::
                                                                                             refine_partition_until_stable__stabilize_new_noninert_a_posteriori,
                                                                                                                                                    1U, *this));
                                                                                         }
                                                                                         if (splitter_Tprime_B->work_counter.has_temporary_work())
-                                                                                        {   assert(splitter_Tprime_B->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                        {   assert(splitter_Tprime_B->add_work_to_bottom_transns(
                                                                                                     check_complexity::
                                                                                                     handle_new_noninert_transns__make_unstable_a_posteriori,
                                                                                                                                                    1U, *this));
@@ -4602,7 +4600,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                         // now splitter must have some transitions that start in bottom states:
                                                                                         if (splitter_Tprime_B->work_counter.has_temporary_work())
                                                                                         {   assert(!is_primary_splitter);
-                                                                                            assert(splitter_Tprime_B->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                            assert(splitter_Tprime_B->add_work_to_bottom_transns(
                                                                                                     check_complexity::
                                                                                                     handle_new_noninert_transns__make_unstable_a_posteriori,
                                                                                                                                                    1U, *this));
@@ -4625,7 +4623,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                     // now splitter must have some transitions that start in bottom states:
                                                                                     if (splitter_Tprime_B->work_counter.has_temporary_work())
                                                                                     {   assert(!is_primary_splitter);
-                                                                                        assert(splitter_Tprime_B->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                        assert(splitter_Tprime_B->add_work_to_bottom_transns(
                                                                                                     check_complexity::
                                                                                                     handle_new_noninert_transns__make_unstable_a_posteriori,
                                                                                                                                                    1U, *this));
@@ -4859,7 +4857,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                         goto continuation;
                                                // i. e. break and then continue
                                     }                                           ONLY_IF_DEBUG( bisim_dnj::succ_entry::add_work_to_out_slice(*this, U_u_iter,
-                                /* Line 3.16l: end for                       */        bisim_gjkw::check_complexity::split_U__test_noninert_transitions, 1U); )
+                                /* Line 3.16l: end for                       */                    check_complexity::split_U__test_noninert_transitions, 1U); )
                                 }
                                 END_COROUTINE_WHILE;
                             // Line 3.17l: end if
@@ -4882,11 +4880,11 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                             // Line 3.23l: end if
                             }
                         // Line 3.19l: end for
-                    continuation:                                               mCRL2complexity(U_t_iter, add_work(bisim_gjkw::
+                    continuation:                                               mCRL2complexity(U_t_iter, add_work(
                                                                                           check_complexity::split_U__handle_transition_to_U_state, 1U), *this);
                         }
-                        END_COROUTINE_FOR;                                      mCRL2complexity(U_s_iter->st, add_work(bisim_gjkw::check_complexity::
-                    /* Line 3.20l: end for                                   */                             split_U__find_predecessors_of_U_state, 1U), *this);
+                        END_COROUTINE_FOR;                                      mCRL2complexity(U_s_iter->st, add_work(
+                    /* Line 3.20l: end for                                   */           check_complexity::split_U__find_predecessors_of_U_state, 1U), *this);
                         ++U_s_iter;
                         if(block_B->marked_bottom_begin == U_s_iter)
                         {
@@ -4960,7 +4958,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                 // Line 3.23r: end if
                                 }
                             }                                                   else  assert(block_B->marked_bottom_begin <= s->pos);
-                                                                                mCRL2complexity(R_s_iter.splitter_iter->pred, add_work(bisim_gjkw::
+                                                                                mCRL2complexity(R_s_iter.splitter_iter->pred, add_work(
                                                                                         check_complexity::split_R__handle_transition_from_R_state, 1U), *this);
                         }
                         END_COROUTINE_WHILE;
@@ -5032,10 +5030,10 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                 // Line 3.22r: Abort this coroutine
                                 ABORT_THIS_COROUTINE();
                             // Line 3.23r: end if
-                            }                                                   mCRL2complexity(R_t_iter, add_work(bisim_gjkw::
+                            }                                                   mCRL2complexity(R_t_iter, add_work(
                         /* Line 3.19r: end for                               */           check_complexity::split_R__handle_transition_to_R_state, 1U), *this);
                         }
-                        END_COROUTINE_FOR;                                      mCRL2complexity(R_s_iter.block->st, add_work(bisim_gjkw::
+                        END_COROUTINE_FOR;                                      mCRL2complexity(R_s_iter.block->st, add_work(
                                                                                                 check_complexity::split_R__find_predecessors_of_R_state,
                     /* Line 3.20r: end for                                   */                                                                    1U), *this);
                         if (block_B->marked_bottom_begin == R_s_iter.block &&
@@ -5203,9 +5201,9 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                     // itself.  Later, we shall find a bottom state to which this work can be
                                                                                     // assigned.
                                                                                     assert(!bbslice_T_N->work_counter.has_temporary_work());
-                                                                                    if (!bbslice_T_N->add_work_to_bottom_transns(bisim_gjkw::check_complexity::
+                                                                                    if (!bbslice_T_N->add_work_to_bottom_transns(check_complexity::
                                                                                                handle_new_noninert_transns__make_unstable_a_priori, 1U, *this))
-                                                                                    {   mCRL2complexity(bbslice_T_N, add_work(bisim_gjkw::check_complexity::
+                                                                                    {   mCRL2complexity(bbslice_T_N, add_work(check_complexity::
                                                                                                   handle_new_noninert_transns__make_unstable_temp, 1U), *this);
                                                                                         assert(bbslice_T_N->work_counter.has_temporary_work());
                                                                                         assert(!bbslice_T_N->is_stable());
@@ -5248,8 +5246,8 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                         succ_iter->block_bunch = new_block_bunch_pos;           // add_work(succ_iter->block_bunch->pred, ...) -- subsumed in the call below
                     }
                 }                                                               else assert(&*bbslice_T_N==&*bbslice_Tprime_R || bbslice_T_N==bbslice_R_tau_U);
-            }                                                                   mCRL2complexity(s, add_work(bisim_gjkw::check_complexity::
-                                                                                                                      handle_new_noninert_transns, 1U), *this);
+            }                                                                   mCRL2complexity(s, add_work(
+                                                                                                    check_complexity::handle_new_noninert_transns, 1U), *this);
         }
         while (++s_iter < block_N->nonbottom_begin);
 
@@ -5275,27 +5273,25 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                     {
                                                                                         if (nullptr != block_U)
                                                                                         {
-                                                                                            unsigned const max_U_block(bisim_gjkw::check_complexity::log_n -
-                                                                                                         bisim_gjkw::check_complexity::ilog2(block_U->size()));
+                                                                                            unsigned const max_U_block(check_complexity::log_n -
+                                                                                                                     check_complexity::ilog2(block_U->size()));
                                                                                             // finalise work counters for the U-states and their transitions
                                                                                             const permutation_entry* s_iter(block_U->begin);
                                                                                             assert(s_iter < block_U->end);
                                                                                             do
                                                                                             {
                                                                                                 const state_info_entry* const s(s_iter->st);
-                                                                                                mCRL2complexity(s, finalise_work(bisim_gjkw::check_complexity::
-                                                                                                        split_U__find_predecessors_of_U_state,
-                                                                                                        bisim_gjkw::check_complexity::
-                                                                                                        split__find_predecessors_of_R_or_U_state,
+                                                                                                mCRL2complexity(s, finalise_work(
+                                                                                                    check_complexity::split_U__find_predecessors_of_U_state,
+                                                                                                    check_complexity::split__find_predecessors_of_R_or_U_state,
                                                                                                                                     max_U_block), partitioner);
                                                                                                 assert(s != partitioner.part_tr.pred.back().target);
                                                                                                 for (const pred_entry* pred_iter(s->pred_inert.begin);
                                                                                                                            s == pred_iter->target; ++pred_iter)
                                                                                                 {
-                                                                                                    mCRL2complexity(pred_iter, finalise_work(
-                                                                                                            bisim_gjkw::check_complexity::
+                                                                                                    mCRL2complexity(pred_iter, finalise_work(check_complexity::
                                                                                                             split_U__handle_transition_to_U_state,
-                                                                                                            bisim_gjkw::check_complexity::
+                                                                                                            check_complexity::
                                                                                                             split__handle_transition_to_R_or_U_state,
                                                                                                                                     max_U_block), partitioner);
                                                                                                 }
@@ -5306,10 +5302,9 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                                 for (const pred_entry* pred_iter(s->pred_inert.begin);
                                                                                                                                   s == (--pred_iter)->target; )
                                                                                                 {
-                                                                                                    mCRL2complexity(pred_iter, finalise_work(
-                                                                                                            bisim_gjkw::check_complexity::
+                                                                                                    mCRL2complexity(pred_iter, finalise_work(check_complexity::
                                                                                                             split_U__handle_transition_to_U_state,
-                                                                                                            bisim_gjkw::check_complexity::
+                                                                                                            check_complexity::
                                                                                                             split__handle_transition_to_R_or_U_state,
                                                                                                                                     max_U_block), partitioner);
                                                                                                 }
@@ -5319,9 +5314,9 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                                                s == (--succ_iter)->block_bunch->pred->source; )
                                                                                                 {
                                                                                                     mCRL2complexity(succ_iter->block_bunch->pred,finalise_work(
-                                                                                                          bisim_gjkw::check_complexity::
+                                                                                                          check_complexity::
                                                                                                           split_U__test_noninert_transitions,
-                                                                                                          bisim_gjkw::check_complexity::
+                                                                                                          check_complexity::
                                                                                                           split__handle_transition_from_R_or_U_state,
                                                                                                                                     max_U_block), partitioner);
                                                                                                 }
@@ -5335,14 +5330,13 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                         do
                                                                                         {
                                                                                             const state_info_entry* const s(s_iter->st);
-                                                                                            mCRL2complexity(s, cancel_work(bisim_gjkw::check_complexity::
+                                                                                            mCRL2complexity(s, cancel_work(check_complexity::
                                                                                                           split_R__find_predecessors_of_R_state), partitioner);
                                                                                             assert(s != partitioner.part_tr.pred.back().target);
                                                                                             for (const pred_entry* pred_iter(s->pred_inert.begin);
                                                                                                                            s == pred_iter->target; ++pred_iter)
                                                                                             {
-                                                                                                mCRL2complexity(pred_iter, cancel_work(
-                                                                                                          bisim_gjkw::check_complexity::
+                                                                                                mCRL2complexity(pred_iter, cancel_work(check_complexity::
                                                                                                           split_R__handle_transition_to_R_state), partitioner);
                                                                                             }
                                                                                             assert(s !=
@@ -5351,21 +5345,21 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                                                s == (--succ_iter)->block_bunch->pred->source; )
                                                                                             {
                                                                                                 mCRL2complexity(succ_iter->block_bunch->pred, cancel_work(
-                                                                                                        bisim_gjkw::check_complexity::
+                                                                                                        check_complexity::
                                                                                                         split_R__handle_transition_from_R_state), partitioner);
                                                                                                 // the following counter measures work done in the
                                                                                                 // U-coroutine that found R-states.
                                                                                                 mCRL2complexity(succ_iter->block_bunch->pred,finalise_work(
-                                                                                                       bisim_gjkw::check_complexity::
+                                                                                                       check_complexity::
                                                                                                        split_U__test_noninert_transitions,
-                                                                                                       bisim_gjkw::check_complexity::
+                                                                                                       check_complexity::
                                                                                                        split__test_noninert_transitions_found_new_bottom_state,
                                                                                                                                              1U), partitioner);
                                                                                             }
                                                                                         }
                                                                                         while (++s_iter < block_R->end);
 
-                                                                                        bisim_gjkw::check_complexity::check_temporary_work();
+                                                                                        check_complexity::check_temporary_work();
                                                                                     }
 
                                                                                     /// \brief moves temporary work counters to normal ones if the R-block is
@@ -5380,22 +5374,21 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                                             const block_t* const block_R,
                                                                                                             const bisim_partitioner_dnj<LTS_TYPE>& partitioner)
                                                                                     {
-                                                                                        unsigned const max_R_block(bisim_gjkw::check_complexity::log_n -
-                                                                                                         bisim_gjkw::check_complexity::ilog2(block_R->size()));
+                                                                                        unsigned const max_R_block(check_complexity::log_n -
+                                                                                                                     check_complexity::ilog2(block_R->size()));
                                                                                         // cancel work counters for the U-states and their transitions
                                                                                         const permutation_entry* s_iter(block_U->begin);
                                                                                         assert(s_iter < block_U->end);
                                                                                         do
                                                                                         {
                                                                                             const state_info_entry* const s(s_iter->st);
-                                                                                            mCRL2complexity(s, cancel_work(bisim_gjkw::check_complexity::
+                                                                                            mCRL2complexity(s, cancel_work(check_complexity::
                                                                                                           split_U__find_predecessors_of_U_state), partitioner);
                                                                                             assert(s != partitioner.part_tr.pred.back().target);
                                                                                             for (const pred_entry* pred_iter(s->pred_inert.begin);
                                                                                                                            s == pred_iter->target; ++pred_iter)
                                                                                             {
-                                                                                                mCRL2complexity(pred_iter, cancel_work(
-                                                                                                          bisim_gjkw::check_complexity::
+                                                                                                mCRL2complexity(pred_iter, cancel_work(check_complexity::
                                                                                                           split_U__handle_transition_to_U_state), partitioner);
                                                                                             }
                                                                                             // Sometimes, inert transitions become transitions from R- to
@@ -5405,8 +5398,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                             for (const pred_entry* pred_iter(s->pred_inert.begin);
                                                                                                                                   s == (--pred_iter)->target; )
                                                                                             {
-                                                                                                mCRL2complexity(pred_iter, cancel_work(
-                                                                                                          bisim_gjkw::check_complexity::
+                                                                                                mCRL2complexity(pred_iter, cancel_work(check_complexity::
                                                                                                           split_U__handle_transition_to_U_state), partitioner);
                                                                                             }
                                                                                             assert(s !=
@@ -5415,7 +5407,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                                                s == (--succ_iter)->block_bunch->pred->source; )
                                                                                             {
                                                                                                 mCRL2complexity(succ_iter->block_bunch->pred, cancel_work(
-                                                                                                             bisim_gjkw::check_complexity::
+                                                                                                             check_complexity::
                                                                                                              split_U__test_noninert_transitions), partitioner);
                                                                                             }
                                                                                         }
@@ -5426,20 +5418,17 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                         do
                                                                                         {
                                                                                             const state_info_entry* const s(s_iter->st);
-                                                                                            mCRL2complexity(s, finalise_work(bisim_gjkw::check_complexity::
-                                                                                                    split_R__find_predecessors_of_R_state,
-                                                                                                    bisim_gjkw::check_complexity::
-                                                                                                    split__find_predecessors_of_R_or_U_state,
+                                                                                            mCRL2complexity(s, finalise_work(
+                                                                                                check_complexity::split_R__find_predecessors_of_R_state,
+                                                                                                check_complexity::split__find_predecessors_of_R_or_U_state,
                                                                                                                                     max_R_block), partitioner);
                                                                                             assert(s != partitioner.part_tr.pred.back().target);
                                                                                             for (const pred_entry* pred_iter(s->pred_inert.begin);
                                                                                                                            s == pred_iter->target; ++pred_iter)
                                                                                             {
                                                                                                 mCRL2complexity(pred_iter, finalise_work(
-                                                                                                        bisim_gjkw::check_complexity::
-                                                                                                        split_R__handle_transition_to_R_state,
-                                                                                                        bisim_gjkw::check_complexity::
-                                                                                                        split__handle_transition_to_R_or_U_state,
+                                                                                                    check_complexity::split_R__handle_transition_to_R_state,
+                                                                                                    check_complexity::split__handle_transition_to_R_or_U_state,
                                                                                                                                     max_R_block), partitioner);
                                                                                             }
                                                                                             assert(s !=
@@ -5448,20 +5437,20 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                                                s == (--succ_iter)->block_bunch->pred->source; )
                                                                                             {
                                                                                                 mCRL2complexity(succ_iter->block_bunch->pred, finalise_work(
-                                                                                                        bisim_gjkw::check_complexity::
+                                                                                                        check_complexity::
                                                                                                         split_R__handle_transition_from_R_state,
-                                                                                                        bisim_gjkw::check_complexity::
+                                                                                                        check_complexity::
                                                                                                         split__handle_transition_from_R_or_U_state,
                                                                                                                                     max_R_block), partitioner);
                                                                                                 // the following counter actually is work done in the
                                                                                                 // U-coroutine that found R-states.
                                                                                                 mCRL2complexity(succ_iter->block_bunch->pred, cancel_work(
-                                                                                                             bisim_gjkw::check_complexity::
+                                                                                                             check_complexity::
                                                                                                              split_U__test_noninert_transitions), partitioner);
                                                                                             }
                                                                                         }
                                                                                         while (++s_iter < block_R->end);
-                                                                                        bisim_gjkw::check_complexity::check_temporary_work();
+                                                                                        check_complexity::check_temporary_work();
                                                                                     }
 
                                                                                     } // end namespace bisim_dnj

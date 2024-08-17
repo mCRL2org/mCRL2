@@ -28,6 +28,19 @@
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
+#include "mcrl2/lts/detail/check_complexity.h"
+
+#ifndef NDEBUG
+    /// \brief include something in Debug mode
+    /// \details In a few places, we have to include an additional parameter to
+    /// a function in Debug mode.  While it is in principle possible to use
+    /// #ifndef NDEBUG ... #endif, that would lead to distributing the code
+    /// over many code lines.  This macro expands to its arguments in Debug
+    /// mode and to nothing otherwise.
+    #define ONLY_IF_DEBUG(...) __VA_ARGS__
+#else
+    #define ONLY_IF_DEBUG(...)
+#endif
 
 namespace mcrl2
 {
@@ -331,6 +344,8 @@ class todo_state_vector
     state_index move_from_todo()
     {
       assert(!todo_is_empty());
+// David suggests: at() checks bounds, but your assertion above already checked the bound.
+// It would be sufficient to write ``return m_vec[m_todo_indicator++]''.
       state_index result=m_vec.at(m_todo_indicator);
       m_todo_indicator++;
       return result;
@@ -388,6 +403,25 @@ struct state_type_gj
   std::size_t counter=undefined; // This field is used to store local information while splitting. While set to -1 (undefined) 
                                  // it is considered to be undefined.
                                  // When set to -2 (Rmarked) it is considered to be marked for being in R or R_todo. 
+  #ifndef NDEBUG
+    /// \brief print a short state identification for debugging
+    template<class LTS_TYPE>
+    std::string debug_id_short(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
+    {
+        assert(&partitioner.m_states.front() <= this);
+        assert(this <= &partitioner.m_states.back());
+        return std::to_string(this - &partitioner.m_states.front());
+    }
+
+    /// \brief print a state identification for debugging
+    template<class LTS_TYPE>
+    std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
+    {
+        return "state " + debug_id_short(partitioner);
+    }
+
+    mutable check_complexity::state_gj_counter_t work_counter;
+  #endif
 };
 
 // The following type gives the start and end indications of the transitions for the same block, label and constellation
@@ -411,6 +445,31 @@ struct transition_type
   // std::vector<transition_index>::iterator ref_incoming_transitions;
   outgoing_transitions_it ref_outgoing_transitions;
   std::vector<transition_index>::iterator ref_BLC_list;
+
+  #ifndef NDEBUG
+    /// \brief print a short transition identification for debugging
+    /// \details This function is only available if compiled in Debug mode.
+    template<class LTS_TYPE>
+    std::string debug_id_short(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
+    {
+        assert(&partitioner.m_transitions.front() <= this);
+        assert(this <= &partitioner.m_transitions.back());
+        const transition& t = m_aut.get_transitions()[this - &partitioner.m_transitions.front()];
+        return partitioner.m_states[t.from()].debug_id_short(partitioner) + " --" +
+               m_aut.action_label(t.label()) + "--> " +
+               partitioner.m_states[t.to()].debug_id_short(partitioner);
+    }
+
+    /// \brief print a transition identification for debugging
+    /// \details This function is only available if compiled in Debug mode.
+    template<class LTS_TYPE>
+    std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
+    {
+        return "transition " + debug_id_short(partitioner);
+    }
+
+    mutable check_complexity::trans_gj_counter_t work_counter;
+#endif
 };
 
 struct block_type
@@ -428,6 +487,24 @@ struct block_type
       start_non_bottom_states(beginning_of_states),
       end_states(beginning_of_states)
   {}
+
+  #ifndef NDEBUG
+    /// \brief print a block identification for debugging
+    template<class LTS_TYPE>
+    inline std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
+    {
+        assert(&partitioner.m_blocks.front() <= this);
+        assert(this <= &partitioner.m_blocks.back());
+        assert(0 <= start_bottom_states);
+        assert(start_bottom_states <= start_non_bottom_states);
+        assert(start_non_bottom_states <= end_states);
+        assert(end_states <= partitioner.m_states.size());
+        return "block [" + std::to_string(start_bottom_states) + "," + std::to_string(end_states) + ")"
+                    " (#" + std::to_string(this - &partitioner.m_blocks.front()) + ")";
+    }
+
+    mutable check_complexity::block_gj_counter_t work_counter;
+  #endif
 };
 
 struct constellation_type
@@ -445,6 +522,22 @@ struct constellation_type
   {
     blocks.push_front(bi);
   }
+
+  #ifndef NDEBUG
+    // calculates the size of the constellation. (The size of a constellation
+    // is needed sometimes to check the complexity. This check is only run in
+    // Debug mode.)
+    template<class LTS_TYPE>
+    state_index size(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
+    {
+        state_index result = 0;
+        for (const block_index bi: blocks)
+        {
+            result += partitioner.m_blocks[bi].size();
+        }
+        return result;
+    }
+  #endif
 };
 
 // The struct below facilitates to walk through a LBC_list starting from an arbitrary transition.
@@ -937,6 +1030,7 @@ class bisim_partitioner_gj
         const block_type& B=m_blocks[bi];
         for(const BLC_indicators blc_ind: B.block_to_constellation)
         {
+          mCRL2complexity(...blc_ind..., add_work(check_complexity::finalize_transition, 1), *this);
           const transition& t= m_aut.get_transitions()[*blc_ind.start_same_BLC];
           const transition_index new_to=get_eq_class(t.to());
           if (!m_aut.is_tau(t.label()) || bi!=new_to) 
@@ -962,6 +1056,7 @@ class bisim_partitioner_gj
     
         for(std::size_t i=0; i<m_aut.num_states(); ++i)
         {
+          mCRL2complexity(&m_states[i], add_work(check_complexity::finalize_state, 1), *this);
           const state_index new_index(get_eq_class(i));
           new_labels[new_index]=new_labels[new_index]+m_aut.state_label(i);
         }
@@ -969,6 +1064,7 @@ class bisim_partitioner_gj
         m_aut.set_num_states(num_eq_classes());
         for (std::size_t i=0; i<num_eq_classes(); ++i)
         {
+          mCRL2complexity(&m_blocks[i], add_work(check_complexity::finalize_block, 1), *this);
           m_aut.set_state_label(i, new_labels[i]);
         }
       }
@@ -1068,6 +1164,8 @@ class bisim_partitioner_gj
       // Carry out the split. 
       for(state_index s: R)
       {
+        mCRL2complexity(&m_states[s], add_work(check_complexity::gj_carry_out_split,
+                check_complexity::log_n - check_complexity::ilog2(m_blocks[B_new].size())), *this);
 //std::cerr << "MOVE STATE TO NEW BLOCK: " << s << "\n";
         m_states[s].block=B_new;
         update_Ptilde(s);
@@ -1417,13 +1515,8 @@ class bisim_partitioner_gj
           case initializing:
           {
             // Algorithm 3, line 3.3, right.
-            if (M_it==M_end)
-            {
-              R_status=state_checking;
-            }
-            else
-            {
               const state_index si= m_aut.get_transitions()[*M_it].from();
+              mCRL2complexity(&m_transitions[*M_it], add_work(check_complexity::simple_splitB_R_initializing, 1), *this);
               ++M_it;
               // R_todo.insert(si);
               if (m_states[si].counter!=Rmarked)
@@ -1438,9 +1531,13 @@ class bisim_partitioner_gj
                 if (2*m_R.size()>B_size) 
                 {
                   R_status=aborted;
+                  break;
                 }
               }
-            }
+              if (M_it==M_end)
+              {
+                R_status=state_checking;
+              }
             break;
           }
           case state_checking: 
@@ -1465,8 +1562,8 @@ class bisim_partitioner_gj
             else
             {
               const state_index s=m_R.move_from_todo();
+              mCRL2complexity(&m_states[s], add_work(check_complexity::simple_splitB_R_state_checking, 1), *this);
 //std::cerr << "R insert: " << s << "\n";
-              R_status=incoming_inert_transition_checking;
               // current_R_incoming_transition_iterator_end=m_states[s].start_incoming_non_inert_transitions;
               if (s+1==m_states.size())
               {
@@ -1477,19 +1574,18 @@ class bisim_partitioner_gj
                 current_R_incoming_transition_iterator_end=m_states[s+1].start_incoming_transitions;
               }
               current_R_incoming_transition_iterator=m_states[s].start_incoming_transitions;
+              if (current_R_incoming_transition_iterator!=current_R_incoming_transition_iterator_end)
+              {
+                R_status=incoming_inert_transition_checking;
+              }
             }
             break;
           }
           case incoming_inert_transition_checking:
           {
-            if (current_R_incoming_transition_iterator==current_R_incoming_transition_iterator_end ||
-                (!m_aut.is_tau(current_R_incoming_transition_iterator->label())))
-            {
-              R_status=state_checking;
-            }
-            else
-            { 
               const transition& tr= *current_R_incoming_transition_iterator;
+              mCRL2complexity(&m_transitions[*current_R_incoming_transition_iterator],
+                        add_work(check_complexity::simple_splitB_R_incoming_inert_transition_checking, 1), *this);
               assert(m_aut.is_tau(tr.label()));
               if (m_states[tr.from()].block==m_states[tr.to()].block && m_states[tr.from()].counter!=Rmarked) 
               {
@@ -1509,8 +1605,12 @@ class bisim_partitioner_gj
                 }
               }
               ++current_R_incoming_transition_iterator;
+              if (current_R_incoming_transition_iterator==current_R_incoming_transition_iterator_end ||
+                  !m_aut.is_tau(m_aut.apply_hidden_label_map(current_R_incoming_transition_iterator->label())))
+              {
+                R_status=state_checking;
+              }
               break;
-            }
           }
           default: break;
         }
@@ -1528,6 +1628,11 @@ class bisim_partitioner_gj
         {
           case initializing: // Only executed in VARIANT 1.
           {
+// David suggests: This should not happen at all.
+// Instead, one should determine all bottom states with a transition to the splitter
+// before the coroutines start (not only in variant 1),
+// and then all bottom states without such a transition become the initial part of U.
+
 //std::cerr << "U_init\n";
             // Algorithm 3, line 3.3 left.
             if (M_co_it==M_co_end)
@@ -1571,6 +1676,11 @@ class bisim_partitioner_gj
 /*          case outgoing_action_constellation_check_during_initialisation:
 // David suggests: this should not be necessary, because the bottom states can always be split
 // before the two coroutines start.
+// In fact, if current_U_outgoing_state is already a bottom state
+// and does not have a transition to the splitter,
+// this check takes too long.
+// The outgoing-action-constellation-check is only allowed for states
+// that can become NEW bottom states.
           {
 //std::cerr << "U_outg_actconstcheckduringit\n";
             if (current_U_outgoing_transition_iterator==m_outgoing_transitions.end() ||

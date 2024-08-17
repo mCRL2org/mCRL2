@@ -612,7 +612,7 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s                           
         split[-1].set_slice_begin_or_before_end(to_C_begin);
         for (succ_iter_t succ_iter = split - 1; to_C_begin != succ_iter; )
         {
-            --succ_iter;                                                        mCRL2complexity(succ_iter->B_to_C->pred,add_work(bisim_gjkw::check_complexity::
+            --succ_iter;                                                        mCRL2complexity(succ_iter->B_to_C->pred,add_work(check_complexity::
                                                                                                Register_that_inert_transitions_from_s_go_to_NewC_succ_2_17,
                                                                                                                                                max_counter), );
                                                                                 assert(succ.end() > succ_iter);
@@ -1869,10 +1869,10 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         bisim_gjkw::block_t* const SpB = SpC->split_off_small_block();
         bisim_gjkw::constln_t* const NewC = SpB->constln();
                                                                                 #ifndef NDEBUG
-                                                                                    unsigned const max_counter = bisim_gjkw::check_complexity::log_n -
-        /*-------------------- find predecessors of SpB ---------------------*/                               bisim_gjkw::check_complexity::ilog2(SpB->size());
+                                                                                    unsigned const max_counter = check_complexity::log_n -
+        /*-------------------- find predecessors of SpB ---------------------*/                                           check_complexity::ilog2(SpB->size());
                                                                                 #endif
-        /* 2.8: Mark block SpB as refinable                                  */ mCRL2complexity(SpB, add_work(bisim_gjkw::check_complexity::
+        /* 2.8: Mark block SpB as refinable                                  */ mCRL2complexity(SpB, add_work(check_complexity::
         /* 2.9: Mark all states of SpB as predecessors                       */               while_C_contains_a_nontrivial_constellation_2_4, max_counter), );
             /* we deviate from the published algorithm: only states with a   */ assert(nullptr == bisim_gjkw::block_t::get_some_refinable());
             // transition to SpC will be marked.  SpB will be split separately.
@@ -1882,8 +1882,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             // transition array.)
         part_tr.split_inert_to_C(SpB);
         // 2.10: for all s in SpB do
-            /* We have to walk through the states from end to beginning so   */ mCRL2complexity(SpB, add_work(bisim_gjkw::check_complexity::
-            /* we can mark state s if necessary.  Marking will move s to a   */                                         for_all_s_in_SpB_2_10, max_counter), );
+            /* We have to walk through the states from end to beginning so   */ mCRL2complexity(SpB,
+            /* we can mark state s if necessary.  Marking will move s to a   */              add_work(check_complexity::for_all_s_in_SpB_2_10, max_counter), );
             // position that has already been visited.
         for (bisim_gjkw::permutation_iter_t s_iter = SpB->end();
                                                       SpB->begin() != s_iter; )
@@ -1893,7 +1893,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             // 2.11: for all s_prime in noninert_in(s) do
             for (bisim_gjkw::pred_iter_t pred_iter = s->noninert_pred_begin();
                               s->noninert_pred_end() != pred_iter; ++pred_iter)
-            {                                                                   mCRL2complexity(pred_iter, add_work(bisim_gjkw::
+            {                                                                   mCRL2complexity(pred_iter, add_work(
                                                                                              check_complexity::for_all_s_prime_in_pred_s_2_11, max_counter), );
                                                                                 assert(part_tr.pred_end() > pred_iter);
                                                                                 assert(pred_iter->succ->B_to_C->pred == pred_iter);
@@ -2041,8 +2041,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                                                                     assert((*s_mark_iter)->succ_begin() <= to_NewC);
                                                                                     assert(to_NewC->target->constln() == NewC);
                                                                                     mCRL2complexity(to_NewC->B_to_C->B_to_C_slice, add_work(
-                                                                                                           bisim_gjkw::check_complexity::
-                                                                                                           for_all_refinable_blocks_RfnB_2_20, max_counter), );
+                                                                                         check_complexity::for_all_refinable_blocks_RfnB_2_20, max_counter), );
                                                                                 #endif
             if (1 == RfnB->size())
             {
@@ -2531,7 +2530,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                                                                                             assert(to_SpC->target->constln() == SpC);
                                                                                         }
                                                                                         bisim_gjkw::succ_entry::slice_add_work_to_transns(to_SpC,
-                                                                                                 bisim_gjkw::check_complexity::
+                                                                                                 check_complexity::
                                                                                                  while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing, 1);
                                                                                     }
                                                                                     else
@@ -2547,7 +2546,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                                                                                             --to_NewC;
                                                                                             assert(to_NewC->target->constln() != SpC);
                                                                                         }
-                                                                                        bisim_gjkw::succ_entry::slice_add_work_to_transns(to_NewC, bisim_gjkw::
+                                                                                        bisim_gjkw::succ_entry::slice_add_work_to_transns(to_NewC,
                                                                                               check_complexity::while_Test_is_not_empty_3_6l_s_is_red_3_9l, 1);
                                                                                     }
                                                                                 #endif
@@ -2562,8 +2561,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                              RfnB->unmarked_bottom_begin()) > RfnB->size() / 2)
                     {
                         ABORT_THIS_COROUTINE();
-                    }                                                           mCRL2complexity(blue_s, add_work(bisim_gjkw::check_complexity::
-                                                                                                           while_Test_is_not_empty_3_6l_s_is_blue_3_11l, 1), );
+                    }                                                           mCRL2complexity(blue_s, add_work(
+                                                                                         check_complexity::while_Test_is_not_empty_3_6l_s_is_blue_3_11l, 1), );
                 // 3.12l: end if
                 }
             // 3.13l: end while
@@ -2603,8 +2602,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                 {
                     blue_s_prime = blue_pred_iter->source;
                     if (blue_s_prime->pos >= RfnB->marked_nonbottom_begin())
-                    {                                                           mCRL2complexity(blue_pred_iter, add_work(bisim_gjkw::check_complexity::
-                                                                                                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
+                    {                                                           mCRL2complexity(blue_pred_iter, add_work(
+                                                                                         check_complexity::for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
                         continue;
                     }
                     // 3.19l: if notblue(s_prime) undefined then
@@ -2622,8 +2621,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                     --blue_s_prime->notblue;
                     // 3.23l: if notblue(s_prime) == 0 && ...
                     if (0 != blue_s_prime->notblue)
-                    {                                                           mCRL2complexity(blue_pred_iter, add_work(bisim_gjkw::check_complexity::
-                                                                                                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
+                    {                                                           mCRL2complexity(blue_pred_iter, add_work(
+                                                                                         check_complexity::for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
                         continue;
                     }
                     // 3.23l: ... && (FromRed == {} ||
@@ -2631,8 +2630,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                     if (!FromRed_is_empty)
                     {
                         if (blue_s_prime->surely_has_transition_to(SpC))
-                        {                                                       mCRL2complexity(blue_pred_iter, add_work(bisim_gjkw::check_complexity::
-                                                                                                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
+                        {                                                       mCRL2complexity(blue_pred_iter, add_work(
+                                                                                         check_complexity::for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
                             continue;
                         }
                         if (!blue_s_prime->surely_has_no_transition_to(SpC))
@@ -2659,14 +2658,14 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                                         bisim_gjkw::succ_entry::slice_end(mid);
                                 }
                                                                                 #ifndef NDEBUG
-                                                                                    bisim_gjkw::succ_entry::slice_add_work_to_transns(mid, bisim_gjkw::
+                                                                                    bisim_gjkw::succ_entry::slice_add_work_to_transns(mid,
                                                                                                 check_complexity::if___s_prime_has_transition_to_SpC_3_23l, 1);
                                                                                 #endif
                             }
                             END_COROUTINE_FOR;
                             if (blue_begin != blue_end)
-                            {                                                   mCRL2complexity(blue_pred_iter, add_work(bisim_gjkw::check_complexity::
-                                                                                                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
+                            {                                                   mCRL2complexity(blue_pred_iter, add_work(
+                                                                                         check_complexity::for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
                                 continue;
                             }
                         }
@@ -2684,12 +2683,12 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                     }
                     // 3.25l: end if
                         // this is implicit in the `continue` statements above.
-                /* 3.26l: end for                                            */ mCRL2complexity(blue_pred_iter, add_work(bisim_gjkw::check_complexity::
-                                                                                                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
+                /* 3.26l: end for                                            */ mCRL2complexity(blue_pred_iter, add_work(
+                                                                                         check_complexity::for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
                 }
                 END_COROUTINE_FOR;
-            /* 3.27l: end while                                              */ mCRL2complexity(blue_s, add_work(bisim_gjkw::check_complexity::
-                                                                                                             while_Blue_contains_unvisited_states_3_15l, 1), );
+            /* 3.27l: end while                                              */ mCRL2complexity(blue_s, add_work(
+                                                                                           check_complexity::while_Blue_contains_unvisited_states_3_15l, 1), );
                 if (RfnB->unmarked_bottom_end() == blue_visited_end)
                 {
                     blue_visited_end = RfnB->unmarked_nonbottom_begin();
@@ -2709,10 +2708,10 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                                  RfnB->split_off_blue(blue_blue_nonbottom_end);
             part_tr.new_blue_block_created(RfnB, NewB);
                                                                                 #ifndef NDEBUG
-                                                                                    unsigned const max_counter = bisim_gjkw::check_complexity::log_n -
-                                                                                                             bisim_gjkw::check_complexity::ilog2(NewB->size());
-                                                                                    mCRL2complexity(NewB, add_work(bisim_gjkw::check_complexity::
-                                                                                                                       for_all_s_in_NewB_3_31, max_counter), );
+                                                                                    unsigned const max_counter = check_complexity::log_n -
+                                                                                                                         check_complexity::ilog2(NewB->size());
+                                                                                    mCRL2complexity(NewB,
+                                                                                            add_work(check_complexity::for_all_s_in_NewB_3_31, max_counter), );
                                                                                 #endif
             // 3.31l: for all s in NewB do
             for (bisim_gjkw::permutation_iter_t s_iter = NewB->begin();
@@ -2722,8 +2721,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                 // 3.32l: for all s_prime in inert_in(s) \ NewB do
                 for (blue_pred_iter = blue_s->inert_pred_begin();
                     blue_s->inert_pred_end()!=blue_pred_iter; ++blue_pred_iter)
-                {                                                               mCRL2complexity(blue_pred_iter, add_work(bisim_gjkw::check_complexity::
-                                                                                                              for_all_s_prime_in_pred_s_3_32l, max_counter), );
+                {                                                               mCRL2complexity(blue_pred_iter, add_work(
+                                                                                            check_complexity::for_all_s_prime_in_pred_s_3_32l, max_counter), );
                                                                                 assert(part_tr.pred_end() > blue_pred_iter);
                                                                                 assert(blue_pred_iter->succ->B_to_C->pred == blue_pred_iter);
                     blue_s_prime = blue_pred_iter->source;
@@ -2824,8 +2823,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                     {
                         ABORT_THIS_COROUTINE();
                     }
-                /* 3.13r: end while                                          */ mCRL2complexity(red_fromred_visited_begin->pred, add_work(bisim_gjkw::
-                                                                                                      check_complexity::while_FromRed_is_not_empty_3_6r, 1), );
+                /* 3.13r: end while                                          */ mCRL2complexity(red_fromred_visited_begin->pred,
+                                                                                             add_work(check_complexity::while_FromRed_is_not_empty_3_6r, 1), );
                 }
                 END_COROUTINE_WHILE;
 
@@ -2877,12 +2876,12 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                     {
                         ABORT_THIS_COROUTINE();
                     }
-                /* 3.26r: end for                                            */ mCRL2complexity(red_pred_iter, add_work(bisim_gjkw::check_complexity::
-                                                                                                                        for_all_s_prime_in_pred_s_3_18r, 1), );
+                /* 3.26r: end for                                            */ mCRL2complexity(red_pred_iter,
+                                                                                             add_work(check_complexity::for_all_s_prime_in_pred_s_3_18r, 1), );
                 }
                 END_COROUTINE_FOR;
-            /* 3.27r: end while                                              */ mCRL2complexity(red_s, add_work(bisim_gjkw::check_complexity::
-                                                                                                              while_Red_contains_unvisited_states_3_15r, 1), );
+            /* 3.27r: end while                                              */ mCRL2complexity(red_s, add_work(
+                                                                                            check_complexity::while_Red_contains_unvisited_states_3_15r, 1), );
                 if (RfnB->marked_bottom_begin() == red_visited_begin)
                 {
                     red_visited_begin = RfnB->marked_nonbottom_end();
@@ -2901,10 +2900,10 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
             RedB = RfnB->split_off_red(RfnB->marked_nonbottom_begin());
             part_tr.new_red_block_created(RfnB, RedB, postprocessing);
                                                                                 #ifndef NDEBUG
-                                                                                    unsigned const max_counter = bisim_gjkw::check_complexity::log_n -
-                                                                                                             bisim_gjkw::check_complexity::ilog2(RedB->size());
-                                                                                    mCRL2complexity(RedB, add_work(bisim_gjkw::check_complexity::
-                                                                                                                       for_all_s_in_NewB_3_31, max_counter), );
+                                                                                    unsigned const max_counter = check_complexity::log_n -
+                                                                                                                         check_complexity::ilog2(RedB->size());
+                                                                                    mCRL2complexity(RedB,
+                                                                                            add_work(check_complexity::for_all_s_in_NewB_3_31, max_counter), );
                                                                                 #endif
             // 3.31r: for all non-bottom s in RedB do
                 // we have to run through the states backwards because
@@ -2918,7 +2917,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                 for (bisim_gjkw::succ_iter_t
                                succ_iter = red_s->inert_succ_begin();
                                red_s->inert_succ_end()!=succ_iter; ++succ_iter)
-                {                                                               mCRL2complexity(succ_iter->B_to_C->pred, add_work(bisim_gjkw::
+                {                                                               mCRL2complexity(succ_iter->B_to_C->pred, add_work(
                                                                                             check_complexity::for_all_s_prime_in_succ_s_3_32r, max_counter), );
                                                                                 assert(part_tr.succ_end() > succ_iter);
                                                                                 assert(succ_iter->B_to_C->pred->succ == succ_iter);
@@ -3045,12 +3044,12 @@ Line_4_4:
         bisim_gjkw::B_to_C_desc_iter_t const new_slice =
                                                       RfnB->to_constln.begin(); // try to assign the work to the transitions from bottom states in RfnB to C.
                                                                                 #ifndef NDEBUG
-                                                                                    if (!new_slice->add_work_to_bottom_transns(bisim_gjkw::check_complexity::
+                                                                                    if (!new_slice->add_work_to_bottom_transns(check_complexity::
                                                                                                        for_all_transitions_from_bottom_states_a_priori_4_4, 1))
                                                                                     {
                                                                                         // It didn't work out -- now assign it temporarily to the
                                                                                         // B_to_C slice itself.
-                                                                                        mCRL2complexity(new_slice, add_work(bisim_gjkw::check_complexity::
+                                                                                        mCRL2complexity(new_slice, add_work(check_complexity::
                                                                                                         for_all_constellations_C_not_in_R_from_RfnB_4_4, 1), );
                                                                                     }
                                                                                 #endif
@@ -3072,8 +3071,8 @@ Line_4_4:
     bisim_gjkw::permutation_iter_t s_iter = RfnB->unmarked_bottom_begin();
     do
     {
-        bisim_gjkw::state_info_ptr const s = *s_iter;                           mCRL2complexity(s, add_work(bisim_gjkw::check_complexity::
-                                                                                                                    for_all_bottom_states_s_in_RfnB_4_8, 1), );
+        bisim_gjkw::state_info_ptr const s = *s_iter;                           mCRL2complexity(s,
+                                                                                         add_work(check_complexity::for_all_bottom_states_s_in_RfnB_4_8, 1), );
         // 4.9: Set the current constellation pointer of s to the first
         //      constellation it can reach
         s->set_current_constln(s->succ_begin());
@@ -3098,7 +3097,7 @@ Line_4_4:
             bisim_gjkw::B_to_C_desc_iter_t FromRed = B_iter->B_to_C_slice;      assert(FromRed->begin == B_iter);
                                                                                 #ifndef NDEBUG
                                                                                     bool postproc_a_posteriori = !FromRed->
-                                                                                        add_work_to_bottom_transns(bisim_gjkw::check_complexity::
+                                                                                        add_work_to_bottom_transns(check_complexity::
                                                                                                       for_all_transitions_that_need_postproc_a_priori_4_12, 1);
                                                                                 #endif
             // 4.13: Delete the transitions from B to SpC from those that need
@@ -3116,8 +3115,7 @@ Line_4_4:
                                                                                 #ifndef NDEBUG
                                                                                     if (0 != FromRed->work_counter.get_work_counter_4_4())
                                                                                     {
-                                                                                        assert(FromRed->add_work_to_bottom_transns(
-                                                                                                  bisim_gjkw::check_complexity::
+                                                                                        assert(FromRed->add_work_to_bottom_transns(check_complexity::
                                                                                                   for_all_transitions_from_bottom_states_a_posteriori_4_4, 1));
                                                                                         FromRed->work_counter.reset_work_counter_4_4();
                                                                                     }
@@ -3136,7 +3134,7 @@ Line_4_4:
                                                                                 #ifndef NDEBUG
                                                                                     FromRed = FromRed_save->succ->B_to_C->B_to_C_slice;
                                                                                     if (postproc_a_posteriori && !FromRed->add_work_to_bottom_transns(
-                                                                                                  bisim_gjkw::check_complexity::
+                                                                                                  check_complexity::
                                                                                                   for_all_transitions_that_need_postproc_a_posteriori_4_12, 1))
                                                                                     {
                                                                                         assert(0 && "no new bottom states to assign work to");
@@ -3145,7 +3143,7 @@ Line_4_4:
                                                                                     // transitions from (new) bottom states now.
                                                                                     if (0 != FromRed->work_counter.get_work_counter_4_4())
                                                                                     {
-                                                                                        if (!FromRed->add_work_to_bottom_transns(bisim_gjkw::check_complexity::
+                                                                                        if (!FromRed->add_work_to_bottom_transns(check_complexity::
                                                                                                    for_all_transitions_from_bottom_states_a_posteriori_4_4, 1))
                                                                                         {
                                                                                             assert(0 && "no new bottom states to assign work to");
@@ -3166,12 +3164,12 @@ Line_4_4:
                 {
                                                                                 #ifndef NDEBUG
                                                                                     bisim_gjkw::succ_entry::slice_add_work_to_transns(s->current_constln(),
-                                                                                     bisim_gjkw::check_complexity::for_all_old_bottom_states_s_in_RedB_4_15,1);
+                                                                                                 check_complexity::for_all_old_bottom_states_s_in_RedB_4_15,1);
                                                                                 #endif
                     s->set_current_constln(bisim_gjkw::succ_entry::slice_end(
                                                         s->current_constln()));
                 }                                                               else
-                                                                                {   mCRL2complexity(s, add_work(bisim_gjkw::check_complexity::
+                                                                                {   mCRL2complexity(s, add_work(check_complexity::
                                                                                                       for_all_old_bottom_states_s_in_RedB_selfloop_4_15, 1), );
                                                                                     assert(B == RedB /* we should test: BlueB is empty */);
                                                                                     assert(B->constln() == SpC);
