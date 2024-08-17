@@ -398,10 +398,7 @@ struct transition_type
 {
   // The position of the transition type corresponds to m_aut.get_transitions(). 
   // std::size_t from, label, to are found in m_aut.get_transitions().
-  // std::list<transition_index>::iterator transitions_per_block_to_constellation;
   linked_list<BLC_indicators>::iterator transitions_per_block_to_constellation;
-  // transition_index previous_LBC=null_transition;
-  // transition_index next_LBC=null_transition;
   std::vector<transition_index>::iterator ref_incoming_transitions;
   outgoing_transitions_it ref_outgoing_transitions;
   std::vector<transition_index>::iterator ref_BLC_list;
@@ -507,18 +504,7 @@ class bisim_partitioner_gj
     {
       for(std::size_t ti=0; ti<m_transitions.size(); ++ti)
       {
-//std::cerr << ""; {const transition& t=m_aut.get_transitions()[ti];
-//std::cerr << "TRANSITION " << ti << ": " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";}
-        /* if (m_transitions[ti].previous_LBC!=null_transition)
-        {
-          assert(ti==m_transitions[m_transitions[ti].previous_LBC].next_LBC);
-        }
-        if (m_transitions[ti].next_LBC!=null_transition)
-        {           
-          assert(ti==m_transitions[m_transitions[ti].next_LBC].previous_LBC);
-        } */
         const std::vector<transition_index>::iterator ind=m_transitions[ti].ref_BLC_list;
-//std::cerr << "IN BLC_list " << *ind << "\n";
         assert(*ind==ti);
 
         const transition& t=m_aut.get_transitions()[ti];
@@ -881,9 +867,9 @@ class bisim_partitioner_gj
         m_preserve_divergence(preserve_divergence)
     {                                                                           
       assert(m_branching || !m_preserve_divergence);
-mCRL2log(log::verbose) << "Start initialisation.\n";
+      mCRL2log(log::verbose) << "Start initialisation.\n";
       create_initial_partition();        
-mCRL2log(log::verbose) << "Start refining\n";
+      mCRL2log(log::verbose) << "After initialisation there are " << m_blocks.size() << " equivalence classes. Start refining. \n";
       refine_partition_until_it_becomes_stable();
       assert(check_data_structures("READY"));
     }
@@ -2077,11 +2063,11 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
       {
         const transition& t=m_aut.get_transitions()[ti];
 //std::cerr << "TRANS " << ptr(ti) << "\n";
-        if (count_transitions_per_action[t.label()]==0 && !m_aut.is_tau(t.label()))
+        if (count_transitions_per_action[t.label()]++ ==0 && !m_aut.is_tau(t.label()))
         {
           todo_stack_actions.push_back(t.label());
         }
-        count_transitions_per_action[t.label()]++;
+        // count_transitions_per_action[t.label()]++;
       }
 //std::cerr << "COUNT_TRANSITIONS PER ACT1    "; for(auto s: count_transitions_per_action){ std::cerr << s << "  "; } std::cerr << "\n";
       accumulate_entries(count_transitions_per_action, todo_stack_actions);
@@ -2090,8 +2076,8 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
       for(transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
       {
         const transition& t=m_aut.get_transitions()[ti];
-        transitions_per_action_label[count_transitions_per_action[t.label()]]=ti; // insert, if it does not occur. 
-        count_transitions_per_action[t.label()]++;
+        transitions_per_action_label[count_transitions_per_action[t.label()]++] =ti; // insert, if it does not occur. 
+        // count_transitions_per_action[t.label()]++;
       }
 
       std::vector<std::size_t> count_outgoing_transitions_per_state(m_aut.num_states(), 0);
@@ -2116,20 +2102,16 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
       accumulate_entries_incoming(count_incoming_transitions_per_state);
 
 mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
-      //std::size_t transition_count=0;
-      // for(const transition& t: m_aut.get_transitions())
+
       for(const transition_index ti: transitions_per_action_label)
       {
         const transition& t=m_aut.get_transitions()[ti];
-        // m_outgoing_transitions[count_outgoing_transitions_per_state[t.from()]].transition=transition_count;
         m_outgoing_transitions[count_outgoing_transitions_per_state[t.from()]].transition=ti;
-        m_transitions[ti].ref_outgoing_transitions=m_outgoing_transitions.begin()+count_outgoing_transitions_per_state[t.from()];
-        count_outgoing_transitions_per_state[t.from()]++;
-        // m_incoming_transitions[count_incoming_transitions_per_state[t.to()]]=transition_count;
+        m_transitions[ti].ref_outgoing_transitions=m_outgoing_transitions.begin()+count_outgoing_transitions_per_state[t.from()]++;
+        // count_outgoing_transitions_per_state[t.from()]++;
         m_incoming_transitions[count_incoming_transitions_per_state[t.to()]]=ti;
-        m_transitions[ti].ref_incoming_transitions=m_incoming_transitions.begin()+count_incoming_transitions_per_state[t.to()];
-        count_incoming_transitions_per_state[t.to()]++;
-        //transition_count++;
+        m_transitions[ti].ref_incoming_transitions=m_incoming_transitions.begin()+count_incoming_transitions_per_state[t.to()]++;
+        // count_incoming_transitions_per_state[t.to()]++;
       }
 
       // Set start_incoming_non_inert_transition for each state.
@@ -2294,8 +2276,7 @@ mCRL2log(log::verbose) << "Start refining in the initialisation\n";
       }
      
       // The initial partition has been constructed. Continue with the initiatialisation.
-      // Initialise m_transitions[...].transitions_per_block_to_constellation and the doubly linked list
-      // represented by next_LBC and previous_LBC in transition_type.
+      // Initialise m_transitions[...].transitions_per_block_to_constellation. .
 
 mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list in the initialisation\n";
       // Move all transitions to m_BLC_transitions and sort on actions afterwards;
@@ -2309,9 +2290,9 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
       for(const transition_index ti: transitions_per_action_label)
       {
         const transition& t=m_aut.get_transitions()[ti];
-        m_BLC_transitions[count_transitions_per_block[m_states[t.from()].block]]=ti;
+        m_BLC_transitions[count_transitions_per_block[m_states[t.from()].block]++]=ti;
 //std::cerr << "INSERT BLC Trans  " << count_transitions_per_block[m_states[t.from()].block] << "   " << ti << "\n";
-        count_transitions_per_block[m_states[t.from()].block]++;
+        //count_transitions_per_block[m_states[t.from()].block]++;
       } 
 
       block_index current_block=null_block;
@@ -2497,14 +2478,12 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
           const block_index bi=m_states[t.from()].block;
           set_of_states_type W=Ptilde[bi];
           const set_of_states_type& aux=grouped_transitions[std::pair(t.label(), m_blocks[m_states[t.to()].block].constellation)];
-//std::cerr << "aux: "; for(auto s: aux) { std::cerr << s << " "; } std::cerr << "\n";
           bool W_empty=true;
 //std::cerr << "W: "; for(auto s: W) { std::cerr << s << " "; } std::cerr << "\n";
           for(const state_index si: W) 
           {
             if (aux.count(si)==0) 
             {
-//std::cerr << "Remove " << si << "\n";
               W_empty=false;
               break;
             }
@@ -2526,7 +2505,6 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
                    [](const block_index, const block_index, const transition_index, const transition_index){},
                    true,  // Update LBC-list.
             // Algorithm 4, line 4.14 and 4.15.
-                   // [&grouped_transitions_per_block, &Q, bi, this]
                    [&Qhat, this]
                    (const transition_index ti, const transition_index remaining_transition, const block_index old_block)
                      { 
@@ -2663,27 +2641,22 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
       outgoing_transitions_it i1=m_transitions[transition_to_bi].ref_outgoing_transitions;
       // i2 refers to the last position, unless i1 is the last, then i2 is the first of all transitions with the same s, a and C.
       outgoing_transitions_it i2=i1->start_same_saC;
-//std::cerr << "AAA1\n";
       if (i2<=i1) 
       {
-//std::cerr << "AAA2\n";
         // So, i1 is the last element with the same s, a, C.
         i2=i1+1;
       }
       else
       {
-//std::cerr << "AAA3\n";
         // In this case i2 refers to the last element with the same s, a, C.
         i2++;
       }
       if (i2==m_outgoing_transitions.end())
       {
-//std::cerr << "AAA4\n";
         return false;
       }
       const transition& t1=m_aut.get_transitions()[transition_to_bi];
       const transition& t2=m_aut.get_transitions()[i2->transition];
-//std::cerr << "AAA5  " << (t1.from()==t2.from()) << "  " << (t1.label()==t2.label()) << "   " << (m_blocks[m_states[t2.to()].block].constellation==old_constellation) << "\n";;
       return t1.from()==t2.from() && t1.label()==t2.label() && m_blocks[m_states[t2.to()].block].constellation==old_constellation;
     }
 
@@ -2850,10 +2823,21 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
       // This represents the while loop in Algorithm 1 from line 1.6 to 1.25.
 
       std::vector<label_count_sum_tuple> value_counter(m_blocks.size());
-      // index_to_set_of_T_map<transition_index> Mleft_map(m_blocks.size());
+      std::vector<std::size_t> count_transitions_per_label(m_aut.num_action_labels(),0);
+      std::vector<std::size_t> todo_stack_labels;
+      std::vector<std::size_t> todo_stack_blocks;
+      std::vector<transition_index> calM;
+      std::vector<transition_index> transitions_for_which_start_same_saC_must_be_repaired;
       // Algorithm 1, line 1.6.
       while (!m_non_trivial_constellations.empty())
       {
+        static time_t last_log_time=time(nullptr)-1;
+        time_t new_log_time = 0;
+        if (time(&new_log_time)>last_log_time)
+        {
+          mCRL2log(log::verbose) << "Refining. There are " << m_blocks.size() << " blocks and " << m_constellations.size() << " constellations.\n";
+          last_log_time=last_log_time = new_log_time;
+        }
         //print_data_structures("MAIN LOOP");
         assert(check_data_structures("MAIN LOOP"));
 
@@ -2866,7 +2850,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         std::forward_list<block_index>::iterator fl=m_constellations[ci].blocks.begin();
         if (++fl == m_constellations[ci].blocks.end()) // Constellation is trivial.
         {
-          // m_non_trivial_constellations.erase(ci);
           assert(m_non_trivial_constellations.back()==ci);
           m_non_trivial_constellations.pop_back();
         }
@@ -2878,17 +2861,13 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         // This happens further below.
 
         // Algorithm 1, line 1.9.
-        // transitions_per_action_label_type calM;
         block_label_to_size_t_map block_label_to_cotransition;
  
         // The following data structure maintains per state and action label from where to where the start_same_saC pointers
         // in m_outgoing_transitions still have to be set. 
-        /* typedef std::unordered_map < std::pair<state_index, label_index>, std::pair < outgoing_transitions_it, outgoing_transitions_it> >
-                repair_pointers_type;
-        repair_pointers_type repair_pointers; */
  
-        std::vector<std::size_t> todo_stack_labels;
-        std::vector<std::size_t> count_transitions_per_label(m_aut.num_action_labels(),0);
+        clear(todo_stack_labels);
+        for(std::size_t& n: count_transitions_per_label){ n=0; }
         for(typename std::vector<state_index>::iterator i=m_blocks[index_block_B].start_bottom_states;
                                                         i!=m_blocks[index_block_B].end_states; ++i)
         {
@@ -2901,17 +2880,17 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             const transition& t=m_aut.get_transitions()[*j];
             if (!m_aut.is_tau(t.label()) || m_states[t.from()].block!=m_states[t.to()].block)
             {
-              if (count_transitions_per_label[t.label()]==0)
+              if (count_transitions_per_label[t.label()]++ ==0)
               {
                 todo_stack_labels.push_back(t.label());
               }    
-              count_transitions_per_label[t.label()]++;
+              // count_transitions_per_label[t.label()]++;
             }
           }
         }
         std::size_t size_of_states_per_action_label=accumulate_entries(count_transitions_per_label, todo_stack_labels);
-        std::vector<transition_index> calM(size_of_states_per_action_label);
-        std::vector<transition_index> transitions_for_which_start_same_saC_must_be_repaired;
+        calM.resize(size_of_states_per_action_label);
+        clear(transitions_for_which_start_same_saC_must_be_repaired);
 
         // Walk through all states in block B
         for(typename std::vector<state_index>::iterator i=m_blocks[index_block_B].start_bottom_states;
@@ -2924,15 +2903,12 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           for(std::vector<transition_index>::iterator j=m_states[*i].start_incoming_inert_transitions; j!=end_it; ++j)
           {
             const transition& t=m_aut.get_transitions()[*j];
-//std::cerr << "INCOMING TRANSITION  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
             
             // Add the source state grouped per label in calM, provided the transition is non inert.
             if (!m_aut.is_tau(t.label()) || m_states[t.from()].block!=m_states[t.to()].block)
             {
-//std::cerr << "PUT in calM " << count_transitions_per_label[t.label()] << "   " << m_aut.action_label(t.label()) << "  :=  " << t.from() << "\n";
-              // calM[t.label()].emplace(*j);
-              calM[count_transitions_per_label[t.label()]]=*j;
-              count_transitions_per_label[t.label()]++;
+              calM[count_transitions_per_label[t.label()]++ ]=*j;
+              // count_transitions_per_label[t.label()]++;
             }
  
             // Update the state-action-constellation (saC) references in m_outgoing_transitions. 
@@ -2958,17 +2934,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             {
               end_same_saC->start_same_saC++;
             }
-//std::cerr << "HIER1AAA\n";
        
-            // typename repair_pointers_type::iterator rep_it=repair_pointers.find(std::pair(t.from(), t.label()));
-            /* if (rep_it==repair_pointers.end())
-            {
-              repair_pointers[std::pair(t.from(), t.label())]=std::pair(pos2,pos2);
-            }
-            else
-            {
-              rep_it->second.second=pos2;  // set the end of the items to repair to pos2.
-            } */
             transitions_for_which_start_same_saC_must_be_repaired.push_back(*j);
             
             // Update the block_label_to_cotransition map.
@@ -3003,26 +2969,10 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
               }
             }
             // Update the doubly linked list L_B->C in blocks as the constellation is split in B and C\B. 
-//std::cerr << "HIER2AAA\n";
             update_the_doubly_linked_list_LBC_new_constellation(index_block_B, t, *j);
           }
         }
         
-//std::cerr << "GROUPED TRANS in calM1 "; for(auto t: calM) { std::cerr << t << "   "; } std::cerr << "\n";
-
-        // Repair the start_same_saC links.
-        /* for(typename repair_pointers_type::iterator rep_it=repair_pointers.begin(); rep_it!=repair_pointers.end(); rep_it++)
-        {
-          const outgoing_transitions_it start_repair_pointer=rep_it->second.first;
-          const outgoing_transitions_it end_repair_pointer=rep_it->second.second;
-          for(outgoing_transitions_it i=start_repair_pointer; i!=end_repair_pointer; ++i)
-          {
-            i->start_same_saC=end_repair_pointer;
-          }
-          assert(end_repair_pointer!=m_outgoing_transitions.end());
-          end_repair_pointer->start_same_saC=start_repair_pointer;
-        } */
-
         while (!transitions_for_which_start_same_saC_must_be_repaired.empty())
         {
           transition_index ti=transitions_for_which_start_same_saC_must_be_repaired.back();
@@ -3111,7 +3061,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         }
         // Algorithm 1, line 1.10.
         typename std::vector<transition_index>::iterator start_index=calM.begin();
-        std::vector<std::size_t> todo_stack_blocks;
+        clear(todo_stack_blocks);
         for(const label_index a: todo_stack_labels)
         {
 //std::cerr << "ACTION " << m_aut.action_label(a) << " target block " << index_block_B << "\n";
@@ -3121,7 +3071,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           value_counter.resize(m_blocks.size());
           assert(todo_stack_blocks.empty());
           typename std::vector<transition_index>::iterator end_index=calM.begin()+count_transitions_per_label[a];
-//std::cerr << "GROUPED TRANS in calM2 "; for(auto t: calM) { std::cerr << t << "   "; } std::cerr << "\n";
           group_in_situ<typename std::vector<transition_index>::iterator>(
                         start_index,
                         end_index,
@@ -3132,7 +3081,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           typename std::vector<transition_index>::iterator start_index_per_block=start_index;
           for(const block_index bi: todo_stack_blocks)
           {
-//std::cerr << "INVESTIGATE BLOCK " << bi << "\n";
             typename std::vector<state_index>::iterator end_index_per_block=start_index+value_counter[bi].not_investigated;
             assert(start_index_per_block!=end_index_per_block);
             block_index Bpp=bi;
@@ -3149,8 +3097,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
               block_index bi1=splitB<1>(bi, 
                                         start_index_per_block,
                                         end_index_per_block,
-                                        // Mleft.fbegin(m_aut.get_transitions()), 
-                                        // Mleft.fend(m_aut.get_transitions()), 
                                         m_blocks[bi].start_bottom_states, 
                                         m_blocks[bi].start_non_bottom_states, 
                                         dummy_number, // unused action index
@@ -3183,10 +3129,8 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
 
             if (bltc_it!=block_label_to_cotransition.end() && 
                 bltc_it->second!=null_transition &&
-                // some_bottom_state_has_no_outgoing_co_transition(Bpp, Mleft, old_constellation)) 
                 some_bottom_state_has_no_outgoing_co_transition(Bpp, start_index_per_block, end_index_per_block, old_constellation)) 
             {
-//std::cerr << ""; const transition& t=m_aut.get_transitions()[bltc_it->second];
 //std::cerr << "CO-TRANSITION  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
               // Algorithm 1, line 1.19.
               
@@ -3220,7 +3164,6 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             start_index_per_block=end_index_per_block;
           }
           start_index=end_index;
-//std::cerr << "ADAPTED start index per action " << &*start_index << "\n";
           todo_stack_blocks.clear();
         }
         
