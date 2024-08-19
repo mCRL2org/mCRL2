@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/structure_graph_builder.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
