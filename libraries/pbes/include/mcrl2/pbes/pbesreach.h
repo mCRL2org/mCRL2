@@ -519,7 +519,7 @@ class pbesreach_algorithm
       {
         auto& table = m_data_index[i];
 
-        mCRL2log(log::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values."<< std::endl;
+        mCRL2log(log::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values"<< std::endl;
         for (const auto& data : table)
         {
           mCRL2log(log::debug) << table.index(data) << ": " << data << std::endl;
