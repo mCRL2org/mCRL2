@@ -361,10 +361,10 @@ class symbolic_parity_game
       mCRL2log(log::verbose) << "--- parity game information ---" << std::endl;
       for (const auto&[rank, Vrank] : m_rank_map)
       {
-        mCRL2log(log::verbose) << "priority " << rank << ": there are " << satcount(Vrank) << " vertices.\n";
+        mCRL2log(log::verbose) << "priority " << rank << ": there are " << satcount(Vrank) << " vertices\n";
       }
 
-      mCRL2log(log::verbose) << "there are " << satcount(m_V[0]) << " even vertices and " << satcount(m_V[1]) << " odd vertices.\n";
+      mCRL2log(log::verbose) << "there are " << satcount(m_V[0]) << " even vertices and " << satcount(m_V[1]) << " odd vertices\n";
     }
 
     /// \returns A string representing the given vertex set in human readable form.

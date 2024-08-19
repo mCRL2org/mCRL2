@@ -494,6 +494,8 @@ class pbesinst_lazy_algorithm
                   );
       }
       on_end_while_loop();
+
+      mCRL2log(log::verbose) << "Generated " << m_iteration_count << " BES equations" << std::endl;
     }
 
     const pbes_equation_index& equation_index() const
