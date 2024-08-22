@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PBESINST_LAZY_H
 #define MCRL2_PBES_PBESINST_LAZY_H
 
+#include <optional>
 #include <thread>
 #include <mutex>
 #include <functional>
@@ -293,15 +294,16 @@ class pbesinst_lazy_algorithm
 
     /// \brief Constructor.
     /// \param p The pbes used in the exploration algorithm.
-    /// \param rewrite_strategy A strategy for the data rewriter.
+    /// \param options Te.
     /// \param search_strategy The search strategy used to explore the pbes, typically depth or breadth first.
     /// \param optimization An indication of the optimisation level.
     explicit pbesinst_lazy_algorithm(
       const pbessolve_options& options,
-      const pbes& p
+      const pbes& p,
+      std::optional<data::rewriter> rewriter = std::nullopt
     )
      : m_options(options),
-       datar(construct_rewriter(p)),
+       datar(rewriter.has_value() ? rewriter.value() : construct_rewriter(p)),
        m_pbes(preprocess(p)),
        m_equation_index(p),
        discovered(m_options.number_of_threads),
