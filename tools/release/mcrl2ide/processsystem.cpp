@@ -371,10 +371,11 @@ QProcess* ProcessSystem::createSubprocess(
     program = "pbessolve";
     inputFile = fileSystem->pbesFilePath(property.name, evidence);
     arguments << inputFile << "--in=pbes"
-              << "--rewriter=jitty"
               << "--search-strategy=breadth-first"
               << "--solve-strategy=0"
               << "--verbose";
+    if (fileSystem->enableJittyc())
+    {
 #ifdef MCRL2_ENABLE_JITTYC
       arguments<< "--rewriter=jittyc";
 #else    
@@ -382,6 +383,8 @@ QProcess* ProcessSystem::createSubprocess(
           ProcessType::Verification,
           "The compiling rewriter (-rjittyc) is not available on this platform, tool option will be ignored!\n");
 #endif // MCRL2_JITTYC_ENABLED
+    }
+
     if (evidence)
     {
       inputFile2 = fileSystem->lpsFilePath();
