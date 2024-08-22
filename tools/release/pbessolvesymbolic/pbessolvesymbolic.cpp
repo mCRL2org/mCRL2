@@ -564,7 +564,6 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
         if (!has_counter_example || options_.naive_counter_example_instantiation)
         {
-          PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
           timer().start("instantiation");
           ldd V = reach.run();
           timer().finish("instantiation");
