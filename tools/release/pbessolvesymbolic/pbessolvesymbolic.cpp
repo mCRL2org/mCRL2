@@ -151,8 +151,9 @@ public:
     const std::unordered_map<core::identifier_string, data::data_expression>& _propvar_map,
     const std::vector<symbolic::data_expression_index>& _data_index,
     const sylvan::ldds::ldd& _Valpha,
-    const sylvan::ldds::ldd& S)
-    : pbesinst_structure_graph_algorithm(options, p, G),
+    const sylvan::ldds::ldd& S,
+    std::optional<data::rewriter> rewriter = std::nullopt)
+    : pbesinst_structure_graph_algorithm(options, p, G, rewriter),
       alpha(_alpha),
       strategy(S),
       Valpha(_Valpha),
@@ -639,7 +640,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
           // TODO: Set options?
           pbessolve_options pbessolve_options;
-          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1);
+          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1, reach.rewriter());
 
           // Perform the second instantiation given the proof graph.      
           timer().start("second-instantiation");
