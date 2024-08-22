@@ -569,6 +569,11 @@ class pbesreach_algorithm
       return m_pbes;
     }
 
+    data::rewriter rewriter() const
+    {
+      return m_rewr;
+    }
+
     const data::variable_list& process_parameters() const
     {
       return m_process_parameters;
