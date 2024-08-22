@@ -29,11 +29,15 @@ There are a number of tool options that can typically lead to large speedups.
 These can be tried in combination with `--max-iterations` to limit exploration
 depth to quickly benchmark their impact. First of all, `--cached` uses
 additional memory to reduce the amount of rewriting required. Next,
---groups=simple is a simple, but often effective, heuristic to merge so-called
-transition groups, which correspond to the summands of the linear process and
-are explained in more detail below. There are two orthogonal exploration
-strategies implemented under options `--chaining` and `--saturation` that also
-often have a large impact on exploration performance.
+`--groups=simple`` is a simple, but often effective, heuristic to merge
+so-called transition groups, which correspond to the summands of the linear
+process and are explained in more detail below. Generally it is advisable by
+linearise the mCRL2 specification using the `--no-cluster` (shorthand `-n`)
+option of :ref:`tool-mcrl22lps`.
+
+There are two orthogonal exploration strategies implemented under options
+`--chaining` and `--saturation` that also often have a large impact on
+exploration performance.
 
 To further guide the effectiveness of the exploration we need some additional
 background information.

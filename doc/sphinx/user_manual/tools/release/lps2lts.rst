@@ -55,6 +55,11 @@ When the linear process has confluent tau actions (which can be proven using the
 then the flag --confluent generates a state space giving priority to confluent tau's [GM14]_. In certain cases
 this can give an exponential reduction. The confluent tau is by default called ctau.
 
+If the exploration takes too much time or is too large to fit in main memory an
+alternative exploration technique that uses symbolic representations based on
+decision diagrams can be utilised, which is implemented in the tool
+:ref:`tool-lpsreach`.
+
 When generating the transition system is taking too much time, the generation can be aborted. lps2lts will attempt
 to save the transition system before terminating. Using the flag --max the size of the state space can also be
 limited a priori.

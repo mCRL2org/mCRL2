@@ -30,6 +30,11 @@ information in the generated PBES. Also note that the specification ``abp.lps`` 
 to create the PBES is passed as an argument to pbessolve with the option `--file`. It
 is needed to construct the counter example.
 
+If the instantiation of the PBES takes too much time or is too large to fit in
+main memory an alternative solving technique that uses symbolic
+representations based on decision diagrams can be utilised, which is implemented
+in the tool :ref:`tool-pbessolvesymbolic`.
+
 Similarly it can be done starting from an LTS instead of an LPS::
 
    mcrl22lps abp.mcrl2 abp.lps
