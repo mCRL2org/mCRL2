@@ -11,6 +11,7 @@ scripts/code_generation/data_types/codegen.pickle
 
 # Ignore the standard build directory
 build/
+.cache
 
 # Ignore IDE files
 .vscode
