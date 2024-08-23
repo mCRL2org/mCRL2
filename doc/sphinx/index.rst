@@ -36,15 +36,15 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
 .. note::
 
-   Listen to the `Parallel Rhapsody <https://suno.com/song/e90327be-a900-4fc3-82b2-8365cc837cfc>`_
-   (thanks to Frederik Gosewehr and Gert Veltink).
+   The latest release, mCRL2 202407.0, is now available from the download page.
+   This release mostly contains usability improvements, and the new machine number representation.
+   See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_ for a detailed list
+   of changes.
 
 .. note::
 
-   The latest release, mCRL2 202307.0, is now available from the download page.
-   This release mainly features parallel state space exploration algorithms for lps2lts and pbes2bool.
-   See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_ for a detailed list
-   of changes.
+   Listen to the `Parallel Rhapsody <https://suno.com/song/e90327be-a900-4fc3-82b2-8365cc837cfc>`_
+   (thanks to Frederik Gosewehr and Gert Veltink).
 
 .. note::
 
