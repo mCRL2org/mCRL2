@@ -249,9 +249,10 @@ public:
       std::mutex* lts_builder_mutex,
       std::mutex* queue_mutex,
       std::mutex* progress_mutex,
-      std::mutex* states_mutex)
+      std::mutex* states_mutex,
+      bool* completed,
+      std::size_t thread_nr)
   {
-    bool done = false;
     while (true)
     {
       if (compute_state(lts_builder,
@@ -264,6 +265,7 @@ public:
               progress_mutex,
               states_mutex))
       {
+        completed[thread_nr] = false;
         progress_mutex->lock();
 
         states_mutex->lock();
@@ -280,11 +282,11 @@ public:
       }
       else
       {
-        if (done)
+        completed[thread_nr] = true;
+        if (std::all_of(completed, completed + *number_of_threads, [](bool b) { return b; }))
         {
           break;
         }
-        done = true;
         // Wait for other threads to finish first run to prevent early shutdown
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
@@ -570,6 +572,8 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   std::mutex states_mutex;
 
   std::vector<std::thread> threads;
+  bool* completed = new bool[nr_of_threads];
+  std::fill(completed, completed + nr_of_threads, false);
 
   for (size_t i = 0; i < nr_of_threads; i++)
   {
@@ -583,7 +587,9 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
         &builder_mutex,
         &queue_mutex,
         &progress_mutex,
-        &states_mutex));
+        &states_mutex,
+        completed,
+        i));
   }
 
   for (size_t i = 0; i < nr_of_threads; i++)
