@@ -33,7 +33,11 @@ static const std::size_t const_tau_label_index=0;
 enum transition_sort_style
 {
   src_lbl_tgt, /**< Sort first on source state, then on label, then on target state */
-  lbl_tgt_src /**< Sort first on label, then on target state, then on source state*/
+  lbl_tgt_src, /**< Sort first on label, then on target state, then on source state */
+  tgt_lbl_src, /**< Sort first on target state, then on label, then on source state */
+  tgt_src_lbl, /**< Sort first on target state, then on the source state, and finally on label */
+  tgt_lbl,     /**< Sort first on target state, then on label */
+  target       /**< Sort on target only */
 };
 
 /// \brief A class containing triples, source label and target representing transitions.

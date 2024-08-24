@@ -3721,6 +3721,8 @@ mCRL2log(log::verbose) << "Start refining\n";
                 "time O(m log n).\n";
         }
 
+sort_transitions(aut.get_transitions(), tgt_lbl_src);
+
         // create one block for all states
         bisim_dnj::block_t* B(
                 #ifdef USE_POOL_ALLOCATOR

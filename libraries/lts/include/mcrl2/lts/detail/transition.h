@@ -92,6 +92,105 @@ class compare_transitions_lts
     }
 };
 
+class compare_transitions_tls
+{
+  protected:
+    const std::set<std::size_t>& m_hide_action_set;
+
+  public:
+    compare_transitions_tls(const std::set<std::size_t>& hide_action_set)
+     : m_hide_action_set(hide_action_set)
+    {}
+
+    bool operator()(const transition& t1, const transition& t2)
+    {
+      if (t1.to() != t2.to())
+      {
+        return t1.to() < t2.to();
+      }
+      else
+      {
+        const std::size_t n1=apply_hidden_labels(t1.label(), m_hide_action_set);
+        const std::size_t n2=apply_hidden_labels(t2.label(), m_hide_action_set);
+        if (n1 != n2)
+        {
+          return n1 < n2;
+        }
+        else
+        {
+          return t1.from() < t2.from();
+        }
+      }
+   }
+};
+
+class compare_transitions_tsl
+{
+  protected:
+    const std::set<std::size_t>& m_hide_action_set;
+
+  public:
+    compare_transitions_tsl(const std::set<std::size_t>& hide_action_set)
+     : m_hide_action_set(hide_action_set)
+    {}
+
+    bool operator()(const transition& t1, const transition& t2)
+    {
+      if (t1.to() != t2.to())
+      {
+        return t1.to() < t2.to();
+      }
+      else if (t1.from() != t2.from())
+      {
+        return t1.from() < t2.from();
+      }
+      else
+      {
+        const std::size_t n1=apply_hidden_labels(t1.label(), m_hide_action_set);
+        const std::size_t n2=apply_hidden_labels(t2.label(), m_hide_action_set);
+        return n1 < n2;
+      }
+   }
+};
+
+class compare_transitions_tl
+{
+  protected:
+    const std::set<std::size_t>& m_hide_action_set;
+
+  public:
+    compare_transitions_tl(const std::set<std::size_t>& hide_action_set)
+     : m_hide_action_set(hide_action_set)
+    {}
+
+    bool operator()(const transition& t1, const transition& t2)
+    {
+      if (t1.to() != t2.to())
+      {
+        return t1.to() < t2.to();
+      }
+      else
+      {
+        const std::size_t n1=apply_hidden_labels(t1.label(), m_hide_action_set);
+        const std::size_t n2=apply_hidden_labels(t2.label(), m_hide_action_set);
+        return n1 < n2;
+      }
+   }
+};
+
+
+class compare_transitions_target
+{
+  public:
+    compare_transitions_target()
+    {}
+
+    bool operator()(const transition& t1, const transition& t2)
+    {
+      return t1.to() < t2.to();
+    }
+};
+
 } // detail
 } // lts
 } // mcrl2

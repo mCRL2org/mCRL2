@@ -2052,6 +2052,19 @@ class bisim_partitioner_gj
     
       std::vector<bool> state_has_outgoing_tau(m_aut.num_states(),false);
       // Initialise m_incoming_(non-)inert-transitions, m_outgoing_transitions, and m_states[si].no_of_outgoing_transitions 
+      //group_transitions_on_label(m_aut.get_transitions(), 
+      //                          [](const transition& t){ return t.label(); }, 
+      //                          m_aut.num_action_labels(), m_aut.tau_label_index()); // sort on label. Tau transitions come first.
+      // group_transitions_on_label(m_aut.get_transitions(), 
+      //                           [](const transition& t){ return t.from(); }, 
+      //                           m_aut.num_states(), 0); // sort on label. Tau transitions come first.
+      // group_transitions_on_label_tgt(m_aut.get_transitions(), m_aut.num_action_labels(), m_aut.tau_label_index(), m_aut.num_states()); // sort on label. Tau transitions come first.
+      // group_transitions_on_tgt(m_aut.get_transitions(), m_aut.num_action_labels(), m_aut.tau_label_index(), m_aut.num_states()); // sort on label. Tau transitions come first.
+      // sort_transitions(m_aut.get_transitions(), lbl_tgt_src);
+      //sort_transitions(m_aut.get_transitions(), tgt_lbl_src);
+      // sort_transitions(m_aut.get_transitions(), src_lbl_tgt);
+      sort_transitions(m_aut.get_transitions(), tgt_lbl);
+      // sort_transitions(m_aut.get_transitions(), target);
 
 mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
 
@@ -2064,11 +2077,12 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
       {
         const transition& t=m_aut.get_transitions()[ti];
 //std::cerr << "TRANS " << ptr(ti) << "\n";
-        if (count_transitions_per_action[t.label()]++ ==0 && !m_aut.is_tau(t.label()))
+        std::size_t&c=count_transitions_per_action[t.label()];
+        if (c==0 && !m_aut.is_tau(t.label()))
         {
           todo_stack_actions.push_back(t.label());
         }
-        // count_transitions_per_action[t.label()]++;
+        c++;
       }
 //std::cerr << "COUNT_TRANSITIONS PER ACT1    "; for(auto s: count_transitions_per_action){ std::cerr << s << "  "; } std::cerr << "\n";
       accumulate_entries(count_transitions_per_action, todo_stack_actions);
@@ -2077,10 +2091,11 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
       for(transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
       {
         const transition& t=m_aut.get_transitions()[ti];
-        transitions_per_action_label[count_transitions_per_action[t.label()]++] =ti; // insert, if it does not occur. 
-        // count_transitions_per_action[t.label()]++;
+        std::size_t& c=count_transitions_per_action[t.label()];
+        transitions_per_action_label[c]=ti; // insert, if it does not occur. 
+        c++;
       }
-
+mCRL2log(log::verbose) << "Grouped transitions per action. \n";
       std::vector<std::size_t> count_outgoing_transitions_per_state(m_aut.num_states(), 0);
       std::vector<std::size_t> count_incoming_transitions_per_state(m_aut.num_states(), 0);
 
@@ -2096,7 +2111,6 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
         }
       }   
   
-
       m_outgoing_transitions.resize(m_aut.num_transitions());
       accumulate_entries_outgoing(count_outgoing_transitions_per_state);
       m_incoming_transitions.resize(m_aut.num_transitions());
@@ -2105,14 +2119,23 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
 mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
 
       for(const transition_index ti: transitions_per_action_label)
+      // std::size_t position=0;
+      // for(const transition& t: m_aut.get_transitions())
       {
         const transition& t=m_aut.get_transitions()[ti];
-        m_outgoing_transitions[count_outgoing_transitions_per_state[t.from()]].transition=ti;
-        m_transitions[ti].ref_outgoing_transitions=m_outgoing_transitions.begin()+count_outgoing_transitions_per_state[t.from()]++;
-        // count_outgoing_transitions_per_state[t.from()]++;
-        m_incoming_transitions[count_incoming_transitions_per_state[t.to()]]=ti;
-        m_transitions[ti].ref_incoming_transitions=m_incoming_transitions.begin()+count_incoming_transitions_per_state[t.to()]++;
-        // count_incoming_transitions_per_state[t.to()]++;
+        std::size_t& pos1=count_outgoing_transitions_per_state[t.from()];
+        // m_outgoing_transitions[pos1].transition=position;
+        m_outgoing_transitions[pos1].transition=ti;
+        // m_transitions[position].ref_outgoing_transitions=m_outgoing_transitions.begin()+pos1; 
+        m_transitions[ti].ref_outgoing_transitions=m_outgoing_transitions.begin()+pos1; 
+        pos1++;
+        std::size_t& pos2=count_incoming_transitions_per_state[t.to()];
+        // m_incoming_transitions[pos2]=position;
+        m_incoming_transitions[pos2]=ti;
+        // m_transitions[position].ref_incoming_transitions=m_incoming_transitions.begin()+pos2;
+        m_transitions[ti].ref_incoming_transitions=m_incoming_transitions.begin()+pos2;
+        pos2++;
+        // position++;
       }
 
       // Set start_incoming_non_inert_transition for each state.
@@ -2218,10 +2241,13 @@ mCRL2log(log::verbose) << "Start refining in the initialisation\n";
       std::vector<label_count_sum_tuple> value_counter(m_blocks.size());
       std::vector<label_index> todo_stack_blocks;
       
+     
       for(label_index a: todo_stack_actions)
       {
         if (count_transitions_per_action[a]>0)
-        {
+        { 
+
+// YYYYYYYYYYYYY
 //std::cerr << "--------------------------------------------------\n";
 //std::cerr << "CONSIDER ACTION " << m_aut.action_label(a) << "   " << count_transitions_per_action[a] << "\n";
           typename std::vector<transition_index>::iterator end_index=transitions_per_action_label.begin()+count_transitions_per_action[a];
@@ -2289,11 +2315,16 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
       accumulate_entries(count_transitions_per_block);
 
       for(const transition_index ti: transitions_per_action_label)
+      // position=0;
+      // for(const transition& t: m_aut.get_transitions())
       {
         const transition& t=m_aut.get_transitions()[ti];
-        m_BLC_transitions[count_transitions_per_block[m_states[t.from()].block]++]=ti;
-//std::cerr << "INSERT BLC Trans  " << count_transitions_per_block[m_states[t.from()].block] << "   " << ti << "\n";
-        //count_transitions_per_block[m_states[t.from()].block]++;
+        std::size_t& pos=count_transitions_per_block[m_states[t.from()].block];
+        // m_BLC_transitions[pos]=position;
+        m_BLC_transitions[pos]=ti;
+//std::cerr << "INSERT BLC Trans  " << count_transitions_per_block[m_states[t.from()].block] << "   " << position << "\n";
+        pos++;
+        // position++;
       } 
 
       block_index current_block=null_block;
@@ -2337,67 +2368,6 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
           m_transitions[*tti].transitions_per_block_to_constellation=new_position;
         }
       }
-
-      /* std::size_t transition_counter=0;
-      for(const transition& t: m_aut.get_transitions())
-      {
-        m_BLC_transitions[count_transitions_per_block[m_states[t.from()].block]]=transition_counter;
-//std::cerr << "INSERT BLC Trans  " << count_transitions_per_block[m_states[t.from()].block] << "   " << transition_counter << "\n";
-        count_transitions_per_block[m_states[t.from()].block]++;
-        transition_counter++;
-      }
-      // sort the entries on action labels.
-      std::size_t block_counter=0;
-      std::vector<label_count_sum_tuple> label_counter(m_aut.num_action_labels());
-      std::vector<std::size_t> todo_stack_labels;
-      std::size_t start_same_block=0;
-
-      for(std::size_t end_same_block: count_transitions_per_block)
-      {
-//std::cerr << "END-START SAME BLOCK " << end_same_block << "   " << start_same_block << "\n";
-        std::vector<transition_index>::iterator start_block=m_BLC_transitions.begin()+start_same_block;
-        group_in_situ<std::vector<transition_index>::iterator>(
-                      start_block,
-                      m_BLC_transitions.begin()+end_same_block,
-                      [this](const std::vector<transition_index>::iterator ti){ return m_aut.get_transitions()[*ti].label(); },
-                      todo_stack_labels,
-                      label_counter);
-        std::size_t start_label=0;
-        for(label_index i: todo_stack_labels)
-        {
-          std::size_t end_label=label_counter[i].not_investigated;
-          block_type& b=m_blocks[block_counter];
-          typename linked_list<BLC_indicators>::iterator new_position;
-          if (m_aut.is_tau(i) || b.block_to_constellation.empty())
-          {
-//std::cerr << "PUSH FRONT " << start_label << "    " << end_label << "\n";
-            new_position=b.block_to_constellation.emplace_front(
-                                                        start_block+start_label, 
-                                                        start_block+end_label);
-          }
-          else
-          {
-//std::cerr << "PUSH BACK FRONT " << start_label << "    " << end_label << "\n";
-            // Guarantee that the tau label ends up in front.
-            // ++new_position;
-            new_position=b.block_to_constellation.emplace(b.block_to_constellation.begin(),
-                                                          start_block+start_label, 
-                                                          start_block+end_label);
-          }
-
-          for(std::vector<transition_index>::iterator ti=start_block+start_label; ti!=start_block+end_label; ++ti)
-          {
-//std::cerr << "IN BLC LIST " << *ti << "   " << &*ti << "\n";
-            m_transitions[*ti].ref_BLC_list=ti;
-            m_transitions[*ti].transitions_per_block_to_constellation=new_position;
-          }
-          start_label=end_label;
-//std::cerr << "BLC_transitions "; for(auto s: m_BLC_transitions){ std::cerr << s << "  "; } std::cerr << "\n";
-        }
-
-        block_counter++;
-        start_same_block=end_same_block;
-      } */
 
       // The data structures have now been completely initialized.
 
@@ -2987,11 +2957,12 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             const transition& t=m_aut.get_transitions()[*j];
             if (!m_aut.is_tau(t.label()) || m_states[t.from()].block!=m_states[t.to()].block)
             {
-              if (count_transitions_per_label[t.label()]++ ==0)
+              std::size_t& c=count_transitions_per_label[t.label()];
+              if (c==0)
               {
                 todo_stack_labels.push_back(t.label());
               }    
-              // count_transitions_per_label[t.label()]++;
+              c++;
             }
           }
         }
@@ -3014,8 +2985,9 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             // Add the source state grouped per label in calM, provided the transition is non inert.
             if (!m_aut.is_tau(t.label()) || m_states[t.from()].block!=m_states[t.to()].block)
             {
-              calM[count_transitions_per_label[t.label()]++ ]=*j;
-              // count_transitions_per_label[t.label()]++;
+              std::size_t& c=count_transitions_per_label[t.label()];
+              calM[c]=*j;
+              c++;
             }
  
             // Update the state-action-constellation (saC) references in m_outgoing_transitions. 
