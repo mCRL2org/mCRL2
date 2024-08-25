@@ -36,8 +36,8 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
 .. note::
 
-   The latest release, mCRL2 202407.0, is now available from the download page.
-   This release mostly contains usability improvements, and the new machine number representation.
+   The latest release, mCRL2 202407.1, is now available from the download page.
+   This release contains a critical bug fix for the mCRL2 ide.
    See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_ for a detailed list
    of changes.
 
