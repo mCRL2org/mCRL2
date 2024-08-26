@@ -3722,7 +3722,7 @@ mCRL2log(log::verbose) << "Start refining\n";
         }
 
 sort_transitions(aut.get_transitions(), tgt_lbl_src);
-
+mCRL2log(log::verbose) << "Carried out sorting\n";
         // create one block for all states
         bisim_dnj::block_t* B(
                 #ifdef USE_POOL_ALLOCATOR

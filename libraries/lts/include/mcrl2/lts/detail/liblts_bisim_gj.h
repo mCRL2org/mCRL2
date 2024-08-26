@@ -142,13 +142,21 @@ struct linked_list_node: public T
 };
 
 template <class T>
+struct global_linked_list_administration
+{ 
+  std::deque<linked_list_node<T> > m_content;
+  linked_list_iterator<T> m_free_list=nullptr;
+};
+
+template <class T>
 struct linked_list
 {
   typedef linked_list_iterator<T> iterator;
-  std::deque<linked_list_node<T> > m_content;
+  // std::deque<linked_list_node<T> > m_content;
+  // iterator m_free_list=nullptr;
 
+  global_linked_list_administration<T>& glla() { static global_linked_list_administration<T> glla; return glla; }
   iterator m_initial_node=nullptr;
-  iterator m_free_list=nullptr;
 
   iterator begin() const
   {
@@ -202,15 +210,15 @@ struct linked_list
     }
 
     iterator new_position;
-    if (m_free_list==nullptr)
+    if (glla().m_free_list==nullptr)
     {
-      new_position=&m_content.emplace_back(T(args...), pos->next(), pos);
+      new_position=&glla().m_content.emplace_back(T(args...), pos->next(), pos);
     }
     else
     { 
       // Take an element from the free list. 
-      new_position=m_free_list;
-      m_free_list=m_free_list->next();
+      new_position=glla().m_free_list;
+      glla().m_free_list=glla().m_free_list->next();
       new_position->prev()=pos;
       new_position->next()=pos->next();;
       new_position->content()=T(args...);
@@ -228,15 +236,15 @@ struct linked_list
   iterator emplace_front(Args&&... args)
   {
     iterator new_position;
-    if (m_free_list==nullptr)
+    if (glla().m_free_list==nullptr)
     {
-      new_position=&m_content.emplace_back(T(args...), m_initial_node, nullptr);  // Deliver the address to new position.
+      new_position=&glla().m_content.emplace_back(T(args...), m_initial_node, nullptr);  // Deliver the address to new position.
     } 
     else
     {
       // Take an element from the free list. 
-      new_position=m_free_list;
-      m_free_list=m_free_list->next();
+      new_position=glla().m_free_list;
+      glla().m_free_list=glla().m_free_list->next();
       new_position->content()=T(args...);
       new_position->next()=m_initial_node;
       new_position->prev()=nullptr;                    
@@ -264,8 +272,8 @@ struct linked_list
     {
       m_initial_node=pos->next();
     }
-    pos->next()=m_free_list;
-    m_free_list=pos;
+    pos->next()=glla().m_free_list;
+    glla().m_free_list=pos;
 #ifndef NDEBUG
     pos->prev()=nullptr;
 #endif
@@ -1381,9 +1389,9 @@ class bisim_partitioner_gj
 #ifndef NDEBUG
         for(state_index si=0; si<m_states.size(); ++si)
         {
-          assert(m_states[si].counter==undefined && !m_R.find(si) && !m_U.find(si)||
-                 m_states[si].counter==Rmarked && m_R.find(si) ||
-                 m_states[si].counter>=0 && !m_R.find(si));
+          assert((m_states[si].counter==undefined && !m_R.find(si) && !m_U.find(si)) ||
+                 (m_states[si].counter==Rmarked && m_R.find(si)) ||
+                 (m_states[si].counter>=0 && !m_R.find(si)));
         }
 #endif
         // The code for the right co-routine. 
@@ -2728,7 +2736,7 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
     // bottom states are touched, leave the touched bottom states in m_R and leave them
     // the markers in m_states[*].counter in place.
     template <class ITERATOR>
-    std::size_t not_all_bottom_states_are_touched(
+    bool not_all_bottom_states_are_touched(
                       const block_index bi, 
                       const ITERATOR begin,
                       const ITERATOR end,
@@ -2750,7 +2758,9 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
           // m_counter_reset_vector.push_back(s);
         } 
       }     
-      
+// David suggestsr: Set all marked states to the front, such that the non marked states in U can be traversed
+//                  without again checking. JFG: doubts whether this checking will have a lot of effect, given
+//                  that the states are in the cache anyhow....     
       if (no_of_touched_bottom_states==std::distance(B.start_bottom_states, B.start_non_bottom_states))
       {
         // All bottom states are touched. No splitting is possible. Reset m_R, m_states[s].counter for s in m_R.
