@@ -1342,7 +1342,7 @@ class bisim_partitioner_gj
       assert(VARIANT!=1 || m_U_counter_reset_vector.empty());
       typedef enum { initializing, state_checking, aborted, aborted_after_initialisation, incoming_inert_transition_checking, outgoing_action_constellation_check,
                      outgoing_action_constellation_check_during_initialisation } status_type;
-      status_type U_status=(VARIANT==1)?initializing:state_checking;
+      status_type U_status=(VARIANT==1)?initializing:(2*m_U.size()>B_size?aborted:state_checking);
       status_type R_status=initializing;
       MARKED_STATE_TRANSITION_ITERATOR M_it=M_begin; 
       UNMARKED_STATE_ITERATOR M_co_it=M_co_begin; 
@@ -1528,7 +1528,7 @@ class bisim_partitioner_gj
                 // if (m_states[si].counter==undefined)
                 {
                   m_U.add_todo(si);
-//std::cerr << "U_todo1 insert: " << si << "\n";
+//std::cerr << "U_todo1 insert: " << si << "   " << m_U.size() << "    " << B_size << "\n";
                   m_states[si].counter=0;
                   m_U_counter_reset_vector.push_back(si);
                   // Algorithm 3, line 3.10 and line 3.11 left. 
@@ -1662,7 +1662,7 @@ class bisim_partitioner_gj
                 {
                   // VARIANT=1. The state can be added to U_todo. 
                   assert(!m_U.find(from));
-//std::cerr << "U_todo3 insert: " << from << "\n";
+//std::cerr << "U_todo3 insert: " << from << "   " << m_U.size() << "    " << B_size << "\n";
                   m_U.add_todo(from);
                   // Algorithm 3, line 3.10 and line 3.11 left. 
                   if (2*m_U.size()>B_size)  
@@ -1685,7 +1685,7 @@ class bisim_partitioner_gj
             {
               // assert(U.find(current_U_outgoing_state)==U.end());
               assert(!m_U.find(current_U_outgoing_state));
-//std::cerr << "U_todo4 insert: " << current_U_outgoing_state << "\n";
+//std::cerr << "U_todo4 insert: " << current_U_outgoing_state << "   " << m_U.size() << "    " << B_size << "\n";
               m_U.add_todo(current_U_outgoing_state);
               // Algorithm 3, line 3.10 and line 3.11 left. 
               if (2*m_U.size()>B_size)
@@ -2330,7 +2330,7 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
         std::size_t& pos=count_transitions_per_block[m_states[t.from()].block];
         // m_BLC_transitions[pos]=position;
         m_BLC_transitions[pos]=ti;
-//std::cerr << "INSERT BLC Trans  " << count_transitions_per_block[m_states[t.from()].block] << "   " << position << "\n";
+//std::cerr << "INSERT BLC Trans  " << count_transitions_per_block[m_states[t.from()].block] << "\n";
         pos++;
         // position++;
       } 

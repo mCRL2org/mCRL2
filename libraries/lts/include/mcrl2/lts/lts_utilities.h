@@ -400,10 +400,10 @@ inline void group_transitions_on_label_tgt(std::vector<transition>& transitions,
     group_transitions_on_label(begin, end, [](const std::vector<transition>::value_type& t){ return t.to(); }, 0, value_sum_counter, todo_stack_target); 
     begin=end;
   }
-}
+} 
 
 
-inline void group_transitions_on_tgt(std::vector<transition>& transitions, 
+/* inline void group_transitions_on_tgt(std::vector<transition>& transitions, 
                                      const std::size_t number_of_labels, 
                                      const std::size_t tau_label_index,
                                      const std::size_t number_of_states)
@@ -438,7 +438,7 @@ inline void group_transitions_on_tgt(std::vector<transition>& transitions,
                                todo_stack_target);
     begin=end;
   }
-}
+} */
 
 /* YYYYY
 inline void group_transitions_on_tgt_lbl_recursive(std::vector<transition>& transitions,
