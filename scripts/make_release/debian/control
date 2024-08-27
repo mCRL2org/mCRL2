@@ -8,6 +8,7 @@ Build-Depends: debhelper (>= 5),
  libboost-dev,
  libgl1-mesa-dev,
  libglu1-mesa-dev,
+ libqt6opengl6-dev,
  qt6-base-dev,
  git
 Standards-Version: 3.9.5
