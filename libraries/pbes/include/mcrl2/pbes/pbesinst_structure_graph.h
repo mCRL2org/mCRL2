@@ -118,7 +118,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       structure_graph& G,
       std::optional<data::rewriter> rewriter = std::nullopt
     )
-      : pbesinst_lazy_algorithm(options, p),
+      : pbesinst_lazy_algorithm(options, p, rewriter),
         m_graph_builder(G)
     {}
 
