@@ -509,6 +509,11 @@ class pbesinst_lazy_algorithm
     {
       return m_global_R;
     }
+
+    const data::rewriter& data_rewriter() const
+    {
+      return datar;
+    };
 };
 
 } // namespace pbes_system

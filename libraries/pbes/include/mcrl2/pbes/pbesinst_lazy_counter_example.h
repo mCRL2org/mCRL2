@@ -140,8 +140,9 @@ public:
     const structure_graph& SG,
     bool _alpha,
     const std::unordered_map<pbes_expression, structure_graph::index_type>& _W,
-    structure_graph& G)
-    : pbesinst_structure_graph_algorithm(options, p, G), 
+    structure_graph& G,
+    std::optional<data::rewriter> rewriter = std::nullopt)
+    : pbesinst_structure_graph_algorithm(options, p, G, rewriter), 
       G(SG),         
       alpha(_alpha), 
       W(_W)
@@ -172,8 +173,9 @@ public:
     const structure_graph& SG,
     bool _alpha,
     const std::unordered_map<pbes_expression, structure_graph::index_type>& _W,
-    structure_graph& G)
-    : pbesinst_structure_graph_algorithm2(options, p, G), 
+    structure_graph& G,
+    std::optional<data::rewriter> rewriter = std::nullopt)
+    : pbesinst_structure_graph_algorithm2(options, p, G, rewriter), 
       G(SG),         
       alpha(_alpha), 
       W(_W)

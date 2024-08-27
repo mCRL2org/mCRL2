@@ -353,7 +353,7 @@ class pbessolve_tool
       mCRL2log(log::trace) << pbesspec << std::endl;
       
       structure_graph G;
-      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, W_alpha, G);
+      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, W_alpha, G, first_instantiate.data_rewriter());
       
       // Perform the second instantiation given the proof graph.      
       timer().start("second-instantiation");
