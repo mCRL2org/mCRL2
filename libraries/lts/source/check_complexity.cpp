@@ -78,8 +78,6 @@ namespace lts
 {
 namespace detail
 {
-namespace bisim_gjkw
-{
 
 #ifndef NDEBUG
 
@@ -96,7 +94,7 @@ signed_trans_type check_complexity::sensible_work = 0;
 /// in the pseudocode in the article [Groote/Jansen/Keiren/Wijs: An O(m log n)
 /// algorithm for computing stuttering equivalence and branching bisimulation.
 /// Accepted for publication in ACM TOCL 2017].
-const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
+const char *check_complexity::work_names[TRANS_gj_MAX - BLOCK_MIN + 1] =
 {
     // block counters
     "2.4: while C contains a nontrivial constellation",
@@ -202,7 +200,37 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     "refine_partition_until_it_becomes_stable(), stabilize block with bottom "
                                         "states for new non-inert transitions",
     "refine_partition_until_it_becomes_stable(), stabilize block without "
-                                  "bottom states for new non-inert transitions"
+                                 "bottom states for new non-inert transitions",
+
+    /*----------------- counters for the bisim_gj algorithm -----------------*/
+
+    // block counters
+    "splitB(): update BLC data structure of the smaller subblock",
+    "finalize_minimized_LTS(): set labels of a block",
+
+    // state counters
+            // Invariant: 0 <= (counter value) <= ilog2 n - ilog2(block size)
+    "split_block_B_into_R_and_BminR(): carry out a split",
+    "simple_splitB(): find a bottom state in the smaller subblock (i.e. in U)",
+    "simple_splitB(): find predecessors of a state in the smaller subblock",
+    "simple_splitB(): find predecessors of a state in R",
+    "simple_splitB(): find a bottom state in U",
+    "simple_splitB(): find predecessors of a state in U",
+    "finalize_minimized_LTS(): collect labels of a state",
+
+    // BLC slice counters
+    "finalize_minimized_LTS(): handle a transition",
+
+    // transition counters
+    "simple_splitB(): handle a transition from a state of the smaller subblock",
+    "simple_splitB(): handle a transition to a state of the smaller subblock",
+    "simple_splitB(): do not add state with a transition in the splitter to U",
+    "simple_splitB(): handle a transition (in the splitter) from an R-state",
+    "simple_splitB(): handle an (inert) transition to an R-state",
+    "simple_splitB(): handle an (inert) transition to a U-state",
+    "simple_splitB(): handle a transition from a potential U-state",
+    "simple_splitB(): the test for outgoing transitions "
+                                                     "found a new bottom state"
 };
 
 
@@ -212,7 +240,7 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
         do                                                                    \
         {                                                                     \
             assert((var) == ctr);                                             \
-            mCRL2log(log::debug, "bisim_gjkw") << "work_names[" #ctr "] = \"" \
+            mCRL2log(log::debug) << "work_names[" #ctr "] = \""               \
                                                 << work_names[ctr] << "\".\n";\
             (var) = (enum counter_type) ((var) + 1);                          \
         }                                                                     \
@@ -369,7 +397,6 @@ void check_complexity::test_work_names()
 
 #endif // #ifndef NDEBUG
 
-} // end namespace bisim_gjkw
 } // end namespace detail
 } // end namespace lts
 } // end namespace mcrl2

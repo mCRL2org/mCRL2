@@ -408,6 +408,7 @@ inline void group_transitions_on_label_tgt(std::vector<transition>& transitions,
                                      const std::size_t tau_label_index,
                                      const std::size_t number_of_states)
 {
+  (void) number_of_labels, (void) number_of_states; // avoid ``unused parameter'' warning
   constexpr size_t shift=11;
   constexpr size_t mask= (1<<shift)-1;
   std::vector<std::pair<std::size_t, std::size_t>> count_sum_transitions_per_action(mask+1, {0,0});
