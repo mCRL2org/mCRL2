@@ -28,7 +28,6 @@
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
-#include "mcrl2/lts/detail/check_complexity.h"
 
 #define CHECK_COMPLEXITY_GJ // check whether coroutines etc. satisfy the O(m log n) time complexity constraint for the concrete input
 
@@ -36,21 +35,11 @@
   #ifdef NDEBUG
     #error "It does not make sense to check the complexity in non-debug mode"
   #endif
+
+  #include "mcrl2/lts/detail/check_complexity.h"
   #define mCRL2complexity_gj(...) mCRL2complexity(__VA_ARGS__)
 #else
   #define mCRL2complexity_gj(...)  do{}while(0)
-#endif
-
-#ifndef NDEBUG
-    /// \brief include something in Debug mode
-    /// \details In a few places, we have to include an additional parameter to
-    /// a function in Debug mode.  While it is in principle possible to use
-    /// #ifndef NDEBUG ... #endif, that would lead to distributing the code
-    /// over many code lines.  This macro expands to its arguments in Debug
-    /// mode and to nothing otherwise.
-    #define ONLY_IF_DEBUG(...) __VA_ARGS__
-#else
-    #define ONLY_IF_DEBUG(...)
 #endif
 
 namespace mcrl2
