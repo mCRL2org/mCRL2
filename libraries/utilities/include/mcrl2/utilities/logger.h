@@ -19,6 +19,7 @@
 #include <set>
 #include <stdexcept>
 
+#include "mcrl2/utilities/noncopyable.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2::log {
@@ -122,19 +123,8 @@ std::set<output_policy*> initialise_output_policies();
 /// Dr. Dobb's Journal, September 5, 2007
 /// (url: http://drdobbs.com/cpp/201804215)
 /// Requires that OutputPolicy is a class which as a static member output(const std::string&)
-class logger
+class logger: private utilities::noncopyable
 {
-  public:
-  // Prevent copying loggers
-  private:
-    logger(const logger&)
-    {}
-
-    logger& operator =(const logger&)
-    {
-      return *this;
-    }
-
   protected:
     /// \brief Stream that is printed to internally
     /// Collects the full debug message that we are currently printing.
@@ -169,8 +159,11 @@ class logger
 
   public:
     /// \brief Default constructor
-    logger()
-    {}
+    logger(const log_level_t l)
+    {
+      m_level = l;
+      std::time(&m_timestamp);
+    }
 
     /// \brief Destructor; flushes output.
     /// Flushing during destruction is important to confer thread safety to the
@@ -244,10 +237,8 @@ class logger
 
     /// Get access to the stream provided by the logger.
     /// \param[in] l Log level for the stream
-    std::ostringstream& get(const log_level_t l)
+    std::ostringstream& get()
     {
-      m_level = l;
-      std::time(&m_timestamp);
       return m_os;
     }
 };
@@ -392,6 +383,6 @@ inline bool mCRL2logEnabled(const log_level_t level)
 } // namespace mcrl2::log
 
 /// \brief mCRL2log(LEVEL) provides the stream used to log.
-#define mCRL2log(LEVEL) if (mcrl2::log::mCRL2logEnabled(LEVEL)) mcrl2::log::logger().get(LEVEL)
+#define mCRL2log(LEVEL) if (mcrl2::log::mCRL2logEnabled(LEVEL)) mcrl2::log::logger(LEVEL).get()
 
 #endif // MCRL2_UTILITIES_LOGGER_H
