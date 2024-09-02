@@ -1356,7 +1356,7 @@ class partial_order_reduction_algorithm
           const summand_class& summand = m_summand_classes[k];
           mCRL2log(log::verbose) << "\n--- summand class " << k << " ---" << std::endl;
           mCRL2log(log::verbose) << "visible = " << std::boolalpha << m_vis.test(k) << "\n";
-          summand.print(log::logger().get(log::verbose));
+          summand.print(log::logger(log::verbose).get());
         }
         for (std::size_t i = 0; i < m_pbes.equations().size(); i++)
         {
