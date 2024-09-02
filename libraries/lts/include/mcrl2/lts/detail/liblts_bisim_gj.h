@@ -389,6 +389,11 @@ class todo_state_vector
       m_todo_indicator=0;
       bisimulation_gj::clear(m_vec);
     }
+
+    void clear_todo()
+    {
+      m_todo_indicator=m_vec.size();
+    }
 };
 
 
@@ -1081,8 +1086,6 @@ class bisim_partitioner_gj
         m_branching(branching),
         m_preserve_divergence(preserve_divergence)
     {
-//mcrl2::log::logger().set_reporting_level(log::debug);
-mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
       assert(m_branching || !m_preserve_divergence);
       mCRL2log(log::verbose) << "Start initialisation.\n";
       create_initial_partition();        
@@ -1524,6 +1527,7 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
     {
       for(const state_index si: m_R)
       {
+        assert(Rmarked == m_states[si].counter); // this allows us to charge the work in this loop to setting the counter to Rmarked
         m_states[si].counter=undefined;
       }
       if (restrict_to_R)
@@ -1532,6 +1536,7 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
       }
       for(const state_index si: m_U_counter_reset_vector)
       {
+        // this work is charged to adding a value to m_U_counter_reset_vector
         m_states[si].counter=undefined;
       }
       clear(m_U_counter_reset_vector);
@@ -1570,7 +1575,7 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
       typedef enum { initializing, state_checking, aborted, aborted_after_initialisation, incoming_inert_transition_checking, outgoing_action_constellation_check /*,
                      outgoing_action_constellation_check_during_initialisation*/ } status_type;
       status_type U_status=(VARIANT==1)?initializing:state_checking;
-      status_type R_status=initializing;
+      status_type R_status=(VARIANT==1)?state_checking:initializing;
       MARKED_STATE_TRANSITION_ITERATOR M_it=M_begin; 
       UNMARKED_STATE_ITERATOR M_co_it=M_co_begin; 
       state_index current_U_incoming_state;
@@ -1585,9 +1590,9 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
                        // In this case it is only necessary whether the state is Rmarked to see whether it has an outgoing
                        // marking transition. 
       {
-        /* for(MARKED_STATE_TRANSITION_ITERATOR ti=M_begin; ti!=M_end; ++ti)
+        /* for(; M_it!=M_end; ++M_it)
         { 
-          const state_index si=m_aut.get_transitions()[*ti].from();
+          const state_index si=m_aut.get_transitions()[*M_it].from();
           if (m_states[si].counter==undefined)
           { 
             m_R.add_todo(si);
@@ -1595,15 +1600,29 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
             m_counter_reset_vector.push_back(si);
           }
         } */
-        R_status=state_checking;
+        if (m_blocks[B].start_non_bottom_states == m_blocks[B].end_states)
+        {
+          m_R.clear_todo();
+        }
         if (M_co_it==M_co_end)
         {
+          if (m_blocks[B].start_non_bottom_states == m_blocks[B].end_states)
+          {
+            m_U.clear_todo();
+          }
           U_status=state_checking;
+        }
+      }
+      else
+      {
+        if (m_blocks[B].start_non_bottom_states == m_blocks[B].end_states)
+        {
+          m_U.clear_todo();
         }
       }
       if (2*m_R.size()>B_size)
       {
-        R_status=aborted;
+        R_status = (VARIANT==1) ? aborted_after_initialisation : aborted;
       }
       if (2*m_U.size()>B_size)
       {
@@ -1622,9 +1641,22 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
 #ifndef NDEBUG
         for(state_index si=0; si<m_states.size(); ++si)
         {
-          assert((m_states[si].counter==undefined && !m_R.find(si) && !m_U.find(si)) ||
-                 (m_states[si].counter==Rmarked && m_R.find(si)) ||
-                 (m_states[si].counter>=0 && !m_R.find(si)));
+          if (m_states[si].block != B)
+          {
+            assert(!m_R.find(si));
+            assert(!m_U.find(si));
+          }
+          else
+          {
+            switch(m_states[si].counter)
+            {
+            case undefined:  if (0 != m_states[si].no_of_outgoing_inert_transitions)  assert(!m_U.find(si));
+                             assert(!m_R.find(si)); break;
+            case Rmarked:    assert( m_R.find(si)); assert(!m_U.find(si)); break;
+            case 0:          assert(!m_R.find(si)); break; // It can happen that the state is in U or is not in U
+            default:         assert(!m_R.find(si)); assert(!m_U.find(si)); break;
+            }
+          }
         }
 #endif
         // The code for the right co-routine. 
@@ -1632,6 +1664,7 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
         {
           case initializing:
           {
+            assert(2 == VARIANT);
             // Algorithm 3, line 3.3, right.
               const state_index si= m_aut.get_transitions()[*M_it].from();
               mCRL2complexity(&m_transitions[*M_it], add_work(check_complexity::simple_splitB_R__handle_transition_from_R_state, 1), *this);
@@ -1639,6 +1672,8 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
               // R_todo.insert(si);
               if (m_states[si].counter!=Rmarked)
               {
+                // assert(undefined == m_states[si].counter); -- does not always hold, because it may be a nonbottom state with a tau-transition to a U-state, or even with all tau-transitions to U-states
+                assert(!m_R.find(si));
                 m_R.add_todo(si);
                 /* if (m_states[si].counter==undefined)
                 {
@@ -1652,8 +1687,14 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
                   break;
                 }
               }
+              else assert(m_R.find(si));
+              assert(!m_U.find(si));
               if (M_it==M_end)
               {
+                if (m_blocks[B].start_non_bottom_states == m_blocks[B].end_states)
+                {
+                  m_R.clear_todo();
+                }
                 R_status=state_checking;
               }
             break;
@@ -1679,6 +1720,7 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
             }
             else
             {
+              assert(m_blocks[B].start_non_bottom_states < m_blocks[B].end_states);
               const state_index s=m_R.move_from_todo();
               mCRL2complexity(&m_states[s], add_work(check_complexity::simple_splitB_R__find_predecessors, 1), *this);
 //std::cerr << "R insert: " << s << "\n";
@@ -1709,6 +1751,7 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
               assert(m_aut.is_tau(tr.label()));
               if (m_states[tr.from()].block==m_states[tr.to()].block && m_states[tr.from()].counter!=Rmarked) 
               {
+                assert(!m_R.find(tr.from()));
 //std::cerr << "R_todo2 insert: " << tr.from() << "\n";
                 m_R.add_todo(tr.from());
                 /* if (m_states[tr.from()].counter==undefined)
@@ -1724,6 +1767,8 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
                   break;
                 }
               }
+              else assert(m_R.find(tr.from()));
+              assert(!m_U.find(tr.from()));
               ++current_R_incoming_transition_iterator;
               if (current_R_incoming_transition_iterator==current_R_incoming_transition_iterator_end ||
                   !m_aut.is_tau(m_aut.apply_hidden_label_map(current_R_incoming_transition_iterator->label())))
@@ -1742,9 +1787,22 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
 #ifndef NDEBUG
         for(state_index si=0; si<m_states.size(); ++si)
         {
-          assert(m_states[si].counter==undefined && !m_R.find(si) && !m_U.find(si)||
-                 m_states[si].counter==Rmarked && m_R.find(si) ||
-                 m_states[si].counter>=0 && !m_R.find(si));
+          if (m_states[si].block != B)
+          {
+            assert(!m_R.find(si));
+            assert(!m_U.find(si));
+          }
+          else
+          {
+            switch(m_states[si].counter)
+            {
+            case undefined:  if (0 != m_states[si].no_of_outgoing_inert_transitions)  assert(!m_U.find(si));
+                             assert(!m_R.find(si)); break;
+            case Rmarked:    assert( m_R.find(si)); assert(!m_U.find(si)); break;
+            case 0:          assert(!m_R.find(si)); break; // It can happen that the state is in U or is not in U
+            default:         assert(!m_R.find(si)); assert(!m_U.find(si)); break;
+            }
+          }
         }
 #endif 
         // The code for the left co-routine. 
@@ -1753,12 +1811,15 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
           case initializing: // Only executed in VARIANT 1.
           {
 //std::cerr << "U_init\n";
+            assert(1 == VARIANT);
             // Algorithm 3, line 3.3 left.
             assert(M_co_it != M_co_end);
             for (;;)
             {
               const state_index si=*M_co_it;
               M_co_it++;
+              assert(0 == m_states[si].no_of_outgoing_inert_transitions);
+              assert(!m_U.find(si));
               
               // if (m_states[si].counter!=Rmarked)
               if (m_states[si].counter==undefined)
@@ -1772,7 +1833,7 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
                   break;
                 } */
 
-                assert(m_states[si].no_of_outgoing_inert_transitions==0);
+                assert(!m_R.find(si));
                 // This is for VARIANT 1.
                 // if (m_states[si].counter==undefined)
                 {
@@ -1784,11 +1845,13 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
                     U_status=aborted;
                     break;
                   }
-                  m_states[si].counter = 0;
-                  m_U_counter_reset_vector.push_back(si);
                 }
                 if (M_co_it == M_co_end)
                 {
+                  if (m_blocks[B].start_non_bottom_states == m_blocks[B].end_states)
+                  {
+                    m_U.clear_todo();
+                  }
                   U_status = state_checking;
                 }
                 // We have executed one step that is actually assigned to a U-state,
@@ -1798,6 +1861,7 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
               else
               {
                 assert(Rmarked == m_states[si].counter);
+                assert(m_R.find(si));
                 // We cannot assign the work to a U-state, but as si must have
                 // a transition in the splitter, we assign it to that transition.
                 add_work_to_out_slice(si, a, C,
@@ -1809,6 +1873,10 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
                 {
                   // We have reached the end of the bottom states without finding an (additional) U-state.
                   // To keep the balance, we have to execute one action from the next case (i.e. case state_checking).
+                  if (m_blocks[B].start_non_bottom_states == m_blocks[B].end_states)
+                  {
+                    m_U.clear_todo();
+                  }
                   U_status = state_checking;
                   goto do_state_checking;
                 }
@@ -1888,8 +1956,10 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
             }
             else
             {
+              assert(m_blocks[B].start_non_bottom_states < m_blocks[B].end_states);
               // const state_index s=U_todo.extract(U_todo.begin()).value();
               const state_index s=m_U.move_from_todo();
+              assert(!m_R.find(s));
               mCRL2complexity(&m_states[s], add_work(check_complexity::simple_splitB_U__find_predecessors, 1), *this);
 //std::cerr << "U insert/ U_todo_remove: " << s << "\n";
               current_U_incoming_state=s;
@@ -1936,6 +2006,7 @@ mCRL2log(log::debug) << "bisim_partitioner_gj constructor starts\n";
                 else
                 {
                   // Algorithm 3, line 3.18, left.
+                  assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), from) != m_U_counter_reset_vector.end());
                   assert(m_states[from].counter>0);
                   m_states[from].counter--;
                 }
@@ -2774,7 +2845,7 @@ mCRL2log(log::debug) << count_transitions_per_action[a] << "\n";
             // Group the states per block.
             value_counter.resize(m_blocks.size());
             assert(todo_stack_blocks.empty());
-mCRL2log(log::debug) << "INDICES " << std::distance(start_index, end_index) << "   " << &*start_index << "    " << &*end_index << "\n";
+// mCRL2log(log::debug) << "INDICES " << std::distance(start_index, end_index) << "   " << &*start_index << "    " << &*end_index << "\n";
             group_in_situ<typename std::vector<transition_index>::iterator>(
                           start_index,
                           end_index,
@@ -2784,10 +2855,10 @@ mCRL2log(log::debug) << "INDICES " << std::distance(start_index, end_index) << "
             typename std::vector<state_index>::iterator start_index_per_block=start_index;
             for(block_index block_ind: todo_stack_blocks)
             {
-mCRL2log(log::debug) << "INVESTIGATED " << block_ind << "    " << value_counter[block_ind].not_investigated << "\n";
+// mCRL2log(log::debug) << "INVESTIGATED " << block_ind << "    " << value_counter[block_ind].not_investigated << "\n";
               typename std::vector<state_index>::iterator end_index_per_block=start_index+value_counter[block_ind].not_investigated;
-mCRL2log(log::debug) << "RANGE " << &*start_index_per_block << "    " << &*end_index_per_block << "\n";
-mCRL2log(log::debug) << "TRANSITIONS PER ACTION LABEL  "; for(auto s: transitions_per_action_label){ mCRL2log(log::debug) << s << "  "; } mCRL2log(log::debug) << "\n";
+// mCRL2log(log::debug) << "RANGE " << &*start_index_per_block << "    " << &*end_index_per_block << "\n";
+// mCRL2log(log::debug) << "TRANSITIONS PER ACTION LABEL  "; for(auto s: transitions_per_action_label){ mCRL2log(log::debug) << s << "  "; } mCRL2log(log::debug) << "\n";
               // Check whether the block B, indexed by block_ind, can be split.
               // This means that the bottom states of B are not all in the split_states.
               const block_type& B=m_blocks[block_ind];
@@ -2847,17 +2918,19 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
       block_index current_block=null_block;
       label_index current_label=null_action;
       std::size_t current_start=0;
+      bool current_transition_is_selfloop = false;
       typename linked_list<BLC_indicators>::iterator new_position;
       for(std::vector<transition_index>::iterator ti=m_BLC_transitions.begin(); ti!=m_BLC_transitions.end(); ++ti)
       {
         const transition& t=m_aut.get_transitions()[*ti];
 
-        if (t.label()!=current_label || m_states[t.from()].block!=current_block)
+        if (t.label()!=current_label || m_states[t.from()].block!=current_block ||
+                (m_preserve_divergence && m_aut.is_tau(m_aut.apply_hidden_label_map(t.label())) && (t.from() == t.to()) != current_transition_is_selfloop))
         {
           std::size_t current_position=std::distance(m_BLC_transitions.begin(),ti);
           if (current_label!=null_action)
           {
-mCRL2log(log::debug) << "PUSH BACK FRONT " << current_start << "    " << current_position << "\n";
+// mCRL2log(log::debug) << "PUSH BACK FRONT " << current_start << "    " << current_position << "\n";
             block_type& b=m_blocks[current_block];
             new_position=b.block_to_constellation.emplace(b.block_to_constellation.begin(),
                                                           m_BLC_transitions.begin()+current_start, 
@@ -2869,6 +2942,7 @@ mCRL2log(log::debug) << "PUSH BACK FRONT " << current_start << "    " << current
           }
           current_block=m_states[t.from()].block;
           current_label=t.label();
+          current_transition_is_selfloop = t.from() == t.to();
           current_start=current_position;
         }
 
