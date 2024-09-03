@@ -36,7 +36,8 @@
 
 #ifdef CHECK_COMPLEXITY_GJ
   #include "mcrl2/lts/detail/check_complexity.h"
-  #define mCRL2complexity_gj(...) mCRL2complexity( __VA_ARGS__ )
+  // Using __VA_ARGS__ is not handled appropriately by MSVC. 
+  #define mCRL2complexity_gj(A1, A2, A3) mCRL2complexity(A1, A2, A3)
 #else
   #define mCRL2complexity_gj(...)  do{}while(0)
 #endif
