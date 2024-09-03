@@ -603,7 +603,7 @@ std::pair<bool, std::unordered_map<pbes_expression, structure_graph::index_type>
 
   std::set<structure_graph::index_type> W_minimal;
   std::set_intersection(minimal_set.begin(), minimal_set.end(), W_alpha.vertices().begin(), W_alpha.vertices().end(), std::inserter(W_minimal, W_minimal.begin()));
-  mCRL2log(log::debug) << "\nExtracted minimal set W " << core::detail::print_set(W_minimal) << std::endl;
+  mCRL2log(log::debug) << "\nExtracted minimal set V0 " << core::detail::print_set(W_minimal) << std::endl;
   for (const auto& index : W_minimal) {
     mCRL2log(log::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
   }
@@ -611,7 +611,7 @@ std::pair<bool, std::unordered_map<pbes_expression, structure_graph::index_type>
   // Make a mapping from the formula to the index it belongs to.
   std::unordered_map<pbes_expression, structure_graph::index_type> mapping;
 
-  for (structure_graph::index_type index : W_alpha.vertices()) {
+  for (structure_graph::index_type index : W_minimal) {
     mapping.insert(std::make_pair(G.find_vertex(index).formula(), index));
   }
 
