@@ -30,12 +30,13 @@
 #include "mcrl2/lts/detail/liblts_merge.h"
 
 #ifndef NDEBUG
-#define CHECK_COMPLEXITY_GJ // check whether coroutines etc. satisfy the O(m log n) time complexity constraint for the concrete input
+#define CHECK_COMPLEXITY_GJ // Check whether coroutines etc. satisfy the O(m log n) time complexity constraint for the concrete input.
+                            // Outcomment to disable. Works only in debug mode. 
 #endif
 
 #ifdef CHECK_COMPLEXITY_GJ
   #include "mcrl2/lts/detail/check_complexity.h"
-  #define mCRL2complexity_gj(...) mCRL2complexity(__VA_ARGS__)
+  #define mCRL2complexity_gj(...) mCRL2complexity( __VA_ARGS__ )
 #else
   #define mCRL2complexity_gj(...)  do{}while(0)
 #endif
