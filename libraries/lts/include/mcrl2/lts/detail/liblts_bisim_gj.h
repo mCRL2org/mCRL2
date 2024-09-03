@@ -33,6 +33,7 @@
 #define CHECK_COMPLEXITY_GJ // check whether coroutines etc. satisfy the O(m log n) time complexity constraint for the concrete input
 #endif
 
+#ifdef CHECK_COMPLEXITY_GJ
   #include "mcrl2/lts/detail/check_complexity.h"
   #define mCRL2complexity_gj(...) mCRL2complexity(__VA_ARGS__)
 #else
