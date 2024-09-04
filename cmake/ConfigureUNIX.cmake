@@ -83,6 +83,11 @@ if(MCRL2_ENABLE_ADDRESSSANITIZER)
   add_compile_options(-fno-omit-frame-pointer)
 endif()
 
+if(MCRL2_ENABLE_MEMORYSANITIZER)
+  add_compile_options(-fsanitize=memory)
+  add_compile_options(-fno-omit-frame-pointer)
+endif()
+
 if(MCRL2_ENABLE_THREADSANITIZER)
   add_compile_options(-fsanitize=thread)
   add_compile_options(-fno-omit-frame-pointer)
@@ -115,6 +120,10 @@ endif()
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
   add_link_options(-fsanitize=address)
+endif()
+
+if(MCRL2_ENABLE_MEMORYSANITIZER)
+  add_link_options(-fsanitize=memory)
 endif()
 
 if(MCRL2_ENABLE_THREADSANITIZER)

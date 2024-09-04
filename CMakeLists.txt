@@ -57,6 +57,7 @@ option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the li
 # Advanced options
 option(MCRL2_ENABLE_STABLE           "Enable compilation of stable tools." ON)
 option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks implemented by the AddressSanitizer." OFF)
+option(MCRL2_ENABLE_MEMORYSANITIZER  "Enable additional memory run-time checks implemented by the MemorySanitizer." OFF)
 option(MCRL2_ENABLE_THREADSANITIZER  "Enable additional data race run-time checks implemented by the ThreadSanitizer." OFF)
 option(MCRL2_ENABLE_CODE_COVERAGE    "Enable generation of code coverage statistics." OFF)
 option(MCRL2_ENABLE_STD_CHECKS       "Enable libstdc++ and libc++ specific assertions, e.g. safe iterator checks." OFF)
@@ -69,6 +70,7 @@ option(MCRL2_ENABLE_LINKER_LLD       "Enable LLVM lld as linker, which offers si
 
 mark_as_advanced(
   MCRL2_ENABLE_ADDRESSSANITIZER
+  MCRL2_ENABLE_MEMORYSANITIZER
   MCRL2_ENABLE_CODE_COVERAGE
   MCRL2_ENABLE_JITTYC
   MCRL2_ENABLE_LINKER_LLD
