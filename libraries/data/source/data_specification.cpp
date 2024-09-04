@@ -632,8 +632,8 @@ void data_specification::find_associated_system_defined_data_types_for_a_sort(
 #endif
   else if (is_function_sort(sort))
   {
-    const sort_expression& t=function_sort(sort).codomain();
-    const sort_expression_list& l=function_sort(sort).domain();
+    const sort_expression& t = static_cast<const function_sort&>(sort).codomain();
+    const sort_expression_list& l = static_cast<const function_sort&>(sort).domain();
     if (l.size()==1)
     {
       const function_symbol_vector f = function_update_generate_functions_code(l.front(),t);
