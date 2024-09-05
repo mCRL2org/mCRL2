@@ -338,7 +338,7 @@ void MainWindow::onInitializedSimulation()
   m_ui.statusBar->clearMessage();
 }
 
-void MainWindow::selectState(std::size_t state)
+void MainWindow::selectState(unsigned long long state)
 {
   if (!m_simulation)
   {
@@ -441,19 +441,19 @@ void MainWindow::animationStep()
   }
 }
 
-void MainWindow::reset(std::size_t selected_state, bool probabilistic)
+void MainWindow::reset(unsigned long long selected_state, bool probabilistic)
 {
-  QMetaObject::invokeMethod(m_simulation, "reset", Qt::BlockingQueuedConnection, Q_ARG(std::size_t, selected_state), Q_ARG(bool, probabilistic));
+  QMetaObject::invokeMethod(m_simulation, "reset", Qt::BlockingQueuedConnection, Q_ARG(unsigned long long, selected_state), Q_ARG(bool, probabilistic));
 
   m_trace = m_simulation->trace();
 }
 
-void MainWindow::select(std::size_t transition)
+void MainWindow::select(unsigned long long transition)
 {
   QEventLoop loop;
   connect(m_simulation, SIGNAL(finished()), &loop, SLOT(quit()));
   QSemaphore semaphore;
-  QMetaObject::invokeMethod(m_simulation, "select", Qt::QueuedConnection, Q_ARG(std::size_t, transition), Q_ARG(std::size_t, m_selected_state), Q_ARG(QSemaphore *, &semaphore));
+  QMetaObject::invokeMethod(m_simulation, "select", Qt::QueuedConnection, Q_ARG(unsigned long long, transition), Q_ARG(unsigned long long, m_selected_state), Q_ARG(QSemaphore *, &semaphore));
 
   waitForResponse(&loop, &semaphore);
 
@@ -466,7 +466,7 @@ void MainWindow::auto_select_state_or_probability()
   QEventLoop loop;
   connect(m_simulation, SIGNAL(finished()), &loop, SLOT(quit()));
   QSemaphore semaphore;
-  QMetaObject::invokeMethod(m_simulation, "auto_select_state_or_probability", Qt::QueuedConnection, Q_ARG(std::size_t, m_selected_state), Q_ARG(QSemaphore *, &semaphore));
+  QMetaObject::invokeMethod(m_simulation, "auto_select_state_or_probability", Qt::QueuedConnection, Q_ARG(unsigned long long, m_selected_state), Q_ARG(QSemaphore *, &semaphore));
 
   waitForResponse(&loop, &semaphore);
 

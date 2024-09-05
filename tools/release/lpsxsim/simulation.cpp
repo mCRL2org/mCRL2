@@ -46,13 +46,13 @@ void Simulation::init(const QString& filename, bool do_not_use_dummies)
   emit initialisationDone();
 }
 
-void Simulation::updateTrace(std::size_t firstChangedState)
+void Simulation::updateTrace(unsigned long long firstChangedState)
 {
   QMutexLocker locker(&m_traceMutex);
 
   m_trace.erase(m_trace.begin() + firstChangedState, m_trace.end());
 
-  for (std::size_t i = firstChangedState; i < m_simulation->trace().size(); i++)
+  for (unsigned long long i = firstChangedState; i < m_simulation->trace().size(); i++)
   {
     assert(m_simulation->trace()[i].source_state.size() > 0);
     TracePosition position;
@@ -61,7 +61,7 @@ void Simulation::updateTrace(std::size_t firstChangedState)
     {
       // Set up the selection of a probabilistic state.
       position.is_probabilistic = true;
-      for (std::size_t j = 0; j < m_simulation->trace()[i].source_state.size(); j++)
+      for (unsigned long long j = 0; j < m_simulation->trace()[i].source_state.size(); j++)
       {
         Transition outgoing_probabilities;
         outgoing_probabilities.action_or_probability = QString::fromStdString(mcrl2::lps::pp(m_simulation->trace()[i].source_state.probabilities[j]));
@@ -77,7 +77,7 @@ void Simulation::updateTrace(std::size_t firstChangedState)
       position.is_probabilistic = false;
       position.state = renderState(current_state.source_state.states[current_state.state_number]);
       position.transitionNumber = m_simulation->trace()[i].transition_number;
-      for (std::size_t j = 0; j < m_simulation->trace()[i].transitions.size(); j++)
+      for (unsigned long long j = 0; j < m_simulation->trace()[i].transitions.size(); j++)
       {
         Transition transition;
         if (current_state.transitions[j].state.size()==1)
@@ -100,7 +100,7 @@ void Simulation::updateTrace(std::size_t firstChangedState)
 Simulation::State Simulation::renderState(const mcrl2::lps::state& state)
 {
   State output;
-  for (std::size_t i = 0; i < state.size(); i++)
+  for (unsigned long long i = 0; i < state.size(); i++)
   {
     if (mcrl2::data::is_variable(state[i]))
     {
@@ -114,9 +114,9 @@ Simulation::State Simulation::renderState(const mcrl2::lps::state& state)
   return output;
 }
 
-void Simulation::select(std::size_t transitionNumber, std::size_t selected_state, QSemaphore *semaphore)
+void Simulation::select(unsigned long long transitionNumber, unsigned long long selected_state, QSemaphore *semaphore)
 {
-  assert(selected_state<static_cast<std::size_t>(m_trace.size()));
+  assert(selected_state<static_cast<unsigned long long>(m_trace.size()));
   if (m_trace[selected_state].is_probabilistic)
   {
     m_simulation->select_state(transitionNumber);
@@ -134,7 +134,7 @@ void Simulation::select(std::size_t transitionNumber, std::size_t selected_state
   emit finished();
 }
 
-void Simulation::auto_select_state_or_probability(std::size_t selected_state, QSemaphore *semaphore)
+void Simulation::auto_select_state_or_probability(unsigned long long selected_state, QSemaphore *semaphore)
 {
   if (m_trace[selected_state].is_probabilistic)
   {

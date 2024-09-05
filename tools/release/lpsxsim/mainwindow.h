@@ -44,7 +44,7 @@ class MainWindow : public QMainWindow
   public slots:
     void openSpecification(QString filename);
     void onInitializedSimulation();
-    void selectState(std::size_t state);
+    void selectState(unsigned long long state);
     void truncateTrace(int state, int column_on_screen);
     void selectTransition(int transition);
     void animationStep();
@@ -56,8 +56,8 @@ class MainWindow : public QMainWindow
     void onLogOutput(QString level, QDateTime timestamp, QString message, QString formattedMessage);
 
   protected:
-    void reset(std::size_t selectedState, bool probabilistic);
-    void select(std::size_t transition);
+    void reset(unsigned long long selectedState, bool probabilistic);
+    void select(unsigned long long transition);
     void waitForResponse(QEventLoop *eventLoop, QSemaphore *semaphore, int timeout = 50);
     /**
      * @brief Saves window information
@@ -73,7 +73,7 @@ class MainWindow : public QMainWindow
     Simulation *m_simulation;
     Simulation *m_newSimulation = nullptr;
     Simulation::Trace m_trace;
-    std::size_t m_selected_state;
+    unsigned long long m_selected_state;
     QTimer *m_animationTimer;
     bool m_randomAnimation;
     bool m_animationDisabled;

@@ -39,7 +39,7 @@ class Simulation : public QObject
                                      // If false, state is defined and transitions represent outgoing transitions. 
       State state;
       QList<Transition> transitions;
-      std::size_t transitionNumber;
+      unsigned long long transitionNumber;
     };
     typedef QList<TracePosition> Trace;
 
@@ -58,16 +58,16 @@ class Simulation : public QObject
 
   private slots:
     void init(const QString& filename, bool do_not_use_dummies);
-    void updateTrace(std::size_t firstChangedState);
+    void updateTrace(unsigned long long firstChangedState);
 
   public slots:
-    void reset(std::size_t stateNumber, bool probabilistic) 
+    void reset(unsigned long long stateNumber, bool probabilistic) 
     { 
       m_simulation->truncate(stateNumber, probabilistic); 
       updateTrace(stateNumber); 
     }
-    void select(std::size_t transitionNumber, std::size_t selected_state, QSemaphore *semaphore);
-    void auto_select_state_or_probability(std::size_t selected_state, QSemaphore *semaphore);
+    void select(unsigned long long transitionNumber, unsigned long long selected_state, QSemaphore *semaphore);
+    void auto_select_state_or_probability(unsigned long long selected_state, QSemaphore *semaphore);
     void enable_auto_select_probability(bool enable, QSemaphore *semaphore);
     void load(QString filename);
     void save(QString filename);
