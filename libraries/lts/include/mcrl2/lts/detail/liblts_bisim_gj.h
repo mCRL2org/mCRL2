@@ -317,22 +317,22 @@ struct transition_pointer_pair
 struct label_count_sum_tuple
 // David suggests: rename this struct to label_count_sum_pair to make the name more different from label_count_sum_triple.
 {
-  std::size_t label_counter=0;
-  std::size_t not_investigated=0;
+  transition_index label_counter=0;
+  transition_index not_investigated=0;
 
   // The default initialiser does not initialize the fields of this struct. 
   label_count_sum_tuple()
   {}
 };
 
-struct label_count_sum_triple: label_count_sum_tuple
+/* struct label_count_sum_triple: label_count_sum_tuple
 {
-  std::size_t cumulative_label_counter=0;
+  transition_index cumulative_label_counter=0;
 
   // The default initialiser does not initialize the fields of this struct. 
   label_count_sum_triple()
   {}
-};
+}; */
 
 class todo_state_vector
 {
@@ -823,7 +823,7 @@ class bisim_partitioner_gj
           for(linked_list< BLC_indicators >::iterator ind=b.block_to_constellation.begin();
                      ind!=b.block_to_constellation.end(); ++ind)
           {
-            transition first_transition=m_aut.get_transitions()[*(ind->start_same_BLC)];
+            const transition& first_transition=m_aut.get_transitions()[*(ind->start_same_BLC)];
             //for(LBC_list_iterator i(ind->start_same_BLC,m_transitions); i!=LBC_list_iterator(ind->end_same_BLC,m_transitions); ++i)
             for(std::vector<transition_index>::iterator i=ind->start_same_BLC; i!=ind->end_same_BLC; ++i)
             {
@@ -839,7 +839,10 @@ class bisim_partitioner_gj
                 assert(b.block_to_constellation.begin()==ind);
               }
             }
-            mCRL2complexity_gj(ind, no_temporary_work(), *this);
+            if (check_temporary_complexity_counters)
+            {
+              mCRL2complexity_gj(ind, no_temporary_work(check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(m_blocks[m_states[first_transition.to()].block].constellation))), *this);
+            }
           }
         }
         assert(initialisation || all_transitions.size()==m_transitions.size());
@@ -1504,6 +1507,9 @@ class bisim_partitioner_gj
                            emplace_front(//first_block_to_constellation, 
                                    this_block_to_constellation->start_same_BLC, 
                                    this_block_to_constellation->start_same_BLC);
+          #ifdef CHECK_COMPLEXITY_GJ
+            first_block_to_constellation->work_counter = this_block_to_constellation->work_counter;
+          #endif
         }
         else  assert(m_states[m_aut.get_transitions()[*(first_block_to_constellation->start_same_BLC)].to()].block==index_block_B);
         last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti,  first_block_to_constellation, this_block_to_constellation);
@@ -1525,6 +1531,9 @@ class bisim_partitioner_gj
                            emplace(this_block_to_constellation, 
                                    this_block_to_constellation->start_same_BLC,
                                    this_block_to_constellation->start_same_BLC);
+          #ifdef CHECK_COMPLEXITY_GJ
+            next_block_to_constellation->work_counter = this_block_to_constellation->work_counter;
+          #endif
         }
         last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, next_block_to_constellation, this_block_to_constellation);
       }
@@ -1581,6 +1590,9 @@ class bisim_partitioner_gj
           new_position=m_blocks[new_bi].block_to_constellation.begin();
           new_position= m_blocks[new_bi].block_to_constellation.emplace(new_position,old_BLC_start, old_BLC_start);
         }
+        #ifdef CHECK_COMPLEXITY_GJ
+          new_position->work_counter = this_block_to_constellation->work_counter;
+        #endif
         last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks(ti, new_position, this_block_to_constellation);
       }
       else
@@ -2528,7 +2540,7 @@ class bisim_partitioner_gj
     void accumulate_entries_into_not_investigated(std::vector<label_count_sum_tuple>& action_counter,
                             const std::vector<block_index>& todo_stack)
     {
-      std::size_t sum=0;
+      transition_index sum=0;
       for(block_index index: todo_stack)
       {
         action_counter[index].not_investigated=sum;
@@ -2536,17 +2548,17 @@ class bisim_partitioner_gj
       }
     }
 
-    void accumulate_entries(std::vector<label_count_sum_triple>& action_counter, 
+    /* void accumulate_entries(std::vector<label_count_sum_triple>& action_counter,
                             const std::vector<label_index>& todo_stack)
     {
-      std::size_t sum=0;
+      transition_index sum=0;
       for(label_index index: todo_stack)
       {
         action_counter[index].cumulative_label_counter=sum;
         action_counter[index].not_investigated=sum;
         sum=sum+action_counter[index].label_counter;
       }
-    }
+    } */
 
     void accumulate_entries(std::vector<transition_index>& counter)
     {
@@ -2604,7 +2616,7 @@ class bisim_partitioner_gj
         const transition& t = m_aut.get_transitions()[*i];
         #ifdef CHECK_COMPLEXITY_GJ
           assert(m_blocks[m_states[t.to()].block].constellation == new_constellation);
-          mCRL2complexity(&m_transitions[*i], add_work(check_complexity::group_in_situ__count_transitions_per_block, max_C), *this);
+          mCRL2complexity_gj(&m_transitions[*i], add_work(check_complexity::group_in_situ__count_transitions_per_block, max_C), *this);
         #endif
         const block_index n=m_states[t.from()].block;
 
@@ -2624,7 +2636,7 @@ class bisim_partitioner_gj
       std::vector<block_index>::iterator current_value=todo_stack.begin();
       for(std::vector<transition_index>::iterator i=begin; i!=end; )
       {
-        mCRL2complexity(&m_transitions[*i], add_work(check_complexity::group_in_situ__swap_transition, max_C), *this);
+        mCRL2complexity_gj(&m_transitions[*i], add_work(check_complexity::group_in_situ__swap_transition, max_C), *this);
         block_index n=m_states[m_aut.get_transitions()[*i].from()].block;
         if (n==*current_value)
         {
@@ -2642,7 +2654,7 @@ class bisim_partitioner_gj
               assert(m_states[m_aut.get_transitions()[*work_i].from()].block == n);
               do
               {
-                mCRL2complexity(&m_transitions[*work_i], add_work(check_complexity::group_in_situ__skip_to_next_block, max_C), *this);
+                mCRL2complexity_gj(&m_transitions[*work_i], add_work(check_complexity::group_in_situ__skip_to_next_block, max_C), *this);
               }
               while (begin != work_i && m_states[m_aut.get_transitions()[*--work_i].from()].block == n);
             #endif
@@ -2665,7 +2677,7 @@ class bisim_partitioner_gj
           std::vector<transition_index>::iterator new_position=begin+value_counter[n].not_investigated;
           while (m_states[m_aut.get_transitions()[*new_position].from()].block==n)
           {
-            mCRL2complexity(&m_transitions[*new_position], add_work(check_complexity::group_in_situ__swap_transition, max_C), *this);
+            mCRL2complexity_gj(&m_transitions[*new_position], add_work(check_complexity::group_in_situ__swap_transition, max_C), *this);
             value_counter[n].not_investigated++;
             value_counter[n].label_counter--;
             new_position++;
@@ -2713,7 +2725,8 @@ class bisim_partitioner_gj
 mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
 
       // Count the number of occurring action labels. 
-      std::vector<transition_index> count_transitions_per_action(m_aut.num_action_labels() + m_preserve_divergence, 0);
+      assert((unsigned) m_preserve_divergence <= 1);
+      std::vector<transition_index> count_transitions_per_action(m_aut.num_action_labels() + (unsigned) m_preserve_divergence, 0);
 // David suggests: The above allocation may take time up to O(|Act|).
 // This is a place where the number of actions plays a role.
 
@@ -2728,7 +2741,7 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
       {
         const transition& t=m_aut.get_transitions()[ti];
 //std::cerr << "TRANS " << ptr(ti) << "\n";
-        // mCRL2complexity(&transitions[ti], add_work(..., 1), *this);
+        // mCRL2complexity_gj(&m_transitions[ti], add_work(..., 1), *this);
             // Because every transition is touched exactly once, we do not store a physical counter for this.
         label_index label = m_preserve_divergence && t.from() == t.to() && m_aut.is_tau(m_aut.apply_hidden_label_map(t.label()))
                             ? m_aut.num_action_labels() : m_aut.apply_hidden_label_map(t.label());
@@ -2749,7 +2762,7 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
       std::vector<transition_index> transitions_per_action_label(m_aut.num_transitions());
       for(transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
       {
-        // mCRL2complexity(&transitions[ti], add_work(..., 1), *this);
+        // mCRL2complexity_gj(&m_transitions[ti], add_work(..., 1), *this);
             // Because every transition is touched exactly once, we do not store a physical counter for this.
         const transition& t=m_aut.get_transitions()[ti];
         label_index label = m_preserve_divergence && t.from() == t.to() && m_aut.is_tau(m_aut.apply_hidden_label_map(t.label()))
@@ -2765,6 +2778,8 @@ mCRL2log(log::verbose) << "Grouped transitions per action. \n";
       // Group transitions per outgoing/incoming state.
       for(const transition& t: m_aut.get_transitions())
       { 
+        // mCRL2complexity_gj(&m_transitions[std::distance(&*m_aut.get_transitions.begin(), &t)], add_work(..., 1), *this);
+            // Because every transition is touched exactly once, we do not store a physical counter for this.
         count_outgoing_transitions_per_state[t.from()]++;
         count_incoming_transitions_per_state[t.to()]++;
         if (is_inert_during_init(t))
@@ -2783,6 +2798,8 @@ mCRL2log(log::verbose) << "Grouped transitions per action. \n";
       // place transitions and set the pointers to incoming/outgoing transitions
       for (state_index s = 0; s < m_aut.num_states(); ++s)
       {
+        // mCRL2complexity_gj(&m_states[s], add_work(..., 1), *this);
+            // Because every state is touched exactly once, we do not store a physical counter for this.
         m_states[s].start_outgoing_transitions = current_outgoing_transitions + m_states[s].no_of_outgoing_inert_transitions;
         current_outgoing_transitions += count_outgoing_transitions_per_state[s];
         count_outgoing_transitions_per_state[s] = 0; // meaning of this counter changes to: number of outgoing transitions already stored
@@ -2795,6 +2812,8 @@ mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
       // std::size_t position=0;
       // for(const transition& t: m_aut.get_transitions())
       {
+        // mCRL2complexity_gj(&m_transitions[ti], add_work(..., 1), *this);
+            // Because every transition is touched exactly once, we do not store a physical counter for this.
         const transition& t=m_aut.get_transitions()[ti];
         // David has changed this: the original code could not accommodate correctly
         // for tau-self-loops in dpbranching-bisim-gj mode, as the tau-self-loop
@@ -2848,15 +2867,20 @@ mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
         m_states[current_state].start_incoming_non_inert_transitions=m_incoming_transitions.end();
       } */
       state_index current_state=null_state;
+      assert(current_state + 1 == 0);
       // bool tau_transitions_passed=true;
       // TODO: This should be combined with another pass through all transitions. 
       for(std::vector<transition>::iterator it=m_aut.get_transitions().begin(); it!=m_aut.get_transitions().end(); it++)
       {
+        // mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), it)], add_work(..., 1), *this);
+            // Because every transition is touched exactly once, we do not store a physical counter for this.
         const transition& t=*it;
         if (t.to()!=current_state)
         { 
           for (state_index i=current_state+1; i<=t.to(); ++i)
           {
+            // ensure that every state is visited at most once:
+            mCRL2complexity_gj(&m_states[i], add_work(check_complexity::create_initial_partition__set_start_incoming_transitions, 1), *this);
 //std::cerr << "SET start_incoming_transitions for state " << i << "\n";
             m_states[i].start_incoming_transitions=it;
           }
@@ -2865,6 +2889,7 @@ mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
       }
       for (state_index i=current_state+1; i<m_states.size(); ++i)
       {
+        mCRL2complexity_gj(&m_states[i], add_work(check_complexity::create_initial_partition__set_start_incoming_transitions, 1), *this);
 //std::cerr << "SET residual start_incoming_transitions for state " << i << "\n";
         m_states[i].start_incoming_transitions=m_aut.get_transitions().end();
       }
@@ -2880,6 +2905,8 @@ mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
         outgoing_transitions_it current_start_same_saC = (it+1).base();
         while (++it != m_outgoing_transitions.rend())
         {
+          // mCRL2complexity_gj(&m_transitions[it->transition], add_work(..., 1), *this);
+              // Because every transition is touched exactly once, we do not store a physical counter for this.
           const transition& t = m_aut.get_transitions()[it->transition];
           const label_index new_label = m_preserve_divergence && t.from() == t.to() && m_aut.is_tau(m_aut.apply_hidden_label_map(t.label()))
                                         ? m_aut.num_action_labels() : m_aut.apply_hidden_label_map(t.label());
@@ -2905,6 +2932,8 @@ mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
       typename std::vector<state_index>::iterator lower_i=m_states_in_blocks.begin(), upper_i=m_states_in_blocks.end();
       for (state_index i=0; i < m_aut.num_states(); ++i)
       {
+        // mCRL2complexity_gj(&m_states[i], add_work(..., 1), *this);
+            // Because every state is touched exactly once, we do not store a physical counter for this.
         if (0 < m_states[i].no_of_outgoing_inert_transitions)
         {
           --upper_i;
@@ -2943,6 +2972,8 @@ mCRL2log(log::verbose) << "Start refining in the initialisation\n";
 // mCRL2log(log::debug) << "CONSIDER ACTION ";
 // if (m_preserve_divergence && m_aut.num_action_labels() == a) { mCRL2log(log::debug) << "(tau-self-loops)   "; } else { mCRL2log(log::debug) << m_aut.action_label(a) << "   "; }
 // mCRL2log(log::debug) << count_transitions_per_action[a] << "\n";
+          // mCRL2complexity_gj(...)
+              // not needed as the inner loop is always executed at least once.
           std::vector<transition_index>::iterator end_index=transitions_per_action_label.begin()+count_transitions_per_action[a];
           if (!m_branching || !m_aut.is_tau(a)) // skip inert transitions
           {
@@ -2955,12 +2986,24 @@ mCRL2log(log::verbose) << "Start refining in the initialisation\n";
                           todo_stack_blocks,
                           value_counter);
             std::vector<transition_index>::iterator start_index_per_block=start_index;
+            assert(!todo_stack_blocks.empty()); // ensure that the inner loop is executed
             for(block_index block_ind: todo_stack_blocks)
             {
 // mCRL2log(log::debug) << "INVESTIGATED " << block_ind << "    " << value_counter[block_ind].not_investigated << "\n";
               std::vector<transition_index>::iterator end_index_per_block=start_index+value_counter[block_ind].not_investigated;
 // mCRL2log(log::debug) << "RANGE " << &*start_index_per_block << "    " << &*end_index_per_block << "\n";
 // mCRL2log(log::debug) << "TRANSITIONS PER ACTION LABEL  "; for(auto s: transitions_per_action_label){ mCRL2log(log::debug) << s << "  "; } mCRL2log(log::debug) << "\n";
+              #ifdef CHECK_COMPLEXITY_GJ
+                // We have to assign the work to some transition in [start_index_per_block, end_index_per_block).
+                // In fact, just to make sure, we assign it to every transition.
+                assert(start_index_per_block!=end_index_per_block);
+                std::vector<transition_index>::iterator work_i = start_index_per_block;
+                do
+                {
+                  mCRL2complexity_gj(&m_transitions[*work_i], add_work(check_complexity::create_initial_partition__select_action_label_and_block_to_be_split, 1), *this);
+                }
+                while (++work_i!=end_index_per_block);
+              #endif
               // Check whether the block B, indexed by block_ind, can be split.
               // This means that the bottom states of B are not all in the split_states.
               const block_type& B=m_blocks[block_ind];
@@ -2968,11 +3011,7 @@ mCRL2log(log::verbose) << "Start refining in the initialisation\n";
               // Count the number of state in split_states that are bottom states. This function has a side effect if not all bottom states are covered
               // on m_P and counters in states. 
               if (not_all_bottom_states_are_touched
-                      (block_ind, start_index_per_block, end_index_per_block
-                          #ifdef CHECK_COMPLEXITY_GJ
-                            , a
-                          #endif
-                          ))
+                      (block_ind, start_index_per_block, end_index_per_block))
               { 
                 bool dummy=false;
                 // std::size_t dummy_number=-1;
@@ -3003,6 +3042,8 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
       std::vector<transition_index> count_transitions_per_block(m_blocks.size(),0);
       for(const transition& t: m_aut.get_transitions())
       {
+        // mCRL2complexity_gj(&m_transitions[std::distance(&*m_aut.gt_transitions().begin(), &t)], add_work(..., 1), *this);
+            // Because every transition is touched exactly once, we do not store a physical counter for this.
         count_transitions_per_block[m_states[t.from()].block]++;
       }
       accumulate_entries(count_transitions_per_block);
@@ -3011,6 +3052,8 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
       // position=0;
       // for(const transition& t: m_aut.get_transitions())
       {
+        // mCRL2complexity_gj(&m_transitions[ti], add_work(..., 1), *this);
+            // Because every transition is touched exactly once, we do not store a physical counter for this.
         const transition& t=m_aut.get_transitions()[ti];
         transition_index& pos=count_transitions_per_block[m_states[t.from()].block];
         // m_BLC_transitions[pos]=position;
@@ -3027,6 +3070,8 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
       typename linked_list<BLC_indicators>::iterator new_position;
       for(std::vector<transition_index>::iterator ti=m_BLC_transitions.begin(); ti!=m_BLC_transitions.end(); ++ti)
       {
+        // mCRL2complexity_gj(&m_transitions[*ti], add_work(..., 1), *this);
+            // Because every transition is touched exactly once, we do not store a physical counter for this.
         const transition& t=m_aut.get_transitions()[*ti];
 
         transition_index current_position=std::distance(m_BLC_transitions.begin(),ti);
@@ -3042,6 +3087,7 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
                                                           m_BLC_transitions.begin()+current_position);
             for(std::vector<transition_index>::iterator tti=m_BLC_transitions.begin()+current_start; tti!=m_BLC_transitions.begin()+current_position; ++tti)
             {
+              mCRL2complexity_gj(&m_transitions[*tti], add_work(check_complexity::create_initial_partition__set_transitions_per_block_to_constellation, 1), *this);
               m_transitions[*tti].transitions_per_block_to_constellation=new_position;
             }
           }
@@ -3062,6 +3108,7 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
                                                       m_BLC_transitions.end());
         for(std::vector<transition_index>::iterator tti=m_BLC_transitions.begin()+current_start; tti!=m_BLC_transitions.end(); ++tti)
         {
+          mCRL2complexity_gj(&m_transitions[*tti], add_work(check_complexity::create_initial_partition__set_transitions_per_block_to_constellation, 1), *this);
           m_transitions[*tti].transitions_per_block_to_constellation=new_position;
         }
       }
@@ -3353,7 +3400,7 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
 //std::cerr << "INSPECT TRANSITION  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
         #ifdef CHECK_COMPLEXITY_GJ
           assert(new_constellation==m_blocks[m_states[t.to()].block].constellation);
-          mCRL2complexity(&m_transitions[*ti], add_work(check_complexity::some_bottom_state_has_no_outgoing_co_transition__handle_transition, max_C), *this);
+          mCRL2complexity_gj(&m_transitions[*ti], add_work(check_complexity::some_bottom_state_has_no_outgoing_co_transition__handle_transition, max_C), *this);
         #endif
         assert(m_states[t.from()].ref_states_in_blocks>=m_blocks[B].start_bottom_states);
         assert(m_states[t.from()].ref_states_in_blocks<m_blocks[B].end_states);
@@ -3441,11 +3488,7 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
     bool not_all_bottom_states_are_touched(
                       const block_index bi, 
                       const std::vector<transition_index>::iterator begin,
-                      const std::vector<transition_index>::iterator end
-                      #ifdef CHECK_COMPLEXITY_GJ
-                        , const label_index a
-                      #endif
-                      )
+                      const std::vector<transition_index>::iterator end)
     {
       state_index no_of_touched_bottom_states=0;
       const block_type& B=m_blocks[bi];
@@ -3453,20 +3496,7 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
       {           
         const transition& t = m_aut.get_transitions()[*i];
         const state_index s=t.from();
-        #ifdef CHECK_COMPLEXITY_GJ
-          if (m_aut.num_action_labels() == a)
-          {
-            assert(m_preserve_divergence);
-            assert(m_aut.is_tau(m_aut.apply_hidden_label_map(t.label())));
-            assert(s == t.to()); // must be a tau-self-loop
-          }
-          else
-          {
-            assert(m_aut.apply_hidden_label_map(t.label()) == a);
-            assert(!m_preserve_divergence || !m_aut.is_tau(a) || s != t.to());
-          }
-          mCRL2complexity(&m_transitions[*i], add_work(check_complexity::not_all_bottom_states_are_touched__mark_source_state, check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(m_blocks[m_states[t.to()].block].constellation))), *this);
-        #endif
+        mCRL2complexity_gj(&m_transitions[*i], add_work(check_complexity::not_all_bottom_states_are_touched__mark_source_state, check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(m_blocks[m_states[t.to()].block].constellation))), *this);
         if (is_inert_during_init(t) && m_states[s].block == m_states[t.to()].block)
         {
           // This is actually an inert transition. Disregard it for deciding whether to split the block.
@@ -3511,14 +3541,14 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
     // This routine can only be called after initialisation.  
     bool hatU_does_not_cover_B_bottom(const block_index index_block_B, const constellation_index old_constellation)
     {  
-      mCRL2complexity(&m_blocks[index_block_B], add_work(check_complexity::hatU_does_not_cover_B_bottom__handle_bottom_states_and_their_outgoing_transitions_in_splitter, check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(index_block_B))), *this);
+      mCRL2complexity_gj(&m_blocks[index_block_B], add_work(check_complexity::hatU_does_not_cover_B_bottom__handle_bottom_states_and_their_outgoing_transitions_in_splitter, check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(index_block_B))), *this);
       assert(m_branching);
       bool hatU_does_not_cover_B_bottom=false;
       for(typename std::vector<state_index>::iterator si=m_blocks[index_block_B].start_bottom_states;
                         si!=m_blocks[index_block_B].start_non_bottom_states; 
                       ++si)
       {
-        // mCRL2complexity(&m_states[*si], add_work(..., max_C), *this);
+        // mCRL2complexity_gj(&m_states[*si], add_work(..., max_C), *this);
             // subsumed by the above call
         bool found=false;
         const outgoing_transitions_it end_it=((*si)+1>=m_states.size())?m_outgoing_transitions.end():m_states[(*si)+1].start_outgoing_transitions;
@@ -3526,7 +3556,7 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
                                      !found && tti!=end_it;
                                      ++tti)
         { 
-          // mCRL2complexity(&m_transitions[tti->transition], add_work(..., max_C), *this);
+          // mCRL2complexity_gj(&m_transitions[tti->transition], add_work(..., max_C), *this);
               // subsumed by the above call
           const transition& t=m_aut.get_transitions()[m_BLC_transitions[tti->transition]];
           assert(t.from() == *si);
@@ -3683,8 +3713,9 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         const constellation_index new_constellation=m_constellations.size()-1;
         m_blocks[index_block_B].constellation=new_constellation;
         #ifdef CHECK_COMPLEXITY_GJ
+          // m_constellations[new_constellation].work_counter = m_constellations[old_constellation].work_counter;
           const unsigned max_C = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(new_constellation));
-          mCRL2complexity(&m_blocks[index_block_B], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_splitter, max_C), *this);
+          mCRL2complexity_gj(&m_blocks[index_block_B], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_splitter, max_C), *this);
         #endif
         // Here the variables block_to_constellation and the doubly linked list L_B->C in blocks must be still be updated.
         // This happens further below.
@@ -3701,7 +3732,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         for(typename std::vector<state_index>::iterator i=m_blocks[index_block_B].start_bottom_states;
                                                         i!=m_blocks[index_block_B].end_states; ++i)
         {
-          // mCRL2complexity(m_states[*i], add_work(check_complexity::..., max_C), *this);
+          // mCRL2complexity_gj(m_states[*i], add_work(check_complexity::..., max_C), *this);
               // subsumed under the above counter
           // and visit the incoming transitions.
           /* const std::vector<transition_index>::iterator end_it=
@@ -3727,7 +3758,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           for(std::vector<transition>::iterator j=m_states[*i].start_incoming_transitions; j!=end_it; ++j)
           {
             const transition& t=*j;
-            // mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), j)], add_work(check_complexity::..., max_C), *this);
+            // mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), j)], add_work(check_complexity::..., max_C), *this);
                 // subsumed under the above counter
             if (// !is_inert_during_init(t) || m_states[t.from()].block!=m_states[t.to()].block
                 // ignore tau-self-loops even if divergence is preserved, because we assume that blocks are stable under these already.
@@ -3750,7 +3781,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         for(typename std::vector<state_index>::iterator i=m_blocks[index_block_B].start_bottom_states;
                                                         i!=m_blocks[index_block_B].end_states; ++i)
         {
-          // mCRL2complexity(m_states[*i], add_work(check_complexity::..., max_C), *this);
+          // mCRL2complexity_gj(m_states[*i], add_work(check_complexity::..., max_C), *this);
               // subsumed under the above counter
           // and visit the incoming transitions. 
           /* const std::vector<transition_index>::iterator end_it=
@@ -3775,7 +3806,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
           {
             const transition& t=*j;
             const transition_index t_index=std::distance(m_aut.get_transitions().begin(),j);
-            // mCRL2complexity(&m_transitions[t_index], add_work(check_complexity::..., max_C), *this);
+            // mCRL2complexity_gj(&m_transitions[t_index], add_work(check_complexity::..., max_C), *this);
                 // subsumed under the above counter
             
             // Add the source state grouped per label in calM, provided the transition is non inert.
@@ -3834,7 +3865,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
 // THIS TAKES TOO LONG. THERE MAY BE MANY TRANSITIONS FROM THE SOURCE BLOCK OF t
 // TO THE LARGE CONSTELLATION ci THAT NEED TO BE SEARCHED.
 // INSTEAD, PLEASE USE OTHER MEANS, LIKE THE BLC JUST BEFORE OR AFTER IN MEMORY.
-                  // mCRL2complexity(&m_transitions[*transition_walker], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_cotransition, max_C), *this);
+                  // mCRL2complexity_gj(&m_transitions[*transition_walker], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_cotransition, max_C), *this);
                   const transition& tw=m_aut.get_transitions()[*transition_walker];
                   assert(m_states[tw.from()].block == m_states[t.from()].block);
                   assert(m_aut.apply_hidden_label_map(tw.label()) == m_aut.apply_hidden_label_map(t.label()));
@@ -3863,7 +3894,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         {
           transition_index ti=transitions_for_which_start_same_saC_must_be_repaired.back();
           transitions_for_which_start_same_saC_must_be_repaired.pop_back();
-          // mCRL2complexity(&m_transitions[ti], add_work(..., max_C), *this);
+          // mCRL2complexity_gj(&m_transitions[ti], add_work(..., max_C), *this);
               // this can be subsumed under the above call
               // because in every iteration we add at most one element to transitions_for_which_start_same_saC_must_be_repaired
           const outgoing_transitions_it outgoing_it=m_transitions[ti].ref_outgoing_transitions;
@@ -3957,6 +3988,8 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
         clear(todo_stack_blocks);
         for(const label_index a: todo_stack_labels)
         {
+          // mCRL2complexity_gj(..., add_work(..., max_C), *this);
+              // not needed as the inner loop is always executed at least once.
 //std::cerr << "ACTION " << m_aut.action_label(a) << " target block " << index_block_B << "\n";
           // print_data_structures("Main loop");
           assert(check_data_structures("Main loop", false, false));
@@ -3969,21 +4002,19 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
                         todo_stack_blocks,
                         value_counter);
 
+          assert(!todo_stack_blocks.empty()); // ensure that the inner loop is executed
           std::vector<transition_index>::iterator start_index_per_block=start_index;
           for(const block_index bi: todo_stack_blocks)
           {
 //std::cerr << "INVESTIGATE ACTION " << m_aut.action_label(a) << " source block " << bi << " target block " << index_block_B << "\n";
             std::vector<transition_index>::iterator end_index_per_block=start_index+value_counter[bi].not_investigated;
             assert(start_index_per_block!=end_index_per_block);
+            mCRL2complexity_gj(m_transitions[*start_index_per_block].transitions_per_block_to_constellation, add_work(check_complexity::refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split, max_C), *this);
             block_index Bpp=bi;
             // Check whether the bottom states of bi are not all included in Mleft. 
             // This function has a side effect if not all states are covered on m_P, m_counter_reset_vector and the counters in states. 
             const bool not_all_states = not_all_bottom_states_are_touched
-                    (bi, start_index_per_block, end_index_per_block
-                     #ifdef CHECK_COMPLEXITY_GJ
-                       , a
-                     #endif
-                     );
+                    (bi, start_index_per_block, end_index_per_block);
             if (not_all_states && m_R.empty())
             {
               // the BLC slice only contains inert transitions.

@@ -382,13 +382,17 @@ class check_complexity
             STATE_gj_MAX_TEMP = simple_splitB_U__find_predecessors,
         // other state counter
             // Invariant: 0 <= (counter value) <= 1
+        create_initial_partition__set_start_incoming_transitions,
         finalize_minimized_LTS__collect_labels_of_state,
             STATE_gj_MAX = finalize_minimized_LTS__collect_labels_of_state,
 
         // BLC slice counters
+            // Invariant:
+            // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
+        refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split,
+            BLC_gj_MIN = refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split,
             // Invariant: 0 <= (counter value) <= 1
         finalize_minimized_LTS__handle_transition,
-            BLC_gj_MIN = finalize_minimized_LTS__handle_transition,
             BLC_gj_MAX = finalize_minimized_LTS__handle_transition,
 
         // transition counters
@@ -408,6 +412,7 @@ class check_complexity
         group_in_situ__count_transitions_per_block,
         group_in_situ__swap_transition,
         group_in_situ__skip_to_next_block,
+        create_initial_partition__select_action_label_and_block_to_be_split,
         // temporary transition counters
         simple_splitB_R__handle_transition_from_R_state, // target constellation size
             TRANS_gj_MIN_TEMP = simple_splitB_R__handle_transition_from_R_state,
@@ -416,6 +421,9 @@ class check_complexity
         simple_splitB_U__handle_transition_from_potential_U_state, // source is in U: source block size
                                                              // source is in R: new bottom state
             TRANS_gj_MAX_TEMP = simple_splitB_U__handle_transition_from_potential_U_state,
+        // other transition counters
+            // Invariant: 0 <= (counter value) <= 1
+        create_initial_partition__set_transitions_per_block_to_constellation,
         // counters for transitions starting in new bottom states
         simple_splitB__test_outgoing_transitions_found_new_bottom_state,
             TRANS_gj_MAX = simple_splitB__test_outgoing_transitions_found_new_bottom_state
@@ -581,8 +589,12 @@ class check_complexity
         ///                 the remainder of the error message as needed.
         bool add_work(enum counter_type const ctr, unsigned const max_value)
         {
-            assert(FirstCounter <= ctr);
-            assert(ctr <= LastCounter);
+            if (FirstCounter > ctr || ctr > LastCounter)
+            {
+              mCRL2log(log::error) << "Error 20: counter \""
+                   << work_names[ctr - BLOCK_MIN] << "\" is not available in ";
+              return false;
+            }
             assert(max_value <= (ctr < FirstTempCounter ? log_n : 1U));
             if (counters[ctr - FirstCounter] >= max_value)
             {
@@ -1354,9 +1366,17 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work()
+        bool no_temporary_work(unsigned max_targetC)
         {
-            for (enum counter_type ctr = BLC_gj_MIN;
+            assert(max_targetC <= log_n);
+            for (enum counter_type ctr = BLC_gj_MIN ;
+                         ctr < finalize_minimized_LTS__handle_transition;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BLC_gj_MIN] <= max_targetC);
+                counters[ctr - BLC_gj_MIN] = max_targetC;
+            }
+            for (enum counter_type ctr = finalize_minimized_LTS__handle_transition;
                          ctr < BLC_gj_MAX; ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - BLC_gj_MIN] <= 1);
@@ -1517,11 +1537,26 @@ class check_complexity
                     return false;
                 }
             }
+            // other counters must be at most 1 (after initialisation)
+            for(enum counter_type ctr=(enum counter_type)(TRANS_gj_MAX_TEMP+1);
+              ctr <
+              simple_splitB__test_outgoing_transitions_found_new_bottom_state ;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                if (counters[ctr - TRANS_gj_MIN] > 1)
+                {
+                    mCRL2log(log::error) << "Error 19: counter \""
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                     "maximum value (" << 1 << ") for ";
+                    return false;
+                }
+            }
             // bottom state counters must be 0 for transitions from non-bottom
             // states and 1 for other transitions
             assert((unsigned) source_bottom <= 1);
-            for(enum counter_type ctr=(enum counter_type)(TRANS_gj_MAX_TEMP+1);
-                     ctr <= TRANS_gj_MAX ; ctr = (enum counter_type) (ctr + 1))
+            for (enum counter_type ctr = (enum counter_type)
+               (simple_splitB__test_outgoing_transitions_found_new_bottom_state
+                 + 1); ctr <= TRANS_gj_MAX ; ctr = (enum counter_type) (ctr+1))
             {
                 if (counters[ctr - TRANS_gj_MIN] > (unsigned) source_bottom)
                 {
