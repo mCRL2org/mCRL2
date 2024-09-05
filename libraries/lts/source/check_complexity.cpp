@@ -232,6 +232,9 @@ const char *check_complexity::work_names[TRANS_gj_MAX - BLOCK_MIN + 1] =
     "simple_splitB(): do not add state with a transition in the splitter to U",
     "not_all_bottom_states_are_touched(): mark the source state",
     "some_bottom_state_has_no_outgoing_co_transition(): handle a transition",
+    "group_in_situ(): count transitions per block",
+    "group_in_situ(): swap transition",
+    "group_in_situ(): skip to the next block",
     "simple_splitB(): handle a transition (in the splitter) from an R-state",
     "simple_splitB(): handle an (inert) transition to an R-state",
     "simple_splitB(): handle an (inert) transition to a U-state",
@@ -441,6 +444,9 @@ void check_complexity::test_work_names()
     test_work_name(i, not_all_bottom_states_are_touched__mark_source_state);
     test_work_name(i,
            some_bottom_state_has_no_outgoing_co_transition__handle_transition);
+    test_work_name(i, group_in_situ__count_transitions_per_block);
+    test_work_name(i, group_in_situ__swap_transition);
+    test_work_name(i, group_in_situ__skip_to_next_block);
     assert(check_complexity::TRANS_gj_MIN_TEMP == i);
     test_work_name(i, simple_splitB_R__handle_transition_from_R_state);
     test_work_name(i, simple_splitB_R__handle_transition_to_R_state);

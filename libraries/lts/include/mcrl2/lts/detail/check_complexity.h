@@ -405,6 +405,9 @@ class check_complexity
         simple_splitB__do_not_add_state_with_transition_in_splitter_to_U,
         not_all_bottom_states_are_touched__mark_source_state,
         some_bottom_state_has_no_outgoing_co_transition__handle_transition,
+        group_in_situ__count_transitions_per_block,
+        group_in_situ__swap_transition,
+        group_in_situ__skip_to_next_block,
         // temporary transition counters
         simple_splitB_R__handle_transition_from_R_state, // target constellation size
             TRANS_gj_MIN_TEMP = simple_splitB_R__handle_transition_from_R_state,
