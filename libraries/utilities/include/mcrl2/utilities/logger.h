@@ -32,7 +32,7 @@ enum log_level_t
   error,
   warning,
   info,
-  status, // This is overwritten in the output when printed consecutively, and the lowest level that is shown by default.
+  status, // This is overwritten in the output when printed consecutively, and the highest level that is shown by default.
   verbose,
   debug,
   trace,
@@ -44,6 +44,7 @@ inline
 std::string log_level_to_string(const log_level_t level)
 {
   static const char* const buffer[] = {"quiet", "error", "warning", "info", "status", "verbose", "debug", "trace"};
+  if ((unsigned) level >= sizeof(buffer) / sizeof(buffer[0]))  return "unknown level";
   return buffer[level];
 }
 
@@ -161,6 +162,7 @@ class logger: private utilities::noncopyable
     /// \brief Default constructor
     logger(const log_level_t l)
     {
+      assert(quiet != l);
       m_level = l;
       std::time(&m_timestamp);
     }
@@ -258,6 +260,7 @@ public:
     /// suppress non used variable warnings.
     (void)level; (void)timestamp; (void)print_time_information;
 
+    assert(quiet != level);
     return msg;
   }
 }; 
@@ -345,6 +348,7 @@ class file_output: public output_policy
     /// atomic.
     virtual void output(const log_level_t level, const time_t timestamp, const std::string& msg, const bool print_time_information) override
     {
+      assert(quiet != level);
       FILE* p_stream = get_stream();
       if (!p_stream)
       {

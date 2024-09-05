@@ -34,6 +34,7 @@ namespace mcrl2 {
                                 const std::string& msg,
                                 const bool print_time_information)
   {
+    assert(quiet != level);
     // Construct the message header, with or without time and debug level info.
     const bool print_log_level= level >= debug;
     std::stringstream start_of_line;

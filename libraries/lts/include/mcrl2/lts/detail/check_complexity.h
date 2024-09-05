@@ -355,9 +355,14 @@ class check_complexity
         /*--------------- counters for the bisim_gj algorithm ---------------*/
 
         // block counters
+            // Invariant:
+            // 0 <= (counter value) <= ilog2 n - ilog2(constellation size)
+        refine_partition_until_it_becomes_stable__find_splitter,
+            BLOCK_gj_MIN =
+                       refine_partition_until_it_becomes_stable__find_splitter,
+        hatU_does_not_cover_B_bottom__handle_bottom_states_and_their_outgoing_transitions_in_splitter,
             // Invariant: 0 <= (counter value) <= ilog2 n - ilog2(block size)
         splitB__update_BLC_of_smaller_subblock,
-            BLOCK_gj_MIN = splitB__update_BLC_of_smaller_subblock,
             // Invariant: 0 <= (counter value) <= 1
         finalize_minimized_LTS__set_labels_of_block,
             BLOCK_gj_MAX = finalize_minimized_LTS__set_labels_of_block,
@@ -391,12 +396,15 @@ class check_complexity
             // 0 <= (counter value) <= ilog2 n - ilog2(source block size)
         simple_splitB__handle_transition_from_R_or_U_state,
             TRANS_gj_MIN = simple_splitB__handle_transition_from_R_or_U_state,
+        refine_partition_until_it_becomes_stable__find_cotransition,
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target block size)
         simple_splitB__handle_transition_to_R_or_U_state,
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
         simple_splitB__do_not_add_state_with_transition_in_splitter_to_U,
+        not_all_bottom_states_are_touched__mark_source_state,
+        some_bottom_state_has_no_outgoing_co_transition__handle_transition,
         // temporary transition counters
         simple_splitB_R__handle_transition_from_R_state, // target constellation size
             TRANS_gj_MIN_TEMP = simple_splitB_R__handle_transition_from_R_state,
@@ -1300,10 +1308,18 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_B)
+        bool no_temporary_work(unsigned const max_C, unsigned const max_B)
         {
+            assert(max_C <= max_B);
             assert(max_B <= log_n);
             for (enum counter_type ctr = BLOCK_gj_MIN;
+                       ctr < splitB__update_BLC_of_smaller_subblock;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BLOCK_gj_MIN] <= max_C);
+                counters[ctr - BLOCK_gj_MIN] = max_C;
+            }
+            for (enum counter_type ctr=splitB__update_BLC_of_smaller_subblock;
                        ctr < finalize_minimized_LTS__set_labels_of_block;
                                            ctr = (enum counter_type) (ctr + 1))
             {
@@ -1558,7 +1574,7 @@ class check_complexity
     };
 
 
-    #if 0
+    #ifdef TEST_WORK_COUNTER_NAMES
         /// \brief prints a message for each counter, for debugging purposes
         /// \details The function can be called, e. g., from
         /// `check_complexity::init()`.  However, as it is not
@@ -1573,7 +1589,7 @@ class check_complexity
     /// \param n  size of the state space
     static void init(state_type n)
     {
-        #if 0
+        #ifdef TEST_WORK_COUNTER_NAMES
             // as debugging measure:
             test_work_names();
         #endif
