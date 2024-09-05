@@ -11,6 +11,7 @@
 #ifndef MCRL2_UTILITIES_LOGGER_H
 #define MCRL2_UTILITIES_LOGGER_H
 
+#include <cassert>
 #include <atomic>
 #include <cstdio>
 #include <ctime>
