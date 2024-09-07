@@ -23,7 +23,7 @@
 #ifndef LIBLTS_BISIM_GJ_H
 #define LIBLTS_BISIM_GJ_H
 
-#include <forward_list>
+// #include <forward_list>
 #include <deque>
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
@@ -217,10 +217,8 @@ struct linked_list
 
   // Puts a new element after the current element indicated by pos, unless
   // pos==nullptr, in which it is put in front of the list. 
-// David suggests: The standard list implementation puts the new element BEFORE pos.
-// It is confusing that this emplace puts it after.
   template <class... Args>
-  iterator emplace(iterator pos, Args&&... args)
+  iterator emplace_after(iterator pos, Args&&... args)
   {
     if (pos==nullptr)
     {
@@ -1528,9 +1526,9 @@ class bisim_partitioner_gj
           // Make a new entry in the list next_block_to_constellation, after the current list element.
           next_block_to_constellation=
                   m_blocks[m_states[t.from()].block].block_to_constellation.
-                           emplace(this_block_to_constellation, 
-                                   this_block_to_constellation->start_same_BLC,
-                                   this_block_to_constellation->start_same_BLC);
+                           emplace_after(this_block_to_constellation, 
+                                         this_block_to_constellation->start_same_BLC,
+                                         this_block_to_constellation->start_same_BLC);
           #ifdef CHECK_COMPLEXITY_GJ
             next_block_to_constellation->work_counter = this_block_to_constellation->work_counter;
           #endif
@@ -1588,7 +1586,7 @@ class bisim_partitioner_gj
         else 
         {
           new_position=m_blocks[new_bi].block_to_constellation.begin();
-          new_position= m_blocks[new_bi].block_to_constellation.emplace(new_position,old_BLC_start, old_BLC_start);
+          new_position= m_blocks[new_bi].block_to_constellation.emplace_after(new_position,old_BLC_start, old_BLC_start);
         }
         #ifdef CHECK_COMPLEXITY_GJ
           new_position->work_counter = this_block_to_constellation->work_counter;
@@ -3082,9 +3080,9 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
           {
 //std::cerr << "PUSH BACK FRONT " << current_start << "    " << current_position << "\n";
             block_type& b=m_blocks[current_block];
-            new_position=b.block_to_constellation.emplace(b.block_to_constellation.begin(),
-                                                          m_BLC_transitions.begin()+current_start, 
-                                                          m_BLC_transitions.begin()+current_position);
+            new_position=b.block_to_constellation.emplace_after(b.block_to_constellation.begin(),
+                                                                m_BLC_transitions.begin()+current_start, 
+                                                                m_BLC_transitions.begin()+current_position);
             for(std::vector<transition_index>::iterator tti=m_BLC_transitions.begin()+current_start; tti!=m_BLC_transitions.begin()+current_position; ++tti)
             {
               mCRL2complexity_gj(&m_transitions[*tti], add_work(check_complexity::create_initial_partition__set_transitions_per_block_to_constellation, 1), *this);
@@ -3103,9 +3101,9 @@ mCRL2log(log::verbose) << "Start post-refinement initialisation of the LBC list 
       if (current_label!=null_action)
       {
         block_type& b=m_blocks[current_block];
-        new_position=b.block_to_constellation.emplace(b.block_to_constellation.begin(),
-                                                      m_BLC_transitions.begin()+current_start, 
-                                                      m_BLC_transitions.end());
+        new_position=b.block_to_constellation.emplace_after(b.block_to_constellation.begin(),
+                                                            m_BLC_transitions.begin()+current_start, 
+                                                            m_BLC_transitions.end());
         for(std::vector<transition_index>::iterator tti=m_BLC_transitions.begin()+current_start; tti!=m_BLC_transitions.end(); ++tti)
         {
           mCRL2complexity_gj(&m_transitions[*tti], add_work(check_complexity::create_initial_partition__set_transitions_per_block_to_constellation, 1), *this);
@@ -3753,8 +3751,8 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             }
           } */
           const std::vector<transition>::iterator end_it=
-                          ((*i)+1==m_states_in_blocks.size())?m_aut.get_transitions().end()
-                                                             :m_states[(*i)+1].start_incoming_transitions;
+                          ((*i)+1==m_states.size())?m_aut.get_transitions().end()
+                                                   :m_states[(*i)+1].start_incoming_transitions;
           for(std::vector<transition>::iterator j=m_states[*i].start_incoming_transitions; j!=end_it; ++j)
           {
             const transition& t=*j;
@@ -3800,8 +3798,8 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             } */
  
           const std::vector<transition>::iterator end_it=
-                          ((*i)+1==m_states_in_blocks.size())?m_aut.get_transitions().end()
-                                                             :m_states[(*i)+1].start_incoming_transitions;
+                          ((*i)+1==m_states.size())?m_aut.get_transitions().end()
+                                                   :m_states[(*i)+1].start_incoming_transitions;
           for(std::vector<transition>::iterator j=m_states[*i].start_incoming_transitions; j!=end_it; ++j)
           {
             const transition& t=*j;
