@@ -23,7 +23,7 @@
 #ifndef LIBLTS_BISIM_GJ_H
 #define LIBLTS_BISIM_GJ_H
 
-// #include <forward_list>
+#include <forward_list>
 #include <deque>
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
@@ -62,6 +62,8 @@ struct transition_pointer_pair;
 typedef std::size_t state_index;
 typedef std::size_t transition_index;
 typedef std::size_t block_index;
+
+
 typedef std::size_t label_index;
 typedef std::size_t constellation_index;
 typedef std::vector<transition_pointer_pair>::iterator outgoing_transitions_it;
@@ -69,7 +71,6 @@ typedef std::vector<transition_pointer_pair>::reverse_iterator outgoing_transiti
 typedef std::vector<transition_pointer_pair>::const_iterator outgoing_transitions_const_it;
 
 constexpr transition_index null_transition=-1;
-// constexpr std::size_t null_pointer=-1;
 constexpr label_index null_action=-1;
 constexpr state_index null_state=-1;
 constexpr block_index null_block=-1;
@@ -130,7 +131,6 @@ struct linked_list_iterator
 template <class T>
 struct linked_list_node: public T
 {
-  // typedef typename std::deque<linked_list_node<T> >::iterator iterator;
   typedef  linked_list_iterator<T> iterator;
   iterator m_next;
   iterator m_prev;
@@ -168,8 +168,6 @@ template <class T>
 struct linked_list
 {
   typedef linked_list_iterator<T> iterator;
-  // std::deque<linked_list_node<T> > m_content;
-  // iterator m_free_list=nullptr;
 
   global_linked_list_administration<T>& glla() { static global_linked_list_administration<T> glla; return glla; }
   iterator m_initial_node=nullptr;
@@ -274,6 +272,11 @@ struct linked_list
     return new_position;
   }
 
+  iterator push_front(const T& t)
+  {
+    return emplace_front(t);
+  }
+
   void erase(iterator pos)
   {
     if (pos->next()!=nullptr)
@@ -312,18 +315,17 @@ struct transition_pointer_pair
   {}
 };
 
-struct label_count_sum_tuple
-// David suggests: rename this struct to label_count_sum_pair to make the name more different from label_count_sum_triple.
+struct label_count_sum_triple
 {
   transition_index label_counter=0;
   transition_index not_investigated=0;
 
   // The default initialiser does not initialize the fields of this struct. 
-  label_count_sum_tuple()
+  label_count_sum_triple()
   {}
 };
 
-/* struct label_count_sum_triple: label_count_sum_tuple
+/* struct label_count_sum_triple: label_count_sum_triple
 {
   transition_index cumulative_label_counter=0;
 
@@ -561,6 +563,7 @@ struct constellation_type
 // With that grouping, it is also not necessary to store constellations in a vector
 // or a list; one can allocate each constellation as its own data structure
 // and use a pointer to constellation_type as identifier of a constellation.
+// JFG answers: I do not see this. Moving a block out of the constellation is tricky.
   std::forward_list<block_index> blocks;
 
   constellation_type(const block_index bi)
@@ -791,7 +794,6 @@ class bisim_partitioner_gj
           assert(b.start_bottom_states>=m_states_in_blocks.begin());
           assert(b.start_non_bottom_states<=m_states_in_blocks.end());
           assert(b.start_non_bottom_states>=m_states_in_blocks.begin());
-          // David changed the following line to a strict < because every block should contain at least one bottom state.
           assert(b.start_bottom_states < b.start_non_bottom_states);
           assert(b.start_non_bottom_states <= b.end_states);
           assert(b.end_states <= m_states_in_blocks.end());
@@ -1199,7 +1201,7 @@ class bisim_partitioner_gj
     {
       // The transitions are most efficiently directly extracted from the block_to_constellation lists in blocks. 
       std::vector<transition> T;
-      for(block_index bi=0; bi<m_blocks.size(); bi++) 
+      for(block_index bi=0; bi<m_blocks.size(); ++bi) 
       {
         const block_type& B=m_blocks[bi];
         for(const BLC_indicators blc_ind: B.block_to_constellation)
@@ -1337,9 +1339,9 @@ class bisim_partitioner_gj
         m_blocks[B_new].work_counter = m_blocks[B].work_counter;
       #endif
       // m_non_trivial_constellations.emplace(m_blocks[B].constellation);
-      std::forward_list<block_index>::const_iterator cit=m_constellations[m_blocks[B].constellation].blocks.begin();
+      std::forward_list<block_index>::iterator cit=m_constellations[m_blocks[B].constellation].blocks.begin();
       assert(cit!=m_constellations[m_blocks[B].constellation].blocks.end());
-      cit++;
+      ++cit;
       if (cit==m_constellations[m_blocks[B].constellation].blocks.end()) // This constellation is trivial.
       {
         // This constellation is trivial, as it will be split add to the non trivial constellations. 
@@ -2535,7 +2537,7 @@ class bisim_partitioner_gj
       return bi;
     }
  
-    void accumulate_entries_into_not_investigated(std::vector<label_count_sum_tuple>& action_counter,
+    void accumulate_entries_into_not_investigated(std::vector<label_count_sum_triple>& action_counter,
                             const std::vector<block_index>& todo_stack)
     {
       transition_index sum=0;
@@ -2569,7 +2571,7 @@ class bisim_partitioner_gj
       }
     }
 
-    void reset_entries(std::vector<label_count_sum_tuple>& action_counter,
+    void reset_entries(std::vector<label_count_sum_triple>& action_counter,
                        std::vector<block_index>& todo_stack)
     {
       for(block_index index: todo_stack)
@@ -2599,7 +2601,7 @@ class bisim_partitioner_gj
     void group_in_situ(const std::vector<transition_index>::iterator begin,
                        const std::vector<transition_index>::iterator end,
                        std::vector<block_index>& todo_stack,
-                       std::vector<label_count_sum_tuple>& value_counter)
+                       std::vector<label_count_sum_triple>& value_counter)
     {
       // Initialise the action counter.
       // The work in reset_entries() can be subsumed under mCRL2complexity calls
@@ -2960,7 +2962,7 @@ mCRL2log(log::verbose) << "Start refining in the initialisation\n";
 //std::cerr << "STATES PER ACTION LABELB "; for(auto s: transitions_per_action_label){ std::cerr << m_states[m_aut.get_transitions()[s].from()].block << "  "; } std::cerr << "\n";
       // Now traverse the states per equal label, grouping them first on outgoing block.
       std::vector<transition_index>::iterator start_index=transitions_per_action_label.begin();
-      std::vector<label_count_sum_tuple> value_counter(m_blocks.size());
+      std::vector<label_count_sum_triple> value_counter(m_blocks.size());
       std::vector<block_index> todo_stack_blocks;
       
      
@@ -3673,7 +3675,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
     {
       // This represents the while loop in Algorithm 1 from line 1.6 to 1.25.
 
-      std::vector<label_count_sum_tuple> value_counter(m_blocks.size());
+      std::vector<label_count_sum_triple> value_counter(m_blocks.size());
       std::vector<transition_index> count_transitions_per_label;
       count_transitions_per_label.reserve(m_aut.num_action_labels()); // will be reset to 0 later
       std::vector<label_index> todo_stack_labels;
