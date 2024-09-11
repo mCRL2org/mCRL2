@@ -1310,8 +1310,9 @@ class bisim_partitioner_gj
               typename std::vector<state_index>::iterator pos3) 
     {
 // David suggests: actually it is enough to require
-// assert(pos1 != pos2 || pos2 == pos3);
+//      assert(pos1 != pos2 || pos2 == pos3);
 // (Memory help: pos3 should be between pos1 and pos2.)
+// JFG answers: The assertion below is much stronger than the one above. 
       assert(pos1!=pos2 && pos2!=pos3 && pos3!=pos1);
       const state_index temp=*pos1;
       *pos1=*pos3;
@@ -1338,14 +1339,15 @@ class bisim_partitioner_gj
       #ifdef CHECK_COMPLEXITY_GJ
         m_blocks[B_new].work_counter = m_blocks[B].work_counter;
       #endif
-      // m_non_trivial_constellations.emplace(m_blocks[B].constellation);
       std::forward_list<block_index>::iterator cit=m_constellations[m_blocks[B].constellation].blocks.begin();
       assert(cit!=m_constellations[m_blocks[B].constellation].blocks.end());
       ++cit;
       if (cit==m_constellations[m_blocks[B].constellation].blocks.end()) // This constellation is trivial.
       {
-        // This constellation is trivial, as it will be split add to the non trivial constellations. 
-        assert(std::find(m_non_trivial_constellations.begin(),m_non_trivial_constellations.end(),m_blocks[B].constellation)==m_non_trivial_constellations.end());
+        // This constellation is trivial, as it will be split add it to the non trivial constellations. 
+        assert(std::find(m_non_trivial_constellations.begin(),
+                         m_non_trivial_constellations.end(),
+                         m_blocks[B].constellation)==m_non_trivial_constellations.end());
         m_non_trivial_constellations.emplace_back(m_blocks[B].constellation);
       }
       m_constellations[m_blocks[B].constellation].blocks.push_front(B_new);
@@ -1369,7 +1371,7 @@ class bisim_partitioner_gj
 // Doing additional assignments is likely faster than all these branches.
 // (perhaps only distinguish between no swap is needed at all/some swap is needed)
 // JFG: I am not so sure whether swapping more is better, as it requires more memory accesses, possibly outside the cache.
-//      But we could attempt to clean up this code. 
+//      The code is cleaned up
           // We know that B must have a bottom state. Not true all bottom states can be removed from B. 
           // assert(m_blocks[B].start_bottom_states!=m_blocks[B].start_non_bottom_states);
           if (pos==m_blocks[B].start_bottom_states)
@@ -1377,27 +1379,18 @@ class bisim_partitioner_gj
             // There is no bottom state left. pos is a non bottom state. No swap is necessary as it is
             // already at the right position.
           }
+          else if (pos==m_blocks[B].start_non_bottom_states || 
+                   m_blocks[B].start_bottom_states==m_blocks[B].start_non_bottom_states)
+          {
+            // pos is not also located at the first bottom state, or
+            // pos is a later non-bottom-state of B. We need to swap:
+            // pos --> B.start_bottom_states --> pos.
+            swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states);
+          }
           else
           {
-            if (pos==m_blocks[B].start_non_bottom_states)
-            {
-              // pos is not also located at the first bottom state, so a swap is needed.
-              // Otherwise no swap is required. 
-              swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states);
-            }
-            else
-            {
-              // pos is a later non-bottom-state of B. We need to swap:
-              // pos --> B.start_bottom_states --> B.start_non_bottom_states --> pos.
-              if (m_blocks[B].start_bottom_states==m_blocks[B].start_non_bottom_states)
-              {
-                swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states);
-              }
-              else
-              {
-                swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states, m_blocks[B].start_non_bottom_states);
-              }
-            }
+            // pos --> B.start_bottom_states --> B.start_non_bottom_states --> pos.
+            swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states, m_blocks[B].start_non_bottom_states);
           }
           m_blocks[B].start_non_bottom_states++;
           m_blocks[B].start_bottom_states++;
@@ -1417,19 +1410,10 @@ class bisim_partitioner_gj
             // It holds that B.start_bottom_states==B_new_bottom_states.
             // Nothing needs to be swapped. 
           }
-          else if (m_blocks[B_new].start_non_bottom_states==m_blocks[B].start_bottom_states)
+          else if (pos==m_blocks[B].start_bottom_states ||
+                   m_blocks[B_new].start_non_bottom_states==m_blocks[B].start_bottom_states)
           {
-            // There are no non-bottom states in B_new. 
-            swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states);
-          }
-          else if (m_blocks[B_new].start_non_bottom_states==m_blocks[B].start_bottom_states)
-          {
-            // pos --> B.start_bottom_states --> pos.
-            swap_states_in_states_in_block(pos,m_blocks[B].start_bottom_states);
-          }
-          else if (pos==m_blocks[B].start_bottom_states)
-          {
-            // pos --> new_B.start_non_bottom_states --> pos.
+            // pos --> B_new.start_non_bottom_states --> pos.
             swap_states_in_states_in_block(pos,m_blocks[B_new].start_non_bottom_states);
           }
           else
@@ -3626,8 +3610,8 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
       // This represents the while loop in Algorithm 1 from line 1.6 to 1.25.
 
       std::vector<label_count_sum_triple> value_counter(m_blocks.size());
-      std::vector<transition_index> count_transitions_per_label;
-      count_transitions_per_label.reserve(m_aut.num_action_labels()); // will be reset to 0 later
+      // The instruction below has complexity O(|Act|);
+      std::vector<transition_index> count_transitions_per_label(m_aut.num_action_labels(),0); 
       std::vector<label_index> todo_stack_labels;
       std::vector<block_index> todo_stack_blocks;
       std::vector<transition_index> calM;
@@ -3770,6 +3754,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             if (!m_branching || !m_aut.is_tau(m_aut.apply_hidden_label_map(t.label())) || m_states[t.from()].block != m_states[t.to()].block)
             {
               transition_index& c=count_transitions_per_label[t.label()];
+              assert(c<calM.size());
               calM[c]=t_index;
               c++;
             }
@@ -4007,7 +3992,7 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
                                                     block_label_to_cotransition,
                                                     ci);
                                           });
-                assert(0 <= bi1 && bi1 < m_blocks.size());
+                assert(bi1 < m_blocks.size());
                 // Algorithm 1, line 1.13.
                 if (M_in_bi1)
                 {
