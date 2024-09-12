@@ -14,9 +14,10 @@
 
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesinst_structure_graph2.h"
-#include "mcrl2/pbes/structure_graph.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
+#include "mcrl2/pbes/structure_graph.h"
+#include "mcrl2/utilities/exception.h"
 
 #include <regex>
 
@@ -30,7 +31,7 @@ static void rewrite_star(pbes_expression& result,
     const pbes_expression& psi,
     const structure_graph& G,
     bool alpha,
-    const std::unordered_map<pbes_expression, structure_graph::index_type>& W)
+    const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping)
 {
   bool changed = false;
   std::smatch match;
@@ -41,8 +42,8 @@ static void rewrite_star(pbes_expression& result,
   std::unordered_set<pbes_expression> Ys;
 
   // If X is won by player alpha, i.e. in the winning set W.
-  auto it = W.find(X);
-  if (it != W.end())
+  auto it = mapping.find(X);
+  if (it != mapping.end())
   {
     structure_graph::index_type index = it->second;
 
@@ -50,7 +51,7 @@ static void rewrite_star(pbes_expression& result,
     // (the initial vertex is in W and every reachable one).
     Ys.insert(X);
 
-    std::unordered_set<structure_graph::index_type> todo = { index };
+    std::unordered_set<structure_graph::index_type> todo = {index};
     std::unordered_set<structure_graph::index_type> done;
 
     while (!todo.empty())
@@ -59,20 +60,46 @@ static void rewrite_star(pbes_expression& result,
       todo.erase(todo.begin());
       done.insert(u);
 
-      // Explore all outgoing edges.
-      for (structure_graph::index_type v: G.all_successors(u))
+      if (mapping.count(G.find_vertex(u).formula()) != 0)
       {
-        if (!mcrl2::utilities::detail::contains(done, v))
+        // This vertex is won by alpha
+        if ((!alpha && G.decoration(u) == structure_graph::d_disjunction)
+            || (alpha && G.decoration(u) == structure_graph::d_conjunction))
         {
-          if (G.rank(v) == undefined_vertex())
+          // The strategy is defined so only explore the strategy edge.
+          auto v = G.strategy(u);
+          if (!mcrl2::utilities::detail::contains(done, v))
           {
+            if (G.rank(v) == undefined_vertex())
+            {
               // explore all outgoing edges that are unranked
               todo.insert(v);
-          }
-          else if (W.count(G.find_vertex(v).formula()) != 0)
-          {
+            }
+            else if (mapping.count(G.find_vertex(v).formula()) != 0)
+            {
               // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
               Ys.insert(G.find_vertex(v).formula());
+            }
+          }
+        }
+      }
+      else
+      {
+        // Explore all edges.
+        for (structure_graph::index_type v : G.all_successors(u))
+        {
+          if (!mcrl2::utilities::detail::contains(done, v))
+          {
+            if (G.rank(v) == undefined_vertex())
+            {
+              // explore all outgoing edges that are unranked
+              todo.insert(v);
+            }
+            else if (mapping.count(G.find_vertex(v).formula()) != 0)
+            {
+              // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
+              Ys.insert(G.find_vertex(v).formula());
+            }
           }
         }
       }
@@ -83,12 +110,13 @@ static void rewrite_star(pbes_expression& result,
 
   mCRL2log(log::debug) << "Ys := " << core::detail::print_set(Ys) << std::endl;
 
-  replace_propositional_variables(
-      result,
+  replace_propositional_variables(result,
       psi,
       [&](const propositional_variable_instantiation& Y) -> pbes_expression
       {
-        if (std::regex_match(static_cast<const std::string&>(Y.name()), match, mcrl2::pbes_system::detail::positive_or_negative))
+        if (std::regex_match(static_cast<const std::string&>(Y.name()),
+                match,
+                mcrl2::pbes_system::detail::positive_or_negative))
         {
           // If Y in L return Y
           mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
@@ -101,10 +129,10 @@ static void rewrite_star(pbes_expression& result,
             mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
             return Y;
           }
-          else 
+          else
           {
             changed = true;
-            if (alpha == 0) 
+            if (alpha == 0)
             {
               // If Y is not reachable, replace it by false
               mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
@@ -118,83 +146,80 @@ static void rewrite_star(pbes_expression& result,
             }
           }
         }
-      }
-  );
+      });
 
   if (changed)
   {
-      simplify_rewriter simplify;
-      const pbes_expression result1 = result;
-      simplify(result, result1);
+    simplify_rewriter simplify;
+    const pbes_expression result1 = result;
+    simplify(result, result1);
   }
 
   mCRL2log(log::debug) << "result = " << psi << std::endl;
 }
 
-class pbesinst_counter_example_structure_graph_algorithm: public pbesinst_structure_graph_algorithm
-{ 
+class pbesinst_counter_example_structure_graph_algorithm : public pbesinst_structure_graph_algorithm
+{
 public:
-  pbesinst_counter_example_structure_graph_algorithm(
-    const pbessolve_options& options,
-    const pbes& p,
-    const structure_graph& SG,
-    bool _alpha,
-    const std::unordered_map<pbes_expression, structure_graph::index_type>& _W,
-    structure_graph& G,
-    std::optional<data::rewriter> rewriter = std::nullopt)
-    : pbesinst_structure_graph_algorithm(options, p, G, rewriter), 
-      G(SG),         
-      alpha(_alpha), 
-      W(_W)
+  pbesinst_counter_example_structure_graph_algorithm(const pbessolve_options& options,
+      const pbes& p,
+      const structure_graph& SG,
+      bool _alpha,
+      const std::unordered_map<pbes_expression, structure_graph::index_type>& _mapping,
+      structure_graph& G,
+      std::optional<data::rewriter> rewriter = std::nullopt)
+      : pbesinst_structure_graph_algorithm(options, p, G, rewriter),
+        G(SG),
+        alpha(_alpha),
+        mapping(_mapping)
   {}
 
   void rewrite_psi(const std::size_t thread_index,
-    pbes_expression& result,
-    const fixpoint_symbol& symbol,
-    const propositional_variable_instantiation& X,
-    const pbes_expression& psi) override
+      pbes_expression& result,
+      const fixpoint_symbol& symbol,
+      const propositional_variable_instantiation& X,
+      const pbes_expression& psi) override
   {
-    rewrite_star(result, symbol, X, psi, G, alpha, W);
+    rewrite_star(result, symbol, X, psi, G, alpha, mapping);
     pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, psi);
-  }    
+  }
 
-private:  
+private:
   const structure_graph& G;
   bool alpha;
-  const std::unordered_map<pbes_expression, structure_graph::index_type>& W;
+  const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping;
 };
 
-
-class pbesinst_counter_example_structure_graph_algorithm2: public pbesinst_structure_graph_algorithm2
-{ 
+class pbesinst_counter_example_structure_graph_algorithm2 : public pbesinst_structure_graph_algorithm2
+{
 public:
   pbesinst_counter_example_structure_graph_algorithm2(const pbessolve_options& options,
-    const pbes& p,
-    const structure_graph& SG,
-    bool _alpha,
-    const std::unordered_map<pbes_expression, structure_graph::index_type>& _W,
-    structure_graph& G,
-    std::optional<data::rewriter> rewriter = std::nullopt)
-    : pbesinst_structure_graph_algorithm2(options, p, G, rewriter), 
-      G(SG),         
-      alpha(_alpha), 
-      W(_W)
+      const pbes& p,
+      const structure_graph& SG,
+      bool _alpha,
+      const std::unordered_map<pbes_expression, structure_graph::index_type>& _mapping,
+      structure_graph& G,
+      std::optional<data::rewriter> rewriter = std::nullopt)
+      : pbesinst_structure_graph_algorithm2(options, p, G, rewriter),
+        G(SG),
+        alpha(_alpha),
+        mapping(_mapping)
   {}
 
   void rewrite_psi(const std::size_t thread_index,
-    pbes_expression& result,
-    const fixpoint_symbol& symbol,
-    const propositional_variable_instantiation& X,
-    const pbes_expression& psi) override
+      pbes_expression& result,
+      const fixpoint_symbol& symbol,
+      const propositional_variable_instantiation& X,
+      const pbes_expression& psi) override
   {
-    rewrite_star(result, symbol, X, psi, G, alpha, W);
+    rewrite_star(result, symbol, X, psi, G, alpha, mapping);
     pbesinst_structure_graph_algorithm2::rewrite_psi(thread_index, result, symbol, X, psi);
   }
-    
-private:  
+
+private:
   const structure_graph& G;
   bool alpha;
-  const std::unordered_map<pbes_expression, structure_graph::index_type>& W;
+  const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping;
 };
 
 } // namespace mcrl2::pbes_system
