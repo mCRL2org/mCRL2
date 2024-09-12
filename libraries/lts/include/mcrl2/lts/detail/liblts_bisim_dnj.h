@@ -4728,7 +4728,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                                ? ",extend_from_splitter)\n"
                                                                                                : ",UNKNOWN MODE)\n")));
                                                                                 #endif
-        bisim_dnj::block_t* block_R;                                            assert(!splitter_T->is_stable());  assert(1 < block_B->size());
+        bisim_dnj::block_t* block_R=nullptr;                                   assert(!splitter_T->is_stable());  assert(1 < block_B->size());
         union R_s_iter_t
         {
             bisim_dnj::block_bunch_entry* splitter_iter;
