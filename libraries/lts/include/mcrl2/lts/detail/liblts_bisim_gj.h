@@ -548,6 +548,12 @@ struct block_type
   std::vector<state_index>::iterator start_bottom_states;
   std::vector<state_index>::iterator start_non_bottom_states;
   std::vector<state_index>::iterator end_states;
+// David thinks that end_states may perhaps be suppressed.
+// We need the size of a block in two cases: to choose a small block in a constellation,
+// and to decide whether to abort a coroutine early in simple_splitB().
+// In both cases it is enough to get an upper bound on the size of the block,
+// and if a constellation is a contiguous slice in m_states_in_blocks (as I
+// suggested elsewhere), the constellation can provide this upper bound.
   // The list below seems too expensive. Maybe a cheaper construction is possible. Certainly the size of the list is not important.
   linked_list< BLC_indicators > block_to_constellation;
 
@@ -587,12 +593,13 @@ struct constellation_type
 // or a list; one can allocate each constellation as its own data structure
 // and use a pointer to constellation_type as identifier of a constellation.
 // JFG answers: I do not see this. Moving a block out of the constellation is tricky.
-  std::forward_list<block_index> blocks;
-
-  constellation_type(const block_index bi)
-  {
-    blocks.push_front(bi);
-  }
+// David answers: One can still move out the first or the last block, whichever is smaller.
+  std::vector<state_index>::iterator start_const_states;
+  std::vector<state_index>::iterator end_const_states;
+  constellation_type(const std::vector<state_index>::iterator new_start, const std::vector<state_index>::iterator new_end)
+    : start_const_states(new_start),
+      end_const_states(new_end)
+  {}
 
   #ifndef NDEBUG
     /// \brief print a constellation identification for debugging
@@ -820,14 +827,16 @@ class bisim_partitioner_gj
         {
           const block_type& b=m_blocks[bi];
           const constellation_type& c=m_constellations[b.constellation];
-          assert(std::find(c.blocks.begin(),c.blocks.end(),bi)!=c.blocks.end());
           assert(b.start_bottom_states<m_states_in_blocks.end());
-          assert(b.start_bottom_states>=m_states_in_blocks.begin());
           assert(b.start_non_bottom_states<=m_states_in_blocks.end());
           assert(b.start_non_bottom_states>=m_states_in_blocks.begin());
+
+          assert(m_states_in_blocks.begin() <= c.start_const_states);
+          assert(c.start_const_states <= b.start_bottom_states);
           assert(b.start_bottom_states < b.start_non_bottom_states);
           assert(b.start_non_bottom_states <= b.end_states);
-          assert(b.end_states <= m_states_in_blocks.end());
+          assert(b.end_states <= c.end_const_states);
+          assert(c.end_const_states <= m_states_in_blocks.end());
 
           #ifdef CHECK_COMPLEXITY_GJ
             unsigned max_B = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(bi));
@@ -900,10 +909,12 @@ class bisim_partitioner_gj
         std::unordered_set<block_index> all_blocks;
         for(constellation_index ci=0; ci<m_constellations.size(); ci++)
         {
-          for(const block_index bi: m_constellations[ci].blocks)
+          for (std::vector<state_index>::iterator constln_it = m_constellations[ci].start_const_states; constln_it < m_constellations[ci].end_const_states; )
           {
+            const block_index bi = m_states[*constln_it].block;
             assert(bi<m_blocks.size());
             assert(all_blocks.emplace(bi).second);  // Block is not already present. Otherwise a block occurs in two constellations.
+            constln_it = m_blocks[bi].end_states;
           }
         }
         assert(all_blocks.size()==m_blocks.size());
@@ -937,10 +948,9 @@ class bisim_partitioner_gj
       for(const constellation_index ci: m_non_trivial_constellations)
       {
         // There are at least two blocks in a non-trivial constellation.
-        std::forward_list<block_index>::const_iterator blocks_it=m_constellations[ci].blocks.begin();
-        assert(blocks_it!=m_constellations[ci].blocks.end());
-        blocks_it++;
-        assert(blocks_it!=m_constellations[ci].blocks.end());
+        const block_index first_bi = m_states[*m_constellations[ci].start_const_states].block;
+        const block_index last_bi = m_states[*std::prev(m_constellations[ci].end_const_states)].block;
+        assert(first_bi != last_bi);
       }
       return true;
     }
@@ -1220,9 +1230,11 @@ class bisim_partitioner_gj
       {
         mCRL2log(log::debug) << "  Constellation " << ci << ":\n";
         mCRL2log(log::debug) << "    Blocks in constellation: ";
-        for(const block_index bi: m_constellations[ci].blocks)
+        for (std::vector<state_index>::iterator constln_it = m_constellations[ci].start_const_states; constln_it < m_constellations[ci].end_const_states; )
         {
-           mCRL2log(log::debug) << bi << " ";
+          const block_index bi = m_states[*constln_it].block;
+          mCRL2log(log::debug) << bi << " ";
+          constln_it = m_blocks[bi].end_states;
         }
         mCRL2log(log::debug) << "\n";
       }
@@ -1273,8 +1285,9 @@ class bisim_partitioner_gj
       : m_aut(aut),
         m_states(aut.num_states()),
         m_transitions(aut.num_transitions()),
+        m_states_in_blocks(aut.num_states()),
         m_blocks(1,{m_states_in_blocks.begin(),0}),
-        m_constellations(1,constellation_type(0)),   // Algorithm 1, line 1.2.
+        m_constellations(1,constellation_type(m_states_in_blocks.begin(), m_states_in_blocks.end())),   // Algorithm 1, line 1.2.
         m_BLC_transitions(aut.num_transitions()),
         m_branching(branching),
         m_preserve_divergence(preserve_divergence)
@@ -1417,18 +1430,10 @@ class bisim_partitioner_gj
       return std::distance(m_blocks[B].start_bottom_states, m_blocks[B].end_states);
     }
 
-#ifndef NDEBUG
     state_index number_of_states_in_constellation(const constellation_index C) const
     {
-      state_index result = 0;
-      for (const block_index bi: m_constellations[C].blocks)
-      {
-        // We do not add a counter because this function is intended to be used only in debug mode.
-        result += number_of_states_in_block(bi);
-      }
-      return result;
+      return std::distance(m_constellations[C].start_const_states, m_constellations[C].end_const_states);
     }
-#endif
 
     void swap_states_in_states_in_block(
               typename std::vector<state_index>::iterator pos1,
@@ -1473,22 +1478,19 @@ class bisim_partitioner_gj
 //std::cerr << "SPLIT BLOCK " << B << " by removing "; for(auto s:R){ std::cerr << s << " "; } std::cerr << "\n";
       // Basic administration. Make a new block and add it to the current constellation.
       const block_index B_new=m_blocks.size();
-      m_blocks.emplace_back(m_blocks[B].start_bottom_states,m_blocks[B].constellation);
+      const constellation_index ci = m_blocks[B].constellation;
+      m_blocks.emplace_back(m_blocks[B].start_bottom_states,ci);
       #ifdef CHECK_COMPLEXITY_GJ
         m_blocks[B_new].work_counter = m_blocks[B].work_counter;
       #endif
-      std::forward_list<block_index>::iterator cit=m_constellations[m_blocks[B].constellation].blocks.begin();
-      assert(cit!=m_constellations[m_blocks[B].constellation].blocks.end());
-      ++cit;
-      if (cit==m_constellations[m_blocks[B].constellation].blocks.end()) // This constellation is trivial.
+      if (m_states[*m_constellations[ci].start_const_states].block == m_states[*std::prev(m_constellations[ci].end_const_states)].block) // This constellation is trivial.
       {
         // This constellation is trivial, as it will be split add it to the non trivial constellations.
         assert(std::find(m_non_trivial_constellations.begin(),
                          m_non_trivial_constellations.end(),
-                         m_blocks[B].constellation)==m_non_trivial_constellations.end());
-        m_non_trivial_constellations.emplace_back(m_blocks[B].constellation);
+                         ci)==m_non_trivial_constellations.end());
+        m_non_trivial_constellations.emplace_back(ci);
       }
-      m_constellations[m_blocks[B].constellation].blocks.push_front(B_new);
 
       // Carry out the split.
       #ifdef CHECK_COMPLEXITY_GJ
@@ -1814,6 +1816,34 @@ class bisim_partitioner_gj
                               const constellation_index C,
                               bool& M_in_bi,
                               std::function<void(const state_index)> update_Ptilde)
+// David suggests to change this function as follows:
+// - Generally, the function takes a BLC-set as splitter.
+//   Some transitions in the BLC-set may be *marked.*
+//   The function first moves all sources of marked transitions to R;
+//   it assumes that all bottom states that should go to R have a marked transition.
+//   (Some non-bottom states may also have such a transition.)
+//   Then, it moves the remaining bottom states to U.
+// - If at this point it appears that R contains all bottom states, no split is needed.
+//   (i.e. it is not necessary to check before calling whether there will be an actual split.)
+// - After that, the coroutines are started to separate the non-bottom states
+//   as in the current code.
+// - The bottom states are not actually inserted into m_R or m_U; the information
+//   which states are in R or U is stored through an iterator into m_states_in_blocks,
+//   known elsewhere as first_unmarked_bottom_state. This will allow to create
+//   the bottom part of U quickly.
+//
+// - There is one special case: when a block has new bottom states, its old and
+//   new bottom states need to be separated. This is done by using the tau-
+//   transitions from R to U as splitter. These tau-transitions are
+//   constellation-inert; the same BLC-set may contain other constellation-inert
+//   tau-transitions out of R but they should be disregarded. In this special
+//   case, we do not take the full BLC-set but only the marked transitions in it
+//   as splitter.
+//   This can be handled by giving an upper bound to the end of the BLC-set.
+//
+// Always using a BLC-set as splitter would require to initialise the BLC-sets
+// before the initial stabilisation. That simplifies some calculations slightly,
+// as one does not need to distinguish between initialisation and later phases.
     {
       const std::size_t B_size=number_of_states_in_block(B);
       assert(1 < B_size);
@@ -3727,17 +3757,16 @@ mCRL2log(log::debug) << "PERFORM A NEW BOTTOM STATE SPLIT\n";
       // Do the minimal checking, i.e., only check two blocks in a constellation.
       // This is equivalent to the code below by setting search_limit to 2.
       ci=m_non_trivial_constellations.back();
-      std::forward_list<block_index>::iterator fl=m_constellations[ci].blocks.begin();
-      block_index index_block_B=*fl;       // The first block.
-      block_index second_block_B=*(++fl);  // The second block.
+      block_index index_block_B = m_states[*m_constellations[ci].start_const_states].block;          // The first block.
+      block_index second_block_B= m_states[*std::prev(m_constellations[ci].end_const_states)].block; // The last block.
 
       if (number_of_states_in_block(index_block_B)<=number_of_states_in_block(second_block_B))
       {
-        m_constellations[ci].blocks.pop_front();
+        m_constellations[ci].start_const_states = m_blocks[index_block_B].end_states;
       }
       else
       {
-        m_constellations[ci].blocks.erase_after(m_constellations[ci].blocks.begin());
+        m_constellations[ci].end_const_states = m_blocks[second_block_B].start_bottom_states;
         index_block_B=second_block_B;
       }
       return index_block_B;
@@ -3770,18 +3799,18 @@ mCRL2log(log::debug) << "PERFORM A NEW BOTTOM STATE SPLIT\n";
         assert(check_stability("MAIN LOOP"));
 
         // Algorithm 1, line 1.7.
-        constellation_index ci=0;
+        constellation_index ci=-1;
         block_index index_block_B=select_and_remove_a_block_in_a_non_trivial_constellation(ci);
 // mCRL2log(log::debug) << "REMOVE BLOCK " << index_block_B << " from constellation " << ci << "\n";
 
         // Algorithm 1, line 1.8.
-        std::forward_list<block_index>::iterator fl=m_constellations[ci].blocks.begin();
-        if (++fl == m_constellations[ci].blocks.end()) // Constellation is trivial.
+        if (m_states[*m_constellations[ci].start_const_states].block == m_states[*std::prev(m_constellations[ci].end_const_states)].block)
         {
+          // Constellation has become trivial.
           assert(m_non_trivial_constellations.back()==ci);
           m_non_trivial_constellations.pop_back();
         }
-        m_constellations.emplace_back(index_block_B);
+        m_constellations.emplace_back(m_blocks[index_block_B].start_bottom_states, m_blocks[index_block_B].end_states);
         const constellation_index old_constellation=m_blocks[index_block_B].constellation;
         assert(old_constellation == ci);
         const constellation_index new_constellation=m_constellations.size()-1;
