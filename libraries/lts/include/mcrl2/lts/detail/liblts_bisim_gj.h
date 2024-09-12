@@ -2201,8 +2201,9 @@ class bisim_partitioner_gj
             }
             // outgoing transitions of s
             for (outgoing_transitions_it ti = (*s+1 >= m_states.size() ? m_outgoing_transitions.end() : m_states[*s+1].start_outgoing_transitions);
-                      ti-- != m_states[*s].start_outgoing_transitions; )
+              ti != m_states[*s].start_outgoing_transitions; )
             {
+              ti--;
               mCRL2complexity_gj(&m_transitions[initialisation?ti->transition:m_BLC_transitions[ti->transition]], finalise_work(check_complexity::simple_splitB_R__handle_transition_from_R_state, check_complexity::simple_splitB__handle_transition_from_R_or_U_state, max_block), *this);
               // We also need to cancel the work on outgoing transitions of U-state candidates that turned out to be new bottom states:
               mCRL2complexity_gj(&m_transitions[initialisation?ti->transition:m_BLC_transitions[ti->transition]], cancel_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state), *this);
@@ -2223,8 +2224,9 @@ class bisim_partitioner_gj
             }
             // outgoing transitions of s
             for (outgoing_transitions_it ti = (*s + 1 >= m_states.size() ? m_outgoing_transitions.end() : m_states[*s+1].start_outgoing_transitions);
-                      ti-- != m_states[*s].start_outgoing_transitions; )
+              ti != m_states[*s].start_outgoing_transitions; )
             {
+              ti--;
               mCRL2complexity_gj(&m_transitions[initialisation?ti->transition:m_BLC_transitions[ti->transition]], cancel_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state), *this);
             }
           }
@@ -2246,8 +2248,9 @@ class bisim_partitioner_gj
             }
             // outgoing transitions of s
             for (outgoing_transitions_it ti = *s + 1 >= m_states.size() ? m_outgoing_transitions.end() : m_states[*s+1].start_outgoing_transitions;
-                      ti-- != m_states[*s].start_outgoing_transitions; )
+              ti != m_states[*s].start_outgoing_transitions; )
             {
+              ti--;
               mCRL2complexity_gj(&m_transitions[initialisation?ti->transition:m_BLC_transitions[ti->transition]], finalise_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, check_complexity::simple_splitB__handle_transition_from_R_or_U_state, max_block), *this);
             }
           }
@@ -2265,8 +2268,9 @@ class bisim_partitioner_gj
             }
             // outgoing transitions of s
             for (outgoing_transitions_it ti = (*s + 1 >= m_states.size() ? m_outgoing_transitions.end() : m_states[*s+1].start_outgoing_transitions);
-                      ti-- != m_states[*s].start_outgoing_transitions; )
+              ti != m_states[*s].start_outgoing_transitions; )
             {
+              ti--;
               mCRL2complexity_gj(&m_transitions[initialisation?ti->transition:m_BLC_transitions[ti->transition]], cancel_work(check_complexity::simple_splitB_R__handle_transition_from_R_state), *this);
               // We also need to move the work on outgoing transitions of U-state candidates that turned out to be new bottom states:
               mCRL2complexity_gj(&m_transitions[initialisation?ti->transition:m_BLC_transitions[ti->transition]], finalise_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, check_complexity::simple_splitB__test_outgoing_transitions_found_new_bottom_state,
