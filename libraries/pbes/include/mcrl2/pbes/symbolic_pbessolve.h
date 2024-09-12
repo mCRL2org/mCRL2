@@ -151,7 +151,7 @@ class symbolic_pbessolve_algorithm
       {
         if (m_check_strategy)
         {
-          check_strategy(initial_vertex, V, solved0, solved1, false, strategy0);
+          check_strategy(initial_vertex, V, Vsinks, solved0, solved1, false, strategy0);
         }
         return std::make_tuple(true, solved0, solved1, strategy0, strategy1);
       }
@@ -159,7 +159,7 @@ class symbolic_pbessolve_algorithm
       {
         if (m_check_strategy)
         {
-          check_strategy(initial_vertex, V, solved0, solved1, true, strategy1);
+          check_strategy(initial_vertex, V, Vsinks, solved0, solved1, true, strategy1);
         }
         return std::make_tuple(false, solved0, solved1, strategy0, strategy1);
       }
@@ -449,6 +449,7 @@ class symbolic_pbessolve_algorithm
     /// Throws an exception when the strategy is invalid.
     void check_strategy(const ldd& initial_vertex,
       const ldd& V,
+      const ldd& Vsinks,
       const ldd& W0, 
       const ldd& W1, 
       bool alpha, 
@@ -456,10 +457,12 @@ class symbolic_pbessolve_algorithm
     {
       mCRL2log(log::debug) << "Checking the strategy of the solved parity game..." << std::endl;
       symbolic_parity_game new_G = m_G.apply_strategy(alpha, strategy);
+      mCRL2log(log::trace) << "Minimal parity game G = " << new_G.print_graph(V) << std::endl;
+      
 
       symbolic_pbessolve_algorithm check(new_G);
 
-      auto[result, W0_prime, W1_prime, S0, S1] = check.solve(initial_vertex, V);      
+      auto[result, W0_prime, W1_prime, S0, S1] = check.solve(initial_vertex, V, Vsinks);      
       if (!(W0 == W0_prime && W1 == W1_prime && result != alpha))
       {
         throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
