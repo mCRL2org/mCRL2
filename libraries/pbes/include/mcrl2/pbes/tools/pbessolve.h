@@ -300,6 +300,11 @@ class pbessolve_tool
             << "Warning: the PBES has counter example information, but no witness will be generated due to lack of --file"
             << std::endl;
       }
+
+      if (options.optimization > 0)
+      {
+        throw mcrl2::runtime_error("Counter example PBES can not be solved with --long-strategy greater than 0.");
+      }
     }
     else if ((!lpsfile.empty() || !ltsfile.empty()))
     {
