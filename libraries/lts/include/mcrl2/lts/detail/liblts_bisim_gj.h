@@ -1312,7 +1312,8 @@ class bisim_partitioner_gj
 // David suggests: actually it is enough to require
 //      assert(pos1 != pos2 || pos2 == pos3);
 // (Memory help: pos3 should be between pos1 and pos2.)
-// JFG answers: The assertion below is much stronger than the one above.
+// JFG answers: The assertion below is much stronger than the one above. I want to optimize on the swaps and believe
+// that the few tests to optimise swaps are natural and defendable. 
       assert(pos1!=pos2 && pos2!=pos3 && pos3!=pos1);
       const state_index temp=*pos1;
       *pos1=*pos3;
@@ -1371,7 +1372,7 @@ class bisim_partitioner_gj
 // Doing additional assignments is likely faster than all these branches.
 // (perhaps only distinguish between no swap is needed at all/some swap is needed)
 // JFG: I am not so sure whether swapping more is better, as it requires more memory accesses, possibly outside the cache.
-//      The code is cleaned up.
+//      The code is cleaned up. Maybe the bottom states come first in R which could lead to a minor optimisation. 
           // Note that B must not have a bottom state here, i.e. when all bottom states are moved to a new block.
           // assert(m_blocks[B].start_bottom_states!=m_blocks[B].start_non_bottom_states);
           if (pos==m_blocks[B].start_bottom_states)
@@ -1404,6 +1405,8 @@ class bisim_partitioner_gj
 // Also, think whether R always starts with bottom states and then continues with nonbottom states;
 // in that case, the iteration over R could be split into two parts, the first part being over bottom states
 // and the second part over nonbottom states. The first part then can assume that B_new does not (yet) contain nonbottom states.
+// JFG: I hardly believe that this will lead to any improvement of performance, or increase of readability of code. The case
+//      distinctions are quite natural, and this optimises on the number of swaps. 
           // Three cases. pos==B_new.start_non_bottom_states
           if (pos==m_blocks[B_new].start_non_bottom_states)
           {
@@ -1669,27 +1672,19 @@ class bisim_partitioner_gj
                        // In this case it is only necessary whether the state is Rmarked to see whether it has an outgoing
                        // marking transition.
       {
-        /* for(; M_it!=M_end; ++M_it)
-        {
-          const state_index si=m_aut.get_transitions()[*M_it].from();
-          if (m_states[si].counter==undefined)
-          {
-            m_R.add_todo(si);
-            m_states[si].counter=Rmarked;
-            m_counter_reset_vector.push_back(si);
-          }
-        } */
         if (m_blocks[B].start_non_bottom_states == m_blocks[B].end_states)
         {
-          m_R.clear_todo();
-          m_U.clear_todo(); // actually it's only necessary if M_co_it==M_co_end but it doesn't hurt either.
+          // There are no non-bottom states, hence we do not need to carry out the tau closure.
+          m_R.clear_todo(); // Move all states from R_todo to R. 
+          // m_U.clear_todo(); // Actually this is only necessary if M_co_it==M_co_end but it doesn't hurt either.
         }
-        if (M_co_it==M_co_end)
+        assert(M_co_it!=M_co_end);
+        /* if (M_co_it==M_co_end)
         {
           U_status=state_checking;
-        }
+        } */
       }
-      else
+      else // VARIANT==2.
       {
         if (m_blocks[B].start_non_bottom_states == m_blocks[B].end_states)
         {
@@ -1740,7 +1735,7 @@ class bisim_partitioner_gj
         {
           case initializing:
           {
-            assert(2 == VARIANT);
+            assert(VARIANT==2);
             // Algorithm 3, line 3.3, right.
               const state_index si= m_aut.get_transitions()[*M_it].from();
               mCRL2complexity_gj(&m_transitions[*M_it], add_work(check_complexity::simple_splitB_R__handle_transition_from_R_state, 1), *this);
@@ -1755,10 +1750,6 @@ class bisim_partitioner_gj
                 // assert(0 < m_states[si].no_of_outgoing_inert_transitions); -- David thinks that all bottom states should already be marked before the coroutines start; however, this does not hold during bottom state splits. David is not sure whether this is correct. What happens if a new bottom state has a transition in the splitter?
                 assert(!m_R.find(si));
                 m_R.add_todo(si);
-                /* if (m_states[si].counter==undefined)
-                {
-                  m_counter_reset_vector.push_back(si);
-                } */
                 m_states[si].counter=Rmarked;
 //std::cerr << "R_todo1 insert: " << si << "\n";
                 if (2*m_R.size()>B_size)
@@ -1787,11 +1778,6 @@ class bisim_partitioner_gj
               // split_block B into R and B\R.
               assert(m_R.size()>0);
               clear_state_counters();
-              /* for(const state_index si: m_counter_reset_vector)
-              {
-                m_states[si].counter=undefined;
-              }
-              clear(m_counter_reset_vector); */
               m_U.clear();
               block_index block_index_of_R=split_block_B_into_R_and_BminR(B, m_R, update_Ptilde);
               m_R.clear();
@@ -1805,7 +1791,6 @@ class bisim_partitioner_gj
               mCRL2complexity_gj(&m_states[s], add_work(check_complexity::simple_splitB_R__find_predecessors, 1), *this);
 //std::cerr << "R insert: " << s << "\n";
               assert(m_states[s].block == B);
-              // current_R_incoming_transition_iterator_end=m_states[s].start_incoming_non_inert_transitions;
               if (s+1==m_states.size())
               {
                 current_R_incoming_transition_iterator_end=m_aut.get_transitions().end();
@@ -1896,33 +1881,30 @@ class bisim_partitioner_gj
           case initializing: // Only executed in VARIANT 1.
           {
 //std::cerr << "U_init\n";
-            assert(1 == VARIANT);
+            assert(VARIANT==1);
             // Algorithm 3, line 3.3 left.
             assert(M_co_it != M_co_end);
-            for (;;)
-            {
+            // for (;;)
+            // {
               const state_index si=*M_co_it;
               M_co_it++;
               assert(0 == m_states[si].no_of_outgoing_inert_transitions);
               assert(!m_U.find(si));
 
               // if (m_states[si].counter!=Rmarked)
-              if (m_states[si].counter==undefined)
+              // if (m_states[si].counter==undefined)
+              assert(m_states[si].counter==undefined);
               {
                 mCRL2complexity_gj(&m_states[si], add_work(check_complexity::simple_splitB_U__find_bottom_state, 1), *this);
 
                 assert(!m_R.find(si));
-                // This is for VARIANT 1.
-                // if (m_states[si].counter==undefined)
-                {
-                  m_U.add_todo(si);
+                m_U.add_todo(si);
 //std::cerr << "U_todo1 insert: " << si << "   " << m_U.size() << "    " << B_size << "\n";
-                  // Algorithm 3, line 3.10 and line 3.11 left.
-                  if (2*m_U.size()>B_size)
-                  {
-                    U_status=aborted;
-                    break;
-                  }
+                // Algorithm 3, line 3.10 and line 3.11 left.
+                if (2*m_U.size()>B_size)
+                {
+                  U_status=aborted;
+                  break;
                 }
                 if (M_co_it == M_co_end)
                 {
@@ -1933,11 +1915,12 @@ class bisim_partitioner_gj
                   U_status = state_checking;
                 }
                 // We have executed one step that is actually assigned to a U-state,
-                // so we should leave the for(;;) loop and yield to the other coroutine.
+                // so we yield to the other coroutine.
                 break;
               }
-              else
+              /* else
               {
+                assert(0);
                 assert(Rmarked == m_states[si].counter);
                 assert(m_R.find(si));
                 // We cannot assign the work to a U-state, but as si must have
@@ -1958,11 +1941,11 @@ class bisim_partitioner_gj
                   U_status = state_checking;
                   goto do_state_checking;
                 }
-              }
-            }
+              } */
+            // }
             break;
           }
-          do_state_checking:
+          // do_state_checking:
           case state_checking:
           {
 //std::cerr << "U_state_checking\n";
@@ -2207,7 +2190,6 @@ class bisim_partitioner_gj
 
 //std::cerr << "Split block of size " << number_of_states_in_block(B) + number_of_states_in_block(bi) << " taking away " << number_of_states_in_block(bi) << " states\n";
       assert(number_of_states_in_block(B) >= number_of_states_in_block(bi));
-// David asks: why the ``+1''? Is that really necessary?
 
       // Because we visit all states of block bi and almost all their incoming and outgoing transitions,
       // we subsume all this bookkeeping in a single block counter:
@@ -2647,7 +2629,7 @@ class bisim_partitioner_gj
       // group_transitions_on_tgt(m_aut.get_transitions(), m_aut.num_action_labels(), m_aut.tau_label_index(), m_aut.num_states()); // sort on label. Tau transitions come first.
       // sort_transitions(m_aut.get_transitions(), lbl_tgt_src);
 // David suggests: I think it is enough to sort according to tgt_lbl.
-// JFG answers: Agreed. But I believe this can be done a no cost. For 1394-fin-vvlarge this saves 1 second to sort, but
+// JFG answers: Agreed. But I believe this will cost performance. For 1394-fin-vvlarge this saves 1 second to sort, but
 //                      requires five more seconds to carry out the splitting. Apparently, there is benefit to have src together.
 //                      This may have been measured on an older version of the code.
       sort_transitions(m_aut.get_transitions(), m_aut.hidden_label_set(), tgt_lbl_src); // THIS IS NOW ESSENTIAL.
@@ -2662,6 +2644,8 @@ mCRL2log(log::verbose) << "Start setting incoming and outgoing transitions\n";
       std::vector<transition_index> count_transitions_per_action(m_aut.num_action_labels() + (unsigned) m_preserve_divergence, 0);
 // David suggests: The above allocation may take time up to O(|Act|).
 // This is a place where the number of actions plays a role.
+// JFG answers: I think we should accept that the algorithm has a complexity of .... + O(|Act|). Act can be assumed to be smaller
+// than m, and n can be assumed to be bigger than 1. In that case O(|Act|) will be subsumed. 
 
       // David has changed the code to: if we have to preserve divergence, tau-self-loops get the artificial label m_aut.num_action_labels().
       std::vector<label_index> todo_stack_actions;
@@ -2942,15 +2926,17 @@ mCRL2log(log::verbose) << "Start refining in the initialisation\n";
 
               // Count the number of state in split_states that are bottom states. This function has a side effect if not all bottom states are covered
               // on m_P and counters in states.
+              std::vector<state_index>::iterator first_unmarked_bottom_state;
               if (not_all_bottom_states_are_touched
-                      (block_ind, start_index_per_block, end_index_per_block))
+                      (block_ind, start_index_per_block, end_index_per_block, first_unmarked_bottom_state))
               {
                 bool dummy=false;
                 const bool initialisation=true;
                 splitB<1>(block_ind,
                           start_index_per_block,
                           end_index_per_block,
-                          B.start_bottom_states,
+                          // B.start_bottom_states,
+                          first_unmarked_bottom_state,
                           B.start_non_bottom_states,
                           a,   // action index (needed to account for the work)
                           0,   // constellation index (there is only one constellation, with number 0)
@@ -3413,17 +3399,21 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
       return true;
     }
 
-    // Count the number of touched bottom states by outgoing transitions in Mleft.
-    // If all bottom states are touched, reset markers and m_R. Otherwise, if not all
+    // Mark all bottom states and move them to the beginning.
+    // If all bottom states are marked, reset markers and m_R. Otherwise, if not all
     // bottom states are touched, leave the touched bottom states in m_R and leave them
     // the markers in m_states[*].counter in place.
+    // The marked bottom states are moved to the front in m_states_in_blocks and
+    // if the function yields true, the first_unmarked_bottom_state indicates the position
+    // of the first non marked bottom state. 
     bool not_all_bottom_states_are_touched(
                       const block_index bi,
                       const std::vector<transition_index>::iterator begin,
-                      const std::vector<transition_index>::iterator end)
+                      const std::vector<transition_index>::iterator end,
+                      std::vector<state_index>::iterator& first_unmarked_bottom_state)
     {
-      state_index no_of_touched_bottom_states=0;
       const block_type& B=m_blocks[bi];
+      first_unmarked_bottom_state=B.start_bottom_states;
       for(std::vector<transition_index>::iterator i=begin; i!=end; ++i)
       {
         const transition& t = m_aut.get_transitions()[*i];
@@ -3436,34 +3426,24 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
         }
         if (m_states[s].counter!=Rmarked)
         {
-          if (m_states[s].ref_states_in_blocks<B.start_non_bottom_states)
+          const std::vector<state_index>::iterator pos_s=m_states[s].ref_states_in_blocks;
+          if (pos_s<B.start_non_bottom_states)
           {
-            no_of_touched_bottom_states++;
-// David suggests: Instead of only counting the bottom states,
-// one could immediately group the bottom states into those that go into R
-// (and those that do not). Then, after not_all_bottom_states_are_touched(),
-// one has already separated the bottom states, and the U-coroutine to separate
-// the nonbottom states can more easily continue the work.
-// However, I am not sure which of the possibilities is actually faster.
+            if (first_unmarked_bottom_state!=pos_s)
+            {
+              swap_states_in_states_in_block(first_unmarked_bottom_state, pos_s); // Move marked states to the front.
+            }
+            first_unmarked_bottom_state++;
           }
           m_R.add_todo(s);
           m_states[s].counter=Rmarked;
-          // m_counter_reset_vector.push_back(s);
         }
       }
-// David suggests: Set all marked states to the front, such that the non marked states in U can be traversed
-//                  without again checking. JFG: doubts whether this checking will have a lot of effect, given
-//                  that the states are in the cache anyhow....
-      if (static_cast<std::ptrdiff_t>(no_of_touched_bottom_states)==std::distance(B.start_bottom_states, B.start_non_bottom_states))
+      if (first_unmarked_bottom_state==B.start_non_bottom_states)
       {
-        // All bottom states are touched. No splitting is possible. Reset m_R, m_states[s].counter for s in m_R.
+        // All bottom states are marked. No splitting is possible. Reset m_R, m_states[s].counter for s in m_R.
         clear_state_counters(false);
-        /* for(const state_index s: m_counter_reset_vector)
-        {
-          m_states[s].counter=undefined;
-        } */
         m_R.clear();
-        // clear(m_counter_reset_vector);
         return false;
       }
       // Not all bottom states are touched. Splitting of block bi must commence.
@@ -3950,16 +3930,17 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
             block_index Bpp=bi;
             // Check whether the bottom states of bi are not all included in Mleft.
             // This function has a side effect if not all states are covered on m_P, m_counter_reset_vector and the counters in states.
-            const bool not_all_states = not_all_bottom_states_are_touched
-                    (bi, start_index_per_block, end_index_per_block);
-            if (not_all_states && m_R.empty())
+            std::vector<state_index>::iterator first_unmarked_bottom_state;
+            const bool not_all_states_are_marked =
+                            not_all_bottom_states_are_touched(bi, start_index_per_block, end_index_per_block, first_unmarked_bottom_state);
+            if (not_all_states_are_marked && m_R.empty())
             {
               // the BLC slice only contains inert transitions.
               // We do not need to do a main split, neither a co-split.
             }
             else
             {
-              if (not_all_states)
+              if (not_all_states_are_marked)
               {
 // mCRL2log(log::debug) << "PERFORM A MAIN SPLIT \n";
               // Algorithm 1, line 1.12.
@@ -3968,7 +3949,8 @@ DIT WERKT NIET MEER WANT NON_TRIVIAL_CONSTELLATIONS IS NU EEN VECTOR EN GEEN SET
                 block_index bi1=splitB<1>(bi,
                                         start_index_per_block,
                                         end_index_per_block,
-                                        m_blocks[bi].start_bottom_states,
+                                        // m_blocks[bi].start_bottom_states,
+                                        first_unmarked_bottom_state,
                                         m_blocks[bi].start_non_bottom_states,
                                         a, // action index (required for bookkeeping)
                                         new_constellation, // constellation index (required for bookkeeping)
