@@ -46,8 +46,6 @@ static void rewrite_star(pbes_expression& result,
   if (it != mapping.end())
   {
     structure_graph::index_type index = it->second;
-    assert(G.decoration(index) != structure_graph::d_true && G.decoration(index) != structure_graph::d_false);
-
     std::unordered_set<structure_graph::index_type> todo = {index};
     std::unordered_set<structure_graph::index_type> done;
 
