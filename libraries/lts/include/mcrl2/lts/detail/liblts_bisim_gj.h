@@ -1860,7 +1860,6 @@ class bisim_partitioner_gj
               // split_block B into U and B\U.
               assert(m_U.size()>0);
               clear_state_counters();
-              clear(m_counter_reset_vector); */
               m_R.clear();
               block_index block_index_of_U=split_block_B_into_R_and_BminR(B, m_U, update_Ptilde);
               m_U.clear();
@@ -3388,7 +3387,7 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
                                                         i!=m_blocks[index_block_B].end_states; ++i)
         {
           // mCRL2complexity_gj(m_states[*i], add_work(check_complexity::..., max_C), *this);
-              // subsumed under the above counter
+          // subsumed under the above counter
           // and visit the incoming transitions.
 
           const std::vector<transition>::iterator end_it=
@@ -3456,9 +3455,14 @@ mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
 
                 while (!found && transition_walker!=m_transitions[t_index].transitions_per_block_to_constellation->end_same_BLC)
                 {
+// David suggests:
 // THIS TAKES TOO LONG. THERE MAY BE MANY TRANSITIONS FROM THE SOURCE BLOCK OF t
 // TO THE LARGE CONSTELLATION ci THAT NEED TO BE SEARCHED.
 // INSTEAD, PLEASE USE OTHER MEANS, LIKE THE BLC JUST BEFORE OR AFTER IN MEMORY.
+// JFG answers: This is not an issue. When traversing the LBC_list for this block/label/constellation we search 
+//              for a co-transition not to C. When we encounter a transition that goes to C the work can be attributed
+//              to moving this transition to a new target constellation. We stop this while loop when the first transition not
+//              to C, but to the constellation from which this transition is taken is encountered. 
                   // mCRL2complexity_gj(&m_transitions[*transition_walker], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_cotransition, max_C), *this);
                   const transition& tw=m_aut.get_transitions()[*transition_walker];
                   assert(m_states[tw.from()].block == m_states[t.from()].block);
