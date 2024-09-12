@@ -343,7 +343,7 @@ class pbessolve_tool
 
       // Solve the initial pbes and obtain the strategies in G.
       timer().start("first-solving");
-      auto [result, W_alpha] = solve_structure_graph_minimal_winning_set(initial_G, true);
+      auto [result, mapping] = solve_structure_graph_winning_mapping(initial_G, true);
       timer().finish("first-solving");
       mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
 
@@ -353,7 +353,7 @@ class pbessolve_tool
       mCRL2log(log::trace) << pbesspec << std::endl;
       
       structure_graph G;
-      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, W_alpha, G, first_instantiate.data_rewriter());
+      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, mapping, G, first_instantiate.data_rewriter());
       
       // Perform the second instantiation given the proof graph.      
       timer().start("second-instantiation");
