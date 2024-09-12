@@ -10,7 +10,7 @@ convenient to use the system package manager to acquire the necessary
 dependencies.
 
   * GCC or Clang compiler, which can be obtained from the ``build-essential`` package.
-  * Qt version 6.2.4. Can be installed using the ``qtbase6-dev`` package on Ubuntu.
+  * Qt version 6.2.4. Can be installed using the ``qt6-base-dev`` package on Ubuntu.
   * Boost library sources, which can be acquired from the ``libboost-dev`` package.
   * `CMake 3.14.0` or higher from <http://www.cmake.org/cmake/resources/software.html>`. 
   * `Python 3.6 <https://www.python.org/>` is optionally needed for various activities such as testing, building documentation and code generation.
