@@ -46,10 +46,7 @@ static void rewrite_star(pbes_expression& result,
   if (it != mapping.end())
   {
     structure_graph::index_type index = it->second;
-
-    // We know that X itself (if it can be reached by a self loop) is in W
-    // (the initial vertex is in W and every reachable one).
-    Ys.insert(X);
+    assert(G.decoration(index) != structure_graph::d_true && G.decoration(index) != structure_graph::d_false);
 
     std::unordered_set<structure_graph::index_type> todo = {index};
     std::unordered_set<structure_graph::index_type> done;
@@ -63,17 +60,38 @@ static void rewrite_star(pbes_expression& result,
       if (mapping.count(G.find_vertex(u).formula()) != 0)
       {
         // This vertex is won by alpha
-        if ((!alpha && G.decoration(u) == structure_graph::d_disjunction)
-            || (alpha && G.decoration(u) == structure_graph::d_conjunction))
+        if (G.strategy(u) != undefined_vertex() &&
+            ((!alpha && G.decoration(u) == structure_graph::d_disjunction)
+            || (alpha && G.decoration(u) == structure_graph::d_conjunction)))
         {
           // The strategy is defined so only explore the strategy edge.
           auto v = G.strategy(u);
-          if (!mcrl2::utilities::detail::contains(done, v))
+          if (G.rank(v) == undefined_vertex())
           {
-            if (G.rank(v) == undefined_vertex())
+            if (!mcrl2::utilities::detail::contains(done, v))
             {
               // explore all outgoing edges that are unranked
               todo.insert(v);
+            }
+          }
+          else if (mapping.count(G.find_vertex(v).formula()) != 0)
+          {
+            // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
+            Ys.insert(G.find_vertex(v).formula());
+          }
+        }
+        else
+        {
+          // Explore all edges.
+          for (structure_graph::index_type v : G.all_successors(u))
+          {
+            if (G.rank(v) == undefined_vertex())
+            {
+              if (!mcrl2::utilities::detail::contains(done, v))
+              {
+                // explore all outgoing edges that are unranked
+                todo.insert(v);
+              }
             }
             else if (mapping.count(G.find_vertex(v).formula()) != 0)
             {
@@ -88,18 +106,18 @@ static void rewrite_star(pbes_expression& result,
         // Explore all edges.
         for (structure_graph::index_type v : G.all_successors(u))
         {
-          if (!mcrl2::utilities::detail::contains(done, v))
+          if (G.rank(v) == undefined_vertex())
           {
-            if (G.rank(v) == undefined_vertex())
+            if (!mcrl2::utilities::detail::contains(done, v))
             {
               // explore all outgoing edges that are unranked
               todo.insert(v);
             }
-            else if (mapping.count(G.find_vertex(v).formula()) != 0)
-            {
-              // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
-              Ys.insert(G.find_vertex(v).formula());
-            }
+          }
+          else if (mapping.count(G.find_vertex(v).formula()) != 0)
+          {
+            // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
+            Ys.insert(G.find_vertex(v).formula());
           }
         }
       }
