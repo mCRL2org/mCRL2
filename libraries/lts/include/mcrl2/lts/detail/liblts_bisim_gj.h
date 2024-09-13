@@ -954,12 +954,14 @@ class bisim_partitioner_gj
       }
       return true;
     }
+#endif //#ifndef NDEBUG
 
     bool check_stability(const std::string& tag,
                          const std::vector<label_index>* const todo_stack_labels = nullptr,
                          const block_label_to_size_t_map* const block_label_to_cotransition = nullptr,
                          const constellation_index old_constellation = -1)
     {
+#ifndef NDEBUG
       // Checks the following invariant:
       //     If a block has a constellation-non-inert transition, then every bottom state has a constellation-non-inert transition
       //     with the same label to the same target constellation.
@@ -1072,9 +1074,9 @@ class bisim_partitioner_gj
           }
         }
       }
+#endif //#ifndef NDEBUG
       return true;
     }
-#endif //#ifndef NDEBUG
 
   #ifdef CHECK_COMPLEXITY_GJ
     // assign work to all transitions from state si with label a to constellation C.
@@ -2294,7 +2296,7 @@ class bisim_partitioner_gj
     {
       // Move this former non-bottom state to the bottom states.
       block_index bi = m_states[si].block;
-mCRL2log(log::debug) << m_states[si].debug_id(*this) << " becomes a new bottom state of block " << bi << ".\n";
+// mCRL2log(log::debug) << m_states[si].debug_id(*this) << " becomes a new bottom state of block " << bi << ".\n";
       assert(0 == m_states[si].no_of_outgoing_inert_transitions);
       assert(find(m_P.begin(), m_P.end(), si)==m_P.end());
       m_P.push_back(si);
@@ -2359,13 +2361,13 @@ mCRL2log(log::debug) << m_states[si].debug_id(*this) << " becomes a new bottom s
                        std::function<void(const state_index)> update_Ptilde=
                                                         [](const state_index){})
     {
-mCRL2log(log::debug) << "splitB<" << VARIANT << ">(" << m_blocks[B].debug_id(*this) << ",{ ";
-for(MARKED_STATE_TRANSITION_ITERATOR s=M_begin; s!=M_end; ++s){ mCRL2log(log::debug) << m_aut.get_transitions()[*s].from() << (m_states[m_aut.get_transitions()[*s].from()].counter==Rmarked ? "R " : (assert(VARIANT==2), " ")); }
-mCRL2log(log::debug) << "},{ ";
-for(UNMARKED_STATE_ITERATOR s=M_co_begin; s!=M_co_end; ++s){ mCRL2log(log::debug) << *s << (m_U.find(*s) ? "U " : " "); }
-if (m_aut.num_action_labels() == a) { mCRL2log(log::debug) << "},tau-self-loops,"; }
-else { mCRL2log(log::debug) << "}," << pp(m_aut.action_label(a)) << ','; }
-mCRL2log(log::debug) << m_constellations[C].debug_id(*this) << ",...)\n";
+// mCRL2log(log::debug) << "splitB<" << VARIANT << ">(" << m_blocks[B].debug_id(*this) << ",{ ";
+// for(MARKED_STATE_TRANSITION_ITERATOR s=M_begin; s!=M_end; ++s){ mCRL2log(log::debug) << m_aut.get_transitions()[*s].from() << (m_states[m_aut.get_transitions()[*s].from()].counter==Rmarked ? "R " : (assert(VARIANT==2), " ")); }
+// mCRL2log(log::debug) << "},{ ";
+// for(UNMARKED_STATE_ITERATOR s=M_co_begin; s!=M_co_end; ++s){ mCRL2log(log::debug) << *s << (m_U.find(*s) ? "U " : " "); }
+// if (m_aut.num_action_labels() == a) { mCRL2log(log::debug) << "},tau-self-loops,"; }
+// else { mCRL2log(log::debug) << "}," << pp(m_aut.action_label(a)) << ','; }
+// mCRL2log(log::debug) << m_constellations[C].debug_id(*this) << ",...)\n";
       assert(M_begin!=M_end || !m_R.empty());
       assert(M_co_begin!=M_co_end || !m_U.empty());
       assert(1!=VARIANT || m_U.empty());
