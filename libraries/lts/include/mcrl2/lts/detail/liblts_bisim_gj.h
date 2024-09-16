@@ -19,6 +19,7 @@
 // Use BLC lists for the main split.
 // Maintain a co-splitter and a splitter to enable a co-split.
 // Eliminate two pointers in transition_type (done).
+// JFG: Optimise swap. 
 
 #ifndef LIBLTS_BISIM_GJ_H
 #define LIBLTS_BISIM_GJ_H
