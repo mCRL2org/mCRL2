@@ -695,9 +695,15 @@ class bisim_partitioner_gj
         const transition& t=m_aut.get_transitions()[ti];
         assert(&*m_states[t.to()].start_incoming_transitions <= &t);
         if (t.to() + 1 == m_states.size())
-          assert(&t < &*m_aut.get_transitions().end());
+        {
+          // Maurice: Not allowed to dereference the end iterator, undefined behaviour
+          //assert(&t < &*m_aut.get_transitions().end());
+        }        
         else
-          assert(&t < &*m_states[t.to() + 1].start_incoming_transitions);
+        {
+          // Maurice: can't dereference out of range vector iterator
+          //assert(&t < &*m_states[t.to() + 1].start_incoming_transitions);
+        }
 
         assert(m_states[t.from()].start_outgoing_transitions <= m_transitions[ti].ref_outgoing_transitions);
         if (t.from() + 1 == m_states.size())
