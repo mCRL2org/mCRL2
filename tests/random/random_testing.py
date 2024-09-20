@@ -147,6 +147,23 @@ class LtscompareTest(ProcessTauTest):
         self.add_command_line_options('t3', ['-e' + equivalence_type])
         self.add_command_line_options('t4', ['-e' + equivalence_type])
 
+class LtsCombineTest(ProcessTest):
+    def __init__(self, name, parallel, settings):
+        super(LtsCombineTest, self).__init__(name, ymlfile('ltscombine'), settings)
+
+        if parallel:
+            self.add_command_line_options('t5', ['--threads=8'])
+
+
+    def create_inputfiles(self, runpath = '.'):
+        super(LtsCombineTest, self).create_inputfiles(runpath)
+
+        # Create a second mCRL2 specification to combine
+        filename = f'{self.name}2.mcrl2'
+        p = random_process_expression.make_process_specification(self.parallel_operator_generators, self.process_expression_generators, self.actions, self.process_identifiers, self.process_size, self.init, self.generate_process_parameters)
+        write_text(filename, str(p))
+        self.inputfiles += [filename]
+
 class LtscompareCounterexampleTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, hide_actions, settings):
         assert equivalence_type in ['bisim', 'branching-bisim', 'trace']
@@ -330,8 +347,17 @@ class PbessolvesymbolicTest(PbesTest):
         super(PbessolvesymbolicTest, self).__init__(name, ymlfile('pbessolvesymbolic'), settings)
         
 class Pbes2boolTest(PbesTest):
-    def __init__(self, name, settings):
+    def __init__(self, name, parallel, settings):
         super(Pbes2boolTest, self).__init__(name, ymlfile('pbessolve'), settings)
+
+        if parallel:            
+            self.add_command_line_options('t2', ["--threads=4"])
+            self.add_command_line_options('t3', ["--threads=4"])
+            self.add_command_line_options('t4', ["--threads=4"])
+            self.add_command_line_options('t5', ["--threads=4"])
+            self.add_command_line_options('t6', ["--threads=4"])
+            self.add_command_line_options('t7', ["--threads=4"])
+            self.add_command_line_options('t8', ["--threads=4"])
 
 class Pres2boolTest(ProcessTest):
     def __init__(self, name, settings):
@@ -452,9 +478,7 @@ available_tests = {
     'bisimulation-branching-bisim-gj'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj', settings)                    ,
     'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                              ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
-    'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
-    'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
     'pbesrewr-pfnf'                               : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                                        ,
     'pbesrewr-quantifier-all'                     : lambda name, settings: PbesrewrTest(name, 'quantifier-all', settings)                              ,
@@ -470,7 +494,8 @@ available_tests = {
     'pbesinst-alternative_lazy'                   : lambda name, settings: PbesinstTest(name, ['-salternative-lazy'], settings)                        ,
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)                   ,
     'pbespgsolve'                                 : lambda name, settings: PbespgsolveTest(name, settings)                                             ,
-    'pbessolve'                                   : lambda name, settings: Pbes2boolTest(name, settings)                                               ,
+    'pbessolve'                                   : lambda name, settings: Pbes2boolTest(name, False, settings)                                        ,
+    'pbessolve-parallel'                          : lambda name, settings: Pbes2boolTest(name, True, settings)                                         ,
     'pbessolve-depth-first'                       : lambda name, settings: Pbes2boolDepthFirstTest(name, settings)                                     ,
     'pbessolve-counter-example-optimization-0'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 0, settings)                            ,
     'pbessolve-counter-example-optimization-1'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 1, settings)                            ,
@@ -483,9 +508,16 @@ available_tests = {
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     'pbes-unify-parameters'                       : lambda name, settings: Pbes_unify_parametersTest(name, settings)                                   ,
     'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                               ,
-    'pressolve'                                   : lambda name, settings: Pres2boolTest(name, settings)                                              ,
-    'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
-    'stochastic-ltscompare'                      : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
+    'stochastic-ltscompare'                       : lambda name, settings: StochasticLtscompareTest(name, settings)                                    ,
+}
+
+available_experimental_tests = {
+    'ltscombine'                                  : lambda name, settings: LtsCombineTest(name, False, settings)                                       ,
+    'ltscombine-parallel'                         : lambda name, settings: LtsCombineTest(name, True, settings)                                        ,
+    'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,                                    ,
+    'pressolve'                                   : lambda name, settings: Pres2boolTest(name, settings)          
+    'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
+    'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                
 }
 
 if shutil.which("z3") is not None:
@@ -508,7 +540,7 @@ def matching_tests(tests, pattern):
         return [pattern]
     return matches
 
-def main(tests):
+def main():
     cmdline_parser = argparse.ArgumentParser()
     cmdline_parser.add_argument('-t', '--toolpath', dest='toolpath', help='The path where the mCRL2 tools are installed')
     cmdline_parser.add_argument('-r', '--repetitions', dest='repetitions', metavar='N', default='10', help='Perform N repetitions of each test')
@@ -517,10 +549,20 @@ def main(tests):
     cmdline_parser.add_argument('-n', '--names', dest='names', action='store_true', help='Print the names of the available tests')
     cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
     cmdline_parser.add_argument('-o', '--output', dest='output', metavar='o', action='store', help='Run the tests in the given directory')
+    cmdline_parser.add_argument('-e', '--experimental', dest='experimental', action='store_true', help='Run random tests using experimental tools.')
+
     args = cmdline_parser.parse_args()
+    tests = available_tests
+    if args.experimental:
+        tests.update(available_experimental_tests)
+
     if args.names:
         print_names(tests)
         return
+    
+    if not args.toolpath:
+        print("To run tests the --toolpath argument is required")
+        sys.exit(-1)
        
     settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
 
@@ -547,4 +589,4 @@ def main(tests):
         sys.exit(-1)
 
 if __name__ == '__main__':
-    main(available_tests)
+    main()
