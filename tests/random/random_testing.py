@@ -507,15 +507,15 @@ available_tests = {
     'pbessolve-counter-example-optimization-7'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 7, settings)                            ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     'pbes-unify-parameters'                       : lambda name, settings: Pbes_unify_parametersTest(name, settings)                                   ,
-    'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                               ,
+    'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
     'stochastic-ltscompare'                       : lambda name, settings: StochasticLtscompareTest(name, settings)                                    ,
 }
 
 available_experimental_tests = {
     'ltscombine'                                  : lambda name, settings: LtsCombineTest(name, False, settings)                                       ,
     'ltscombine-parallel'                         : lambda name, settings: LtsCombineTest(name, True, settings)                                        ,
-    'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,                                    ,
-    'pressolve'                                   : lambda name, settings: Pres2boolTest(name, settings)          
+    'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
+    'pressolve'                                   : lambda name, settings: Pres2boolTest(name, settings)                                               ,
     'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                
 }

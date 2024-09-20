@@ -35,8 +35,6 @@ foreach(type "random" "regression")
 
     set(targetname "${type}_${testname}")
 
-    message(STATUS ${testrunner} ${EXTRA_ARGS})
-
     add_test(NAME ${targetname}
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
              COMMAND ${Python_EXECUTABLE} ${testrunner} ${EXTRA_ARGS} --toolpath ${MCRL2_TOOL_PATH} --pattern ${testname})
