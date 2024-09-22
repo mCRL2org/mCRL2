@@ -20,7 +20,6 @@
 // Copyright 2020 Wieger Wesselink
 //
 /// \file mcrl2/3rdparty/sylvan/sylvan_bdd.hpp
-/// \brief add your file description here.
 
 #ifndef SYLVAN_BDD_HPP
 #define SYLVAN_BDD_HPP
@@ -67,6 +66,13 @@ class bdd
       sylvan_protect(&m_bdd);
     }
 
+    bdd(const std::uint32_t var, bdd low, bdd high)
+     : m_bdd(sylvan_makenode(var, low.get(), high.get()))
+    {
+      sylvan_protect(&m_bdd);
+    }
+
+
     bdd& operator=(const bdd& other) = default;
 
     ~bdd()
@@ -80,6 +86,11 @@ class bdd
     }
     
     int is_true() const
+    {
+      return m_bdd == sylvan_true;
+    }
+
+    int is_empty() const
     {
       return m_bdd == sylvan_true;
     }
@@ -355,6 +366,14 @@ class bdd_substitution
     {
       m_bdd = sylvan_map_add(m_bdd, index, value.get());
     }
+
+    // \brief Adds a key-value pair to the substitution
+    /// \param index The index of a bdd variable
+    /// \param value The value to replace the index by.
+    void put(std::uint32_t index, std::uint32_t value)
+    {
+      m_bdd = sylvan_map_add(m_bdd, index, sylvan_ithvar(value));
+    }
 };
 
 /// \brief Applies the substitution sigma to x.
@@ -362,6 +381,20 @@ inline bdd let(const bdd_substitution& sigma, const bdd& x)
 {
   LACE_ME;
   return bdd(sylvan_compose(x.get(), sigma.get()));
+}
+
+/// \brief Takes the conjunction of two bdds
+inline bdd bdd_and(const bdd& x, const bdd& y)
+{
+  LACE_ME;
+  return bdd(sylvan_and(x.get(), y.get()));
+}
+
+/// \brief exists variables . set ^ other  
+inline bdd and_exists(const bdd& set, const bdd& other, const bdd& variables)
+{
+    LACE_ME;
+    return bdds::bdd(sylvan_and_exists(set.get(), other.get(), variables.get()));
 }
 
 /// \brief  Computes the reverse application of a transition relation to this set.
@@ -394,6 +427,7 @@ inline bdd relnext(const bdd& relation, const bdd& x, const bdd& variables)
 }
 
 // Applies relation R to x
+inline 
 bdd relation_forward(const bdd& R, const bdd& x, const bdd& variables, const bdd_substitution& prev_substitution, bool optimized = false)
 {
   if (optimized)
@@ -405,6 +439,7 @@ bdd relation_forward(const bdd& R, const bdd& x, const bdd& variables, const bdd
 };
 
 // Applies the inverse of the relation R to x
+inline 
 bdd relation_backward(const bdd& R, const bdd& x, const bdd& next_variables, const bdd_substitution& next_substitution, bool optimized = false)
 {
   if (optimized)
@@ -440,6 +475,75 @@ inline bdd any(const std::vector<bdd>& v)
   {
     result |= *i;
   }
+  return result;
+}
+
+inline 
+bdd cube(const std::vector<std::uint32_t>& variables)
+{
+  // Create bottom up, therefore inverting the variable list.
+  bdd result = true_();
+  for (auto it = variables.rbegin(); it != variables.rend(); ++it) {
+      result = bdd(sylvan_makenode(*it, false_().get(), result.get()));
+  }
+
+  return bdd(result);
+}
+
+inline
+void bdd_solutions_callback(WorkerP*, Task*, void* context, unsigned int*, unsigned char* values, int n)
+{
+  std::vector<std::vector<int>>& V = *reinterpret_cast<std::vector<std::vector<int>>*>(context);
+  std::vector<int> result(n);
+  for (int i = 0; i < n; ++i)
+  {
+    if (values[i])
+    {
+      result[i] = values[i];
+    }
+  }
+
+  V.push_back(result);
+}
+
+inline
+void bdd_variables_callback(WorkerP*, Task*, void* context, unsigned int* vars, unsigned char* values, int n)
+{
+  std::vector<std::vector<int>>& V = *reinterpret_cast<std::vector<std::vector<int>>*>(context);
+  std::vector<int> result(n);
+  for (int i = 0; i < n; ++i)
+  {
+    if (values[i])
+    {
+      result[i] = vars[i];
+    }
+  }
+
+  V.push_back(result);
+}
+
+inline
+void enumerate(const bdd& x, const bdd& vars, enum_cb cb, void* context = nullptr)
+{
+  LACE_ME;
+  sylvan_enum(x.get(), vars.get(), cb, context);
+}
+
+/// \brief Returns int instead of std::uint8_t since the latter is not treated as a number for all intents and purposes, for example when printing.
+inline
+std::vector<std::vector<std::uint32_t>> bdd_solutions(const bdd& x, const bdd& vars)
+{
+  std::vector<std::vector<std::uint32_t>> result;
+  enumerate(x, vars, &bdd_solutions_callback, &result);
+  return result;
+}
+
+/// \brief Returns the variable vectors contained in the bdd
+inline
+std::vector<std::vector<std::uint32_t>> bdd_variables(const bdd& x, const bdd& vars)
+{
+  std::vector<std::vector<std::uint32_t>> result;
+  enumerate(x, vars, &bdd_variables_callback, &result);
   return result;
 }
 
