@@ -17,7 +17,7 @@ namespace detail
 inline bool contains_keyword_init(const std::string& input)
 {
   QRegularExpression rx("\\binit\\b", QRegularExpression::PatternOption::CaseInsensitiveOption);
-  return rx.match(QString::fromStdString(input)).isValid();
+  return rx.match(QString::fromStdString(input)).hasMatch();
 }
 
 } // end namespace detail
