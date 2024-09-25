@@ -222,6 +222,8 @@ const char *check_complexity::work_names[TRANS_gj_MAX - BLOCK_MIN + 1] =
     "create_initial_partition(): set start_incoming_transitions",
 
     // BLC slice counters
+    "refine_partition_until_it_becomes_stable(): prepare tau-co-split",
+    "refine_partition_until_it_becomes_stable(): correct the end of calM",
     "refine_partition_until_it_becomes_stable(): "
                               "select an action label and a block to be split",
 
@@ -439,6 +441,10 @@ void check_complexity::test_work_names()
 
     // BLC slice counters
     assert(check_complexity::BLC_gj_MIN == i);
+    test_work_name(i,
+                    refine_partition_until_it_becomes_stable__prepare_cosplit);
+    test_work_name(i,
+                refine_partition_until_it_becomes_stable__correct_end_of_calM);
     test_work_name(i,
         refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split);
     assert(check_complexity::BLC_gj_MAX + 1 == i);

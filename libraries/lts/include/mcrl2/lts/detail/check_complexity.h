@@ -386,11 +386,18 @@ class check_complexity
         create_initial_partition__set_start_incoming_transitions,
             STATE_gj_MAX = create_initial_partition__set_start_incoming_transitions,
 
-        // BLC slice counter
+        // BLC slice counters
+            // Invariant:
+            // 0 <= (counter value) <= ilog2 n - ilog2(source constln size)
+                // Note that it should be the source constellation size,
+                // even though the BLC slice only contains transitions
+                // from a single source block.
+        refine_partition_until_it_becomes_stable__prepare_cosplit,
+            BLC_gj_MIN = refine_partition_until_it_becomes_stable__prepare_cosplit,
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
-        refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split,
-            BLC_gj_MIN = refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split,
+            refine_partition_until_it_becomes_stable__correct_end_of_calM,
+            refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split,
             BLC_gj_MAX = refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split,
 
         // transition counters
@@ -1357,17 +1364,29 @@ class check_complexity
         /// The function additionally ensures that no work counter exceeds its
         /// maximal allowed value, based on the size of the target
         /// constellation.
+        /// \param max_sourceC  ilog2(n) - ilog2(size of source constellation)
+        ///                 Note that it should be the size of the source
+        ///                 constellation, even though the transitions all
+        ///                 start in the same block.
         /// \param max_targetC  ilog2(n) - ilog2(size of target constellation)
         /// \returns false  iff some temporary counter was nonzero.  In that
         ///                 case, also the beginning of an error message is
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned max_targetC)
+        bool no_temporary_work(unsigned max_sourceC, unsigned max_targetC)
         {
+            assert(max_sourceC <= log_n);
             assert(max_targetC <= log_n);
-            for (enum counter_type ctr = BLC_gj_MIN ;
-                       ctr <= BLC_gj_MAX ; ctr = (enum counter_type) (ctr + 1))
+            enum counter_type ctr;
+            for (ctr = BLC_gj_MIN ; ctr <
+                 refine_partition_until_it_becomes_stable__correct_end_of_calM;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BLC_gj_MIN] <= max_sourceC);
+                counters[ctr - BLC_gj_MIN] = max_sourceC;
+            }
+            for (; ctr <= BLC_gj_MAX ; ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - BLC_gj_MIN] <= max_targetC);
                 counters[ctr - BLC_gj_MIN] = max_targetC;
