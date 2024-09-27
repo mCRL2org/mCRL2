@@ -792,10 +792,6 @@ class bisim_partitioner_gj
       #endif
     }
 
-#ifndef NDEBUG // This suppresses many unused variable warnings.
-    // This function calculates the end of the transitions in BLC set ind.
-    // Because it is slow if SAVE_BLC_MEMORY, it is only defined in debug mode
-    // and should only be called in debugging functions.
   public:
     LBC_list_const_iterator calculate_end_same_BLC(const BLC_indicators& ind) const
     {
@@ -809,6 +805,12 @@ class bisim_partitioner_gj
         return ind.end_same_BLC;
       #endif
     }
+
+#ifndef NDEBUG 
+    // This suppresses many unused variable warnings.
+    // This function calculates the end of the transitions in BLC set ind.
+    // Because it is slow if SAVE_BLC_MEMORY, it is only defined in debug mode
+    // and should only be called in debugging functions.
 
     // This function counts the number of marked transitions. Because it is slow
     // if SAVE_BLC_MEMORY, it is only defined in debug mode and should only be
