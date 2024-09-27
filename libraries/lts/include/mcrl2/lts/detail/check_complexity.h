@@ -371,6 +371,7 @@ class check_complexity
             STATE_gj_MIN = split_block_B_into_R_and_BminR__carry_out_split,
         simple_splitB__find_bottom_state,
         simple_splitB__find_predecessors_of_R_or_U_state,
+        multiple_swap_states_in_block__swap_state_in_small_block,
         // temporary state counters
             // Invariant: 0 <= (counter value) <= 1
         simple_splitB_R__find_predecessors,
