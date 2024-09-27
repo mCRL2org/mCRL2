@@ -909,7 +909,9 @@ assert(!initialisation);
 
         assert(std::find(m_blocks[s.block].start_bottom_states, m_blocks[s.block].end_states,si)!=m_blocks[s.block].end_states);
 
-        const outgoing_transitions_const_it end_it1=(si+1>=m_states.size())?m_outgoing_transitions.cend():m_states[si+1].start_outgoing_transitions;
+        // The construction below is added to enable compilation on Windows. 
+        outgoing_transitions_const_it end_it1;
+        if (si+1>=m_states.size()) { end_it1=m_outgoing_transitions.cend(); } else { end_it1=m_states[si+1].start_outgoing_transitions; }
         for(outgoing_transitions_const_it it=s.start_outgoing_transitions; it!=end_it1; ++it)
         {
           const transition& t=m_aut.get_transitions()
@@ -940,7 +942,10 @@ assert(!initialisation);
         // First there are inert transitions. Then there are other transitions sorted per label
         // and constellation.
         std::unordered_set<std::pair<label_index, constellation_index> > constellations_seen;
-        const outgoing_transitions_const_it end_it2=(si+1>=m_states.size())?m_outgoing_transitions.cend():m_states[si+1].start_outgoing_transitions;
+
+        // The construction below is to enable translation on Windows. 
+        outgoing_transitions_const_it end_it2;
+        if (si+1>=m_states.size()) { end_it2=m_outgoing_transitions.cend(); } else { m_it2=m_states[si+1].start_outgoing_transitions; }
         for(outgoing_transitions_const_it it=s.start_outgoing_transitions; it!=end_it2; ++it)
         {
           const transition& t=m_aut.get_transitions()[/*initialisation?it->transition:*/m_BLC_transitions[it->transition]];
