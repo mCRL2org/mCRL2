@@ -945,7 +945,7 @@ assert(!initialisation);
 
         // The construction below is to enable translation on Windows. 
         outgoing_transitions_const_it end_it2;
-        if (si+1>=m_states.size()) { end_it2=m_outgoing_transitions.cend(); } else { m_it2=m_states[si+1].start_outgoing_transitions; }
+        if (si+1>=m_states.size()) { end_it2=m_outgoing_transitions.cend(); } else { end_it2=m_states[si+1].start_outgoing_transitions; }
         for(outgoing_transitions_const_it it=s.start_outgoing_transitions; it!=end_it2; ++it)
         {
           const transition& t=m_aut.get_transitions()[/*initialisation?it->transition:*/m_BLC_transitions[it->transition]];
