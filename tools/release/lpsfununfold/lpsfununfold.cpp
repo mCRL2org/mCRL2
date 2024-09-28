@@ -22,6 +22,8 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/enumerator.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::data;
@@ -31,6 +33,23 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
 
 using mcrl2::data::tools::rewriter_tool;
+
+
+struct replaced_function_parameter
+{
+  data::variable old_parameter;
+  std::vector<data::variable> new_parameters;
+  // The vector below enumerates all expressions in the domain of the replaced function.
+  std::vector<data::data_expression_list> domain_expressions;
+
+  replaced_function_parameter(const data::variable& v,
+                              const std::vector<data::variable>& vl,
+                              const std::vector<data::data_expression_list>& dl)
+     : old_parameter(v),
+       new_parameters(vl),
+       domain_expressions(dl)
+  {}
+};
 
 class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 {
@@ -141,31 +160,55 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
     {
       lps::stochastic_specification spec;
       load_lps(spec, input_filename());
+      set_identifier_generator fresh_name;
+      std::vector<replaced_function_parameter> representation_for_the_new_parameters;
+      rewriter R = create_rewriter(spec.data());
 
       /* lpsfununfold-cache is used to avoid the introduction of equations for already unfolded sorts */
 
-      /* data::variable_list resulting_parameters;
-      for (data::variable v: spec.proc().parameters())
+      std::vector<data::variable> resulting_parameters;
+      for (data::variable v: spec.process().process_parameters())
       {
-        if (is_function_sort(v.sort())
+        if (!is_function_sort(v.sort()))
         {
+          resulting_parameters.push_back(v);
+        }
+        else
+        {
+          // Handle variable v which has a function sort. Check whether it has a finite domain. 
           function_sort s=atermpp::down_cast<function_sort>(v.sort());
-          mCRL2log(verbose) << "Considering parameter " << v << "\n";
+          mCRL2log(verbose) << "Considering parameter " << v << ": " << v.sort() << ".\n";
 
-          for(sort_expression codom: s.codomain())
+          if (!spec.data().is_certainly_finite(s.domain()))
           {
-            if (is_certainly_finite(codom))
-            {
-              
-            }
+            mCRL2log(verbose) << "This parameter is not replaced as its domain does not seem finite.\n";
+            resulting_parameters.push_back(v);
           }
-          data::variable_list vars;
-          std::vector<data::data_expression_list>
-          enumerate(vars, true, sigma, ZZZZ
+          else
+          {
+            std::vector<data::variable> new_parameters;
+            std::vector<data::data_expression_list> new_enumerated_domain_elements(1);
+            for(std::size_t i=0; i<s.domain().size(); ++i)
+            {
+              new_parameters.emplace_back(fresh_name(v.name()), v.sort());
+              data_expression_vector new_elements=enumerate_expressions(v.sort(), spec.data(), R);
+              std::vector<data::data_expression_list> old_enumerated_domain_elements=new_enumerated_domain_elements;
+              new_enumerated_domain_elements.clear();
+              for(data_expression d: new_elements)
+              {
+                for(data_expression_list l: old_enumerated_domain_elements)
+                {
+                  new_enumerated_domain_elements.push_back(l);
+                  new_enumerated_domain_elements.back().push_front(d);
+                }
+              }
+            }
+            representation_for_the_new_parameters.emplace_back(v, new_parameters, new_enumerated_domain_elements);
+          }
         }
 
         //Calculate process parameters indices where m_unfoldsort occurs
-        if (!m_unfoldsort.empty())
+        /* if (!m_unfoldsort.empty())
         {
           m_set_index.clear();
 
@@ -208,8 +251,8 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
           rewriter R = create_rewriter(spec.data());
           lps::rewrite(spec, R);
           h_set_index.erase(index);
-        }
-      } */
+        } */
+      }
       save_lps(spec, output_filename());
 
       return true;

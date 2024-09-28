@@ -663,6 +663,23 @@ class data_specification: public sort_specification
     ///      false otherwise.
     bool is_certainly_finite(const sort_expression& s) const;
 
+    /// \brief Checks whether all sorts are certainly finite in a sort_expression_list.
+    ///
+    /// \param[in] l A sort expression list
+    /// \return true if all sorts in the list l can be determined to be finite. 
+    ///      false otherwise.
+    bool is_certainly_finite(const sort_expression_list& l) const
+    {
+      for(const data::sort_expression& s: l)
+      {
+        if (!is_certainly_finite(s))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
     /// \brief Checks whether a sort is a constructor sort
     ///
     /// \param[in] s A sort expression
