@@ -12,18 +12,16 @@
 #include <climits>
 
 //LPS framework
-#include "mcrl2/lps/io.h"
 
 //DATA
-#include "mcrl2/data/parse.h"
-
-//LPSPARUNFOLDLIB
-// #include "mcrl2/lps/lpsfununfoldlib.h"
-
 #include "mcrl2/utilities/input_output_tool.h"
+// #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/replace.h"
+
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::data;
@@ -37,19 +35,111 @@ using mcrl2::data::tools::rewriter_tool;
 
 struct replaced_function_parameter
 {
-  data::variable old_parameter;
+  // This is the list of variables that can act as the function argument for this function parameter.
+  data::variable_list function_arguments;
+  // For each element of the domain of the list of variables below contains one variable. 
   std::vector<data::variable> new_parameters;
   // The vector below enumerates all expressions in the domain of the replaced function.
   std::vector<data::data_expression_list> domain_expressions;
 
-  replaced_function_parameter(const data::variable& v,
+  replaced_function_parameter(const data::variable_list& fa,
                               const std::vector<data::variable>& vl,
                               const std::vector<data::data_expression_list>& dl)
-     : old_parameter(v),
+     : function_arguments(fa),
        new_parameters(vl),
        domain_expressions(dl)
   {}
 };
+
+data_expression equal(const variable_list& vl, data::data_expression_list dl)
+{
+  assert(vl.size()==dl.size());
+  data::data_expression result;
+  bool result_defined=false;
+  for(const data::data_expression& d: vl)
+  {
+    if (result_defined)
+    {
+      result=data::sort_bool::and_(data::equal_to(d, dl.front()), result);
+    }
+    else
+    {
+      result=data::equal_to(d, dl.front());
+      result_defined=true;
+    }
+    dl.pop_front();
+  }
+  return result;
+}
+
+void unfold_assignments_in_summands(
+           lps::stochastic_action_summand_vector& summands, 
+           std::unordered_map<variable, replaced_function_parameter>& replacement,
+           const rewriter& R)
+{                               
+  for (lps::stochastic_action_summand& summand: summands)
+  {
+    data::assignment_vector new_assignments;
+    for (const data::assignment& k: summand.assignments())
+    {
+      const std::unordered_map<variable, replaced_function_parameter>::const_iterator i=replacement.find(k.lhs());
+      if (i!=replacement.end())
+      {
+        const std::vector<data_expression_list>& dl=i->second.domain_expressions;
+        std::size_t count=0;
+        for(const variable& v: i->second.new_parameters)
+        {
+          data_expression new_rhs=R(application(k.rhs(),dl[count]));
+          if (new_rhs!=v)
+          {
+            new_assignments.emplace_back(v,new_rhs);
+          }
+          count++;
+        }
+      }
+      else
+      {
+        new_assignments.push_back(k);
+      }
+    }
+    summand.assignments() = data::assignment_list(new_assignments.begin(), new_assignments.end());
+  }
+}   
+
+void unfold_initializer(
+           lps::stochastic_process_initializer& initializer,
+           std::unordered_map<variable, replaced_function_parameter>& replacement,
+           const variable_list& old_parameters,
+           const rewriter& R)
+{                               
+std::cerr << "INITIALIZER \n";
+  data_expression_vector new_initializer;
+  variable_list::const_iterator parameter=old_parameters.begin();
+  for (const data_expression& d: initializer.expressions())
+  {       
+std::cerr << " QQQQ " << *parameter << "   " << d << "\n";
+    const std::unordered_map<variable, replaced_function_parameter>::const_iterator i=replacement.find(*parameter);
+    if (i!=replacement.end())
+    {     
+      const std::vector<data_expression_list>& dl=i->second.domain_expressions;
+      for(std::size_t count=0; count<i->second.new_parameters.size(); count++)
+      {   
+        new_initializer.push_back(R(application(d,dl[count])));
+std::cerr << "NEW NINIT " << new_initializer.back() << "\n";
+      }  
+    } 
+    else 
+    {   
+      new_initializer.push_back(d);
+    }
+    parameter++;
+  }
+  initializer=lps::stochastic_process_initializer(data_expression_list(new_initializer.begin(),new_initializer.end()),
+                                                  initializer.distribution());
+    
+}     
+
+
 
 class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 {
@@ -161,7 +251,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
       lps::stochastic_specification spec;
       load_lps(spec, input_filename());
       set_identifier_generator fresh_name;
-      std::vector<replaced_function_parameter> representation_for_the_new_parameters;
+      std::unordered_map<variable, replaced_function_parameter> representation_for_the_new_parameters;
       rewriter R = create_rewriter(spec.data());
 
       /* lpsfununfold-cache is used to avoid the introduction of equations for already unfolded sorts */
@@ -188,10 +278,12 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
           {
             std::vector<data::variable> new_parameters;
             std::vector<data::data_expression_list> new_enumerated_domain_elements(1);
-            for(std::size_t i=0; i<s.domain().size(); ++i)
+            variable_vector new_arguments;
+            for(const sort_expression& se: s.domain())
             {
-              new_parameters.emplace_back(fresh_name(v.name()), v.sort());
-              data_expression_vector new_elements=enumerate_expressions(v.sort(), spec.data(), R);
+              new_arguments.emplace_back(fresh_name("x"), se);
+              data_expression_vector new_elements=enumerate_expressions(se, spec.data(), R);
+std::cerr << "GENERATED NO ELEMS " << new_elements.size() << "\n";
               std::vector<data::data_expression_list> old_enumerated_domain_elements=new_enumerated_domain_elements;
               new_enumerated_domain_elements.clear();
               for(data_expression d: new_elements)
@@ -203,56 +295,69 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
                 }
               }
             }
-            representation_for_the_new_parameters.emplace_back(v, new_parameters, new_enumerated_domain_elements);
-          }
-        }
-
-        //Calculate process parameters indices where m_unfoldsort occurs
-        /* if (!m_unfoldsort.empty())
-        {
-          m_set_index.clear();
-
-          data::sort_expression b_sort = mcrl2::data::parse_sort_expression( m_unfoldsort, spec.data() );
-          mcrl2::data::sort_expression sort = normalize_sorts(b_sort, spec.data());
-
-
-          if (!search_sort_expression(spec.data().sorts(), sort))
-          {
-            mCRL2log(warning) << "No sorts found of name " << m_unfoldsort << std::endl;
-            break;
-          }
-          mcrl2::data::data_expression_list el = spec.initial_process().expressions();
-          std::size_t index=0;
-          for (const data_expression& e: spec.initial_process().expressions())
-          {
-            if (e.sort() == sort)
+std::cerr << "TOTAL GENERATED NO ELEMS " << new_enumerated_domain_elements.size() << "\n";
+            for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
             {
-              m_set_index.insert(index);
+              new_parameters.emplace_back(fresh_name(v.name()), s.codomain());
             }
-            index++;
-          }
-
-          if (m_set_index.empty())
-          {
-            mCRL2log(warning) << "No process parameters found of sort " << m_unfoldsort << std::endl;
-            break;
+            representation_for_the_new_parameters.insert({v, replaced_function_parameter(
+                                                                variable_list(new_arguments.begin(), new_arguments.end()), 
+                                                                new_parameters, 
+                                                                new_enumerated_domain_elements)});
           }
         }
-
-        //Unfold process parameters for calculated indices
-        std::set< std::size_t > h_set_index = m_set_index;
-
-        while (!h_set_index.empty())
-        {
-          lps::lpsfunufold lpsfununfold(spec, unfold_cache, m_alt_case_placement, m_possibly_inconsistent, !m_disable_pattern_unfolding);
-          std::size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
-          lpsfununfold.algorithm(index);
-          // Rewriting intermediate results helps counteract blowup of the intermediate results
-          rewriter R = create_rewriter(spec.data());
-          lps::rewrite(spec, R);
-          h_set_index.erase(index);
-        } */
       }
+      // Replace the function parameters by the newly generated parameters.
+
+      data::mutable_indexed_substitution sigma;
+      std::vector<data::variable> new_parameters;
+      // data::variable_list old_parameters=spec.process().process_parameters();
+      // for(const replaced_function_parameter& rfp: representation_for_the_new_parameters)
+std::cerr << "PROCESS PARS " << spec.process().process_parameters() << "\n";
+      for(const variable& v: spec.process().process_parameters())
+      {
+        const std::unordered_map<variable, replaced_function_parameter>::const_iterator i=representation_for_the_new_parameters.find(v);
+        if (i!=representation_for_the_new_parameters.end())
+        {
+          // Here par==rfp.variable. 
+          new_parameters.insert(new_parameters.end(), i->second.new_parameters.begin(), i->second.new_parameters.end());
+
+          data::variable_list new_parameters(i->second.new_parameters.begin(), i->second.new_parameters.end());
+          data::data_expression body;
+          bool body_defined=false;
+          for(const data::data_expression_list& dl: i->second.domain_expressions)
+          {
+            if (!body_defined)
+            {
+              body=application(v,dl);
+              body_defined=true;
+            }
+            else
+            {
+              body=if_(equal(i->second.function_arguments,dl),application(v,dl),body);
+            }
+          }
+          sigma[v]=lambda(i->second.function_arguments,body);
+std::cerr << "SIGMA " << v << ":=" << lambda(i->second.function_arguments,body) << "\n";
+        }
+        else
+        {
+          new_parameters.push_back(v);
+        }
+      }
+
+      variable_list old_process_parameters=spec.process().process_parameters();
+std::cerr << "PROCESS1 " << spec << "\n";
+      lps::replace_variables(spec.process(),sigma);
+std::cerr << "PROCESS2 " << spec << "\n";
+      unfold_assignments_in_summands(spec.process().action_summands(), representation_for_the_new_parameters, R);
+std::cerr << "AAAA " << atermpp::aterm(variable_list(new_parameters.begin(), new_parameters.end())) << "\n" 
+                     << variable_list(new_parameters.begin(), new_parameters.end()) << "\n";
+      unfold_initializer(spec.initial_process(), representation_for_the_new_parameters, old_process_parameters, R);
+std::cerr << "BBBBB" << spec.initial_process() << "\n";
+      spec.process().process_parameters()=variable_list(new_parameters.begin(), new_parameters.end());
+std::cerr << "CCCCC" << spec.process().process_parameters()  << "\n";
+      
       save_lps(spec, output_filename());
 
       return true;
