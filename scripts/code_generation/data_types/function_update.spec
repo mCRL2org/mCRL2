@@ -25,8 +25,9 @@ eqn  @is_not_an_update(f) -> @func_update(f,x,v) = @if_always_else(==(f(x),v),f,
                                      @func_update_stable(@func_update_stable(f,y,w), x,v));
      !=(x,y) -> @func_update_stable(f,x,v)(y) = f(y);
      @func_update_stable(f,x,v)(x) = v;
-     !=(x,y) -> @func_update(f,x,v)(y) = f(y);
-     @func_update(f,x,v)(x) = v;
+%     !=(x,y) -> @func_update(f,x,v)(y) = f(y);
+%     @func_update(f,x,v)(x) = v;
+     @func_update(f,x,v)(y) = if(==(x,y),v,f(y));
 
 % Below are the old rules. Although theoretically elegant, they require exponential time, and therefore are very slow. 
 % map @func_update <"function_update">: (S -> T) <"arg1"> # S <"arg2"> # T <"arg3"> -> (S -> T)                   external defined_by_rewrite_rules;

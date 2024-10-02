@@ -250,7 +250,8 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
     {
       lps::stochastic_specification spec;
       load_lps(spec, input_filename());
-      set_identifier_generator fresh_name;
+      set_identifier_generator fresh_name_generator;
+      fresh_name_generator.add_identifiers(lps::find_identifiers(spec));
       std::unordered_map<variable, replaced_function_parameter> representation_for_the_new_parameters;
       rewriter R = create_rewriter(spec.data());
 
@@ -281,7 +282,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
             variable_vector new_arguments;
             for(const sort_expression& se: s.domain())
             {
-              new_arguments.emplace_back(fresh_name("x"), se);
+              new_arguments.emplace_back(fresh_name_generator("x"), se);
               data_expression_vector new_elements=enumerate_expressions(se, spec.data(), R);
 std::cerr << "GENERATED NO ELEMS " << new_elements.size() << "\n";
               std::vector<data::data_expression_list> old_enumerated_domain_elements=new_enumerated_domain_elements;
@@ -298,7 +299,8 @@ std::cerr << "GENERATED NO ELEMS " << new_elements.size() << "\n";
 std::cerr << "TOTAL GENERATED NO ELEMS " << new_enumerated_domain_elements.size() << "\n";
             for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
             {
-              new_parameters.emplace_back(fresh_name(v.name()), s.codomain());
+              new_parameters.emplace_back(fresh_name_generator(v.name()), s.codomain());
+std::cerr << "FRESH NAME " << fresh_name_generator(v.name()) << "   " << v.name() << "\n";
             }
             representation_for_the_new_parameters.insert({v, replaced_function_parameter(
                                                                 variable_list(new_arguments.begin(), new_arguments.end()), 
@@ -325,17 +327,21 @@ std::cerr << "PROCESS PARS " << spec.process().process_parameters() << "\n";
           data::variable_list new_parameters(i->second.new_parameters.begin(), i->second.new_parameters.end());
           data::data_expression body;
           bool body_defined=false;
+          std::vector<data::variable>::const_iterator new_parameters_it = i->second.new_parameters.begin();
           for(const data::data_expression_list& dl: i->second.domain_expressions)
           {
             if (!body_defined)
             {
-              body=application(v,dl);
+              // body=application(v,dl);
+              body = *new_parameters_it;
               body_defined=true;
             }
             else
             {
-              body=if_(equal(i->second.function_arguments,dl),application(v,dl),body);
+              // body=if_(equal(i->second.function_arguments,dl),application(v,dl),body);
+              body=if_(equal(i->second.function_arguments,dl),*new_parameters_it,body);
             }
+            new_parameters_it++;
           }
           sigma[v]=lambda(i->second.function_arguments,body);
 std::cerr << "SIGMA " << v << ":=" << lambda(i->second.function_arguments,body) << "\n";
