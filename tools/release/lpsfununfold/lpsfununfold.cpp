@@ -112,12 +112,10 @@ void unfold_initializer(
            const variable_list& old_parameters,
            const rewriter& R)
 {                               
-std::cerr << "INITIALIZER \n";
   data_expression_vector new_initializer;
   variable_list::const_iterator parameter=old_parameters.begin();
   for (const data_expression& d: initializer.expressions())
   {       
-std::cerr << " QQQQ " << *parameter << "   " << d << "\n";
     const std::unordered_map<variable, replaced_function_parameter>::const_iterator i=replacement.find(*parameter);
     if (i!=replacement.end())
     {     
@@ -125,7 +123,6 @@ std::cerr << " QQQQ " << *parameter << "   " << d << "\n";
       for(std::size_t count=0; count<i->second.new_parameters.size(); count++)
       {   
         new_initializer.push_back(R(application(d,dl[count])));
-std::cerr << "NEW NINIT " << new_initializer.back() << "\n";
       }  
     } 
     else 
@@ -284,7 +281,6 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
             {
               new_arguments.emplace_back(fresh_name_generator("x"), se);
               data_expression_vector new_elements=enumerate_expressions(se, spec.data(), R);
-std::cerr << "GENERATED NO ELEMS " << new_elements.size() << "\n";
               std::vector<data::data_expression_list> old_enumerated_domain_elements=new_enumerated_domain_elements;
               new_enumerated_domain_elements.clear();
               for(data_expression d: new_elements)
@@ -296,11 +292,9 @@ std::cerr << "GENERATED NO ELEMS " << new_elements.size() << "\n";
                 }
               }
             }
-std::cerr << "TOTAL GENERATED NO ELEMS " << new_enumerated_domain_elements.size() << "\n";
             for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
             {
               new_parameters.emplace_back(fresh_name_generator(v.name()), s.codomain());
-std::cerr << "FRESH NAME " << fresh_name_generator(v.name()) << "   " << v.name() << "\n";
             }
             representation_for_the_new_parameters.insert({v, replaced_function_parameter(
                                                                 variable_list(new_arguments.begin(), new_arguments.end()), 
@@ -315,7 +309,6 @@ std::cerr << "FRESH NAME " << fresh_name_generator(v.name()) << "   " << v.name(
       std::vector<data::variable> new_parameters;
       // data::variable_list old_parameters=spec.process().process_parameters();
       // for(const replaced_function_parameter& rfp: representation_for_the_new_parameters)
-std::cerr << "PROCESS PARS " << spec.process().process_parameters() << "\n";
       for(const variable& v: spec.process().process_parameters())
       {
         const std::unordered_map<variable, replaced_function_parameter>::const_iterator i=representation_for_the_new_parameters.find(v);
@@ -344,7 +337,6 @@ std::cerr << "PROCESS PARS " << spec.process().process_parameters() << "\n";
             new_parameters_it++;
           }
           sigma[v]=lambda(i->second.function_arguments,body);
-std::cerr << "SIGMA " << v << ":=" << lambda(i->second.function_arguments,body) << "\n";
         }
         else
         {
@@ -353,16 +345,10 @@ std::cerr << "SIGMA " << v << ":=" << lambda(i->second.function_arguments,body) 
       }
 
       variable_list old_process_parameters=spec.process().process_parameters();
-std::cerr << "PROCESS1 " << spec << "\n";
       lps::replace_variables(spec.process(),sigma);
-std::cerr << "PROCESS2 " << spec << "\n";
       unfold_assignments_in_summands(spec.process().action_summands(), representation_for_the_new_parameters, R);
-std::cerr << "AAAA " << atermpp::aterm(variable_list(new_parameters.begin(), new_parameters.end())) << "\n" 
-                     << variable_list(new_parameters.begin(), new_parameters.end()) << "\n";
       unfold_initializer(spec.initial_process(), representation_for_the_new_parameters, old_process_parameters, R);
-std::cerr << "BBBBB" << spec.initial_process() << "\n";
       spec.process().process_parameters()=variable_list(new_parameters.begin(), new_parameters.end());
-std::cerr << "CCCCC" << spec.process().process_parameters()  << "\n";
       
       save_lps(spec, output_filename());
 
