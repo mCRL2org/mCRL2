@@ -42,13 +42,13 @@ public:
 ///
 /// \param syncs The list of synchronisations
 /// \param actions The list of actions to be matched.
-/// \returns The index of the matching synchronisation, or -1 when no matching synchronisation is found.
+/// \returns The index of the matching synchronisation, or max value when no matching synchronisation is found.
 size_t get_sync(std::vector<core::identifier_string_list>& syncs, core::identifier_string_list& action_names)
 {
   // A synchronising action must consist of two or more action labels
   if (action_names.size() < 2)
   {
-    return -1;
+    return std::numeric_limits<std::size_t>::max();
   }
 
   for (auto it = syncs.begin(); it != syncs.end(); it++)
@@ -59,7 +59,7 @@ size_t get_sync(std::vector<core::identifier_string_list>& syncs, core::identifi
     }
   }
 
-  return -1;
+  return std::numeric_limits<std::size_t>::max();
 }
 
 /// \brief Convert and sort an action_list to an
@@ -419,7 +419,7 @@ private:
 
       mCRL2log(log::debug) << core::pp(action_names) << std::endl;
 
-      if (can_sync(combo.first) && (sync_index = get_sync(syncs, action_names)) != -1)
+      if (can_sync(combo.first) && (sync_index = get_sync(syncs, action_names)) != std::numeric_limits<std::size_t>::max())
       {
         // Synchronise
         core::identifier_string result_action = resulting_actions[sync_index];
