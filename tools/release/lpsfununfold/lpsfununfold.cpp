@@ -265,11 +265,10 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
         {
           // Handle variable v which has a function sort. Check whether it has a finite domain. 
           function_sort s=atermpp::down_cast<function_sort>(v.sort());
-          mCRL2log(verbose) << "Considering parameter " << v << ": " << v.sort() << ".\n";
 
           if (!spec.data().is_certainly_finite(s.domain()))
           {
-            mCRL2log(verbose) << "This parameter is not replaced as its domain does not seem finite.\n";
+            mCRL2log(verbose) << "The process parameter " << v << ":" << v.sort() << " is not replaced as its domain does not seem finite.\n";
             resulting_parameters.push_back(v);
           }
           else
@@ -296,6 +295,8 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
             {
               new_parameters.emplace_back(fresh_name_generator(v.name()), s.codomain());
             }
+            mCRL2log(verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by " 
+                              << new_enumerated_domain_elements.size() << " new parameters.\n";
             representation_for_the_new_parameters.insert({v, replaced_function_parameter(
                                                                 variable_list(new_arguments.begin(), new_arguments.end()), 
                                                                 new_parameters, 
