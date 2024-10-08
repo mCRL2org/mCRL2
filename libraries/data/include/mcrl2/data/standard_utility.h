@@ -220,7 +220,7 @@ inline std::list<data_expression> split_disjunction(const data_expression& condi
 
   while (!todo.empty())
   {
-    const data::data_expression& expr = todo.front();
+    data::data_expression expr = todo.front();
     todo.pop();
 
     if (sort_bool::is_or_application(expr))
