@@ -360,7 +360,7 @@ class check_complexity
         refine_partition_until_it_becomes_stable__find_splitter,
             BLOCK_gj_MIN =
                        refine_partition_until_it_becomes_stable__find_splitter,
-        hatU_does_not_cover_B_bottom__handle_bottom_states_and_their_outgoing_transitions_in_splitter,
+        //hatU_does_not_cover_B_bottom__handle_bottom_states_and_their_outgoing_transitions_in_splitter,
             // Invariant: 0 <= (counter value) <= ilog2 n - ilog2(block size)
         splitB__update_BLC_of_smaller_subblock,
             BLOCK_gj_MAX = splitB__update_BLC_of_smaller_subblock,
@@ -382,7 +382,7 @@ class check_complexity
         // bottom state counters
         stabilizeB__prepare_block,
         stabilizeB__distribute_states_over_Phat,
-        stabilizeB__group_outgoing_transitions,
+        //stabilizeB__group_outgoing_transitions,
         // other state counter
             // Invariant: 0 <= (counter value) <= 1
         create_initial_partition__set_start_incoming_transitions,
@@ -413,12 +413,12 @@ class check_complexity
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
         simple_splitB__do_not_add_state_with_transition_in_splitter_to_U,
-        not_all_bottom_states_are_touched__mark_source_state,
-        some_bottom_state_has_no_outgoing_co_transition__handle_transition,
-        group_in_situ__count_transitions_per_block,
-        group_in_situ__swap_transition,
-        group_in_situ__skip_to_next_block,
-        create_initial_partition__select_action_label_and_block_to_be_split,
+        //not_all_bottom_states_are_touched__mark_source_state,
+        //some_bottom_state_has_no_outgoing_co_transition__handle_transition,
+        //group_in_situ__count_transitions_per_block,
+        //group_in_situ__swap_transition,
+        //group_in_situ__skip_to_next_block,
+        //create_initial_partition__select_action_label_and_block_to_be_split,
         refine_partition_until_it_becomes_stable__find_cotransition,
         // temporary transition counters
         simple_splitB_R__handle_transition_from_R_state, // target constellation size
@@ -431,10 +431,14 @@ class check_complexity
         // counters for transitions starting in (new) bottom states
             // Invariant: 0 <= (counter value) <= (source is a bottom state)
         simple_splitB__test_outgoing_transitions_found_new_bottom_state,
+        splitB__unmark_transitions_out_of_new_bottom_block,
+        splitB__unmark_transitions_out_of_new_bottom_block_afterwards,
         stabilizeB__initialize_Qhat,
         stabilizeB__initialize_Qhat_afterwards,
-        W_empty__find_new_bottom_state_in_R,
-        change_non_bottom_state_to_bottom_state__adapt_BLC,
+        stabilizeB__main_loop,
+        stabilizeB__main_loop_afterwards,
+        //W_empty__find_new_bottom_state_in_R,
+        //change_non_bottom_state_to_bottom_state__adapt_BLC,
         // other transition counters
             // Invariant: 0 <= (counter value) <= 1
         create_initial_partition__set_transitions_per_block_to_constellation,
