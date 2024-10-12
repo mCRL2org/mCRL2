@@ -218,6 +218,7 @@ const char *check_complexity::work_names[TRANS_gj_MAX - BLOCK_MIN + 1] =
     "simple_splitB(): find predecessors of a state in R",
     "simple_splitB(): find a bottom state in U",
     "simple_splitB(): find predecessors of a state in U",
+    "stabilizeB(): prepare a block with new bottom states",
     "stabilizeB(): distribute states over Phat",
     "stabilizeB(): group outgoing transitions",
     "create_initial_partition(): set start_incoming_transitions",
@@ -436,6 +437,7 @@ void check_complexity::test_work_names()
     test_work_name(i, simple_splitB_U__find_bottom_state);
     test_work_name(i, simple_splitB_U__find_predecessors);
     assert(check_complexity::STATE_gj_MAX_TEMP + 1 == i);
+    test_work_name(i, stabilizeB__prepare_block);
     test_work_name(i, stabilizeB__distribute_states_over_Phat);
     test_work_name(i, stabilizeB__group_outgoing_transitions);
     test_work_name(i,create_initial_partition__set_start_incoming_transitions);

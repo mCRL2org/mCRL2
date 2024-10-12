@@ -379,7 +379,8 @@ class check_complexity
         simple_splitB_U__find_bottom_state,
         simple_splitB_U__find_predecessors,
             STATE_gj_MAX_TEMP = simple_splitB_U__find_predecessors,
-        // bottom state counter
+        // bottom state counters
+        stabilizeB__prepare_block,
         stabilizeB__distribute_states_over_Phat,
         stabilizeB__group_outgoing_transitions,
         // other state counter
