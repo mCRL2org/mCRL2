@@ -10,7 +10,7 @@ analysis techniques for labelled transition systems (LTS's).
 
 In the analysis mode, the tool allows the user to cluster states based on
 selected attributes. The clusters are visualized in a hierarchical pyramid
-structure were transitions between clusters are shown by arcs. The simulation
+structure where transitions between clusters are shown by arcs. The simulation
 view gives the user the facility to navigate through the transition graph and
 shows the effect of actions on the configuration. The integrated edit mode
 allows the user to create such a configuration. A configuration consists of
