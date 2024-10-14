@@ -322,24 +322,10 @@ std::string print_read_write_patterns(const std::vector<boost::dynamic_bitset<>>
   };
 
   std::ostringstream out;
-  out << "used parameters" << std::endl;
-  for (std::size_t i = 0; i < patterns.size(); i++)
-  {
-    out << std::setw(4) << i << " " << print_used(patterns[i]) << std::endl;
-  }
-  out << std::endl;
-
-  out << "read/write patterns" << std::endl;
-  for (std::size_t i = 0; i < patterns.size(); i++)
-  {
-    out << std::setw(4) << i << " " << print_rw(patterns[i]) << std::endl;
-  }
-  out << std::endl;
-
   out << "read/write patterns compacted" << std::endl;
   for (std::size_t i = 0; i < patterns.size(); i++)
   {
-    out << std::setw(4) << i << " " << print_compact(patterns[i]) << std::endl;
+    out << std::setw(4) << (i+1) << " " << print_compact(patterns[i]) << std::endl;
   }
   return out.str();
 }
