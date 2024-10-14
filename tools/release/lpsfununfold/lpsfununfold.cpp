@@ -271,7 +271,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 
     }
 
-    void add_fset_rewrite_rules(const sort_expression& s, data_specification& data_spec)
+    bool add_fset_rewrite_rules(const sort_expression& s, data_specification& data_spec)
     {
       static std::unordered_set<sort_expression> sorts_for_which_extra_rewrite_rules_have_been_generated;
       bool no_equations_added_yet=sorts_for_which_extra_rewrite_rules_have_been_generated.empty();
@@ -298,7 +298,9 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
           // equation: if(b,true,false)=b.
           data_spec.add_equation(data_equation(variable_list({vb}),if_(vb,sort_bool::true_(),sort_bool::false_()), vb));
         }
+        return true;
       }
+      return false;
     }
 
   public:
@@ -307,10 +309,11 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
       : super(
         "lpsfununfold",
         "Jan Friso Groote",
-        "Unfolds process parameter of type function sort with a finite domain",
-        "Unfolds each parameters with a function type D1#D2#...#Dn -> D into a sequence "
-        "of parameters of sort D in the lps "
-        "in INFILE and writes the result to OUTFILE. If INFILE is not present, stdin is "
+        "Unfolds process parameters of type function sort and fset with a finite domain",
+        "Unfolds each parameter with a function type D1#D2#...#Dn -> D into a sequence "
+        "of parameters of sort D in the lps, and each parameter of type fset(D) into a sequence of boolean "
+        "variables. The number of variables is equal to the number of elements in D1#...#Dn, resp. D. "
+        "The input is taken from INFILE and writes the result to OUTFILE. If INFILE is not present, stdin is "
         "used. If OUTFILE is not present, stdout is used."
       )
     {}
@@ -327,6 +330,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
       rewriter R = create_rewriter(spec.data());
 
       std::vector<data::variable> resulting_parameters;
+      bool new_rewrite_rules_added=false;
       for (data::variable v: spec.process().process_parameters())
       {
         if (is_function_sort(v.sort()))
@@ -390,30 +394,40 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
             }
             else
             { 
-              std::vector<data::variable> new_parameters;
-              variable_vector new_arguments; 
-              
-              new_arguments.emplace_back(fresh_name_generator("x"), s.element_sort());
-              std::vector<data::data_expression_list> new_enumerated_domain_elements;
-              data_expression_vector new_elements=enumerate_expressions(s.element_sort(), spec.data(), R);
-              for(data_expression d: new_elements)
-              {
-                data_expression_list l;
-                l.push_front(d);
-                new_enumerated_domain_elements.push_back(l);
-              }
-              const sort_expression target_sort=(is_fset_container(t) || is_set_container(t)? sort_bool::bool_(): sort_nat::nat());
-              
-              for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
+              if (is_fset_container(t)) 
               { 
-                new_parameters.emplace_back(fresh_name_generator(v.name()), target_sort);
+                new_rewrite_rules_added=new_rewrite_rules_added||add_fset_rewrite_rules(s.element_sort(), spec.data());
+              
+                std::vector<data::variable> new_parameters;
+                variable_vector new_arguments; 
+                
+                new_arguments.emplace_back(fresh_name_generator("x"), s.element_sort());
+                std::vector<data::data_expression_list> new_enumerated_domain_elements;
+                data_expression_vector new_elements=enumerate_expressions(s.element_sort(), spec.data(), R);
+                for(data_expression d: new_elements)
+                {
+                  data_expression_list l;
+                  l.push_front(d);
+                  new_enumerated_domain_elements.push_back(l);
+                }
+                const sort_expression target_sort=(is_fset_container(t) || is_set_container(t)? sort_bool::bool_(): sort_nat::nat());
+                
+                for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
+                { 
+                  new_parameters.emplace_back(fresh_name_generator(v.name()), target_sort);
+                }
+                mCRL2log(verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by "
+                                  << new_enumerated_domain_elements.size() << " new parameters.\n";
+                representation_for_the_new_parameters.insert({v, replaced_function_parameter(
+                                                                    variable_list(new_arguments.begin(), new_arguments.end()),
+                                                                    new_parameters, 
+                                                                    new_enumerated_domain_elements)});
               }
-              mCRL2log(verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by "
-                                << new_enumerated_domain_elements.size() << " new parameters.\n";
-              representation_for_the_new_parameters.insert({v, replaced_function_parameter(
-                                                                  variable_list(new_arguments.begin(), new_arguments.end()),
-                                                                  new_parameters, 
-                                                                  new_enumerated_domain_elements)});
+              else
+              {
+                mCRL2log(verbose) << "The process parameter " << v << ":" << v.sort() << " is of type set, bag or fbag, which are not yet handled..\n";
+                resulting_parameters.push_back(v);
+              }
             }
           }
 
@@ -422,6 +436,10 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
         {
           resulting_parameters.push_back(v);
         }
+      }
+      if (new_rewrite_rules_added)
+      {
+        R = create_rewriter(spec.data());
       }
       // Replace the function parameters by the newly generated parameters.
 
@@ -456,7 +474,6 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
                 const container_type& t=s.container_name();
                 if (is_fset_container(t))
                 {
-                  add_fset_rewrite_rules(s.element_sort(), spec.data());
                   body = if_(*new_parameters_it,
                                   sort_fset::insert(s.element_sort(), dl.front(),sort_fset::empty(s.element_sort())),
                                   sort_fset::empty(s.element_sort()));
