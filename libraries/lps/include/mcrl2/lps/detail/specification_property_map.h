@@ -29,9 +29,9 @@ namespace detail
 /// \brief Stores the following properties of a linear process specification:
 /// <table>
 /// <tr><th>property                    </th><th>description                                 </th><th>format                                </th></tr>
-/// <tr><td>summand_count               </td><td>The number of summands                      </td><td>NUMBER                                </td></tr>
+/// <tr><td>action_summand_count        </td><td>The number of action summands               </td><td>NUMBER                                </td></tr>
 /// <tr><td>tau_summand_count           </td><td>The number of tau summands                  </td><td>NUMBER                                </td></tr>
-/// <tr><td>delta_summand_count         </td><td>The number of delta summands                </td><td>NUMBER                                </td></tr>
+/// <tr><td>delta_summand_count         </td><td>The number of delta/deadlock summands       </td><td>NUMBER                                </td></tr>
 /// <tr><td>declared_free_variables     </td><td>The declared free variables                 </td><td>NAME:SORT; ... ; NAME:SORT            </td></tr>
 /// <tr><td>declared_free_variable_names</td><td>The names of the declared free variables    </td><td>NAME; ... ; NAME                      </td></tr>
 /// <tr><td>declared_variable_count     </td><td>The number of declared free variables       </td><td>NUMBER                                </td></tr>
@@ -238,6 +238,7 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
     specification_property_map(const Specification& spec)
     {
       std::size_t                            summand_count           = spec.process().summand_count();
+      std::size_t                            action_summand_count    = spec.process().action_summands().size();
       std::size_t                            tau_summand_count       = compute_tau_summand_count(spec);
       std::size_t                            delta_summand_count     = spec.process().deadlock_summands().size();
       const std::set<data::variable>&               declared_free_variables = spec.global_variables();
@@ -250,6 +251,7 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
       auto                                   used_multi_actions      = compute_used_multi_actions(spec);
 
       m_data["summand_count"               ] = print(summand_count);
+      m_data["action_summand_count"        ] = print(action_summand_count);
       m_data["tau_summand_count"           ] = print(tau_summand_count);
       m_data["delta_summand_count"         ] = print(delta_summand_count);
       m_data["declared_free_variables"     ] = print(declared_free_variables, false);
@@ -282,7 +284,8 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
     std::string info() const
     {
       std::ostringstream out;
-      out << "Number of summands                  : " << (*this)["summand_count"               ] << "\n";
+      out << "Number of action summands           : " << (*this)["action_summand_count"        ] << "\n";
+      out << "Number of deadlock/delta summands   : " << (*this)["delta_summand_count"         ] << "\n";
       out << "Number of tau-summands              : " << (*this)["tau_summand_count"           ] << "\n";
       out << "Number of declared global variables : " << (*this)["declared_free_variable_count"] << "\n";
       out << "Number of process parameters        : " << (*this)["process_parameter_count"     ] << "\n";
