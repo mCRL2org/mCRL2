@@ -89,12 +89,34 @@ void unfold_assignments_in_summands(
         std::size_t count=0;
         for(const variable& v: i->second.new_parameters)
         {
-          data_expression new_rhs=R(application(k.rhs(),dl[count]));
-          if (new_rhs!=v)
+          if (is_function_sort(k.lhs().sort()))
           {
-            new_assignments.emplace_back(v,new_rhs);
+            data_expression new_rhs=R(application(k.rhs(),dl[count]));
+            if (new_rhs!=v)
+            {
+              new_assignments.emplace_back(v,new_rhs);
+            }
+            count++;
           }
-          count++;
+          else if (is_container_sort(k.lhs().sort()))
+          {
+            const container_sort& s=atermpp::down_cast<container_sort>(k.lhs().sort());
+            const container_type& t=s.container_name();
+            if (is_fset_container(t))
+            {
+              data_expression new_rhs=R(sort_fset::in(s.element_sort(),dl[count].front(),k.rhs()));
+              if (new_rhs!=v)
+              {
+                new_assignments.emplace_back(v, new_rhs);
+              }
+              count++;
+            }
+            // TODO set, bag, fbag.
+            else 
+            {
+              new_assignments.push_back(k);
+            }
+          }
         }
       }
       else
@@ -122,8 +144,30 @@ void unfold_initializer(
       const std::vector<data_expression_list>& dl=i->second.domain_expressions;
       for(std::size_t count=0; count<i->second.new_parameters.size(); count++)
       {   
-        new_initializer.push_back(R(application(d,dl[count])));
+        if (is_function_sort(d.sort()))
+        {
+          new_initializer.push_back(R(application(d,dl[count])));
+        }
+        else if (is_container_sort(d.sort()))
+        {
+          const container_sort& s=atermpp::down_cast<container_sort>(d.sort());
+          const container_type& t=s.container_name();
+          if (is_fset_container(t))
+          {
+            new_initializer.push_back(R(sort_fset::in(s.element_sort(),dl[count].front(),d)));
+          }
+          else if (is_set_container(t))
+          {
+            new_initializer.push_back(R(sort_set::in(s.element_sort(),dl[count].front(),d)));
+          }
+          // TODO set, bag, fbag. 
+          else // container is a list, which is not expanded.
+          {
+            new_initializer.push_back(d);
+          }
+        }
       }  
+      
     } 
     else 
     {   
@@ -227,6 +271,36 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 
     }
 
+    void add_fset_rewrite_rules(const sort_expression& s, data_specification& data_spec)
+    {
+      static std::unordered_set<sort_expression> sorts_for_which_extra_rewrite_rules_have_been_generated;
+      bool no_equations_added_yet=sorts_for_which_extra_rewrite_rules_have_been_generated.empty();
+      if (sorts_for_which_extra_rewrite_rules_have_been_generated.insert(s).second)
+      {
+        variable vb("b",sort_bool::bool_());
+        variable vd("d",s);
+        variable vs("s",sort_fset::fset(s));
+        variable vt("t",sort_fset::fset(s));
+        // Equation: d in s+t = d in s || d in t.
+        data_spec.add_equation(data_equation(variable_list({vd, vs, vt}), 
+                               sort_fset::in(s, vd, sort_fset::union_(s, vs, vt)), 
+                               sort_bool::or_(sort_fset::in(s, vd, vs), sort_fset::in(s, vd, vt))));
+        // Equation: d in s-t = d in s && !(d in t).
+        data_spec.add_equation(data_equation(variable_list({vd, vs, vt}), 
+                               sort_fset::in(s, vd, sort_fset::difference(s, vs, vt)), 
+                               sort_bool::and_(sort_fset::in(s, vd, vs), sort_bool::not_(sort_fset::in(s, vd, vt)))));
+        // Equation: d in if(b,s,t) = if(b, d in s, d in t).
+        data_spec.add_equation(data_equation(variable_list({vb, vd, vs, vt}), 
+                               sort_fset::in(s, vd, if_(vb, vs, vt)), 
+                               if_(vb, sort_fset::in(s, vd, vs), sort_fset::in(s, vd, vt))));
+        if (no_equations_added_yet)
+        {
+          // equation: if(b,true,false)=b.
+          data_spec.add_equation(data_equation(variable_list({vb}),if_(vb,sort_bool::true_(),sort_bool::false_()), vb));
+        }
+      }
+    }
+
   public:
 
     lpsfununfold_tool()
@@ -252,19 +326,13 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
       std::unordered_map<variable, replaced_function_parameter> representation_for_the_new_parameters;
       rewriter R = create_rewriter(spec.data());
 
-      /* lpsfununfold-cache is used to avoid the introduction of equations for already unfolded sorts */
-
       std::vector<data::variable> resulting_parameters;
       for (data::variable v: spec.process().process_parameters())
       {
-        if (!is_function_sort(v.sort()))
-        {
-          resulting_parameters.push_back(v);
-        }
-        else
+        if (is_function_sort(v.sort()))
         {
           // Handle variable v which has a function sort. Check whether it has a finite domain. 
-          function_sort s=atermpp::down_cast<function_sort>(v.sort());
+          const function_sort& s=atermpp::down_cast<function_sort>(v.sort());
 
           if (!spec.data().is_certainly_finite(s.domain()))
           {
@@ -303,6 +371,57 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
                                                                 new_enumerated_domain_elements)});
           }
         }
+        else if (is_container_sort(v.sort()))
+        {
+          const container_sort& s=atermpp::down_cast<container_sort>(v.sort());
+          const container_type& t=s.container_name();
+          
+          if (is_list_container(t))
+          {
+            resulting_parameters.push_back(v);  // A list container is not replaced.
+          }
+          else
+          { // This is an fset, set, fbag or bag container.
+            assert(is_fset_container(t) || is_fbag_container(t) || is_fbag_container(t) || is_bag_container(t));
+            if (!spec.data().is_certainly_finite(s.element_sort()))
+            { 
+              mCRL2log(verbose) << "The process parameter " << v << ":" << v.sort() << " is not replaced as its domain does not seem finite.\n";
+              resulting_parameters.push_back(v);
+            }
+            else
+            { 
+              std::vector<data::variable> new_parameters;
+              variable_vector new_arguments; 
+              
+              new_arguments.emplace_back(fresh_name_generator("x"), s.element_sort());
+              std::vector<data::data_expression_list> new_enumerated_domain_elements;
+              data_expression_vector new_elements=enumerate_expressions(s.element_sort(), spec.data(), R);
+              for(data_expression d: new_elements)
+              {
+                data_expression_list l;
+                l.push_front(d);
+                new_enumerated_domain_elements.push_back(l);
+              }
+              const sort_expression target_sort=(is_fset_container(t) || is_set_container(t)? sort_bool::bool_(): sort_nat::nat());
+              
+              for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
+              { 
+                new_parameters.emplace_back(fresh_name_generator(v.name()), target_sort);
+              }
+              mCRL2log(verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by "
+                                << new_enumerated_domain_elements.size() << " new parameters.\n";
+              representation_for_the_new_parameters.insert({v, replaced_function_parameter(
+                                                                  variable_list(new_arguments.begin(), new_arguments.end()),
+                                                                  new_parameters, 
+                                                                  new_enumerated_domain_elements)});
+            }
+          }
+
+        }
+        else
+        {
+          resulting_parameters.push_back(v);
+        }
       }
       // Replace the function parameters by the newly generated parameters.
 
@@ -326,18 +445,57 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
           {
             if (!body_defined)
             {
-              // body=application(v,dl);
-              body = *new_parameters_it;
-              body_defined=true;
+              if (is_function_sort(v.sort()))
+              {
+                body = *new_parameters_it;
+                body_defined=true;
+              }
+              else if (is_container_sort(v.sort()))
+              {
+                const container_sort& s=atermpp::down_cast<container_sort>(v.sort());
+                const container_type& t=s.container_name();
+                if (is_fset_container(t))
+                {
+                  add_fset_rewrite_rules(s.element_sort(), spec.data());
+                  body = if_(*new_parameters_it,
+                                  sort_fset::insert(s.element_sort(), dl.front(),sort_fset::empty(s.element_sort())),
+                                  sort_fset::empty(s.element_sort()));
+                  body_defined=true;
+                }
+                // TODO: set, fbag, bag.
+              }
             }
             else
             {
-              // body=if_(equal(i->second.function_arguments,dl),application(v,dl),body);
-              body=if_(equal(i->second.function_arguments,dl),*new_parameters_it,body);
+              if (is_function_sort(v.sort()))
+              {
+                body=if_(equal(i->second.function_arguments,dl),*new_parameters_it,body);
+              }
+              else if (is_container_sort(v.sort()))
+              {
+                const container_sort& s=atermpp::down_cast<container_sort>(v.sort());
+                const container_type& t=s.container_name();
+                if (is_fset_container(t))
+                {
+                  body = sort_fset::union_(s.element_sort(),
+                                           if_(*new_parameters_it, 
+                                               sort_fset::insert(s.element_sort(), dl.front(), sort_fset::empty(s.element_sort())),
+                                               sort_fset::empty(s.element_sort())),
+                                           body);
+                }
+                // TODO: set, fbag, bag.
+              }
             }
             new_parameters_it++;
           }
-          sigma[v]=lambda(i->second.function_arguments,body);
+          if (is_function_sort(v.sort()))
+          {
+            sigma[v]=lambda(i->second.function_arguments,body);
+          }
+          else
+          {
+            sigma[v]=body;
+          }
         }
         else
         {
@@ -349,6 +507,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
       lps::replace_variables(spec.process(),sigma);
       unfold_assignments_in_summands(spec.process().action_summands(), representation_for_the_new_parameters, R);
       unfold_initializer(spec.initial_process(), representation_for_the_new_parameters, old_process_parameters, R);
+      assert(spec.initial_process().expressions().size()==new_parameters.size());
       spec.process().process_parameters()=variable_list(new_parameters.begin(), new_parameters.end());
       
       save_lps(spec, output_filename());
