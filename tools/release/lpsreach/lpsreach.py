@@ -73,13 +73,18 @@ def run_command(command_line, timeout=1000):
         error = error.decode("utf-8")
     return str(output) + str(error)
 
+def is_used(entry: str):
+    if entry == "-":
+        return "0"
+
+    return "1"
 
 def parse_read_write_matrix(text):
-    m = re.search(r'used parameters\s*(.*?)\s*read', text, flags=re.DOTALL)
+    m = re.search(r'read/write patterns compacted\n(.*)\nNone?', text, flags=re.DOTALL)
     rows = [re.sub(r'^\s*\d+\s*', '', line) for line in m.group(1).split('\n')]
     n = len(rows)
     m = len(rows[0])
-    columns = [[rows[i][j] for i in range(n)] for j in range(m)]
+    columns = [[is_used(rows[i][j]) for i in range(n)] for j in range(m)]
     return columns
 
 
