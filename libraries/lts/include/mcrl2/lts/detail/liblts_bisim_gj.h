@@ -2117,14 +2117,14 @@ assert(!initialisation);
 //std::cerr << "MOVE STATE TO NEW BLOCK: " << s << "\n";
         assert(B == m_states[s].block);
         m_states[s].block=B_new;
-        typename std::vector<state_index>::iterator pos=m_states[s].ref_states_in_blocks;
-        assert(pos < m_blocks[B].start_non_bottom_states); // the state is a bottom state.
+        assert(m_states[s].ref_states_in_blocks < m_blocks[B_new].start_non_bottom_states); // the state is a bottom state.
       }
       for(state_index s: R)
       {
         mCRL2complexity_gj(&m_states[s], add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split,
                 max_B), *this);
 //std::cerr << "MOVE STATE TO NEW BLOCK: " << s << "\n";
+        assert(B == m_states[s].block);
         m_states[s].block=B_new;
         typename std::vector<state_index>::iterator pos=m_states[s].ref_states_in_blocks;
         assert(pos>=m_blocks[B].start_non_bottom_states); // the state is a non bottom state.
@@ -2469,7 +2469,20 @@ assert(!initialisation);
                     }
 //else { std::cerr << (old_constellation == to_constln ? "This candidate is at the beginning of m_BLC_transitions. There is no new main splitter yet.\n" : "This candidate is at the beginning of m_BLC_transitions. There is no new co-splitter yet.\n"); }
                   }
-//else { std::cerr << (old_constellation == to_constln ? "There is no candidate old main splitter.\n" : "There is no candidate old co-splitter.\n"); }
+                  else
+                  {
+                    // this_block_to_constellation is a main splitter
+                    // but it has no corresponding co-splitter.
+                    // If it becomes empty, one can immediately delete it.
+                    old_constellation = null_constellation;
+//std::cerr << (old_constellation == to_constln ? "There is no candidate old main splitter.\n" : "There is no candidate old co-splitter.\n");
+                  }
+                }
+                else
+                {
+                  // this_block_to_constellation is neither a main splitter nor a co-splitter.
+                  // If it becomes empty, one can immediately delete it.
+                  old_constellation = null_constellation;
                 }
               }
               if (!co_block_found)
@@ -2490,6 +2503,10 @@ assert(!initialisation);
                       new_position = perhaps_inert;
                     }
                   }
+                  // one can avoid the check above if one inserts an empty BLC set
+                  // for the inert transitions in m_blocks[new_bi].block_to_constellation
+                  // before starting the calls to update_the_doubly_linked_list_LBC_new_block().
+                  // This is necessary #ifdef SAVE_BLC_MEMORY.
                 }
               }
             }
@@ -2521,8 +2538,13 @@ assert(!initialisation);
             // Sometimes we could still remove this_block_to_constellation immediately
             // (namely if the new main splitter and the new co-splitter already exist,
             // or if the old co-splitter does not exist at all).
-            // Two small such cases is handled above,
-            // but other cases would require additional, possibly extensive, checks.
+            // A few small such cases are handled above,
+            // but other cases would require additional, possibly extensive, checks:
+            // if (co_block_found) {
+            //   copy more or less the code from above that decides
+            //   whether this_block_to_constellation is a main splitter
+            //   that has an old co-splitter but not a new co-splitter or vice versa.
+            // }
             m_BLC_indicators_to_be_deleted.push_back(this_block_to_constellation);
           }
           else
@@ -3188,6 +3210,17 @@ assert(!initialisation);
                                 m_blocks[B].block_to_constellation, splitter);
         skip_transitions_in_splitter = true;
       }
+      #ifdef SAVE_BLC_MEMORY
+        //if (m_branching)
+        //{
+          // one might insert an empty BLC set into m_blocks[bi].block_to_constellation
+          // for the inert transitions out of m_blocks[bi],
+          // to avoid the need to check whether such a BLC set already exists
+          // in update_the_doubly_linked_list_LBC_new_block().
+          // This set, if it remains empty, will need to be deleted
+          // after updating the BLC sets.
+        //}
+      #endif
       // Recall new LBC positions.
       for(typename std::vector<state_index>::iterator ssi=m_blocks[bi].start_bottom_states;
                                                       ssi!=m_blocks[bi].end_states;
