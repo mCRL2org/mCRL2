@@ -2127,9 +2127,14 @@ assert(!initialisation);
     }
 
     // Move the content if i1 to i2, i2 to i3 and i3 to i1.
-    void swap_three_iterators_and_update_m_transitions(const BLC_list_iterator& i1, const BLC_list_iterator& i2, const BLC_list_iterator& i3)
+    void swap_three_iterators_and_update_m_transitions(const BLC_list_iterator i1, const BLC_list_iterator i2, const BLC_list_iterator i3)
     {
-      assert(i1!=i3);
+      assert(i3<=i2);
+      assert(i2<=i1);
+      if (i1==i3)
+      {
+        return;
+      }
       if ((i1==i2)||(i2==i3))
       {
         std::swap(*i1,*i3);
@@ -2172,6 +2177,9 @@ assert(!initialisation);
         assert(old_position<old_BLC_block->end_same_BLC); // the source block or the target constellation may be wrong, so we cannot use points_into_BLC_set()
         assert(new_BLC_block->start_marked_BLC==new_BLC_block->end_same_BLC);
         assert(old_BLC_block->start_marked_BLC<=old_BLC_block->end_same_BLC);
+      #else
+        // the constellation index of the target block has not yet changed to the new constellation:
+        assert(old_to_constellation==m_blocks[m_states[m_aut.get_transitions()[ti].to()].block].constellation);
       #endif
       assert(calculate_end_same_BLC(*new_BLC_block)==old_BLC_block->start_same_BLC);
       assert(m_transitions[ti].transitions_per_block_to_constellation == old_BLC_block);
@@ -2353,27 +2361,14 @@ assert(!initialisation);
       #endif
       assert(calculate_end_same_BLC(*new_BLC_block)==old_BLC_block->start_same_BLC);
       assert(m_transitions[ti].transitions_per_block_to_constellation == old_BLC_block);
+      assert(m_blocks.size()-1==m_states[m_aut.get_transitions()[ti].from()].block);
       assert(ti == *old_position);
       if (old_position < old_BLC_block->start_marked_BLC)
       {
 // std::cerr << "Moving unmarked " << m_transitions[*old_position].debug_id(*this);
         assert(old_BLC_block->start_same_BLC <= old_position);
         assert(new_BLC_block->start_marked_BLC <= old_BLC_block->start_same_BLC);
-        if (old_position != new_BLC_block->start_marked_BLC)
-        {
-          swap_three_iterators_and_update_m_transitions(old_position, old_BLC_block->start_same_BLC, new_BLC_block->start_marked_BLC); 
-          /* transition_index temp = *old_position;
-          *old_position = *old_BLC_block->start_same_BLC;
-          *old_BLC_block->start_same_BLC = *new_BLC_block->start_marked_BLC;
-          *new_BLC_block->start_marked_BLC = temp;
-          m_transitions[*old_position].ref_outgoing_transitions->ref_BLC_transitions = old_position;
-          m_transitions[*old_BLC_block->start_same_BLC].ref_outgoing_transitions->ref_BLC_transitions = old_BLC_block->start_same_BLC;
-          m_transitions[*new_BLC_block->start_marked_BLC].ref_outgoing_transitions->ref_BLC_transitions = new_BLC_block->start_marked_BLC; */
-        }
-        else
-        {
-          assert(old_position == old_BLC_block->start_same_BLC);
-        }
+        swap_three_iterators_and_update_m_transitions(old_position, old_BLC_block->start_same_BLC, new_BLC_block->start_marked_BLC);
         new_BLC_block->start_marked_BLC++;
       }
       else
@@ -2381,28 +2376,14 @@ assert(!initialisation);
 // std::cerr << "Moving marked " << m_transitions[*old_position].debug_id(*this);
         assert(old_BLC_block->start_marked_BLC <= old_position);
         assert(old_BLC_block->start_same_BLC <= old_BLC_block->start_marked_BLC);
-        if (old_position != old_BLC_block->start_same_BLC)
-        {
-          swap_three_iterators_and_update_m_transitions(old_position, old_BLC_block->start_marked_BLC, old_BLC_block->start_same_BLC);
-          /* transition_index temp = *old_position;
-          *old_position = *old_BLC_block->start_marked_BLC;
-          *old_BLC_block->start_marked_BLC = *old_BLC_block->start_same_BLC;
-          *old_BLC_block->start_same_BLC = temp;
-          m_transitions[*old_position].ref_outgoing_transitions->ref_BLC_transitions = old_position;
-          m_transitions[*old_BLC_block->start_marked_BLC].ref_outgoing_transitions->ref_BLC_transitions = old_BLC_block->start_marked_BLC;
-          m_transitions[*old_BLC_block->start_same_BLC].ref_outgoing_transitions->ref_BLC_transitions = old_BLC_block->start_same_BLC; */
-        }
-        else
-        {
-          assert(old_position == old_BLC_block->start_marked_BLC);
-        }
+        swap_three_iterators_and_update_m_transitions(old_position, old_BLC_block->start_marked_BLC, old_BLC_block->start_same_BLC);
         old_BLC_block->start_marked_BLC++;
       }
       m_transitions[ti].transitions_per_block_to_constellation=new_BLC_block;
       #ifndef SAVE_BLC_MEMORY
-        new_BLC_block->end_same_BLC++;
+        new_BLC_block->end_same_BLC=
       #endif
-      old_BLC_block->start_same_BLC++;
+      ++old_BLC_block->start_same_BLC;
 // std::cerr << " to new " << new_BLC_block->debug_id(*this) << '\n';
       #ifdef SAVE_BLC_MEMORY
         if (old_BLC_block->start_same_BLC >= m_BLC_transitions.end())
@@ -2410,7 +2391,8 @@ assert(!initialisation);
           return true;
         }
         const transition& old_t = m_aut.get_transitions()[*old_BLC_block->start_same_BLC];
-        return m_states[old_t.from()].block != old_from_block ||
+        return (m_states[old_t.from()].block!=old_from_block &&
+                m_states[old_t.from()].block!=m_blocks.size()-1) ||
                label_or_divergence(old_t) != label_or_divergence(m_aut.get_transitions()[ti]) ||
                m_blocks[m_states[old_t.to()].block].constellation != old_to_constellation;
       #else
@@ -5514,7 +5496,7 @@ assert(!initialisation);
       #ifdef COUNT_R_U_STATUS_TIMES
         if (m_branching)
         {
-          const char* filename="/Users/dnjansen/onderzoek/modelcheckers/mCRL2/build/status_counter_values.txt";
+          const char* filename="../../status_counter_values.txt";
           FILE* fp=std::fopen(filename, "r+");
           if (NULL!=fp)
           {
@@ -5537,6 +5519,7 @@ assert(!initialisation);
           else
           {
             fp=std::fopen(filename, "w");
+            assert(NULL!=fp);
           }
           for (unsigned i=0; i<sizeof(m_R_status_counter)/sizeof(m_R_status_counter[0]); ++i)
           {
