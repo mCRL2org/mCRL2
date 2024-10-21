@@ -2139,6 +2139,28 @@ assert(!initialisation);
       return B_new;
     }
 
+    // Move the content if i1 to i2, i2 to i3 and i3 to i1.
+    void swap_three_iterators_and_update_m_transitions(const BLC_list_iterator& i1, const BLC_list_iterator& i2, const BLC_list_iterator& i3)
+    {
+      assert(i1!=i3);
+      if ((i1==i2)||(i2==i3))
+      {
+        std::swap(*i1,*i3);
+        m_transitions[*i1].ref_outgoing_transitions->ref_BLC_transitions = i1;
+        m_transitions[*i3].ref_outgoing_transitions->ref_BLC_transitions = i3;
+      }
+      else  // swap all three elements.
+      {
+        transition_index temp = *i1;
+        *i1=*i2;
+        *i2=*i3;
+        *i3=temp;
+        m_transitions[*i1].ref_outgoing_transitions->ref_BLC_transitions = i1;
+        m_transitions[*i2].ref_outgoing_transitions->ref_BLC_transitions = i2;
+        m_transitions[*i3].ref_outgoing_transitions->ref_BLC_transitions = i3;
+      }
+    }
+
     // It is assumed that the new block is located precisely before the old_block in m_BLC_transitions.
     // This routine can not be used in the initialisation phase. It can only be used during refinement.
     // The routine returns true if the last element of old_BLC_block has been removed.
@@ -2172,13 +2194,14 @@ assert(!initialisation);
         assert(new_BLC_block->start_marked_BLC <= old_BLC_block->start_same_BLC);
         if (old_position != new_BLC_block->start_marked_BLC)
         {
-          transition_index temp = *old_position;
+          swap_three_iterators_and_update_m_transitions(old_position, old_BLC_block->start_same_BLC, new_BLC_block->start_marked_BLC); 
+          /* transition_index temp = *old_position;
           *old_position = *old_BLC_block->start_same_BLC;
           *old_BLC_block->start_same_BLC = *new_BLC_block->start_marked_BLC;
           *new_BLC_block->start_marked_BLC = temp;
           m_transitions[*old_position].ref_outgoing_transitions->ref_BLC_transitions = old_position;
           m_transitions[*old_BLC_block->start_same_BLC].ref_outgoing_transitions->ref_BLC_transitions = old_BLC_block->start_same_BLC;
-          m_transitions[*new_BLC_block->start_marked_BLC].ref_outgoing_transitions->ref_BLC_transitions = new_BLC_block->start_marked_BLC;
+          m_transitions[*new_BLC_block->start_marked_BLC].ref_outgoing_transitions->ref_BLC_transitions = new_BLC_block->start_marked_BLC; */
         }
         else
         {
@@ -2193,13 +2216,14 @@ assert(!initialisation);
         assert(old_BLC_block->start_same_BLC <= old_BLC_block->start_marked_BLC);
         if (old_position != old_BLC_block->start_same_BLC)
         {
-          transition_index temp = *old_position;
+          swap_three_iterators_and_update_m_transitions(old_position, old_BLC_block->start_marked_BLC, old_BLC_block->start_same_BLC);
+          /* transition_index temp = *old_position;
           *old_position = *old_BLC_block->start_marked_BLC;
           *old_BLC_block->start_marked_BLC = *old_BLC_block->start_same_BLC;
           *old_BLC_block->start_same_BLC = temp;
           m_transitions[*old_position].ref_outgoing_transitions->ref_BLC_transitions = old_position;
           m_transitions[*old_BLC_block->start_marked_BLC].ref_outgoing_transitions->ref_BLC_transitions = old_BLC_block->start_marked_BLC;
-          m_transitions[*old_BLC_block->start_same_BLC].ref_outgoing_transitions->ref_BLC_transitions = old_BLC_block->start_same_BLC;
+          m_transitions[*old_BLC_block->start_same_BLC].ref_outgoing_transitions->ref_BLC_transitions = old_BLC_block->start_same_BLC; */
         }
         else
         {

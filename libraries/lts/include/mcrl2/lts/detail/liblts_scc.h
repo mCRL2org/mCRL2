@@ -257,11 +257,11 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
         preserve_divergence_loops ||
         block_index_of_a_state[t.from()]!=block_index_of_a_state[t.to()])
     {
-      resulting_transitions.insert(
+      resulting_transitions.insert(    // insert is faster than emplace. 
         transition(
           block_index_of_a_state[t.from()],
           aut.apply_hidden_label_map(t.label()),
-          block_index_of_a_state[t.to()]));
+          block_index_of_a_state[t.to()])); 
     }
   }
 
@@ -270,7 +270,7 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
 
   for (const transition& t: resulting_transitions)
   {
-    aut.add_transition(transition(t.from(),t.label(),t.to()));
+    aut.add_transition(t);
   }
 
   // Merge the states, by setting the state labels of each state to the concatenation of the state labels of its

@@ -437,7 +437,7 @@ class lts: public LTS_BASE
         \return The index of the corresponding action label in which actions are hidden. */
     labels_size_type apply_hidden_label_map(const labels_size_type action) const
     {
-      if (m_hidden_label_set.count(action)>0)
+      if (!m_hidden_label_set.empty() && m_hidden_label_set.count(action)>0)
       {
         return tau_label_index();
       }
