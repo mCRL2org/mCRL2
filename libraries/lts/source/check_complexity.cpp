@@ -212,6 +212,7 @@ const char *check_complexity::work_names[TRANS_gj_MAX - BLOCK_MIN + 1] =
 
     // state counters
     "split_block_B_into_R_and_BminR(): carry out a split",
+    "split_block_B_into_R_and_BminR(): skip over a state",
     "simple_splitB(): find a bottom state in the smaller subblock (i.e. in U)",
     "simple_splitB(): find predecessors of a state in the smaller subblock",
     "multiple_swap_states_in_block(): swap states in the smaller subblock",
@@ -434,6 +435,7 @@ void check_complexity::test_work_names()
     // state counters
     assert(check_complexity::STATE_gj_MIN == i);
     test_work_name(i, split_block_B_into_R_and_BminR__carry_out_split);
+    test_work_name(i, split_block_B_into_R_and_BminR__skip_over_state);
     test_work_name(i, simple_splitB__find_bottom_state);
     test_work_name(i, simple_splitB__find_predecessors_of_R_or_U_state);
     test_work_name(i,multiple_swap_states_in_block__swap_state_in_small_block);

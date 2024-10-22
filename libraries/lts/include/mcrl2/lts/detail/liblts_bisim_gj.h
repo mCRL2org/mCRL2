@@ -51,14 +51,20 @@
   // It seems that defining this constant is advantageous.
   #define CO_SPLITTER_IN_BLC_LIST
 
-  // To JFG: Please try whether it's faster to define this constant or not.
+  // It seems that when we define this constant as well, it's a little faster.
   #define CO_SPLITTER_IN_BLC_LIST_VARIANT
 #endif
 
 // If COUNT_R_U_STATUS_TIMES is defined, simple_splitB() counts how often every
 // step in the coroutines is executed. This helps to find the most efficient
 // arrangement of the checks to determine the step to be executed.
-// #define COUNT_R_U_STATUS_TIMES This leads to a segmentation fault when reducing 1394-fin-vvlarge.aut (JFG). 
+//#define COUNT_R_U_STATUS_TIMES
+
+// If TRY_EFFICIENT_SWAP is defined, then splitting a block will try to swap more
+// efficiently: states that are already in an acceptable position in m_states_in_blocks
+// will not be moved. This may require some additional reading but fewer changes
+// of pointers.
+#define TRY_EFFICIENT_SWAP
 
 #ifndef NDEBUG
   // If CHECK_COMPLEXITY_GJ is defined, macros are included to check running time
@@ -74,7 +80,6 @@
 
 #ifdef CHECK_COMPLEXITY_GJ
   #include "mcrl2/lts/detail/check_complexity.h"
-  // Using __VA_ARGS__ is not handled appropriately by MSVC.
   #define mCRL2complexity_gj(unit, call, info_for_debug) mCRL2complexity(unit, call, info_for_debug)
 #else
   #define mCRL2complexity_gj(unit, call, info_for_debug)  do{}while(0)
@@ -105,7 +110,6 @@ typedef std::size_t block_index;
 typedef std::size_t label_index;
 typedef std::size_t constellation_index;
 typedef std::vector<outgoing_transition_type>::iterator outgoing_transitions_it;
-typedef std::vector<outgoing_transition_type>::reverse_iterator outgoing_transitions_reverse_it;
 typedef std::vector<outgoing_transition_type>::const_iterator outgoing_transitions_const_it;
 
 constexpr constellation_index null_constellation=-1;
@@ -1903,7 +1907,7 @@ assert(!initialisation);
       return std::distance(m_constellations[C].start_const_states, m_constellations[C].end_const_states);
     }
 
-    void swap_states_in_states_in_block(
+    void swap_states_in_states_in_block_never_equal(
               typename std::vector<state_index>::iterator pos1,
               typename std::vector<state_index>::iterator pos2)
     {
@@ -1911,42 +1915,38 @@ assert(!initialisation);
       assert(pos1 < m_states_in_blocks.end());
       assert(m_states_in_blocks.begin() <= pos2);
       assert(pos2 < m_states_in_blocks.end());
-      #ifndef SWAP_EVEN_IF_EQUAL
-        if (pos1 != pos2)
-      #endif
+      assert(pos1!=pos2);
+      std::swap(*pos1,*pos2);
+      m_states[*pos1].ref_states_in_blocks=pos1;
+      m_states[*pos2].ref_states_in_blocks=pos2;
+    }
+
+    void swap_states_in_states_in_block(
+              typename std::vector<state_index>::iterator pos1,
+              typename std::vector<state_index>::iterator pos2)
+    {
+      if (pos1!=pos2)
       {
-        std::swap(*pos1,*pos2);
-        m_states[*pos1].ref_states_in_blocks=pos1;
-        m_states[*pos2].ref_states_in_blocks=pos2;
+        swap_states_in_states_in_block_never_equal(pos1, pos2);
       }
     }
 
     // Move pos1 to pos2, pos2 to pos3 and pos3 to pos1;
     // The function requires that pos3 lies in between pos1 and pos2.
-    void swap_states_in_states_in_block(
+    // It also requires that pos1 and pos2 are different.
+    void swap_states_in_states_in_block_23_never_equal(
               typename std::vector<state_index>::iterator pos1,
               typename std::vector<state_index>::iterator pos2,
               typename std::vector<state_index>::iterator pos3)
     {
-      assert(m_states_in_blocks.begin() <= pos2);
-      assert(pos2 <= pos3); assert(pos3 <= pos1);
-      assert(pos2 <= pos3); assert(pos3 <= pos1);
-      assert(pos1 < m_states_in_blocks.end());
-      #ifndef SWAP_EVEN_IF_EQUAL
-        if (pos1 == pos3)
-        {
-          if (pos1 == pos2)
-          {
-            return;
-          }
-          std::swap(*pos1,*pos2);
-        }
-        else if (pos2 == pos3)
-        {
-          std::swap(*pos1,*pos2);
-        }
-        else
-      #endif
+      assert(m_states_in_blocks.begin()<=pos2);
+      assert(pos2<pos3); assert(pos3<=pos1);
+      assert(pos1<m_states_in_blocks.end());
+      if (pos1==pos3)
+      {
+        std::swap(*pos1,*pos2);
+      }
+      else
       {
         const state_index temp=*pos1;
         *pos1=*pos3;
@@ -1957,6 +1957,49 @@ assert(!initialisation);
       }
       m_states[*pos1].ref_states_in_blocks=pos1;
       m_states[*pos2].ref_states_in_blocks=pos2;
+    }
+
+    // Move pos1 to pos2, pos2 to pos3 and pos3 to pos1;
+    // The function requires that pos3 lies in between pos1 and pos2.
+    void swap_states_in_states_in_block(
+              typename std::vector<state_index>::iterator pos1,
+              typename std::vector<state_index>::iterator pos2,
+              typename std::vector<state_index>::iterator pos3)
+    {
+      if (pos2==pos3)
+      {
+        swap_states_in_states_in_block(pos1,pos2);
+      }
+      else
+      {
+        swap_states_in_states_in_block_23_never_equal(pos1,pos2,pos3);
+      }
+/*    assert(m_states_in_blocks.begin() <= pos2);
+      assert(pos2 <= pos3); assert(pos3 <= pos1);
+      assert(pos1 < m_states_in_blocks.end());
+      if (pos1 == pos3)
+      {
+        if (pos1 == pos2)
+        {
+          return;
+        }
+        std::swap(*pos1,*pos2);
+      }
+      else if (pos2 == pos3)
+      {
+        std::swap(*pos1,*pos2);
+      }
+      else
+      {
+        const state_index temp=*pos1;
+        *pos1=*pos3;
+        *pos3=*pos2;
+        *pos2=temp;
+
+        m_states[*pos3].ref_states_in_blocks=pos3;
+      }
+      m_states[*pos1].ref_states_in_blocks=pos1;
+      m_states[*pos2].ref_states_in_blocks=pos2; */
     }
 
     // Swap the range [pos1, pos1 + count) with the range [pos2, pos2 + count).
@@ -1980,12 +2023,13 @@ assert(!initialisation);
       assert(m_states_in_blocks.begin() <= pos1);
       assert(pos1 < pos2); // in particular, they are not allowed to be equal
       assert(pos2 <= m_states_in_blocks.end() - count);
-      if (std::distance(pos2, pos1 + count) > 0)
       {
-        // state_index is unsigned, so we cannot test "if (overlap > 0)"
-        state_index overlap = std::distance(pos2, pos1 + count);
-        count -= overlap;
-        pos2 += overlap;
+        std::make_signed<state_index>::type overlap = std::distance(pos2, pos1 + count);
+        if (overlap > 0)
+        {
+          count -= overlap;
+          pos2 += overlap;
+        }
       }
       state_index temp = *pos1;
       while (--count > 0)
@@ -2055,8 +2099,18 @@ assert(!initialisation);
                      const block_index B,
                      std::vector<state_index>::iterator first_bottom_state_in_R,
                      std::vector<state_index>::iterator last_bottom_state_in_R,
-                     const todo_state_vector& R)
+                     const todo_state_vector& R
+                     #ifdef TRY_EFFICIENT_SWAP
+                       , const transition_index marking_value
+                     #endif
+                     )
     {
+//std::cerr << "block_index split_block_B_into_R_and_BminR(" << m_blocks[B].debug_id(*this)
+//<< ",&m_states_in_blocks[" << std::distance(m_states_in_blocks.begin(), first_bottom_state_in_R)
+//<< "..." << std::distance(m_states_in_blocks.begin(), last_bottom_state_in_R)
+//<< "),R = {";
+//for(auto s:R){ std::cerr << ' ' << s; }
+//std::cerr << " }," << static_cast<std::make_signed<transition_index>::type>(marking_value) << ")\n";
 //std::cerr << "SPLIT BLOCK " << B << " by removing"; for(auto s = first_bottom_state_in_R; s < last_bottom_state_in_R; ++s){ std::cerr << ' ' << *s;} for(auto s:R){ std::cerr << ' ' << s; } std::cerr << '\n';
       assert(m_blocks[B].start_bottom_states <= first_bottom_state_in_R);
       assert(first_bottom_state_in_R <= last_bottom_state_in_R);
@@ -2093,28 +2147,139 @@ assert(!initialisation);
         last_bottom_state_in_R = m_blocks[B].start_bottom_states + std::distance(first_bottom_state_in_R, last_bottom_state_in_R);
         first_bottom_state_in_R = m_blocks[B].start_bottom_states;
       }
-      m_blocks[B_new].start_non_bottom_states = last_bottom_state_in_R;
-      m_blocks[B_new].end_states = last_bottom_state_in_R;
-      m_blocks[B].start_bottom_states = last_bottom_state_in_R;
-      for(std::vector<state_index>::iterator s_it = first_bottom_state_in_R; s_it < last_bottom_state_in_R; ++s_it)
+
+      assert(m_blocks[B_new].start_bottom_states==first_bottom_state_in_R);
+      m_blocks[B_new].start_non_bottom_states=last_bottom_state_in_R;
+      // Update the block pointers for R-bottom states:
+      for(std::vector<state_index>::iterator s_it=first_bottom_state_in_R; s_it<last_bottom_state_in_R; ++s_it)
       {
-        const state_index s = *s_it;
+        const state_index s=*s_it;
         mCRL2complexity_gj(&m_states[s], add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split,
                 max_B), *this);
 //std::cerr << "MOVE STATE TO NEW BLOCK: " << s << "\n";
-        assert(B == m_states[s].block);
+        assert(B==m_states[s].block);
         m_states[s].block=B_new;
-        assert(m_states[s].ref_states_in_blocks < m_blocks[B_new].start_non_bottom_states); // the state is a bottom state.
+        assert(m_states[s].ref_states_in_blocks==s_it);
       }
-      for(state_index s: R)
-      {
-        mCRL2complexity_gj(&m_states[s], add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split,
+      // Now the R bottom states are in the correct position, and we don't have to look into them any more.
+      #ifdef TRY_EFFICIENT_SWAP
+        // (We could perhaps extend the efficient swap to include the R bottom states,
+        // but I think that is too complicated for me to think through.)
+        const std::vector<state_index>::iterator BminR_start_bottom_states=last_bottom_state_in_R+R.size();
+        const std::vector<state_index>::iterator BminR_start_non_bottom_states=m_blocks[B].start_non_bottom_states+R.size();
+
+        std::vector<state_index>::const_iterator take_next_R_non_bottom_state_from=R.begin();
+        std::vector<state_index>::iterator move_next_R_non_bottom_state_to=last_bottom_state_in_R;
+        std::vector<state_index>::iterator move_next_R_non_bottom_state_to_end=BminR_start_bottom_states;
+        // Move BminR bottom states out of the way.
+        std::vector<state_index>::iterator move_next_BminR_bottom_state_to=m_blocks[B].start_non_bottom_states;
+        if (move_next_BminR_bottom_state_to<move_next_R_non_bottom_state_to_end)
+        {
+          // there are many R-non-bottom states, so we will need to move all BminR bottom states.
+          // (Later, the remaining R-non-bottom states will be placed.)
+          move_next_R_non_bottom_state_to_end=move_next_BminR_bottom_state_to;
+          move_next_BminR_bottom_state_to=BminR_start_bottom_states;
+        }
+        for (; move_next_R_non_bottom_state_to<move_next_R_non_bottom_state_to_end;
+               ++move_next_R_non_bottom_state_to, ++move_next_BminR_bottom_state_to)
+        {
+          // Now the BminR-bottom state at *move_next_R_non_bottom_state_to should move to *move_next_BminR_bottom_state_to.
+          // Find some R-non-bottom state that can move to *move_next_R_non_bottom_state_to:
+          if (marking_value==m_states[*move_next_BminR_bottom_state_to].counter)
+          {
+            // There is a R-non-bottom state at *move_next_BminR_bottom_state_to already:
+            swap_states_in_states_in_block_never_equal(move_next_R_non_bottom_state_to, move_next_BminR_bottom_state_to);
+          }
+          else
+          {
+            // *move_next_BminR_bottom_state_to now contains a BminR-non-bottom state.
+            // Find a place where to move it to, namely some R-non-bottom state that needs to be moved.
+            while (assert(take_next_R_non_bottom_state_from<R.end()),
+                   m_states[*take_next_R_non_bottom_state_from].ref_states_in_blocks<BminR_start_non_bottom_states)
+            {
+              mCRL2complexity_gj(&m_states[*take_next_R_non_bottom_state_from], add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+              assert(marking_value==m_states[*take_next_R_non_bottom_state_from].counter);
+              assert((m_states[*take_next_R_non_bottom_state_from].ref_states_in_blocks<move_next_R_non_bottom_state_to
+                      ? B_new : B)==m_states[*take_next_R_non_bottom_state_from].block);
+              ++take_next_R_non_bottom_state_from;
+            }
+            swap_states_in_states_in_block_23_never_equal(m_states[*take_next_R_non_bottom_state_from].ref_states_in_blocks, move_next_R_non_bottom_state_to, move_next_BminR_bottom_state_to);
+            ++take_next_R_non_bottom_state_from;
+          }
+          assert(marking_value==m_states[*move_next_R_non_bottom_state_to].counter);
+          assert(B==m_states[*move_next_R_non_bottom_state_to].block);
+          m_states[*move_next_R_non_bottom_state_to].block=B_new;
+          mCRL2complexity_gj(&m_states[*move_next_R_non_bottom_state_to],
+                             add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
+                             *this);
+        }
+        #ifndef NDEBUG
+          if (move_next_R_non_bottom_state_to<BminR_start_bottom_states)
+          {
+            // There are still some R-non-bottom states that may not be in their correct positions.
+            assert(move_next_R_non_bottom_state_to==m_blocks[B].start_non_bottom_states);
+          }
+          else
+          {
+            // All states are in their correct positions.
+            assert(BminR_start_non_bottom_states==move_next_BminR_bottom_state_to);
+          }
+        #endif
+        for (; move_next_R_non_bottom_state_to<BminR_start_bottom_states; ++move_next_R_non_bottom_state_to)
+        {
+          // This loop moves R non-bottom states to places where there were BminR non-bottom states before;
+          // it is executed if there are more R non-bottom states that BminR bottom states.
+
+          // Try to find a R non-bottom state to move to *move_next_R_non_bottom_state_to.
+          if (marking_value==m_states[*move_next_R_non_bottom_state_to].counter)
+          {
+            // There is already a suitable state at this position. Do nothing.
+          }
+          else
+          {
+            // *move_next_R_non_bottom_state_to now contains a BminR-non-bottom state.
+            // Find a place where to move it to, namely some R-non-bottom state that needs to be moved.
+            while (assert(take_next_R_non_bottom_state_from<R.end()),
+                   assert(R.begin()<=take_next_R_non_bottom_state_from),
+                   assert(take_next_R_non_bottom_state_from<R.end()),
+                   m_states[*take_next_R_non_bottom_state_from].ref_states_in_blocks<BminR_start_non_bottom_states)
+            {
+              // Actually the state at *take_next_R_non_bottom_state_from is already at an acceptable position.
+              // Leave it there and try the next state.
+              mCRL2complexity_gj(&m_states[*take_next_R_non_bottom_state_from], add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+              assert(marking_value==m_states[*take_next_R_non_bottom_state_from].counter);
+              assert((m_states[*take_next_R_non_bottom_state_from].ref_states_in_blocks<move_next_R_non_bottom_state_to
+                      ? B_new : B)==m_states[*take_next_R_non_bottom_state_from].block);
+              ++take_next_R_non_bottom_state_from;
+            }
+            swap_states_in_states_in_block_never_equal(m_states[*take_next_R_non_bottom_state_from].ref_states_in_blocks, move_next_R_non_bottom_state_to);
+            ++take_next_R_non_bottom_state_from;
+            assert(marking_value==m_states[*move_next_R_non_bottom_state_to].counter);
+          }
+          assert(B==m_states[*move_next_R_non_bottom_state_to].block);
+          m_states[*move_next_R_non_bottom_state_to].block=B_new;
+          mCRL2complexity_gj(&m_states[*move_next_R_non_bottom_state_to],
+                             add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
+                             *this);
+        }
+        m_blocks[B_new].end_states=BminR_start_bottom_states;
+        m_blocks[B].start_bottom_states=BminR_start_bottom_states;
+        m_blocks[B].start_non_bottom_states=BminR_start_non_bottom_states;
+        assert(static_cast<std::make_signed<state_index>::type>(R.size())==std::distance(m_blocks[B_new].start_non_bottom_states, m_blocks[B_new].end_states));
+      #else
+        m_blocks[B_new].end_states=last_bottom_state_in_R;
+        m_blocks[B].start_bottom_states=last_bottom_state_in_R;
+
+        // Move the non-bottom states to their correct positions:
+        for(state_index s: R)
+        {
+          mCRL2complexity_gj(&m_states[s], add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split,
                 max_B), *this);
 //std::cerr << "MOVE STATE TO NEW BLOCK: " << s << "\n";
-        assert(B == m_states[s].block);
-        m_states[s].block=B_new;
-        typename std::vector<state_index>::iterator pos=m_states[s].ref_states_in_blocks;
-        assert(pos>=m_blocks[B].start_non_bottom_states); // the state is a non bottom state.
+          assert(B==m_states[s].block);
+          m_states[s].block=B_new;
+          typename std::vector<state_index>::iterator pos=m_states[s].ref_states_in_blocks;
+          assert(pos>=m_blocks[B].start_non_bottom_states); // the state is a non bottom state.
             // pos --> B.start_bottom_states --> B.start_non_bottom_states --> pos.
           swap_states_in_states_in_block(pos, m_blocks[B].start_bottom_states, m_blocks[B].start_non_bottom_states);
           m_blocks[B].start_non_bottom_states++;
@@ -2122,7 +2287,8 @@ assert(!initialisation);
           m_blocks[B_new].end_states++;
           assert(m_blocks[B].start_bottom_states<=m_blocks[B].start_non_bottom_states);
           assert(m_blocks[B_new].start_bottom_states<m_blocks[B_new].end_states);
-      }
+        }
+      #endif
       return B_new;
     }
 
@@ -2678,6 +2844,7 @@ assert(!initialisation);
       }
       if (restrict_to_R)
       {
+        assert(m_U_counter_reset_vector.empty());
         return;
       }
       for(const state_index si: m_U_counter_reset_vector)
@@ -2691,16 +2858,17 @@ assert(!initialisation);
     }
 
     // Calculate the states R in block B that can inertly reach a state with a transition in splitter
-    // and split B in R and B\R. The complexity is conform the smallest block of R and B\R.
+    // and split B in R and B\R. The complexity is conform the smaller block, either R or B\R.
     // The LBC_list and bottom states are not updated.
-    // Provide the index of the newly created block as a result. This block is the smallest of R and B\R.
-    // Return M_in_bi=true iff the new block bi is the one with the transitions in the splitter.
+    // Provide the index of subblock R as a result.
 
-    // The function assumes that R has already been pre-filled with the sources of
-    // the marked transitions in the splitter, and therefore a split is always
-    // needed. Bottom states in R are those in the range
+    // The function assumes that R has already been pre-filled with the
+    // sources of the marked transitions in the splitter, and therefore a
+    // split is always needed.  Bottom states in R are those in the range
     // [m_blocks[B].start_bottom_states, first_unmarked_bottom_state),
-    // non-bottom states in R are already in m_R.
+    // non-bottom states in R are already in m_R.  (Unmarked transitions
+    // in the splitter may need to be checked still, but they can only add
+    // non-bottom states to R.)
 
     // Occasionally it is necessary to split using only a subset of a splitter.
     // Then, splitter_end_unmarked_BLC can be used to indicate that this is the case.
@@ -2714,48 +2882,29 @@ assert(!initialisation);
                               const std::vector<state_index>::iterator first_unmarked_bottom_state,
                               // const bool initialisation,
                               const BLC_list_iterator splitter_end_unmarked_BLC)
-// David suggests to change this function as follows:
-// - Generally, the function takes a BLC-set as splitter.
-//   Some transitions in the BLC-set may be *marked.*
-//   The function first moves all sources of marked transitions to R;
-//   it assumes that all bottom states that should go to R have a marked transition.
-//   (Some non-bottom states may also have such a transition.)
-//   Then, it moves the remaining bottom states to U.
-// - If at this point it appears that R contains all bottom states, no split is needed.
-//   (i.e. it is not necessary to check before calling whether there will be an actual split.)
-// - After that, the coroutines are started to separate the non-bottom states
-//   as in the current code.
-// - The bottom states are not actually inserted into m_R or m_U; the information
-//   which states are in R or U is stored through an iterator into m_states_in_blocks,
-//   known elsewhere as first_unmarked_bottom_state. This will allow to create
-//   the bottom part of U quickly.
-//
-// - There is one special case: when a block has new bottom states, its old and
-//   new bottom states need to be separated. This is done by using the tau-
-//   transitions from R to U as splitter. These tau-transitions are
-//   constellation-inert; the same BLC-set may contain other constellation-inert
-//   tau-transitions out of R but they should be disregarded. In this special
-//   case, we do not take the full BLC-set but only the marked transitions in it
-//   as splitter.
-//   This can be handled by giving an upper bound to the end of the BLC-set.
-//
-// Always using a BLC-set as splitter would require to initialise the BLC-sets
-// before the initial stabilisation. That simplifies some calculations slightly,
-// as one does not need to distinguish between initialisation and later phases.
     {
 // std::cerr << "simple_splitB(block " << B << ",...)\n";
-      assert(1 < number_of_states_in_block(B));
-      assert(!m_blocks[B].contains_new_bottom_states);
-      assert(m_U.empty());
-      assert(m_U_counter_reset_vector.empty());
-      // assert(splitter_end_unmarked_BLC == old value of splitter->start_marked_BLC || splitter_end_unmarked_BLC == splitter->start_same_BLC);
       typedef enum { initializing, state_checking, aborted, aborted_after_initialisation,
                      incoming_inert_transition_checking, outgoing_action_constellation_check } status_type;
       status_type U_status=state_checking;
       status_type R_status=initializing;
       BLC_list_iterator M_it = splitter->start_same_BLC;
+      std::vector<transition>::iterator current_U_incoming_transition_iterator;
+      std::vector<transition>::iterator current_U_incoming_transition_iterator_end;
+      state_index current_U_outgoing_state;
+      outgoing_transitions_it current_U_outgoing_transition_iterator;
+      outgoing_transitions_it current_U_outgoing_transition_iterator_end;
+      std::vector<transition>::iterator current_R_incoming_transition_iterator;
+      std::vector<transition>::iterator current_R_incoming_transition_iterator_end;
+      std::vector<state_index>::iterator current_R_incoming_bottom_state_iterator = m_blocks[B].start_bottom_states;
+      std::vector<state_index>::iterator current_U_incoming_bottom_state_iterator = first_unmarked_bottom_state;
+
+      assert(1 < number_of_states_in_block(B));
+      assert(!m_blocks[B].contains_new_bottom_states);
+      assert(m_U.empty());
+      assert(m_U_counter_reset_vector.empty());
+      // assert(splitter_end_unmarked_BLC == old value of splitter->start_marked_BLC || splitter_end_unmarked_BLC == splitter->start_same_BLC);
       assert(m_BLC_transitions.begin() <= splitter->start_same_BLC);
-      //assert(splitter->start_same_BLC<=M_it);
       assert(M_it <= splitter_end_unmarked_BLC);
       assert(splitter_end_unmarked_BLC <= splitter->start_marked_BLC);
       #ifndef SAVE_BLC_MEMORY
@@ -2765,17 +2914,8 @@ assert(!initialisation);
       #endif
       assert(!has_marked_transitions(*splitter));
       assert(m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].block == B);
-      std::vector<transition>::iterator current_U_incoming_transition_iterator;
-      std::vector<transition>::iterator current_U_incoming_transition_iterator_end;
-      state_index current_U_outgoing_state;
-      outgoing_transitions_it current_U_outgoing_transition_iterator;
-      outgoing_transitions_it current_U_outgoing_transition_iterator_end;
-      std::vector<transition>::iterator current_R_incoming_transition_iterator;
-      std::vector<transition>::iterator current_R_incoming_transition_iterator_end;
-      std::vector<state_index>::iterator current_R_incoming_bottom_state_iterator = m_blocks[B].start_bottom_states;
       assert(current_R_incoming_bottom_state_iterator <= first_unmarked_bottom_state);
       assert(current_R_incoming_bottom_state_iterator < first_unmarked_bottom_state || !m_R.empty() || M_it < splitter_end_unmarked_BLC);
-      std::vector<state_index>::iterator current_U_incoming_bottom_state_iterator = first_unmarked_bottom_state;
       assert(current_U_incoming_bottom_state_iterator < m_blocks[B].start_non_bottom_states);
 
       const state_index max_R_nonbottom_size = number_of_states_in_block(B)/2 - std::distance(m_blocks[B].start_bottom_states, first_unmarked_bottom_state); // can underflow
@@ -2797,7 +2937,11 @@ assert(!initialisation);
           assert(m_U.empty()); // m_U.clear(); is superfluous;
           assert(m_U_counter_reset_vector.empty()); // clear_state_counters(); is superfluous
           // split_block B into R and B\R.
-          return split_block_B_into_R_and_BminR(B, m_blocks[B].start_bottom_states, first_unmarked_bottom_state, m_R);
+          return split_block_B_into_R_and_BminR(B, m_blocks[B].start_bottom_states, first_unmarked_bottom_state, m_R
+                                                #ifdef TRY_EFFICIENT_SWAP
+                                                  , Rmarked
+                                                #endif
+                                                );
         }
         else if (M_it==splitter_end_unmarked_BLC)
         {
@@ -2826,7 +2970,11 @@ assert(!initialisation);
           assert(m_U.empty()); // m_U.clear(); is superfluous;
           assert(m_U_counter_reset_vector.empty()); // clear_state_counters(); is superfluous
           // split_block B into U and B\U.
-          split_block_B_into_R_and_BminR(B, first_unmarked_bottom_state, m_blocks[B].end_states, m_U);
+          split_block_B_into_R_and_BminR(B, first_unmarked_bottom_state, m_blocks[B].end_states, m_U
+                                         #ifdef TRY_EFFICIENT_SWAP
+                                           , 0
+                                         #endif
+                                         );
           return B;
         }
       }
@@ -2837,11 +2985,13 @@ assert(!initialisation);
       const transition& first_t = m_aut.get_transitions()[*splitter->start_same_BLC];
       const label_index a = label_or_divergence(first_t);
       const constellation_index C = m_blocks[m_states[first_t.to()].block].constellation;
-      if (initializing == R_status || aborted == R_status)
-      {
-        // For constellation-inert splitters (which only happens for the special split to separate new from old bottom states), one has to mark all transitions in the splitter.
-        assert(!m_aut.is_tau(a) || m_blocks[B].constellation != C);
-      }
+      #ifndef NDEBUG
+        if (initializing == R_status || aborted == R_status)
+        {
+          // For constellation-inert splitters (which only happens for the special split to separate new from old bottom states), one has to mark all transitions in the splitter.
+          assert(!m_aut.is_tau(a) || m_blocks[B].constellation != C);
+        }
+      #endif
 
       // Algorithm 3, line 3.2 left.
 
@@ -2874,6 +3024,10 @@ assert(!initialisation);
                              // It can happen that the state has a tau-transition to a U-state, then it will be in the m_U_counter_reset_vector.
                              break;
             case 0:          assert(!m_R.find(si)); // It can happen that the state is in U or is not in U
+                             #ifdef TRY_EFFICIENT_SWAP
+                               assert(m_U.find(si) ||
+                                      (si==current_U_outgoing_state && outgoing_action_constellation_check==U_status));
+                             #endif
                              assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) != m_U_counter_reset_vector.end());
                              break;
             default:         assert(!m_R.find(si)); assert(!m_U.find(si));
@@ -2887,14 +3041,15 @@ assert(!initialisation);
         #ifdef COUNT_R_U_STATUS_TIMES
           m_R_status_counter[R_status]++;
         #endif
-        if (incoming_inert_transition_checking==R_status) // 18178 times
+        if (incoming_inert_transition_checking==R_status) // 18178 times (large 1394-fin.lts example: 372431 times)
         {
           assert(current_R_incoming_transition_iterator<current_R_incoming_transition_iterator_end);
-          const transition& tr=*current_R_incoming_transition_iterator;
-          assert(m_aut.is_tau(m_aut.apply_hidden_label_map(tr.label())));
           mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), current_R_incoming_transition_iterator)],
                         add_work(check_complexity::simple_splitB_R__handle_transition_to_R_state, 1), *this);
-          assert(m_states[tr.to()].block==B);
+          assert(m_aut.is_tau(m_aut.apply_hidden_label_map(current_R_incoming_transition_iterator->label())));
+          assert(m_states[current_R_incoming_transition_iterator->to()].block==B);
+
+          const transition& tr=*current_R_incoming_transition_iterator;
           if (m_states[tr.from()].block==B && !(m_preserve_divergence && tr.from() == tr.to()))
           {
             if (m_states[tr.from()].counter!=Rmarked)
@@ -2923,7 +3078,7 @@ assert(!initialisation);
           }
           R_status=state_checking;
         }
-        else if (state_checking==R_status) // 18014 times
+        else if (state_checking==R_status) // 18014 times (large 1394-fin.lts example: 331708 times)
         {
           const state_index s=(current_R_incoming_bottom_state_iterator<first_unmarked_bottom_state
                                     ? *current_R_incoming_bottom_state_iterator++
@@ -2949,11 +3104,11 @@ assert(!initialisation);
         }
         else if (initializing!=R_status)
         {
-          assert(aborted_after_initialisation==R_status || // 10280 times
-                 aborted==R_status); // 663 times
+          assert(aborted_after_initialisation==R_status || // 10280 times (large 1394-fin.lts example: 550 times)
+                 aborted==R_status); // 663 times (large 1394-fin.lts example: 584 times)
           goto R_handled_and_is_not_state_checking;
         }
-        else // initializing==R_status: 2742 times
+        else // initializing==R_status: 2742 times (large 1394-fin.lts example: 1200 times)
         {
             // Algorithm 3, line 3.3, right.
           assert(M_it<splitter_end_unmarked_BLC);
@@ -3001,10 +3156,14 @@ assert(!initialisation);
           // split_block B into R and B\R.
           assert(0 < std::distance(m_blocks[B].start_bottom_states, first_unmarked_bottom_state) + m_R.size());
           assert(std::distance(m_blocks[B].start_bottom_states, first_unmarked_bottom_state) + m_R.size() <= number_of_states_in_block(B)/2);
+          const block_index block_index_of_R = split_block_B_into_R_and_BminR(B, m_blocks[B].start_bottom_states, first_unmarked_bottom_state, m_R
+                                    #ifdef TRY_EFFICIENT_SWAP
+                                      , Rmarked
+                                    #endif
+                                    );
           clear_state_counters();
-          m_U.clear();
-          const block_index block_index_of_R = split_block_B_into_R_and_BminR(B, m_blocks[B].start_bottom_states, first_unmarked_bottom_state, m_R);
           m_R.clear();
+          m_U.clear();
           return block_index_of_R;
         }
     R_handled_and_is_not_state_checking:
@@ -3031,6 +3190,10 @@ assert(!initialisation);
                              // It can happen that the state has a tau-transition to a U-state, then it will be in the m_U_counter_reset_vector.
                              break;
             case 0:          assert(!m_R.find(si)); // It can happen that the state is in U or is not in U
+                             #ifdef TRY_EFFICIENT_SWAP
+                               assert(m_U.find(si) ||
+                                      (si==current_U_outgoing_state && outgoing_action_constellation_check==U_status));
+                             #endif
                              assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) != m_U_counter_reset_vector.end());
                              break;
             default:         assert(!m_R.find(si)); assert(!m_U.find(si));
@@ -3044,7 +3207,7 @@ assert(!initialisation);
         #ifdef COUNT_R_U_STATUS_TIMES
           m_U_status_counter[U_status]++;
         #endif
-        if (incoming_inert_transition_checking==U_status) // 20299 times
+        if (incoming_inert_transition_checking==U_status) // 20299 times (large 1394-fin.lts example: 360327 times)
         {
 //std::cerr << "U_incoming_inert_transition_checking\n";
             // Algorithm 3, line 3.8, left.
@@ -3137,7 +3300,7 @@ assert(!initialisation);
           }
           U_status=state_checking;
         }
-        else if (state_checking==U_status) // 18920 times
+        else if (state_checking==U_status) // 18920 times (large 1394-fin.lts example: 340893 times)
         {
 //std::cerr << "U_state_checking\n";
 
@@ -3157,13 +3320,13 @@ assert(!initialisation);
             goto U_handled_and_is_not_state_checking;
           }
         }
-        else if (aborted_after_initialisation==U_status) // 6284 times
+        else if (aborted_after_initialisation==U_status) // 6284 times (large 1394-fin.lts example: 2500 times)
         {
           goto U_handled_and_is_not_state_checking;
         }
         else
         {
-          assert(outgoing_action_constellation_check==U_status); // 911 times
+          assert(outgoing_action_constellation_check==U_status); // 911 times (large 1394-fin.lts example: 912 times)
 //std::cerr << "U_outgoing_action_constellation_check\n";
           assert(current_U_outgoing_transition_iterator!=current_U_outgoing_transition_iterator_end);
             // will only be used if the transitions are not constellation-inert:
@@ -3192,6 +3355,15 @@ assert(!initialisation);
                 label_or_divergence(t_local) == a)
           {
                 // This state must be blocked.
+            #ifdef TRY_EFFICIENT_SWAP
+              if(Rmarked!=m_states[current_U_outgoing_state].counter)
+              {
+                m_states[current_U_outgoing_state].counter=std::numeric_limits<std::make_signed<transition_index>::type>::max();
+                assert(0!=m_states[current_U_outgoing_state].counter);
+                assert(undefined!=m_states[current_U_outgoing_state].counter);
+                assert(Rmarked!=m_states[current_U_outgoing_state].counter);
+              }
+            #endif
           }
           else if (current_U_outgoing_transition_iterator==current_U_outgoing_transition_iterator_end)
           {
@@ -3227,9 +3399,13 @@ assert(!initialisation);
 //std::cerr << "U_todo empty:\n";
           assert(0 < std::distance(first_unmarked_bottom_state, m_blocks[B].start_non_bottom_states) + m_U.size());
           assert(std::distance(first_unmarked_bottom_state, m_blocks[B].start_non_bottom_states) + m_U.size() <= number_of_states_in_block(B)/2);
+          split_block_B_into_R_and_BminR(B, first_unmarked_bottom_state, m_blocks[B].start_non_bottom_states, m_U
+                                         #ifdef TRY_EFFICIENT_SWAP
+                                           , 0
+                                         #endif
+                                         );
           clear_state_counters();
           m_R.clear();
-          split_block_B_into_R_and_BminR(B, first_unmarked_bottom_state, m_blocks[B].start_non_bottom_states, m_U);
           m_U.clear();
           return B;
         }
@@ -3685,7 +3861,7 @@ assert(!initialisation);
       return R_block;
     }
 
-    void accumulate_entries_into_not_investigated(std::vector<label_count_sum_triple>& action_counter,
+    /* void accumulate_entries_into_not_investigated(std::vector<label_count_sum_triple>& action_counter,
                             const std::vector<block_index>& todo_stack)
     {
       transition_index sum=0;
@@ -3721,7 +3897,7 @@ assert(!initialisation);
         action_counter[index].label_counter=0;
       }
       todo_stack.clear();
-    }
+    } */
 
     transition_index accumulate_entries(std::vector<transition_index>& action_counter,
                                    const std::vector<label_index>& todo_stack) const
@@ -5519,17 +5695,19 @@ assert(!initialisation);
           else
           {
             fp=std::fopen(filename, "w");
-            assert(NULL!=fp);
           }
-          for (unsigned i=0; i<sizeof(m_R_status_counter)/sizeof(m_R_status_counter[0]); ++i)
+          if (NULL!=fp)
           {
-            std::fprintf(fp, "%u: %u\n", i, m_R_status_counter[i]);
+            for (unsigned i=0; i<sizeof(m_R_status_counter)/sizeof(m_R_status_counter[0]); ++i)
+            {
+              std::fprintf(fp, "%u: %u\n", i, m_R_status_counter[i]);
+            }
+            for (unsigned i=0; i<sizeof(m_U_status_counter)/sizeof(m_U_status_counter[0]); ++i)
+            {
+              std::fprintf(fp, "%u: %u\n", i, m_U_status_counter[i]);
+            }
+            std::fclose(fp);
           }
-          for (unsigned i=0; i<sizeof(m_U_status_counter)/sizeof(m_U_status_counter[0]); ++i)
-          {
-            std::fprintf(fp, "%u: %u\n", i, m_U_status_counter[i]);
-          }
-          std::fclose(fp);
         }
       #endif
     }

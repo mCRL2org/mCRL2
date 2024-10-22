@@ -369,6 +369,7 @@ class check_complexity
             // Invariant: 0 <= (counter value) <= ilog2 n - ilog2(block size)
         split_block_B_into_R_and_BminR__carry_out_split,
             STATE_gj_MIN = split_block_B_into_R_and_BminR__carry_out_split,
+        split_block_B_into_R_and_BminR__skip_over_state,
         simple_splitB__find_bottom_state,
         simple_splitB__find_predecessors_of_R_or_U_state,
         multiple_swap_states_in_block__swap_state_in_small_block,
