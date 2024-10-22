@@ -58,7 +58,7 @@
 // If COUNT_R_U_STATUS_TIMES is defined, simple_splitB() counts how often every
 // step in the coroutines is executed. This helps to find the most efficient
 // arrangement of the checks to determine the step to be executed.
-#define COUNT_R_U_STATUS_TIMES
+// #define COUNT_R_U_STATUS_TIMES This leads to a segmentation fault when reducing 1394-fin-vvlarge.aut (JFG). 
 
 #ifndef NDEBUG
   // If CHECK_COMPLEXITY_GJ is defined, macros are included to check running time
