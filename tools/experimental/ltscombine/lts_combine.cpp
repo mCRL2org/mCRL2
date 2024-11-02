@@ -215,7 +215,7 @@ public:
       : lts_lts_disk_builder(filename, dataspec, action_labels, process_parameters)
   {}
 
-  void finalize_combined(size_t states) override
+  void finalize_combined(size_t /* states */) override
   {
     // Write the initial state.
     lts::write_initial_state(*stream, 0);

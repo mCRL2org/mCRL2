@@ -3897,7 +3897,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                       next_action_label_begin);
                 if (0 != label && aut.num_transitions() < action_label.size())
                 {
-                    mCRL2log(log::warning) << "Action label "
+                    mCRL2log(log::verbose) << "Action label "
                         << pp(aut.action_label(label)) << " has no "
                         "transitions, and the number of action labels exceeds "
                         "the number of transitions. It is not guaranteed that "
@@ -5493,7 +5493,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
     {
         // LTSs with 1 state also need to be reduced because some users call
         // bisimulation minimisation just to remove duplicated transitions.
-        mCRL2log(log::warning) << "There is only 1 state in the LTS. It is "
+        mCRL2log(log::verbose) << "There is only 1 state in the LTS. It is "
                 "not guaranteed that branching bisimulation minimisation runs "
                 "in time O(m log n).\n";
     }

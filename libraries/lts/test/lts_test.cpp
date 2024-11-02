@@ -307,10 +307,11 @@ BOOST_AUTO_TEST_CASE(test_reachability)
   std::istringstream is(REACH);
   lts::lts_aut_t l_reach;
   l_reach.load(is);
-  test_lts("reach test",l_reach, expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("reach test",l_reach, expected_label_count, expected_state_count, expected_transition_count));
   BOOST_CHECK(!reachability_check(l_reach,false));
   reachability_check(l_reach,true);
-  test_lts("reach test after reachability reduction",l_reach, expected_label_count-1, expected_state_count-1, expected_transition_count-1);
+  BOOST_CHECK(test_lts("reach test after reachability reduction",
+                       l_reach, expected_label_count-1, expected_state_count-1, expected_transition_count-1));
   BOOST_CHECK(reachability_check(l_reach,false));
 }
 
@@ -360,16 +361,20 @@ BOOST_AUTO_TEST_CASE(failing_test_groote_wijs_algorithm)
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim);
-  test_lts("gw problem (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("gw problem (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_gv);
-  test_lts("gw problem (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("gw problem (branching bisimulation [Groote/Vaandrager 1990])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_gjkw);
-  test_lts("gw problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("gw problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_sigref);
-  test_lts("gw problem (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("gw problem (branching bisimulation signature [Blom/Orzan 2003])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
 }
 
 // The following counterexample was taken from
@@ -415,10 +420,12 @@ void counterexample_jk_1(std::size_t k)
     l_cjk1.load(is);
     lts::lts_aut_t l=l_cjk1;
     reduce(l,lts::lts_eq_branching_bisim);
-    test_lts("counterexample JK 1 (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
+    BOOST_CHECK(test_lts("counterexample JK 1 (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
+                         l,expected_label_count, expected_state_count, expected_transition_count));
     l=l_cjk1;
     reduce(l,lts::lts_eq_branching_bisim_gv);
-    test_lts("counterexample JK 1 (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
+    BOOST_CHECK(test_lts("counterexample JK 1 (branching bisimulation [Groote/Vaandrager 1990])",
+                         l,expected_label_count, expected_state_count, expected_transition_count));
 }
 
 
@@ -489,16 +496,20 @@ BOOST_AUTO_TEST_CASE(counterexample_postprocessing)
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim);
-  test_lts("postprocessing problem (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("postprocessing problem (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_gv);
-  test_lts("postprocessing problem (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("postprocessing problem (branching bisimulation [Groote/Vaandrager 1990])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_gjkw);
-  test_lts("postprocessing problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("postprocessing problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_sigref);
-  test_lts("postprocessing problem (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("postprocessing problem (branching bisimulation signature [Blom/Orzan 2003])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
 }
 
 BOOST_AUTO_TEST_CASE(regression_delete_old_bb_slice)
@@ -679,16 +690,20 @@ BOOST_AUTO_TEST_CASE(regression_delete_old_bb_slice)
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim);
-  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gv);
-  test_lts("regression test for GJKW bug (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Groote/Vaandrager 1990])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gjkw);
-  test_lts("regression test for GJKW bug (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_sigref);
-  test_lts("regression test for GJKW bug (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation signature [Blom/Orzan 2003])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
 }
 
 BOOST_AUTO_TEST_CASE(is_deterministic_test1)
@@ -735,7 +750,8 @@ BOOST_AUTO_TEST_CASE(hide_actions1)
   std::size_t expected_label_count = 5;
   std::size_t expected_state_count = 3;
   std::size_t expected_transition_count = 3;
-  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
 }
 
 
@@ -757,7 +773,8 @@ BOOST_AUTO_TEST_CASE(hide_actions2)
   std::size_t expected_label_count = 5;
   std::size_t expected_state_count = 2;
   std::size_t expected_transition_count = 3;
-  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
 }
 
 BOOST_AUTO_TEST_CASE(hide_actions3)
@@ -778,9 +795,9 @@ BOOST_AUTO_TEST_CASE(hide_actions3)
   std::size_t expected_label_count = 5;
   std::size_t expected_state_count = 3;
   std::size_t expected_transition_count = 3;
-  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
 }
-
 
 BOOST_AUTO_TEST_CASE(hide_actions4)
 {
@@ -800,6 +817,29 @@ BOOST_AUTO_TEST_CASE(hide_actions4)
   std::size_t expected_label_count = 5;
   std::size_t expected_state_count = 2;
   std::size_t expected_transition_count = 3;
-  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
+  BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+                       l,expected_label_count, expected_state_count, expected_transition_count));
 }
+
+BOOST_AUTO_TEST_CASE(hide_actions5)
+{
+  std::string automaton =
+     "des (0,3,2)\n"
+     "(0,\"RA !ADD (0, EMPTYSET) a\",1)\n"
+     "(1,\"RA !ADD (0, EMPTYSET)|a\",0)\n"
+     "(1,\"RA !ADD (0, EMPTYSET)\",0)\n";
+
+  std::istringstream is(automaton);
+  lts::lts_aut_t l;
+  l.load(is);
+  std::vector<std::string>hidden_actions(1,"a");
+  l.record_hidden_actions(hidden_actions);
+  reduce(l,lts::lts_eq_branching_bisim);
+  std::size_t expected_label_count = 4;
+  std::size_t expected_state_count = 2;
+  std::size_t expected_transition_count = 2;
+  BOOST_CHECK(test_lts("regression test for incorrectly hiding actions with an odd structure (bug #1786)", 
+                       l,expected_label_count, expected_state_count, expected_transition_count));
+}
+
 
