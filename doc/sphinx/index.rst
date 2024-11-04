@@ -36,10 +36,9 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
 .. warning::
 
-   The latest release, mCRL2 202407.1, the tool `lpsxsim` does not work on
+   In the latest release, mCRL2 202407.1, the tool `lpsxsim` does not work on
    Ubuntu. This will be fixed in the next release, but in the meantime the
    nightly builds can be used.
-
 
 .. note::
 
