@@ -37,7 +37,7 @@ latest release of the toolset.
 
 
 Stable releases for Arch Linux are available via the `Arch User Repository <https://aur.archlinux.org/packages/mcrl2/>`_.
-This package is currently maintained by Jorai Rijsdijk.
+This package is currently maintained by Kevin Jilissen.
 
 Nightly build
 --------------
