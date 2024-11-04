@@ -626,3 +626,44 @@ BOOST_AUTO_TEST_CASE(Test18)
 
 }
 
+// This example is provided by JFG to test the GJ bisimulation minimisation algorithm;
+// the example was handled incorrectly.
+BOOST_AUTO_TEST_CASE(Test19)
+{
+  const std::string test19=
+    "des(0,15,6)\n"
+    "(1,\"a\",3)\n"
+    "(0,\"b\",3)\n"
+    "(1,\"b\",3)\n"
+    "(3,\"b\",5)\n"
+    "(4,\"b\",5)\n"
+    "(5,\"b\",0)\n"
+    "(0,\"tau\",0)\n"
+    "(3,\"tau\",2)\n"
+    "(1,\"tau\",2)\n"
+    "(0,\"tau\",2)\n"
+    "(3,\"tau\",5)\n"
+    "(1,\"tau\",3)\n"
+    "(0,\"tau\",0)\n"
+    "(1,\"tau\",4)\n"
+    "(1,\"tau\",1)\n";
+
+  expected_sizes e;
+  e.states_plain=6; e.transitions_plain=15; e.labels_plain=3;
+  e.states_bisimulation=6, e.transitions_bisimulation=14, e.labels_bisimulation=3;
+  e.states_branching_bisimulation=6, e.transitions_branching_bisimulation=12, e.labels_branching_bisimulation=3;
+  e.states_divergence_preserving_branching_bisimulation=6, e.transitions_divergence_preserving_branching_bisimulation=14,
+         e.labels_divergence_preserving_branching_bisimulation=3;
+  e.states_weak_bisimulation=6, e.transitions_weak_bisimulation=11, e.labels_weak_bisimulation=3;
+  e.states_divergence_preserving_weak_bisimulation=6, e.transitions_divergence_preserving_weak_bisimulation=13,
+         e.labels_divergence_preserving_weak_bisimulation=4;
+  e.states_simulation=3, e.transitions_simulation=5, e.labels_simulation=2;
+  e.states_trace_equivalence=3, e.transitions_trace_equivalence=5, e.labels_trace_equivalence=3;
+  e.states_weak_trace_equivalence=1, e.transitions_weak_trace_equivalence=1, e.labels_weak_trace_equivalence=2;
+  e.states_determinisation=5, e.transitions_determinisation=8, e.labels_determinisation=3;
+  e.is_deterministic=false;
+
+  BOOST_CHECK(reduce_lts_in_various_ways("Test19", test19, e));
+
+}
+

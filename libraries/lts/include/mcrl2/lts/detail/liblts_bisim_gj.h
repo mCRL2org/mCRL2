@@ -64,7 +64,9 @@
 // efficiently: states that are already in an acceptable position in m_states_in_blocks
 // will not be moved. This may require some additional reading but fewer changes
 // of pointers.
-#define TRY_EFFICIENT_SWAP
+// However, a test pointed out that it is about 2% slower.  As the code becomes
+// more complex with TRY_EFFICIENT_SWAP, I suggest to not use the option.
+//#define TRY_EFFICIENT_SWAP
 
 #ifndef NDEBUG
   // If CHECK_COMPLEXITY_GJ is defined, macros are included to check running time
@@ -1767,6 +1769,8 @@ assert(!initialisation);
         m_branching(branching),
         m_preserve_divergence(preserve_divergence)
     {
+//log::logger::set_reporting_level(log::debug);
+
       assert(m_branching || !m_preserve_divergence);
       mCRL2log(log::verbose) << "Start initialisation.\n";
       create_initial_partition();
@@ -2163,7 +2167,7 @@ assert(!initialisation);
       {
         mCRL2complexity_gj(s_it->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split,
                 max_B), *this);
-//std::cerr << "MOVE STATE TO NEW BLOCK: " << s << "\n";
+//std::cerr << "MOVE STATE TO NEW BLOCK: " << std::distance(m_states.begin(), s_it->ref_state) << "\n";
         assert(B==s_it->ref_state->block);
         s_it->ref_state->block=B_new;
         assert(s_it->ref_state->ref_states_in_blocks==s_it);
@@ -2172,106 +2176,193 @@ assert(!initialisation);
       #ifdef TRY_EFFICIENT_SWAP
         // (We could perhaps extend the efficient swap to include the R bottom states,
         // but I think that is too complicated for me to think through.)
-        // (Also, if there are very many R non-bottom states,
-        // it might be advantageous to just ignore R.begin()...R.end() and only
-        // look at ...counter==marking_value, because many states will already
-        // be at the correct position and going through R.begin()...R.end() is
-        // mostly superfluous.)
         const std::vector<state_in_block_pointer>::iterator BminR_start_bottom_states=last_bottom_state_in_R+R.size();
         const std::vector<state_in_block_pointer>::iterator BminR_start_non_bottom_states=m_blocks[B].start_non_bottom_states+R.size();
 
-        std::vector<state_in_block_pointer>::const_iterator take_next_R_non_bottom_state_from=R.begin();
-        std::vector<state_in_block_pointer>::iterator move_next_R_non_bottom_state_to=last_bottom_state_in_R;
-        std::vector<state_in_block_pointer>::iterator move_next_R_non_bottom_state_to_end=BminR_start_bottom_states;
-        // Move BminR bottom states out of the way.
-        std::vector<state_in_block_pointer>::iterator move_next_BminR_bottom_state_to=m_blocks[B].start_non_bottom_states;
-        if (move_next_BminR_bottom_state_to<move_next_R_non_bottom_state_to_end)
+        if (R.size()>0)
         {
-          // there are many R-non-bottom states, so we will need to move all BminR bottom states.
-          // (Later, the remaining R-non-bottom states will be placed.)
-          move_next_R_non_bottom_state_to_end=move_next_BminR_bottom_state_to;
-          move_next_BminR_bottom_state_to=BminR_start_bottom_states;
-        }
-        for (; move_next_R_non_bottom_state_to<move_next_R_non_bottom_state_to_end;
-               ++move_next_R_non_bottom_state_to, ++move_next_BminR_bottom_state_to)
-        {
-          // Now the BminR-bottom state at *move_next_R_non_bottom_state_to should move to *move_next_BminR_bottom_state_to.
-          // Find some R-non-bottom state that can move to *move_next_R_non_bottom_state_to:
-          if (marking_value==move_next_BminR_bottom_state_to->ref_state->counter)
+          std::vector<state_in_block_pointer>::iterator move_next_R_non_bottom_state_to=last_bottom_state_in_R;
+          std::vector<state_in_block_pointer>::iterator move_next_R_non_bottom_state_to_end=BminR_start_bottom_states;
+          // Move BminR bottom states out of the way.
+          std::vector<state_in_block_pointer>::iterator move_next_BminR_bottom_state_to=m_blocks[B].start_non_bottom_states;
+          if (move_next_BminR_bottom_state_to<move_next_R_non_bottom_state_to_end)
           {
-            // There is a R-non-bottom state at *move_next_BminR_bottom_state_to already:
-            swap_states_in_states_in_block_never_equal(move_next_R_non_bottom_state_to, move_next_BminR_bottom_state_to);
+            // there are many R-non-bottom states, so we will need to move all BminR bottom states.
+            // (Later, the remaining R-non-bottom states will be placed.)
+            move_next_R_non_bottom_state_to_end=move_next_BminR_bottom_state_to;
+            move_next_BminR_bottom_state_to=BminR_start_bottom_states;
+          }
+          if (R.size()*2>=static_cast<state_index>(std::distance(m_blocks[B].start_non_bottom_states, m_blocks[B].end_states)))
+          {
+            // At least half the non-bottom states go into R.
+            // It is more economical to disregard R completely and look only at ....counter==marking_value.
+
+            // Move BminR bottom states out of the way.
+            std::vector<state_in_block_pointer>::iterator take_next_R_non_bottom_state_from=BminR_start_non_bottom_states;
+            #ifdef CHECK_COMPLEXITY_GJ
+              std::vector<state_in_block_pointer>::const_iterator account_for_skipped_BminR_states=R.begin();
+            #endif
+            for (; move_next_R_non_bottom_state_to<move_next_R_non_bottom_state_to_end;
+                   ++move_next_R_non_bottom_state_to, ++move_next_BminR_bottom_state_to)
+            {
+              // Now the BminR-bottom state at *move_next_R_non_bottom_state_to should move to *move_next_BminR_bottom_state_to.
+              // Find some R-non-bottom state that can move to *move_next_R_non_bottom_state_to:
+              if (marking_value==move_next_BminR_bottom_state_to->ref_state->counter)
+              {
+                // There is a R-non-bottom state at *move_next_BminR_bottom_state_to already:
+                swap_states_in_states_in_block_never_equal(move_next_R_non_bottom_state_to, move_next_BminR_bottom_state_to);
+              }
+              else
+              {
+                // *move_next_BminR_bottom_state_to now contains a BminR-non-bottom state.
+                // Find a place where to move it to, namely some R-non-bottom state that needs to be moved.
+                while (assert(take_next_R_non_bottom_state_from<m_blocks[B].end_states),
+                       marking_value!=take_next_R_non_bottom_state_from->ref_state->counter)
+                {
+                  #ifdef CHECK_COMPLEXITY_GJ
+                    // assign the work in this loop to some R non-bottom state.
+                    // (This is possible because there are no fewer R non-bottom states than BminR non-bottom states.)
+                    assert(account_for_skipped_BminR_states<R.end());
+                    mCRL2complexity_gj(account_for_skipped_BminR_states->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+                    ++account_for_skipped_BminR_states;
+                  #endif
+                  ++take_next_R_non_bottom_state_from;
+                }
+                swap_states_in_states_in_block_23_never_equal(take_next_R_non_bottom_state_from, move_next_R_non_bottom_state_to, move_next_BminR_bottom_state_to);
+                ++take_next_R_non_bottom_state_from;
+              }
+              assert(marking_value==move_next_R_non_bottom_state_to->ref_state->counter);
+              assert(B==move_next_R_non_bottom_state_to->ref_state->block);
+              move_next_R_non_bottom_state_to->ref_state->block=B_new;
+              mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
+                                 add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
+                                 *this);
+            }
+            for (; move_next_R_non_bottom_state_to<BminR_start_bottom_states; ++move_next_R_non_bottom_state_to)
+            {
+              // This loop moves R non-bottom states to places where there were BminR non-bottom states before;
+              // it is executed if there are more R non-bottom states that BminR bottom states.
+
+              // Try to find a R non-bottom state to move to *move_next_R_non_bottom_state_to.
+              if (marking_value==move_next_R_non_bottom_state_to->ref_state->counter)
+              {
+                // There is already a suitable state at this position. Do nothing.
+              }
+              else
+              {
+                // *move_next_R_non_bottom_state_to now contains a BminR-non-bottom state.
+                // Find a place where to move it to, namely some R-non-bottom state that needs to be moved.
+                while (assert(take_next_R_non_bottom_state_from<m_blocks[B].end_states),
+                       marking_value!=take_next_R_non_bottom_state_from->ref_state->counter)
+                {
+                  #ifdef CHECK_COMPLEXITY_GJ
+                    // assign the work in this loop to some R non-bottom state.
+                    // (This is possible because there are no fewer R non-bottom states than BminR non-bottom states.)
+                    assert(account_for_skipped_BminR_states<R.end());
+                    mCRL2complexity_gj(account_for_skipped_BminR_states->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+                    ++account_for_skipped_BminR_states;
+                  #endif
+                  ++take_next_R_non_bottom_state_from;
+                }
+                swap_states_in_states_in_block_never_equal(take_next_R_non_bottom_state_from, move_next_R_non_bottom_state_to);
+                ++take_next_R_non_bottom_state_from;
+                assert(marking_value==move_next_R_non_bottom_state_to->ref_state->counter);
+              }
+              assert(B==move_next_R_non_bottom_state_to->ref_state->block);
+              move_next_R_non_bottom_state_to->ref_state->block=B_new;
+              mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
+                                 add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
+                                 *this);
+            }
           }
           else
           {
-            // *move_next_BminR_bottom_state_to now contains a BminR-non-bottom state.
-            // Find a place where to move it to, namely some R-non-bottom state that needs to be moved.
-            while (assert(take_next_R_non_bottom_state_from<R.end()),
-                   take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<BminR_start_non_bottom_states)
+            // Less than half of the non-bottom states go to R.
+            // We have to ensure that we assign every move to some R non-bottom state
+            // (and do not look at too many BminR states).
+            std::vector<state_in_block_pointer>::const_iterator take_next_R_non_bottom_state_from=R.begin();
+            for (; move_next_R_non_bottom_state_to<move_next_R_non_bottom_state_to_end;
+               ++move_next_R_non_bottom_state_to, ++move_next_BminR_bottom_state_to)
             {
-              mCRL2complexity_gj(take_next_R_non_bottom_state_from->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
-              assert(marking_value==take_next_R_non_bottom_state_from->ref_state->counter);
-              assert((take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<move_next_R_non_bottom_state_to
+              // Now the BminR-bottom state at *move_next_R_non_bottom_state_to should move to *move_next_BminR_bottom_state_to.
+              // Find some R-non-bottom state that can move to *move_next_R_non_bottom_state_to:
+              if (marking_value==move_next_BminR_bottom_state_to->ref_state->counter)
+              {
+                // There is a R-non-bottom state at *move_next_BminR_bottom_state_to already:
+                swap_states_in_states_in_block_never_equal(move_next_R_non_bottom_state_to, move_next_BminR_bottom_state_to);
+              }
+              else
+              {
+                // *move_next_BminR_bottom_state_to now contains a BminR-non-bottom state.
+                // Find a place where to move it to, namely some R-non-bottom state that needs to be moved.
+                while (assert(take_next_R_non_bottom_state_from<R.end()),
+                   take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<BminR_start_non_bottom_states)
+                {
+                  mCRL2complexity_gj(take_next_R_non_bottom_state_from->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+                  assert(marking_value==take_next_R_non_bottom_state_from->ref_state->counter);
+                  assert((take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<move_next_R_non_bottom_state_to
                       ? B_new : B)==take_next_R_non_bottom_state_from->ref_state->block);
-              ++take_next_R_non_bottom_state_from;
-            }
-            swap_states_in_states_in_block_23_never_equal(take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks, move_next_R_non_bottom_state_to, move_next_BminR_bottom_state_to);
-            ++take_next_R_non_bottom_state_from;
-          }
-          assert(marking_value==move_next_R_non_bottom_state_to->ref_state->counter);
-          assert(B==move_next_R_non_bottom_state_to->ref_state->block);
-          move_next_R_non_bottom_state_to->ref_state->block=B_new;
-          mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
+                  ++take_next_R_non_bottom_state_from;
+                }
+                swap_states_in_states_in_block_23_never_equal(take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks, move_next_R_non_bottom_state_to, move_next_BminR_bottom_state_to);
+                ++take_next_R_non_bottom_state_from;
+              }
+              assert(marking_value==move_next_R_non_bottom_state_to->ref_state->counter);
+              assert(B==move_next_R_non_bottom_state_to->ref_state->block);
+              move_next_R_non_bottom_state_to->ref_state->block=B_new;
+              mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
                              add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
                              *this);
-        }
-        #ifndef NDEBUG
-          if (move_next_R_non_bottom_state_to<BminR_start_bottom_states)
-          {
-            // There are still some R-non-bottom states that may not be in their correct positions.
-            assert(move_next_R_non_bottom_state_to==m_blocks[B].start_non_bottom_states);
-          }
-          else
-          {
-            // All states are in their correct positions.
-            assert(BminR_start_non_bottom_states==move_next_BminR_bottom_state_to);
-          }
-        #endif
-        for (; move_next_R_non_bottom_state_to<BminR_start_bottom_states; ++move_next_R_non_bottom_state_to)
-        {
-          // This loop moves R non-bottom states to places where there were BminR non-bottom states before;
-          // it is executed if there are more R non-bottom states that BminR bottom states.
+            }
+            #ifndef NDEBUG
+              if (move_next_R_non_bottom_state_to<BminR_start_bottom_states)
+              {
+                // There are still some R-non-bottom states that may not be in their correct positions.
+                assert(move_next_R_non_bottom_state_to==m_blocks[B].start_non_bottom_states);
+              }
+              else
+              {
+                // All states are in their correct positions.
+                assert(BminR_start_non_bottom_states==move_next_BminR_bottom_state_to);
+              }
+            #endif
+            for (; move_next_R_non_bottom_state_to<BminR_start_bottom_states; ++move_next_R_non_bottom_state_to)
+            {
+              // This loop moves R non-bottom states to places where there were BminR non-bottom states before;
+              // it is executed if there are more R non-bottom states that BminR bottom states.
 
-          // Try to find a R non-bottom state to move to *move_next_R_non_bottom_state_to.
-          if (marking_value==move_next_R_non_bottom_state_to->ref_state->counter)
-          {
-            // There is already a suitable state at this position. Do nothing.
-          }
-          else
-          {
-            // *move_next_R_non_bottom_state_to now contains a BminR-non-bottom state.
-            // Find a place where to move it to, namely some R-non-bottom state that needs to be moved.
-            while (assert(R.begin()<=take_next_R_non_bottom_state_from),
+              // Try to find a R non-bottom state to move to *move_next_R_non_bottom_state_to.
+              if (marking_value==move_next_R_non_bottom_state_to->ref_state->counter)
+              {
+                // There is already a suitable state at this position. Do nothing.
+              }
+              else
+              {
+                // *move_next_R_non_bottom_state_to now contains a BminR-non-bottom state.
+                // Find a place where to move it to, namely some R-non-bottom state that needs to be moved.
+                while (assert(R.begin()<=take_next_R_non_bottom_state_from),
                    assert(take_next_R_non_bottom_state_from<R.end()),
                    take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<BminR_start_non_bottom_states)
-            {
-              // Actually the state at *take_next_R_non_bottom_state_from is already at an acceptable position.
-              // Leave it there and try the next state.
-              mCRL2complexity_gj(take_next_R_non_bottom_state_from->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
-              assert(marking_value==take_next_R_non_bottom_state_from->ref_state->counter);
-              assert((take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<move_next_R_non_bottom_state_to
+                {
+                  // Actually the state at *take_next_R_non_bottom_state_from is already at an acceptable position.
+                  // Leave it there and try the next state.
+                  mCRL2complexity_gj(take_next_R_non_bottom_state_from->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+                  assert(marking_value==take_next_R_non_bottom_state_from->ref_state->counter);
+                  assert((take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<move_next_R_non_bottom_state_to
                       ? B_new : B)==take_next_R_non_bottom_state_from->ref_state->block);
-              ++take_next_R_non_bottom_state_from;
-            }
-            swap_states_in_states_in_block_never_equal(take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks, move_next_R_non_bottom_state_to);
-            ++take_next_R_non_bottom_state_from;
-            assert(marking_value==move_next_R_non_bottom_state_to->ref_state->counter);
-          }
-          assert(B==move_next_R_non_bottom_state_to->ref_state->block);
-          move_next_R_non_bottom_state_to->ref_state->block=B_new;
-          mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
+                  ++take_next_R_non_bottom_state_from;
+                }
+                swap_states_in_states_in_block_never_equal(take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks, move_next_R_non_bottom_state_to);
+                ++take_next_R_non_bottom_state_from;
+                assert(marking_value==move_next_R_non_bottom_state_to->ref_state->counter);
+              }
+              assert(B==move_next_R_non_bottom_state_to->ref_state->block);
+              move_next_R_non_bottom_state_to->ref_state->block=B_new;
+              mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
                              add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
                              *this);
+            }
+          }
         }
         m_blocks[B_new].end_states=BminR_start_bottom_states;
         m_blocks[B].start_bottom_states=BminR_start_bottom_states;
@@ -2452,6 +2543,7 @@ assert(!initialisation);
         if (next_block_to_constellation==this_block_to_constellation)
         {
           // Make a new entry in the list block_to_constellation, at the beginning;
+//std::cerr << "Creating new BLC set for inert " << m_transitions[ti].debug_id(*this) << ": ";
 
           next_block_to_constellation=
                   m_blocks[from_block].block_to_constellation.
@@ -2464,6 +2556,7 @@ assert(!initialisation);
         }
         else
         {
+//std::cerr << "Extending existing BLC set for inert " << m_transitions[ti].debug_id(*this) << ": ";
           assert(m_states[m_aut.get_transitions()[*(next_block_to_constellation->start_same_BLC)].to()].block==index_block_B);
         }
       }
@@ -2484,7 +2577,7 @@ assert(!initialisation);
              m_states[first_t->to()].block!=index_block_B) ||
             (label_or_divergence(*first_t) != label_or_divergence(t)))
         {
-// std::cerr << "Creating new BLC set for " << m_transitions[ti].debug_id(*this) << ": ";
+//std::cerr << "Creating new BLC set for " << m_transitions[ti].debug_id(*this) << ": ";
           // Make a new entry in the list next_block_to_constellation, after the current list element.
           next_block_to_constellation=
                   m_blocks[from_block].block_to_constellation.
@@ -2496,7 +2589,7 @@ assert(!initialisation);
           #endif
           new_block_created = true;
         }
-// else { std::cerr << "Extending existing BLC set for " << m_transitions[ti].debug_id(*this) << ": "; }
+//else { std::cerr << "Extending existing BLC set for " << m_transitions[ti].debug_id(*this) << ": "; }
       }
 
       if (swap_in_the_doubly_linked_list_LBC_in_blocks_new_constellation(ti,
@@ -2507,7 +2600,6 @@ assert(!initialisation);
                     ))
       {
         m_blocks[from_block].block_to_constellation.erase(this_block_to_constellation);
-        new_block_created=false;
       }
       #ifndef NDEBUG
         check_transitions(false, false);
@@ -3431,7 +3523,7 @@ assert(!initialisation);
     // The transition must go from one block to another but it cannot be constellation-inert yet.
     void make_transition_non_inert(const transition& t)
     {
-// std::cerr << "Transition " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << " becomes non-inert.\n";
+//std::cerr << "Transition " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << " becomes non-inert.\n";
       assert(is_inert_during_init(t));
       assert(m_states[t.to()].block!=m_states[t.from()].block);
       assert(m_blocks[m_states[t.to()].block].constellation == m_blocks[m_states[t.from()].block].constellation);
@@ -3445,7 +3537,7 @@ assert(!initialisation);
       // Move this former non-bottom state to the bottom states.
       // The block of si is not yet inserted into the set of blocks with new bottom states.
       block_index bi = si->block;
-// std::cerr << si->debug_id(*this) << " becomes a new bottom state of " << m_blocks[bi].debug_id(*this) << ".\n";
+//std::cerr << si->debug_id(*this) << " becomes a new bottom state of " << m_blocks[bi].debug_id(*this) << ".\n";
       assert(0 == si->no_of_outgoing_inert_transitions);
       assert(!m_blocks[bi].contains_new_bottom_states);
       swap_states_in_states_in_block(si->ref_states_in_blocks, m_blocks[bi].start_non_bottom_states);
@@ -3472,8 +3564,8 @@ assert(!initialisation);
 //std::cerr << "splitB(splitter = " << splitter->debug_id(*this) << ", first_unmarked_bottom_state = " << first_unmarked_bottom_state->ref_state->debug_id(*this) << ", splitter_end_unmarked_BLC = "
 //<< (split_off_new_bottom_states && splitter_end_unmarked_BLC == splitter->start_marked_BLC ? "start_marked_BLC" : (splitter_end_unmarked_BLC == splitter->start_same_BLC ? "start_same_BLC" : "?")) << ", ..., split_off_new_bottom_states = " << split_off_new_bottom_states << ")\n";
       const block_index B = m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].block;
-//std::cerr << "Marked bottom states:"; for (state_in_block_pointer it=m_blocks[B].start_bottom_states; it!=first_unmarked_bottom_state; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it.ref_state); }
-//std::cerr << "\nUnmarked bottom states:"; for (state_in_block_pointer it=first_unmarked_bottom_state; it!=m_blocks[B].start_non_bottom_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it.ref_state); } std::cerr << "\nAdditionally, " << m_R.size() << " non-bottom states have been marked.\n";
+//std::cerr << "Marked bottom states:"; for (std::vector<state_in_block_pointer>::iterator it=m_blocks[B].start_bottom_states; it!=first_unmarked_bottom_state; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); }
+//std::cerr << "\nUnmarked bottom states:"; for (std::vector<state_in_block_pointer>::iterator it=first_unmarked_bottom_state; it!=m_blocks[B].start_non_bottom_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << "\nAdditionally, " << m_R.size() << " non-bottom states have been marked.\n";
       assert(!has_marked_transitions(*splitter));
       if (1 >= number_of_states_in_block(B))
       {
@@ -5055,10 +5147,10 @@ assert(!initialisation);
     // Select a block that is not the largest block in the constellation.
     // It is advantageous to select the smallest block.
     // The constellation ci is returned.
-    block_index select_and_remove_a_block_in_a_non_trivial_constellation(constellation_index& ci)
+    block_index select_and_remove_a_block_in_a_non_trivial_constellation()
     {
       // Do the minimal checking, i.e., only check two blocks in a constellation.
-      ci=m_non_trivial_constellations.back();
+      const constellation_index ci=m_non_trivial_constellations.back();
       block_index index_block_B=m_constellations[ci].start_const_states->ref_state->block;           // The first block.
       block_index second_block_B=std::prev(m_constellations[ci].end_const_states)->ref_state->block; // The last block.
 
@@ -5102,8 +5194,8 @@ assert(!initialisation);
         assert(check_stability("MAIN LOOP"));
 
         // Algorithm 1, line 1.7.
-        constellation_index old_constellation = null_constellation;
-        block_index index_block_B=select_and_remove_a_block_in_a_non_trivial_constellation(old_constellation);
+        block_index index_block_B=select_and_remove_a_block_in_a_non_trivial_constellation();
+        const constellation_index old_constellation=m_blocks[index_block_B].constellation;
 //std::cerr << "REMOVE BLOCK " << index_block_B << " from constellation " << old_constellation << "\n";
 
         // Algorithm 1, line 1.8.
@@ -5114,7 +5206,6 @@ assert(!initialisation);
           m_non_trivial_constellations.pop_back();
         }
         m_constellations.emplace_back(m_blocks[index_block_B].start_bottom_states, m_blocks[index_block_B].end_states);
-        assert(old_constellation == m_blocks[index_block_B].constellation);
         const constellation_index new_constellation=m_constellations.size()-1;
         // Block index_block_B is moved to the new constellation but we cannot yet assign
         // m_blocks[index_block_B].constellation = new_constellation;
@@ -5298,15 +5389,15 @@ assert(!initialisation);
             #endif
             // Update the doubly linked list L_B->C in blocks as the constellation is split in B and C\B.
             if (update_the_doubly_linked_list_LBC_new_constellation(index_block_B, t, t_index) &&
-                !source_block_is_singleton)
+                !source_block_is_singleton &&
+                (!is_inert_during_init(t) || index_block_B!=m_states[t.from()].block))
             {
-              assert(!is_inert_during_init(t) ||
-                     m_states[t.to()].block!=m_states[t.from()].block);
               // a new BLC set has been constructed, insert its start position into calM.
               // (unless the source block is a singleton)
               BLC_list_iterator BLC_pos = m_transitions[t_index].ref_outgoing_transitions->ref_BLC_transitions;
               assert(t_index == *BLC_pos);
               calM.emplace_back(BLC_pos, BLC_pos);
+//std::cerr << "This transition is in a main splitter.\n";
               // The end-position (the second element in the pair) will need to be corrected later.
             }
           }
@@ -5317,19 +5408,26 @@ assert(!initialisation);
         for (std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> >::iterator calM_elt=calM.begin(); calM_elt!=calM.end(); )
         {
           linked_list <BLC_indicators>::iterator ind=m_transitions[*calM_elt->first].transitions_per_block_to_constellation;
+//std::cerr << "Checking whether " << ind->debug_id(*this) << " is a splitter: ";
           mCRL2complexity_gj(ind, add_work(check_complexity::refine_partition_until_it_becomes_stable__correct_end_of_calM, max_C), *this);
           assert(ind->start_same_BLC==calM_elt->first);
           assert(!has_marked_transitions(*ind));
           // check if all transitions were moved to the new constellation,
           // or some transitions to the old constellation have remained:
-          const transition* last_t, * next_t;
-          if (ind->start_marked_BLC<m_BLC_transitions.end() &&
-              (last_t=&m_aut.get_transitions()[*std::prev(ind->start_marked_BLC)],
-               assert(m_blocks[m_states[last_t->to()].block].constellation==new_constellation),
-               next_t=&m_aut.get_transitions()[*ind->start_marked_BLC],
-               m_states[last_t->from()].block==m_states[next_t->from()].block &&
-                label_or_divergence(*last_t)==label_or_divergence(*next_t) &&
-                m_blocks[m_states[next_t->to()].block].constellation==old_constellation))
+          const transition& last_t=m_aut.get_transitions()[*std::prev(ind->start_marked_BLC)];
+          assert(m_blocks[m_states[last_t.to()].block].constellation==new_constellation);
+          const transition* next_t;
+          if ((is_inert_during_init(last_t) && m_blocks[m_states[last_t.from()].block].constellation==old_constellation &&
+               (assert(m_states[last_t.from()].block!=index_block_B),
+//std::cerr << "yes, it was constellation-inert earlier but is no more\n",
+                                                                       true)) ||
+              (ind->start_marked_BLC<m_BLC_transitions.end() &&
+               (next_t=&m_aut.get_transitions()[*ind->start_marked_BLC],
+                m_states[last_t.from()].block==m_states[next_t->from()].block &&
+                label_or_divergence(last_t)==label_or_divergence(*next_t) &&
+                m_blocks[m_states[next_t->to()].block].constellation==old_constellation
+//&& (std::cerr << "yes, there are transitions in the corresponding co-splitter\n", true)
+                                                                                       )))
           {
             // there are some transitions to the corresponding co-splitter,
             // so we will have to stabilize the block
@@ -5340,6 +5438,7 @@ assert(!initialisation);
           }
           else
           {
+//std::cerr << "no, all transitions in the old BLC set have moved to the new BLC set\n";
             // all transitions in the old BLC set have moved to the new BLC set;
             // as the old BLC set was stable, so is the new one.
             // We can skip this element.
