@@ -32,17 +32,15 @@ class t_tool_options
     lts_type        outtype;
     lts_equivalence equivalence;
     std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
-    bool            remove_state_information;
-    bool            determinise;
-    bool            check_reach;
+    bool            remove_state_information=false;
+    bool            determinise=false;
+    bool            check_reach=true;
+    bool            add_state_as_state_label=false;
 
     inline t_tool_options() 
      : intype(lts_none), 
        outtype(lts_none), 
-       equivalence(lts_eq_none),
-       remove_state_information(false), 
-       determinise(false), 
-       check_reach(true)
+       equivalence(lts_eq_none)
     {
     }
 
@@ -178,6 +176,22 @@ class ltsconvert_tool : public input_output_tool
       if (tool_options.remove_state_information)
       {
         l.clear_state_labels();
+      }
+
+      if (tool_options.add_state_as_state_label)
+      {
+        // Add the state numbers as the labels of the states. 
+        if constexpr (std::is_same<LTS_TYPE,probabilistic_lts_fsm_t>::value ||
+                      std::is_same<LTS_TYPE,lts_fsm_t>::value)
+        {
+          l.clear_process_parameters();
+          l.add_process_parameter("state_number","Nat");
+          for(std::size_t i=0; i<l.num_states(); ++i)
+          {
+            l.add_state_element_value(0,std::to_string(i));
+          }
+        }
+        l.add_state_number_as_state_information();
       }
 
       if (tool_options.equivalence != lts_eq_none)
@@ -372,6 +386,9 @@ class ltsconvert_tool : public input_output_tool
                       "consider actions with a name in the comma separated list ACTNAMES to "
                       "be internal (tau) actions in addition to those defined as such by "
                       "the input.");
+      desc.add_hidden_option("add_state_as_state_label",
+                             "add the state number as the label of the states in the input file, "
+                             "and remove other state labels if they exist");
     }
 
     void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
@@ -434,6 +451,15 @@ class ltsconvert_tool : public input_output_tool
       if (parser.options.count("tau"))
       {
         set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
+      }
+
+      if (parser.options.count("add_state_as_state_label"))
+      {
+        if (tool_options.intype == lts_aut)
+        {
+          parser.error("cannot use --add_state_as_state_label on a .aut input file, as .aut files do not have state labels\n");
+        }
+        tool_options.add_state_as_state_label=true;
       }
 
       tool_options.determinise                       = 0 < parser.options.count("determinise");

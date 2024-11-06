@@ -64,6 +64,13 @@ class state_label_fsm:  public std::vector < std::size_t >
       }
       return (*this); 
     }
+
+    /** \brief Create a state label consisting of a number as the only list element.
+    */
+    static state_label_fsm number_to_label(const std::size_t n)
+    {
+      return state_label_fsm(std::vector < std::size_t >(1,n));
+    }
 };
 
 /** \brief Pretty print an fsm state label. */

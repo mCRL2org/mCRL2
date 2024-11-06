@@ -52,6 +52,13 @@ class state_label_empty
       return state_label_empty();
     }
 
+    /** \brief Create a state label consisting of a number as the only list element.
+               For empty state labels this does nothing as there are no state labels.
+    */
+    static state_label_empty number_to_label(const std::size_t )
+    {
+      return state_label_empty();
+    }
 };
 
 inline std::string pp(const state_label_empty& )

@@ -90,6 +90,13 @@ class state_label_lts : public atermpp::term_list< lps::state >
 
       return result;
     }
+
+    /** \brief Create a state label consisting of a number as the only list element.
+    */
+    static state_label_lts number_to_label(const std::size_t n)
+    {
+      return state_label_lts(lps::state(mcrl2::data::sort_nat::nat(n)));
+    }
 };
 
 /** \brief Pretty print a state value of this LTS.

@@ -501,11 +501,21 @@ class lts: public LTS_BASE
 
     /** \brief Clear the labels of an lts.
      *  \details This removes the action labels of an lts.
-     *           It does not change the number of
-     *           state labels */
+     *           It does not change the number of states */
     void clear_state_labels()
     {
       m_state_labels.clear();
+    }
+
+    /** \brief Label each state with its state number.
+     *  \details This overwrites existing state labels. */
+    void add_state_number_as_state_information()
+    {
+      m_state_labels.resize(num_states());
+      for(std::size_t i=0; i<num_states(); ++i)
+      {
+        set_state_label(i,STATE_LABEL_T::number_to_label(i));   // YYYYYY TODO FINISH.
+      }
     }
 
     /** \brief Clear the transitions system.
