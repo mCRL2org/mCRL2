@@ -113,6 +113,7 @@ add_custom_target(${coverage_target}
   # Create baseline to make sure untouched files show up in the report
   COMMAND ${LCOV_PATH} --capture --initial --directory . 
     --exclude *.g --exclude */3rd-party/* --exclude *toolset_version_const.h --exclude *jittyc_*.cpp
+    --ignore-errors mismatch,unused
     --output ${coverage_target}.base
 
   # Run tests
@@ -123,6 +124,7 @@ add_custom_target(${coverage_target}
   # Capturing lcov counters and generating report
   COMMAND ${LCOV_PATH} --capture --directory . 
     --exclude *.g --exclude */3rd-party/* --exclude *toolset_version_const.h --exclude *jittyc_*.cpp
+    --ignore-errors mismatch,unused
     --output-file ${coverage_target}.info
 
   # add baseline counters
