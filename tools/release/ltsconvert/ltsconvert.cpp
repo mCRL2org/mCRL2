@@ -191,6 +191,12 @@ class ltsconvert_tool : public input_output_tool
             l.add_state_element_value(0,std::to_string(i));
           }
         }
+        if constexpr (std::is_same<LTS_TYPE,probabilistic_lts_lts_t>::value ||
+                      std::is_same<LTS_TYPE,lts_lts_t>::value)
+        {
+          // l.set_process_parameters(atermpp::term_list<mcrl2::data::variable>(mcrl2::data::variable("state_number",mcrl2::data::sort_nat::nat())));
+          l.set_process_parameters({mcrl2::data::variable("state_number",mcrl2::data::sort_nat::nat())});
+        }
         l.add_state_number_as_state_information();
       }
 
@@ -386,7 +392,7 @@ class ltsconvert_tool : public input_output_tool
                       "consider actions with a name in the comma separated list ACTNAMES to "
                       "be internal (tau) actions in addition to those defined as such by "
                       "the input.");
-      desc.add_hidden_option("add_state_as_state_label",
+      desc.add_hidden_option("add-state-as-state-label",
                              "add the state number as the label of the states in the input file, "
                              "and remove other state labels if they exist");
     }
@@ -453,11 +459,11 @@ class ltsconvert_tool : public input_output_tool
         set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
       }
 
-      if (parser.options.count("add_state_as_state_label"))
+      if (parser.options.count("add-state-as-state-label"))
       {
         if (tool_options.intype == lts_aut)
         {
-          parser.error("cannot use --add_state_as_state_label on a .aut input file, as .aut files do not have state labels\n");
+          parser.error("cannot use --add-state-as-state-label on a .aut input file, as .aut files do not have state labels\n");
         }
         tool_options.add_state_as_state_label=true;
       }
