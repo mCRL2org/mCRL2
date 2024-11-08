@@ -4133,8 +4133,8 @@ assert(!initialisation);
 // JFG answers: Agreed. But I believe this will cost performance. For 1394-fin-vvlarge this saves 1 second to sort, but
 //                      requires five more seconds to carry out the splitting. Apparently, there is benefit to have src together.
 //                      This may have been measured on an older version of the code.
-      //group_transitions_on_tgt_label(m_aut);
-      sort_transitions(m_aut.get_transitions(), m_aut.hidden_label_set(), tgt_lbl_src); // THIS IS NOW ESSENTIAL.
+      group_transitions_on_tgt_label(m_aut);
+      // sort_transitions(m_aut.get_transitions(), m_aut.hidden_label_set(), tgt_lbl_src); // THIS IS NOW ESSENTIAL.
       // sort_transitions(m_aut.get_transitions(), src_lbl_tgt);
       // sort_transitions(m_aut.get_transitions(), tgt_lbl);
       // sort_transitions(m_aut.get_transitions(), target);
@@ -4142,7 +4142,7 @@ assert(!initialisation);
       // Count the number of occurring action labels.
       assert((unsigned) m_preserve_divergence <= 1);
 
-      mCRL2log(log::verbose) << "Start initialisation of the BLC list in the initialisation\n";
+      mCRL2log(log::verbose) << "Start initialisation of the BLC list in the initialisation, after sorting.\n";
       {
         std::vector<label_index> todo_stack_actions;
         std::vector<transition_index> count_transitions_per_action(m_aut.num_action_labels() + (unsigned) m_preserve_divergence, 0);
