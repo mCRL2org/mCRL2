@@ -389,7 +389,7 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
                                            const std::size_t tau_label_index,
                                            const std::size_t number_of_states)
 {
-  constexpr std::size_t log2cache_size = 13; // This is an approximation of the 2log of the cache size in pointers. 
+  constexpr std::size_t log2cache_size = 16; // This is an approximation of the 2log of the cache size in pointers. 
   constexpr std::size_t one=1;
   assert(number_of_states>0);
   assert(number_of_states< (one << 2*log2cache_size));
@@ -398,8 +398,9 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
   size_t mask=0, shift=0;
   if (relevant_bits>log2cache_size)
   {
-    mask=(one<<log2cache_size)-1;
-    shift=relevant_bits-log2cache_size;
+    // Sort in two phases, with the relevant bits evenly divided. 
+    mask=(one<<(relevant_bits/2))-1;
+    shift=relevant_bits-(relevant_bits/2);
   } 
   else
   {
