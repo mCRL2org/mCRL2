@@ -90,84 +90,118 @@ inline std::string ptr(const transition t)
       return std::to_string(t.from()) + " -" + std::to_string(t.label()) + "-> " + std::to_string(t.to());
     } 
 
+static std::vector<std::size_t> bogus_todo_stack;
+
+template <bool USE_STACK>
 inline void group_transitions_on_label(const std::vector<transition>::iterator begin,
                                        const std::vector<transition>::iterator end,
                                        std::function<std::size_t(const transition&)> get_label, 
-                                       const std::size_t tau_label_index,
                                        std::vector<std::pair<std::size_t, std::size_t>>& count_sum_transitions_per_action,
-                                       std::vector<std::size_t>& todo_stack)
+                                       const std::size_t tau_label_index=0,
+                                       std::vector<std::size_t>& todo_stack=bogus_todo_stack)
 {
-//std::cerr << "START SORTING TRANSITIONS\n";
-//std::cerr << "==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
+std::cerr << "START SORTING TRANSITIONS\n";
+std::cerr << "==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
 #ifndef NDEBUG
   for(std::pair<std::size_t, std::size_t> p: count_sum_transitions_per_action){ assert(p.first==0); }
   assert(todo_stack.empty());
 #endif
 
-  todo_stack.push_back(tau_label_index);
+  if (USE_STACK) todo_stack.push_back(tau_label_index);
   for(std::vector<transition>::iterator ti=begin; ti!=end; ++ti)
   {
     const transition& t=*ti;
     std::size_t label=get_label(t);
-    if (label!=tau_label_index && count_sum_transitions_per_action[label].first==0)
+    if (USE_STACK && label!=tau_label_index && count_sum_transitions_per_action[label].first==0)
     {
       todo_stack.push_back(label);
     }
+std::cerr << "COUNT LABEL " << label << "\n";
     count_sum_transitions_per_action[label].first++;
   }
+std::cerr << "+++++++++++++++++++++\n"; for(auto p: count_sum_transitions_per_action) { std::cerr << "AAAA1 " << p.first << "    " << p.second << "\n"; }
 
   // Sum the number of transitions per label. By summing these numbers up, count_sum_transitions_per_action[a].second indicates the starting
   // position where a transition with label a must be placed. 
 
   std::size_t sum=0;
-  for(std::size_t a: todo_stack)
+  if (USE_STACK) 
   {
-    sum=sum+count_sum_transitions_per_action[a].first;
-    count_sum_transitions_per_action[a].second=sum;
+    for(std::size_t a: todo_stack)
+    {
+      sum=sum+count_sum_transitions_per_action[a].first;
+      count_sum_transitions_per_action[a].second=sum;
+    }
   }
+  else
+  {
+    for(std::pair<std::size_t, std::size_t>& p: count_sum_transitions_per_action)
+    {
+      sum=sum+p.first;
+      p.second=sum;
+    }
+  }
+std::cerr << "+++++++++++++++++++++\n"; for(auto p: count_sum_transitions_per_action) { std::cerr << "AAAA2 " << p.first << "    " << p.second << "\n"; }
 
   // Move from left to right through the transitions and move them to the required place. 
   std::vector<transition>::iterator current_leftmost_position=begin;
   std::vector<std::size_t>::iterator current_leftmost_label=todo_stack.begin();
+  std::size_t current_label=USE_STACK?*current_leftmost_label:0;
   while (current_leftmost_position!=end)
   {
-//std::cerr << "POINTERS " << &*current_leftmost_position << "    " << &*end << "\n";
-//std::cerr << "AAAAA==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
-    while (current_leftmost_label!=todo_stack.end() && count_sum_transitions_per_action[*current_leftmost_label].first==0)
+std::cerr << "POINTERS  " << &*current_leftmost_position << "    " << &*end << "\n";
+std::cerr << "POINTERS1 " << &*current_leftmost_label << "    " << &*todo_stack.end() << "\n";
+std::cerr << "AAAAA==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
+    while ((USE_STACK
+              ?current_leftmost_label!=todo_stack.end() 
+              :current_label<count_sum_transitions_per_action.size()) && 
+           count_sum_transitions_per_action[current_label].first==0)
     {
-//std::cerr << "HIER\n";
-      current_leftmost_label++;
+// std::cerr << "HIER\n";
+      if (USE_STACK)
+      {
+        current_leftmost_label++;
+        current_label=*current_leftmost_label;
+      }
+      else
+      {
+        current_label++;
+      }
     }
     // Move to the first position with the current label that is potentially not correct.
-//std::cerr << "Current leftmost label " << *current_leftmost_label << "   " << count_sum_transitions_per_action[*current_leftmost_label].first << "    " << count_sum_transitions_per_action[*current_leftmost_label].second << "\n";
-    if (current_leftmost_label==todo_stack.end()) 
+    if (USE_STACK
+          ?current_leftmost_label==todo_stack.end() 
+          :current_label==count_sum_transitions_per_action.size()) 
     {
       break;
     }
-    current_leftmost_position=begin+count_sum_transitions_per_action[*current_leftmost_label].second-count_sum_transitions_per_action[*current_leftmost_label].first;
+    current_leftmost_position=begin+
+                              count_sum_transitions_per_action[current_label].second-
+                              count_sum_transitions_per_action[current_label].first;
     
-//std::cerr << "BBBBB==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
+std::cerr << "current_leftmost_position: " << &*current_leftmost_position << "\n";
+std::cerr << "BBBBB==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
     // Shift the current leftmost position until a transition is found that must be moved.
-    while (current_leftmost_position!=end && get_label(*current_leftmost_position)==*current_leftmost_label)
+    while (current_leftmost_position!=end && get_label(*current_leftmost_position)==current_label)
     {
       current_leftmost_position++;
-      count_sum_transitions_per_action[*current_leftmost_label].first--;
-      // count_sum_transitions_per_action[*current_leftmost_label].second;
+      count_sum_transitions_per_action[current_label].first--;
+      // count_sum_transitions_per_action[current_label].second;
     }
     
     // Check whether a transition with the current label is expected at the current_leftmost_position.
-    if (count_sum_transitions_per_action[*current_leftmost_label].first>0)
+    if (count_sum_transitions_per_action[current_label].first>0)
     {
       // At the current position there is a transition that needs to be moved. Move transitions out of the way, until
       // the transitions that belongs here is found and is moved in place. 
       transition transition_on_the_move= *current_leftmost_position;
-//std::cerr << "Transition on the move " << ptr(transition_on_the_move) << "\n";
+// std::cerr << "Transition on the move " << ptr(transition_on_the_move) << "\n";
       do
       {
-//std::cerr << "CCCCC==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
+std::cerr << "CCCCC==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
         std::size_t label=get_label(transition_on_the_move);
         std::size_t new_position=count_sum_transitions_per_action[label].second-count_sum_transitions_per_action[label].first;
-//std::cerr << "FIrst NEW POSITION " << new_position << "\n";
+std::cerr << "FIrst NEW POSITION " << new_position << "\n";
         assert(0<std::distance(begin,end)-new_position);
         count_sum_transitions_per_action[label].first--;
         // Search for a target position with a non-matching label. 
@@ -178,18 +212,19 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
           count_sum_transitions_per_action[label].first--;
         }
         assert(get_label(transition_on_the_move)!=get_label(*(begin+new_position)));
-//std::cerr << "DEFINITIVE NEW POSITION " << new_position << "\n";
+std::cerr << "DEFINITIVE NEW POSITION " << new_position << "\n";
         std::swap(transition_on_the_move,*(begin+new_position));
       }
-      while (get_label(transition_on_the_move)!=*current_leftmost_label);
+      while (get_label(transition_on_the_move)!=current_label);
       // We found the transition that we must put at the current place. 
       *current_leftmost_position=transition_on_the_move;
       current_leftmost_position++;
-      count_sum_transitions_per_action[*current_leftmost_label].first--;
-      // count_sum_transitions_per_action[*current_leftmost_label].second++;
+      count_sum_transitions_per_action[current_label].first--;
+      // count_sum_transitions_per_action[current_label].second++;
     }
   }
-//std::cerr << "END SORTING TRANSITIONS\n";
+std::cerr << "==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
+std::cerr << "END SORTING TRANSITIONS\n";
 }
 
 inline void group_transitions_on_label(std::vector<transition>& transitions, 
@@ -199,7 +234,8 @@ inline void group_transitions_on_label(std::vector<transition>& transitions,
 {
   std::vector<std::pair<std::size_t, std::size_t>> count_sum_transitions_per_action(number_of_labels, {0,0});
   std::vector<std::size_t> todo_stack;
-  group_transitions_on_label(transitions.begin(), transitions.end(), get_label, tau_label_index, count_sum_transitions_per_action, todo_stack);
+  group_transitions_on_label<true>(transitions.begin(), transitions.end(), get_label, 
+                                   count_sum_transitions_per_action, tau_label_index, todo_stack);
 }
 
 
@@ -242,67 +278,16 @@ void group_in_situ(const ITERATOR& begin,
 //std::cerr << "VALUE COUNTER1 not_in "; for(auto s:  value_counter){ std::cerr << s.not_investigated << "  "; } std::cerr << "\n";
                                         
   // std::vector<std::size_t>::iterator current_value=todo_stack.begin();
-static std::size_t count1=0;
-static std::size_t count2=0;
-static std::size_t count3=0;
-static std::size_t count4=0;
-static std::size_t count5=0;
-count1=0; count2=0; count3=0; count4=0; count5=0;
-/ * =====================================
-  for(ITERATOR i=begin; i!=end; )   
-  {                                 
-count1++;
-    std::size_t n=get_value(i);     
-    if (n==*current_value)          
-    {                               
-      value_counter[n]--;
-      sum_counter[n]++;
-      ++i;                             
-      while (current_value!=todo_stack.end() && value_counter[*current_value]==0)
-      {                               
-count2++;
-        current_value++;                
-        if (current_value!=todo_stack.end())    
-        {                                       
-          i=begin+sum_counter[*current_value]; // Jump to the first non investigated action.
-        }                                       
-        else                                    
-        {                                       
-          break; // exit the while loop.
-        } 
-      }   
-    }     
-    else
-    {
-      // Find the first transition with a different label than t.label to swap with. 
-      ITERATOR new_position=begin+sum_counter[n];
-      while (get_value(new_position)==n)
-      {
-count3++;
-        sum_counter[n]++;
-        value_counter[n]--;
-        new_position++;
-        assert(new_position!=end);
-      }
-      assert(value_counter[n]>0);
-      std::swap(*i, *new_position);
-      sum_counter[n]++;
-      value_counter[n]--;
-    }
-  }
-====================* /
 
   // Move from left to right through the transitions and move them to the required place. 
   std::vector<transition>::iterator current_leftmost_position=begin;
   std::vector<std::size_t>::iterator current_leftmost_value=todo_stack.begin();
   while (current_leftmost_position!=end)
   {
-count1++;
 // std::cerr << "POINTERS " << &*current_leftmost_position << "    " << &*transitions.end() << "\n";
 // std::cerr << "AAAAA==============\n"; for(auto t: transitions){ std::cerr << ptr(t) << "\n";} std::cerr << "---------\n";
     while (current_leftmost_value!=todo_stack.end() && value_sum_counter[*current_leftmost_value].first==0)
     {
-count2++;
 // std::cerr << "HIER\n";
       current_leftmost_value++;
     }
@@ -318,7 +303,6 @@ count2++;
     // while (current_leftmost_position!=end && get_value(*current_leftmost_position)==*current_leftmost_value)
     while (current_leftmost_position!=end && current_leftmost_position->to()==*current_leftmost_value)
     {
-count3++;
       current_leftmost_position++;
       value_sum_counter[*current_leftmost_value].first--;
       // sum_counter[*current_leftmost_value]++;
@@ -333,7 +317,6 @@ count3++;
 //std::cerr << "Transition on the move " << ptr(transition_on_the_move) << "\n";
       do
       {
-count4++;
         // std::size_t value=get_value(transition_on_the_move);
         std::size_t value=transition_on_the_move.to();
         assert(value<value_sum_counter.size());
@@ -345,7 +328,6 @@ count4++;
         // while (get_value(*(begin+new_position))==value)
         while ((begin+new_position)->to()==value)
         {
-count5++;
           new_position++;
           // value_sum_counter[value]++;
           value_sum_counter[value].first--;
@@ -367,7 +349,6 @@ count5++;
 
 
 
-//std::cerr << "COUNTS " << count1 << "    " << count2 << "    " << count3 << "    " << count4 << "    " << count5 << "\n";
 //std::cerr << "TODO STACK "; for(auto s:  todo_stack){ std::cerr << s << "  "; } std::cerr << "\n";
 //std::cerr << "VALUE COUNTER2 "; for(auto s:  value_counter){ std::cerr << s << "  "; } std::cerr << "\n";
 //std::cerr << "RANGE OUT  "; for(auto s=begin; s!=end; s++){ std::cerr << *s << "  "; } std::cerr << "\n"; 
@@ -381,12 +362,12 @@ inline void group_transitions_on_label_tgt(std::vector<transition>& transitions,
   std::vector<std::pair<std::size_t, std::size_t>> count_sum_transitions_per_action(number_of_labels, {0,0});
   std::vector<std::size_t> todo_stack;
 
-  group_transitions_on_label(transitions.begin(), 
-                             transitions.end(),
-                             [](const transition& t){ return t.label(); }, 
-                             tau_label_index, 
-                             count_sum_transitions_per_action, 
-                             todo_stack);
+  group_transitions_on_label<true>(transitions.begin(), 
+                                   transitions.end(),
+                                   [](const transition& t){ return t.label(); }, 
+                                   count_sum_transitions_per_action, 
+                                   tau_label_index, 
+                                   todo_stack);
 //std::cerr << "HIER\n";
   std::vector<std::size_t> todo_stack_target;
   // std::vector<std::size_t> value_counter(number_of_states,0);
@@ -397,49 +378,149 @@ inline void group_transitions_on_label_tgt(std::vector<transition>& transitions,
 //std::cerr << "SORT " << &*begin << "   tot   " << &*end << "    " << current_label << "    " << std::distance(begin,end) << "\n";
     todo_stack_target.clear();
     std::vector<transition>::iterator end=transitions.begin()+count_sum_transitions_per_action[label].second;
-    group_transitions_on_label(begin, end, [](const std::vector<transition>::value_type& t){ return t.to(); }, 0, value_sum_counter, todo_stack_target); 
+    group_transitions_on_label<true>(begin, end, [](const std::vector<transition>::value_type& t){ return t.to(); }, value_sum_counter, 0, todo_stack_target); 
     begin=end;
   }
 } 
 
 
-/* inline void group_transitions_on_tgt(std::vector<transition>& transitions, 
-                                     const std::size_t number_of_labels, 
-                                     const std::size_t tau_label_index,
-                                     const std::size_t number_of_states)
+inline void group_transitions_on_tgt_label(std::vector<transition>& transitions, 
+                                           const std::size_t number_of_labels, 
+                                           const std::size_t tau_label_index,
+                                           const std::size_t number_of_states)
 {
-  (void) number_of_labels, (void) number_of_states; // avoid ``unused parameter'' warning
-  constexpr size_t shift=11;
-  constexpr size_t mask= (1<<shift)-1;
-  std::vector<std::pair<std::size_t, std::size_t>> count_sum_transitions_per_action(mask+1, {0,0});
+  constexpr std::size_t log2cache_size = 8; // This is an approximation of the 2log of the cache size in pointers. 
+  constexpr std::size_t one=1;
+  assert(number_of_states>0);
+  assert(number_of_states< (one << 2*log2cache_size));
+  size_t relevant_bits=(number_of_states<2?1:std::log2(number_of_states-1)+1);
+  assert((one<<relevant_bits)>=number_of_states);
+  size_t mask=0, shift=0;
+  if (relevant_bits>log2cache_size)
+  {
+    mask=(one<<log2cache_size)-1;
+    shift=relevant_bits-log2cache_size;
+  } 
+  else
+  {
+    mask=(one<<relevant_bits)-1;
+    shift=0;
+  }
+  relevant_bits=shift;
+
+std::cerr << "SHIFT MASK1 " << shift << "    " << mask << "\n";
+
+  std::vector<std::pair<std::size_t, std::size_t>> count_sum_transitions_per_tgt1(mask+1, {0,0});
   std::vector<std::size_t> todo_stack;
   
-  group_transitions_on_label(transitions.begin(),
-                             transitions.end(),
-                             [](const transition& t){ return t.to() & mask; },
-                             tau_label_index,
-                             count_sum_transitions_per_action, 
-                             todo_stack);
-
-//std::cerr << "HIER\n";
-  std::vector<std::size_t> todo_stack_target;
-  // std::vector<std::size_t> value_counter(number_of_states,0);
-  std::vector<std::pair<std::size_t, std::size_t>> value_sum_counter(mask+1, {0,0});
-  std::vector<transition>::iterator begin=transitions.begin();
-  for(std::size_t label: todo_stack)
+  group_transitions_on_label<false>(transitions.begin(),
+                                    transitions.end(),
+                                    [shift, mask](const transition& t){ return (t.to()>>shift) & mask; },
+                                    count_sum_transitions_per_tgt1);
+std::cerr << "==============\n"; for(transition& t: transitions){ std::cerr << ptr(t) << "\n";} std::cerr << "---------\n";
+//std::cerr << "END SORTING TRANSITIONS\n";
+  
+  if (relevant_bits>0)
   {
-//std::cerr << "SORT " << &*begin << "   tot   " << &*end << "    " << current_label << "    " << std::distance(begin,end) << "\n";
-    todo_stack_target.clear();
-    std::vector<transition>::iterator end=transitions.begin()+count_sum_transitions_per_action[label].second;
-    group_transitions_on_label(begin, 
-                               end, 
-                               [](const std::vector<transition>::value_type& t){ return (t.to()>>shift) & mask; }, 
-                               0, 
-                               value_sum_counter, 
-                               todo_stack_target);
-    begin=end;
+    mask=(one<<shift)-1;
+    std::vector<std::pair<std::size_t, std::size_t>> count_sum_transitions_per_tgt2(mask+1, {0,0});
+    std::vector<std::size_t> todo_stack_target;
+    std::vector<std::pair<std::size_t, std::size_t>> value_sum_counter(number_of_labels, {0,0});
+
+    std::vector<transition>::iterator begin=transitions.begin();
+    for(std::pair<std::size_t, std::size_t>& p1: count_sum_transitions_per_tgt1)
+    {
+std::cerr << "P1: " << p1.first << "    " << p1.second << "\n";
+      std::vector<transition>::iterator end=transitions.begin()+p1.second;
+std::cerr << "SHIFT MASK2 " << shift << "    " << mask << "\n";
+      group_transitions_on_label<false>(begin, 
+                                        end, 
+                                        [mask](const transition& t){ return (t.to() & mask); }, 
+                                        count_sum_transitions_per_tgt2);
+std::cerr << "QQQQQ==============\n"; for(auto t=begin; t!=end; t++){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
+      std::vector<transition>::iterator begina=begin;
+      for(std::pair<std::size_t, std::size_t>& p2: count_sum_transitions_per_tgt2)
+      {
+
+        std::vector<transition>::iterator enda=begin+p2.second;
+// std::cerr << "LABEL1 \n";
+        group_transitions_on_label<true>(begina, 
+                                         enda, 
+                                         [](const std::vector<transition>::value_type& t){ return t.label(); }, 
+                                         value_sum_counter, 
+                                         tau_label_index, 
+                                         todo_stack_target);
+        for(std::size_t i:todo_stack)
+        {
+          if (value_sum_counter[i].first!=0) throw mcrl2::runtime_error("BLAH " + std::to_string(value_sum_counter[i].first));;
+          value_sum_counter[i].second=0;
+        }
+        todo_stack_target.clear();
+        begina=enda;
+        
+      }
+      begin=end;
+    }
   }
-} */
+  else 
+  {
+    std::vector<std::size_t> todo_stack_target;
+    // std::vector<std::size_t> value_counter(number_of_labels,0);
+    std::vector<std::pair<std::size_t, std::size_t>> value_sum_counter(number_of_labels, {0,0});
+    std::vector<transition>::iterator begin=transitions.begin();
+    for(std::pair<std::size_t, std::size_t>& p: count_sum_transitions_per_tgt1)
+    {
+//std::cerr << "SORT " << &*begin << "   tot   " << &*end << "    " << current_label << "    " << std::distance(begin,end) << "\n";
+      std::vector<transition>::iterator end=transitions.begin()+p.second;
+//std::cerr << "LABEL2 \n";
+     /* group_transitions_on_label<true>(begin, 
+                                      end, 
+                                      [](const transition& t){ return t.label(); }, 
+                                      value_sum_counter, 
+                                      0, 
+                                      todo_stack_target);
+      for(std::size_t i:todo_stack)
+      {
+        value_sum_counter[i]={0,0};
+      }
+      todo_stack_target.clear(); */
+      std::sort(begin, end, [](const transition& t1, const transition& t2){ return t1.label()<t2.label(); });
+      begin=end;
+    }
+  }
+#ifndef NDEBUG
+  std::size_t last_state=0;
+  std::size_t last_label=tau_label_index;
+  std::unordered_set<std::size_t> seen_labels;
+std::cerr << "==============\n"; for(transition& t: transitions){ std::cerr << ptr(t) << "\n";} std::cerr << "---------\n";
+  for(const transition& t: transitions)
+  {
+std::cerr << "CHECK " << ptr(t) << "\n";
+    if (last_state<t.to())
+    {
+      last_label=tau_label_index;
+      last_state=t.to();
+      seen_labels.clear();
+    }
+    else
+    {
+      assert(last_state==t.to());
+      if (last_label!=t.label())
+      {
+        seen_labels.insert(last_label);
+        assert(seen_labels.count(t.label())==0);
+        last_label=t.label();
+      }
+    }
+  }
+#endif
+} 
+
+template <class LTS_TYPE>
+inline void group_transitions_on_tgt_label(LTS_TYPE& aut)
+{
+  group_transitions_on_tgt_label(aut.get_transitions(), aut.num_action_labels(), aut.tau_label_index(), aut.num_states());
+}
 
 /* YYYYY
 inline void group_transitions_on_tgt_lbl_recursive(std::vector<transition>& transitions,
@@ -464,8 +545,8 @@ inline void group_transitions_on_tgt_lbl_recursive(std::vector<transition>& tran
     group_transitions_on_label(transitions.begin(),
                                transitions.end(),
                                [](const transition& t){ return t.to() & mask; },
-                               tau_label_index,
                                count_sum_transitions_per_action,
+                               tau_label_index,
                                todo_stack);
     
 
