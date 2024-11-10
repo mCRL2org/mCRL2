@@ -14,6 +14,7 @@
 //LPS framework
 
 //DATA
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/utilities/input_output_tool.h"
 // #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter_tool.h"
@@ -130,7 +131,7 @@ void unfold_assignments_in_summands(
 
 void unfold_initializer(
            lps::stochastic_process_initializer& initializer,
-           std::unordered_map<variable, replaced_function_parameter>& replacement,
+           const std::unordered_map<variable, replaced_function_parameter>& replacement,
            const variable_list& old_parameters,
            const rewriter& R)
 {                               
@@ -150,7 +151,8 @@ void unfold_initializer(
         }
         else if (is_container_sort(d.sort()))
         {
-          const container_sort& s=atermpp::down_cast<container_sort>(d.sort());
+          sort_expression sort = d.sort();
+          const container_sort& s=atermpp::down_cast<container_sort>(sort);
           const container_type& t=s.container_name();
           if (is_fset_container(t))
           {
