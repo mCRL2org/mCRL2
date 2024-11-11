@@ -30,30 +30,17 @@
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 
-// Decided on 2024-10-07: I won't look into SAVE_BLC_MEMORY any more; we rather
-// would like to know whether the block_label_to_cotransition map can be replaced
-// by adding a pointer to cotransitions in every block.
+// If CO_SPLITTER_IN_BLC_LIST is defined, the co-splitter belonging to a splitter
+// is found by ordering the BLC_indicators lists in a specific way: the co-splitter
+// is always placed immediately before the main splitter in the respective list.
+// (If CO_SPLITTER_IN_BLC_LIST is not defined, one uses a std::unordered_map to
+// store for every pair <source block, action label> a transition to the respective
+// co-splitter.)
+// It seems that defining this constant is advantageous.
+#define CO_SPLITTER_IN_BLC_LIST
 
-// If SAVE_BLC_MEMORY is defined, the BLC_indicators type does not include a
-// field end_same_BLC. In principle, one can trade some memory savings against
-// a longer running time. However, we have decided to not pursue this feature,
-// so the code with SAVE_BLC_MEMORY has not been tested and is probably still
-// buggy. Also, it cannot be defined at the same time as CO_SPLITTER_IN_BLC_LIST.
-// #define SAVE_BLC_MEMORY
-
-#ifndef SAVE_BLC_MEMORY
-  // If CO_SPLITTER_IN_BLC_LIST is defined, the co-splitter belonging to a splitter
-  // is found by ordering the BLC_indicators lists in a specific way: the co-splitter
-  // is always placed immediately before the main splitter in the respective list.
-  // (If CO_SPLITTER_IN_BLC_LIST is not defined, one uses a std::unordered_map to
-  // store for every pair <source block, action label> a transition to the respective
-  // co-splitter.)
-  // It seems that defining this constant is advantageous.
-  #define CO_SPLITTER_IN_BLC_LIST
-
-  // It seems that when we define this constant as well, it's a little faster.
-  #define CO_SPLITTER_IN_BLC_LIST_VARIANT
-#endif
+// It seems that when we define this constant as well, it's a little faster.
+#define CO_SPLITTER_IN_BLC_LIST_VARIANT
 
 // If COUNT_R_U_STATUS_TIMES is defined, simple_splitB() counts how often every
 // step in the coroutines is executed. This helps to find the most efficient
@@ -629,16 +616,12 @@ struct BLC_indicators
 {
   BLC_list_iterator start_same_BLC;
   BLC_list_iterator start_marked_BLC;
-  #ifndef SAVE_BLC_MEMORY
-    BLC_list_iterator end_same_BLC;
-  #endif
+  BLC_list_iterator end_same_BLC;
 
   BLC_indicators(BLC_list_iterator start, BLC_list_iterator end)
    : start_same_BLC(start),
-     start_marked_BLC(end)
-     #ifndef SAVE_BLC_MEMORY
-       , end_same_BLC(end)
-     #endif
+     start_marked_BLC(end),
+     end_same_BLC(end)
   {}
 
   #ifdef CHECK_COMPLEXITY_GJ
@@ -648,21 +631,20 @@ struct BLC_indicators
     std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
     {
         assert(partitioner.m_BLC_transitions.begin() <= start_same_BLC);
-        BLC_list_const_iterator my_end_same_BLC = partitioner.calculate_end_same_BLC(*this);
-        assert(start_same_BLC <= my_end_same_BLC);
-        if (start_same_BLC == my_end_same_BLC)
+        assert(start_same_BLC<=end_same_BLC);
+        if (start_same_BLC==end_same_BLC)
         {
-          return "Empty BLC slice at m_BLC_transitions[" + std::to_string(std::distance(partitioner.m_BLC_transitions.begin(), my_end_same_BLC)) + "]";
+          return "Empty BLC slice at m_BLC_transitions["+std::to_string(std::distance<std::vector<transition_index>::const_iterator>(partitioner.m_BLC_transitions.begin(), end_same_BLC))+"]";
         }
-        assert(my_end_same_BLC <= partitioner.m_BLC_transitions.end());
+        assert(end_same_BLC<=partitioner.m_BLC_transitions.end());
         std::string result("BLC slice ");
         result += partitioner.m_blocks[partitioner.m_states[partitioner.m_aut.get_transitions()[*start_same_BLC].from()].block].debug_id(partitioner);
         result += " -> ";
         result += partitioner.m_constellations[partitioner.m_blocks[partitioner.m_states[partitioner.m_aut.get_transitions()[*start_same_BLC].to()].block].constellation].debug_id(partitioner);
         result += " containing the ";
-        if (std::distance<BLC_list_const_iterator>(start_same_BLC, my_end_same_BLC) > 1)
+        if (std::distance(start_same_BLC, end_same_BLC)>1)
         {
-            result += std::to_string(std::distance<BLC_list_const_iterator>(start_same_BLC, my_end_same_BLC));
+            result+=std::to_string(std::distance(start_same_BLC, end_same_BLC));
             result += " transitions ";
         }
         else
@@ -673,16 +655,16 @@ struct BLC_indicators
             result += "| ";
         }
         result += partitioner.m_transitions[*iter].debug_id_short(partitioner);
-        if (std::distance<BLC_list_const_iterator>(start_same_BLC, my_end_same_BLC) > 4)
+        if (std::distance(start_same_BLC, end_same_BLC)>4)
         {
             ++iter;
             result += start_marked_BLC == iter ? " | " : ", ";
             result += partitioner.m_transitions[*iter].debug_id_short(partitioner);
             result += std::next(iter) == start_marked_BLC ? " | ..."
-                      : (std::next(iter) < start_marked_BLC && start_marked_BLC <= my_end_same_BLC - 3 ? ", ..|.." : ", ...");
-            iter = my_end_same_BLC - 3;
+                      : (std::next(iter)<start_marked_BLC && start_marked_BLC<=end_same_BLC-3 ? ", ..|.." : ", ...");
+            iter = end_same_BLC-3;
         }
-        while (++iter != my_end_same_BLC)
+        while (++iter!=end_same_BLC)
         {
             result += start_marked_BLC == iter ? " | " : ", ";
             result += partitioner.m_transitions[*iter].debug_id_short(partitioner);
@@ -896,89 +878,25 @@ class bisim_partitioner_gj
       return result;
     }
 
-    // The function decides whether iterator it points to a transition that is part
-    // of the BLC set ind. (This is non-trivial if SAVE_BLC_MEMORY.)
-    bool points_into_BLC_set(BLC_list_const_iterator it, const BLC_indicators& ind) const
-    {
-      assert(ind.start_same_BLC <= ind.start_marked_BLC);
-      assert(ind.start_same_BLC <= it);
-      #ifdef SAVE_BLC_MEMORY
-        if (m_BLC_transitions.end() <= it)
-        {
-          return false;
-        }
-        const transition& first_t = m_aut.get_transitions()[*ind.start_same_BLC];
-        const transition& it_t = m_aut.get_transitions()[*it];
-        return m_states[first_t.from()].block == m_states[it_t.from()].block &&
-               label_or_divergence(first_t) == label_or_divergence(it_t) &&
-               m_blocks[m_states[first_t.to()].block].constellation == m_blocks[m_states[it_t.to()].block].constellation;
-      #else
-        assert(ind.start_marked_BLC <= ind.end_same_BLC);
-        return it < ind.end_same_BLC;
-      #endif
-    }
-
     // This function returns true iff the BLC set ind contains at least one
     // marked transition.
     bool has_marked_transitions(const BLC_indicators& ind) const
     {
       assert(ind.start_same_BLC <= ind.start_marked_BLC);
-      #ifndef SAVE_BLC_MEMORY
-        assert(ind.start_marked_BLC <= ind.end_same_BLC);
-      #endif
-      return points_into_BLC_set(ind.start_marked_BLC, ind);
+      assert(ind.start_marked_BLC<=ind.end_same_BLC);
+      return ind.start_marked_BLC<ind.end_same_BLC;
     }
 
     // This function unmarks all transitions in BLC set ind.
-    // If SAVE_BLC_MEMORY, it is linear in the number of marked transitions, but
-    // that is ok, as transition markings come with the right to visit the
-    // transitions.
     void unmark_all_transitions(BLC_indicators& ind)
     {
       assert(ind.start_same_BLC <= ind.start_marked_BLC);
-      #ifdef SAVE_BLC_MEMORY
-        BLC_list_iterator end_same_BLC = ind.start_marked_BLC;
-        for (; assert(ind.start_same_BLC <= end_same_BLC), points_into_BLC_set(end_same_BLC, ind); ++end_same_BLC)
-        {
-          // mCRL2complexity(m_aut.get_transitions()[*ind], add_work(...), *this);
-              // not needed, as we unmark transitions and we are allowed to visit
-              // every marked transition a fixed number of times
-        }
-        ind.start_marked_BLC = end_same_BLC;
-      #else
-        ind.start_marked_BLC = ind.end_same_BLC;
-      #endif
+      ind.start_marked_BLC = ind.end_same_BLC;
     }
 
-  public:
 #ifndef NDEBUG
     // This suppresses many unused variable warnings.
 
-    // This function calculates the end of the transitions in BLC set ind.
-    // Because it is slow if SAVE_BLC_MEMORY, it is only defined in debug mode
-    // and should only be called in debugging functions.
-    BLC_list_const_iterator calculate_end_same_BLC(const BLC_indicators& ind) const
-    {
-      assert(ind.start_same_BLC <= ind.start_marked_BLC);
-      #ifdef SAVE_BLC_MEMORY
-        BLC_list_const_iterator it = ind.start_marked_BLC;
-        for (; assert(ind.start_same_BLC <= it), points_into_BLC_set(it, ind); ++it)
-        {}
-        return it;
-      #else
-        return ind.end_same_BLC;
-      #endif
-    }
-
-    // This function counts the number of marked transitions. Because it is slow
-    // if SAVE_BLC_MEMORY, it is only defined in debug mode and should only be
-    // called in debugging functions.
-    transition_index count_marked_transitions(const BLC_indicators& ind) const
-    {
-      return std::distance<BLC_list_const_iterator>(ind.start_marked_BLC, calculate_end_same_BLC(ind));
-    }
-
-  protected:
     void check_transitions(const bool check_temporary_complexity_counters, const bool check_block_to_constellation = true) const
     {
       // This routine can only be used after initialisation.
@@ -1002,7 +920,7 @@ class bisim_partitioner_gj
           assert(m_transitions[ti].ref_outgoing_transitions < m_states[t.from() + 1].start_outgoing_transitions);
 
         assert(m_transitions[ti].transitions_per_block_to_constellation->start_same_BLC <= btc_ti);
-        assert(points_into_BLC_set(btc_ti, *m_transitions[ti].transitions_per_block_to_constellation));
+        assert(btc_ti<m_transitions[ti].transitions_per_block_to_constellation->end_same_BLC);
 
         if (!check_block_to_constellation)
           continue;
@@ -1013,15 +931,9 @@ class bisim_partitioner_gj
         bool found=false;
         for(const BLC_indicators& blc: m_blocks[b].block_to_constellation)
         {
-          if (blc.start_same_BLC != blc.start_marked_BLC)
-          {
-            assert(blc.start_same_BLC < blc.start_marked_BLC);
-            assert(blc.start_same_BLC <= std::prev(blc.start_marked_BLC));
-            assert(points_into_BLC_set(std::prev(blc.start_marked_BLC), blc));
-          }
-          #ifndef SAVE_BLC_MEMORY
-            assert(blc.start_same_BLC < blc.end_same_BLC);
-          #endif
+          assert(blc.start_same_BLC<=blc.start_marked_BLC);
+          assert(blc.start_marked_BLC<=blc.end_same_BLC);
+          assert(blc.start_same_BLC<blc.end_same_BLC);
           transition& first_t = m_aut.get_transitions()[*blc.start_same_BLC];
           assert(b == m_states[first_t.from()].block);
           if (t_label == label_or_divergence(first_t) &&
@@ -1030,7 +942,7 @@ class bisim_partitioner_gj
 // if (found) { std::cerr << "Found multiple BLC sets with transitions (block " << b << " -" << m_aut.action_label(t.label()) << "-> constellation " << m_blocks[m_states[t.to()].block].constellation << ")\n"; }
             assert(!found);
             assert(blc.start_same_BLC <= btc_ti);
-            assert(points_into_BLC_set(btc_ti, blc));
+            assert(btc_ti<blc.end_same_BLC);
             assert(&blc == &*m_transitions[ti].transitions_per_block_to_constellation);
             found = true;
           }
@@ -1174,12 +1086,10 @@ assert(!initialisation);
           for(linked_list< BLC_indicators >::iterator ind=b.block_to_constellation.begin();
                      ind!=b.block_to_constellation.end(); ++ind)
           {
-            #ifndef SAVE_BLC_MEMORY
-              assert(ind->start_same_BLC < ind->end_same_BLC);
-            #endif
+            assert(ind->start_same_BLC<ind->end_same_BLC);
             const transition& first_transition=m_aut.get_transitions()[*(ind->start_same_BLC)];
             const label_index first_transition_label = label_or_divergence(first_transition);
-            for(BLC_list_const_iterator i=ind->start_same_BLC; assert(ind->start_same_BLC <= i), points_into_BLC_set(i, *ind); ++i)
+            for(BLC_list_const_iterator i=ind->start_same_BLC; i<ind->end_same_BLC; ++i)
             {
               const transition& t=m_aut.get_transitions()[*i];
               assert(m_transitions[*i].transitions_per_block_to_constellation == ind);
@@ -1289,15 +1199,13 @@ assert(!initialisation);
         {
           set_of_states_type all_source_bottom_states;
 
-          #ifndef SAVE_BLC_MEMORY
-            assert(ind->start_same_BLC < ind->end_same_BLC);
-          #endif
+          assert(ind->start_same_BLC<ind->end_same_BLC);
           const transition& first_t = m_aut.get_transitions()[*ind->start_same_BLC];
           const label_index first_t_label = label_or_divergence(first_t);
           const bool all_transitions_in_BLC_are_inert = is_inert_during_init(first_t) &&
                                                         m_blocks[m_states[first_t.to()].block].constellation == b.constellation;
           assert(!all_transitions_in_BLC_are_inert || b.block_to_constellation.begin() == ind);
-          for(BLC_list_const_iterator i=ind->start_same_BLC; assert(ind->start_same_BLC <= i), points_into_BLC_set(i, *ind); ++i)
+          for(BLC_list_const_iterator i=ind->start_same_BLC; i<ind->end_same_BLC; ++i)
           {
             assert(m_BLC_transitions.begin() <= i);
             assert(i < m_BLC_transitions.end());
@@ -1345,7 +1253,7 @@ assert(!initialisation);
           if (has_marked_transitions(*ind))
           {
             // only splitters should contain marked transitions.
-            mCRL2log(log::debug) << ind->debug_id(*this) << " contains " << count_marked_transitions(*ind) << " marked transitions.\n";
+            mCRL2log(log::debug) << ind->debug_id(*this) << " contains " << std::distance(ind->start_marked_BLC, ind->end_same_BLC) << " marked transitions.\n";
             eventual_marking_is_ok = false;
           }
           if (m_blocks[bi].contains_new_bottom_states)
@@ -1355,7 +1263,7 @@ assert(!initialisation);
             if (!eventual_marking_is_ok)
             {
               eventual_marking_is_ok = true;
-              for (BLC_list_const_iterator i=ind->start_marked_BLC; assert(ind->start_same_BLC <= i), points_into_BLC_set(i, *ind); ++i)
+              for (BLC_list_const_iterator i=ind->start_marked_BLC; i<ind->end_same_BLC; ++i)
               {
                 const state_index from = m_aut.get_transitions()[*i].from();
                 // assert(m_states[from].block == bi); -- already checked earlier
@@ -1393,7 +1301,7 @@ assert(!initialisation);
                 }
                 ++calM_iter;
               }
-              if (calM_elt->first <= ind->start_same_BLC && ind->start_same_BLC <= calM_elt->second && !points_into_BLC_set(calM_elt->second, *ind))
+              if (calM_elt->first<=ind->start_same_BLC && ind->end_same_BLC<=calM_elt->second)
               {
                 mCRL2log(log::debug) << "  This is ok because the BLC set (block " << bi << " -" << m_aut.action_label(first_t.label()) << "-> constellation " << m_blocks[m_states[first_t.to()].block].constellation << ") is soon going to be a main splitter.\n";
                 eventual_instability_is_ok = true;
@@ -1414,8 +1322,7 @@ assert(!initialisation);
                           m_blocks[m_states[main_t.to()].block].constellation == m_constellations.size() - 1)
                       {
 // std::cerr << "Corresponding main splitter: " << main_splitter->debug_id(*this) << '\n';
-                        if (calM_elt->first <= main_splitter->start_same_BLC &&
-                            main_splitter->start_same_BLC <= calM_elt->second && !points_into_BLC_set(calM_elt->second, *main_splitter))
+                        if (calM_elt->first<=main_splitter->start_same_BLC && main_splitter->end_same_BLC<=calM_elt->second)
                         {
                           assert(m_constellations.size() - 1 == m_blocks[m_states[main_t.to()].block].constellation);
                           mCRL2log(log::debug) << "  This is ok because the BLC set (block " << bi << " -" << m_aut.action_label(first_t.label()) << "-> constellation " << old_constellation << ") is soon going to be a co-splitter.\n";
@@ -1432,9 +1339,7 @@ assert(!initialisation);
                   {
                     for (BLC_list_const_iterator ind_iter = calM_elt->second; ind_iter > calM_elt->first; )
                     {
-                      #ifndef SAVE_BLC_MEMORY
-                        assert(m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC < m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->end_same_BLC);
-                      #endif
+                      assert(m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC<m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->end_same_BLC);
                       ind_iter = m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC;
                       const transition& t = m_aut.get_transitions()[*ind_iter];
                       block_label_to_size_t_map::const_iterator co_iter = block_label_to_cotransition->find(std::pair(m_states[t.from()].block, label_or_divergence(t)));
@@ -1454,7 +1359,7 @@ assert(!initialisation);
             }
             for(; !(eventual_instability_is_ok && eventual_marking_is_ok) && calM->end() != calM_iter; ++calM_iter)
             {
-              if (calM_iter->first <= ind->start_same_BLC && ind->start_same_BLC <= calM_iter->second && !points_into_BLC_set(calM_iter->second, *ind))
+              if (calM_iter->first<=ind->start_same_BLC && ind->end_same_BLC<=calM_iter->second)
               {
                 mCRL2log(log::debug) << "  This is ok because the BLC set (block " << bi << " -" << m_aut.action_label(first_t.label()) << "-> constellation " << m_blocks[m_states[first_t.to()].block].constellation << ") is going to be a main splitter later.\n";
                 eventual_instability_is_ok = true;
@@ -1474,8 +1379,7 @@ assert(!initialisation);
                       if (label_or_divergence(first_t) == label_or_divergence(main_t) &&
                           m_blocks[m_states[main_t.to()].block].constellation == m_constellations.size() - 1)
                       {
-                        if (calM_iter->first <= main_splitter->start_same_BLC &&
-                            main_splitter->start_same_BLC <= calM_iter->second && !points_into_BLC_set(calM_iter->second, *main_splitter))
+                        if (calM_iter->first<=main_splitter->start_same_BLC && main_splitter->end_same_BLC<=calM_iter->second)
                         {
                           assert(m_constellations.size() - 1 == m_blocks[m_states[main_t.to()].block].constellation);
                           mCRL2log(log::debug) << "  This is ok because the BLC set (block " << bi << " -" << m_aut.action_label(first_t.label()) << "-> constellation " << old_constellation << ") is soon going to be a co-splitter.\n";
@@ -1492,9 +1396,7 @@ assert(!initialisation);
                   {
                     for (BLC_list_const_iterator ind_iter = calM_iter->second; ind_iter > calM_iter->first; )
                     {
-                      #ifndef SAVE_BLC_MEMORY
-                        assert(m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC < m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->end_same_BLC);
-                      #endif
+                      assert(m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC<m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->end_same_BLC);
                       ind_iter = m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC;
                       const transition& t = m_aut.get_transitions()[*ind_iter];
                       block_label_to_size_t_map::const_iterator co_iter = block_label_to_cotransition->find(std::pair(m_states[t.from()].block, label_or_divergence(t)));
@@ -1545,8 +1447,8 @@ assert(!initialisation);
       for(const BLC_indicators& blc_it: m_blocks[bi].block_to_constellation)
       {
         mCRL2log(log::debug) << "\n    BLC_sublist:  " << std::distance<BLC_list_const_iterator>(m_BLC_transitions.begin(),blc_it.start_same_BLC) << " -- "
-                             << std::distance<BLC_list_const_iterator>(m_BLC_transitions.begin(),calculate_end_same_BLC(blc_it)) << "\n";
-        for(BLC_list_const_iterator i=blc_it.start_same_BLC; assert(blc_it.start_same_BLC <= i), points_into_BLC_set(i, blc_it); ++i)
+                             << std::distance<BLC_list_const_iterator>(m_BLC_transitions.begin(), blc_it.end_same_BLC) << "\n";
+        for(BLC_list_const_iterator i=blc_it.start_same_BLC; i<blc_it.end_same_BLC; ++i)
         {
           if (i == blc_it.start_marked_BLC)
           {
@@ -1829,9 +1731,7 @@ assert(!initialisation);
         {
           // mCRL2complexity_gj(&blc_ind, add_work(..., 1), *this);
               // Because every BLC set is touched exactly once, we do not store a physical counter for this.
-          #ifndef SAVE_BLC_MEMORY
-            assert(blc_ind.start_same_BLC < blc_ind.end_same_BLC);
-          #endif
+          assert(blc_ind.start_same_BLC<blc_ind.end_same_BLC);
           const transition& t= m_aut.get_transitions()[*blc_ind.start_same_BLC];
           const transition_index new_to=get_eq_class(t.to());
           if (!is_inert_during_init(t) || bi!=new_to)
@@ -2075,7 +1975,7 @@ assert(!initialisation);
       linked_list<BLC_indicators>::iterator ind = m_transitions[*old_pos].transitions_per_block_to_constellation;
       assert(ind->start_same_BLC <= old_pos);
       assert(old_pos < m_BLC_transitions.end());
-      assert(points_into_BLC_set(old_pos, *ind));
+      assert(old_pos<ind->end_same_BLC);
       if (old_pos < ind->start_marked_BLC)
       {
         // The transition is not marked
@@ -2083,7 +1983,7 @@ assert(!initialisation);
         BLC_list_iterator new_pos = std::prev(ind->start_marked_BLC);
         assert(ind->start_same_BLC <= new_pos);
         assert(new_pos < m_BLC_transitions.end());
-        assert(points_into_BLC_set(new_pos, *ind));
+        assert(new_pos<ind->end_same_BLC);
         if (old_pos < new_pos)
         {
           std::swap(*old_pos, *new_pos);
@@ -2099,7 +1999,7 @@ assert(!initialisation);
         {
           assert(m_transitions[*it].ref_outgoing_transitions->ref_BLC_transitions == it);
           assert(m_transitions[*it].transitions_per_block_to_constellation->start_same_BLC <= it);
-          assert(points_into_BLC_set(it, *m_transitions[*it].transitions_per_block_to_constellation));
+          assert(it<m_transitions[*it].transitions_per_block_to_constellation->end_same_BLC);
         }
       #endif
     }
@@ -2431,25 +2331,16 @@ assert(!initialisation);
     bool swap_in_the_doubly_linked_list_LBC_in_blocks_new_constellation(
                const transition_index ti,
                linked_list<BLC_indicators>::iterator new_BLC_block,
-               linked_list<BLC_indicators>::iterator old_BLC_block
-               #ifdef SAVE_BLC_MEMORY
-                 , const constellation_index old_to_constellation
-               #endif
-               )
+               linked_list<BLC_indicators>::iterator old_BLC_block)
     {
       assert(new_BLC_block->start_same_BLC <= new_BLC_block->start_marked_BLC);
       assert(old_BLC_block->start_same_BLC <= old_BLC_block->start_marked_BLC);
       BLC_list_iterator old_position = m_transitions[ti].ref_outgoing_transitions->ref_BLC_transitions;
       assert(old_BLC_block->start_same_BLC <= old_position);
-      #ifndef SAVE_BLC_MEMORY
-        assert(old_position<old_BLC_block->end_same_BLC); // the source block or the target constellation may be wrong, so we cannot use points_into_BLC_set()
-        assert(new_BLC_block->start_marked_BLC==new_BLC_block->end_same_BLC);
-        assert(old_BLC_block->start_marked_BLC<=old_BLC_block->end_same_BLC);
-      #else
-        // the constellation index of the target block has not yet changed to the new constellation:
-        assert(old_to_constellation==m_blocks[m_states[m_aut.get_transitions()[ti].to()].block].constellation);
-      #endif
-      assert(calculate_end_same_BLC(*new_BLC_block)==old_BLC_block->start_same_BLC);
+      assert(old_position<old_BLC_block->end_same_BLC);
+      assert(new_BLC_block->start_marked_BLC==new_BLC_block->end_same_BLC);
+      assert(old_BLC_block->start_marked_BLC<=old_BLC_block->end_same_BLC);
+      assert(new_BLC_block->end_same_BLC==old_BLC_block->start_same_BLC);
       assert(m_transitions[ti].transitions_per_block_to_constellation == old_BLC_block);
       assert(ti == *old_position);
 
@@ -2465,11 +2356,7 @@ assert(!initialisation);
           // namely for the co-splitters. So we can only unmark transitions if
           // transition ti itself is marked.)
         #endif
-        #ifdef SAVE_BLC_MEMORY
-          old_BLC_block->start_marked_BLC=std::next(old_position);
-        #else
-          old_BLC_block->start_marked_BLC=old_BLC_block->end_same_BLC;
-        #endif
+        old_BLC_block->start_marked_BLC=old_BLC_block->end_same_BLC;
       }
       assert(old_BLC_block->start_same_BLC<=old_position);
       assert(new_BLC_block->start_marked_BLC==old_BLC_block->start_same_BLC);
@@ -2483,25 +2370,10 @@ assert(!initialisation);
       {
         assert(old_position==old_BLC_block->start_same_BLC);
       }
-      #ifndef SAVE_BLC_MEMORY
-        new_BLC_block->end_same_BLC=
-      #endif
-      new_BLC_block->start_marked_BLC=++old_BLC_block->start_same_BLC;
+      new_BLC_block->end_same_BLC=new_BLC_block->start_marked_BLC=++old_BLC_block->start_same_BLC;
       m_transitions[ti].transitions_per_block_to_constellation=new_BLC_block;
 // std::cerr << " to new " << new_BLC_block->debug_id(*this) << '\n';
-      #ifdef SAVE_BLC_MEMORY
-        if (old_BLC_block->start_same_BLC >= m_BLC_transitions.end())
-        {
-          return true;
-        }
-        const transition& t=m_aut.get_transitions()[ti];
-        const transition& old_t = m_aut.get_transitions()[*old_BLC_block->start_same_BLC];
-        return m_states[old_t.from()].block != m_states[t.from()].block ||
-               label_or_divergence(old_t) != label_or_divergence(t) ||
-               m_blocks[m_states[old_t.to()].block].constellation != old_to_constellation;
-      #else
-        return old_BLC_block->start_same_BLC==old_BLC_block->end_same_BLC;
-      #endif
+      return old_BLC_block->start_same_BLC==old_BLC_block->end_same_BLC;
     }
 
     // Move the transition t with transition index ti to a new
@@ -2535,9 +2407,7 @@ assert(!initialisation);
       {
         next_block_to_constellation=m_blocks[from_block].block_to_constellation.begin();
         assert(next_block_to_constellation->start_same_BLC<m_BLC_transitions.end());
-        #ifndef SAVE_BLC_MEMORY
-          assert(next_block_to_constellation->start_same_BLC<next_block_to_constellation->end_same_BLC);
-        #endif
+        assert(next_block_to_constellation->start_same_BLC<next_block_to_constellation->end_same_BLC);
         assert(m_states[m_aut.get_transitions()[*(next_block_to_constellation->start_same_BLC)].from()].block==index_block_B);
         assert(m_aut.is_tau(m_aut.apply_hidden_label_map(m_aut.get_transitions()[*(next_block_to_constellation->start_same_BLC)].label())));
         if (next_block_to_constellation==this_block_to_constellation)
@@ -2593,11 +2463,7 @@ assert(!initialisation);
       }
 
       if (swap_in_the_doubly_linked_list_LBC_in_blocks_new_constellation(ti,
-                    next_block_to_constellation, this_block_to_constellation
-                    #ifdef SAVE_BLC_MEMORY
-                      , m_blocks[index_block_B].constellation
-                    #endif
-                    ))
+                    next_block_to_constellation, this_block_to_constellation))
       {
         m_blocks[from_block].block_to_constellation.erase(this_block_to_constellation);
       }
@@ -2614,23 +2480,16 @@ assert(!initialisation);
     bool swap_in_the_doubly_linked_list_LBC_in_blocks_new_block(
                const transition_index ti,
                linked_list<BLC_indicators>::iterator new_BLC_block,
-               linked_list<BLC_indicators>::iterator old_BLC_block
-               #ifdef SAVE_BLC_MEMORY
-                 , const block_index old_from_block,
-                   const constellation_index old_to_constellation
-               #endif
-               )
+               linked_list<BLC_indicators>::iterator old_BLC_block)
     {
       assert(new_BLC_block->start_same_BLC <= new_BLC_block->start_marked_BLC);
       assert(old_BLC_block->start_same_BLC <= old_BLC_block->start_marked_BLC);
       BLC_list_iterator old_position = m_transitions[ti].ref_outgoing_transitions->ref_BLC_transitions;
       assert(old_BLC_block->start_same_BLC <= old_position);
-      #ifndef SAVE_BLC_MEMORY
-        assert(old_position < old_BLC_block->end_same_BLC); // the source block or the target constellation may be wrong, so we cannot use points_into_BLC_set()
-        assert(new_BLC_block->start_marked_BLC <= new_BLC_block->end_same_BLC);
-        assert(old_BLC_block->start_marked_BLC <= old_BLC_block->end_same_BLC);
-      #endif
-      assert(calculate_end_same_BLC(*new_BLC_block)==old_BLC_block->start_same_BLC);
+      assert(old_position<old_BLC_block->end_same_BLC);
+      assert(new_BLC_block->start_marked_BLC<=new_BLC_block->end_same_BLC);
+      assert(old_BLC_block->start_marked_BLC<=old_BLC_block->end_same_BLC);
+      assert(new_BLC_block->end_same_BLC==old_BLC_block->start_same_BLC);
       assert(m_transitions[ti].transitions_per_block_to_constellation == old_BLC_block);
       assert(m_blocks.size()-1==m_states[m_aut.get_transitions()[ti].from()].block);
       assert(ti == *old_position);
@@ -2651,24 +2510,9 @@ assert(!initialisation);
         old_BLC_block->start_marked_BLC++;
       }
       m_transitions[ti].transitions_per_block_to_constellation=new_BLC_block;
-      #ifndef SAVE_BLC_MEMORY
-        new_BLC_block->end_same_BLC=
-      #endif
-      ++old_BLC_block->start_same_BLC;
+      new_BLC_block->end_same_BLC=++old_BLC_block->start_same_BLC;
 // std::cerr << " to new " << new_BLC_block->debug_id(*this) << '\n';
-      #ifdef SAVE_BLC_MEMORY
-        if (old_BLC_block->start_same_BLC >= m_BLC_transitions.end())
-        {
-          return true;
-        }
-        const transition& old_t = m_aut.get_transitions()[*old_BLC_block->start_same_BLC];
-        return (m_states[old_t.from()].block!=old_from_block &&
-                m_states[old_t.from()].block!=m_blocks.size()-1) ||
-               label_or_divergence(old_t) != label_or_divergence(m_aut.get_transitions()[ti]) ||
-               m_blocks[m_states[old_t.to()].block].constellation != old_to_constellation;
-      #else
-        return old_BLC_block->start_same_BLC==old_BLC_block->end_same_BLC;
-      #endif
+      return old_BLC_block->start_same_BLC==old_BLC_block->end_same_BLC;
     }
 
     // Update the LBC list of a transition, when the from state of the transition moves
@@ -2895,11 +2739,7 @@ assert(!initialisation);
         }
       }
       const bool last_element_removed=swap_in_the_doubly_linked_list_LBC_in_blocks_new_block(ti,
-                    new_BLC_block, this_block_to_constellation
-                    #ifdef SAVE_BLC_MEMORY
-                      , old_bi, to_constln
-                    #endif
-                    );
+                    new_BLC_block, this_block_to_constellation);
 
       transition_index remaining_transition=null_transition;
       if (last_element_removed)
@@ -3012,11 +2852,9 @@ assert(!initialisation);
       assert(m_BLC_transitions.begin() <= splitter->start_same_BLC);
       assert(M_it <= splitter_end_unmarked_BLC);
       assert(splitter_end_unmarked_BLC <= splitter->start_marked_BLC);
-      #ifndef SAVE_BLC_MEMORY
-        assert(splitter->start_marked_BLC <= splitter->end_same_BLC);
-        assert(splitter->start_same_BLC < splitter->end_same_BLC);
-        assert(splitter->end_same_BLC <= m_BLC_transitions.end());
-      #endif
+      assert(splitter->start_marked_BLC<=splitter->end_same_BLC);
+      assert(splitter->start_same_BLC<splitter->end_same_BLC);
+      assert(splitter->end_same_BLC<=m_BLC_transitions.end());
       assert(!has_marked_transitions(*splitter));
       assert(m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].block == B);
       assert(current_R_incoming_bottom_state_iterator <= first_unmarked_bottom_state);
@@ -3084,9 +2922,7 @@ assert(!initialisation);
         }
       }
       assert(m_blocks[B].start_non_bottom_states < m_blocks[B].end_states);
-      #ifndef SAVE_BLC_MEMORY
-        assert(splitter->start_same_BLC < splitter->end_same_BLC);
-      #endif
+      assert(splitter->start_same_BLC<splitter->end_same_BLC);
       const transition& first_t = m_aut.get_transitions()[*splitter->start_same_BLC];
       const label_index a = label_or_divergence(first_t);
       const constellation_index C = m_blocks[m_states[first_t.to()].block].constellation;
@@ -3381,7 +3217,7 @@ assert(!initialisation);
 // std::cerr << "State " << std::distance(m_states.begin(), current_U_outgoing_state.ref_state) << " has a transition in the splitter, namely " << m_transitions[*out_it->ref_BLC_transitions].debug_id_short(*this) << '\n';
                       assert(out_it->ref_BLC_transitions>=splitter_end_unmarked_BLC);
                       assert(splitter->start_same_BLC<=out_it->ref_BLC_transitions);
-                      assert(points_into_BLC_set(out_it->ref_BLC_transitions, *splitter));
+                      assert(out_it->ref_BLC_transitions<splitter->end_same_BLC);
                     }
                   }
                 #endif
@@ -3698,9 +3534,7 @@ assert(!initialisation);
                 const linked_list<BLC_indicators>::iterator new_splitter = m_transitions[*ti->ref_BLC_transitions].transitions_per_block_to_constellation;
                 if (R_to_U_tau_splitter == m_blocks[R_block].block_to_constellation.end())
                 {
-                  #ifndef SAVE_BLC_MEMORY
-                    assert(!has_marked_transitions(*new_splitter));
-                  #endif
+                  assert(!has_marked_transitions(*new_splitter));
                 }
                 else
                 {
@@ -4393,9 +4227,7 @@ assert(!initialisation);
             // not needed, as the splitter has marked transitions and we are allowed to visit each marked transition a fixed number of times.
         stabilize_pair.second = splitter->start_same_BLC;
         assert(stabilize_pair.first <= stabilize_pair.second);
-        #ifndef SAVE_BLC_MEMORY
-          assert(splitter->start_same_BLC < splitter->end_same_BLC);
-        #endif
+        assert(splitter->start_same_BLC<splitter->end_same_BLC);
 
         const transition& first_t = m_aut.get_transitions()[*splitter->start_same_BLC];
         if (number_of_states_in_block(m_states[first_t.from()].block) <= 1)
@@ -4493,9 +4325,7 @@ assert(!initialisation);
           typename linked_list<BLC_indicators>::iterator ind = m_blocks[bi].block_to_constellation.begin();
           if (m_blocks[bi].block_to_constellation.end() != ind)
           {
-            #ifndef SAVE_BLC_MEMORY
-              assert(ind->start_same_BLC < ind->end_same_BLC);
-            #endif
+            assert(ind->start_same_BLC<ind->end_same_BLC);
             const transition& first_t = m_aut.get_transitions()[*ind->start_same_BLC];
             assert(m_states[first_t.from()].block == bi);
             if (is_inert_during_init_if_branching(first_t) &&
@@ -4517,15 +4347,14 @@ assert(!initialisation);
                      m_blocks[bi].constellation != m_blocks[m_states[first_t.to()].block].constellation);
 #endif
               // BLC set transitions are not constellation-inert, so we need to stabilize under them
-              Qhat.emplace_back(ind->start_same_BLC, ind->start_marked_BLC);
-              // In the above line we need that !has_marked_transitions(*ind).
+              Qhat.emplace_back(ind->start_same_BLC, ind->end_same_BLC);
 
               #ifdef CHECK_COMPLEXITY_GJ
                 // The work is assigned to the transitions out of new bottom states in ind.
                 // Try to find a new bottom state to which to assign it.
                 bool work_assigned = false;
                 // assign the work to the transitions out of bottom states in this BLC-set
-                for (BLC_list_const_iterator work_it = ind->start_same_BLC; work_it < ind->start_marked_BLC; ++work_it)
+                for (BLC_list_const_iterator work_it = ind->start_same_BLC; work_it<ind->end_same_BLC; ++work_it)
                 {
                   // assign the work to this transition
                   if (0 == m_states[m_aut.get_transitions()[*work_it].from()].no_of_outgoing_inert_transitions)
@@ -4549,9 +4378,8 @@ assert(!initialisation);
                   // - towards the end of the main loop, go through the ranges stored in the temporary variable
                   //   and mark the transitions that start in a bottm state in m_blocks_with_new_bottom_states.
                   //   For every range, we must mark at least one transition.
-//std::cerr << "Haven't yet found a transition from a new bottom state in " << ind->debug_id(*this) << " to assign the initialization of Qhat to\n";
-                  initialize_qhat_work_to_assign_later.emplace_back(ind->start_same_BLC, ind->start_marked_BLC);
-                  // In the above line we need that !has_marked_transitions(*ind).
+std::cerr << "Haven't yet found a transition from a new bottom state in " << ind->debug_id(*this) << " to assign the initialization of Qhat to\n";
+                  initialize_qhat_work_to_assign_later.emplace_back(ind->start_same_BLC, ind->end_same_BLC);
                 }
               #endif
             }
@@ -4602,7 +4430,7 @@ assert(!initialisation);
           // Algorithm 4, line 4.9.
           // mCRL2complexity_gj(..., add_work(..., max_C), *this);
               // not needed as the inner loop is always executed at least once.
-          //print_data_structures("Main stabilize loop");
+          print_data_structures("Main stabilize loop");
           assert(check_data_structures("New bottom state loop", false, false));
           assert(check_stability("New bottom state loop", &Qhat, &Qhat_elt));
 
@@ -4613,9 +4441,7 @@ assert(!initialisation);
 //std::cerr << "Now stabilizing under " << splitter->debug_id(*this) << '\n';
             Qhat_elt.second = splitter->start_same_BLC;
 
-            #ifndef SAVE_BLC_MEMORY
-              assert(splitter->start_same_BLC < splitter->end_same_BLC);
-            #endif
+            assert(splitter->start_same_BLC<splitter->end_same_BLC);
             const transition& first_t = m_aut.get_transitions()[*splitter->start_same_BLC];
             const block_type& from_block = m_blocks[m_states[first_t.from()].block];
             #ifdef CHECK_COMPLEXITY_GJ
@@ -4633,8 +4459,7 @@ assert(!initialisation);
               {
                 // The work is assigned to the transitions out of new bottom states in splitter.
                 bool work_assigned = false;
-                BLC_list_const_iterator work_it = splitter->start_same_BLC;
-                for (; points_into_BLC_set(work_it, *splitter); ++work_it)
+                for (BLC_list_const_iterator work_it=splitter->start_same_BLC; work_it<splitter->end_same_BLC; ++work_it)
                 {
                   // assign the work to this transition
                   if (0 == m_states[m_aut.get_transitions()[*work_it].from()].no_of_outgoing_inert_transitions)
@@ -4647,7 +4472,7 @@ assert(!initialisation);
                 {
                   // We register that we still have to find a transition from a new bottom state in this slice.
 //std::cerr << "Haven't yet found a transition from a new bottom state in " << splitter->debug_id(*this) << " to assign the main loop work to\n";
-                  stabilize_work_to_assign_later.emplace_back(splitter->start_same_BLC, calculate_end_same_BLC(*splitter));
+                  stabilize_work_to_assign_later.emplace_back(splitter->start_same_BLC, splitter->end_same_BLC);
                 }
               }
             #endif
@@ -4699,12 +4524,13 @@ assert(!initialisation);
               if (0 == m_states[t_from].no_of_outgoing_inert_transitions)
               {
                 // t_from is a new bottom state, so we can assign the work to this transition
-//std::cerr << m_transitions[*work_it].debug_id(*this) << " is assigned work on initializing Qhat afterwards\n";
+std::cerr << m_transitions[*work_it].debug_id(*this) << " is assigned work on initializing Qhat afterwards\n";
                 assert(m_blocks[m_states[t_from].block].contains_new_bottom_states);
                 mCRL2complexity_gj(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__initialize_Qhat_afterwards, 1), *this);
                 new_bottom_state_with_transition_found = true;
               }
             }
+if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state found to assign work to on initializing Qhat for BLC slice containing transitions"; for (BLC_list_const_iterator work_it = qhat_it->first; work_it < qhat_it->second; ++work_it) { std::cerr << ' ' << m_transitions[*work_it].debug_id_short(*this); } std::cerr << '\n'; }
             assert(new_bottom_state_with_transition_found);
           }
 
@@ -4799,9 +4625,7 @@ assert(!initialisation);
         // The new constellation has no outgoing transitions at all.
         return m_blocks[index_block_B].block_to_constellation.end();
       }
-      #ifndef SAVE_BLC_MEMORY
-        assert(btc_it->start_same_BLC < btc_it->end_same_BLC);
-      #endif
+      assert(btc_it->start_same_BLC<btc_it->end_same_BLC);
       const transition& btc_t=m_aut.get_transitions()[*(btc_it->start_same_BLC)];
       if (!is_inert_during_init_if_branching(btc_t))
       {
@@ -4828,9 +4652,7 @@ assert(!initialisation);
         // The new constellation has no other outgoing transitions.
         return m_blocks[index_block_B].block_to_constellation.end();
       }
-      #ifndef SAVE_BLC_MEMORY
-        assert(btc_it->start_same_BLC < btc_it->end_same_BLC);
-      #endif
+      assert(btc_it->start_same_BLC<btc_it->end_same_BLC);
       const transition& btc2_t=m_aut.get_transitions()[*(btc_it->start_same_BLC)];
       if (!is_inert_during_init_if_branching(btc2_t) ||
           m_blocks[m_states[btc2_t.to()].block].constellation != old_constellation) // The new constellation has no tau-transitions to the old constellation.
@@ -5017,7 +4839,7 @@ assert(!initialisation);
       // If the above assertion is false, one can just: return B.end_states;
       std::vector<state_in_block_pointer>::iterator first_unmarked_bottom_state=B.start_bottom_states;
       BLC_list_iterator marked_t_it = splitter->start_marked_BLC;
-      for(; assert(splitter->start_same_BLC <= marked_t_it), points_into_BLC_set(marked_t_it, *splitter); ++marked_t_it)
+      for(; marked_t_it<splitter->end_same_BLC; ++marked_t_it)
       {
         const transition& t = m_aut.get_transitions()[*marked_t_it];
         const state_in_block_pointer s(m_states.begin()+t.from());
@@ -5208,9 +5030,8 @@ assert(!initialisation);
         }
         m_constellations.emplace_back(m_blocks[index_block_B].start_bottom_states, m_blocks[index_block_B].end_states);
         const constellation_index new_constellation=m_constellations.size()-1;
-        // Block index_block_B is moved to the new constellation but we cannot yet assign
-        // m_blocks[index_block_B].constellation = new_constellation;
-        // because this would confuse points_into_BLC_set().
+        // Block index_block_B is moved to the new constellation but we shall not yet assign
+        // m_blocks[index_block_B].constellation = new_constellation.
         #ifdef CHECK_COMPLEXITY_GJ
           // m_constellations[new_constellation].work_counter = m_constellations[old_constellation].work_counter;
           const unsigned max_C = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(new_constellation));
@@ -5363,7 +5184,7 @@ assert(!initialisation);
                   BLC_list_iterator transition_walker=ind.start_same_BLC;
 
                   assert(ind.start_same_BLC <= transition_walker);
-                  assert(points_into_BLC_set(transition_walker, ind));
+                  assert(transition_walker<ind.end_same_BLC);
                   do
                   {
                     const transition& tw=m_aut.get_transitions()[*transition_walker];
@@ -5380,7 +5201,7 @@ assert(!initialisation);
                     mCRL2complexity_gj(&m_transitions[*transition_walker], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_cotransition, max_C), *this);
                     ++transition_walker;
                   }
-                  while (assert(ind.start_same_BLC <= transition_walker), points_into_BLC_set(transition_walker, ind));
+                  while (transition_walker<ind.end_same_BLC);
                 }
                 if (!found)
                 {
@@ -5415,15 +5236,15 @@ assert(!initialisation);
           assert(!has_marked_transitions(*ind));
           // check if all transitions were moved to the new constellation,
           // or some transitions to the old constellation have remained:
-          const transition& last_t=m_aut.get_transitions()[*std::prev(ind->start_marked_BLC)];
+          const transition& last_t=m_aut.get_transitions()[*std::prev(ind->end_same_BLC)];
           assert(m_blocks[m_states[last_t.to()].block].constellation==new_constellation);
           const transition* next_t;
           if ((is_inert_during_init(last_t) && m_blocks[m_states[last_t.from()].block].constellation==old_constellation &&
                (assert(m_states[last_t.from()].block!=index_block_B),
 //std::cerr << "yes, it was constellation-inert earlier but is no more\n",
                                                                        true)) ||
-              (ind->start_marked_BLC<m_BLC_transitions.end() &&
-               (next_t=&m_aut.get_transitions()[*ind->start_marked_BLC],
+              (ind->end_same_BLC<m_BLC_transitions.end() &&
+               (next_t=&m_aut.get_transitions()[*ind->end_same_BLC],
                 m_states[last_t.from()].block==m_states[next_t->from()].block &&
                 label_or_divergence(last_t)==label_or_divergence(*next_t) &&
                 m_blocks[m_states[next_t->to()].block].constellation==old_constellation
@@ -5432,7 +5253,7 @@ assert(!initialisation);
           {
             // there are some transitions to the corresponding co-splitter,
             // so we will have to stabilize the block
-            calM_elt->second = ind->start_marked_BLC;
+            calM_elt->second = ind->end_same_BLC;
             ind->start_marked_BLC = ind->start_same_BLC;
             // The mCRL2complexity_gj call above assigns work to every transition in ind, so we are allowed to mark all transitions at once.
             ++calM_elt;
@@ -5530,18 +5351,12 @@ assert(!initialisation);
             // mCRL2complexity_gj(splitter, add_work(..., max_C), *this);
                 // not needed, as all transitions in calM are transitions into the small new constellation.
             assert(splitter->start_same_BLC < calM_elt.second);
-            assert(!points_into_BLC_set(calM_elt.second, *splitter));
-            assert(points_into_BLC_set(std::prev(calM_elt.second), *splitter));
-            if (splitter->start_same_BLC != splitter->start_marked_BLC)
-            {
-              assert(splitter->start_same_BLC < splitter->start_marked_BLC);
-              assert(points_into_BLC_set(std::prev(splitter->start_marked_BLC), *splitter));
-            }
+            assert(splitter->end_same_BLC==calM_elt.second);
+            assert(splitter->start_same_BLC<=splitter->start_marked_BLC);
+            assert(splitter->start_marked_BLC<=splitter->end_same_BLC);
             calM_elt.second = splitter->start_same_BLC;
 
-            #ifndef SAVE_BLC_MEMORY
-              assert(splitter->start_same_BLC < splitter->end_same_BLC);
-            #endif
+            assert(splitter->start_same_BLC<splitter->end_same_BLC);
             const transition& first_t = m_aut.get_transitions()[*splitter->start_same_BLC];
             const label_index a = label_or_divergence(first_t);
             assert(m_blocks[m_states[first_t.to()].block].constellation == new_constellation);
@@ -5748,9 +5563,7 @@ assert(!initialisation);
                     {
                       for (const BLC_indicators& ind : m_blocks[Bpp].block_to_constellation)
                       {
-                        #ifndef SAVE_BLC_MEMORY
-                          assert(ind.start_same_BLC < ind.end_same_BLC);
-                        #endif
+                        assert(ind.start_same_BLC<ind.end_same_BLC);
                         const transition& co_t = m_aut.get_transitions()[*ind.start_same_BLC];
                         assert(m_states[co_t.from()].block == Bpp);
                         assert(label_or_divergence(co_t) != a ||
@@ -5771,7 +5584,7 @@ assert(!initialisation);
           while (calM_elt.first < calM_elt.second);
         }
 
-//print_data_structures("Before stabilize");
+print_data_structures("Before stabilize");
         assert(check_data_structures("Before stabilize", false, false));
         assert(check_stability("Before stabilize"));
         stabilizeB();
