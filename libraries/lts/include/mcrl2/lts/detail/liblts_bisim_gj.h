@@ -29,6 +29,7 @@
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
+#include "mcrl2/lts/detail/check_complexity.h"
 
 // If CO_SPLITTER_IN_BLC_LIST is defined, the co-splitter belonging to a splitter
 // is found by ordering the BLC_indicators lists in a specific way: the co-splitter
@@ -39,14 +40,6 @@
 // It seems that defining this constant is advantageous.
 #define CO_SPLITTER_IN_BLC_LIST
 
-// It seems that when we define this constant as well, it's a little faster.
-#define CO_SPLITTER_IN_BLC_LIST_VARIANT
-
-// If COUNT_R_U_STATUS_TIMES is defined, simple_splitB() counts how often every
-// step in the coroutines is executed. This helps to find the most efficient
-// arrangement of the checks to determine the step to be executed.
-//#define COUNT_R_U_STATUS_TIMES
-
 // If TRY_EFFICIENT_SWAP is defined, then splitting a block will try to swap more
 // efficiently: states that are already in an acceptable position in m_states_in_blocks
 // will not be moved. This may require some additional reading but fewer changes
@@ -54,25 +47,6 @@
 // However, a test pointed out that it is about 2% slower.  As the code becomes
 // more complex with TRY_EFFICIENT_SWAP, I suggest to not use the option.
 //#define TRY_EFFICIENT_SWAP
-
-#ifndef NDEBUG
-  // If CHECK_COMPLEXITY_GJ is defined, macros are included to check running time
-  // constraints: In every iteration of a loop, some counter of a state or
-  // transition is increased, and no counter is allowed to exceed (log n + 1).
-  // In this way, one can ensure the overall O(m log n) time bound.
-  // (Details: Occasionally, if a loop runs over all states of a block, or over
-  // all transitions of a state, a counter is assigned to the block or state, to
-  // reduce the number of counters slightly.)
-  // This feature only works in debug mode.
-  #define CHECK_COMPLEXITY_GJ
-#endif
-
-#ifdef CHECK_COMPLEXITY_GJ
-  #include "mcrl2/lts/detail/check_complexity.h"
-  #define mCRL2complexity_gj(unit, call, info_for_debug) mCRL2complexity(unit, call, info_for_debug)
-#else
-  #define mCRL2complexity_gj(unit, call, info_for_debug)  do{}while(0)
-#endif
 
 namespace mcrl2
 {
@@ -413,10 +387,8 @@ struct linked_list
       assert(to_pos == from_pos->next()->prev());
       from_pos->next()->prev() = from_pos;
     }
-    #ifndef NDEBUG
-      assert(check_linked_list());
-      assert(other_list.check_linked_list());
-    #endif
+    assert(check_linked_list());
+    assert(other_list.check_linked_list());
   }
 
   void erase(iterator const pos)
@@ -589,7 +561,7 @@ struct state_type_gj
   transition_index counter=undefined; // This field is used to store local information while splitting. While set to -1 (undefined)
                                  // it is considered to be undefined.
                                  // When set to -2 (Rmarked) it is considered to be marked for being in R or R_todo.
-  #ifdef CHECK_COMPLEXITY_GJ
+  #ifndef NDEBUG
     /// \brief print a short state identification for debugging
     template<class LTS_TYPE>
     std::string debug_id_short(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
@@ -624,7 +596,7 @@ struct BLC_indicators
      end_same_BLC(end)
   {}
 
-  #ifdef CHECK_COMPLEXITY_GJ
+  #ifndef NDEBUG
     /// \brief print a B_to_C slice identification for debugging
     /// \details This function is only available if compiled in Debug mode.
     template<class LTS_TYPE>
@@ -691,7 +663,7 @@ struct transition_type
                                                      // entry in m_BLC_transitions, of which the field transition contains the index
                                                      // of this transition.
 
-  #ifdef CHECK_COMPLEXITY_GJ
+  #ifndef NDEBUG
     /// \brief print a short transition identification for debugging
     /// \details This function is only available if compiled in Debug mode.
     template<class LTS_TYPE>
@@ -714,7 +686,7 @@ struct transition_type
     }
 
     mutable check_complexity::trans_gj_counter_t work_counter;
-#endif
+  #endif
 };
 
 struct block_type
@@ -741,7 +713,7 @@ struct block_type
       block_to_constellation()
   {}
 
-  #ifdef CHECK_COMPLEXITY_GJ
+  #ifndef NDEBUG
     /// \brief print a block identification for debugging
     template<class LTS_TYPE>
     inline std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
@@ -950,14 +922,12 @@ class bisim_partitioner_gj
         assert(found);
         if (check_temporary_complexity_counters)
         {
-          #ifdef CHECK_COMPLEXITY_GJ
-            const block_index targetb = m_states[t.to()].block;
-            const unsigned max_sourceB = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(b));
-            const unsigned max_targetC = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(m_blocks[targetb].constellation));
-            const unsigned max_targetB = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(targetb));
-            mCRL2complexity_gj(&m_transitions[ti], no_temporary_work(max_sourceB, max_targetC, max_targetB,
+          const block_index targetb = m_states[t.to()].block;
+          const unsigned max_sourceB = check_complexity::log_n-check_complexity::ilog2(number_of_states_in_block(b));
+          const unsigned max_targetC = check_complexity::log_n-check_complexity::ilog2(number_of_states_in_constellation(m_blocks[targetb].constellation));
+          const unsigned max_targetB = check_complexity::log_n-check_complexity::ilog2(number_of_states_in_block(targetb));
+          mCRL2complexity(&m_transitions[ti], no_temporary_work(max_sourceB, max_targetC, max_targetB,
                   0 == m_states[t.from()].no_of_outgoing_inert_transitions), *this);
-          #endif
         }
       }
     }
@@ -1055,10 +1025,8 @@ assert(!initialisation);
           assert(b.end_states <= c.end_const_states);
           assert(c.end_const_states <= m_states_in_blocks.end());
 
-          #ifdef CHECK_COMPLEXITY_GJ
-            unsigned max_B = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(bi));
-            unsigned max_C = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(b.constellation));
-          #endif
+          unsigned max_B = check_complexity::log_n-check_complexity::ilog2(number_of_states_in_block(bi));
+          unsigned max_C = check_complexity::log_n-check_complexity::ilog2(number_of_states_in_constellation(b.constellation));
           for(std::vector<state_in_block_pointer>::const_iterator is=b.start_bottom_states;
                    is!=b.start_non_bottom_states; ++is)
           {
@@ -1066,7 +1034,7 @@ assert(!initialisation);
             assert(is->ref_state->no_of_outgoing_inert_transitions==0);
             if (check_temporary_complexity_counters)
             {
-              mCRL2complexity_gj(is->ref_state, no_temporary_work(max_B, true), *this);
+              mCRL2complexity(is->ref_state, no_temporary_work(max_B, true), *this);
             }
           }
           for(std::vector<state_in_block_pointer>::const_iterator is=b.start_non_bottom_states;
@@ -1076,11 +1044,11 @@ assert(!initialisation);
             assert(is->ref_state->no_of_outgoing_inert_transitions>0);
             // Because there cannot be new bottom states among the non-bottom states,
             // we can always check the temporary work of non-bottom states:
-            mCRL2complexity_gj(is->ref_state, no_temporary_work(max_B, false), *this);
+            mCRL2complexity(is->ref_state, no_temporary_work(max_B, false), *this);
           }
           // Because a block has no temporary or new-bottom-state-related counters,
           // we can always check its temporary work:
-          mCRL2complexity_gj(&b, no_temporary_work(max_C, max_B), *this);
+          mCRL2complexity(&b, no_temporary_work(max_C, max_B), *this);
 
           assert(b.block_to_constellation.check_linked_list());
           for(linked_list< BLC_indicators >::iterator ind=b.block_to_constellation.begin();
@@ -1106,7 +1074,7 @@ assert(!initialisation);
             }
             if (check_temporary_complexity_counters)
             {
-              mCRL2complexity_gj(ind, no_temporary_work(max_C, check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(m_blocks[m_states[first_transition.to()].block].constellation))), *this);
+              mCRL2complexity(ind, no_temporary_work(max_C, check_complexity::log_n-check_complexity::ilog2(number_of_states_in_constellation(m_blocks[m_states[first_transition.to()].block].constellation))), *this);
             }
           }
         }
@@ -1725,11 +1693,11 @@ assert(!initialisation);
       for(block_index bi=0; bi<m_blocks.size(); ++bi)
       {
         const block_type& B=m_blocks[bi];
-        //mCRL2complexity_gj(&B, add_work(..., 1), *this);
+        //mCRL2complexity(&B, add_work(..., 1), *this);
             // Because every block is touched exactly once, we do not store a physical counter for this.
         for(const BLC_indicators blc_ind: B.block_to_constellation)
         {
-          // mCRL2complexity_gj(&blc_ind, add_work(..., 1), *this);
+          // mCRL2complexity(&blc_ind, add_work(..., 1), *this);
               // Because every BLC set is touched exactly once, we do not store a physical counter for this.
           assert(blc_ind.start_same_BLC<blc_ind.end_same_BLC);
           const transition& t= m_aut.get_transitions()[*blc_ind.start_same_BLC];
@@ -1743,7 +1711,7 @@ assert(!initialisation);
       m_aut.clear_transitions();
       for (const transition& t: T)
       {
-        //mCRL2complexity_gj(..., add_work(..., 1), *this);
+        //mCRL2complexity(..., add_work(..., 1), *this);
             // we do not add a counter because every transition has been generated by one of the above iterations.
         m_aut.add_transition(t);
       }
@@ -1759,7 +1727,7 @@ assert(!initialisation);
 
         for(std::size_t i=0; i<m_aut.num_states(); ++i)
         {
-          //mCRL2complexity_gj(&m_states[i], add_work(..., 1), *this);
+          //mCRL2complexity(&m_states[i], add_work(..., 1), *this);
               // Because every state is touched exactly once, we do not store a physical counter for this.
           const state_index new_index(get_eq_class(i));
           new_labels[new_index]=new_labels[new_index]+m_aut.state_label(i);
@@ -1768,7 +1736,7 @@ assert(!initialisation);
         m_aut.set_num_states(num_eq_classes());
         for (std::size_t i=0; i<num_eq_classes(); ++i)
         {
-          // mCRL2complexity_gj(&m_blocks[i], add_work(check_complexity::finalize_minimized_LTS__set_labels_of_block, 1), *this);
+          // mCRL2complexity(&m_blocks[i], add_work(check_complexity::finalize_minimized_LTS__set_labels_of_block, 1), *this);
               // Because every block is touched exactly once, we do not store a physical counter for this.
           m_aut.set_state_label(i, new_labels[i]);
         }
@@ -1924,7 +1892,7 @@ assert(!initialisation);
               typename std::vector<state_in_block_pointer>::iterator pos1,
               typename std::vector<state_in_block_pointer>::iterator pos2,
               state_index count
-              #ifdef CHECK_COMPLEXITY_GJ
+              #ifndef NDEBUG
                 , const state_index max_B
               #endif
               )
@@ -1946,7 +1914,7 @@ assert(!initialisation);
       state_in_block_pointer temp=*pos1;
       while (--count > 0)
       {
-        mCRL2complexity_gj(pos2->ref_state, add_work(check_complexity::multiple_swap_states_in_block__swap_state_in_small_block, max_B), *this);
+        mCRL2complexity(pos2->ref_state, add_work(check_complexity::multiple_swap_states_in_block__swap_state_in_small_block, max_B), *this);
         *pos1 = *pos2;
         pos1->ref_state->ref_states_in_blocks=pos1;
         ++pos1;
@@ -2031,7 +1999,7 @@ assert(!initialisation);
       const block_index B_new=m_blocks.size();
       const constellation_index ci = m_blocks[B].constellation;
       m_blocks.emplace_back(m_blocks[B].start_bottom_states,ci);
-      #ifdef CHECK_COMPLEXITY_GJ
+      #ifndef NDEBUG
         m_blocks[B_new].work_counter = m_blocks[B].work_counter;
       #endif
       if (m_constellations[ci].start_const_states->ref_state->block==std::prev(m_constellations[ci].end_const_states)->ref_state->block) // This constellation is trivial.
@@ -2044,7 +2012,7 @@ assert(!initialisation);
       }
 
       // Carry out the split.
-      #ifdef CHECK_COMPLEXITY_GJ
+      #ifndef NDEBUG
         // The size of the new block is not yet fixed.
         const state_index max_B = check_complexity::log_n - check_complexity::ilog2(std::distance(first_bottom_state_in_R, last_bottom_state_in_R) + R.size());
       #endif
@@ -2052,7 +2020,7 @@ assert(!initialisation);
       {
         multiple_swap_states_in_states_in_block(m_blocks[B].start_bottom_states, first_bottom_state_in_R,
                     std::distance(first_bottom_state_in_R, last_bottom_state_in_R)
-                    #ifdef CHECK_COMPLEXITY_GJ
+                    #ifndef NDEBUG
                       , max_B
                     #endif
                     );
@@ -2065,7 +2033,7 @@ assert(!initialisation);
       // Update the block pointers for R-bottom states:
       for(std::vector<state_in_block_pointer>::iterator s_it=first_bottom_state_in_R; s_it<last_bottom_state_in_R; ++s_it)
       {
-        mCRL2complexity_gj(s_it->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split,
+        mCRL2complexity(s_it->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split,
                 max_B), *this);
 //std::cerr << "MOVE STATE TO NEW BLOCK: " << std::distance(m_states.begin(), s_it->ref_state) << "\n";
         assert(B==s_it->ref_state->block);
@@ -2099,7 +2067,7 @@ assert(!initialisation);
 
             // Move BminR bottom states out of the way.
             std::vector<state_in_block_pointer>::iterator take_next_R_non_bottom_state_from=BminR_start_non_bottom_states;
-            #ifdef CHECK_COMPLEXITY_GJ
+            #ifndef NDEBUG
               std::vector<state_in_block_pointer>::const_iterator account_for_skipped_BminR_states=R.begin();
             #endif
             for (; move_next_R_non_bottom_state_to<move_next_R_non_bottom_state_to_end;
@@ -2119,11 +2087,11 @@ assert(!initialisation);
                 while (assert(take_next_R_non_bottom_state_from<m_blocks[B].end_states),
                        marking_value!=take_next_R_non_bottom_state_from->ref_state->counter)
                 {
-                  #ifdef CHECK_COMPLEXITY_GJ
+                  #ifndef NDEBUG
                     // assign the work in this loop to some R non-bottom state.
                     // (This is possible because there are no fewer R non-bottom states than BminR non-bottom states.)
                     assert(account_for_skipped_BminR_states<R.end());
-                    mCRL2complexity_gj(account_for_skipped_BminR_states->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+                    mCRL2complexity(account_for_skipped_BminR_states->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
                     ++account_for_skipped_BminR_states;
                   #endif
                   ++take_next_R_non_bottom_state_from;
@@ -2134,7 +2102,7 @@ assert(!initialisation);
               assert(marking_value==move_next_R_non_bottom_state_to->ref_state->counter);
               assert(B==move_next_R_non_bottom_state_to->ref_state->block);
               move_next_R_non_bottom_state_to->ref_state->block=B_new;
-              mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
+              mCRL2complexity(move_next_R_non_bottom_state_to->ref_state,
                                  add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
                                  *this);
             }
@@ -2155,11 +2123,11 @@ assert(!initialisation);
                 while (assert(take_next_R_non_bottom_state_from<m_blocks[B].end_states),
                        marking_value!=take_next_R_non_bottom_state_from->ref_state->counter)
                 {
-                  #ifdef CHECK_COMPLEXITY_GJ
+                  #ifndef NDEBUG
                     // assign the work in this loop to some R non-bottom state.
                     // (This is possible because there are no fewer R non-bottom states than BminR non-bottom states.)
                     assert(account_for_skipped_BminR_states<R.end());
-                    mCRL2complexity_gj(account_for_skipped_BminR_states->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+                    mCRL2complexity(account_for_skipped_BminR_states->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
                     ++account_for_skipped_BminR_states;
                   #endif
                   ++take_next_R_non_bottom_state_from;
@@ -2170,7 +2138,7 @@ assert(!initialisation);
               }
               assert(B==move_next_R_non_bottom_state_to->ref_state->block);
               move_next_R_non_bottom_state_to->ref_state->block=B_new;
-              mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
+              mCRL2complexity(move_next_R_non_bottom_state_to->ref_state,
                                  add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
                                  *this);
             }
@@ -2198,7 +2166,7 @@ assert(!initialisation);
                 while (assert(take_next_R_non_bottom_state_from<R.end()),
                    take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<BminR_start_non_bottom_states)
                 {
-                  mCRL2complexity_gj(take_next_R_non_bottom_state_from->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+                  mCRL2complexity(take_next_R_non_bottom_state_from->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
                   assert(marking_value==take_next_R_non_bottom_state_from->ref_state->counter);
                   assert((take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<move_next_R_non_bottom_state_to
                       ? B_new : B)==take_next_R_non_bottom_state_from->ref_state->block);
@@ -2210,7 +2178,7 @@ assert(!initialisation);
               assert(marking_value==move_next_R_non_bottom_state_to->ref_state->counter);
               assert(B==move_next_R_non_bottom_state_to->ref_state->block);
               move_next_R_non_bottom_state_to->ref_state->block=B_new;
-              mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
+              mCRL2complexity(move_next_R_non_bottom_state_to->ref_state,
                              add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
                              *this);
             }
@@ -2246,7 +2214,7 @@ assert(!initialisation);
                 {
                   // Actually the state at *take_next_R_non_bottom_state_from is already at an acceptable position.
                   // Leave it there and try the next state.
-                  mCRL2complexity_gj(take_next_R_non_bottom_state_from->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
+                  mCRL2complexity(take_next_R_non_bottom_state_from->ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__skip_over_state, max_B), *this);
                   assert(marking_value==take_next_R_non_bottom_state_from->ref_state->counter);
                   assert((take_next_R_non_bottom_state_from->ref_state->ref_states_in_blocks<move_next_R_non_bottom_state_to
                       ? B_new : B)==take_next_R_non_bottom_state_from->ref_state->block);
@@ -2258,7 +2226,7 @@ assert(!initialisation);
               }
               assert(B==move_next_R_non_bottom_state_to->ref_state->block);
               move_next_R_non_bottom_state_to->ref_state->block=B_new;
-              mCRL2complexity_gj(move_next_R_non_bottom_state_to->ref_state,
+              mCRL2complexity(move_next_R_non_bottom_state_to->ref_state,
                              add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split, max_B),
                              *this);
             }
@@ -2275,7 +2243,7 @@ assert(!initialisation);
         // Move the non-bottom states to their correct positions:
         for(state_in_block_pointer s: R)
         {
-          mCRL2complexity_gj(s.ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split,
+          mCRL2complexity(s.ref_state, add_work(check_complexity::split_block_B_into_R_and_BminR__carry_out_split,
                 max_B), *this);
 //std::cerr << "MOVE STATE TO NEW BLOCK: " << s << "\n";
           assert(B==s.ref_state->block);
@@ -2420,7 +2388,7 @@ assert(!initialisation);
                            emplace_front(//first_block_to_constellation,
                                    this_block_to_constellation->start_same_BLC,
                                    this_block_to_constellation->start_same_BLC);
-          #ifdef CHECK_COMPLEXITY_GJ
+          #ifndef NDEBUG
             next_block_to_constellation->work_counter = this_block_to_constellation->work_counter;
           #endif
         }
@@ -2454,7 +2422,7 @@ assert(!initialisation);
                            emplace_after(this_block_to_constellation,
                                          this_block_to_constellation->start_same_BLC,
                                          this_block_to_constellation->start_same_BLC);
-          #ifdef CHECK_COMPLEXITY_GJ
+          #ifndef NDEBUG
             next_block_to_constellation->work_counter = this_block_to_constellation->work_counter;
           #endif
           new_block_created = true;
@@ -2542,7 +2510,7 @@ assert(!initialisation);
       const label_index a = label_or_divergence(t);
       const constellation_index to_constln = m_blocks[m_states[t.to()].block].constellation;
       linked_list<BLC_indicators>::iterator new_BLC_block;
-      #ifdef CO_SPLITTER_IN_BLC_LIST_VARIANT
+      #ifdef CO_SPLITTER_IN_BLC_LIST
         if (is_inert_during_init(t) && to_constln==m_blocks[new_bi].constellation)
         {
           assert(this_block_to_constellation==m_blocks[old_bi].block_to_constellation.begin());
@@ -2583,30 +2551,13 @@ assert(!initialisation);
           // We first calculate the position where the new BLC set should go to in new_position.
           // Default position: at the beginning.
           linked_list<BLC_indicators>::iterator new_position=m_blocks[new_bi].block_to_constellation.end();
-          #ifdef CO_SPLITTER_IN_BLC_LIST_VARIANT
+          #ifdef CO_SPLITTER_IN_BLC_LIST
             assert(!(is_inert_during_init(t) && to_constln==m_blocks[new_bi].constellation));
-          #else
-            if (is_inert_during_init(t) && to_constln==m_blocks[new_bi].constellation)
-            {
-              // This BLC slice contains inert transitions and should always be placed at the front.
-              assert(this_block_to_constellation==m_blocks[old_bi].block_to_constellation.begin());
-              #ifdef CO_SPLITTER_IN_BLC_LIST
-                // The inert transitions do not need to preserve their co-splitter position
-                old_constellation=null_constellation;
-//std::cerr << "Creating new BLC set for inert transitions\n";
-              #endif
-            }
-            else
-          #endif
-          {
-            // This BLC slice does not contain inert transitions.
-            #ifdef CO_SPLITTER_IN_BLC_LIST
+
               if (m_blocks[new_bi].block_to_constellation.empty())
               {
                 // This is the first transition that is moved.
-                #ifdef CO_SPLITTER_INBLC_LIST_VARIANT
-                  assert(!m_branching);
-                #endif
+                assert(!m_branching);
 //std::cerr << "This is the first transition that is moved.\n";
               }
               else
@@ -2702,38 +2653,30 @@ assert(!initialisation);
                   if (m_branching)
                   {
                     const linked_list<BLC_indicators>::iterator perhaps_inert=m_blocks[new_bi].block_to_constellation.begin();
-                    #ifdef CO_SPLITTER_IN_BLC_LIST_VARIANT
-                      // In this case we always inserted a new BLC set for the inert transitions,
-                      // so we can place the BLC set after that one.
-                      new_position=perhaps_inert;
-                    #else
-                      if (perhaps_inert->start_same_BLC<perhaps_inert->end_same_BLC)
-                      {
-                        const transition& p_i_t=m_aut.get_transitions()[*perhaps_inert->start_same_BLC];
-                        assert(new_bi==m_states[p_i_t.from()].block);
-                        if (is_inert_during_init_if_branching(p_i_t) &&
-                            m_blocks[new_bi].constellation==m_blocks[m_states[p_i_t.to()].block].constellation)
-                        {
-                          // perhaps_inert does contain constellation-inert transitions, place the new BLC set after that
-                          new_position=perhaps_inert;
-                        }
-                      }
-                    #endif
+                    // We always inserted a new BLC set for the inert transitions,
+                    // so we can place the BLC set after that one.
+                    new_position=perhaps_inert;
                   }
                 }
               }
-            #else
+            assert(!m_branching || m_blocks[new_bi].block_to_constellation.end()!=new_position);
+          #else
+            if (is_inert_during_init(t) && to_constln==m_blocks[new_bi].constellation)
+            {
+              // This BLC slice contains inert transitions and should always be placed at the front.
+              assert(this_block_to_constellation==m_blocks[old_bi].block_to_constellation.begin());
+            }
+            else
+            {
+              // This BLC slice does not contain inert transitions.
               // Place the new BLC set in the 2nd position
               // (This is a safe choice, as there is no requirement on the order of non-inert BLC sets)
               new_position=m_blocks[new_bi].block_to_constellation.begin();
-            #endif
-          }
-          #ifdef CO_SPLITTER_IN_BLC_LIST_VARIANT
-            assert(!m_branching || m_blocks[new_bi].block_to_constellation.end()!=new_position);
+            }
           #endif
           const BLC_list_iterator old_BLC_start=this_block_to_constellation->start_same_BLC;
           new_BLC_block=m_blocks[new_bi].block_to_constellation.emplace_after(new_position, old_BLC_start, old_BLC_start);
-          #ifdef CHECK_COMPLEXITY_GJ
+          #ifndef NDEBUG
             new_BLC_block->work_counter=this_block_to_constellation->work_counter;
           #endif
         }
@@ -2979,13 +2922,10 @@ assert(!initialisation);
         }
 #endif
         // The code for the right co-routine.
-        #ifdef COUNT_R_U_STATUS_TIMES
-          m_R_status_counter[R_status]++;
-        #endif
         if (incoming_inert_transition_checking==R_status) // 18178 times (large 1394-fin.lts example: 372431 times)
         {
           assert(current_R_incoming_transition_iterator<current_R_incoming_transition_iterator_end);
-          mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), current_R_incoming_transition_iterator)],
+          mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), current_R_incoming_transition_iterator)],
                         add_work(check_complexity::simple_splitB_R__handle_transition_to_R_state, 1), *this);
           assert(m_aut.is_tau(m_aut.apply_hidden_label_map(current_R_incoming_transition_iterator->label())));
           assert(m_states[current_R_incoming_transition_iterator->to()].block==B);
@@ -3024,7 +2964,7 @@ assert(!initialisation);
           const state_in_block_pointer s=(current_R_incoming_bottom_state_iterator<first_unmarked_bottom_state
                                     ? *current_R_incoming_bottom_state_iterator++
                                     : m_R.move_from_todo());
-          mCRL2complexity_gj(s.ref_state, add_work(check_complexity::simple_splitB_R__find_predecessors, 1), *this);
+          mCRL2complexity(s.ref_state, add_work(check_complexity::simple_splitB_R__find_predecessors, 1), *this);
 //std::cerr << "R insert: " << s << "\n";
           assert(s.ref_state->block==B);
           if (std::next(s.ref_state)==m_states.end())
@@ -3054,7 +2994,7 @@ assert(!initialisation);
             // Algorithm 3, line 3.3, right.
           assert(M_it<splitter_end_unmarked_BLC);
           const state_in_block_pointer si(m_states.begin() + m_aut.get_transitions()[*M_it].from());
-          mCRL2complexity_gj(&m_transitions[*M_it], add_work(check_complexity::simple_splitB_R__handle_transition_from_R_state, 1), *this);
+          mCRL2complexity(&m_transitions[*M_it], add_work(check_complexity::simple_splitB_R__handle_transition_from_R_state, 1), *this);
           assert(si.ref_state->block==B);
           assert(!is_inert_during_init(m_aut.get_transitions()[*M_it]) || m_blocks[B].constellation!=m_blocks[m_states[m_aut.get_transitions()[*M_it].to()].block].constellation);
           ++M_it;
@@ -3145,9 +3085,6 @@ assert(!initialisation);
         }
 #endif
         // The code for the left co-routine.
-        #ifdef COUNT_R_U_STATUS_TIMES
-          m_U_status_counter[U_status]++;
-        #endif
         if (incoming_inert_transition_checking==U_status) // 20299 times (large 1394-fin.lts example: 360327 times)
         {
 //std::cerr << "U_incoming_inert_transition_checking\n";
@@ -3156,7 +3093,7 @@ assert(!initialisation);
           assert(m_aut.is_tau(m_aut.apply_hidden_label_map(current_U_incoming_transition_iterator->label())));
             // Check one incoming transition.
             // Algorithm 3, line 3.12, left.
-          mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), current_U_incoming_transition_iterator)], add_work(check_complexity::simple_splitB_U__handle_transition_to_U_state, 1), *this);
+          mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), current_U_incoming_transition_iterator)], add_work(check_complexity::simple_splitB_U__handle_transition_to_U_state, 1), *this);
           current_U_outgoing_state=state_in_block_pointer(m_states.begin()+current_U_incoming_transition_iterator->from());
           assert(m_states[current_U_incoming_transition_iterator->to()].block==B);
           current_U_incoming_transition_iterator++;
@@ -3250,7 +3187,7 @@ assert(!initialisation);
                                ? *current_U_incoming_bottom_state_iterator++
                                : m_U.move_from_todo());
           assert(!m_R.find(s));
-          mCRL2complexity_gj(s.ref_state, add_work(check_complexity::simple_splitB_U__find_predecessors, 1), *this);
+          mCRL2complexity(s.ref_state, add_work(check_complexity::simple_splitB_U__find_predecessors, 1), *this);
 //std::cerr << "U insert/ U_todo_remove: " << s << "\n";
           current_U_incoming_transition_iterator=s.ref_state->start_incoming_transitions;
           current_U_incoming_transition_iterator_end=(std::next(s.ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s.ref_state)->start_incoming_transitions);
@@ -3273,14 +3210,14 @@ assert(!initialisation);
             // will only be used if the transitions are not constellation-inert:
           assert(!m_aut.is_tau(a) || m_blocks[B].constellation!=C);
             // assert(splitter_end_unmarked_BLC == old value of splitter->start_marked_BLC); -- can no longer be checked
-          #ifdef CHECK_COMPLEXITY_GJ
-            mCRL2complexity_gj((&m_transitions[/*initialisation?current_U_outgoing_transition_iterator->transition:*/ *current_U_outgoing_transition_iterator->ref_BLC_transitions]), add_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, 1), *this);
+          #ifndef NDEBUG
+            mCRL2complexity((&m_transitions[/*initialisation?current_U_outgoing_transition_iterator->transition:*/ *current_U_outgoing_transition_iterator->ref_BLC_transitions]), add_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, 1), *this);
               // This is one step in the coroutine, so we should assign the work to exactly one transition.
               // But to make sure, we also mark the other transitions that we skipped in the optimisation.
             for (outgoing_transitions_it out_it=current_U_outgoing_transition_iterator; out_it<current_U_outgoing_transition_iterator->start_same_saC; )
             {
               ++out_it;
-              mCRL2complexity_gj(&m_transitions[/*initialisation?out_it->transition:*/ *out_it->ref_BLC_transitions], add_work_notemporary(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, 1), *this);
+              mCRL2complexity(&m_transitions[/*initialisation?out_it->transition:*/ *out_it->ref_BLC_transitions], add_work_notemporary(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, 1), *this);
             }
           #endif
           const transition& t_local=m_aut.get_transitions()
@@ -3417,13 +3354,13 @@ assert(!initialisation);
 
       // Because we visit all states of block bi and almost all their incoming and outgoing transitions,
       // we subsume all this bookkeeping in a single block counter:
-      mCRL2complexity_gj(&m_blocks[bi], add_work(check_complexity::splitB__update_BLC_of_smaller_subblock, check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(bi))), *this);
+      mCRL2complexity(&m_blocks[bi], add_work(check_complexity::splitB__update_BLC_of_smaller_subblock, check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(bi))), *this);
       // Update the LBC_list, and bottom states, and invariant on inert transitions.
       const std::vector<state_in_block_pointer>::iterator start_new_bottom_states=m_blocks[R_block].start_non_bottom_states;
       linked_list<BLC_indicators>::iterator R_to_U_tau_splitter = m_blocks[R_block].block_to_constellation.end();
       bool skip_transitions_in_splitter = false;
       assert(m_blocks[bi].block_to_constellation.begin() == m_blocks[bi].block_to_constellation.end());
-      #ifdef CO_SPLITTER_IN_BLC_LIST_VARIANT
+      #ifdef CO_SPLITTER_IN_BLC_LIST
         if (m_branching)
         {
           // insert an empty BLC set into m_blocks[bi].block_to_constellation
@@ -3440,8 +3377,6 @@ assert(!initialisation);
           m_blocks[bi].block_to_constellation.emplace_front(perhaps_inert_ind->start_same_BLC, perhaps_inert_ind->start_same_BLC);
           assert(!m_blocks[bi].block_to_constellation.empty());
         }
-      #endif
-      #ifdef CO_SPLITTER_IN_BLC_LIST
         assert(m_BLC_indicators_to_be_deleted.empty());
       #endif
       if (split_off_new_bottom_states && bi == R_block)
@@ -3462,7 +3397,7 @@ assert(!initialisation);
           }
         #endif
         m_blocks[R_block].block_to_constellation.splice_to_after(
-                                #ifdef CO_SPLITTER_IN_BLC_LIST_VARIANT
+                                #ifdef CO_SPLITTER_IN_BLC_LIST
                                   m_blocks[R_block].block_to_constellation.begin(),
                                 #else
                                   m_blocks[R_block].block_to_constellation.end(),
@@ -3477,7 +3412,7 @@ assert(!initialisation);
       {
         state_type_gj& s=*ssi->ref_state;
         assert(s.ref_states_in_blocks == ssi);
-        // mCRL2complexity_gj(s, add_work(..., max_bi_counter), *this);
+        // mCRL2complexity(s, add_work(..., max_bi_counter), *this);
             // is subsumed in the above call
         assert(s.block == bi);
 
@@ -3487,7 +3422,7 @@ assert(!initialisation);
           for(outgoing_transitions_it ti=s.start_outgoing_transitions; ti!=end_it; ti++)
           {
             assert(m_states.begin()+m_aut.get_transitions()[*ti->ref_BLC_transitions].from()==ssi->ref_state);
-            // mCRL2complexity_gj(&m_transitions[*ti->ref_BLC_transitions], add_work(..., max_bi_counter), *this);
+            // mCRL2complexity(&m_transitions[*ti->ref_BLC_transitions], add_work(..., max_bi_counter), *this);
                 // is subsumed in the above call
             transition_index old_remaining_transition;
             if (!skip_transitions_in_splitter || m_transitions[*ti->ref_BLC_transitions].transitions_per_block_to_constellation != splitter)
@@ -3521,7 +3456,7 @@ assert(!initialisation);
 
           for(outgoing_transitions_it ti=s.start_outgoing_transitions; ti!=end_it; ti++)
           {
-            // mCRL2complexity_gj(&m_transitions[*ti->ref_BLC_transitions], add_work(..., max_bi_counter), *this);
+            // mCRL2complexity(&m_transitions[*ti->ref_BLC_transitions], add_work(..., max_bi_counter), *this);
                 // is subsumed in the above call
             const transition& t=m_aut.get_transitions()[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions];
             assert(m_states.begin()+t.from()==ssi->ref_state);
@@ -3567,7 +3502,7 @@ assert(!initialisation);
                         it!=it_end; it++)
           {
             const transition& t=*it;
-            // mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), it)], add_work(..., max_bi_counter), *this);
+            // mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), it)], add_work(..., max_bi_counter), *this);
                 // is subsumed in the above call
             assert(m_states.begin()+t.to()==ssi->ref_state);
             if (!m_aut.is_tau(m_aut.apply_hidden_label_map(t.label())))
@@ -3605,7 +3540,7 @@ assert(!initialisation);
         }
       }
       assert(m_blocks[R_block].start_bottom_states < m_blocks[R_block].start_non_bottom_states);
-      #ifdef CO_SPLITTER_IN_BLC_LIST_VARIANT
+      #ifdef CO_SPLITTER_IN_BLC_LIST
         if (m_branching)
         {
           // Before the loop we inserted an empty BLC set for the inert transitions
@@ -3617,8 +3552,6 @@ assert(!initialisation);
             m_blocks[bi].block_to_constellation.erase(perhaps_inert_ind);
           }
         }
-      #endif
-      #ifdef CO_SPLITTER_IN_BLC_LIST
         for (std::vector<linked_list<BLC_indicators>::iterator>::iterator it = m_BLC_indicators_to_be_deleted.begin(); it < m_BLC_indicators_to_be_deleted.end(); ++it)
         {
           m_blocks[B].block_to_constellation.erase(*it);
@@ -3636,7 +3569,7 @@ assert(!initialisation);
         #endif
       #endif
 
-      #ifdef CHECK_COMPLEXITY_GJ
+      #ifndef NDEBUG
         unsigned const max_block(check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(bi)));
         if (bi == R_block)
         {
@@ -3644,41 +3577,41 @@ assert(!initialisation);
           for (typename std::vector<state_in_block_pointer>::iterator s=m_blocks[bi].start_bottom_states;
                               s!=m_blocks[bi].end_states; ++s)
           {
-            mCRL2complexity_gj(s->ref_state, finalise_work(check_complexity::simple_splitB_R__find_predecessors, check_complexity::simple_splitB__find_predecessors_of_R_or_U_state, max_block), *this);
+            mCRL2complexity(s->ref_state, finalise_work(check_complexity::simple_splitB_R__find_predecessors, check_complexity::simple_splitB__find_predecessors_of_R_or_U_state, max_block), *this);
             // incoming tau-transitions of s
             const std::vector<transition>::iterator in_ti_end = std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
             for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
             {
               if (!m_aut.is_tau(m_aut.apply_hidden_label_map(ti->label())))  break;
-              mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], finalise_work(check_complexity::simple_splitB_R__handle_transition_to_R_state, check_complexity::simple_splitB__handle_transition_to_R_or_U_state, max_block), *this);
+              mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], finalise_work(check_complexity::simple_splitB_R__handle_transition_to_R_state, check_complexity::simple_splitB__handle_transition_to_R_or_U_state, max_block), *this);
             }
             // outgoing transitions of s
             const outgoing_transitions_it out_ti_end=std::next(s->ref_state)>=m_states.end() ? m_outgoing_transitions.end() : std::next(s->ref_state)->start_outgoing_transitions;
             for (outgoing_transitions_it ti=s->ref_state->start_outgoing_transitions; ti!=out_ti_end; ++ti)
             {
-              mCRL2complexity_gj(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], finalise_work(check_complexity::simple_splitB_R__handle_transition_from_R_state, check_complexity::simple_splitB__handle_transition_from_R_or_U_state, max_block), *this);
+              mCRL2complexity(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], finalise_work(check_complexity::simple_splitB_R__handle_transition_from_R_state, check_complexity::simple_splitB__handle_transition_from_R_or_U_state, max_block), *this);
               // We also need to cancel the work on outgoing transitions of U-state candidates that turned out to be new bottom states:
-              mCRL2complexity_gj(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], cancel_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state), *this);
+              mCRL2complexity(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], cancel_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state), *this);
             }
           }
           // ensure not too much work has been done on U
           for (std::vector<state_in_block_pointer>::iterator s=m_blocks[B].start_bottom_states;
                               s!=m_blocks[B].end_states; ++s)
           {
-            mCRL2complexity_gj(s->ref_state, cancel_work(check_complexity::simple_splitB_U__find_bottom_state), *this);
-            mCRL2complexity_gj(s->ref_state, cancel_work(check_complexity::simple_splitB_U__find_predecessors), *this);
+            mCRL2complexity(s->ref_state, cancel_work(check_complexity::simple_splitB_U__find_bottom_state), *this);
+            mCRL2complexity(s->ref_state, cancel_work(check_complexity::simple_splitB_U__find_predecessors), *this);
             // incoming tau-transitions of s
             const std::vector<transition>::iterator in_ti_end=std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
             for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
             {
               if (!m_aut.is_tau(m_aut.apply_hidden_label_map(ti->label())))  break;
-              mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], cancel_work(check_complexity::simple_splitB_U__handle_transition_to_U_state), *this);
+              mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], cancel_work(check_complexity::simple_splitB_U__handle_transition_to_U_state), *this);
             }
             // outgoing transitions of s
             const outgoing_transitions_it out_ti_end=std::next(s->ref_state)>=m_states.end() ? m_outgoing_transitions.end() : std::next(s->ref_state)->start_outgoing_transitions;
             for (outgoing_transitions_it ti=s->ref_state->start_outgoing_transitions; ti!=out_ti_end; ++ti)
             {
-              mCRL2complexity_gj(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], cancel_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state), *this);
+              mCRL2complexity(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], cancel_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state), *this);
             }
           }
         }
@@ -3688,47 +3621,47 @@ assert(!initialisation);
           for (typename std::vector<state_in_block_pointer>::iterator s=m_blocks[bi].start_bottom_states;
                               s!=m_blocks[bi].end_states; ++s)
           {
-            mCRL2complexity_gj(s->ref_state, finalise_work(check_complexity::simple_splitB_U__find_bottom_state, check_complexity::simple_splitB__find_bottom_state, max_block), *this);
-            mCRL2complexity_gj(s->ref_state, finalise_work(check_complexity::simple_splitB_U__find_predecessors, check_complexity::simple_splitB__find_predecessors_of_R_or_U_state, max_block), *this);
+            mCRL2complexity(s->ref_state, finalise_work(check_complexity::simple_splitB_U__find_bottom_state, check_complexity::simple_splitB__find_bottom_state, max_block), *this);
+            mCRL2complexity(s->ref_state, finalise_work(check_complexity::simple_splitB_U__find_predecessors, check_complexity::simple_splitB__find_predecessors_of_R_or_U_state, max_block), *this);
             // incoming tau-transitions of s
             const std::vector<transition>::iterator in_ti_end = std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
             for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
             {
               if (!m_aut.is_tau(m_aut.apply_hidden_label_map(ti->label())))  break;
-              mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], finalise_work(check_complexity::simple_splitB_U__handle_transition_to_U_state, check_complexity::simple_splitB__handle_transition_to_R_or_U_state, max_block), *this);
+              mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], finalise_work(check_complexity::simple_splitB_U__handle_transition_to_U_state, check_complexity::simple_splitB__handle_transition_to_R_or_U_state, max_block), *this);
             }
             // outgoing transitions of s
             const outgoing_transitions_it out_ti_end=std::next(s->ref_state)>=m_states.end() ? m_outgoing_transitions.end() : std::next(s->ref_state)->start_outgoing_transitions;
             for (outgoing_transitions_it ti = s->ref_state->start_outgoing_transitions; ti!=out_ti_end; ++ti)
             {
-              mCRL2complexity_gj(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], finalise_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, check_complexity::simple_splitB__handle_transition_from_R_or_U_state, max_block), *this);
+              mCRL2complexity(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], finalise_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, check_complexity::simple_splitB__handle_transition_from_R_or_U_state, max_block), *this);
             }
           }
           // ensure not too much work has been done on R
           for (typename std::vector<state_in_block_pointer>::iterator s=m_blocks[B].start_bottom_states;
                               s!=m_blocks[B].end_states; ++s)
           {
-            mCRL2complexity_gj(s->ref_state, cancel_work(check_complexity::simple_splitB_R__find_predecessors), *this);
+            mCRL2complexity(s->ref_state, cancel_work(check_complexity::simple_splitB_R__find_predecessors), *this);
             // incoming tau-transitions of s
             const std::vector<transition>::iterator in_ti_end = std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
             for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
             {
               if (!m_aut.is_tau(m_aut.apply_hidden_label_map(ti->label())))  break;
-              mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], cancel_work(check_complexity::simple_splitB_R__handle_transition_to_R_state), *this);
+              mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], cancel_work(check_complexity::simple_splitB_R__handle_transition_to_R_state), *this);
             }
             // outgoing transitions of s
             const outgoing_transitions_it out_ti_end=std::next(s->ref_state)>=m_states.end() ? m_outgoing_transitions.end() : std::next(s->ref_state)->start_outgoing_transitions;
             for (outgoing_transitions_it ti=s->ref_state->start_outgoing_transitions; ti!=out_ti_end; ++ti)
             {
-              mCRL2complexity_gj(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], cancel_work(check_complexity::simple_splitB_R__handle_transition_from_R_state), *this);
+              mCRL2complexity(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], cancel_work(check_complexity::simple_splitB_R__handle_transition_from_R_state), *this);
               // We also need to move the work on outgoing transitions of U-state candidates that turned out to be new bottom states:
-              mCRL2complexity_gj(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], finalise_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, check_complexity::simple_splitB__test_outgoing_transitions_found_new_bottom_state,
+              mCRL2complexity(&m_transitions[/*initialisation?ti->transition:*/ *ti->ref_BLC_transitions], finalise_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, check_complexity::simple_splitB__test_outgoing_transitions_found_new_bottom_state,
                       0==s->ref_state->no_of_outgoing_inert_transitions ? 1 : 0), *this);
             }
           }
         }
         check_complexity::check_temporary_work();
-      #endif // ifdef CHECK_COMPLEXITY_GJ
+      #endif // ifndef NDEBUG
 
       if (split_off_new_bottom_states && start_new_bottom_states < m_blocks[R_block].start_non_bottom_states)
       {
@@ -3854,20 +3787,17 @@ assert(!initialisation);
       // The work in reset_entries() can be subsumed under mCRL2complexity calls
       // that have been issued in earlier executions of group_in_situ().
       reset_entries(value_counter, todo_stack);
-      #ifdef CHECK_COMPLEXITY_GJ
+      #ifndef NDEBUG
         const constellation_index new_constellation = m_constellations.size()-1;
         const unsigned max_C = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(new_constellation));
       #endif
       for(std::vector<transition_index>::iterator i=begin; i!=end; ++i)
       {
         const transition& t = m_aut.get_transitions()[*i];
-        #ifdef CHECK_COMPLEXITY_GJ
-          assert(m_blocks[m_states[t.to()].block].constellation == new_constellation);
-          mCRL2complexity_gj(&m_transitions[*i], add_work(check_complexity::group_in_situ__count_transitions_per_block, max_C), *this);
-        #endif
+        assert(m_blocks[m_states[t.to()].block].constellation == new_constellation);
+        mCRL2complexity(&m_transitions[*i], add_work(check_complexity::group_in_situ__count_transitions_per_block, max_C), *this);
         const block_index n=m_states[t.from()].block;
 
-        // mCRL2complexity_gj(..., add_work(..., ...), *this);
         if (value_counter[n].label_counter==0)
         {
           todo_stack.push_back(n);
@@ -3883,7 +3813,7 @@ assert(!initialisation);
       std::vector<block_index>::iterator current_value=todo_stack.begin();
       for(std::vector<transition_index>::iterator i=begin; i!=end; )
       {
-        mCRL2complexity_gj(&m_transitions[*i], add_work(check_complexity::group_in_situ__swap_transition, max_C), *this);
+        mCRL2complexity(&m_transitions[*i], add_work(check_complexity::group_in_situ__swap_transition, max_C), *this);
         block_index n=m_states[m_aut.get_transitions()[*i].from()].block;
         if (n==*current_value)
         {
@@ -3892,7 +3822,7 @@ assert(!initialisation);
           ++i;
           while (assert(current_value!=todo_stack.end()), value_counter[n].label_counter==0)
           {
-            #ifdef CHECK_COMPLEXITY_GJ
+            #ifndef NDEBUG
               // This work needs to be assigned to some transition from block n.
               // Just to make sure we assign it to all such transitions:
               std::vector<transition_index>::iterator work_i = i;
@@ -3901,7 +3831,7 @@ assert(!initialisation);
               assert(m_states[m_aut.get_transitions()[*work_i].from()].block == n);
               do
               {
-                mCRL2complexity_gj(&m_transitions[*work_i], add_work(check_complexity::group_in_situ__skip_to_next_block, max_C), *this);
+                mCRL2complexity(&m_transitions[*work_i], add_work(check_complexity::group_in_situ__skip_to_next_block, max_C), *this);
               }
               while (begin != work_i && m_states[m_aut.get_transitions()[*--work_i].from()].block == n);
             #endif
@@ -3924,7 +3854,7 @@ assert(!initialisation);
           std::vector<transition_index>::iterator new_position=begin+value_counter[n].not_investigated;
           while (m_states[m_aut.get_transitions()[*new_position].from()].block==n)
           {
-            mCRL2complexity_gj(&m_transitions[*new_position], add_work(check_complexity::group_in_situ__swap_transition, max_C), *this);
+            mCRL2complexity(&m_transitions[*new_position], add_work(check_complexity::group_in_situ__swap_transition, max_C), *this);
             value_counter[n].not_investigated++;
             value_counter[n].label_counter--;
             new_position++;
@@ -3949,7 +3879,7 @@ assert(!initialisation);
            << "bisimulation partitioner created for " << m_aut.num_states()
            << " states and " << m_aut.num_transitions() << " transitions (using the experimental algorithm GJ2024).\n";
       // Initialisation.
-      #ifdef CHECK_COMPLEXITY_GJ
+      #ifndef NDEBUG
         check_complexity::init(2 * m_aut.num_states()); // we need ``2*'' because there is one additional call to splitB during initialisation
       #endif
 
@@ -3992,7 +3922,7 @@ assert(!initialisation);
         for(transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
         {
           const transition& t=m_aut.get_transitions()[ti];
-          // mCRL2complexity_gj(&m_transitions[ti], add_work(..., 1), *this);
+          // mCRL2complexity(&m_transitions[ti], add_work(..., 1), *this);
             // Because every transition is touched exactly once, we do not store a physical counter for this.
           const label_index label = label_or_divergence(t);
           transition_index& c=count_transitions_per_action[label];
@@ -4012,7 +3942,7 @@ assert(!initialisation);
 //std::cerr << "COUNT_TRANSITIONS PER ACT2    "; for(auto s: count_transitions_per_action){ std::cerr << s << "  "; } std::cerr << "\n";
         for(transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
         {
-          // mCRL2complexity_gj(&m_transitions[ti], add_work(..., 1), *this);
+          // mCRL2complexity(&m_transitions[ti], add_work(..., 1), *this);
             // Because every transition is touched exactly once, we do not store a physical counter for this.
           const transition& t=m_aut.get_transitions()[ti];
           const label_index label = label_or_divergence(t);
@@ -4026,7 +3956,7 @@ assert(!initialisation);
         BLC_list_iterator start_index = m_BLC_transitions.begin();
         for(label_index a: todo_stack_actions)
         {
-          // mCRL2complexity_gj(..., add_work(..., 1), *this);
+          // mCRL2complexity(..., add_work(..., 1), *this);
               // not needed because the inner loop is always executed (except possibly for 1 iteration)
 //std::cerr << "  Initialising m_BLC_transitions for action " << (m_aut.num_action_labels() == a ? "(tau-self-loops)" : pp(m_aut.action_label(a))) << '\n';
           const BLC_list_iterator end_index = m_BLC_transitions.begin() + count_transitions_per_action[a];
@@ -4046,7 +3976,7 @@ assert(!initialisation);
             }
             do
             {
-              // mCRL2complexity_gj(&m_transitions[*start_index], add_work(..., 1), *this);
+              // mCRL2complexity(&m_transitions[*start_index], add_work(..., 1), *this);
                   // Because every transition is touched exactly once, we do not store a physical counter for this.
               m_transitions[*start_index].transitions_per_block_to_constellation = current_BLC;
             }
@@ -4065,7 +3995,7 @@ assert(!initialisation);
         std::vector<transition_index> count_outgoing_transitions_per_state(m_aut.num_states(), 0);
         for(const transition& t: m_aut.get_transitions())
         {
-          // mCRL2complexity_gj(&m_transitions[std::distance(&*m_aut.get_transitions.begin(), &t)], add_work(..., 1), *this);
+          // mCRL2complexity(&m_transitions[std::distance(&*m_aut.get_transitions.begin(), &t)], add_work(..., 1), *this);
             // Because every transition is touched exactly once, we do not store a physical counter for this.
           count_outgoing_transitions_per_state[t.from()]++;
           if (is_inert_during_init(t))
@@ -4083,7 +4013,7 @@ assert(!initialisation);
         // place transitions and set the pointers to incoming/outgoing transitions
         for (state_index s = 0; s < m_aut.num_states(); ++s)
         {
-          // mCRL2complexity_gj(&m_states[s], add_work(..., 1), *this);
+          // mCRL2complexity(&m_states[s], add_work(..., 1), *this);
             // Because every state is touched exactly once, we do not store a physical counter for this.
           m_states[s].start_outgoing_transitions = current_outgoing_transitions + m_states[s].no_of_outgoing_inert_transitions;
           current_outgoing_transitions += count_outgoing_transitions_per_state[s];
@@ -4095,7 +4025,7 @@ assert(!initialisation);
 
         for(BLC_list_iterator ti = m_BLC_transitions.begin(); ti < m_BLC_transitions.end(); ++ti)
         {
-          // mCRL2complexity_gj(&m_transitions[*ti], add_work(..., 1), *this);
+          // mCRL2complexity(&m_transitions[*ti], add_work(..., 1), *this);
             // Because every transition is touched exactly once, we do not store a physical counter for this.
           const transition& t=m_aut.get_transitions()[*ti];
           if (is_inert_during_init(t))
@@ -4118,7 +4048,7 @@ assert(!initialisation);
       // TODO: This should be combined with another pass through all transitions.
       for(std::vector<transition>::iterator it=m_aut.get_transitions().begin(); it!=m_aut.get_transitions().end(); it++)
       {
-        // mCRL2complexity_gj(&m_transitions[std::distance(m_aut.get_transitions().begin(), it)], add_work(..., 1), *this);
+        // mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), it)], add_work(..., 1), *this);
             // Because every transition is touched exactly once, we do not store a physical counter for this.
         const transition& t=*it;
         if (t.to()!=current_state)
@@ -4126,7 +4056,7 @@ assert(!initialisation);
           for (state_index i=current_state+1; i<=t.to(); ++i)
           {
             // ensure that every state is visited at most once:
-            mCRL2complexity_gj(&m_states[i], add_work(check_complexity::create_initial_partition__set_start_incoming_transitions, 1), *this);
+            mCRL2complexity(&m_states[i], add_work(check_complexity::create_initial_partition__set_start_incoming_transitions, 1), *this);
 //std::cerr << "SET start_incoming_transitions for state " << i << "\n";
             m_states[i].start_incoming_transitions=it;
           }
@@ -4135,7 +4065,7 @@ assert(!initialisation);
       }
       for (state_index i=current_state+1; i<m_states.size(); ++i)
       {
-        mCRL2complexity_gj(&m_states[i], add_work(check_complexity::create_initial_partition__set_start_incoming_transitions, 1), *this);
+        mCRL2complexity(&m_states[i], add_work(check_complexity::create_initial_partition__set_start_incoming_transitions, 1), *this);
 //std::cerr << "SET residual start_incoming_transitions for state " << i << "\n";
         m_states[i].start_incoming_transitions=m_aut.get_transitions().end();
       }
@@ -4152,7 +4082,7 @@ assert(!initialisation);
         while (m_outgoing_transitions.begin() < it)
         {
           --it;
-          // mCRL2complexity_gj(&m_transitions[*it->ref_BLC_transitions], add_work(..., 1), *this);
+          // mCRL2complexity(&m_transitions[*it->ref_BLC_transitions], add_work(..., 1), *this);
               // Because every transition is touched exactly once, we do not store a physical counter for this.
           const transition& t = m_aut.get_transitions()[*it->ref_BLC_transitions];
           const label_index new_label = label_or_divergence(t);
@@ -4178,7 +4108,7 @@ assert(!initialisation);
       typename std::vector<state_in_block_pointer>::iterator lower_i=m_states_in_blocks.begin(), upper_i=m_states_in_blocks.end();
       for (std::vector<state_type_gj>::iterator i=m_states.begin(); i<m_states.end(); ++i)
       {
-        // mCRL2complexity_gj(&m_states[i], add_work(..., 1), *this);
+        // mCRL2complexity(&m_states[i], add_work(..., 1), *this);
             // Because every state is touched exactly once, we do not store a physical counter for this.
         if (0<i->no_of_outgoing_inert_transitions)
         {
@@ -4223,7 +4153,7 @@ assert(!initialisation);
           assert(check_stability("Initialisation loop", &transition_array_for_check_stability, &stabilize_pair));
         #endif
         linked_list<BLC_indicators>::iterator splitter = m_transitions[*std::prev(stabilize_pair.second)].transitions_per_block_to_constellation;
-        // mCRL2complexity_gj(...);
+        // mCRL2complexity(...);
             // not needed, as the splitter has marked transitions and we are allowed to visit each marked transition a fixed number of times.
         stabilize_pair.second = splitter->start_same_BLC;
         assert(stabilize_pair.first <= stabilize_pair.second);
@@ -4289,24 +4219,24 @@ assert(!initialisation);
 
       while (!m_blocks_with_new_bottom_states.empty())
       {
-        // mCRL2complexity_gj(all bottom states, add_work(..., 1), *this);
+        // mCRL2complexity(all bottom states, add_work(..., 1), *this);
             // not necessary, as the inner loop is always executed
 
-        #ifdef CHECK_COMPLEXITY_GJ
+        #ifndef NDEBUG
           std::vector<std::pair<BLC_list_const_iterator, BLC_list_const_iterator> > initialize_qhat_work_to_assign_later;
         #endif
         // Qhat contains the slices of BLC transitions that still need stabilization
         std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> > Qhat;
         for(const block_index bi: m_blocks_with_new_bottom_states)
         {
-          #ifdef CHECK_COMPLEXITY_GJ
+          #ifndef NDEBUG
             // The work in this loop is assigned to the (new) bottom states in bi
             // It cannot be assigned to the block bi because there may be more new bottom states later.
             std::vector<state_in_block_pointer>::iterator new_bott_it = m_blocks[bi].start_bottom_states;
             assert(new_bott_it < m_blocks[bi].start_non_bottom_states);
             do
             {
-              mCRL2complexity_gj(new_bott_it->ref_state, add_work(check_complexity::stabilizeB__prepare_block, 1), *this);
+              mCRL2complexity(new_bott_it->ref_state, add_work(check_complexity::stabilizeB__prepare_block, 1), *this);
             }
             while (++new_bott_it < m_blocks[bi].start_non_bottom_states);
           #endif
@@ -4349,7 +4279,7 @@ assert(!initialisation);
               // BLC set transitions are not constellation-inert, so we need to stabilize under them
               Qhat.emplace_back(ind->start_same_BLC, ind->end_same_BLC);
 
-              #ifdef CHECK_COMPLEXITY_GJ
+              #ifndef NDEBUG
                 // The work is assigned to the transitions out of new bottom states in ind.
                 // Try to find a new bottom state to which to assign it.
                 bool work_assigned = false;
@@ -4359,7 +4289,7 @@ assert(!initialisation);
                   // assign the work to this transition
                   if (0 == m_states[m_aut.get_transitions()[*work_it].from()].no_of_outgoing_inert_transitions)
                   {
-                    mCRL2complexity_gj(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__initialize_Qhat, 1), *this);
+                    mCRL2complexity(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__initialize_Qhat, 1), *this);
                     work_assigned = true;
                   }
                 }
@@ -4389,12 +4319,12 @@ std::cerr << "Haven't yet found a transition from a new bottom state in " << ind
           assert(m_blocks[bi].start_bottom_states < m_blocks[bi].start_non_bottom_states);
           for (std::vector<state_in_block_pointer>::iterator si=m_blocks[bi].start_bottom_states; si<m_blocks[bi].start_non_bottom_states; ++si)
           {
-            mCRL2complexity_gj(si->ref_state, add_work(check_complexity::stabilizeB__distribute_states_over_Phat, 1), *this);
+            mCRL2complexity(si->ref_state, add_work(check_complexity::stabilizeB__distribute_states_over_Phat, 1), *this);
             assert(si->ref_state->block==bi);
             outgoing_transitions_it end_it = std::next(si->ref_state)>=m_states.end() ? m_outgoing_transitions.end() : std::next(si->ref_state)->start_outgoing_transitions;
             for (outgoing_transitions_it ti=si->ref_state->start_outgoing_transitions; ti<end_it; ++ti)
             {
-              // mCRL2complexity_gj(&m_transitions[m_BLC_transitions[ti->transition]], add_work(..., 1), *this);
+              // mCRL2complexity(&m_transitions[m_BLC_transitions[ti->transition]], add_work(..., 1), *this);
                   // subsumed under the above counter
               const transition& t = m_aut.get_transitions()[*ti->ref_BLC_transitions];
               assert(m_states.begin()+t.from()==si->ref_state);
@@ -4421,14 +4351,14 @@ std::cerr << "Haven't yet found a transition from a new bottom state in " << ind
 //    Do a normal splitB() under this splitter.
 //    If more new bottom states are created, store them in the new m_blocks_with_new_bottom_states.
 
-        #ifdef CHECK_COMPLEXITY_GJ
+        #ifndef NDEBUG
           std::vector<std::pair<BLC_list_const_iterator, BLC_list_const_iterator> > stabilize_work_to_assign_later;
         #endif
         // Algorithm 4, line 4.8.
         for (std::pair<BLC_list_iterator, BLC_list_iterator> Qhat_elt: Qhat)
         {
           // Algorithm 4, line 4.9.
-          // mCRL2complexity_gj(..., add_work(..., max_C), *this);
+          // mCRL2complexity(..., add_work(..., max_C), *this);
               // not needed as the inner loop is always executed at least once.
           print_data_structures("Main stabilize loop");
           assert(check_data_structures("New bottom state loop", false, false));
@@ -4444,7 +4374,7 @@ std::cerr << "Haven't yet found a transition from a new bottom state in " << ind
             assert(splitter->start_same_BLC<splitter->end_same_BLC);
             const transition& first_t = m_aut.get_transitions()[*splitter->start_same_BLC];
             const block_type& from_block = m_blocks[m_states[first_t.from()].block];
-            #ifdef CHECK_COMPLEXITY_GJ
+            #ifndef NDEBUG
               if (from_block.contains_new_bottom_states)
               {
                 // This block contains new bottom states that have been found during stabilizeB(),
@@ -4464,7 +4394,7 @@ std::cerr << "Haven't yet found a transition from a new bottom state in " << ind
                   // assign the work to this transition
                   if (0 == m_states[m_aut.get_transitions()[*work_it].from()].no_of_outgoing_inert_transitions)
                   {
-                    mCRL2complexity_gj(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__main_loop, 1), *this);
+                    mCRL2complexity(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__main_loop, 1), *this);
                     work_assigned = true;
                   }
                 }
@@ -4511,7 +4441,7 @@ std::cerr << "Haven't yet found a transition from a new bottom state in " << ind
           while (Qhat_elt.first < Qhat_elt.second);
         }
 
-        #ifdef CHECK_COMPLEXITY_GJ
+        #ifndef NDEBUG
           // We now have to try and find further new bottom states to which to assign
           // the initialization of Qhat that had not yet been assigned earlier.
           for (std::vector<std::pair<BLC_list_const_iterator, BLC_list_const_iterator> >::iterator qhat_it = initialize_qhat_work_to_assign_later.begin();
@@ -4526,7 +4456,7 @@ std::cerr << "Haven't yet found a transition from a new bottom state in " << ind
                 // t_from is a new bottom state, so we can assign the work to this transition
 std::cerr << m_transitions[*work_it].debug_id(*this) << " is assigned work on initializing Qhat afterwards\n";
                 assert(m_blocks[m_states[t_from].block].contains_new_bottom_states);
-                mCRL2complexity_gj(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__initialize_Qhat_afterwards, 1), *this);
+                mCRL2complexity(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__initialize_Qhat_afterwards, 1), *this);
                 new_bottom_state_with_transition_found = true;
               }
             }
@@ -4550,7 +4480,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
                 // t_from is a new bottom state, so we can assign the work to this transition
 //std::cerr << "    " << m_transitions[*work_it].debug_id(*this) << " is assigned work on the main loop of stabilizeB() afterwards\n";
                 assert(m_blocks[m_states[t_from].block].contains_new_bottom_states);
-                mCRL2complexity_gj(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__main_loop_afterwards, 1), *this);
+                mCRL2complexity(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__main_loop_afterwards, 1), *this);
                 new_bottom_state_with_transition_found = true;
               }
             }
@@ -4702,7 +4632,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
                                                          std::vector<state_index>::iterator& first_unmarked_bottom_state)
     {
       first_unmarked_bottom_state = m_blocks[B].start_bottom_states;
-      #ifdef CHECK_COMPLEXITY_GJ
+      #ifndef NDEBUG
         const constellation_index new_constellation = m_constellations.size()-1;
         const unsigned max_C = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(new_constellation));
       #endif
@@ -4710,10 +4640,8 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
       {
         const transition& t=m_aut.get_transitions()[*ti];
 //std::cerr << "INSPECT TRANSITION  " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << "\n";
-        #ifdef CHECK_COMPLEXITY_GJ
-          assert(new_constellation==m_blocks[m_states[t.to()].block].constellation);
-          mCRL2complexity_gj(&m_transitions[*ti], add_work(check_complexity::some_bottom_state_has_no_outgoing_co_transition__handle_transition, max_C), *this);
-        #endif
+        assert(new_constellation==m_blocks[m_states[t.to()].block].constellation);
+        mCRL2complexity(&m_transitions[*ti], add_work(check_complexity::some_bottom_state_has_no_outgoing_co_transition__handle_transition, max_C), *this);
         const state_index s = t.from();
         assert(m_states[s].ref_states_in_blocks>=m_blocks[B].start_bottom_states);
         assert(m_states[s].ref_states_in_blocks<m_blocks[B].end_states);
@@ -4762,7 +4690,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
     // m_R, m_U, m_states[s].counters and m_U_counter_reset vector untouched.
 
     bool W_empty(const set_of_states_type& W, const set_of_states_type& aux,
-                 #ifdef CHECK_COMPLEXITY_GJ
+                 #ifndef NDEBUG
                    const label_index a,
                    const constellation_index C,
                  #endif
@@ -4772,9 +4700,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
       bool W_empty=true;
 //std::cerr << "W: "; for(auto s: W) { std::cerr << s << " "; } std::cerr << "\n";
       #ifndef NDEBUG
-        #ifdef CHECK_COMPLEXITY_GJ
-          assert(m_aut.apply_hidden_label_map(a) == a);
-        #endif
+        assert(m_aut.apply_hidden_label_map(a) == a);
         const block_type& B = m_blocks[m_states[*first_unmarked_bottom_state].block];
         assert(B.start_bottom_states == first_unmarked_bottom_state);
         // assert(static_cast<std::ptrdiff_t>(std::distance(B.start_bottom_states, B.start_non_bottom_states)) == W.size());
@@ -4844,7 +4770,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
         const transition& t = m_aut.get_transitions()[*marked_t_it];
         const state_in_block_pointer s(m_states.begin()+t.from());
         assert(s.ref_state->block==bi);
-        // mCRL2complexity_gj(&m_transitions[*i], add_work(...), *this);
+        // mCRL2complexity(&m_transitions[*i], add_work(...), *this);
             // not needed because this work can be attributed to the marking of the transition
         const std::vector<state_in_block_pointer>::iterator pos_s=s.ref_state->ref_states_in_blocks;
         assert(B.start_bottom_states <= pos_s);
@@ -4908,14 +4834,14 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
                                       const constellation_index old_constellation,
                                       std::vector<state_index>::iterator first_unmarked_bottom_state)
     {
-      mCRL2complexity_gj(&m_blocks[index_block_B], add_work(check_complexity::hatU_does_not_cover_B_bottom__handle_bottom_states_and_their_outgoing_transitions_in_splitter, check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(index_block_B))), *this);
+      mCRL2complexity(&m_blocks[index_block_B], add_work(check_complexity::hatU_does_not_cover_B_bottom__handle_bottom_states_and_their_outgoing_transitions_in_splitter, check_complexity::log_n - check_complexity::ilog2(number_of_states_in_block(index_block_B))), *this);
       assert(m_branching);
       first_unmarked_bottom_state = m_blocks[index_block_B].start_bottom_states;
       for(typename std::vector<state_index>::iterator si=m_blocks[index_block_B].start_bottom_states;
                         si!=m_blocks[index_block_B].start_non_bottom_states;
                       ++si)
       {
-        // mCRL2complexity_gj(&m_states[*si], add_work(..., max_C), *this);
+        // mCRL2complexity(&m_states[*si], add_work(..., max_C), *this);
             // subsumed by the above call
         bool found=false;
         const outgoing_transitions_it end_it=((*si)+1>=m_states.size())?m_outgoing_transitions.end():m_states[(*si)+1].start_outgoing_transitions;
@@ -4923,7 +4849,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
                                      !found && tti!=end_it;
                                      ++tti)
         {
-          // mCRL2complexity_gj(&m_transitions[*tti->ref_BLC_transitions], add_work(..., max_C), *this);
+          // mCRL2complexity(&m_transitions[*tti->ref_BLC_transitions], add_work(..., max_C), *this);
           // subsumed by the above call
           const transition& t=m_aut.get_transitions()[*tti->ref_BLC_transitions];
           assert(t.from() == *si);
@@ -5032,10 +4958,10 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
         const constellation_index new_constellation=m_constellations.size()-1;
         // Block index_block_B is moved to the new constellation but we shall not yet assign
         // m_blocks[index_block_B].constellation = new_constellation.
-        #ifdef CHECK_COMPLEXITY_GJ
+        #ifndef NDEBUG
           // m_constellations[new_constellation].work_counter = m_constellations[old_constellation].work_counter;
           const unsigned max_C = check_complexity::log_n - check_complexity::ilog2(number_of_states_in_constellation(new_constellation));
-          mCRL2complexity_gj(&m_blocks[index_block_B], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_splitter, max_C), *this);
+          mCRL2complexity(&m_blocks[index_block_B], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_splitter, max_C), *this);
         #endif
         // Here the variables block_to_constellation and the doubly linked list L_B->C in blocks must be still be updated.
         // This happens further below.
@@ -5048,7 +4974,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
         for(typename std::vector<state_in_block_pointer>::iterator i=m_blocks[index_block_B].start_bottom_states;
                                                         i!=m_blocks[index_block_B].end_states; ++i)
         {
-          // mCRL2complexity_gj(m_states[*i], add_work(check_complexity::..., max_C), *this);
+          // mCRL2complexity(m_states[*i], add_work(check_complexity::..., max_C), *this);
               // subsumed under the above counter
           // and visit the incoming transitions.
           const std::vector<transition>::iterator end_it=
@@ -5058,7 +4984,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
           {
             const transition& t=*j;
             const transition_index t_index = std::distance(m_aut.get_transitions().begin(),j);
-            // mCRL2complexity_gj(&m_transitions[t_index], add_work(check_complexity::..., max_C), *this);
+            // mCRL2complexity(&m_transitions[t_index], add_work(check_complexity::..., max_C), *this);
                 // subsumed under the above counter
 
             // Update the state-action-constellation (saC) references in m_outgoing_transitions.
@@ -5103,7 +5029,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
         for(typename std::vector<state_in_block_pointer>::iterator i=m_blocks[index_block_B].start_bottom_states;
                                                         i!=m_blocks[index_block_B].end_states; ++i)
         {
-          // mCRL2complexity_gj(m_states[*i], add_work(check_complexity::..., max_C), *this);
+          // mCRL2complexity(m_states[*i], add_work(check_complexity::..., max_C), *this);
               // subsumed under the above counter
 
           // and visit the incoming transitions.
@@ -5116,7 +5042,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
             const transition_index t_index=std::distance(m_aut.get_transitions().begin(),j);
             assert(m_states[t.to()].block == index_block_B);
             bool source_block_is_singleton = (1 >= number_of_states_in_block(m_states[t.from()].block));
-            // mCRL2complexity_gj(&m_transitions[t_index], add_work(check_complexity::..., max_C), *this);
+            // mCRL2complexity(&m_transitions[t_index], add_work(check_complexity::..., max_C), *this);
                 // subsumed under the above counter
 
             // Give the saC slice of this transition its final correction
@@ -5198,7 +5124,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
                       block_label_to_cotransition[std::pair(m_states[t.from()].block,label_or_divergence(t))] = *transition_walker;
                       break;
                     }
-                    mCRL2complexity_gj(&m_transitions[*transition_walker], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_cotransition, max_C), *this);
+                    mCRL2complexity(&m_transitions[*transition_walker], add_work(check_complexity::refine_partition_until_it_becomes_stable__find_cotransition, max_C), *this);
                     ++transition_walker;
                   }
                   while (transition_walker<ind.end_same_BLC);
@@ -5231,7 +5157,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
         {
           linked_list <BLC_indicators>::iterator ind=m_transitions[*calM_elt->first].transitions_per_block_to_constellation;
 //std::cerr << "Checking whether " << ind->debug_id(*this) << " is a splitter: ";
-          mCRL2complexity_gj(ind, add_work(check_complexity::refine_partition_until_it_becomes_stable__correct_end_of_calM, max_C), *this);
+          mCRL2complexity(ind, add_work(check_complexity::refine_partition_until_it_becomes_stable__correct_end_of_calM, max_C), *this);
           assert(ind->start_same_BLC==calM_elt->first);
           assert(!has_marked_transitions(*ind));
           // check if all transitions were moved to the new constellation,
@@ -5255,7 +5181,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
             // so we will have to stabilize the block
             calM_elt->second = ind->end_same_BLC;
             ind->start_marked_BLC = ind->start_same_BLC;
-            // The mCRL2complexity_gj call above assigns work to every transition in ind, so we are allowed to mark all transitions at once.
+            // The mCRL2complexity call above assigns work to every transition in ind, so we are allowed to mark all transitions at once.
             ++calM_elt;
           }
           else
@@ -5289,7 +5215,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
           {
             tau_co_splitter->start_marked_BLC = tau_co_splitter->start_same_BLC;
             // We have to give credit for marking all transitions in the splitter at once:
-            mCRL2complexity_gj(tau_co_splitter, add_work(check_complexity::refine_partition_until_it_becomes_stable__prepare_cosplit, max_C), *this);
+            mCRL2complexity(tau_co_splitter, add_work(check_complexity::refine_partition_until_it_becomes_stable__prepare_cosplit, max_C), *this);
             // The routine below has a side effect, as it sets m_R for all bottom states of block B.
             const BLC_list_iterator splitter_end_unmarked_BLC = tau_co_splitter->start_marked_BLC;
             std::vector<state_in_block_pointer>::iterator first_unmarked_bottom_state=not_all_bottom_states_are_touched(tau_co_splitter
@@ -5333,7 +5259,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
         // Algorithm 1, line 1.10.
         for (std::pair<BLC_list_iterator, BLC_list_iterator> calM_elt: calM)
         {
-          // mCRL2complexity_gj(..., add_work(..., max_C), *this);
+          // mCRL2complexity(..., add_work(..., max_C), *this);
               // not needed as the inner loop is always executed at least once.
           #ifdef CO_SPLITTER_IN_BLC_LIST
             //print_data_structures("Main loop");
@@ -5348,7 +5274,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
           do
           {
             linked_list<BLC_indicators>::iterator splitter = m_transitions[*std::prev(calM_elt.second)].transitions_per_block_to_constellation;
-            // mCRL2complexity_gj(splitter, add_work(..., max_C), *this);
+            // mCRL2complexity(splitter, add_work(..., max_C), *this);
                 // not needed, as all transitions in calM are transitions into the small new constellation.
             assert(splitter->start_same_BLC < calM_elt.second);
             assert(splitter->end_same_BLC==calM_elt.second);
@@ -5589,53 +5515,7 @@ print_data_structures("Before stabilize");
         assert(check_stability("Before stabilize"));
         stabilizeB();
       }
-      #ifdef COUNT_R_U_STATUS_TIMES
-        if (m_branching)
-        {
-          const char* filename="../../status_counter_values.txt";
-          FILE* fp=std::fopen(filename, "r+");
-          if (NULL!=fp)
-          {
-            for (unsigned i=0; i<sizeof(m_R_status_counter)/sizeof(m_R_status_counter[0]); ++i)
-            {
-              unsigned old_i, old_counter;
-              std::fscanf(fp, "%u: %u\n", &old_i, &old_counter);
-              assert(i==old_i);
-              m_R_status_counter[i]+=old_counter;
-            }
-            for (unsigned i=0; i<sizeof(m_U_status_counter)/sizeof(m_U_status_counter[0]); ++i)
-            {
-              unsigned old_i, old_counter;
-              std::fscanf(fp, "%u: %u\n", &old_i, &old_counter);
-              assert(i==old_i);
-              m_U_status_counter[i]+=old_counter;
-            }
-            std::fseek(fp, 0L, SEEK_SET);
-          }
-          else
-          {
-            fp=std::fopen(filename, "w");
-          }
-          if (NULL!=fp)
-          {
-            for (unsigned i=0; i<sizeof(m_R_status_counter)/sizeof(m_R_status_counter[0]); ++i)
-            {
-              std::fprintf(fp, "%u: %u\n", i, m_R_status_counter[i]);
-            }
-            for (unsigned i=0; i<sizeof(m_U_status_counter)/sizeof(m_U_status_counter[0]); ++i)
-            {
-              std::fprintf(fp, "%u: %u\n", i, m_U_status_counter[i]);
-            }
-            std::fclose(fp);
-          }
-        }
-      #endif
     }
-  #ifdef COUNT_R_U_STATUS_TIMES
-    private:
-      unsigned m_R_status_counter[6] = {0, 0, 0, 0, 0, 0};
-      unsigned m_U_status_counter[6] = {0, 0, 0, 0, 0, 0};
-  #endif
 };
 
 /* ************************************************************************* */
