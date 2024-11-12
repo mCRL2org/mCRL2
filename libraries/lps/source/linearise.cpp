@@ -8211,7 +8211,7 @@ class specification_basic_type
       deadlock_summand_vector resultingDeltaSummands;
       deadlock_summands.swap(resultingDeltaSummands);
 
-      bool inline_allow = is_allow || is_block;
+      const bool inline_allow = is_allow || is_block;
       if (inline_allow)
       {
         // Inline allow is only supported for ignore_time,
@@ -11273,6 +11273,7 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   {
     balance_summands(input_process);
   }
+  balance_merge(input_process);
 
   if (lin_options.apply_alphabet_axioms) // Apply alphabet reduction if requested. 
   {
