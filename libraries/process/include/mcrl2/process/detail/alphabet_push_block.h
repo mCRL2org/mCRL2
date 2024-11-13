@@ -154,7 +154,7 @@ std::string print_B(const std::set<core::identifier_string>& B)
   return out.str();
 }
 
-process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, std::vector<process_equation>& equations, push_block_cache& W, data::set_identifier_generator& id_generator);
+process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, std::map<process_identifier, process_equation>& equations, push_block_cache& W, data::set_identifier_generator& id_generator);
 
 template <typename Derived>
 struct push_block_builder: public process_expression_builder<Derived>
@@ -166,7 +166,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   using super::update;
 
   // used for computing the alphabet
-  std::vector<process_equation>& equations;
+  std::map<process_identifier, process_equation>& equations;
   push_block_cache& W;
 
   // the parameter B
@@ -175,7 +175,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   // used for generating process identifiers
   data::set_identifier_generator& id_generator;
 
-  push_block_builder(std::vector<process_equation>& equations_, push_block_cache& W_, const std::set<core::identifier_string>& B_, data::set_identifier_generator& id_generator_)
+  push_block_builder(std::map<process_identifier, process_equation>& equations_, push_block_cache& W_, const std::set<core::identifier_string>& B_, data::set_identifier_generator& id_generator_)
     : equations(equations_), W(W_), B(B_), id_generator(id_generator_)
   {}
 
@@ -230,7 +230,7 @@ struct push_block_builder: public process_expression_builder<Derived>
 
     // create a new equation P1(d) = p1
     process_equation eqn1(P1, d, p1);
-    equations.push_back(eqn1);
+    equations.insert({P1, eqn1});
 
     result = process_instance(P1, x.actual_parameters());
   }
@@ -338,13 +338,13 @@ struct apply_push_block_builder: public Traverser<apply_push_block_builder<Trave
   using super::apply;
   using super::update;
 
-  apply_push_block_builder(std::vector<process_equation>& equations, push_block_cache& W, const std::set<core::identifier_string>& B, data::set_identifier_generator& id_generator)
+  apply_push_block_builder(std::map<process_identifier, process_equation>& equations, push_block_cache& W, const std::set<core::identifier_string>& B, data::set_identifier_generator& id_generator)
     : super(equations, W, B, id_generator)
   {}
 };
 
 inline
-process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, std::vector<process_equation>& equations, push_block_cache& W, data::set_identifier_generator& id_generator)
+process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, std::map<process_identifier, process_equation>& equations, push_block_cache& W, data::set_identifier_generator& id_generator)
 {
   apply_push_block_builder<push_block_builder> f(equations, W, B, id_generator);
   process_expression result;
@@ -357,7 +357,7 @@ process_expression push_block(const std::set<core::identifier_string>& B, const 
 inline
 process_expression push_block(const core::identifier_string_list& B,
                               const process_expression& x,
-                              std::vector<process_equation>& equations,
+                              std::map<process_identifier, process_equation>& equations,
                               data::set_identifier_generator& id_generator,
                               std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache
                              )

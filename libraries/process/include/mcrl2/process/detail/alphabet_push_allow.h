@@ -276,7 +276,7 @@ std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
   return out << "Node(" << pp(x.alphabet) << ", " << process::pp(x.expression) << ")";
 }
 
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, push_allow_cache& W, bool generate_missing_equations = false);
+push_allow_node push_allow(const process_expression& x, const allow_set& A, std::map<process_identifier, process_equation>& equations, push_allow_cache& W, bool generate_missing_equations = false);
 
 template <typename Derived, typename Node = push_allow_node>
 struct push_allow_traverser: public process_expression_traverser<Derived>
@@ -287,7 +287,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   using super::apply;
 
   // used for computing the alphabet
-  std::vector<process_equation>& equations;
+  std::map<process_identifier, process_equation>& equations;
   push_allow_cache& W;
 
   // the parameter A
@@ -295,7 +295,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   std::vector<Node> node_stack;
 
-  push_allow_traverser(std::vector<process_equation>& equations_, push_allow_cache& W_, const allow_set& A_)
+  push_allow_traverser(std::map<process_identifier, process_equation>& equations_, push_allow_cache& W_, const allow_set& A_)
     : equations(equations_), W(W_), A(A_)
   {}
 
@@ -430,7 +430,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
         // create a new equation P(d) = p1
         const process_expression& p1 = node.expression;
         process_equation eqn1(P1, d, p1);
-        equations.push_back(eqn1);
+        equations.insert({P1, eqn1});
 
         alpha.alphabet = node.alphabet;
         alpha.status = push_allow_cache::finished;
@@ -697,13 +697,13 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
   using super::leave;
   using super::apply;
 
-  apply_push_allow_traverser(std::vector<process_equation>& equations, push_allow_cache& W, const allow_set& A)
+  apply_push_allow_traverser(std::map<process_identifier, process_equation>& equations, push_allow_cache& W, const allow_set& A)
     : super(equations, W, A)
   {}
 };
 
 inline
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, push_allow_cache& W, bool generate_missing_equations)
+push_allow_node push_allow(const process_expression& x, const allow_set& A, std::map<process_identifier, process_equation>& equations, push_allow_cache& W, bool generate_missing_equations)
 {
   apply_push_allow_traverser<push_allow_traverser> f(equations, W, A);
   f.apply(x);
@@ -734,7 +734,7 @@ push_allow_node push_allow(const process_expression& x, const allow_set& A, std:
 inline
 process_expression push_allow(const process_expression& x,
                               const action_name_multiset_list& V,
-                              std::vector<process_equation>& equations,
+                              std::map<process_identifier, process_equation>& equations,
                               data::set_identifier_generator& id_generator,
                               std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache
                             )

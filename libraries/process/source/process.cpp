@@ -80,22 +80,40 @@ std::set<data::variable> find_free_variables(const process::process_specificatio
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x) { return process::find_identifiers< process::process_specification >(x); }
 //--- end generated process overloads ---//
 
-void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equation_limit)
+void alphabet_reduce(process_specification& procspec, const std::size_t duplicate_equation_limit)
 {
   mCRL2log(log::verbose) << "applying alphabet reduction..." << std::endl;
   process_expression init = procspec.init();
 
+  const std::vector<process_equation>& equations = procspec.equations();
+
   // cache the alphabet of pcrl equations and apply alphabet reduction to block({}, init)
-  std::vector<process_equation>& equations = procspec.equations();
+  // instead of passing the vector of equations directly, we cache them in a map to avoid expensive linear
+  // searches.
+  // We later compute the equations from the map and update the process.
+  std::map<process_identifier, process_equation> process_equation_map;
+
   std::map<process_identifier, multi_action_name_set> pcrl_equation_cache;
   data::set_identifier_generator id_generator;
-  for (process_equation& equation: equations)
+  for (const process_equation& equation: equations)
   {
     id_generator.add_identifier(equation.identifier().name());
+    process_equation_map.insert({equation.identifier(), equation});
   }
+
   pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations, init);
+
   core::identifier_string_list empty_blockset;
-  procspec.init() = push_block(empty_blockset, init, equations, id_generator, pcrl_equation_cache);
+  procspec.init() = push_block(empty_blockset, init, process_equation_map, id_generator, pcrl_equation_cache);
+
+  // Replace the equations with the new equations that we calculated.
+  std::vector<process_equation> new_equations;
+  new_equations.reserve(process_equation_map.size());
+  for(const auto& equation: process_equation_map)
+  {
+    new_equations.push_back(equation.second);
+  }
+  procspec.equations().swap(new_equations);
 
   // remove duplicate equations
   if (procspec.equations().size() < duplicate_equation_limit)
