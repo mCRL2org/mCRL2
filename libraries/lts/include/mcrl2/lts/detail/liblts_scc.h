@@ -250,7 +250,7 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
   // Put all the non inert transitions in a set. Add the transitions that form a self
   // loop. Such transitions only exist in case divergence preserving branching bisimulation is
   // used. A set is used to remove double occurrences of transitions.
-  std::unordered_set < transition > resulting_transitions;
+  /* std::unordered_set < transition > resulting_transitions;
   for (const transition& t: aut.get_transitions())
   {
     if (!aut.is_tau(aut.apply_hidden_label_map(t.label())) ||
@@ -271,7 +271,39 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
   for (const transition& t: resulting_transitions)
   {
     aut.add_transition(t);
+  } */
+  
+  for (transition& t: aut.get_transitions())
+  { 
+    t.set_from(block_index_of_a_state[t.from()]);
+    t.set_label(aut.apply_hidden_label_map(t.label()));
+    t.set_to(block_index_of_a_state[t.to()]);
   }
+  
+  sort_transitions(aut.get_transitions(),std::set<transition::size_type>(),tgt_lbl_src);
+  
+  // Compress the transitions while removing double occurrences, and if needed self-loops. 
+  constexpr std::size_t non_existent=-1;
+  std::size_t old_index=non_existent;
+  for (const transition& t: aut.get_transitions())
+  {
+    if (!aut.is_tau(t.label()) ||
+        preserve_divergence_loops ||
+        t.from()!=t.to())
+    {
+      if (old_index==non_existent)
+      {
+        old_index=0;
+        aut.get_transitions()[old_index]=t;
+      }
+      else if (t!=aut.get_transitions()[old_index])
+      {
+        old_index++;
+        aut.get_transitions()[old_index]=t;
+      }
+    }
+  }
+  aut.set_num_transitions(old_index+1);
 
   // Merge the states, by setting the state labels of each state to the concatenation of the state labels of its
   // equivalence class. 

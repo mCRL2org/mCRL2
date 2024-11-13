@@ -304,6 +304,15 @@ class lts: public LTS_BASE
       return m_transitions.size();
     }
 
+    /** \brief Sets the number of transitions of this LTS and tries to shrink the datastructure.
+     *  \details The transitions 0 up till n-1 are untouched. 
+     *  \param n The new number of transitions. */
+    void set_num_transitions(const std::size_t n)
+    {
+      m_transitions.resize(n);
+      m_transitions.shrink_to_fit();
+    }
+
     /** \brief Sets the number of action labels of this LTS.
      * \details If space is reserved for new action labels,
      *          these are set to the default action label. */

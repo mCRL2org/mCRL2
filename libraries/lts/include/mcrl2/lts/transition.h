@@ -18,6 +18,7 @@
 #define MCRL2_LTS_TRANSITION_H
 
 #include <functional>
+#include "mcrl2/utilities/hash_utility.h"
 
 namespace mcrl2
 {
@@ -55,13 +56,20 @@ class transition
     size_type m_to;
 
   public:
-    // There is no default constructor
-    transition() = delete;
+    // The default transition is intentionally a non realistic transition. 
+    transition()
+      : m_from(-1),
+        m_label(-1),
+        m_to(-1)
+    {}
 
     /// \brief Constructor (there is no default constructor).
     transition(const std::size_t f,
                const std::size_t l,
-               const std::size_t t):m_from(f),m_label(l),m_to(t)
+               const std::size_t t)
+      : m_from(f),
+        m_label(l),
+        m_to(t)
     {}
 
     /// \brief Copy constructor.
@@ -155,7 +163,8 @@ struct hash<mcrl2::lts::transition>
 {
   std::size_t operator()(const mcrl2::lts::transition& t) const
   {
-    return t.from() << 2 ^ t.label() << 1 ^ t.to();
+    // return t.from() << 2 ^ t.label() << 1 ^ t.to();
+    return mcrl2::utilities::detail::hash_combine(t.from(),mcrl2::utilities::detail::hash_combine(t.label(), t.to()));
   }
 };
 
