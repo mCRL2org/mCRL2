@@ -4529,7 +4529,7 @@ std::cerr << "Haven't yet found a transition from a new bottom state in " << ind
           // Algorithm 4, line 4.9.
           // mCRL2complexity(..., add_work(..., max_C), *this);
               // not needed as the inner loop is always executed at least once.
-          print_data_structures("Main stabilize loop");
+          // print_data_structures("Main stabilize loop");
           assert(check_data_structures("New bottom state loop", false, false));
           assert(check_stability("New bottom state loop", &Qhat, &Qhat_elt));
 
