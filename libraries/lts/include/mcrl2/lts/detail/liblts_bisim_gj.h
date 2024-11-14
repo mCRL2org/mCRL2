@@ -4273,7 +4273,7 @@ assert(!initialisation);
       }
 
 //std::cerr << "Start filling states_in_blocks\n";
-      m_states_in_blocks.resize(m_aut.num_states());
+      assert(m_states_in_blocks.size()==m_aut.num_states());
       fixed_vector<state_in_block_pointer>::iterator lower_i=m_states_in_blocks.begin(), upper_i=m_states_in_blocks.end();
       for (fixed_vector<state_type_gj>::iterator i=m_states.begin(); i<m_states.end(); ++i)
       {
