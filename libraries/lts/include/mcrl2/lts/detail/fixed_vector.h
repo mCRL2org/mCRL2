@@ -33,8 +33,6 @@ namespace lts
 {
 namespace detail
 {
-namespace bisim_gjkw
-{
 
 template <class T>
 class fixed_vector : private std::vector<T>
@@ -68,7 +66,6 @@ public:
 #endif
 };
 
-} // end namespace bisim_gjkw
 } // end namespace detail
 } // end namespace lts
 } // end namespace mcrl2
