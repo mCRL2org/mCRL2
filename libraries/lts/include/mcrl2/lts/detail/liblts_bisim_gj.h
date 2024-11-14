@@ -94,6 +94,14 @@ void clear(CONTAINER& c)
 
 // Private linked list that uses less memory.
 
+// The linked_list type given here is almost a circular list:
+// every element points to the next, except the last one, which contains nullptr
+// as next pointer.
+// The prev pointers are completely circular.
+// This allows to find the last element of the list as well.
+// Additionally, it simplifies walking forward through the list, as
+// end()==nullptr.  (Walking backward is slightly more difficult; to enable it,
+// there is an additional iterator before_end().)
 template <class T>
 struct linked_list_node;
 
@@ -132,6 +140,7 @@ struct linked_list_iterator
   {
     assert(nullptr != m_iterator);
     *this=m_iterator->prev();
+    assert(m_iterator->next()!=nullptr); // -- should not be applied to begin()
     return *this;
   }
 
@@ -226,6 +235,12 @@ struct linked_list
     return m_initial_node==nullptr;
   }
 
+  iterator before_end() const
+  {
+    assert(!empty());
+    return m_initial_node->prev();
+  }
+
 #ifndef NDEBUG
   [[nodiscard]]
   bool check_linked_list() const
@@ -235,41 +250,42 @@ struct linked_list
       return true;
     }
     iterator i=m_initial_node;
-    if (i->prev()!=nullptr)
+    if (i->prev()==nullptr)
     {
-std::cerr << "Error at the beginning of a linked list\n";
+//std::cerr << "Error at the beginning of a linked list\n";
       return false;
     }
     while (i->next()!=nullptr)
     {
       if (i->next()->prev()!=i)
       {
-std::cerr << "Error in the middle of a linked list\n";
+//std::cerr << "Error in the middle of a linked list\n";
         return false;
       }
-      i=i->next();
+      ++i;
       assert(i->prev()->next() == i);
     }
-    return true;
+//if (m_initial_node->prev()!=i) { std::cerr << "Error at the end of a linked list\n"; }
+    return m_initial_node->prev()==i;
   }
 #endif
 
   // Puts a new element before the current element indicated by pos.
-  // It is an error if pos == end().
+  // It is ok to place the new element at the end (i.e. pos==nullptr is allowed).
   template <class... Args>
   iterator emplace(const iterator pos, Args&&... args)
   {
-    assert(nullptr != pos);
     #ifndef NDEBUG
       assert(pos==nullptr || !empty());
-      assert(pos==nullptr || pos==m_initial_node || pos->prev()!=nullptr);
+      assert(pos==nullptr || pos->prev()!=nullptr);
       assert(check_linked_list());
       if (pos!=nullptr) { for(iterator i=begin();i!=pos;++i) { assert(i!=end()); } }
     #endif
+    const iterator prev = pos==nullptr ? (empty() ? nullptr/* should become ==new_position later */ : before_end()) : pos->prev();
     iterator new_position;
     if (glla().m_free_list==nullptr)
     {
-      new_position=&glla().m_content.emplace_back(pos, pos->prev(), std::forward<Args>(args)...);
+      new_position=&glla().m_content.emplace_back(pos, prev, std::forward<Args>(args)...);
     }
     else
     {
@@ -278,20 +294,42 @@ std::cerr << "Error in the middle of a linked list\n";
       glla().m_free_list=glla().m_free_list->next();
       new_position->content()=T(std::forward<Args>(args)...);
       new_position->next()=pos;
-      new_position->prev()=pos->prev();
+      new_position->prev()=prev;
     }
-    if (pos->prev()!=nullptr)
+    if (pos==m_initial_node)
     {
-      pos->prev()->next()=new_position;
+      // we insert a new element before the current list begin, so the begin should change.
+      // This includes the case that the list was empty before.
+      m_initial_node=new_position;
+    }
+    else if (prev!=nullptr)
+    {
+      // We insert an element not at the current list begin, so it should be reachable from its predecessor.
+      prev->next()=new_position;
+    }
+    if (pos!=nullptr)
+    {
+      pos->prev()=new_position;
     }
     else
     {
-      m_initial_node=new_position;
+      assert(m_initial_node!=nullptr);
+      m_initial_node->prev()=new_position;
     }
-    pos->prev()=new_position;
-    assert(check_linked_list());
+    #ifndef NDEBUG
+      assert(check_linked_list());
+      assert((pos==nullptr ? before_end() : pos->prev())==new_position);
+      for(iterator i=begin();i!=new_position;++i) { assert(i!=end()); }
+    #endif
 
     return new_position;
+  }
+
+  // Puts a new element at the end.
+  template <class... Args>
+  iterator emplace_back(Args&&... args)
+  {
+    return emplace(end(), std::forward<Args>(args)...);
   }
 
   // Puts a new element after the current element indicated by pos, unless
@@ -301,19 +339,17 @@ std::cerr << "Error in the middle of a linked list\n";
   {
     #ifndef NDEBUG
       assert(pos==nullptr || !empty());
-      assert(pos==nullptr || pos==m_initial_node || pos->prev()!=nullptr);
+      assert(pos==nullptr || pos->prev()!=nullptr);
       assert(check_linked_list());
       if (pos!=nullptr) { for(iterator i=begin();i!=pos;++i) { assert(i!=end()); } }
     #endif
-    if (pos==nullptr)
-    {
-      return emplace_front(args...);
-    }
-
+    const iterator next = pos==nullptr ? begin() : pos->next();
+    const iterator prev = pos==nullptr ? (empty() ? nullptr/* should become ==new_position later */ : before_end()) : pos;
+//std::cerr << "emplace_after(this == " << (const void*)this << ", pos == " << (const void*)(pos==nullptr ? nullptr : &*pos) << ",...): next == " << (const void*)(next==nullptr ? nullptr : &*next) << ", prev == " << (const void*)(prev==nullptr ? nullptr : &*prev);
     iterator new_position;
     if (glla().m_free_list==nullptr)
     {
-      new_position=&glla().m_content.emplace_back(pos->next(), pos, std::forward<Args>(args)...);
+      new_position=&glla().m_content.emplace_back(next, prev, std::forward<Args>(args)...);
     }
     else
     {
@@ -321,14 +357,35 @@ std::cerr << "Error in the middle of a linked list\n";
       new_position=glla().m_free_list;
       glla().m_free_list=glla().m_free_list->next();
       new_position->content()=T(std::forward<Args>(args)...);
-      new_position->next()=pos->next();
-      new_position->prev()=pos;
+      new_position->next()=next;
+      new_position->prev()=prev;
     }
-    if (pos->next()!=nullptr)
+//std::cerr << ", new_position == " << (const void*)&*new_position << '\n';
+    if (pos==nullptr)
     {
-      pos->next()->prev()=new_position;
+      // we insert a new element before the current list begin, so the begin should change.
+      // This includes the case that the list was empty before.
+      m_initial_node=new_position;
     }
-    pos->next()=new_position;
+    else
+    {
+      pos->next()=new_position;
+    }
+    assert(m_initial_node!=nullptr);
+    if (next==nullptr)
+    {
+      m_initial_node->prev()=new_position;
+    }
+    else
+    {
+      next->prev()=new_position;
+    }
+    #ifndef NDEBUG
+//std::cerr << "m_initial_node == " << (const void*)&*m_initial_node << ", new_position->prev() == " << (const void*)&*new_position->prev() << ", new_position->next() == " << (const void*)(new_position->next()==nullptr ? nullptr : &*new_position->next()) << '\n';
+      assert(check_linked_list());
+      assert((pos==nullptr ? m_initial_node : pos->next())==new_position);
+      for(iterator i=begin();i!=new_position;++i) { assert(i!=end()); }
+    #endif
 
     return new_position;
   }
@@ -336,27 +393,7 @@ std::cerr << "Error in the middle of a linked list\n";
   template <class... Args>
   iterator emplace_front(Args&&... args)
   {
-    iterator new_position;
-    if (glla().m_free_list==nullptr)
-    {
-      new_position=&glla().m_content.emplace_back(m_initial_node, nullptr, std::forward<Args>(args)...);  // Deliver the address to new position.
-    }
-    else
-    {
-      // Take an element from the free list.
-      new_position=glla().m_free_list;
-      glla().m_free_list=glla().m_free_list->next();
-      new_position->content()=T(std::forward<Args>(args)...);
-      new_position->next()=m_initial_node;
-      new_position->prev()=nullptr;
-    }
-    if (m_initial_node!=nullptr)
-    {
-      m_initial_node->prev()=new_position;
-    }
-    m_initial_node=new_position;
-
-    return new_position;
+    return emplace_after(end(), std::forward<Args>(args)...);
   }
 
   //iterator push_front(const T& t)
@@ -372,11 +409,11 @@ std::cerr << "Error in the middle of a linked list\n";
   {
     #ifndef NDEBUG
       assert(to_pos==nullptr || !empty());
-      assert(to_pos==nullptr || to_pos==m_initial_node || to_pos->prev()!=nullptr);
+      assert(to_pos==nullptr || to_pos->prev()!=nullptr);
       assert(check_linked_list());
       if (to_pos!=nullptr) { for(iterator i=begin();i!=to_pos;++i) { assert(i!=end()); } }
       assert(from_pos!=nullptr);
-      assert(from_pos==from_list.m_initial_node || from_pos->prev()!=nullptr);
+      assert(from_pos->prev()!=nullptr);
       assert(!from_list.empty());
       assert(from_list.check_linked_list());
       for(iterator i=from_list.begin();i!=from_pos;++i) { assert(i!=from_list.end()); }
@@ -388,7 +425,13 @@ std::cerr << "Error in the middle of a linked list\n";
       assert(from_pos == from_pos->next()->prev());
       from_pos->next()->prev() = from_pos->prev();
     }
-    if (from_pos->prev() != nullptr)
+    else
+    {
+      // last element in from_list
+      assert(from_pos==from_list.m_initial_node->prev());
+      from_list.m_initial_node->prev()=from_pos->prev();
+    }
+    if (from_pos!=from_list.m_initial_node)
     {
       // not the first element in from_list
       assert(from_pos == from_pos->prev()->next());
@@ -397,20 +440,24 @@ std::cerr << "Error in the middle of a linked list\n";
     else
     {
       // first element in from_list
-      assert(from_pos == from_list.m_initial_node);
-      from_list.m_initial_node = from_pos->next();
+      assert(from_pos->prev()->next()==nullptr);
+      from_list.m_initial_node=from_pos->next();
     }
     // update the pointers of from_pos and insert from_pos into this list
-    from_pos->prev() = to_pos;
     if (to_pos != nullptr)
     {
       // not the first element in *this
+      from_pos->prev()=to_pos;
       from_pos->next() = to_pos->next();
       to_pos->next() = from_pos;
     }
     else
     {
       // first element in *this
+      if (!empty())
+      {
+        from_pos->prev()=m_initial_node->prev();
+      }
       from_pos->next() = m_initial_node;
       m_initial_node = from_pos;
     }
@@ -420,15 +467,25 @@ std::cerr << "Error in the middle of a linked list\n";
       assert(to_pos == from_pos->next()->prev());
       from_pos->next()->prev() = from_pos;
     }
-    assert(check_linked_list());
-    assert(from_list.check_linked_list());
+    else
+    {
+      // last element in *this
+      m_initial_node->prev()=from_pos;
+    }
+    #ifndef NDEBUG
+      assert(check_linked_list());
+      assert(from_list.check_linked_list());
+      assert((to_pos==nullptr ? m_initial_node : to_pos->next())==from_pos);
+      for(iterator i=begin();i!=from_pos;++i) { assert(i!=end()); }
+      if (to_pos!=nullptr) { for(iterator i=begin();i!=to_pos;++i) { assert(i!=end()); } }
+    #endif
   }
 
   void erase(iterator const pos)
   {
     #ifndef NDEBUG
       assert(pos!=nullptr);
-      assert(pos==m_initial_node || pos->prev()!=nullptr);
+      assert(pos->prev()!=nullptr);
       assert(!empty());
       assert(check_linked_list());
       for(iterator i=begin();i!=pos;++i) { assert(i!=end()); }
@@ -439,7 +496,13 @@ std::cerr << "Error in the middle of a linked list\n";
       assert(pos == pos->next()->prev());
       pos->next()->prev()=pos->prev();
     }
-    if (pos->prev()!=nullptr)
+    else
+    {
+      // last element in the list
+      assert(pos==m_initial_node->prev());
+      m_initial_node->prev()=pos->prev();
+    }
+    if (pos!=m_initial_node)
     {
       // not the first element in the list
       assert(pos == pos->prev()->next());
@@ -448,15 +511,46 @@ std::cerr << "Error in the middle of a linked list\n";
     else
     {
       // first element in the list
-      assert(pos == m_initial_node);
+      assert(pos->prev()->next()==nullptr);
       m_initial_node=pos->next();
     }
     pos->next()=glla().m_free_list;
     glla().m_free_list=pos;
 #ifndef NDEBUG
     pos->prev()=nullptr;
-#endif
     assert(check_linked_list());
+    for(iterator i=begin();i!=end();++i) { assert(i!=pos); }
+#endif
+  }
+
+  // The function computes the successor of pos in the list.  If pos is the last
+  // element of the list, it returns end().  It is an error if pos==end() or
+  // if pos is not in the list.
+  #ifdef NDEBUG
+    static // only in debug mode it accesses data of the list itself
+  #endif
+  iterator next(iterator pos)
+  #ifndef NDEBUG
+    const // static functions cannot be const
+  #endif
+  {
+    #ifndef NDEBUG
+      assert(pos!=end());
+      for(iterator i=begin();i!=pos;++i) { assert(i!=end()); }
+    #endif
+    return pos->next();
+  }
+
+  // The function computes the predecessor of pos in the list.  If pos is at the
+  // beginning of the list, it returns end().  It is an error if pos==end() or
+  // if pos is not in the list.
+  iterator prev(iterator pos) const
+  {
+    #ifndef NDEBUG
+      assert(pos!=end());
+      for(iterator i=begin();i!=pos;++i) { assert(i!=end()); }
+    #endif
+    return begin()==pos ? end() : pos->prev();
   }
 };
 
@@ -1327,7 +1421,7 @@ assert(!initialisation);
                 #ifdef CO_SPLITTER_IN_BLC_LIST
                   if (old_constellation == m_blocks[m_states[first_t.to()].block].constellation)
                   {
-                    const linked_list<BLC_indicators>::iterator main_splitter = std::next(ind);
+                    const linked_list<BLC_indicators>::iterator main_splitter = m_blocks[bi].block_to_constellation.next(ind);
                     if (main_splitter != m_blocks[bi].block_to_constellation.end())
                     {
                       assert(main_splitter->start_same_BLC < main_splitter->end_same_BLC);
@@ -1354,8 +1448,10 @@ assert(!initialisation);
                   {
                     for (BLC_list_const_iterator ind_iter = calM_elt->second; ind_iter > calM_elt->first; )
                     {
+                      assert(m_BLC_transitions.begin()<ind_iter);
                       assert(m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC<m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->end_same_BLC);
                       ind_iter = m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC;
+                      assert(ind_iter<m_BLC_transitions.end());
                       const transition& t = m_aut.get_transitions()[*ind_iter];
                       block_label_to_size_t_map::const_iterator co_iter = block_label_to_cotransition->find(std::pair(m_states[t.from()].block, label_or_divergence(t)));
                       if (block_label_to_cotransition->end() != co_iter && null_transition != co_iter->second && m_transitions[co_iter->second].transitions_per_block_to_constellation == ind)
@@ -1385,7 +1481,7 @@ assert(!initialisation);
                 #ifdef CO_SPLITTER_IN_BLC_LIST
                   if (old_constellation == m_blocks[m_states[first_t.to()].block].constellation)
                   {
-                    const linked_list<BLC_indicators>::iterator main_splitter = std::next(ind);
+                    const linked_list<BLC_indicators>::iterator main_splitter = m_blocks[bi].block_to_constellation.next(ind);
                     if (main_splitter != m_blocks[bi].block_to_constellation.end())
                     {
                       assert(main_splitter->start_same_BLC < main_splitter->end_same_BLC);
@@ -1411,8 +1507,10 @@ assert(!initialisation);
                   {
                     for (BLC_list_const_iterator ind_iter = calM_iter->second; ind_iter > calM_iter->first; )
                     {
+                      assert(m_BLC_transitions.begin()<ind_iter);
                       assert(m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC<m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->end_same_BLC);
                       ind_iter = m_transitions[*std::prev(ind_iter)].transitions_per_block_to_constellation->start_same_BLC;
+                      assert(ind_iter<m_BLC_transitions.end());
                       const transition& t = m_aut.get_transitions()[*ind_iter];
                       block_label_to_size_t_map::const_iterator co_iter = block_label_to_cotransition->find(std::pair(m_states[t.from()].block, label_or_divergence(t)));
                       if (block_label_to_cotransition->end() != co_iter && null_transition != co_iter->second && m_transitions[co_iter->second].transitions_per_block_to_constellation == ind)
@@ -2462,7 +2560,7 @@ assert(!initialisation);
 
         // This method also ensures that transitions from the old constellation
         // to the old constellation will remain at the beginning of their respective BLC set.
-        next_block_to_constellation=std::next(this_block_to_constellation);
+        next_block_to_constellation=m_blocks[from_block].block_to_constellation.next(this_block_to_constellation);
         const transition* first_t;
         if (next_block_to_constellation==m_blocks[from_block].block_to_constellation.end() ||
             (first_t = &m_aut.get_transitions()[*(next_block_to_constellation->start_same_BLC)],
@@ -2633,11 +2731,11 @@ assert(!initialisation);
                   assert(old_constellation<new_constellation);
                   linked_list<BLC_indicators>::iterator old_co_splitter;
                   if ((old_constellation==to_constln /* i.e. this_block_to_constellation is a co-splitter */ &&
-                     (old_co_splitter = std::next(this_block_to_constellation),
+                     (old_co_splitter = m_blocks[old_bi].block_to_constellation.next(this_block_to_constellation),
 //(std::cerr << "Transition is originally in a co-splitter; "),
                       true)) ||
                     (new_constellation == to_constln /* i.e. this_block_to_constellation is a main splitter */ &&
-                     (old_co_splitter = std::prev(this_block_to_constellation),
+                     (old_co_splitter = m_blocks[old_bi].block_to_constellation.prev(this_block_to_constellation),
 //(std::cerr << "Transition is originally in a main splitter; "),
                       true)))
                   {
@@ -2668,7 +2766,7 @@ assert(!initialisation);
                           if (old_constellation==to_constln)
                           {
                             // (this_block_to_constellation was a co-splitter:) temp_transition is in the new main splitter; place the new BLC set immediately before this main splitter in the list m_blocks[new_bi].block_to_constellation.
-                            --new_position;
+                            new_position = m_blocks[new_bi].block_to_constellation.prev(new_position);
 //std::cerr << ". This is a real old main splitter.\n";
                           }
 //else { std::cerr << ". This is a real old co-splitter.\n"; }
@@ -3400,8 +3498,9 @@ assert(!initialisation);
 //std::cerr << "splitB(splitter = " << splitter->debug_id(*this) << ", first_unmarked_bottom_state = " << first_unmarked_bottom_state->ref_state->debug_id(*this) << ", splitter_end_unmarked_BLC = "
 //<< (split_off_new_bottom_states && splitter_end_unmarked_BLC == splitter->start_marked_BLC ? "start_marked_BLC" : (splitter_end_unmarked_BLC == splitter->start_same_BLC ? "start_same_BLC" : "?")) << ", ..., split_off_new_bottom_states = " << split_off_new_bottom_states << ")\n";
       const block_index B = m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].block;
-//std::cerr << "Marked bottom states:"; for (fixed_vector<state_in_block_pointer>::iterator it=m_blocks[B].start_bottom_states; it!=first_unmarked_bottom_state; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); }
-//std::cerr << "\nUnmarked bottom states:"; for (fixed_vector<state_in_block_pointer>::iterator it=first_unmarked_bottom_state; it!=m_blocks[B].start_non_bottom_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << "\nAdditionally, " << m_R.size() << " non-bottom states have been marked.\n";
+//std::cerr << (m_branching ? "Marked bottom states:" : "Marked states:"); for (fixed_vector<state_in_block_pointer>::iterator it=m_blocks[B].start_bottom_states; it!=first_unmarked_bottom_state; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); }
+//std::cerr << (m_branching ? "\nUnmarked bottom states:" : "\nUnmarked states:"); for (fixed_vector<state_in_block_pointer>::iterator it=first_unmarked_bottom_state; it!=m_blocks[B].start_non_bottom_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); }
+//if (m_branching) { std::cerr << "\nAdditionally, " << m_R.size() << " non-bottom states have been marked.\n"; }
       assert(!has_marked_transitions(*splitter));
       if (1 >= number_of_states_in_block(B))
       {
@@ -3457,7 +3556,8 @@ assert(!initialisation);
                 assert(i!=m_blocks[B].block_to_constellation.end());
               }
             #endif
-            // insert a dummy splitter to help with placing the corresponding main/co splitter correctly:
+            // insert a dummy old splitter to help with placing the corresponding main/co splitter correctly:
+//std::cerr << "Inserting a dummy old splitter at m_BLC_transitions[" << std::distance(m_BLC_transitions.begin(), splitter->end_same_BLC) << "]\n";
             m_BLC_indicators_to_be_deleted.push_back(
               m_blocks[B].block_to_constellation.emplace_after(splitter, splitter->end_same_BLC, splitter->end_same_BLC)
             );
@@ -3619,8 +3719,10 @@ assert(!initialisation);
             m_blocks[bi].block_to_constellation.erase(perhaps_inert_ind);
           }
         }
+//std::cerr << "Removing " << m_BLC_indicators_to_be_deleted.size() << " empty BLC sets\n";
         for (std::vector<linked_list<BLC_indicators>::iterator>::iterator it = m_BLC_indicators_to_be_deleted.begin(); it < m_BLC_indicators_to_be_deleted.end(); ++it)
         {
+          assert((*it)->start_same_BLC==(*it)->end_same_BLC);
           m_blocks[B].block_to_constellation.erase(*it);
         }
         clear(m_BLC_indicators_to_be_deleted);
@@ -4643,7 +4745,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
       }
       // *btc_it is the BLC_indicator for the inert transitions of the new constellation.
       // Try the second element in the list:
-      ++btc_it;
+      btc_it=m_blocks[index_block_B].block_to_constellation.next(btc_it);
       if (btc_it == m_blocks[index_block_B].block_to_constellation.end())
       {
         // The new constellation has no other outgoing transitions.
@@ -5375,7 +5477,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
               // Check whether the bottom states of Bpp are not all included in Mleft.
               const BLC_list_iterator splitter_end_unmarked_BLC = splitter->start_marked_BLC;
               #ifdef CO_SPLITTER_IN_BLC_LIST
-                linked_list<BLC_indicators>::iterator co_splitter = std::prev(splitter);
+                linked_list<BLC_indicators>::iterator co_splitter = m_blocks[Bpp].block_to_constellation.prev(splitter);
               #endif
               fixed_vector<state_in_block_pointer>::iterator first_unmarked_bottom_state=not_all_bottom_states_are_touched(splitter
                         #ifndef NDEBUG
@@ -5437,7 +5539,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
                   {
                     assert(a == label_or_divergence(splitter_start_t));
                     assert(new_constellation == m_blocks[m_states[splitter_start_t.to()].block].constellation);
-                    co_splitter = std::prev(m_transitions[*splitter_start].transitions_per_block_to_constellation);
+                    co_splitter = m_blocks[Bpp].block_to_constellation.prev(m_transitions[*splitter_start].transitions_per_block_to_constellation);
                   }
                   else
                   {
@@ -5447,7 +5549,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
                       assert(a == label_or_divergence(splitter_end_t));
                       assert(new_constellation == m_blocks[m_states[splitter_end_t.to()].block].constellation);
                     #endif
-                    co_splitter = std::prev(m_transitions[*(splitter_end - 1)].transitions_per_block_to_constellation);
+                    co_splitter = m_blocks[Bpp].block_to_constellation.prev(m_transitions[*(splitter_end-1)].transitions_per_block_to_constellation);
                   }
                 #endif
               }
@@ -5548,7 +5650,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
                 {
                   // check that there is really no co-splitter
                   #ifndef NDEBUG
-                    if (m_aut.is_tau(a) && m_blocks[Bpp].constellation == old_constellation)
+                    if (m_branching && m_aut.is_tau(a) && m_blocks[Bpp].constellation == old_constellation)
                     {
 //std::cerr << "No co-split is needed because the co-splitting transitions are constellation-inert.\n";
                     }
@@ -5577,7 +5679,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
           while (calM_elt.first < calM_elt.second);
         }
 
-print_data_structures("Before stabilize");
+//print_data_structures("Before stabilize");
         assert(check_data_structures("Before stabilize", false, false));
         assert(check_stability("Before stabilize"));
         stabilizeB();
