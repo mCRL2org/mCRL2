@@ -966,11 +966,19 @@ class bisim_partitioner_gj
     /// bisimulation.
     const bool m_preserve_divergence;
 
+    /// The auxiliary function below can be removed, but is now used to express that the hidden_label_map does not need
+    /// to be applied, while still leaving it in the code.
+    
+    typename LTS_TYPE::labels_size_type m_aut_apply_hidden_label_map(typename LTS_TYPE::labels_size_type l) const
+    {
+      return l;
+    }
+
     // The function assumes that m_branching is true and tests whether transition t is inert during initialisation under that condition
     bool is_inert_during_init_if_branching(const transition& t) const
     {
       assert(m_branching);
-      return m_aut.is_tau(m_aut.apply_hidden_label_map(t.label())) && (!m_preserve_divergence || t.from() != t.to());
+      return m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())) && (!m_preserve_divergence || t.from() != t.to());
     }
 
     // The function tests whether transition t is inert during initialisation, i.e. when there is only one source/target block.
@@ -982,7 +990,7 @@ class bisim_partitioner_gj
     // The function calculates the label index of transition t, where tau-self-loops get the special index m_aut.num_action_labels() if divergence needs to be preserved
     label_index label_or_divergence(const transition& t) const
     {
-      label_index result = m_aut.apply_hidden_label_map(t.label());
+      label_index result = m_aut_apply_hidden_label_map(t.label());
       if (m_preserve_divergence && (assert(m_branching), t.from() == t.to()) && m_aut.is_tau(result))
       {
         return m_aut.num_action_labels();
@@ -1577,7 +1585,7 @@ assert(!initialisation);
           {
             mCRL2log(log::debug) << " (constellation-inert)";
           }
-          else if (m_preserve_divergence && t.from() == t.to() && m_aut.is_tau(m_aut.apply_hidden_label_map(t.label())))
+          else if (m_preserve_divergence && t.from() == t.to() && m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())))
           {
             mCRL2log(log::debug) << " (divergent self-loop)";
           }
@@ -2530,7 +2538,7 @@ assert(!initialisation);
         assert(next_block_to_constellation->start_same_BLC<m_BLC_transitions.end());
         assert(next_block_to_constellation->start_same_BLC<next_block_to_constellation->end_same_BLC);
         assert(m_states[m_aut.get_transitions()[*(next_block_to_constellation->start_same_BLC)].from()].block==index_block_B);
-        assert(m_aut.is_tau(m_aut.apply_hidden_label_map(m_aut.get_transitions()[*(next_block_to_constellation->start_same_BLC)].label())));
+        assert(m_aut.is_tau(m_aut_apply_hidden_label_map(m_aut.get_transitions()[*(next_block_to_constellation->start_same_BLC)].label())));
         if (next_block_to_constellation==this_block_to_constellation)
         {
           // Make a new entry in the list block_to_constellation, at the beginning;
@@ -3088,7 +3096,7 @@ assert(!initialisation);
           assert(current_R_incoming_transition_iterator<current_R_incoming_transition_iterator_end);
           mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), current_R_incoming_transition_iterator)],
                         add_work(check_complexity::simple_splitB_R__handle_transition_to_R_state, 1), *this);
-          assert(m_aut.is_tau(m_aut.apply_hidden_label_map(current_R_incoming_transition_iterator->label())));
+          assert(m_aut.is_tau(m_aut_apply_hidden_label_map(current_R_incoming_transition_iterator->label())));
           assert(m_states[current_R_incoming_transition_iterator->to()].block==B);
 
           const transition& tr=*current_R_incoming_transition_iterator;
@@ -3114,7 +3122,7 @@ assert(!initialisation);
           }
           ++current_R_incoming_transition_iterator;
           if (current_R_incoming_transition_iterator!=current_R_incoming_transition_iterator_end &&
-              m_aut.is_tau(m_aut.apply_hidden_label_map(current_R_incoming_transition_iterator->label())))
+              m_aut.is_tau(m_aut_apply_hidden_label_map(current_R_incoming_transition_iterator->label())))
           {
             goto R_handled_and_is_not_state_checking;
           }
@@ -3138,7 +3146,7 @@ assert(!initialisation);
           }
           current_R_incoming_transition_iterator=s.ref_state->start_incoming_transitions;
           if (current_R_incoming_transition_iterator!=current_R_incoming_transition_iterator_end &&
-                  m_aut.is_tau(m_aut.apply_hidden_label_map(current_R_incoming_transition_iterator->label())))
+                  m_aut.is_tau(m_aut_apply_hidden_label_map(current_R_incoming_transition_iterator->label())))
           {
             R_status=incoming_inert_transition_checking;
             goto R_handled_and_is_not_state_checking;
@@ -3251,7 +3259,7 @@ assert(!initialisation);
 //std::cerr << "U_incoming_inert_transition_checking\n";
             // Algorithm 3, line 3.8, left.
           assert(current_U_incoming_transition_iterator<current_U_incoming_transition_iterator_end);
-          assert(m_aut.is_tau(m_aut.apply_hidden_label_map(current_U_incoming_transition_iterator->label())));
+          assert(m_aut.is_tau(m_aut_apply_hidden_label_map(current_U_incoming_transition_iterator->label())));
             // Check one incoming transition.
             // Algorithm 3, line 3.12, left.
           mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), current_U_incoming_transition_iterator)], add_work(check_complexity::simple_splitB_U__handle_transition_to_U_state, 1), *this);
@@ -3332,7 +3340,7 @@ assert(!initialisation);
             else assert(m_R.find(current_U_outgoing_state));
           }
           if (current_U_incoming_transition_iterator!=current_U_incoming_transition_iterator_end &&
-                m_aut.is_tau(m_aut.apply_hidden_label_map(current_U_incoming_transition_iterator->label())))
+                m_aut.is_tau(m_aut_apply_hidden_label_map(current_U_incoming_transition_iterator->label())))
           {
             assert(incoming_inert_transition_checking==U_status);
             goto U_handled_and_is_not_state_checking;
@@ -3353,7 +3361,7 @@ assert(!initialisation);
           current_U_incoming_transition_iterator=s.ref_state->start_incoming_transitions;
           current_U_incoming_transition_iterator_end=(std::next(s.ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s.ref_state)->start_incoming_transitions);
           if (current_U_incoming_transition_iterator!=current_U_incoming_transition_iterator_end &&
-              m_aut.is_tau(m_aut.apply_hidden_label_map(current_U_incoming_transition_iterator->label())))
+              m_aut.is_tau(m_aut_apply_hidden_label_map(current_U_incoming_transition_iterator->label())))
           {
             U_status=incoming_inert_transition_checking;
             goto U_handled_and_is_not_state_checking;
@@ -3423,7 +3431,7 @@ assert(!initialisation);
           }
 
           if (current_U_incoming_transition_iterator!=current_U_incoming_transition_iterator_end &&
-              m_aut.is_tau(m_aut.apply_hidden_label_map(current_U_incoming_transition_iterator->label())))
+              m_aut.is_tau(m_aut_apply_hidden_label_map(current_U_incoming_transition_iterator->label())))
           {
             U_status = incoming_inert_transition_checking;
             goto U_handled_and_is_not_state_checking;
@@ -3672,7 +3680,7 @@ assert(!initialisation);
             // mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), it)], add_work(..., max_bi_counter), *this);
                 // is subsumed in the above call
             assert(m_states.begin()+t.to()==ssi->ref_state);
-            if (!m_aut.is_tau(m_aut.apply_hidden_label_map(t.label())))
+            if (!m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())))
             {
               break; // All tau transitions have been investigated.
             }
@@ -3751,7 +3759,7 @@ assert(!initialisation);
             const std::vector<transition>::iterator in_ti_end = std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
             for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
             {
-              if (!m_aut.is_tau(m_aut.apply_hidden_label_map(ti->label())))  break;
+              if (!m_aut.is_tau(m_aut_apply_hidden_label_map(ti->label())))  break;
               mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], finalise_work(check_complexity::simple_splitB_R__handle_transition_to_R_state, check_complexity::simple_splitB__handle_transition_to_R_or_U_state, max_block), *this);
             }
             // outgoing transitions of s
@@ -3773,7 +3781,7 @@ assert(!initialisation);
             const std::vector<transition>::iterator in_ti_end=std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
             for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
             {
-              if (!m_aut.is_tau(m_aut.apply_hidden_label_map(ti->label())))  break;
+              if (!m_aut.is_tau(m_aut_apply_hidden_label_map(ti->label())))  break;
               mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], cancel_work(check_complexity::simple_splitB_U__handle_transition_to_U_state), *this);
             }
             // outgoing transitions of s
@@ -3796,7 +3804,7 @@ assert(!initialisation);
             const std::vector<transition>::iterator in_ti_end = std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
             for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
             {
-              if (!m_aut.is_tau(m_aut.apply_hidden_label_map(ti->label())))  break;
+              if (!m_aut.is_tau(m_aut_apply_hidden_label_map(ti->label())))  break;
               mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], finalise_work(check_complexity::simple_splitB_U__handle_transition_to_U_state, check_complexity::simple_splitB__handle_transition_to_R_or_U_state, max_block), *this);
             }
             // outgoing transitions of s
@@ -3815,7 +3823,7 @@ assert(!initialisation);
             const std::vector<transition>::iterator in_ti_end = std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
             for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
             {
-              if (!m_aut.is_tau(m_aut.apply_hidden_label_map(ti->label())))  break;
+              if (!m_aut.is_tau(m_aut_apply_hidden_label_map(ti->label())))  break;
               mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], cancel_work(check_complexity::simple_splitB_R__handle_transition_to_R_state), *this);
             }
             // outgoing transitions of s
@@ -4054,7 +4062,7 @@ assert(!initialisation);
 
       // Initialise m_incoming_(non-)inert-transitions, m_outgoing_transitions, and m_states[si].no_of_outgoing_transitions
       //group_transitions_on_label(m_aut.get_transitions(),
-      //                          [](const transition& t){ return m_aut.apply_hidden_label_map(t.label()); },
+      //                          [](const transition& t){ return m_aut_apply_hidden_label_map(t.label()); },
       //                          m_aut.num_action_labels(), m_aut.tau_label_index()); // sort on label. Tau transitions come first.
       // group_transitions_on_label(m_aut.get_transitions(),
       //                           [](const transition& t){ return t.from(); },
@@ -4786,7 +4794,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
       }
       const transition& t1=m_aut.get_transitions()[transition_to_bi];
       const transition& t2=m_aut.get_transitions()[*i2->ref_BLC_transitions];
-      return t1.from()==t2.from() && m_aut.apply_hidden_label_map(t1.label())==m_aut.apply_hidden_label_map(t2.label()) && m_blocks[m_states[t2.to()].block].constellation==old_constellation;
+      return t1.from()==t2.from() && m_aut_apply_hidden_label_map(t1.label())==m_aut_apply_hidden_label_map(t2.label()) && m_blocks[m_states[t2.to()].block].constellation==old_constellation;
     }
 
     // This function determines whether all bottom states in B have outgoing co-transitions. If yes false is reported.
@@ -4869,7 +4877,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
       bool W_empty=true;
 //std::cerr << "W: "; for(auto s: W) { std::cerr << s << " "; } std::cerr << "\n";
       #ifndef NDEBUG
-        assert(m_aut.apply_hidden_label_map(a) == a);
+        assert(m_aut_apply_hidden_label_map(a) == a);
         const block_type& B = m_blocks[m_states[*first_unmarked_bottom_state].block];
         assert(B.start_bottom_states == first_unmarked_bottom_state);
         // assert(static_cast<std::ptrdiff_t>(std::distance(B.start_bottom_states, B.start_non_bottom_states)) == W.size());
@@ -5022,7 +5030,7 @@ if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state fou
           // subsumed by the above call
           const transition& t=m_aut.get_transitions()[*tti->ref_BLC_transitions];
           assert(t.from() == *si);
-          if (m_aut.is_tau(m_aut.apply_hidden_label_map(t.label())) && m_blocks[m_states[t.to()].block].constellation==old_constellation)
+          if (m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())) && m_blocks[m_states[t.to()].block].constellation==old_constellation)
           {
             found =true;
           }
