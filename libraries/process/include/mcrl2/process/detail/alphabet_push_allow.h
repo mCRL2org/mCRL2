@@ -276,7 +276,7 @@ std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
   return out << "Node(" << pp(x.alphabet) << ", " << process::pp(x.expression) << ")";
 }
 
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::map<process_identifier, process_equation>& equations, push_allow_cache& W, bool generate_missing_equations = false);
+void push_allow(push_allow_node& result, const process_expression& x, const allow_set& A, std::map<process_identifier, process_equation>& equations, push_allow_cache& W, bool generate_missing_equations = false);
 
 template <typename Derived, typename Node = push_allow_node>
 struct push_allow_traverser: public process_expression_traverser<Derived>
@@ -293,10 +293,17 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   // the parameter A
   const allow_set& A;
 
+  // precompute the subsets of A
+  const allow_set A_sub;
+    
+
   std::vector<Node> node_stack;
 
   push_allow_traverser(std::map<process_identifier, process_equation>& equations_, push_allow_cache& W_, const allow_set& A_)
-    : equations(equations_), W(W_), A(A_)
+      : equations(equations_),
+        W(W_),
+        A(A_),
+        A_sub(alphabet_operations::subsets(A))
   {}
 
   Derived& derived()
@@ -422,7 +429,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       push_allow_node node;
 
       // compute the alphabet for (A, P)
-      node = push_allow(p, A, equations, W);
+      push_allow(node, p, A, equations, W);
 
       W.dependent_nodes.erase(key);
       if (W.dependent_nodes.empty())
@@ -543,7 +550,8 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     const core::identifier_string_list& I = x.hide_set();
     allow_set A1 = alphabet_operations::hide_inverse(I, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W);
+    push_allow_node node;
+    push_allow(node, x.operand(), A1, equations, W);
     push(push_allow_node(alphabet_operations::hide(I, node.alphabet), process::hide(I, node.expression)));
     mCRL2log(log::debug) << log(x, log_hide(x, A1));
   }
@@ -559,7 +567,8 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     const core::identifier_string_list& B = x.block_set();
     allow_set A1 = alphabet_operations::block(B, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W);
+    push_allow_node node;
+    push_allow(node, x.operand(), A1, equations, W);
     push(node);
     mCRL2log(log::debug) << log(x, log_block(x, A1));
   }
@@ -575,7 +584,8 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     const rename_expression_list& R = x.rename_set();
     allow_set A1 = alphabet_operations::rename_inverse(R, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W);
+    push_allow_node node;
+    push_allow(node, x.operand(), A1, equations, W);
     push(push_allow_node(alphabet_operations::rename(R, node.alphabet), process::rename(R, node.expression)));
     mCRL2log(log::debug) << log(x, log_rename(x, A1));
   }
@@ -591,7 +601,8 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     const communication_expression_list& C = x.comm_set();
     allow_set A1 = alphabet_operations::comm_inverse(C, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W);
+    push_allow_node node;
+    push_allow(node, x.operand(), A1, equations, W);
     communication_expression_list C1 = alphabet_operations::filter_comm_set(C, node.alphabet);
     push(push_allow_node(alphabet_operations::comm(C1, node.alphabet), make_comm(C1, node.expression)));
     top().apply_allow(A);
@@ -609,7 +620,8 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   {
     const action_name_multiset_list& V = x.allow_set();
     allow_set A1 = alphabet_operations::allow(V, A);
-    push_allow_node node = push_allow(x.operand(), A1, equations, W);
+    push_allow_node node;
+    push_allow(node, x.operand(), A1, equations, W);
     push(node);
     mCRL2log(log::debug) << log(x, log_allow(x, A1));
   }
@@ -623,10 +635,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void apply(const process::merge& x)
   {
-    allow_set A_sub = alphabet_operations::subsets(A);
-    push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
+    push_allow_node p1;
+    push_allow(p1, x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
-    push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
+    push_allow_node q1;
+    push_allow(q1, x.right(), A_arrow, equations, W);
     auto [Apq, allow_required] = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
     push(push_allow_node(Apq, make_merge(p1.expression, q1.expression)));
     top().apply_allow(A, allow_required);
@@ -642,10 +655,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void apply(const process::left_merge& x)
   {
-    allow_set A_sub = alphabet_operations::subsets(A);
-    push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
+    push_allow_node p1;
+    push_allow(p1, x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
-    push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
+    push_allow_node q1;
+    push_allow(q1, x.right(), A_arrow, equations, W);
     auto [Apq, allow_required] = alphabet_operations::bounded_left_merge(p1.alphabet, q1.alphabet, A);
     push(push_allow_node(Apq, make_left_merge(p1.expression, q1.expression)));
     top().apply_allow(A, allow_required);
@@ -678,10 +692,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       return;
     }
 
-    allow_set A_sub = alphabet_operations::subsets(A);
-    push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
+    push_allow_node p1;
+    push_allow(p1, x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
-    push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
+    push_allow_node q1;
+    push_allow(q1, x.right(), A_arrow, equations, W);
     auto [Apq, allow_required] = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
     push(push_allow_node(Apq, make_sync(p1.expression, q1.expression)));
     top().apply_allow(A, allow_required);
@@ -703,14 +718,15 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
 };
 
 inline
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::map<process_identifier, process_equation>& equations, push_allow_cache& W, bool generate_missing_equations)
+void push_allow(push_allow_node& result, const process_expression& x, const allow_set& A, std::map<process_identifier, process_equation>& equations, push_allow_cache& W, bool generate_missing_equations)
 {
   apply_push_allow_traverser<push_allow_traverser> f(equations, W, A);
   f.apply(x);
-  push_allow_node result = f.node_stack.back();
+  result = f.node_stack.back();
 
   if (generate_missing_equations)
   {
+    push_allow_node ignored_result;
     while (!W.unfinished.empty())
     {
       detail::push_allow_cache::unfinished_value v = *W.unfinished.begin();
@@ -720,13 +736,11 @@ push_allow_node push_allow(const process_expression& x, const allow_set& A, std:
       if (value.status != detail::push_allow_cache::finished)
       {
         mCRL2log(log::debug) << "generating unfinished equation for " << key << " -> " << value << std::endl;
-        push_allow(v.P, v.A, equations, W);
+        push_allow(ignored_result, v.P, v.A, equations, W);
       }
     }
   }
   // W.check_equations(equations);
-
-  return result;
 }
 
 } // namespace detail
@@ -741,7 +755,8 @@ process_expression push_allow(const process_expression& x,
 {
   allow_set A(alphabet_operations::make_name_set(V));
   detail::push_allow_cache W(id_generator, pcrl_equation_cache);
-  detail::push_allow_node node = detail::push_allow(x, A, equations, W, true);
+  detail::push_allow_node node;
+  detail::push_allow(node, x, A, equations, W, true);
   return node.expression;
 }
 
