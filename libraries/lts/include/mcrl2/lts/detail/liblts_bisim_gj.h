@@ -4870,6 +4870,10 @@ assert(!initialisation);
 
     void stabilizeB()
     {
+      if (m_blocks_with_new_bottom_states.empty())
+      {
+        return;
+      }
       bool initial_stabilization=true;
       // Qhat contains the slices of BLC transitions that still need stabilization
       std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> > Qhat;
@@ -4883,9 +4887,11 @@ assert(!initialisation);
         // mCRL2complexity(all bottom states, add_work(..., 1), *this);
             // not necessary, as the inner loop is always executed
 
+        assert(!m_blocks_with_new_bottom_states.empty());
         for(const block_index bi: m_blocks_with_new_bottom_states)
         {
           #ifndef NDEBUG
+//std::cerr << "Block " << bi << " has new bottom states.\n";
             // The work in this loop is assigned to the (new) bottom states in bi
             // It cannot be assigned to the block bi because there may be more new bottom states later.
             fixed_vector<state_in_block_pointer>::iterator new_bott_it = m_blocks[bi].start_bottom_states;
@@ -4901,6 +4907,7 @@ assert(!initialisation);
           if (1 >= number_of_states_in_block(bi))
           {
             // blocks with only 1 state do not need to be stabilized further
+//std::cerr << "    But it has only 1 state.\n";
             continue;
           }
 
@@ -4935,6 +4942,7 @@ assert(!initialisation);
               #endif
               break;
             }
+//std::cerr << "    Preparing to stabilize under " << ind->debug_id(*this) << '\n';
             ind->start_marked_BLC=ind->end_same_BLC;
             #ifndef NDEBUG
               assert(!has_marked_transitions(*ind));
@@ -5023,85 +5031,98 @@ assert(!initialisation);
 //    If more new bottom states are created, store them in the new m_blocks_with_new_bottom_states.
 
         // Algorithm 4, line 4.8.
-        if (Qhat.empty())
+        // inner loop to be executed until further new bottom states are found:
+        do
         {
-          break;
-        }
+          if (Qhat.empty())
+          {
+            // nothing needs to be stabilized any more.
+
+            // Therefore, it is impossible that further new bottom states are
+            // found in these rounds.  So all work must have been accounted for:
+            assert(initialize_qhat_work_to_assign_later.empty());
+            assert(stabilize_work_to_assign_later.empty());
+
+            assert(check_data_structures("End of stabilizeB()"));
+            assert(check_stability("End of stabilizeB()"));
+            return;
+          }
           // Algorithm 4, line 4.9.
-        // mCRL2complexity(..., add_work(..., max_C), *this);
+          // mCRL2complexity(..., add_work(..., max_C), *this);
               // not needed as the inner loop is always executed at least once.
-        //print_data_structures("Main stabilize loop");
-        assert(check_data_structures("New bottom state loop", false, false));
-        assert(check_stability("New bottom state loop", &Qhat));
+          //print_data_structures("New bottom state loop");
+          assert(check_data_structures("New bottom state loop", false, false));
+          assert(check_stability("New bottom state loop", &Qhat));
 
-        std::pair<BLC_list_iterator, BLC_list_iterator>& Qhat_elt=Qhat.back();
-        assert(Qhat_elt.first < Qhat_elt.second);
-        const linked_list<BLC_indicators>::iterator splitter=m_transitions[*std::prev(Qhat_elt.second)].transitions_per_block_to_constellation;
+          std::pair<BLC_list_iterator, BLC_list_iterator>& Qhat_elt=Qhat.back();
+          assert(Qhat_elt.first < Qhat_elt.second);
+          const linked_list<BLC_indicators>::iterator splitter=m_transitions[*std::prev(Qhat_elt.second)].transitions_per_block_to_constellation;
 //std::cerr << "Now stabilizing under " << splitter->debug_id(*this) << '\n';
-        assert(splitter->end_same_BLC==Qhat_elt.second);
-        Qhat_elt.second = splitter->start_same_BLC;
-        assert(Qhat_elt.first<=Qhat_elt.second);
-        if (Qhat_elt.first==Qhat_elt.second)
-        {
-          Qhat.pop_back(); // invalidates Qhat_elt
-        }
+          assert(splitter->end_same_BLC==Qhat_elt.second);
+          Qhat_elt.second = splitter->start_same_BLC;
+          assert(Qhat_elt.first<=Qhat_elt.second);
+          if (Qhat_elt.first==Qhat_elt.second)
+          {
+            Qhat.pop_back(); // invalidates Qhat_elt
+          }
 
-        assert(splitter->start_same_BLC<splitter->end_same_BLC);
-        const transition& first_t=m_aut.get_transitions()[*splitter->start_same_BLC];
-        const block_type& from_block=m_blocks[m_states[first_t.from()].block];
-        #ifndef NDEBUG
-          assert(!from_block.contains_new_bottom_states);
+          assert(splitter->start_same_BLC<splitter->end_same_BLC);
+          const transition& first_t=m_aut.get_transitions()[*splitter->start_same_BLC];
+          const block_type& from_block=m_blocks[m_states[first_t.from()].block];
+          #ifndef NDEBUG
+            assert(!from_block.contains_new_bottom_states);
                 // The work is assigned to the transitions out of new bottom states in splitter.
-          bool work_assigned=false;
-          for (BLC_list_const_iterator work_it=splitter->start_same_BLC; work_it<splitter->end_same_BLC; ++work_it)
-          {
-            // assign the work to this transition
-            if (0==m_states[m_aut.get_transitions()[*work_it].from()].no_of_outgoing_inert_transitions)
+            bool work_assigned=false;
+            for (BLC_list_const_iterator work_it=splitter->start_same_BLC; work_it<splitter->end_same_BLC; ++work_it)
             {
-              mCRL2complexity(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__main_loop, 1), *this);
-              work_assigned=true;
+              // assign the work to this transition
+              if (0==m_states[m_aut.get_transitions()[*work_it].from()].no_of_outgoing_inert_transitions)
+              {
+                mCRL2complexity(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__main_loop, 1), *this);
+                work_assigned=true;
+              }
             }
-          }
-          if (!work_assigned)
-          {
-            // We register that we still have to find a transition from a new bottom state in this slice.
+            if (!work_assigned)
+            {
+              // We register that we still have to find a transition from a new bottom state in this slice.
 //std::cerr << "Haven't yet found a transition from a new bottom state in " << splitter->debug_id(*this) << " to assign the main loop work to\n";
-            stabilize_work_to_assign_later.emplace_back(splitter->start_same_BLC, splitter->end_same_BLC);
-          }
-        #endif
-        if (std::distance(from_block.start_bottom_states, from_block.end_states)<=1)
-        {
-          // a block with 1 state does not need to be split
-          //splitter->make_stable();
+              stabilize_work_to_assign_later.emplace_back(splitter->start_same_BLC, splitter->end_same_BLC);
+            }
+          #endif
+          if (std::distance(from_block.start_bottom_states, from_block.end_states)<=1)
+          {
+            // a block with 1 state does not need to be split
+            //splitter->make_stable();
 //std::cerr << "No stabilization is needed because the source block contains only 1 state.\n";
-        }
-        else
-        {
-          assert(!is_inert_during_init(first_t) ||
+          }
+          else
+          {
+            assert(!is_inert_during_init(first_t) ||
                      from_block.constellation != m_blocks[m_states[first_t.to()].block].constellation);
 
-          // Algorithm 4, line 4.10.
-          const BLC_list_iterator splitter_end_unmarked_BLC=splitter->start_marked_BLC;
-          fixed_vector<state_in_block_pointer>::iterator first_unmarked_bottom_state=not_all_bottom_states_are_touched(splitter
+            // Algorithm 4, line 4.10.
+            const BLC_list_iterator splitter_end_unmarked_BLC=splitter->start_marked_BLC;
+            fixed_vector<state_in_block_pointer>::iterator first_unmarked_bottom_state=not_all_bottom_states_are_touched(splitter
                         #ifndef NDEBUG
                           , splitter_end_unmarked_BLC
                         #endif
                         );
-          if (first_unmarked_bottom_state<from_block.start_non_bottom_states)
-          {
+            if (first_unmarked_bottom_state<from_block.start_non_bottom_states)
+            {
 //std::cerr << "PERFORM A NEW BOTTOM STATE SPLIT\n";
-            // Algorithm 4, line 4.11, and implicitly 4.12, 4.13 and 4.18.
-            splitB(splitter, first_unmarked_bottom_state, splitter_end_unmarked_BLC);
-          }
+              // Algorithm 4, line 4.11, and implicitly 4.12, 4.13 and 4.18.
+              splitB(splitter, first_unmarked_bottom_state, splitter_end_unmarked_BLC);
+            }
 //else { std::cerr << "No split is needed because every bottom state has a transition in the splitter.\n"; }
+          }
         }
-      }
+        while (m_blocks_with_new_bottom_states.empty());
 
-      #ifndef NDEBUG
-          // We now have to try and find further new bottom states to which to assign
+        #ifndef NDEBUG
+          // Further new bottom states have been found, so we now have a chance at assigning
           // the initialization of Qhat that had not yet been assigned earlier.
           for (std::vector<std::pair<BLC_list_const_iterator, BLC_list_const_iterator> >::iterator qhat_it = initialize_qhat_work_to_assign_later.begin();
-                        qhat_it != initialize_qhat_work_to_assign_later.end(); ++qhat_it)
+                        qhat_it!=initialize_qhat_work_to_assign_later.end(); )
           {
             bool new_bottom_state_with_transition_found = false;
             for (BLC_list_const_iterator work_it = qhat_it->first; work_it < qhat_it->second; ++work_it)
@@ -5110,40 +5131,62 @@ assert(!initialisation);
               if (0 == m_states[t_from].no_of_outgoing_inert_transitions)
               {
                 // t_from is a new bottom state, so we can assign the work to this transition
-//std::cerr << m_transitions[*work_it].debug_id(*this) << " is assigned work on initializing Qhat afterwards\n";
                 mCRL2complexity(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__initialize_Qhat_afterwards, 1), *this);
                 new_bottom_state_with_transition_found = true;
               }
             }
-//if (!new_bottom_state_with_transition_found) { std::cerr << "No bottom state found to assign work to on initializing Qhat for BLC slice containing transitions"; for (BLC_list_const_iterator work_it=qhat_it->first; work_it < qhat_it->second; ++work_it) { std::cerr << ' ' << m_transitions[*work_it].debug_id_short(*this); } std::cerr << '\n'; }
-            assert(new_bottom_state_with_transition_found);
+            if (new_bottom_state_with_transition_found)
+            {
+              // The work has been assigned successfully, so we can replace this
+              // entry of initialize_qhat_work_to_assign_later with the last one.
+              #ifndef NDEBUG
+                bool at_end=std::next(qhat_it)==initialize_qhat_work_to_assign_later.end();
+              #endif
+              *qhat_it=initialize_qhat_work_to_assign_later.back();
+              initialize_qhat_work_to_assign_later.pop_back();
+              assert(at_end == (qhat_it==initialize_qhat_work_to_assign_later.end()));
+            }
+            else
+            {
+              ++qhat_it;
+            }
           }
 
-          // We also have to try and find further new bottom states to which to assign
+          // We shall also try and find further new bottom states to which to assign
           // the main loop iterations that had not yet been assigned earlier.
           for (std::vector<std::pair<BLC_list_const_iterator, BLC_list_const_iterator> >::iterator stabilize_it = stabilize_work_to_assign_later.begin();
-                        stabilize_it != stabilize_work_to_assign_later.end(); ++stabilize_it)
+                        stabilize_it!=stabilize_work_to_assign_later.end(); )
           {
-//std::cerr << "stabilize_it slice m_BLC_transitions[" << std::distance(m_BLC_transitions.cbegin(), stabilize_it->first) << ',' << std::distance(m_BLC_transitions.cbegin(), stabilize_it->second) << ")\n";
             bool new_bottom_state_with_transition_found = false;
             for (BLC_list_const_iterator work_it = stabilize_it->first; work_it < stabilize_it->second; ++work_it)
             {
-//if (stabilize_it->first == work_it || m_transitions[*work_it].transitions_per_block_to_constellation != m_transitions[*(work_it - 1)].transitions_per_block_to_constellation) { std::cerr << "  Now looking at " << m_transitions[*work_it].transitions_per_block_to_constellation->debug_id(*this) << '\n'; }
               const state_index t_from = m_aut.get_transitions()[*work_it].from();
               if (0 == m_states[t_from].no_of_outgoing_inert_transitions)
               {
                 // t_from is a new bottom state, so we can assign the work to this transition
-//std::cerr << "    " << m_transitions[*work_it].debug_id(*this) << " is assigned work on the main loop of stabilizeB() afterwards\n";
                 mCRL2complexity(&m_transitions[*work_it], add_work(check_complexity::stabilizeB__main_loop_afterwards, 1), *this);
                 new_bottom_state_with_transition_found = true;
               }
             }
-            assert(new_bottom_state_with_transition_found);
+            if (new_bottom_state_with_transition_found)
+            {
+              // The work has been assigned successfully, so we can replace this
+              // entry of stabilize_work_to_assign_later with the last one.
+              #ifndef NDEBUG
+                bool at_end=std::next(stabilize_it)==stabilize_work_to_assign_later.end();
+              #endif
+              *stabilize_it=stabilize_work_to_assign_later.back();
+              stabilize_work_to_assign_later.pop_back();
+              assert(at_end == (stabilize_it==stabilize_work_to_assign_later.end()));
+            }
+            else
+            {
+              ++stabilize_it;
+            }
           }
-      #endif
-        // destroy and deallocate initialize_qhat_work_to_assign_later and stabilize_work_to_assign_later here
-        // Algorithm 4, line 4.17.
-      return;
+        #endif
+      }
+      assert(0); // unreachable
     }
 
 #ifndef CO_SPLITTER_IN_BLC_LIST

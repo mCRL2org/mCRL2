@@ -691,15 +691,15 @@ BOOST_AUTO_TEST_CASE(Test20)
   e.states_plain=6; e.transitions_plain=13; e.labels_plain=3;
   e.states_bisimulation=5, e.transitions_bisimulation=11, e.labels_bisimulation=3;
   e.states_branching_bisimulation=5, e.transitions_branching_bisimulation=9, e.labels_branching_bisimulation=3;
-  e.states_divergence_preserving_branching_bisimulation=5, e.transitions_divergence_preserving_branching_bisimulation=9,
+  e.states_divergence_preserving_branching_bisimulation=5, e.transitions_divergence_preserving_branching_bisimulation=11,
          e.labels_divergence_preserving_branching_bisimulation=3;
-  e.states_weak_bisimulation=5, e.transitions_weak_bisimulation=9, e.labels_weak_bisimulation=3;
-  e.states_divergence_preserving_weak_bisimulation=5, e.transitions_divergence_preserving_weak_bisimulation=9,
+  e.states_weak_bisimulation=5, e.transitions_weak_bisimulation=8, e.labels_weak_bisimulation=3;
+  e.states_divergence_preserving_weak_bisimulation=5, e.transitions_divergence_preserving_weak_bisimulation=10,
          e.labels_divergence_preserving_weak_bisimulation=4;
-  e.states_simulation=5, e.transitions_simulation=9, e.labels_simulation=3;
-  e.states_trace_equivalence=5, e.transitions_trace_equivalence=9, e.labels_trace_equivalence=3;
-  e.states_weak_trace_equivalence=1, e.transitions_weak_trace_equivalence=2, e.labels_weak_trace_equivalence=3;
-  e.states_determinisation=6, e.transitions_determinisation=9, e.labels_determinisation=3;
+  e.states_simulation=5, e.transitions_simulation=10, e.labels_simulation=3;
+  e.states_trace_equivalence=6, e.transitions_trace_equivalence=11, e.labels_trace_equivalence=3;
+  e.states_weak_trace_equivalence=3, e.transitions_weak_trace_equivalence=3, e.labels_weak_trace_equivalence=3;
+  e.states_determinisation=6, e.transitions_determinisation=11, e.labels_determinisation=3;
   e.is_deterministic=false;
 
   BOOST_CHECK(reduce_lts_in_various_ways("Test20", test20, e));
