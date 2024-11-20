@@ -26,12 +26,29 @@ namespace std
 template<>
 struct hash<atermpp::detail::_aterm*>
 {
+  uint64_t xorshift(const uint64_t& n, int i) const
+  {
+    return n^(n>>i);
+  }
+
+  //   uint64_t hash(const atermpp::aterm_core* term) const
   std::size_t operator()(const atermpp::detail::_aterm* term) const
   {
     // All terms are 8 bytes aligned which means that the three lowest significant
     // bits of their pointers are always 0. However, their smallest size is 16 bytes so
     // the lowest 4 bits do not carry much information.
+
+    // The standard hash function for pointers of the current compiler. This is the very complex murmur hash on the Mac.
+    // std::hash<const void*> hasher;
+    // return hasher(reinterpret_cast<const void*>(term));
+    
+    // The original hash function in the aterm library. 
     return reinterpret_cast<std::uintptr_t>(term) >> 4;
+
+    // A rather arbitrary hash function suggested by stack overflow. 
+    // uint64_t p = 0x5555555555555555ull; // pattern of alternating 0 and 1
+    // uint64_t c = 17316035218449499591ull;// random uneven integer constant; 
+    // return c*xorshift(p*xorshift(reinterpret_cast<std::uintptr_t>(term),32),32);
   }
 };
 
