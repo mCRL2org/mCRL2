@@ -667,3 +667,314 @@ BOOST_AUTO_TEST_CASE(Test19)
 
 }
 
+// The following examples are provided by JFG to test the version checked in on 20 November 2024
+// of the GJ bisimulation minimisation algorithm.
+BOOST_AUTO_TEST_CASE(Test20)
+{
+  const std::string test20=
+    "des(0,13,6)\n"
+    "(0,\"a\",2)\n"
+    "(3,\"a\",4)\n"
+    "(2,\"b\",4)\n"
+    "(5,\"b\",2)\n"
+    "(0,\"tau\",2)\n"
+    "(1,\"tau\",1)\n"
+    "(1,\"tau\",4)\n"
+    "(0,\"tau\",1)\n"
+    "(5,\"tau\",5)\n"
+    "(0,\"tau\",3)\n"
+    "(0,\"tau\",5)\n"
+    "(3,\"tau\",5)\n"
+    "(4,\"tau\",4)\n";
+
+  expected_sizes e;
+  e.states_plain=6; e.transitions_plain=13; e.labels_plain=3;
+  e.states_bisimulation=5, e.transitions_bisimulation=11, e.labels_bisimulation=3;
+  e.states_branching_bisimulation=5, e.transitions_branching_bisimulation=9, e.labels_branching_bisimulation=3;
+  e.states_divergence_preserving_branching_bisimulation=5, e.transitions_divergence_preserving_branching_bisimulation=9,
+         e.labels_divergence_preserving_branching_bisimulation=3;
+  e.states_weak_bisimulation=5, e.transitions_weak_bisimulation=9, e.labels_weak_bisimulation=3;
+  e.states_divergence_preserving_weak_bisimulation=5, e.transitions_divergence_preserving_weak_bisimulation=9,
+         e.labels_divergence_preserving_weak_bisimulation=4;
+  e.states_simulation=5, e.transitions_simulation=9, e.labels_simulation=3;
+  e.states_trace_equivalence=5, e.transitions_trace_equivalence=9, e.labels_trace_equivalence=3;
+  e.states_weak_trace_equivalence=1, e.transitions_weak_trace_equivalence=2, e.labels_weak_trace_equivalence=3;
+  e.states_determinisation=6, e.transitions_determinisation=9, e.labels_determinisation=3;
+  e.is_deterministic=false;
+
+  BOOST_CHECK(reduce_lts_in_various_ways("Test20", test20, e));
+}
+
+/*
+BOOST_AUTO_TEST_CASE(Test20a)
+{
+  const std::string test20a=
+    "des(0,125,60)\n"
+    "(12,\"a\",46)\n"
+    "(32,\"a\",37)\n"
+    "(52,\"a\",27)\n"
+    "(54,\"a\",35)\n"
+    "(0,\"b\",57)\n"
+    "(1,\"b\",55)\n"
+    "(2,\"b\",47)\n"
+    "(4,\"b\",8)\n"
+    "(6,\"b\",11)\n"
+    "(9,\"b\",31)\n"
+    "(12,\"b\",52)\n"
+    "(14,\"b\",24)\n"
+    "(16,\"b\",16)\n"
+    "(20,\"b\",58)\n"
+    "(21,\"b\",8)\n"
+    "(22,\"b\",8)\n"
+    "(24,\"b\",48)\n"
+    "(25,\"b\",39)\n"
+    "(29,\"b\",43)\n"
+    "(30,\"b\",4)\n"
+    "(31,\"b\",52)\n"
+    "(32,\"b\",40)\n"
+    "(33,\"b\",57)\n"
+    "(39,\"b\",34)\n"
+    "(40,\"b\",42)\n"
+    "(44,\"b\",58)\n"
+    "(46,\"b\",39)\n"
+    "(47,\"b\",55)\n"
+    "(48,\"b\",44)\n"
+    "(50,\"b\",33)\n"
+    "(51,\"b\",42)\n"
+    "(53,\"b\",21)\n"
+    "(56,\"b\",34)\n"
+    "(58,\"b\",55)\n"
+    "(59,\"b\",37)\n"
+    "(22,\"tau\",8)\n"
+    "(22,\"tau\",14)\n"
+    "(40,\"tau\",46)\n"
+    "(35,\"tau\",21)\n"
+    "(29,\"tau\",23)\n"
+    "(25,\"tau\",53)\n"
+    "(58,\"tau\",26)\n"
+    "(11,\"tau\",20)\n"
+    "(52,\"tau\",3)\n"
+    "(58,\"tau\",51)\n"
+    "(31,\"tau\",0)\n"
+    "(33,\"tau\",57)\n"
+    "(35,\"tau\",3)\n"
+    "(19,\"tau\",12)\n"
+    "(41,\"tau\",59)\n"
+    "(18,\"tau\",53)\n"
+    "(36,\"tau\",38)\n"
+    "(10,\"tau\",34)\n"
+    "(55,\"tau\",0)\n"
+    "(5,\"tau\",51)\n"
+    "(18,\"tau\",58)\n"
+    "(15,\"tau\",15)\n"
+    "(30,\"tau\",19)\n"
+    "(20,\"tau\",37)\n"
+    "(11,\"tau\",56)\n"
+    "(43,\"tau\",48)\n"
+    "(24,\"tau\",26)\n"
+    "(23,\"tau\",30)\n"
+    "(54,\"tau\",35)\n"
+    "(10,\"tau\",27)\n"
+    "(21,\"tau\",49)\n"
+    "(3,\"tau\",0)\n"
+    "(50,\"tau\",29)\n"
+    "(53,\"tau\",24)\n"
+    "(50,\"tau\",57)\n"
+    "(4,\"tau\",9)\n"
+    "(53,\"tau\",15)\n"
+    "(46,\"tau\",35)\n"
+    "(24,\"tau\",18)\n"
+    "(39,\"tau\",6)\n"
+    "(33,\"tau\",37)\n"
+    "(43,\"tau\",34)\n"
+    "(43,\"tau\",49)\n"
+    "(34,\"tau\",42)\n"
+    "(40,\"tau\",6)\n"
+    "(47,\"tau\",27)\n"
+    "(18,\"tau\",17)\n"
+    "(6,\"tau\",28)\n"
+    "(6,\"tau\",38)\n"
+    "(17,\"tau\",34)\n"
+    "(13,\"tau\",42)\n"
+    "(45,\"tau\",52)\n"
+    "(48,\"tau\",30)\n"
+    "(54,\"tau\",14)\n"
+    "(0,\"tau\",46)\n"
+    "(1,\"tau\",56)\n"
+    "(1,\"tau\",56)\n"
+    "(41,\"tau\",57)\n"
+    "(2,\"tau\",17)\n"
+    "(28,\"tau\",54)\n"
+    "(18,\"tau\",56)\n"
+    "(3,\"tau\",12)\n"
+    "(1,\"tau\",18)\n"
+    "(58,\"tau\",46)\n"
+    "(37,\"tau\",28)\n"
+    "(43,\"tau\",20)\n"
+    "(23,\"tau\",0)\n"
+    "(34,\"tau\",31)\n"
+    "(48,\"tau\",22)\n"
+    "(2,\"tau\",52)\n"
+    "(25,\"tau\",10)\n"
+    "(50,\"tau\",36)\n"
+    "(20,\"tau\",32)\n"
+    "(36,\"tau\",39)\n"
+    "(51,\"tau\",19)\n"
+    "(47,\"tau\",21)\n"
+    "(36,\"tau\",51)\n"
+    "(26,\"tau\",35)\n"
+    "(44,\"tau\",3)\n"
+    "(0,\"tau\",42)\n"
+    "(45,\"tau\",37)\n"
+    "(13,\"tau\",35)\n"
+    "(58,\"tau\",19)\n"
+    "(6,\"tau\",48)\n"
+    "(3,\"tau\",24)\n"
+    "(15,\"tau\",58)\n"
+    "(10,\"tau\",29)\n"
+    "(26,\"tau\",13)\n"
+    "(36,\"tau\",39)\n"
+    "(2,\"tau\",16)\n";
+
+  expected_sizes e;
+  e.states_plain=60; e.transitions_plain=125; e.labels_plain=3;
+  e.states_bisimulation=54, e.transitions_bisimulation=123, e.labels_bisimulation=3;
+  e.states_branching_bisimulation=32, e.transitions_branching_bisimulation=86, e.labels_branching_bisimulation=3;
+  e.states_divergence_preserving_branching_bisimulation=32, e.transitions_divergence_preserving_branching_bisimulation=87,
+         e.labels_divergence_preserving_branching_bisimulation=3;
+  e.states_weak_bisimulation=16, e.transitions_weak_bisimulation=32, e.labels_weak_bisimulation=3;
+  e.states_divergence_preserving_weak_bisimulation=16, e.transitions_divergence_preserving_weak_bisimulation=33,
+         e.labels_divergence_preserving_weak_bisimulation=4;
+  e.states_simulation=38, e.transitions_simulation=77, e.labels_simulation=3;
+  e.states_trace_equivalence=260, e.transitions_trace_equivalence=619, e.labels_trace_equivalence=3;
+  e.states_weak_trace_equivalence=1, e.transitions_weak_trace_equivalence=2, e.labels_weak_trace_equivalence=3;
+  e.states_determinisation=325, e.transitions_determinisation=770, e.labels_determinisation=3;
+  e.is_deterministic=false;
+
+  BOOST_CHECK(reduce_lts_in_various_ways("Test20a", test20a, e));
+}
+
+BOOST_AUTO_TEST_CASE(Test21)
+{
+  const std::string test21=
+    "des(0,101,60)\n"
+    "(26,\"a\",0)\n"
+    "(29,\"a\",4)\n"
+    "(39,\"a\",44)\n"
+    "(40,\"a\",15)\n"
+    "(48,\"a\",54)\n"
+    "(1,\"b\",27)\n"
+    "(2,\"b\",11)\n"
+    "(3,\"b\",34)\n"
+    "(4,\"b\",22)\n"
+    "(5,\"b\",47)\n"
+    "(6,\"b\",28)\n"
+    "(10,\"b\",3)\n"
+    "(11,\"b\",24)\n"
+    "(13,\"b\",6)\n"
+    "(14,\"b\",32)\n"
+    "(17,\"b\",22)\n"
+    "(21,\"b\",42)\n"
+    "(22,\"b\",45)\n"
+    "(23,\"b\",58)\n"
+    "(24,\"b\",8)\n"
+    "(25,\"b\",49)\n"
+    "(26,\"b\",7)\n"
+    "(28,\"b\",26)\n"
+    "(30,\"b\",16)\n"
+    "(31,\"b\",52)\n"
+    "(33,\"b\",29)\n"
+    "(34,\"b\",27)\n"
+    "(36,\"b\",41)\n"
+    "(38,\"b\",32)\n"
+    "(39,\"b\",4)\n"
+    "(45,\"b\",12)\n"
+    "(47,\"b\",24)\n"
+    "(48,\"b\",29)\n"
+    "(49,\"b\",14)\n"
+    "(50,\"b\",16)\n"
+    "(53,\"b\",0)\n"
+    "(54,\"b\",8)\n"
+    "(55,\"b\",19)\n"
+    "(56,\"b\",13)\n"
+    "(58,\"b\",14)\n"
+    "(59,\"b\",27)\n"
+    "(45,\"tau\",46)\n"
+    "(51,\"tau\",43)\n"
+    "(23,\"tau\",38)\n"
+    "(15,\"tau\",11)\n"
+    "(21,\"tau\",37)\n"
+    "(0,\"tau\",19)\n"
+    "(34,\"tau\",32)\n"
+    "(19,\"tau\",27)\n"
+    "(33,\"tau\",40)\n"
+    "(51,\"tau\",52)\n"
+    "(40,\"tau\",46)\n"
+    "(38,\"tau\",55)\n"
+    "(26,\"tau\",32)\n"
+    "(35,\"tau\",37)\n"
+    "(20,\"tau\",41)\n"
+    "(54,\"tau\",51)\n"
+    "(28,\"tau\",43)\n"
+    "(31,\"tau\",31)\n"
+    "(31,\"tau\",3)\n"
+    "(39,\"tau\",0)\n"
+    "(19,\"tau\",52)\n"
+    "(51,\"tau\",57)\n"
+    "(18,\"tau\",18)\n"
+    "(22,\"tau\",4)\n"
+    "(7,\"tau\",28)\n"
+    "(43,\"tau\",4)\n"
+    "(39,\"tau\",47)\n"
+    "(59,\"tau\",45)\n"
+    "(47,\"tau\",16)\n"
+    "(18,\"tau\",24)\n"
+    "(39,\"tau\",7)\n"
+    "(16,\"tau\",52)\n"
+    "(25,\"tau\",32)\n"
+    "(5,\"tau\",58)\n"
+    "(13,\"tau\",48)\n"
+    "(23,\"tau\",35)\n"
+    "(29,\"tau\",36)\n"
+    "(57,\"tau\",53)\n"
+    "(32,\"tau\",28)\n"
+    "(16,\"tau\",25)\n"
+    "(29,\"tau\",41)\n"
+    "(29,\"tau\",34)\n"
+    "(17,\"tau\",51)\n"
+    "(9,\"tau\",46)\n"
+    "(56,\"tau\",30)\n"
+    "(49,\"tau\",21)\n"
+    "(23,\"tau\",19)\n"
+    "(12,\"tau\",49)\n"
+    "(2,\"tau\",22)\n"
+    "(16,\"tau\",28)\n"
+    "(0,\"tau\",41)\n"
+    "(0,\"tau\",45)\n"
+    "(50,\"tau\",36)\n"
+    "(48,\"tau\",8)\n"
+    "(5,\"tau\",22)\n"
+    "(13,\"tau\",39)\n"
+    "(12,\"tau\",37)\n"
+    "(20,\"tau\",18)\n"
+    "(46,\"tau\",42)\n"
+    "(15,\"tau\",28)\n";
+
+  expected_sizes e;
+  e.states_plain=60; e.transitions_plain=101; e.labels_plain=3;
+  e.states_bisimulation=49, e.transitions_bisimulation=94, e.labels_bisimulation=3;
+  e.states_branching_bisimulation=40, e.transitions_branching_bisimulation=81, e.labels_branching_bisimulation=3;
+  e.states_divergence_preserving_branching_bisimulation=41, e.transitions_divergence_preserving_branching_bisimulation=84,
+         e.labels_divergence_preserving_branching_bisimulation=3;
+  e.states_weak_bisimulation=36, e.transitions_weak_bisimulation=69, e.labels_weak_bisimulation=3;
+  e.states_divergence_preserving_weak_bisimulation=37, e.transitions_divergence_preserving_weak_bisimulation=72,
+         e.labels_divergence_preserving_weak_bisimulation=4;
+  e.states_simulation=14, e.transitions_simulation=20, e.labels_simulation=3;
+  e.states_trace_equivalence=14, e.transitions_trace_equivalence=20, e.labels_trace_equivalence=3;
+  e.states_weak_trace_equivalence=5, e.transitions_weak_trace_equivalence=6, e.labels_weak_trace_equivalence=3;
+  e.states_determinisation=18, e.transitions_determinisation=24, e.labels_determinisation=3;
+  e.is_deterministic=false;
+
+  BOOST_CHECK(reduce_lts_in_various_ways("Test21", test21, e));
+}
+*/
