@@ -26,29 +26,22 @@ namespace std
 template<>
 struct hash<atermpp::detail::_aterm*>
 {
-  uint64_t xorshift(const uint64_t& n, int i) const
-  {
-    return n^(n>>i);
-  }
-
-  //   uint64_t hash(const atermpp::aterm_core* term) const
   std::size_t operator()(const atermpp::detail::_aterm* term) const
   {
-    // All terms are 8 bytes aligned which means that the three lowest significant
-    // bits of their pointers are always 0. However, their smallest size is 16 bytes so
-    // the lowest 4 bits do not carry much information.
+    // The hash function given here shifts a term four positions to the right.
+    // This is very effective in the toolset, as the aterms are often stored 
+    // in consecutive positions and this means they are stored in consecutive positions
+    // in hash tables based on chaining. However, this has function is very disadvantageous
+    // for other hash tables, especially those with open addressing. In that case
+    // it is much better to use the hash function below, which unfortunately can lead
+    // to a performance drop of 1/3, compared to the ">> 4" hash below. 
+    // The reason for the performance drop is most likely that with better hashing
+    // the items are better dispersed in hash tables, leading to worse cache behaviour. 
+    //   std::hash<const void*> hasher;
+    //   return hasher(reinterpret_cast<const void*>(term));
 
-    // The standard hash function for pointers of the current compiler. This is the very complex murmur hash on the Mac.
-    // std::hash<const void*> hasher;
-    // return hasher(reinterpret_cast<const void*>(term));
-    
-    // The original hash function in the aterm library. 
     return reinterpret_cast<std::uintptr_t>(term) >> 4;
-
-    // A rather arbitrary hash function suggested by stack overflow. 
-    // uint64_t p = 0x5555555555555555ull; // pattern of alternating 0 and 1
-    // uint64_t c = 17316035218449499591ull;// random uneven integer constant; 
-    // return c*xorshift(p*xorshift(reinterpret_cast<std::uintptr_t>(term),32),32);
+    
   }
 };
 
