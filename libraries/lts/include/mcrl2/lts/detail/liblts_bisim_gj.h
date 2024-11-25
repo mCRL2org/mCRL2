@@ -3063,17 +3063,16 @@ assert(!initialisation);
               assert(m_blocks[new_bi].block_to_constellation.end()!=new_position);
             }
             const constellation_index new_constellation=m_constellations.size()-1;
-            assert(!t_is_inert || to_constln!=old_constellation || m_blocks[new_bi].constellation!=new_constellation);
-                // < If the formerly inert transition goes from the new constellation to the old constellation,
-                // it is in a co-splitter without (unstable) main splitter, and this co-splitter was handled
-                // as the first splitting action.
-                // Therefore, it must be stable, and the situation does not appear.
-            if (t_is_inert && to_constln==new_constellation && m_blocks[new_bi].constellation==old_constellation)
-            {
-              // The transition goes from the old constellation to the splitter
+            if (t_is_inert && ((to_constln==new_constellation && m_blocks[new_bi].constellation==old_constellation) ||
+              // < The transition goes from the old constellation to the splitter
               // and was inert earlier.
               // It is in a main splitter without (unstable) co-splitter.
               // We do not need to find the co-splitter, and we do not need to maintain the relationship with it.
+                               (to_constln==old_constellation && m_blocks[new_bi].constellation==new_constellation)))
+                // < If the formerly inert transition goes from the new constellation to the old constellation,
+                // it is in a co-splitter without (unstable) main splitter, and this co-splitter was handled
+                // as the first splitting action.
+            {
               old_constellation=null_constellation;
 //std::cerr << "This transition was inert earlier, so we do not need to find a co-splitter.\n";
             }
