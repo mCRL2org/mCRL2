@@ -72,10 +72,9 @@ inline
 multi_action_name_set make_name_set(const action_name_multiset_list& v)
 {
   multi_action_name_set result;
-  core::identifier_string_list& names;
   for (const action_name_multiset& i: v)
   {
-    names = i.names();
+    const core::identifier_string_list& names = i.names();
     result.insert(multi_action_name(names.begin(), names.end()));
   }
   return result;
