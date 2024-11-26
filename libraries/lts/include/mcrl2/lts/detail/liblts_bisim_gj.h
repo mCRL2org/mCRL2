@@ -4523,7 +4523,9 @@ assert(!initialisation);
           {
             assert(number_of_states_in_block(R_block) > 1);
             const BLC_list_iterator splitter_start_same_BLC=splitter->start_same_BLC;
+#ifndef NDEBUG
             const BLC_list_iterator splitter_end_same_BLC=splitter->end_same_BLC;
+#endif
             // Some tau-transitions from R to U may come out of states that are not (yet) new bottom states.
             // Therefore we still have to go through the movement of constructing m_R:
             const BLC_list_iterator R_to_U_tau_splitter_start_same_BLC=R_to_U_tau_splitter->start_same_BLC;

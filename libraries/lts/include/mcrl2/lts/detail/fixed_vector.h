@@ -50,6 +50,7 @@ public:
     using std::vector<T>::back;
     using std::vector<T>::size;
     using std::vector<T>::clear;
+    using std::vector<T>::empty;
 
     explicit fixed_vector(size_type n)  :std::vector<T>(n)  {  }
     explicit fixed_vector(size_type n, T init)  :std::vector<T>(n, init)  {  }
@@ -57,7 +58,6 @@ public:
 #ifdef NDEBUG
     using std::vector<T>::operator[];
 #else
-    using std::vector<T>::empty;
     using std::vector<T>::data;
 
     // operator[] calls std::vector<T>::at because the latter checks bounds.
