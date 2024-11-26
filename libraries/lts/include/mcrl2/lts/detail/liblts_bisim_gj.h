@@ -2987,12 +2987,12 @@ assert(!initialisation);
       if (t_is_inert && to_constln==m_blocks[new_bi].constellation)
       {
           // Before correcting the BLC lists, we already inserted an empty BLC_indicator
-          // into the list to take the inert transitions.
+          // into the list to take the constellation-inert transitions.
           assert(this_block_to_constellation==m_blocks[old_bi].block_to_constellation.begin());
           assert(!m_blocks[new_bi].block_to_constellation.empty());
           new_BLC_block=m_blocks[new_bi].block_to_constellation.begin();
           #ifndef NDEBUG
-//std::cerr << "This transition remains inert and is moved to " << new_BLC_block->debug_id(*this) << '\n';
+//std::cerr << "This transition remains constellation-inert and is moved to " << new_BLC_block->debug_id(*this) << '\n';
             if (new_BLC_block->start_same_BLC<new_BLC_block->end_same_BLC)
             {
               const transition& inert_t=m_aut.get_transitions()[*new_BLC_block->start_same_BLC];
@@ -3062,24 +3062,24 @@ assert(!initialisation);
               new_position=m_blocks[new_bi].block_to_constellation.before_end();
               assert(m_blocks[new_bi].block_to_constellation.end()!=new_position);
             }
-            const constellation_index new_constellation=m_constellations.size()-1;
-            if (t_is_inert && ((to_constln==new_constellation && m_blocks[new_bi].constellation==old_constellation) ||
-              // < The transition goes from the old constellation to the splitter
-              // and was inert earlier.
-              // It is in a main splitter without (unstable) co-splitter.
-              // We do not need to find the co-splitter, and we do not need to maintain the relationship with it.
-                               (to_constln==old_constellation && m_blocks[new_bi].constellation==new_constellation)))
-                // < If the formerly inert transition goes from the new constellation to the old constellation,
-                // it is in a co-splitter without (unstable) main splitter, and this co-splitter was handled
-                // as the first splitting action.
-            {
-              old_constellation=null_constellation;
-//std::cerr << "This transition was inert earlier, so we do not need to find a co-splitter.\n";
-            }
-            else
-            {
-              #ifdef CO_SPLITTER_IN_BLC_LIST
-                if (null_constellation!=old_constellation)
+            #ifdef CO_SPLITTER_IN_BLC_LIST
+              if (null_constellation!=old_constellation)
+              {
+                const constellation_index new_constellation=m_constellations.size()-1;
+                if (t_is_inert && ((to_constln==new_constellation && m_blocks[new_bi].constellation==old_constellation) ||
+                                        // < The transition goes from the old constellation to the splitter block
+                                        // and was constellation-inert earlier.
+                                        // It is in a main splitter without (unstable) co-splitter.
+                                        // We do not need to find the co-splitter, and we do not need to maintain the relationship with it.
+                                   (to_constln==old_constellation && m_blocks[new_bi].constellation==new_constellation)))
+                                        // < If the formerly constellation-inert transition goes from the new constellation to the old constellation,
+                                        // it is in a co-splitter without (unstable) main splitter, and this co-splitter was handled
+                                        // as the first splitting action.
+                {
+                  old_constellation=null_constellation;
+//std::cerr << (old_constellation==to_constln ? "This transition was constellation-inert earlier, so we do not need to find a main splitter.\n" : "This transition was constellation-inert earlier, so we do not need to find a co-splitter.\n");
+                }
+                else
                 {
                   // The following comments are all formulated for the case that this_block_to_constellation is a main splitter (except when indicated explicitly).
                   assert(old_constellation<new_constellation);
@@ -3205,10 +3205,10 @@ assert(!initialisation);
                     old_constellation=null_constellation;
                   }
                 }
-              #else
-                #error "old_co_splitter_end should be calculated here"
-              #endif
-            }
+              }
+            #else
+              #error "old_co_splitter_end should be calculated here"
+            #endif
           }
           assert(!m_branching || m_blocks[new_bi].block_to_constellation.end()!=new_position);
           const BLC_list_iterator old_BLC_start=this_block_to_constellation->start_same_BLC;
@@ -3224,7 +3224,7 @@ assert(!initialisation);
               // this is a new co-splitter but we haven't yet found the new main splitter.
               // Perhaps we will have to stabilize it later.
               m_co_splitters_to_be_checked.emplace_back(new_BLC_block->start_same_BLC, new_bi);
-//std::cerr << "We will check the new co-splitter later.\n";
+//std::cerr << "We will check the stability of the new and old co-splitters later.\n";
               // We may also have to stabilize the old co-splitter later.
               assert(&*m_BLC_transitions.begin()<this_block_to_constellation->end_same_BLC);
               m_co_splitters_to_be_checked.emplace_back(std::prev(this_block_to_constellation->end_same_BLC), old_bi);
@@ -3238,7 +3238,7 @@ assert(!initialisation);
               assert(&*m_BLC_transitions.begin()<old_co_splitter_end);
               assert(old_co_splitter_end<=&*m_BLC_transitions.end());
               m_co_splitters_to_be_checked.emplace_back(std::prev(old_co_splitter_end), old_bi);
-//std::cerr << "We will check the old co-splitter later.\n";
+//std::cerr << "We will check the stability of the old co-splitter later.\n";
             }
           }
         }
@@ -4133,11 +4133,11 @@ assert(!initialisation);
       return first_unmarked_bottom_state;
     } */
 
-    // Make this transition non-inert.
+    // Make this transition non-block-inert.
     // The transition must go from one block to another but it cannot be constellation-inert yet.
     void make_transition_non_inert(const transition& t)
     {
-//std::cerr << "Transition " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << " becomes non-inert.\n";
+//std::cerr << "Transition " << t.from() << " -" << m_aut.action_label(t.label()) << "-> " << t.to() << " becomes non-block-inert.\n";
       assert(is_inert_during_init(t));
       assert(m_states[t.to()].block!=m_states[t.from()].block);
       assert(m_blocks[m_states[t.to()].block].constellation == m_blocks[m_states[t.from()].block].constellation);
@@ -4173,7 +4173,8 @@ assert(!initialisation);
         if (m_branching)
         {
           const transition& perhaps_inert_t=m_aut.get_transitions()[*btc.begin()->start_same_BLC];
-          assert(m_states[perhaps_inert_t.from()].block==m_states[t.from()].block);
+          // The following assertion may fail because we sometimes make a splitter stable early:
+          //assert(m_states[perhaps_inert_t.from()].block==m_states[t.from()].block);
           if (is_inert_during_init_if_branching(perhaps_inert_t) &&
               m_blocks[m_states[perhaps_inert_t.to()].block].constellation==from_block.constellation)
           {
@@ -4226,7 +4227,7 @@ assert(!initialisation);
       }
       block_index R_block = simple_splitB(B, splitter, first_unmarked_bottom_state, splitter_end_unmarked_BLC);
       const block_index bi = m_blocks.size() - 1;
-//std::cerr << "Split block of size " << number_of_states_in_block(B) + number_of_states_in_block(bi) << " taking away " << number_of_states_in_block(bi) << " states (namely"; for (auto it=m_blocks[bi].start_bottom_states; it<m_blocks[bi].end_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << ")\n";
+//std::cerr << "Split block of size " << number_of_states_in_block(B) + number_of_states_in_block(bi) << " taking away " << number_of_states_in_block(bi) << " states (namely"; for (auto it=m_blocks[bi].start_bottom_states; it<m_blocks[bi].end_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << (bi == R_block ? ", the R-subblock)\n" : ", the U-subblock)\n");
       assert(bi == R_block || B == R_block);
       assert(number_of_states_in_block(B) >= number_of_states_in_block(bi));
 
@@ -4256,32 +4257,53 @@ assert(!initialisation);
       #ifdef CO_SPLITTER_IN_BLC_LIST
         assert(m_BLC_indicators_to_be_deleted.empty());
       #endif
-      assert(split_off_new_bottom_states || m_blocks[B].block_to_constellation.begin()==splitter);
-      if (split_off_new_bottom_states && bi == R_block)
+
+      const constellation_index to_constln=m_blocks[m_states[m_aut.get_transitions()[*splitter->start_same_BLC].to()].block].constellation;
+      bool make_splitter_stable_early=false;
+      if (!split_off_new_bottom_states)
       {
-        // move splitter as a whole from its current list to the new list where it will be part of:
-        // (This only works if the whole splitter BLC set has moved, i.e. only if split_off_new_bottom_states == true.)
-        #ifdef CO_SPLITTER_IN_BLC_LIST
-          if (null_constellation != old_constellation)
+        // This is a new bottom split, the splitter contains the constellation-inert transitions.
+        make_splitter_stable_early=true;
+        assert(m_blocks[B].block_to_constellation.begin()==splitter);
+        splitter->make_stable();
+      }
+      else
+      {
+        if (null_constellation==old_constellation || old_constellation==to_constln)
+        {
+          // splitter is not a main splitter. So it can be stabilized already
+          // (as we do not need to maintain the order of main/co-splitter).
+          make_splitter_stable_early=true;
+          // However, we may need to move the splitter to its new constellation at the same time.
+          if (bi==R_block)
           {
-            #ifndef NDEBUG
-              const constellation_index to_constln = m_blocks[m_states[m_aut.get_transitions()[*splitter->start_same_BLC].to()].block].constellation;
-              assert(to_constln == old_constellation || to_constln == m_constellations.size() - 1);
-              for (linked_list<BLC_indicators>::iterator i=m_blocks[B].block_to_constellation.begin(); i!=splitter; ++i)
-              {
-                assert(i!=m_blocks[B].block_to_constellation.end());
-              }
-            #endif
-            // insert a dummy old splitter to help with placing the corresponding main/co splitter correctly:
-//std::cerr << "Inserting a dummy old splitter at m_BLC_transitions[" << std::distance(&*m_BLC_transitions.begin(), splitter->end_same_BLC) << "]\n";
+            splitter->make_stable();
+            // move splitter as a whole from its current list to the new list where it will be part of:
+            // (This only works if the whole splitter BLC set has moved, i.e. only if split_off_new_bottom_states == true.)
+            m_blocks[R_block].block_to_constellation.splice(m_blocks[R_block].block_to_constellation.end(),
+                                m_blocks[B].block_to_constellation, splitter);
+            skip_transitions_in_splitter=true;
+          }
+          else
+          {
+            make_splitter_stable(splitter);
+          }
+        }
+        else if (bi==R_block)
+        {
+          // move splitter as a whole from its current list to the new list where it will be part of:
+          // (This only works if the whole splitter BLC set has moved, i.e. only if split_off_new_bottom_states == true.)
+          #ifdef CO_SPLITTER_IN_BLC_LIST
+            // insert a dummy old main splitter to help with placing the corresponding co-splitter correctly:
+//std::cerr << "Inserting a dummy old main splitter at m_BLC_transitions[" << std::distance(&*m_BLC_transitions.begin(), splitter->end_same_BLC) << "]\n";
             m_BLC_indicators_to_be_deleted.push_back(
               m_blocks[B].block_to_constellation.emplace_after(splitter, splitter->end_same_BLC, splitter->end_same_BLC, false)
             );
-          }
-        #endif
-        m_blocks[R_block].block_to_constellation.splice(m_blocks[R_block].block_to_constellation.end(),
+          #endif
+          m_blocks[R_block].block_to_constellation.splice(m_blocks[R_block].block_to_constellation.end(),
                                 m_blocks[B].block_to_constellation, splitter);
-        skip_transitions_in_splitter = true;
+          skip_transitions_in_splitter=true;
+        }
       }
       // Recall new LBC positions.
       assert(m_co_splitters_to_be_checked.empty());
@@ -4638,6 +4660,10 @@ assert(!initialisation);
             R_to_U_tau_splitter->make_stable();
             new_bottom_block = R_block;
             R_block = null_block;
+            // During stabilizeB(), the splitter should be made stable again, even the part starting in the new bottom states.
+            // However, during stabilizeB() we have null_constellation==old_constellation,
+            // so it has already been made stable.
+            assert(make_splitter_stable_early || null_constellation!=old_constellation);
           }
           else
           {
@@ -4677,10 +4703,17 @@ assert(!initialisation);
               assert(m_states[m_aut.get_transitions()[*std::prev(R_to_U_tau_splitter_end_same_BLC)].from()].block==new_bottom_block);
               assert(m_blocks[new_bottom_block].block_to_constellation.begin()==m_transitions[*std::prev(R_to_U_tau_splitter_end_same_BLC)].transitions_per_block_to_constellation);
               assert(!m_blocks[new_bottom_block].block_to_constellation.empty());
-              assert(!m_blocks[new_bottom_block].block_to_constellation.begin()->is_stable());
-              m_blocks[new_bottom_block].block_to_constellation.begin()->make_stable();
+              assert(m_blocks[new_bottom_block].block_to_constellation.begin()->is_stable());
               // The original splitter part of the old bottom states (i.e. the part of the new block) should be made stable.
               assert(m_states[m_aut.get_transitions()[*splitter_start_same_BLC].from()].block==R_block);
+              if (!make_splitter_stable_early)
+              {
+                const linked_list<BLC_indicators>::iterator new_part_of_splitter=m_transitions[*splitter_start_same_BLC].transitions_per_block_to_constellation;
+                assert(new_part_of_splitter!=splitter); // as the splitter both contains transitions from every old bottom states and from every new bottom state, it must have been separated into two parts
+                assert(splitter_start_same_BLC==new_part_of_splitter->start_same_BLC);
+                assert(new_part_of_splitter==m_transitions[*splitter_start_same_BLC].transitions_per_block_to_constellation);
+                make_splitter_stable(new_part_of_splitter);
+              }
             }
             else
             {
@@ -4696,37 +4729,32 @@ assert(!initialisation);
               assert(!m_blocks[R_block].block_to_constellation.empty()); // R_block still has transitions in the original splitter
               if (R_to_U_tau_splitter_end_same_BLC==m_blocks[R_block].block_to_constellation.begin()->end_same_BLC)
               {
-                assert(!m_blocks[R_block].block_to_constellation.begin()->is_stable());
                 // The R_to_U_tau_splitter part of the old block should be made stable.
-                m_blocks[R_block].block_to_constellation.begin()->make_stable();
+                assert(m_blocks[R_block].block_to_constellation.begin()->is_stable());
               }
-              else
-              {
-                // R_block must have lost all its inert transitions.
-                assert(R_to_U_tau_splitter_end_same_BLC==m_blocks[new_bottom_block].block_to_constellation.begin()->end_same_BLC);
-                #ifndef NDEBUG
+              #ifndef NDEBUG
+                else
+                {
+                  // R_block must have lost all its inert transitions.
+                  assert(R_to_U_tau_splitter_end_same_BLC==m_blocks[new_bottom_block].block_to_constellation.begin()->end_same_BLC);
                   assert(m_blocks[new_bottom_block].block_to_constellation.begin()==m_transitions[*std::prev(R_to_U_tau_splitter_end_same_BLC)].transitions_per_block_to_constellation);
                   const transition& not_inert_t=m_aut.get_transitions()[*m_blocks[R_block].block_to_constellation.begin()->start_same_BLC];
                   assert(R_block==m_states[not_inert_t.from()].block);
                   assert(!is_inert_during_init(not_inert_t) ||
                          m_blocks[R_block].constellation!=m_blocks[m_states[not_inert_t.to()].block].constellation);
-                #endif
-              }
+                }
+              #endif
               // The original splitter part of the old bottom states (i.e. the part of the old block) should be made stable.
               assert(m_states[m_aut.get_transitions()[*std::prev(splitter_end_same_BLC)].from()].block==R_block);
+              if (!make_splitter_stable_early)
+              {
+                make_splitter_stable(splitter);
+              }
             }
             assert(!m_blocks[R_block].block_to_constellation.empty());
-            const linked_list<BLC_indicators>::iterator new_part_of_splitter=m_transitions[*splitter_start_same_BLC].transitions_per_block_to_constellation;
-            assert(new_part_of_splitter!=splitter); // as the splitter both contains transitions from every old bottom states and from every new bottom state, it must have been separated into two parts
             assert(splitter_end_same_BLC==splitter->end_same_BLC);
             assert(splitter==m_transitions[*std::prev(splitter_end_same_BLC)].transitions_per_block_to_constellation);
-            assert(splitter_start_same_BLC==new_part_of_splitter->start_same_BLC);
-            assert(new_part_of_splitter==m_transitions[*splitter_start_same_BLC].transitions_per_block_to_constellation);
-            // both parts of the splitter must be made stable, even the one starting in the new bottom states,
-            // as the latter has to be added to Qhat again (in case this was a split during stabilizeB()):
-            make_splitter_stable(new_part_of_splitter);
           }
-          make_splitter_stable(splitter);
           assert(0 <= new_bottom_block);  assert(new_bottom_block < m_blocks.size());
           assert(!m_blocks[new_bottom_block].contains_new_bottom_states);
 //std::cerr << "new_bottom_block = " << new_bottom_block << ", R_block = " << static_cast<std::make_signed<block_index>::type>(R_block) << '\n';
@@ -4745,7 +4773,10 @@ assert(!initialisation);
             assert(m_blocks[R_block].block_to_constellation.begin()==R_to_U_tau_splitter);
             R_to_U_tau_splitter->make_stable();
           }
-          make_splitter_stable(splitter);
+          if (!make_splitter_stable_early)
+          {
+            make_splitter_stable(splitter);
+          }
         }
       }
 
