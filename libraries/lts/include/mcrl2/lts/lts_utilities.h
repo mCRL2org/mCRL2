@@ -152,28 +152,38 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
 // std::cerr << "POINTERS  " << &*current_leftmost_position << "    " << &*end << "\n";
 // std::cerr << "POINTERS1 " << &*current_leftmost_label << "    " << &*todo_stack.end() << "\n";
 // std::cerr << "AAAAA==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
-    while ((USE_STACK
-              ?current_leftmost_label!=todo_stack.end() 
-              :current_label<count_sum_transitions_per_action.size()) && 
-           count_sum_transitions_per_action[current_label].first==0)
+    if (USE_STACK)
     {
-// std::cerr << "HIER\n";
-      if (USE_STACK)
+      assert(current_leftmost_label!=todo_stack.end());
+      while (count_sum_transitions_per_action[current_label].first==0)
       {
+// std::cerr << "HIER\n";
         current_leftmost_label++;
+        if (current_leftmost_label==todo_stack.end())
+        {
+          break;
+        }
         current_label=*current_leftmost_label;
       }
-      else
+      // Move to the first position with the current label that is potentially not correct.
+      if (current_leftmost_label==todo_stack.end())
       {
-        current_label++;
+        break;
       }
     }
-    // Move to the first position with the current label that is potentially not correct.
-    if (USE_STACK
-          ?current_leftmost_label==todo_stack.end() 
-          :current_label==count_sum_transitions_per_action.size()) 
+    else
     {
-      break;
+      while (current_label<count_sum_transitions_per_action.size() &&
+             count_sum_transitions_per_action[current_label].first==0)
+      {
+// std::cerr << "HIER\n";
+        current_label++;
+      }
+      // Move to the first position with the current label that is potentially not correct.
+      if (current_label==count_sum_transitions_per_action.size())
+      {
+        break;
+      }
     }
     current_leftmost_position=begin+
                               count_sum_transitions_per_action[current_label].second-
