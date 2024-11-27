@@ -50,6 +50,39 @@ process_expression join_summands(FwdIt first, FwdIt last)
   }, delta_);
 }
 
+/// \brief Splits a merge into a set of operands
+/// Given a process expression of the form p1 || p2 || .... || pn, this will yield a
+/// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
+/// function symbol.
+/// \param x A process expression.
+/// \return A set of process expressions.
+inline std::vector<process_expression> split_merges(const process_expression& x)
+{
+  std::vector<process_expression> result;
+  utilities::detail::split(
+      x,
+      std::back_inserter(result),
+      is_merge,
+      [](const process_expression& x) { return atermpp::down_cast<merge>(x).left(); },
+      [](const process_expression& x) { return atermpp::down_cast<merge>(x).right(); });
+  return result;
+}
+
+/// \brief Returns || applied to the sequence of process expressions [first, last).
+/// \param first Start of a sequence of process expressions.
+/// \param last End of a sequence of of process expressions.
+/// \return The choice operator applied to the sequence of process expressions [first, last).
+template <typename FwdIt>
+process_expression join_merge(FwdIt first, FwdIt last)
+{
+  const process_expression delta_ = delta();
+  return utilities::detail::join(
+      first,
+      last,
+      [](const process_expression& x, const process_expression& y) { return merge(x, y); },
+      delta_);
+}
+
 } // namespace process
 
 } // namespace mcrl2

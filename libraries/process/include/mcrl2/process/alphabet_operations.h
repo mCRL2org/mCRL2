@@ -166,8 +166,7 @@ inline
 multi_action_name_set block(const core::identifier_string_list& B, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   multi_action_name_set result;
-  multi_action_name beta(B.begin(), B.end());
-
+  
   if (A_includes_subsets)
   {
     for (multi_action_name alpha: A)
@@ -184,6 +183,8 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
   }
   else
   {
+    multi_action_name beta(B.begin(), B.end());
+
     for (const multi_action_name& alpha: A)
     {
       if (utilities::detail::has_empty_intersection(beta.begin(), beta.end(), alpha.begin(), alpha.end()))
@@ -249,7 +250,6 @@ multi_action_name hide(const std::set<core::identifier_string>& I, const multi_a
 template <typename IdentifierContainer>
 multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
-  multi_action_name m(I.begin(), I.end());
   multi_action_name_set result;
   for (multi_action_name alpha: A)
   {

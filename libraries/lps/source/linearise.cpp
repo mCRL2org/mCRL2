@@ -8211,7 +8211,7 @@ class specification_basic_type
       deadlock_summand_vector resultingDeltaSummands;
       deadlock_summands.swap(resultingDeltaSummands);
 
-      bool inline_allow = is_allow || is_block;
+      const bool inline_allow = is_allow || is_block;
       if (inline_allow)
       {
         // Inline allow is only supported for ignore_time,
@@ -11267,12 +11267,18 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   mcrl2::process::process_specification input_process=type_checked_spec;
   data_specification data_spec=input_process.data();
 
-  if (lin_options.balance_summands) // Make a balanced tree of long expressions of the shape p1 + p2 + p3 + ... + p4. 
+  if (lin_options.balance_summands) // Make a balanced tree of long expressions of the shape p1 + p2 + p3 + ... + pn. 
                                     // By default the parser provides a skewed tree, and for very long sequences of summands this overflows the
                                     // stack.
   {
     balance_summands(input_process);
   }
+  if (lin_options.balance_merge) // Make a balanced tree of long expressions of the shape p1 || p2 || p3 || ... || pn. 
+                                 // By default the parser provides a skewed tree, and for very long sequences of summands this overflows the
+                                 // stack.
+  {
+    balance_merge(input_process);
+  }  
 
   if (lin_options.apply_alphabet_axioms) // Apply alphabet reduction if requested. 
   {
