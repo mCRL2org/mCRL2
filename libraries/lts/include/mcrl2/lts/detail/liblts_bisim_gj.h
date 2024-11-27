@@ -2757,9 +2757,10 @@ class bisim_partitioner_gj
                const transition_index ti,
                linked_list<BLC_indicators>::iterator new_BLC_block,
                linked_list<BLC_indicators>::iterator old_BLC_block)
-    {                                                                           assert(old_BLC_block->start_same_BLC <= old_position);
+    {                                                                           assert(new_BLC_block->end_same_BLC==old_BLC_block->start_same_BLC);
       BLC_list_iterator old_position =
-               m_transitions[ti].ref_outgoing_transitions->ref_BLC_transitions; assert(old_position<old_BLC_block->end_same_BLC);
+               m_transitions[ti].ref_outgoing_transitions->ref_BLC_transitions; assert(old_BLC_block->start_same_BLC<=old_position);
+                                                                                assert(old_position<old_BLC_block->end_same_BLC);
                                                                                 #ifndef NDEBUG
                                                                                   if (!old_BLC_block->is_stable())
                                                                                   {
@@ -2772,10 +2773,9 @@ class bisim_partitioner_gj
                                                                                     assert(new_BLC_block->start_marked_BLC<=new_BLC_block->end_same_BLC);
                                                                                   }
                                                                                 #endif
-                                                                                assert(new_BLC_block->end_same_BLC==old_BLC_block->start_same_BLC);
                                                                                 assert(m_transitions[ti].transitions_per_block_to_constellation == old_BLC_block);
                                                                                 assert(m_blocks.size()-1==m_states[m_aut.get_transitions()[ti].from()].block);
-                                                                                assert(ti == *old_position);
+                                                                                assert(ti==*old_position);
       if (old_BLC_block->is_stable() ||
           old_position<old_BLC_block->start_marked_BLC)
       {                                                                         assert(old_BLC_block->start_same_BLC <= old_position);

@@ -32,6 +32,8 @@
 #include <cstddef>     // for std::size_t
 #include <new>         // for placement new
 #include <type_traits> // for std::is_trivially_destructible<class>
+#include <functional>  // for std::less
+#include <iterator>    // for std::bidirectional_iterator_tag
 
 // My provisional recommendation is to always use simple lists and pool
 // allocators.  Using standard allocation and standard lists is 5-15% slower
