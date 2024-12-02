@@ -705,7 +705,6 @@ BOOST_AUTO_TEST_CASE(Test20)
   BOOST_CHECK(reduce_lts_in_various_ways("Test20", test20, e));
 }
 
-/*
 BOOST_AUTO_TEST_CASE(Test20a)
 {
   const std::string test20a=
@@ -977,4 +976,4 @@ BOOST_AUTO_TEST_CASE(Test21)
 
   BOOST_CHECK(reduce_lts_in_various_ways("Test21", test21, e));
 }
-*/
+

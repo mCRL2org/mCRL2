@@ -3101,7 +3101,7 @@ class bisim_partitioner_gj
                  // after co-splitter BLC sets (target constellation == old_constellation) in the BLC sets
                )
     {                                                                           assert(m_blocks[old_bi].block.to_constellation.check_linked_list());
-//std::cerr << "update_the_doubly_linked_list_LBC_new_block(old_bi = " << old_bi << ", new_bi = " << new_bi << ", transition_index = " << ti << " = " << m_transitions[ti].debug_id_short(*this) << ")\n";
+//std::cerr << "update_the_doubly_linked_list_LBC_new_block(old_bi==" << old_bi << ", new_bi==" << new_bi << ", transition_index==" << ti << "==" << m_transitions[ti].debug_id_short(*this) << ", old_constellation==" << static_cast<std::make_signed<constellation_index>::type>(old_constellation) << ")\n";
       const transition& t=m_aut.get_transitions()[ti];                          assert(m_blocks[new_bi].block.to_constellation.check_linked_list());
                                                                                 assert(m_states[t.from()].block==new_bi);
       linked_list<BLC_indicators>::iterator this_block_to_constellation=
@@ -3174,13 +3174,14 @@ class bisim_partitioner_gj
           BLC_list_iterator_or_null old_co_splitter_end=nullptr;                assert(!is_inert_during_init(t)||to_constln!=m_blocks[new_bi].c.on.stellation);
           if (this_block_to_constellation->is_stable())
           {
+//std::cerr << "Transition is in a stable BLC set.\n";
             if (m_branching)
             {
               // We always inserted a new BLC set for the inert transitions,
               // so we can place the BLC set after that one.
               new_position=m_blocks[new_bi].block.to_constellation.begin();
+//std::cerr << "    and is placed after " << new_position->debug_id(*this) << '\n';
             }
-//std::cerr << "Transition is in a stable BLC set.\n";
             // Because the BLC set is stable, one does not need to keep main
             // splitter and co-splitter together.
             // If the BLC set becomes empty, one can immediately delete it.
@@ -4576,23 +4577,6 @@ class bisim_partitioner_gj
              start_new_bottom_states=m_blocks[R_block].start_non_bottom_states;
       linked_list<BLC_indicators>::iterator R_to_U_tau_splitter =
                                 m_blocks[R_block].block.to_constellation.end(); assert(m_blocks[bi].block.to_constellation.empty());
-      if (use_BLC_transitions && m_branching)
-      {                                                                         assert(!m_blocks[B].block.to_constellation.empty());
-        // insert an empty BLC set into m_blocks[bi].block.to_constellation
-        // for the inert transitions out of m_blocks[bi],
-        // to avoid the need to check whether such a BLC set already exists
-        // in update_the_doubly_linked_list_LBC_new_block().
-        // This set, if it remains empty, will need to be deleted
-        // after updating the BLC sets.
-        // (It may happen that there are actually no inert transitions. Then
-        // the new list will contain some dummy empty element, which should
-        // remain empty until it is deleted again later.)
-        linked_list<BLC_indicators>::const_iterator perhaps_inert_ind=
-                                    m_blocks[B].block.to_constellation.begin();
-        m_blocks[bi].block.to_constellation.emplace_front(
-                                      perhaps_inert_ind->start_same_BLC,
-                                      perhaps_inert_ind->start_same_BLC, true);
-      }
       bool skip_transitions_in_splitter=false;                                  assert(m_BLC_indicators_to_be_deleted.empty());
       bool make_splitter_stable_early=false;                                    assert(initialisation || split_off_new_bottom_states ||
                                                                                        m_blocks[B].block.to_constellation.begin()==splitter);
@@ -4607,7 +4591,7 @@ class bisim_partitioner_gj
 //std::cerr << "Making splitter ";
         if constexpr (use_BLC_transitions)
         {
-//std::cerr << splitter->debug_id(*this);
+//std::cerr << splitter->debug_id(*this) << " stable early.\n";
           // However, we may need to move the splitter to its new constellation
           // at the same time.
           if (bi==R_block &&
@@ -4622,6 +4606,7 @@ class bisim_partitioner_gj
                                 m_blocks[R_block].block.to_constellation.end(),
                                 m_blocks[B].block.to_constellation, splitter);
             skip_transitions_in_splitter=true;
+//std::cerr << "    and moving it to the BLC list of " << R_block << '\n';
           }
           else if (!initialisation && split_off_new_bottom_states)
           {
@@ -4634,10 +4619,14 @@ class bisim_partitioner_gj
             // stable.
             splitter->make_stable();
           }
-        }                                                                       else  assert(nullptr==splitter);
-//std::cerr << " stable early.\n";
+        }                                                                       else
+                                                                                {
+                                                                                  assert(nullptr==splitter);
+//std::cerr << "(nullptr) stable early.\n";
+                                                                                }
       }
-      else if constexpr (!initialisation) // actually the condition always holds, but we need "constexpr"
+      else if constexpr (!initialisation) // actually the condition always
+                                          // holds, but we need "constexpr"
       {                                                                         assert(!splitter->is_stable());
         // unmark all states in the splitter (needed to avoid that parts of the
         // splitter will retain marked states)
@@ -4660,7 +4649,44 @@ class bisim_partitioner_gj
                                 m_blocks[B].block.to_constellation, splitter);
           skip_transitions_in_splitter=true;
         }
-      }                                                                         assert(!initialisation || make_splitter_stable_early);
+      }                                                                         else  assert(0);
+                                                                                assert(!initialisation || make_splitter_stable_early);
+      if (use_BLC_transitions && m_branching)
+      {
+        if ((!initialisation &&
+             (split_off_new_bottom_states || !make_splitter_stable_early)) ||
+            !skip_transitions_in_splitter)
+        {                                                                       assert(!m_blocks[B].block.to_constellation.empty());
+                                                                                #ifndef NDEBUG
+          /* insert an empty BLC set into m_blocks[bi].block.to_constellation*/   const transition* t;
+          /* for the inert transitions out of m_blocks[bi] (unless the       */   assert(m_blocks[bi].block.to_constellation.empty() ||
+          /* splitter inserted above was the set of inert transitions),      */          (t=&m_aut.get_transitions()[*m_blocks[bi].
+          /* to avoid the need to check whether such a BLC set already exists*/                              block.to_constellation.begin()->start_same_BLC],
+          /* in update_the_doubly_linked_list_LBC_new_block().               */           !is_inert_during_init(*t)) ||
+          /* This set, if it remains empty, will need to be deleted          */          m_blocks[m_states[t->from()].block].c.on.stellation!=
+          /* after updating the BLC sets.                                    */                             m_blocks[m_states[t->to()].block].c.on.stellation);
+                                                                                #endif
+//std::cerr << "Inserting an empty BLC set for the constellation-inert transitions into the BLC list of block " << bi << '\n';
+          linked_list<BLC_indicators>::const_iterator perhaps_inert_ind=
+                                    m_blocks[B].block.to_constellation.begin();
+          m_blocks[bi].block.to_constellation.emplace_front(
+                                      perhaps_inert_ind->start_same_BLC,
+                                      perhaps_inert_ind->start_same_BLC, true);
+        }                                                                       else
+                                                                                {
+                                                                                  #ifndef NDEBUG
+                                                                                    assert(!m_blocks[bi].block.to_constellation.empty());
+                                                                                    assert(m_blocks[bi].block.to_constellation.begin()->start_same_BLC<
+                                                                                                    m_blocks[bi].block.to_constellation.begin()->end_same_BLC);
+                                                                                    const transition& t=m_aut.get_transitions()
+                                                                                                [*m_blocks[bi].block.to_constellation.begin()->start_same_BLC];
+                                                                                    assert(is_inert_during_init(t));
+                                                                                    assert(m_blocks[m_states[t.from()].block].c.on.stellation==
+                                                                                                             m_blocks[m_states[t.to()].block].c.on.stellation);
+                                                                                  #endif
+                                                                                }
+      }
+
       /* Recall new LBC positions.                                           */ assert(m_co_splitters_to_be_checked.empty());
       for(fixed_vector<state_in_block_pointer>::iterator
                                     ssi=m_blocks[bi].start_bottom_states;
@@ -5047,6 +5073,7 @@ class bisim_partitioner_gj
                                     R_to_U_tau_splitter->start_same_BLC,
                                     old_constellation,
                                     false);
+//std::cerr << "new_bottom_block==" << new_bottom_block << '\n';
             if (R_block == new_bottom_block)
             {                                                                   assert(m_states[m_aut.get_transitions()[*std::prev(
               /* The new block contains the old bottom states.               */         R_to_U_tau_splitter_end_same_BLC)].from()].block==new_bottom_block);
@@ -5078,6 +5105,9 @@ class bisim_partitioner_gj
             {                                                                   assert(m_blocks.size()-1==new_bottom_block);
               /* All parts of R_to_U_tau_splitter should be made stable.     */ assert(m_states[m_aut.get_transitions()
               /* The new part is already stable: as it contains inert        */        [*R_to_U_tau_splitter_start_same_BLC].from()].block==new_bottom_block);
+//std::cerr << "Transition at m_transitions[*R_to_U_tau_splitter_start_same_BLC]==" << m_transitions[*R_to_U_tau_splitter_start_same_BLC].debug_id(*this) << '\n';
+//std::cerr << "m_transitions[*R_to_U_tau_splitter_start_same_BLC].transitions_per_block_to_constellation==" << m_transitions[*R_to_U_tau_splitter_start_same_BLC].transitions_per_block_to_constellation->debug_id(*this) << '\n';
+//std::cerr << "m_blocks[new_bottom_block].block.to_constellation.begin()==" << m_blocks[new_bottom_block].block.to_constellation.begin()->debug_id(*this) << '\n';
               /* transitions, it is always created stably.                   */ assert(m_blocks[new_bottom_block].block.to_constellation.begin()==
               /* It cannot be empty, as the new bottom block always has some */                 m_transitions[*R_to_U_tau_splitter_start_same_BLC].
               /* constellation-inert transitions.                            */                                        transitions_per_block_to_constellation);
@@ -5703,7 +5733,7 @@ class bisim_partitioner_gj
       // If INITIAL_PARTITION_WITHOUT_BLC_SETS, everything except
       // `m_BLC_transitions` is now completely initialized.  Otherwise,
       // The data structures have now been completely initialized.
-                                                                                print_data_structures("After initial reading before splitting in the initialisation", true);
+                                                                                //print_data_structures("After initial reading before splitting in the initialisation", true);
                                                                                 assert(check_data_structures("After initial reading before splitting in the initialisation", true, false));
       // The initial partition has been constructed. Continue with the initialisation.
       mCRL2log(log::verbose) << "Start refining in the initialisation\n";
@@ -5882,7 +5912,7 @@ class bisim_partitioner_gj
       #endif
       // Algorithm 1, line 1.4 is implicitly done in the call to splitB above.
 
-      /* Algorithm 1, line 1.5.                                              */ print_data_structures("End initialisation");
+      /* Algorithm 1, line 1.5.                                              */ //print_data_structures("End initialisation");
                                                                                 assert(check_stability("End initialisation"));
       mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";    assert(check_data_structures("End initialisation", false, false));
       stabilizeB();
@@ -6886,7 +6916,7 @@ class bisim_partitioner_gj
             }
           }
           while (calM_elt.first < calM_elt.second);
-        }                                                                       print_data_structures("Before stabilize");
+        }                                                                       //print_data_structures("Before stabilize");
                                                                                 assert(check_data_structures("Before stabilize", false, false));
                                                                                 assert(check_stability("Before stabilize"));
         stabilizeB();
