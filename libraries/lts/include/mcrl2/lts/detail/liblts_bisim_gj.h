@@ -4651,27 +4651,30 @@ class bisim_partitioner_gj
         }
       }                                                                         else  assert(0);
                                                                                 assert(!initialisation || make_splitter_stable_early);
+//std::cerr << "initialisation==" << initialisation << ", use_BLC_transitions==" << use_BLC_transitions
+//<< ", m_branching==" << m_branching << ", split_off_new_bottom_states==" << split_off_new_bottom_states
+//<< ", make_splitter_stable_early==" << make_splitter_stable_early << ", skip_transitions_in_splitter==" << skip_transitions_in_splitter << '\n';
       if (use_BLC_transitions && m_branching)
       {
-        if ((!initialisation &&
-             (split_off_new_bottom_states || !make_splitter_stable_early)) ||
-            !skip_transitions_in_splitter)
-        {                                                                       assert(!m_blocks[B].block.to_constellation.empty());
+        if (initialisation || split_off_new_bottom_states ||
+            !make_splitter_stable_early || !skip_transitions_in_splitter)
+        {
                                                                                 #ifndef NDEBUG
-          /* insert an empty BLC set into m_blocks[bi].block.to_constellation*/   const transition* t;
-          /* for the inert transitions out of m_blocks[bi] (unless the       */   assert(m_blocks[bi].block.to_constellation.empty() ||
-          /* splitter inserted above was the set of inert transitions),      */          (t=&m_aut.get_transitions()[*m_blocks[bi].
+          /* insert an empty BLC set into m_blocks[bi].block.to_constellation*/   if (!m_blocks[B].block.to_constellation.empty())  {  const transition* t;
+          /* for the inert transitions out of m_blocks[bi] (unless the       */     assert(m_blocks[bi].block.to_constellation.empty() ||
+          /* splitter inserted above was the set of inert transitions),      */            (t=&m_aut.get_transitions()[*m_blocks[bi].
           /* to avoid the need to check whether such a BLC set already exists*/                              block.to_constellation.begin()->start_same_BLC],
-          /* in update_the_doubly_linked_list_LBC_new_block().               */           !is_inert_during_init(*t)) ||
-          /* This set, if it remains empty, will need to be deleted          */          m_blocks[m_states[t->from()].block].c.on.stellation!=
-          /* after updating the BLC sets.                                    */                             m_blocks[m_states[t->to()].block].c.on.stellation);
+          /* in update_the_doubly_linked_list_LBC_new_block().               */             !is_inert_during_init(*t)) ||
+          /* This set, if it remains empty, will need to be deleted          */            m_blocks[m_states[t->from()].block].c.on.stellation!=
+          /* after updating the BLC sets.                                    */                          m_blocks[m_states[t->to()].block].c.on.stellation);  }
                                                                                 #endif
 //std::cerr << "Inserting an empty BLC set for the constellation-inert transitions into the BLC list of block " << bi << '\n';
-          linked_list<BLC_indicators>::const_iterator perhaps_inert_ind=
-                                    m_blocks[B].block.to_constellation.begin();
-          m_blocks[bi].block.to_constellation.emplace_front(
-                                      perhaps_inert_ind->start_same_BLC,
-                                      perhaps_inert_ind->start_same_BLC, true);
+          BLC_list_iterator start_inert_BLC=
+               m_blocks[B].block.to_constellation.empty()
+                  ? std::next(&m_BLC_transitions.back()) // there are no inert transitions but we still insert a dummy set
+                  : m_blocks[B].block.to_constellation.begin()->start_same_BLC; // if there are inert transitions, they are here
+          m_blocks[bi].block.to_constellation.emplace_front(start_inert_BLC,
+                                                        start_inert_BLC, true);
         }                                                                       else
                                                                                 {
                                                                                   #ifndef NDEBUG
