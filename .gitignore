@@ -27,3 +27,6 @@ build/
 *.trc
 *.sym
 jittyc*
+
+#On the mac ignore extra directory information
+.DS_Store
