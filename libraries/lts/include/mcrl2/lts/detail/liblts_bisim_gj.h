@@ -37,7 +37,7 @@
 // algorithm, this kind of initialisation was much faster than the one that
 // does maintain BLC sets from the very start.
 // (However, the current implementation is independent of the early version.)
-//#define INITIAL_PARTITION_WITHOUT_BLC_SETS
+#define INITIAL_PARTITION_WITHOUT_BLC_SETS
 
 // If `TRY_EFFICIENT_SWAP` is defined, then splitting a block will try to swap
 // more efficiently: states that are already in an acceptable position in
@@ -3520,7 +3520,7 @@ class bisim_partitioner_gj
       #else
         #define use_BLC_transitions true
       #endif
-std::cerr << "simple_splitB" << (initialisation ? "<true>" : "") << "(block " << B << ",...)\n";
+//std::cerr << "simple_splitB" << (initialisation ? "<true>" : "") << "(block " << B << ",...)\n";
       typedef enum { initializing, state_checking, aborted,
                      aborted_after_initialisation,
                      incoming_inert_transition_checking,
@@ -3651,7 +3651,7 @@ std::cerr << "simple_splitB" << (initialisation ? "<true>" : "") << "(block " <<
       /* control to the other co-routine. The coroutines can be found        */     }
       /* sequentially below surrounded by a while loop.                      */   }
                                                                                 #endif
-std::cerr << "simple_splitB() before while\n";
+//std::cerr << "simple_splitB() before while\n";
       while (true)
       {                                                                         assert(U_status!=aborted_after_initialisation ||
                                                                                        (R_status!=aborted && R_status!=aborted_after_initialisation));
@@ -3705,7 +3705,7 @@ std::cerr << "simple_splitB() before while\n";
           {
             if (m_states[tr.from()].counter!=Rmarked)
             {                                                                   assert(!m_R.find(m_states.begin() + tr.from()));
-std::cerr << "R_todo2 insert: " << tr.from() << "\n";
+//std::cerr << "R_todo2 insert: " << tr.from() << "\n";
               m_R.add_todo(m_states.begin() + tr.from());
               m_states[tr.from()].counter=Rmarked;
 
@@ -3732,7 +3732,7 @@ std::cerr << "R_todo2 insert: " << tr.from() << "\n";
                                     ? *current_R_incoming_bottom_state_iterator++
                                     : m_R.move_from_todo());
                                                                                 mCRL2complexity(s.ref_state, add_work(check_complexity::simple_splitB_R__find_predecessors, 1), *this);
-std::cerr << "R insert: " << s.ref_state->debug_id(*this) << "\n";
+//std::cerr << "R insert: " << s.ref_state->debug_id(*this) << "\n";
                                                                                 assert(s.ref_state->block==B);
           if (std::next(s.ref_state)==m_states.end())
           {
@@ -3776,7 +3776,7 @@ std::cerr << "R insert: " << s.ref_state->debug_id(*this) << "\n";
             /* The state is a nonbottom state that is not yet in R */           assert(si.ref_state->ref_states_in_blocks<m_blocks[B].end_states);
             m_R.add_todo(si);
             si.ref_state->counter=Rmarked;
-std::cerr << "R_todo1 insert: " << si.ref_state->debug_id(*this) << "\n";
+//std::cerr << "R_todo1 insert: " << si.ref_state->debug_id(*this) << "\n";
             if (m_R.size()>static_cast<state_index>(max_R_nonbottom_size))
             {                                                                   assert(aborted_after_initialisation!=U_status);
               R_status=aborted;
@@ -3794,7 +3794,7 @@ std::cerr << "R_todo1 insert: " << si.ref_state->debug_id(*this) << "\n";
                             first_unmarked_bottom_state && m_R.todo_is_empty())
         {                                                                       assert(0 < std::distance(m_blocks[B].start_bottom_states,
                                                                                                                       first_unmarked_bottom_state) + m_R.size());
-std::cerr << "R empty: " << "\n";
+//std::cerr << "R empty: " << "\n";
           /* split_block B into R and B\R. */                                   assert(std::distance(m_blocks[B].start_bottom_states,
                                                                                                      first_unmarked_bottom_state) + m_R.size() <=
                                                                                                                                 number_of_states_in_block(B)/2);
@@ -3853,7 +3853,7 @@ std::cerr << "R empty: " << "\n";
         // The code for the left co-routine.
         if (incoming_inert_transition_checking==U_status) // 20299 times (large 1394-fin.lts example: 360327 times)
         {
-std::cerr << "U_incoming_inert_transition_checking\n";
+//std::cerr << "U_incoming_inert_transition_checking\n";
             // Algorithm 3, line 3.8, left.
                                                                                 assert(current_U_incoming_transition_iterator<current_U_incoming_transition_iterator_end);
                                                                                 assert(m_aut.is_tau(m_aut_apply_hidden_label_map(current_U_incoming_transition_iterator->label())));
@@ -3863,7 +3863,7 @@ std::cerr << "U_incoming_inert_transition_checking\n";
           current_U_outgoing_state=state_in_block_pointer(m_states.begin()+
                                current_U_incoming_transition_iterator->from()); assert(m_states[current_U_incoming_transition_iterator->to()].block==B);
           current_U_incoming_transition_iterator++;
-std::cerr << "FROM " << std::distance(m_states.begin(), current_U_outgoing_state.ref_state) << "\n";
+//std::cerr << "FROM " << std::distance(m_states.begin(), current_U_outgoing_state.ref_state) << "\n";
           if (current_U_outgoing_state.ref_state->block==B &&
               !(m_preserve_divergence &&
                 std::prev(current_U_incoming_transition_iterator)->from()==
@@ -3887,7 +3887,7 @@ std::cerr << "FROM " << std::distance(m_states.begin(), current_U_outgoing_state
                 /* Algorithm 3, line 3.18, left. */                             assert(current_U_outgoing_state.ref_state->counter>0);
                 current_U_outgoing_state.ref_state->counter--;
               }
-std::cerr << "COUNTER " << current_U_outgoing_state.ref_state->counter << "\n";
+//std::cerr << "COUNTER " << current_U_outgoing_state.ref_state->counter << "\n";
                 // Algorithm 3, line 3.19, left.
               if (current_U_outgoing_state.ref_state->counter==0)
               {
@@ -3936,7 +3936,7 @@ std::cerr << "COUNTER " << current_U_outgoing_state.ref_state->counter << "\n";
                                                                                           C==m_blocks[m_states[t.to()].block].c.on.stellation)
                                                                                       {
                                                                                             // The transition is in the splitter, so it must be in the part of the splitter that is disregarded.
-std::cerr << "State " << std::distance(m_states.begin(), current_U_outgoing_state.ref_state) << " has a transition in the splitter, namely " << m_transitions[*out_it->ref.BLC_transitions].debug_id_short(*this) << '\n';
+//std::cerr << "State " << std::distance(m_states.begin(), current_U_outgoing_state.ref_state) << " has a transition in the splitter, namely " << m_transitions[*out_it->ref.BLC_transitions].debug_id_short(*this) << '\n';
                                                                                         assert(out_it->ref.BLC_transitions>=splitter_end_unmarked_BLC);
                                                                                         assert(splitter->start_same_BLC<=out_it->ref.BLC_transitions);
                                                                                         assert(out_it->ref.BLC_transitions<splitter->end_same_BLC);
@@ -3965,7 +3965,7 @@ std::cerr << "State " << std::distance(m_states.begin(), current_U_outgoing_stat
         }
         else if (state_checking==U_status) // 18920 times (large 1394-fin.lts example: 340893 times)
         {
-std::cerr << "U_state_checking\n";
+//std::cerr << "U_state_checking\n";
 
             // Algorithm 3, line 3.23 and line 3.24, left.
           const state_in_block_pointer s=
@@ -3974,7 +3974,7 @@ std::cerr << "U_state_checking\n";
                                ? *current_U_incoming_bottom_state_iterator++
                                : m_U.move_from_todo());                         assert(!m_R.find(s));
                                                                                 mCRL2complexity(s.ref_state, add_work(check_complexity::simple_splitB_U__find_predecessors, 1), *this);
-std::cerr << "U insert/ U_todo_remove: " << s.ref_state->debug_id(*this) << "\n";
+//std::cerr << "U insert/ U_todo_remove: " << s.ref_state->debug_id(*this) << "\n";
           current_U_incoming_transition_iterator=
                                        s.ref_state->start_incoming_transitions;
           current_U_incoming_transition_iterator_end=
@@ -3997,7 +3997,7 @@ std::cerr << "U insert/ U_todo_remove: " << s.ref_state->debug_id(*this) << "\n"
         }
         else if constexpr (!initialisation) // the condition holds always
         {                                                                       assert(outgoing_action_constellation_check==U_status); // 911 times (large 1394-fin.lts example: 912 times)
-std::cerr << "U_outgoing_action_constellation_check\n";
+//std::cerr << "U_outgoing_action_constellation_check\n";
                                                                                 assert(current_U_outgoing_transition_iterator!=
                                                                                                                    current_U_outgoing_transition_iterator_end);
                                                                                   // will only be used if the transitions are not constellation-inert:
@@ -4036,7 +4036,7 @@ std::cerr << "U_outgoing_action_constellation_check\n";
           else if (current_U_outgoing_transition_iterator==
                                     current_U_outgoing_transition_iterator_end)
           {                                                                     assert(!m_U.find(current_U_outgoing_state));
-std::cerr << "U_todo4 insert: " << std::distance(m_states.begin(), current_U_outgoing_state.ref_state) << "   " << m_U.size() << "    " << number_of_states_in_block(B) << "\n";
+//std::cerr << "U_todo4 insert: " << std::distance(m_states.begin(), current_U_outgoing_state.ref_state) << "   " << m_U.size() << "    " << number_of_states_in_block(B) << "\n";
             m_U.add_todo(current_U_outgoing_state);
               // Algorithm 3, line 3.10 and line 3.11 left.
             if (m_U.size()>static_cast<state_index>(max_U_nonbottom_size))
@@ -4065,7 +4065,7 @@ std::cerr << "U_todo4 insert: " << std::distance(m_states.begin(), current_U_out
                     m_blocks[B].start_non_bottom_states && m_U.todo_is_empty())
         {
           // split_block B into U and B\U.
-std::cerr << "U_todo empty:\n";
+//std::cerr << "U_todo empty:\n";
                                                                                 assert(0 < std::distance(first_unmarked_bottom_state, m_blocks[B].start_non_bottom_states) + m_U.size());
                                                                                 assert(std::distance(first_unmarked_bottom_state, m_blocks[B].start_non_bottom_states) + m_U.size() <= number_of_states_in_block(B)/2);
           split_block_B_into_R_and_BminR<!use_BLC_transitions>(B,
@@ -4112,7 +4112,7 @@ std::cerr << "U_todo empty:\n";
                                                                                 #endif
             )
     {                                                                           assert(!splitter->is_stable());
-std::cerr << "not_all_bottom_states_are_touched(" << bi << ',' << splitter->debug_id(*this) << ")\n";
+//std::cerr << "not_all_bottom_states_are_touched(" << bi << ',' << splitter->debug_id(*this) << ")\n";
                                                                                 assert(bi==
                                                                                     m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].block);
                                                                                 assert(splitter_end_unmarked_BLC<=splitter->start_marked_BLC);
@@ -4528,16 +4528,16 @@ std::cerr << "not_all_bottom_states_are_touched(" << bi << ',' << splitter->debu
       #else
         #define use_BLC_transitions true
       #endif
-std::cerr << (initialisation ? "splitB<true>(" : "splitB(") << m_blocks[B].debug_id(*this) << ", splitter==";
-if constexpr (use_BLC_transitions) { std::cerr << splitter->debug_id(*this); }
-else { std::cerr << splitter; }
-std::cerr << ", first_unmarked_bottom_state==" << first_unmarked_bottom_state->ref_state->debug_id(*this) << ", splitter_end_unmarked_BLC==";
-if constexpr (use_BLC_transitions) { std::cerr << (split_off_new_bottom_states && splitter_end_unmarked_BLC == splitter->start_marked_BLC ? "start_marked_BLC" : (splitter_end_unmarked_BLC == splitter->start_same_BLC ? "start_same_BLC" : "?")); }
-else { std::cerr << splitter_end_unmarked_BLC; }
-std::cerr << ", old_constellation==" << static_cast<std::make_signed<constellation_index>::type>(old_constellation) << ", split_off_new_bottom_states==" << split_off_new_bottom_states << ")\n";
-std::cerr << (m_branching ? "Marked bottom states:" : "Marked states:"); for (fixed_vector<state_in_block_pointer>::const_iterator it=m_blocks[B].start_bottom_states; it!=first_unmarked_bottom_state; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); }
-std::cerr << (m_branching ? "\nUnmarked bottom states:" : "\nUnmarked states:"); for (fixed_vector<state_in_block_pointer>::const_iterator it=first_unmarked_bottom_state; it!=m_blocks[B].start_non_bottom_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << '\n';
-if (m_branching) { std::cerr << "Additionally, " << m_R.size() << " non-bottom states have been marked.\n"; }
+//std::cerr << (initialisation ? "splitB<true>(" : "splitB(") << m_blocks[B].debug_id(*this) << ", splitter==";
+//if constexpr (use_BLC_transitions) { std::cerr << splitter->debug_id(*this); }
+//else { std::cerr << splitter; }
+//std::cerr << ", first_unmarked_bottom_state==" << first_unmarked_bottom_state->ref_state->debug_id(*this) << ", splitter_end_unmarked_BLC==";
+//if constexpr (use_BLC_transitions) { std::cerr << (split_off_new_bottom_states && splitter_end_unmarked_BLC == splitter->start_marked_BLC ? "start_marked_BLC" : (splitter_end_unmarked_BLC == splitter->start_same_BLC ? "start_same_BLC" : "?")); }
+//else { std::cerr << splitter_end_unmarked_BLC; }
+//std::cerr << ", old_constellation==" << static_cast<std::make_signed<constellation_index>::type>(old_constellation) << ", split_off_new_bottom_states==" << split_off_new_bottom_states << ")\n";
+//std::cerr << (m_branching ? "Marked bottom states:" : "Marked states:"); for (fixed_vector<state_in_block_pointer>::const_iterator it=m_blocks[B].start_bottom_states; it!=first_unmarked_bottom_state; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); }
+//std::cerr << (m_branching ? "\nUnmarked bottom states:" : "\nUnmarked states:"); for (fixed_vector<state_in_block_pointer>::const_iterator it=first_unmarked_bottom_state; it!=m_blocks[B].start_non_bottom_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << '\n';
+//if (m_branching) { std::cerr << "Additionally, " << m_R.size() << " non-bottom states have been marked.\n"; }
                                                                                 if constexpr (initialisation)
                                                                                 {
                                                                                   assert(m_constellations.size()==1);
@@ -4564,7 +4564,7 @@ if (m_branching) { std::cerr << "Additionally, " << m_R.size() << " non-bottom s
       block_index R_block=simple_splitB<initialisation, Iterator>(B, splitter,
                        first_unmarked_bottom_state, splitter_end_unmarked_BLC);
       const block_index bi = m_blocks.size() - 1;                               assert(bi == R_block || B == R_block);
-std::cerr << "Split block of size " << number_of_states_in_block(B) + number_of_states_in_block(bi) << " taking away " << number_of_states_in_block(bi) << " states (namely"; for (auto it=m_blocks[bi].start_bottom_states; it<m_blocks[bi].end_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << (bi == R_block ? ", the R-subblock)\n" : ", the U-subblock)\n");
+//std::cerr << "Split block of size " << number_of_states_in_block(B) + number_of_states_in_block(bi) << " taking away " << number_of_states_in_block(bi) << " states (namely"; for (auto it=m_blocks[bi].start_bottom_states; it<m_blocks[bi].end_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << (bi == R_block ? ", the R-subblock)\n" : ", the U-subblock)\n");
                                                                                 assert(number_of_states_in_block(B) >= number_of_states_in_block(bi));
                                                                                 // Because we visit all states of block bi and almost all their incoming and
                                                                                 // outgoing transitions, we subsume all this bookkeeping in a single block
