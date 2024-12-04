@@ -1061,6 +1061,11 @@ struct block_type
     constellation_or_first_unmarked_bottom_state(constellation_index new_c)
       :on(new_c)
     {}
+
+    ~constellation_or_first_unmarked_bottom_state()
+    {
+      on.~constellation_and_new_bottom_states();
+    }
   } c;
   /// first state of the block in m_states_in_blocks
   /// States in [start_bottom_states, start_non_bottom_states) are bottom
@@ -6119,7 +6124,9 @@ class bisim_partitioner_gj
                   }
                   B.block.R=new std::vector<state_in_block_pointer>();
                   blocks_that_need_refinement.push_back(s.ref_state->block);
-                  B.c.first_unmarked_bottom_state=B.start_bottom_states;
+                  B.c.on.~constellation_and_new_bottom_states();
+                  new (&B.c.first_unmarked_bottom_state) fixed_vector
+                     <state_in_block_pointer>::iterator(B.start_bottom_states);
                 }                                                               else  assert(std::find(blocks_that_need_refinement.begin(),
                                                                                                  blocks_that_need_refinement.end(), s.ref_state->block)!=
                                                                                                                             blocks_that_need_refinement.end());
@@ -6153,8 +6160,11 @@ class bisim_partitioner_gj
                 // prepare for next label:
                 delete m_blocks[bi].block.R;
                 m_blocks[bi].block.R=nullptr;
-                m_blocks[bi].c.on.stellation=0;
-                m_blocks[bi].c.on.tains_new_bottom_states=false;
+                m_blocks[bi].c.first_unmarked_bottom_state.fixed_vector
+                               <state_in_block_pointer>::iterator::~iterator();
+                new (&m_blocks[bi].c.on) block_type::
+                      constellation_or_first_unmarked_bottom_state::
+                                        constellation_and_new_bottom_states(0);
                                                                                 #ifndef NDEBUG
                                                                                   {
                                                                                     std::vector<state_in_block_pointer>::const_iterator
