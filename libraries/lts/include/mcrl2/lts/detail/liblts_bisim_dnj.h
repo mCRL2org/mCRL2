@@ -2939,7 +2939,7 @@ mCRL2log(log::verbose) << "Start refining\n";
                                                     this step can be ignored */
         {
             /* Create a vector for the new labels */
-            fixed_vector<typename LTS_TYPE::state_label_t>
+            typename std::remove_reference<decltype(aut.state_labels())>::type
                                                   new_labels(num_eq_classes());
 
             state_type i(aut.num_states());                                     assert(0 < i);
@@ -2947,21 +2947,17 @@ mCRL2log(log::verbose) << "Start refining\n";
             {
                 --i;
                 const state_type new_index(get_eq_class(i));
-                new_labels[new_index]=new_labels[new_index]+aut.state_label(i);
+                new_labels[new_index]=aut.state_label(i)+new_labels[new_index];
             }
             while (0 < i);
 
-            aut.set_num_states(num_eq_classes());
-            i = 0;                                                              assert(i < num_eq_classes());
-            do
-            {
-                aut.set_state_label(i, new_labels[i]);
-            }
-            while (++i < num_eq_classes());
+            aut.set_num_states(num_eq_classes(), false);                        assert(0 == m_aut.num_states_labels());
+            //m_aut.clear_state_labels();
+            new_labels.swap(aut.state_labels());
         }
         else
         {
-            aut.set_num_states(num_eq_classes());
+            aut.set_num_states(num_eq_classes(), false);
         }
 
         aut.set_initial_state(get_eq_class(aut.initial_state()));
