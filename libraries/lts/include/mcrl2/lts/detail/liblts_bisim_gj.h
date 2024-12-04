@@ -2366,7 +2366,7 @@ class bisim_partitioner_gj
       state_in_block_pointer temp=*pos1;
       while (--count > 0)
       {                                                                         mCRL2complexity(pos2->ref_state, add_work(check_complexity::
-                                                                                        multiple_swap_states_in_block__swap_state_in_small_block, max_B), *this);
+                                                                                      multiple_swap_states_in_block__swap_state_in_small_block, max_B), *this);
         *pos1 = *pos2;
         pos1->ref_state->ref_states_in_blocks=pos1;
         ++pos1;
@@ -2535,7 +2535,7 @@ class bisim_partitioner_gj
             // ....counter==marking_value.
 
             // Move BminR bottom states out of the way.
-            fixed_vector<state_in_block_pointer>::iterator
+            state_in_block_pointer*
                take_next_R_non_bottom_state_from=BminR_start_non_bottom_states;
                                                                                 #ifndef NDEBUG
                                                                                   todo_state_vector::const_iterator account_for_skipped_BminR_states=R.begin();
@@ -4267,7 +4267,7 @@ class bisim_partitioner_gj
       assert(m_R.empty());
       assert(1 < number_of_states_in_block(bi));
       // If the above assertion is false, one can just: return B.end_states;
-      fixed_vector<state_in_block_pointer>::iterator first_unmarked_bottom_state=B.start_bottom_states;
+      state_in_block_pointer* first_unmarked_bottom_state=B.start_bottom_states;
       assert(!splitter->is_stable());
       const BLC_list_iterator splitter_start_marked_BLC = splitter->start_marked_BLC;
       for (BLC_list_iterator marked_t_it = splitter_start_marked_BLC; marked_t_it<splitter->end_same_BLC; ++marked_t_it)
@@ -4319,7 +4319,7 @@ class bisim_partitioner_gj
       {
         // all bottom states are marked.
         // reset all counters of bottom states
-        for(fixed_vector<state_in_block_pointer>::iterator s_it=B.start_non_bottom_states; s_it<first_unmarked_bottom_state; ++s_it)
+        for(state_in_block_pointer* s_it=B.start_non_bottom_states; s_it<first_unmarked_bottom_state; ++s_it)
         {
           // mCRL2complexity(s_it->ref_state, ...)
               // not needed because it can be ascribed to the marked transition(s) of s_it->ref_state
@@ -4338,7 +4338,7 @@ class bisim_partitioner_gj
         // the majority of bottom states is marked
         // so go through the bottom states from the end and swap in those few unmarked bottom states there
         std::vector<state_in_block_pointer>::iterator take_U_bottom_state_from=B.start_bottom_states;
-        for (fixed_vector<state_in_block_pointer>::iterator s_it=B.start_non_bottom_states;
+        for (state_in_block_pointer* s_it=B.start_non_bottom_states;
              s_it>first_unmarked_bottom_state; )
         {
           --s_it;
@@ -4384,7 +4384,7 @@ class bisim_partitioner_gj
           assert(s.ref_state->block==bi);
           // mCRL2complexity(&m_transitions[*i], add_work(...), *this);
               // not needed because this work can be attributed to the marking of the transition
-          const fixed_vector<state_in_block_pointer>::iterator pos_s=s.ref_state->ref_states_in_blocks;
+          state_in_block_pointer* const pos_s=s.ref_state->ref_states_in_blocks;
           assert(B.start_bottom_states<=pos_s);
           assert(pos_s<B.end_states);
           if (first_unmarked_bottom_state<=pos_s)
@@ -4421,7 +4421,7 @@ class bisim_partitioner_gj
           const transition& t = m_aut.get_transitions()[*i];
           const state_in_block_pointer s(m_states.begin()+t.from());
           assert(s.ref_state->block == bi);
-          const fixed_vector<state_in_block_pointer>::const_iterator pos_s=s.ref_state->ref_states_in_blocks;
+          const state_in_block_pointer* const pos_s=s.ref_state->ref_states_in_blocks;
           assert(*pos_s==s);
           assert(B.start_bottom_states <= pos_s);
           assert(pos_s < B.end_states);
