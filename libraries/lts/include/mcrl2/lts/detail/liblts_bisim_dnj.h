@@ -2951,7 +2951,7 @@ mCRL2log(log::verbose) << "Start refining\n";
             }
             while (0 < i);
 
-            aut.set_num_states(num_eq_classes(), false);                        assert(0 == m_aut.num_states_labels());
+            aut.set_num_states(num_eq_classes(), false);                        assert(0 == aut.num_state_labels());
             //m_aut.clear_state_labels();
             new_labels.swap(aut.state_labels());
         }

@@ -360,7 +360,6 @@ class check_complexity
         refine_partition_until_it_becomes_stable__find_splitter,
             BLOCK_gj_MIN =
                        refine_partition_until_it_becomes_stable__find_splitter,
-        //hatU_does_not_cover_B_bottom__handle_bottom_states_and_their_outgoing_transitions_in_splitter,
             // Invariant: 0 <= (counter value) <= ilog2 n - ilog2(block size)
         splitB__update_BLC_of_smaller_subblock,
             BLOCK_gj_MAX = splitB__update_BLC_of_smaller_subblock,
@@ -383,7 +382,6 @@ class check_complexity
         // bottom state counters
         stabilizeB__prepare_block,
         stabilizeB__distribute_states_over_Phat,
-        //stabilizeB__group_outgoing_transitions,
         // other state counter
             // Invariant: 0 <= (counter value) <= 1
         create_initial_partition__set_start_incoming_transitions,
@@ -400,8 +398,8 @@ class check_complexity
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
             refine_partition_until_it_becomes_stable__correct_end_of_calM,
-            refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split,
-            BLC_gj_MAX = refine_partition_until_it_becomes_stable__select_action_label_and_block_to_be_split,
+            refine_partition_until_it_becomes_stable__execute_main_split,
+            BLC_gj_MAX = refine_partition_until_it_becomes_stable__execute_main_split,
 
         // transition counters
             // Invariant:
@@ -414,13 +412,12 @@ class check_complexity
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
         simple_splitB__do_not_add_state_with_transition_in_splitter_to_U,
-        //not_all_bottom_states_are_touched__mark_source_state,
-        //some_bottom_state_has_no_outgoing_co_transition__handle_transition,
-        //group_in_situ__count_transitions_per_block,
-        //group_in_situ__swap_transition,
-        //group_in_situ__skip_to_next_block,
-        //create_initial_partition__select_action_label_and_block_to_be_split,
         refine_partition_until_it_becomes_stable__find_cotransition,
+            // Invariant:
+            // 0 == (counter value) during the first half of initialisation
+            // 0 <= (counter value) <= ilog2 n after the quicksort part of the
+            // initialisation
+        order_BLC_transitions__sort_transition,
         // temporary transition counters
         simple_splitB_R__handle_transition_from_R_state, // target constellation size
             TRANS_gj_MIN_TEMP = simple_splitB_R__handle_transition_from_R_state,
@@ -438,12 +435,10 @@ class check_complexity
         stabilizeB__initialize_Qhat_afterwards,
         stabilizeB__main_loop,
         stabilizeB__main_loop_afterwards,
-        //W_empty__find_new_bottom_state_in_R,
-        //change_non_bottom_state_to_bottom_state__adapt_BLC,
         // other transition counters
             // Invariant: 0 <= (counter value) <= 1
-        create_initial_partition__set_transitions_per_block_to_constellation,
-            TRANS_gj_MAX = create_initial_partition__set_transitions_per_block_to_constellation
+        create_initial_partition__refine_block,
+            TRANS_gj_MAX = create_initial_partition__refine_block
     };
 
     /// \brief special value for temporary work without changing the balance
@@ -1533,10 +1528,17 @@ class check_complexity
                 assert(counters[ctr - TRANS_gj_MIN] <= max_targetB);
                 counters[ctr - TRANS_gj_MIN] = max_targetB;
             }
-            for ( ; ctr < TRANS_gj_MIN_TEMP; ctr = (enum counter_type) (ctr+1))
+            for ( ; ctr < order_BLC_transitions__sort_transition;
+                                             ctr = (enum counter_type) (ctr+1))
             {
                 assert(counters[ctr - TRANS_gj_MIN] <= max_targetC);
                 counters[ctr - TRANS_gj_MIN] = max_targetC;
+            }
+            // counter for the initialisation
+            for ( ; ctr < TRANS_gj_MIN_TEMP; ctr = (enum counter_type) (ctr+1))
+            {
+                assert(counters[ctr - TRANS_gj_MIN] <= log_n);
+                // counters[ctr - TRANS_gj_MIN] = ...;
             }
             // temporary transition counters must be zero
             for (; ctr <= TRANS_gj_MAX_TEMP ; ctr = (enum counter_type)(ctr+1))
@@ -1551,7 +1553,7 @@ class check_complexity
             }
             // bottom state counters must be 0 for transitions from non-bottom
             // states and 1 for other transitions
-            for( ; ctr < create_initial_partition__set_transitions_per_block_to_constellation ;
+            for( ; ctr < create_initial_partition__refine_block ;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 if (counters[ctr - TRANS_gj_MIN] > (unsigned) source_bottom)
