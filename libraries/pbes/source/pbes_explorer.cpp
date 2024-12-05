@@ -279,7 +279,17 @@ inline int lts_info::count_variables(const pbes_expression& e)
     }
     else if (is_and(e) || is_or(e) || is_imp(e))
     {
-        return count_variables(pbes_system::accessors::left(e)) + count_variables(pbes_system::accessors::right(e));
+        int a = count_variables(pbes_system::accessors::left(e));
+        int b = count_variables(pbes_system::accessors::right(e));
+
+        if (a < INT_MAX && b < INT_MAX)
+        {
+            return a + b;
+        }
+        else 
+        {
+            return INT_MAX;
+        }
     }
     else if (is_forall(e) || is_exists(e))
     {
