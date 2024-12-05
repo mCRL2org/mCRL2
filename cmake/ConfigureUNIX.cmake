@@ -59,7 +59,7 @@ mcrl2_add_cxx_debug_flag(-Wunused)
 mcrl2_add_cxx_debug_flag(-Wno-system-headers)
 mcrl2_add_cxx_debug_flag(-Woverloaded-virtual)
 mcrl2_add_cxx_debug_flag(-Wwrite-strings)
-mcrl2_add_cxx_debug_flag(ftrapv)
+mcrl2_add_cxx_debug_flag(-ftrapv)
 
 # Change the thread local storage model to 'initial-exec', which applies additional
 # optimisations which assume that the shared library will never be dynamically loaded.
