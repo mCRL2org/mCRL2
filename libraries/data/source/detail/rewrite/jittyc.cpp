@@ -1426,21 +1426,40 @@ class RewriterCompilingJitty::ImplementTree
       nfs_array args_nfs(recursive_number_of_args(a));
       args_nfs.fill(true);
 
-      s << m_padding << appl_function(arity) << "(" + target_for_output + ",";
-      std::stringstream types_for_arguments;
-      calc_inner_term(s, "", head, startarg, true, types_for_arguments, type_of_code_variables);
-      s << ", ";
-      if (arity>0)
+      if (target_for_output.empty())
       {
-        types_for_arguments << ", ";
-      }
-      calc_inner_terms(s, a, startarg, args_nfs,types_for_arguments, type_of_code_variables);
-      s << ");\n";
-      s << m_padding << "this_rewriter->rewrite_lambda_application(" << target_for_output << ", " << target_for_output;
-      result_type << "data_expression";
+        s << "this_rewriter->rewrite_lambda_application(application(";
+        std::stringstream types_for_arguments;
+        calc_inner_term(s, "", head, startarg, true, types_for_arguments, type_of_code_variables);
+        s << ", ";
+        if (arity>0)
+        {
+          types_for_arguments << ", ";
+        }
+        calc_inner_terms(s, a, startarg, args_nfs,types_for_arguments, type_of_code_variables);
+        s << "), sigma(this_rewriter))\n";
+        result_type << "data_expression";
 
-      s << ", sigma(this_rewriter));\n";
-      return require_normal_form;
+        return require_normal_form;
+      }
+      else 
+      {
+        s << m_padding << appl_function(arity) << "(" + target_for_output + ",";
+        std::stringstream types_for_arguments;
+        calc_inner_term(s, "", head, startarg, true, types_for_arguments, type_of_code_variables);
+        s << ", ";
+        if (arity>0)
+        {
+          types_for_arguments << ", ";
+        }
+        calc_inner_terms(s, a, startarg, args_nfs,types_for_arguments, type_of_code_variables);
+        s << ");\n";
+        s << m_padding << "this_rewriter->rewrite_lambda_application(" << target_for_output << ", " << target_for_output;
+        result_type << "data_expression";
+
+        s << ", sigma(this_rewriter));\n";
+        return require_normal_form;
+      }
     }
     else
     {
@@ -1448,19 +1467,37 @@ class RewriterCompilingJitty::ImplementTree
       nfs_array args_nfs(arity);
       args_nfs.fill(true);
 
-      s << m_padding << appl_function(arity) << "(" << target_for_output;
-      std::stringstream types_for_arguments;
-      calc_inner_term(s, target_for_output, head, startarg, true, types_for_arguments, type_of_code_variables);
-      s << ", ";
-      if (arity>0)
+      if (target_for_output.empty())
       {
-        types_for_arguments << ", ";
+        s << "term_not_in_normalform(application(";
+        std::stringstream types_for_arguments;
+        calc_inner_term(s, target_for_output, head, startarg, true, types_for_arguments, type_of_code_variables);
+        s << ", ";
+        if (arity>0)
+        {
+          types_for_arguments << ", ";
+        }
+        calc_inner_terms(s, a, startarg, args_nfs,types_for_arguments, type_of_code_variables);
+        s << "))";
+        result_type << "term_not_in_normalform";
+        return require_normal_form;
       }
-      calc_inner_terms(s, a, startarg, args_nfs,types_for_arguments, type_of_code_variables);
-      s << ");\n";
-      s << m_padding << target_for_output << "= term_not_in_normalform(" << target_for_output << ");\n";
-      result_type << "term_not_in_normalform";
-      return require_normal_form;
+      else 
+      {
+        s << m_padding << appl_function(arity) << "(" << target_for_output;
+        std::stringstream types_for_arguments;
+        calc_inner_term(s, target_for_output, head, startarg, true, types_for_arguments, type_of_code_variables);
+        s << ", ";
+        if (arity>0)
+        {
+          types_for_arguments << ", ";
+        }
+        calc_inner_terms(s, a, startarg, args_nfs,types_for_arguments, type_of_code_variables);
+        s << ");\n";
+        s << m_padding << target_for_output << "= term_not_in_normalform(" << target_for_output << ");\n";
+        result_type << "term_not_in_normalform";
+        return require_normal_form;
+      }
     }
   }
 

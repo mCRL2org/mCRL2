@@ -236,7 +236,16 @@ void Rewriter::rewrite_lambda_application(
   return;
 }
 
-
+// A variant of rewrite_lambda that delivers its result via the stack.
+// This is less efficient as the result on the stack will temporarily be protected.
+data_expression Rewriter::rewrite_lambda_application(
+                      const data_expression& t,
+                      substitution_type& sigma)
+{
+  data_expression result;
+  rewrite_lambda_application(result, t, sigma);
+  return result;
+}
 
 // The function rewrite_lambda_application rewrites a lambda term to a set of
 // arguments which are the arguments 1,...,n of t. If t has the shape
