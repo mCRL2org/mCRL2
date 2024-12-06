@@ -423,7 +423,7 @@ struct linked_list
   /// pos==end(), in which it is put in front of the list.
   template <class... Args>
   iterator emplace_after(const iterator pos, Args&&... args)
-  {                                                                             assert(pos==nullptr || !empty());  assert(pos==nullptr || pos->prev()!=nullptr);
+  {                                                                             assert(pos==nullptr || !empty()); assert(pos==nullptr || pos->prev()!=nullptr);
                                                                                 #ifndef NDEBUG
                                                                                   assert(check_linked_list());
                                                                                   if (pos!=nullptr)
@@ -3533,11 +3533,12 @@ class bisim_partitioner_gj
     /// case; the function will only treat
     /// [`splitter->start_same_BLC`, `splitter_end_unmarked_BLC`) as unmarked
     /// transitions.
-    template <bool initialisation=false, class Iterator=linked_list<BLC_indicators>::iterator>
+    template <bool initialisation=false,
+                          class Iterator=linked_list<BLC_indicators>::iterator>
     block_index simple_splitB(const block_index B,
                   Iterator splitter,
                   state_in_block_pointer* const first_unmarked_bottom_state,
-                  const BLC_list_iterator splitter_end_unmarked_BLC)
+                  const BLC_list_iterator_or_null splitter_end_unmarked_BLC)
     {                                                                           assert(!initialisation || m_constellations.size()==1);
       #ifdef INITIAL_PARTITION_WITHOUT_BLC_SETS
         #define use_BLC_transitions (!initialisation)
@@ -4542,7 +4543,7 @@ class bisim_partitioner_gj
                                        this default argument is not allowed */,
                       constellation_index old_constellation=null_constellation,
                       const bool split_off_new_bottom_states=true)
-    {
+    {                                                                           assert(nullptr!=first_unmarked_bottom_state);
       #ifdef INITIAL_PARTITION_WITHOUT_BLC_SETS
         #define use_BLC_transitions (!initialisation)
       #else
@@ -6846,12 +6847,18 @@ class bisim_partitioner_gj
                                         old_constellation);
                 if (linked_list<BLC_indicators>::end()!=co_splitter)
                 {
+                  // we need to use linked_list<BLC_indicators>::end(), the
+                  // static function, because it is unclear whether Bpp is
+                  // still a valid block (it could be that all states in the
+                  // R-subblock are new bottom states). But even in that case
+                  // we have to declare the co-splitter part of the U-subblock
+                  // stable, so we cannot just skip the loop that comes here:
+
                   // The former co-splitter has been separated into up to three parts:
                   // one with transitions starting in the R-subblock (that will be the true co-splitter);
                   // one with transitions starting in the U-subblock (that actually is already stable);
                   // one with transitions starting in new bottom states and their predecessors.
-                                                                                assert(Bpp<m_blocks.size());
-                  co_splitter=m_blocks[Bpp].block.to_constellation.end();       assert(co_splitter_begin<co_splitter_end);
+                  co_splitter=linked_list<BLC_indicators>::end();               assert(co_splitter_begin<co_splitter_end);
                                                                                 #ifndef NDEBUG
                                                                                   int number_of_iterations=0;
                                                                                 #endif
@@ -6871,7 +6878,7 @@ class bisim_partitioner_gj
                     const block_index from_block=m_states[t.from()].block;
                     if (from_block==Bpp)
                     {                                                           assert(null_block!=Bpp);
-                      /* This is the part that starts in the R-subblock      */ assert(m_blocks[Bpp].block.to_constellation.end()==co_splitter);
+                      /* This is the part that starts in the R-subblock      */ assert(linked_list<BLC_indicators>::end()==co_splitter);
 //std::cerr << "Co-splitter updated to " << candidate->debug_id(*this) << '\n';
                       co_splitter=candidate;
                     }
