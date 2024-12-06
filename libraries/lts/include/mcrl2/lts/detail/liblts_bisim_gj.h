@@ -6850,6 +6850,7 @@ class bisim_partitioner_gj
                   // one with transitions starting in the R-subblock (that will be the true co-splitter);
                   // one with transitions starting in the U-subblock (that actually is already stable);
                   // one with transitions starting in new bottom states and their predecessors.
+                                                                                assert(Bpp<m_blocks.size());
                   co_splitter=m_blocks[Bpp].block.to_constellation.end();       assert(co_splitter_begin<co_splitter_end);
                                                                                 #ifndef NDEBUG
                                                                                   int number_of_iterations=0;
