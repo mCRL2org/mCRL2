@@ -2942,14 +2942,13 @@ mCRL2log(log::verbose) << "Start refining\n";
             typename std::remove_reference<decltype(aut.state_labels())>::type
                                                   new_labels(num_eq_classes());
 
-            state_type i(aut.num_states());                                     assert(0 < i);
+            state_type i(0);                                                    assert(i < aut.num_states());
             do
             {
-                --i;
                 const state_type new_index(get_eq_class(i));
-                new_labels[new_index]=aut.state_label(i)+new_labels[new_index];
+                new_labels[new_index]=new_labels[new_index]+aut.state_label(i);
             }
-            while (0 < i);
+            while (++i < aut.num_states());
 
             aut.set_num_states(num_eq_classes(), false);                        assert(0 == aut.num_state_labels());
             //m_aut.clear_state_labels();
