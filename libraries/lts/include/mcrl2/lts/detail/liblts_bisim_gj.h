@@ -281,9 +281,14 @@ struct linked_list_node: public T
       return content();
     }
 
-    operator const T&() const
+    const T& content() const
     {
       return static_cast<const T&>(*this);
+    }
+
+    operator const T&() const
+    {
+      return content();
     }
 };
 
@@ -712,6 +717,27 @@ struct linked_list
                                                                                 #endif
     return begin()==pos ? end() : pos->prev();
   }
+
+  bool operator==(const linked_list& other) const
+  {
+    linked_list_const_iterator it=m_initial_node;
+    linked_list_const_iterator other_it=other.m_initial_node;
+    while (end()!=it)
+    {
+      if (end()==other_it || it->content()!=other_it->content())
+      {
+        return false;
+      }
+      ++it;
+      ++other_it;
+    }
+    return end()==other_it;
+  }
+
+  bool operator!=(const linked_list& other) const
+  {
+    return !operator==(other);
+  }
 };
 
 // The struct below facilitates to walk through a LBC_list starting from an
@@ -882,7 +908,7 @@ struct state_type_gj
   /// first outgoing transition
   outgoing_transitions_it start_outgoing_transitions;
   /// pointer to the corresponding entry in m_states_in_blocks
-  state_in_block_pointer* ref_states_in_blocks;
+  fixed_vector<state_in_block_pointer>::iterator ref_states_in_blocks;
   /// number of outgoing block-inert transitions
   transition_index no_of_outgoing_block_inert_transitions=0;
   /// counter used during splitting
@@ -899,9 +925,9 @@ struct state_type_gj
                                                                                   template<class LTS_TYPE>
                                                                                   std::string debug_id_short(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
                                                                                   {
-                                                                                    assert(&partitioner.m_states.front() <= this);
-                                                                                    assert(this <= &partitioner.m_states.back());
-                                                                                    return std::to_string(this - &partitioner.m_states.front());
+                                                                                    assert(partitioner.m_states.data()<=this);
+                                                                                    assert(this<partitioner.m_states.data_end());
+                                                                                    return std::to_string(this-partitioner.m_states.data());
                                                                                   }
 
                                                                                   /// \brief print a state identification for debugging
@@ -953,6 +979,18 @@ struct BLC_indicators
   {                                                                             assert(is_stable());
     start_marked_BLC=end_same_BLC;
   }
+
+  bool operator==(const BLC_indicators& other) const
+  {
+    return start_same_BLC==other.start_same_BLC &&
+           start_marked_BLC==other.start_marked_BLC &&
+           end_same_BLC==other.end_same_BLC;
+  }
+
+  bool operator!=(const BLC_indicators& other) const
+  {
+    return !operator==(other);
+  }
                                                                                 #ifndef NDEBUG
                                                                                   /// \brief print a B_to_C slice identification for debugging
                                                                                   /// \details This function is only available if compiled in Debug mode.
@@ -963,7 +1001,7 @@ struct BLC_indicators
                                                                                     assert(nullptr==start_marked_BLC || start_same_BLC<=start_marked_BLC);
                                                                                     assert(nullptr==start_marked_BLC || start_marked_BLC<=end_same_BLC);
                                                                                     assert(start_same_BLC<=end_same_BLC);
-                                                                                    assert(&*partitioner.m_BLC_transitions.begin()==end_same_BLC || std::prev(end_same_BLC)<=&*std::prev(partitioner.m_BLC_transitions.end()));
+                                                                                    assert(end_same_BLC<=partitioner.m_BLC_transitions.data_end());
                                                                                     std::string result("BLC set ["+std::to_string(std::distance<BLC_list_const_iterator>(&*partitioner.m_BLC_transitions.begin(), start_same_BLC))+","+std::to_string(std::distance<BLC_list_const_iterator>(&*partitioner.m_BLC_transitions.begin(), end_same_BLC))+")");
                                                                                     if (start_same_BLC==end_same_BLC)
                                                                                     {
@@ -1032,9 +1070,10 @@ struct transition_type
                                                                                   template<class LTS_TYPE>
                                                                                   std::string debug_id_short(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
                                                                                   {
-                                                                                    assert(&partitioner.m_transitions.front() <= this);
-                                                                                    assert(this <= &partitioner.m_transitions.back());
-                                                                                    const transition& t = partitioner.m_aut.get_transitions()[this - &partitioner.m_transitions.front()];
+                                                                                    assert(partitioner.m_transitions.data()<=this);
+                                                                                    assert(this<partitioner.m_transitions.data_end());
+                                                                                    const transition& t=partitioner.m_aut.get_transitions()
+                                                                                                                       [this-partitioner.m_transitions.data()];
                                                                                     return partitioner.m_states[t.from()].debug_id_short(partitioner) + " -" +
                                                                                            pp(partitioner.m_aut.action_label(t.label())) + "-> " +
                                                                                            partitioner.m_states[t.to()].debug_id_short(partitioner);
@@ -1072,35 +1111,46 @@ struct block_type
       {}
     } on;
     /// \brief field used during initialisation for the first unmarked bottom state
-    /// \details The field cannot be an iterator because the iterator has a
-    /// nontrivial destructor; then the union would also have a nontrivial
-    /// destructor (even though it is only destroyed when field on is in use).
-    state_in_block_pointer* first_unmarked_bottom_state;
+    fixed_vector<state_in_block_pointer>::iterator first_unmarked_bottom_state;
 
     constellation_or_first_unmarked_bottom_state(constellation_index new_c)
       :on(new_c)
     {}
+
+    /// \brief destructor of the union
+    /// \details Because the iterator type has a nontrivial destructor, C++11
+    /// requires that the union also has an explicit destructor, even though
+    /// it is only destroyed when field `on` is in use.  (If one requires it
+    /// to be trivially destructible, one might have to change the definition
+    /// of `fixed_vector<...>::iterator` to use pointers instead of
+    /// `std::vector<...>::iterator`.
+    ~constellation_or_first_unmarked_bottom_state()
+    {
+      on.~constellation_and_new_bottom_states();
+    }
   } c;
   /// first state of the block in m_states_in_blocks
   /// States in [start_bottom_states, start_non_bottom_states) are bottom
   /// states in the block
-  state_in_block_pointer* start_bottom_states;
+  fixed_vector<state_in_block_pointer>::iterator start_bottom_states;
   /// first non-bottom state of the block in m_states_in_blocks
   /// States in [start_non_bottom_states, end_states) are non-bottom states in
   /// the block.
   /// If m_branching==false, we have start_non_bottom_states==end_states.
-  state_in_block_pointer* start_non_bottom_states;
+  fixed_vector<state_in_block_pointer>::iterator start_non_bottom_states;
   /// pointer past the last state in the block
-  state_in_block_pointer* end_states;
+  fixed_vector<state_in_block_pointer>::iterator end_states;
   /// list of descriptors of all BLC sets that contain transitions starting in
   /// the block.
   /// The first element in the list contains inert transitions (if they exist);
   /// BLC sets that are regarded as unstable are near the end of the list.
   union btc_R
   {
-    linked_list< BLC_indicators > to_constellation;
-    std::vector<state_in_block_pointer>* R;
+    linked_list<BLC_indicators> to_constellation;
 
+    /// \brief constructor
+    /// \details Note: `if_R_is_nullptr_then_to_constellation_is_empty_list()`
+    /// depends on the fact that the constructor creates the variant field `R`.
     btc_R()
       #ifdef INITIAL_PARTITION_WITHOUT_BLC_SETS
       : R(nullptr)
@@ -1109,15 +1159,37 @@ struct block_type
       #endif
     {}
 
-    /// \brief Convert the object from pointer to to_constellation list
-    void convert_to_BLC_list()
-    {
-                                                                                #ifndef INITIAL_PARTITION_WITHOUT_BLC_SETS
-                                                                                  assert(0);
-                                                                                #endif
-      delete R;
-      new (&to_constellation) linked_list<BLC_indicators>();
-    }
+    #ifdef INITIAL_PARTITION_WITHOUT_BLC_SETS
+      std::vector<state_in_block_pointer>* R;
+
+      /// \brief indicates whether the default values of the union members agree
+      /// \details If this function returns `false`, it is necesssary to
+      /// explicitly construct every `block.to_constellation` list during
+      /// initialisation.  Otherwise, it would be enough to just keep `R` as
+      /// `nullptr`.  The function is not a constexpr but it is optimized away
+      /// completely (at least by my compiler, DNJ).
+      static bool if_R_is_nullptr_then_to_constellation_is_empty_list()
+      {
+        if constexpr (sizeof(std::vector<state_in_block_pointer>*)!=
+                                           sizeof(linked_list<BLC_indicators>))
+        {
+          return false;
+        }
+        btc_R test_should_be_empty_BLC_list=btc_R();                            assert(nullptr==test_should_be_empty_BLC_list.R);
+        if (test_should_be_empty_BLC_list.to_constellation.empty() &&
+            test_should_be_empty_BLC_list.to_constellation==
+                                                 linked_list<BLC_indicators>())
+        {
+          // no need to change `test_should_be_empty_BLC_list` from a pointer
+          // to a linked_list explicitly, as the two seem to have the same bit
+          // pattern; the destructor will work fine.
+          return true;
+        }
+        // The destructor expects a linked list:
+        new (&test_should_be_empty_BLC_list) linked_list<BLC_indicators>();
+        return false;
+      }
+    #endif
 
     /// \brief destruct the object as a to_constellation list
     ~btc_R()
@@ -1126,7 +1198,7 @@ struct block_type
     }
   } block;
 
-  block_type(state_in_block_pointer*
+  block_type(fixed_vector<state_in_block_pointer>::iterator
                                 beginning_of_states, constellation_index new_c)
     : c(new_c),
       start_bottom_states(beginning_of_states),
@@ -1137,19 +1209,21 @@ struct block_type
                                                                                 #ifndef NDEBUG
                                                                                   /// \brief print a block identification for debugging
                                                                                   template<class LTS_TYPE>
-                                                                                  inline std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
+                                                                                  std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
                                                                                   {
                                                                                     assert(!partitioner.m_blocks.empty());
                                                                                     assert(partitioner.m_blocks.data()<=this);
-                                                                                    assert(this<=&partitioner.m_blocks.back());
-                                                                                    assert(partitioner.m_states_in_blocks.data()<=start_bottom_states);
+                                                                                    assert(this<partitioner.m_blocks.data_end());
+                                                                                    assert(partitioner.m_states_in_blocks.begin()<=start_bottom_states);
                                                                                     assert(start_bottom_states<=start_non_bottom_states);
                                                                                     assert(start_non_bottom_states<=end_states);
-                                                                                    assert(end_states<=std::next(&partitioner.m_states_in_blocks.back()));
-                                                                                    return"block ["+std::to_string(std::distance<const state_in_block_pointer*>
-                                                                                          (partitioner.m_states_in_blocks.data(), start_bottom_states)) + "," +
-                                                                                        std::to_string(std::distance<const state_in_block_pointer*>
-                                                                                                (partitioner.m_states_in_blocks.data(), end_states)) + ") (#" +
+                                                                                    assert(end_states<=partitioner.m_states_in_blocks.end());
+                                                                                    return"block ["+std::to_string
+                                                                                          (std::distance<fixed_vector<state_in_block_pointer>::const_iterator>
+                                                                                            (partitioner.m_states_in_blocks.begin(), start_bottom_states))+","+
+                                                                                        std::to_string
+                                                                                          (std::distance<fixed_vector<state_in_block_pointer>::const_iterator>
+                                                                                            (partitioner.m_states_in_blocks.begin(), end_states))+") (#"+
                                                                                         std::to_string(std::distance(partitioner.m_blocks.data(), this)) + ")";
                                                                                   }
 
@@ -1161,22 +1235,24 @@ struct block_type
 struct constellation_type
 {
   /// points to the first state in m_states_in_blocks
-  state_in_block_pointer* start_const_states;
+  fixed_vector<state_in_block_pointer>::iterator start_const_states;
   /// points past the last state in m_states_in_blocks
-  state_in_block_pointer* end_const_states;
-  constellation_type(state_in_block_pointer* const new_start,
-                     state_in_block_pointer* const new_end)
+  fixed_vector<state_in_block_pointer>::iterator end_const_states;
+  constellation_type(
+              fixed_vector<state_in_block_pointer>::iterator const new_start,
+              fixed_vector<state_in_block_pointer>::iterator const new_end)
     : start_const_states(new_start),
       end_const_states(new_end)
   {}
                                                                                 #ifndef NDEBUG
                                                                                   /// \brief print a constellation identification for debugging
                                                                                   template<class LTS_TYPE>
-                                                                                  inline std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
+                                                                                  std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
                                                                                   {
-                                                                                    assert(&partitioner.m_constellations.front() <= this);
-                                                                                    assert(this <= &partitioner.m_constellations.back());
-                                                                                    return "constellation " + std::to_string(this - &partitioner.m_constellations.front());
+                                                                                    assert(partitioner.m_constellations.data()<=this);
+                                                                                    assert(this<partitioner.m_constellations.data_end());
+                                                                                    return "constellation "+
+                                                                                                      std::to_string(this-partitioner.m_constellations.data());
                                                                                   }
                                                                                 #endif
 };
@@ -1326,7 +1402,7 @@ class bisim_partitioner_gj
                                                                                                          const bool check_temporary_complexity_counters,
                                                                                                          const bool check_block_to_constellation = true) const
                                                                                   {
-                                                                                    for(transition_index ti=0; ti<m_transitions.size(); ++ti)
+                                                                                    for(transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
                                                                                     {
                                                                                       const BLC_list_const_iterator btc_ti=
                                                                                                m_transitions[ti].ref_outgoing_transitions->ref.BLC_transitions;
@@ -1334,7 +1410,7 @@ class bisim_partitioner_gj
 
                                                                                       const transition& t=m_aut.get_transitions()[ti];
                                                                                       assert(&*m_states[t.to()].start_incoming_transitions<=&t);
-                                                                                      if (t.to()+1!=m_states.size())
+                                                                                      if (t.to()+1!=m_aut.num_states())
                                                                                       {
                                                                                         assert(&t<=&*std::prev(m_states[t.to()+1].start_incoming_transitions));
                                                                                       }
@@ -1345,7 +1421,7 @@ class bisim_partitioner_gj
 
                                                                                       assert(m_states[t.from()].start_outgoing_transitions<=
                                                                                                                    m_transitions[ti].ref_outgoing_transitions);
-                                                                                      if (t.from()+1==m_states.size())
+                                                                                      if (t.from()+1==m_aut.num_states())
                                                                                       {
                                                                                         assert(m_transitions[ti].ref_outgoing_transitions<
                                                                                                                                  m_outgoing_transitions.end());
@@ -1426,7 +1502,10 @@ class bisim_partitioner_gj
                                                                                     #endif
                                                                                     mCRL2log(log::debug) << "Check data structures: " << tag << ".\n";
                                                                                     assert(m_states.size()==m_aut.num_states());
+                                                                                    assert(m_states_in_blocks.size()==m_aut.num_states());
+                                                                                    assert(m_transitions.size()==m_aut.num_transitions());
                                                                                     assert(m_outgoing_transitions.size()==m_aut.num_transitions());
+                                                                                    assert(m_BLC_transitions.size()==m_aut.num_transitions());
 
                                                                                     // Check that the elements in m_states are well formed.
                                                                                     for (fixed_vector<state_type_gj>::iterator si=
@@ -1528,18 +1607,18 @@ class bisim_partitioner_gj
                                                                                       {
                                                                                         const block_type& b=m_blocks[bi];
                                                                                         const constellation_type& c=m_constellations[b.c.on.stellation];
-                                                                                        assert(m_states_in_blocks.data()<=c.start_const_states);
+                                                                                        assert(m_states_in_blocks.begin()<=c.start_const_states);
                                                                                         assert(c.start_const_states<=b.start_bottom_states);
                                                                                         assert(b.start_bottom_states<b.start_non_bottom_states);
                                                                                         assert(b.start_non_bottom_states<=b.end_states);
                                                                                         assert(b.end_states<=c.end_const_states);
-                                                                                        assert(c.end_const_states<=std::next(&m_states_in_blocks.back()));
+                                                                                        assert(c.end_const_states<=m_states_in_blocks.end());
 
                                                                                         unsigned max_B = check_complexity::log_n-
                                                                                                         check_complexity::ilog2(number_of_states_in_block(bi));
                                                                                         unsigned max_C = check_complexity::log_n-check_complexity::
                                                                                                    ilog2(number_of_states_in_constellation(b.c.on.stellation));
-                                                                                        for(const state_in_block_pointer*
+                                                                                        for (fixed_vector<state_in_block_pointer>::const_iterator
                                                                                                  is=b.start_bottom_states; is!=b.start_non_bottom_states; ++is)
                                                                                         {
                                                                                           assert(is->ref_state->block==bi);
@@ -1551,7 +1630,7 @@ class bisim_partitioner_gj
                                                                                                                                       !initialisation), *this);
                                                                                           }
                                                                                         }
-                                                                                        for(const state_in_block_pointer*
+                                                                                        for (fixed_vector<state_in_block_pointer>::const_iterator
                                                                                                           is=b.start_non_bottom_states; is!=b.end_states; ++is)
                                                                                         {
                                                                                           assert(is->ref_state->block==bi);
@@ -1607,7 +1686,7 @@ class bisim_partitioner_gj
                                                                                         }
                                                                                       }
                                                                                       assert(!use_BLC_transitions ||
-                                                                                             all_transitions.size()==m_transitions.size());
+                                                                                             all_transitions.size()==m_aut.num_transitions());
                                                                                       // destruct `all_transitions` here
                                                                                     }
 
@@ -1616,7 +1695,7 @@ class bisim_partitioner_gj
                                                                                       std::unordered_set<block_index> all_blocks;
                                                                                       for(constellation_index ci=0; ci<m_constellations.size(); ci++)
                                                                                       {
-                                                                                        for (const state_in_block_pointer*
+                                                                                        for (fixed_vector<state_in_block_pointer>::const_iterator
                                                                                                     constln_it=m_constellations[ci].start_const_states;
                                                                                                     constln_it<m_constellations[ci].end_const_states; )
                                                                                         {
@@ -1632,8 +1711,8 @@ class bisim_partitioner_gj
 
                                                                                     // Check that the states in m_states_in_blocks refer to with ref_states_in_block to the right position.
                                                                                     // and that a state is correctly designated as a (non-)bottom state.
-                                                                                    for(const state_in_block_pointer* si=m_states_in_blocks.data();
-                                                                                                                          si<=&m_states_in_blocks.back(); ++si)
+                                                                                    for (fixed_vector<state_in_block_pointer>::const_iterator
+                                                                                              si=m_states_in_blocks.begin(); si<m_states_in_blocks.end(); ++si)
                                                                                     {
                                                                                       assert(si==si->ref_state->ref_states_in_blocks);
                                                                                     }
@@ -1684,16 +1763,18 @@ class bisim_partitioner_gj
                                                                                   ///     block.
                                                                                   [[nodiscard]]
                                                                                   bool check_stability(const std::string& tag,
-                                                                                                       const std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> >* calM = nullptr,
-                                                                                                       const std::pair<BLC_list_iterator, BLC_list_iterator>* calM_elt = nullptr,
-                                                                                                       const constellation_index old_constellation = null_constellation) const
+                                                                                        const std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> >*
+                                                                                                                                                calM=nullptr,
+                                                                                        const std::pair<BLC_list_iterator,BLC_list_iterator>* calM_elt=nullptr,
+                                                                                        const constellation_index old_constellation=null_constellation) const
                                                                                   {
                                                                                     mCRL2log(log::debug) << "Check stability: " << tag << ".\n";
                                                                                     for(block_index bi=0; bi<m_blocks.size(); ++bi)
                                                                                     {
                                                                                       const block_type& b=m_blocks[bi];
                                                                                       bool previous_stable=true;
-                                                                                      for(linked_list< BLC_indicators >::iterator ind=b.block.to_constellation.begin();
+                                                                                      for (linked_list<BLC_indicators>::iterator
+                                                                                                   ind=b.block.to_constellation.begin();
                                                                                                    ind!=b.block.to_constellation.end(); ++ind)
                                                                                       {
                                                                                         set_of_states_type all_source_bottom_states;
@@ -1708,7 +1789,7 @@ class bisim_partitioner_gj
                                                                                         for(BLC_list_const_iterator i=ind->start_same_BLC; i<ind->end_same_BLC; ++i)
                                                                                         {
                                                                                           assert(m_BLC_transitions.data()<=i);
-                                                                                          assert(i<=&m_BLC_transitions.back());
+                                                                                          assert(i<m_BLC_transitions.data_end());
                                                                                           const transition& t=m_aut.get_transitions()[*i];
 // if (m_states[t.from()].block != bi) { std::cerr << m_transitions[*ind->start_same_BLC].debug_id(*this) << " should start in block " << bi << '\n'; }
                                                                                           assert(m_states[t.from()].block == bi);
@@ -1749,7 +1830,10 @@ class bisim_partitioner_gj
                                                                                           mCRL2log(log::debug) << "Not all " << std::distance(b.start_bottom_states, b.start_non_bottom_states)
                                                                                               << (m_branching ? " bottom states have a transition in the " : " states have a transition in the ")
                                                                                               << ind->debug_id(*this) << ": transitions found from states";
-                                                                                          for (set_of_states_type::iterator asbc_it = all_source_bottom_states.begin() ; asbc_it != all_source_bottom_states.end() ; ++asbc_it) { mCRL2log(log::debug) << ' ' << *asbc_it; }
+                                                                                          for (set_of_states_type::iterator
+                                                                                                           asbc_it=all_source_bottom_states.begin();
+                                                                                                           asbc_it!=all_source_bottom_states.end() ; ++asbc_it)
+                                                                                          { mCRL2log(log::debug) << ' ' << *asbc_it; }
                                                                                           mCRL2log(log::debug) << '\n';
                                                                                           eventual_instability_is_ok = false;
                                                                                         }
@@ -1982,13 +2066,13 @@ class bisim_partitioner_gj
                                                                                     if (!mCRL2logEnabled(log::debug))  return;
                                                                                     mCRL2log(log::debug) << "========= PRINT DATASTRUCTURE: " << header << " =======================================\n";
                                                                                     mCRL2log(log::debug) << "++++++++++++++++++++  States     ++++++++++++++++++++++++++++\n";
-                                                                                    for(state_index si=0; si<m_states.size(); ++si)
+                                                                                    for(state_index si=0; si<m_aut.num_states(); ++si)
                                                                                     {
                                                                                       mCRL2log(log::debug) << "State " << si <<" (Block: " << m_states[si].block <<"):\n";
                                                                                       mCRL2log(log::debug) << "  #Inert outgoing transitions: " << m_states[si].no_of_outgoing_block_inert_transitions << '\n';
 
                                                                                       mCRL2log(log::debug) << "  Incoming transitions:\n";
-                                                                                      std::vector<transition>::const_iterator end=(si+1==m_states.size()?m_aut.get_transitions().end():m_states[si+1].start_incoming_transitions);
+                                                                                      std::vector<transition>::const_iterator end=(si+1==m_aut.num_states()?m_aut.get_transitions().end():m_states[si+1].start_incoming_transitions);
                                                                                       for(std::vector<transition>::const_iterator it=m_states[si].start_incoming_transitions; it!=end; ++it)
                                                                                       {
                                                                                          mCRL2log(log::debug) << "  " << ptr(*it) << "\n";
@@ -1997,7 +2081,7 @@ class bisim_partitioner_gj
                                                                                       mCRL2log(log::debug) << "  Outgoing transitions:\n";
                                                                                       for(outgoing_transitions_const_it it=m_states[si].start_outgoing_transitions;
                                                                                                       it!=m_outgoing_transitions.end() &&
-                                                                                                      (si+1>=m_states.size() || it!=m_states[si+1].start_outgoing_transitions);
+                                                                                                      (si+1>=m_aut.num_states() || it!=m_states[si+1].start_outgoing_transitions);
                                                                                                    ++it)
                                                                                       {
                                                                                          const transition& t=m_aut.get_transitions()[use_BLC_transitions
@@ -2008,7 +2092,7 @@ class bisim_partitioner_gj
                                                                                       mCRL2log(log::debug) << "---------------------------------------------------\n";
                                                                                     }
                                                                                     mCRL2log(log::debug) << "++++++++++++++++++++ Transitions ++++++++++++++++++++++++++++\n";
-                                                                                    for(state_index ti=0; ti<m_transitions.size(); ++ti)
+                                                                                    for(state_index ti=0; ti<m_aut.num_transitions(); ++ti)
                                                                                     {
                                                                                       const transition& t=m_aut.get_transitions()[ti];
                                                                                       mCRL2log(log::debug) << "Transition " << ti <<": " << t.from()
@@ -2022,7 +2106,8 @@ class bisim_partitioner_gj
                                                                                       mCRL2log(log::debug) << "  Block " << bi << " (const: "
                                                                                         << (initialisation?constellation_index(0):m_blocks[bi].c.on.stellation)
                                                                                                  << (m_branching ? "):\n  Bottom states: " : "):\n  States: ");
-                                                                                      for(const state_in_block_pointer* sit=m_blocks[bi].start_bottom_states;
+                                                                                      for (fixed_vector<state_in_block_pointer>::const_iterator
+                                                                                                      sit=m_blocks[bi].start_bottom_states;
                                                                                                       sit!=m_blocks[bi].start_non_bottom_states; ++sit)
                                                                                       {
                                                                                         mCRL2log(log::debug) << std::distance<fixed_vector<state_type_gj>::const_iterator>(m_states.cbegin(), sit->ref_state) << "  ";
@@ -2030,8 +2115,9 @@ class bisim_partitioner_gj
                                                                                       if (m_branching)
                                                                                       {
                                                                                         mCRL2log(log::debug) << "\n  Non-bottom states: ";
-                                                                                        for (const state_in_block_pointer* sit=m_blocks[bi].
-                                                                                                  start_non_bottom_states; sit!=m_blocks[bi].end_states; ++sit)
+                                                                                        for (fixed_vector<state_in_block_pointer>::const_iterator
+                                                                                                  sit=m_blocks[bi].start_non_bottom_states;
+                                                                                                                           sit!=m_blocks[bi].end_states; ++sit)
                                                                                         {
                                                                                           mCRL2log(log::debug) << std::distance<fixed_vector<state_type_gj>::const_iterator>(m_states.cbegin(), sit->ref_state) << "  ";
                                                                                         }
@@ -2052,8 +2138,9 @@ class bisim_partitioner_gj
                                                                                     {
                                                                                       mCRL2log(log::debug) << "  Constellation " << ci << ":\n";
                                                                                       mCRL2log(log::debug) << "    Blocks in constellation:";
-                                                                                      for (const state_in_block_pointer* constln_it=m_constellations[ci].
-                                                                                        start_const_states; constln_it<m_constellations[ci].end_const_states; )
+                                                                                      for (fixed_vector<state_in_block_pointer>::const_iterator
+                                                                                                            constln_it=m_constellations[ci].start_const_states;
+                                                                                                            constln_it<m_constellations[ci].end_const_states; )
                                                                                       {
                                                                                         const block_index bi=constln_it->ref_state->block;
                                                                                         mCRL2log(log::debug) << " " << bi;
@@ -2160,7 +2247,7 @@ class bisim_partitioner_gj
     /// \param s state whose equivalence class needs to be found
     /// \returns sequence number of the equivalence class of state s
     state_index get_eq_class(const state_index si) const
-    {                                                                           assert(si<m_states.size());
+    {                                                                           assert(si<m_aut.num_states());
       return m_states[si].block;
     }
 
@@ -2272,19 +2359,18 @@ class bisim_partitioner_gj
 
     /// \brief swap the contents of `pos1` and `pos2`, assuming they are different
     void swap_states_in_states_in_block_never_equal(
-              state_in_block_pointer* pos1,
-              state_in_block_pointer* pos2)
-    {                                                                           assert(m_states_in_blocks.data()<=pos1);
-                                                                                assert(pos1<=&m_states_in_blocks.back());
-      std::swap(*pos1,*pos2);                                                   assert(m_states_in_blocks.data()<=pos2);
-      pos1->ref_state->ref_states_in_blocks=pos1;                               assert(pos2<=&m_states_in_blocks.back());
-      pos2->ref_state->ref_states_in_blocks=pos2;                               assert(pos1!=pos2);
+              fixed_vector<state_in_block_pointer>::iterator pos1,
+              fixed_vector<state_in_block_pointer>::iterator pos2)
+    {                                                                           assert(m_states_in_blocks.begin()<=pos1);
+      std::swap(*pos1,*pos2);                                                   assert(pos1<m_states_in_blocks.end());
+      pos1->ref_state->ref_states_in_blocks=pos1;                               assert(m_states_in_blocks.begin()<=pos2);
+      pos2->ref_state->ref_states_in_blocks=pos2;                               assert(pos2<m_states_in_blocks.end());  assert(pos1!=pos2);
     }
 
     /// \brief swap the contents of `pos1` and `pos2` if they are different
     void swap_states_in_states_in_block(
-              state_in_block_pointer* pos1,
-              state_in_block_pointer* pos2)
+              fixed_vector<state_in_block_pointer>::iterator pos1,
+              fixed_vector<state_in_block_pointer>::iterator pos2)
     {
       if (pos1!=pos2)
       {
@@ -2296,17 +2382,17 @@ class bisim_partitioner_gj
     /// \details The function requires that `pos3` lies in between `pos1` and
     /// `pos2`.  It also requires that `pos2` and `pos3` are different.
     void swap_states_in_states_in_block_23_never_equal(
-              state_in_block_pointer* pos1,
-              state_in_block_pointer* pos2,
-              state_in_block_pointer* pos3)
-    {                                                                           assert(m_states_in_blocks.data()<=pos2);   assert(pos2<pos3);
-                                                                                assert(pos3<=pos1);  assert(pos1<=&m_states_in_blocks.back());
+              fixed_vector<state_in_block_pointer>::iterator pos1,
+              fixed_vector<state_in_block_pointer>::iterator pos2,
+              fixed_vector<state_in_block_pointer>::iterator pos3)
+    {                                                                           assert(m_states_in_blocks.begin()<=pos2);   assert(pos2<pos3);
+                                                                                assert(pos1<m_states_in_blocks.end());
       if (pos1==pos3)
       {
         std::swap(*pos1,*pos2);
       }
       else
-      {
+      {                                                                         assert(pos3<pos1);
         const state_in_block_pointer temp=*pos1;
         *pos1=*pos3;
         *pos3=*pos2;
@@ -2322,9 +2408,9 @@ class bisim_partitioner_gj
     /// \details The function requires that `pos3` lies in between `pos1` and
     /// `pos2`.  The swap is only executed if the positions are different.
     void swap_states_in_states_in_block(
-              state_in_block_pointer* pos1,
-              state_in_block_pointer* pos2,
-              state_in_block_pointer* pos3)
+              fixed_vector<state_in_block_pointer>::iterator pos1,
+              fixed_vector<state_in_block_pointer>::iterator pos2,
+              fixed_vector<state_in_block_pointer>::iterator pos3)
     {
       if (pos2==pos3)
       {
@@ -2344,17 +2430,16 @@ class bisim_partitioner_gj
     /// into their proper places; also, the work counters assume that
     /// [`pos2`, `pos2` + `count`) is assigned the work.)
     void multiple_swap_states_in_states_in_block(
-              state_in_block_pointer* pos1,
-              state_in_block_pointer* pos2,
+              fixed_vector<state_in_block_pointer>::iterator pos1,
+              fixed_vector<state_in_block_pointer>::iterator pos2,
               state_index count
                                                                                 #ifndef NDEBUG
                                                                                   , const state_index max_B
                                                                                 #endif
               )
-    {                                                                           assert(count<m_states_in_blocks.size());
-      /* if (pos1 > pos2)  std::swap(pos1, pos2);                            */ assert(m_states_in_blocks.data()<=pos1);
-                                                                                assert(pos1<pos2); // in particular, they are not allowed to be equal
-      {                                                                         assert(pos2<=std::next(&m_states_in_blocks.back())-count);
+    {                                                                           assert(count<m_aut.num_states());
+      /* if (pos1 > pos2)  std::swap(pos1, pos2);                            */ assert(m_states_in_blocks.begin()<=pos1);  assert(pos1<pos2);
+      {                                                                         assert(pos2<=m_states_in_blocks.end()-count);
         std::make_signed<state_index>::type overlap = std::distance(pos2,
                                                                    pos1+count);
         if (overlap > 0)
@@ -2379,7 +2464,8 @@ class bisim_partitioner_gj
       *pos2 = temp;
       pos2->ref_state->ref_states_in_blocks=pos2;
                                                                                 #ifndef NDEBUG
-                                                                                  for (fixed_vector<state_type_gj>::const_iterator si = m_states.cbegin(); si < m_states.cend(); ++si)
+                                                                                  for (fixed_vector<state_type_gj>::const_iterator
+                                                                                                                si=m_states.cbegin(); si<m_states.cend(); ++si)
                                                                                   {
                                                                                     assert(si==si->ref_states_in_blocks->ref_state);
                                                                                   }
@@ -2394,13 +2480,13 @@ class bisim_partitioner_gj
       BLC_list_iterator old_pos = out_pos->ref.BLC_transitions;
       linked_list<BLC_indicators>::iterator ind =
                 m_transitions[*old_pos].transitions_per_block_to_constellation; assert(ind->start_same_BLC<=old_pos);
-                                                                                assert(old_pos<=&m_BLC_transitions.back());
+                                                                                assert(old_pos<m_BLC_transitions.data_end());
                                                                                 assert(old_pos<ind->end_same_BLC);  assert(!ind->is_stable());
       if (old_pos < ind->start_marked_BLC)
       {
         /* The transition is not marked */                                      assert(ind->start_same_BLC<ind->start_marked_BLC);
         BLC_list_iterator new_pos = std::prev(ind->start_marked_BLC);           assert(ind->start_same_BLC<=new_pos);  assert(new_pos<ind->end_same_BLC);
-                                                                                assert(new_pos<=&m_BLC_transitions.back());
+                                                                                assert(new_pos<m_BLC_transitions.data_end());
         if (old_pos < new_pos)
         {
           std::swap(*old_pos, *new_pos);
@@ -2428,8 +2514,8 @@ class bisim_partitioner_gj
     template <bool initialisation=false>
     block_index split_block_B_into_R_and_BminR(
         const block_index B,
-        state_in_block_pointer* first_bottom_state_in_R,
-        state_in_block_pointer* last_bottom_state_in_R,
+        fixed_vector<state_in_block_pointer>::iterator first_bottom_state_in_R,
+        fixed_vector<state_in_block_pointer>::iterator last_bottom_state_in_R,
         const todo_state_vector& R
         #ifdef TRY_EFFICIENT_SWAP
           , const transition_index marking_value
@@ -2456,11 +2542,10 @@ class bisim_partitioner_gj
                                                                                 #ifndef NDEBUG
                                                                                   m_blocks[B_new].work_counter=m_blocks[B].work_counter;
                                                                                 #endif
-                                                                                assert(m_states_in_blocks.data()<=m_constellations[ci].start_const_states);
+                                                                                assert(m_states_in_blocks.begin()<=m_constellations[ci].start_const_states);
                                                                                 assert(m_constellations[ci].start_const_states<
                                                                                                                         m_constellations[ci].end_const_states);
-                                                                                assert(m_constellations[ci].end_const_states<=
-                                                                                                                        std::next(&m_states_in_blocks.back()));
+                                                                                assert(m_constellations[ci].end_const_states<=m_states_in_blocks.end());
       if (m_constellations[ci].start_const_states->ref_state->block==
             std::prev(m_constellations[ci].end_const_states)->ref_state->block)
       {                                                                         assert(std::find(m_non_trivial_constellations.begin(),
@@ -2490,8 +2575,8 @@ class bisim_partitioner_gj
                                                                                 assert(m_blocks[B_new].start_bottom_states==first_bottom_state_in_R);
       m_blocks[B_new].start_non_bottom_states=last_bottom_state_in_R;
       // Update the block pointers for R-bottom states:
-      for(state_in_block_pointer* s_it=first_bottom_state_in_R;
-                                           s_it<last_bottom_state_in_R; ++s_it)
+      for (fixed_vector<state_in_block_pointer>::iterator
+             s_it=first_bottom_state_in_R; s_it<last_bottom_state_in_R; ++s_it)
       {                                                                         mCRL2complexity(s_it->ref_state, add_work(check_complexity::
                                                                                                 split_block_B_into_R_and_BminR__carry_out_split, max_B), *this);
 //std::cerr << "MOVE STATE TO NEW BLOCK: " << std::distance(m_states.begin(), s_it->ref_state) << "\n";
@@ -2503,20 +2588,21 @@ class bisim_partitioner_gj
       #ifdef TRY_EFFICIENT_SWAP
         // (We could perhaps extend the efficient swap to include the R bottom
         // states, but that is too complicated for me to think through.)
-        state_in_block_pointer* const
+        fixed_vector<state_in_block_pointer>::iterator const
                      BminR_start_bottom_states=last_bottom_state_in_R+R.size();
-        state_in_block_pointer* const BminR_start_non_bottom_states=
+        fixed_vector<state_in_block_pointer>::iterator const
+                     BminR_start_non_bottom_states=
                                   m_blocks[B].start_non_bottom_states+R.size();
 
         if (R.size()>0)
         {
-          state_in_block_pointer*
-                 move_next_R_non_bottom_state_to=last_bottom_state_in_R;
-          state_in_block_pointer*
+          fixed_vector<state_in_block_pointer>::iterator
+                        move_next_R_non_bottom_state_to=last_bottom_state_in_R;
+          fixed_vector<state_in_block_pointer>::iterator
                  move_next_R_non_bottom_state_to_end=BminR_start_bottom_states;
           // Move BminR bottom states out of the way.
-          state_in_block_pointer* move_next_BminR_bottom_state_to=
-                                           m_blocks[B].start_non_bottom_states;
+          fixed_vector<state_in_block_pointer>::iterator
+           move_next_BminR_bottom_state_to=m_blocks[B].start_non_bottom_states;
           if (move_next_BminR_bottom_state_to<
                                            move_next_R_non_bottom_state_to_end)
           {
@@ -2535,7 +2621,7 @@ class bisim_partitioner_gj
             // ....counter==marking_value.
 
             // Move BminR bottom states out of the way.
-            state_in_block_pointer*
+            fixed_vector<state_in_block_pointer>::iterator
                take_next_R_non_bottom_state_from=BminR_start_non_bottom_states;
                                                                                 #ifndef NDEBUG
                                                                                   todo_state_vector::const_iterator account_for_skipped_BminR_states=R.begin();
@@ -2760,7 +2846,8 @@ class bisim_partitioner_gj
 //std::cerr << "MOVE STATE TO NEW BLOCK: " << s << "\n";
                                                                                 assert(B==s.ref_state->block);
           s.ref_state->block=B_new;
-          state_in_block_pointer* pos=s.ref_state->ref_states_in_blocks;        assert(pos>=m_blocks[B].start_non_bottom_states); // it's a non-bottom state
+          fixed_vector<state_in_block_pointer>::iterator
+                                         pos=s.ref_state->ref_states_in_blocks; assert(pos>=m_blocks[B].start_non_bottom_states); // it's a non-bottom state
             // pos -> B.start_bottom_states -> B.start_non_bottom_states -> pos
           swap_states_in_states_in_block(pos, m_blocks[B].start_bottom_states,
                                           m_blocks[B].start_non_bottom_states);
@@ -3432,7 +3519,7 @@ class bisim_partitioner_gj
             {                                                                   assert(m_constellations.size()-1==to_constln);
               /* this is a new main splitter but we haven't yet found the new*/ assert(nullptr!=old_co_splitter_end);
               /* co-splitter.  Perhaps we will have to stabilize the old     */ assert(m_BLC_transitions.data()<old_co_splitter_end);
-              /* co-splitter later.                                          */ assert(std::prev(old_co_splitter_end)<=&m_BLC_transitions.back());
+              /* co-splitter later.                                          */ assert(old_co_splitter_end<=m_BLC_transitions.data_end());
               m_co_splitters_to_be_checked.emplace_back
                                       (std::prev(old_co_splitter_end), old_bi);
 //std::cerr << "We will check the stability of the old co-splitter later.\n";
@@ -3537,7 +3624,8 @@ class bisim_partitioner_gj
                           class Iterator=linked_list<BLC_indicators>::iterator>
     block_index simple_splitB(const block_index B,
                   Iterator splitter,
-                  state_in_block_pointer* const first_unmarked_bottom_state,
+                  fixed_vector<state_in_block_pointer>::iterator const
+                                               first_unmarked_bottom_state,
                   const BLC_list_iterator_or_null splitter_end_unmarked_BLC)
     {                                                                           assert(!initialisation || m_constellations.size()==1);
       #ifdef INITIAL_PARTITION_WITHOUT_BLC_SETS
@@ -3563,7 +3651,7 @@ class bisim_partitioner_gj
                                                                                        splitter_end_unmarked_BLC==M_it);
                                                                                 assert(m_BLC_transitions.data()<=M_it);  assert(!splitter->is_stable());
                                                                                 assert(splitter->start_same_BLC<splitter->end_same_BLC);
-                                                                                assert(std::prev(splitter->end_same_BLC)<=&m_BLC_transitions.back());
+                                                                                assert(splitter->end_same_BLC<=m_BLC_transitions.data_end());
                                                                                 assert(m_states[m_aut.get_transitions()
                                                                                                                  [*splitter->start_same_BLC].from()].block==B);
       }
@@ -3574,12 +3662,14 @@ class bisim_partitioner_gj
       outgoing_transitions_it current_U_outgoing_transition_iterator;
       outgoing_transitions_it current_U_outgoing_transition_iterator_end;
       std::vector<transition>::iterator current_R_incoming_transition_iterator;
-      state_in_block_pointer* current_R_incoming_bottom_state_iterator=
+      fixed_vector<state_in_block_pointer>::iterator
+                      current_R_incoming_bottom_state_iterator=
                                                m_blocks[B].start_bottom_states; assert(current_R_incoming_bottom_state_iterator<=first_unmarked_bottom_state);
       std::vector<transition>::iterator
                                     current_R_incoming_transition_iterator_end; assert(current_R_incoming_bottom_state_iterator<first_unmarked_bottom_state ||
                                                                                        !m_R.empty() || M_it<splitter_end_unmarked_BLC);
-      state_in_block_pointer* current_U_incoming_bottom_state_iterator=
+      fixed_vector<state_in_block_pointer>::iterator
+                      current_U_incoming_bottom_state_iterator=
                                                    first_unmarked_bottom_state; assert(current_U_incoming_bottom_state_iterator<
                                                                                                                           m_blocks[B].start_non_bottom_states);
       const std::make_signed<state_index>::type max_R_nonbottom_size=
@@ -3742,8 +3832,10 @@ class bisim_partitioner_gj
                                                                                 assert(!m_U.find(m_states.begin() + tr.from()));
           }
           ++current_R_incoming_transition_iterator;
-          if (current_R_incoming_transition_iterator!=current_R_incoming_transition_iterator_end &&
-              m_aut.is_tau(m_aut_apply_hidden_label_map(current_R_incoming_transition_iterator->label())))
+          if (current_R_incoming_transition_iterator!=
+                                  current_R_incoming_transition_iterator_end &&
+              m_aut.is_tau(m_aut_apply_hidden_label_map
+                            (current_R_incoming_transition_iterator->label())))
           {
             goto R_handled_and_is_not_state_checking;
           }
@@ -3751,23 +3843,30 @@ class bisim_partitioner_gj
         }
         else if (state_checking==R_status) // 18014 times (large 1394-fin.lts example: 331708 times)
         {
-          const state_in_block_pointer s=(current_R_incoming_bottom_state_iterator<first_unmarked_bottom_state
-                                    ? *current_R_incoming_bottom_state_iterator++
-                                    : m_R.move_from_todo());
+          const state_in_block_pointer s=
+                  (current_R_incoming_bottom_state_iterator<
+                                                    first_unmarked_bottom_state
+                                  ? *current_R_incoming_bottom_state_iterator++
+                                  : m_R.move_from_todo());
                                                                                 mCRL2complexity(s.ref_state, add_work(check_complexity::simple_splitB_R__find_predecessors, 1), *this);
 //std::cerr << "R insert: " << s.ref_state->debug_id(*this) << "\n";
                                                                                 assert(s.ref_state->block==B);
           if (std::next(s.ref_state)==m_states.end())
           {
-            current_R_incoming_transition_iterator_end=m_aut.get_transitions().end();
+            current_R_incoming_transition_iterator_end=
+                                                 m_aut.get_transitions().end();
           }
           else
           {
-            current_R_incoming_transition_iterator_end=std::next(s.ref_state)->start_incoming_transitions;
+            current_R_incoming_transition_iterator_end=
+                            std::next(s.ref_state)->start_incoming_transitions;
           }
-          current_R_incoming_transition_iterator=s.ref_state->start_incoming_transitions;
-          if (current_R_incoming_transition_iterator!=current_R_incoming_transition_iterator_end &&
-                  m_aut.is_tau(m_aut_apply_hidden_label_map(current_R_incoming_transition_iterator->label())))
+          current_R_incoming_transition_iterator=
+                                       s.ref_state->start_incoming_transitions;
+          if (current_R_incoming_transition_iterator!=
+                                  current_R_incoming_transition_iterator_end &&
+              m_aut.is_tau(m_aut_apply_hidden_label_map
+                            (current_R_incoming_transition_iterator->label())))
           {
             R_status=incoming_inert_transition_checking;
             goto R_handled_and_is_not_state_checking;
@@ -3782,8 +3881,9 @@ class bisim_partitioner_gj
         else // initializing==R_status: 2742 times (large 1394-fin.lts example: 1200 times)
         {                                                                       assert(M_it<splitter_end_unmarked_BLC);
             // Algorithm 3, line 3.3, right.
-          const state_in_block_pointer si(m_states.begin() + m_aut.get_transitions()[*M_it].from());
-                                                                                mCRL2complexity(&m_transitions[*M_it], add_work(check_complexity::simple_splitB_R__handle_transition_from_R_state, 1), *this);
+          const state_in_block_pointer
+                    si(m_states.begin()+m_aut.get_transitions()[*M_it].from()); mCRL2complexity(&m_transitions[*M_it], add_work(check_complexity::
+                                                                                                   simple_splitB_R__handle_transition_from_R_state, 1), *this);
                                                                                 assert(si.ref_state->block==B);
                                                                                 assert(!is_inert_during_init(m_aut.get_transitions()[*M_it]) ||
                                                                                        m_blocks[B].c.on.stellation!=m_blocks[m_states
@@ -3795,7 +3895,8 @@ class bisim_partitioner_gj
                                                                                 assert(!m_R.find(si));
           }
           else if (si.ref_state->counter!=Rmarked)
-          {                                                                     assert(m_blocks[B].start_non_bottom_states<=si.ref_state->ref_states_in_blocks);
+          {                                                                     assert(m_blocks[B].start_non_bottom_states<=
+                                                                                                                           si.ref_state->ref_states_in_blocks);
             /* The state is a nonbottom state that is not yet in R */           assert(si.ref_state->ref_states_in_blocks<m_blocks[B].end_states);
             m_R.add_todo(si);
             si.ref_state->counter=Rmarked;
@@ -3822,8 +3923,7 @@ class bisim_partitioner_gj
                                                                                                      first_unmarked_bottom_state) + m_R.size() <=
                                                                                                                                 number_of_states_in_block(B)/2);
           const block_index block_index_of_R=split_block_B_into_R_and_BminR
-                   <!use_BLC_transitions>(B,
-                                    m_blocks[B].start_bottom_states,
+             <!use_BLC_transitions>(B, m_blocks[B].start_bottom_states,
                                     first_unmarked_bottom_state, m_R
                                     #ifdef TRY_EFFICIENT_SWAP
                                       , Rmarked
@@ -3875,14 +3975,15 @@ class bisim_partitioner_gj
                                                                                 #endif
         // The code for the left co-routine.
         if (incoming_inert_transition_checking==U_status) // 20299 times (large 1394-fin.lts example: 360327 times)
-        {
+        {                                                                       assert(current_U_incoming_transition_iterator<
+                                                                                                                   current_U_incoming_transition_iterator_end);
 //std::cerr << "U_incoming_inert_transition_checking\n";
-            // Algorithm 3, line 3.8, left.
-                                                                                assert(current_U_incoming_transition_iterator<current_U_incoming_transition_iterator_end);
-                                                                                assert(m_aut.is_tau(m_aut_apply_hidden_label_map(current_U_incoming_transition_iterator->label())));
-            // Check one incoming transition.
-            // Algorithm 3, line 3.12, left.
-                                                                                mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), current_U_incoming_transition_iterator)], add_work(check_complexity::simple_splitB_U__handle_transition_to_U_state, 1), *this);
+            /* Algorithm 3, line 3.8, left.                                  */ assert(m_aut.is_tau(m_aut_apply_hidden_label_map
+                                                                                                           (current_U_incoming_transition_iterator->label())));
+            /* Check one incoming transition.                                */ mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(),
+            /* Algorithm 3, line 3.12, left.                                 */                                       current_U_incoming_transition_iterator)],
+                                                                                                add_work(check_complexity::
+                                                                                                     simple_splitB_U__handle_transition_to_U_state, 1), *this);
           current_U_outgoing_state=state_in_block_pointer(m_states.begin()+
                                current_U_incoming_transition_iterator->from()); assert(m_states[current_U_incoming_transition_iterator->to()].block==B);
           current_U_incoming_transition_iterator++;
@@ -3916,7 +4017,8 @@ class bisim_partitioner_gj
               {
                 if (initializing==R_status || aborted==R_status)
                 {
-                  // Start searching for an outgoing transition with action a to constellation C.
+                  // Start searching for an outgoing transition with action a
+                  // to constellation C.
                   current_U_outgoing_transition_iterator=
                               current_U_outgoing_state.ref_state->
                                                     start_outgoing_transitions; assert(m_outgoing_transitions.begin()<=current_U_outgoing_transition_iterator);
@@ -3949,7 +4051,7 @@ class bisim_partitioner_gj
                                                                                       assert(m_outgoing_transitions.begin()<=out_it);
                                                                                       assert(out_it<m_outgoing_transitions.end());
                                                                                       assert(m_BLC_transitions.data()<=out_it->ref.BLC_transitions);
-                                                                                      assert(out_it->ref.BLC_transitions<=&m_BLC_transitions.back());
+                                                                                      assert(out_it->ref.BLC_transitions<m_BLC_transitions.data_end());
                                                                                       assert(0<=*out_it->ref.BLC_transitions);
                                                                                       assert(*out_it->ref.BLC_transitions<m_aut.num_transitions());
                                                                                       assert(m_transitions[*out_it->ref.BLC_transitions].ref_outgoing_transitions==out_it);
@@ -4126,7 +4228,8 @@ class bisim_partitioner_gj
     // the return value indicates the position (in m_states_in_blocks)
     // of the first non-marked bottom state.
     [[nodiscard]]
-    state_in_block_pointer* not_all_bottom_states_are_touched(
+    fixed_vector<state_in_block_pointer>::iterator
+    not_all_bottom_states_are_touched(
             const block_index bi,
             linked_list<BLC_indicators>::iterator splitter
                                                                                 #ifndef NDEBUG
@@ -4142,7 +4245,8 @@ class bisim_partitioner_gj
       block_type& B=m_blocks[bi];                                               assert(m_R.empty());  assert(m_U.empty());
                                                                                 assert(1 < number_of_states_in_block(bi));
                                                                                 // If the above assertion is false, one can just: return B.end_states;
-      state_in_block_pointer*first_unmarked_bottom_state=B.start_bottom_states; assert(!B.c.on.tains_new_bottom_states);
+      fixed_vector<state_in_block_pointer>::iterator
+                             first_unmarked_bottom_state=B.start_bottom_states; assert(!B.c.on.tains_new_bottom_states);
       #ifdef TWO_PHASES
         // First make a quick tour through the marked transitions to decide
         // whether all bottom states have a transition:
@@ -4167,14 +4271,15 @@ class bisim_partitioner_gj
         {
           // all bottom states are marked. No split is needed.
           // Reset the counters of all bottom states:
-          for (state_in_block_pointer* it=B.start_bottom_states;
-                                          it<first_unmarked_bottom_state; it++)
+          for (fixed_vector<state_in_block_pointer>::iterator
+                it=B.start_bottom_states; it<first_unmarked_bottom_state; it++)
           {                                                                     assert(Rmarked==it->ref_state->counter);
             it->ref_state->counter=undefined;
           }
           return first_unmarked_bottom_state;
         }
-        state_in_block_pointer* move_R_bottom_state_to=B.start_bottom_states;
+        fixed_vector<state_in_block_pointer>::iterator
+                                  move_R_bottom_state_to=B.start_bottom_states;
       #endif
       // Now go through the marked transitions in detail:
       BLC_list_iterator marked_t_it = splitter->start_marked_BLC;
@@ -4183,7 +4288,8 @@ class bisim_partitioner_gj
         const transition& t = m_aut.get_transitions()[*marked_t_it];            // mCRL2complexity(&m_transitions[*marked_t_it], add_work(...), *this);
                                                                                     // not needed as this work can be attributed to marking of the transition
         const state_in_block_pointer s(m_states.begin()+t.from());
-        state_in_block_pointer* const pos_s=s.ref_state->ref_states_in_blocks;  assert(B.start_bottom_states<=pos_s);  assert(pos_s<B.end_states);
+        fixed_vector<state_in_block_pointer>::iterator const
+                                       pos_s=s.ref_state->ref_states_in_blocks; assert(B.start_bottom_states<=pos_s);  assert(pos_s<B.end_states);
         if (first_unmarked_bottom_state<=pos_s)
         {
           if (0==s.ref_state->no_of_outgoing_block_inert_transitions)
@@ -4230,7 +4336,8 @@ class bisim_partitioner_gj
                                                                                     const transition& t = m_aut.get_transitions()[*i];
                                                                                     const state_in_block_pointer s(m_states.begin()+t.from());
                                                                                     assert(s.ref_state->block == bi);
-                                                                                    const state_in_block_pointer*const pos_s=s.ref_state->ref_states_in_blocks;
+                                                                                    fixed_vector<state_in_block_pointer>::const_iterator const
+                                                                                                                       pos_s=s.ref_state->ref_states_in_blocks;
                                                                                     assert(*pos_s==s);
                                                                                     assert(B.start_bottom_states <= pos_s);
                                                                                     assert(pos_s < B.end_states);
@@ -4268,7 +4375,7 @@ class bisim_partitioner_gj
       assert(m_R.empty());
       assert(1 < number_of_states_in_block(bi));
       // If the above assertion is false, one can just: return B.end_states;
-      state_in_block_pointer* first_unmarked_bottom_state=B.start_bottom_states;
+      fixed_vector<state_in_block_pointer>::iterator first_unmarked_bottom_state=B.start_bottom_states;
       assert(!splitter->is_stable());
       const BLC_list_iterator splitter_start_marked_BLC = splitter->start_marked_BLC;
       for (BLC_list_iterator marked_t_it = splitter_start_marked_BLC; marked_t_it<splitter->end_same_BLC; ++marked_t_it)
@@ -4320,7 +4427,7 @@ class bisim_partitioner_gj
       {
         // all bottom states are marked.
         // reset all counters of bottom states
-        for(state_in_block_pointer* s_it=B.start_non_bottom_states; s_it<first_unmarked_bottom_state; ++s_it)
+        for (fixed_vector<state_in_block_pointer>::iterator s_it=B.start_non_bottom_states; s_it<first_unmarked_bottom_state; ++s_it)
         {
           // mCRL2complexity(s_it->ref_state, ...)
               // not needed because it can be ascribed to the marked transition(s) of s_it->ref_state
@@ -4339,7 +4446,7 @@ class bisim_partitioner_gj
         // the majority of bottom states is marked
         // so go through the bottom states from the end and swap in those few unmarked bottom states there
         std::vector<state_in_block_pointer>::iterator take_U_bottom_state_from=B.start_bottom_states;
-        for (state_in_block_pointer* s_it=B.start_non_bottom_states;
+        for (fixed_vector<state_in_block_pointer>::iterator s_it=B.start_non_bottom_states;
              s_it>first_unmarked_bottom_state; )
         {
           --s_it;
@@ -4385,7 +4492,7 @@ class bisim_partitioner_gj
           assert(s.ref_state->block==bi);
           // mCRL2complexity(&m_transitions[*i], add_work(...), *this);
               // not needed because this work can be attributed to the marking of the transition
-          state_in_block_pointer* const pos_s=s.ref_state->ref_states_in_blocks;
+          fixed_vector<state_in_block_pointer>::iterator const pos_s=s.ref_state->ref_states_in_blocks;
           assert(B.start_bottom_states<=pos_s);
           assert(pos_s<B.end_states);
           if (first_unmarked_bottom_state<=pos_s)
@@ -4422,7 +4529,7 @@ class bisim_partitioner_gj
           const transition& t = m_aut.get_transitions()[*i];
           const state_in_block_pointer s(m_states.begin()+t.from());
           assert(s.ref_state->block == bi);
-          const state_in_block_pointer* const pos_s=s.ref_state->ref_states_in_blocks;
+          fixed_vector<state_in_block_pointer>::const_iterator const pos_s=s.ref_state->ref_states_in_blocks;
           assert(*pos_s==s);
           assert(B.start_bottom_states <= pos_s);
           assert(pos_s < B.end_states);
@@ -4537,13 +4644,14 @@ class bisim_partitioner_gj
               class Iterator=linked_list<BLC_indicators>::iterator>
     block_index splitB(block_index B,
                       Iterator splitter,
-                      state_in_block_pointer* first_unmarked_bottom_state,
+                      fixed_vector<state_in_block_pointer>::iterator
+                                                   first_unmarked_bottom_state,
                       const BLC_list_iterator splitter_end_unmarked_BLC
                                     /* =splitter->start_marked_BLC -- but
                                        this default argument is not allowed */,
                       constellation_index old_constellation=null_constellation,
                       const bool split_off_new_bottom_states=true)
-    {                                                                           assert(nullptr!=first_unmarked_bottom_state);
+    {
       #ifdef INITIAL_PARTITION_WITHOUT_BLC_SETS
         #define use_BLC_transitions (!initialisation)
       #else
@@ -4556,8 +4664,8 @@ class bisim_partitioner_gj
 //if constexpr (use_BLC_transitions) { std::cerr << (split_off_new_bottom_states && splitter_end_unmarked_BLC == splitter->start_marked_BLC ? "start_marked_BLC" : (splitter_end_unmarked_BLC == splitter->start_same_BLC ? "start_same_BLC" : "?")); }
 //else { std::cerr << splitter_end_unmarked_BLC; }
 //std::cerr << ", old_constellation==" << static_cast<std::make_signed<constellation_index>::type>(old_constellation) << ", split_off_new_bottom_states==" << split_off_new_bottom_states << ")\n";
-//std::cerr << (m_branching ? "Marked bottom states:" : "Marked states:"); for (const state_in_block_pointer* it=m_blocks[B].start_bottom_states; it!=first_unmarked_bottom_state; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); }
-//std::cerr << (m_branching ? "\nUnmarked bottom states:" : "\nUnmarked states:"); for (const state_in_block_pointer* it=first_unmarked_bottom_state; it!=m_blocks[B].start_non_bottom_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << '\n';
+//std::cerr << (m_branching ? "Marked bottom states:" : "Marked states:"); for (fixed_vector<state_in_block_pointer>::const_iterator it=m_blocks[B].start_bottom_states; it!=first_unmarked_bottom_state; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); }
+//std::cerr << (m_branching ? "\nUnmarked bottom states:" : "\nUnmarked states:"); for (fixed_vector<state_in_block_pointer>::const_iterator it=first_unmarked_bottom_state; it!=m_blocks[B].start_non_bottom_states; ++it) { std::cerr << ' ' << std::distance(m_states.begin(), it->ref_state); } std::cerr << '\n';
 //if (m_branching) { std::cerr << "Additionally, " << m_R.size() << " non-bottom states have been marked.\n"; }
                                                                                 if constexpr (initialisation)
                                                                                 {
@@ -4593,7 +4701,7 @@ class bisim_partitioner_gj
                                                                                 mCRL2complexity(&m_blocks[bi], add_work(check_complexity::
       /* Update the BLC_list, and bottom states, and invariant on inert      */     splitB__update_BLC_of_smaller_subblock, check_complexity::log_n -
       /* transitions.                                                        */     check_complexity::ilog2(number_of_states_in_block(bi))), *this);
-      state_in_block_pointer* const
+      fixed_vector<state_in_block_pointer>::iterator const
              start_new_bottom_states=m_blocks[R_block].start_non_bottom_states;
       linked_list<BLC_indicators>::iterator R_to_U_tau_splitter =
                                 m_blocks[R_block].block.to_constellation.end(); assert(m_blocks[bi].block.to_constellation.empty());
@@ -4691,7 +4799,7 @@ class bisim_partitioner_gj
 //std::cerr << "Inserting an empty BLC set for the constellation-inert transitions into the BLC list of block " << bi << '\n';
           BLC_list_iterator start_inert_BLC=
                m_blocks[B].block.to_constellation.empty()
-                  ? std::next(&m_BLC_transitions.back()) // there are no inert transitions but we still insert a dummy set
+                  ? m_BLC_transitions.data_end() // there are no inert transitions but we still insert a dummy set
                   : m_blocks[B].block.to_constellation.begin()->start_same_BLC; // if there are inert transitions, they are here
           m_blocks[bi].block.to_constellation.emplace_front(start_inert_BLC,
                                                         start_inert_BLC, true);
@@ -4711,8 +4819,8 @@ class bisim_partitioner_gj
       }
 
       /* Recall new LBC positions.                                           */ assert(m_co_splitters_to_be_checked.empty());
-      for(state_in_block_pointer* ssi=m_blocks[bi].start_bottom_states;
-                                           ssi!=m_blocks[bi].end_states; ++ssi)
+      for (fixed_vector<state_in_block_pointer>::iterator ssi=
+         m_blocks[bi].start_bottom_states; ssi!=m_blocks[bi].end_states; ++ssi)
       {
         state_type_gj& s=*ssi->ref_state;                                       assert(s.ref_states_in_blocks==ssi);
                                                                                 // mCRL2complexity(s, add_work(..., max_bi_counter), *this);
@@ -4900,7 +5008,7 @@ class bisim_partitioner_gj
         {                                                                       assert(m_BLC_transitions.data()<=co_splitter_check.first);
                                                                                 // The work in this loop can be attributed to the operation that added
                                                                                 // `co_splitter_check` to `m_co_splitters_to_be_checked`
-          const transition_index co_transition=*co_splitter_check.first;        assert(co_splitter_check.first<=&m_BLC_transitions.back());
+          const transition_index co_transition=*co_splitter_check.first;        assert(co_splitter_check.first<m_BLC_transitions.data_end());
           const block_index from_block=co_splitter_check.second;                assert(B==from_block || bi==from_block);
           const transition& co_t=m_aut.get_transitions()[co_transition];        assert(old_constellation==m_blocks[m_states[co_t.to()].block].c.on.stellation);
           if (m_states[co_t.from()].block==from_block)
@@ -4956,7 +5064,7 @@ class bisim_partitioner_gj
                                                                                   if (bi==R_block)
                                                                                   {
                                                                                     // account for the work in R
-                                                                                    for (const state_in_block_pointer*
+                                                                                    for (fixed_vector<state_in_block_pointer>::const_iterator
                                                                                            s=m_blocks[bi].start_bottom_states; s!=m_blocks[bi].end_states; ++s)
                                                                                     {
                                                                                       mCRL2complexity(s->ref_state, finalise_work(check_complexity::simple_splitB_R__find_predecessors, check_complexity::simple_splitB__find_predecessors_of_R_or_U_state, max_block), *this);
@@ -4977,8 +5085,8 @@ class bisim_partitioner_gj
                                                                                       }
                                                                                     }
                                                                                     // ensure not too much work has been done on U
-                                                                                    for (const state_in_block_pointer* s=m_blocks[B].start_bottom_states;
-                                                                                                        s!=m_blocks[B].end_states; ++s)
+                                                                                    for (fixed_vector<state_in_block_pointer>::const_iterator
+                                                                                             s=m_blocks[B].start_bottom_states; s!=m_blocks[B].end_states; ++s)
                                                                                     {
                                                                                       mCRL2complexity(s->ref_state, cancel_work(check_complexity::simple_splitB_U__find_bottom_state), *this);
                                                                                       mCRL2complexity(s->ref_state, cancel_work(check_complexity::simple_splitB_U__find_predecessors), *this);
@@ -5000,8 +5108,8 @@ class bisim_partitioner_gj
                                                                                   else
                                                                                   {
                                                                                     // account for the work in U
-                                                                                    for (const state_in_block_pointer* s=m_blocks[bi].start_bottom_states;
-                                                                                                        s!=m_blocks[bi].end_states; ++s)
+                                                                                    for (fixed_vector<state_in_block_pointer>::const_iterator
+                                                                                           s=m_blocks[bi].start_bottom_states; s!=m_blocks[bi].end_states; ++s)
                                                                                     {
                                                                                       mCRL2complexity(s->ref_state, finalise_work(check_complexity::simple_splitB_U__find_bottom_state, check_complexity::simple_splitB__find_bottom_state, max_block), *this);
                                                                                       mCRL2complexity(s->ref_state, finalise_work(check_complexity::simple_splitB_U__find_predecessors, check_complexity::simple_splitB__find_predecessors_of_R_or_U_state, max_block), *this);
@@ -5020,8 +5128,8 @@ class bisim_partitioner_gj
                                                                                       }
                                                                                     }
                                                                                     // ensure not too much work has been done on R
-                                                                                    for (const state_in_block_pointer* s=m_blocks[B].start_bottom_states;
-                                                                                                        s!=m_blocks[B].end_states; ++s)
+                                                                                    for (fixed_vector<state_in_block_pointer>::const_iterator
+                                                                                             s=m_blocks[B].start_bottom_states; s!=m_blocks[B].end_states; ++s)
                                                                                     {
                                                                                       mCRL2complexity(s->ref_state, cancel_work(check_complexity::simple_splitB_R__find_predecessors), *this);
                                                                                       // incoming tau-transitions of s
@@ -5507,7 +5615,8 @@ class bisim_partitioner_gj
                                                                                   // The work in this loop is assigned to the (new) bottom states in bi
                                                                                   // It cannot be assigned to the block bi because there may be more new bottom
                                                                                   // states later.
-                                                                                  const state_in_block_pointer* new_bott_it=m_blocks[bi].start_bottom_states;
+                                                                                  fixed_vector<state_in_block_pointer>::const_iterator
+                                                                                                                  new_bott_it=m_blocks[bi].start_bottom_states;
                                                                                   assert(new_bott_it < m_blocks[bi].start_non_bottom_states);
                                                                                   do
                                                                                   {
@@ -5592,7 +5701,8 @@ class bisim_partitioner_gj
           }
 
 // 2. Administration: Mark all transitions out of (new) bottom states
-          state_in_block_pointer* si=m_blocks[bi].start_bottom_states;          assert(si<m_blocks[bi].start_non_bottom_states);
+          fixed_vector<state_in_block_pointer>::iterator
+                                           si=m_blocks[bi].start_bottom_states; assert(si<m_blocks[bi].start_non_bottom_states);
           do
           {                                                                     mCRL2complexity(si->ref_state, add_work(
                                                                                          check_complexity::stabilizeB__distribute_states_over_Phat, 1), *this);
@@ -5699,7 +5809,8 @@ class bisim_partitioner_gj
           {                                                                     assert(!is_inert_during_init(first_t) || from_block.c.on.stellation!=
                                                                                                        m_blocks[m_states[first_t.to()].block].c.on.stellation);
             // Algorithm 4, line 4.10.
-            state_in_block_pointer* first_unmarked_bottom_state=
+            fixed_vector<state_in_block_pointer>::iterator
+                first_unmarked_bottom_state=
                     not_all_bottom_states_are_touched(from_block_index,splitter
                                                                                 #ifndef NDEBUG
                                                                                   , splitter->start_marked_BLC
@@ -5881,8 +5992,8 @@ class bisim_partitioner_gj
             const label_index a=*a_it;                                              // not needed because the inner loop is always executed
 //std::cerr << "  Initialising m_BLC_transitions for action " << (m_aut.num_action_labels() == a ? "(tau-self-loops)" : pp(m_aut.action_label(a))) << '\n';
             const BLC_list_iterator end_index=
-                      m_BLC_transitions.data()+count_transitions_per_action[a]; assert(m_BLC_transitions.data()==end_index ||
-            /* create a BLC_indicator and insert it into the list...         */        std::prev(end_index)<=&m_BLC_transitions.back());
+                      m_BLC_transitions.data()+count_transitions_per_action[a]; assert(end_index<=m_BLC_transitions.data_end());
+            // create a BLC_indicator and insert it into the list...
             typename linked_list<BLC_indicators>::iterator current_BLC=
                  temporary_BLC_list->emplace_back(start_index,end_index, true); assert(start_index<end_index);
             #ifdef INITIAL_PARTITION_WITHOUT_BLC_SETS
@@ -5904,7 +6015,7 @@ class bisim_partitioner_gj
               while (++start_index < end_index);
             #endif
           }
-          while (++a_it!=todo_stack_actions.end());                             assert(start_index==std::next(&m_BLC_transitions.back()));
+          while (++a_it!=todo_stack_actions.end());                             assert(start_index==m_BLC_transitions.data_end());
         }
         // destroy and deallocate `todo_stack_actions` and
         // `count_transitions_per_action` here.
@@ -5978,7 +6089,7 @@ class bisim_partitioner_gj
             ++count_outgoing_transitions_per_state[t.from()];
             ++ti;
           }
-          while (ti<std::next(&m_BLC_transitions.back()));
+          while (ti<m_BLC_transitions.data_end());
         }
         // destroy and deallocate count_outgoing_transitions_per_state here.
       }
@@ -6003,7 +6114,7 @@ class bisim_partitioner_gj
           current_state=t.to();
         }
       }
-      for (state_index i=current_state+1; i<m_states.size(); ++i)
+      for (state_index i=current_state+1; i<m_aut.num_states(); ++i)
       {                                                                         mCRL2complexity(&m_states[i], add_work(check_complexity::
                                                                                           create_initial_partition__set_start_incoming_transitions, 1), *this);
 //std::cerr << "SET residual start_incoming_transitions for state " << i << "\n";
@@ -6056,9 +6167,11 @@ class bisim_partitioner_gj
       }
                                                                                 assert(m_states_in_blocks.size()==m_aut.num_states());
 //std::cerr << "Start filling states_in_blocks\n";
-      state_in_block_pointer* lower_i=m_states_in_blocks.data();
+      fixed_vector<state_in_block_pointer>::iterator
+                                            lower_i=m_states_in_blocks.begin();
       m_blocks[0].start_bottom_states=lower_i;
-      state_in_block_pointer* upper_i=std::next(&m_states_in_blocks.back());
+      fixed_vector<state_in_block_pointer>::iterator
+                                              upper_i=m_states_in_blocks.end();
       m_blocks[0].end_states=upper_i;
       for (fixed_vector<state_type_gj>::iterator i=m_states.begin();
                                                          i<m_states.end(); ++i)
@@ -6095,10 +6208,10 @@ class bisim_partitioner_gj
         // Therefore, we run a kind of simplified stabilisation: we do not need
         // to check the target constellation but only the action of the
         /* transition.                                                       */ assert(nullptr!=temporary_BLC_list);
-        linked_list<BLC_indicators>::iterator blc_it=
-                                                   temporary_BLC_list->begin();
-        if (temporary_BLC_list->end()!=blc_it)
-        {                                                                       assert(blc_it->start_same_BLC<blc_it->end_same_BLC);
+        if (!temporary_BLC_list->empty())
+        {
+          linked_list<BLC_indicators>::iterator blc_it=
+                                                   temporary_BLC_list->begin(); assert(blc_it->start_same_BLC<blc_it->end_same_BLC);
           if (!is_inert_during_init
                           (m_aut.get_transitions()[*blc_it->start_same_BLC]) ||
               ++blc_it!=temporary_BLC_list->end())
@@ -6127,12 +6240,15 @@ class bisim_partitioner_gj
                   }
                   B.block.R=new std::vector<state_in_block_pointer>();
                   blocks_that_need_refinement.push_back(s.ref_state->block);
-                  B.c.first_unmarked_bottom_state=B.start_bottom_states;
+                  B.c.on.~constellation_and_new_bottom_states();
+                  new (&B.c.first_unmarked_bottom_state)
+                                fixed_vector<state_in_block_pointer>::
+                                               iterator(B.start_bottom_states);
                 }                                                               else  assert(std::find(blocks_that_need_refinement.begin(),
                                                                                                  blocks_that_need_refinement.end(), s.ref_state->block)!=
                                                                                                                             blocks_that_need_refinement.end());
-                state_in_block_pointer* const pos_s=
-                                             s.ref_state->ref_states_in_blocks; assert(B.start_bottom_states<=pos_s);  assert(pos_s<B.end_states);
+                fixed_vector<state_in_block_pointer>::iterator const
+                                       pos_s=s.ref_state->ref_states_in_blocks; assert(B.start_bottom_states<=pos_s);  assert(pos_s<B.end_states);
                 if (B.c.first_unmarked_bottom_state<=pos_s)
                 {
                   if (0==s.ref_state->no_of_outgoing_block_inert_transitions)
@@ -6153,60 +6269,75 @@ class bisim_partitioner_gj
               for (const block_index bi : blocks_that_need_refinement)
               {                                                                 assert(m_R.empty());  assert(nullptr!=m_blocks[bi].block.R);
 //std::cerr << "Now refining " << m_blocks[bi].debug_id(*this) << '\n';
-                m_R.swap_vec(*m_blocks[bi].block.R);                            assert(m_blocks[bi].start_bottom_states<=
-                                                                                                                   m_blocks[bi].c.first_unmarked_bottom_state);
-                state_in_block_pointer* const first_unmarked_bottom_state=
-                                    m_blocks[bi].c.first_unmarked_bottom_state;
-                // prepare for next label:
+                m_R.swap_vec(*m_blocks[bi].block.R);
                 delete m_blocks[bi].block.R;
                 m_blocks[bi].block.R=nullptr;
-                m_blocks[bi].c.on.stellation=0;
-                m_blocks[bi].c.on.tains_new_bottom_states=false;
+                fixed_vector<state_in_block_pointer>::iterator const
+                          first_unmarked_bottom_state=
+                                    m_blocks[bi].c.first_unmarked_bottom_state; assert(m_blocks[bi].start_bottom_states<=first_unmarked_bottom_state);
+                // prepare for next label:
+                m_blocks[bi].c.first_unmarked_bottom_state.
+                   fixed_vector<state_in_block_pointer>::iterator::~iterator();
+                new (&m_blocks[bi].c.on) block_type::
+                          constellation_or_first_unmarked_bottom_state::
+                                        constellation_and_new_bottom_states(0); assert(m_blocks[bi].start_bottom_states!=first_unmarked_bottom_state ||
+                                                                                       !m_R.empty());
                                                                                 #ifndef NDEBUG
-                                                                                  {
-                                                                                    const state_in_block_pointer* s=m_blocks[bi].start_bottom_states;
-                                                                                    if (s==first_unmarked_bottom_state)
-                                                                                    {
-                                                                                      assert(!m_R.empty()); // there is at least one marked state
-                                                                                      s=m_R.data();
-                                                                                    }
-                                                                                    do
-                                                                                    {
-                                                                                      // assign the work to the a-transitions from *s->ref_state with label a
-                                                                                      outgoing_transitions_const_it out_it_end=
-                                                                                         std::next(s->ref_state)==m_states.end() ? m_outgoing_transitions.end()
+                                                                                  // two identical for loops, only the loop variable `s` is different.
+                                                                                  for (fixed_vector<state_in_block_pointer>::const_iterator s=
+                                                                                         m_blocks[bi].start_bottom_states; s!=first_unmarked_bottom_state; ++s)
+                                                                                  { // assign the work to the a-transitions from *s->ref_state with label a
+                                                                                    outgoing_transitions_const_it out_it_end=
+                                                                                       std::next(s->ref_state)==m_states.end() ? m_outgoing_transitions.end()
                                                                                                          : std::next(s->ref_state)->start_outgoing_transitions;
-                                                                                      outgoing_transitions_const_it
+                                                                                    outgoing_transitions_const_it
                                                                                                                out_it=s->ref_state->start_outgoing_transitions;
-                                                                                      assert(out_it<out_it_end);
-                                                                                      for (;;)
-                                                                                      {
-                                                                                        assert(out_it<=out_it->start_same_saC);
-                                                                                        const transition& t=m_aut.get_transitions()[out_it->ref.transitions];
-                                                                                        if (label_or_divergence(t)==a)
-                                                                                        {
-                                                                                          out_it_end=out_it->start_same_saC;
-                                                                                          do
-                                                                                          {
-                                                                                            mCRL2complexity(&m_transitions[out_it->ref.transitions], add_work(
-                                                                                                  check_complexity::create_initial_partition__refine_block, 1),
-                                                                                                                                                        *this);
-                                                                                          }
-                                                                                          while (++out_it<=out_it_end);
-                                                                                          break;
+                                                                                    assert(out_it<out_it_end);
+                                                                                    for (;;)
+                                                                                    { assert(out_it<=out_it->start_same_saC);
+                                                                                      const transition& t=m_aut.get_transitions()[out_it->ref.transitions];
+                                                                                      if (label_or_divergence(t)==a)
+                                                                                      { out_it_end=out_it->start_same_saC;
+                                                                                        do
+                                                                                        { mCRL2complexity(&m_transitions[out_it->ref.transitions], add_work(
+                                                                                            check_complexity::create_initial_partition__refine_block,1),*this);
                                                                                         }
-                                                                                        else
-                                                                                        { // skip the complete saC slice
-                                                                                          out_it=std::next(out_it->start_same_saC);
-                                                                                          assert(out_it<out_it_end); // we should find some a-transitions
-                                                                                        }
+                                                                                        while (++out_it<=out_it_end);
+                                                                                        break;
                                                                                       }
-                                                                                      if (++s==first_unmarked_bottom_state)
-                                                                                      {
-                                                                                        s=m_R.data();
+                                                                                      else
+                                                                                      { // skip the complete saC slice
+                                                                                        out_it=std::next(out_it->start_same_saC);
+                                                                                        assert(out_it<out_it_end); // we should find some a-transitions
                                                                                       }
                                                                                     }
-                                                                                    while (std::next(&m_R.back())!=s);
+                                                                                  }
+                                                                                  for (state_in_block_pointer s: m_R)
+                                                                                  { // assign the work to the a-transitions from *s->ref_state with label a
+                                                                                    outgoing_transitions_const_it out_it_end=
+                                                                                       std::next(s.ref_state)==m_states.end() ? m_outgoing_transitions.end()
+                                                                                                          : std::next(s.ref_state)->start_outgoing_transitions;
+                                                                                    outgoing_transitions_const_it
+                                                                                                                out_it=s.ref_state->start_outgoing_transitions;
+                                                                                    assert(out_it<out_it_end);
+                                                                                    for (;;)
+                                                                                    { assert(out_it<=out_it->start_same_saC);
+                                                                                      const transition& t=m_aut.get_transitions()[out_it->ref.transitions];
+                                                                                      if (label_or_divergence(t)==a)
+                                                                                      { out_it_end=out_it->start_same_saC;
+                                                                                        do
+                                                                                        { mCRL2complexity(&m_transitions[out_it->ref.transitions], add_work(
+                                                                                            check_complexity::create_initial_partition__refine_block,1),*this);
+                                                                                        }
+                                                                                        while (++out_it<=out_it_end);
+                                                                                        break;
+                                                                                      }
+                                                                                      else
+                                                                                      { // skip the complete saC slice
+                                                                                        out_it=std::next(out_it->start_same_saC);
+                                                                                        assert(out_it<out_it_end); // we should find some a-transitions
+                                                                                      }
+                                                                                    }
                                                                                   }
                                                                                 #endif
                 if (first_unmarked_bottom_state<
@@ -6226,14 +6357,30 @@ class bisim_partitioner_gj
             }
             while (++blc_it!=temporary_BLC_list->end());
           }
-          // Now create the correct BLC sets
-          blc_it=temporary_BLC_list->begin();
+        }
+        if (!block_type::btc_R::
+                         if_R_is_nullptr_then_to_constellation_is_empty_list())
+        {
+          // We need to explicitly convert the null pointers stored in block.R
+          // to empty lists for block.to_constellation.
+std::cerr << "Initializing block.to_constellation lists one-by-one\n";
+          std::vector<block_type>::iterator blk_it=m_blocks.begin();            assert(m_blocks.end()!=blk_it);
           do
-          {                                                                     // mCRL2complexity(blc_it, add_work(...), *this);
-            order_BLC_transitions(blc_it->start_same_BLC, blc_it->end_same_BLC,     // Because every BLC set (= set of transitions with the same label)
-                                                         0, m_blocks.size()-1);     // is touched exactly once, we do not store a physicaal counter for it.
+          {                                                                     assert(nullptr==blk_it->block.R);
+            // delete blk_it->block.R;  -- not needed, as it should be nullptr
+            // destroy blk_it->block.R; -- not needed, as it is a pointer and
+            //                             has a trivial destructor.
+            new(&blk_it->block.to_constellation) linked_list<BLC_indicators>();
           }
-          while (++blc_it!=temporary_BLC_list->end());
+          while (++blk_it!=m_blocks.end());
+        }
+        // Now create the correct BLC sets
+        for (linked_list<BLC_indicators>::iterator
+                        blc_it=temporary_BLC_list->begin();
+                                   temporary_BLC_list->end()!=blc_it; ++blc_it)
+        {                                                                       // mCRL2complexity(blc_it, add_work(...), *this);
+          order_BLC_transitions(blc_it->start_same_BLC, blc_it->end_same_BLC,       // Because every BLC set (= set of transitions with the same label)
+                                                         0, m_blocks.size()-1);     // is touched exactly once, we do not store a physicaal counter for it.
         }
         delete temporary_BLC_list;
       #else
@@ -6242,7 +6389,7 @@ class bisim_partitioner_gj
         // so we can just run normal stabilisations.
         std::pair<BLC_list_iterator, BLC_list_iterator>
                stabilize_pair(m_BLC_transitions.data(),
-                              std::next(&m_BLC_transitions.back()));
+                              m_BLC_transitions.data_end());
                                                                                 #ifndef NDEBUG
                                                                                   const std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> >
                                                                                                         transition_array_for_check_stability(1, stabilize_pair);
@@ -6280,7 +6427,8 @@ class bisim_partitioner_gj
           {                                                                     assert(splitter->start_marked_BLC == splitter->start_same_BLC);
 //std::cerr << "Now stabilizing under " << splitter->debug_id(*this) << '\n';
             const block_index source_block = m_states[first_t.from()].block;
-            state_in_block_pointer* const first_unmarked_bottom_state=
+            fixed_vector<state_in_block_pointer>::iterator const
+                  first_unmarked_bottom_state=
                       not_all_bottom_states_are_touched(source_block, splitter
                                                                                 #ifndef NDEBUG
                                                                                   , splitter->start_marked_BLC
@@ -6460,7 +6608,7 @@ class bisim_partitioner_gj
         // L_B->C in blocks must be still be updated.
         // This happens further below.
 
-        for(state_in_block_pointer*
+        for (fixed_vector<state_in_block_pointer>::iterator
                             i=m_blocks[index_block_B].start_bottom_states;
                                     i!=m_blocks[index_block_B].end_states; ++i)
         {                                                                       // mCRL2complexity(m_states[*i], add_work(..., max_C), *this);
@@ -6523,8 +6671,8 @@ class bisim_partitioner_gj
         calM.clear();
 
         // Walk through all states in block B
-        for(state_in_block_pointer* i=
-                      m_blocks[index_block_B].start_bottom_states;
+        for (fixed_vector<state_in_block_pointer>::iterator
+                        i=m_blocks[index_block_B].start_bottom_states;
                                     i!=m_blocks[index_block_B].end_states; ++i)
         {                                                                       // mCRL2complexity(m_states[*i], add_work(..., max_C), *this);
           // and visit the incoming transitions.                                    // subsumed under the above counter
@@ -6581,7 +6729,7 @@ class bisim_partitioner_gj
               // Now we set the pointer to a co-splitter.
               const outgoing_transitions_it start_old_saC=
                                                       std::next(start_new_saC);
-              if (start_old_saC < (t.from()+1 >= m_states.size()
+              if (start_old_saC < (t.from()+1 >= m_aut.num_states()
                             ? m_outgoing_transitions.end()
                             : m_states[t.from()+1].start_outgoing_transitions))
               {                                                                 assert(start_old_saC<=start_old_saC->start_same_saC);
@@ -6644,7 +6792,7 @@ class bisim_partitioner_gj
                (                                                                assert(m_states[last_t.from()].block!=index_block_B),
 //std::cerr << "yes, it was constellation-inert earlier but is no more\n",
                                                                       true)) ||
-              (ind->end_same_BLC<std::next(&m_BLC_transitions.back()) &&
+              (ind->end_same_BLC<m_BLC_transitions.data_end()) &&
                (next_t=&m_aut.get_transitions()[*ind->end_same_BLC],
                 m_states[last_t.from()].block==m_states[next_t->from()].block &&
                 label_or_divergence(last_t)==label_or_divergence(*next_t) &&
@@ -6713,7 +6861,8 @@ class bisim_partitioner_gj
             tau_co_splitter->start_marked_BLC=tau_co_splitter->start_same_BLC;  mCRL2complexity(tau_co_splitter, add_work(check_complexity::
                                                                                      refine_partition_until_it_becomes_stable__prepare_cosplit, max_C), *this);
             // The routine below has a side effect, as it sets m_R for all bottom states of block B.
-            state_in_block_pointer* first_unmarked_bottom_state=
+            fixed_vector<state_in_block_pointer>::iterator
+               first_unmarked_bottom_state=
                not_all_bottom_states_are_touched(index_block_B, tau_co_splitter
                                                                                 #ifndef NDEBUG
                                                                                   , tau_co_splitter->start_marked_BLC
@@ -6829,7 +6978,8 @@ class bisim_partitioner_gj
                         m_blocks[Bpp].block.to_constellation.end()==co_splitter
                                          ? nullptr : co_splitter->end_same_BLC;
 
-              state_in_block_pointer* first_unmarked_bottom_state=
+              fixed_vector<state_in_block_pointer>::iterator
+                  first_unmarked_bottom_state=
                       not_all_bottom_states_are_touched(Bpp, splitter
                                                                                 #ifndef NDEBUG
                                                                                   , splitter->start_marked_BLC
@@ -7011,9 +7161,9 @@ class bisim_partitioner_gj
         m_outgoing_transitions(aut.num_transitions()),
         m_transitions(aut.num_transitions()),
         m_states_in_blocks(aut.num_states()),
-        m_blocks(1,{m_states_in_blocks.data(),0}),
-        m_constellations(1,constellation_type(m_states_in_blocks.data(),
-                                       std::next(&m_states_in_blocks.back()))),
+        m_blocks(1,{m_states_in_blocks.begin(),0}),
+        m_constellations(1,constellation_type(m_states_in_blocks.begin(),
+                                                    m_states_in_blocks.end())),
         m_BLC_transitions(aut.num_transitions()),
         m_branching(branching),
         m_preserve_divergence(preserve_divergence)

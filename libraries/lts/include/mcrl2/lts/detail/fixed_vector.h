@@ -53,6 +53,12 @@ public:
     using std::vector<T>::empty;
     using std::vector<T>::data;
 
+    // define pointer access to what is basically &*end().
+    // the compiler will optimize the addition away.
+          T* data_end()         {  return data() + size();  }
+    const T* data_end()  const  {  return data() + size();  }
+    const T* data_cend() const  {  return data() + size();  }
+
     explicit fixed_vector(size_type n)  :std::vector<T>(n)  {  }
     explicit fixed_vector(size_type n, T init)  :std::vector<T>(n, init)  {  }
 
