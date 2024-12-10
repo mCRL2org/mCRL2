@@ -1210,10 +1210,9 @@ struct block_type
                                                                                   /// \brief print a block identification for debugging
                                                                                   template<class LTS_TYPE>
                                                                                   std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
-                                                                                  {
-                                                                                    assert(!partitioner.m_blocks.empty());
+                                                                                  { assert(!partitioner.m_blocks.empty());
                                                                                     assert(partitioner.m_blocks.data()<=this);
-                                                                                    assert(this<partitioner.m_blocks.data_end());
+                                                                                    assert(this<partitioner.m_blocks.data()+partitioner.m_blocks.size());
                                                                                     assert(partitioner.m_states_in_blocks.begin()<=start_bottom_states);
                                                                                     assert(start_bottom_states<=start_non_bottom_states);
                                                                                     assert(start_non_bottom_states<=end_states);
@@ -1248,9 +1247,10 @@ struct constellation_type
                                                                                   /// \brief print a constellation identification for debugging
                                                                                   template<class LTS_TYPE>
                                                                                   std::string debug_id(const bisim_partitioner_gj<LTS_TYPE>& partitioner) const
-                                                                                  {
+                                                                                  { assert(!partitioner.m_constellations.empty());
                                                                                     assert(partitioner.m_constellations.data()<=this);
-                                                                                    assert(this<partitioner.m_constellations.data_end());
+                                                                                    assert(this<partitioner.m_constellations.data()+
+                                                                                                                          partitioner.m_constellations.size());
                                                                                     return "constellation "+
                                                                                                       std::to_string(this-partitioner.m_constellations.data());
                                                                                   }
@@ -2247,7 +2247,7 @@ class bisim_partitioner_gj
     /// \param s state whose equivalence class needs to be found
     /// \returns sequence number of the equivalence class of state s
     state_index get_eq_class(const state_index si) const
-    {                                                                           assert(si<m_aut.num_states());
+    {                                                                           assert(si<m_states.size());
       return m_states[si].block;
     }
 
@@ -6792,7 +6792,7 @@ std::cerr << "Initializing block.to_constellation lists one-by-one\n";
                (                                                                assert(m_states[last_t.from()].block!=index_block_B),
 //std::cerr << "yes, it was constellation-inert earlier but is no more\n",
                                                                       true)) ||
-              (ind->end_same_BLC<m_BLC_transitions.data_end()) &&
+              (ind->end_same_BLC<m_BLC_transitions.data_end() &&
                (next_t=&m_aut.get_transitions()[*ind->end_same_BLC],
                 m_states[last_t.from()].block==m_states[next_t->from()].block &&
                 label_or_divergence(last_t)==label_or_divergence(*next_t) &&
