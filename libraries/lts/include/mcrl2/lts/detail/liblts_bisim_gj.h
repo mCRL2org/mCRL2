@@ -1117,6 +1117,10 @@ struct block_type
       :on(new_c)
     {}
 
+    constellation_or_first_unmarked_bottom_state(const constellation_or_first_unmarked_bottom_state& other)
+      :on(other.on)
+    {}
+
     /// \brief destructor of the union
     /// \details Because the iterator type has a nontrivial destructor, C++11
     /// requires that the union also has an explicit destructor, even though
@@ -1197,6 +1201,14 @@ struct block_type
       to_constellation.~linked_list();
     }
   } block;
+
+  block_type(const block_type& other)
+    : c(other.c),
+      start_bottom_states(other.start_bottom_states),
+      start_non_bottom_states(other.start_non_bottom_states),
+      end_states(other.end_states),
+      block(other.block)
+  {}
 
   block_type(fixed_vector<state_in_block_pointer>::iterator
                                 beginning_of_states, constellation_index new_c)
@@ -7162,7 +7174,7 @@ std::cerr << "Initializing block.to_constellation lists one-by-one\n";
         m_outgoing_transitions(aut.num_transitions()),
         m_transitions(aut.num_transitions()),
         m_states_in_blocks(aut.num_states()),
-        m_blocks(1,{m_states_in_blocks.begin(),0}),
+        m_blocks(1,block_type(m_states_in_blocks.begin(), 0)),
         m_constellations(1,constellation_type(m_states_in_blocks.begin(),
                                                     m_states_in_blocks.end())),
         m_BLC_transitions(aut.num_transitions()),
