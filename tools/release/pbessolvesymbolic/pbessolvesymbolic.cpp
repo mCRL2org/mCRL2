@@ -280,7 +280,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       }
 
       options.solve_strategy =  parser.option_argument_as<int>("solve-strategy");
-      if (options.solve_strategy < 0 || options.solve_strategy > 7)
+      if (options.solve_strategy > 7)
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.solve_strategy));
       }
