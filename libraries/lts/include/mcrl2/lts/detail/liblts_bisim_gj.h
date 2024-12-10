@@ -3574,7 +3574,7 @@ class bisim_partitioner_gj
     /// `m_U_counter_reset_vector`.
     void clear_state_counters(bool restrict_to_R=false)
     {
-      for(const state_in_block_pointer si: m_R)
+      for(const state_in_block_pointer& si: m_R)
       {                                                                         assert(Rmarked == si.ref_state->counter);
         // The work in this loop is accounted for by the same action that set
         // the counter to `Rmarked`
@@ -3584,7 +3584,7 @@ class bisim_partitioner_gj
       {                                                                         assert(m_U_counter_reset_vector.empty());
         return;
       }
-      for(const state_in_block_pointer si: m_U_counter_reset_vector)
+      for(const state_in_block_pointer& si: m_U_counter_reset_vector)
       {                                                                         assert(undefined!=si.ref_state->counter || m_R.find(si));
         /* The work in this loop is accounted for by the action that set the */ assert(Rmarked!=si.ref_state->counter);
         // counter to some defined value (possibly to `Rmarked`, but then it
@@ -4052,7 +4052,7 @@ class bisim_partitioner_gj
                                                                                       assert(out_it<m_outgoing_transitions.end());
                                                                                       assert(m_BLC_transitions.data()<=out_it->ref.BLC_transitions);
                                                                                       assert(out_it->ref.BLC_transitions<m_BLC_transitions.data_end());
-                                                                                      assert(0<=*out_it->ref.BLC_transitions);
+                                                                                      /* assert(0<=*out_it->ref.BLC_transitions); Always true */
                                                                                       assert(*out_it->ref.BLC_transitions<m_aut.num_transitions());
                                                                                       assert(m_transitions[*out_it->ref.BLC_transitions].ref_outgoing_transitions==out_it);
                                                                                       const transition& t=m_aut.get_transitions()[*out_it->ref.BLC_transitions];
@@ -5281,7 +5281,8 @@ class bisim_partitioner_gj
                                                                                 assert(splitter==m_transitions[*std::prev(splitter_end_same_BLC)].
                                                                                                                        transitions_per_block_to_constellation);
           }                                                                     else assert(0);
-                                                                                assert(0 <= new_bottom_block);  assert(new_bottom_block < m_blocks.size());
+                                                                                /* assert(0 <= new_bottom_block); Always true */  
+                                                                                assert(new_bottom_block < m_blocks.size());
                                                                                 assert(!m_blocks[new_bottom_block].c.on.tains_new_bottom_states);
 //std::cerr << "new_bottom_block = " << new_bottom_block << ", R_block = " << static_cast<std::make_signed<block_index>::type>(R_block) << '\n';
           m_blocks[new_bottom_block].c.on.tains_new_bottom_states=true;         assert(use_BLC_transitions || nullptr==m_blocks[new_bottom_block].block.R);

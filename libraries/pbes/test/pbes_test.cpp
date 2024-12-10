@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_pbes)
     load_pbes(p, "non-existing file");
     BOOST_CHECK(false); // loading is expected to fail
   }
-  catch (mcrl2::runtime_error e)
+  catch (mcrl2::runtime_error&)
   {
   }
 
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_pbes)
     load_pbes(p, filename);
     BOOST_CHECK(false); // loading is expected to fail
   }
-  catch (mcrl2::runtime_error e)
+  catch (mcrl2::runtime_error&)
   {
     remove(filename.c_str());
   }
