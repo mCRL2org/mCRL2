@@ -1117,10 +1117,6 @@ struct block_type
       :on(new_c)
     {}
 
-    constellation_or_first_unmarked_bottom_state(const constellation_or_first_unmarked_bottom_state& other)
-      :on(other.on)
-    {}
-
     /// \brief destructor of the union
     /// \details Because the iterator type has a nontrivial destructor, C++11
     /// requires that the union also has an explicit destructor, even though
@@ -1202,12 +1198,13 @@ struct block_type
     }
   } block;
 
-  block_type(const block_type& other)
-    : c(other.c),
-      start_bottom_states(other.start_bottom_states),
-      start_non_bottom_states(other.start_non_bottom_states),
-      end_states(other.end_states),
-      block(other.block)
+  /// \brief default constructor, used for first block
+  /// \details The block boundaries of block 0 are set in
+  /// `create_initial_partition()` so it is not actually necessary to
+  /// initialize them.
+  block_type()
+    : c(0),
+      block()
   {}
 
   block_type(fixed_vector<state_in_block_pointer>::iterator
@@ -1537,12 +1534,44 @@ class bisim_partitioner_gj
                                                                                                     m_blocks[s.block].end_states,
                                                                                                     state_in_block_pointer(si))!=m_blocks[s.block].end_states);
 
-                                                                                      // The construction below is added to enable compilation on Windows.
-                                                                                      const outgoing_transitions_const_it end_it1=std::next(si)>=m_states.end()
-                                                                                                           ? m_outgoing_transitions.cend()
-                                                                                                           : std::next(si)->start_outgoing_transitions;
+                                                                                      assert(s.ref_states_in_blocks->ref_state==si);
+
+                                                                                      // ensure that in the incoming transitions we first have the transitions
+                                                                                      // with label tau, and then the other transitions:
+                                                                                      bool maybe_tau=true;
+                                                                                      const std::vector<transition>::const_iterator end_it1=
+                                                                                            std::next(si)>=m_states.end() ? m_aut.get_transitions().end()
+                                                                                                                   : std::next(si)->start_incoming_transitions;
+                                                                                      for (std::vector<transition>::const_iterator it=s.start_incoming_transitions; it!=end_it1; ++it)
+                                                                                      {
+                                                                                        const transition& t=*it;
+                                                                                        if (m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())))
+                                                                                        {
+                                                                                          assert(maybe_tau);
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                          maybe_tau=false;
+                                                                                        }
+                                                                                        // potentially we might test that the transitions are grouped per label
+                                                                                      }
+
+                                                                                      // Check that for each state the outgoing transitions satisfy the
+                                                                                      // following invariant:  First there are (originally) inert transitions
+                                                                                      // (inert transitions may be separated over multiple constellations, so
+                                                                                      // we cannot require that the inert transitions come before other
+                                                                                      // tau-transitions).  Then there are other transitions sorted per label
+                                                                                      // and constellation.
+                                                                                      std::unordered_set<std::pair<label_index, constellation_index> >
+                                                                                                                                           constellations_seen;
+
+                                                                                      maybe_tau=true;
+                                                                                      // The construction below is to enable translation on Windows.
+                                                                                      const outgoing_transitions_const_it end_it2=
+                                                                                            std::next(si)>=m_states.end() ? m_outgoing_transitions.cend()
+                                                                                                                   : std::next(si)->start_outgoing_transitions;
                                                                                       for(outgoing_transitions_const_it it=s.start_outgoing_transitions;
-                                                                                                                                             it!=end_it1; ++it)
+                                                                                                                                             it!=end_it2; ++it)
                                                                                       {
                                                                                         const transition& t=m_aut.get_transitions()[use_BLC_transitions
                                                                                                              ? *it->ref.BLC_transitions : it->ref.transitions];
@@ -1571,24 +1600,7 @@ class bisim_partitioner_gj
                                                                                           assert(m_blocks[m_states[t.to()].block].c.on.stellation==
                                                                                                             m_blocks[m_states[t1.to()].block].c.on.stellation);
                                                                                         }
-                                                                                      }
-                                                                                      assert(s.ref_states_in_blocks->ref_state==si);
 
-                                                                                      // Check that for each state the outgoing transitions satisfy the
-                                                                                      // following invariant:  First there are inert transitions. Then there
-                                                                                      // are other transitions sorted per label and constellation.
-                                                                                      std::unordered_set<std::pair<label_index, constellation_index> >
-                                                                                                                                           constellations_seen;
-
-                                                                                      // The construction below is to enable translation on Windows.
-                                                                                      const outgoing_transitions_const_it end_it2=
-                                                                                            std::next(si)>=m_states.end() ? m_outgoing_transitions.cend()
-                                                                                                                   : std::next(si)->start_outgoing_transitions;
-                                                                                      for(outgoing_transitions_const_it it=s.start_outgoing_transitions;
-                                                                                                                                             it!=end_it2; ++it)
-                                                                                      {
-                                                                                        const transition& t=m_aut.get_transitions()[use_BLC_transitions ?
-                                                                                                               *it->ref.BLC_transitions : it->ref.transitions];
                                                                                         const label_index label = label_or_divergence(t);
                                                                                         // Check that if the target constellation, if not new, is equal to the
                                                                                         // target constellation of the previous outgoing transition.
@@ -1604,7 +1616,19 @@ class bisim_partitioner_gj
                                                                                           assert(t_to_constellation==
                                                                                                          m_blocks[m_states[old_t.to()].block].c.on.stellation);
                                                                                         }
-                                                                                        constellations_seen.emplace(label,t_to_constellation);
+                                                                                        else
+                                                                                        {
+                                                                                          if (m_branching &&
+                                                                                              m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())))
+                                                                                          {
+                                                                                            assert(maybe_tau);
+                                                                                          }
+                                                                                          else
+                                                                                          {
+                                                                                            maybe_tau=false;
+                                                                                          }
+                                                                                          constellations_seen.emplace(label,t_to_constellation);
+                                                                                        }
                                                                                       }
                                                                                     }
                                                                                     // Check that the elements in m_transitions are well formed.
@@ -4866,7 +4890,7 @@ class bisim_partitioner_gj
           if (0 < s.no_of_outgoing_block_inert_transitions)
           {                                                                     assert(ssi>=m_blocks[R_block].start_non_bottom_states);
             // si is a non_bottom_state in the smallest block containing M.
-            bool non_bottom_state_becomes_bottom_state=true;
+            bool non_bottom_state_becomes_bottom_state=true;                    assert(m_branching);
 
             for(outgoing_transitions_it ti=s.start_outgoing_transitions;
                                                               ti!=end_it; ti++)
@@ -4874,9 +4898,14 @@ class bisim_partitioner_gj
                                                                                 //                 add_work(..., max_bi_counter), *this);
               const transition& t=m_aut.get_transitions()[use_BLC_transitions       // is subsumed in the above call
                              ? *ti->ref.BLC_transitions : ti->ref.transitions]; assert(m_states.begin()+t.from()==ssi->ref_state);
-              if (is_inert_during_init_if_branching(t))
+              if (!m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())))
               {
-                if (m_states[t.to()].block==B)
+                break;
+              }
+              if (m_states[t.to()].block==B)
+              {
+                // if (is_inert_during_init(t)) -- always true because it
+                                                // cannot be a tau-self-loop
                 {
                   // This is a transition that has become non-block-inert.
                   // (However, it is still constellation-inert.)
@@ -4899,11 +4928,15 @@ class bisim_partitioner_gj
                     mark_BLC_transition(ti);
                   }
                 }
-                else if (m_states[t.to()].block==R_block)
-                {
-                  // There is an outgoing inert tau. State remains non-bottom.
-                  non_bottom_state_becomes_bottom_state=false;
-                }
+              }
+              else if (m_preserve_divergence && t.from()==t.to())
+              {                                                                 assert(!is_inert_during_init(t));
+                // transition is a divergent tau-self-loop. It never was inert.
+              }
+              else if (m_states[t.to()].block==R_block)
+              {                                                                 assert(is_inert_during_init(t));
+                // There is an outgoing inert tau. State remains non-bottom.
+                non_bottom_state_becomes_bottom_state=false;
               }
             }
             if (non_bottom_state_becomes_bottom_state)
@@ -4934,8 +4967,7 @@ class bisim_partitioner_gj
 
             const fixed_vector<state_type_gj>::iterator from
                                                    (m_states.begin()+t.from());
-            if (from->block==R_block &&
-                !(m_preserve_divergence && from==ssi->ref_state))
+            if (from->block==R_block)
             {
               // This transition did become non-block-inert.
               // (However, it is still constellation-inert.)
@@ -7175,7 +7207,7 @@ std::cerr << "Initializing block.to_constellation lists one-by-one\n";
         m_outgoing_transitions(aut.num_transitions()),
         m_transitions(aut.num_transitions()),
         m_states_in_blocks(aut.num_states()),
-        m_blocks(1,block_type(m_states_in_blocks.begin(), 0)),
+        m_blocks(1),
         m_constellations(1,constellation_type(m_states_in_blocks.begin(),
                                                     m_states_in_blocks.end())),
         m_BLC_transitions(aut.num_transitions()),
