@@ -168,7 +168,7 @@ semantics [#f1]_.
 
 A µ-calculus formula `\varphi` is interpreted over an LTS 
 `T = \langle S, \act, \rightarrow, i, f \rangle`. To accomodate the fixpoint
-variables, we also need a *predicate environment} `\rho: \mathcal{X} \to 2^S`,
+variables, we also need a *predicate environment* `\rho: \mathcal{X} \to 2^S`,
 which maps variable names to their semantics (*i.e.*, sets of states from
 `T`). We use `\rho[X\mapsto V]` to denote the environment that maps `X` to the
 set `V`, and that maps all other variable names in the same way `\rho` does.
