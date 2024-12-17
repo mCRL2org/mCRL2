@@ -37,6 +37,7 @@ if (MCRL2_ENABLE_STD_CHECKS)
   add_compile_definitions(_GLIBCXX_DEBUG_PEDANTIC=1)
   add_compile_definitions(_FORTIFY_SOURCE=3)
   add_compile_definitions(_GLIBCXX_ASSERTIONS=1)
+  add_compile_definitions(_GLIBCXX_DEBUG_BACKTRACE=1)  
 endif()
 
 ##---------------------------------------------------
