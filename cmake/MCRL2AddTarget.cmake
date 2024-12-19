@@ -56,7 +56,7 @@ function(mcrl2_add_library TARGET_NAME)
   mcrl2_install_header_files(${TARGET_INCLUDE_FILES})
 
   if (MCRL2_ENABLE_STD_CHECKS)
-    if(${MCRL2_IS_CLANG} || APPLE)
+    if(${MCRL2_IS_CLANG} OR APPLE)
       target_link_libraries(${TARGET_NAME} PUBLIC -lstdc++_libbacktrace)
     else()
       target_link_libraries(${TARGET_NAME} PUBLIC -lbacktrace) 
