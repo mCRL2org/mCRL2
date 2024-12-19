@@ -12,10 +12,12 @@
 #ifndef MCRL2_PBES_UNIFY_PARAMETERS_H
 #define MCRL2_PBES_UNIFY_PARAMETERS_H
 
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/default_expression_generator.h"
-#include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/srf_pbes.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
+#include <optional>
 
 namespace mcrl2 {
 
@@ -99,6 +101,11 @@ struct unify_parameters_replace_function
 
   propositional_variable_instantiation operator()(const propositional_variable_instantiation& x) const
   {
+    if (detail::is_counter_example_instantiation(x))
+    {
+      return x;
+    }
+
     const data::variable_list& variables = propositional_variable_parameters.at(x.name());
     const data::data_expression_list& values = x.parameters();
     auto i = variables.begin();
@@ -131,7 +138,11 @@ void unify_parameters(pbes& p)
   std::map<core::identifier_string, data::variable_list> propositional_variable_parameters;
   for (const pbes_equation& eqn: p.equations())
   {
-    propositional_variable_parameters[eqn.variable().name()] = eqn.variable().parameters();
+    // Ignore the counter example equations for the list of parameters.
+    if (!detail::is_counter_example_equation(eqn))
+    {
+      propositional_variable_parameters[eqn.variable().name()] = eqn.variable().parameters();
+    }
   }
 
   unify_parameters_replace_function replace(propositional_variable_parameters, p.data());
@@ -145,8 +156,12 @@ void unify_parameters(pbes& p)
   // update the left hand sides of the equations
   for (pbes_equation& eqn: p.equations())
   {
-    propositional_variable& X = eqn.variable();
-    X = propositional_variable(X.name(), replace.parameters);
+    // Do not replace the counter example equations
+    if (!detail::is_counter_example_equation(eqn))
+    {
+      propositional_variable& X = eqn.variable();
+      X = propositional_variable(X.name(), replace.parameters);
+    }
   }
 }
 
@@ -174,6 +189,29 @@ void unify_parameters(srf_pbes& p, bool reset = true)
 
   // update the initial state
   p.initial_state() = replace(p.initial_state());
+}
+
+/// \returns true iff all PBES equations have the same parameter list.
+inline
+bool has_unified_parameters(const pbes& pbes)
+{  
+  std::optional<data::variable_list> parameters;
+  for (const auto& equation : pbes.equations())
+  {
+    if (!parameters.has_value())
+    {
+      parameters = equation.variable().parameters();
+    }
+    else 
+    {
+      if (parameters.value() != equation.variable().parameters())
+      {
+        return false;
+      }    
+    }
+  }
+
+  return true;
 }
 
 } // namespace pbes_system
