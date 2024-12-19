@@ -15,6 +15,7 @@ Publications
 General
 -------
 
+.. [GK21] J.F. Groote, J.J.A. Keiren. Tutorial: Designing Distributed Software in mCRL2. In: Formal Techniques for Distributed Objects, Components, and Systems., pp. 226--243. Springer International Publishing, Cham. 2021. Also appeared on `arXiv <http://arxiv.org/abs/2104.10542>`__. `(DOI) <https://doi.org/10.1007/978-3-030-78089-0_15>`__
 .. [GKLVW19] J.F. Groote, J.J.A. Keiren, B. Luttik, E.P. de Vink, T.A.C. Willemse. Modelling and Analysing Software in mCRL2. FACS 2019, LNCS vol. 12018, pp. 25-48. `(DOI) <https://doi.org/10.1007/978-3-030-40914-2_2>`__
 .. [BGK+19] O\. Bunte, J.F. Groote, J.J.A. Keiren, M\. Laveaux, T\. Neele, E.P. de Vink, J.W. Wesselink, A.J. Wijs, T.A.C. Willemse. The mCRL2 Toolset for Analysing Concurrent Systems: Improvements in Expressivity and Usability. TACAS 2019, LNCS vol. 11428, pp. 21-39. `(DOI) <https://doi.org/10.1007/978-3-030-17465-1_2>`__
 .. [GM14] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/9780262027717/>`__. The MIT press. 2014.
@@ -25,6 +26,7 @@ General
 .. [GMR+07] J.F. Groote, A. Mathijssen, M.A. Reniers, Y.S. Usenko, M.J. van Weerdenburg. The Formal Specification Language mCRL2. In: Proc. Methods for Modelling Software Systems. Dagstuhl Seminar Proceedings 06351, 2007. (http://drops.dagstuhl.de/opus/volltexte/2007/862/pdf/06351.GrooteJanFriso.Paper.862.pdf).
 .. [GMWU06] J.F. Groote, A. Mathijssen, M.J. van Weerdenburg, Y.S. Usenko. From µCRL to mCRL2: Motivation and Outline. In: Proc. Workshop Essays on Algebraic Process Calculi (APC 25). ENTCS 162 (2006), pp 191-196. Also appeared in the `BRICS Notes Series <http://www.brics.dk/NS/05/3/BRICS-NS-05-3.pdf>`_. `(DOI) <http://dx.doi.org/10.1016/j.entcs.2005.12.101>`__
 .. [GR01] J.F. Groote and M.A. Reniers. Algebraic process verification. In J. A. Bergstra, A. Ponse and S. A. Smolka. Handbook of Process Algebra, pages 1151-1208, Elsevier, Amsterdam, 2001. Also appeared as a `technical report <http://alexandria.tue.nl/extra1/wskrap/publichtml/200011195.pdf>`__. `(DOI) <http://dx.doi.org/10.1016/B978-044482830-9/50035-7>`__
+
 
 Research
 --------
@@ -66,6 +68,9 @@ Research
 Applications
 ------------
 
+.. [vDKW24] D\. van Dortmont, J. J. A. Keiren, T. A. C. Willemse. Modelling and Analysing a Mechanical Lung Ventilator in mCRL2. In: Rigorous State-Based Methods., pp. 341--359. Springer Nature Switzerland, Cham. 2024. `(DOI) <https://doi.org/10.1007/978-3-031-63790-2_27>`__
+.. [HKG24] Y\. Hafidi, J. J. A. Keiren, J. F. Groote. Fair Mutual Exclusion for N Processes. In: Tools and Methods of Program Analysis. Communications in Computer and Information Science, pp. 149--160. Springer Nature Switzerland, Cham. 2024. Also appeared on `arXiv <https://arxiv.org/abs/2111.02251>`__. `(DOI) <https://doi.org/10.1007/978-3-031-50423-5_14>`__
+.. [SK23] A\. Stramaglia, J. J. A. Keiren. Formal Verification of an Industrial UML-like Model Using mCRL2. In: Formal Methods for Industrial Critical Systems. Lecture Notes in Computer Science, pp. 86--102. Springer International Publishing, Cham. 2022. Also appeared on `arXiv <https://arxiv.org/abs/2205.08146>`__. `(DOI) <http://doi.org/10.1007/978-3-031-15008-1_7>`__
 .. [NRG19] T\. Neele, M. H. Rol, J. F. Groote. Verifying System-Wide Properties of Industrial Component-Based Software. In FSEN 2019, LNCS vol. 11761, pp. 158-175. `(DOI) <https://doi.org/10.1007/978-3-030-31517-7_11>`__
 .. [BGH+17] R\. van Beusekom, J. F. Groote, P. Hoogendijk, R. Howe, J. W. Wesselink, R. Wieringa, and T. A. C. Willemse. Formalising the Dezyne Modelling Language in mCRL2. In FMICS-AVoCS 2017, LNCS vol. 10471, pp. 217-233. `(DOI) <https://doi.org/10.1007/978-3-319-67113-0_14>`__
 .. [RTW+13] Daniela Remenska, Jeff Templon, Tim A.C. Willemse, Philip Homburg, Kees Verstoep , Adria Casajus and Henri Bal. From UML to Process Algebra and Back: An Automated Approach to Model-Checking Software Design Artifacts of Concurrent Systems. In Guillaume Brat, Neha Rungta, Arnaud Venet (eds.), NFM 2013, Lecture Notes in Computer Science 7871, Springer, pp. 244-260, 2013. `(DOI) <http://dx.doi.org/10.1007/978-3-642-38088-4_17>`__
