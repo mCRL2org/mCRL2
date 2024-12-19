@@ -91,13 +91,14 @@ constexpr transition_index null_transition=-1;
 constexpr label_index null_action=-1;
 constexpr state_index null_state=-1;
 constexpr block_index null_block=-1;
-constexpr transition_index undefined=-1;
-constexpr transition_index Rmarked=-2;
+constexpr transition_index undefined=0;
+constexpr transition_index Rmarked=-1;
+constexpr transition_index Umarked=1;
 
 /// The function clear() takes care that a container frees memory when it is
 /// cleared and it is large.
 template <class CONTAINER>
-void clear(CONTAINER& c)
+static inline void clear(CONTAINER& c)
 {
   if (c.size()>1000) { c=CONTAINER(); } else { c.clear(); }
 }
@@ -888,11 +889,6 @@ class todo_state_vector
       m_todo_indicator=0;
       bisimulation_gj::clear(m_vec);
     }
-
-    void clear_todo()
-    {
-      m_todo_indicator=m_vec.size();
-    }
 };
 
 
@@ -1618,9 +1614,9 @@ class bisim_partitioner_gj
                                                                                         }
                                                                                         else
                                                                                         {
-                                                                                          if (m_branching &&
-                                                                                              m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())))
+                                                                                          if (m_branching && m_aut.is_tau(label))
                                                                                           {
+//if (!maybe_tau) { std::cerr << "maybe_tau==false for " << m_transitions[use_BLC_transitions ? *it->ref.BLC_transitions : it->ref.transitions].debug_id(*this) << '\n'; }
                                                                                             assert(maybe_tau);
                                                                                           }
                                                                                           else
@@ -3825,9 +3821,12 @@ class bisim_partitioner_gj
                                                                                                        assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) == m_U_counter_reset_vector.end());
                                                                                                        break;
                                                                                       case Rmarked:    assert( m_R.find(si)); assert(!m_U.find(si));
-                                                                                                       // It can happen that the state has a tau-transition to a U-state, then it will be in the m_U_counter_reset_vector.
+                                                                                                       // It can happen that the state has a tau-transition
+                                                                                                       // to a U-state, then it will be in the
+                                                                                                       // m_U_counter_reset_vector.
                                                                                                        break;
-                                                                                      case 0:          assert(!m_R.find(si)); // It can happen that the state is in U or is not in U
+                                                                                      case Umarked:    assert(!m_R.find(si)); // It can happen that the state
+                                                                                                                              // is in U or is not in U
                                                                                                        #ifdef TRY_EFFICIENT_SWAP
                                                                                                          assert(m_U.find(si) ||
                                                                                                                 (si==current_U_outgoing_state && outgoing_action_constellation_check==U_status));
@@ -3974,16 +3973,19 @@ class bisim_partitioner_gj
                                                                                        current_R_incoming_bottom_state_iterator!=first_unmarked_bottom_state ||
                                                                                        !m_R.todo_is_empty());
                                                                                 #ifndef NDEBUG
-                                                                                  for(state_in_block_pointer si=state_in_block_pointer(m_states.begin()); si.ref_state<m_states.end(); ++si.ref_state)
+                                                                                  for (state_in_block_pointer si=state_in_block_pointer(m_states.begin());
+                                                                                                                   si.ref_state<m_states.end(); ++si.ref_state)
                                                                                   {
-                                                                                    if (si.ref_state->block!=B || 0==si.ref_state->no_of_outgoing_block_inert_transitions)
+                                                                                    if (si.ref_state->block!=B ||
+                                                                                        0==si.ref_state->no_of_outgoing_block_inert_transitions)
                                                                                     {
                                                                                       assert((!use_BLC_transitions &&
                                                                                               0!=si.ref_state->no_of_outgoing_block_inert_transitions) ||
                                                                                              undefined==si.ref_state->counter);
                                                                                       assert(!m_R.find(si));
                                                                                       assert(!m_U.find(si));
-                                                                                      assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) == m_U_counter_reset_vector.end());
+                                                                                      assert(std::find(m_U_counter_reset_vector.begin(),
+                                                                                          m_U_counter_reset_vector.end(), si)==m_U_counter_reset_vector.end());
                                                                                     }
                                                                                     else
                                                                                     {
@@ -3993,9 +3995,12 @@ class bisim_partitioner_gj
                                                                                                        assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) == m_U_counter_reset_vector.end());
                                                                                                        break;
                                                                                       case Rmarked:    assert( m_R.find(si)); assert(!m_U.find(si));
-                                                                                                       // It can happen that the state has a tau-transition to a U-state, then it will be in the m_U_counter_reset_vector.
+                                                                                                       // It can happen that the state has a tau-transition
+                                                                                                       // to a U-state, then it will be in the
+                                                                                                       // m_U_counter_reset_vector.
                                                                                                        break;
-                                                                                      case 0:          assert(!m_R.find(si)); // It can happen that the state is in U or is not in U
+                                                                                      case Umarked:    assert(!m_R.find(si)); // It can happen that the state
+                                                                                                                              // is in U or is not in U
                                                                                                        #ifdef TRY_EFFICIENT_SWAP
                                                                                                          assert(m_U.find(si) ||
                                                                                                                 (si==current_U_outgoing_state && outgoing_action_constellation_check==U_status));
@@ -4035,21 +4040,21 @@ class bisim_partitioner_gj
               {
                   // Algorithm 3, line 3.13, left.
                   // Algorithm 3, line 3.15 and 3.18, left.
-                current_U_outgoing_state.ref_state->counter=
+                current_U_outgoing_state.ref_state->counter=Umarked-1+
                             current_U_outgoing_state.ref_state->
-                                      no_of_outgoing_block_inert_transitions-1;
+                                        no_of_outgoing_block_inert_transitions;
                 m_U_counter_reset_vector.push_back(current_U_outgoing_state);
               }
               else
               {                                                                 assert(std::find(m_U_counter_reset_vector.begin(),
                                                                                                  m_U_counter_reset_vector.end(),
                                                                                                  current_U_outgoing_state) != m_U_counter_reset_vector.end());
-                /* Algorithm 3, line 3.18, left. */                             assert(current_U_outgoing_state.ref_state->counter>0);
+                /* Algorithm 3, line 3.18, left. */                             assert(current_U_outgoing_state.ref_state->counter>Umarked);
                 current_U_outgoing_state.ref_state->counter--;
               }
 //std::cerr << "COUNTER " << current_U_outgoing_state.ref_state->counter << "\n";
                 // Algorithm 3, line 3.19, left.
-              if (current_U_outgoing_state.ref_state->counter==0)
+              if (current_U_outgoing_state.ref_state->counter==Umarked)
               {
                 if (initializing==R_status || aborted==R_status)
                 {
@@ -5090,6 +5095,12 @@ class bisim_partitioner_gj
               {
                 /* co_splitter does not have a corresponding main splitter   */ assert(!has_marked_transitions(*co_splitter));
 //std::cerr << ": does not have a corresponding main splitter";  if (m_blocks[from_block].block.to_constellation.end()!=main_splitter) { std::cerr << ", candidate was " << main_splitter->debug_id(*this); }  std::cerr << '\n';
+                // Note that if splitter is a main splitter, then the
+                // co-splitter that belongs to it should be identifiable. That
+                // is why we do not always make the splitter stable early, even
+                // though in the main routine we do no longer need the link
+                // between main and co-splitter maintained after the main
+                // split.
                 make_stable_and_move_to_start_of_BLC(from_block, co_splitter);
               }
 //else { std::cerr << ": its main splitter is " << main_splitter->debug_id(*this) << '\n'; }
@@ -7016,13 +7027,6 @@ std::cerr << "Initializing block.to_constellation lists one-by-one\n";
                 }
 //std::cerr << '\n';
               }
-              const BLC_list_iterator co_splitter_begin=
-                        m_blocks[Bpp].block.to_constellation.end()==co_splitter
-                                       ? nullptr : co_splitter->start_same_BLC;
-                    BLC_list_iterator co_splitter_end  =
-                        m_blocks[Bpp].block.to_constellation.end()==co_splitter
-                                         ? nullptr : co_splitter->end_same_BLC;
-
               fixed_vector<state_in_block_pointer>::iterator
                   first_unmarked_bottom_state=
                       not_all_bottom_states_are_touched(Bpp, splitter
@@ -7034,6 +7038,12 @@ std::cerr << "Initializing block.to_constellation lists one-by-one\n";
                                          m_blocks[Bpp].start_non_bottom_states)
               {                                                                 assert(m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].
                                                                                                                   block==Bpp);
+                const BLC_list_iterator_or_null co_splitter_begin=
+                        m_blocks[Bpp].block.to_constellation.end()==co_splitter
+                                       ? nullptr : co_splitter->start_same_BLC;
+                BLC_list_iterator_or_null co_splitter_end=
+                        m_blocks[Bpp].block.to_constellation.end()==co_splitter
+                                         ? nullptr : co_splitter->end_same_BLC;
 //std::cerr << "PERFORM A MAIN SPLIT\n";
               // Algorithm 1, line 1.12.
                 Bpp = splitB(Bpp, splitter,
