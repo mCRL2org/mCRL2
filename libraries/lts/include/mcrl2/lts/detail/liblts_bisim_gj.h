@@ -7076,7 +7076,8 @@ std::cerr << "Initializing block.to_constellation lists one-by-one\n";
                   // Then no co-split is needed to stabilize the old bottom
                   // states in the R-block!
                   continue;
-                }                                                               assert(0 <= Bpp); assert(Bpp < m_blocks.size());
+                }                                                               /* assert(0 <= Bpp); Trivially true */
+                                                                                assert(Bpp < m_blocks.size());
                 // Algorithm 1, line 1.13.
                 // Algorithm 1, line 1.14 is implicitly done in the call of
                 // splitB above.
