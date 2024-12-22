@@ -1325,6 +1325,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vf}), or_function(s, vf, true_function(s)), true_function(s)));
         result.push_back(data_equation(variable_list({vf}), or_function(s, true_function(s), vf), true_function(s)));
         result.push_back(data_equation(variable_list({ve, vf, vg}), or_function(s, vf, vg)(ve), sort_bool::or_(vf(ve), vg(ve))));
+        result.push_back(data_equation(variable_list({vs, vt}), fset_union(s, false_function(s), false_function(s), vs, vt), union_(s, vs, vt)));
         result.push_back(data_equation(variable_list({vf, vg}), fset_union(s, vf, vg, sort_fset::empty(s), sort_fset::empty(s)), sort_fset::empty(s)));
         result.push_back(data_equation(variable_list({vd, vf, vg, vs}), fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::empty(s)), sort_fset::cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, sort_fset::empty(s)))));
         result.push_back(data_equation(variable_list({ve, vf, vg, vt}), fset_union(s, vf, vg, sort_fset::empty(s), sort_fset::cons_(s, ve, vt)), sort_fset::cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, sort_fset::empty(s), vt))));

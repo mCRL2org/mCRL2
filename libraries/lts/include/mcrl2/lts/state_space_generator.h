@@ -808,7 +808,7 @@ struct state_space_generator
     }
     catch (const data::enumerator_error& e)
     {
-      mCRL2log(log::error) << "Error while exploring state space: " << e.what() << "\n";
+      mCRL2log(log::error) << "Error while exploring state space: " << e.what() << ".\n";
       if (options.save_error_trace)
       {
         const lps::state& s = *source;
@@ -816,7 +816,6 @@ struct state_space_generator
         std::string filename = options.trace_prefix + "_error.trc";
         detail::save_trace(tr, filename);
       }
-      mCRL2log(log::info) << ".\n";
       return false;
     }
 

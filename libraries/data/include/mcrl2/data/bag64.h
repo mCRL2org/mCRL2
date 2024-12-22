@@ -1781,6 +1781,8 @@ namespace mcrl2 {
         variable vs("s",sort_fset::fset(s));
         variable vx("x",bag(s));
         variable vy("y",bag(s));
+        variable vz("z",sort_fbag::fbag(s));
+        variable vw("w",sort_fbag::fbag(s));
 
         data_equation_vector result;
         result.push_back(data_equation(variable_list({vb}), bag_fbag(s, vb), constructor(s, zero_function(s), vb)));
@@ -1826,6 +1828,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({ve, vh}), bool2nat_function(s, vh)(ve), if_(vh(ve), sort_nat::most_significant_digit_nat(sort_machine_word::one_word()), sort_nat::c0())));
         result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::false_function(s)), zero_function(s)));
         result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::true_function(s)), one_function(s)));
+        result.push_back(data_equation(variable_list({vw, vz}), join(s, zero_function(s), zero_function(s), vw, vz), union_(s, vw, vz)));
         result.push_back(data_equation(variable_list({vf, vg}), join(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)), sort_fbag::empty(s)));
         result.push_back(data_equation(variable_list({vb, vd, vf, vg, vp}), join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()), join(s, vf, vg, vb, sort_fbag::empty(s)))));
         result.push_back(data_equation(variable_list({vc, ve, vf, vg, vq}), join(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)), join(s, vf, vg, sort_fbag::empty(s), vc))));

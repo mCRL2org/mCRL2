@@ -91,6 +91,7 @@ eqn @setfset(s)  =  @set(@false_, s);
     @or_(f, @true_)  =  @true_;
     @or_(@true_, f)  =  @true_;
     @or_(f, g)(e)  =  ||(f(e), g(e));
+    @fset_union(@false_, @false_, s, t)  = +(s,t);
     @fset_union(f, g, {}, {})  =  {};
     @fset_union(f, g, @fset_cons(d, s), {})  =  @fset_cinsert(d, !(g(d)), @fset_union(f, g, s, {}));
     @fset_union(f, g, {}, @fset_cons(e, t))  =  @fset_cinsert(e, !(f(e)), @fset_union(f, g, {}, t));

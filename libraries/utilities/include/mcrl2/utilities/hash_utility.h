@@ -90,6 +90,8 @@ struct hash< std::map < X, Y > >
 template <class X, class Y>
 struct hash< std::pair < X, Y > >
 {
+  hash() = default;
+
   std::size_t operator()(const std::pair < X, Y >& p) const
   {
     hash<X> hasher1;

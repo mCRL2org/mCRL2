@@ -341,4 +341,21 @@ inline void swap(fbag_container& t1, fbag_container& t2)
 
 } // namespace mcrl2
 
+namespace std
+{
+  
+template<>
+struct hash<mcrl2::data::container_type>
+{
+    std::size_t operator()(const mcrl2::data::container_type& v) const
+    {
+      const hash<atermpp::aterm> hasher;
+      return hasher(v);
+    }
+};
+
+} // namespace std
+  
+
+
 #endif // MCRL2_DATA_CONTAINER_TYPE_H

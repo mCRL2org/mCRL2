@@ -57,6 +57,8 @@ var b: FBag(S);
     s: FSet(S);
     x: Bag(S);
     y: Bag(S);
+    w: FBag(S);
+    z: FBag(S);
 
 eqn @bagfbag(b)  =  @bag(@zero_, b);
     @bagcomp(f)  =  @bag(f, {:});
@@ -101,6 +103,7 @@ eqn @bagfbag(b)  =  @bag(@zero_, b);
     @Bool2Nat_(h)(e)  =  if(h(e), @cNat(@c1), @c0);
     @Bool2Nat_(@false_)  =  @zero_;
     @Bool2Nat_(@true_)  =  @one_;
+    @fbag_join(@zero_, @zero_, w, z)  =  +(w,z);
     @fbag_join(f, g, {:}, {:})  =  {:};
     @fbag_join(f, g, @fbag_cons(d, p, b), {:})  =  @fbag_cinsert(d, @swap_zero_add(f(d), g(d), @cNat(p), @c0), @fbag_join(f, g, b, {:}));
     @fbag_join(f, g, {:}, @fbag_cons(e, q, c))  =  @fbag_cinsert(e, @swap_zero_add(f(e), g(e), @c0, @cNat(q)), @fbag_join(f, g, {:}, c));
