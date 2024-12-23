@@ -42,8 +42,6 @@ if (MCRL2_ENABLE_STD_CHECKS)
   endif()
 endif()
 
-add_compile_definitions(SYLVAN_STATS=1)
-
 ##---------------------------------------------------
 ## Set C++ compile flags
 ##---------------------------------------------------
