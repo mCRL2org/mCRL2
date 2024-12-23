@@ -35,7 +35,9 @@ namespace detail
 {
 
 template <class T>
-class fixed_vector : private std::vector<T>
+class fixed_vector : public std::vector<T>
+// class fixed_vector : private std::vector<T>   The elements of vector should not be made public. However, with this, the 
+//                                               destructor of an iterator does not become visible on windows leading to compilation issues. 
 {
 public:
     // only reveal as much of the interface of std::vector<T> as is needed:
