@@ -1483,9 +1483,11 @@ class part_trans_t
     {                                                                           assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
                                                                                 assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
         // swap contents
-        B_to_C_entry const temp_entry(*pos1->B_to_C);
-        *pos1->B_to_C = *pos2->B_to_C;
-        *pos2->B_to_C = temp_entry;
+        // XXXXXX IS NOT ALLOWED.
+        // B_to_C_entry const temp_entry(*pos1->B_to_C);
+        // *pos1->B_to_C = *pos2->B_to_C;
+        // *pos2->B_to_C = temp_entry;
+        std::swap(*pos1->B_to_C,*pos2->B_to_C);
         // swap pointers to contents
         B_to_C_iter_t const temp_iter(pos1->B_to_C);
         pos1->B_to_C = pos2->B_to_C;
