@@ -1,22 +1,24 @@
 .. index:: lpsfununfold
 
+.. highlight:: mcrl2
+
 .. _tool-lpsfununfold:
 
 lpsfununfold
 ============
 
-The tool lpsfununfold takes an .lps file and transforms it by replacing process parameters of type function sorts, sets, finite sets, bags and finite
+The tool `lpsfununfold` takes an .lps file and transforms it by replacing process parameters of type function sorts, sets, finite sets, bags and finite
 bags with finite domains by a sequence of parameters of the type equal the target sort of the function, or booleans in case of sets, and natural numbers
 in case of bags. This is similar to the tool :ref:`tool-lpsparunfold`. The advantage is that the resulting linear process may be more amenable to processing 
 by tools like :ref:`tool-lpsconstelm` and :ref:`tool-lpsparelm`. Furthermore, symbolic tools may be able to handle the transformed linear process more fruitfully.
 
-In case of sets and bags, lpsfununfold adds a number of rewrite rules to simplify the resulting linear process. It rewrites the arguments
+In case of sets and bags, `lpsfununfold` adds a number of rewrite rules to simplify the resulting linear process. It rewrites the arguments
 of process invocations, but it does not rewrite the resulting linear process completely. 
 
 An example with function arguments
-==================================
+----------------------------------
 
-If lpsfununfold is applied to the following linear process with process argument of sort ``Bool->Bool``::
+If `lpsfununfold` is applied to the following linear process with process argument of sort ``Bool->Bool``::
 
   act  a:Bool;
   proc P(f2:Bool->Bool)=
@@ -44,9 +46,9 @@ process is rewritten using the tool :ref:`tool-lpsrewr`, it simplifies to::
   init P(true, true);
 
 An example with finite sets
-===========================
+---------------------------
 
-This tool also unfolds parameters of type set, finite set, bag and finite bag provided that the domain of
+The tool `lpsfununfold` also unfolds parameters of type set, finite set, bag and finite bag provided that the domain of
 these sets and bags are finite. This is illustrated by the following example::
 
   proc P(fs:FSet(Bool))=
@@ -54,7 +56,7 @@ these sets and bags are finite. This is illustrated by the following example::
   
   init P({false});
 
-After applying lpsfununfold and subsequently :ref:`tool-lpsrewr` we obtain::
+After applying `lpsfununfold` and subsequently :ref:`tool-lpsrewr` we obtain::
 
   act  a: Bool;
        b: Nat;
@@ -67,11 +69,10 @@ After applying lpsfununfold and subsequently :ref:`tool-lpsrewr` we obtain::
 init P(false, true);
 
 The rewrite rules that are added
-================================
+--------------------------------
 
-There are a number of rewrite rules added, but this may not be enough to simplify the resulting
-linear process. Using for instance the tool :ref:`tool-lpsactionrename` it is possible to add extra rewrite
-rules, by adding rewrite rules in a rename file and by leaving the rename section empty.
+The tool `lpsfununfold` adds some rewrite rules to the specification to simplify expressions that typically occur after
+applying `lpsfununfold`. 
 
 The added rules are (for ``s`` and ``t`` (finite) sets::
 
@@ -87,4 +88,7 @@ For ``s`` and ``t`` (finite) bags the added rules are::
   count(d,if(b,s,t)) = if(count(b, d),count(d,t))
   if(b,true,false)=b
 
+These rewrite rules may not be enough to simplify the resulting
+linear process. Using for instance the tool :ref:`tool-lpsactionrename` it is possible to add extra rewrite
+rules, by adding rewrite rules in a rename file and by leaving the rename section empty.
 
