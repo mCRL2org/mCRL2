@@ -74,14 +74,18 @@ The rewrite rules that are added
 The tool `lpsfununfold` adds some rewrite rules to the specification to simplify expressions that typically occur after
 applying `lpsfununfold`. 
 
-The added rules are (for ``s`` and ``t`` (finite) sets::
+For a function sort `s->t` a single rewrite rule is added, where ``f`` and ``g`` are of sort `s->t` and ``b`` is a boolean::
+
+  if(b, f, g)(t) = if(b, f(t), g(t))
+
+For ``s`` and ``t`` (finite) sets the following rules are added::
 
   d in s+t = d in s || d in t
   d in s-t = d in s && !(d in t)
   d in if(b,s,t) = if(b, d in s, d in t)
   if(b,true,false)=b
 
-For ``s`` and ``t`` (finite) bags the added rules are::
+And for ``s`` and ``t`` (finite) bags these are the added rules::
 
   count(d,s+t) = count(d,s) + count(d,t)
   count(d,s-t) = monus(count(d,s), count(d,t))

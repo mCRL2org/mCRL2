@@ -198,5 +198,20 @@ inline function_sort make_function_sort_(const sort_expression& dom1,
 
 } // namespace mcrl2
 
+namespace std
+{
+
+template<>
+struct hash<mcrl2::data::function_sort>
+{ 
+    std::size_t operator()(const mcrl2::data::function_sort& v) const
+    {
+      const hash<atermpp::aterm> hasher;
+      return hasher(v);
+    }
+};
+
+} // namespace std
+
 #endif // MCRL2_DATA_FUNCTION_SORT_H
 

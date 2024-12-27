@@ -228,68 +228,39 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
     {
       super::parse_options(parser);
 
-//      if (((0 == parser.options.count("index")) && (0 == parser.options.count("sort"))) ||
-//          ((0 < parser.options.count("index") && (0 < parser.options.count("sort")))))
-//      {
-//        parser.error("Use either --sort or --index to unfold process parameters.");
-//      }
-
-      // Parse string argument to [NUM] (a set of indices)
-/*      if (0 < parser.options.count("index"))
-      {
-        std::string indices_str(parser.option_argument_as<std::string>("index"));
-        std::stringstream indices(indices_str);
-
-        std::size_t index;
-        char comma;
-        while (indices.good())
-        {
-          indices >> index;
-          if (indices.bad())
-          {
-            throw mcrl2::runtime_error("Not a valid comma-separated list of indices: " + indices_str);
-          }
-          m_set_index.insert(index);
-          if (indices.good())
-          {
-            indices >> comma;
-            if (comma != ',')
-            {
-              throw mcrl2::runtime_error("Not a valid comma-separated list of indices: " + indices_str);
-            }
-          }
-        }
-        if (!indices.eof())
-        {
-          throw mcrl2::runtime_error("Not a valid comma-separated list of indices: " + indices_str);
-        }
-      }
-
-      // Parse string argument NAME for sort argument
-      if (0 < parser.options.count("sort"))
-      {
-        m_unfoldsort = parser.option_argument_as< std::string  >("sort");
-      }
-
-      m_repeat_unfold = 1;
-      if (0 < parser.options.count("repeat"))
-      {
-        m_repeat_unfold = parser.option_argument_as< std::size_t  >("repeat");
-      }
-
-      m_alt_case_placement = parser.options.count("alt-case") > 0;
-      m_possibly_inconsistent = parser.options.count("possibly-inconsistent") > 0;
-      m_disable_pattern_unfolding = parser.options.count("no-pattern") > 0; */
-
     }
+
+    bool add_rewrite_rules_for_functions(const function_sort& s, data_specification& data_spec)
+    {                         
+std::cerr << "ADD FUNCtion RULES FOR SORT " << s << "\n";
+      static std::unordered_set<function_sort> function_sorts_for_which_extra_rewrite_rules_have_been_generated;
+                                                                
+      if (function_sorts_for_which_extra_rewrite_rules_have_been_generated.insert(s).second)
+      {   
+        variable vb("b",sort_bool::bool_());
+        variable vf("f",s);
+        variable vg("g",s);
+        variable_list vt;
+        for(const sort_expression& s1: s.domain()) { vt=push_back(vt,variable("t",s1)); } ;
+        // Equation: if(b, f, g)(t) = if(b, f(t), g(t)).
+        data_spec.add_equation(data_equation(variable_list({vb, vf, vg}) + vt, 
+                                             application(if_(vb, vf, vg),vt),
+                                             if_(vb,application(vf,vt),application(vg,vt))));
+        return true;
+      }
+      return false;
+   } 
+
 
     bool add_rewrite_rules(const container_type& t, const sort_expression& s, data_specification& data_spec)
     {
+std::cerr << "HIER " << t << "    " << s << "\n";
       static std::unordered_set<std::pair<container_type, sort_expression>> sorts_for_which_extra_rewrite_rules_have_been_generated;
       bool no_equations_added_yet=sorts_for_which_extra_rewrite_rules_have_been_generated.empty();
 
       if (sorts_for_which_extra_rewrite_rules_have_been_generated.count(std::pair(t,s))==0)
       {
+std::cerr << "ADD REWRITE RULES FOR SORT " << t << "   " << s << "\n";
         if (is_set_container(t))
         {
           sorts_for_which_extra_rewrite_rules_have_been_generated.insert(std::pair(t,s));
@@ -429,6 +400,8 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
           }
           else
           {
+            new_rewrite_rules_added=add_rewrite_rules_for_functions(s, spec.data())||new_rewrite_rules_added;
+
             std::vector<data::variable> new_parameters;
             std::vector<data::data_expression_list> new_enumerated_domain_elements(1);
             variable_vector new_arguments;
@@ -473,14 +446,14 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
             assert(is_fset_container(t) || is_set_container(t) || is_fbag_container(t) || is_bag_container(t));
             if (!spec.data().is_certainly_finite(s.element_sort()))
             { 
-              mCRL2log(verbose) << "The process parameter " << v << ":" << v.sort() << " is not replaced as its domain does not seem finite.\n";
+              mCRL2log(verbose) << "The process parameter " << v << ":" << v.sort() << " is not replaced as its element sort does not seem finite.\n";
               resulting_parameters.push_back(v);
             }
             else
             { 
               if (is_fset_container(t) || is_set_container(t) || is_fbag_container(t) || is_bag_container(t)) 
               { 
-                new_rewrite_rules_added=new_rewrite_rules_added||add_rewrite_rules(t, s.element_sort(), spec.data());
+                new_rewrite_rules_added= add_rewrite_rules(t, s.element_sort(), spec.data())||new_rewrite_rules_added;
               
                 std::vector<data::variable> new_parameters;
                 variable_vector new_arguments; 
