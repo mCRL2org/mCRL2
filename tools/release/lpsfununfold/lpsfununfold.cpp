@@ -232,7 +232,6 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 
     bool add_rewrite_rules_for_functions(const function_sort& s, data_specification& data_spec)
     {                         
-std::cerr << "ADD FUNCtion RULES FOR SORT " << s << "\n";
       static std::unordered_set<function_sort> function_sorts_for_which_extra_rewrite_rules_have_been_generated;
                                                                 
       if (function_sorts_for_which_extra_rewrite_rules_have_been_generated.insert(s).second)
@@ -254,13 +253,11 @@ std::cerr << "ADD FUNCtion RULES FOR SORT " << s << "\n";
 
     bool add_rewrite_rules(const container_type& t, const sort_expression& s, data_specification& data_spec)
     {
-std::cerr << "HIER " << t << "    " << s << "\n";
       static std::unordered_set<std::pair<container_type, sort_expression>> sorts_for_which_extra_rewrite_rules_have_been_generated;
       bool no_equations_added_yet=sorts_for_which_extra_rewrite_rules_have_been_generated.empty();
 
       if (sorts_for_which_extra_rewrite_rules_have_been_generated.count(std::pair(t,s))==0)
       {
-std::cerr << "ADD REWRITE RULES FOR SORT " << t << "   " << s << "\n";
         if (is_set_container(t))
         {
           sorts_for_which_extra_rewrite_rules_have_been_generated.insert(std::pair(t,s));
