@@ -31,8 +31,8 @@ class xinput_tool: public tool
     std::vector<std::string> m_input_filenames;
 
     // The minimum and maximum number of files
-    uint16_t min_input_files;
-    uint16_t max_input_files;
+    std::size_t min_input_files;
+    std::size_t max_input_files;
 
     /// \brief Checks if the number of positional options is OK.
     /// \param parser A command line parser
