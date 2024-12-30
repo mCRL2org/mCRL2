@@ -92,8 +92,8 @@ namespace detail
 /// \details defined here because this is the most basic #include header that
 /// uses it.
 ///
-/// It would be better to define it as LTS_TYPE::states_size_type but that would
-/// require most classes to become templates.
+/// It would be better to define it as LTS_TYPE::states_size_type but that
+/// would require most classes to become templates.
 typedef std::size_t state_type;
 #define STATE_TYPE_MIN (std::numeric_limits<state_type>::min())
 #define STATE_TYPE_MAX (std::numeric_limits<state_type>::max())
@@ -371,12 +371,12 @@ class check_complexity
         split_block_B_into_R_and_BminR__skip_over_state,
         simple_splitB__find_bottom_state,
         simple_splitB__find_predecessors_of_R_or_U_state,
+        multiple_swap_states_in_block__account_for_swap_in_aborted_block,
         multiple_swap_states_in_block__swap_state_in_small_block,
         // temporary state counters
             // Invariant: 0 <= (counter value) <= 1
         simple_splitB_R__find_predecessors,
             STATE_gj_MIN_TEMP = simple_splitB_R__find_predecessors,
-        simple_splitB_U__find_bottom_state,
         simple_splitB_U__find_predecessors,
             STATE_gj_MAX_TEMP = simple_splitB_U__find_predecessors,
         // bottom state counters
@@ -399,7 +399,8 @@ class check_complexity
             // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
             refine_partition_until_it_becomes_stable__correct_end_of_calM,
             refine_partition_until_it_becomes_stable__execute_main_split,
-            BLC_gj_MAX = refine_partition_until_it_becomes_stable__execute_main_split,
+            four_way_splitB__handle_transitions_in_main_splitter,
+            BLC_gj_MAX = four_way_splitB__handle_transitions_in_main_splitter,
 
         // transition counters
             // Invariant:
@@ -411,7 +412,6 @@ class check_complexity
         simple_splitB__handle_transition_to_R_or_U_state,
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
-        simple_splitB__do_not_add_state_with_transition_in_splitter_to_U,
         refine_partition_until_it_becomes_stable__find_cotransition,
             // Invariant:
             // 0 == (counter value) during the first half of initialisation
@@ -419,7 +419,7 @@ class check_complexity
             // initialisation
         order_BLC_transitions__sort_transition,
         // temporary transition counters
-        simple_splitB_R__handle_transition_from_R_state, // target constellation size
+        simple_splitB_R__handle_transition_from_R_state, // source block size
             TRANS_gj_MIN_TEMP = simple_splitB_R__handle_transition_from_R_state,
         simple_splitB_R__handle_transition_to_R_state, // target block size
         simple_splitB_U__handle_transition_to_U_state, // target block size
@@ -444,6 +444,13 @@ class check_complexity
     /// \brief special value for temporary work without changing the balance
     #define DONT_COUNT_TEMPORARY (std::numeric_limits<unsigned char>::max()-1)
 
+    enum result_type {
+        // three magic values to ensure that the result is actually correct...
+        complexity_ok = 77655,
+        complexity_print = 54854,
+        complexity_error = 81956
+    };
+
     /// \brief value of floor(log2(n)) for easy access
     /// \details This variable has to be set by `init()` before counting work
     /// can begin.
@@ -453,7 +460,7 @@ class check_complexity
     /// \details The function cannot be constexpr because std::log2() may have
     /// the side effect of setting `errno`.
     static int ilog2(state_type size)
-    {
+    {                                                                           assert(0<size);
         #ifdef __GNUC__
             if constexpr (sizeof(unsigned) == sizeof(size))
             {
@@ -489,10 +496,46 @@ class check_complexity
     /// \details Sensible work will be counted positively, and cancelled work
     /// negatively.
     static signed_trans_type sensible_work;
+    static trans_type no_of_waiting_cycles;
+    static trans_type sensible_work_grand_total;
+    static trans_type cancelled_work_grand_total;
+    static trans_type no_of_waiting_cycles_grand_total;
+    static bool cannot_wait_before_reset;
 
   public:
     /// \brief printable names of the counter types (for error messages)
     static const char *work_names[TRANS_gj_MAX - BLOCK_MIN + 1];
+
+    /// \brief do some work that cannot be assigned directly
+    /// \details This is meant for a coroutine that has nothing to do
+    /// currently; in particular, it cannot do sensible work on a state or
+    /// transition.
+    static void wait(trans_type units = 1)
+    {
+      assert(!cannot_wait_before_reset);
+      no_of_waiting_cycles += units;
+      no_of_waiting_cycles_grand_total += units;
+    }
+
+    static void check_waiting_cycles()
+    {
+        assert(0 <= sensible_work &&
+               no_of_waiting_cycles <= (trans_type) sensible_work);
+        no_of_waiting_cycles = 0;
+        cannot_wait_before_reset = true;
+    }
+
+    static void finalise_work_units(trans_type units=1)
+    {
+        sensible_work += units;
+        sensible_work_grand_total += units;
+    }
+
+    static void cancel_work_units(trans_type units=1)
+    {
+        sensible_work -= units;
+        cancelled_work_grand_total += units;
+    }
 
     /// \brief check that not too much superfluous work has been done
     /// \details After having moved all temporary work counters to the normal
@@ -501,7 +544,9 @@ class check_complexity
     static void check_temporary_work()
     {
         assert(-1 <= sensible_work);
+        //assert(0 == no_of_waiting_cycles);
         sensible_work = 0;
+        cannot_wait_before_reset = false;
     }
 
     /// \brief subset of counters (to be associated with a state or transition)
@@ -529,20 +574,38 @@ class check_complexity
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
         ///                 the remainder of the error message as needed.
-        bool cancel_work(enum counter_type const ctr)
+        [[nodiscard]]
+        result_type cancel_work(enum counter_type const ctr)
         {
             assert(FirstTempCounter <= ctr);
             assert(ctr < FirstPostprocessCounter);
+            assert(0 == no_of_waiting_cycles);
             if ((FirstTempCounter != TRANS_MIN_TEMP &&
                  FirstTempCounter != TRANS_dnj_MIN_TEMP &&
                  FirstTempCounter != TRANS_gj_MIN_TEMP) ||
                           DONT_COUNT_TEMPORARY != counters[ctr - FirstCounter])
             {
                 assert(counters[ctr - FirstCounter] <= 1);
-                sensible_work -= counters[ctr - FirstCounter];
+                cancel_work_units(counters[ctr - FirstCounter]);
+                //if (0 != counters[ctr-FirstCounter])
+                //{
+                //    mCRL2log(log::debug) << "Cancelling work ("
+                //        << counters[ctr - FirstCounter] << ") for counter \""
+                //        << work_names[ctr - BLOCK_MIN] << "\" done on ";
+                //    counters[ctr - FirstCounter] = 0;
+                //    return complexity_print;
+                //}
             }
+            //else if (DONT_COUNT_TEMPORARY == counters[ctr - FirstCounter])
+            //{
+            //    mCRL2log(log::debug) << "Work was artificially assigned "
+            //              "(without changing the balance) to counter \""
+            //                  << work_names[ctr - BLOCK_MIN] << "\" of ";
+            //    counters[ctr - FirstCounter] = 0;
+            //    return complexity_print;
+            //}
             counters[ctr - FirstCounter] = 0;
-            return true;
+            return complexity_ok;
         }
 
 
@@ -560,7 +623,8 @@ class check_complexity
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
         ///                 the remainder of the error message as needed.
-        bool finalise_work(enum counter_type const from,
+        [[nodiscard]]
+        result_type finalise_work(enum counter_type const from,
                           enum counter_type const to, unsigned const max_value)
         {
             // assert(...) -- see move_work().
@@ -569,11 +633,17 @@ class check_complexity
                  FirstTempCounter != TRANS_gj_MIN_TEMP) ||
                          DONT_COUNT_TEMPORARY != counters[from - FirstCounter])
             {
-                sensible_work += counters[from - FirstCounter];
+                finalise_work_units(counters[from - FirstCounter]);
+                if (0<counters[from - FirstCounter])
+                {
+                    mCRL2log(log::debug) << "In finalise_work(), ";
+                }
             }
             else
             {
                 counters[from - FirstCounter] = 1;
+                mCRL2log(log::debug) << "In finalise_work() "
+                                        "(without changing the balance), ";
             }
             return move_work(from, to, max_value);
         }
@@ -599,13 +669,15 @@ class check_complexity
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
         ///                 the remainder of the error message as needed.
-        bool add_work(enum counter_type const ctr, unsigned const max_value)
+        [[nodiscard]]
+        result_type add_work(enum counter_type const ctr,
+                             unsigned const max_value)
         {
             if (FirstCounter > ctr || ctr > LastCounter)
             {
               mCRL2log(log::error) << "Error 20: counter \""
                    << work_names[ctr - BLOCK_MIN] << "\" is not available in ";
-              return false;
+              return complexity_error;
             }
             assert(max_value <= (ctr < FirstTempCounter ? log_n : 1U));
             if (counters[ctr - FirstCounter] >= max_value)
@@ -613,10 +685,10 @@ class check_complexity
                 mCRL2log(log::error) << "Error 1: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
-                return false;
+                return complexity_error;
             }
             counters[ctr - FirstCounter] = max_value;
-            return true;
+            return complexity_ok;
         }
 
 
@@ -637,7 +709,8 @@ class check_complexity
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
         ///                 the remainder of the error message as needed.
-        bool move_work(enum counter_type const from,
+        [[nodiscard]]
+        result_type move_work(enum counter_type const from,
                           enum counter_type const to, unsigned const max_value)
         {
             assert(FirstTempCounter <= from);
@@ -645,13 +718,13 @@ class check_complexity
             assert(FirstCounter <= to);
             assert(to <= LastCounter);
             assert(max_value <= (to < FirstTempCounter ? log_n : 1U));
-            if (0 == counters[from - FirstCounter])  return true;
+            if (0 == counters[from - FirstCounter])  return complexity_ok;
             if (counters[to - FirstCounter] >= max_value)
             {
                 mCRL2log(log::error) << "Error 2: counter \""
                         << work_names[to - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
-                return false;
+                return complexity_error;
             }
             /*
             if ((FirstTempCounter == TRANS_MIN_TEMP ||
@@ -671,7 +744,11 @@ class check_complexity
                 assert(1 == counters[from - FirstCounter]);
             }
             counters[from - FirstCounter] = 0;
-            return true;
+            //mCRL2log(log::debug) << "moving work from counter \""
+            //    << work_names[from - BLOCK_MIN] << "\" to \""
+            //    << work_names[to - BLOCK_MIN] << "\" for ";
+            //return complexity_print;
+            return complexity_ok;
         }
     };
 
@@ -708,7 +785,9 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_C, unsigned const max_B)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_C,
+                                      unsigned const max_B)
         {
             assert(max_C <= max_B);
             for (enum counter_type ctr = BLOCK_MIN;
@@ -726,7 +805,7 @@ class check_complexity
                 assert(counters[ctr - BLOCK_MIN] <= max_B);
                 counters[ctr - BLOCK_MIN] = max_B;
             }
-            return true;
+            return complexity_ok;
         }
     };
 
@@ -751,7 +830,8 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_targetC)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_targetC)
         {
             assert(max_targetC <= log_n);
             for (enum counter_type ctr = B_TO_C_MIN;
@@ -768,11 +848,11 @@ class check_complexity
                     mCRL2log(log::error) << "Error 3: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
-                    return false;
+                    return complexity_error;
                 }
             }
             static_assert(B_TO_C_MAX_TEMP == B_TO_C_MAX);
-            return true;
+            return complexity_ok;
         }
 
 
@@ -845,7 +925,8 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_B, bool const bottom)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_B, bool const bottom)
         {
             assert(max_B <= log_n);
             for (enum counter_type ctr = STATE_MIN;
@@ -864,7 +945,7 @@ class check_complexity
                     mCRL2log(log::error) << "Error 4: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
-                    return false;
+                    return complexity_error;
                 }
             }
             // bottom state counters must be 0 for non-bottom states and 1 for
@@ -878,11 +959,11 @@ class check_complexity
                     mCRL2log(log::error) << "Error 5: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                             "maximum value (" << (unsigned) bottom << ") for ";
-                    return false;
+                    return complexity_error;
                 }
                 counters[ctr - STATE_MIN] = (unsigned) bottom;
             }
-            return true;
+            return complexity_ok;
         }
     };
 
@@ -922,7 +1003,8 @@ class check_complexity
         ///                 called through the macro `mCRL2complexity()`,
         ///                 because that macro will print the remainder of the
         ///                 error message as needed.
-        bool no_temporary_work(unsigned const max_sourceB,
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_sourceB,
                           unsigned const max_targetC,
                           unsigned const max_targetB, bool const source_bottom)
         {
@@ -958,7 +1040,7 @@ class check_complexity
                     mCRL2log(log::error) << "Error 6: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
-                    return false;
+                    return complexity_error;
                 }
             }
             // bottom state counters must be 0 for transitions from non-bottom
@@ -972,11 +1054,11 @@ class check_complexity
                     mCRL2log(log::error) << "Error 7: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                      "maximum value (" << (unsigned) source_bottom << ") for ";
-                    return false;
+                    return complexity_error;
                 }
                 counters[ctr - TRANS_MIN] = (unsigned) source_bottom;
             }
-            return true;
+            return complexity_ok;
         }
 
 
@@ -998,7 +1080,8 @@ class check_complexity
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
         ///                 the remainder of the error message as needed.
-        bool add_work_notemporary(enum counter_type const ctr,
+        [[nodiscard]]
+        result_type add_work_notemporary(enum counter_type const ctr,
                                                       unsigned const max_value)
         {
             if (TRANS_MIN_TEMP > ctr || ctr > TRANS_MAX_TEMP)
@@ -1010,13 +1093,13 @@ class check_complexity
             if (0 == counters[ctr - TRANS_MIN])
             {
                 counters[ctr - TRANS_MIN] = DONT_COUNT_TEMPORARY;
-                return true;
+                return complexity_ok;
             }
 
             mCRL2log(log::error) << "Error 8: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
-            return false;
+            return complexity_error;
         }
     };
 
@@ -1041,7 +1124,8 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_block)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_block)
         {
             assert((log_n + 1U) / 2U <= max_block);
             if (max_block > log_n)
@@ -1049,7 +1133,7 @@ class check_complexity
                     mCRL2log(log::error) << "Error 14: max_block == "
                                          << max_block << " exceeded log_n == "
                                          << (unsigned) log_n << " for ";
-                    return false;
+                    return complexity_error;
             }
             assert(max_block <= log_n);
             for (enum counter_type ctr = BLOCK_dnj_MIN;
@@ -1065,7 +1149,7 @@ class check_complexity
                 assert(counters[ctr - BLOCK_dnj_MIN] <= 1);
                 counters[ctr - BLOCK_dnj_MIN] = 1;
             }
-            return true;
+            return complexity_ok;
         }
     };
 
@@ -1088,7 +1172,9 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_block, bool const bottom)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_block,
+                                                             bool const bottom)
         {
             assert((log_n + 1U) / 2U <= max_block);
             assert(max_block <= log_n);
@@ -1111,7 +1197,7 @@ class check_complexity
                 assert(counters[ctr - STATE_dnj_MIN] <= (unsigned) bottom);
                 counters[ctr - STATE_dnj_MIN] = (unsigned) bottom;
             }
-            return true;
+            return complexity_ok;
         }
     };
 
@@ -1133,7 +1219,8 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_bunch)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_bunch)
         {
             assert(max_bunch <= log_n);
             for (enum counter_type ctr = BUNCH_dnj_MIN;
@@ -1142,7 +1229,7 @@ class check_complexity
                 assert(counters[ctr - BUNCH_dnj_MIN] <= max_bunch);
                 counters[ctr - BUNCH_dnj_MIN] = max_bunch;
             }
-            return true;
+            return complexity_ok;
         }
     };
 
@@ -1166,7 +1253,8 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_bunch)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_bunch)
         {
             assert(max_bunch <= log_n);
             for (enum counter_type ctr = BLOCK_BUNCH_dnj_MIN;
@@ -1178,7 +1266,7 @@ class check_complexity
                     mCRL2log(log::error) << "Error 12: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                         "maximum value (" << (unsigned) max_bunch << ") for ";
-                    return false;
+                    return complexity_error;
                 }
                 assert(counters[ctr - BLOCK_BUNCH_dnj_MIN] <= max_bunch);
                 counters[ctr - BLOCK_BUNCH_dnj_MIN] = max_bunch;
@@ -1191,12 +1279,12 @@ class check_complexity
                     mCRL2log(log::error) << "Error 13: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                         "maximum value (" << (unsigned) 0 << ") for ";
-                    return false;
+                    return complexity_error;
                 }
                 assert(counters[ctr - BLOCK_BUNCH_dnj_MIN] <= 0);
             }
             static_assert(BLOCK_BUNCH_dnj_MAX_TEMP == BLOCK_BUNCH_dnj_MAX);
-            return true;
+            return complexity_ok;
         }
 
         bool has_temporary_work()
@@ -1232,7 +1320,8 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_source_block,
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_source_block,
                             unsigned const max_target_block, bool const bottom)
         {
             assert((log_n + 1U) / 2U <= max_source_block);
@@ -1268,11 +1357,11 @@ class check_complexity
                     mCRL2log(log::error) << "Error 11: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                             "maximum value (" << (unsigned) bottom << ") for ";
-                    return false;
+                    return complexity_error;
                 }
                 counters[ctr - TRANS_dnj_MIN] = (unsigned) bottom;
             }
-            return true;
+            return complexity_ok;
         }
 
         /// \brief register work with some temporary counter without changing
@@ -1293,7 +1382,8 @@ class check_complexity
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
         ///                 the remainder of the error message as needed.
-        bool add_work_notemporary(enum counter_type const ctr,
+        [[nodiscard]]
+        result_type add_work_notemporary(enum counter_type const ctr,
                                                       unsigned const max_value)
         {
             if (TRANS_dnj_MIN_TEMP > ctr || ctr > TRANS_dnj_MAX_TEMP)
@@ -1305,13 +1395,13 @@ class check_complexity
             if (0 == counters[ctr - TRANS_dnj_MIN])
             {
                 counters[ctr - TRANS_dnj_MIN] = DONT_COUNT_TEMPORARY;
-                return true;
+                return complexity_ok;
             }
 
             mCRL2log(log::error) << "Error 9: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
-            return false;
+            return complexity_error;
         }
     };
 
@@ -1335,7 +1425,9 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_C, unsigned const max_B)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_C,
+                                                          unsigned const max_B)
         {
             assert(max_C <= max_B);
             assert(max_B <= log_n);
@@ -1352,7 +1444,7 @@ class check_complexity
                 assert(counters[ctr - BLOCK_gj_MIN] <= max_B);
                 counters[ctr - BLOCK_gj_MIN] = max_B;
             }
-            return true;
+            return complexity_ok;
         }
     };
 
@@ -1376,7 +1468,9 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned max_sourceC, unsigned max_targetC)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned max_sourceC,
+                                                          unsigned max_targetC)
         {
             assert(max_sourceC <= log_n);
             assert(max_targetC <= log_n);
@@ -1393,12 +1487,12 @@ class check_complexity
                 assert(counters[ctr - BLC_gj_MIN] <= max_targetC);
                 counters[ctr - BLC_gj_MIN] = max_targetC;
             }
-            return true;
+            return complexity_ok;
         }
     };
 
     class state_gj_counter_t : public counter_t<STATE_gj_MIN, STATE_gj_MAX,
-                 STATE_gj_MIN_TEMP, (enum counter_type) (STATE_gj_MAX_TEMP + 1)>
+                STATE_gj_MIN_TEMP, (enum counter_type) (STATE_gj_MAX_TEMP + 1)>
     {
       public:
         /// \brief ensures there is no orphaned temporary work counter
@@ -1422,13 +1516,21 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message as needed.
-        bool no_temporary_work(unsigned const max_B, bool const bottom)
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_B, bool const bottom)
         {
             assert(max_B <= log_n);
             enum counter_type ctr;
             for (ctr = STATE_gj_MIN ;
                  ctr < STATE_gj_MIN_TEMP ; ctr = (enum counter_type) (ctr + 1))
             {
+                if (counters[ctr - STATE_gj_MIN] > max_B)
+                {
+                    mCRL2log(log::error) << "Error 21: counter \""
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                                        "maximum value (" << max_B << ") for ";
+                    return complexity_error;
+                }
                 assert(counters[ctr - STATE_gj_MIN] <= max_B);
                 counters[ctr - STATE_gj_MIN] = max_B;
             }
@@ -1441,7 +1543,7 @@ class check_complexity
                     mCRL2log(log::error) << "Error 15: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
-                    return false;
+                    return complexity_error;
                 }
             }
 
@@ -1456,7 +1558,7 @@ class check_complexity
                     mCRL2log(log::error) << "Error 16: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                             "maximum value (" << (unsigned) bottom << ") for ";
-                    return false;
+                    return complexity_error;
                 }
                 counters[ctr - STATE_gj_MIN] = (unsigned) bottom;
             }
@@ -1466,7 +1568,7 @@ class check_complexity
             {
                 assert(counters[ctr - STATE_gj_MIN] <= 1);
             }
-            return true;
+            return complexity_ok;
         }
     };
 
@@ -1506,7 +1608,8 @@ class check_complexity
         ///                 called through the macro `mCRL2complexity()`,
         ///                 because that macro will print the remainder of the
         ///                 error message as needed.
-        bool no_temporary_work(unsigned const max_sourceB,
+        [[nodiscard]]
+        result_type no_temporary_work(unsigned const max_sourceB,
                           unsigned const max_targetC,
                           unsigned const max_targetB, bool const source_bottom)
         {
@@ -1522,7 +1625,7 @@ class check_complexity
                 counters[ctr - TRANS_gj_MIN] = max_sourceB;
             }
             for ( ; ctr <
-              simple_splitB__do_not_add_state_with_transition_in_splitter_to_U;
+              refine_partition_until_it_becomes_stable__find_cotransition;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - TRANS_gj_MIN] <= max_targetB);
@@ -1548,7 +1651,7 @@ class check_complexity
                     mCRL2log(log::error) << "Error 17: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
-                    return false;
+                    return complexity_error;
                 }
             }
             // bottom state counters must be 0 for transitions from non-bottom
@@ -1561,7 +1664,7 @@ class check_complexity
                     mCRL2log(log::error) << "Error 18: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                      "maximum value (" << (unsigned) source_bottom << ") for ";
-                    return false;
+                    return complexity_error;
                 }
                 counters[ctr - TRANS_gj_MIN] = (unsigned) source_bottom;
             }
@@ -1574,10 +1677,10 @@ class check_complexity
                     mCRL2log(log::error) << "Error 19: counter \""
                              << work_names[ctr - BLOCK_MIN]
                              << "\" exceeded maximum value (" << 1 << ") for ";
-                    return false;
+                    return complexity_error;
                 }
             }
-            return true;
+            return complexity_ok;
         }
 
 
@@ -1599,7 +1702,8 @@ class check_complexity
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
         ///                 the remainder of the error message as needed.
-        bool add_work_notemporary(enum counter_type const ctr,
+        [[nodiscard]]
+        result_type add_work_notemporary(enum counter_type const ctr,
                                                       unsigned const max_value)
         {
             if (TRANS_gj_MIN_TEMP > ctr || ctr > TRANS_gj_MAX_TEMP)
@@ -1611,13 +1715,13 @@ class check_complexity
             if (0 == counters[ctr - TRANS_gj_MIN])
             {
                 counters[ctr - TRANS_gj_MIN] = DONT_COUNT_TEMPORARY;
-                return true;
+                return complexity_ok;
             }
 
             mCRL2log(log::error) << "Error 8: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
-            return false;
+            return complexity_error;
         }
     };
 
@@ -1644,6 +1748,56 @@ class check_complexity
 
         log_n = ilog2(n);
         assert(0 == sensible_work);     sensible_work = 0;
+        sensible_work_grand_total = 0;
+        cancelled_work_grand_total = 0;
+        no_of_waiting_cycles = 0;
+        no_of_waiting_cycles_grand_total = 0;
+        cannot_wait_before_reset = false;
+    }
+
+
+    /// \brief print grand total of work in the coroutines (to measure overhead)
+    static void print_grand_totals()
+    {
+        trans_type overall_total = sensible_work_grand_total +
+                 cancelled_work_grand_total + no_of_waiting_cycles_grand_total;
+        #define percentage(steps,total)                                       \
+            (assert((steps)<=                                                 \
+                       (std::numeric_limits<trans_type>::max()-(total))/200), \
+             ((steps)*(trans_type)200+(total))/(total)/2)
+        if (0 != overall_total)
+        {
+            mCRL2log(log::verbose) << "In the coroutines, "
+                << (sensible_work_grand_total + cancelled_work_grand_total)
+                << " states and transitions were inspected.  ";
+            if (0 != no_of_waiting_cycles_grand_total)
+            {
+                mCRL2log(log::verbose) << "Additionally, there were "
+                  << no_of_waiting_cycles_grand_total << " waiting cycles ("
+                  << percentage(no_of_waiting_cycles_grand_total,overall_total)
+                  << "% of all steps and cycles).\n";
+            }
+            mCRL2log(log::verbose) << "Of these, "
+                << cancelled_work_grand_total << " steps were cancelled ("
+                << percentage(cancelled_work_grand_total, overall_total)
+                << "% of all steps";
+            if (0 != no_of_waiting_cycles_grand_total)
+            {
+                mCRL2log(log::verbose) << " and cycles).\n";
+                if (0 != cancelled_work_grand_total)
+                {
+                    mCRL2log(log::verbose) << "If we exclude the waiting "
+                      "cycles, then " << percentage(cancelled_work_grand_total,
+                        sensible_work_grand_total + cancelled_work_grand_total)
+                    << "% of the steps have been cancelled.\n";
+                }
+            }
+            else
+            {
+                mCRL2log(log::verbose) << ").\n";
+            }
+        }
+        #undef percentage
     }
 
 
@@ -1662,17 +1816,24 @@ class check_complexity
     #define mCRL2complexity(unit, call, info_for_debug)                       \
             do                                                                \
             {                                                                 \
-                if (!((unit)->work_counter. call ))                           \
+                const enum check_complexity::result_type                      \
+                GG00OCOC0GQQ0COG00GQQQQOCOGQCO=((unit)->work_counter. call ); \
+                switch (GG00OCOC0GQQ0COG00GQQQQOCOGQCO)                       \
                 {                                                             \
-                    mCRL2log(log::error) << (unit)->debug_id(info_for_debug)  \
-                                                                      << '\n';\
-                    exit(EXIT_FAILURE);                                       \
+                    case check_complexity::complexity_ok:  break;             \
+                    default:                                                  \
+                        mCRL2log(log::error) << "Unexpected return value "    \
+                            << (int)GG00OCOC0GQQ0COG00GQQQQOCOGQCO << " for ";\
+                            [[fallthrough]];                                  \
+                    case check_complexity::complexity_error:                  \
+                    case check_complexity::complexity_print:                  \
+                        mCRL2log(log::error)                                  \
+                                 << (unit)->debug_id(info_for_debug) << '\n'; \
+                        if (check_complexity::complexity_print !=             \
+                                              GG00OCOC0GQQ0COG00GQQQQOCOGQCO) \
+                            exit(EXIT_FAILURE);                               \
+                        break;                                                \
                 }                                                             \
-                /* else                                                       \
-                {                                                             \
-                    mCRL2log(log::debug) << "mCRL2complexity("                \
-                      << (unit)->debug_id(info_for_debug) << ", " #call ")\n";\
-                } */                                                          \
             }                                                                 \
             while (0)
 

@@ -115,7 +115,13 @@ obitstream::obitstream(std::ostream& stream)
 void obitstream::write_bits(std::size_t value, unsigned int number_of_bits)
 {
   // Add val to the buffer by masking out additional bits and put them at left-most position free in the buffer.
-  write_buffer |= std::bitset<128>(value & ((static_cast<std::size_t>(1) << number_of_bits) - 1)) << ((128 - bits_in_buffer) - number_of_bits);
+  assert(number_of_bits <= std::numeric_limits<std::size_t>::digits);
+  if (number_of_bits < std::numeric_limits<std::size_t>::digits) // the check is needed to avoid undefined behavior
+  {
+    value &= (static_cast<std::size_t>(1) << number_of_bits) - 1;
+  }
+
+  write_buffer |= std::bitset<128>(value) << ((128 - bits_in_buffer) - number_of_bits);
   bits_in_buffer += number_of_bits;
 
   // Write 8 bytes if available
