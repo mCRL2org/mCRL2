@@ -26,6 +26,7 @@
 
 //#include <forward_list>
 #include <deque>
+#include "mcrl2/utilities/unused.h"
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
@@ -5457,6 +5458,7 @@ class bisim_partitioner_gj
         {                                                                       mCRL2complexity(main_splitter, add_work(check_complexity::
           /* This is a normal main/co-split (where `main_splitter` contains  */           four_way_splitB__handle_transitions_in_main_splitter, max_C), *this);
           /* transitions to the _small_ new constellation and `co_splitter`  */ const transition& co_t=m_aut.get_transitions()[*co_splitter->start_same_BLC];
+                                                                                utilities::mcrl2_unused(co_t);  // Suppress unused variable warning.
           /* transitions from the same block with the same label to the old  */ assert(bi==m_states[co_t.from()].block);
           /* constellation).  None of these transitions are                  */ assert(label_or_divergence(main_t)==label_or_divergence(co_t));
           /* constellation-inert.                                            */ assert(!is_inert_during_init(main_t) ||
