@@ -5118,24 +5118,24 @@ class bisim_partitioner_gj
       m_blocks.emplace_back(start_bottom_states,
                            start_non_bottom_states, end_states, constellation); assert(end_states<=m_constellations[constellation].end_const_states);
 
-std::cerr << "Creating new " << m_blocks[new_block_index].debug_id(*this) << " from block " << old_block_index << " with states";
+//std::cerr << "Creating new " << m_blocks[new_block_index].debug_id(*this) << " from block " << old_block_index << " with states";
       for(; start_bottom_states<start_non_bottom_states; ++start_bottom_states)
       {                                                                         assert(0==
                                                                                        start_bottom_states->ref_state->no_of_outgoing_block_inert_transitions);
-std::cerr << ' ' << std::distance(m_states.begin(), start_bottom_states->ref_state);
+//std::cerr << ' ' << std::distance(m_states.begin(), start_bottom_states->ref_state);
                                                                                 assert(old_block_index==start_bottom_states->ref_state->block);
         start_bottom_states->ref_state->block=new_block_index;                  assert(start_bottom_states->ref_state->counter==undefined);
       }
-std::cerr << " |";
+//std::cerr << " |";
       for (; start_bottom_states<end_states; ++start_bottom_states)
       {                                                                         assert(0!=
                                                                                        start_bottom_states->ref_state->no_of_outgoing_block_inert_transitions);
-std::cerr << ' ' << std::distance(m_states.begin(), start_bottom_states->ref_state);
+//std::cerr << ' ' << std::distance(m_states.begin(), start_bottom_states->ref_state);
                                                                                 assert(old_block_index==start_bottom_states->ref_state->block);
         start_bottom_states->ref_state->block=new_block_index;
         start_bottom_states->ref_state->counter=undefined;
       }
-std::cerr << '\n';
+//std::cerr << '\n';
 
       return update_BLC_sets_new_block
                          (old_block_index, new_block_index, old_constellation);
@@ -5201,7 +5201,7 @@ std::cerr << '\n';
     {
       for (; start_bottom!=end_non_bottom; ++start_bottom)
       {
-std::cerr << "Checking whether incoming transitions of " << start_bottom->ref_state->debug_id(*this) << " have become non-block-inert:\n";
+//std::cerr << "Checking whether incoming transitions of " << start_bottom->ref_state->debug_id(*this) << " have become non-block-inert:\n";
         std::vector<transition>::const_iterator const in_it_end=
            std::next(start_bottom->ref_state)>=m_states.end()
               ? m_aut.get_transitions().end()
@@ -5217,13 +5217,13 @@ std::cerr << "Checking whether incoming transitions of " << start_bottom->ref_st
           if (MultiSub_block_index==from->block)
           {
             // make_transition_non_block_inert(*in_it);
-std::cerr << "    " << m_transitions[std::distance(m_aut.get_transitions().begin(), in_it)].debug_id(*this) << " has become non-block-inert";
+//std::cerr << "    " << m_transitions[std::distance(m_aut.get_transitions().begin(), in_it)].debug_id(*this) << " has become non-block-inert";
             if (0== --from->no_of_outgoing_block_inert_transitions)
             {
-std::cerr << " and its source is a new bottom state";
+//std::cerr << " and its source is a new bottom state";
               change_non_bottom_state_to_bottom_state(from);
             }
-std::cerr << '\n';
+//std::cerr << '\n';
           }
         }
       }
@@ -5324,11 +5324,11 @@ std::cerr << '\n';
                      constellation_index old_constellation=null_constellation)
     {                                                                           assert(1<number_of_states_in_block(bi));
                                                                                 assert(!m_blocks[bi].c.on.tains_new_bottom_states);
-std::cerr << "four_way_splitB(main splitter=="
-<< (linked_list<BLC_indicators>::end()==main_splitter ? std::string("none") : main_splitter->debug_id(*this))
-<< ", co-splitter=="
-<< (linked_list<BLC_indicators>::end()==co_splitter ? std::string("none") : co_splitter->debug_id(*this))
-<< ", old_constellation==" << old_constellation << ")\n";
+//std::cerr << "four_way_splitB(main splitter=="
+//<< (linked_list<BLC_indicators>::end()==main_splitter ? std::string("none") : main_splitter->debug_id(*this))
+//<< ", co-splitter=="
+//<< (linked_list<BLC_indicators>::end()==co_splitter ? std::string("none") : co_splitter->debug_id(*this))
+//<< ", old_constellation==" << old_constellation << ")\n";
 
       enum subblocks { ReachAlw=0, // states that can reach always all splitters
                        XcludeCo=1, // states that cannot inertly reach the co-splitter (while it is not empty)
@@ -5496,7 +5496,7 @@ std::cerr << "four_way_splitB(main splitter=="
         {                                                                       // mCRL2complexity(&m_transitions[*splitter_it], add_work(...), *this);
           state_in_block_pointer const src=m_states.begin()+                        // is subsumed in the above call
                                   m_aut.get_transitions()[*splitter_it].from();
-std::cerr << "In main splitter: " << m_transitions[*splitter_it].debug_id(*this);
+//std::cerr << "In main splitter: " << m_transitions[*splitter_it].debug_id(*this);
           if (0==src.ref_state->no_of_outgoing_block_inert_transitions)
           {                                                                     assert(m_blocks[bi].start_bottom_states<=src.ref_state->ref_states_in_blocks);
             /* src is a ReachAlw-bottom state or an XcludeCo-bottom state    */ assert(src.ref_state->ref_states_in_blocks<
@@ -5506,10 +5506,10 @@ std::cerr << "In main splitter: " << m_transitions[*splitter_it].debug_id(*this)
             {
               if(m_blocks[bi].block.to_constellation.end()==co_splitter
                  ?(                                                             assert(start_bottom_states[MissMain]==start_bottom_states[XcludeCo]),
-std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom (co-splitter is empty)\n",
+//std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom (co-splitter is empty)\n",
                    ++start_bottom_states[XcludeCo], true)
                  :next_target_constln_in_same_saC(src,splitter_it)!=co_splitter
-&& (std::cerr << ", source moved to " debug_coroutine_of_XcludeCo "-bottom\n", true)
+//&& (std::cerr << ", source moved to " debug_coroutine_of_XcludeCo "-bottom\n", true)
                                                                              )
               {
                 swap_states_in_states_in_block(start_bottom_states[MissMain],
@@ -5517,7 +5517,7 @@ std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom (co-split
               }
               else
               {
-std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom\n";
+//std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom\n";
                 swap_states_in_states_in_block
                                           (src.ref_state->ref_states_in_blocks,
                                            start_bottom_states[XcludeCo],
@@ -5528,7 +5528,7 @@ std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom\n";
             }
                                                                                 #ifndef NDEBUG
                                                                                   else if (start_bottom_states[XcludeCo]<=src.ref_state->ref_states_in_blocks) {
-std::cerr << ", source is already in " debug_coroutine_of_XcludeCo "-bottom\n";
+//std::cerr << ", source is already in " debug_coroutine_of_XcludeCo "-bottom\n";
                                                                                     assert(m_blocks[bi].block.to_constellation.end()!=co_splitter);
                                                                                     outgoing_transitions_const_it const out_it_end=std::next(src.ref_state)>=
                                                                                          m_states.end() ? m_outgoing_transitions.end()
@@ -5540,7 +5540,7 @@ std::cerr << ", source is already in " debug_coroutine_of_XcludeCo "-bottom\n";
                                                                                                           transitions_per_block_to_constellation!=co_splitter);
                                                                                     }
                                                                                   } else {
-std::cerr << ", source is already in " debug_coroutine_of_ReachAlw "-bottom\n";
+//std::cerr << ", source is already in " debug_coroutine_of_ReachAlw "-bottom\n";
                                                                                     if (m_blocks[bi].block.to_constellation.end()!=co_splitter) {
                                                                                       assert(next_target_constln_in_same_saC(src, splitter_it)==co_splitter);
                                                                                     }
@@ -5556,14 +5556,14 @@ std::cerr << ", source is already in " debug_coroutine_of_ReachAlw "-bottom\n";
               if (m_blocks[bi].block.to_constellation.end()==co_splitter ||
                 next_target_constln_in_same_saC(src, splitter_it)==co_splitter)
               {
-std::cerr << ", source moved to potentially " debug_coroutine_of_ReachAlw "-nonbottom\n";
+//std::cerr << ", source moved to potentially " debug_coroutine_of_ReachAlw "-nonbottom\n";
                 src.ref_state->counter=marked(ReachAlw)+
                          src.ref_state->no_of_outgoing_block_inert_transitions; assert(is_in_marked_range_of(src.ref_state->counter, ReachAlw));
                 potential_non_bottom_states[ReachAlw].push_back(src);
               }
               else
               {
-std::cerr << ", source moved to potentially " debug_coroutine_of_Hit_Main "-nonbottom\n";
+//std::cerr << ", source moved to potentially " debug_coroutine_of_Hit_Main "-nonbottom\n";
                 src.ref_state->counter=marked_Hit_Main;
                 potential_non_bottom_states_Hit_Main.push_back(src);
                                                                                 #ifndef NDEBUG
@@ -5581,11 +5581,11 @@ std::cerr << ", source moved to potentially " debug_coroutine_of_Hit_Main "-nonb
             }
                                                                                 #ifndef NDEBUG
                                                                                   else if (marked_Hit_Main==src.ref_state->counter) {
-std::cerr << ", source is already in potentially " debug_coroutine_of_Hit_Main "-nonbottom\n";
+//std::cerr << ", source is already in potentially " debug_coroutine_of_Hit_Main "-nonbottom\n";
                                                                                     assert(m_blocks[bi].block.to_constellation.end()!=co_splitter);
                                                                                   } else {
                                                                                     assert(is_in_marked_range_of(src.ref_state->counter, ReachAlw));
-std::cerr << ", source is already in potentially " debug_coroutine_of_ReachAlw "-nonbottom\n";
+//std::cerr << ", source is already in potentially " debug_coroutine_of_ReachAlw "-nonbottom\n";
                                                                                     if (m_blocks[bi].block.to_constellation.end()!=co_splitter) {
                                                                                       assert(next_target_constln_in_same_saC(src, splitter_it)==co_splitter);
                                                                                     }
@@ -5614,7 +5614,7 @@ std::cerr << ", source is already in potentially " debug_coroutine_of_ReachAlw "
         {                                                                       // We can assign the work to the marked transition and do not need a counter
           state_in_block_pointer const src=m_states.begin()+                    // for this loop.
                                m_aut.get_transitions()[*co_splitter_it].from(); assert(0==src.ref_state->no_of_outgoing_block_inert_transitions);
-std::cerr << "In co-splitter: " << m_transitions[*co_splitter_it].debug_id(*this);
+//std::cerr << "In co-splitter: " << m_transitions[*co_splitter_it].debug_id(*this);
                                                                                 assert(m_blocks[bi].start_bottom_states<=src.ref_state->ref_states_in_blocks);
           /* src is a ReachAlw-bottom state                                  */ assert(src.ref_state->ref_states_in_blocks<
                                                                                                                          m_blocks[bi].start_non_bottom_states);
@@ -5623,10 +5623,10 @@ std::cerr << "In co-splitter: " << m_transitions[*co_splitter_it].debug_id(*this
           {
             swap_states_in_states_in_block(start_bottom_states[XcludeCo],
                                           src.ref_state->ref_states_in_blocks);
-std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom\n";
+//std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom\n";
             ++start_bottom_states[XcludeCo];
           }
-else { std::cerr << ", source is already in " debug_coroutine_of_ReachAlw "-bottom\n"; }
+//else { std::cerr << ", source is already in " debug_coroutine_of_ReachAlw "-bottom\n"; }
         }
                                                                                 #ifndef NDEBUG
                                                                                   // test that no bottom sate ae exceeding into each other
@@ -5641,7 +5641,7 @@ else { std::cerr << ", source is already in " debug_coroutine_of_ReachAlw "-bott
       //    the remaining two subblocks and again split off the smaller one.)
       if (m_blocks[bi].start_non_bottom_states==m_blocks[bi].end_states)
       {
-std::cerr << "All bottom states, split decisions finished\n";
+//std::cerr << "All bottom states, split decisions finished\n";
         block_index ReachAlw_block_index=null_block;
         const constellation_index constellation=m_blocks[bi].c.on.stellation;
         bool constellation_was_trivial=
@@ -5805,12 +5805,12 @@ std::cerr << "All bottom states, split decisions finished\n";
         }
         ++no_of_finished_searches;
         status[ReachAlw]=finished;
-std::cerr << debug_coroutine_of_ReachAlw " is already finished (empty)\n";
+//std::cerr << debug_coroutine_of_ReachAlw " is already finished (empty)\n";
       }
       else if (bottom_size_too_large(ReachAlw))
       {
         status[ReachAlw]=aborted;
-std::cerr << debug_coroutine_of_ReachAlw " is already aborted\n";
+//std::cerr << debug_coroutine_of_ReachAlw " is already aborted\n";
         no_of_unfinished_states_in_block=
                                        std::numeric_limits<state_index>::max(); assert(m_aut.num_states()<no_of_unfinished_states_in_block/2);
       }
@@ -5824,7 +5824,7 @@ std::cerr << debug_coroutine_of_ReachAlw " is already aborted\n";
       if (0==bottom_size(XcludeCo))
       {
         /* XcludeCo is empty and finishes early.                             */ assert(potential_non_bottom_states[XcludeCo].empty());
-std::cerr << debug_coroutine_of_XcludeCo " is already finished (empty)\n";
+//std::cerr << debug_coroutine_of_XcludeCo " is already finished (empty)\n";
         if (finished==status[ReachAlw])
         {
           // both ReachAlw and XcludeCo are empty.  So the Hit_Main states must
@@ -5849,7 +5849,7 @@ std::cerr << debug_coroutine_of_XcludeCo " is already finished (empty)\n";
         if (bottom_size_too_large(XcludeCo))
         {
           status[XcludeCo]=aborted;
-std::cerr << debug_coroutine_of_XcludeCo " is already aborted\n";
+//std::cerr << debug_coroutine_of_XcludeCo " is already aborted\n";
           no_of_unfinished_states_in_block=
                                        std::numeric_limits<state_index>::max(); assert(m_aut.num_states()<no_of_unfinished_states_in_block/2);
         }
@@ -5867,11 +5867,11 @@ std::cerr << debug_coroutine_of_XcludeCo " is already aborted\n";
         // might be moved to MultiSub.
         ++no_of_finished_searches;
         status[MissMain]=finished;
-std::cerr << debug_coroutine_of_MissMain " is already finished (empty)\n";
+//std::cerr << debug_coroutine_of_MissMain " is already finished (empty)\n";
 
         if (finished==status[XcludeCo] && non_bottom_states[MultiSub].empty())
         {                                                                       assert(2==no_of_finished_searches);
-std::cerr << debug_coroutine_of_MultiSub " is already finished (empty) and the split is trivial.\n";
+//std::cerr << debug_coroutine_of_MultiSub " is already finished (empty) and the split is trivial.\n";
           ++no_of_finished_searches;
           status_MultiSub=finished;
           // We must have that at least two of the other subblocks are empty.
@@ -5892,7 +5892,7 @@ std::cerr << debug_coroutine_of_MultiSub " is already finished (empty) and the s
       else if (bottom_size_too_large(MissMain))
       {
         status[MissMain]=aborted;
-std::cerr << debug_coroutine_of_MissMain " is already aborted\n";
+//std::cerr << debug_coroutine_of_MissMain " is already aborted\n";
         no_of_unfinished_states_in_block=
                                        std::numeric_limits<state_index>::max(); assert(m_aut.num_states()<no_of_unfinished_states_in_block/2);
       }
@@ -5906,7 +5906,7 @@ std::cerr << debug_coroutine_of_MissMain " is already aborted\n";
       if (non_bottom_size_too_large_MultiSub())
       {
         status_MultiSub=aborted;
-std::cerr << debug_coroutine_of_MultiSub " is already aborted\n";
+//std::cerr << debug_coroutine_of_MultiSub " is already aborted\n";
         no_of_unfinished_states_in_block=
                                        std::numeric_limits<state_index>::max(); assert(m_aut.num_states()<no_of_unfinished_states_in_block/2);
       }
@@ -5952,11 +5952,11 @@ std::cerr << debug_coroutine_of_MultiSub " is already aborted\n";
         {
           const int current_search=running_searches[current_search_index];      assert(0<=current_search);  assert(current_search<MultiSub);
 
-std::cerr << "Doing one step for coroutine " << debug_coroutine_of(current_search) << ": ";
+//std::cerr << "Doing one step for coroutine " << debug_coroutine_of(current_search) << ": ";
           if (incoming_inert_transition_checking==status[current_search])
           {                                                                     assert(current_source_iter[current_search]<
                                                                                                                       current_source_iter_end[current_search]);
-std::cerr << "incoming_inert_transition " << m_transitions[std::distance(m_aut.get_transitions().begin(), current_source_iter[current_search])].debug_id(*this);
+//std::cerr << "incoming_inert_transition " << m_transitions[std::distance(m_aut.get_transitions().begin(), current_source_iter[current_search])].debug_id(*this);
                                                                                 mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(),
                                                                                         current_source_iter[current_search])], add_work(check_complexity::
                                                                                                      simple_splitB_U__handle_transition_to_U_state, 1), *this);
@@ -5974,7 +5974,7 @@ std::cerr << "incoming_inert_transition " << m_transitions[std::distance(m_aut.g
                                                                                                  potential_non_bottom_states[current_search].end(), src)==
                                                                                                  potential_non_bottom_states[current_search].end()),
                    potential_non_bottom_states[current_search].push_back(src),
-(std::cerr << ": source added to potential-" << debug_coroutine_of(current_search) << "-nonbottom"),
+//(std::cerr << ": source added to potential-" << debug_coroutine_of(current_search) << "-nonbottom"),
                    src.ref_state->counter=marked(current_search)+src.
                    ref_state->no_of_outgoing_block_inert_transitions,true)) ||
                  is_in_marked_range_of(src.ref_state->counter, current_search))
@@ -5988,7 +5988,7 @@ std::cerr << "incoming_inert_transition " << m_transitions[std::distance(m_aut.g
                   if (XcludeCo==current_search &&
                       co_splitter_iter_MultiSub!=co_splitter_iter_end_MultiSub)
                   {                                                             assert(m_blocks[bi].block.to_constellation.end()!=co_splitter);
-std::cerr << ", going to check outgoing transitions of potential " debug_coroutine_of_XcludeCo "-state\n";
+//std::cerr << ", going to check outgoing transitions of potential " debug_coroutine_of_XcludeCo "-state\n";
                     // but XcludeCo needs to check whether src has a transition
                     // in the co-splitter
                     // (This can be avoided if we remember that the state had
@@ -6006,7 +6006,7 @@ std::cerr << ", going to check outgoing transitions of potential " debug_corouti
                     continue;
                   }
                   non_bottom_states[current_search].add_todo(src);
-std::cerr << ": source added to " << debug_coroutine_of(current_search);
+//std::cerr << ": source added to " << debug_coroutine_of(current_search);
                   if (size_too_large(current_search))
                   {
                     status[current_search]=aborted;                             assert(running_searches[current_search_index]==current_search);
@@ -6016,14 +6016,14 @@ std::cerr << ": source added to " << debug_coroutine_of(current_search);
                     running_searches[current_search_index]=
                                       running_searches[no_of_running_searches];
                     --current_search_index;
-std::cerr << " and aborted\n";
+//std::cerr << " and aborted\n";
                     continue;
                   }
                 }
               }
               else if (marked_MultiSub!=src.ref_state->counter)
               {
-std::cerr << ": source is already potentially-" << debug_coroutine_of_counter(src.ref_state->counter) << " and is moved to " debug_coroutine_of_MultiSub;
+//std::cerr << ": source is already potentially-" << debug_coroutine_of_counter(src.ref_state->counter) << " and is moved to " debug_coroutine_of_MultiSub;
                 // The state has block-inert transitions to multiple
                 // subblocks (or it is Hit_Main and the current search is
                 // MissMain).  It should be added to MultiSub.
@@ -6031,18 +6031,18 @@ std::cerr << ": source is already potentially-" << debug_coroutine_of_counter(sr
                 non_bottom_states[MultiSub].add_todo(src);
                 if (non_bottom_size_too_large_MultiSub())
                 {                                                               assert(aborted!=status_MultiSub);
-std::cerr << ", which is aborted";
+//std::cerr << ", which is aborted";
                   status_MultiSub=aborted;
                   no_of_unfinished_states_in_block=
                                        std::numeric_limits<state_index>::max(); assert(m_aut.num_states()<no_of_unfinished_states_in_block/2);
                 }
               }                                                                 else {
-std::cerr << ": source is already in " debug_coroutine_of_MultiSub;
+//std::cerr << ": source is already in " debug_coroutine_of_MultiSub;
                                                                                   assert(non_bottom_states[MultiSub].find(src));
                                                                                 }
             }
-else std::cerr << " is not block-inert";
-std::cerr << '\n';
+//else std::cerr << " is not block-inert";
+//std::cerr << '\n';
             if (current_source_iter[current_search]!=
                                      current_source_iter_end[current_search] &&
                 m_aut.is_tau(m_aut_apply_hidden_label_map
@@ -6060,7 +6060,7 @@ std::cerr << '\n';
                           ? *current_bottom_state_iter[current_search]++
                           : non_bottom_states[current_search].move_from_todo(); assert(!non_bottom_states[current_search^1].find(tgt));
 
-std::cerr << "state_checking " << tgt.ref_state->debug_id(*this) << '\n';
+//std::cerr << "state_checking " << tgt.ref_state->debug_id(*this) << '\n';
             /* Prepare for the sources of tgt to be added to the subblock    */ mCRL2complexity(tgt.ref_state,
                                                                                      add_work(check_complexity::simple_splitB_U__find_predecessors, 1), *this);
             current_source_iter[current_search]=
@@ -6083,7 +6083,7 @@ std::cerr << "state_checking " << tgt.ref_state->debug_id(*this) << '\n';
                                                                                 assert(outgoing_constellation_checking==status[XcludeCo]);
             --current_outgoing_iter_XcludeCo;                                   assert(current_outgoing_iter_start_XcludeCo<=
                                                                                                                current_outgoing_iter_XcludeCo->start_same_saC);
-std::cerr << "outgoing_constellation_checking " << m_transitions[*current_outgoing_iter_XcludeCo->ref.BLC_transitions].debug_id(*this);
+//std::cerr << "outgoing_constellation_checking " << m_transitions[*current_outgoing_iter_XcludeCo->ref.BLC_transitions].debug_id(*this);
                                                                                 assert(current_outgoing_iter_XcludeCo->start_same_saC<=
                                                                                                                                 current_outgoing_iter_XcludeCo);
                                                                                 #ifndef NDEBUG
@@ -6109,7 +6109,7 @@ std::cerr << "outgoing_constellation_checking " << m_transitions[*current_outgoi
                    ref.BLC_transitions].transitions_per_block_to_constellation; assert(m_blocks[bi].block.to_constellation.end()!=co_splitter);
             if (current_splitter==co_splitter)
             {
-std::cerr << ": source belongs to " debug_coroutine_of_MultiSub;
+//std::cerr << ": source belongs to " debug_coroutine_of_MultiSub;
               /* The state has a transition in the co-splitter, so it should */
               /* not be added to XcludeCo.  Instead, add it to MultiSub:     */
               if (marked_MultiSub!=current_source_XcludeCo.ref_state->counter)
@@ -6121,18 +6121,18 @@ std::cerr << ": source belongs to " debug_coroutine_of_MultiSub;
                 non_bottom_states[MultiSub].add_todo(current_source_XcludeCo);
                 if (non_bottom_size_too_large_MultiSub())
                 {                                                               assert(aborted!=status_MultiSub);
-std::cerr << ", which is aborted";
+//std::cerr << ", which is aborted";
                   status_MultiSub=aborted;
                   no_of_unfinished_states_in_block=
                                        std::numeric_limits<state_index>::max(); assert(m_aut.num_states()<no_of_unfinished_states_in_block/2);
                 }
               }                                                                 else  assert(non_bottom_states[MultiSub].find(current_source_XcludeCo));
-std::cerr << '\n';
+//std::cerr << '\n';
             }
             else if ((current_splitter==main_splitter                           && (assert(std::find(potential_non_bottom_states_Hit_Main.begin(),
                                                                                          potential_non_bottom_states_Hit_Main.end(), current_source_XcludeCo)!=
                                                                                                              potential_non_bottom_states_Hit_Main.end()),
-std::cerr << ": is in main splitter, so there was no transition in the co-splitter, source belongs to " debug_coroutine_of_XcludeCo,
+//std::cerr << ": is in main splitter, so there was no transition in the co-splitter, source belongs to " debug_coroutine_of_XcludeCo,
                                                                                                                                                           true)
                                                      ) ||
                      (current_outgoing_iter_XcludeCo=
@@ -6141,7 +6141,7 @@ std::cerr << ": is in main splitter, so there was no transition in the co-splitt
                                                current_outgoing_iter_XcludeCo   && (assert(std::find(potential_non_bottom_states_Hit_Main.begin(),
                                                                                          potential_non_bottom_states_Hit_Main.end(), current_source_XcludeCo)==
                                                                                                              potential_non_bottom_states_Hit_Main.end()),
-std::cerr << ": no transitions in co-splitter found, source belongs to " debug_coroutine_of_XcludeCo,
+//std::cerr << ": no transitions in co-splitter found, source belongs to " debug_coroutine_of_XcludeCo,
                                                                                                                                                           true)
                                                                              ))
             {
@@ -6153,7 +6153,7 @@ std::cerr << ": no transitions in co-splitter found, source belongs to " debug_c
               non_bottom_states[XcludeCo].add_todo(current_source_XcludeCo);    assert(marked(XcludeCo)==current_source_XcludeCo.ref_state->counter);
               if (size_too_large(XcludeCo))
               {
-std::cerr << ", which is aborted\n";
+//std::cerr << ", which is aborted\n";
                 status[XcludeCo]=aborted;                                       assert(running_searches[current_search_index]==XcludeCo);
                 no_of_unfinished_states_in_block=
                                        std::numeric_limits<state_index>::max(); assert(m_aut.num_states()<no_of_unfinished_states_in_block/2);
@@ -6163,11 +6163,11 @@ std::cerr << ", which is aborted\n";
                 --current_search_index;
                 continue;
               }
-std::cerr << '\n';
+//std::cerr << '\n';
             }
             else
             {
-std::cerr << ": still undecided\n";
+//std::cerr << ": still undecided\n";
               continue;
             }
             // At this point the search for outgoing transitions has finished
@@ -6193,11 +6193,11 @@ std::cerr << ": still undecided\n";
           {
             // the current search is completed. Finish the subblock:
             status[current_search]=finished;
-std::cerr << debug_coroutine_of(current_search) << " is finished.\n";
+//std::cerr << debug_coroutine_of(current_search) << " is finished.\n";
             ++no_of_finished_searches;
                                                                                 #ifndef NDEBUG
                                                                                   // Finalise the work distribution here:
-std::cerr << "Finalising counters for " << debug_coroutine_of(current_search) << '\n';
+//std::cerr << "Finalising counters for " << debug_coroutine_of(current_search) << '\n';
                                                                                   // Forget the balance of earlier processes that finished:
                                                                                   // (If MultiSub is unfinished, the third process does enough work to tilt the
                                                                                   // balance into the positive.  If another process is unfinished, then
@@ -6333,14 +6333,14 @@ std::cerr << "Finalising counters for " << debug_coroutine_of(current_search) <<
                                                                                 assert(!non_bottom_states[MissMain].find(st));
                   if (marked_Hit_Main==st.ref_state->counter)
                   {                                                             assert(!non_bottom_states[MultiSub].find(st));
-std::cerr << "    and consequently, " debug_coroutine_of_Hit_Main "-" << st.ref_state->debug_id(*this) << " is added to " debug_coroutine_of_MultiSub ".\n";
+//std::cerr << "    and consequently, " debug_coroutine_of_Hit_Main "-" << st.ref_state->debug_id(*this) << " is added to " debug_coroutine_of_MultiSub ".\n";
                     non_bottom_states[MultiSub].add_todo(st);                   assert(!non_bottom_states[ReachAlw].find(st));
                     st.ref_state->counter=marked_MultiSub;                      assert(!non_bottom_states[XcludeCo].find(st));
                   }                                                             else  {  assert(marked(ReachAlw)==st.ref_state->counter ||
                                                                                                 marked(XcludeCo)==st.ref_state->counter ||
                                                                                                 marked_MultiSub==st.ref_state->counter);  }
                 }
-std::cerr << "    and consequently, " debug_coroutine_of_Hit_Main " is guaranteed to be empty.\n";
+//std::cerr << "    and consequently, " debug_coroutine_of_Hit_Main " is guaranteed to be empty.\n";
                 clear(potential_non_bottom_states_Hit_Main);
               }
               if (std::numeric_limits<state_index>::max()!=
@@ -6355,7 +6355,7 @@ std::cerr << "    and consequently, " debug_coroutine_of_Hit_Main " is guarantee
                 if (size_too_large(running_searches[0]))
                 {
                   status[running_searches[0]]=aborted;
-std::cerr << "    and consequently, " << debug_coroutine_of(running_searches[0]) << " is aborted.\n";
+//std::cerr << "    and consequently, " << debug_coroutine_of(running_searches[0]) << " is aborted.\n";
                   // The if statement is not necessary, as the result will just
                   // be ignored if 1==no_of_running_searches, because we will
                   // have 0==no_of_running_searches after the decrement a few
@@ -6377,7 +6377,7 @@ std::cerr << "    and consequently, " << debug_coroutine_of(running_searches[0])
                          size_too_large(running_searches[1])))
                 {
                   status[running_searches[1]]=aborted;
-std::cerr << "    and consequently, " << debug_coroutine_of(running_searches[1]) << " is aborted.\n";
+//std::cerr << "    and consequently, " << debug_coroutine_of(running_searches[1]) << " is aborted.\n";
                   // if (1==current_search_index)  { --current_search_index; }
                   // < will be ignored, because the new search index will
                   // then become 1 again, which is >= the number of running
@@ -6389,7 +6389,7 @@ std::cerr << "    and consequently, " << debug_coroutine_of(running_searches[1])
                 else if (non_bottom_size_too_large_MultiSub())
                 {
                   status_MultiSub=aborted;
-std::cerr << "    and consequently, " debug_coroutine_of_MultiSub " is aborted.\n";
+//std::cerr << "    and consequently, " debug_coroutine_of_MultiSub " is aborted.\n";
                   no_of_unfinished_states_in_block=
                                        std::numeric_limits<state_index>::max(); assert(m_aut.num_states()<no_of_unfinished_states_in_block/2);
                 }
@@ -6486,7 +6486,7 @@ std::cerr << "    and consequently, " debug_coroutine_of_MultiSub " is aborted.\
                 max_process=ReachAlw;
               }
               status_MultiSub=finished;
-std::cerr << "Aborting " << debug_coroutine_of(max_process) << " instead of aborting " debug_coroutine_of_MultiSub " because the latter is empty\n";
+//std::cerr << "Aborting " << debug_coroutine_of(max_process) << " instead of aborting " debug_coroutine_of_MultiSub " because the latter is empty\n";
               status[max_process]=aborted;
               // we need to swap the vectors for clearing the state counters:
               clear(potential_non_bottom_states[current_search]);               assert(potential_non_bottom_states[max_process].empty());
@@ -6570,7 +6570,7 @@ std::cerr << "Aborting " << debug_coroutine_of(max_process) << " instead of abor
                                               new_start_bottom_states_MissMain,
                                               new_end_bottom_states_MultiSub);
             }                                                                   else {
-std::cerr << "Not creating a new block for " debug_coroutine_of_MissMain " as it's empty\n";
+//std::cerr << "Not creating a new block for " debug_coroutine_of_MissMain " as it's empty\n";
                                                                                   assert(non_bottom_states[MissMain].empty());
                                                                                 }
 
@@ -6606,7 +6606,7 @@ std::cerr << "Not creating a new block for " debug_coroutine_of_MissMain " as it
                                              new_start_bottom_states_XcludeCo,
                                              new_start_bottom_states_MissMain);
             }                                                                   else {
-std::cerr << "Not creating a new block for " debug_coroutine_of_XcludeCo " as it's empty\n";
+//std::cerr << "Not creating a new block for " debug_coroutine_of_XcludeCo " as it's empty\n";
                                                                                   assert(non_bottom_states[XcludeCo].empty());
                                                                                 }
 
@@ -6631,7 +6631,7 @@ std::cerr << "Not creating a new block for " debug_coroutine_of_XcludeCo " as it
                                              start_bottom_states[ReachAlw],
                                              new_start_bottom_states_XcludeCo);
             }                                                                   else {
-std::cerr << "Not creating a new block for " debug_coroutine_of_ReachAlw " as it's empty\n";
+//std::cerr << "Not creating a new block for " debug_coroutine_of_ReachAlw " as it's empty\n";
                                                                                   assert(non_bottom_states[ReachAlw].empty());
                                                                                 }
             m_blocks[MultiSub_block_index].c.on.tains_new_bottom_states=true;   assert(m_blocks[MultiSub_block_index].start_bottom_states<
@@ -6642,11 +6642,11 @@ std::cerr << "Not creating a new block for " debug_coroutine_of_ReachAlw " as it
         } // end of inner coroutine loop for the ReachAlw/XcludeCo/MissMain-states
 
         // Now do one step for the MultiSub-states:
-std::cerr << "Doing one step for coroutine " debug_coroutine_of_MultiSub ": ";
+//std::cerr << "Doing one step for coroutine " debug_coroutine_of_MultiSub ": ";
 
         if (incoming_inert_transition_checking==status_MultiSub)
         {                                                                       assert(current_source_iter_MultiSub<current_source_iter_end_MultiSub);
-std::cerr << "incoming_inert_transition_checking " << m_transitions[std::distance(m_aut.get_transitions().begin(), current_source_iter_MultiSub)].debug_id(*this);
+//std::cerr << "incoming_inert_transition_checking " << m_transitions[std::distance(m_aut.get_transitions().begin(), current_source_iter_MultiSub)].debug_id(*this);
                                                                                 mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(),
                                                                                             current_source_iter_MultiSub)], add_work(check_complexity::
                                                                                                      simple_splitB_R__handle_transition_to_R_state, 1), *this);
@@ -6663,18 +6663,18 @@ std::cerr << "incoming_inert_transition_checking " << m_transitions[std::distanc
               if (non_bottom_size_too_large_MultiSub())
               {
                 status_MultiSub=aborted;
-std::cerr << ": source added to " debug_coroutine_of_MultiSub ", which is aborted\n";
+//std::cerr << ": source added to " debug_coroutine_of_MultiSub ", which is aborted\n";
                 no_of_unfinished_states_in_block=
                                        std::numeric_limits<state_index>::max(); assert(m_aut.num_states()<no_of_unfinished_states_in_block/2);
                 continue;
               }
-std::cerr << ": source added to " debug_coroutine_of_MultiSub "\n";
+//std::cerr << ": source added to " debug_coroutine_of_MultiSub "\n";
             }                                                                   else {
-std::cerr << ": source is already in " debug_coroutine_of_MultiSub "\n";
+//std::cerr << ": source is already in " debug_coroutine_of_MultiSub "\n";
                                                                                   assert(non_bottom_states[MultiSub].find(src));
                                                                                 }
           }
-else std::cerr << " is not block-inert\n";
+//else std::cerr << " is not block-inert\n";
           if (current_source_iter_MultiSub==current_source_iter_end_MultiSub ||
               !m_aut.is_tau(m_aut_apply_hidden_label_map
                                       (current_source_iter_MultiSub->label())))
@@ -6684,12 +6684,12 @@ else std::cerr << " is not block-inert\n";
         }
         else if (state_checking==status_MultiSub)
         {
-std::cerr << "state_checking ";
+//std::cerr << "state_checking ";
           if (!non_bottom_states[MultiSub].todo_is_empty())
           {
             state_in_block_pointer
                               tgt=non_bottom_states[MultiSub].move_from_todo();
-std::cerr << tgt.ref_state->debug_id(*this) << '\n';
+//std::cerr << tgt.ref_state->debug_id(*this) << '\n';
             /* Prepare for the sources of tgt to be added to the subblock    */ mCRL2complexity(tgt.ref_state,
                                                                                      add_work(check_complexity::simple_splitB_R__find_predecessors, 1), *this);
             current_source_iter_MultiSub=
@@ -6708,7 +6708,7 @@ std::cerr << tgt.ref_state->debug_id(*this) << '\n';
           }
           if (2>no_of_finished_searches)
           {
-std::cerr << "but there is nothing to do\n";
+//std::cerr << "but there is nothing to do\n";
                                                                                 #ifndef NDEBUG
             /* Nothing can be done now for the MultiSub-subblock; we just    */   check_complexity::wait();
             // have to wait for another subblock to give us some initial
@@ -6726,7 +6726,7 @@ std::cerr << "but there is nothing to do\n";
           {
             if (aborted==status[XcludeCo])
             {                                                                   assert(0==no_of_running_searches);
-std::cerr << "but actually initializing all co-splitter transitions\n";
+//std::cerr << "but actually initializing all co-splitter transitions\n";
               do
               {                                                                 mCRL2complexity(&m_transitions[*co_splitter_iter_MultiSub],
                 /* All source states in the co-splitter that start in        */           add_work(check_complexity::
@@ -6760,7 +6760,7 @@ std::cerr << "but actually initializing all co-splitter transitions\n";
               /* Take just one step in the same search as above.             */                    simple_splitB_R__handle_transition_from_R_state, 1), *this);
               const transition&
                          t=m_aut.get_transitions()[*co_splitter_iter_MultiSub];
-std::cerr << "but actually initializing co-splitter " << m_transitions[*co_splitter_iter_MultiSub].debug_id(*this) << '\n';
+//std::cerr << "but actually initializing co-splitter " << m_transitions[*co_splitter_iter_MultiSub].debug_id(*this) << '\n';
               ++co_splitter_iter_MultiSub;
               state_in_block_pointer src=m_states.begin()+t.from();             assert(src.ref_state->block==bi);
               if (0<src.ref_state->no_of_outgoing_block_inert_transitions)
@@ -6803,7 +6803,7 @@ std::cerr << "but actually initializing co-splitter " << m_transitions[*co_split
                 // out that MultiSub has finished all it can do, so XcludeCo
                 // shall be aborted.
             status_MultiSub=finished;                                           assert(3==++no_of_finished_searches);
-std::cerr << "\n" debug_coroutine_of_MultiSub " is finished.\n";
+//std::cerr << "\n" debug_coroutine_of_MultiSub " is finished.\n";
 
             // Calculate the placement of subblocks, and also clear state
             // counters of the aborted subblock:
@@ -6968,7 +6968,7 @@ std::cerr << "\n" debug_coroutine_of_MultiSub " is finished.\n";
                                                                                   // Finalise the work in MultiSub.  This should be done after calling `
                                                                                   // check_complexity::check_waiting_cycles()` so MultiSub cannot make its own
                                                                                   // waiting time appear small.
-std::cerr << "Finalising work in " debug_coroutine_of_MultiSub "\n";
+//std::cerr << "Finalising work in " debug_coroutine_of_MultiSub "\n";
                                                                                   const char max_new_B=check_complexity::log_n-check_complexity::ilog2
                                                                                       (std::distance(new_end_bottom_states_MultiSub, m_blocks[bi].end_states));
                                                                                   fixed_vector<state_in_block_pointer>::const_iterator
@@ -7007,7 +7007,7 @@ std::cerr << "Finalising work in " debug_coroutine_of_MultiSub "\n";
                     : std::next(nst_it->ref_state)->start_outgoing_transitions;
                 outgoing_transitions_it out_it=nst_it->ref_state->
                                                     start_outgoing_transitions; assert(out_it!=out_it_end);
-std::cerr << "Checking whether outgoing transitions of " << nst_it->ref_state->debug_id(*this) << " have become non-block-inert:\n";
+//std::cerr << "Checking whether outgoing transitions of " << nst_it->ref_state->debug_id(*this) << " have become non-block-inert:\n";
                 const transition*
                      tr=&m_aut.get_transitions()[*out_it->ref.BLC_transitions]; assert(0<nst_it->ref_state->no_of_outgoing_block_inert_transitions);
                 do
@@ -7019,23 +7019,23 @@ std::cerr << "Checking whether outgoing transitions of " << nst_it->ref_state->d
                     /* (However, it is still constellation-inert.)           */                                       m_states[tr->to()].ref_states_in_blocks);
                     /* make_transition_non_inert(*tr)                        */ assert(m_states[tr->to()].ref_states_in_blocks<new_end_bottom_states_MultiSub);
                     /* < would just execute the decrement "--" below:        */ assert(0<nst_it->ref_state->no_of_outgoing_block_inert_transitions);
-std::cerr << "    " << m_transitions[*out_it->ref.BLC_transitions].debug_id(*this) << " has become non-block-inert";
+//std::cerr << "    " << m_transitions[*out_it->ref.BLC_transitions].debug_id(*this) << " has become non-block-inert";
                     if (0== --nst_it->ref_state->
                                         no_of_outgoing_block_inert_transitions)
                     {
                       // The state at nst_it has become a bottom_state.
-std::cerr << " and its source is a new bottom state\n";
+//std::cerr << " and its source is a new bottom state\n";
                       change_non_bottom_state_to_bottom_state
                                                            (nst_it->ref_state);
                       break;
                     }
                   }                                                             else {
-std::cerr << " does not change inertness because it's going to " << m_blocks[m_states[tr->to()].block].debug_id(*this);
+//std::cerr << " does not change inertness because it's going to " << m_blocks[m_states[tr->to()].block].debug_id(*this);
                                                                                   assert(new_end_bottom_states_MultiSub<=
                                                                                                                      m_states[tr->to()].ref_states_in_blocks ||
                                                                                         m_states[tr->to()].ref_states_in_blocks<start_bottom_states[ReachAlw]);
                                                                                 }
-std::cerr << '\n';
+//std::cerr << '\n';
                   ++out_it;
                 }
                 while (out_it!=out_it_end &&
@@ -7053,7 +7053,7 @@ std::cerr << '\n';
                                                                                   check_complexity::check_temporary_work();
                                                                                 #endif
         end_for_empty_MultiSub_subblock:
-std::cerr << "Not creating a new block for " debug_coroutine_of_MultiSub " as it's empty\n";
+//std::cerr << "Not creating a new block for " debug_coroutine_of_MultiSub " as it's empty\n";
                                                                                 assert(non_bottom_states[MultiSub].empty());
               if ((new_start_bottom_states_MissMain!=
                                                new_end_bottom_states_MultiSub)+
@@ -7154,7 +7154,7 @@ std::cerr << "Not creating a new block for " debug_coroutine_of_MultiSub " as it
               }
               clear(non_bottom_states[MissMain]);
             }                                                                   else {
-std::cerr << "Not creating a new block for " debug_coroutine_of_MissMain " as it's empty\n";
+//std::cerr << "Not creating a new block for " debug_coroutine_of_MissMain " as it's empty\n";
                                                                                   assert(non_bottom_states[MissMain].empty());
                                                                                   assert(finished==status[MissMain]);
                                                                                 }
@@ -7208,7 +7208,7 @@ std::cerr << "Not creating a new block for " debug_coroutine_of_MissMain " as it
               }
               clear(non_bottom_states[XcludeCo]);
             }                                                                   else {
-std::cerr << "Not creating a new block for " debug_coroutine_of_XcludeCo " as it's empty\n";
+//std::cerr << "Not creating a new block for " debug_coroutine_of_XcludeCo " as it's empty\n";
                                                                                   assert(non_bottom_states[XcludeCo].empty());
                                                                                   assert(finished==status[XcludeCo]);
                                                                                 }
@@ -7241,7 +7241,7 @@ std::cerr << "Not creating a new block for " debug_coroutine_of_XcludeCo " as it
               }
               clear(non_bottom_states[ReachAlw]);
             }                                                                   else {
-std::cerr << "Not creating a new block for " debug_coroutine_of_ReachAlw " as it's empty\n";
+//std::cerr << "Not creating a new block for " debug_coroutine_of_ReachAlw " as it's empty\n";
                                                                                   assert(non_bottom_states[ReachAlw].empty());
                                                                                 }
             return ReachAlw_block_index; // leave the function completely, as we have finished.
