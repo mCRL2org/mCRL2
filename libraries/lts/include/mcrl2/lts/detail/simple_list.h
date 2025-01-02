@@ -438,10 +438,7 @@ namespace detail
             }
             bool operator==(const T* const other) const
             {                                                                   assert(nullptr != other);
-                // It is allowed to call this even if is_null().  Therefore, we
-                // cannot use operator->().
-                return &static_cast<const entry*>(const_iterator::ptr)->data ==
-                                                                         other;
+                return !is_null() && operator->() == other;
             }
             bool operator!=(const T* const other) const
             {
