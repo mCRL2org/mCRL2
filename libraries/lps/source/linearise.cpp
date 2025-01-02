@@ -7849,10 +7849,55 @@ class specification_basic_type
           tmp = lhs;
           match_failed = std::vector<bool>(size(), false);
         }
+
+        /// Check if m is contained in a lhs in the communication entry.
+        /// Returns true if this is the case, false otherwise.
+        /// Precondition: temporary data has been reset.
+        /// Postcondition: for every i such that m is not contained in lhs[i], match_failed[i] is true.
+        bool match_multiaction(const action_list& m) {
+          // m must match a lhs; check every action
+          for (const action& a: m)
+          {
+            const identifier_string& actionname=a.label().name();
+
+            // check every lhs for actionname
+            bool comm_ok = false;
+            for (std::size_t i=0; i < size(); ++i)
+            {
+              if (match_failed[i]) // lhs i does not match
+              {
+                continue;
+              }
+              if (tmp[i].empty()) // lhs cannot match actionname
+              {
+                match_failed[i]=true;
+                continue;
+              }
+              if (actionname != tmp[i].front())
+              {
+                // no match
+                match_failed[i] = true;
+              }
+              else
+              {
+                // possible match; on to next action
+                tmp[i].pop_front();
+                comm_ok = true;
+              }
+            }
+            if (!comm_ok)   // no (possibly) matching lhs
+            {
+              return false;
+            }
+          }
+
+          // There must be an lhs that contains m.
+          return true;
+        }
     };
 
     /// Determine if there exists a communication expression a1|...|an -> b in comm_table
-    /// such that a1|...|an \subseteq m', where m' is the multiset of actionnames for multiaction m.
+    /// such that m' \subseteq a1|...|an , where m' is the multiset of actionnames for multiaction m.
     process::action_label can_communicate(const action_list& m, comm_entry& comm_table)
     {
       /* this function indicates whether the actions in m
@@ -7862,40 +7907,8 @@ class specification_basic_type
       // first copy the left-hand sides of communications for use
       comm_table.reset_temporary_data();
 
-      // m must match a lhs; check every action
-      for (const action& a: m)
-      {
-        identifier_string actionname=a.label().name();
-
-        // check every lhs for actionname
-        bool comm_ok = false;
-        for (std::size_t i=0; i<comm_table.size(); ++i)
-        {
-          if (comm_table.match_failed[i]) // lhs i does not match
-          {
-            continue;
-          }
-          if (comm_table.tmp[i].empty()) // lhs cannot match actionname
-          {
-            comm_table.match_failed[i]=true;
-            continue;
-          }
-          if (actionname != comm_table.tmp[i].front())
-          {
-            // no match
-            comm_table.match_failed[i] = true;
-          }
-          else
-          {
-            // possible match; on to next action
-            comm_table.tmp[i].pop_front();
-            comm_ok = true;
-          }
-        }
-        if (!comm_ok)   // no (possibly) matching lhs
-        {
-          return action_label();
-        }
+      if(!comm_table.match_multiaction(m)) {
+        return action_label();
       }
 
       // there is a lhs containing m; find it
@@ -7930,41 +7943,8 @@ class specification_basic_type
 
       comm_table.reset_temporary_data();
 
-      // m must be contained in a lhs; check every action
-      for (const action& a: m)
-      {
-        const identifier_string actionname=a.label().name();
-        // check every lhs for actionname
-        bool comm_ok = false;
-        for (std::size_t i=0; i<comm_table.size(); ++i)
-        {
-          if (comm_table.match_failed[i])
-          {
-            continue;
-          }
-          if (comm_table.tmp[i].empty()) // actionname not in here; ignore lhs
-          {
-            comm_table.match_failed[i]=true;
-            continue;
-          }
-
-          if (actionname != comm_table.tmp[i].front())
-          {
-            // action is not in m, so it should be in n
-            // but all actions in m come before n
-            comm_table.match_failed[i]=true;
-          }
-          else
-          {
-            // actionname found; on to the next action
-            comm_table.tmp[i].pop_front();
-            comm_ok = true;
-          }
-        }
-        if (!comm_ok)
-        {
-          return false;
-        }
+      if(!comm_table.match_multiaction(m)) {
+        return false;
       }
 
       // the rest of actions of lhs that are not in m should be in n
