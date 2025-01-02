@@ -7953,7 +7953,6 @@ class specification_basic_type
             // action is not in m, so it should be in n
             // but all actions in m come before n
             comm_table.match_failed[i]=true;
-            comm_table.tmp[i]=identifier_string_list();
           }
           else
           {
