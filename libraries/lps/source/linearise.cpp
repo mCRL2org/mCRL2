@@ -7948,18 +7948,16 @@ class specification_basic_type
             continue;
           }
 
-          identifier_string commname = comm_table.tmp[i].front();
-          while (actionname != commname)
+          if (actionname != comm_table.tmp[i].front())
           {
             // action is not in m, so it should be in n
             // but all actions in m come before n
             comm_table.match_failed[i]=true;
             comm_table.tmp[i]=identifier_string_list();
-            break;
-            commname = comm_table.tmp[i].front();
           }
-          if (actionname==commname) // actionname found
+          else
           {
+            // actionname found; on to the next action
             comm_table.tmp[i].pop_front();
             comm_ok = true;
           }
