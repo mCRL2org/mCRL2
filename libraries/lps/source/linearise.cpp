@@ -7948,14 +7948,15 @@ class specification_basic_type
             continue;
           }
 
-          identifier_string commname;
-          while (actionname != (commname = comm_table.tmp[i].front()))
+          identifier_string commname = comm_table.tmp[i].front();
+          while (actionname != commname)
           {
             // action is not in m, so it should be in n
             // but all actions in m come before n
             comm_table.match_failed[i]=true;
             comm_table.tmp[i]=identifier_string_list();
             break;
+            commname = comm_table.tmp[i].front();
           }
           if (actionname==commname) // actionname found
           {
@@ -7990,15 +7991,16 @@ class specification_basic_type
           }
           // get first action in lhs i
           const identifier_string commname = comm_table.tmp[i].front();
-          identifier_string restname;
+          identifier_string restname = rest[i].front().label().name();
           // find it in rest[i]
-          while (commname!=(restname = rest[i].front().label().name()))
+          while (commname!=restname)
           {
             rest[i].pop_front();
             if (rest[i].empty()) // no more
             {
               break;
             }
+            restname = rest[i].front().label().name();
           }
           if (commname!=restname) // action was not found
           {
