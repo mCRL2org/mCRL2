@@ -7851,6 +7851,8 @@ class specification_basic_type
         }
     };
 
+    /// Determine if there exists a communication expression a1|...|an -> b in comm_table
+    /// such that a1|...|an \subseteq m', where m' is the multiset of actionnames for multiaction m.
     process::action_label can_communicate(const action_list& m, comm_entry& comm_table)
     {
       /* this function indicates whether the actions in m
@@ -7969,9 +7971,7 @@ class specification_basic_type
 
       // the rest of actions of lhs that are not in m should be in n
       // rest[i] contains the part of n in which lhs i has to find matching actions
-      // rest_is_null[i] contains indications whether rest[i] is NULL.
       std::vector < action_list > rest(comm_table.size(),n);
-      std::vector < bool > rest_is_null(comm_table.size(),false);
 
       // check every lhs
       for (std::size_t i=0; i<comm_table.size(); ++i)
@@ -7986,7 +7986,6 @@ class specification_basic_type
           // .. find them in rest[i]
           if (rest[i].empty()) // no luck
           {
-            rest_is_null[i] = true;
             break;
           }
           // get first action in lhs i
@@ -7998,7 +7997,6 @@ class specification_basic_type
             rest[i].pop_front();
             if (rest[i].empty()) // no more
             {
-              rest_is_null[i] = true;
               break;
             }
           }
@@ -8011,7 +8009,7 @@ class specification_basic_type
           comm_table.tmp[i].pop_front();
         }
 
-        if (!rest_is_null[i]) // lhs was found in rest[i]
+        if (!rest[i].empty()) // lhs was found in rest[i]
         {
           return true;
         }
