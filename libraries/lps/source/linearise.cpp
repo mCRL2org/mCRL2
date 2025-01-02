@@ -7806,9 +7806,7 @@ class specification_basic_type
     }
 
 
-    // Type and variables for a somewhat more efficient storage of the
-    // communication function
-
+    /// Data structure to store the communication function more efficiently.
     class comm_entry
     {
       public:
@@ -7816,29 +7814,40 @@ class specification_basic_type
         comm_entry(const comm_entry& )=delete;
         comm_entry& operator=(const comm_entry& )=delete;
 
+        /// Left-hand sides of communication expressions
         std::vector <identifier_string_list> lhs;
+
+        /// Right-hand sides of communication expressions
         std::vector <identifier_string> rhs;
+
+        /// Temporary data using in determining whether communication is allowed.
+        /// See usages of the data structure below.
         std::vector <identifier_string_list> tmp;
         std::vector< bool > match_failed;
 
         comm_entry(const communication_expression_list& communications)
+            : tmp(communications.size(), identifier_string_list()),
+              match_failed(communications.size(), false)
         {
           for (const communication_expression& l: communications)
           {
             lhs.push_back(l.action_name().names());
             rhs.push_back(l.name());
-            tmp.push_back(identifier_string_list());
-            match_failed.push_back(false);
           }
         }
 
-        ~comm_entry()
-        {}
+        ~comm_entry() = default;
 
         std::size_t size() const
         {
           assert(lhs.size()==rhs.size() && rhs.size()==tmp.size() && tmp.size()==match_failed.size());
           return lhs.size();
+        }
+
+        void reset_temporary_data()
+        {
+          tmp = lhs;
+          match_failed = std::vector<bool>(size(), false);
         }
     };
 
@@ -7849,11 +7858,7 @@ class specification_basic_type
          a communication can take place. If not action_label() is delivered,
          otherwise the resulting action is the result. */
       // first copy the left-hand sides of communications for use
-      for (std::size_t i=0; i<comm_table.size(); ++i)
-      {
-        comm_table.tmp[i] = comm_table.lhs[i];
-        comm_table.match_failed[i]=false;
-      }
+      comm_table.reset_temporary_data();
 
       // m must match a lhs; check every action
       for (const action& a: m)
@@ -7921,12 +7926,7 @@ class specification_basic_type
          that are not in m should be in n (i.e. there must be a
          subbag o of n such that m+o can communicate. */
 
-      // first copy the left-hand sides of communications for use
-      for (std::size_t i=0; i<comm_table.size(); ++i)
-      {
-        comm_table.match_failed[i]=false;
-        comm_table.tmp[i] = comm_table.lhs[i];
-      }
+      comm_table.reset_temporary_data();
 
       // m must be contained in a lhs; check every action
       for (const action& a: m)
