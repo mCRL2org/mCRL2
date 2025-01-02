@@ -7809,11 +7809,7 @@ class specification_basic_type
     /// Data structure to store the communication function more efficiently.
     class comm_entry
     {
-      public:
-        // comm_entries are not copyable.
-        comm_entry(const comm_entry& )=delete;
-        comm_entry& operator=(const comm_entry& )=delete;
-
+      protected:
         /// Left-hand sides of communication expressions
         std::vector <identifier_string_list> lhs;
 
@@ -7824,25 +7820,6 @@ class specification_basic_type
         /// See usages of the data structure below.
         std::vector <identifier_string_list> tmp;
         std::vector< bool > match_failed;
-
-        comm_entry(const communication_expression_list& communications)
-            : tmp(communications.size(), identifier_string_list()),
-              match_failed(communications.size(), false)
-        {
-          for (const communication_expression& l: communications)
-          {
-            lhs.push_back(l.action_name().names());
-            rhs.push_back(l.name());
-          }
-        }
-
-        ~comm_entry() = default;
-
-        std::size_t size() const
-        {
-          assert(lhs.size()==rhs.size() && rhs.size()==tmp.size() && tmp.size()==match_failed.size());
-          return lhs.size();
-        }
 
         void reset_temporary_data()
         {
@@ -7894,109 +7871,134 @@ class specification_basic_type
           // There must be an lhs that contains m.
           return true;
         }
-    };
 
-    /// Determine if there exists a communication expression a1|...|an -> b in comm_table
-    /// such that m' \subseteq a1|...|an , where m' is the multiset of actionnames for multiaction m.
-    process::action_label can_communicate(const action_list& m, comm_entry& comm_table)
-    {
-      /* this function indicates whether the actions in m
-         consisting of actions and data occur in C, such that
-         a communication can take place. If not action_label() is delivered,
-         otherwise the resulting action is the result. */
-      // first copy the left-hand sides of communications for use
-      comm_table.reset_temporary_data();
 
-      if(!comm_table.match_multiaction(m)) {
-        return action_label();
-      }
+      public:
+        // comm_entries are not copyable.
+        comm_entry(const comm_entry& )=delete;
+        comm_entry& operator=(const comm_entry& )=delete;
 
-      // there is a lhs containing m; find it
-      for (std::size_t i=0; i<comm_table.size(); ++i)
-      {
-        // lhs i matches only if comm_table[i] is empty
-        if ((!comm_table.match_failed[i]) && comm_table.tmp[i].empty())
+        comm_entry(const communication_expression_list& communications)
+            : tmp(communications.size(), identifier_string_list()),
+              match_failed(communications.size(), false)
         {
-          if (comm_table.rhs[i] == tau())
+          for (const communication_expression& l: communications)
           {
-            throw mcrl2::runtime_error("Cannot linearise a process with a communication operator, containing a communication that results in tau or that has an empty right hand side");
+            lhs.push_back(l.action_name().names());
+            rhs.push_back(l.name());
+          }
+        }
+
+        ~comm_entry() = default;
+
+        std::size_t size() const
+        {
+          assert(lhs.size()==rhs.size() && rhs.size()==tmp.size() && tmp.size()==match_failed.size());
+          return lhs.size();
+        }
+
+        /// Determine if there exists a communication expression a1|...|an -> b in comm_table
+        /// such that m' \subseteq a1|...|an , where m' is the multiset of actionnames for multiaction m.
+        process::action_label can_communicate(const action_list& m)
+        {
+          /* this function indicates whether the actions in m
+             consisting of actions and data occur in C, such that
+             a communication can take place. If not action_label() is delivered,
+             otherwise the resulting action is the result. */
+          // first copy the left-hand sides of communications for use
+          reset_temporary_data();
+
+          if(!match_multiaction(m)) {
             return action_label();
           }
-          return action_label(comm_table.rhs[i],m.front().label().sorts());
-        }
-      }
-      // no match
-      return action_label();
-    }
 
-    static bool might_communicate(const action_list& m,
-                                  comm_entry& comm_table,
-                                  const action_list& n)
-    {
-      /* this function indicates whether the actions in m
-         consisting of actions and data occur in C, such that
-         a communication might take place (i.e. m is a subbag
-         of the lhs of a communication in C).
-         if n is not empty, then all actions of a matching communication
-         that are not in m should be in n (i.e. there must be a
-         subbag o of n such that m+o can communicate. */
-
-      comm_table.reset_temporary_data();
-
-      if(!comm_table.match_multiaction(m)) {
-        return false;
-      }
-
-      // the rest of actions of lhs that are not in m should be in n
-      // rest[i] contains the part of n in which lhs i has to find matching actions
-      std::vector < action_list > rest(comm_table.size(),n);
-
-      // check every lhs
-      for (std::size_t i=0; i<comm_table.size(); ++i)
-      {
-        if (comm_table.match_failed[i]) // lhs i did not contain m
-        {
-          continue;
-        }
-        // as long as there are still unmatch actions in lhs i...
-        while (!comm_table.tmp[i].empty())
-        {
-          // .. find them in rest[i]
-          if (rest[i].empty()) // no luck
+          // there is a lhs containing m; find it
+          for (std::size_t i=0; i<size(); ++i)
           {
-            break;
-          }
-          // get first action in lhs i
-          const identifier_string commname = comm_table.tmp[i].front();
-          identifier_string restname = rest[i].front().label().name();
-          // find it in rest[i]
-          while (commname!=restname)
-          {
-            rest[i].pop_front();
-            if (rest[i].empty()) // no more
+            // lhs i matches only if comm_table[i] is empty
+            if ((!match_failed[i]) && tmp[i].empty())
             {
-              break;
+              if (rhs[i] == tau())
+              {
+                throw mcrl2::runtime_error("Cannot linearise a process with a communication operator, containing a communication that results in tau or that has an empty right hand side");
+                return action_label();
+              }
+              return action_label(rhs[i],m.front().label().sorts());
             }
-            restname = rest[i].front().label().name();
           }
-          if (commname!=restname) // action was not found
-          {
-            break;
-          }
-          // action found; try next
-          rest[i].pop_front();
-          comm_table.tmp[i].pop_front();
+          // no match
+          return action_label();
         }
 
-        if (!rest[i].empty()) // lhs was found in rest[i]
+        bool might_communicate(const action_list& m,
+            const action_list& n)
         {
-          return true;
-        }
-      }
+          /* this function indicates whether the actions in m
+             consisting of actions and data occur in C, such that
+             a communication might take place (i.e. m is a subbag
+             of the lhs of a communication in C).
+             if n is not empty, then all actions of a matching communication
+             that are not in m should be in n (i.e. there must be a
+             subbag o of n such that m+o can communicate. */
 
-      // no lhs completely matches
-      return false;
-    }
+          reset_temporary_data();
+
+          if(!match_multiaction(m)) {
+            return false;
+          }
+
+          // the rest of actions of lhs that are not in m should be in n
+          // rest[i] contains the part of n in which lhs i has to find matching actions
+          std::vector < action_list > rest(size(),n);
+
+          // check every lhs
+          for (std::size_t i=0; i<size(); ++i)
+          {
+            if (match_failed[i]) // lhs i did not contain m
+            {
+              continue;
+            }
+            // as long as there are still unmatch actions in lhs i...
+            while (!tmp[i].empty())
+            {
+              // .. find them in rest[i]
+              if (rest[i].empty()) // no luck
+              {
+                break;
+              }
+              // get first action in lhs i
+              const identifier_string commname = tmp[i].front();
+              identifier_string restname = rest[i].front().label().name();
+              // find it in rest[i]
+              while (commname!=restname)
+              {
+                rest[i].pop_front();
+                if (rest[i].empty()) // no more
+                {
+                  break;
+                }
+                restname = rest[i].front().label().name();
+              }
+              if (commname!=restname) // action was not found
+              {
+                break;
+              }
+              // action found; try next
+              rest[i].pop_front();
+              tmp[i].pop_front();
+            }
+
+            if (!rest[i].empty()) // lhs was found in rest[i]
+            {
+              return true;
+            }
+          }
+
+          // no lhs completely matches
+          return false;
+        }
+
+    };
 
     tuple_list phi(const action_list& m,
                    const data_expression_list& d,
@@ -8016,13 +8018,13 @@ class specification_basic_type
          and C contains a list of multiaction action pairs indicating
          possible communications */
 
-      if (!might_communicate(m,comm_table,n))
+      if (!comm_table.might_communicate(m,n))
       {
         return tuple_list();
       }
       if (n.empty())
       {
-        process::action_label c=can_communicate(m,comm_table); /* returns action_label() if no communication
+        process::action_label c = comm_table.can_communicate(m); /* returns action_label() if no communication
                                                                   is possible */
         if (c!=action_label())
         {
@@ -8065,7 +8067,7 @@ class specification_basic_type
     {
       if (beta.empty())
       {
-        return can_communicate(alpha,comm_table)!=action_label();
+        return comm_table.can_communicate(alpha)!=action_label();
       }
       else
       {
@@ -8074,11 +8076,11 @@ class specification_basic_type
         l=push_back(l,a);
         const action_list& beta_next = beta.tail();
 
-        if (can_communicate(l,comm_table)!=action_label())
+        if (comm_table.can_communicate(l)!=action_label())
         {
           return true;
         }
-        else if (might_communicate(l,comm_table,beta_next))
+        else if (comm_table.might_communicate(l,beta_next))
         {
           return xi(l,beta_next,comm_table) || xi(alpha,beta_next,comm_table);
         }
@@ -8101,7 +8103,7 @@ class specification_basic_type
         while (!beta.empty())
         {
           const action_list actl({ a, beta.front() });
-          if (might_communicate(actl,comm_table,beta.tail()) && xi(actl,beta.tail(),comm_table))
+          if (comm_table.might_communicate(actl,beta.tail()) && xi(actl,beta.tail(),comm_table))
           {
             // sort and remove duplicates??
             cond = lazy::or_(cond,pairwiseMatch(a.arguments(),beta.front().arguments()));
