@@ -8016,11 +8016,12 @@ class specification_basic_type
           {
             // the rest of actions of lhs that are not in m should be in n
             // rest[i] contains the part of n in which lhs i has to find matching actions
-            // if rest[i] cannot match the left hand side m_lhs_iters[i], i.e., it becomes empty
+            // if rest[i] cannot match the next remaining action in the left hand side, stored in m_lhs_iters[i], i.e., rest[i] becomes empty
             // before matching all actions in the lhs, we set it to std::nullopt.
             // N.B. when rest[i] becomes empty after matching all actions in the lhs,
             // rest[i].empty() is a meaningful result: we have a successful match.
-            std::vector<std::optional<action_list>> rest(size(), action_list(n_first, n_last));
+            std::vector<std::optional<std::pair<action_list::const_iterator, action_list::const_iterator>>>
+              rest(size(), std::make_pair(n_first, n_last)); // pairs of iterator into n; the second element of the pair indicates the end of the range in n.
 
             // check every lhs
             for (std::size_t i = 0; i < size(); ++i)
@@ -8035,24 +8036,24 @@ class specification_basic_type
               {
                 assert(rest[i] != std::nullopt);
                 // .. find them in rest[i]
-                if (rest[i]->empty()) // no luck
+                if (rest[i]->first == rest[i]->second) // no luck
                 {
                   rest[i] = std::nullopt;
                   break;
                 }
                 // get first action in lhs i
                 const identifier_string& commname = *m_lhs_iters[i];
-                identifier_string restname = rest[i]->front().label().name();
+                identifier_string restname = rest[i]->first->label().name();
                 // find it in rest[i]
                 while (commname != restname)
                 {
-                  rest[i]->pop_front();
-                  if (rest[i]->empty()) // no more
+                  ++(rest[i]->first);
+                  if (rest[i]->first == rest[i]->second) // no more
                   {
                     rest[i] = std::nullopt;
                     break;
                   }
-                  restname = rest[i]->front().label().name();
+                  restname = rest[i]->first->label().name();
                 }
                 if (commname != restname) // action was not found
                 {
@@ -8060,7 +8061,7 @@ class specification_basic_type
                 }
 
                 // action found; try next
-                rest[i]->pop_front();
+                ++(rest[i]->first);
                 ++m_lhs_iters[i];
               }
 
