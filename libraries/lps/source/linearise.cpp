@@ -7816,6 +7816,10 @@ class specification_basic_type
         /// Right-hand sides of communication expressions
         const std::vector <identifier_string> rhs;
 
+        /// Caches.
+        std::unordered_map<action_list, process::action_label> m_can_communicate_cache;
+        std::unordered_map<action_list, bool> m_might_communicate_cache;
+
         /// Temporary data using in determining whether communication is allowed.
         /// See usages of the data structure below.
         std::vector <identifier_string_list> tmp;
@@ -7864,6 +7868,7 @@ class specification_basic_type
                 comm_ok = true;
               }
             }
+
             if (!comm_ok)   // no (possibly) matching lhs
             {
               return false;
@@ -7923,30 +7928,40 @@ class specification_basic_type
         process::action_label can_communicate(const action_list& m)
         {
           /* this function indicates whether the actions in m
-             consisting of actions and data occur in C, such that
-             a communication can take place. If not action_label() is delivered,
-             otherwise the resulting action is the result. */
-          // first copy the left-hand sides of communications for use
-          if(!match_multiaction(m)) {
-            return action_label();
+                       consisting of actions and data occur in C, such that
+                       a communication can take place. If not action_label() is delivered,
+                       otherwise the resulting action is the result. */
+
+          // Check the cache first.
+          auto it = m_can_communicate_cache.find(m);
+          if(it != m_can_communicate_cache.end())
+          {
+            return it->second;
           }
 
-          // there is a lhs containing m; find it
-          for (std::size_t i=0; i<size(); ++i)
+          action_label result; // if no match fount, return action_label()
+
+          if(match_multiaction(m))
           {
-            // lhs i matches only if comm_table[i] is empty
-            if ((!match_failed[i]) && tmp[i].empty())
+            // there is a lhs containing m; find it
+            for (std::size_t i = 0; i < size(); ++i)
             {
-              if (rhs[i] == tau())
+              // lhs i matches only if comm_table[i] is empty
+              if ((!match_failed[i]) && tmp[i].empty())
               {
-                throw mcrl2::runtime_error("Cannot linearise a process with a communication operator, containing a communication that results in tau or that has an empty right hand side");
-                return action_label();
+                if (rhs[i] == tau())
+                {
+                  throw mcrl2::runtime_error("Cannot linearise a process with a communication operator, containing a communication that results in tau or that has an empty right hand side");
+                }
+                result = action_label(rhs[i], m.front().label().sorts());
+                break;
               }
-              return action_label(rhs[i],m.front().label().sorts());
             }
           }
-          // no match
-          return action_label();
+
+          // cache the result
+          m_can_communicate_cache.insert({m, result});
+          return result;
         }
 
         bool might_communicate(const action_list& m,
@@ -7960,70 +7975,79 @@ class specification_basic_type
              that are not in m should be in n (i.e. there must be a
              subbag o of n such that m+o can communicate. */
 
-          if(!match_multiaction(m)) {
-            return false;
+          // Check the cache first.
+          auto it = m_might_communicate_cache.find(m);
+          if(it != m_might_communicate_cache.end())
+          {
+            return it->second;
           }
 
-          // the rest of actions of lhs that are not in m should be in n
-          // rest[i] contains the part of n in which lhs i has to find matching actions
-          // if rest[i] cannot match the left hand side tmp[i], i.e., it becomes empty
-          // before matching all actions in the lhs, we set it to std::nullopt.
-          // N.B. when rest[i] becomes empty after matching all actions in the lhs,
-          // rest[i].empty() is a meaningful result: we have a successful match.
-          std::vector < std::optional<action_list> > rest(size(),n);
+          bool result = false;
 
-          // check every lhs
-          for (std::size_t i=0; i<size(); ++i)
+          if(match_multiaction(m))
           {
-            if (match_failed[i]) // lhs i did not contain m
-            {
-              continue;
-            }
+            // the rest of actions of lhs that are not in m should be in n
+            // rest[i] contains the part of n in which lhs i has to find matching actions
+            // if rest[i] cannot match the left hand side tmp[i], i.e., it becomes empty
+            // before matching all actions in the lhs, we set it to std::nullopt.
+            // N.B. when rest[i] becomes empty after matching all actions in the lhs,
+            // rest[i].empty() is a meaningful result: we have a successful match.
+            std::vector<std::optional<action_list>> rest(size(), n);
 
-            // as long as there are still unmatched actions in lhs i...
-            while (!tmp[i].empty())
+            // check every lhs
+            for (std::size_t i = 0; i < size(); ++i)
             {
-              assert(rest[i] != std::nullopt);
-              // .. find them in rest[i]
-              if (rest[i]->empty()) // no luck
+              if (match_failed[i]) // lhs i did not contain m
               {
-                rest[i] = std::nullopt;
-                break;
+                continue;
               }
-              // get first action in lhs i
-              const identifier_string& commname = tmp[i].front();
-              identifier_string restname = rest[i]->front().label().name();
-              // find it in rest[i]
-              while (commname!=restname)
+
+              // as long as there are still unmatched actions in lhs i...
+              while (!tmp[i].empty())
               {
-                rest[i]->pop_front();
-                if (rest[i]->empty()) // no more
+                assert(rest[i] != std::nullopt);
+                // .. find them in rest[i]
+                if (rest[i]->empty()) // no luck
                 {
                   rest[i] = std::nullopt;
                   break;
                 }
-                restname = rest[i]->front().label().name();
+                // get first action in lhs i
+                const identifier_string& commname = tmp[i].front();
+                identifier_string restname = rest[i]->front().label().name();
+                // find it in rest[i]
+                while (commname != restname)
+                {
+                  rest[i]->pop_front();
+                  if (rest[i]->empty()) // no more
+                  {
+                    rest[i] = std::nullopt;
+                    break;
+                  }
+                  restname = rest[i]->front().label().name();
+                }
+                if (commname != restname) // action was not found
+                {
+                  break;
+                }
+
+                // action found; try next
+                rest[i]->pop_front();
+                tmp[i].pop_front();
               }
-              if (commname!=restname) // action was not found
+
+              if (rest[i] != std::nullopt) // lhs was found in rest[i]
               {
+                result = true;
                 break;
               }
-
-              // action found; try next
-              rest[i]->pop_front();
-              tmp[i].pop_front();
-            }
-
-            if (rest[i] != std::nullopt) // lhs was found in rest[i]
-            {
-              return true;
             }
           }
 
-          // no lhs completely matches
-          return false;
+          // cache the result
+          m_might_communicate_cache.insert({m, result});
+          return result;
         }
-
     };
 
     tuple_list phi(const action_list& m,
@@ -8098,7 +8122,7 @@ class specification_basic_type
       {
         const action& a = beta.front();
         action_list l=alpha;
-        l=push_back(l,a);
+        l=push_back(l,a); // this is expensive!
         const action_list& beta_next = beta.tail();
 
         if (comm_table.can_communicate(l)!=action_label())
@@ -8131,7 +8155,9 @@ class specification_basic_type
 
         while (!beta.empty())
         {
-          actl = action_list({a, beta.front()});
+          actl = action_list();
+          actl.emplace_front(beta.front());
+          actl.emplace_front(a);
           if (comm_table.might_communicate(actl,beta.tail()) && xi(actl,beta.tail(),comm_table))
           {
             // sort and remove duplicates??
