@@ -8121,14 +8121,18 @@ class specification_basic_type
     {
       action_list alpha=reverse(alpha_in);
       data_expression cond = sort_bool::false_();
+
+      action a; // a and beta used in the loop; avoid repeated allocation and deallocation
+      action_list beta;
+      action_list actl; // used in inner loop.
       while (!alpha.empty())
       {
-        const action a = alpha.front();
-        action_list beta = alpha.tail();
+        a = alpha.front();
+        beta = alpha.tail();
 
         while (!beta.empty())
         {
-          const action_list actl({ a, beta.front() });
+          actl = action_list({a, beta.front()});
           if (comm_table.might_communicate(actl,beta.tail()) && xi(actl,beta.tail(),comm_table))
           {
             // sort and remove duplicates??
