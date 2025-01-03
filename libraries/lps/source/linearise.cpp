@@ -8080,7 +8080,8 @@ class specification_basic_type
     tuple_list phi(const action_list& m,
                    const data_expression_list& d,
                    const action_list& w,
-                   const action_list& n,
+                   action_list::const_iterator n_first,
+                   action_list::const_iterator n_last,
                    const action_list& r,
                    comm_entry& comm_table)
     {
@@ -8094,11 +8095,11 @@ class specification_basic_type
          and C contains a list of multiaction action pairs indicating
          possible communications */
 
-      if (!comm_table.might_communicate(m,n))
+      if (!comm_table.might_communicate(m,action_list(n_first, n_last)))
       {
         return tuple_list();
       }
-      if (n.empty())
+      if (n_first == n_last)
       {
         action_label c = comm_table.can_communicate(m); /* returns action_label() if no communication
                                                                   is possible */
@@ -8115,27 +8116,27 @@ class specification_basic_type
         return tuple_list();
       }
       /* if n=[a(f)] \oplus o */
-      const action& firstaction=n.front();
-      const action_list& o=n.tail();
+      const action& firstaction=*n_first;
+
       const data_expression condition=pairwiseMatch(d,firstaction.arguments());
       if (condition==sort_bool::false_())
       {
         action_list tempw=w;
         tempw=push_back(tempw,firstaction);
-        return phi(m,d,tempw,o,r,comm_table);
+        return phi(m,d,tempw,std::next(n_first), n_last,r,comm_table);
       }
       else
       {
         action_list tempm=m;
         tempm=push_back(tempm,firstaction);
-        const tuple_list T=phi(tempm,d,w,o,r,comm_table);
+        const tuple_list T=phi(tempm,d,w,std::next(n_first), n_last,r,comm_table);
         action_list tempw=w;
         tempw=push_back(tempw,firstaction);
         return addActionCondition(
                  action(),
                  condition,
                  T,
-                 phi(m,d,tempw,o,r,comm_table));
+                 phi(m,d,tempw,std::next(n_first), n_last,r,comm_table));
       }
     }
 
@@ -8219,12 +8220,10 @@ class specification_basic_type
 
       const action& firstaction=*multiaction_first;
 
-      const action_list remainingmultiaction(std::next(multiaction_first), multiaction_last); /* This is m in [1] */
-
       const tuple_list S=phi(action_list({ firstaction }),
                              firstaction.arguments(),
                              action_list(),
-                             remainingmultiaction,
+                             std::next(multiaction_first), multiaction_last,
                              r,comm_table);
       action_list tempr=r;
       tempr.push_front(firstaction);
