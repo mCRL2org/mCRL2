@@ -7811,10 +7811,10 @@ class specification_basic_type
     {
       protected:
         /// Left-hand sides of communication expressions
-        std::vector <identifier_string_list> lhs;
+        const std::vector <identifier_string_list> lhs;
 
         /// Right-hand sides of communication expressions
-        std::vector <identifier_string> rhs;
+        const std::vector <identifier_string> rhs;
 
         /// Temporary data using in determining whether communication is allowed.
         /// See usages of the data structure below.
@@ -7829,9 +7829,11 @@ class specification_basic_type
 
         /// Check if m is contained in a lhs in the communication entry.
         /// Returns true if this is the case, false otherwise.
-        /// Precondition: temporary data has been reset.
         /// Postcondition: for every i such that m is not contained in lhs[i], match_failed[i] is true.
+        /// NB: resets temporary data before performing computations.
         bool match_multiaction(const action_list& m) {
+          reset_temporary_data();
+
           // m must match a lhs; check every action
           for (const action& a: m)
           {
@@ -7872,6 +7874,29 @@ class specification_basic_type
           return true;
         }
 
+        // Initialization of lhs, defined as static function so it can be used in the constructor.
+        // Allows lhs to be defined as const.
+        static std::vector <identifier_string_list> init_lhs(const communication_expression_list& communications)
+        {
+          std::vector <identifier_string_list> result;
+          for (const communication_expression& l: communications)
+          {
+            result.push_back(l.action_name().names());
+          }
+          return result;
+        }
+
+        // Initialization of rhs, defined as static function so it can be used in the constructor.
+        // Allows rhs to be defined as const.
+        static std::vector <identifier_string> init_rhs(const communication_expression_list& communications)
+        {
+          std::vector <identifier_string> result;
+          for (const communication_expression& l: communications)
+          {
+            result.push_back(l.name());
+          }
+          return result;
+        }
 
       public:
         // comm_entries are not copyable.
@@ -7879,15 +7904,11 @@ class specification_basic_type
         comm_entry& operator=(const comm_entry& )=delete;
 
         comm_entry(const communication_expression_list& communications)
-            : tmp(communications.size(), identifier_string_list()),
+            : lhs(init_lhs(communications)),
+              rhs(init_rhs(communications)),
+              tmp(communications.size(), identifier_string_list()),
               match_failed(communications.size(), false)
-        {
-          for (const communication_expression& l: communications)
-          {
-            lhs.push_back(l.action_name().names());
-            rhs.push_back(l.name());
-          }
-        }
+        {}
 
         ~comm_entry() = default;
 
@@ -7906,8 +7927,6 @@ class specification_basic_type
              a communication can take place. If not action_label() is delivered,
              otherwise the resulting action is the result. */
           // first copy the left-hand sides of communications for use
-          reset_temporary_data();
-
           if(!match_multiaction(m)) {
             return action_label();
           }
@@ -7941,8 +7960,6 @@ class specification_basic_type
              that are not in m should be in n (i.e. there must be a
              subbag o of n such that m+o can communicate. */
 
-          reset_temporary_data();
-
           if(!match_multiaction(m)) {
             return false;
           }
@@ -7962,6 +7979,7 @@ class specification_basic_type
             {
               continue;
             }
+
             // as long as there are still unmatched actions in lhs i...
             while (!tmp[i].empty())
             {
@@ -7990,6 +8008,7 @@ class specification_basic_type
               {
                 break;
               }
+
               // action found; try next
               rest[i]->pop_front();
               tmp[i].pop_front();
@@ -8183,15 +8202,14 @@ class specification_basic_type
                         "- calculating the communication operator on ") << action_summands.size() << " action summands";
 
       /* first we sort the multiactions in communications */
-      communication_expression_list resultingCommunications;
+      communication_expression_list sorted_communications;
 
       for (const communication_expression& comm: communications)
       {
         const action_name_multiset& source=comm.action_name();
         const identifier_string& target=comm.name();
-        resultingCommunications.push_front(communication_expression(sort_action_labels(source),target));
+        sorted_communications.push_front(communication_expression(sort_action_labels(source),target));
       }
-      communication_expression_list communications1=resultingCommunications;
 
       stochastic_action_summand_vector resultsumlist;
       deadlock_summand_vector resultingDeltaSummands;
@@ -8210,7 +8228,7 @@ class specification_basic_type
       for (const stochastic_action_summand& smmnd: action_summands)
       {
         const variable_list& sumvars=smmnd.summation_variables();
-        const action_list multiaction=smmnd.multi_action().actions();
+        const action_list& multiaction=smmnd.multi_action().actions();
         const data_expression& condition=smmnd.condition();
         const assignment_list& nextstate=smmnd.assignments();
         const stochastic_distribution& dist=smmnd.distribution();
@@ -8256,13 +8274,13 @@ class specification_basic_type
         const tuple_list multiactionconditionlist=
           makeMultiActionConditionList(
             multiaction,
-            communications1);
+            sorted_communications);
 
         assert(multiactionconditionlist.actions.size()==
                multiactionconditionlist.conditions.size());
         for (std::size_t i=0 ; i<multiactionconditionlist.actions.size(); ++i)
         {
-          const action_list multiaction=multiactionconditionlist.actions[i];
+          const action_list& multiaction=multiactionconditionlist.actions[i];
 
           if (is_allow && !allow_(allowlist,multiaction))
           {
