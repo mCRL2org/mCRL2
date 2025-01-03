@@ -7993,7 +7993,8 @@ class specification_basic_type
         }
 
         bool might_communicate(const action_list& m,
-            const action_list& n)
+          action_list::const_iterator n_first,
+          action_list::const_iterator n_last)
         {
           /* this function indicates whether the actions in m
              consisting of actions and data occur in C, such that
@@ -8019,7 +8020,7 @@ class specification_basic_type
             // before matching all actions in the lhs, we set it to std::nullopt.
             // N.B. when rest[i] becomes empty after matching all actions in the lhs,
             // rest[i].empty() is a meaningful result: we have a successful match.
-            std::vector<std::optional<action_list>> rest(size(), n);
+            std::vector<std::optional<action_list>> rest(size(), action_list(n_first, n_last));
 
             // check every lhs
             for (std::size_t i = 0; i < size(); ++i)
@@ -8080,8 +8081,8 @@ class specification_basic_type
     tuple_list phi(const action_list& m,
                    const data_expression_list& d,
                    const action_list& w,
-                   action_list::const_iterator n_first,
-                   action_list::const_iterator n_last,
+                   const action_list::const_iterator& n_first,
+                   const action_list::const_iterator& n_last,
                    const action_list& r,
                    comm_entry& comm_table)
     {
@@ -8095,7 +8096,7 @@ class specification_basic_type
          and C contains a list of multiaction action pairs indicating
          possible communications */
 
-      if (!comm_table.might_communicate(m,action_list(n_first, n_last)))
+      if (!comm_table.might_communicate(m, n_first, n_last))
       {
         return tuple_list();
       }
@@ -8158,7 +8159,7 @@ class specification_basic_type
         {
           return true;
         }
-        else if (comm_table.might_communicate(l,beta_next))
+        else if (comm_table.might_communicate(l,beta_next.begin(), beta_next.end()))
         {
           return xi(l,beta_next,comm_table) || xi(alpha,beta_next,comm_table);
         }
@@ -8187,7 +8188,8 @@ class specification_basic_type
           actl = action_list();
           actl.emplace_front(beta.front());
           actl.emplace_front(a);
-          if (comm_table.might_communicate(actl,beta.tail()) && xi(actl,beta.tail(),comm_table))
+          const action_list& beta_tail = beta.tail();
+          if (comm_table.might_communicate(actl,beta_tail.begin(), beta_tail.end()) && xi(actl,beta.tail(),comm_table))
           {
             // sort and remove duplicates??
             cond = lazy::or_(cond,pairwiseMatch(a.arguments(),beta.front().arguments()));
