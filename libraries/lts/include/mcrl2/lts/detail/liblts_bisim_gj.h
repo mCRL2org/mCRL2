@@ -1094,7 +1094,8 @@ struct block_type
 {
   union constellation_or_first_unmarked_bottom_state
   {
-    struct constellation_and_new_bottom_states {
+    struct constellation_and_new_bottom_states 
+    {
       /// constellation that the block is in
       constellation_index stellation: (sizeof(constellation_index)*CHAR_BIT-1);
       /// a boolean that is true iff the block contains new bottom states;
@@ -1205,8 +1206,17 @@ struct block_type
       block()
   {}
 
-  /// \brief copy constructor.
-  block_type(const block_type&) = default;
+  /// \brief copy constructor. Required by MSCV. 
+  block_type(const block_type& other)
+    : c(0),
+      start_bottom_states(other.start_bottom_states),
+      start_non_bottom_states(other.start_non_bottom_states),
+      end_states(other.end_states),
+      block(other.block)
+  {
+    // c.on.first_unmarked_bottom_state=other.c.on.first_unmarked_bottom_state
+    c.on=other.c.on;
+  }
 
   block_type(fixed_vector<state_in_block_pointer>::iterator
                                 beginning_of_states, constellation_index new_c)
