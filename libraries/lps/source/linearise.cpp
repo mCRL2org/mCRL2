@@ -106,7 +106,7 @@ class objectdatatype
       constructor=false;
       processstatus=unknown;
       object=none;
-      canterminate=0;
+      canterminate=false;
       containstime=false;
     }
 
@@ -238,14 +238,14 @@ class specification_basic_type
         terminatedProcId,
         variable_list(),
         seq(terminationAction,delta()),
-        pCRL,0,false);
+        pCRL,false,false);
       delta_process=newprocess(variable_list(),delta(),pCRL,false,false);
       tau_process=newprocess(variable_list(),tau(),pCRL,true,false);
     }
 
     ~specification_basic_type()
     {
-      for (; stack_operations_list!=nullptr;)
+      while (stack_operations_list!=nullptr)
       {
         stackoperations* temp=stack_operations_list->next;
         delete stack_operations_list;
@@ -255,18 +255,8 @@ class specification_basic_type
     }
 
   private:
-    /* data_expression real_zero()
-    {
-      static data_expression zero=sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1());
-      return zero;
-    }
 
-    data_expression real_one()
-    {
-      static data_expression one=sort_real::creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1());
-      return one;
-    } */
-
+    static
     data_expression real_times_optimized(const data_expression& r1, const data_expression& r2)
     {
       if (r1==sort_real::real_zero() || r2==sort_real::real_zero())
@@ -284,7 +274,8 @@ class specification_basic_type
       return sort_real::times(r1,r2);
     }
 
-    process_expression delta_at_zero(void)
+    static
+    process_expression delta_at_zero()
     {
       return at(delta(), sort_real::real_(0));
     }
@@ -344,6 +335,7 @@ class specification_basic_type
       fresh_identifier_generator.add_identifier(str);
     }
 
+    static
     process_expression action_list_to_process(const action_list& ma)
     {
       if (ma.size()==0)
@@ -357,6 +349,7 @@ class specification_basic_type
       return process::sync(ma.front(),action_list_to_process(ma.tail()));
     }
 
+    static
     action_list to_action_list(const process_expression& p)
     {
       if (is_tau(p))
@@ -377,7 +370,8 @@ class specification_basic_type
       return action_list();
     }
 
-    process::action_label_list getnames(const process_expression& multiAction)
+    static
+    action_label_list getnames(const process_expression& multiAction)
     {
       if (is_action(multiAction))
       {
@@ -433,6 +427,7 @@ class specification_basic_type
       return getparameters_rec(multiAction,occurs_set);
     }
 
+    static
     data_expression_list getarguments(const action_list& multiAction)
     {
       data_expression_list result;
@@ -443,6 +438,7 @@ class specification_basic_type
       return reverse(result);
     }
 
+    static
     action_list makemultiaction(const process::action_label_list& actionIds, const data_expression_list& args)
     {
       action_list result;
@@ -540,6 +536,7 @@ class specification_basic_type
 
     /************ upperpowerof2 *********************************************/
 
+    static
     std::size_t upperpowerof2(std::size_t i)
     /* function yields n for the smallest value n such that
        2^n>=i. This constitutes the number of bits necessary
@@ -749,7 +746,7 @@ class specification_basic_type
           e.identifier(),
           e.formal_parameters(),
           e.expression(),
-          unknown,0,false);
+          unknown,false,false);
       }
     }
 
@@ -759,7 +756,7 @@ class specification_basic_type
       const processstatustype s,
       const bool canterminate,
       const bool containstime,
-      process_identifier& p)
+      process_identifier& p) const
     {
       for(const std::pair<const aterm,objectdatatype>& d: objectdata)
       {
@@ -787,13 +784,14 @@ class specification_basic_type
          because it cannot occur as a string in the input */
 
       process_identifier initprocess(std::string("init"), variable_list());
-      insert_process_declaration(initprocess,variable_list(),init,unknown,0,false);
+      insert_process_declaration(initprocess,variable_list(),init,unknown,false,false);
       return initprocess;
     }
 
   private:
 
     /********** various functions on action and multi actions  ***************/
+    static
     bool actioncompare(const action_label& a1, const action_label& a2)
     {
       /* first compare the strings in the actions */
@@ -812,6 +810,7 @@ class specification_basic_type
       return false;
     }
 
+    static
     action_list linInsertActionInMultiActionList(
       const action& act,
       action_list multiAction)
@@ -1103,9 +1102,8 @@ class specification_basic_type
       const process_identifier& procDecl,
       const processstatustype status)
     {
-      processstatustype s;
       objectdatatype& object=objectIndex(procDecl);
-      s=object.processstatus;
+      processstatustype s=object.processstatus;
 
       if (s==unknown)
       {
@@ -1272,7 +1270,8 @@ class specification_basic_type
 
     /****************  occursinterm *** occursintermlist ***********/
 
-    bool occursinterm(const variable& var, const data_expression& t) const
+    static
+    bool occursinterm(const variable& var, const data_expression& t)
     {
       return data::search_free_variable(t, var);
     }
@@ -1326,7 +1325,8 @@ class specification_basic_type
       filter_vars_by_termlist(a.begin(),a.end(),vars_set,vars_result_set);
     }
 
-    bool occursintermlist(const variable& var, const data_expression_list& r) const
+    static
+    bool occursintermlist(const variable& var, const data_expression_list& r)
     {
       for (const data_expression& d: r)
       {
@@ -1738,6 +1738,7 @@ class specification_basic_type
     }
 
     /* Remove assignments that do not appear in the parameter list. */
+    static
     assignment_list filter_assignments(const assignment_list& assignments, const variable_list& parameters)
     {
       assignment_vector result;
@@ -1877,6 +1878,7 @@ class specification_basic_type
     }
 
     // Sort the assignments, such that they have the same order as the parameters
+    static
     assignment_list sort_assignments(const assignment_list& ass, const variable_list& parameters)
     {
       std::map<variable,data_expression>assignment_map;
@@ -2399,6 +2401,7 @@ class specification_basic_type
     }
 
 
+   static
    assignment_list parameters_to_assignment_list(const variable_list& parameters, const std::set<variable>& variables_bound_in_sum)
    {
      assignment_vector result;
@@ -3123,6 +3126,7 @@ class specification_basic_type
       return process_expression();
     }
 
+    static
     int match_sequence(
       const std::vector < process_instance_assignment >& s1,
       const std::vector < process_instance_assignment >& s2,
@@ -3868,7 +3872,7 @@ class specification_basic_type
     {
       std::vector <process_identifier> todo;
       todo.push_back(procsIdDecl);
-      for (; !todo.empty() ;)
+      while (!todo.empty())
       {
         const process_identifier pi=todo.back();
         todo.pop_back();
@@ -3967,6 +3971,7 @@ class specification_basic_type
        that no id1 that occurs at the right of the map can occur at the left.
     */
 
+    static
     process_identifier get_last(const process_identifier& id, const std::map< process_identifier, process_identifier >& identifier_identifier_map)
     {
       process_identifier target_id=id;
@@ -3988,6 +3993,7 @@ class specification_basic_type
     }
 
 
+    static
     void set_proc_identifier_map(
             std::map< process_identifier, process_identifier >& identifier_identifier_map,
             const process_identifier& id1_,
@@ -4011,6 +4017,7 @@ class specification_basic_type
       }
     }
 
+    static
     void complete_proc_identifier_map(std::map< process_identifier, process_identifier >& identifier_identifier_map)
     {
       std::map< process_identifier, process_identifier > new_identifier_identifier_map;
@@ -4236,6 +4243,7 @@ class specification_basic_type
 
     /**************** Collectparameterlist ******************************/
 
+    static
     bool alreadypresent(variable& var,const variable_list& vl)
     {
       /* Note: variables can be different, although they have the
@@ -4262,6 +4270,7 @@ class specification_basic_type
       return alreadypresent(var,vl.tail());
     }
 
+    static
     variable_list joinparameters(const variable_list& par1,
                                  const variable_list& par2)
     {
@@ -4385,7 +4394,7 @@ class specification_basic_type
         stacklisttype(const stacklisttype& )=delete;
         stacklisttype& operator=(const stacklisttype& )=delete;
 
-
+        static
         stackoperations* find_suitable_stack_operations(
           const variable_list& parameters,
           stackoperations* stack_operations_list)
@@ -4491,7 +4500,7 @@ class specification_basic_type
     }
 
     data_expression getvar(const variable& var,
-                           const stacklisttype& stack)
+                           const stacklisttype& stack) const
     {
       /* first search whether the variable is a free process variable */
       if (global_variables.count(var)>0)
@@ -5082,6 +5091,7 @@ class specification_basic_type
       return assignment_list({ assignment(stack.stackvar,sf) });
     }
 
+    static
     bool occursin(const variable& name,
                   const variable_list& pars)
     {
@@ -5330,7 +5340,7 @@ class specification_basic_type
          list sumvars */
 
       variable_list sumvars;
-      for (; is_sum(summandterm) ;)
+      while (is_sum(summandterm))
       {
         sumvars=sum(summandterm).variables() + sumvars;
         summandterm=sum(summandterm).operand();
@@ -5358,7 +5368,7 @@ class specification_basic_type
       stochastic_distribution cumulative_distribution(variable_list(),sort_real::real_one());
 
       /* The conditions are collected for use. The stochastic operators before the action are ignored */
-      for (; (is_if_then(summandterm)||is_stochastic_operator(summandterm)) ;)
+      while ((is_if_then(summandterm)||is_stochastic_operator(summandterm)))
       {
         if (is_if_then(summandterm))
         {
@@ -5671,7 +5681,7 @@ class specification_basic_type
       return w;
     }
 
-    data::function_symbol find_case_function(std::size_t index, const sort_expression& sort)
+    data::function_symbol find_case_function(std::size_t index, const sort_expression& sort) const
     {
       for (const data::function_symbol& f: enumeratedtypes[index].functions)
       {
@@ -5921,6 +5931,7 @@ class specification_basic_type
       return false;
     }
 
+    static
     data_expression_list extend(const data_expression& c, const data_expression_list& cl)
     {
       return data_expression_list(cl.begin(), 
@@ -6124,6 +6135,7 @@ class specification_basic_type
       return construct_binary_case_tree_rec(n-1,sums,terms,termsort,e);
     }
 
+    static
     bool summandsCanBeClustered(
       const stochastic_action_summand& summand1,
       const stochastic_action_summand& summand2)
@@ -6159,6 +6171,7 @@ class specification_basic_type
       return i2 == multiactionlist2.end();
     }
 
+    static
     data_expression getRHSassignment(const variable& var, const assignment_list& as)
     {
       for (const assignment& a: as)
@@ -7047,6 +7060,7 @@ class specification_basic_type
                               some_summand_has_time?deadlock(resulttime):deadlock());
     }
 
+    static
     sort_expression_list getActionSorts(const action_list& actionlist)
     {
       sort_expression_list resultsorts;
@@ -7275,6 +7289,7 @@ class specification_basic_type
 
     /**************** hiding *****************************************/
 
+    static
     action_list hide_(const identifier_string_list& hidelist, const action_list& multiaction)
     {
       action_list resultactionlist;
@@ -7291,6 +7306,7 @@ class specification_basic_type
       return reverse(resultactionlist);
     }
 
+    static
     void hidecomposition(const identifier_string_list& hidelist, stochastic_action_summand_vector& action_summands)
     {
       for (stochastic_action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end() ; ++i)
@@ -7306,6 +7322,7 @@ class specification_basic_type
 
     /**************** allow/block *************************************/
 
+    static
     bool implies_condition(const data_expression& c1, const data_expression& c2)
     {
       if (c2==sort_bool::true_())
@@ -7368,7 +7385,7 @@ class specification_basic_type
     void insert_timed_delta_summand(
       const stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
-      const deadlock_summand& s)
+      const deadlock_summand& s) const
     {
       deadlock_summand_vector result;
 
@@ -7435,6 +7452,7 @@ class specification_basic_type
     //         in which case true is delivered. If multiaction is the action Terminate,
     //         then true is also returned.
 
+    static
     bool allowsingleaction(const action_name_multiset& allowaction,
                            const action_list& multiaction)
     {
@@ -7486,6 +7504,7 @@ class specification_basic_type
       return false;
     }
 
+    static
     bool encap(const action_name_multiset_list& encaplist, const action_list& multiaction)
     {
       for (const action& a: multiaction)
@@ -7605,6 +7624,7 @@ class specification_basic_type
 
     /**************** renaming ******************************************/
 
+    static
     action rename_action(const rename_expression_list& renamings, const action& act)
     {
       const action_label& actionId=act.label();
@@ -7653,13 +7673,14 @@ class specification_basic_type
 
     /**************** equalargs ****************************************/
 
+    static
     bool occursinvarandremove(const variable& var, variable_list& vl)
     {
       bool result=false;
 
       if (vl.empty())
       {
-        return 0;
+        return false;
       }
       vl.pop_front();
       const variable var1=vl.front();
@@ -7752,7 +7773,7 @@ class specification_basic_type
     }
 
     template <typename List>
-    sort_expression_list get_sorts(const List& l)
+    static sort_expression_list get_sorts(const List& l)
     {
       return sort_expression_list(l.begin(), l.end(), [](const typename List::value_type& d) -> sort_expression {return d.sort();});
     }
@@ -7810,11 +7831,14 @@ class specification_basic_type
     class comm_entry
     {
       protected:
+        /// Type used to store the names of the actions in a multiaction
+        using multi_action_name_t = std::vector<identifier_string>;
+
         /// Left-hand sides of communication expressions
-        const std::vector <identifier_string_list> lhs;
+        const std::vector<multi_action_name_t> m_lhs;
 
         /// Right-hand sides of communication expressions
-        const std::vector <identifier_string> rhs;
+        const std::vector<identifier_string> m_rhs;
 
         /// Caches.
         std::unordered_map<action_list, process::action_label> m_can_communicate_cache;
@@ -7822,13 +7846,16 @@ class specification_basic_type
 
         /// Temporary data using in determining whether communication is allowed.
         /// See usages of the data structure below.
-        std::vector <identifier_string_list> tmp;
-        std::vector< bool > match_failed;
+        std::vector<multi_action_name_t::const_iterator> m_lhs_iters; // offset into lhs
+        std::vector<bool> m_match_failed;
 
         void reset_temporary_data()
         {
-          tmp = lhs;
-          match_failed = std::vector<bool>(size(), false);
+          for (std::size_t i = 0; i < size(); ++i)
+          {
+            m_lhs_iters[i] = m_lhs[i].begin();
+            m_match_failed[i] = false;
+          }
         }
 
         /// Check if m is contained in a lhs in the communication entry.
@@ -7847,24 +7874,24 @@ class specification_basic_type
             bool comm_ok = false;
             for (std::size_t i=0; i < size(); ++i)
             {
-              if (match_failed[i]) // lhs i does not match
+              if (m_match_failed[i]) // lhs i does not match
               {
                 continue;
               }
-              if (tmp[i].empty()) // lhs cannot match actionname
+              if (m_lhs_iters[i] == m_lhs[i].end()) // lhs cannot match actionname
               {
-                match_failed[i]=true;
+                m_match_failed[i]=true;
                 continue;
               }
-              if (actionname != tmp[i].front())
+              if (actionname != *m_lhs_iters[i])
               {
                 // no match
-                match_failed[i] = true;
+                m_match_failed[i] = true;
               }
               else
               {
                 // possible match; on to next action
-                tmp[i].pop_front();
+                ++m_lhs_iters[i];
                 comm_ok = true;
               }
             }
@@ -7881,12 +7908,13 @@ class specification_basic_type
 
         // Initialization of lhs, defined as static function so it can be used in the constructor.
         // Allows lhs to be defined as const.
-        static std::vector <identifier_string_list> init_lhs(const communication_expression_list& communications)
+        static std::vector < multi_action_name_t > init_lhs(const communication_expression_list& communications)
         {
-          std::vector <identifier_string_list> result;
+          std::vector<multi_action_name_t> result;
           for (const communication_expression& l: communications)
           {
-            result.push_back(l.action_name().names());
+            const identifier_string_list& names = l.action_name().names();
+            result.emplace_back(names.begin(), names.end());
           }
           return result;
         }
@@ -7909,18 +7937,18 @@ class specification_basic_type
         comm_entry& operator=(const comm_entry& )=delete;
 
         comm_entry(const communication_expression_list& communications)
-            : lhs(init_lhs(communications)),
-              rhs(init_rhs(communications)),
-              tmp(communications.size(), identifier_string_list()),
-              match_failed(communications.size(), false)
+            : m_lhs(init_lhs(communications)),
+              m_rhs(init_rhs(communications)),
+              m_lhs_iters(communications.size()),
+              m_match_failed(communications.size())
         {}
 
         ~comm_entry() = default;
 
         std::size_t size() const
         {
-          assert(lhs.size()==rhs.size() && rhs.size()==tmp.size() && tmp.size()==match_failed.size());
-          return lhs.size();
+          assert(lhs.size()==rhs.size() && rhs.size()==m_lhs_iters.size() && m_lhs_iters.size()==match_failed.size());
+          return m_lhs.size();
         }
 
         /// Determine if there exists a communication expression a1|...|an -> b in comm_table
@@ -7947,13 +7975,13 @@ class specification_basic_type
             for (std::size_t i = 0; i < size(); ++i)
             {
               // lhs i matches only if comm_table[i] is empty
-              if ((!match_failed[i]) && tmp[i].empty())
+              if ((!m_match_failed[i]) && m_lhs_iters[i] == m_lhs[i].end())
               {
-                if (rhs[i] == tau())
+                if (m_rhs[i] == tau())
                 {
                   throw mcrl2::runtime_error("Cannot linearise a process with a communication operator, containing a communication that results in tau or that has an empty right hand side");
                 }
-                result = action_label(rhs[i], m.front().label().sorts());
+                result = action_label(m_rhs[i], m.front().label().sorts());
                 break;
               }
             }
@@ -7976,8 +8004,7 @@ class specification_basic_type
              subbag o of n such that m+o can communicate. */
 
           // Check the cache first.
-          auto it = m_might_communicate_cache.find(m);
-          if(it != m_might_communicate_cache.end())
+          if(auto it = m_might_communicate_cache.find(m); it != m_might_communicate_cache.end())
           {
             return it->second;
           }
@@ -7988,7 +8015,7 @@ class specification_basic_type
           {
             // the rest of actions of lhs that are not in m should be in n
             // rest[i] contains the part of n in which lhs i has to find matching actions
-            // if rest[i] cannot match the left hand side tmp[i], i.e., it becomes empty
+            // if rest[i] cannot match the left hand side m_lhs_iters[i], i.e., it becomes empty
             // before matching all actions in the lhs, we set it to std::nullopt.
             // N.B. when rest[i] becomes empty after matching all actions in the lhs,
             // rest[i].empty() is a meaningful result: we have a successful match.
@@ -7997,13 +8024,13 @@ class specification_basic_type
             // check every lhs
             for (std::size_t i = 0; i < size(); ++i)
             {
-              if (match_failed[i]) // lhs i did not contain m
+              if (m_match_failed[i]) // lhs i did not contain m
               {
                 continue;
               }
 
               // as long as there are still unmatched actions in lhs i...
-              while (!tmp[i].empty())
+              while (m_lhs_iters[i] != m_lhs[i].end())
               {
                 assert(rest[i] != std::nullopt);
                 // .. find them in rest[i]
@@ -8013,7 +8040,7 @@ class specification_basic_type
                   break;
                 }
                 // get first action in lhs i
-                const identifier_string& commname = tmp[i].front();
+                const identifier_string& commname = *m_lhs_iters[i];
                 identifier_string restname = rest[i]->front().label().name();
                 // find it in rest[i]
                 while (commname != restname)
@@ -8033,7 +8060,7 @@ class specification_basic_type
 
                 // action found; try next
                 rest[i]->pop_front();
-                tmp[i].pop_front();
+                ++m_lhs_iters[i];
               }
 
               if (rest[i] != std::nullopt) // lhs was found in rest[i]
@@ -8073,7 +8100,7 @@ class specification_basic_type
       }
       if (n.empty())
       {
-        process::action_label c = comm_table.can_communicate(m); /* returns action_label() if no communication
+        action_label c = comm_table.can_communicate(m); /* returns action_label() if no communication
                                                                   is possible */
         if (c!=action_label())
         {
@@ -8112,6 +8139,7 @@ class specification_basic_type
       }
     }
 
+    static
     bool xi(const action_list& alpha, const action_list& beta, comm_entry& comm_table)
     {
       if (beta.empty())
@@ -8360,6 +8388,7 @@ class specification_basic_type
       mCRL2log(mcrl2::log::verbose) << " resulting in " << action_summands.size() << " action summands and " << deadlock_summands.size() << " delta summands\n";
     }
 
+    static
     bool check_real_variable_occurrence(
       const variable_list& sumvars,
       const data_expression& actiontime,
@@ -9139,11 +9168,9 @@ class specification_basic_type
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
 
-      variable_list allpars;
-      allpars=par1 + par3;
+      variable_list allpars = par1 + par3;
 
-      bool inline_allow = is_allow || is_block;
-      if (inline_allow)
+      if (is_allow || is_block)
       {
         // Inline allow is only supported for ignore_time,
         // for in other cases generation of delta summands cannot be inlined in any simple way.
@@ -9524,11 +9551,12 @@ class specification_basic_type
         {
           ultimate_delay_condition=getUltimateDelayCondition(action_summands,deadlock_summands,pars);
 
-          // The ultimate_delay_condition can be complex. Try to simplify it with a fourier_motzkin reduction.
-          data_expression simplified_ultimate_delay_condition;
-          variable_list reduced_sumvars;
           try
           {
+            // The ultimate_delay_condition can be complex. Try to simplify it with a fourier_motzkin reduction.
+            data_expression simplified_ultimate_delay_condition;
+            variable_list reduced_sumvars;
+
             fourier_motzkin(ultimate_delay_condition.constraint(),
                             ultimate_delay_condition.variables(),
                             simplified_ultimate_delay_condition,
@@ -9903,13 +9931,13 @@ class specification_basic_type
          it prints the process variables that contain time. Furtermore, it returns
          whether there are processes that contain an if-then that will be translated
          to an if-then-else with an delta@0 in the else branch, introducing time */
-      bool stable=0;
+      bool stable=false;
       bool contains_if_then=false;
 
       while (!stable)
       {
         std::set < process_identifier > visited;
-        stable=1;
+        stable=true;
         containstime_rec(procId,&stable,visited,contains_if_then);
       }
       return contains_if_then;
@@ -9945,7 +9973,7 @@ class specification_basic_type
           for(const variable& v: relevant_stochastic_variables)
           {
             new_assignments=push_back(new_assignments,assignment(*i,local_sigma1(v)));
-            i++;
+            ++i;
           }
           data_expression new_distribution = data::replace_variables_capture_avoiding(sto.distribution(),local_sigma1);
 
@@ -11293,7 +11321,7 @@ class specification_basic_type
 
 mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
-  mcrl2::lps::t_lin_options lin_options)
+  const mcrl2::lps::t_lin_options& lin_options)
 {
   mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_options.lin_method << "' method.\n";
   mcrl2::process::process_specification input_process=type_checked_spec;
