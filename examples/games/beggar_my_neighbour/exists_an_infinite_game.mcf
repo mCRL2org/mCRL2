@@ -1,0 +1,2 @@
+% This formula is true if there is an infinite game. 
+form nu X.<true>X;

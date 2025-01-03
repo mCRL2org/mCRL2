@@ -1,0 +1,66 @@
+% This example is a model of the card game Beggar-my-neighbour, a simple and deterministic game (https://en.wikipedia.org/wiki/Beggar-my-neighbour).
+% A longstanding open question was whether this game always terminates. Conway once referred to this problem as an 'anti-Hilbert' problem,
+% suggesting it should not drive the future of mathematical research.
+% 
+% A non-terminating instance of Beggar-my-neighbour was presented in Casella et al. -- "A Non-Terminating Game of Beggar-My-Neighbor." arXiv preprint arXiv:2403.13855 (2024).
+% This file contains the run of the non-terminating game 'LoopingGame' and a simulation of all possible games on a partial deck 'PartialDeck'.
+% In this partial deck, no non-terminating games exist.
+% 
+% Jan Martens, January 2025.
+
+act splay, rplay, play: Bool # Card;
+    sdraw, rdraw, draw: Bool # Card;
+    takeStock, sTakeStock, rTakeStock: Bool # List(Card);
+
+
+sort Card = struct J | Q  | K | A | C;
+
+map costs: Card -> Int;
+    drawFromDeck: Bag(Card) # Card -> Bag(Card);
+    InitDeck: Bag(Card);
+    reverse: List(Card) -> List(Card);
+    number_of_cards: Nat;
+
+var deck: Bag(Card);
+    Ca: Card;
+
+ 
+
+eqn InitDeck = {J:1, Q:1, K:1, A:1, C:6};
+    number_of_cards = count(J,InitDeck) + count(Q,InitDeck) + count(K,InitDeck) + count(A,InitDeck) + count(C,InitDeck);
+    drawFromDeck(deck, Ca) = deck - {Ca:1};
+
+eqn costs(J) = 1;
+    costs(Q) = 2;
+    costs(K) = 3;
+    costs(A) = 4;
+ 
+proc Player(p:Bool, deck: List(Card), cardsleft:Int)
+=
+    (cardsleft > 0) -> (sum c:Card. sdraw(p,c) . Player(cardsleft=cardsleft-1, deck = c |> deck)) +
+    (deck != [] && cardsleft ==0)->
+        (splay(p, head(deck)). Player(deck = tail(deck)))
+    +
+    sum cards:List(Card). rTakeStock(p, cards) . Player(deck = deck ++ cards);
+
+Game(board: List(Card), deckLeft:Bag(Card) , turn:Bool, counter:Int)
+=
+   sum Ca: Card. (count(Ca, deckLeft) > 0) -> rdraw(turn, Ca). Game(deckLeft=drawFromDeck(deckLeft, Ca)) +
+   (counter == 0) -> ( rplay(turn, C) . Game(turn = !turn, board = board ++ [C]) +
+                    sum c:Card. (c != C) -> rplay(turn, c) . Game(board = board ++ [c] , counter = costs(c), turn =!turn)) +
+   (counter == 1) -> ( rplay(turn, C). sTakeStock(!turn, board ++ [C]). Game(board = [],turn=!turn, counter = 0) +
+                    sum c:Card. (c != C) -> rplay(turn, c) . Game(board = board ++ [c], counter = costs(c), turn =!turn)) +
+   (counter > 1) -> ( rplay(turn, C) . Game(board = board ++ [C], counter = counter-1) +
+                    sum c:Card. (c != C) -> rplay(turn, c) . Game(board = board ++ [c] , counter = costs(c), turn =!turn));
+
+
+LoopingGame  = Game([],InitDeck, true, 0) || Player(true, [C,C,C,K,C,C,C,Q,C,K,Q,A,J,C,C,C,C,C,A,A,J,C,C,J,C,C]
+            , 0) || Player(false, [C,C,C,C,C,C,C,C,C,C,Q,C,C,C,C,K,Q,C,J,C,C,C,C,C,K,A], 0);
+
+PartialDeck =   Game([],InitDeck, true, 0) || Player(true, [], number_of_cards div 2) || Player(false, [C,C,C,C,C,C,C,C,C,C,Q,C,C,C,C,K,Q,C,J,C,C,C,C,C,K,A], number_of_cards div 2);
+
+init allow({play,draw, takeStock},
+	comm({splay|rplay -> play, sdraw|rdraw -> draw, sTakeStock|rTakeStock-> takeStock},
+        %PartialDeck
+        LoopingGame
+     ));
