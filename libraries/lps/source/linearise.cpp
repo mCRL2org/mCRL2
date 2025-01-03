@@ -37,6 +37,8 @@
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h"
+#include "mcrl2/lps/linearise_utility.h"
+#include "mcrl2/lps/linearise_rename.h"
 
 // Process libraries.
 #include "mcrl2/process/alphabet_reduce.h"
@@ -791,24 +793,6 @@ class specification_basic_type
   private:
 
     /********** various functions on action and multi actions  ***************/
-    static
-    bool actioncompare(const action_label& a1, const action_label& a2)
-    {
-      /* first compare the strings in the actions */
-      if (std::string(a1.name())<std::string(a2.name()))
-      {
-        return true;
-      }
-
-      if (a1.name()==a2.name())
-      {
-        /* the strings are equal; the sorts are used to
-           determine the ordering */
-        return a1.sorts()<a2.sorts();
-      }
-
-      return false;
-    }
 
     static
     action_list linInsertActionInMultiActionList(
@@ -829,7 +813,7 @@ class specification_basic_type
          in memory, to order them. As the aterm library maintains
          pointers to objects that are not garbage collected, this
          is a safe way to do this. */
-      if (actioncompare(act.label(),firstAction.label()))
+      if (action_label_compare(act.label(),firstAction.label()))
       {
         multiAction.push_front(act);
         return multiAction;
@@ -7622,54 +7606,7 @@ class specification_basic_type
       }
     }
 
-    /**************** renaming ******************************************/
 
-    static
-    action rename_action(const rename_expression_list& renamings, const action& act)
-    {
-      const action_label& actionId=act.label();
-      const identifier_string& s=actionId.name();
-      for (const rename_expression& renaming: renamings)
-      {
-        if (s==renaming.source())
-        {
-          return action(action_label(renaming.target(),actionId.sorts()),
-                        act.arguments());
-        }
-      }
-      return act;
-    }
-
-    action_list rename_actions(const rename_expression_list& renamings,
-                               const action_list& multiaction)
-    {
-      action_list resultactionlist;
-
-      for (const action& a: multiaction)
-      {
-        resultactionlist=linInsertActionInMultiActionList(
-                           rename_action(renamings,a),
-                           resultactionlist);
-      }
-      return resultactionlist;
-    }
-
-    void renamecomposition(
-      const rename_expression_list& renamings,
-      stochastic_action_summand_vector& action_summands)
-    {
-      for (stochastic_action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
-      {
-        const action_list actions=rename_actions(renamings,i->multi_action().actions());
-
-        *i= stochastic_action_summand(i->summation_variables(),
-                           i->condition(),
-                           i->multi_action().has_time()?multi_action(actions,i->multi_action().time()):multi_action(actions),
-                           i->assignments(),
-                           i->distribution());
-
-      }
-    }
 
     /**************** equalargs ****************************************/
 
@@ -9477,7 +9414,7 @@ class specification_basic_type
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,process::rename(t).operand(),
                               regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
-        renamecomposition(process::rename(t).rename_set(),action_summands);
+        lps::rename(process::rename(t).rename_set(),action_summands);
         return;
       }
 
