@@ -8031,7 +8031,6 @@ class specification_basic_type
                    const action_list& w,
                    const action_list& n,
                    const action_list& r,
-                   const bool r_is_null,
                    comm_entry& comm_table)
     {
       /* phi is a function that yields a list of pairs
@@ -8054,7 +8053,7 @@ class specification_basic_type
                                                                   is possible */
         if (c!=action_label())
         {
-          const tuple_list T=makeMultiActionConditionList_aux(w,comm_table,r,r_is_null);
+          const tuple_list T=makeMultiActionConditionList_aux(w,comm_table,r);
           return addActionCondition(
                    (c==action_label()?action():action(c,d)),  //Check. Nil kan niet geleverd worden.
                    sort_bool::true_(),
@@ -8072,20 +8071,20 @@ class specification_basic_type
       {
         action_list tempw=w;
         tempw=push_back(tempw,firstaction);
-        return phi(m,d,tempw,o,r,r_is_null,comm_table);
+        return phi(m,d,tempw,o,r,comm_table);
       }
       else
       {
         action_list tempm=m;
         tempm=push_back(tempm,firstaction);
-        const tuple_list T=phi(tempm,d,w,o,r,r_is_null,comm_table);
+        const tuple_list T=phi(tempm,d,w,o,r,comm_table);
         action_list tempw=w;
         tempw=push_back(tempw,firstaction);
         return addActionCondition(
                  action(),
                  condition,
                  T,
-                 phi(m,d,tempw,o,r,r_is_null,comm_table));
+                 phi(m,d,tempw,o,r,comm_table));
       }
     }
 
@@ -8150,8 +8149,7 @@ class specification_basic_type
     tuple_list makeMultiActionConditionList_aux(
       const action_list& multiaction,
       comm_entry& comm_table,
-      const action_list& r,
-      const bool r_is_null)
+      const action_list& r)
     {
       /* This is the function gamma(m,C,r) provided
          by Muck van Weerdenburg in Calculation of
@@ -8159,7 +8157,7 @@ class specification_basic_type
       if (multiaction.empty())
       {
         tuple_list t;
-        t.conditions.push_back((r_is_null)?static_cast<const data_expression&>(sort_bool::true_()):psi(r,comm_table));
+        t.conditions.push_back((r.empty())?static_cast<const data_expression&>(sort_bool::true_()):psi(r,comm_table));
         t.actions.push_back(action_list());
         return t;
       }
@@ -8171,12 +8169,12 @@ class specification_basic_type
                              firstaction.arguments(),
                              action_list(),
                              remainingmultiaction,
-                             r,r_is_null,comm_table);
+                             r,comm_table);
       action_list tempr=r;
       tempr.push_front(firstaction);
       const tuple_list T=makeMultiActionConditionList_aux(
                            remainingmultiaction,comm_table,
-                           (r_is_null) ? action_list({ firstaction }) : tempr, false);
+                           tempr);
       return addActionCondition(firstaction,sort_bool::true_(),T,S);
     }
 
@@ -8185,7 +8183,7 @@ class specification_basic_type
       const communication_expression_list& communications)
     {
       comm_entry comm_table(communications);
-      return makeMultiActionConditionList_aux(multiaction,comm_table,action_list(),true);
+      return makeMultiActionConditionList_aux(multiaction,comm_table,action_list());
     }
 
     void communicationcomposition(
