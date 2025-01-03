@@ -7949,7 +7949,11 @@ class specification_basic_type
 
           // the rest of actions of lhs that are not in m should be in n
           // rest[i] contains the part of n in which lhs i has to find matching actions
-          std::vector < action_list > rest(size(),n);
+          // if rest[i] cannot match the left hand side tmp[i], i.e., it becomes empty
+          // before matching all actions in the lhs, we set it to std::nullopt.
+          // N.B. when rest[i] becomes empty after matching all actions in the lhs,
+          // rest[i].empty() is a meaningful result: we have a successful match.
+          std::vector < std::optional<action_list> > rest(size(),n);
 
           // check every lhs
           for (std::size_t i=0; i<size(); ++i)
@@ -7958,37 +7962,40 @@ class specification_basic_type
             {
               continue;
             }
-            // as long as there are still unmatch actions in lhs i...
+            // as long as there are still unmatched actions in lhs i...
             while (!tmp[i].empty())
             {
+              assert(rest[i] != std::nullopt);
               // .. find them in rest[i]
-              if (rest[i].empty()) // no luck
+              if (rest[i]->empty()) // no luck
               {
+                rest[i] = std::nullopt;
                 break;
               }
               // get first action in lhs i
-              const identifier_string commname = tmp[i].front();
-              identifier_string restname = rest[i].front().label().name();
+              const identifier_string& commname = tmp[i].front();
+              identifier_string restname = rest[i]->front().label().name();
               // find it in rest[i]
               while (commname!=restname)
               {
-                rest[i].pop_front();
-                if (rest[i].empty()) // no more
+                rest[i]->pop_front();
+                if (rest[i]->empty()) // no more
                 {
+                  rest[i] = std::nullopt;
                   break;
                 }
-                restname = rest[i].front().label().name();
+                restname = rest[i]->front().label().name();
               }
               if (commname!=restname) // action was not found
               {
                 break;
               }
               // action found; try next
-              rest[i].pop_front();
+              rest[i]->pop_front();
               tmp[i].pop_front();
             }
 
-            if (!rest[i].empty()) // lhs was found in rest[i]
+            if (rest[i] != std::nullopt) // lhs was found in rest[i]
             {
               return true;
             }
