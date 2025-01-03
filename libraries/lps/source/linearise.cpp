@@ -8104,7 +8104,7 @@ class specification_basic_type
                                                                   is possible */
         if (c!=action_label())
         {
-          const tuple_list T=makeMultiActionConditionList_aux(w,comm_table,r);
+          const tuple_list T=makeMultiActionConditionList_aux(w.begin(), w.end(),comm_table,r);
           return addActionCondition(
                    (c==action_label()?action():action(c,d)),  //Check. Nil kan niet geleverd worden.
                    sort_bool::true_(),
@@ -8150,7 +8150,7 @@ class specification_basic_type
       {
         const action& a = beta.front();
         action_list l=alpha;
-        l=push_back(l,a); // this is expensive!
+        l=push_back(l,a);
         const action_list& beta_next = beta.tail();
 
         if (comm_table.can_communicate(l)!=action_label())
@@ -8201,14 +8201,15 @@ class specification_basic_type
 
     // returns a list of tuples.
     tuple_list makeMultiActionConditionList_aux(
-      const action_list& multiaction,
+      action_list::const_iterator multiaction_first,
+      action_list::const_iterator multiaction_last,
       comm_entry& comm_table,
       const action_list& r)
     {
       /* This is the function gamma(m,C,r) provided
          by Muck van Weerdenburg in Calculation of
          Communication with open terms [1]. */
-      if (multiaction.empty())
+      if (multiaction_first == multiaction_last)
       {
         tuple_list t;
         t.conditions.push_back((r.empty())?static_cast<const data_expression&>(sort_bool::true_()):psi(r,comm_table));
@@ -8216,8 +8217,9 @@ class specification_basic_type
         return t;
       }
 
-      const action& firstaction=multiaction.front();
-      const action_list& remainingmultiaction=multiaction.tail(); /* This is m in [1] */
+      const action& firstaction=*multiaction_first;
+
+      const action_list remainingmultiaction(std::next(multiaction_first), multiaction_last); /* This is m in [1] */
 
       const tuple_list S=phi(action_list({ firstaction }),
                              firstaction.arguments(),
@@ -8226,8 +8228,7 @@ class specification_basic_type
                              r,comm_table);
       action_list tempr=r;
       tempr.push_front(firstaction);
-      const tuple_list T=makeMultiActionConditionList_aux(
-                           remainingmultiaction,comm_table,
+      const tuple_list T=makeMultiActionConditionList_aux(std::next(multiaction_first), multiaction_last,comm_table,
                            tempr);
       return addActionCondition(firstaction,sort_bool::true_(),T,S);
     }
@@ -8237,7 +8238,7 @@ class specification_basic_type
       const communication_expression_list& communications)
     {
       comm_entry comm_table(communications);
-      return makeMultiActionConditionList_aux(multiaction,comm_table,action_list());
+      return makeMultiActionConditionList_aux(multiaction.begin(), multiaction.end(),comm_table,action_list());
     }
 
     void communicationcomposition(
@@ -8271,7 +8272,7 @@ class specification_basic_type
       deadlock_summand_vector resultingDeltaSummands;
       deadlock_summands.swap(resultingDeltaSummands);
 
-      bool inline_allow = is_allow || is_block;
+      const bool inline_allow = is_allow || is_block;
       if (inline_allow)
       {
         // Inline allow is only supported for ignore_time,
