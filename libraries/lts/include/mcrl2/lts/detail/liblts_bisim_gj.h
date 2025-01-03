@@ -1205,6 +1205,9 @@ struct block_type
       block()
   {}
 
+  /// \brief copy constructor.
+  block_type(const block_type&) = default;
+
   block_type(fixed_vector<state_in_block_pointer>::iterator
                                 beginning_of_states, constellation_index new_c)
     : c(new_c),
