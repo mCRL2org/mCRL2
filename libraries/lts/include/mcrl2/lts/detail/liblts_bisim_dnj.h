@@ -279,7 +279,8 @@ class state_info_entry
                                                                                     {
                                                                                         return "state " + debug_id_short(partitioner);
                                                                                     }
-
+                                                                                #endif
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     mutable check_complexity::state_dnj_counter_t work_counter;
                                                                                 #endif
 };
@@ -488,8 +489,6 @@ class block_t
     /// \returns pointer to the new block
                                                                                 ONLY_IF_DEBUG( template<class LTS_TYPE> )
     block_t* split_off_block(enum new_block_mode_t new_block_mode,              ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
-            ONLY_IF_POOL_ALLOCATOR(
-                 my_pool<simple_list<block_bunch_slice_t>::entry>& storage, )
                                                          state_type new_seqnr);
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief print a block identification for debugging
@@ -507,7 +506,8 @@ class block_t
                                                                                            "," + std::to_string(end - partitioner.part_st.permutation.data()) +
                                                                                                                           ") (#" + std::to_string(seqnr) + ")";
                                                                                     }
-
+                                                                                #endif
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     mutable check_complexity::block_dnj_counter_t work_counter;
                                                                                 #endif
 };
@@ -545,8 +545,10 @@ class part_state_t
         state_info(num_states),
         nr_of_blocks(0)
     {                                                                           assert(0 < num_states);
-        permutation_entry* perm_iter(permutation.data());                       ONLY_IF_POOL_ALLOCATOR(
-                                                                                               static_assert(std::is_trivially_destructible<block_t>::value); )
+        permutation_entry* perm_iter(permutation.data());
+                                                                                #ifdef USE_POOL_ALLOCATOR
+                                                                                    static_assert(std::is_trivially_destructible<block_t>::value);
+                                                                                #endif
         state_info_entry* state_iter(state_info.data());                        assert(perm_iter < permutation.data_end());
         do
         {
@@ -727,7 +729,7 @@ class part_state_t
 
 
 
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
 /* ************************************************************************* */     static struct {
 /*                                                                           */         bool operator()(const iterator_or_counter<action_block_entry*> p1,
 /*                           T R A N S I T I O N S                           */                             const action_block_entry* const action_block) const
@@ -799,7 +801,7 @@ class succ_entry
 
     /// \brief find the bunch of the transition
     bunch_t* bunch() const;
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     /// \brief assign work to the transitions in an out-slice (i.e. the
                                                                                     /// transitions from one state in a specific bunch)
                                                                                     /// \details This debugging function is called to account for work that
@@ -878,7 +880,8 @@ class pred_entry
                                                                                         return pp(partitioner.aut.action_label(label)) + "-transition " +
                                                                                                                                    debug_id_short(partitioner);
                                                                                     }
-
+                                                                                #endif
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     mutable check_complexity::trans_dnj_counter_t work_counter;
                                                                                 #endif
 };
@@ -1047,7 +1050,8 @@ class bunch_t
                                                                                         }
                                                                                         return result;
                                                                                     }
-
+                                                                                #endif
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     /// \brief calculates the maximal allowed value for work counters
                                                                                     /// associated with this bunch
                                                                                     /// \details Work counters may only be nonzero if this bunch is a
@@ -1200,7 +1204,8 @@ class block_bunch_slice_t
                                                                                                                    source_block()->debug_id(partitioner) +
                                                                                                                    " in " + bunch->debug_id_short(partitioner);
                                                                                     }
-
+                                                                                #endif
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     /// \brief add work to transitions starting in bottom states
                                                                                     /// \details Sometimes an action is done whose time could be accounted for
                                                                                     /// by any transition starting in a bottom state of the block.
@@ -1231,6 +1236,7 @@ class block_bunch_slice_t
                                                                                             {
                                                                                                 mCRL2complexity(block_bunch->pred, add_work(ctr, max_value),
                                                                                                                                                   partitioner);
+                                                                                                (void) partitioner; // avoid unused variable warning
                                                                                                 result = true;
                                                                                             }
                                                                                         }
@@ -1269,7 +1275,7 @@ inline bunch_t* succ_entry::bunch() const
 {
     return block_bunch->slice->bunch;
 }
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     /// \brief register that work has been done for the out-slice containing
                                                                                     /// `out_slice_begin`
                                                                                     /// \details This function should be used if work
@@ -1290,12 +1296,17 @@ inline bunch_t* succ_entry::bunch() const
                                                                                         assert(out_slice_begin <= out_slice_before_end);
                                                                                         mCRL2complexity(out_slice_begin->block_bunch->pred,
                                                                                                                         add_work(ctr, max_value), partitioner);
-                                                                                        while (++out_slice_begin <= out_slice_before_end)
-                                                                                        {
-                                                                                            // treat temporary counters specially
-                                                                                            mCRL2complexity(out_slice_begin->block_bunch->pred,
+                                                                                        #ifndef NDEBUG
+                                                                                            while (++out_slice_begin <= out_slice_before_end)
+                                                                                            {
+                                                                                                // treat temporary counters specially
+                                                                                                mCRL2complexity(out_slice_begin->block_bunch->pred,
                                                                                                             add_work_notemporary(ctr, max_value), partitioner);
-                                                                                        }
+                                                                                            }
+                                                                                        #else
+                                                                                            (void) partitioner; (void) out_slice_before_end;
+                                                                                            // avoid unused variable warning
+                                                                                        #endif
                                                                                     }
                                                                                 #endif
 class part_trans_t
@@ -1346,10 +1357,6 @@ class part_trans_t
   public:
     #ifdef USE_POOL_ALLOCATOR
                                                                                 static_assert(std::is_trivially_destructible<bunch_t>::value);
-                                                                                static_assert(std::is_trivially_destructible<
-                                                                                                              simple_list<block_bunch_slice_t>::entry>::value);
-        /// \brief pool for allocation of block_bunch-slices
-        my_pool<simple_list<block_bunch_slice_t>::entry> storage;
     #endif
 
     /// \brief number of new bottom states found until now.
@@ -1564,15 +1571,16 @@ class part_trans_t
 
             #ifdef USE_SIMPLE_LIST
                 new_block_bunch_slice = splitter_list.emplace_back(
-                            ONLY_IF_POOL_ALLOCATOR( storage, )
                              new_block_bunch_pos + 1, bunch_T_a_Bprime, false);
             #else
                 splitter_list.emplace_back(new_block_bunch_pos + 1,
                                                       bunch_T_a_Bprime, false);
                 new_block_bunch_slice = std::prev(splitter_list.end());
             #endif
-            ++nr_of_block_bunch_slices;                                         ONLY_IF_DEBUG( new_block_bunch_slice->work_counter =
-                                                                                                                         old_block_bunch_slice->work_counter; )
+            ++nr_of_block_bunch_slices;
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    new_block_bunch_slice->work_counter = old_block_bunch_slice->work_counter;
+                                                                                #endif
             splitter_list.splice(splitter_list.end(),
                       source_block->stable_block_bunch, old_block_bunch_slice);
             old_block_bunch_slice->make_unstable();
@@ -1594,8 +1602,7 @@ class part_trans_t
         old_block_bunch_slice->marked_begin = new_block_bunch_pos;              assert(nullptr != new_block_bunch_pos);
         if (old_block_bunch_slice->empty())
         {                                                                       assert(!old_block_bunch_slice->is_stable());
-            splitter_list.erase(  ONLY_IF_POOL_ALLOCATOR( storage, )
-                                                        old_block_bunch_slice); assert(!new_block_bunch_slice->is_stable());
+            splitter_list.erase(old_block_bunch_slice);                         assert(!new_block_bunch_slice->is_stable());
             --nr_of_block_bunch_slices;
 
             // Because now every bottom state has a transition in the new
@@ -1759,9 +1766,7 @@ class part_trans_t
                                                                                 ONLY_IF_DEBUG( template <class LTS_TYPE> )
     succ_entry* move_out_slice_to_new_block(
                                succ_entry* out_slice_end,                       ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
-                               #ifndef USE_SIMPLE_LIST
-                                   block_t* const old_block,
-                               #endif
+                               block_t* const old_block,
                                block_bunch_slice_const_iter_t const splitter_T)
     {                                                                           assert(&succ.cbegin()[1] < out_slice_end);
         succ_entry* const out_slice_begin(
@@ -1797,7 +1802,6 @@ class part_trans_t
                 #ifdef USE_SIMPLE_LIST
                     new_block_bunch_slice =
                         new_block->stable_block_bunch.emplace_front(
-                                ONLY_IF_POOL_ALLOCATOR( storage, )
                                            old_block_bunch_slice->end,
                                            old_block_bunch_slice->bunch, true);
                 #else
@@ -1812,7 +1816,6 @@ class part_trans_t
             {
                 #ifdef USE_SIMPLE_LIST
                     new_block_bunch_slice = splitter_list.emplace_after(
-                            ONLY_IF_POOL_ALLOCATOR( storage, )
                                           old_block_bunch_slice,
                                           old_block_bunch_slice->end,
                                           old_block_bunch_slice->bunch, false);
@@ -1823,11 +1826,15 @@ class part_trans_t
                                           old_block_bunch_slice->bunch, false);
                 #endif
             }
-            ++nr_of_block_bunch_slices;                                         ONLY_IF_DEBUG( new_block_bunch_slice->work_counter =
-                                                                                                                         old_block_bunch_slice->work_counter; )
+            ++nr_of_block_bunch_slices;
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    new_block_bunch_slice->work_counter = old_block_bunch_slice->work_counter;
+                                                                                #endif
         }
-                                                                                ONLY_IF_DEBUG( unsigned max_counter = check_complexity::log_n -
-                                                                                                                  check_complexity::ilog2(new_block->size()); )
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    unsigned max_counter = check_complexity::log_n -
+                                                                                                                    check_complexity::ilog2(new_block->size());
+                                                                                #endif
         /* move all transitions in this out-slice to the new block_bunch     */ assert(out_slice_begin < out_slice_end);
         do
         {                                                                       assert(old_block_bunch_pos == out_slice_end[-1].block_bunch);
@@ -1899,34 +1906,28 @@ class part_trans_t
 
         if (old_block_bunch_slice->empty())
         {
-            #ifdef USE_SIMPLE_LIST
-                simple_list<block_bunch_slice_t>::erase(
-                            ONLY_IF_POOL_ALLOCATOR( storage, )
-                                                        old_block_bunch_slice);
-            #else
-                if (old_block_bunch_slice->is_stable())
-                {
-                    // If the new block is R, then the old (U) block loses
-                    // exactly one stable block_bunch-slice, namely the one we
-                    // just stabilised for (`splitter_T`).  We could perhaps
-                    // optimize this by moving that slice as a whole to the new
-                    // block -- perhaps later.
-                    //
-                    // If the new block is U, then the old (R) block loses
-                    // no stable block_bunch-slices if it contains any bottom
-                    // state.  If it doesn't contain any bottom state, it will
-                    // definitely keep `splitter_T`, but nothing else can be
-                    // guaranteed.
-                    //
-                    // So old_block_bunch_slice may be deleted, in particular
-                    // if the new block is U, but not exclusively.
-                    old_block->stable_block_bunch.erase(old_block_bunch_slice);
-                }
-                else
-                {
-                    splitter_list.erase(old_block_bunch_slice);
-                }
-            #endif
+            if (old_block_bunch_slice->is_stable())
+            {
+                // If the new block is R, then the old (U) block loses
+                // exactly one stable block_bunch-slice, namely the one we
+                // just stabilised for (`splitter_T`).  We could perhaps
+                // optimize this by moving that slice as a whole to the new
+                // block -- perhaps later.
+                //
+                // If the new block is U, then the old (R) block loses
+                // no stable block_bunch-slices if it contains any bottom
+                // state.  If it doesn't contain any bottom state, it will
+                // definitely keep `splitter_T`, but nothing else can be
+                // guaranteed.
+                //
+                // So old_block_bunch_slice may be deleted, in particular
+                // if the new block is U, but not exclusively.
+                old_block->stable_block_bunch.erase(old_block_bunch_slice);
+            }
+            else
+            {
+                splitter_list.erase(old_block_bunch_slice);
+            }
             --nr_of_block_bunch_slices;
         }
         return out_slice_begin;
@@ -2258,7 +2259,8 @@ class part_trans_t
             // create a new bunch for noninert transitions
             new_noninert_bunch =
                 #ifdef USE_POOL_ALLOCATOR
-                    storage.template construct<bunch_t>
+                    simple_list<block_bunch_slice_t>::get_pool().
+                    template construct<bunch_t>
                 #else
                     new bunch_t
                 #endif
@@ -2269,7 +2271,6 @@ class part_trans_t
             #ifdef USE_SIMPLE_LIST
                 block_bunch_slice_iter_t new_noninert_block_bunch(
                     splitter_list.emplace_back(
-                        ONLY_IF_POOL_ALLOCATOR( storage, )
                           block_bunch_inert_begin, new_noninert_bunch, false));
             #else
                 splitter_list.emplace_back(block_bunch_inert_begin,
@@ -2335,10 +2336,7 @@ class part_trans_t
                                 s == succ_iter[-1].block_bunch->pred->source; )
             {
                 succ_iter = move_out_slice_to_new_block(succ_iter,              ONLY_IF_DEBUG( partitioner, )
-                                                    #ifndef USE_SIMPLE_LIST
-                                                        old_block,
-                                                    #endif
-                                                                   splitter_T); assert(succ_iter->block_bunch->pred->action_block->succ == succ_iter);
+                                                        old_block, splitter_T); assert(succ_iter->block_bunch->pred->action_block->succ == succ_iter);
                                                                                 assert(s == succ_iter->block_bunch->pred->source);
                                                                                 // add_work_to_out_slice(succ_iter, ...) -- subsumed in the call below
             }
@@ -2477,20 +2475,24 @@ class part_trans_t
                                                                                         }
                                                                                         const state_info_entry* source(succ_iter->block_bunch->pred->source);
                                                                                         mCRL2log(log::debug) << source->debug_id(partitioner) << ":\n";
-                                                                                        block_bunch_slice_iter_or_null_t current_out_bunch(
-                                                                                                         const_cast<part_trans_t*>(this)->splitter_list.end());
+                                                                                        if (succ_iter->block_bunch->slice.is_null())
+                                                                                        {
+                                                                                            mCRL2log(log::debug) << "\tInert successors:\n";
+                                                                                        }
+                                                                                        block_bunch_slice_iter_or_null_t current_out_bunch(nullptr);
                                                                                         do
                                                                                         {
+                                                                                            bool always_print=false;
                                                                                             if (source != succ_iter->block_bunch->pred->source)
                                                                                             {   assert(source < succ_iter->block_bunch->pred->source);
                                                                                                 source = succ_iter->block_bunch->pred->source;
                                                                                                 mCRL2log(log::debug)
                                                                                                     << source->debug_id(partitioner) << ":\n";
-                                                                                                current_out_bunch =
-                                                                                                          const_cast<part_trans_t*>(this)->splitter_list.end();
+                                                                                                always_print=true;
                                                                                             }
-                                                                                            if (succ_iter->block_bunch->slice != current_out_bunch)
-                                                                                            {   assert(!current_out_bunch.is_null());
+                                                                                            if (always_print ||
+                                                                                                succ_iter->block_bunch->slice != current_out_bunch)
+                                                                                            {   //assert(!current_out_bunch.is_null());
                                                                                                 if (succ_iter->block_bunch->slice.is_null())
                                                                                                 {   assert(succ_iter == source->succ_inert.begin);
                                                                                                     mCRL2log(log::debug)<<"\tInert successors:\n";
@@ -2498,9 +2500,9 @@ class part_trans_t
                                                                                                 }
                                                                                                 else
                                                                                                 {   assert(succ_iter < source->succ_inert.begin);
-                                                                                                    assert(!current_out_bunch.is_null());
-                                                                                                    assert(current_out_bunch == splitter_list.end() ||
-                                                                                                               current_out_bunch->bunch != succ_iter->bunch());
+                                                                                                    //assert(!current_out_bunch.is_null());
+                                                                                                    //assert(current_out_bunch == splitter_list.end() ||
+                                                                                                    //           current_out_bunch->bunch != succ_iter->bunch());
                                                                                                     mCRL2log(log::debug) << "\tSuccessors in "
                                                                                                       <<succ_iter->bunch()->debug_id_short(partitioner)<<":\n";
                                                                                                     current_out_bunch = succ_iter->block_bunch->slice;
@@ -2593,15 +2595,11 @@ class part_trans_t
 /// \param  new_block_mode  indicates whether the U- or the R-block should be
 ///                         the new one.  (This parameter is necessary in case
 ///                         the two halves have exactly the same size.)
-/// \param  storage         (only if one uses the pool allocator) reference to
-///                         the pool allocator where the new block is placed
 /// \param  new_seqnr       is the sequence number of the new block
 /// \returns pointer to the new block
                                                                                 ONLY_IF_DEBUG( template<class LTS_TYPE> )
 inline block_t* block_t::split_off_block(
         enum new_block_mode_t const new_block_mode,                             ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
-        ONLY_IF_POOL_ALLOCATOR(
-                  my_pool<simple_list<block_bunch_slice_t>::entry>& storage, )
                                                     state_type const new_seqnr)
 {                                                                               assert(0 < marked_size());  assert(0 < unmarked_bottom_size());
     // create a new block
@@ -2615,7 +2613,8 @@ inline block_t* block_t::split_off_block(
     {                                                                           assert((state_type) (splitpoint - begin) <= size()/2);
         new_block =
                     #ifdef USE_POOL_ALLOCATOR
-                        storage.template construct<block_t>
+                        simple_list<block_bunch_slice_t>::get_pool().
+                        template construct<block_t>
                     #else
                         new block_t
                     #endif
@@ -2630,7 +2629,8 @@ inline block_t* block_t::split_off_block(
     {                                                                           assert(new_block_is_R == new_block_mode);
         new_block =
                     #ifdef USE_POOL_ALLOCATOR
-                        storage.template construct<block_t>
+                        simple_list<block_bunch_slice_t>::get_pool().
+                        template construct<block_t>
                     #else
                         new block_t
                     #endif
@@ -2640,10 +2640,10 @@ inline block_t* block_t::split_off_block(
         // adapt the old block: it only keeps the U-states
         end = splitpoint;
         nonbottom_begin = marked_bottom_begin;
-    }                                                                           ONLY_IF_DEBUG( new_block->work_counter = work_counter; )
-
-    // swap contents
-
+    }
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+    /* swap contents                                                         */     new_block->work_counter = work_counter;
+                                                                                #endif
     // The structure of a block is
     // |  unmarked  |   marked   |  unmarked  |   marked   |
     // |   bottom   |   bottom   | non-bottom | non-bottom |
@@ -2717,7 +2717,8 @@ inline bunch_t* bunch_t::split_off_small_action_block_slice(
         // Line 2.7: Pi_t := Pi_t \ {T} union { T--a-->B', T \ T--a-->B' }
         bunch_T_a_Bprime =
                             #ifdef USE_POOL_ALLOCATOR
-                                 part_tr.storage.template construct<bunch_t>
+                                 simple_list<block_bunch_slice_t>::get_pool().
+                                 template construct<bunch_t>
                             #else
                                 new bunch_t
                             #endif
@@ -2734,7 +2735,8 @@ inline bunch_t* bunch_t::split_off_small_action_block_slice(
         // Line 2.7: Pi_t := Pi_t \ {T} union { T--a-->B', T \ T--a-->B' }
         bunch_T_a_Bprime =
                             #ifdef USE_POOL_ALLOCATOR
-                                 part_tr.storage.template construct<bunch_t>
+                                 simple_list<block_bunch_slice_t>::get_pool().
+                                 template construct<bunch_t>
                             #else
                                 new bunch_t
                             #endif
@@ -2745,7 +2747,10 @@ inline bunch_t* bunch_t::split_off_small_action_block_slice(
             ++begin;                                                            assert(begin <= last_slice_begin);
         }                                                                       assert(nullptr != begin->begin_or_before_end);
         if (begin == last_slice_begin)  part_tr.make_trivial(this);
-    }                                                                           ONLY_IF_DEBUG( bunch_T_a_Bprime->work_counter = work_counter; )
+    }
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    bunch_T_a_Bprime->work_counter = work_counter;
+                                                                                #endif
     ++part_tr.nr_of_bunches;
     return bunch_T_a_Bprime;
 }
@@ -2824,7 +2829,7 @@ class bisim_partitioner_dnj
     /// been requested.  There is no such thing as divergence-preserving strong
     /// bisimulation.
     bool const preserve_divergence;
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     friend class bisim_dnj::pred_entry;
                                                                                     friend class bisim_dnj::bunch_t;
                                                                                 #endif
@@ -3010,7 +3015,8 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
         // create one block for all states
         bisim_dnj::block_t* B(
                 #ifdef USE_POOL_ALLOCATOR
-                    part_tr.storage.template construct<bisim_dnj::block_t>
+                    simple_list<bisim_dnj::block_bunch_slice_t>::get_pool().
+                    template construct<bisim_dnj::block_t>
                 #else
                     new bisim_dnj::block_t
                 #endif
@@ -3112,7 +3118,8 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
             // create a single bunch containing all non-inert transitions
             bunch =
                 #ifdef USE_POOL_ALLOCATOR
-                    part_tr.storage.template construct<bisim_dnj::bunch_t>
+                    simple_list<bisim_dnj::block_bunch_slice_t>::get_pool().
+                    template construct<bisim_dnj::bunch_t>
                 #else
                     new bisim_dnj::bunch_t
                 #endif
@@ -3122,7 +3129,6 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
 
             // create a single block_bunch entry for all non-inert transitions
             part_tr.splitter_list.emplace_front(
-                    ONLY_IF_POOL_ALLOCATOR( part_tr.storage, )
                                 part_tr.block_bunch_inert_begin, bunch, false); assert(!part_tr.splitter_list.empty());
             ++part_tr.nr_of_block_bunch_slices;                                 assert(1 == part_tr.nr_of_block_bunch_slices);
         }
@@ -3139,7 +3145,10 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
         /* multiple dummy entries will be placed side-by-side.               */                               aut.num_transitions() + action_label.size() - 1);
         bisim_dnj::action_block_entry*
                           next_action_label_begin(part_tr.action_block.data());
-        trans_type const n_square(part_st.state_size() * part_st.state_size()); ONLY_IF_DEBUG( trans_type max_transitions = n_square; )
+        trans_type const n_square(part_st.state_size() * part_st.state_size());
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    trans_type max_transitions = n_square;
+                                                                                #endif
         label_type label(action_label.size());                                  assert(0 < label);
         do
         {
@@ -3159,8 +3168,11 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                         << pp(aut.action_label(label)) << "-transitions.  "
                         "This is more than n^2 (= " << n_square << "). It is "
                         "not guaranteed that branching bisimulation "
-                        "minimisation runs in time O(m log n).\n";              ONLY_IF_DEBUG(  if (max_transitions < action_label[label].count)
-                                                                                                {   max_transitions = action_label[label].count;   }  )
+                        "minimisation runs in time O(m log n).\n";
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    if (max_transitions < action_label[label].count)
+                                                                                    {   max_transitions = action_label[label].count;   }
+                                                                                #endif
                 }
                 // initialise begin_or_before_end pointers for this
                 // action_block-slice
@@ -3195,9 +3207,9 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                      next_action_label_begin->succ = nullptr,
                      next_action_label_begin->begin_or_before_end = nullptr,
                                              ++next_action_label_begin, true)); assert(next_action_label_begin == part_tr.action_block_inert_begin);
-
-        /* distribute the transitions over the data structures               */ ONLY_IF_DEBUG( check_complexity::init(2 * max_transitions); )
-
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+        /* distribute the transitions over the data structures               */     check_complexity::init(2 * max_transitions);
+                                                                                #endif
         bisim_dnj::block_bunch_entry*
                               next_block_bunch(1 + part_tr.block_bunch.data());
         for (const transition& t: aut.get_transitions())
@@ -3620,8 +3632,8 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
     void refine_partition_until_it_becomes_stable()
     {
         // Line 2.5: for all non-trivial bunches bunch_T in Pi_t do
-        clock_t next_print_time = clock();
-        const clock_t rounded_start_time = next_print_time - CLOCKS_PER_SEC/2;
+        std::clock_t next_print_time = std::clock();
+        const std::clock_t rounded_start_time=next_print_time-CLOCKS_PER_SEC/2;
         // const double log_initial_nr_of_action_block_slices =
         //                   100 / std::log(part_tr.nr_of_action_block_slices);
         for (;;)
@@ -3634,7 +3646,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
             bisim_dnj::bunch_t* const bunch_T(part_tr.get_some_nontrivial());
             if (mCRL2logEnabled(log::verbose))
             {
-                if (clock_t now = clock(); next_print_time <= now ||
+                if (std::clock_t now = std::clock(); next_print_time <= now ||
                                                             nullptr == bunch_T)
                 {
 
@@ -3713,9 +3725,9 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
             /*              { bunch_T_a_Bprime, bunch_T \ bunch_T_a_Bprime } */ assert(part_tr.nr_of_bunches < part_tr.nr_of_action_block_slices);
             bisim_dnj::bunch_t* const bunch_T_a_Bprime(
                          bunch_T->split_off_small_action_block_slice(part_tr));
-                                                                                #ifndef NDEBUG
-            /*------------ find predecessors of bunch_T_a_Bprime ------------*/     mCRL2log(log::debug) << "Splitting off "
-                                                                                                                  << bunch_T_a_Bprime->debug_id(*this) << '\n';
+                                                                                ONLY_IF_DEBUG( mCRL2log(log::debug) << "Splitting off "
+            /*------------ find predecessors of bunch_T_a_Bprime ------------*/                                 << bunch_T_a_Bprime->debug_id(*this) << '\n'; )
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
             /* Line 2.8: for all B in splittableBlocks(bunch_T_a_Bprime) do  */     unsigned const max_splitter_counter(
                 /* we actually run through the transitions in T--a-->B'      */                                     bunch_T_a_Bprime->max_work_counter(*this));
                                                                                 #endif
@@ -3757,15 +3769,16 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
             while (++splitter_iter < bunch_T_a_Bprime->end);                    mCRL2complexity(bunch_T_a_Bprime,
                                                                                          add_work(check_complexity::refine_partition_until_stable__find_pred,
             /*----------------- stabilise the partition again ---------------*/                                                  max_splitter_counter), *this);
-                                                                                ONLY_IF_DEBUG( bisim_dnj::block_bunch_slice_iter_or_null_t
-            /* Line 2.14: for all T'_B--> in the splitter list (in order) do */                                                bbslice_T_a_Bprime_B(nullptr); )
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+            /* Line 2.14: for all T'_B--> in the splitter list (in order) do */     bisim_dnj::block_bunch_slice_iter_or_null_t bbslice_T_a_Bprime_B(nullptr);
+                                                                                #endif
             while (!part_tr.splitter_list.empty())
             {
                 bisim_dnj::block_bunch_slice_iter_t splitter_Tprime_B(          // We have to call mCRL2complexity here because `splitter_Tprime_B` may be
                                                 part_tr.splitter_list.begin()); // split up later.
                 bisim_dnj::block_t* block_B(splitter_Tprime_B->source_block()); assert(!splitter_Tprime_B->is_stable());
                 bool const is_primary_splitter = 0 < block_B->marked_size();    assert(!splitter_Tprime_B->empty());
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     bool add_stabilize_to_bottom_transns_succeeded = true;
                                                                                     if (is_primary_splitter)
                                                                                     {
@@ -3839,7 +3852,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                         /* Line 2.20: end if                                 */     }
                                                                                 #endif
                         }
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     else
                                                                                     {
                                                                                         // account for work that couldn't be accounted for earlier (because we
@@ -3881,17 +3894,17 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                 #endif
                         }
                     }
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     else
                                                                                     {   assert(0 == block_R->marked_size());
                                                                                         assert(add_stabilize_to_bottom_transns_succeeded);
                                                                                         // now splitter must have some transitions that start in bottom states:
                                                                                         if (splitter_Tprime_B->work_counter.has_temporary_work())
                                                                                         {   assert(!is_primary_splitter);
-                                                                                            assert(splitter_Tprime_B->add_work_to_bottom_transns(
-                                                                                                    check_complexity::
-                                                                                                    handle_new_noninert_transns__make_unstable_a_posteriori,
-                                                                                                                                                   1U, *this));
+                                                                                            if (!splitter_Tprime_B->add_work_to_bottom_transns(check_complexity
+                                                                                                  ::handle_new_noninert_transns__make_unstable_a_posteriori,
+                                                                                                                                                    1U, *this))
+                                                                                            {  assert(0);  }
                                                                                             splitter_Tprime_B->work_counter.reset_temporary_work();
                                                                                         }
                                                                                     }
@@ -3907,14 +3920,14 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                      block_B->stable_block_bunch.end(),
                                      part_tr.splitter_list, splitter_Tprime_B);
                     splitter_Tprime_B->make_stable();                           assert(add_stabilize_to_bottom_transns_succeeded);
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     // now splitter must have some transitions that start in bottom states:
                                                                                     if (splitter_Tprime_B->work_counter.has_temporary_work())
                                                                                     {   assert(!is_primary_splitter);
-                                                                                        assert(splitter_Tprime_B->add_work_to_bottom_transns(
-                                                                                                    check_complexity::
+                                                                                        if (!splitter_Tprime_B->add_work_to_bottom_transns(check_complexity::
                                                                                                     handle_new_noninert_transns__make_unstable_a_posteriori,
-                                                                                                                                                   1U, *this));
+                                                                                                                                                   1U, *this))
+                                                                                        {  assert(0);  }
                                                                                         splitter_Tprime_B->work_counter.reset_temporary_work();
                                                                                     }
                                                                                 #endif
@@ -4082,7 +4095,10 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                     // transitions that have become non-inert.
                     block_B->marked_nonbottom_begin = block_B->end;
                     block_B->marked_bottom_begin = block_B->nonbottom_begin;
-                    block_R = block_B;                                          ONLY_IF_DEBUG( finalise_U_is_smaller(nullptr, block_R, *this); )
+                    block_R = block_B;
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    finalise_U_is_smaller(nullptr, block_R, *this);
+                                                                                #endif
                     TERMINATE_COROUTINE_SUCCESSFULLY();
                 }
 
@@ -4144,8 +4160,11 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                     {
                                         goto continuation;
                                                // i. e. break and then continue
-                                    }                                           ONLY_IF_DEBUG( bisim_dnj::succ_entry::add_work_to_out_slice(*this, U_u_iter,
-                                /* Line 3.16l: end for                       */                    check_complexity::split_U__test_noninert_transitions, 1U); )
+                                    }
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    bisim_dnj::succ_entry::add_work_to_out_slice(*this, U_u_iter,
+                                /* Line 3.16l: end for                       */                      check_complexity::split_U__test_noninert_transitions, 1U);
+                                                                                #endif
                                 }
                                 END_COROUTINE_WHILE;
                             // Line 3.17l: end if
@@ -4192,14 +4211,16 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                 block_R = block_B;
                 bisim_dnj::block_t* const block_U(
                     block_R->split_off_block(bisim_dnj::new_block_is_U,         ONLY_IF_DEBUG( *this, )
-                                  ONLY_IF_POOL_ALLOCATOR( part_tr.storage, )
                                                       part_st.nr_of_blocks++));
                 // Line 2.16: Remove Tprime_B--> = Tprime_R--> from the
                 //            splitter list
                 /* and the remainder of Line 2.17                            */ assert(0 == block_U->marked_size());  assert(0 == block_R->marked_size());
                 part_tr.adapt_transitions_for_new_block(block_U, block_R,       ONLY_IF_DEBUG( *this, )
                     extend_from_marked_states__add_new_noninert_to_splitter ==
-                                  mode, splitter_T, bisim_dnj::new_block_is_U); ONLY_IF_DEBUG( finalise_U_is_smaller(block_U, block_R, *this); )
+                                  mode, splitter_T, bisim_dnj::new_block_is_U);
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    finalise_U_is_smaller(block_U, block_R, *this);
+                                                                                #endif
             END_COROUTINE
 
             /*------------------------ find R-states ------------------------*/
@@ -4340,14 +4361,16 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                 // Line 2.17: Pi_s := Pi_s \ { B } union ({ R, U } \ { {} })
                     // All non-R states are in U.
                 block_R = block_B->split_off_block(bisim_dnj::new_block_is_R,   ONLY_IF_DEBUG( *this, )
-                                   ONLY_IF_POOL_ALLOCATOR( part_tr.storage, )
                                                        part_st.nr_of_blocks++);
                 // Line 2.16: Remove Tprime_B--> = Tprime_R--> from the
                 //            splitter list
                 /* and the remainder of Line 2.17                            */ assert(0 == block_B->marked_size());  assert(0 == block_R->marked_size());
                 part_tr.adapt_transitions_for_new_block(block_R, block_B,       ONLY_IF_DEBUG( *this, )
                     extend_from_marked_states__add_new_noninert_to_splitter ==
-                                  mode, splitter_T, bisim_dnj::new_block_is_R); ONLY_IF_DEBUG( finalise_R_is_smaller(block_B, block_R, *this); )
+                                  mode, splitter_T, bisim_dnj::new_block_is_R);
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    finalise_R_is_smaller(block_B, block_R, *this);
+                                                                                #endif
             END_COROUTINE
         END_COROUTINES_SECTION
         return block_R;
@@ -4482,7 +4505,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                      block_N->stable_block_bunch, bbslice_T_N);
                 bbslice_T_N->make_unstable();
             }
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     // Try to assign this work to a transition from a bottom state in
                                                                                     // bbslice_T_N.
                                                                                     // If that does not succeed, temporarily assign it to the block_bunch
@@ -4544,7 +4567,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
 };
 
 ///@} (end of group part_refine)
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     namespace bisim_dnj {
 
                                                                                     /// \brief moves temporary work counters to normal ones if the U-block is
@@ -4648,6 +4671,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                         while (++s_iter < block_R->end);
 
                                                                                         check_complexity::check_temporary_work();
+                                                                                        (void) partitioner; // avoid unused variable warning
                                                                                     }
 
                                                                                     /// \brief moves temporary work counters to normal ones if the R-block is
@@ -4739,6 +4763,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                                                         }
                                                                                         while (++s_iter < block_R->end);
                                                                                         check_complexity::check_temporary_work();
+                                                                                        (void) partitioner; // avoid unused variable warning
                                                                                     }
 
                                                                                     } // end namespace bisim_dnj

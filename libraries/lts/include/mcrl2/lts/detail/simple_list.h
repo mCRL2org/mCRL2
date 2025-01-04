@@ -15,13 +15,27 @@
 /// \details This file supports partition refinement algorithms by implementing
 /// a simple list data structure, possibly with a pool allocator.
 ///
-/// The main difference to std::list<T> is that the simple list does not store
-/// the list size.  Also, it requires the stored elements to be trivially
+/// The main difference to std::list<T> is that the simple list only stores
+/// a pointer to the first list element; there is no sentinel.  The list
+/// elements themselves form a doubly-linked list that is almost circular; only
+/// the pointer from the last element to the next one is nullptr.  This allows
+/// to find the last element in the list (namely as predecessor of the first).
+/// A disadvantage is that the list does not allow to find the last element
+/// through `std::prev(end())`; to alleviate this, we offer a separate function
+/// `before_end()`.
+///
+/// Also, a simple list requires the stored elements to be trivially
 /// destructible, so they can be stored in a pool allocator data structure.
 ///
-/// The pool allocator uses larger blocks to allocate data items, mostly list
-/// elements, but also other items can be stored, as long as they are trivially
-/// destructible.
+/// The pool allocator uses larger blocks to allocate data items,
+/// mostly list elements, but also other items can be stored, as long
+/// as they are trivially destructible.  To access the pool, one uses
+/// `simple_list<element type>::get_pool()`.  However, only elements of the
+/// same size as `simple_list<element type>` entries can be deleted.  This is
+/// a static pool that is available throughout the running time of the program.
+/// (If you are really concerned about shaving off every small bit of time,
+/// you might destroy the pool through a memory leak upon termination of the
+/// program -- to that end, modify the destructor of `my_pool` to do nothing.)
 ///
 /// \author David N. Jansen, Institute of Software, Chinese Academy of
 /// Sciences, Beijing, PR China
@@ -33,7 +47,7 @@
 #include <new>         // for placement new
 #include <type_traits> // for std::is_trivially_destructible<class>
 #include <functional>  // for std::less
-#include <iterator>    // for std::bidirectional_iterator_tag
+#include <iterator>    // for std::forward_iterator_tag
 
 // My provisional recommendation is to always use simple lists and pool
 // allocators.  Using standard allocation and standard lists is 5-15% slower
@@ -93,7 +107,7 @@ namespace detail
     /// There is a free list, a (single-linked) list of elements in the chunks
     /// that have been freed.  However, all elements in the free list have to
     /// have the same size as type T.
-    template <class T, std::size_t BLOCKSIZE = 1000>
+    template <class T, std::size_t BLOCKSIZE = 4000>
     class my_pool
     {                                                                           static_assert(std::is_trivially_destructible<T>::value);
       private:                                                                  static_assert(sizeof(void*) <= sizeof(T));
@@ -280,62 +294,62 @@ namespace detail
     template <class T>
     class simple_list
     {
-      private:
-        /// \brief empty entry, used for the sentinel
-        class empty_entry
-        {
-          protected:
-            /// \brief pointer to the next element in the list
-            empty_entry* next;
-
-            /// \brief pointer to the previous element in the list
-            empty_entry* prev;
-
-            empty_entry(empty_entry*const new_next, empty_entry*const new_prev)
-              : next(new_next),
-                prev(new_prev)
-            {  }
-
-            friend class simple_list;
-        };
-
-        /// \brief sentinel, i.e. element that provides pointers to the
-        /// beginning and the end of the list
-        empty_entry sentinel;
-
       public:
+        class const_iterator;
+
+    #ifndef USE_POOL_ALLOCATOR
+      private:
+    #endif
         /// \brief list entry
         /// \details If the list is to use the pool allocator, its designated
         /// type must be `simple_list::entry` so elements can be erased.
-        class entry : public empty_entry
+        class entry
         {
           private:
+            entry* next;
+            entry* prev;
             T data;
 
             friend class simple_list;
-          public:
+            friend class const_iterator;
+            friend class my_pool<entry>;
+
             template <class... Args>
-            entry(empty_entry* const new_next, empty_entry* const new_prev,
-                                                                Args&&... args)
-              : empty_entry(new_next, new_prev),
+            entry(entry* const new_next, entry* const new_prev, Args&&... args)
+              : next(new_next),
+                prev(new_prev),
                 data(std::forward<Args>(args)...)
             {  }
         };
+
+      private:
+        /// \brief pointer to the beginning of the list
+        entry* first;
+
+      public:
+        #ifdef USE_POOL_ALLOCATOR
+            static my_pool<entry>& get_pool()
+            {
+                static my_pool<entry> pool;
+
+                return pool;
+            }
+        #endif
 
         /// \brief constant iterator class for simple_list
         class const_iterator
         {
           public:
-            typedef std::forward_iterator_tag iterator_category;
             typedef T value_type;
-            typedef std::ptrdiff_t difference_type;
             typedef T* pointer;
             typedef T& reference;
+            typedef std::ptrdiff_t difference_type;
+            typedef std::forward_iterator_tag iterator_category;
           protected:
-            empty_entry* ptr;
+            entry* ptr;
 
-            const_iterator(const empty_entry* const new_ptr)
-              : ptr(const_cast<empty_entry*>(new_ptr))
+            const_iterator(const entry* const new_ptr)
+              : ptr(const_cast<entry*>(new_ptr))
             {  }
 
             friend class simple_list;
@@ -355,11 +369,11 @@ namespace detail
             }
             const T& operator*() const
             {                                                                   assert(nullptr != ptr);
-                return  static_cast<const entry*>(ptr)->data;
+                return  ptr->data;
             }
             const T* operator->() const
             {                                                                   assert(nullptr != ptr);
-                return &static_cast<const entry*>(ptr)->data;
+                return &ptr->data;
             }
             bool operator==(const const_iterator& other) const
             {
@@ -375,29 +389,36 @@ namespace detail
         class iterator : public const_iterator
         {
           public:
-            typedef typename const_iterator::iterator_category
-                                                             iterator_category;
-            typedef typename const_iterator::value_type value_type;
-            typedef typename const_iterator::difference_type difference_type;
-            typedef typename const_iterator::pointer pointer;
-            typedef typename const_iterator::reference reference;
+            using typename const_iterator::value_type;
+            using typename const_iterator::pointer;
+            using typename const_iterator::reference;
+            using typename const_iterator::difference_type;
+            using typename const_iterator::iterator_category;
+            using const_iterator::operator==;
+            using const_iterator::operator!=;
           protected:
-            iterator(empty_entry*const new_ptr) : const_iterator(new_ptr)  {  }
+            iterator(entry* const new_ptr) : const_iterator(new_ptr)  {  }
 
             friend class simple_list;
           public:
             iterator() = default;
+
             iterator(const iterator& other) = default;
+
             iterator& operator=(const iterator& other) = default;
+
             iterator& operator++(){const_iterator::operator++(); return *this;}
+
             iterator& operator--(){const_iterator::operator--(); return *this;}
+
             T& operator*() const
             {
-                return  static_cast<entry*>(const_iterator::ptr)->data;
+                return const_cast<T&>(const_iterator::operator*());
             }
+
             T* operator->() const
             {
-                return &static_cast<entry*>(const_iterator::ptr)->data;
+                return const_cast<T*>(const_iterator::operator->());
             }
         };
 
@@ -408,38 +429,33 @@ namespace detail
         class iterator_or_null : public iterator
         {
           public:
-            typedef typename iterator::iterator_category iterator_category;
-            typedef typename iterator::value_type value_type;
-            typedef typename iterator::difference_type difference_type;
-            typedef typename iterator::pointer pointer;
-            typedef typename iterator::reference reference;
+            using typename iterator::value_type;
+            using typename iterator::pointer;
+            using typename iterator::reference;
+            using typename iterator::difference_type;
+            using typename iterator::iterator_category;
+            using iterator::operator*;
+            using iterator::operator->;
+            using iterator::operator==;
+            using iterator::operator!=;
+
             iterator_or_null() : iterator()  {  }
+
             iterator_or_null(std::nullptr_t) : iterator()
             {
                  const_iterator::ptr = nullptr;
             }
+
             iterator_or_null(const iterator& other) : iterator(other)  {  }
+
             bool is_null() const  {  return nullptr == const_iterator::ptr;  }
-            T& operator*() const
-            {
-                return iterator::operator*();
-            }
-            T* operator->() const
-            {
-                return iterator::operator->();
-            }
-            bool operator==(const const_iterator& other) const
-            {
-                return const_iterator::ptr == other.ptr;
-            }
-            bool operator!=(const const_iterator& other) const
-            {
-                return !operator==(other);
-            }
+
             bool operator==(const T* const other) const
             {                                                                   assert(nullptr != other);
+                // It is allowed to call this even if is_null().
                 return !is_null() && operator->() == other;
             }
+
             bool operator!=(const T* const other) const
             {
                 return !operator==(other);
@@ -453,7 +469,7 @@ namespace detail
 
         /// \brief constructor
         simple_list()
-          : sentinel(&sentinel, &sentinel)
+          : first(nullptr)
         {                                                                       static_assert(std::is_trivially_destructible<entry>::value);
         }
 
@@ -464,144 +480,483 @@ namespace detail
                 for (iterator iter = begin(); end() != iter; )
                 {
                     iterator next = std::next(iter);
-                    delete static_cast<entry*>(iter.ptr);
+                    delete iter.ptr;
                     iter = next;
                 }
             }
         #endif
 
+        /// \brief return true iff the list is empty
+        bool empty() const  {  return nullptr==first;  }
+
         /// \brief return an iterator to the first element of the list
-        iterator begin()  {  return iterator(sentinel.next);  }
+        iterator begin()              {  return iterator(first);         }
 
         /// \brief return an iterator past the last element of the list
-        iterator end()    {  return iterator(&sentinel);      }
+        static iterator end()         {  return iterator(nullptr);       }
 
         /// \brief return a constant iterator to the first element of the list
-        const_iterator cbegin() const { return const_iterator(sentinel.next); }
+        const_iterator cbegin() const {  return const_iterator(first);   }
 
         /// \brief return a constant iterator past the last element of the list
-        const_iterator cend()   const { return const_iterator(&sentinel);     }
+        static const_iterator cend()  {  return end();                   }
 
         /// \brief return a constant iterator to the first element of the list
-        const_iterator begin() const  {  return cbegin();  }
+        const_iterator begin() const  {  return cbegin();                }
 
-        /// \brief return a constant iterator past the last element of the list
-        const_iterator end()   const  {  return cend();    }
+        /// \brief return an iterator to the last element of the list
+        iterator before_end()
+        {                                                                       assert(!empty());
+            return iterator(first->prev);
+        }
+
+        const_iterator before_end() const
+        {                                                                       assert(!empty());
+            return const_iterator(first->prev);
+        }
 
         /// \brief return a reference to the first element of the list
         T& front()
         {                                                                       assert(!empty());
-            return static_cast<entry*>(sentinel.next)->data;
+            return first->data;
         }
 
         /// \brief return a reference to the last element of the list
         T& back()
         {                                                                       assert(!empty());
-            return static_cast<entry*>(sentinel.prev)->data;
+            return first->prev->data;
         }
-
-        /// \brief return true iff the list is empty
-        bool empty() const  {  return sentinel.next == &sentinel;  }
-
+                                                                                #ifndef NDEBUG
+                                                                                    [[nodiscard]]
+                                                                                    bool check_linked_list() const
+                                                                                    {
+                                                                                        if (empty())
+                                                                                        {
+                                                                                            return true;
+                                                                                        }
+                                                                                        const_iterator i = first;
+                                                                                        if (nullptr == i.ptr->prev)
+                                                                                        {
+                                                                                            return false;
+                                                                                        }
+                                                                                        while (nullptr != i.ptr->next)
+                                                                                        {
+                                                                                            if (i.ptr->next->prev != i.ptr)
+                                                                                            {
+                                                                                                return false;
+                                                                                            }
+                                                                                            ++i;
+                                                                                            assert(i.ptr->prev->next == i.ptr);
+                                                                                        }
+                                                                                        return first->prev == i.ptr;
+                                                                                    }
+                                                                                #endif
         /// \brief construct a new list entry before pos
+        /// \details If pos==end(), construct a new list entry at the end
         template<class... Args>
-        static iterator emplace(
-                ONLY_IF_POOL_ALLOCATOR( my_pool<entry>& pool, )
-                                                  iterator pos, Args&&... args)
-        {
+        iterator emplace(iterator pos, Args&&... args)
+        {                                                                       assert(end()==pos || !empty()); assert(end()==pos || nullptr==pos.ptr->prev);
+                                                                                #ifndef NDEBUG
+                                                                                    assert(check_linked_list());
+                                                                                    if (end() != pos)
+                                                                                    { for(const_iterator i=begin(); i!=pos; ++i) { assert(end()!=i); } }
+                                                                                #endif
+            entry* const prev = end() == pos
+                                ? (empty() ? nullptr : first->prev)
+                                : pos.ptr->prev;
             entry* const new_entry(
                 #ifdef USE_POOL_ALLOCATOR
-                    pool.template construct<entry>
+                    get_pool().template construct<entry>
                 #else
                     new entry
                 #endif
-                        (pos.ptr, pos.ptr->prev, std::forward<Args>(args)...));
-            pos.ptr->prev->next = new_entry;
-            pos.ptr->prev = new_entry;
+                                 (pos.ptr, prev, std::forward<Args>(args)...));
+            if (begin() == pos)
+            {
+                // we insert a new element before the current list begin, so
+                // the begin should change.  This includes the case that the
+                // list was empty before.
+                first = new_entry;
+            }
+            else if (nullptr != prev)
+            {
+                // We insert an element not at the current list begin, so it
+                // should be reachable from its predecessor.
+                prev->next = new_entry;
+            }
+            if (end() != pos)
+            {
+                pos.ptr->prev = new_entry;
+            }
+            else
+            {                                                                   assert(nullptr != first);
+                first->prev = new_entry;
+            }                                                                   assert(check_linked_list());
+                                                                                #ifndef NDEBUG
+                                                                                    assert((end() == pos ? before_end() : pos.ptr->prev) == new_entry);
+                                                                                    for (const_iterator i=begin(); i != new_entry; ++i) { assert(end() != i); }
+                                                                                #endif
             return iterator(new_entry);
         }
+
+
+        /// Puts a new element at the end.
+        template <class... Args>
+        iterator emplace_back(Args&&... args)
+        {
+            return emplace(end(), std::forward<Args>(args)...);
+        }
+
 
         /// \brief construct a new list entry after pos
+        /// \details if pos==end(), the new list entry is created at the front.
         template<class... Args>
-        static iterator emplace_after(
-                ONLY_IF_POOL_ALLOCATOR( my_pool<entry>& pool, )
-                                                  iterator pos, Args&&... args)
-        {
+        iterator emplace_after(iterator pos, Args&&... args)
+        {                                                                       assert(end()==pos || !empty()); assert(end()==pos || end()!=pos.ptr->prev);
+                                                                                #ifndef NDEBUG
+                                                                                    assert(check_linked_list());
+                                                                                    if (end() != pos) {
+                                                                                        for (const_iterator i = begin(); i != pos; ++i) { assert(end() != i); }
+                                                                                    }
+                                                                                #endif
+            entry* const next = end() == pos ? begin().ptr : pos.ptr->next;
             entry* const new_entry(
                 #ifdef USE_POOL_ALLOCATOR
-                    pool.template construct<entry>
+                    get_pool().template construct<entry>
                 #else
                     new entry
                 #endif
-                        (pos.ptr->next, pos.ptr, std::forward<Args>(args)...));
-            pos.ptr->next->prev = new_entry;
-            pos.ptr->next = new_entry;
+                                 (next, pos.ptr, std::forward<Args>(args)...));
+            if (end() == pos)
+            {
+                // we insert a new element before the current list begin, so
+                // the begin should change.  This includes the case that the
+                // list was empty before.
+                new_entry->prev = empty() ? new_entry : before_end().ptr;
+                first = new_entry;
+            }
+            else
+            {
+                pos.ptr->next = new_entry;
+            }                                                                   assert(nullptr != first);
+            if (nullptr == next)
+            {
+                first->prev = new_entry;
+            }
+            else
+            {
+                next->prev = new_entry;
+            }                                                                   assert(check_linked_list());
+                                                                                #ifndef NDEBUG
+                                                                                    assert((end() == pos ? first : pos.ptr->next) == new_entry);
+                                                                                    for (const_iterator i=begin(); i != new_entry; ++i) { assert(end() != i); }
+                                                                                #endif
             return iterator(new_entry);
         }
+
 
         /// \brief construct a new list entry at the beginning
         template<class... Args>
-        iterator emplace_front(
-                ONLY_IF_POOL_ALLOCATOR( my_pool<entry>& pool, )
-                                                                Args&&... args)
+        iterator emplace_front(Args&&... args)
         {
-            entry* const new_entry(
-                #ifdef USE_POOL_ALLOCATOR
-                    pool.template construct<entry>
-                #else
-                    new entry
-                #endif
-                      (sentinel.next, &sentinel, std::forward<Args>(args)...));
-            sentinel.next->prev = new_entry;
-            sentinel.next = new_entry;
-            return iterator(new_entry);
+            return emplace_after(end(), std::forward<Args>(args)...);
         }
 
-        /// \brief construct a new list entry at the end
-        template<class... Args>
-        iterator emplace_back(
-                ONLY_IF_POOL_ALLOCATOR( my_pool<entry>& pool, )
-                                                                Args&&... args)
-        {
-            entry* const new_entry(
-                #ifdef USE_POOL_ALLOCATOR
-                    pool.template construct<entry>
-                #else
-                    new entry
-                #endif
-                      (&sentinel, sentinel.prev, std::forward<Args>(args)...));
-            sentinel.prev->next = new_entry;
-            sentinel.prev = new_entry;
-            return iterator(new_entry);
+
+        /// The function moves the element pointed at by from_pos (that is in
+        /// the list indicated by the 2nd parameter) just after position to_pos
+        /// (that is in this list). If to_pos == end(), move the element to the
+        /// beginning of this list.
+        void splice_to_after(iterator const to_pos, simple_list<T>& from_list,
+                                                       iterator const from_pos)
+        {                                                                       assert(from_pos != to_pos);
+                                                                                #ifndef NDEBUG
+                                                                                    assert(check_linked_list());
+                                                                                    if (end() != to_pos) {
+                                                                                        assert(!empty());  assert(nullptr != to_pos.ptr->prev);
+                                                                                        for(const_iterator i = begin(); i!=to_pos; ++i) { assert(end() != i); }
+                                                                                    }
+                                                                                    assert(end() != from_pos);  assert(nullptr != from_pos.ptr->prev);
+                                                                                    assert(!from_list.empty());  assert(from_list.check_linked_list());
+            /* remove element from_pos from its original list                */     for (const_iterator i = from_list.begin(); i != from_pos; ++i) {
+                                                                                        assert(from_list.end() != i);
+                                                                                    }
+                                                                                #endif
+            if (from_pos.ptr != from_list.first)
+            {                                                                   assert(nullptr != from_list.first->next); // at least 2 elements in the list
+                /* not the first element in from_list                        */ assert(from_pos == from_pos.ptr->prev->next);
+                from_pos.ptr->prev->next = from_pos.ptr->next;
+                if (nullptr != from_pos.ptr->next)
+                {
+                    /* not the last element in from_list                     */ assert(from_pos == from_pos.ptr->next->prev);
+                    from_pos.ptr->next->prev = from_pos.ptr->prev;
+                }
+                else
+                {
+                    /* last element in from_list                             */ assert(from_pos == from_list.first->prev);
+                    from_list.first->prev = from_pos.ptr->prev;
+                }
+            }
+            else
+            {
+                /* first element in from_list                                */ assert(nullptr == from_pos.ptr->prev->next);
+                from_list.first = from_pos.ptr->next;
+                if (!from_list.empty())
+                {
+                    /* not the last element in from_list                     */ assert(from_pos == from_pos.ptr->next->prev);
+                    from_pos.ptr->next->prev = from_pos.ptr->prev;
+                }
+            }
+            // update the pointers of from_pos and insert from_pos into this
+            // list
+            entry* next;
+            if (end() == to_pos)
+            {
+                // we insert the element before the current list begin, so
+                // the begin should change.  This includes the case that the
+                // list was empty before.
+                if (!empty())
+                {
+                    from_pos.ptr->prev = before_end().ptr;
+                }
+                // else from_pos->prev = from_pos; -- will be set below.
+                next = first;
+                first = from_pos.ptr;
+            }
+            else
+            {
+                from_pos.ptr->prev = to_pos.ptr;
+                next = to_pos.ptr->next;
+                to_pos.ptr->next = from_pos.ptr;
+            }                                                                   assert(nullptr != first);
+            from_pos.ptr->next = next;
+            if (nullptr == next)
+            {
+                first->prev = from_pos.ptr;
+            }
+            else
+            {
+                next->prev = from_pos.ptr;
+            }                                                                   assert(check_linked_list());  assert(from_list.check_linked_list());
+                                                                                #ifndef NDEBUG
+                                                                                    assert(from_pos == (end() == to_pos ? first : to_pos.ptr->next));
+                                                                                    for (const_iterator i=begin(); i!=from_pos; ++i) { assert(i!=end()); }
+                                                                                    if (end() != to_pos) {
+                                                                                        for (const_iterator i=begin(); i!=to_pos; ++i) { assert(end() != i); }
+                                                                                    }
+                                                                                #endif
         }
+
 
         /// \brief move a list entry from one position to another (possibly in
         /// a different list)
-        static void splice(iterator const new_pos, simple_list& /* unused */,
-                                                        iterator const old_pos)
-        {
-            old_pos.ptr->prev->next = old_pos.ptr->next;
-            old_pos.ptr->next->prev = old_pos.ptr->prev;
-
-            old_pos.ptr->next = new_pos.ptr->prev->next;
-            old_pos.ptr->prev = new_pos.ptr->prev;
-
-            old_pos.ptr->prev->next = old_pos.ptr;
-            old_pos.ptr->next->prev = old_pos.ptr;
+        /// The function moves the element pointed at by from_pos (that is in
+        /// the list indicated by the 2nd parameter) just before position
+        /// to_pos (that is in this list). If to_pos == end(), move the element
+        /// to the end of this list.
+        void splice(iterator const to_pos, simple_list<T>& from_list,
+                                                       iterator const from_pos)
+        {                                                                       assert(from_pos != to_pos);  assert(end() == to_pos || !empty());
+                                                                                #ifndef NDEBUG
+                                                                                    assert(end() == to_pos || nullptr != to_pos.ptr->prev);
+                                                                                    assert(check_linked_list());
+                                                                                    if (end() != to_pos) {
+                                                                                        for (const_iterator i=begin(); i!=to_pos; ++i) { assert(end() != i); }
+                                                                                    }
+                                                                                    assert(from_list.end() != from_pos); assert(nullptr != from_pos.ptr->prev);
+                                                                                    assert(!from_list.empty());  assert(from_list.check_linked_list());
+            /* remove element from_pos from its original list                */     for (const_iterator i=from_list.begin(); i!=from_pos; ++i) {
+                                                                                        assert(from_list.end() != i);
+                                                                                    }
+                                                                                #endif
+            if (from_pos != from_list.first)
+            {                                                                   assert(nullptr != from_list.first->next); // at least 2 elements in the list
+                /* not the first element in from_list                        */ assert(from_pos.ptr == from_pos.ptr->prev->next);
+                from_pos.ptr->prev->next = from_pos.ptr->next;
+                if (nullptr != from_pos.ptr->next)
+                {
+                    /* not the last element in from_list                     */ assert(from_pos.ptr == from_pos.ptr->next->prev);
+                    from_pos.ptr->next->prev = from_pos.ptr->prev;
+                }
+                else
+                {
+                    /* last element in from_list                             */ assert(from_pos.ptr == from_list.first->prev);
+                    from_list.first->prev = from_pos.ptr->prev;
+                }
+            }
+            else
+            {
+                /* first element in from_list                                */ assert(nullptr == from_pos.ptr->prev->next);
+                from_list.first = from_pos.ptr->next;
+                if (!from_list.empty())
+                {
+                    /* not the last element in from_list                     */ assert(from_pos.ptr == from_pos.ptr->next->prev);
+                    from_pos.ptr->next->prev = from_pos.ptr->prev;
+                }
+            }
+            // update the pointers of from_pos and insert from_pos into this
+            // list
+            from_pos.ptr->next = to_pos.ptr;
+            if (end() == to_pos)
+            {
+                // from_pos becomes the last element in *this
+                if (empty())
+                {
+                    from_pos.ptr->prev = from_pos.ptr;
+                    first = from_pos.ptr;                                       assert(check_linked_list());  assert(from_list.check_linked_list());
+                    return;
+                }
+                from_pos.ptr->prev = before_end().ptr;
+                from_pos.ptr->prev->next = from_pos.ptr;
+                first->prev = from_pos.ptr;
+            }
+            else
+            {
+                /* from_pos does not become the last element in *this        */ assert(!empty());
+                from_pos.ptr->prev = to_pos.ptr->prev;
+                to_pos.ptr->prev = from_pos.ptr;
+                if (to_pos.ptr == first)
+                {
+                    // we insert a new element before the current list begin,
+                    // so the begin should change.
+                    first = from_pos.ptr;
+                }
+                else
+                {
+                    from_pos.ptr->prev->next = from_pos.ptr;
+                }
+            }                                                                   assert(check_linked_list());  assert(from_list.check_linked_list());
+                                                                                #ifndef NDEBUG
+                                                                                    assert((end() == to_pos ? before_end().ptr
+                                                                                                            : iterator(to_pos.ptr->prev)) == from_pos.ptr);
+                                                                                    for (const_iterator i=begin(); i != from_pos; ++i) { assert(end() != i); }
+                                                                                    if (end() != to_pos) {
+                                                                                        for (const_iterator i=begin(); i!=to_pos; ++i) { assert(end() != i); }
+                                                                                    }
+                                                                                #endif
         }
 
+
         /// \brief erase an element from a list
-        static void erase(
-                ONLY_IF_POOL_ALLOCATOR( my_pool<entry>& pool, )
-                                                            iterator const pos)
-        {
-            pos.ptr->prev->next = pos.ptr->next;
-            pos.ptr->next->prev = pos.ptr->prev;
+        void erase(iterator const pos)
+        {                                                                       assert(end() != pos);  assert(nullptr != pos.ptr->prev);  assert(!empty());
+                                                                                #ifndef NDEBUG
+                                                                                    assert(check_linked_list());
+                                                                                    for (const_iterator i = begin(); i != pos; ++i) { assert(end() != i); }
+                                                                                #endif
+            if (pos != first)
+            {                                                                   assert(nullptr != first->next); // at least 2 elements in the list
+                /* not the first element                                     */ assert(pos.ptr == pos.ptr->prev->next);
+                pos.ptr->prev->next = pos.ptr->next;
+                if (nullptr != pos.ptr->next)
+                {
+                    /* not the last element                                  */ assert(pos.ptr == pos.ptr->next->prev);
+                    pos.ptr->next->prev = pos.ptr->prev;
+                }
+                else
+                {
+                    /* last element                                          */ assert(pos.ptr == first->prev);
+                    first->prev = pos.ptr->prev;
+                }
+            }
+            else
+            {
+                /* first element                                             */ assert(nullptr == pos.ptr->prev->next);
+                first = pos.ptr->next;
+                if (!empty())
+                {
+                    /* not the last element                                  */ assert(pos.ptr == pos.ptr->next->prev);
+                    pos.ptr->next->prev = pos.ptr->prev;
+                }
+            }
             #ifdef USE_POOL_ALLOCATOR
-                pool.destroy(static_cast<entry*>(pos.ptr));
+                get_pool().destroy(pos.ptr);
             #else
-                delete static_cast<entry*>(pos.ptr);
+                delete pos.ptr;
             #endif
+        }
+
+
+        /// The function computes the successor of pos in the list.  If pos is
+        /// the last element of the list, it returns end().  It is an error if
+        /// pos==end() or if pos is not in the list.
+        #ifdef NDEBUG
+            static // only in debug mode it accesses data of the list itself
+        #endif
+        iterator next(iterator pos)
+                                                                                #ifndef NDEBUG
+                                                                                    const // static functions cannot be const
+                                                                                #endif
+        {                                                                       assert(end() != pos);
+                                                                                #ifndef NDEBUG
+                                                                                    for (const_iterator i = begin(); i != pos; ++i) { assert(end() != i); }
+                                                                                #endif
+            return iterator(pos.ptr->next);
+        }
+
+
+        /// The function computes the successor of pos in the list.  If pos is
+        /// the last element of the list, it returns end().  It is an error if
+        /// pos==end() or if pos is not in the list.
+        #ifdef NDEBUG
+            static // only in debug mode it accesses data of the list itself
+        #endif
+        const_iterator next(const_iterator pos)
+                                                                                #ifndef NDEBUG
+                                                                                    const // static functions cannot be const
+                                                                                #endif
+        {                                                                       assert(end() != pos);
+                                                                                #ifndef NDEBUG
+                                                                                    for (const_iterator i = begin(); i != pos; ++i) { assert(end() != i); }
+                                                                                #endif
+            return const_iterator(pos.ptr->next);
+        }
+
+
+        /// The function computes the predecessor of pos in the list.  If pos is at
+        /// the beginning of the list, it returns end().  It is an error if
+        /// pos==end() or if pos is not in the list.
+        iterator prev(iterator pos) const
+        {                                                                       assert(pos!=end());
+                                                                                #ifndef NDEBUG
+                                                                                    for (const_iterator i = begin(); i != pos; ++i) { assert(end() != i); }
+                                                                                #endif
+            return begin() == pos ? end() : iterator(pos.ptr->prev);
+        }
+
+
+        /// The function computes the predecessor of pos in the list.  If pos is at
+        /// the beginning of the list, it returns end().  It is an error if
+        /// pos==end() or if pos is not in the list.
+        const_iterator prev(const_iterator pos) const
+        {                                                                       assert(end() != pos);
+                                                                                #ifndef NDEBUG
+                                                                                    for (const_iterator i = begin(); i != pos; ++i) { assert(end() != i); }
+                                                                                #endif
+            return begin() == pos ? end() : const_iterator(pos.ptr->prev);
+        }
+
+
+        bool operator==(const simple_list& other) const
+        {
+            const_iterator it = cbegin();
+            const_iterator other_it = other.cbegin();
+            while (cend() != it)
+            {
+                if (cend() == other_it || *it != *other_it)
+                {
+                    return false;
+                }
+                ++it;
+                ++other_it;
+            }
+            return end()==other_it;
+        }
+
+
+        bool operator!=(const simple_list& other) const
+        {
+            return !operator==(other);
         }
     };
 
@@ -640,7 +995,7 @@ namespace detail
 
 
         /// \brief Construct an object containing a valid iterator
-        explicit iterator_or_null_t(const iterator& other)
+        explicit iterator_or_null_t(const iterator other)
         {
             new (&iter) iterator(other);                                        assert(nullptr != null);
         }
@@ -660,11 +1015,11 @@ namespace detail
             }
         }
 
-        iterator* operator->()
+        El* operator->()
         {                                                                       assert(nullptr != null);
             return iter.operator->();
         }
-        iterator& operator*()
+        El& operator*()
         {                                                                       assert(nullptr != null);
             return iter.operator*();
         }
@@ -697,7 +1052,7 @@ namespace detail
         /// \brief Compare the object with another iterator_or_null_t object
         /// \details The operator could be templated so that iterator_or_null_t
         /// objects of different types can be compared.
-        bool operator==(const iterator_or_null_t& other) const
+        bool operator==(const iterator_or_null_t other) const
         {
             if constexpr (sizeof(null) == sizeof(iter))
             {
@@ -712,7 +1067,7 @@ namespace detail
 
 
         /// \brief Compare the object with another iterator_or_null_t object
-        bool operator!=(const iterator_or_null_t& other) const
+        bool operator!=(const iterator_or_null_t other) const
         {
             return !operator==(other);
         }
@@ -739,8 +1094,7 @@ namespace detail
         /// compares unequal with the pointer.
         bool operator==(const El* const other) const
         {                                                                       assert(nullptr != other);
-            return (sizeof(null) == sizeof(iter) || !is_null()) &&
-                                                               &*iter == other;
+            return !is_null() && &*iter == other;
         }
 
 
