@@ -63,18 +63,26 @@ namespace lps
   }
 
   inline
+  stochastic_action_summand rename(const process::rename_expression_list& renamings,
+    const stochastic_action_summand& summand)
+  {
+    return stochastic_action_summand(summand.summation_variables(),
+                             summand.condition(),
+                             rename(renamings, summand.multi_action()),
+                             summand.assignments(),
+                             summand.distribution());
+  }
+
+
+  inline
   void rename(
     const process::rename_expression_list& renamings,
     lps::stochastic_action_summand_vector& action_summands)
   {
-      for (lps::stochastic_action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
-      {
-          *i = lps::stochastic_action_summand(i->summation_variables(),
-                             i->condition(),
-                             rename(renamings, i->multi_action()),
-                             i->assignments(),
-                             i->distribution());
-      }
+    for (auto& action_summand: action_summands)
+    {
+      action_summand = rename(renamings, action_summand);
+    }
   }
 
 } // namespace lps
