@@ -37,6 +37,7 @@
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h"
+#include "mcrl2/lps/linearise_allow_block.h"
 #include "mcrl2/lps/linearise_utility.h"
 #include "mcrl2/lps/linearise_rename.h"
 
@@ -794,43 +795,14 @@ class specification_basic_type
 
     /********** various functions on action and multi actions  ***************/
 
-    static
-    action_list linInsertActionInMultiActionList(
-      const action& act,
-      action_list multiAction)
-    {
-      /* store the action in the multiAction, alphabetically
-         sorted on the actionname in the actionId. Note that
-         the empty multiAction represents tau. */
 
-      if (multiAction.empty())
-      {
-        return action_list({ act });
-      }
-      const action firstAction=multiAction.front();
-
-      /* Actions are compared on the basis of their position
-         in memory, to order them. As the aterm library maintains
-         pointers to objects that are not garbage collected, this
-         is a safe way to do this. */
-      if (action_label_compare(act.label(),firstAction.label()))
-      {
-        multiAction.push_front(act);
-        return multiAction;
-      }
-      action_list result= linInsertActionInMultiActionList(
-                          act,
-                          multiAction.tail());
-      result.push_front(firstAction);
-      return result;
-    }
 
     action_list linMergeMultiActionList(const action_list& ma1, const action_list& ma2)
     {
       action_list result=ma2;
       for (const action& a: ma1) 
       {
-        result=linInsertActionInMultiActionList(a,result);
+        result=insert(a,result,action_compare);
       }
       return result;
     }
@@ -5283,7 +5255,7 @@ class specification_basic_type
                                    deadlock_summands,
                                    deadlock_summand(sumvars,
                                                     rewritten_condition,
-                                                    has_time?deadlock(actTime):deadlock()));
+                                                    has_time?deadlock(actTime):deadlock()),options.ignore_time);
       }
       else
       {
@@ -7304,310 +7276,6 @@ class specification_basic_type
       }
     }
 
-    /**************** allow/block *************************************/
-
-    static
-    bool implies_condition(const data_expression& c1, const data_expression& c2)
-    {
-      if (c2==sort_bool::true_())
-      {
-        return true;
-      }
-
-      if (c1==sort_bool::false_())
-      {
-        return true;
-      }
-
-      if (c1==sort_bool::true_())
-      {
-        return false;
-      }
-
-      if (c2==sort_bool::false_())
-      {
-        return false;
-      }
-
-      if (c1==c2)
-      {
-        return true;
-      }
-
-      /* Dealing with the conjunctions (&&) first and then the disjunctions (||)
-         yields a 10-fold speed increase compared to the case where first the
-         || occur, and then the &&. This result was measured on the alternating
-         bit protocol, with --regular. */
-
-      if (sort_bool::is_and_application(c2))
-      {
-        return implies_condition(c1,data::binary_left(down_cast<application>(c2))) &&
-               implies_condition(c1,data::binary_right(down_cast<application>(c2)));
-      }
-
-      if (sort_bool::is_or_application(c1))
-      {
-        return implies_condition(data::binary_left(down_cast<application>(c1)),c2) &&
-               implies_condition(data::binary_right(down_cast<application>(c1)),c2);
-      }
-
-      if (sort_bool::is_and_application(c1))
-      {
-        return implies_condition(data::binary_left(down_cast<application>(c1)),c2) ||
-               implies_condition(data::binary_right(down_cast<application>(c1)),c2);
-      }
-
-      if (sort_bool::is_or_application(c2))
-      {
-        return implies_condition(c1,data::binary_left(down_cast<application>(c2))) ||
-               implies_condition(c1,data::binary_right(down_cast<application>(c2)));
-      }
-
-      return false;
-    }
-
-    void insert_timed_delta_summand(
-      const stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands,
-      const deadlock_summand& s) const
-    {
-      deadlock_summand_vector result;
-
-      // const variable_list sumvars=s.summation_variables();
-      const data_expression& cond=s.condition();
-      const data_expression& actiontime=s.deadlock().time();
-
-      // First check whether the delta summand is subsumed by an action summands.
-      if (!options.ignore_time)
-      {
-        for (const stochastic_action_summand& as: action_summands)
-        {
-          const data_expression& cond1=as.condition();
-          if (((actiontime==as.multi_action().time()) || (!as.multi_action().has_time())) &&
-              (implies_condition(cond,cond1)))
-          {
-            /* De delta summand is subsumed by action summand as. So, it does not
-               have to be added. */
-
-            return;
-          }
-        }
-      }
-
-      for (deadlock_summand_vector::iterator i=deadlock_summands.begin(); i!=deadlock_summands.end(); ++i)
-      {
-        const deadlock_summand& smmnd=*i;
-        const data_expression& cond1=i->condition();
-        if ((!options.ignore_time) &&
-            ((actiontime==i->deadlock().time()) || (!i->deadlock().has_time())) &&
-            (implies_condition(cond,cond1)))
-        {
-          /* put the summand that was effective in removing
-             this delta summand to the front, such that it
-             is encountered early later on, removing a next
-             delta summand */
-
-          copy(i,deadlock_summands.end(),back_inserter(result));
-          deadlock_summands.swap(result);
-          return;
-        }
-        if (((options.ignore_time)||
-             (((actiontime==smmnd.deadlock().time())|| (!s.deadlock().has_time())) &&
-              (implies_condition(cond1,cond)))))
-        {
-          /* do not add summand to result, as it is superseded by s */
-        }
-        else
-        {
-          result.push_back(smmnd);
-        }
-      }
-
-      result.push_back(s);
-      deadlock_summands.swap(result);
-    }
-
-    static action_name_multiset_list sort_multi_action_labels(const action_name_multiset_list& l)
-    {
-      return action_name_multiset_list(l.begin(),l.end(),[](const action_name_multiset& al){ return sort_action_labels(al); });
-    }
-
-    /// \brief determine whether the multiaction has the same labels as the allow action,
-    //         in which case true is delivered. If multiaction is the action Terminate,
-    //         then true is also returned.
-
-    static
-    bool allowsingleaction(const action_name_multiset& allowaction,
-                           const action_list& multiaction)
-    {
-      /* The special cases where multiaction==tau and multiaction=={ Terminated } must have been
-         dealt with separately. */
-      assert(multiaction.size()!=0 && multiaction != action_list({ terminationAction }));
-
-      const identifier_string_list& names=allowaction.names();
-      identifier_string_list::const_iterator i=names.begin();
-
-      for (action_list::const_iterator walker=multiaction.begin();
-           walker!=multiaction.end(); ++walker,++i)
-      {
-        if (i==names.end())
-        {
-          return false;
-        }
-        if (*i!=walker->label().name())
-        {
-          return false;
-        }
-      }
-      return i==names.end();
-    }
-
-    bool allow_(const action_name_multiset_list& allowlist,
-                const action_list& multiaction)
-    {
-      /* The empty multiaction, i.e. tau, is never blocked by allow */
-      if (multiaction.empty())
-      {
-        return true;
-      }
-
-      /* The multiaction is equal to the special Terminate action. This action cannot be blocked. */
-      if (multiaction == action_list({ terminationAction }))
-      {
-        return true;
-      }
-
-      for (action_name_multiset_list::const_iterator i=allowlist.begin();
-           i!=allowlist.end(); ++i)
-      {
-        if (allowsingleaction(*i,multiaction))
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    static
-    bool encap(const action_name_multiset_list& encaplist, const action_list& multiaction)
-    {
-      for (const action& a: multiaction)
-      {
-        assert(encaplist.size()==1);
-        for (const identifier_string& s1: encaplist.front().names())
-        {
-          const identifier_string s2=a.label().name();
-          if (s1==s2)
-          {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
-    void allowblockcomposition(
-      const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
-      const bool is_allow,
-      stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands)
-    {
-      /* This function calculates the allow or the block operator,
-         depending on whether is_allow is true */
-
-      stochastic_action_summand_vector sourcesumlist;
-      action_summands.swap(sourcesumlist);
-
-      deadlock_summand_vector resultdeltasumlist;
-      deadlock_summand_vector resultsimpledeltasumlist;
-      deadlock_summands.swap(resultdeltasumlist);
-
-      action_name_multiset_list allowlist((is_allow)?sort_multi_action_labels(allowlist1):allowlist1);
-
-      std::size_t sourcesumlist_length=sourcesumlist.size();
-      if (sourcesumlist_length>2 || is_allow) // This condition prevents this message to be printed
-        // when performing data elimination. In this case the
-        // term delta is linearised, to determine which data
-        // is essential for all processes. In these cases a
-        // message about the block operator is very confusing.
-      {
-        mCRL2log(mcrl2::log::verbose) << "- calculating the " << (is_allow?"allow":"block") <<
-              " operator on " << sourcesumlist.size() << " action summands and " << resultdeltasumlist.size() << " delta summands";
-      }
-
-      /* First add the resulting sums in two separate lists
-         one for actions, and one for delta's. The delta's
-         are added at the end to the actions, where for
-         each delta summand it is determined whether it ought
-         to be added, or is superseded by an action or another
-         delta summand */
-      for (const stochastic_action_summand& smmnd: sourcesumlist)
-      {
-        const variable_list& sumvars=smmnd.summation_variables();
-        const action_list multiaction=smmnd.multi_action().actions();
-        const data_expression& actiontime=smmnd.multi_action().time();
-        const data_expression& condition=smmnd.condition();
-
-        // Explicitly allow the termination action in any allow.
-        if ((is_allow && allow_(allowlist,multiaction)) ||
-            (!is_allow && !encap(allowlist,multiaction)))
-        {
-          action_summands.push_back(smmnd);
-        }
-        else
-        {
-          if (smmnd.has_time())
-          {
-            resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock(actiontime)));
-          }
-          else
-          {
-            // summand has no time.
-            if (condition==sort_bool::true_())
-            {
-              resultsimpledeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
-            }
-            else
-            {
-              resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
-            }
-          }
-        }
-      }
-
-      if (options.nodeltaelimination)
-      {
-        deadlock_summands.swap(resultsimpledeltasumlist);
-        copy(resultdeltasumlist.begin(),resultdeltasumlist.end(),back_inserter(deadlock_summands));
-      }
-      else
-      {
-        if (!options.ignore_time) /* if a delta summand is added, conditional, timed
-                                   delta's are subsumed and do not need to be added */
-        {
-          for (const deadlock_summand& summand: resultsimpledeltasumlist)
-          {
-            insert_timed_delta_summand(action_summands,deadlock_summands,summand);
-          }
-          for (const deadlock_summand& summand: resultdeltasumlist)
-          {
-            insert_timed_delta_summand(action_summands,deadlock_summands,summand);
-          }
-        }
-        else
-        {
-          // Add a true -> delta
-          insert_timed_delta_summand(action_summands,deadlock_summands,deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
-        }
-      }
-      if (mCRL2logEnabled(mcrl2::log::verbose) && (sourcesumlist_length>2 || is_allow))
-      {
-        mCRL2log(mcrl2::log::verbose) << ", resulting in " << action_summands.size() << " action summands and " << deadlock_summands.size() << " delta summands\n";
-      }
-    }
-
-
-
     /**************** equalargs ****************************************/
 
     static
@@ -7701,14 +7369,6 @@ class specification_basic_type
 
     /**************** communication operator composition ****************/
 
-    static action_name_multiset sort_action_labels(const action_name_multiset& actionlabels)
-    {
-      return action_name_multiset(atermpp::sort_list<identifier_string>(
-                                               actionlabels.names(),
-                                               [](const identifier_string& a1, const identifier_string& a2)
-                                                                { return std::string(a1)<std::string(a2); }));
-    }
-
     template <typename List>
     static sort_expression_list get_sorts(const List& l)
     {
@@ -7756,7 +7416,7 @@ class specification_basic_type
       for (std::size_t i=0; i<L.actions.size(); ++i)
       {
         S.actions.push_back((firstaction!=action())?
-                            linInsertActionInMultiActionList(firstaction,L.actions[i]):
+                            insert(firstaction,L.actions[i], action_compare):
                             L.actions[i]);
         S.conditions.push_back(lazy::and_(L.conditions[i],condition));
       }
@@ -8278,7 +7938,7 @@ class specification_basic_type
         {
           const action_list& multiaction=multiactionconditionlist.actions[i];
 
-          if (is_allow && !allow_(allowlist,multiaction))
+          if (is_allow && !allow_(allowlist,multiaction,terminationAction))
           {
             continue;
           }
@@ -8321,7 +7981,7 @@ class specification_basic_type
       {
         for (const deadlock_summand& summand: resultingDeltaSummands)
         {
-          insert_timed_delta_summand(action_summands,deadlock_summands,summand);
+          insert_timed_delta_summand(action_summands,deadlock_summands,summand,options.ignore_time);
         }
       }
 
@@ -8730,7 +8390,7 @@ class specification_basic_type
 
         if (multiaction1 != action_list({ terminationAction }))
         {
-          if (is_allow && !allow_(allowlist,multiaction1))
+          if (is_allow && !allow_(allowlist,multiaction1,terminationAction))
           {
             continue;
           }
@@ -8834,7 +8494,8 @@ class specification_basic_type
           {
             insert_timed_delta_summand(action_summands,
                                        deadlock_summands,
-                                       deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
+                                       deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()),
+                                       options.ignore_time);
           }
         }
       }
@@ -8897,7 +8558,7 @@ class specification_basic_type
               multiaction3=linMergeMultiActionList(multiaction1,multiaction2);
             }
 
-            if (is_allow && !allow_(allowlist,multiaction3))
+            if (is_allow && !allow_(allowlist,multiaction3,terminationAction))
             {
               continue;
             }
@@ -9007,7 +8668,8 @@ class specification_basic_type
                                        deadlock_summands,
                                        deadlock_summand(allsums,
                                                         condition3,
-                                                        has_time3?deadlock(action_time3):deadlock()));
+                                                        has_time3?deadlock(action_time3):deadlock()),
+                                       options.ignore_time);
           }
 
         }
@@ -9065,7 +8727,8 @@ class specification_basic_type
                                        deadlock_summands,
                                        deadlock_summand(allsums,
                                                         condition3,
-                                                        has_time3?deadlock(action_time3):deadlock()));
+                                                        has_time3?deadlock(action_time3):deadlock()),
+                                       options.ignore_time);
           }
 
         }
@@ -9367,7 +9030,7 @@ class specification_basic_type
         }
 
         generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
-        allowblockcomposition(allow(t).allow_set(),true,action_summands,deadlock_summands);
+        allowblockcomposition(allow(t).allow_set(),true,action_summands,deadlock_summands,terminationAction,options.ignore_time,options.nodeltaelimination);
         return;
       }
 
@@ -9406,7 +9069,7 @@ class specification_basic_type
 
         generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         // Encode the actions of the block list in one multi action.
-        allowblockcomposition(action_name_multiset_list({action_name_multiset(block(t).block_set())}),false,action_summands,deadlock_summands);
+        allowblockcomposition(action_name_multiset_list({action_name_multiset(block(t).block_set())}),false,action_summands,deadlock_summands,terminationAction,options.ignore_time,options.nodeltaelimination);
         return;
       }
 
@@ -11246,7 +10909,7 @@ class specification_basic_type
                       initial_state,
                       initial_stochastic_distribution,
                       dummy_ultimate_delay_condition);
-      allowblockcomposition(action_name_multiset_list({action_name_multiset()}),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
+      allowblockcomposition(action_name_multiset_list({action_name_multiset()}),false,action_summands,deadlock_summands,terminationAction,options.ignore_time,options.nodeltaelimination); // This removes superfluous delta summands.
       if (options.final_cluster)
       {
         cluster_actions(action_summands,deadlock_summands,parameters);

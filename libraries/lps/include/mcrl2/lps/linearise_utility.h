@@ -48,6 +48,171 @@ bool action_compare(const process::action& a1, const process::action& a2)
   return action_label_compare(a1.label(), a2.label());
 }
 
+/// Insert action into an action_list, keeping the action list sorted w.r.t. cmp.
+/// Complexity: O(n) for an action_list of length n.
+process::action_list insert(
+      const process::action& act,
+      process::action_list l,
+      const std::function<bool(const process::action&, const process::action&)>& cmp
+                                      = [](const process::action& t1, const process::action& t2){ return t1<t2;}
+      )
+{
+  if (l.empty())
+  {
+    return process::action_list({ act });
+  }
+
+  const process::action head = l.front();
+  if (cmp(act, head))
+  {
+    l.push_front(act);
+  }
+  else
+  {
+    l = insert(act, l.tail());
+    l.push_front(head);
+  }
+
+  return l;
+}
+
+inline
+process::action_name_multiset sort_action_labels(const process::action_name_multiset& action_labels,
+  const std::function<bool(const core::identifier_string&, const core::identifier_string&)>& cmp
+                                    = [](const core::identifier_string& t1, const core::identifier_string& t2){ return std::string(t1)<std::string(t2);})
+{
+  return process::action_name_multiset(atermpp::sort_list(action_labels.names(), cmp));
+}
+
+inline
+process::action_name_multiset_list sort_multi_action_labels(const process::action_name_multiset_list& l)
+{
+  return process::action_name_multiset_list(l.begin(),l.end(),[](const process::action_name_multiset& al){ return sort_action_labels(al); });
+}
+
+inline
+bool implies_condition(const data::data_expression& c1, const data::data_expression& c2)
+{
+  if (c2==data::sort_bool::true_())
+  {
+    return true;
+  }
+
+  if (c1==data::sort_bool::false_())
+  {
+    return true;
+  }
+
+  if (c1==data::sort_bool::true_())
+  {
+    return false;
+  }
+
+  if (c2==data::sort_bool::false_())
+  {
+    return false;
+  }
+
+  if (c1==c2)
+  {
+    return true;
+  }
+
+  /* Dealing with the conjunctions (&&) first and then the disjunctions (||)
+     yields a 10-fold speed increase compared to the case where first the
+     || occur, and then the &&. This result was measured on the alternating
+     bit protocol, with --regular. */
+
+  if (data::sort_bool::is_and_application(c2))
+  {
+    return implies_condition(c1,data::binary_left(down_cast<data::application>(c2))) &&
+           implies_condition(c1,data::binary_right(down_cast<data::application>(c2)));
+  }
+
+  if (data::sort_bool::is_or_application(c1))
+  {
+    return implies_condition(data::binary_left(down_cast<data::application>(c1)),c2) &&
+           implies_condition(data::binary_right(down_cast<data::application>(c1)),c2);
+  }
+
+  if (data::sort_bool::is_and_application(c1))
+  {
+    return implies_condition(data::binary_left(down_cast<data::application>(c1)),c2) ||
+           implies_condition(data::binary_right(down_cast<data::application>(c1)),c2);
+  }
+
+  if (data::sort_bool::is_or_application(c2))
+  {
+    return implies_condition(c1,data::binary_left(down_cast<data::application>(c2))) ||
+           implies_condition(c1,data::binary_right(down_cast<data::application>(c2)));
+  }
+
+  return false;
+}
+
+inline
+void insert_timed_delta_summand(
+      const stochastic_action_summand_vector& action_summands,
+      deadlock_summand_vector& deadlock_summands,
+      const deadlock_summand& s,
+      bool ignore_time)
+    {
+      deadlock_summand_vector result;
+
+      // const variable_list sumvars=s.summation_variables();
+      const data::data_expression& cond=s.condition();
+      const data::data_expression& actiontime=s.deadlock().time();
+
+      // First check whether the delta summand is subsumed by an action summands.
+      if (!ignore_time)
+      {
+        for (const stochastic_action_summand& as: action_summands)
+        {
+          const data::data_expression& cond1=as.condition();
+          if (((actiontime==as.multi_action().time()) || (!as.multi_action().has_time())) &&
+              (implies_condition(cond,cond1)))
+          {
+            /* De delta summand is subsumed by action summand as. So, it does not
+               have to be added. */
+
+            return;
+          }
+        }
+      }
+
+      for (deadlock_summand_vector::iterator i=deadlock_summands.begin(); i!=deadlock_summands.end(); ++i)
+      {
+        const deadlock_summand& smmnd=*i;
+        const data::data_expression& cond1=i->condition();
+        if ((!ignore_time) &&
+            ((actiontime==i->deadlock().time()) || (!i->deadlock().has_time())) &&
+            (implies_condition(cond,cond1)))
+        {
+          /* put the summand that was effective in removing
+             this delta summand to the front, such that it
+             is encountered early later on, removing a next
+             delta summand */
+
+          copy(i,deadlock_summands.end(),back_inserter(result));
+          deadlock_summands.swap(result);
+          return;
+        }
+        if (((ignore_time)||
+             (((actiontime==smmnd.deadlock().time())|| (!s.deadlock().has_time())) &&
+              (implies_condition(cond1,cond)))))
+        {
+          /* do not add summand to result, as it is superseded by s */
+        }
+        else
+        {
+          result.push_back(smmnd);
+        }
+      }
+
+      result.push_back(s);
+      deadlock_summands.swap(result);
+    }
+
 } // namespace lps
 
 } // namespace mcrl2
