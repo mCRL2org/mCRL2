@@ -802,7 +802,7 @@ class specification_basic_type
       action_list result=ma2;
       for (const action& a: ma1) 
       {
-        result=insert(a,result,action_compare);
+        result=insert(a,result);
       }
       return result;
     }
@@ -7416,7 +7416,7 @@ class specification_basic_type
       for (std::size_t i=0; i<L.actions.size(); ++i)
       {
         S.actions.push_back((firstaction!=action())?
-                            insert(firstaction,L.actions[i], action_compare):
+                            insert(firstaction,L.actions[i]):
                             L.actions[i]);
         S.conditions.push_back(lazy::and_(L.conditions[i],condition));
       }

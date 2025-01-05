@@ -53,33 +53,28 @@ bool action_compare(const process::action& a1, const process::action& a2)
   return action_label_compare(a1.label(), a2.label());
 }
 
-/// Insert action into an action_list, keeping the action list sorted w.r.t. cmp.
+/// Insert action into an action_list, keeping the action list sorted w.r.t. action_compare.
 /// Complexity: O(n) for an action_list of length n.
 inline
 process::action_list insert(
-      const process::action& act,
-      process::action_list l,
-      const std::function<bool(const process::action&, const process::action&)>& cmp
-                                      = [](const process::action& t1, const process::action& t2){ return t1<t2;}
-      )
+  const process::action& act,
+  process::action_list l)
 {
   if (l.empty())
   {
     return process::action_list({ act });
   }
+  const process::action& head = l.front();
 
-  const process::action head = l.front();
-  if (cmp(act, head))
+  if (action_compare(act, head))
   {
     l.push_front(act);
-  }
-  else
-  {
-    l = insert(act, l.tail());
-    l.push_front(head);
+    return l;
   }
 
-  return l;
+  process::action_list result = insert(act, l.tail());
+  result.push_front(head);
+  return result;
 }
 
 inline
