@@ -6,13 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/linearise_utilities.h
+/// \file mcrl2/lps/linearise_utility.h
 /// \brief Utilities used in linearisation. Mainly for actions and multiactions.
 
 #ifndef MCRL2_LPS_LINEARISE_UTILITY_H
 #define MCRL2_LPS_LINEARISE_UTILITY_H
 
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/lps/deadlock_summand.h"
+#include "mcrl2/lps/stochastic_action_summand.h"
 
 
 namespace mcrl2
@@ -23,6 +26,7 @@ namespace lps
 
 /// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
 /// consistent.
+inline
 bool action_label_compare(const process::action_label& a1, const process::action_label& a2)
 {
   /* first compare the strings in the actions */
@@ -43,6 +47,7 @@ bool action_label_compare(const process::action_label& a1, const process::action
 
   /// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
 /// consistent.
+inline
 bool action_compare(const process::action& a1, const process::action& a2)
 {
   return action_label_compare(a1.label(), a2.label());
@@ -50,6 +55,7 @@ bool action_compare(const process::action& a1, const process::action& a2)
 
 /// Insert action into an action_list, keeping the action list sorted w.r.t. cmp.
 /// Complexity: O(n) for an action_list of length n.
+inline
 process::action_list insert(
       const process::action& act,
       process::action_list l,
@@ -125,26 +131,26 @@ bool implies_condition(const data::data_expression& c1, const data::data_express
 
   if (data::sort_bool::is_and_application(c2))
   {
-    return implies_condition(c1,data::binary_left(down_cast<data::application>(c2))) &&
-           implies_condition(c1,data::binary_right(down_cast<data::application>(c2)));
+    return implies_condition(c1,data::binary_left(atermpp::down_cast<data::application>(c2))) &&
+           implies_condition(c1,data::binary_right(atermpp::down_cast<data::application>(c2)));
   }
 
   if (data::sort_bool::is_or_application(c1))
   {
-    return implies_condition(data::binary_left(down_cast<data::application>(c1)),c2) &&
-           implies_condition(data::binary_right(down_cast<data::application>(c1)),c2);
+    return implies_condition(data::binary_left(atermpp::down_cast<data::application>(c1)),c2) &&
+           implies_condition(data::binary_right(atermpp::down_cast<data::application>(c1)),c2);
   }
 
   if (data::sort_bool::is_and_application(c1))
   {
-    return implies_condition(data::binary_left(down_cast<data::application>(c1)),c2) ||
-           implies_condition(data::binary_right(down_cast<data::application>(c1)),c2);
+    return implies_condition(data::binary_left(atermpp::down_cast<data::application>(c1)),c2) ||
+           implies_condition(data::binary_right(atermpp::down_cast<data::application>(c1)),c2);
   }
 
   if (data::sort_bool::is_or_application(c2))
   {
-    return implies_condition(c1,data::binary_left(down_cast<data::application>(c2))) ||
-           implies_condition(c1,data::binary_right(down_cast<data::application>(c2)));
+    return implies_condition(c1,data::binary_left(atermpp::down_cast<data::application>(c2))) ||
+           implies_condition(c1,data::binary_right(atermpp::down_cast<data::application>(c2)));
   }
 
   return false;
