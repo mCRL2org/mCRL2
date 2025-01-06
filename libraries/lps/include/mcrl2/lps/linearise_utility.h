@@ -152,7 +152,9 @@ bool implies_condition(const data::data_expression& c1, const data::data_express
 }
 
 /// Determine if action summand as subsumes delta summand ds.
-inline
+///
+/// The action summand subsumes the deadlock summand if its condition is implied by that of the deadlock summand,
+/// and either the action summand is not timed, or the timestamp of the deadlock summand and the action summand coincide.
 bool subsumes(const stochastic_action_summand& as, const deadlock_summand& ds)
 {
   return (!as.multi_action().has_time() || ds.deadlock().time() == as.multi_action().time())
