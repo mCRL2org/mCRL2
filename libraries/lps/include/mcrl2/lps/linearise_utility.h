@@ -47,10 +47,23 @@ bool action_label_compare(const process::action_label& a1, const process::action
 
 /// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
 /// consistent.
+///
+/// \returns true iff the label of a1 is less than the label of a2 (w.r.t. action_label_compare), or the labels are equal and the arguments of a1 are less than the arguments of a2.
+/// for the latter, we use the standard < comparison.
 inline
 bool action_compare(const process::action& a1, const process::action& a2)
 {
-  return action_label_compare(a1.label(), a2.label());
+  if (action_label_compare(a1.label(), a2.label()))
+  {
+    return true;
+  };
+
+  if  (a1.label() == a2.label())
+  {
+    return a1.arguments() < a2.arguments();
+  }
+
+  return false;
 }
 
 /// Insert action into an action_list, keeping the action list sorted w.r.t. action_compare.
