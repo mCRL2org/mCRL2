@@ -495,7 +495,7 @@ tuple_list makeMultiActionConditionList_aux(
     return t;
   }
 
-  const process::action& firstaction=*multiaction_first;
+  const process::action& firstaction = *multiaction_first;
 
   const tuple_list S=phi(process::action_list({ firstaction }),
                          firstaction.arguments(),
@@ -516,13 +516,14 @@ tuple_list makeMultiActionConditionList(
   const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
   comm_entry comm_table(communications);
-  return makeMultiActionConditionList_aux(multiaction.begin(), multiaction.end(),comm_table,process::action_list(),RewriteTerm);
+  return makeMultiActionConditionList_aux(multiaction.begin(), multiaction.end(), comm_table, process::action_list(), RewriteTerm);
 }
 
+/// Apply the communication composition to a list of action summands.
 inline
 void communicationcomposition(
-  const process::communication_expression_list& communications,
-  const process::action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
+  process::communication_expression_list communications,
+  process::action_name_multiset_list allowlist,  // This is a list of list of identifierstring.
   const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
   const bool is_block,
   stochastic_action_summand_vector& action_summands,
@@ -542,37 +543,35 @@ void communicationcomposition(
          is_block ? "- calculating the communication operator modulo the block operator on " :
                     "- calculating the communication operator on ") << action_summands.size() << " action summands";
 
-  /* first we sort the multiactions in communications */
-  process::communication_expression_list sorted_communications;
-
-  for (const process::communication_expression& comm: communications)
+  // Ensure communications and allowlist are sorted. We rely on the sort order later.
+  communications = sort_communications(communications);
+  if (is_allow)
   {
-    const process::action_name_multiset& source=comm.action_name();
-    const core::identifier_string& target=comm.name();
-    sorted_communications.push_front(process::communication_expression(sort_action_labels(source),target));
+    allowlist = sort_multi_action_labels(allowlist);
   }
 
-  stochastic_action_summand_vector resultsumlist;
-  deadlock_summand_vector resultingDeltaSummands;
-  deadlock_summands.swap(resultingDeltaSummands);
+  deadlock_summand_vector resulting_deadlock_summands;
+  deadlock_summands.swap(resulting_deadlock_summands);
 
   const bool inline_allow = is_allow || is_block;
   if (inline_allow)
   {
     // Inline allow is only supported for ignore_time,
     // for in other cases generation of delta summands cannot be inlined in any simple way.
-    assert(!options.nodeltaelimination && options.ignore_time);
+    assert(!nodeltaelimination && ignore_time);
     deadlock_summands.push_back(deadlock_summand(data::variable_list(), data::sort_bool::true_(),deadlock()));
   }
-  process::action_name_multiset_list allowlist((is_allow)?sort_multi_action_labels(allowlist1):allowlist1);
+
+  stochastic_action_summand_vector resulting_action_summands;
 
   for (const stochastic_action_summand& smmnd: action_summands)
   {
-    const data::variable_list& sumvars=smmnd.summation_variables();
-    const process::action_list& multiaction=smmnd.multi_action().actions();
-    const data::data_expression& condition=smmnd.condition();
-    const data::assignment_list& nextstate=smmnd.assignments();
-    const stochastic_distribution& dist=smmnd.distribution();
+    const data::variable_list& sumvars = smmnd.summation_variables();
+    const process::action_list& multiaction = smmnd.multi_action().actions();
+    const data::data_expression& time = smmnd.multi_action().time();
+    const data::data_expression& condition = smmnd.condition();
+    const data::assignment_list& nextstate = smmnd.assignments();
+    const stochastic_distribution& dist = smmnd.distribution();
 
     if (!inline_allow)
     {
@@ -586,22 +585,12 @@ void communicationcomposition(
        * later on, and will in general reduce the number of delta
        * summands in the whole system */
 
-      /* But first remove free variables from sumvars */
+      // Create new list of summand variables containing only those that occur in the condition or the timestamp.
+      data::variable_list newsumvars;
+      atermpp::make_term_list(newsumvars, sumvars.begin(), sumvars.end(), [](const data::variable& v) { return v; },
+        [&condition, &time](const data::variable& v) { return occursinterm(condition, v) || occursinterm(time, v); });
 
-      data::variable_vector newsumvars_;
-      for (const data::variable& sumvar: sumvars)
-      {
-        if (occursinterm(condition, sumvar) ||
-            (smmnd.has_time() && occursinterm(smmnd.multi_action().time(), sumvar)))
-        {
-          newsumvars_.push_back(sumvar);
-        }
-      }
-      data::variable_list newsumvars=data::variable_list(newsumvars_.begin(), newsumvars_.end());
-
-      resultingDeltaSummands.push_back(deadlock_summand(newsumvars,
-                                                        condition,
-                                                        smmnd.multi_action().has_time()?deadlock(smmnd.multi_action().time()):deadlock()));
+      resulting_deadlock_summands.emplace_back(newsumvars, condition, deadlock(time));
     }
 
     /* the multiactionconditionlist is a list containing
@@ -615,14 +604,14 @@ void communicationcomposition(
     const tuple_list multiactionconditionlist=
       makeMultiActionConditionList(
         multiaction,
-        sorted_communications,
+        communications,
         RewriteTerm);
 
     for (std::size_t i=0 ; i<multiactionconditionlist.size(); ++i)
     {
       const process::action_list& multiaction=multiactionconditionlist.actions[i];
 
-      if (is_allow && !allow_(allowlist,multiaction,terminationAction))
+      if (is_allow && !allow_(allowlist, multiaction,terminationAction))
       {
         continue;
       }
@@ -651,21 +640,20 @@ void communicationcomposition(
 
       if (new_summand.condition()!=data::sort_bool::false_())
       {
-        resultsumlist.push_back(new_summand);
+        resulting_action_summands.push_back(new_summand);
       }
     }
 
   }
 
+  action_summands.swap(resulting_action_summands);
+
   /* Now the resulting delta summands must be added again */
-
-  action_summands.swap(resultsumlist);
-
   if (!inline_allow && !nodeltaelimination)
   {
-    for (const deadlock_summand& summand: resultingDeltaSummands)
+    for (const deadlock_summand& summand: resulting_deadlock_summands)
     {
-      insert_timed_delta_summand(action_summands,deadlock_summands,summand,ignore_time);
+      insert_timed_delta_summand(action_summands, deadlock_summands, summand, ignore_time);
     }
   }
 

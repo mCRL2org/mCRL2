@@ -104,6 +104,22 @@ process::action_name_multiset_list sort_multi_action_labels(const process::actio
   return process::action_name_multiset_list(l.begin(),l.end(),[](const process::action_name_multiset& al){ return sort_action_labels(al); });
 }
 
+/// Sort the left-hand sides of the communication expressions in communications
+///
+/// Sorting is done using sort_action_labels, so by default, the left-hand sides of the communications are sorted by names of the actions.
+inline
+process::communication_expression_list sort_communications(const process::communication_expression_list& communications)
+{
+  process::communication_expression_list result;
+
+  for (const process::communication_expression& comm: communications)
+  {
+    result.push_front(process::communication_expression(sort_action_labels(comm.action_name()),comm.name()));
+  }
+
+  return result;
+}
+
 inline
 bool implies_condition(const data::data_expression& c1, const data::data_expression& c2)
 {
