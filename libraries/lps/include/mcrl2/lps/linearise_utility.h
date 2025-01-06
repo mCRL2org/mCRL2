@@ -39,13 +39,13 @@ bool action_label_compare(const process::action_label& a1, const process::action
   {
     /* the strings are equal; the sorts are used to
        determine the ordering */
-    return a1.sorts()<a2.sorts();
+    return a1.sorts() < a2.sorts();
   }
 
   return false;
 }
 
-  /// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
+/// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
 /// consistent.
 inline
 bool action_compare(const process::action& a1, const process::action& a2)
@@ -157,62 +157,68 @@ void insert_timed_delta_summand(
       deadlock_summand_vector& deadlock_summands,
       const deadlock_summand& s,
       bool ignore_time)
+{
+  deadlock_summand_vector result;
+
+  // const variable_list sumvars=s.summation_variables();
+  const data::data_expression& cond=s.condition();
+  const data::data_expression& actiontime=s.deadlock().time();
+
+  // First check whether the delta summand is subsumed by an action summands.
+  if (!ignore_time)
+  {
+    for (const stochastic_action_summand& as: action_summands)
     {
-      deadlock_summand_vector result;
-
-      // const variable_list sumvars=s.summation_variables();
-      const data::data_expression& cond=s.condition();
-      const data::data_expression& actiontime=s.deadlock().time();
-
-      // First check whether the delta summand is subsumed by an action summands.
-      if (!ignore_time)
+      const data::data_expression& cond1=as.condition();
+      if (((actiontime==as.multi_action().time()) || (!as.multi_action().has_time())) &&
+          (implies_condition(cond,cond1)))
       {
-        for (const stochastic_action_summand& as: action_summands)
-        {
-          const data::data_expression& cond1=as.condition();
-          if (((actiontime==as.multi_action().time()) || (!as.multi_action().has_time())) &&
-              (implies_condition(cond,cond1)))
-          {
-            /* De delta summand is subsumed by action summand as. So, it does not
-               have to be added. */
+        /* De delta summand is subsumed by action summand as. So, it does not
+           have to be added. */
 
-            return;
-          }
-        }
+        return;
       }
-
-      for (deadlock_summand_vector::iterator i=deadlock_summands.begin(); i!=deadlock_summands.end(); ++i)
-      {
-        const deadlock_summand& smmnd=*i;
-        const data::data_expression& cond1=i->condition();
-        if ((!ignore_time) &&
-            ((actiontime==i->deadlock().time()) || (!i->deadlock().has_time())) &&
-            (implies_condition(cond,cond1)))
-        {
-          /* put the summand that was effective in removing
-             this delta summand to the front, such that it
-             is encountered early later on, removing a next
-             delta summand */
-
-          copy(i,deadlock_summands.end(),back_inserter(result));
-          deadlock_summands.swap(result);
-          return;
-        }
-        if (((ignore_time)||
-             (((actiontime==smmnd.deadlock().time())|| (!s.deadlock().has_time())) &&
-              (implies_condition(cond1,cond)))))
-        {
-          /* do not add summand to result, as it is superseded by s */
-        }
-        else
-        {
-          result.push_back(smmnd);
-        }
-      }
-
-      result.push_back(s);
-      deadlock_summands.swap(result);
     }
+  }
+
+  for (deadlock_summand_vector::iterator i=deadlock_summands.begin(); i!=deadlock_summands.end(); ++i)
+  {
+    const deadlock_summand& smmnd=*i;
+    const data::data_expression& cond1=i->condition();
+    if ((!ignore_time) &&
+        ((actiontime==i->deadlock().time()) || (!i->deadlock().has_time())) &&
+        (implies_condition(cond,cond1)))
+    {
+      /* put the summand that was effective in removing
+         this delta summand to the front, such that it
+         is encountered early later on, removing a next
+         delta summand */
+
+      copy(i,deadlock_summands.end(),back_inserter(result));
+      deadlock_summands.swap(result);
+      return;
+    }
+    if (((ignore_time)||
+         (((actiontime==smmnd.deadlock().time())|| (!s.deadlock().has_time())) &&
+          (implies_condition(cond1,cond)))))
+    {
+      /* do not add summand to result, as it is superseded by s */
+    }
+    else
+    {
+      result.push_back(smmnd);
+    }
+  }
+
+  result.push_back(s);
+  deadlock_summands.swap(result);
+}
+
+inline
+bool occursinterm(const data::variable& var, const data::data_expression& t)
+{
+  return data::search_free_variable(t, var);
+}
 
 } // namespace lps
 
