@@ -151,6 +151,14 @@ bool implies_condition(const data::data_expression& c1, const data::data_express
   return false;
 }
 
+/// Determine if action summand as subsumes delta summand ds.
+inline
+bool subsumes(const stochastic_action_summand& as, const deadlock_summand& ds)
+{
+  return (!as.multi_action().has_time() || ds.deadlock().time() == as.multi_action().time())
+      && implies_condition(ds.condition(), as.condition());
+}
+
 inline
 void insert_timed_delta_summand(
       const stochastic_action_summand_vector& action_summands,
@@ -158,28 +166,21 @@ void insert_timed_delta_summand(
       const deadlock_summand& s,
       bool ignore_time)
 {
-  deadlock_summand_vector result;
-
-  // const variable_list sumvars=s.summation_variables();
-  const data::data_expression& cond=s.condition();
-  const data::data_expression& actiontime=s.deadlock().time();
-
-  // First check whether the delta summand is subsumed by an action summands.
+  // First check whether the delta summand is subsumed by an action summand.
   if (!ignore_time)
   {
     for (const stochastic_action_summand& as: action_summands)
     {
-      const data::data_expression& cond1=as.condition();
-      if (((actiontime==as.multi_action().time()) || (!as.multi_action().has_time())) &&
-          (implies_condition(cond,cond1)))
+      if (subsumes(as, s))
       {
-        /* De delta summand is subsumed by action summand as. So, it does not
-           have to be added. */
-
         return;
       }
     }
   }
+
+  deadlock_summand_vector result;
+  const data::data_expression& cond = s.condition();
+  const data::data_expression& actiontime = s.deadlock().time();
 
   for (deadlock_summand_vector::iterator i=deadlock_summands.begin(); i!=deadlock_summands.end(); ++i)
   {
