@@ -215,7 +215,7 @@ void insert_timed_delta_summand(
 }
 
 inline
-bool occursinterm(const data::variable& var, const data::data_expression& t)
+bool occursinterm(const data::data_expression& t, const data::variable& var)
 {
   return data::search_free_variable(t, var);
 }

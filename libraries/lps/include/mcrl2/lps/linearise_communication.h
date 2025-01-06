@@ -580,8 +580,8 @@ void communicationcomposition(
       data::variable_vector newsumvars_;
       for (const data::variable& sumvar: sumvars)
       {
-        if (occursinterm(sumvar,condition) ||
-            (smmnd.has_time() && occursinterm(sumvar,smmnd.multi_action().time())))
+        if (occursinterm(condition, sumvar) ||
+            (smmnd.has_time() && occursinterm(smmnd.multi_action().time(), sumvar)))
         {
           newsumvars_.push_back(sumvar);
         }

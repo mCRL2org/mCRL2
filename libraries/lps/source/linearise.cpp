@@ -1282,7 +1282,7 @@ class specification_basic_type
     {
       for (const data_expression& d: r)
       {
-        if (occursinterm(var,d))
+        if (occursinterm(d, var))
         {
           return true;
         }
@@ -1295,7 +1295,7 @@ class specification_basic_type
       std::set<variable> assigned_variables;
       for (const assignment& l: r)
       {
-        if (occursinterm(var,l.rhs()))
+        if (occursinterm(l.rhs(), var))
         {
           return true;
         }
@@ -1371,7 +1371,7 @@ class specification_basic_type
       }
       if (is_if_then(p))
       {
-        return occursinterm(var,if_then(p).condition())||
+        return occursinterm(if_then(p).condition(), var) ||
                occursinpCRLterm(var,if_then(p).then_case(),strict);
       }
 
@@ -1393,13 +1393,13 @@ class specification_basic_type
         if (strict)
         {
           return occursintermlist(var,variable_list_to_data_expression_list(sto.variables())) ||
-                      occursinterm(var,sto.distribution()) ||
+                      occursinterm(sto.distribution(), var) ||
                       occursinpCRLterm(var,sto.operand(),strict);
         }
         else
         {
           return (!occursintermlist(var,variable_list_to_data_expression_list(sto.variables()))) &&
-                      (occursinterm(var,sto.distribution()) ||
+                      (occursinterm(sto.distribution(), var) ||
                        occursinpCRLterm(var,sto.operand(),strict));
         }
       }
@@ -1418,7 +1418,7 @@ class specification_basic_type
       }
       if (is_at(p))
       {
-        return occursinterm(var,at(p).time_stamp()) ||
+        return occursinterm(at(p).time_stamp(), var) ||
                occursinpCRLterm(var,at(p).operand(),strict);
       }
       if (is_delta(p))
@@ -7384,7 +7384,7 @@ class specification_basic_type
       if (is_variable(actiontime))
       {
         const variable& t = atermpp::down_cast<variable>(actiontime);
-        if (occursintermlist(t, variable_list_to_data_expression_list(sumvars)) && !occursinterm(t, condition))
+        if (occursintermlist(t, variable_list_to_data_expression_list(sumvars)) && !occursinterm(condition, t))
         {
           return true;
         }
@@ -7452,7 +7452,7 @@ class specification_basic_type
       }
       for (const variable& v: freevars)
       {
-        if (occursinterm(v,result))
+        if (occursinterm(result, v))
         {
           variables.push_front(v);
         }
@@ -7460,7 +7460,7 @@ class specification_basic_type
 
       for (const variable& v: global_variables)
       {
-        if (occursinterm(v,result))
+        if (occursinterm(result, v))
         {
           variables.push_front(v);
         }
@@ -7468,7 +7468,7 @@ class specification_basic_type
 
       for (const variable& v: sumvars)
       {
-        if (occursinterm(v,result))
+        if (occursinterm(result, v))
         {
           used_sumvars.push_front(v);
         }
