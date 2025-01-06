@@ -26,6 +26,22 @@ namespace mcrl2
 namespace lps
 {
 
+using action_name_t = core::identifier_string;
+using action_multiset_t = process::action_list; // sorted w.r.t. action_compare
+using action_name_multiset_t = core::identifier_string_list; // sorted w.r.t. action_label_compare
+
+inline
+action_multiset_t make_action_multiset(const process::action_list& actions)
+{
+  return actions;
+}
+
+inline
+process::action_list make_multi_action(const action_multiset_t& actions)
+{
+  return actions;
+}
+
 // Check that the sorts of both termlists match.
 inline
 data::data_expression pairwiseMatch(const data::data_expression_list& l1, const data::data_expression_list& l2, const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
@@ -34,6 +50,7 @@ data::data_expression pairwiseMatch(const data::data_expression_list& l1, const 
   {
     return data::sort_bool::false_();
   }
+
   data::data_expression_list::const_iterator i2=l2.begin();
   data::data_expression result=data::sort_bool::true_();
   for(const data::data_expression& t1: l1)
@@ -52,7 +69,7 @@ data::data_expression pairwiseMatch(const data::data_expression_list& l1, const 
 // can occur.
 struct tuple_list
 {
-  std::vector < process::action_list > actions;
+  std::vector < action_multiset_t > actions;
   std::vector < data::data_expression > conditions;
 
   std::size_t size() const
@@ -91,14 +108,11 @@ tuple_list addActionCondition(
 class comm_entry
 {
   protected:
-    /// Type used to store the names of the actions in a multiaction
-    using multi_action_name_t = std::vector<core::identifier_string>;
-
     /// Left-hand sides of communication expressions
-    const std::vector<multi_action_name_t> m_lhs;
+    const std::vector<action_name_multiset_t> m_lhs;
 
     /// Right-hand sides of communication expressions
-    const std::vector<core::identifier_string> m_rhs;
+    const std::vector<action_name_t> m_rhs;
 
     /// Caches.
     std::unordered_map<process::action_list, process::action_label> m_can_communicate_cache;
@@ -106,7 +120,7 @@ class comm_entry
 
     /// Temporary data using in determining whether communication is allowed.
     /// See usages of the data structure below.
-    std::vector<multi_action_name_t::const_iterator> m_lhs_iters; // offset into lhs
+    std::vector<action_name_multiset_t::const_iterator> m_lhs_iters; // offset into lhs
     std::vector<bool> m_match_failed;
 
     void reset_temporary_data()
@@ -122,13 +136,13 @@ class comm_entry
     /// Returns true if this is the case, false otherwise.
     /// Postcondition: for every i such that m is not contained in lhs[i], match_failed[i] is true.
     /// NB: resets temporary data before performing computations.
-    bool match_multiaction(const process::action_list& m) {
+    bool match_multiaction(const action_multiset_t& m) {
       reset_temporary_data();
 
       // m must match a lhs; check every action
       for (const process::action& a: m)
       {
-        const core::identifier_string& actionname=a.label().name();
+        const action_name_t& actionname=a.label().name();
 
         // check every lhs for actionname
         bool comm_ok = false;
@@ -168,9 +182,9 @@ class comm_entry
 
     // Initialization of lhs, defined as static function so it can be used in the constructor.
     // Allows lhs to be defined as const.
-    static std::vector < multi_action_name_t > init_lhs(const process::communication_expression_list& communications)
+    static std::vector < action_name_multiset_t > init_lhs(const process::communication_expression_list& communications)
     {
-      std::vector<multi_action_name_t> result;
+      std::vector<action_name_multiset_t> result;
       for (const process::communication_expression& l: communications)
       {
         const core::identifier_string_list& names = l.action_name().names();
@@ -181,9 +195,9 @@ class comm_entry
 
     // Initialization of rhs, defined as static function so it can be used in the constructor.
     // Allows rhs to be defined as const.
-    static std::vector <core::identifier_string> init_rhs(const process::communication_expression_list& communications)
+    static std::vector <action_name_t> init_rhs(const process::communication_expression_list& communications)
     {
-      std::vector <core::identifier_string> result;
+      std::vector <action_name_t> result;
       for (const process::communication_expression& l: communications)
       {
         result.push_back(l.name());
@@ -213,7 +227,7 @@ class comm_entry
 
     /// Determine if there exists a communication expression a1|...|an -> b in comm_table
     /// such that m' \subseteq a1|...|an , where m' is the multiset of actionnames for multiaction m.
-    process::action_label can_communicate(const process::action_list& m)
+    process::action_label can_communicate(const action_multiset_t& m)
     {
       /* this function indicates whether the actions in m
                    consisting of actions and data occur in C, such that
@@ -252,9 +266,9 @@ class comm_entry
       return result;
     }
 
-    bool might_communicate(const process::action_list& m,
-      process::action_list::const_iterator n_first,
-      process::action_list::const_iterator n_last)
+    bool might_communicate(const action_multiset_t& m,
+      action_multiset_t::const_iterator n_first,
+      action_multiset_t::const_iterator n_last)
     {
       /* this function indicates whether the actions in m
          consisting of actions and data occur in C, such that
@@ -280,7 +294,7 @@ class comm_entry
         // before matching all actions in the lhs, we set it to std::nullopt.
         // N.B. when rest[i] becomes empty after matching all actions in the lhs,
         // rest[i].empty() is a meaningful result: we have a successful match.
-        std::vector<std::optional<std::pair<process::action_list::const_iterator, process::action_list::const_iterator>>>
+        std::vector<std::optional<std::pair<action_multiset_t::const_iterator, action_multiset_t::const_iterator>>>
           rest(size(), std::make_pair(n_first, n_last)); // pairs of iterator into n; the second element of the pair indicates the end of the range in n.
 
         // check every lhs
@@ -302,8 +316,8 @@ class comm_entry
               break;
             }
             // get first action in lhs i
-            const core::identifier_string& commname = *m_lhs_iters[i];
-            core::identifier_string restname = rest[i]->first->label().name();
+            const action_name_t& commname = *m_lhs_iters[i];
+            action_name_t restname = rest[i]->first->label().name();
             // find it in rest[i]
             while (commname != restname)
             {
@@ -342,19 +356,19 @@ class comm_entry
 /// \prototype
 inline
 tuple_list makeMultiActionConditionList_aux(
-  process::action_list::const_iterator multiaction_first,
-  process::action_list::const_iterator multiaction_last,
+  action_multiset_t::const_iterator multiaction_first,
+  action_multiset_t::const_iterator multiaction_last,
   comm_entry& comm_table,
   const process::action_list& r,
   const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm);
 
 inline
-tuple_list phi(const process::action_list& m,
+tuple_list phi(const action_multiset_t& m,
                const data::data_expression_list& d,
-               const process::action_list& w,
-               const process::action_list::const_iterator& n_first,
-               const process::action_list::const_iterator& n_last,
-               const process::action_list& r,
+               const action_multiset_t& w,
+               const action_multiset_t::const_iterator& n_first,
+               const action_multiset_t::const_iterator& n_last,
+               const action_multiset_t& r,
                comm_entry& comm_table,
                const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
@@ -394,17 +408,18 @@ tuple_list phi(const process::action_list& m,
   const data::data_expression condition=pairwiseMatch(d,firstaction.arguments(),RewriteTerm);
   if (condition==data::sort_bool::false_())
   {
-    process::action_list tempw=w;
+    action_multiset_t tempw=w;
+    tempw = insert(firstaction, tempw);
     tempw=push_back(tempw,firstaction);
     return phi(m,d,tempw,std::next(n_first), n_last,r,comm_table,RewriteTerm);
   }
   else
   {
-    process::action_list tempm=m;
-    tempm=push_back(tempm,firstaction);
+    action_multiset_t tempm=m;
+    tempm = insert(firstaction, tempm);
     const tuple_list T=phi(tempm,d,w,std::next(n_first), n_last,r,comm_table,RewriteTerm);
-    process::action_list tempw=w;
-    tempw=push_back(tempw,firstaction);
+    action_multiset_t tempw=w;
+    tempw = insert(firstaction, tempw);
     return addActionCondition(
              process::action(),
              condition,
@@ -414,7 +429,7 @@ tuple_list phi(const process::action_list& m,
 }
 
 inline
-bool xi(const process::action_list& alpha, const process::action_list& beta, comm_entry& comm_table)
+bool xi(const action_multiset_t& alpha, const action_multiset_t& beta, comm_entry& comm_table)
 {
   if (beta.empty())
   {
@@ -423,8 +438,8 @@ bool xi(const process::action_list& alpha, const process::action_list& beta, com
   else
   {
     const process::action& a = beta.front();
-    process::action_list l=alpha;
-    l=push_back(l,a);
+    action_multiset_t l=alpha;
+    l = insert(a, l);
     const process::action_list& beta_next = beta.tail();
 
     if (comm_table.can_communicate(l)!=process::action_label())
@@ -443,14 +458,14 @@ bool xi(const process::action_list& alpha, const process::action_list& beta, com
 }
 
 inline
-data::data_expression psi(const process::action_list& alpha_in, comm_entry& comm_table, const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
+data::data_expression psi(const action_multiset_t& alpha_in, comm_entry& comm_table, const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
-  process::action_list alpha=reverse(alpha_in);
+  action_multiset_t alpha=reverse(alpha_in);
   data::data_expression cond = data::sort_bool::false_();
 
   process::action a; // a and beta used in the loop; avoid repeated allocation and deallocation
-  process::action_list beta;
-  process::action_list actl; // used in inner loop.
+  action_multiset_t beta;
+  action_multiset_t actl; // used in inner loop.
   while (!alpha.empty())
   {
     a = alpha.front();
@@ -458,10 +473,10 @@ data::data_expression psi(const process::action_list& alpha_in, comm_entry& comm
 
     while (!beta.empty())
     {
-      actl = process::action_list();
-      actl.emplace_front(beta.front());
-      actl.emplace_front(a);
-      const process::action_list& beta_tail = beta.tail();
+      actl = action_multiset_t();
+      actl = insert(beta.front(), actl);
+      actl = insert(a, actl);
+      const action_multiset_t& beta_tail = beta.tail();
       if (comm_table.might_communicate(actl,beta_tail.begin(), beta_tail.end()) && xi(actl,beta.tail(),comm_table))
       {
         // sort and remove duplicates??
@@ -478,10 +493,10 @@ data::data_expression psi(const process::action_list& alpha_in, comm_entry& comm
 // returns a list of tuples.
 inline
 tuple_list makeMultiActionConditionList_aux(
-  process::action_list::const_iterator multiaction_first,
-  process::action_list::const_iterator multiaction_last,
+  action_multiset_t::const_iterator multiaction_first,
+  action_multiset_t::const_iterator multiaction_last,
   comm_entry& comm_table,
-  const process::action_list& r,
+  const action_multiset_t& r,
   const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
   /* This is the function gamma(m,C,r) provided
@@ -497,13 +512,13 @@ tuple_list makeMultiActionConditionList_aux(
 
   const process::action& firstaction = *multiaction_first;
 
-  const tuple_list S=phi(process::action_list({ firstaction }),
+  const tuple_list S=phi(action_multiset_t({ firstaction }),
                          firstaction.arguments(),
-                         process::action_list(),
+                         action_multiset_t(),
                          std::next(multiaction_first), multiaction_last,
                          r,comm_table, RewriteTerm);
-  process::action_list tempr=r;
-  tempr.push_front(firstaction);
+  action_multiset_t tempr=r;
+  tempr = insert(firstaction, tempr);
   const tuple_list T=makeMultiActionConditionList_aux(std::next(multiaction_first), multiaction_last,comm_table,
                        tempr,RewriteTerm);
   return addActionCondition(firstaction,data::sort_bool::true_(),T,S);
@@ -511,12 +526,12 @@ tuple_list makeMultiActionConditionList_aux(
 
 inline
 tuple_list makeMultiActionConditionList(
-  const process::action_list& multiaction,
+  const action_multiset_t& multiaction,
   const process::communication_expression_list& communications,
   const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
   comm_entry comm_table(communications);
-  return makeMultiActionConditionList_aux(multiaction.begin(), multiaction.end(), comm_table, process::action_list(), RewriteTerm);
+  return makeMultiActionConditionList_aux(multiaction.begin(), multiaction.end(), comm_table, action_multiset_t(), RewriteTerm);
 }
 
 /// Apply the communication composition to a list of action summands.
@@ -603,13 +618,13 @@ void communicationcomposition(
 
     const tuple_list multiactionconditionlist=
       makeMultiActionConditionList(
-        multiaction,
+        make_action_multiset(multiaction),
         communications,
         RewriteTerm);
 
     for (std::size_t i=0 ; i<multiactionconditionlist.size(); ++i)
     {
-      const process::action_list& multiaction=multiactionconditionlist.actions[i];
+      const process::action_list& multiaction=make_multi_action(multiactionconditionlist.actions[i]);
 
       if (is_allow && !allow_(allowlist, multiaction,terminationAction))
       {

@@ -24,18 +24,27 @@ namespace mcrl2
 namespace lps
 {
 
+inline
+bool action_name_compare(const core::identifier_string& s1, const core::identifier_string& s2)
+{
+  return std::string(s1) < std::string(s2);
+}
+
 /// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
 /// consistent.
 inline
 bool action_label_compare(const process::action_label& a1, const process::action_label& a2)
 {
   /* first compare the strings in the actions */
-  if (std::string(a1.name())<std::string(a2.name()))
+  const core::identifier_string a1_name = a1.name();
+  const core::identifier_string a2_name = a2.name();
+
+  if (action_name_compare(a1_name, a2_name))
   {
     return true;
   }
 
-  if (a1.name()==a2.name())
+  if (a1_name == a2_name)
   {
     /* the strings are equal; the sorts are used to
        determine the ordering */
@@ -53,12 +62,15 @@ bool action_label_compare(const process::action_label& a1, const process::action
 inline
 bool action_compare(const process::action& a1, const process::action& a2)
 {
-  if (action_label_compare(a1.label(), a2.label()))
+  const process::action_label a1_label = a1.label();
+  const process::action_label a2_label = a2.label();
+
+  if (action_label_compare(a1_label, a2_label))
   {
     return true;
   };
 
-  if  (a1.label() == a2.label())
+  if  (a1_label == a2_label)
   {
     return a1.arguments() < a2.arguments();
   }
@@ -86,6 +98,29 @@ process::action_list insert(
   }
 
   process::action_list result = insert(act, l.tail());
+  result.push_front(head);
+  return result;
+}
+
+/// insert an action name into the list, while preserving the sorting of action names.
+inline
+core::identifier_string_list insert(
+  const core::identifier_string& s,
+  core::identifier_string_list l)
+{
+  if (l.empty())
+  {
+    return core::identifier_string_list({ s });
+  }
+  const core::identifier_string& head = l.front();
+
+  if (action_name_compare(s, head))
+  {
+    l.push_front(s);
+    return l;
+  }
+
+  core::identifier_string_list result = insert(s, l.tail());
   result.push_front(head);
   return result;
 }
