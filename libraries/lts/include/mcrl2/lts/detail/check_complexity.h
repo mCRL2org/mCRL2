@@ -80,7 +80,7 @@
 // `cancel_work()`, and `wait()`.  It is not necessary to preserve
 // `add_work_notemporary()`.  The function `print_grand_totals()` prints a
 // verbose message about the number of coroutine steps executed.
-#define COUNT_WORK_BALANCE
+//#define COUNT_WORK_BALANCE
 
 // If the preprocessor constant `TEST_WORK_COUNTER_NAMES` is defined,
 // initialising will print an overview of the defined work counter names (to
