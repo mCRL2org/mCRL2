@@ -184,42 +184,49 @@ bool implies_condition(const data::data_expression& c1, const data::data_express
 ///
 /// The action summand subsumes the deadlock summand if its condition is implied by that of the deadlock summand,
 /// and either the action summand is not timed, or the timestamp of the deadlock summand and the action summand coincide.
+inline
 bool subsumes(const stochastic_action_summand& as, const deadlock_summand& ds)
 {
   return (!as.multi_action().has_time() || ds.deadlock().time() == as.multi_action().time())
       && implies_condition(ds.condition(), as.condition());
 }
 
+/// Determine if delta summand ds1 subsumes delta summand ds2.
+inline
+bool subsumes(const deadlock_summand& ds1, const deadlock_summand& ds2)
+{
+  return (!ds1.deadlock().has_time() || ds2.deadlock().time() == ds1.deadlock().time())
+      && implies_condition(ds2.condition(), ds1.condition());
+}
+
+
 inline
 void insert_timed_delta_summand(
       const stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       const deadlock_summand& s,
-      bool ignore_time)
+      const bool ignore_time)
 {
-  // First check whether the delta summand is subsumed by an action summand.
-  if (!ignore_time)
+  if (ignore_time)
   {
-    for (const stochastic_action_summand& as: action_summands)
-    {
-      if (subsumes(as, s))
-      {
-        return;
-      }
-    }
+    deadlock_summands.push_back(s);
+    return;
+  }
+
+  assert(!ignore_time);
+
+  // First check whether the delta summand is subsumed by an action summand.
+  if (std::any_of(action_summands.begin(), action_summands.end(),
+    [&s](const stochastic_action_summand& as) { return subsumes(as, s); }))
+  {
+    return;
   }
 
   deadlock_summand_vector result;
-  const data::data_expression& cond = s.condition();
-  const data::data_expression& actiontime = s.deadlock().time();
 
   for (deadlock_summand_vector::iterator i=deadlock_summands.begin(); i!=deadlock_summands.end(); ++i)
   {
-    const deadlock_summand& smmnd=*i;
-    const data::data_expression& cond1=i->condition();
-    if ((!ignore_time) &&
-        ((actiontime==i->deadlock().time()) || (!i->deadlock().has_time())) &&
-        (implies_condition(cond,cond1)))
+    if (subsumes(*i, s))
     {
       /* put the summand that was effective in removing
          this delta summand to the front, such that it
@@ -230,15 +237,9 @@ void insert_timed_delta_summand(
       deadlock_summands.swap(result);
       return;
     }
-    if (((ignore_time)||
-         (((actiontime==smmnd.deadlock().time())|| (!s.deadlock().has_time())) &&
-          (implies_condition(cond1,cond)))))
+    if (!subsumes(s, *i))
     {
-      /* do not add summand to result, as it is superseded by s */
-    }
-    else
-    {
-      result.push_back(smmnd);
+      result.push_back(*i);
     }
   }
 
