@@ -423,7 +423,7 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermC
 /// \param target The variable to which the list is assigned. 
 /// \param first The start of a range of elements.
 /// \param last The end of a range of elements.
-/// \param convert_to_aterm A class with a () operation, whic is applied to each element
+/// \param convert_to_aterm A class with a () operation, which is applied to each element
 ///                      before it is put into the list.
 /// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
 template <class Term, class Iter, class  ATermConverter, class ATermFilter>
