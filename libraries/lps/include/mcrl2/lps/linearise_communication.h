@@ -54,8 +54,19 @@ struct tuple_list
 {
   std::vector < process::action_list > actions;
   std::vector < data::data_expression > conditions;
+
+  std::size_t size() const
+  {
+    assert(action.size() == conditions.size());
+    return actions.size();
+  }
 };
 
+/// Returns the list S ++ L',
+/// where L' is the list L in which firstaction is inserted into every action, and each condition is strengthened with condition.
+///
+/// If firstaction == action(), it is not added to the multiactions in L', but the conditions will be strengthened.
+/// \pre condition != sort_bool::false_()
 inline
 tuple_list addActionCondition(
   const process::action& firstaction,
@@ -63,16 +74,16 @@ tuple_list addActionCondition(
   const tuple_list& L,
   tuple_list S)
 {
-  /* if firstaction==action(), it should not be added */
-  assert(condition!=sort_bool::false_()); // It makes no sense to add an action with condition false,
-  // as it cannot happen anyhow.
-  for (std::size_t i=0; i<L.actions.size(); ++i)
+  assert(condition!=sort_bool::false_()); // It makes no sense to add an action with condition false, as it cannot happen anyhow.
+
+  for (std::size_t i = 0; i < L.size(); ++i)
   {
     S.actions.push_back((firstaction!=process::action())?
                         insert(firstaction,L.actions[i]):
                         L.actions[i]);
     S.conditions.push_back(data::lazy::and_(L.conditions[i],condition));
   }
+
   return S;
 }
 
@@ -607,9 +618,7 @@ void communicationcomposition(
         sorted_communications,
         RewriteTerm);
 
-    assert(multiactionconditionlist.actions.size()==
-           multiactionconditionlist.conditions.size());
-    for (std::size_t i=0 ; i<multiactionconditionlist.actions.size(); ++i)
+    for (std::size_t i=0 ; i<multiactionconditionlist.size(); ++i)
     {
       const process::action_list& multiaction=multiactionconditionlist.actions[i];
 
