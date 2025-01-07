@@ -459,30 +459,33 @@ tuple_list phi(const action_multiset_t& m,
 }
 
 inline
-bool xi(const action_multiset_t& alpha, const action_multiset_t& beta, comm_entry& comm_table)
+bool xi(const action_multiset_t& alpha,
+        const action_multiset_t::const_iterator& beta_first,
+        const action_multiset_t::const_iterator& beta_last,
+        comm_entry& comm_table)
 {
-  if (beta.empty())
+  if (beta_first == beta_last)
   {
     return comm_table.can_communicate(alpha)!=process::action_label();
   }
   else
   {
-    const process::action& a = beta.front();
+    const process::action& a = *beta_first;
     action_multiset_t l=alpha;
     l = insert(a, l);
-    const process::action_list& beta_next = beta.tail();
 
     if (comm_table.can_communicate(l)!=process::action_label())
     {
       return true;
     }
-    else if (comm_table.might_communicate(l,beta_next.begin(), beta_next.end()))
+
+     if (comm_table.might_communicate(l,std::next(beta_first), beta_last))
     {
-      return xi(l,beta_next,comm_table) || xi(alpha,beta_next,comm_table);
+      return xi(l,std::next(beta_first), beta_last,comm_table) || xi(alpha,std::next(beta_first), beta_last, comm_table);
     }
     else
     {
-      return xi(alpha,beta_next,comm_table);
+      return xi(alpha, std::next(beta_first), beta_last, comm_table);
     }
   }
 }
@@ -507,7 +510,7 @@ data::data_expression psi(const action_multiset_t& alpha_in, comm_entry& comm_ta
       actl = insert(beta.front(), actl);
       actl = insert(a, actl);
       const action_multiset_t& beta_tail = beta.tail();
-      if (comm_table.might_communicate(actl,beta_tail.begin(), beta_tail.end()) && xi(actl,beta.tail(),comm_table))
+      if (comm_table.might_communicate(actl,beta_tail.begin(), beta_tail.end()) && xi(actl,beta_tail.begin(), beta_tail.end(),comm_table))
       {
         // sort and remove duplicates??
         cond = data::lazy::or_(cond,pairwiseMatch(a.arguments(),beta.front().arguments(),RewriteTerm));
