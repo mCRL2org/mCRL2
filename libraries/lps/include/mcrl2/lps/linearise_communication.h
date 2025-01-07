@@ -26,6 +26,37 @@ namespace mcrl2
 namespace lps
 {
 
+#if false
+using action_name_t = core::identifier_string;
+using action_multiset_t = std::multiset<process::action>; //process::action_list; // sorted w.r.t. action_compare
+using action_name_multiset_t = std::multiset<core::identifier_string, action_name_compare>; //core::identifier_string_list; // sorted w.r.t. action_label_compare
+
+inline
+action_multiset_t make_action_multiset(const process::action_list& actions)
+{
+  return action_multiset_t(actions.begin(), actions.end());
+}
+
+inline
+process::action_list make_multi_action(const action_multiset_t& actions)
+{
+  return process::action_list(actions.begin(), actions.end());
+}
+
+inline
+action_multiset_t insert(const process::action& action, action_multiset_t actions)
+{
+  actions.insert(action);
+  return actions;
+}
+
+inline
+action_name_multiset_t insert(const action_name_t& action_name, action_name_multiset_t action_names)
+{
+  action_names.insert(action_name);
+  return action_names;
+}
+#else
 using action_name_t = core::identifier_string;
 using action_multiset_t = process::action_list; // sorted w.r.t. action_compare
 using action_name_multiset_t = core::identifier_string_list; // sorted w.r.t. action_label_compare
@@ -41,6 +72,8 @@ process::action_list make_multi_action(const action_multiset_t& actions)
 {
   return actions;
 }
+
+#endif
 
 // Check that the sorts of both termlists match.
 inline
@@ -115,8 +148,8 @@ class comm_entry
     const std::vector<action_name_t> m_rhs;
 
     /// Caches.
-    std::unordered_map<process::action_list, process::action_label> m_can_communicate_cache;
-    std::unordered_map<process::action_list, bool> m_might_communicate_cache;
+    std::unordered_map<action_multiset_t, process::action_label> m_can_communicate_cache;
+    std::unordered_map<action_multiset_t, bool> m_might_communicate_cache;
 
     /// Temporary data using in determining whether communication is allowed.
     /// See usages of the data structure below.
@@ -255,7 +288,7 @@ class comm_entry
             {
               throw mcrl2::runtime_error("Cannot linearise a process with a communication operator, containing a communication that results in tau or that has an empty right hand side");
             }
-            result = process::action_label(m_rhs[i], m.front().label().sorts());
+            result = process::action_label(m_rhs[i], m.begin()->label().sorts());
             break;
           }
         }
@@ -316,10 +349,10 @@ class comm_entry
               break;
             }
             // get first action in lhs i
-            const action_name_t& commname = *m_lhs_iters[i];
-            action_name_t restname = rest[i]->first->label().name();
+            const action_name_t& comm_name = *m_lhs_iters[i];
+            action_name_t rest_name = rest[i]->first->label().name();
             // find it in rest[i]
-            while (commname != restname)
+            while (comm_name != rest_name)
             {
               ++(rest[i]->first);
               if (rest[i]->first == rest[i]->second) // no more
@@ -327,9 +360,9 @@ class comm_entry
                 rest[i] = std::nullopt;
                 break;
               }
-              restname = rest[i]->first->label().name();
+              rest_name = rest[i]->first->label().name();
             }
-            if (commname != restname) // action was not found
+            if (comm_name != rest_name) // action was not found
             {
               break;
             }
@@ -359,7 +392,7 @@ tuple_list makeMultiActionConditionList_aux(
   action_multiset_t::const_iterator multiaction_first,
   action_multiset_t::const_iterator multiaction_last,
   comm_entry& comm_table,
-  const process::action_list& r,
+  const action_multiset_t& r,
   const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm);
 
 inline
@@ -379,7 +412,7 @@ tuple_list phi(const action_multiset_t& m,
      can take place. In the communication all actions of
      m, none of w and a subset of n can take part in the
      communication. d is the data parameter of the communication
-     and C contains a list of multiaction action pairs indicating
+     and comm_table contains a list of multiaction action pairs indicating
      possible communications */
 
   if (!comm_table.might_communicate(m, n_first, n_last))
@@ -388,16 +421,12 @@ tuple_list phi(const action_multiset_t& m,
   }
   if (n_first == n_last)
   {
-    process::action_label c = comm_table.can_communicate(m); /* returns process::action_label() if no communication
+    const process::action_label c = comm_table.can_communicate(m); /* returns process::action_label() if no communication
                                                               is possible */
     if (c!=process::action_label())
     {
       const tuple_list T=makeMultiActionConditionList_aux(w.begin(), w.end(),comm_table,r,RewriteTerm);
-      return addActionCondition(
-               (c==process::action_label()?process::action():process::action(c,d)),  //Check. Nil kan niet geleverd worden.
-               data::sort_bool::true_(),
-               T,
-               tuple_list());
+      return addActionCondition(process::action(c,d), data::sort_bool::true_(), T, tuple_list());
     }
     /* c==NULL, actions in m cannot communicate */
     return tuple_list();
@@ -408,9 +437,10 @@ tuple_list phi(const action_multiset_t& m,
   const data::data_expression condition=pairwiseMatch(d,firstaction.arguments(),RewriteTerm);
   if (condition==data::sort_bool::false_())
   {
+    // a(f) cannot take part in communication as the arguments do not match. Move to w and continue with next action
     action_multiset_t tempw=w;
-    tempw = insert(firstaction, tempw);
-    tempw=push_back(tempw,firstaction);
+    //tempw = insert(firstaction, tempw);
+    tempw = push_back(tempw, firstaction); // todo
     return phi(m,d,tempw,std::next(n_first), n_last,r,comm_table,RewriteTerm);
   }
   else
@@ -506,7 +536,7 @@ tuple_list makeMultiActionConditionList_aux(
   {
     tuple_list t;
     t.conditions.push_back((r.empty())?static_cast<const data::data_expression&>(data::sort_bool::true_()):psi(r,comm_table,RewriteTerm));
-    t.actions.push_back(process::action_list());
+    t.actions.push_back(action_multiset_t());
     return t;
   }
 

@@ -24,59 +24,67 @@ namespace mcrl2
 namespace lps
 {
 
-inline
-bool action_name_compare(const core::identifier_string& s1, const core::identifier_string& s2)
+struct action_name_compare
 {
-  return std::string(s1) < std::string(s2);
-}
+  bool operator()(const core::identifier_string& s1, const core::identifier_string& s2) const
+  {
+    return std::string(s1) < std::string(s2);
+  }
+};
 
 /// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
 /// consistent.
-inline
-bool action_label_compare(const process::action_label& a1, const process::action_label& a2)
+struct action_label_compare
 {
-  /* first compare the strings in the actions */
-  const core::identifier_string a1_name = a1.name();
-  const core::identifier_string a2_name = a2.name();
 
-  if (action_name_compare(a1_name, a2_name))
+  bool operator()(const process::action_label& a1, const process::action_label& a2) const
   {
-    return true;
-  }
+    /* first compare the strings in the actions */
+    const core::identifier_string a1_name = a1.name();
+    const core::identifier_string a2_name = a2.name();
 
-  if (a1_name == a2_name)
-  {
-    /* the strings are equal; the sorts are used to
-       determine the ordering */
-    return a1.sorts() < a2.sorts();
-  }
+    if (action_name_compare()(a1_name, a2_name))
+    {
+      return true;
+    }
 
-  return false;
-}
+    if (a1_name == a2_name)
+    {
+      /* the strings are equal; the sorts are used to
+         determine the ordering */
+      return a1.sorts() < a2.sorts();
+    }
+
+    return false;
+  }
+};
+
 
 /// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
 /// consistent.
 ///
 /// \returns true iff the label of a1 is less than the label of a2 (w.r.t. action_label_compare), or the labels are equal and the arguments of a1 are less than the arguments of a2.
 /// for the latter, we use the standard < comparison.
-inline
-bool action_compare(const process::action& a1, const process::action& a2)
+struct action_compare
 {
-  const process::action_label a1_label = a1.label();
-  const process::action_label a2_label = a2.label();
-
-  if (action_label_compare(a1_label, a2_label))
+  bool operator()(const process::action& a1, const process::action& a2) const
   {
-    return true;
-  };
+    const process::action_label a1_label = a1.label();
+    const process::action_label a2_label = a2.label();
 
-  if  (a1_label == a2_label)
-  {
-    return a1.arguments() < a2.arguments();
+    if (action_label_compare()(a1_label, a2_label))
+    {
+      return true;
+    };
+
+    if  (a1_label == a2_label)
+    {
+      return a1.arguments() < a2.arguments();
+    }
+
+    return false;
   }
-
-  return false;
-}
+};
 
 /// Insert action into an action_list, keeping the action list sorted w.r.t. action_compare.
 /// Complexity: O(n) for an action_list of length n.
@@ -91,7 +99,7 @@ process::action_list insert(
   }
   const process::action& head = l.front();
 
-  if (action_compare(act, head))
+  if (action_compare()(act, head))
   {
     l.push_front(act);
     return l;
@@ -114,7 +122,7 @@ core::identifier_string_list insert(
   }
   const core::identifier_string& head = l.front();
 
-  if (action_name_compare(s, head))
+  if (action_name_compare()(s, head))
   {
     l.push_front(s);
     return l;
