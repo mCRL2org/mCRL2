@@ -438,18 +438,15 @@ tuple_list phi(const action_multiset_t& m,
   if (condition==data::sort_bool::false_())
   {
     // a(f) cannot take part in communication as the arguments do not match. Move to w and continue with next action
-    action_multiset_t tempw=w;
-    //tempw = insert(firstaction, tempw);
-    tempw = push_back(tempw, firstaction); // todo
+    const action_multiset_t tempw = insert(firstaction, w);
     return phi(m,d,tempw,std::next(n_first), n_last,r,comm_table,RewriteTerm);
   }
   else
   {
-    action_multiset_t tempm=m;
-    tempm = insert(firstaction, tempm);
+    const action_multiset_t tempm = insert(firstaction, m);
     const tuple_list T=phi(tempm,d,w,std::next(n_first), n_last,r,comm_table,RewriteTerm);
-    action_multiset_t tempw=w;
-    tempw = insert(firstaction, tempw);
+
+    const action_multiset_t tempw = insert(firstaction, w);
     return addActionCondition(
              process::action(),
              condition,
@@ -493,32 +490,33 @@ bool xi(const action_multiset_t& alpha,
 inline
 data::data_expression psi(const action_multiset_t& alpha_in, comm_entry& comm_table, const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
-  action_multiset_t alpha=reverse(alpha_in);
+  const action_multiset_t alpha=reverse(alpha_in);
+  //const action_multiset_t alpha = alpha_in;
+  action_multiset_t::const_iterator alpha_first = alpha.begin();
+  const action_multiset_t::const_iterator alpha_last = alpha.end();
+
   data::data_expression cond = data::sort_bool::false_();
 
-  process::action a; // a and beta used in the loop; avoid repeated allocation and deallocation
-  action_multiset_t beta;
   action_multiset_t actl; // used in inner loop.
-  while (!alpha.empty())
+  while (alpha_first != alpha_last)
   {
-    a = alpha.front();
-    beta = alpha.tail();
+    action_multiset_t::const_iterator beta_first = std::next(alpha_first);
+    const action_multiset_t::const_iterator beta_last = alpha_last;
 
-    while (!beta.empty())
+    while (beta_first != beta_last)
     {
       actl = action_multiset_t();
-      actl = insert(beta.front(), actl);
-      actl = insert(a, actl);
-      const action_multiset_t& beta_tail = beta.tail();
-      if (comm_table.might_communicate(actl,beta_tail.begin(), beta_tail.end()) && xi(actl,beta_tail.begin(), beta_tail.end(),comm_table))
+      actl = insert(*beta_first, actl);
+      actl = insert(*alpha_first, actl);
+      if (comm_table.might_communicate(actl,std::next(beta_first), beta_last) && xi(actl,std::next(beta_first), beta_last,comm_table))
       {
         // sort and remove duplicates??
-        cond = data::lazy::or_(cond,pairwiseMatch(a.arguments(),beta.front().arguments(),RewriteTerm));
+        cond = data::lazy::or_(cond,pairwiseMatch(alpha_first->arguments(),beta_first->arguments(),RewriteTerm));
       }
-      beta.pop_front();
+      beta_first = std::next(beta_first);
     }
 
-    alpha.pop_front();
+    alpha_first = std::next(alpha_first);
   }
   return data::lazy::not_(cond);
 }
