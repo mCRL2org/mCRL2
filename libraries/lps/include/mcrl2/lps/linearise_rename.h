@@ -51,7 +51,7 @@ namespace lps
       result.push_front(rename(renamings, a));
     }
 
-    result = atermpp::sort_list(result, std::function<bool(const process::action&, const process::action&)>(action_compare));
+    result = atermpp::sort_list(result, std::function<bool(const process::action&, const process::action&)>(action_compare()));
     return result;
   }
 
