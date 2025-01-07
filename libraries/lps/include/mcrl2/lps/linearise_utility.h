@@ -40,22 +40,11 @@ struct action_label_compare
   bool operator()(const process::action_label& a1, const process::action_label& a2) const
   {
     /* first compare the strings in the actions */
-    const core::identifier_string a1_name = a1.name();
-    const core::identifier_string a2_name = a2.name();
+    const core::identifier_string& a1_name = a1.name();
+    const core::identifier_string& a2_name = a2.name();
 
-    if (action_name_compare()(a1_name, a2_name))
-    {
-      return true;
-    }
-
-    if (a1_name == a2_name)
-    {
-      /* the strings are equal; the sorts are used to
-         determine the ordering */
-      return a1.sorts() < a2.sorts();
-    }
-
-    return false;
+    return action_name_compare()(a1_name, a2_name) ||
+      (a1_name == a2_name && a1.sorts() < a2.sorts());
   }
 };
 
@@ -69,20 +58,11 @@ struct action_compare
 {
   bool operator()(const process::action& a1, const process::action& a2) const
   {
-    const process::action_label a1_label = a1.label();
-    const process::action_label a2_label = a2.label();
+    const process::action_label& a1_label = a1.label();
+    const process::action_label& a2_label = a2.label();
 
-    if (action_label_compare()(a1_label, a2_label))
-    {
-      return true;
-    };
-
-    if  (a1_label == a2_label)
-    {
-      return a1.arguments() < a2.arguments();
-    }
-
-    return false;
+    return action_label_compare()(a1_label, a2_label) ||
+      (a1_label == a2_label && a1.arguments() < a2.arguments());
   }
 };
 
