@@ -19,7 +19,6 @@
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/process/process_expression.h"
 
-
 #define CACHE_COMMUNICATION
 
 namespace mcrl2
@@ -28,61 +27,10 @@ namespace mcrl2
 namespace lps
 {
 
-#if false
-using action_name_t = core::identifier_string;
-using action_multiset_t = std::multiset<process::action, action_compare>; //process::action_list; // sorted w.r.t. action_compare
-using action_name_multiset_t = std::multiset<core::identifier_string, action_name_compare>; //core::identifier_string_list; // sorted w.r.t. action_label_compare
-
-inline
-action_multiset_t make_action_multiset(const process::action_list& actions)
-{
-  return action_multiset_t(actions.begin(), actions.end());
-}
-
-inline
-process::action_list make_multi_action(const action_multiset_t& actions)
-{
-  return process::action_list(actions.begin(), actions.end());
-}
-
-inline
-action_multiset_t insert(const process::action& action, action_multiset_t actions)
-{
-  actions.insert(action);
-  return actions;
-}
-
-inline
-action_name_multiset_t insert(const action_name_t& action_name, action_name_multiset_t action_names)
-{
-  action_names.insert(action_name);
-  return action_names;
-}
-
-inline
-action_multiset_t reverse(const action_multiset_t& actions)
-{
-  return actions;
-}
-
-#else
 using action_name_t = core::identifier_string;
 using action_multiset_t = process::action_list; // sorted w.r.t. action_compare
 using action_name_multiset_t = core::identifier_string_list; // sorted w.r.t. action_label_compare
 
-inline
-action_multiset_t make_action_multiset(const process::action_list& actions)
-{
-  return actions;
-}
-
-inline
-process::action_list make_multi_action(const action_multiset_t& actions)
-{
-  return actions;
-}
-
-#endif
 
 inline
 core::identifier_string_list names(const action_multiset_t& actions)
@@ -127,31 +75,73 @@ struct tuple_list
     assert(action.size() == conditions.size());
     return actions.size();
   }
+
+  tuple_list() = default;
+
+  tuple_list(const std::vector < action_multiset_t>& actions_, const std::vector< data::data_expression >& conditions_)
+    : actions(actions_), conditions(conditions_)
+  {}
+
+  tuple_list(std::vector < action_multiset_t>&& actions_, std::vector< data::data_expression >&& conditions_)
+    : actions(std::move(actions_)), conditions(std::move(conditions_))
+  {}
 };
 
-/// Returns the list S ++ L',
+/// Extends the list S to S ++ L',
 /// where L' is the list L in which firstaction is inserted into every action, and each condition is strengthened with condition.
 ///
+/// Note that by using move semantics for L, we force the caller to transfer ownership of L to this function,
+/// and make it explicit that L should not be used by the caller afterwards.
 /// If firstaction == action(), it is not added to the multiactions in L', but the conditions will be strengthened.
 /// \pre condition != sort_bool::false_()
 inline
-tuple_list addActionCondition(
+void addActionCondition(
   const process::action& firstaction,
   const data::data_expression& condition,
-  const tuple_list& L,
-  tuple_list S)
+  tuple_list&& L,
+  tuple_list& S)
 {
   assert(condition!=sort_bool::false_()); // It makes no sense to add an action with condition false, as it cannot happen anyhow.
 
-  for (std::size_t i = 0; i < L.size(); ++i)
+  // If S is empty, do not copy the vectors, but simply perform the operation in L and move.
+  // This is a common special case
+  if (S.size() == 0)
   {
-    S.actions.push_back((firstaction!=process::action())?
-                        insert(firstaction,L.actions[i]):
-                        L.actions[i]);
-    S.conditions.push_back(data::lazy::and_(L.conditions[i],condition));
+    if (firstaction != process::action())
+    {
+      for (action_multiset_t& m: L.actions)
+      {
+        m = insert(firstaction, m);
+      }
+    }
+
+    // Strengthen the conditions in L with condition and append to S.
+    for (data::data_expression& x: L.conditions)
+    {
+      x = data::lazy::and_(x, condition);
+    }
+    S = std::move(L);
+    return;
   }
 
-  return S;
+  if (firstaction == process::action())
+  {
+    S.actions.insert(S.actions.end(), std::make_move_iterator(L.actions.begin()), std::make_move_iterator(L.actions.end()));
+  }
+  else
+  {
+    for (action_multiset_t& m: L.actions)
+    {
+      m = insert(firstaction, m);
+      S.actions.emplace_back(std::move(m));
+    }
+  }
+
+  // Strengthen the conditions in L with condition and append to S.
+  for (const data::data_expression& x: L.conditions)
+  {
+    S.conditions.emplace_back(data::lazy::and_(x, condition));
+  }
 }
 
 /// Data structure to store the communication function more efficiently.
@@ -453,8 +443,10 @@ tuple_list phi(const action_multiset_t& m,
                                                               is possible */
     if (c!=process::action_label())
     {
-      const tuple_list T=makeMultiActionConditionList_aux(w.begin(), w.end(),comm_table,r,RewriteTerm);
-      return addActionCondition(process::action(c,d), data::sort_bool::true_(), T, tuple_list());
+      tuple_list T=makeMultiActionConditionList_aux(w.begin(), w.end(),comm_table,r,RewriteTerm);
+      tuple_list result;
+      addActionCondition(process::action(c,d), data::sort_bool::true_(), std::move(T), result);
+      return result;
     }
     /* c==NULL, actions in m cannot communicate */
     return tuple_list();
@@ -471,13 +463,14 @@ tuple_list phi(const action_multiset_t& m,
   }
   else
   {
-    const tuple_list T=phi(insert(firstaction, m),d,w,std::next(n_first), n_last,r,comm_table,RewriteTerm);
+    tuple_list T=phi(insert(firstaction, m),d,w,std::next(n_first), n_last,r,comm_table,RewriteTerm);
 
-    const tuple_list result = addActionCondition(
+    tuple_list result = phi(m,d,insert(firstaction, w),std::next(n_first), n_last,r,comm_table,RewriteTerm);
+    addActionCondition(
              process::action(),
              condition,
-             T,
-             phi(m,d,insert(firstaction, w),std::next(n_first), n_last,r,comm_table,RewriteTerm));
+             std::move(T),
+             result);
     return result;
   }
 }
@@ -567,15 +560,16 @@ tuple_list makeMultiActionConditionList_aux(
 
   action_multiset_t m({firstaction});
   action_multiset_t w;
-  const tuple_list S=phi(m,
+  tuple_list S=phi(m,
                          firstaction.arguments(),
                          w,
                          std::next(multiaction_first), multiaction_last,
                          r,comm_table, RewriteTerm);
 
-  const tuple_list T=makeMultiActionConditionList_aux(std::next(multiaction_first), multiaction_last,comm_table,
+  tuple_list T=makeMultiActionConditionList_aux(std::next(multiaction_first), multiaction_last,comm_table,
                        insert(firstaction, r),RewriteTerm);
-  return addActionCondition(firstaction,data::sort_bool::true_(),T,S);
+  addActionCondition(firstaction,data::sort_bool::true_(),std::move(T),S);
+  return S;
 }
 
 inline
@@ -673,13 +667,13 @@ void communicationcomposition(
 
     const tuple_list multiactionconditionlist=
       makeMultiActionConditionList(
-        make_action_multiset(multiaction),
+        multiaction,
         communications,
         RewriteTerm);
 
     for (std::size_t i=0 ; i<multiactionconditionlist.size(); ++i)
     {
-      const process::action_list& multiaction=make_multi_action(multiactionconditionlist.actions[i]);
+      const process::action_list& multiaction=multiactionconditionlist.actions[i];
 
       if (is_allow && !allow_(allowlist, multiaction,terminationAction))
       {
