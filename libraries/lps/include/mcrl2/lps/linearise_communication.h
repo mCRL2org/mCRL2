@@ -353,8 +353,8 @@ class comm_entry
         // before matching all actions in the lhs, we set it to std::nullopt.
         // N.B. when rest[i] becomes empty after matching all actions in the lhs,
         // rest[i].empty() is a meaningful result: we have a successful match.
-        std::vector<std::optional<std::pair<ConstIterType, ConstIterType>>>
-          rest(size(), std::make_pair(n_first, n_last)); // pairs of iterator into n; the second element of the pair indicates the end of the range in n.
+        std::vector<std::optional<ConstIterType>>
+          rest(size(), n_first); // pairs of iterator into n; the second element of the pair indicates the end of the range in n.
 
         // check every lhs
         for (std::size_t i = 0; i < size(); ++i)
@@ -369,24 +369,24 @@ class comm_entry
           {
             assert(rest[i] != std::nullopt);
             // .. find them in rest[i]
-            if (rest[i]->first == rest[i]->second) // no luck
+            if (*rest[i] == n_last) // no luck
             {
               rest[i] = std::nullopt;
               break;
             }
             // get first action in lhs i
             const action_name_t& comm_name = *m_lhs_iters[i];
-            action_name_t rest_name = rest[i]->first->label().name();
+            action_name_t rest_name = (*rest[i])->label().name();
             // find it in rest[i]
             while (comm_name != rest_name)
             {
-              ++(rest[i]->first);
-              if (rest[i]->first == rest[i]->second) // no more
+              ++(*rest[i]);
+              if (*rest[i] == n_last) // no more
               {
                 rest[i] = std::nullopt;
                 break;
               }
-              rest_name = rest[i]->first->label().name();
+              rest_name = (*rest[i])->label().name();
             }
             if (comm_name != rest_name) // action was not found
             {
@@ -394,7 +394,7 @@ class comm_entry
             }
 
             // action found; try next
-            ++(rest[i]->first);
+            ++(*rest[i]);
             ++m_lhs_iters[i];
           }
 
