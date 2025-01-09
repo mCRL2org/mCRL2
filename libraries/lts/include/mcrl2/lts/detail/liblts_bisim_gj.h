@@ -14,13 +14,6 @@
 ///        should be slightly faster, but in particular use less memory than liblts_bisim_dnj.h.
 ///        Otherwise the functionality is exactly the same.
 
-// TODO:
-// Merge identifying whether there is a splitter and actual splitting (Done. No performance effect).
-// Use BLC lists for the main split.
-// Maintain a co-splitter and a splitter to enable a co-split.
-// Eliminate two pointers in transition_type (done).
-// JFG: Optimise swap. 
-
 #ifndef LIBLTS_BISIM_GJ_H
 #define LIBLTS_BISIM_GJ_H
 
@@ -34,34 +27,10 @@
 #include "mcrl2/lts/detail/simple_list.h"
 #define linked_list simple_list
 
-// Decided on 2025-01-06:
-// JFG will try whether USE_INCLUDE_CO and XCLUDECO_AND_HIT_MAIN bring great
-// performance advantages but otherwise we shall remove them to simplify the
-// code.
-
 // If `USE_FOUR_WAY_SPLIT` is defined, then splitting a block will use a
 // four-way split function that can split under a main and a co-splitter at the
 // same time, together with creating the new bottom state block.
 #define USE_FOUR_WAY_SPLIT
-
-// The following two are sub-options for `USE_FOUR_WAY_SPLIT`.
-// If (in addition to `USE_FOUR_WAY_SPLIT`) one defines `USE_INCLUDE_CO`, then
-// the MultiSub coroutine will try to avoid waiting by marking all states with
-// a transition in the co-splitter as NcludeCo (but only in turns when MultiSub
-// has nothing else to do), so that they can be handled faster by XcludeCo
-// later.
-//#define USE_INCLUDE_CO
-
-// If (in addition to `USE_FOUR_WAY_SPLIT`) one defines `XCLUDECO_AND_HIT_MAIN`
-// then the XcludeCo coroutine will remember whether a state has a transition
-// in the main splitter (i.e. it is marked Hit_Main in the beginning) to avoid
-// searching through the outgoing transitions later.
-//#define XCLUDECO_AND_HIT_MAIN
-
-// A very small experiment did not show significant differences; there may
-// be a less-than-significant tendency for the base version of the four-way
-// split (better than the versions with additional features), and a
-// less-than-significant tendency for the new linked list.
 
 namespace mcrl2
 {
@@ -103,33 +72,17 @@ constexpr transition_index Umarked=1;
 
 #ifdef USE_FOUR_WAY_SPLIT
   /// \brief the number of counter values that can be used for one subblock
-  /// \details There are three or four singular values (`undefined`,
-  /// `marked_MultiSub`, `marked_Hit_Main` and possibly `marked_NcludeCo`),
-  /// and the other values needs to be distributed over three or four subblocks
-  /// (ReachAlw, XcludeCo, MissMain and possibly XcludeCo_and_Hit_Main).
+  /// \details There are three singular values (`undefined`, `marked_MultiSub`,
+  /// and `marked_Hit_Main`), and the other values needs to be distributed over
+  /// three subblocks (ReachAlw, XcludeCo, and MissMain).
   constexpr transition_index marked_range=
-    (std::numeric_limits<transition_index>::max()-2
-                                                 #ifdef USE_INCLUDE_CO
-                                                   -1
-                                                 #endif
-                                                 )/
-                                                   #ifdef XCLUDECO_AND_HIT_MAIN
-                                                     4;
-                                                   #else
-                                                     3;
-                                                   #endif
+    (std::numeric_limits<transition_index>::max()-2)/3;
 
   enum subblocks { ReachAlw=0,// states that can reach always all splitters
                    MissMain,  // states that cannot inertly reach the main
                               // splitter (while it is not empty)
                    XcludeCo,  // states that cannot inertly reach the
                               // co-splitter (while it is not empty)
-                   #ifdef XCLUDECO_AND_HIT_MAIN
-                     XcludeCo_and_Hit_Main, // states that cannot inertly
-                              // reach the co-splitter (while it is not
-                              // empty), but that have a strong transition
-                              // in the main splitter
-                   #endif
                    MultiSub}; // states that can inertly reach multiple of
                               // the above subblocks
                 // The following values are used only for temporary marking
@@ -137,9 +90,6 @@ constexpr transition_index Umarked=1;
                 // Hit_Main -- states that can (non-inertly) reach the main
                 //             splitter; they can be in any subblock except
                 //             MissMain.  Necessary for correctness.
-                // NcludeCo -- states that can (non-inertly) reach the
-                //             co-splitter; they can be in any subblock
-                //             except XcludeCo.  Optional.
 
   /// \brief base marking value for a subblock
   /// \details If the counter has this value, the state definitely belongs
@@ -147,33 +97,20 @@ constexpr transition_index Umarked=1;
   static inline constexpr transition_index marked(enum subblocks subblock)
   {
     return
-                                                                                #ifdef XCLUDECO_AND_HIT_MAIN
-                                                                                  assert(ReachAlw==subblock || MissMain==subblock || XcludeCo==subblock ||
-                                                                                         XcludeCo_and_Hit_Main==subblock || MultiSub==subblock),
-                                                                                #else
-                                                                                  assert(ReachAlw==subblock || MissMain==subblock || XcludeCo==subblock ||
-                                                                                                                            MultiSub==subblock),
-                                                                                #endif
+                                                                                assert(ReachAlw==subblock || MissMain==subblock ||
+                                                                                       XcludeCo==subblock || MultiSub==subblock),
            marked_range*subblock+1;
   }
 
   constexpr transition_index marked_MultiSub=marked(MultiSub);                  static_assert(marked_MultiSub<std::numeric_limits<transition_index>::max());
   constexpr transition_index marked_Hit_Main=marked_MultiSub+1;
-  #ifdef USE_INCLUDE_CO
-    constexpr transition_index marked_NcludeCo=marked_Hit_Main+1;               static_assert(marked_Hit_Main<std::numeric_limits<transition_index>::max());
-  #endif
 
   /// \brief checks whether a counter value is a marking for a given subblock
   static inline constexpr bool is_in_marked_range_of
                             (transition_index counter, enum subblocks subblock)
   {
     return                                                                      assert(ReachAlw==subblock || MissMain==subblock || XcludeCo==subblock),
-    #ifdef XCLUDECO_AND_HIT_MAIN
-           XcludeCo==subblock
-               ? counter-marked(subblock)<2*marked_range
-               :
-    #endif
-                 counter-marked(subblock)<marked_range;
+           counter-marked(subblock)<marked_range;
   }
 #endif
 
@@ -577,15 +514,25 @@ struct transition_type
 };
 
 /// information about a block
+/// \details A block is mainly described through the set of states it contains.
+/// For this we have `fixed_vector<state_in_block_pointer> m_states_in_blocks`,
+/// where states are kept grouped by block.  The fields `start_bottom_states`,
+/// `sta.rt_non_bottom_states` and `end_states` are pointers into that array.
+///
+/// Some fields get a second life (to save memory) during initialisation or
+/// during finalising; that is the purpose of the unions.
+///
+/// A block should be trivially destructible because we want it to be allocated
+/// using the pool allocator `linked_list<BLC_indicators>::get_pool()`.  This
+/// is why there are no iterator fields.
 struct block_type
 {
   union constellation_or_first_unmarked_bottom_state
   {
     /// constellation that the block is in
     constellation_type* onstellation;
-    /// \brief field used during initialisation for the first unmarked bottom state
-    /// \details This cannot be an iterator, otherwise the requirement that the
-    /// destructor is trivial would be violated.
+
+    /// \brief used during initialisation for the first unmarked bottom state
     state_in_block_pointer* first_unmarked_bottom_state;
 
     constellation_or_first_unmarked_bottom_state(constellation_type* new_c)
@@ -605,12 +552,9 @@ struct block_type
     /// in the block.
     ///
     /// If m_branching==false, we have sta.rt_non_bottom_states==end_states.
-    ///
-    /// This cannot be an iterator because then the destructor would be
-    /// non-trivial.
     state_in_block_pointer* rt_non_bottom_states;
 
-    /// \brief state index in the reduced LTS
+    /// \brief used during finalizing for the state index in the reduced LTS
     /// \details After partition refinement has finished, the boundary between
     /// bottom and non-bottom states is no longer needed.  Therefore, we use
     /// the same space to store a block number instead.  This block number is
@@ -624,16 +568,20 @@ struct block_type
 
   /// pointer past the last state in the block
   state_in_block_pointer* end_states;
-  /// list of descriptors of all BLC sets that contain transitions starting in
-  /// the block.
-  /// The first element in the list contains inert transitions (if they exist);
-  /// BLC sets that are regarded as unstable are near the end of the list.
+
   union btc_R
   {
-    // linked_list should be trivially destructible
+    /// \brief list of descriptors of all BLC sets that contain transitions starting in the block
+    /// \details If the block has inert transitions, they are always in the
+    /// first element of the list.
+    ///
+    /// During the main/co-split phase, a main splitter immediately follows the
+    /// corresponding co-splitter in the list.
+    /// During `stabilize()`, BLC sets that are regarded as unstable are near
+    /// the end of the list.
     linked_list<BLC_indicators> to_constellation;                               static_assert(std::is_trivially_destructible
                                                                                                                         <linked_list<BLC_indicators> >::value);
-    /// \brief pointer to vector of marked states
+    /// \brief used during initialisation for a pointer to a vector of marked states
     /// \details During initialisation (when there is only one constellation)
     /// the same space as `to_constellation` is actually used for something
     /// else.
@@ -694,12 +642,13 @@ struct block_type
       contains_new_bottom_states(other.contains_new_bottom_states)
   {}
 
-  /// a boolean that is true iff the block contains new bottom states; in that
-  /// case the block will be ignored until stabilizeB() handles all blocks
-  /// with new bottom states.  Such a block must also be added to the list
-  /// m_blocks_with_new_bottom_states.
+  /// \brief a boolean that is true iff the block contains new bottom states
+  /// \details If a block contains new bottom states, it will be ignored until
+  /// `stabilizeB()` handles all blocks with new bottom states.  Such a block
+  /// must also be added to the list `m_blocks_with_new_bottom_states`.
   bool contains_new_bottom_states;
 
+#ifndef USE_FOUR_WAY_SPLIT
   block_type(state_in_block_pointer* beginning_of_states,
              constellation_type* new_c)
     : c(new_c),
@@ -709,6 +658,7 @@ struct block_type
       block(),
       contains_new_bottom_states(false)
   {}
+#endif
 
   /// constructor for first block and for four_way_splitB()
   block_type(state_in_block_pointer* start_bottom,
@@ -801,8 +751,14 @@ class bisim_partitioner_gj
     LTS_TYPE& m_aut;
 
     // Generic data structures.
+    /// \brief information about states
     fixed_vector<state_type_gj> m_states;
 
+    /// \brief transitions ordered per source state
+    /// \details This array is used to go through the outgoing transitions of a
+    /// state.  The transitions of a given source state are further grouped per
+    /// action label, and within every action label per target constellation.
+    /// The invisible label (tau) is always the first label.
     fixed_vector<outgoing_transition_type> m_outgoing_transitions;
                                                                   // During refining this contains the index in m_BLC_transition, of which
                                                                   // the transition field contains the index of the transition.
@@ -4905,26 +4861,17 @@ class bisim_partitioner_gj
 //<< ", old_constellation==" << old_constellation << ")\n";
                                                                                 assert(1<number_of_states_in_block(*bi));
                                                                                 assert(!bi->contains_new_bottom_states);
-                                                                                assert(has_main_splitter==(linked_list<BLC_indicators>::end()!=main_splitter));
-                                                                                assert(has_co_splitter  ==(linked_list<BLC_indicators>::end()!=  co_splitter));
       /// \brief potential non-bottom states
       /// \details These vectors contain non-bottom states that have been found
       /// when going through predecessors of a subblock.
       ///
       /// The variable is declared `static` to avoid repeated deallocations and
       /// reallocations while the algorithm runs many refinements.
-      ///
-      /// We do not need a separate array for XcludeCo_and_Hit_Main states;
-      /// they can share with the XcludeCo states.
       static std::vector<state_in_block_pointer>potential_non_bottom_states[3]; assert(potential_non_bottom_states[ReachAlw].empty());
                                                                                 assert(potential_non_bottom_states[MissMain].empty());
                                                                                 assert(potential_non_bottom_states[XcludeCo].empty());
       static std::vector<state_in_block_pointer>
                                           potential_non_bottom_states_Hit_Main; assert(potential_non_bottom_states_Hit_Main.empty());
-      #ifdef USE_INCLUDE_CO
-        static std::vector<state_in_block_pointer>
-                                          potential_non_bottom_states_NcludeCo; assert(potential_non_bottom_states_NcludeCo.empty());
-      #endif
 
       /// \brief proven non-bottom states
       /// \details These vectors contain all non-bottom states of which the
@@ -4934,10 +4881,6 @@ class bisim_partitioner_gj
       ///
       /// The variable is declared `static` to avoid repeated deallocations and
       /// reallocations while the algorithm runs many refinements.
-      ///
-      /// Again, we do not need a separate array for the XcludeCo_and_Hit_Main
-      /// states; this information is not needed once it's been determined that
-      /// a state is in XcludeCo.
       ///
       /// The fourth entry in this array is for MultiSub; it should be in the
       /// same array to allow to find the three other arrays with coroutine^1,
@@ -4979,73 +4922,45 @@ class bisim_partitioner_gj
       BLC_list_const_iterator co_splitter_iter_end_MultiSub;
 
       if (has_main_splitter /* needed for correctness */)
-      {
+      {                                                                         assert(bi->block.to_constellation.end()!=main_splitter);
         // by default states are in MissMain:
         start_bottom_states[XcludeCo]=bi->sta.rt_non_bottom_states;             assert(main_splitter->is_stable());
                                                                                 #ifndef NDEBUG
-                                                                                  const transition&
-                                                                                                main_t=m_aut.get_transitions()[*main_splitter->start_same_BLC];
-                                                                                  assert(bi==m_states[main_t.from()].block);
-                                                                                  #define debug_coroutine_of_ReachAlw "ReachAlw"
-                                                                                  #define debug_coroutine_of_MissMain "MissMain"
-                                                                                  #define debug_coroutine_of_XcludeCo "XcludeCo"
-                                                                                  #define debug_coroutine_of_MultiSub "MultiSub"
-                                                                                  #define debug_coroutine_of_Hit_Main "Hit_Main"
-                                                                                  #ifdef XCLUDECO_AND_HIT_MAIN
-        /* 1. All transitions in the main splitter are looked through.       */
-        /*    For each state with a transition in the main splitter, it      */
-        /*    is possible to check whether it has a transition in the        */
+        /* 1. All transitions in the main splitter are looked through.       */   const transition&
+        /*    For each state with a transition in the main splitter, it      */                 main_t=m_aut.get_transitions()[*main_splitter->start_same_BLC];
+        /*    is possible to check whether it has a transition in the        */   assert(bi==m_states[main_t.from()].block);
         /*    co-splitter or not, using the `start_same_saC` pointer.        */
         /*    We distribute the states as follows:                           */
-                                                                                    #define debug_coroutine_of(coroutine) (                                   \
-        /*    - bottom states with transitions in all provided splitters are */                                      assert((enum subblocks) 0<=(coroutine)), \
-        /*      moved to ReachAlw                                            */                                      assert((coroutine)<(enum subblocks) 5),  \
-                                                                                           &debug_coroutine_of_MultiSub "\0" debug_coroutine_of_ReachAlw "\0" \
-        /*    - bottom states without a transition in the co-splitter, even  */             debug_coroutine_of_MissMain "\0" debug_coroutine_of_XcludeCo "\0" \
-        /*      though it is provided, are moved to XcludeCo.  (If there is  */             debug_coroutine_of_XcludeCo "_and_" debug_coroutine_of_Hit_Main   \
-        /*      no co-splitter, XcludeCo is empty.)                          */                                                        [((coroutine)+1)%5*9])
-                                                                                  #else
-        /*    - bottom states without a transition in the main splitter, even*/
-        /*      though it is provided, are moved to MissMain.  (If there is  */
-        /*      no main splitter, MissMain is empty.)                        */
-                                                                                    #define debug_coroutine_of(coroutine) (                                   \
-        /*    - non-bottom states with transitions to both splitters are     */        assert((enum subblocks)0<=(coroutine)&&(coroutine)<(enum subblocks)4), \
-        /*      potentially-ReachAlw; we will check their block-inert        */       &debug_coroutine_of_ReachAlw "\0" debug_coroutine_of_MissMain "\0"      \
-        /*      successors later to see whether they end up there or in      */        debug_coroutine_of_XcludeCo "\0" debug_coroutine_of_MultiSub           \
-        /*      MultiSub instead.                                            */                                                              [9*(coroutine)])
-                                                                                  #endif
-        /*    - non-bottom states with a transition in the main splitter can */   assert(std::strcmp(debug_coroutine_of(ReachAlw),
-        /*      end up everywhere except in MissMain, depending on their     */                      debug_coroutine_of_ReachAlw)==0);
-        /*      inert successors.  We provisionally mark them Hit_Main; upon */   assert(std::strcmp(debug_coroutine_of(MissMain),
-        /*      getting handled by the search for inert predecessors in the  */                      debug_coroutine_of_MissMain)==0);
-        /*      coroutines, they will move to the correct subblock.          */   assert(std::strcmp(debug_coroutine_of(XcludeCo),
-        /*      (If such a state is later found to be in XcludeCo, we might  */                      debug_coroutine_of_XcludeCo)==0);
-        /*      use the information that it has no transition in the         */   assert(std::strcmp(debug_coroutine_of(MultiSub),
-        /*      co-splitter.  Perhaps include later.)                        */                      debug_coroutine_of_MultiSub)==0);
-                                                                                  #define coroutine_of_counter(ctr)                     \
-        /*    The running time for this is assigned to the transitions in    */       (assert(marked((enum subblocks) 0)<=(ctr)),       \
-        /*    the main splitter, which contains transitions to the new small */        assert((ctr)<=marked_MultiSub),                  \
-        /*    constellation.                                                 */        ((ctr)-marked((enum subblocks) 0))/marked_range)
-                                                                                  #ifdef USE_INCLUDE_CO
-                                                                                    #define debug_coroutine_of_NcludeCo "NcludeCo"
-                                                                                    #define debug_coroutine_of_counter(ctr)                    \
-                                                                                          (marked_Hit_Main!=(ctr)                              \
-                                                                                           ? marked_NcludeCo!=(ctr)                            \
-                                                                                             ? debug_coroutine_of(coroutine_of_counter((ctr))) \
-                                                                                             : debug_coroutine_of_NcludeCo                     \
-                                                                                           : debug_coroutine_of_Hit_Main)
-                                                                                  #else
-                                                                                    #define debug_coroutine_of_counter(ctr)                                   \
-                                                                                      (marked_Hit_Main!=(ctr)?debug_coroutine_of(coroutine_of_counter((ctr))) \
-                                                                                                             :debug_coroutine_of_Hit_Main)
-                                                                                  #endif
+                                                                                  #define debug_coroutine_of_counter(ctr)                                     \
+        /*    - bottom states with transitions in all provided splitters are */     (marked_Hit_Main!=(ctr) ? debug_coroutine_of(coroutine_of_counter((ctr))) \
+        /*      moved to ReachAlw                                            */                             : "Hit_Main")
+                                                                                  #define debug_coroutine_of(coroutine)                                       \
+        /*    - bottom states without a transition in the co-splitter, even  */           (                          assert((enum subblocks) 0<=(coroutine)), \
+        /*      though the splitter is provided, are moved to XcludeCo.      */                                      assert((coroutine)<(enum subblocks) 4),  \
+        /*      (If there is no co-splitter, XcludeCo is empty.)             */            &"ReachAlw\0MissMain\0XcludeCo\0MultiSub"[9*(coroutine)])
+                                                                                  #define coroutine_of_counter(ctr)                                           \
+        /*    - bottom states without a transition in the main splitter, even*/           (                        assert(marked((enum subblocks) 0)<=(ctr)), \
+        /*      though the splitter is provided, are moved to MissMain.      */                                    assert((ctr)<=marked_MultiSub),            \
+        /*      (If there is no main splitter, MissMain is empty.)           */            ((ctr)-marked((enum subblocks) 0))/marked_range)
                                                                                 #endif
+        /*    - non-bottom states with transitions to both splitters are     */
+        /*      potentially-ReachAlw; we will check their block-inert        */
+        /*      successors later to see whether they end up there or in      */
+        /*      MultiSub instead.                                            */
+
+        /*    - non-bottom states with a transition in the main splitter can */
+        /*      end up everywhere except in MissMain, depending on their     */
+        /*      inert successors.  We provisionally mark them Hit_Main; upon */
+        /*      getting handled by the search for inert predecessors in the  */
+        /*      coroutines, they will move to the correct subblock.          */
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                                                                                  const unsigned char max_C=check_complexity::log_n-check_complexity::
-                                                                                                  ilog2(number_of_states_in_constellation(*new_constellation));
+        /*    The running time for this is assigned to the transitions in    */   const unsigned char max_C=check_complexity::log_n-check_complexity::
+        /*    the main splitter, which contains transitions to the new small */                   ilog2(number_of_states_in_constellation(*new_constellation));
+        /*    constellation.                                                 */
                                                                                 #endif
-        if (bi->block.to_constellation.end()!=co_splitter)
-        {                                                                       mCRL2complexity(main_splitter, add_work(check_complexity::
+        if (has_co_splitter /* needed for correctness */)
+        {                                                                       assert(bi->block.to_constellation.end()!=co_splitter);
+                                                                                mCRL2complexity(main_splitter, add_work(check_complexity::
                                                                                           four_way_splitB__handle_transitions_in_main_splitter, max_C), *this);
                                                                                 #ifndef NDEBUG
           /* This is a normal main/co-split (where `main_splitter` contains  */   const transition& co_t=m_aut.get_transitions()[*co_splitter->start_same_BLC];
@@ -5059,15 +4974,16 @@ class bisim_partitioner_gj
           co_splitter_iter_end_MultiSub=co_splitter->end_same_BLC;              assert(old_constellation==m_states[co_t.to()].block->c.onstellation);
         }
         else
-        {                                                                       assert(is_inert_during_init(main_t));
+        {                                                                       assert(bi->block.to_constellation.end()==co_splitter);
+                                                                                assert(is_inert_during_init(main_t));
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
           /* This is a tau co-split (where `main_splitter` contains          */   if (old_constellation==bi->c.onstellation) {
           /* tau-transitions from the _small_ new constellation to the old   */     // This is still a normal split with tau-transitions
           /* constellation), or it is a tau main split of the old            */     mCRL2complexity(main_splitter, add_work(check_complexity::
           /* constellation (where `main_splitter` contains tau-transitions   */           four_way_splitB__handle_transitions_in_main_splitter, max_C), *this);
-          /* from the old constellation to the _small_ new constellation,    */     assert(new_constellation==m_states[main_t.to()].block->c.onstellation);
-          /* and there is no co-splitter because its transitions are still   */   } else {
-          /* constellation-inert).                                           */     // This is a tau co-split
+          /* from the old constellation to the _small_ new constellation).   */     assert(new_constellation==m_states[main_t.to()].block->c.onstellation);
+          /* The other splitter is missing because these transitions are     */   } else {
+          /* still constellation-inert.                                      */     // This is a tau co-split
                                                                                     mCRL2complexity(main_splitter, add_work(check_complexity::
                                                                                        refine_partition_until_it_becomes_stable__prepare_cosplit,max_C),*this);
                                                                                     assert(new_constellation==bi->c.onstellation);
@@ -5094,7 +5010,7 @@ class bisim_partitioner_gj
                                                  start_bottom_states[MissMain])
             {
                                                                                 #ifndef NDEBUG
-//std::cerr << ", source is already in " debug_coroutine_of_ReachAlw "-bottom\n";
+//std::cerr << ", source is already in ReachAlw-bottom\n";
                                                                                   if (bi->block.to_constellation.end()!=co_splitter) {
                                                                                     assert(has_main_splitter || has_co_splitter),
               /* source state is already in ReachAlw-bottom                  */     assert(next_target_constln_in_same_saC(src, splitter_it)==co_splitter);
@@ -5107,13 +5023,13 @@ class bisim_partitioner_gj
               swap_states_in_states_in_block(start_bottom_states[MissMain],
                                           src.ref_state->ref_states_in_blocks);
               ++start_bottom_states[MissMain];
-//std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom (co-splitter is empty)\n";
+//std::cerr << ", source moved to ReachAlw-bottom (co-splitter is empty)\n";
             }
             else if (start_bottom_states[MissMain+1]<=
                                            src.ref_state->ref_states_in_blocks)
             {
                                                                                 #ifndef NDEBUG
-//std::cerr << ", source is already in " debug_coroutine_of_XcludeCo "-bottom\n";
+//std::cerr << ", source is already in XcludeCo-bottom\n";
                                                                                   assert(bi->block.to_constellation.end()!=co_splitter);
                                                                                   outgoing_transitions_const_it const out_it_end=std::next(src.ref_state)>=
               /* source state is already in XcludeCo-bottom                  */          m_states.end() ? m_outgoing_transitions.end()
@@ -5133,7 +5049,7 @@ class bisim_partitioner_gj
               swap_states_in_states_in_block(start_bottom_states[MissMain],
                                           src.ref_state->ref_states_in_blocks);
               ++start_bottom_states[MissMain];
-//std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom\n";
+//std::cerr << ", source moved to ReachAlw-bottom\n";
             }
             else
             {
@@ -5141,7 +5057,7 @@ class bisim_partitioner_gj
               --start_bottom_states[MissMain+1];
               swap_states_in_states_in_block(start_bottom_states[MissMain+1],
                                           src.ref_state->ref_states_in_blocks);
-//std::cerr << ", source moved to " debug_coroutine_of_XcludeCo "-bottom\n";
+//std::cerr << ", source moved to XcludeCo-bottom\n";
             }
           }
           else
@@ -5153,14 +5069,14 @@ class bisim_partitioner_gj
               if (!has_co_splitter /* needed for correctness */ ||
                 next_target_constln_in_same_saC(src, splitter_it)==co_splitter)
               {
-//std::cerr << ", source inserted into potentially " debug_coroutine_of_ReachAlw "-nonbottom\n";
+//std::cerr << ", source inserted into potentially ReachAlw-nonbottom\n";
                 src.ref_state->counter=marked(ReachAlw)+
                          src.ref_state->no_of_outgoing_block_inert_transitions; assert(is_in_marked_range_of(src.ref_state->counter, ReachAlw));
                 potential_non_bottom_states[ReachAlw].push_back(src);
               }
               else
               {
-//std::cerr << ", source inserted into potentially " debug_coroutine_of_Hit_Main "-nonbottom\n";
+//std::cerr << ", source inserted into potentially Hit_Main-nonbottom\n";
                 src.ref_state->counter=marked_Hit_Main;
                 potential_non_bottom_states_Hit_Main.push_back(src);
                                                                                 #ifndef NDEBUG
@@ -5179,11 +5095,11 @@ class bisim_partitioner_gj
             }
                                                                                 #ifndef NDEBUG
                                                                                   else if (marked_Hit_Main==src.ref_state->counter) {
-//std::cerr << ", source is already in potentially " debug_coroutine_of_Hit_Main "-nonbottom\n";
+//std::cerr << ", source is already in potentially Hit_Main-nonbottom\n";
                                                                                     assert(bi->block.to_constellation.end()!=co_splitter);
                                                                                   } else {
                                                                                     assert(is_in_marked_range_of(src.ref_state->counter, ReachAlw));
-//std::cerr << ", source is already in potentially " debug_coroutine_of_ReachAlw "-nonbottom\n";
+//std::cerr << ", source is already in potentially ReachAlw-nonbottom\n";
                                                                                     if (bi->block.to_constellation.end()!=co_splitter) {
                                                                                       assert(has_main_splitter || has_co_splitter),
                                                                                       assert(next_target_constln_in_same_saC(src, splitter_it)==co_splitter);
@@ -5196,10 +5112,11 @@ class bisim_partitioner_gj
         while (splitter_it!=main_splitter->end_same_BLC);
       }
       else if (has_co_splitter /* needed for correctness */)
-      {                                                                         assert(bi->block.to_constellation.end()!=co_splitter);
-        /* This is a bottom state split.  We can only go through the         */ assert(!co_splitter->is_stable());
-        /* transitions from (new) bottom states in the co-splitter before    */ assert(null_constellation==old_constellation);
-        // starting the coroutines.
+      {                                                                         assert(bi->block.to_constellation.end()==main_splitter);
+        /* This is a bottom state split.  We can only go through the         */ assert(bi->block.to_constellation.end()!=co_splitter);
+        /* transitions from (new) bottom states in the co-splitter before    */ assert(!co_splitter->is_stable());
+        /* starting the coroutines.  These transitions must have been marked */ assert(null_constellation==old_constellation);
+        /* by the caller.                                                    */
 
         // MissMain is empty; XcludeCo is the default subblock for bottom
         // states without a transition in the co-splitter.  But we will set
@@ -5221,19 +5138,28 @@ class bisim_partitioner_gj
           {
             swap_states_in_states_in_block(start_bottom_states[MissMain],
                                           src.ref_state->ref_states_in_blocks);
-//std::cerr << ", source moved to " debug_coroutine_of_ReachAlw "-bottom\n";
+//std::cerr << ", source moved to ReachAlw-bottom\n";
             ++start_bottom_states[MissMain];
           }
-//else { std::cerr << ", source is already in " debug_coroutine_of_ReachAlw "-bottom\n"; }
+//else { std::cerr << ", source is already in ReachAlw-bottom\n"; }
         }
         start_bottom_states[XcludeCo]=start_bottom_states[MissMain];
         make_stable_and_move_to_start_of_BLC(bi, co_splitter);
       }
       else
-      {                                                                         assert(linked_list<BLC_indicators>::end()==main_splitter);
-        // This is a refinement during initialisation
+      {                                                                         assert(bi->block.to_constellation.end()==main_splitter);
+        /* This is a refinement during initialisation.                       */ assert(bi->block.to_constellation.end()==  co_splitter);
+        /* During initialisation, we do not maintain BLC sets, so the        */
+        /* splitters cannot be given as such sets.  The information needed   */
+        /* to split the block is instead provided within the block_type of   */
+        /* `*bi`.  As there is only one constellation, the split actually    */
+        /* considers all transitions with a specific label out of `*bi`.     */
+        /* The field `c.first_unmarked_bottom_state` indicates which bottom  */
+        /* have such a transition (namely the bottom states before that      */
+        /* pointer), and the field `block.R` points to a vector containing   */
+        /* the non-bottom states with such a transition.                     */
 
-        start_bottom_states[MissMain]=bi->c.first_unmarked_bottom_state;        assert(linked_list<BLC_indicators>::end()==co_splitter);
+        start_bottom_states[MissMain]=bi->c.first_unmarked_bottom_state;
         start_bottom_states[MissMain+1]=bi->sta.rt_non_bottom_states;           assert(nullptr!=bi->block.R);
         potential_non_bottom_states[ReachAlw].swap(*bi->block.R);               assert(null_constellation==old_constellation);
 
@@ -5267,11 +5193,11 @@ class bisim_partitioner_gj
         bool constellation_was_trivial=
                   constellation->start_const_states->ref_state->block==
                   std::prev(constellation->end_const_states)->ref_state->block;
-        bool constellation_becomes_nontrivial=false;                            assert(has_co_splitter || 0==bottom_size(XcludeCo));
+        bool constellation_becomes_nontrivial=false;
         if (has_co_splitter && bottom_size(ReachAlw)<bottom_size(XcludeCo))
         {                                                                       assert(bi->start_bottom_states==start_bottom_states[ReachAlw]);
-          if (0<bottom_size(ReachAlw))
-          {
+          if (!has_main_splitter || 0<bottom_size(ReachAlw))
+          {                                                                     assert(0<bottom_size(ReachAlw));
             bi->start_bottom_states=start_bottom_states[ReachAlw+1];
             ReachAlw_block_index=create_new_block
                       <!has_main_splitter && !has_co_splitter>
@@ -5282,7 +5208,8 @@ class bisim_partitioner_gj
             constellation_becomes_nontrivial=true;
           }                                                                     assert(has_main_splitter || 0==bottom_size(MissMain));
           if(!has_main_splitter || bottom_size(MissMain)<bottom_size(XcludeCo))
-          {                                                                     assert(bi->start_bottom_states==start_bottom_states[MissMain]);
+          {                                                                     assert(bottom_size(MissMain)<bottom_size(XcludeCo));
+                                                                                assert(bi->start_bottom_states==start_bottom_states[MissMain]);
             if (has_main_splitter && 0<bottom_size(MissMain))
             {
               bi->start_bottom_states=start_bottom_states[MissMain+1];
@@ -5292,7 +5219,7 @@ class bisim_partitioner_gj
                        start_bottom_states[MissMain+1], bi,
                        old_constellation, new_constellation);
               constellation_becomes_nontrivial=true;
-            }
+            }                                                                   else  {  assert(0==bottom_size(MissMain));  }
           }
           else if (0<bottom_size(XcludeCo))
           {                                                                     assert(bi->end_states==start_bottom_states[XcludeCo+1]);
@@ -5307,7 +5234,8 @@ class bisim_partitioner_gj
           }
         }
         else
-        {                                                                       assert(bi->end_states==start_bottom_states[XcludeCo+1]);
+        {                                                                       assert(bottom_size(ReachAlw)>=bottom_size(XcludeCo));
+                                                                                assert(bi->end_states==start_bottom_states[XcludeCo+1]);
           if (has_co_splitter && 0<bottom_size(XcludeCo))
           {
             bi->sta.rt_non_bottom_states=start_bottom_states[XcludeCo];
@@ -5318,24 +5246,21 @@ class bisim_partitioner_gj
                        start_bottom_states[XcludeCo+1], bi,
                        old_constellation, new_constellation);
             constellation_becomes_nontrivial=true;
-          }                                                                     assert((has_main_splitter || !has_co_splitter) || 0==bottom_size(MissMain));
+          }                                                                     else  {  assert(0==bottom_size(XcludeCo));  }
           if ((has_main_splitter || !has_co_splitter) &&
               bottom_size(ReachAlw)<bottom_size(MissMain))
           {                                                                     assert(bi->start_bottom_states==start_bottom_states[ReachAlw]);
-            if (0<bottom_size(ReachAlw))
-            {
-              bi->start_bottom_states=start_bottom_states[ReachAlw+1];
-              ReachAlw_block_index=create_new_block
+            bi->start_bottom_states=start_bottom_states[ReachAlw+1];            assert(0<bottom_size(ReachAlw));
+            ReachAlw_block_index=create_new_block
                       <!has_main_splitter && !has_co_splitter>
                       (start_bottom_states[ReachAlw],
                        start_bottom_states[ReachAlw+1],
                        start_bottom_states[ReachAlw+1], bi,
                        old_constellation, new_constellation);
-              constellation_becomes_nontrivial=true;
-            }
+            constellation_becomes_nontrivial=true;
           }
           else
-          {
+          {                                                                     assert(bottom_size(ReachAlw)>=bottom_size(MissMain));
             ReachAlw_block_index=bi;
             if ((has_main_splitter || !has_co_splitter) &&
                 0<bottom_size(MissMain))
@@ -5348,7 +5273,7 @@ class bisim_partitioner_gj
                        start_bottom_states[MissMain+1], bi,
                        old_constellation, new_constellation);
               constellation_becomes_nontrivial=true;
-            }
+            }                                                                   else  {  assert(0==bottom_size(MissMain));  }
           }
         }
 
@@ -5463,16 +5388,11 @@ class bisim_partitioner_gj
       enum subblocks running_searches[3]; // does not include the MultiSub-search
 
       if ((!has_main_splitter && has_co_splitter) || 0==bottom_size(MissMain))
-      {
+      {                                                                         assert(0==bottom_size(MissMain));
         /* MissMain is empty and finishes early.  There are no states that   */ assert(potential_non_bottom_states[MissMain].empty());
         // might be moved to MultiSub.
-//std::cerr << debug_coroutine_of_MissMain " is already finished (empty)\n";
+//std::cerr << "MissMain is already finished (empty)\n";
 
-        // if (finished==status[ReachAlw]) {
-          // In principle, one would move the NcludeCo-states to MultiSub now.
-          // But there are no NcludeCo-states yet (unless we would allow marked
-          // non-bottom transitions in a split without main splitter).
-        // }
         ++no_of_finished_searches;
         status[MissMain]=finished;
       }
@@ -5483,15 +5403,16 @@ class bisim_partitioner_gj
         current_bottom_state_iter[MissMain]=start_bottom_states[MissMain];
         status[MissMain]=state_checking;
       }
-//else std::cerr << debug_coroutine_of_MissMain " is already aborted\n";
+//else std::cerr << "MissMain is already aborted\n";
 
+      label_index a; // action label of the co-splitter; only used if the co-splitter exists and is not aborted
       if (!has_co_splitter || 0==bottom_size(XcludeCo))
-      {
+      {                                                                         assert(0==bottom_size(XcludeCo));
         /* XcludeCo is empty and finishes early.                             */ assert(potential_non_bottom_states[XcludeCo].empty());
-//std::cerr << debug_coroutine_of_XcludeCo " is already finished (empty)\n";
+//std::cerr << "XcludeCo is already finished (empty)\n";
         if (finished==status[MissMain])
         {
-//std::cerr << debug_coroutine_of_MultiSub " is already finished (empty) and the split is trivial.\n";
+//std::cerr << "MultiSub is already finished (empty) and the split is trivial.\n";
           //++no_of_finished_searches;
           //status_MultiSub=finished;
           // This is a trivial split and nothing needs to be done.
@@ -5520,9 +5441,11 @@ class bisim_partitioner_gj
           running_searches[no_of_running_searches]=XcludeCo;
           ++no_of_running_searches;
           current_bottom_state_iter[XcludeCo]=start_bottom_states[XcludeCo];
+          a=m_aut_apply_hidden_label_map(m_aut.get_transitions()
+                                       [*co_splitter->start_same_BLC].label());
           status[XcludeCo]=state_checking;
         }
-//else std::cerr << debug_coroutine_of_XcludeCo " is already aborted\n";
+//else std::cerr << "XcludeCo is already aborted\n";
       }
 
       if (0==bottom_size(ReachAlw))
@@ -5533,7 +5456,7 @@ class bisim_partitioner_gj
         non_bottom_states_MultiSub.swap_vec
                                        (potential_non_bottom_states[ReachAlw]);
         if (!has_co_splitter || finished==status[XcludeCo])
-        {
+        {                                                                       assert(finished==status[XcludeCo]);
           // both ReachAlw and XcludeCo are empty.  So the Hit_Main states must
           // be in MultiSub.  (MultiSub has not yet been aborted.)
           if (has_main_splitter && has_co_splitter)
@@ -5559,7 +5482,7 @@ class bisim_partitioner_gj
         }
         ++no_of_finished_searches;
         status[ReachAlw]=finished;
-//std::cerr << debug_coroutine_of_ReachAlw " is already finished (empty)\n";
+//std::cerr << "ReachAlw is already finished (empty)\n";
       }
       else if (!abort_if_bottom_size_too_large(ReachAlw))
       {
@@ -5568,11 +5491,11 @@ class bisim_partitioner_gj
         current_bottom_state_iter[ReachAlw]=start_bottom_states[ReachAlw];
         status[ReachAlw]=state_checking;
       }
-//else std::cerr << debug_coroutine_of_ReachAlw " is already aborted\n";
+//else std::cerr << "ReachAlw is already aborted\n";
 
       status_MultiSub=state_checking;
       abort_if_non_bottom_size_too_large_MultiSub();
-//&& (std::cerr << debug_coroutine_of_MultiSub " is already aborted\n");
+//&& (std::cerr << "MultiSub is already aborted\n");
 
       // 5. We start the coroutines for the non-empty, non-aborted subblocks.
       //    Every coroutine executes one step in turn.  The coroutines stop as
@@ -5583,14 +5506,15 @@ class bisim_partitioner_gj
       //    known to be in the X-subblock, the state is determined to be in the
       //    X-subblock itself.
       //    There are two twists here:
-      //    - The coroutine for the R-subblock needs to check, when all
-      //      successors are known to be in the R-subblock, whether the state
-      //      has a transition in the co-splitter; if yes, the state is
-      //      actually a new bottom state in the N-subblock (all its inert
-      //      successors are in R but the state itself is in N).
-      //    - Predecessors of N-states are immediately added to the N-subblock
-      //      because for them, having one N-successor is enough.  There is no
-      //      need to maintain a set of potentially-N states.
+      //    - The coroutine for the XcludeCo-subblock needs to check, when all
+      //      successors are known to be in the XcludeCo-subblock, whether the
+      //      state has a transition in the co-splitter; if yes, the state is
+      //      actually a new bottom state in the MultiSub-subblock (all its
+      //      inert successors are in XcludeCo but the state itself is in
+      //      MultiSub).
+      //    - Predecessors of MultiSub-states are immediately added to the
+      //      MultiSub-subblock because for them, having one MultiSub-successor
+      //      is enough.  There is no set of potentially-MultiSub states.
 
       std::vector<transition>::iterator current_source_iter[3],
                                                   current_source_iter_MultiSub;
@@ -5598,6 +5522,7 @@ class bisim_partitioner_gj
                                               current_source_iter_end_MultiSub;
 
       state_in_block_pointer current_source_XcludeCo;
+      bool a_seen_XcludeCo; // boolean indicating whether label a has been seen
       outgoing_transitions_const_it current_outgoing_iter_start_XcludeCo;
       outgoing_transitions_const_it current_outgoing_iter_XcludeCo;             assert(co_splitter_iter_MultiSub<=co_splitter_iter_end_MultiSub);
       for (;;)
@@ -5632,22 +5557,9 @@ class bisim_partitioner_gj
               if(  (   (   undefined==current_counter
                         || (   has_main_splitter && has_co_splitter
                             && marked_Hit_Main==current_counter
-                            && MissMain!=current_search        )
-#ifdef USE_INCLUDE_CO
-                        || (   has_co_splitter
-                            && marked_NcludeCo==current_counter
-                            && XcludeCo!=current_search        )
-#endif
-                                                                )
-                    && (src.ref_state->counter=marked(
-                                        #ifdef XCLUDECO_AND_HIT_MAIN
-                                          has_main_splitter&&has_co_splitter &&
-                                          marked_Hit_Main==current_counter &&
-                                          XcludeCo==current_search
-                                          ? XcludeCo_and_Hit_Main :
-                                        #endif
-                                        current_search)+src.ref_state->
-                                     no_of_outgoing_block_inert_transitions,    assert(std::find(potential_non_bottom_states[current_search].begin(),
+                            && MissMain!=current_search        ))
+                    && (src.ref_state->counter=marked(current_search)+
+                        src.ref_state->no_of_outgoing_block_inert_transitions,  assert(std::find(potential_non_bottom_states[current_search].begin(),
                                                                                                  potential_non_bottom_states[current_search].end(), src)==
                                                                                                  potential_non_bottom_states[current_search].end()),
                         potential_non_bottom_states[current_search].
@@ -5658,20 +5570,18 @@ class bisim_partitioner_gj
               {                                                                 assert(is_in_marked_range_of(src.ref_state->counter, current_search));
                 --src.ref_state->counter;                                       assert(is_in_marked_range_of(src.ref_state->counter, current_search));
                                                                                 assert(!non_bottom_states_MultiSub.find(src));
-                if (marked((enum subblocks) 0)==
-                                         src.ref_state->counter % marked_range)
-                {
-                  // all inert transitions of src point to the current
-                  // subblock
+                if (marked(current_search)==src.ref_state->counter)
+                {                                                               if (!has_co_splitter) {
+                  /* all inert transitions of src point to the current       */   assert(XcludeCo!=current_search);
+                  /* subblock                                                */   if (!has_main_splitter)  {  assert(marked_Hit_Main!=current_counter);  }
+                                                                                }
                   if (has_co_splitter &&
-                      marked(XcludeCo)==src.ref_state->counter &&
-                      #ifndef XCLUDECO_AND_HIT_MAIN
-                        (!has_main_splitter ||
-                         marked_Hit_Main!=current_counter) && // this test seems to shave off 1-2% of the coroutine steps
-                      #endif
+                      XcludeCo==current_search &&
+                      (!has_main_splitter ||
+                       marked_Hit_Main!=current_counter) && // this test seems to shave off 1-2% of the coroutine steps
                       co_splitter_iter_MultiSub!=co_splitter_iter_end_MultiSub)
                   {                                                             assert(bi->block.to_constellation.end()!=co_splitter);
-//std::cerr << ", going to check outgoing transitions of potential " debug_coroutine_of_XcludeCo "-state\n";
+//std::cerr << ", going to check outgoing transitions of potential XcludeCo-state\n";
                     // but XcludeCo needs to check whether src has a transition
                     // in the co-splitter
                     // (This can be avoided if we remember that the state had
@@ -5680,6 +5590,7 @@ class bisim_partitioner_gj
                     // co-splitter.)
                     current_source_XcludeCo=src;
                     status[XcludeCo]=outgoing_constellation_checking;
+                    a_seen_XcludeCo=false;
                     current_outgoing_iter_start_XcludeCo=
                                      src.ref_state->start_outgoing_transitions;
                     current_outgoing_iter_XcludeCo=
@@ -5700,18 +5611,12 @@ class bisim_partitioner_gj
 //std::cerr << " and aborted\n";
                     continue;
                   }
-                  #ifdef XCLUDECO_AND_HIT_MAIN
-                    if (has_main_splitter && has_co_splitter)
-                    {
-                      src.ref_state->counter=marked(current_search);
-                    }
-                  #endif
                   non_bottom_states[current_search].add_todo(src);
                 }
               }
               else if (marked_MultiSub!=src.ref_state->counter)
               {
-//std::cerr << ": source is already potentially-" << debug_coroutine_of_counter(src.ref_state->counter) << " and is moved to " debug_coroutine_of_MultiSub;
+//std::cerr << ": source is already potentially-" << debug_coroutine_of_counter(src.ref_state->counter) << " and is moved to MultiSub";
                 // The state has block-inert transitions to multiple
                 // subblocks (or it is Hit_Main and the current search is
                 // MissMain).  It should be added to MultiSub.
@@ -5723,8 +5628,8 @@ class bisim_partitioner_gj
                 }
 //else { std::cerr << ", which is or was aborted"; }
               }                                                                 else {
-//std::cerr << ": source is already in " debug_coroutine_of_MultiSub;
-                                                                                  assert(non_bottom_states_MultiSub.find(src));
+//std::cerr << ": source is already in MultiSub";
+                                                                                  assert(aborted==status_MultiSub || non_bottom_states_MultiSub.find(src));
                                                                                 }
             }
 //else { std::cerr << " is not block-inert"; }
@@ -5767,10 +5672,10 @@ class bisim_partitioner_gj
           else
           {                                                                     assert(XcludeCo==current_search);
                                                                                 assert(outgoing_constellation_checking==status[XcludeCo]);
-            --current_outgoing_iter_XcludeCo;                                   assert(current_outgoing_iter_start_XcludeCo<=
+                                                                                assert(current_outgoing_iter_start_XcludeCo<
                                                                                                                current_outgoing_iter_XcludeCo->start_same_saC);
 //std::cerr << "outgoing_constellation_checking " << m_transitions[assert(has_main_splitter || has_co_splitter), *current_outgoing_iter_XcludeCo->ref.BLC_transitions].debug_id(*this);
-                                                                                assert(current_outgoing_iter_XcludeCo->start_same_saC<=
+            --current_outgoing_iter_XcludeCo;                                   assert(current_outgoing_iter_XcludeCo->start_same_saC<=
                                                                                                                                 current_outgoing_iter_XcludeCo);
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                   // Assign the work to the transitions in the same_saC slice
@@ -5800,7 +5705,7 @@ class bisim_partitioner_gj
                                         transitions_per_block_to_constellation; assert(bi->block.to_constellation.end()!=co_splitter);
             if (current_splitter==co_splitter)
             {
-//std::cerr << ": source belongs to " debug_coroutine_of_MultiSub;
+//std::cerr << ": source belongs to MultiSub";
               /* The state has a transition in the co-splitter, so it should */
               /* not be added to XcludeCo.  Instead, add it to MultiSub:     */
               if (marked_MultiSub!=current_source_XcludeCo.ref_state->counter)
@@ -5818,27 +5723,34 @@ class bisim_partitioner_gj
               }                                                                 else  assert(non_bottom_states_MultiSub.find(current_source_XcludeCo));
 //std::cerr << '\n';
             }
-            else if ((has_main_splitter && current_splitter==main_splitter      && (assert(std::find(potential_non_bottom_states_Hit_Main.begin(),
-                                                                                         potential_non_bottom_states_Hit_Main.end(), current_source_XcludeCo)!=
-                                                                                                             potential_non_bottom_states_Hit_Main.end()),
-//std::cerr << ": is in main splitter, so there was no transition in the co-splitter, source belongs to " debug_coroutine_of_XcludeCo,
-                                                                                                                                                          true)
-                                                                          ) ||
-                     (current_outgoing_iter_XcludeCo=
+            else if ((current_outgoing_iter_XcludeCo=
                                 current_outgoing_iter_XcludeCo->start_same_saC,
                       current_outgoing_iter_start_XcludeCo==
-                                               current_outgoing_iter_XcludeCo   && (assert(std::find(potential_non_bottom_states_Hit_Main.begin(),
-                                                                                         potential_non_bottom_states_Hit_Main.end(), current_source_XcludeCo)==
-                                                                                                             potential_non_bottom_states_Hit_Main.end()),
-//std::cerr << ": no transitions in co-splitter found, source belongs to " debug_coroutine_of_XcludeCo,
+                                             current_outgoing_iter_XcludeCo
+                      // We have searched all outgoing transitions but found
+                      // none in the co-splitter
+//&& (std::cerr << ": no transitions in co-splitter found, source belongs to XcludeCo", true)
+                                                                           ) ||
+                     (m_aut_apply_hidden_label_map(m_aut.get_transitions()
+                           [*current_splitter->start_same_BLC].label())==a
+                      ? (has_main_splitter && current_splitter==main_splitter   && (assert(std::find(potential_non_bottom_states_Hit_Main.begin(),
+                      /* Transitions to the co-splitter must come after      */                      potential_non_bottom_states_Hit_Main.end(),
+                      /* transitions to the main splitter; so we can break   */                      current_source_XcludeCo)!=
+                      /* off the search early when we see the main splitter  */                              potential_non_bottom_states_Hit_Main.end()),
+                      /* (if `current_source_XcludeCo` also had a transition */
+                      /* in the co-splitter, it would have been added to     */
+                      /* ReachAlw.)                                          */
+//std::cerr << ": is in main splitter, so there was no transition in the co-splitter, source belongs to XcludeCo",
                                                                                                                                                           true)
+                                             ) || (a_seen_XcludeCo=true, false)
+                      : a_seen_XcludeCo
+                      /* Transitions with the same action label are placed   */
+                      /* together; so we can break off the search early if   */
+                      /* we find the current transition has _no_ _longer_    */
+                      /* the same action label as the co-splitter            */
+//&& (std::cerr << ": passed transitions with label " << m_aut.action_label(a) << " without finding transition in the co-splitter, source belongs to XcludeCo", true)
                                                                              ))
             {                                                                   assert(marked(XcludeCo)==current_source_XcludeCo.ref_state->counter);
-              // Transitions to the co-splitter must come after transitions
-              // to the main splitter; so we can break off the search early
-              // when we see the main splitter (because if it had also a
-              // transition in the co-splitter, the state would have been added
-              // to Hit_Main).
               if (abort_if_size_too_large(XcludeCo, 1))
               {                                                                 assert(running_searches[current_search_index]==XcludeCo);
 //std::cerr << ", which is aborted\n";
@@ -6024,41 +5936,16 @@ class bisim_partitioner_gj
                                                                                 assert(!non_bottom_states[MissMain].find(st));
                     if (marked_Hit_Main==st.ref_state->counter)
                     {                                                           assert(!non_bottom_states_MultiSub.find(st));
-//std::cerr << "    and consequently, " debug_coroutine_of_Hit_Main "-" << st.ref_state->debug_id(*this) << " is added to " debug_coroutine_of_MultiSub ".\n";
+//std::cerr << "    and consequently, Hit_Main-" << st.ref_state->debug_id(*this) << " is added to MultiSub.\n";
                       non_bottom_states_MultiSub.add_todo(st);                  assert(!non_bottom_states[ReachAlw].find(st));
                       st.ref_state->counter=marked_MultiSub;                    assert(!non_bottom_states[XcludeCo].find(st));
                     }                                                           else  {  assert(marked(ReachAlw)==st.ref_state->counter ||
                                                                                                 marked(XcludeCo)==st.ref_state->counter ||
                                                                                                 marked_MultiSub==st.ref_state->counter);  }
                   }
-//std::cerr << "    and consequently, " debug_coroutine_of_Hit_Main " is guaranteed to be empty.\n";
+//std::cerr << "    and consequently, Hit_Main is guaranteed to be empty.\n";
                   clear(potential_non_bottom_states_Hit_Main);
                 }
-                #ifdef USE_INCLUDE_CO
-                  else if (finished==status[MissMain])
-                  {                                                             assert(1>=no_of_running_searches);
-                    /* The NcludeCo states can be assigned to MultiSub       */ assert(finished!=status[XcludeCo]);
-                    /* because they cannot be in ReachAlw or MissMain        */ assert(finished!=status_MultiSub);
-                    for (state_in_block_pointer st:
-                                          potential_non_bottom_states_NcludeCo)
-                    {                                                           assert(0<st.ref_state->no_of_outgoing_block_inert_transitions);
-                                                                                // The work in this loop can be assigned to the same transition in
-                                                                                // the co-splitter as the one(s) that made st become a member of
-                                                                                // `potential_non_bottom_states_NcludeCo`.
-                                                                                assert(!non_bottom_states[XcludeCo].find(st));
-                      if (marked_NcludeCo==st.ref_state->counter)
-                      {                                                         assert(!non_bottom_states_MultiSub.find(st));
-//std::cerr << "    and consequently, " debug_coroutine_of_NcludeCo "-" << st.ref_state->debug_id(*this) << " is added to " debug_coroutine_of_MultiSub ".\n";
-                        non_bottom_states_MultiSub.add_todo(st);                assert(!non_bottom_states[ReachAlw].find(st));
-                        st.ref_state->counter=marked_MultiSub;                  assert(!non_bottom_states[MissMain].find(st));
-                      }                                                         else  {  assert(marked(ReachAlw)==st.ref_state->counter ||
-                                                                                                marked(MissMain)==st.ref_state->counter ||
-                                                                                                marked_MultiSub==st.ref_state->counter);  }
-                    }
-//std::cerr << "    and consequently, " debug_coroutine_of_NcludeCo " is guaranteed to be empty.\n";
-                    clear (potential_non_bottom_states_NcludeCo);
-                  }
-                #endif
               }
               if (std::numeric_limits<state_index>::max()!=
                                               no_of_unfinished_states_in_block)
@@ -6100,7 +5987,7 @@ class bisim_partitioner_gj
                 else
                 {
                   abort_if_non_bottom_size_too_large_MultiSub();
-//&& (std::cerr << "    and consequently, " debug_coroutine_of_MultiSub " is aborted.\n");
+//&& (std::cerr << "    and consequently, MultiSub is aborted.\n");
                 }
               }
               continue;
@@ -6203,7 +6090,7 @@ class bisim_partitioner_gj
                 max_process=ReachAlw;
               }
               status_MultiSub=finished;
-//std::cerr << "Aborting " << debug_coroutine_of(max_process) << " instead of aborting " debug_coroutine_of_MultiSub " because the latter is empty\n";
+//std::cerr << "Aborting " << debug_coroutine_of(max_process) << " instead of aborting MultiSub because the latter is empty\n";
               status[max_process]=aborted;
               // we need to swap the vectors for clearing the state counters:
               clear(potential_non_bottom_states[current_search]);               assert(potential_non_bottom_states[max_process].empty());
@@ -6220,19 +6107,6 @@ class bisim_partitioner_gj
               {
                 clear(potential_non_bottom_states_Hit_Main);
               }
-              #ifdef USE_INCLUDE_CO
-                                                                                #ifndef NDEBUG
-                                                                                  for (state_in_block_pointer st: potential_non_bottom_states_NcludeCo) {
-                                                                                    assert(has_co_splitter);
-                /* All NcludeCo states must have been assigned to some       */     assert(marked(ReachAlw)==st.ref_state->counter ||
-                /* subblock, so there is no need to clear these state        */            marked(MissMain)==st.ref_state->counter);
-                /* counters as well:                                         */   }
-                                                                                #endif
-                if (has_co_splitter)
-                {
-                  clear(potential_non_bottom_states_NcludeCo);
-                }
-              #endif
               goto end_for_empty_MultiSub_subblock;
             }
 
@@ -6260,21 +6134,13 @@ class bisim_partitioner_gj
             /* their states in potential_non_bottom_states to MultiSub.      */ assert(potential_non_bottom_states[MissMain].empty());
             clear_state_counters(non_bottom_states_MultiSub.begin(),
                                  non_bottom_states_MultiSub.end(), bi);
-            clear(non_bottom_states_MultiSub);
+            non_bottom_states_MultiSub.clear();
             // Some Hit_Main states may also be not-yet-found MultiSub states,
             // so we have to clear these state counters as well.
             clear_state_counters
                               (potential_non_bottom_states_Hit_Main.begin(),
                                potential_non_bottom_states_Hit_Main.end(), bi);
             clear(potential_non_bottom_states_Hit_Main);
-            #ifdef USE_INCLUDE_CO
-              // Some NcludeCo states may also be not-yet-found MultiSub states,
-              // so we have to clear these state counters as well.
-              clear_state_counters
-                              (potential_non_bottom_states_NcludeCo.begin(),
-                               potential_non_bottom_states_NcludeCo.end(), bi);
-              clear(potential_non_bottom_states_NcludeCo);
-            #endif
                                                                                 assert(has_co_splitter ||
                                                                                        new_start_bottom_states(XcludeCo)==new_start_bottom_states(XcludeCo+1));
             /* Split off the third subblock (XcludeCo)                       */ static_assert(2==XcludeCo);  assert(finished==status[XcludeCo]);
@@ -6301,7 +6167,7 @@ class bisim_partitioner_gj
                                                                                 #endif
                                                                              );
               }
-              clear(non_bottom_states[XcludeCo]); // cannot clear before the above call to bottom_and_non_bottom_size(2)
+              non_bottom_states[XcludeCo].clear(); // cannot clear before the above call to bottom_and_non_bottom_size(2)
               create_new_block<!has_main_splitter && !has_co_splitter>
                   (new_start_bottom_states(XcludeCo),
                    new_end_bottom_states(XcludeCo),
@@ -6312,7 +6178,7 @@ class bisim_partitioner_gj
                                           new_start_bottom_states(XcludeCo),
                                           new_start_bottom_states(XcludeCo+1));
             }                                                                   else {
-//std::cerr << "Not creating a new block for " debug_coroutine_of_XcludeCo " as it's empty\n";
+//std::cerr << "Not creating a new block for XcludeCo as it's empty\n";
                                                                                   assert(0==bottom_size(XcludeCo));assert(non_bottom_states[XcludeCo].empty());
                                                                                 }
                                                                                 assert(has_co_splitter ||
@@ -6342,7 +6208,7 @@ class bisim_partitioner_gj
                                                                                 #endif
                                                                              );
               }
-              clear(non_bottom_states[MissMain]); // cannot clear before the above call to bottom_and_non_bottom_size(XcludeCo)
+              non_bottom_states[MissMain].clear(); // cannot clear before the above call to bottom_and_non_bottom_size(XcludeCo)
               create_new_block<!has_main_splitter && !has_co_splitter>
                   (new_start_bottom_states(MissMain),
                    new_end_bottom_states(MissMain),
@@ -6353,7 +6219,7 @@ class bisim_partitioner_gj
                                           new_start_bottom_states(MissMain),
                                           new_start_bottom_states(MissMain+1));
             }                                                                   else {
-//std::cerr << "Not creating a new block for " debug_coroutine_of_MissMain " as it's empty\n";
+//std::cerr << "Not creating a new block for MissMain as it's empty\n";
                                                                                   assert(0==bottom_size(MissMain));assert(non_bottom_states[MissMain].empty());
                                                                                 }
 
@@ -6368,7 +6234,7 @@ class bisim_partitioner_gj
                                                                                   , bottom_size(ReachAlw)
                                                                                 #endif
                                                                              );
-              clear(non_bottom_states[ReachAlw]);
+              non_bottom_states[ReachAlw].clear();
               ReachAlw_block_index=create_new_block
                   <!has_main_splitter && !has_co_splitter>
                   (start_bottom_states[ReachAlw],
@@ -6380,7 +6246,7 @@ class bisim_partitioner_gj
                                           start_bottom_states[ReachAlw],
                                           new_start_bottom_states(ReachAlw+1));
             }                                                                   else {
-//std::cerr << "Not creating a new block for " debug_coroutine_of_ReachAlw " as it's empty\n";
+//std::cerr << "Not creating a new block for ReachAlw as it's empty\n";
                                                                                   assert(0==bottom_size(ReachAlw));assert(non_bottom_states[ReachAlw].empty());
                                                                                 }
             MultiSub_block_index->contains_new_bottom_states=true;              assert(MultiSub_block_index->start_bottom_states<
@@ -6391,7 +6257,7 @@ class bisim_partitioner_gj
         } // end of inner coroutine loop for the ReachAlw/XcludeCo/MissMain-states
 
         // Now do one step for the MultiSub-states:
-//std::cerr << "Doing one step for coroutine " debug_coroutine_of_MultiSub ": ";
+//std::cerr << "Doing one step for coroutine MultiSub: ";
 
         if (incoming_inert_transition_checking==status_MultiSub)
         {                                                                       assert(current_source_iter_MultiSub<current_source_iter_end_MultiSub);
@@ -6409,7 +6275,7 @@ class bisim_partitioner_gj
               src.ref_state->counter=marked_MultiSub;                           assert(!non_bottom_states_MultiSub.find(src));
                                                                                 assert(!non_bottom_states[XcludeCo].find(src));
               non_bottom_states_MultiSub.add_todo(src);                         assert(!non_bottom_states[MissMain].find(src));
-//std::cerr << ": source added to " debug_coroutine_of_MultiSub;
+//std::cerr << ": source added to MultiSub";
               if (abort_if_non_bottom_size_too_large_MultiSub())
               {
 //std::cerr << ", which is aborted\n";
@@ -6417,7 +6283,7 @@ class bisim_partitioner_gj
               }
 //std::cerr << '\n';
             }                                                                   else {
-//std::cerr << ": source is already in " debug_coroutine_of_MultiSub "\n";
+//std::cerr << ": source is already in MultiSub\n";
                                                                                   assert(non_bottom_states_MultiSub.find(src));
                                                                                 }
           }
@@ -6453,18 +6319,16 @@ class bisim_partitioner_gj
             }
             continue;
           }
-          #ifndef USE_INCLUDE_CO
-            if (1>=no_of_finished_searches)
-            {
+          if (1>=no_of_finished_searches)
+          {
 //std::cerr << "but there is nothing to do\n";
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-              /* Nothing can be done now for the MultiSub-subblock; we just  */   check_complexity::wait();
-              // have to wait for another subblock to give us some initial
-              // MultiSub-state.
+            /* Nothing can be done now for the MultiSub-subblock; we just    */   check_complexity::wait();
+            // have to wait for another subblock to give us some initial
+            // MultiSub-state.
                                                                                 #endif
-              continue;
-            }
-          #endif
+            continue;
+          }
           if (has_co_splitter && finished!=status[XcludeCo] &&
               co_splitter_iter_MultiSub!=co_splitter_iter_end_MultiSub)
           {
@@ -6519,17 +6383,6 @@ class bisim_partitioner_gj
 //std::cerr << " (accounting as a wait cycle)\n";
                                                                                   }
                                                                                 #endif
-                #ifdef USE_INCLUDE_CO
-                  if (undefined==src.ref_state->counter &&
-                      1>=no_of_finished_searches)
-                  {
-                    // At least one of ReachAlw or MissMain is not finished,
-                    // so we cannot be sure that src is in MultiSub yet.
-                    src.ref_state->counter=marked_NcludeCo;
-                    potential_non_bottom_states_NcludeCo.push_back(src);
-                    break;
-                  }
-                #endif
                 if ((undefined==src.ref_state->counter                          && (assert(finished==status[ReachAlw]),
                                                                                     assert(finished==status[MissMain]), true)
                                                       ) ||
@@ -6561,19 +6414,7 @@ class bisim_partitioner_gj
                    co_splitter_iter_MultiSub!=co_splitter_iter_end_MultiSub);
           }
           else
-          {
-            #ifdef USE_INCLUDE_CO
-              if (1>=no_of_finished_searches)
-              {
-//std::cerr << "but there is nothing to do\n";
-                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                /* Nothing can be done now for the MultiSub-subblock; we just*/   check_complexity::wait();
-                // have to wait for another subblock to give us some initial
-                // MultiSub-state.
-                                                                                #endif
-                continue;
-              }
-            #endif                                                              // Now check that there were not too many waiting cycles:
+          {                                                                     // Now check that there were not too many waiting cycles:
                                                                                 #ifndef NDEBUG
                                                                                   check_complexity::check_waiting_cycles();
                                                                                   // After this check we are no longer allowed to wait (and we are allowed to
@@ -6597,7 +6438,7 @@ class bisim_partitioner_gj
                 // out that MultiSub has finished all it can do, so XcludeCo
                 // shall be aborted.
             status_MultiSub=finished;                                           assert(3==++no_of_finished_searches);
-//std::cerr << "\n" debug_coroutine_of_MultiSub " is finished.\n";
+//std::cerr << "\nMultiSub is finished.\n";
 
             // Calculate the placement of subblocks, and also clear state
             // counters of the aborted subblock:
@@ -6611,16 +6452,6 @@ class bisim_partitioner_gj
                                             non_bottom_states[XcludeCo].size();
               new_start_bottom_states(XcludeCo)=
                          new_end_bottom_states(XcludeCo)-bottom_size(XcludeCo);
-              #ifdef USE_INCLUDE_CO
-                // Some NcludeCo states may still linger around in the aborted
-                // subblock.  So we also have to clear these state counters.
-                if (has_co_splitter)
-                {
-                  clear_state_counters
-                              (potential_non_bottom_states_NcludeCo.begin(),
-                               potential_non_bottom_states_NcludeCo.end(), bi);
-                }                                                               else  {  assert(potential_non_bottom_states_NcludeCo.empty());  }
-              #endif
               if ((!has_main_splitter && has_co_splitter) ||
                   finished==status[MissMain])
               {                                                                 assert(finished!=status[ReachAlw]);
@@ -6630,7 +6461,7 @@ class bisim_partitioner_gj
                 new_start_bottom_states(MissMain)=
                          new_end_bottom_states(MissMain)-bottom_size(MissMain);
                 // clear the state counters of the aborted subblock:
-                clear(non_bottom_states[ReachAlw]);
+                non_bottom_states[ReachAlw].clear();
                 clear_state_counters
                              (potential_non_bottom_states[ReachAlw].begin(),
                               potential_non_bottom_states[ReachAlw].end(), bi);
@@ -6652,7 +6483,7 @@ class bisim_partitioner_gj
                 new_end_bottom_states(MissMain)=
                        new_start_bottom_states(MissMain)+bottom_size(MissMain);
                 // clear the state counters of the aborted subblock:
-                clear(non_bottom_states[MissMain]);
+                non_bottom_states[MissMain].clear();
                 clear_state_counters
                              (potential_non_bottom_states[MissMain].begin(),
                               potential_non_bottom_states[MissMain].end(), bi);
@@ -6674,15 +6505,11 @@ class bisim_partitioner_gj
               new_end_bottom_states(XcludeCo)=
                        new_start_bottom_states(XcludeCo)+bottom_size(XcludeCo);
               // clear the state counters of the aborted subblock:
-              clear(non_bottom_states[XcludeCo]);
+              non_bottom_states[XcludeCo].clear();
               clear_state_counters
                              (potential_non_bottom_states[XcludeCo].begin(),
                               potential_non_bottom_states[XcludeCo].end(), bi);
               clear(potential_non_bottom_states[XcludeCo]);
-              #ifdef USE_INCLUDE_CO
-                // All NcludeCo states must have been hit by some other
-                // subblock and included there.  So we can just delete them.
-              #endif
               if (has_main_splitter)
               {
                 // Some Hit_Main states may still linger around.
@@ -6697,9 +6524,6 @@ class bisim_partitioner_gj
               {
                 clear(potential_non_bottom_states_Hit_Main);
               }                                                                 else  {  assert(potential_non_bottom_states_Hit_Main.empty());  }
-              #ifdef USE_INCLUDE_CO
-                clear(potential_non_bottom_states_NcludeCo);
-              #endif
             }                                                                   else  {  assert(potential_non_bottom_states_Hit_Main.empty());  }
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                   // Finish the accounting.
@@ -6710,19 +6534,15 @@ class bisim_partitioner_gj
                                                                                   // have not yet been positioned correctly; also, most likely not all its
                                                                                   // non-bottom states will be in `non_bottom_states[...]`).
                                                                                   {
-//std::cerr << "Finalising work in " debug_coroutine_of_MultiSub ", part 1\n";
+//std::cerr << "Finalising work in MultiSub, part 1\n";
                                                                                     state_type max_NcludeCo_size=std::distance(
                                                                                                                new_end_bottom_states_MultiSub, bi->end_states);
-                                                                                    if (finished==status[ReachAlw]) {
-                                                                                      max_NcludeCo_size=std::max<state_type>(max_NcludeCo_size, std::distance(
+                                                                                    max_NcludeCo_size=std::max<state_type>(max_NcludeCo_size, std::distance(
                                                                                           start_bottom_states[ReachAlw], new_start_bottom_states(ReachAlw+1)));
-                                                                                    }
-                                                                                    if (finished==status[MissMain]) {
-                                                                                      max_NcludeCo_size=std::max<state_type>(max_NcludeCo_size, std::distance(
+                                                                                    max_NcludeCo_size=std::max<state_type>(max_NcludeCo_size, std::distance(
                                                                                        new_start_bottom_states(MissMain),new_start_bottom_states(MissMain+1)));
-                                                                                    }
-                                                                                    const unsigned char max_NcludeCo_B=0==max_NcludeCo_size ? 0
-                                                                                          : check_complexity::log_n-check_complexity::ilog2(max_NcludeCo_size);
+                                                                                    const unsigned char max_NcludeCo_B=
+                                                                                            check_complexity::log_n-check_complexity::ilog2(max_NcludeCo_size);
                                                                                     const state_in_block_pointer* s=bi->start_bottom_states;
                                                                                     do {
                                                                                       mCRL2complexity(s->ref_state, cancel_work
@@ -6739,35 +6559,28 @@ class bisim_partitioner_gj
                                                                                                 cbegin(), ti)], cancel_work(check_complexity::
                                                                                                         simple_splitB_U__handle_transition_to_U_state), *this);
                                                                                       }
-                                                                                      #ifdef USE_INCLUDE_CO
-                                                                                        if (!has_co_splitter) {
-                                                                                          continue;
-                                                                                        }
-                                                                                      #else
-                                                                                        if (finished==status[XcludeCo]) {
-                                                                                          continue;
-                                                                                        }
-                                                                                      #endif
-                                                                                      // outgoing transitions of s
-                                                                                      const outgoing_transitions_const_it out_ti_end=
+                                                                                      if (has_co_splitter && finished!=status[XcludeCo]) {
+                                                                                        // outgoing transitions of s
+                                                                                        const outgoing_transitions_const_it out_ti_end=
                                                                                          std::next(s->ref_state)>=m_states.end() ? m_outgoing_transitions.end()
                                                                                                          : std::next(s->ref_state)->start_outgoing_transitions;
-                                                                                      for (outgoing_transitions_const_it
+                                                                                        for (outgoing_transitions_const_it
                                                                                              ti=s->ref_state->start_outgoing_transitions; ti!=out_ti_end; ++ti)
-                                                                                      {
-                                                                                        assert(has_main_splitter || has_co_splitter);
-                                                                                        mCRL2complexity(&m_transitions[*ti->ref.BLC_transitions],
+                                                                                        {
+                                                                                          assert(has_main_splitter || has_co_splitter);
+                                                                                          mCRL2complexity(&m_transitions[*ti->ref.BLC_transitions],
                                                                                             cancel_work(check_complexity::
                                                                                             simple_splitB_U__handle_transition_from_potential_U_state), *this);
-                                                                                        // We should also finalise the co-splitter transitions handled by
-                                                                                        // MultiSub (which may exist even if MultiSub is empty):
-                                                                                        mCRL2complexity(&m_transitions[*ti->ref.BLC_transitions],
+                                                                                          // We should also finalise the co-splitter transitions handled by
+                                                                                          // MultiSub (which may exist even if MultiSub is empty):
+                                                                                          mCRL2complexity(&m_transitions[*ti->ref.BLC_transitions],
                                                                                               finalise_work(check_complexity::
                                                                                                             simple_splitB_R__handle_transition_from_R_state,
                                                                                                             check_complexity::
                                                                                                             simple_splitB__handle_transition_from_R_or_U_state,
                                                                                                                                        max_NcludeCo_B), *this);
-                                                                                      }
+                                                                                        }
+                                                                                      } else  {  assert(finished==status[XcludeCo]);  }
                                                                                     } while (++s!=bi->end_states);
                                                                                   }
                                                                                 #endif
@@ -6795,7 +6608,7 @@ class bisim_partitioner_gj
                                                                                   , 0
                                                                                 #endif
                                                                              );
-              clear(non_bottom_states_MultiSub);
+              non_bottom_states_MultiSub.clear();
               block_type* const MultiSub_block_index=
                   create_new_block<!has_main_splitter && !has_co_splitter>
                              (new_end_bottom_states_MultiSub,
@@ -6806,7 +6619,7 @@ class bisim_partitioner_gj
                                                                                   // Finalise the work in MultiSub.  This should be done after calling `
                                                                                   // check_complexity::check_waiting_cycles()` so MultiSub cannot make its own
                                                                                   // waiting time appear small.
-//std::cerr << "Finalising work in " debug_coroutine_of_MultiSub ", part 2\n";
+//std::cerr << "Finalising work in MultiSub, part 2\n";
                                                                                   const unsigned char max_new_B=check_complexity::log_n-check_complexity::ilog2
                                                                                       (std::distance(new_end_bottom_states_MultiSub, bi->end_states));
                                                                                   const state_in_block_pointer* s=new_end_bottom_states_MultiSub;
@@ -6893,7 +6706,7 @@ class bisim_partitioner_gj
                                                                                   check_complexity::check_temporary_work();
                                                                                 #endif
         end_for_empty_MultiSub_subblock:
-//std::cerr << "Not creating a new block for " debug_coroutine_of_MultiSub " as it's empty\n";
+//std::cerr << "Not creating a new block for MultiSub as it's empty\n";
                                                                                 assert(non_bottom_states_MultiSub.empty());
               if (has_co_splitter
                   ? has_main_splitter
@@ -6966,7 +6779,7 @@ class bisim_partitioner_gj
                                                                                       acct_iter=non_bottom_states[XcludeCo].data();
                                                                                       acct_B_size=std::max(bottom_and_non_bottom_size(MissMain),
                                                                                                            bottom_and_non_bottom_size(ReachAlw));
-//std::cerr << "Both " debug_coroutine_of_MissMain " (" << non_bottom_states[MissMain].size() << " states) and " debug_coroutine_of_ReachAlw " (" << non_bottom_states[ReachAlw].size() << " states) are too small to account for moving " << count << " states for the aborted " debug_coroutine_of_XcludeCo " bottom states (" << bottom_size(XcludeCo) << " bottom states).\n";
+//std::cerr << "Both MissMain (" << non_bottom_states[MissMain].size() << " states) and ReachAlw (" << non_bottom_states[ReachAlw].size() << " states) are too small to account for moving " << count << " states for the aborted XcludeCo bottom states (" << bottom_size(XcludeCo) << " bottom states).\n";
                                                                                     }
                                                                                   }
                                                                                 #endif
@@ -6991,7 +6804,7 @@ class bisim_partitioner_gj
                                                                                   , bottom_size(XcludeCo)
                                                                                 #endif
                                                                              );
-                clear(non_bottom_states[XcludeCo]);
+                non_bottom_states[XcludeCo].clear();
                 create_new_block<!has_main_splitter && !has_co_splitter>
                   (new_start_bottom_states(XcludeCo),
                    new_end_bottom_states(XcludeCo),
@@ -7003,14 +6816,14 @@ class bisim_partitioner_gj
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                   // delete what we've stored in non_bottom_states[XcludeCo] just for
                                                                                   // accounting
-                                                                                  clear(non_bottom_states[XcludeCo]);
+                                                                                  non_bottom_states[XcludeCo].clear();
                                                                                 #endif
                 bi->start_bottom_states=new_start_bottom_states(XcludeCo);
                 bi->sta.rt_non_bottom_states=new_end_bottom_states(XcludeCo);   assert(bi->start_bottom_states<bi->sta.rt_non_bottom_states);
                 bi->end_states=new_start_bottom_states(XcludeCo+1);             assert(bi->sta.rt_non_bottom_states<=bi->end_states);
               }
             }                                                                   else {
-//std::cerr << "Not creating a new block for " debug_coroutine_of_XcludeCo " as it's empty\n";
+//std::cerr << "Not creating a new block for XcludeCo as it's empty\n";
                                                                                   assert(0==bottom_size(XcludeCo));assert(non_bottom_states[XcludeCo].empty());
                                                                                   assert(finished==status[XcludeCo]);
                                                                                 }
@@ -7051,7 +6864,7 @@ class bisim_partitioner_gj
                                                                                   , bottom_size(MissMain)
                                                                                 #endif
                                                                              );
-                clear(non_bottom_states[MissMain]);
+                non_bottom_states[MissMain].clear();
                 create_new_block<!has_main_splitter && !has_co_splitter>
                   (new_start_bottom_states(MissMain),
                    new_end_bottom_states(MissMain),
@@ -7065,7 +6878,7 @@ class bisim_partitioner_gj
                 bi->end_states=new_start_bottom_states(MissMain+1);             assert(bi->sta.rt_non_bottom_states<=bi->end_states);
               }
             }                                                                   else {
-//std::cerr << "Not creating a new block for " debug_coroutine_of_MissMain " as it's empty\n";
+//std::cerr << "Not creating a new block for MissMain as it's empty\n";
                                                                                   assert(0==bottom_size(MissMain));assert(non_bottom_states[MissMain].empty());
                                                                                   assert(finished==status[MissMain]);
                                                                                 }
@@ -7084,7 +6897,7 @@ class bisim_partitioner_gj
                                                                                   , bottom_size(ReachAlw)
                                                                                 #endif
                                                                              );
-                clear(non_bottom_states[ReachAlw]);
+                non_bottom_states[ReachAlw].clear();
                 ReachAlw_block_index=create_new_block
                       <!has_main_splitter && !has_co_splitter>
                       (start_bottom_states[ReachAlw],
@@ -7099,7 +6912,7 @@ class bisim_partitioner_gj
                 ReachAlw_block_index=bi;
               }
             }                                                                   else {
-//std::cerr << "Not creating a new block for " debug_coroutine_of_ReachAlw " as it's empty\n";
+//std::cerr << "Not creating a new block for ReachAlw as it's empty\n";
                                                                                   assert(0==bottom_size(ReachAlw));assert(non_bottom_states[ReachAlw].empty());
                                                                                 }
             return ReachAlw_block_index; // leave the function completely, as we have finished.
@@ -9222,16 +9035,6 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
         mCRL2log(log::verbose) << "Running times measured using "
             #ifdef USE_FOUR_WAY_SPLIT
                 "the four-way split"
-                #ifdef USE_INCLUDE_CO
-                    " with NcludeCo"
-                    #ifdef XCLUDECO_AND_HIT_MAIN
-                        " and XcludeCo_and_Hit_Main"
-                    #endif
-                #else
-                    #ifdef XCLUDECO_AND_HIT_MAIN
-                        " with XcludeCo_and_Hit_Main"
-                    #endif
-                #endif
             #else
                 "the two-way split"
             #endif
