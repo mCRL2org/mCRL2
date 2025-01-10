@@ -19,7 +19,7 @@
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/process/process_expression.h"
 
-#define CACHE_COMMUNICATION
+#define MCRL2_COUNT_COMMUNICATION_OPERATIONS
 
 namespace mcrl2
 {
@@ -154,12 +154,6 @@ class comm_entry
     /// Right-hand sides of communication expressions
     const std::vector<action_name_t> m_rhs;
 
-#ifdef CACHE_COMMUNICATION
-    /// Caches.
-    std::unordered_map<core::identifier_string_list, process::action_label> m_can_communicate_cache;
-    std::unordered_map<core::identifier_string_list, bool> m_might_communicate_cache;
-#endif
-
     /// Temporary data using in determining whether communication is allowed.
     /// See usages of the data structure below.
     std::vector<action_name_multiset_t::const_iterator> m_lhs_iters; // offset into lhs
@@ -276,13 +270,6 @@ class comm_entry
                    otherwise the resulting action is the result. */
 
       const core::identifier_string_list m_names = names(m);
-#ifdef CACHE_COMMUNICATION
-      // Check the cache first.
-      if(const auto it = m_can_communicate_cache.find(m_names); it != m_can_communicate_cache.end())
-      {
-        return it->second;
-      }
-#endif
 
       process::action_label result; // if no match fount, return process::action_label()
 
@@ -304,10 +291,6 @@ class comm_entry
         }
       }
 
-#ifdef CACHE_COMMUNICATION
-      // cache the result
-      m_can_communicate_cache.insert({m_names, result});
-#endif
       return result;
     }
 
@@ -324,14 +307,6 @@ class comm_entry
          that are not in m should be in n (i.e. there must be a
          subbag o of n such that m+o can communicate. */
       const core::identifier_string_list m_names = names(m);
-
-#ifdef CACHE_COMMUNICATION
-      // Check the cache first.
-      if(const auto it = m_might_communicate_cache.find(m_names); it != m_might_communicate_cache.end())
-      {
-        return it->second;
-      }
-#endif
 
       bool result = false;
 
@@ -396,10 +371,6 @@ class comm_entry
         }
       }
 
-#ifdef CACHE_COMMUNICATION
-      // cache the result
-      m_might_communicate_cache.insert({m_names, result});
-#endif
       return result;
     }
 };
@@ -607,6 +578,10 @@ void communicationcomposition(
          is_block ? "- calculating the communication operator modulo the block operator on " :
                     "- calculating the communication operator on ") << action_summands.size() << " action summands";
 
+#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+  mCRL2log(mcrl2::log::info) << "Calculating communication operator using a set of " << communications.size() << " communication expressions." << std::endl;
+#endif
+
   // Ensure communications and allowlist are sorted. We rely on the sort order later.
   communications = sort_communications(communications);
   if (is_allow)
@@ -671,16 +646,31 @@ void communicationcomposition(
         communications,
         RewriteTerm);
 
+#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+    mCRL2log(mcrl2::log::info) << "Calculating communication on multiaction with " << multiaction.size() << " actions results in " << multiactionconditionlist.size() << " potential summands" << std::endl;
+    std::size_t disallowed_summands = 0;
+    std::size_t blocked_summands = 0;
+    std::size_t false_condition_summands = 0;
+    std::size_t added_summands = 0;
+#endif
+
     for (std::size_t i=0 ; i<multiactionconditionlist.size(); ++i)
     {
+
       const process::action_list& multiaction=multiactionconditionlist.actions[i];
 
       if (is_allow && !allow_(allowlist, multiaction,terminationAction))
       {
+#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+        ++disallowed_summands;
+#endif
         continue;
       }
       if (is_block && encap(allowlist,multiaction))
       {
+#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+        ++blocked_summands;
+#endif
         continue;
       }
 
@@ -701,12 +691,28 @@ void communicationcomposition(
           new_summand.condition() = RewriteTerm(new_summand.condition());
         }
       }
-
+#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+      if (new_summand.condition()==data::sort_bool::false_())
+      {
+        ++false_condition_summands;
+      }
+#endif
       if (new_summand.condition()!=data::sort_bool::false_())
       {
         resulting_action_summands.push_back(new_summand);
+#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+        ++added_summands;
+#endif
       }
     }
+
+#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+     mCRL2log(mcrl2::log::info) << "Statistics of new summands: " << std::endl
+     << "- Disallowed summands: " << disallowed_summands << std::endl
+     << "- Blocked summands: " << blocked_summands << std::endl
+     << "- Summands with false condition: " << false_condition_summands << std::endl
+     << "- New summands added: " << added_summands << std::endl;
+#endif
 
   }
 
