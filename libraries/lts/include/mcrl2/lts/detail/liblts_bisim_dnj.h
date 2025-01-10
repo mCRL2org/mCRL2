@@ -81,6 +81,8 @@
 #ifndef LIBLTS_BISIM_DNJ_H
 #define LIBLTS_BISIM_DNJ_H
 
+#include <iomanip> // for std::fixed, std::setprecision(), std::setw()
+#include <ctime> // for std::clock_t, std::clock()
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/coroutine.h"
@@ -2834,6 +2836,9 @@ class bisim_partitioner_dnj
                                                                                     friend class bisim_dnj::bunch_t;
                                                                                 #endif
   public:
+    /// time measurement after the end of create_initial_partition()
+    std::clock_t end_initial_part;
+
     /// \brief constructor
     /// \details The constructor constructs the data structures and immediately
     /// calculates the partition corresponding with the bisimulation quotient.
@@ -2855,10 +2860,11 @@ class bisim_partitioner_dnj
         preserve_divergence(new_preserve_divergence)
     {                                                                           assert(branching || !preserve_divergence);
 
-mCRL2log(log::verbose) << "Start initialisation.\n";
+        mCRL2log(log::verbose) << "Start initialisation.\n";
         create_initial_partition();                                             ONLY_IF_DEBUG( part_tr.action_block_orig_inert_begin =
                                                                                                                        part_tr.action_block_inert_begin; )
-mCRL2log(log::verbose) << "Start refining\n";
+        end_initial_part = std::clock();
+        mCRL2log(log::verbose) << "Start refining\n";
         refine_partition_until_it_becomes_stable();
     }
 
@@ -3010,8 +3016,8 @@ mCRL2log(log::verbose) << "Start refining\n";
                 "time O(m log n).\n";
         }
 
-sort_transitions(aut.get_transitions(), tgt_lbl_src);
-mCRL2log(log::verbose) << "Carried out sorting\n";
+        sort_transitions(aut.get_transitions(), tgt_lbl_src);
+        mCRL2log(log::verbose) << "Carried out sorting\n";
         // create one block for all states
         bisim_dnj::block_t* B(
                 #ifdef USE_POOL_ALLOCATOR
@@ -3194,7 +3200,7 @@ mCRL2log(log::verbose) << "Carried out sorting\n";
                                                       next_action_label_begin);
                 if (0 != label && aut.num_transitions() < action_label.size())
                 {
-                    mCRL2log(log::verbose) << "Action label "
+                    mCRL2log(log::warning) << "Action label "
                         << pp(aut.action_label(label)) << " has no "
                         "transitions, and the number of action labels exceeds "
                         "the number of transitions. It is not guaranteed that "
@@ -4806,12 +4812,13 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
     {
         // LTSs with 1 state also need to be reduced because some users call
         // bisimulation minimisation just to remove duplicated transitions.
-        mCRL2log(log::verbose) << "There is only 1 state in the LTS. It is "
+        mCRL2log(log::warning) << "There is only 1 state in the LTS. It is "
                 "not guaranteed that branching bisimulation minimisation runs "
                 "in time O(m log n).\n";
     }
     // Line 2.1: Find tau-SCCs and contract each of them to a single state
-mCRL2log(log::verbose) << "Start SCC\n";
+    const std::clock_t start_SCC=std::clock();
+    mCRL2log(log::verbose) << "Start SCC\n";
     if (branching)
     {
         scc_reduce(l, preserve_divergence);
@@ -4819,16 +4826,80 @@ mCRL2log(log::verbose) << "Start SCC\n";
         // finished because scc_reduce() also removes duplicated transitions.
         if (1 >= l.num_states())  return;
     }
-
-mCRL2log(log::verbose) << "Start Partitioning\n";
     // Now apply the branching bisimulation reduction algorithm.  If there
     // are no taus, this will automatically yield strong bisimulation.
+    const std::clock_t start_part=std::clock();
+    mCRL2log(log::verbose) << "Start Partitioning\n";
     bisim_partitioner_dnj<LTS_TYPE> bisim_part(l, branching,
                                                           preserve_divergence);
 
     // Assign the reduced LTS
-mCRL2log(log::verbose) << "Start finalizing\n";
+    const std::clock_t end_part=std::clock();
+    mCRL2log(log::verbose) << "Start finalizing\n";
     bisim_part.finalize_minimized_LTS();
+
+    if (mCRL2logEnabled(log::verbose))
+    {
+        const std::clock_t end_finalizing=std::clock();
+        const int prec=std::lrint(std::log10(CLOCKS_PER_SEC)+0.19897000433602);
+            // For example, if CLOCKS_PER_SEC>=     20: >=2 digits
+            //              If CLOCKS_PER_SEC>=    200: >=3 digits
+            //              If CLOCKS_PER_SEC>=2000000: >=7 digits
+
+        double runtime[5];
+        runtime[0]=(double) (end_finalizing                        -                        start_SCC)/CLOCKS_PER_SEC; // total time
+        runtime[1]=(double) (                                                    start_part-start_SCC)/CLOCKS_PER_SEC;
+        runtime[2]=(double) (                        bisim_part.end_initial_part-start_part          )/CLOCKS_PER_SEC;
+        runtime[3]=(double) (               end_part-bisim_part.end_initial_part                     )/CLOCKS_PER_SEC;
+        runtime[4]=(double) (end_finalizing-end_part                                                 )/CLOCKS_PER_SEC;
+        if (runtime[0]>=60.0)
+        {
+            int min[sizeof(runtime)/sizeof(runtime[0])];
+            for (unsigned i = 0; i < sizeof(runtime)/sizeof(runtime[0]); ++i)
+            {
+                min[i] = trunc(runtime[i] / 60.0);
+                runtime[i] -= 60 * min[i];
+            }
+            if (min[0]>=60)
+            {
+                int h[sizeof(runtime)/sizeof(runtime[0])];
+                for (unsigned i=0; i < sizeof(runtime)/sizeof(runtime[0]); ++i)
+                {
+                    h[i] = min[i] / 60;
+                    min[i] %= 60;
+                }
+                int width = trunc(log10(h[0])) + 1;
+
+                mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
+                    << "Time spent on contracting SCCs: " << std::setw(width) << h[1] << "h " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
+                       "Time spent on initial partition:" << std::setw(width) << h[2] << "h " << std::setw(2) << min[2] << "min " << std::setw(prec+3) << runtime[2] << "s\n"
+                       "Time spent on refining:         " << std::setw(width) << h[3] << "h " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
+                       "Time spent on finalizing:       " << std::setw(width) << h[4] << "h " << std::setw(2) << min[4] << "min " << std::setw(prec+3) << runtime[4] << "s\n"
+                       "Total CPU time:                 " << std::setw(width) << h[0] << "h " << std::setw(2) << min[0] << "min " << std::setw(prec+3) << runtime[0] << "s\n"
+                    << std::defaultfloat;
+            }
+            else
+            {
+                mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
+                    << "Time spent on contracting SCCs: " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
+                       "Time spent on initial partition:" << std::setw(2) << min[2] << "min " << std::setw(prec+3) << runtime[2] << "s\n"
+                       "Time spent on refining:         " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
+                       "Time spent on finalizing:       " << std::setw(2) << min[4] << "min " << std::setw(prec+3) << runtime[4] << "s\n"
+                       "Total CPU time:                 " << std::setw(2) << min[0] << "min " << std::setw(prec+3) << runtime[0] << "s\n"
+                    << std::defaultfloat;
+            }
+        }
+        else
+        {
+            mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
+                << "Time spent on contracting SCCs: " << std::setw(prec+3) << runtime[1] << "s\n"
+                   "Time spent on initial partition:" << std::setw(prec+3) << runtime[2] << "s\n"
+                   "Time spent on refining:         " << std::setw(prec+3) << runtime[3] << "s\n"
+                   "Time spent on finalizing:       " << std::setw(prec+3) << runtime[4] << "s\n"
+                   "Total CPU time:                 " << std::setw(prec+3) << runtime[0] << "s\n"
+                << std::defaultfloat;
+        }
+    }
 }
 
 

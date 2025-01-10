@@ -19,7 +19,6 @@
 
 #include <iomanip> // for std::fixed, std::setprecision(), std::setw()
 #include <ctime> // for std::clock_t, std::clock()
-//#include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/check_complexity.h"
@@ -8941,37 +8940,29 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                 "guaranteed that branching bisimulation minimisation runs in "
                 "time O(m log n).\n";
     }
-
-    const std::clock_t start_SCC=std::clock();
-
     // Line 1.2: Find tau-SCCs and contract each of them to a single state
+    const std::clock_t start_SCC=std::clock();
     mCRL2log(log::verbose) << "Start SCC\n";
     if (branching)
     {
         scc_reduce(l, preserve_divergence);
     }
 
-    const std::clock_t start_part=std::clock();
-
     // Now apply the branching bisimulation reduction algorithm.  If there
     // are no taus, this will automatically yield strong bisimulation.
+    const std::clock_t start_part=std::clock();
     mCRL2log(log::verbose) << "Start Partitioning\n";
     bisim_partitioner_gj<LTS_TYPE> bisim_part(l,branching,preserve_divergence);
 
-    const std::clock_t end_part=std::clock();
-
     // Assign the reduced LTS
+    const std::clock_t end_part=std::clock();
     mCRL2log(log::verbose) << "Start finalizing\n";
     bisim_part.finalize_minimized_LTS();
 
     if (mCRL2logEnabled(log::verbose))
     {
         const std::clock_t end_finalizing=std::clock();
-
-        //auto old_reporting_level=log::logger::get_reporting_level();
-        //log::logger::set_reporting_level(log::verbose);
-
-        const int prec = std::lrint(std::log10(CLOCKS_PER_SEC) + 0.19897000433602);
+        const int prec=std::lrint(std::log10(CLOCKS_PER_SEC)+0.19897000433602);
             // For example, if CLOCKS_PER_SEC>=     20: >=2 digits
             //              If CLOCKS_PER_SEC>=    200: >=3 digits
             //              If CLOCKS_PER_SEC>=2000000: >=7 digits
@@ -9004,7 +8995,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
             if (min[0]>=60)
             {
                 int h[sizeof(runtime)/sizeof(runtime[0])];
-                for (unsigned i = 0; i < sizeof(runtime)/sizeof(runtime[0]); ++i)
+                for (unsigned i=0; i < sizeof(runtime)/sizeof(runtime[0]); ++i)
                 {
                     h[i] = min[i] / 60;
                     min[i] %= 60;
@@ -9040,8 +9031,6 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                    "Total CPU time:                 " << std::setw(prec+3) << runtime[0] << "s\n"
                 << std::defaultfloat;
         }
-
-        //log::logger::set_reporting_level(old_reporting_level);
     }
 }
 
@@ -9126,4 +9115,5 @@ inline bool bisimulation_compare_gj(const LTS_TYPE& l1, const LTS_TYPE& l2,
 } // end namespace lts
 } // end namespace mcrl2
 
+#undef linked_list
 #endif // ifndef LIBLTS_BISIM_GJ_H
