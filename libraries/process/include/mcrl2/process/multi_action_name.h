@@ -20,17 +20,7 @@ namespace mcrl2 {
 namespace process {
 
 /// \brief Represents the name of a multi action
-struct multi_action_name: public std::multiset<core::identifier_string>
-{
-  typedef std::multiset<core::identifier_string> super;
-
-  multi_action_name() = default;
-
-  template <typename InputIterator>
-  multi_action_name(InputIterator first, InputIterator last)
-    : super(first, last)
-  {}
-};
+typedef std::multiset<core::identifier_string> multi_action_name;
 
 /// \brief Represents a set of multi action names
 typedef std::set<multi_action_name> multi_action_name_set;

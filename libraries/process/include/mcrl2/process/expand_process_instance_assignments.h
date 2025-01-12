@@ -28,9 +28,9 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
   using super::apply;
   using super::update;
 
-  const std::vector<process_equation>& equations;
+  const std::map<process_identifier, process_equation>& equations;
 
-  explicit expand_process_instance_assignments_builder(const std::vector<process_equation>& equations_)
+  explicit expand_process_instance_assignments_builder(const std::map<process_identifier, process_equation>& equations_)
     : equations(equations_)
   {}
 
@@ -73,7 +73,7 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
 
 /// \brief Replaces embedded process instances by the right hand sides of the corresponding equations
 inline
-process_expression expand_process_instance_assignments(const process_expression& x, const std::vector<process_equation>& equations)
+process_expression expand_process_instance_assignments(const process_expression& x, const std::map<process_identifier, process_equation>& equations)
 {
   detail::expand_process_instance_assignments_builder f(equations);
   process_expression result;
@@ -83,7 +83,7 @@ process_expression expand_process_instance_assignments(const process_expression&
 
 // Converts a process_instance_assignment into a process_instance, by expanding assignments
 inline
-process_instance expand_assignments(const process::process_instance_assignment& x, const std::vector<process_equation>& equations)
+process_instance expand_assignments(const process::process_instance_assignment& x, const std::map<process_identifier, process_equation>& equations)
 {
   const process_equation& eqn = find_equation(equations, x.identifier());
   data::assignment_sequence_substitution sigma(x.assignments());

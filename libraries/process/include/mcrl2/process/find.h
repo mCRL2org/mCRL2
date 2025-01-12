@@ -286,15 +286,31 @@ std::set<core::identifier_string> find_action_names(const T& x)
 /// \param[in] equations a sequence of process equations
 /// \param[in] id The identifier of the equation that is searched for.
 /// \return The equation with the given process identifier. Throws an exception if no such equation was found.
+/// \note Complexity of this function is O(equations.size()).
 inline
 const process_equation& find_equation(const std::vector<process_equation>& equations, const process_identifier& id)
 {
-  for (const process_equation& equation: equations)
+  const auto it = std::find_if(equations.begin(), equations.end(),
+      [&id](auto equation) { return equation.identifier() == id; });
+  if (it != equations.end())
   {
-    if (equation.identifier() == id)
-    {
-      return equation;
-    }
+    return *it;
+  }
+  throw mcrl2::runtime_error("unknown process identifier " + process::pp(id));
+}
+
+/// \brief Finds an equation that corresponds to a process identifier
+/// \param[in] equations a mapping of identifiers to process equations
+/// \param[in] id The identifier of the equation that is searched for.
+/// \return The equation with the given process identifier. Throws an exception if no such equation was found.
+/// \note Complexity of this function is the complexity of std::map's find()
+inline
+const process_equation& find_equation(const std::map<process_identifier, process_equation>& equations, const process_identifier& id)
+{
+  const auto it = equations.find(id);
+  if (it != equations.end())
+  {
+    return it->second;
   }
   throw mcrl2::runtime_error("unknown process identifier " + process::pp(id));
 }

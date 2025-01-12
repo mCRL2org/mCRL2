@@ -124,6 +124,9 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       desc.add_option("balance-summands",
                       "transform inputs expressions p1 + ... + pn into a balanced tree before "
                       "linearising. Sometimes helpful in preventing stack overflow.");
+      desc.add_option("balance-merge",
+          "transform inputs expressions p1 || ... || pn into a balanced tree before "
+          "linearising. Sometimes helpful in preventing stack overflow.");
     }
 
     void parse_options(const mcrl2::utilities::command_line_parser& parser)
@@ -145,6 +148,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm") ||
                                                         0 < parser.options.count("no-rewrite");
       m_linearisation_options.balance_summands        = 0 < parser.options.count("balance-summands");
+      m_linearisation_options.balance_merge           = 0 < parser.options.count("balance-merge");
 
       m_linearisation_options.lin_method = parser.option_argument_as< mcrl2::lps::t_lin_method >("lin-method");
 
