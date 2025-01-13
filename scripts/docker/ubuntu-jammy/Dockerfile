@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
  libglu1-mesa-dev \
  qt6-base-dev \
 # Packages needed for generating the documentation
-# doxygen \
+ doxygen \
  wget \ 
  python3-pip \
  sphinx-common \
@@ -19,9 +19,6 @@ RUN apt-get update && apt-get install -y \
  texlive-latex-extra \
  texlive-science \
  texlive-pstricks
-
-# Unfortunately the packaged doxygen is too old (1.9.1) and has bugs that affect doxylink, so we install newer binaries
-RUN wget https://www.doxygen.nl/files/doxygen-1.9.7.linux.bin.tar.gz && tar -xf ./doxygen-1.9.7.linux.bin.tar.gz && cd ./doxygen-1.9.7 && make
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt
