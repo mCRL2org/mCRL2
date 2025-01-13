@@ -27,56 +27,65 @@ namespace lps
 
 /**************** allow/block *************************************/
 
+/// Determine if allow_action allows multi_action.
+///
+/// \param allow_action A sorted action_name_multiset a1|...|an
+/// \param multi_action A multiaction b1(d1)|...|bm(dm)
+/// \param termination_action The action that encodes successful termination (used only in debug mode)
+/// \returns n == m and ai == bi for 1 <= i <= n
 inline
-bool allowsingleaction(const process::action_name_multiset& allowaction,
-                       const process::action_list& multiaction)
+bool allow_(const process::action_name_multiset& allow_action,
+            const process::action_list& multi_action,
+            const process::action& termination_action)
 {
   /* The special cases where multiaction==tau and multiaction=={ Terminated } must have been
      dealt with separately. */
-  assert(multiaction.size()!=0 && multiaction != action_list({ terminationAction }));
+  assert(!multi_action.empty());
+  assert(multi_action != process::action_list({ termination_action }));
+  assert(std::is_sorted(allow_action.names().begin(), allow_action.names().end(), action_name_compare()));
+  assert(std::is_sorted(multi_action.begin(), multi_action.end(), action_compare()));
 
-  const core::identifier_string_list& names=allowaction.names();
-  core::identifier_string_list::const_iterator i=names.begin();
-
-  for (process::action_list::const_iterator walker=multiaction.begin();
-       walker!=multiaction.end(); ++walker,++i)
+  if (allow_action.size() != multi_action.size())
   {
-    if (i==names.end())
-    {
-      return false;
-    }
-    if (*i!=walker->label().name())
-    {
-      return false;
-    }
+    return false;
   }
-  return i==names.end();
+
+  const core::identifier_string_list& names=allow_action.names();
+  core::identifier_string_list::const_iterator names_it = names.begin();
+  process::action_list::const_iterator multiaction_it = multi_action.begin();
+
+  while (names_it != names.end())
+  {
+    assert(multiaction_it != multi_action.end());
+    if (*names_it != multiaction_it->label().name())
+    {
+      return false;
+    }
+    ++names_it;
+    ++multiaction_it;
+  }
+
+  return true;
 }
 
-/// \brief determine whether the multiaction has the same labels as the allow action,
-//         in which case true is delivered. If multiaction is the action Terminate,
-//         then true is also returned.
+/// \brief Determine if multi_action is allowed by an allow expression in allow_list
+///
+/// Calculates if the names of the action in multi_action match with an expression in allow_list.
+/// If multi_action is the termination action, or multi_action is the empty multiaction, the result is also true.
 inline
-bool allow_(const process::action_name_multiset_list& allowlist,
-            const process::action_list& multiaction,
-            const process::action termination_action)
+bool allow_(const process::action_name_multiset_list& allow_list,
+            const process::action_list& multi_action,
+            const process::action& termination_action)
 {
-  /* The empty multiaction, i.e. tau, is never blocked by allow */
-  if (multiaction.empty())
+  // The empty multiaction and the termination action can never be blocked by allows.
+  if (multi_action.empty() || multi_action == process::action_list({ termination_action }))
   {
     return true;
   }
 
-  /* The multiaction is equal to the special Terminate action. This action cannot be blocked. */
-  if (multiaction == process::action_list({ termination_action }))
+  for (const process::action_name_multiset& allow_action: allow_list)
   {
-    return true;
-  }
-
-  for (process::action_name_multiset_list::const_iterator i=allowlist.begin();
-       i!=allowlist.end(); ++i)
-  {
-    if (allowsingleaction(*i,multiaction))
+    if (allow_(allow_action, multi_action, termination_action))
     {
       return true;
     }
@@ -84,21 +93,43 @@ bool allow_(const process::action_name_multiset_list& allowlist,
   return false;
 }
 
+/// \brief Calculate if any of the actions in multiaction is blocked by encap_list.
+///
+/// \param encap_list is a list of action_name_multisets of size 1. Its single element contains all the blocked actions.
+/// \param multi_action contains a multiaction a1(d1)|...|an(dn)
+/// \returns true iff
 inline
 bool encap(const process::action_name_multiset_list& encaplist, const process::action_list& multiaction)
 {
-  for (const process::action& a: multiaction)
+  assert(encaplist.size() == 1);
+  assert(std::is_sorted(multiaction.begin(), multiaction.end(), action_compare()));
+
+  const core::identifier_string_list& blocked_actions = encaplist.front().names();
+  assert(std::is_sorted(blocked_actions.begin(), blocked_actions.end(), action_name_compare()));
+
+  core::identifier_string_list::const_iterator blocked_actions_it = blocked_actions.begin();
+  process::action_list::const_iterator multiaction_it = multiaction.begin();
+
+  while (blocked_actions_it != blocked_actions.end() && multiaction_it != multiaction.end())
   {
-    assert(encaplist.size()==1);
-    for (const core::identifier_string& s1: encaplist.front().names())
+    if (*blocked_actions_it == multiaction_it->label().name())
     {
-      const core::identifier_string s2=a.label().name();
-      if (s1==s2)
-      {
-        return true;
-      }
+      return true;
+    }
+
+    if (action_name_compare()(*blocked_actions_it, multiaction_it->label().name()))
+    {
+      ++blocked_actions_it;
+    }
+    else
+    {
+      // The following assertion should hold because blocked_actions_it is not less than or equal to the name
+      // of multiaction_it
+      assert(action_name_compare()(multiaction_it->label().name(), *blocked_actions_it));
+      ++multiaction_it;
     }
   }
+
   return false;
 }
 
