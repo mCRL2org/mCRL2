@@ -45,18 +45,17 @@ bool allow_(const process::action_name_multiset& allow_action,
   assert(std::is_sorted(allow_action.names().begin(), allow_action.names().end(), action_name_compare()));
   assert(std::is_sorted(multi_action.begin(), multi_action.end(), action_compare()));
 
-  if (allow_action.size() != multi_action.size())
+  const core::identifier_string_list& names = allow_action.names();
+  if (names.size() != multi_action.size())
   {
     return false;
   }
 
-  const core::identifier_string_list& names=allow_action.names();
   core::identifier_string_list::const_iterator names_it = names.begin();
   process::action_list::const_iterator multiaction_it = multi_action.begin();
 
   while (names_it != names.end())
   {
-    assert(multiaction_it != multi_action.end());
     if (*names_it != multiaction_it->label().name())
     {
       return false;
@@ -64,6 +63,9 @@ bool allow_(const process::action_name_multiset& allow_action,
     ++names_it;
     ++multiaction_it;
   }
+
+  assert(names_it == names.end());
+  assert(multiaction_it == multi_action.end());
 
   return true;
 }
@@ -175,7 +177,7 @@ void allowblockcomposition(
       for (const stochastic_action_summand& smmnd: sourcesumlist)
       {
         const data::variable_list& sumvars=smmnd.summation_variables();
-        const process::action_list multiaction=smmnd.multi_action().actions();
+        const process::action_list& multiaction=smmnd.multi_action().actions();
         const data::data_expression& actiontime=smmnd.multi_action().time();
         const data::data_expression& condition=smmnd.condition();
 
