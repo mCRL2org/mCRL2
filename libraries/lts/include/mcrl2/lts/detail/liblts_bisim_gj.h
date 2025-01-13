@@ -26,11 +26,6 @@
 #include "mcrl2/lts/detail/simple_list.h"
 #define linked_list simple_list
 
-// If `USE_FOUR_WAY_SPLIT` is defined, then splitting a block will use a
-// four-way split function that can split under a main and a co-splitter at the
-// same time, together with creating the new bottom state block.
-#define USE_FOUR_WAY_SPLIT
-
 namespace mcrl2
 {
 namespace lts
@@ -69,7 +64,6 @@ constexpr transition_index undefined=0;
 constexpr transition_index Rmarked=-1;
 constexpr transition_index Umarked=1;
 
-#ifdef USE_FOUR_WAY_SPLIT
   /// \brief the number of counter values that can be used for one subblock
   /// \details There are three singular values (`undefined`, `marked_MultiSub`,
   /// and `marked_Hit_Main`), and the other values needs to be distributed over
@@ -110,7 +104,6 @@ constexpr transition_index Umarked=1;
     return                                                                      assert(ReachAlw==subblock || MissMain==subblock || XcludeCo==subblock),
            counter-marked(subblock)<marked_range;
   }
-#endif
 
 /// The function clear() takes care that a container frees memory when it is
 /// cleared and it is large.
@@ -267,7 +260,6 @@ class todo_state_vector
     //  return m_vec.back();
     //}
 
-#ifdef USE_FOUR_WAY_SPLIT
     void reserve(std::vector<state_in_block_pointer>::size_type new_cap)
     {
       m_vec.reserve(new_cap);
@@ -290,7 +282,6 @@ class todo_state_vector
     {
       m_vec.insert(m_vec.end(), begin, end);
     }
-#endif
 
     void clear()
     {
@@ -645,19 +636,7 @@ struct block_type
   /// must also be added to the list `m_blocks_with_new_bottom_states`.
   bool contains_new_bottom_states;
 
-#ifndef USE_FOUR_WAY_SPLIT
-  block_type(state_in_block_pointer* beginning_of_states,
-             constellation_type* new_c)
-    : c(new_c),
-      start_bottom_states(beginning_of_states),
-      sta(beginning_of_states),
-      end_states(beginning_of_states),
-      block(),
-      contains_new_bottom_states(false)
-  {}
-#endif
-
-  /// constructor for first block and for four_way_splitB()
+  /// constructor
   block_type(state_in_block_pointer* start_bottom,
              state_in_block_pointer* start_non_bottom,
              state_in_block_pointer* end,
@@ -767,27 +746,11 @@ class bisim_partitioner_gj
   private:
     std::vector<block_type*> m_blocks_with_new_bottom_states;
 
-#ifndef USE_FOUR_WAY_SPLIT
-    /// Below are the two vectors that contain the marked and unmarked states,
-    /// which are internally split in a part for states to be investigated, and
-    /// a part for states that belong definitively to this set.
-    todo_state_vector m_R, m_U;
-    std::vector<state_in_block_pointer> m_U_counter_reset_vector;
-#endif
-
     /// The following variable contains all non-trivial constellations.
     std::vector<constellation_type*> m_non_trivial_constellations;
 
     std::vector<linked_list<BLC_indicators>::iterator>
                                                 m_BLC_indicators_to_be_deleted;
-
-#ifndef USE_FOUR_WAY_SPLIT
-    /// In m_co_splitters_to_be_checked we store pairs (transition,from_block).
-    /// The transition is in an unstable co-splitter that may have no
-    /// corresponding main splitter. In that case it should be made stable.
-    std::vector<std::pair<BLC_list_iterator, block_type*> >
-                                                  m_co_splitters_to_be_checked;
-#endif
 
     /// \brief true iff branching (not strong) bisimulation has been requested
     const bool m_branching;
@@ -2085,96 +2048,6 @@ class bisim_partitioner_gj
                                                                                 #endif
     }
 
-#ifndef USE_FOUR_WAY_SPLIT
-    /// Split the block `B` by moving the elements in R to the front in m_states,
-    /// and add a new element B_new at the end of m_blocks referring to R.
-    /// Adapt B.start_bottom_states, B.sta.rt_non_bottom_states and
-    /// B.end_states, and do the same for B_new.
-    /// returns pointer to the new block
-    template <bool initialisation=false>
-    block_type* split_block_B_into_R_and_BminR(
-        block_type* const B,
-        state_in_block_pointer* first_bottom_state_in_R,
-        state_in_block_pointer* last_bottom_state_in_R,
-        const todo_state_vector& R)
-    {                                                                           assert(B->start_bottom_states<=first_bottom_state_in_R);
-      /* Basic administration. Make a new block and add it to the current    */ assert(first_bottom_state_in_R<=last_bottom_state_in_R);
-      /* constellation.                                                      */ assert(last_bottom_state_in_R<=B->sta.rt_non_bottom_states);
-      constellation_type* const ci=B->c.onstellation;
-      block_type* const B_new=
-                #ifdef USE_POOL_ALLOCATOR
-                    simple_list<BLC_indicators>::get_pool().
-                    template construct<block_type>
-                #else
-                    new block_type
-                #endif
-                                  (B->start_bottom_states, ci);
-      ++no_of_blocks;
-                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                                                                                  B_new->work_counter=B->work_counter;
-                                                                                #endif
-                                                                                assert(m_states_in_blocks.data()<=ci->start_const_states);
-                                                                                assert(ci->start_const_states<ci->end_const_states);
-                                                                                assert(ci->end_const_states<=m_states_in_blocks.data_end());
-      if (ci->start_const_states->ref_state->block==
-            std::prev(ci->end_const_states)->ref_state->block)
-      {                                                                         assert(std::find(m_non_trivial_constellations.begin(),
-        /* This constellation was trivial, as it will be split add it to the */                  m_non_trivial_constellations.end(),
-        /* non-trivial constellations.                                       */                  ci)==m_non_trivial_constellations.end());
-        m_non_trivial_constellations.emplace_back(ci);
-      }                                                                         // The size of the new block is not yet number_of_states_in_block(...)
-                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                                                                                  unsigned char const max_B = check_complexity::log_n -
-                                                                                      check_complexity::ilog2(std::distance(first_bottom_state_in_R,
-      /* Carry out the split.                                                */                                             last_bottom_state_in_R) + R.size());
-                                                                                #endif
-      if (B->start_bottom_states!=first_bottom_state_in_R)
-      {                                                                         assert(first_bottom_state_in_R!=last_bottom_state_in_R);
-        multiple_swap_states_in_states_in_block(
-                B->start_bottom_states, first_bottom_state_in_R,
-                std::distance(first_bottom_state_in_R, last_bottom_state_in_R)
-                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                                                                                  , first_bottom_state_in_R, max_B
-                                                                                #endif
-                );
-        last_bottom_state_in_R = B->start_bottom_states +
-                std::distance(first_bottom_state_in_R, last_bottom_state_in_R);
-        first_bottom_state_in_R = B->start_bottom_states;
-      }                                                                         assert(B_new->start_bottom_states==first_bottom_state_in_R);
-
-      B_new->sta.rt_non_bottom_states=last_bottom_state_in_R;
-      // Update the block pointers for R-bottom states:
-      for (state_in_block_pointer*
-             s_it=first_bottom_state_in_R; s_it<last_bottom_state_in_R; ++s_it)
-      {                                                                         mCRL2complexity(s_it->ref_state, add_work(check_complexity::
-                                                                                                split_block_B_into_R_and_BminR__carry_out_split, max_B), *this);
-                                                                                assert(B==s_it->ref_state->block);
-        s_it->ref_state->block=B_new;                                           assert(s_it->ref_state->ref_states_in_blocks==s_it);
-      }
-      // Now the R bottom states are in the correct position, and we don't have
-      // to look into them any more.
-      B_new->end_states=last_bottom_state_in_R;
-      B->start_bottom_states=last_bottom_state_in_R;
-
-        // Move the non-bottom states to their correct positions:
-        for(state_in_block_pointer s: R)
-        {                                                                       mCRL2complexity(s.ref_state, add_work(check_complexity::
-                                                                                               split_block_B_into_R_and_BminR__carry_out_split, max_B), *this);
-                                                                                assert(B==s.ref_state->block);
-          s.ref_state->block=B_new;
-          state_in_block_pointer* pos=s.ref_state->ref_states_in_blocks;        assert(pos>=B->sta.rt_non_bottom_states); // it's a non-bottom state
-          // pos -> B.start_bottom_states -> B.sta.rt_non_bottom_states -> pos
-          swap_states_in_states_in_block(pos, B->start_bottom_states,
-                                                  B->sta.rt_non_bottom_states);
-          B->sta.rt_non_bottom_states++;
-          B->start_bottom_states++;
-          B_new->end_states++;                                                  assert(B->start_bottom_states<=B->sta.rt_non_bottom_states);
-                                                                                assert(B_new->start_bottom_states<B_new->end_states);
-        }
-      return B_new;
-    }
-#endif
-
     /// \brief Move the content of i1 to i2, i2 to i3 and i3 to i1.
     void swap_three_iterators_and_update_m_transitions(
                                                     const BLC_list_iterator i1,
@@ -2230,25 +2103,8 @@ class bisim_partitioner_gj
                m_transitions[ti].ref_outgoing_transitions->ref.BLC_transitions; assert(old_BLC_block->start_same_BLC <= old_position);
                                                                                 assert(old_position<old_BLC_block->end_same_BLC);
                                                                                 assert(new_BLC_block->end_same_BLC==old_BLC_block->start_same_BLC);
-                                                                                assert(m_transitions[ti].transitions_per_block_to_constellation == old_BLC_block);
-                                                                                assert(ti == *old_position);
-      if (!old_BLC_block->is_stable())
-      {                                                                         assert(old_BLC_block->start_same_BLC<=old_BLC_block->start_marked_BLC);
-                                                                                assert(old_BLC_block->start_marked_BLC<=old_BLC_block->end_same_BLC);
-        if (old_BLC_block->start_marked_BLC<=old_position)
-        {                                                                       assert(m_states[m_aut.get_transitions()[ti].from()].block->
-                                                                                                                                  contains_new_bottom_states ||
-                                                                                       number_of_states_in_block
-                                                                                                     (*m_states[m_aut.get_transitions()[ti].from()].block)<=1);
-          // It's ok to unmark transitions because they start in blocks with
-          // new bottom states, or in blocks with only 1 state.
-          // (However, it may happen that unmarked transitions from other blocks
-          // are moved, even if there are marked transitions in the same BLC set---
-          // namely for the co-splitters. So we can only unmark transitions if
-          // transition ti itself is marked.)
-          old_BLC_block->start_marked_BLC=old_BLC_block->end_same_BLC;
-        }
-      }
+                                                                                assert(m_transitions[ti].transitions_per_block_to_constellation==old_BLC_block);
+                                                                                assert(ti == *old_position);  assert(old_BLC_block->is_stable());
       if (old_position!=old_BLC_block->start_same_BLC)
       {
         std::swap(*old_position,*old_BLC_block->start_same_BLC);
@@ -2292,7 +2148,7 @@ class bisim_partitioner_gj
       block_type* const from_block=m_states[t.from()].block;                    assert(&m_aut.get_transitions()[ti] == &t);
       bool new_block_created = false;                                           assert(from_block->block.to_constellation.check_linked_list());
       linked_list<BLC_indicators>::iterator this_block_to_constellation=
-                      m_transitions[ti].transitions_per_block_to_constellation;
+                      m_transitions[ti].transitions_per_block_to_constellation; assert(this_block_to_constellation->is_stable());
                                                                                 #ifndef NDEBUG
                                                                                   // Check whether this_block_to_constellation is in the corresponding list
                                                                                   for (linked_list<BLC_indicators>::const_iterator i=from_block->block.to_constellation.begin();
@@ -2303,11 +2159,6 @@ class bisim_partitioner_gj
                                                                                 #endif
                                                                                 assert(this_block_to_constellation!=from_block->block.to_constellation.end());
                                                                                 assert(this_block_to_constellation->start_same_BLC <= m_transitions[ti].ref_outgoing_transitions->ref.BLC_transitions);
-                                                                                // the transition is never marked:
-                                                                                assert(from_block->contains_new_bottom_states ||
-                                                                                       number_of_states_in_block(*from_block)<=1 ||
-                                                                                       this_block_to_constellation->is_stable() ||
-                                                                                       m_transitions[ti].ref_outgoing_transitions->ref.BLC_transitions<this_block_to_constellation->start_marked_BLC);
       linked_list<BLC_indicators>::iterator next_block_to_constellation;
       // if this transition is inert, it is inserted in a block in front.
       // Otherwise, it is inserted after the current element in the list.
@@ -2353,8 +2204,7 @@ class bisim_partitioner_gj
         if (next_block_to_constellation==
                                     from_block->block.to_constellation.end() ||
             (first_t=&m_aut.get_transitions()
-                      [*(next_block_to_constellation->start_same_BLC)],
-             assert(m_states[first_t->from()].block==from_block),
+                           [*(next_block_to_constellation->start_same_BLC)],    assert(m_states[first_t->from()].block==from_block),
              m_states[first_t->to()].block!=index_block_B) ||
             label_or_divergence(*first_t)!=label_or_divergence(t))
         {
@@ -2407,12 +2257,7 @@ class bisim_partitioner_gj
     /// This routine cannot be used in the initialisation phase, but only
     /// during refinement.
     ///
-    /// The stability state of old and new BLC set may be different.
-    /// However, the procedure is only called for different stability states
-    /// if `ti` is a constellation-inert transition and some *other*
-    /// constellation-inert transitions have been marked for being no longer
-    /// block-inert.  (So, it will not happen that `ti` is marked and the new
-    /// BLC set is stable.)
+    /// The stability state of old and new BLC set is always the same.
     [[nodiscard]]
     bool swap_in_the_doubly_linked_list_LBC_in_blocks_new_block(
                const transition_index ti,
@@ -2421,74 +2266,41 @@ class bisim_partitioner_gj
     {                                                                           assert(new_BLC_block->end_same_BLC==old_BLC_block->start_same_BLC);
       BLC_list_iterator old_position =
                m_transitions[ti].ref_outgoing_transitions->ref.BLC_transitions; assert(old_BLC_block->start_same_BLC<=old_position);
-                                                                                assert(old_position<old_BLC_block->end_same_BLC);
-                                                                                #ifndef NDEBUG
-                                                                                  if (!old_BLC_block->is_stable())
-                                                                                  {
-                                                                                    assert(old_BLC_block->start_same_BLC<=old_BLC_block->start_marked_BLC);
-                                                                                    assert(old_BLC_block->start_marked_BLC<=old_BLC_block->end_same_BLC);
-                                                                                  }
-                                                                                  if (!new_BLC_block->is_stable())
-                                                                                  {
-                                                                                    assert(new_BLC_block->start_same_BLC<=new_BLC_block->start_marked_BLC);
-                                                                                    assert(new_BLC_block->start_marked_BLC<=new_BLC_block->end_same_BLC);
-                                                                                  }
-                                                                                #endif
+                                                                                assert(old_position<old_BLC_block->end_same_BLC);  assert(ti==*old_position);
                                                                                 assert(m_transitions[ti].transitions_per_block_to_constellation==
                                                                                                                                                 old_BLC_block);
                                                                                 //assert(new block==m_states[m_aut.get_transitions()[ti].from()].block);
-                                                                                assert(ti==*old_position);
-      if (old_BLC_block->is_stable() ||
-          old_position<old_BLC_block->start_marked_BLC)
-      {                                                                         assert(old_BLC_block->start_same_BLC <= old_position);
+      if (old_BLC_block->is_stable())
+      {                                                                         assert(new_BLC_block->is_stable());
 //std::cerr << "Moving unmarked " << m_transitions[*old_position].debug_id(*this);
-        if (new_BLC_block->is_stable())
+        if (old_position!=old_BLC_block->start_same_BLC)
         {
-                                                                                #ifndef NDEBUG
-                                                                                  if (!old_BLC_block->is_stable())
-                                                                                  {
-                                                                                    // different stability status: check that ti is inert
-                                                                                    const transition& t=m_aut.get_transitions()[ti];
-                                                                                    assert(is_inert_during_init(t) &&
-                                                                                           (no_of_constellations<=1 /* i.e. initialisation */ ||
-                                                                                            m_states[t.from()].block->c.onstellation==
-                                                                                                                      m_states[t.to()].block->c.onstellation));
-                                                                                  }
-                                                                                #endif
-          if (old_position!=old_BLC_block->start_same_BLC)
-          {
-            std::swap(*old_position, *old_BLC_block->start_same_BLC);
-            m_transitions[*old_position].ref_outgoing_transitions->
+          std::swap(*old_position, *old_BLC_block->start_same_BLC);
+          m_transitions[*old_position].ref_outgoing_transitions->
                                               ref.BLC_transitions=old_position;
-            m_transitions[*old_BLC_block->start_same_BLC].
-                      ref_outgoing_transitions->ref.BLC_transitions=
+          m_transitions[*old_BLC_block->start_same_BLC].
+                    ref_outgoing_transitions->ref.BLC_transitions=
                                                  old_BLC_block->start_same_BLC;
-          }
-        }
-        else
-        {                                                                       assert(new_BLC_block->start_marked_BLC<=old_BLC_block->start_same_BLC);
-                                                                                #ifndef NDEBUG
-                                                                                  if (old_BLC_block->is_stable())
-                                                                                  {
-                                                                                    // different stability status: check that ti is inert
-                                                                                    const transition& t=m_aut.get_transitions()[ti];
-                                                                                    assert(is_inert_during_init(t) &&
-                                                                                           (/*initialisation ||*/
-                                                                                            m_states[t.from()].block->c.onstellation==
-                                                                                                                      m_states[t.to()].block->c.onstellation));
-                                                                                  }
-                                                                                #endif
-          swap_three_iterators_and_update_m_transitions(old_position,
-             old_BLC_block->start_same_BLC, new_BLC_block->start_marked_BLC++);
         }
       }
       else
-      {                                                                         assert(old_BLC_block->start_marked_BLC <= old_position);
+      {                                                                         assert(!new_BLC_block->is_stable());
+                                                                                assert(new_BLC_block->start_same_BLC<=new_BLC_block->start_marked_BLC);
+                                                                                assert(new_BLC_block->start_marked_BLC<=new_BLC_block->end_same_BLC);
+        if (old_position<old_BLC_block->start_marked_BLC)
+        {                                                                       assert(old_BLC_block->start_marked_BLC<=old_BLC_block->end_same_BLC);
+//std::cerr << "Moving unmarked " << m_transitions[*old_position].debug_id(*this);
+          swap_three_iterators_and_update_m_transitions(old_position,
+               old_BLC_block->start_same_BLC, new_BLC_block->start_marked_BLC);
+          ++new_BLC_block->start_marked_BLC;
+        }
+        else
+        {                                                                       assert(old_BLC_block->start_same_BLC<=old_BLC_block->start_marked_BLC);
 //std::cerr << "Moving marked " << m_transitions[*old_position].debug_id(*this);
-                                                                                assert(old_BLC_block->start_same_BLC <= old_BLC_block->start_marked_BLC);
-                                                                                assert(!new_BLC_block->is_stable());
-        swap_three_iterators_and_update_m_transitions(old_position,
-             old_BLC_block->start_marked_BLC++, old_BLC_block->start_same_BLC);
+          swap_three_iterators_and_update_m_transitions(old_position,
+               old_BLC_block->start_marked_BLC, old_BLC_block->start_same_BLC);
+          ++old_BLC_block->start_marked_BLC;
+        }
       }
       m_transitions[ti].transitions_per_block_to_constellation=new_BLC_block;
       new_BLC_block->end_same_BLC=++old_BLC_block->start_same_BLC;
@@ -2610,220 +2422,151 @@ class bisim_partitioner_gj
           // Default position: at the beginning.
           linked_list<BLC_indicators>::iterator new_position=
                                           new_bi->block.to_constellation.end(); assert(!is_inert_during_init(t)||to_constln!=new_bi->c.onstellation);
-#ifndef USE_FOUR_WAY_SPLIT
-          BLC_list_iterator_or_null old_co_splitter_end=nullptr;
-          if (this_block_to_constellation->is_stable())
-          {
-            if (m_branching)
-            {
-              // We always inserted a new BLC set for the inert transitions,
-              // so we can place the BLC set after that one.
-              new_position=new_bi->block.to_constellation.begin();
-            }
-            // Because the BLC set is stable, one does not need to keep main
-            // splitter and co-splitter together.
-            // If the BLC set becomes empty, one can immediately delete it.
-            old_constellation=null_constellation;
+          if (new_bi->block.to_constellation.empty())
+          {                                                                     assert(!m_branching);
+            /* This is the first transition that is moved.                   */ assert(new_bi->block.to_constellation.end()==new_position);
+//std::cerr << "This is the first transition that is moved.\n";
           }
           else
-#endif
           {
-            if (new_bi->block.to_constellation.empty())
-            {                                                                   assert(!m_branching);
-              /* This is the first transition that is moved. */                 assert(new_bi->block.to_constellation.end()==new_position);
-//std::cerr << "This is the first transition that is moved.\n";
-            }
-            else
-            {
-              // default position: place it at the end of the list
-              new_position=new_bi->block.to_constellation.before_end();         assert(new_bi->block.to_constellation.end()!=new_position);
-            }
-            if (null_constellation!=old_constellation)
-            {
-              if (t_is_inert &&
-                  ((to_constln==new_constellation &&
-                    new_bi->c.onstellation==old_constellation) ||
+            // default position: place it at the end of the list
+            new_position=new_bi->block.to_constellation.before_end();           assert(new_bi->block.to_constellation.end()!=new_position);
+          }
+          if (null_constellation!=old_constellation)
+          {
+            if (t_is_inert &&
+                ((to_constln==new_constellation &&
+                  new_bi->c.onstellation==old_constellation) ||
                       // < The transition goes from the old constellation to
                       // the splitter block and was constellation-inert before.
                       // It is in a main splitter without (unstable)
                       // co-splitter. We do not need to find the co-splitter.
-                   (to_constln==old_constellation &&
-                    new_bi->c.onstellation==new_constellation)))
+                 (to_constln==old_constellation &&
+                  new_bi->c.onstellation==new_constellation)))
                       // < The formerly constellation-inert transition goes
                       // from the new constellation to the old constellation,
                       // it is in a co-splitter without (unstable) main
                       // splitter, and this co-splitter was handled as the
                       // first splitting action.
-              {
-                old_constellation=null_constellation;
+            {
+              old_constellation=null_constellation;
 //std::cerr << (old_constellation==to_constln ? "This transition was constellation-inert earlier, so we do not need to find a main splitter.\n" : "This transition was constellation-inert earlier, so we do not need to find a co-splitter.\n");
-              }
-              else
-              {                                                                 assert(old_constellation!=new_constellation);
-                // The following comments are all formulated for the case that
-                // this_block_to_constellation is a main splitter (except when
-                // indicated explicitly).
-                linked_list<BLC_indicators>::const_iterator old_co_splitter;
-                constellation_type* co_to_constln;
-                if ((old_constellation==to_constln &&
+            }
+            else
+            {                                                                   assert(old_constellation!=new_constellation);
+              // The following comments are all formulated for the case that
+              // this_block_to_constellation is a main splitter (except when
+              // indicated explicitly).
+              linked_list<BLC_indicators>::const_iterator old_co_splitter;
+              constellation_type* co_to_constln;
+              if ((old_constellation==to_constln &&
                      // i.e. `this_block_to_constellation` is a co-splitter
-                     (old_co_splitter=old_bi->block.to_constellation.
+                   (old_co_splitter=old_bi->block.to_constellation.
                                              next(this_block_to_constellation),
-                      co_to_constln=new_constellation,
+                    co_to_constln=new_constellation,
 //(std::cerr << "Transition is originally in a co-splitter; "),
                                                                       true)) ||
-                    (new_constellation==to_constln &&
+                  (new_constellation==to_constln &&
                      // i.e. `this_block_to_constellation` is a main splitter
-                     (old_co_splitter=old_bi->block.to_constellation.
+                   (old_co_splitter=old_bi->block.to_constellation.
                                              prev(this_block_to_constellation),
-                      co_to_constln=old_constellation,
+                    co_to_constln=old_constellation,
 //(std::cerr << "Transition is originally in a main splitter; "),
                                                                         true)))
+              {
+                if (old_bi->block.to_constellation.end()!=old_co_splitter)
                 {
-                  if (old_bi->block.to_constellation.end()!=old_co_splitter)
-                  {
 //std::cerr << (old_constellation == to_constln ? "Current old main splitter candidate: " : "Current old co-splitter candidate: ") << old_co_splitter->debug_id(*this, old_bi);
-                    // If the co-splitter belonging to
-                    // `this_block_to_constellation` exists, then it is
-                    // `old_co_splitter` (but if there is no such co-splitter,
-                    // `old_co_splitter` could be a different main splitter, a
-                    // different co-splitter without main splitter, or a
-                    // completely unrelated splitter).
+                  // If the co-splitter belonging to
+                  // `this_block_to_constellation` exists, then it is
+                  // `old_co_splitter` (but if there is no such co-splitter,
+                  // `old_co_splitter` could be a different main splitter, a
+                  // different co-splitter without main splitter, or a
+                  // completely unrelated splitter).
 
-                    // Try to find out whether there is already a corresponding
-                    // co-splitter in `new_bi->block.to_constellation`
-                    // This co-splitter would be just before `old_co_splitter`
-                    // in `m_BLC_transitions`.
-                    if (new_bi->block.to_constellation.end()!=new_position &&
-                        m_BLC_transitions.data()<
-                                               old_co_splitter->start_same_BLC)
-                        // i.e. this is not the first transition -- neither the
-                        // first to be moved to the new block nor the first in
-                        // m_BLC_transitions
-                    {
-                      // Check the transition in the potential corresponding
-                      // new co-splitter:
-                      const transition_index perhaps_new_co_spl_transition=
+                  // Try to find out whether there is already a corresponding
+                  // co-splitter in `new_bi->block.to_constellation`
+                  // This co-splitter would be just before `old_co_splitter`
+                  // in `m_BLC_transitions`.
+                  if (new_bi->block.to_constellation.end()!=new_position &&
+                      m_BLC_transitions.data()<old_co_splitter->start_same_BLC)
+                      // i.e. this is not the first transition -- neither the
+                      // first to be moved to the new block nor the first in
+                      // m_BLC_transitions
+                  {
+                    // Check the transition in the potential corresponding
+                    // new co-splitter:
+                    const transition_index perhaps_new_co_spl_transition=
                                    *std::prev(old_co_splitter->start_same_BLC);
-                      const transition& perhaps_new_co_spl_t=
+                    const transition& perhaps_new_co_spl_t=
                         m_aut.get_transitions()[perhaps_new_co_spl_transition];
-                      if(new_bi==m_states[perhaps_new_co_spl_t.from()].block &&
-                         a==label_or_divergence(perhaps_new_co_spl_t) &&
-                         co_to_constln==m_states
+                    if(new_bi==m_states[perhaps_new_co_spl_t.from()].block &&
+                       a==label_or_divergence(perhaps_new_co_spl_t) &&
+                       co_to_constln==m_states
                              [perhaps_new_co_spl_t.to()].block->c.onstellation)
-                      {
-                        // `perhaps_new_co_spl_transition` is in the
-                        // corresponding new co-splitter; place the new BLC set
-                        // immediately after this co-splitter in the list
-                        // `new_bi->block.to_constellation`.
-                        new_position=m_transitions
+                    {
+                      // `perhaps_new_co_spl_transition` is in the
+                      // corresponding new co-splitter; place the new BLC set
+                      // immediately after this co-splitter in the list
+                      // `new_bi->block.to_constellation`.
+                      new_position=m_transitions
                                       [perhaps_new_co_spl_transition].
                                         transitions_per_block_to_constellation;
-                        if (old_constellation==to_constln)
-                        {
-                          // (`this_block_to_constellation` was a co-splitter:)
-                          // `perhaps_new_co_spl_transition` is in the new main
-                          // splitter; place the new BLC set immediately before
-                          // this main splitter in the list
-                          // `new_bi->block.to_constellation`.
-                          new_position=new_bi->block.to_constellation.
+                      if (old_constellation==to_constln)
+                      {
+                        // (`this_block_to_constellation` was a co-splitter:)
+                        // `perhaps_new_co_spl_transition` is in the new main
+                        // splitter; place the new BLC set immediately before
+                        // this main splitter in the list
+                        // `new_bi->block.to_constellation`.
+                        new_position=new_bi->block.to_constellation.
                                                             prev(new_position);
 //std::cerr << ". This is a real old main splitter.\n";
-                        }
+                      }
 //else { std::cerr << ". This is a real old co-splitter.\n"; }
                                                                                 #ifndef NDEBUG
-                        /* The new co-splitter was found, and                */   if (old_co_splitter->start_same_BLC<old_co_splitter->end_same_BLC)
-                        /* `old_co_splitter` must have been the old          */   {
-                        /* co-splitter.                                      */     const transition& co_t=m_aut.get_transitions()
-                                                                                                                            [*old_co_splitter->start_same_BLC];
-                        /* Now the new main splitter is about to be created. */     assert(old_bi==m_states[co_t.from()].block ||
-                        /* In this case it is ok to delete                   */            new_bi==m_states[co_t.from()].block);
-                        /* `this_block_to_constellation` when it becomes     */     assert(a==label_or_divergence(co_t));
-                        /* empty; therefore we set `old_constellation` in a  */     assert(co_to_constln==m_states[co_t.to()].block->c.onstellation);
-                        /* way that it's going to delete it immediately:     */   }
+                      /* The new co-splitter was found, and                  */   if (old_co_splitter->start_same_BLC<old_co_splitter->end_same_BLC)
+                      /* `old_co_splitter` must have been the old            */   {
+                      /* co-splitter.                                        */     const transition& co_t=m_aut.get_transitions()
+                                                                                                                          [*old_co_splitter->start_same_BLC];
+                      /* Now the new main splitter is about to be created.   */     assert(old_bi==m_states[co_t.from()].block ||
+                      /* In this case it is ok to delete                     */            new_bi==m_states[co_t.from()].block);
+                      /* `this_block_to_constellation` when it becomes       */     assert(a==label_or_divergence(co_t));
+                      /* empty; therefore we set `old_constellation` in a    */     assert(co_to_constln==m_states[co_t.to()].block->c.onstellation);
+                      /* way that it's going to delete it immediately:       */   }
                                                                                 #endif
-                        old_constellation=null_constellation;
-                        // We should not use `old_constellation` for anything
-                        // else after this point.
-                      }
-#ifdef USE_FOUR_WAY_SPLIT
-//else  {  std::cerr << ". The transition just before it in m_BLC_transitions (" << m_transitions[perhaps_new_co_spl_transition].debug_id_short(*this) << ") does not belong to the new co-splitter.\n";  }
-#else
-                      else if (new_constellation==to_constln)
-                      {
-                        const transition* co_t;
-                        if (old_co_splitter->start_same_BLC<
-                                               old_co_splitter->end_same_BLC &&
-                            (co_t=&m_aut.get_transitions()
-                                          [*old_co_splitter->start_same_BLC],   assert(old_bi==m_states[co_t->from()].block ||
-                                                                                       new_bi==m_states[co_t->from()].block),
-                             a==label_or_divergence(*co_t)) &&
-                            old_constellation==m_states
-                                            [co_t->to()].block->c.onstellation)
-                        {
-                          old_co_splitter_end=old_co_splitter->end_same_BLC;
-                        }
-                        else
-                        {
-                          // As there is no old co-splitter, we do not need to keep an empty old main splitter.
-                          old_constellation=null_constellation;
-                        }
-                      }                                                         else  {  assert(old_constellation==to_constln);  }
-#endif
+                      old_constellation=null_constellation;
+                      // We should not use `old_constellation` for anything
+                      // else after this point.
                     }
-#ifdef USE_FOUR_WAY_SPLIT
+//else  {  std::cerr << ". The transition just before it in m_BLC_transitions (" << m_transitions[perhaps_new_co_spl_transition].debug_id_short(*this) << ") does not belong to the new co-splitter.\n";  }
+                  }
 //else  {  std::cerr << ". This candidate is at the beginning of m_BLC_transitions, or it is the first transition. There is no new co-splitter yet.\n";  }
-#else
-                    else if (new_constellation==to_constln)
-                    {
-                      const transition* co_t;
-                      if (old_co_splitter->start_same_BLC<
-                                               old_co_splitter->end_same_BLC &&
-                          (co_t=&m_aut.get_transitions()
-                                          [*old_co_splitter->start_same_BLC],   assert(old_bi==m_states[co_t->from()].block ||
-                                                                                       new_bi==m_states[co_t->from()].block),
-                           a==label_or_divergence(*co_t)) &&
-                          old_constellation==m_states
-                                            [co_t->to()].block->c.onstellation)
-                      {
-                        old_co_splitter_end=old_co_splitter->end_same_BLC;
-                      }
-                      else
-                      {
-                        // As there is no old co-splitter, we do not need to
-                        // keep an empty old main splitter.
-                        old_constellation=null_constellation;
-                      }
-                    }                                                           else  {  assert(old_constellation==to_constln);  }
-#endif
-                  }
-                  else
-                  {
-                    // this_block_to_constellation is a main splitter
-                    // but it has no corresponding co-splitter.
-                    // If it becomes empty, one can immediately delete it.
-                    old_constellation=null_constellation;
-//std::cerr << (old_constellation == to_constln ? "There is no candidate old main splitter.\n" : "There is no candidate old co-splitter.\n");
-                  }
                 }
                 else
                 {
-                  // this_block_to_constellation is neither a main splitter nor
-                  // a co-splitter.  If it becomes empty, one can immediately
-                  // delete it.
+                  // this_block_to_constellation is a main splitter
+                  // but it has no corresponding co-splitter.
+                  // If it becomes empty, one can immediately delete it.
                   old_constellation=null_constellation;
+//std::cerr << (old_constellation == to_constln ? "There is no candidate old main splitter.\n" : "There is no candidate old co-splitter.\n");
                 }
               }
+              else
+              {
+                // this_block_to_constellation is neither a main splitter nor
+                // a co-splitter.  If it becomes empty, one can immediately
+                // delete it.
+                old_constellation=null_constellation;
+              }
             }
-#ifdef USE_FOUR_WAY_SPLIT
-            else if (this_block_to_constellation->is_stable())
-            {
-              // default position during new bottom splits: at the beginning of
-              // the list (but after the BLC set of inert transitions)
-              new_position=m_branching ? new_bi->block.to_constellation.begin()
-                                       : new_bi->block.to_constellation.end();
-            }
-#endif
+          }
+          else if (this_block_to_constellation->is_stable())
+          {
+            // default position during new bottom splits: at the beginning of
+            // the list (but after the BLC set of inert transitions)
+            new_position=m_branching ? new_bi->block.to_constellation.begin()
+                                     : new_bi->block.to_constellation.end();
           }                                                                     assert(!m_branching || new_bi->block.to_constellation.end()!=new_position);
           const BLC_list_iterator old_BLC_start=this_block_to_constellation->start_same_BLC;
           new_BLC_block=new_bi->block.to_constellation.emplace_after
@@ -2833,31 +2576,6 @@ class bisim_partitioner_gj
                                                                                   new_BLC_block->work_counter=this_block_to_constellation->work_counter;
                                                                                 #endif
           ++no_of_non_constellation_inert_BLC_sets;
-#ifndef USE_FOUR_WAY_SPLIT
-          if (null_constellation!=old_constellation)
-          {
-            // This is a new main splitter without new co-splitter, or a new
-            // co-splitter without new main splitter
-            if (old_constellation==to_constln)
-            {
-              // this is a new co-splitter but we haven't yet found the new
-              // main splitter.  Perhaps we will have to stabilize it later.
-              m_co_splitters_to_be_checked.emplace_back
-                                       (new_BLC_block->start_same_BLC, new_bi);
-              /* We may also have to stabilize the old co-splitter later.    */ assert(m_BLC_transitions.data()<this_block_to_constellation->end_same_BLC);
-              m_co_splitters_to_be_checked.emplace_back
-                (std::prev(this_block_to_constellation->end_same_BLC), old_bi);
-            }
-            else
-            {                                                                   assert(new_constellation==to_constln);
-              /* this is a new main splitter but we haven't yet found the new*/ assert(nullptr!=old_co_splitter_end);
-              /* co-splitter.  Perhaps we will have to stabilize the old     */ assert(m_BLC_transitions.data()<old_co_splitter_end);
-              /* co-splitter later.                                          */ assert(old_co_splitter_end<=m_BLC_transitions.data_end());
-              m_co_splitters_to_be_checked.emplace_back
-                                      (std::prev(old_co_splitter_end), old_bi);
-            }
-          }
-#endif
         }
       }
       const bool last_element_removed=
@@ -2903,7 +2621,6 @@ class bisim_partitioner_gj
       return;
     }
 
-#ifdef USE_FOUR_WAY_SPLIT
     /// \brief reset a range of state counters to `undefined`
     /// \details The function is prepared for a situation when we join the
     /// `block` and `counter` fields together into one `block_plus_counter`.
@@ -2921,690 +2638,6 @@ class bisim_partitioner_gj
         ++begin;
       }
     }
-
-#else
-
-    /// \brief Reset state counters to `undefined`
-    /// \param restrict_to_R  If this is true, it is assumed that `m_U` was empty
-    /// \details `simple_splitB()` and a few other functions set
-    /// `m_states[...].counter` to a defined value; after finishing them, one
-    /// needs to reset it to undefined without touching too many counters.
-    /// This function resets all counters that have been changed back to
-    /// `undefined`.  Changes have been recorded in `m_R` and sometimes in
-    /// `m_U_counter_reset_vector`.
-    void clear_state_counters(bool restrict_to_R=false)
-    {
-      for(const state_in_block_pointer& si: m_R)
-      {                                                                         assert(Rmarked == si.ref_state->counter);
-        // The work in this loop is accounted for by the same action that set
-        // the counter to `Rmarked`
-        si.ref_state->counter=undefined;
-      }
-      if (restrict_to_R)
-      {                                                                         assert(m_U_counter_reset_vector.empty());
-        return;
-      }
-      for(const state_in_block_pointer& si: m_U_counter_reset_vector)
-      {                                                                         assert(undefined!=si.ref_state->counter || m_R.find(si));
-        /* The work in this loop is accounted for by the action that set the */ assert(Rmarked!=si.ref_state->counter);
-        // counter to some defined value (possibly to `Rmarked`, but then it
-        // has already been changed back to `undefined` by the loop above).
-        si.ref_state->counter=undefined;
-      }
-      clear(m_U_counter_reset_vector);
-    }
-
-    /// \brief Split block `B` into the part with a transition in `splitter` and the rest
-    /// \param B                            index of the block that must be split
-    /// \param splitter                     set of transitions used to split `B`
-    /// \param first_unmarked_bottom_state  separates between bottom states of `B` with and without transition in `splitter`
-    /// \param splitter_end_unmarked_BLC    indicates until where in `splitter` unmarked transitions still need to be checked
-    /// \returns the block index of subblock R, the subblock with transitions in `splitter`
-    /// \details The function finds the non-bottom states in block `B` that can
-    /// inertly reach a state with a transition in splitter and splits `B` in R
-    /// and `B`\R.  The complexity is conform to the smaller subblock, either R
-    /// or `B`\R.  The BLC list and bottom states of the subblocks are *not*
-    /// updated.
-    ///
-    /// The function assumes that the sources of *marked* transitions in
-    /// splitter have already been handled: the bottom states are in
-    /// [`B->start_bottom_states`, `first_unmarked_bottom_state`),
-    /// while the non-bottom states are in `m_R`. A split is always needed.
-    /// (Unmarked transitions in the splitter may need to be checked still, but
-    /// they can only add non-bottom states to R.)
-    ///
-    /// Usually `splitter_end_unmarked_BLC==splitter->start_marked_BLC`;
-    /// however, occasionally it is necessary to split using only a subset of
-    /// splitter.
-    /// `splitter_end_unmarked_BLC` can be used to indicate that this is the
-    /// case; the function will only treat
-    /// [`splitter->start_same_BLC`, `splitter_end_unmarked_BLC`) as unmarked
-    /// transitions.
-    template <bool initialisation=false,
-                          class Iterator=linked_list<BLC_indicators>::iterator>
-    block_type* simple_splitB(block_type* const B,
-                  Iterator splitter,
-                  state_in_block_pointer* const first_unmarked_bottom_state,
-                  const BLC_list_iterator_or_null splitter_end_unmarked_BLC,
-                  block_type*& ptr_to_new_block)
-    {
-      typedef enum { initializing, state_checking, aborted,
-                     aborted_after_initialisation,
-                     incoming_inert_transition_checking,
-                     outgoing_action_constellation_check } status_type;         assert(1 < number_of_states_in_block(*B));
-      status_type U_status=state_checking;                                      assert(!B->contains_new_bottom_states);
-      status_type R_status=initializing;                                        assert(m_U.empty());  assert(m_U_counter_reset_vector.empty());
-      BLC_list_iterator M_it;
-      if constexpr (initialisation)
-      {
-        M_it=splitter_end_unmarked_BLC;
-      }
-      else
-      {                                                                         assert(splitter_end_unmarked_BLC<=splitter->end_same_BLC);
-        M_it=splitter->start_same_BLC;                                          assert(splitter_end_unmarked_BLC==splitter->start_marked_BLC ||
-                                                                                       splitter_end_unmarked_BLC==M_it);
-                                                                                assert(m_BLC_transitions.data()<=M_it);  assert(!splitter->is_stable());
-                                                                                assert(splitter->start_same_BLC<splitter->end_same_BLC);
-                                                                                assert(splitter->end_same_BLC<=m_BLC_transitions.data_end());
-                                                                                assert(m_states[m_aut.get_transitions()
-                                                                                                                 [*splitter->start_same_BLC].from()].block==B);
-      }
-      std::vector<transition>::iterator current_U_incoming_transition_iterator;
-      std::vector<transition>::iterator
-                                    current_U_incoming_transition_iterator_end; assert(M_it <= splitter_end_unmarked_BLC);
-      state_in_block_pointer current_U_outgoing_state;
-      outgoing_transitions_it current_U_outgoing_transition_iterator;
-      outgoing_transitions_it current_U_outgoing_transition_iterator_end;
-      std::vector<transition>::iterator current_R_incoming_transition_iterator;
-      state_in_block_pointer* current_R_incoming_bottom_state_iterator=
-                                                        B->start_bottom_states; assert(current_R_incoming_bottom_state_iterator<=first_unmarked_bottom_state);
-      std::vector<transition>::iterator
-                                    current_R_incoming_transition_iterator_end; assert(current_R_incoming_bottom_state_iterator<first_unmarked_bottom_state ||
-                                                                                       !m_R.empty() || M_it<splitter_end_unmarked_BLC);
-      state_in_block_pointer* current_U_incoming_bottom_state_iterator=
-                                                   first_unmarked_bottom_state; assert(current_U_incoming_bottom_state_iterator<B->sta.rt_non_bottom_states);
-      const std::make_signed<state_index>::type max_R_nonbottom_size=
-                    number_of_states_in_block(*B)/2-
-                                    std::distance(B->start_bottom_states,
-                                                  first_unmarked_bottom_state); // can underflow
-      if (max_R_nonbottom_size <
-                  static_cast<std::make_signed<state_index>::type>(m_R.size()))
-      {                                                                         assert(number_of_states_in_block(*B)/2 < std::distance(
-                                                                                      B->start_bottom_states, first_unmarked_bottom_state)+m_R.size());
-        R_status = (M_it == splitter_end_unmarked_BLC)
-                   ? aborted_after_initialisation : aborted;
-      }
-      else
-      {                                                                         assert(number_of_states_in_block(*B)/2 >= std::distance(
-                                                                                      B->start_bottom_states, first_unmarked_bottom_state)+m_R.size());
-        if (B->sta.rt_non_bottom_states==B->end_states)
-        {                                                                       assert(B->start_bottom_states<first_unmarked_bottom_state);
-          /* There are no non-bottom states, hence we do not need to carry */   assert(std::distance(B->start_bottom_states,
-          /* out the tau closure. */                                                                 first_unmarked_bottom_state) <=
-          /* Also, there cannot be any new bottom states. */                          std::distance(first_unmarked_bottom_state, B->sta.rt_non_bottom_states));
-                                                                                assert(m_R.empty()); // m_R.clear(); is superfluous
-                                                                                assert(m_U.empty()); // m_U.clear(); is superfluous;
-                                                                                assert(m_U_counter_reset_vector.empty()); // clear_state_counters(); is superfluous
-          // split_block B into R and B\R.
-          ptr_to_new_block=split_block_B_into_R_and_BminR<initialisation>
-                 (B, B->start_bottom_states, first_unmarked_bottom_state, m_R);
-          return ptr_to_new_block;
-        }
-        else if (M_it==splitter_end_unmarked_BLC)
-        {
-          // There are no more transitions in the splitter whose source states
-          // need to be added to R.                                             //assert(B->start_bottom_states < first_unmarked_bottom_state || !m_R.empty());
-          R_status=state_checking;
-        }
-      }
-      const std::make_signed<state_index>::type max_U_nonbottom_size=
-                  number_of_states_in_block(*B)/2-
-                  std::distance(first_unmarked_bottom_state,
-                                B->sta.rt_non_bottom_states); // can underflow
-      if (max_U_nonbottom_size<0)
-      {                                                                         assert(static_cast<std::make_signed<state_index>::type>
-                                                                                                (number_of_states_in_block(*B)/2) <
-                                                                                std::distance(first_unmarked_bottom_state, B->sta.rt_non_bottom_states));
-        U_status=aborted_after_initialisation;                                  assert(aborted != R_status); assert(aborted_after_initialisation != R_status);
-      }
-      else
-      {                                                                         assert(static_cast<std::make_signed<state_index>::type>
-                                                                                                (number_of_states_in_block(*B)/2) >=
-                                                                                      std::distance(first_unmarked_bottom_state, B->sta.rt_non_bottom_states));
-        if (B->sta.rt_non_bottom_states==B->end_states)
-        {                                                                       assert(first_unmarked_bottom_state<B->sta.rt_non_bottom_states);
-          /* There are no non-bottom states, hence we do not need to carry */   assert(std::distance(first_unmarked_bottom_state,
-          /* out the tau closure.                                          */                        B->sta.rt_non_bottom_states) <=
-          /* Also, there cannot be any new bottom states.                  */              std::distance(B->start_bottom_states, first_unmarked_bottom_state));
-                                                                                assert(m_R.empty()); // m_R.clear(); is superfluous
-                                                                                assert(m_U.empty()); // m_U.clear(); is superfluous;
-                                                                                assert(m_U_counter_reset_vector.empty()); // clear_state_counters(); is superfluous
-          // split_block B into U and B\U.
-          ptr_to_new_block=split_block_B_into_R_and_BminR<initialisation>
-                          (B, first_unmarked_bottom_state, B->end_states, m_U);
-          return B;
-        }
-      }                                                                         assert(B->sta.rt_non_bottom_states<B->end_states);
-      label_index a=null_action;
-      constellation_type* C;
-      if constexpr (!initialisation)
-      {                                                                         assert(splitter->start_same_BLC<splitter->end_same_BLC);
-        const transition& first_t=
-                            m_aut.get_transitions()[*splitter->start_same_BLC];
-        a=label_or_divergence(first_t);
-        C=m_states[first_t.to()].block->c.onstellation;
-      }                                                                         else{assert(state_checking==R_status||aborted_after_initialisation==R_status);}
-                                                                                #ifndef NDEBUG
-                                                                                  if constexpr (!initialisation)
-                                                                                  {
-                                                                                    if (initializing==R_status || aborted==R_status)
-                                                                                    {
-                                                                                      // For constellation-inert splitters (which only happens for the special
-      /* Algorithm 3, line 3.2 left.                                         */       // split to separate new from old bottom states), one has to mark all
-                                                                                      // transitions in the splitter.
-      /* start coroutines. Each co-routine handles one state, and then gives */       assert(!m_aut.is_tau(a) || B->c.onstellation != C);
-      /* control to the other co-routine. The coroutines can be found        */     }
-      /* sequentially below surrounded by a while loop.                      */   }
-                                                                                #endif
-      while (true)
-      {                                                                         assert(U_status!=aborted_after_initialisation ||
-                                                                                       (R_status!=aborted && R_status!=aborted_after_initialisation));
-                                                                                #ifndef NDEBUG
-                                                                                  for(state_in_block_pointer si=state_in_block_pointer(m_states.begin()); si.ref_state<m_states.end(); ++si.ref_state)
-                                                                                  {
-                                                                                    if (si.ref_state->block!=B || 0==si.ref_state->no_of_outgoing_block_inert_transitions)
-                                                                                    {
-                                                                                      assert((initialisation &&
-                                                                                              0!=si.ref_state->no_of_outgoing_block_inert_transitions) ||
-                                                                                             undefined==si.ref_state->counter);
-                                                                                      assert(!m_R.find(si));  assert(!m_U.find(si));
-                                                                                      assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) == m_U_counter_reset_vector.end());
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      switch(si.ref_state->counter)
-                                                                                      {
-                                                                                      case undefined:  assert(!m_U.find(si)); assert(!m_R.find(si));
-                                                                                                       assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) == m_U_counter_reset_vector.end());
-                                                                                                       break;
-                                                                                      case Rmarked:    assert( m_R.find(si)); assert(!m_U.find(si));
-                                                                                                       // It can happen that the state has a tau-transition
-                                                                                                       // to a U-state, then it will be in the
-                                                                                                       // m_U_counter_reset_vector.
-                                                                                                       break;
-                                                                                      case Umarked:    assert(!m_R.find(si)); // It can happen that the state
-                                                                                                                              // is in U or is not in U
-                                                                                                       assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) != m_U_counter_reset_vector.end());
-                                                                                                       break;
-                                                                                      default:         assert(!m_R.find(si)); assert(!m_U.find(si));
-                                                                                                       assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) != m_U_counter_reset_vector.end());
-                                                                                                       break;
-                                                                                      }
-                                                                                    }
-        /* The code for the right co-routine.                                */   }
-                                                                                #endif
-        if (incoming_inert_transition_checking==R_status) // 18178 times (large 1394-fin.lts example: 372431 times)
-        {                                                                       assert(current_R_incoming_transition_iterator <
-                                                                                                                    current_R_incoming_transition_iterator_end);
-                                                                                mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), current_R_incoming_transition_iterator)],
-                                                                                              add_work(check_complexity::simple_splitB_R__handle_transition_to_R_state, 1), *this);
-                                                                                assert(m_aut.is_tau(m_aut_apply_hidden_label_map(current_R_incoming_transition_iterator->label())));
-                                                                                assert(m_states[current_R_incoming_transition_iterator->to()].block==B);
-          const transition& tr=*current_R_incoming_transition_iterator;
-          if (m_states[tr.from()].block==B &&
-              !(m_preserve_divergence && tr.from() == tr.to()))
-          {
-            if (m_states[tr.from()].counter!=Rmarked)
-            {                                                                   assert(!m_R.find(m_states.begin() + tr.from()));
-              m_R.add_todo(m_states.begin() + tr.from());
-              m_states[tr.from()].counter=Rmarked;
-
-              // Algorithm 3, line 3.10 and line 3.11, right.
-              if (m_R.size()>static_cast<state_index>(max_R_nonbottom_size))
-              {                                                                 assert(aborted_after_initialisation!=U_status);
-                R_status=aborted_after_initialisation;
-                goto R_handled_and_is_not_state_checking;
-              }
-            }                                                                   else  {  assert(m_R.find(m_states.begin() + tr.from()));  }
-                                                                                assert(!m_U.find(m_states.begin() + tr.from()));
-          }
-          ++current_R_incoming_transition_iterator;
-          if (current_R_incoming_transition_iterator!=
-                                  current_R_incoming_transition_iterator_end &&
-              m_aut.is_tau(m_aut_apply_hidden_label_map
-                            (current_R_incoming_transition_iterator->label())))
-          {
-            goto R_handled_and_is_not_state_checking;
-          }
-          R_status=state_checking;
-        }
-        else if (state_checking==R_status) // 18014 times (large 1394-fin.lts example: 331708 times)
-        {
-          const state_in_block_pointer s=
-                  (current_R_incoming_bottom_state_iterator<
-                                                    first_unmarked_bottom_state
-                                  ? *current_R_incoming_bottom_state_iterator++
-                                  : m_R.move_from_todo());                      mCRL2complexity(s.ref_state, add_work(check_complexity::simple_splitB_R__find_predecessors, 1), *this);
-                                                                                assert(s.ref_state->block==B);
-          if (std::next(s.ref_state)==m_states.end())
-          {
-            current_R_incoming_transition_iterator_end=
-                                                 m_aut.get_transitions().end();
-          }
-          else
-          {
-            current_R_incoming_transition_iterator_end=
-                            std::next(s.ref_state)->start_incoming_transitions;
-          }
-          current_R_incoming_transition_iterator=
-                                       s.ref_state->start_incoming_transitions;
-          if (current_R_incoming_transition_iterator!=
-                                  current_R_incoming_transition_iterator_end &&
-              m_aut.is_tau(m_aut_apply_hidden_label_map
-                            (current_R_incoming_transition_iterator->label())))
-          {
-            R_status=incoming_inert_transition_checking;
-            goto R_handled_and_is_not_state_checking;
-          }
-        }
-        else if (initializing!=R_status)
-        {                                                                       assert(aborted_after_initialisation==R_status || // 10280 times (large 1394-fin.lts example: 550 times)
-                                                                                       aborted==R_status); // 663 times (large 1394-fin.lts example: 584 times)
-          goto R_handled_and_is_not_state_checking;
-        }
-        else // initializing==R_status: 2742 times (large 1394-fin.lts example: 1200 times)
-        {                                                                       assert(M_it<splitter_end_unmarked_BLC);
-            // Algorithm 3, line 3.3, right.
-          const state_in_block_pointer
-                    si(m_states.begin()+m_aut.get_transitions()[*M_it].from()); mCRL2complexity(&m_transitions[*M_it], add_work(check_complexity::
-                                                                                                   simple_splitB_R__handle_transition_from_R_state, 1), *this);
-                                                                                assert(si.ref_state->block==B);
-                                                                                assert(!is_inert_during_init(m_aut.get_transitions()[*M_it]) ||
-                                                                                       B->c.onstellation!=
-                                                                                          m_states[m_aut.get_transitions()[*M_it].to()].block->c.onstellation);
-          ++M_it;
-          if (0==si.ref_state->no_of_outgoing_block_inert_transitions)
-          {                                                                     assert(B->start_bottom_states<=si.ref_state->ref_states_in_blocks);
-            /* The state is a bottom state, it should be in R already */        assert(si.ref_state->ref_states_in_blocks<first_unmarked_bottom_state);
-                                                                                assert(!m_R.find(si));
-          }
-          else if (si.ref_state->counter!=Rmarked)
-          {                                                                     assert(B->sta.rt_non_bottom_states<=si.ref_state->ref_states_in_blocks);
-            /* The state is a nonbottom state that is not yet in R */           assert(si.ref_state->ref_states_in_blocks<B->end_states);
-            m_R.add_todo(si);
-            si.ref_state->counter=Rmarked;
-            if (m_R.size()>static_cast<state_index>(max_R_nonbottom_size))
-            {                                                                   assert(aborted_after_initialisation!=U_status);
-              R_status=aborted;
-              goto R_handled_and_is_not_state_checking;
-            }
-          }                                                                     else  {  assert(m_R.find(si));  }
-                                                                                assert(!m_U.find(si));
-          if (M_it!=splitter_end_unmarked_BLC)
-          {
-            goto R_handled_and_is_not_state_checking;
-          }                                                                     assert(B->sta.rt_non_bottom_states<B->end_states);
-          R_status=state_checking;
-        }                                                                       assert(state_checking==R_status);
-        if (current_R_incoming_bottom_state_iterator==
-                            first_unmarked_bottom_state && m_R.todo_is_empty())
-        {                                                                       assert(0 < std::distance(B->start_bottom_states,
-                                                                                                                    first_unmarked_bottom_state) + m_R.size());
-          /* split_block B into R and B\R. */                                   assert(std::distance(B->start_bottom_states, first_unmarked_bottom_state) +
-                                                                                                                m_R.size() <= number_of_states_in_block(*B)/2);
-          ptr_to_new_block=split_block_B_into_R_and_BminR
-             <initialisation>(B, B->start_bottom_states,
-                                    first_unmarked_bottom_state, m_R);
-          clear_state_counters();
-          m_R.clear();
-          m_U.clear();
-          return ptr_to_new_block;
-        }
-    R_handled_and_is_not_state_checking:                                        assert(state_checking!=R_status ||
-                                                                                       current_R_incoming_bottom_state_iterator!=first_unmarked_bottom_state ||
-                                                                                       !m_R.todo_is_empty());
-                                                                                #ifndef NDEBUG
-                                                                                  for (state_in_block_pointer si=state_in_block_pointer(m_states.begin());
-                                                                                                                   si.ref_state<m_states.end(); ++si.ref_state)
-                                                                                  {
-                                                                                    if (si.ref_state->block!=B ||
-                                                                                        0==si.ref_state->no_of_outgoing_block_inert_transitions)
-                                                                                    {
-                                                                                      assert((initialisation &&
-                                                                                              0!=si.ref_state->no_of_outgoing_block_inert_transitions) ||
-                                                                                             undefined==si.ref_state->counter);
-                                                                                      assert(!m_R.find(si));  assert(!m_U.find(si));
-                                                                                      assert(std::find(m_U_counter_reset_vector.begin(),
-                                                                                          m_U_counter_reset_vector.end(), si)==m_U_counter_reset_vector.end());
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                      switch(si.ref_state->counter)
-                                                                                      {
-                                                                                      case undefined:  assert(!m_U.find(si)); assert(!m_R.find(si));
-                                                                                                       assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) == m_U_counter_reset_vector.end());
-                                                                                                       break;
-                                                                                      case Rmarked:    assert( m_R.find(si)); assert(!m_U.find(si));
-                                                                                                       // It can happen that the state has a tau-transition
-                                                                                                       // to a U-state, then it will be in the
-                                                                                                       // m_U_counter_reset_vector.
-                                                                                                       break;
-                                                                                      case Umarked:    assert(!m_R.find(si)); // It can happen that the state
-                                                                                                                              // is in U or is not in U
-                                                                                                       assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) != m_U_counter_reset_vector.end());
-                                                                                                       break;
-                                                                                      default:         assert(!m_R.find(si)); assert(!m_U.find(si));
-                                                                                                       assert(std::find(m_U_counter_reset_vector.begin(), m_U_counter_reset_vector.end(), si) != m_U_counter_reset_vector.end());
-                                                                                                       break;
-                                                                                      }
-                                                                                    }
-                                                                                  }
-                                                                                #endif
-        // The code for the left co-routine.
-        if (incoming_inert_transition_checking==U_status) // 20299 times (large 1394-fin.lts example: 360327 times)
-        {                                                                       assert(current_U_incoming_transition_iterator<
-                                                                                                                   current_U_incoming_transition_iterator_end);
-            /* Algorithm 3, line 3.8, left.                                  */ assert(m_aut.is_tau(m_aut_apply_hidden_label_map
-                                                                                                           (current_U_incoming_transition_iterator->label())));
-            /* Check one incoming transition.                                */ mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(),
-            /* Algorithm 3, line 3.12, left.                                 */                                       current_U_incoming_transition_iterator)],
-                                                                                                add_work(check_complexity::
-                                                                                                     simple_splitB_U__handle_transition_to_U_state, 1), *this);
-          current_U_outgoing_state=state_in_block_pointer(m_states.begin()+
-                               current_U_incoming_transition_iterator->from()); assert(m_states[current_U_incoming_transition_iterator->to()].block==B);
-          current_U_incoming_transition_iterator++;
-          if (current_U_outgoing_state.ref_state->block==B &&
-              !(m_preserve_divergence &&
-                std::prev(current_U_incoming_transition_iterator)->from()==
-                std::prev(current_U_incoming_transition_iterator)->to()))
-          {                                                                     assert(!m_U.find(current_U_outgoing_state));
-            if (current_U_outgoing_state.ref_state->counter!=Rmarked)
-            {
-              if (current_U_outgoing_state.ref_state->counter==undefined)
-              {
-                  // Algorithm 3, line 3.13, left.
-                  // Algorithm 3, line 3.15 and 3.18, left.
-                current_U_outgoing_state.ref_state->counter=Umarked-1+
-                            current_U_outgoing_state.ref_state->
-                                        no_of_outgoing_block_inert_transitions;
-                m_U_counter_reset_vector.push_back(current_U_outgoing_state);
-              }
-              else
-              {                                                                 assert(std::find(m_U_counter_reset_vector.begin(),
-                                                                                                 m_U_counter_reset_vector.end(),
-                                                                                                 current_U_outgoing_state) != m_U_counter_reset_vector.end());
-                /* Algorithm 3, line 3.18, left. */                             assert(current_U_outgoing_state.ref_state->counter>Umarked);
-                current_U_outgoing_state.ref_state->counter--;
-              }
-                // Algorithm 3, line 3.19, left.
-              if (current_U_outgoing_state.ref_state->counter==Umarked)
-              {
-                if (initializing==R_status || aborted==R_status)
-                {
-                  // Start searching for an outgoing transition with action a
-                  // to constellation C.
-                  current_U_outgoing_transition_iterator=
-                              current_U_outgoing_state.ref_state->
-                                                    start_outgoing_transitions; assert(m_outgoing_transitions.begin()<=current_U_outgoing_transition_iterator);
-                                                                                assert(current_U_outgoing_transition_iterator<m_outgoing_transitions.end());
-                  current_U_outgoing_transition_iterator_end=
-                      (std::next(current_U_outgoing_state.ref_state)>=
-                                                                m_states.end()
-                          ? m_outgoing_transitions.end()
-                          : std::next(current_U_outgoing_state.ref_state)->
-                                                   start_outgoing_transitions); assert(current_U_outgoing_transition_iterator<
-                                                                                                                    current_U_outgoing_transition_iterator_end);
-                                                                                assert(m_states.begin()+m_aut.get_transitions()[*current_U_outgoing_transition_iterator->ref.BLC_transitions].from()==current_U_outgoing_state.ref_state);
-                  U_status=outgoing_action_constellation_check;
-                  goto U_handled_and_is_not_state_checking;
-                }
-                    // The state can be added to U_todo immediately.
-                                                                                #ifndef NDEBUG
-                                                                                  if constexpr (!initialisation)
-                                                                                  {
-                                                                                    // check that the state has no transition in the splitter
-                                                                                    const outgoing_transitions_it out_it_end =
-                                                                                          std::next(current_U_outgoing_state.ref_state)>=m_states.end()
-                                                                                                ? m_outgoing_transitions.end()
-                                                                                                : std::next(current_U_outgoing_state.ref_state)->
-                                                                                                                                    start_outgoing_transitions;
-                                                                                    for (outgoing_transitions_it out_it=current_U_outgoing_state.ref_state->
-                                                                                                                                    start_outgoing_transitions;
-                                                                                             out_it<out_it_end; ++out_it)
-                                                                                    {
-                                                                                      assert(m_outgoing_transitions.begin()<=out_it);
-                                                                                      assert(out_it<m_outgoing_transitions.end());
-                                                                                      assert(m_BLC_transitions.data()<=out_it->ref.BLC_transitions);
-                                                                                      assert(out_it->ref.BLC_transitions<m_BLC_transitions.data_end());
-                                                                                      /* assert(0<=*out_it->ref.BLC_transitions); Always true */
-                                                                                      assert(*out_it->ref.BLC_transitions<m_aut.num_transitions());
-                                                                                      assert(m_transitions[*out_it->ref.BLC_transitions].ref_outgoing_transitions==out_it);
-                                                                                      const transition& t=m_aut.get_transitions()[*out_it->ref.BLC_transitions];
-                                                                                      assert(m_states.begin()+t.from()==current_U_outgoing_state.ref_state);
-                                                                                      if (a==label_or_divergence(t) &&
-                                                                                          C==m_states[t.to()].block->c.onstellation)
-                                                                                      {
-                                                                                            // The transition is in the splitter, so it must be in the part of the splitter that is disregarded.
-                                                                                        assert(out_it->ref.BLC_transitions>=splitter_end_unmarked_BLC);
-                                                                                        assert(splitter->start_same_BLC<=out_it->ref.BLC_transitions);
-                                                                                        assert(out_it->ref.BLC_transitions<splitter->end_same_BLC);
-                                                                                      }
-                                                                                    }
-                                                                                  }
-                                                                                #endif
-                m_U.add_todo(current_U_outgoing_state);
-                    // Algorithm 3, line 3.10 and line 3.11 left.
-                if (m_U.size()>static_cast<state_index>(max_U_nonbottom_size))
-                {                                                               assert(aborted!=R_status); assert(aborted_after_initialisation!=R_status);
-                  U_status=aborted_after_initialisation;
-                  goto U_handled_and_is_not_state_checking;
-                }
-              }
-            }                                                                   else  {  assert(m_R.find(current_U_outgoing_state));  }
-          }
-          if (current_U_incoming_transition_iterator!=
-                                  current_U_incoming_transition_iterator_end &&
-                m_aut.is_tau(m_aut_apply_hidden_label_map(
-                             current_U_incoming_transition_iterator->label())))
-          {                                                                     assert(incoming_inert_transition_checking==U_status);
-            goto U_handled_and_is_not_state_checking;
-          }
-          U_status=state_checking;
-        }
-        else if (state_checking==U_status) // 18920 times (large 1394-fin.lts example: 340893 times)
-        {
-            // Algorithm 3, line 3.23 and line 3.24, left.
-          const state_in_block_pointer s=
-                          (current_U_incoming_bottom_state_iterator<
-                                                    B->sta.rt_non_bottom_states
-                               ? *current_U_incoming_bottom_state_iterator++
-                               : m_U.move_from_todo());                         assert(!m_R.find(s));
-                                                                                mCRL2complexity(s.ref_state, add_work(check_complexity::simple_splitB_U__find_predecessors, 1), *this);
-          current_U_incoming_transition_iterator=
-                                       s.ref_state->start_incoming_transitions;
-          current_U_incoming_transition_iterator_end=
-                        (std::next(s.ref_state)>=m_states.end()
-                         ? m_aut.get_transitions().end()
-                         : std::next(s.ref_state)->start_incoming_transitions);
-          if (current_U_incoming_transition_iterator!=
-                                  current_U_incoming_transition_iterator_end &&
-              m_aut.is_tau(m_aut_apply_hidden_label_map(
-                             current_U_incoming_transition_iterator->label())))
-          {
-            U_status=incoming_inert_transition_checking;
-            goto U_handled_and_is_not_state_checking;
-          }
-        }
-        else if (initialisation ||
-                 aborted_after_initialisation==U_status) // 6284 times (large 1394-fin.lts example: 2500 times)
-        {                                                                       assert(aborted_after_initialisation==U_status);
-          goto U_handled_and_is_not_state_checking;
-        }
-        else if constexpr (!initialisation) // the condition holds always
-        {                                                                       assert(outgoing_action_constellation_check==U_status); // 911 times (large 1394-fin.lts example: 912 times)
-                                                                                assert(current_U_outgoing_transition_iterator!=
-                                                                                                                   current_U_outgoing_transition_iterator_end);
-                                                                                  // will only be used if the transitions are not constellation-inert:
-                                                                                assert(!m_aut.is_tau(a) || B->c.onstellation!=C);
-                                                                                assert(splitter_end_unmarked_BLC==splitter->start_marked_BLC);
-                                                                                mCRL2complexity((&m_transitions[*current_U_outgoing_transition_iterator->ref.BLC_transitions]), add_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, 1), *this);
-                                                                                #ifndef NDEBUG
-                                                                                  // This is one step in the coroutine, so we should assign the work to exactly one transition.
-                                                                                  // But to make sure, we also mark the other transitions that we skipped in the optimisation.
-                                                                                  for (outgoing_transitions_it out_it=current_U_outgoing_transition_iterator; out_it<current_U_outgoing_transition_iterator->start_same_saC; )
-                                                                                  {
-                                                                                    ++out_it;
-                                                                                    mCRL2complexity(&m_transitions[*out_it->ref.BLC_transitions], add_work_notemporary(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, 1), *this);
-                                                                                  }
-                                                                                #endif
-          const transition& t_local=m_aut.get_transitions()
-                [*current_U_outgoing_transition_iterator->ref.BLC_transitions];
-          current_U_outgoing_transition_iterator= // This is an optimisation.
-                        current_U_outgoing_transition_iterator->start_same_saC;
-          ++current_U_outgoing_transition_iterator;                             assert(m_states.begin()+t_local.from()==current_U_outgoing_state.ref_state);
-                                                                                assert(m_branching);
-          if (m_states[t_local.to()].block->c.onstellation==C &&
-              label_or_divergence(t_local) == a)
-          {
-                // This state must be blocked.
-          }
-          else if (current_U_outgoing_transition_iterator==
-                                    current_U_outgoing_transition_iterator_end)
-          {                                                                     assert(!m_U.find(current_U_outgoing_state));
-            m_U.add_todo(current_U_outgoing_state);
-              // Algorithm 3, line 3.10 and line 3.11 left.
-            if (m_U.size()>static_cast<state_index>(max_U_nonbottom_size))
-            {                                                                   assert(aborted!=R_status); assert(aborted_after_initialisation!=R_status);
-              U_status=aborted_after_initialisation;
-              goto U_handled_and_is_not_state_checking;
-            }
-          }
-          else
-          {
-            goto U_handled_and_is_not_state_checking;
-          }
-
-          if (current_U_incoming_transition_iterator!=
-                                  current_U_incoming_transition_iterator_end &&
-              m_aut.is_tau(m_aut_apply_hidden_label_map(
-                             current_U_incoming_transition_iterator->label())))
-          {
-            U_status = incoming_inert_transition_checking;
-            goto U_handled_and_is_not_state_checking;
-          }
-          U_status=state_checking;
-        }                                                                       else  {  assert(0);  }
-                                                                                assert(state_checking==U_status);
-        if (current_U_incoming_bottom_state_iterator==
-                            B->sta.rt_non_bottom_states && m_U.todo_is_empty())
-        {                                                                       assert(0 < std::distance(first_unmarked_bottom_state,
-          /* split_block B into U and B\U.                                   */                                     B->sta.rt_non_bottom_states) + m_U.size());
-                                                                                assert(std::distance(first_unmarked_bottom_state, B->sta.rt_non_bottom_states)+
-                                                                                                                 m_U.size() <= number_of_states_in_block(*B)/2);
-          ptr_to_new_block=split_block_B_into_R_and_BminR<initialisation>
-            (B, first_unmarked_bottom_state, B->sta.rt_non_bottom_states, m_U);
-          clear_state_counters();
-          m_R.clear();
-          m_U.clear();
-          return B;
-        }
-    U_handled_and_is_not_state_checking:                                        assert(state_checking!=U_status ||
-                                                                                       current_U_incoming_bottom_state_iterator!=B->sta.rt_non_bottom_states ||
-                                                                                       !m_U.todo_is_empty());
-      }                                                                         assert(0);
-    }
-
-    // Mark all states that are sources of the marked transitions in splitter
-    // and move them to the beginning.
-    // (Marking of bottom states is done by moving them to the beginning of the
-    // bottom states. Marking of non-bottom states is done by adding them to m_R
-    // and setting m_states[*].counter = Rmarked.)
-    // Also make the splitter stable and move it to the beginning of the respective
-    // list of BLC sets.
-    // If all bottom states are marked, reset markers and m_R.
-    // Otherwise, if not all
-    // bottom states are touched, leave the marked non-bottom states in m_R and leave
-    // the markers in m_states[*].counter in place.
-    // The marked bottom states are moved to the front in m_states_in_blocks and
-    // the return value indicates the position (in m_states_in_blocks)
-    // of the first non-marked bottom state.
-    [[nodiscard]]
-    state_in_block_pointer*
-    not_all_bottom_states_are_touched(
-            block_type* const bi,
-            linked_list<BLC_indicators>::iterator splitter
-                                                                                #ifndef NDEBUG
-                                                                                  , const BLC_list_const_iterator splitter_end_unmarked_BLC
-                                                                                    // = splitter->start_marked_BLC -- this default argument is not allowed
-                                                                                #endif
-            )
-    {                                                                           assert(!splitter->is_stable());
-                                                                                assert(bi==
-                                                                                    m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].block);
-                                                                                assert(splitter_end_unmarked_BLC<=splitter->start_marked_BLC);
-      block_type& B=*bi;                                                        assert(m_R.empty());  assert(m_U.empty());
-      state_in_block_pointer*first_unmarked_bottom_state=B.start_bottom_states; assert(1 < number_of_states_in_block(B));
-      // Now go through the marked transitions in detail:                       // If the above assertion is false, one can just: return B.end_states;
-      BLC_list_iterator marked_t_it = splitter->start_marked_BLC;               assert(!B.contains_new_bottom_states);
-      for(; marked_t_it<splitter->end_same_BLC; ++marked_t_it)
-      {
-        const transition& t = m_aut.get_transitions()[*marked_t_it];            // mCRL2complexity(&m_transitions[*marked_t_it], add_work(...), *this);
-        const state_in_block_pointer s(m_states.begin()+t.from());                  // not needed as this work can be attributed to marking of the transition
-        state_in_block_pointer* const pos_s=s.ref_state->ref_states_in_blocks;  assert(B.start_bottom_states<=pos_s);  assert(pos_s<B.end_states);
-        if (first_unmarked_bottom_state<=pos_s)
-        {
-          if (0==s.ref_state->no_of_outgoing_block_inert_transitions)
-          {                                                                     assert(pos_s<B.sta.rt_non_bottom_states);
-            swap_states_in_states_in_block(first_unmarked_bottom_state, pos_s); assert(undefined==s.ref_state->counter);
-            first_unmarked_bottom_state++;
-          }
-          else if (Rmarked!=s.ref_state->counter)
-          {                                                                     assert(B.sta.rt_non_bottom_states<=pos_s);
-            m_R.add_todo(s);                                                    assert(undefined==s.ref_state->counter);
-            s.ref_state->counter=Rmarked;
-          }
-        }
-      }
-                                                                                #ifndef NDEBUG
-                                                                                  // ensure that the unmarked transitions do not add any bottom states.
-                                                                                  assert(splitter->start_same_BLC <= splitter_end_unmarked_BLC);
-                                                                                  for(BLC_list_const_iterator i = splitter->start_same_BLC; i < splitter_end_unmarked_BLC; ++i)
-                                                                                  {
-                                                                                    assert(splitter_end_unmarked_BLC == splitter->start_marked_BLC);
-                                                                                    const transition& t = m_aut.get_transitions()[*i];
-                                                                                    const state_in_block_pointer s(m_states.begin()+t.from());
-                                                                                    const state_in_block_pointer*const pos_s=s.ref_state->ref_states_in_blocks;
-                                                                                    assert(s.ref_state->block == bi);  assert(*pos_s==s);
-                                                                                    assert(B.start_bottom_states <= pos_s);  assert(pos_s < B.end_states);
-                                                                                    if (0==s.ref_state->no_of_outgoing_block_inert_transitions) {
-                                                                                      // State s is a bottom state. It should already have been marked.
-                                                                                      assert(pos_s<first_unmarked_bottom_state);
-                                                                                    } else {
-                                                                                      assert(B.sta.rt_non_bottom_states <= pos_s);
-                                                                                    }
-                                                                                  }
-                                                                                #endif
-      if (first_unmarked_bottom_state==B.sta.rt_non_bottom_states)
-      {
-        // All bottom states are marked. No splitting is possible. Reset m_R,
-        // m_states[s].counter for s in m_R.
-        clear_state_counters(true);
-        m_R.clear();
-      }
-      return first_unmarked_bottom_state;
-    }
-
-    /// \brief Make the transition `t` non-block-inert.
-    /// \details The transition must go from one block to another but it cannot
-    /// be constellation-inert yet.
-    void make_transition_non_block_inert(const transition& t)
-    {                                                                           assert(is_inert_during_init(t));
-                                                                                assert(m_states[t.to()].block!=m_states[t.from()].block);
-      m_states[t.from()].no_of_outgoing_block_inert_transitions--;              assert(no_of_constellations<=1 /* initialisation */ ||
-                                                                                       m_states[t.to()].block->c.onstellation ==
-                                                                                                                     m_states[t.from()].block->c.onstellation);
-    }
-#endif
 
     /// \brief Moves the former non-bottom state `si` to the bottom states
     /// \details The block of si is not yet inserted into the set of blocks
@@ -3647,684 +2680,6 @@ class bisim_partitioner_gj
         btc.splice_to_after(move_splitter_after, btc, splitter);
       }
     }
-
-#ifndef USE_FOUR_WAY_SPLIT
-    /// \brief determines the target constellation of a BLC set
-    /// \details needed because during initialisation, `splitter` may be of a
-    /// different type without a field `start_same_BLC`.
-    template<bool initialisation, class Iterator>
-    inline constellation_type* target_constellation(Iterator splitter) const
-    {
-      if constexpr (initialisation)
-      {                                                                         assert(0);
-        return nullptr;
-      }
-      else
-      {
-        return m_states[m_aut.get_transitions()
-                       [*splitter->start_same_BLC].to()].block->c.onstellation;
-      }
-    }
-
-    /// \brief Split block `B` into states with a transition in `splitter` (and their tau-predecessors) and other states
-    /// \param B                            block that is split
-    /// \param splitter                     BLC set that contains the relevant transitions from `B`
-    /// \param first_unmarked_bottom_state  bottom states [`B->start_bottom`, `first_unmarked_bottom_state`) have transitions in `splitter`
-    /// \param splitter_end_unmarked_BLC    transitions [`splitter->start_same_BLC`, `splitter_end_unmarked_BLC`) still need to be considered
-    /// \param old_constellation            if this is a main- or co-split, this is the target constellation of the co-split
-    /// \param split_off_new_bottom_states  true if new bottom states need to be separated further
-    /// \returns index of the subblock containing states with transitions in `splitter`
-    /// \details This function assumes that block `B` has already been prepared
-    /// by `not_all_bottom_states_are_touched()` (namely, bottom states are
-    /// already separated and non-bottom states with a marked transition in
-    /// `splitter` are in `m_R`), and that a split is necessary.  The split is
-    /// executed in time O(min(|R|,|U|).
-    ///
-    /// The splitter is marked as stable and moved to a suitable position at or
-    /// near the beginning of the list of BLC sets.
-    /// (If `!split_off_new_bottom_states`, it was already the first BLC set.)
-    /// This means that the order of main splitter/co-splitter is not
-    /// maintained; the recommended course of actions for the caller is:
-    /// first remember in which slice of `m_BLC_transitions` the co-splitter is
-    /// stored, then call `splitB()`, then recover the co-splitter from this
-    /// slice.  (The co-splitter part that starts in the U-subblock is actually
-    /// already stable and just needs to be marked so; the part that starts in
-    /// the R-subblock may require another call of splitB().)
-    template <bool initialisation=false,
-              class Iterator=linked_list<BLC_indicators>::iterator>
-    block_type* splitB(block_type* const B,
-                      Iterator splitter,
-                      state_in_block_pointer* first_unmarked_bottom_state,
-                      const BLC_list_iterator splitter_end_unmarked_BLC
-                                    /* =splitter->start_marked_BLC -- but
-                                       this default argument is not allowed */,
-                      block_type*& bi,
-                      constellation_type* const old_constellation,
-                      constellation_type* const new_constellation,
-                      const bool split_off_new_bottom_states=true)
-    {                                                                           if constexpr (initialisation) {
-                                                                                  assert(no_of_constellations==1);  assert(!split_off_new_bottom_states);
-                                                                                  assert(null_constellation==old_constellation);
-                                                                                } else {
-                                                                                  assert(split_off_new_bottom_states ||
-                                                                                         B->block.to_constellation.begin()==splitter);
-                                                                                }
-                                                                                if constexpr (!initialisation) {
-                                                                                  assert(m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].
-                                                                                                                                            block==B);
-                                                                                  assert(!splitter->is_stable());
-                                                                                  assert(!split_off_new_bottom_states ||
-                                                                                         splitter_end_unmarked_BLC==splitter->start_marked_BLC);
-                                                                                }
-                                                                                assert(1<number_of_states_in_block(*B));
-      block_type* R_block=simple_splitB<initialisation, Iterator>(B, splitter,
-                   first_unmarked_bottom_state, splitter_end_unmarked_BLC, bi); assert(bi == R_block || B == R_block);
-                                                                                assert(number_of_states_in_block(*B) >= number_of_states_in_block(*bi));
-                                                                                // Because we visit all states of block bi and almost all their incoming and
-                                                                                // outgoing transitions, we subsume all this bookkeeping in a single block
-                                                                                // counter:
-                                                                                mCRL2complexity(bi, add_work(check_complexity::
-      /* Update the BLC_list, and bottom states, and invariant on inert      */     splitB__update_BLC_of_smaller_subblock, check_complexity::log_n -
-      /* transitions.                                                        */     check_complexity::ilog2(number_of_states_in_block(*bi))), *this);
-      state_in_block_pointer* const
-                     start_new_bottom_states=R_block->sta.rt_non_bottom_states;
-      linked_list<BLC_indicators>::iterator R_to_U_tau_splitter =
-                                         R_block->block.to_constellation.end(); assert(bi->block.to_constellation.empty());
-      bool skip_transitions_in_splitter=false;                                  assert(m_BLC_indicators_to_be_deleted.empty());
-      bool make_splitter_stable_early=false;
-
-      if (initialisation || !split_off_new_bottom_states ||
-          null_constellation==old_constellation ||
-          target_constellation<initialisation, Iterator>(splitter)==
-                                                             old_constellation)
-      {
-        // splitter is not a main splitter. So it can be stabilized already
-        // (as we do not need to maintain the order of main/co-splitter).
-        make_splitter_stable_early=true;
-        if constexpr (!initialisation)
-        {
-          // However, we may need to move the splitter to its new constellation
-          // at the same time.
-          if (bi==R_block &&
-              (initialisation || split_off_new_bottom_states ||
-               splitter_end_unmarked_BLC==splitter->start_marked_BLC))
-          {
-            splitter->make_stable();
-            // move splitter as a whole from its current list to the new list
-            // where it will be part of:
-            // (This only works if the whole splitter BLC set has moved.)
-            R_block->block.to_constellation.splice(
-                                         R_block->block.to_constellation.end(),
-                                         B->block.to_constellation, splitter);
-            skip_transitions_in_splitter=true;
-          }
-          else if (!initialisation && split_off_new_bottom_states &&
-                   null_constellation==old_constellation)
-          {
-            // Only during new bottom state splits, we really need to move the
-            // splitter to the beginning of the list of splitters.
-            make_stable_and_move_to_start_of_BLC(R_block, splitter);
-          }
-          else
-          {
-            // During initialisation, we do not bother to move the splitter to
-            // the beginning of the BLC list, as every splitter will become
-            // stable.
-            splitter->make_stable();
-          }
-        }                                                                       else  {  assert(nullptr==splitter);  }
-      }
-      else if constexpr (!initialisation) // actually the condition always
-                                          // holds, but we need "constexpr"
-      {                                                                         assert(!splitter->is_stable());
-        // unmark all states in the splitter (needed to avoid that parts of the
-        // splitter will retain marked states)
-        splitter->start_marked_BLC=splitter->end_same_BLC;
-        if (bi==R_block)
-        {
-          // insert a dummy old main splitter to help with placing the
-          // corresponding co-splitter correctly:
-          m_BLC_indicators_to_be_deleted.push_back(
-                B->block.to_constellation.emplace_after(splitter,
-                         splitter->end_same_BLC, splitter->end_same_BLC, false)
-          );                                                                    // ...->work_counter=... -- not needed, as the set will be deleted soon again.
-          // ++no_of_non_constellation_inert_BLC_sets; -- not needed, as BLC sets in m_BLC_indicators_to_be_deleted are not counted
-          // move splitter as a whole from its current list to the new list
-          // where it will be part of:
-          // (This only works if the whole splitter BLC set has moved, i.e.
-          // only if split_off_new_bottom_states == true.)
-          R_block->block.to_constellation.splice(
-                                         R_block->block.to_constellation.end(),
-                                         B->block.to_constellation, splitter);
-          skip_transitions_in_splitter=true;
-        }
-      }                                                                         else  {  assert(0);  }
-                                                                                assert(!initialisation || make_splitter_stable_early);
-      if (!initialisation && m_branching)
-      {
-        if (initialisation || split_off_new_bottom_states ||
-            !make_splitter_stable_early || !skip_transitions_in_splitter)
-        {
-                                                                                #ifndef NDEBUG
-          /* insert an empty BLC set into bi->block.to_constellation         */   if (!B->block.to_constellation.empty())  {  const transition* t;
-          /* for the inert transitions out of *bi (unless the                */     assert(bi->block.to_constellation.empty() ||
-          /* splitter inserted above was the set of inert transitions),      */            (t=&m_aut.get_transitions()[*bi->
-          /* to avoid the need to check whether such a BLC set already exists*/                              block.to_constellation.begin()->start_same_BLC],
-          /* in update_the_doubly_linked_list_LBC_new_block().               */             !is_inert_during_init(*t)) ||
-          /* This set, if it remains empty, will need to be deleted          */            m_states[t->from()].block->c.onstellation!=
-          /* after updating the BLC sets.                                    */                                    m_states[t->to()].block->c.onstellation);  }
-                                                                                #endif
-          BLC_list_iterator start_inert_BLC=
-               B->block.to_constellation.empty()
-                  ? m_BLC_transitions.data_end() // there are no inert transitions but we still insert a dummy set
-                  : B->block.to_constellation.begin()->start_same_BLC; // if there are inert transitions, they are here
-                                                                                linked_list<BLC_indicators>::iterator new_inert_BLC_set=
-          bi->block.to_constellation.emplace_front(start_inert_BLC,
-                                                        start_inert_BLC, true);
-                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                                                                                  if (!B->block.to_constellation.empty() &&
-                                                                                      start_inert_BLC<B->block.to_constellation.begin()->end_same_BLC)
-                                                                                      // the first element that's currently in the old BLC list could be the
-                                                                                      // dummy main splitter
-                                                                                  {
-                                                                                    const transition&perhaps_inert_t=m_aut.get_transitions()[*start_inert_BLC];
-                                                                                    assert(m_states[perhaps_inert_t.from()].block==B ||
-                                                                                           m_states[perhaps_inert_t.from()].block==bi);
-                                                                                    if(is_inert_during_init(perhaps_inert_t) &&
-                                                                                       m_states[perhaps_inert_t.to()].block->c.onstellation==B->c.onstellation)
-                                                                                    {
-                                                                                      // This are really the inert transitions, so we should copy the work
-                                                                                      // counter
-                                                                                      new_inert_BLC_set->work_counter=
-                                                                                                               B->block.to_constellation.begin()->work_counter;
-                                                                                    }
-                                                                                  }
-                                                                                #else
-                                                                                  (void) new_inert_BLC_set; // avoid unused variable warning
-                                                                                #endif
-          // ++no_of_non_constellation_inert_BLC_sets; -- not needed, as this BLC set will contain constellation-inert transitions
-        }                                                                       else
-                                                                                {
-                                                                                  #ifndef NDEBUG
-                                                                                    assert(!bi->block.to_constellation.empty());
-                                                                                    assert(bi->block.to_constellation.begin()->start_same_BLC<
-                                                                                                             bi->block.to_constellation.begin()->end_same_BLC);
-                                                                                    const transition& t=m_aut.get_transitions()
-                                                                                                         [*bi->block.to_constellation.begin()->start_same_BLC];
-                                                                                    assert(is_inert_during_init(t));
-                                                                                    assert(m_states[t.from()].block->c.onstellation==
-                                                                                                                       m_states[t.to()].block->c.onstellation);
-                                                                                  #endif
-                                                                                }
-      }
-                                                                                #ifndef USE_FOUR_WAY_SPLIT
-      /* Recall new LBC positions.                                           */   assert(m_co_splitters_to_be_checked.empty());
-                                                                                #endif
-      for (state_in_block_pointer*
-                       ssi=bi->start_bottom_states; ssi!=bi->end_states; ++ssi)
-      {
-        state_type_gj& s=*ssi->ref_state;                                       // mCRL2complexity(s, add_work(..., max_bi_counter), *this);
-        const outgoing_transitions_it end_it=                                       // is subsumed in the above call
-                       (std::next(ssi->ref_state)==m_states.end())
-                       ? m_outgoing_transitions.end()
-                       : std::next(ssi->ref_state)->start_outgoing_transitions; assert(s.ref_states_in_blocks==ssi);  assert(s.block==bi);
-        if constexpr (!initialisation)
-        {
-          // update the BLC_lists.
-          for(outgoing_transitions_it ti=s.start_outgoing_transitions;
-                                                              ti!=end_it; ti++)
-          {                                                                     assert(m_states.begin()+m_aut.get_transitions()
-                                                                                                            [*ti->ref.BLC_transitions].from()==ssi->ref_state);
-                                                                                // mCRL2complexity(&m_transitions[*ti->ref.BLC_transitions],
-                                                                                //                 add_work(..., max_bi_counter), *this);
-            if (!skip_transitions_in_splitter ||                                    // is subsumed in the above call
-                m_transitions[*ti->ref.BLC_transitions].
-                              transitions_per_block_to_constellation!=splitter)
-            {
-              update_the_doubly_linked_list_LBC_new_block(B, bi,
-               *ti->ref.BLC_transitions, old_constellation, new_constellation);
-            }
-          }
-        }
-
-        // Situation below is only relevant if the new block contains the
-        // R-states:
-        if (bi==R_block)
-        {
-          if (0 < s.no_of_outgoing_block_inert_transitions)
-          {                                                                     assert(ssi>=R_block->sta.rt_non_bottom_states);
-            // si is a non_bottom_state in the smallest block containing M.
-            bool non_bottom_state_becomes_bottom_state=true;                    assert(m_branching);
-
-            for(outgoing_transitions_it ti=s.start_outgoing_transitions;
-                                                              ti!=end_it; ti++)
-            {                                                                   // mCRL2complexity(&m_transitions[*ti->ref.BLC_transitions],
-                                                                                //                 add_work(..., max_bi_counter), *this);
-              const transition& t=m_aut.get_transitions()[!initialisation           // is subsumed in the above call
-                             ? *ti->ref.BLC_transitions : ti->ref.transitions]; assert(m_states.begin()+t.from()==ssi->ref_state);
-              if (!m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())))
-              {
-                break;
-              }
-              if (m_states[t.to()].block==B)
-              {
-                // if (is_inert_during_init(t)) -- always true because it
-                                                // cannot be a tau-self-loop
-                {
-                  // This is a transition that has become non-block-inert.
-                  // (However, it is still constellation-inert.)
-                  make_transition_non_block_inert(t);
-                  if (!initialisation && split_off_new_bottom_states)
-                  {
-                    const linked_list<BLC_indicators>::iterator new_splitter=
-                                  m_transitions[*ti->ref.BLC_transitions].
-                                        transitions_per_block_to_constellation; assert(R_block->block.to_constellation.begin()==new_splitter);
-                    if (R_to_U_tau_splitter==
-                                         R_block->block.to_constellation.end())
-                    {
-                      R_to_U_tau_splitter=new_splitter;
-                      R_to_U_tau_splitter->make_unstable();
-                    }                                                           else
-                                                                                {
-                                                                                  assert(R_to_U_tau_splitter==new_splitter);
-                    /* immediately mark this transition, in case we get */        assert(!R_to_U_tau_splitter->is_stable());
-                    /* new bottom states: */                                    }
-                    mark_BLC_transition(ti);
-                  }
-                }
-              }
-              else if (m_preserve_divergence && t.from()==t.to())
-              {                                                                 assert(!is_inert_during_init(t));
-                // transition is a divergent tau-self-loop. It never was inert.
-              }
-              else if (m_states[t.to()].block==R_block)
-              {                                                                 assert(is_inert_during_init(t));
-                // There is an outgoing inert tau. State remains non-bottom.
-                non_bottom_state_becomes_bottom_state=false;
-              }
-            }
-            if (non_bottom_state_becomes_bottom_state)
-            {                                                                   assert(initialisation || !split_off_new_bottom_states ||
-              /* The state at si has become a bottom_state. */                         R_block->block.to_constellation.end()!=R_to_U_tau_splitter);
-              change_non_bottom_state_to_bottom_state(ssi->ref_state);
-            }
-          }
-        }
-        // Investigate the incoming formerly inert tau transitions.
-        else if (R_block->sta.rt_non_bottom_states<R_block->end_states)
-        {
-          const std::vector<transition>::iterator it_end =
-                      std::next(ssi->ref_state)>=m_states.end()
-                      ? m_aut.get_transitions().end()
-                      : std::next(ssi->ref_state)->start_incoming_transitions;
-          for(std::vector<transition>::iterator it =
-                                s.start_incoming_transitions; it!=it_end; it++)
-          {                                                                     // mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().
-                                                                                //                 begin(), it)], add_work(..., max_bi_counter), *this);
-                                                                                    // subsumed in the above call
-            const transition& t=*it;                                            assert(m_states.begin()+t.to()==ssi->ref_state);
-            if (!m_aut.is_tau(m_aut_apply_hidden_label_map(t.label())))
-            {
-              break; // All tau transitions have been investigated.
-            }
-
-            const fixed_vector<state_type_gj>::iterator from
-                                                   (m_states.begin()+t.from());
-            if (from->block==R_block)
-            {
-              // This transition did become non-block-inert.
-              // (However, it is still constellation-inert.)
-              make_transition_non_block_inert(t);
-              if (!initialisation && split_off_new_bottom_states)
-              {
-                const linked_list<BLC_indicators>::iterator new_splitter=
-                   m_transitions[std::distance(m_aut.get_transitions().begin(),
-                                  it)].transitions_per_block_to_constellation;  assert(R_block->block.to_constellation.begin()==new_splitter);
-                if (R_to_U_tau_splitter==R_block->block.to_constellation.end())
-                {
-                  R_to_U_tau_splitter=new_splitter;
-                  R_to_U_tau_splitter->make_unstable();
-                }                                                               else
-                                                                                {
-                                                                                  assert(R_to_U_tau_splitter==new_splitter);
-                /* immediately mark this transition, in case we get new */        assert(!R_to_U_tau_splitter->is_stable());
-                /* bottom states: */                                            }
-                mark_BLC_transition(m_transitions
-                      [std::distance(m_aut.get_transitions().begin(), it)].
-                                                     ref_outgoing_transitions);
-              }
-              // Check whether from is a new bottom state.
-              if (from->no_of_outgoing_block_inert_transitions==0)
-              {
-                // This state has no more outgoing inert transitions. It
-                // becomes a bottom state.
-                change_non_bottom_state_to_bottom_state(from);
-              }
-            }
-          }
-        }
-      }                                                                         assert(R_block->start_bottom_states<R_block->sta.rt_non_bottom_states);
-      if constexpr (!initialisation)
-      {
-        if (m_branching)
-        {                                                                       assert(!bi->block.to_constellation.empty());
-          // Before the loop we inserted an empty BLC set for the inert
-          // transitions into bi->block.to_constellation.
-          // If it is still empty, we have to remove it again.
-          linked_list<BLC_indicators>::iterator
-                                  inert_ind=bi->block.to_constellation.begin();
-          if (inert_ind->start_same_BLC==inert_ind->end_same_BLC)
-          {                                                                     assert(inert_ind->is_stable());
-            bi->block.to_constellation.erase(inert_ind);
-          }                                                                     else {
-                                                                                  #ifndef NDEBUG
-                                                                                    const transition& inert_t=
-                                                                                                   m_aut.get_transitions()[*inert_ind->start_same_BLC];
-                                                                                    assert(is_inert_during_init(inert_t));
-                                                                                    assert(bi==m_states[inert_t.from()].block);
-                                                                                    assert(bi->c.onstellation==m_states[inert_t.to()].block->c.onstellation);
-                                                                                  #endif
-                                                                                }
-        }
-        for (std::vector<linked_list<BLC_indicators>::iterator>::iterator
-                                 it=m_BLC_indicators_to_be_deleted.begin();
-                                 it<m_BLC_indicators_to_be_deleted.end(); ++it)
-        {                                                                       assert((*it)->start_same_BLC==(*it)->end_same_BLC);
-                                                                                // the work in this loop can be attributed to the operation that aded this BLC
-                                                                                // set to m_BLC_indicators_to_be_deleted
-          B->block.to_constellation.erase(*it);
-        }
-        clear(m_BLC_indicators_to_be_deleted);
-                                                                                #ifndef NDEBUG
-                                                                                  for (const BLC_indicators& B_it : B->block.to_constellation)
-                                                                                  {
-                                                                                    assert(B_it.start_same_BLC<B_it.end_same_BLC);
-                                                                                  }
-                                                                                  for (const BLC_indicators& bi_it : bi->block.to_constellation)
-                                                                                  {
-                                                                                    assert(bi_it.start_same_BLC<bi_it.end_same_BLC);
-                                                                                  }
-                                                                                #endif
-        for (const std::pair<BLC_list_iterator, block_type*>&
-                               co_splitter_check: m_co_splitters_to_be_checked)
-        {                                                                       assert(m_BLC_transitions.data()<=co_splitter_check.first);
-                                                                                // The work in this loop can be attributed to the operation that added
-                                                                                // `co_splitter_check` to `m_co_splitters_to_be_checked`
-          const transition_index co_transition=*co_splitter_check.first;        assert(co_splitter_check.first<m_BLC_transitions.data_end());
-          block_type* const from_block=co_splitter_check.second;                assert(B==from_block || bi==from_block);
-          const transition& co_t=m_aut.get_transitions()[co_transition];        assert(old_constellation==m_states[co_t.to()].block->c.onstellation);
-          if (m_states[co_t.from()].block==from_block)
-          {
-            linked_list<BLC_indicators>::iterator co_splitter=
-                            m_transitions[co_transition].
-                                        transitions_per_block_to_constellation; assert(co_splitter->start_same_BLC<=co_splitter_check.first);
-            linked_list<BLC_indicators>& btc=
-                                            from_block->block.to_constellation; assert(co_splitter_check.first<co_splitter->end_same_BLC);
-            linked_list<BLC_indicators>::const_iterator main_splitter=
-                                                         btc.next(co_splitter); assert(!co_splitter->is_stable());
-            const transition* t;
-            if (from_block->block.to_constellation.end()==main_splitter ||
-                  (t=&m_aut.get_transitions()[*main_splitter->start_same_BLC],  assert(m_states[t->from()].block==from_block),
-                   label_or_divergence(co_t)!=label_or_divergence(*t)) ||
-                  new_constellation!=m_states[t->to()].block->c.onstellation)
-            {
-              /* co_splitter does not have a corresponding main splitter     */ assert(!co_splitter->has_marked_transitions());
-              // Note that if splitter is a main splitter, then the
-              // co-splitter that belongs to it should be identifiable.  That
-              // is why we do not always make the splitter stable early, even
-              // though in the main routine we do no longer need the link
-              // between main and co-splitter maintained after the main
-              // split.
-              co_splitter->make_stable();
-            }
-          }                                                                     else  {  assert(bi==m_states[co_t.from()].block);  }
-        }
-        clear(m_co_splitters_to_be_checked);
-      }                                                                         else
-                                                                                {
-                                                                                  assert(m_BLC_indicators_to_be_deleted.empty());
-                                                                                  assert(m_co_splitters_to_be_checked.empty());
-                                                                                }
-                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                                                                                  unsigned char const max_block=check_complexity::log_n-
-                                                                                                       check_complexity::ilog2(number_of_states_in_block(*bi));
-                                                                                  if (bi==R_block)
-                                                                                  {
-                                                                                    // account for the work in R
-                                                                                    for (const state_in_block_pointer*
-                                                                                                             s=bi->start_bottom_states; s!=bi->end_states; ++s)
-                                                                                    {
-                                                                                      mCRL2complexity(s->ref_state, finalise_work(check_complexity::simple_splitB_R__find_predecessors, check_complexity::simple_splitB__find_predecessors_of_R_or_U_state, max_block), *this);
-                                                                                      // incoming tau-transitions of s
-                                                                                      const std::vector<transition>::iterator in_ti_end = std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
-                                                                                      for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
-                                                                                      {
-                                                                                        if (!m_aut.is_tau(m_aut_apply_hidden_label_map(ti->label())))  break;
-                                                                                        mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], finalise_work(check_complexity::simple_splitB_R__handle_transition_to_R_state, check_complexity::simple_splitB__handle_transition_to_R_or_U_state, max_block), *this);
-                                                                                      }
-                                                                                      // outgoing transitions of s
-                                                                                      const outgoing_transitions_it out_ti_end=std::next(s->ref_state)>=m_states.end() ? m_outgoing_transitions.end() : std::next(s->ref_state)->start_outgoing_transitions;
-                                                                                      for (outgoing_transitions_it ti=s->ref_state->start_outgoing_transitions; ti!=out_ti_end; ++ti)
-                                                                                      {
-                                                                                        mCRL2complexity(&m_transitions[!initialisation ? *ti->ref.BLC_transitions : ti->ref.transitions], finalise_work(check_complexity::simple_splitB_R__handle_transition_from_R_state, check_complexity::simple_splitB__handle_transition_from_R_or_U_state, max_block), *this);
-                                                                                        // We also need to cancel the work on outgoing transitions of U-state candidates that turned out to be new bottom states:
-                                                                                        mCRL2complexity(&m_transitions[!initialisation ? *ti->ref.BLC_transitions : ti->ref.transitions], cancel_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state), *this);
-                                                                                      }
-                                                                                    }
-                                                                                    // ensure not too much work has been done on U
-                                                                                    for (const state_in_block_pointer*
-                                                                                                               s=B->start_bottom_states; s!=B->end_states; ++s)
-                                                                                    {
-                                                                                      mCRL2complexity(s->ref_state, cancel_work(check_complexity::simple_splitB_U__find_predecessors), *this);
-                                                                                      // incoming tau-transitions of s
-                                                                                      const std::vector<transition>::iterator in_ti_end=std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
-                                                                                      for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
-                                                                                      {
-                                                                                        if (!m_aut.is_tau(m_aut_apply_hidden_label_map(ti->label())))  break;
-                                                                                        mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], cancel_work(check_complexity::simple_splitB_U__handle_transition_to_U_state), *this);
-                                                                                      }
-                                                                                      // outgoing transitions of s
-                                                                                      const outgoing_transitions_it out_ti_end=std::next(s->ref_state)>=m_states.end() ? m_outgoing_transitions.end() : std::next(s->ref_state)->start_outgoing_transitions;
-                                                                                      for (outgoing_transitions_it ti=s->ref_state->start_outgoing_transitions; ti!=out_ti_end; ++ti)
-                                                                                      {
-                                                                                        mCRL2complexity(&m_transitions[!initialisation ? *ti->ref.BLC_transitions : ti->ref.transitions], cancel_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state), *this);
-                                                                                      }
-                                                                                    }
-                                                                                  }
-                                                                                  else
-                                                                                  {
-                                                                                    // account for the work in U
-                                                                                    for (const state_in_block_pointer*
-                                                                                                             s=bi->start_bottom_states; s!=bi->end_states; ++s)
-                                                                                    {
-                                                                                      mCRL2complexity(s->ref_state, finalise_work(check_complexity::simple_splitB_U__find_predecessors, check_complexity::simple_splitB__find_predecessors_of_R_or_U_state, max_block), *this);
-                                                                                      // incoming tau-transitions of s
-                                                                                      const std::vector<transition>::iterator in_ti_end = std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
-                                                                                      for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
-                                                                                      {
-                                                                                        if (!m_aut.is_tau(m_aut_apply_hidden_label_map(ti->label())))  break;
-                                                                                        mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], finalise_work(check_complexity::simple_splitB_U__handle_transition_to_U_state, check_complexity::simple_splitB__handle_transition_to_R_or_U_state, max_block), *this);
-                                                                                      }
-                                                                                      // outgoing transitions of s
-                                                                                      const outgoing_transitions_it out_ti_end=std::next(s->ref_state)>=m_states.end() ? m_outgoing_transitions.end() : std::next(s->ref_state)->start_outgoing_transitions;
-                                                                                      for (outgoing_transitions_it ti = s->ref_state->start_outgoing_transitions; ti!=out_ti_end; ++ti)
-                                                                                      {
-                                                                                        mCRL2complexity(&m_transitions[!initialisation ? *ti->ref.BLC_transitions : ti->ref.transitions], finalise_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, check_complexity::simple_splitB__handle_transition_from_R_or_U_state, max_block), *this);
-                                                                                      }
-                                                                                    }
-                                                                                    // ensure not too much work has been done on R
-                                                                                    for (const state_in_block_pointer*
-                                                                                                               s=B->start_bottom_states; s!=B->end_states; ++s)
-                                                                                    {
-                                                                                      mCRL2complexity(s->ref_state, cancel_work(check_complexity::simple_splitB_R__find_predecessors), *this);
-                                                                                      // incoming tau-transitions of s
-                                                                                      const std::vector<transition>::iterator in_ti_end = std::next(s->ref_state)>=m_states.end() ? m_aut.get_transitions().end() : std::next(s->ref_state)->start_incoming_transitions;
-                                                                                      for (std::vector<transition>::iterator ti=s->ref_state->start_incoming_transitions; ti!=in_ti_end; ++ti)
-                                                                                      {
-                                                                                        if (!m_aut.is_tau(m_aut_apply_hidden_label_map(ti->label())))  break;
-                                                                                        mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(), ti)], cancel_work(check_complexity::simple_splitB_R__handle_transition_to_R_state), *this);
-                                                                                      }
-                                                                                      // outgoing transitions of s
-                                                                                      const outgoing_transitions_it out_ti_end=std::next(s->ref_state)>=m_states.end() ? m_outgoing_transitions.end() : std::next(s->ref_state)->start_outgoing_transitions;
-                                                                                      for (outgoing_transitions_it ti=s->ref_state->start_outgoing_transitions; ti!=out_ti_end; ++ti)
-                                                                                      {
-                                                                                        mCRL2complexity(&m_transitions[!initialisation ? *ti->ref.BLC_transitions : ti->ref.transitions], cancel_work(check_complexity::simple_splitB_R__handle_transition_from_R_state), *this);
-                                                                                        // We also need to move the work on outgoing transitions of U-state candidates that turned out to be new bottom states:
-                                                                                        mCRL2complexity(&m_transitions[!initialisation ? *ti->ref.BLC_transitions : ti->ref.transitions], finalise_work(check_complexity::simple_splitB_U__handle_transition_from_potential_U_state, check_complexity::simple_splitB__test_outgoing_transitions_found_new_bottom_state,
-                                                                                                0==s->ref_state->no_of_outgoing_block_inert_transitions ? 1 : 0), *this);
-                                                                                      }
-                                                                                    }
-                                                                                  }
-                                                                                  check_complexity::check_temporary_work();
-                                                                                #endif // ifndef NDEBUG
-      if (initialisation || split_off_new_bottom_states)
-      {
-        if (start_new_bottom_states<R_block->sta.rt_non_bottom_states)
-        {                                                                       assert(initialisation || !R_block->block.to_constellation.empty());
-          /* There are new bottom states, and (unless we are initialising)   */ assert(initialisation ||
-          /* we have to separate them immediately from the old bottom        */        R_block->block.to_constellation.begin()==R_to_U_tau_splitter);
-          /* states.  This will make sure that the next call of stabilizeB() */ assert(initialisation || R_to_U_tau_splitter->has_marked_transitions());
-          // will not encounter blocks with both old and new bottom states.
-          block_type* new_bottom_block;
-          if (initialisation ||
-              start_new_bottom_states==R_block->start_bottom_states)
-          {
-            // all bottom states in this block are new
-            // (or, during initialisation, we can regard all bottom states in
-            // this block as new, as they have never been treated as new bottom
-            // states earlier.)
-            if constexpr (!initialisation)
-            {
-              R_to_U_tau_splitter->make_stable();
-            }
-            new_bottom_block = R_block;
-            R_block = null_block;
-            // During stabilizeB(), the splitter should be made stable again,
-            // even the part starting in the new bottom states.
-            // However, during stabilizeB() we have null_constellation ==
-            /* old_constellation, so it has already been made stable.        */ assert(make_splitter_stable_early || null_constellation!=old_constellation);
-          }
-          else if constexpr (!initialisation)
-          {                                                                     assert(number_of_states_in_block(*R_block)>1);
-            const BLC_list_iterator splitter_start_same_BLC=
-                                                      splitter->start_same_BLC;
-                                                                                #ifndef NDEBUG
-                                                                                  const BLC_list_iterator splitter_end_same_BLC=splitter->end_same_BLC;
-                                                                                  const BLC_list_iterator R_to_U_tau_splitter_start_same_BLC=
-            /* Some tau-transitions from R to U may come out of states that  */                                            R_to_U_tau_splitter->start_same_BLC;
-            /* are not (yet) new bottom states.  Therefore we still have to  */   const BLC_list_iterator R_to_U_tau_splitter_end_same_BLC=
-            /* go through the movement of constructing m_R:                  */                                              R_to_U_tau_splitter->end_same_BLC;
-                                                                                #endif
-            first_unmarked_bottom_state=not_all_bottom_states_are_touched
-                                                  (R_block, R_to_U_tau_splitter
-                                                                                #ifndef NDEBUG
-                                                                                  , R_to_U_tau_splitter->start_same_BLC
-                                                                                #endif
-                                                   );                           assert(R_to_U_tau_splitter_start_same_BLC==
-                                                                                                                          R_to_U_tau_splitter->start_same_BLC);
-            block_type* new_block;                                              assert(std::distance(start_new_bottom_states,
-                                                                                                     R_block->sta.rt_non_bottom_states)==
-                                                                                       std::distance(R_block->start_bottom_states,
-                                                                                                                                first_unmarked_bottom_state));
-            new_bottom_block=splitB<initialisation>(R_block,
-                                    R_to_U_tau_splitter,
-                                    first_unmarked_bottom_state,
-                                    R_to_U_tau_splitter->start_same_BLC,
-                                    new_block,
-                                    old_constellation, new_constellation,
-                                    false);
-            if (R_block == new_bottom_block)
-            {                                                                   assert(m_states[m_aut.get_transitions()[*std::prev(
-              /* The new block contains the old bottom states.               */         R_to_U_tau_splitter_end_same_BLC)].from()].block==new_bottom_block);
-              R_block=new_block;
-              /* All parts of R_to_U_tau_splitter should be made stable.     */ assert(new_bottom_block->block.to_constellation.begin()==
-              /* The new part is already stable: as it contains inert        */           m_transitions[*std::prev(R_to_U_tau_splitter_end_same_BLC)].
-              /* transitions, it is always created stably.                   */                                     transitions_per_block_to_constellation);
-              /* However, the old part must still contain some transitions   */ assert(!new_bottom_block->block.to_constellation.empty());
-              /* that are not marked stable; it cannot be empty, as the      */ assert(new_bottom_block->block.to_constellation.begin()->is_stable());
-              /* new_bottom_block always has some constellation-inert        */ assert(m_states[m_aut.get_transitions()
-              /* transitions.                                                */                           [*splitter_start_same_BLC].from()].block==R_block);
-
-              // The original splitter part of the old bottom states
-              // (i.e. the part of the new block) should be made stable.
-              if (!make_splitter_stable_early)
-              {                                                                 assert(null_constellation!=old_constellation);
-                const linked_list<BLC_indicators>::iterator
-                        new_part_of_splitter=
-                            m_transitions[*splitter_start_same_BLC].
-                                        transitions_per_block_to_constellation; assert(new_part_of_splitter!=splitter);
-                /* As the splitter both contains transitions from every old  */ assert(splitter_start_same_BLC==new_part_of_splitter->start_same_BLC);
-                /* bottom state and from every new bottom state, it must     */ assert(new_part_of_splitter==m_transitions
-                /* have been separated into two parts.                       */         [*splitter_start_same_BLC].transitions_per_block_to_constellation);
-                new_part_of_splitter->make_stable();
-              }
-            }
-            else
-            {                                                                   assert(new_block==new_bottom_block);
-              /* All parts of R_to_U_tau_splitter should be made stable.     */ assert(m_states[m_aut.get_transitions()
-              /* The new part is already stable: as it contains inert        */        [*R_to_U_tau_splitter_start_same_BLC].from()].block==new_bottom_block);
-              /* transitions, it is always created stably.                   */ assert(new_bottom_block->block.to_constellation.begin()==
-              /* It cannot be empty, as the new bottom block always has some */                 m_transitions[*R_to_U_tau_splitter_start_same_BLC].
-              /* constellation-inert transitions.                            */                                        transitions_per_block_to_constellation);
-              /* However, the old part may still contain some transitions.   */ assert(!new_bottom_block->block.to_constellation.empty());
-                                                                                assert(new_bottom_block->block.to_constellation.begin()->is_stable());
-              /* Also, R_block still has transitions in the original splitter*/ assert(!R_block->block.to_constellation.empty());
-                                                                                #ifndef NDEBUG
-                                                                                  if (R_to_U_tau_splitter_end_same_BLC==
-                                                                                                         R_block->block.to_constellation.begin()->end_same_BLC)
-                                                                                  {
-                                                                                    assert(R_block->block.to_constellation.begin()->is_stable());
-                                                                                  } else {
-                                                                                    // R_block must have lost all its inert transitions.
-                                                                                    assert(R_to_U_tau_splitter_end_same_BLC==
-                                                                                               new_bottom_block->block.to_constellation.begin()->end_same_BLC);
-                                                                                    assert(new_bottom_block->block.to_constellation.begin()==
-                                                                                          m_transitions[*std::prev(R_to_U_tau_splitter_end_same_BLC)].
-                                                                                                                       transitions_per_block_to_constellation);
-                                                                                    const transition& not_inert_t=m_aut.get_transitions()
-                                                                                                    [*R_block->block.to_constellation.begin()->start_same_BLC];
-                                                                                    assert(R_block==m_states[not_inert_t.from()].block);
-                                                                                    assert(!is_inert_during_init(not_inert_t) ||
-                                                                                           R_block->c.onstellation!=
-                                                                                                             m_states[not_inert_t.to()].block->c.onstellation);
-                                                                                  }
-                                                                                #endif
-              /* The original splitter part of the old bottom states         */ assert(m_states[m_aut.get_transitions()
-              /* (i.e. the part of the old block) should be made stable.     */             [*std::prev(splitter_end_same_BLC)].from()].block==R_block);
-              if (!make_splitter_stable_early)
-              {                                                                 assert(null_constellation!=old_constellation);
-                splitter->make_stable();
-              }
-            }                                                                   assert(!R_block->block.to_constellation.empty());
-                                                                                assert(splitter_end_same_BLC==splitter->end_same_BLC);
-                                                                                assert(splitter==m_transitions[*std::prev(splitter_end_same_BLC)].
-                                                                                                                       transitions_per_block_to_constellation);
-          }                                                                     else  {  assert(0);  }
-                                                                                assert(!new_bottom_block->contains_new_bottom_states);
-          new_bottom_block->contains_new_bottom_states=true;                    assert(!initialisation || nullptr==new_bottom_block->block.R);
-          m_blocks_with_new_bottom_states.push_back(new_bottom_block);
-        }
-        else if constexpr (!initialisation)
-        {
-          // No new bottom states found.
-          // Still there might be some transitions that became non-inert.
-          if (R_block->block.to_constellation.end()!=R_to_U_tau_splitter)
-          {                                                                     assert(R_block->block.to_constellation.begin()==R_to_U_tau_splitter);
-            // unmark the transitions from R to U.
-            // We do not need to stabilize the (formerly inert) tau-transitions
-            // from R to U, because they are still in the same constellation.
-            R_to_U_tau_splitter->make_stable();
-          }
-          if (!make_splitter_stable_early)
-          {                                                                     assert(null_constellation!=old_constellation);
-            splitter->make_stable();
-          }
-        }
-      }                                                                         else  {  assert(R_block->block.to_constellation.end()==R_to_U_tau_splitter);  }
-      return R_block;
-    }
-
-#else // #ifndef USE_FOUR_WAY_SPLIT
 
     /// \brief Move states in a set to a specific position in `m_states_in_block`
     /// \param R       vector of states that need to be moved
@@ -5346,7 +3701,27 @@ one_slice_has_finished:
         /* MissMain is empty and finishes early.  There are no states that   */ assert(potential_non_bottom_states[MissMain].empty());
         // might be moved to MultiSub.
 //std::cerr << "MissMain is already finished (empty)\n";
+        if (!has_co_splitter || 0==bottom_size(XcludeCo))
+        {                                                                       assert(0==bottom_size(XcludeCo));
+//std::cerr << "XcludeCo and MultiSub are already finished (empty) and the split is trivial.\n";
+          //++no_of_finished_searches;
+          //status_MultiSub=finished;
+          // This is a trivial split and nothing needs to be done.
+          // If XcludeCo were not yet finished, it could still happen that
+          // some states are found to have a transition in the co-splitter,
+          // so they would yet be added to MultiSub.
 
+          clear_state_counters(potential_non_bottom_states[ReachAlw].begin(),
+                              potential_non_bottom_states[ReachAlw].end(), bi);
+          clear(potential_non_bottom_states[ReachAlw]);
+          if (has_main_splitter && has_co_splitter)
+          {
+            clear_state_counters(potential_non_bottom_states_Hit_Main.begin(),
+                               potential_non_bottom_states_Hit_Main.end(), bi);
+            clear(potential_non_bottom_states_Hit_Main);
+          }                                                                     else  {  assert(potential_non_bottom_states_Hit_Main.empty());  }
+          return bi;
+        }
         ++no_of_finished_searches;
         status[MissMain]=finished;
       }
@@ -5363,27 +3738,6 @@ one_slice_has_finished:
       {                                                                         assert(0==bottom_size(XcludeCo));
         /* XcludeCo is empty and finishes early.                             */ assert(potential_non_bottom_states[XcludeCo].empty());
 //std::cerr << "XcludeCo is already finished (empty)\n";
-        if (finished==status[MissMain])
-        {
-//std::cerr << "MultiSub is already finished (empty) and the split is trivial.\n";
-          //++no_of_finished_searches;
-          //status_MultiSub=finished;
-          // This is a trivial split and nothing needs to be done.
-          // If XcludeCo were not yet finished, it could still happen that
-          // some states are found to have a transition in the co-splitter,
-          /* so they would yet be added to MultiSub.                         */ assert(0==bottom_and_non_bottom_size(MissMain));
-
-          clear_state_counters(potential_non_bottom_states[ReachAlw].begin(),
-                              potential_non_bottom_states[ReachAlw].end(), bi); assert(potential_non_bottom_states[MissMain].empty());
-          clear(potential_non_bottom_states[ReachAlw]);
-          if (has_main_splitter && has_co_splitter)
-          {
-            clear_state_counters(potential_non_bottom_states_Hit_Main.begin(),
-                               potential_non_bottom_states_Hit_Main.end(), bi);
-            clear(potential_non_bottom_states_Hit_Main);
-          }                                                                     else  {  assert(potential_non_bottom_states_Hit_Main.empty());  }
-          return bi;
-        }
         ++no_of_finished_searches;
         status[XcludeCo]=finished;
       }
@@ -5396,6 +3750,7 @@ one_slice_has_finished:
       }
 //else std::cerr << "XcludeCo is already aborted\n";
 
+      status_MultiSub=state_checking;
       if (0==bottom_size(ReachAlw))
       {
         // ReachAlw is empty and finishes early.  Its non-bottom states are
@@ -5431,6 +3786,8 @@ one_slice_has_finished:
         ++no_of_finished_searches;
         status[ReachAlw]=finished;
 //std::cerr << "ReachAlw is already finished (empty)\n";
+        abort_if_non_bottom_size_too_large_MultiSub();
+//&& (std::cerr << "MultiSub is already aborted\n");
       }
       else if (!abort_if_bottom_size_too_large(ReachAlw))
       {
@@ -5440,10 +3797,6 @@ one_slice_has_finished:
         status[ReachAlw]=state_checking;
       }
 //else std::cerr << "ReachAlw is already aborted\n";
-
-      status_MultiSub=state_checking;
-      abort_if_non_bottom_size_too_large_MultiSub();
-//&& (std::cerr << "MultiSub is already aborted\n");
 
       // 5. We start the coroutines for the non-empty, non-aborted subblocks.
       //    Every coroutine executes one step in turn.  The coroutines stop as
@@ -5871,45 +4224,44 @@ one_slice_has_finished:
               clear(potential_non_bottom_states[current_search]);
               --no_of_running_searches;                                         assert(current_search_index<=no_of_running_searches);
               running_searches[current_search_index]=
-                                      running_searches[no_of_running_searches]; assert(has_co_splitter || finished==status[XcludeCo]);
+                                      running_searches[no_of_running_searches];
               --current_search_index; /* is now -1, 0 or +1 */                  assert((has_main_splitter && has_co_splitter) ||
                                                                                        potential_non_bottom_states_Hit_Main.empty());
               if (has_main_splitter && has_co_splitter &&
-                  finished==status[ReachAlw] && aborted!=status_MultiSub)
-              {                                                                 assert(finished==status[ReachAlw]);  assert(aborted!=status_MultiSub);
-                if (finished==status[XcludeCo])
-                {                                                               assert(1>=no_of_running_searches);
-                  /* The Hit_Main states can be assigned to MultiSub because */ assert(finished!=status[MissMain]);
-                  /* they cannot be in ReachAlw or XcludeCo                  */ assert(finished!=status_MultiSub);
-                  for (state_in_block_pointer st:
+                  finished==status[ReachAlw] && finished==status[XcludeCo] &&
+                  aborted!=status_MultiSub)
+              {                                                                 assert(1>=no_of_running_searches);
+                /* The Hit_Main states can be assigned to MultiSub because   */ assert(finished!=status[MissMain]);
+                /* they cannot be in ReachAlw or XcludeCo                    */ assert(finished!=status_MultiSub);
+                for (state_in_block_pointer st:
                                           potential_non_bottom_states_Hit_Main)
-                  {                                                             assert(0<st.ref_state->no_of_outgoing_block_inert_transitions);
+                {                                                               assert(0<st.ref_state->no_of_outgoing_block_inert_transitions);
                                                                                 // The work in this loop can be assigned to the same transitions in
                                                                                 // the main splitter as the one(s) that made st become a member of
                                                                                 // `potential_non_bottom_states_Hit_Main`.
                                                                                 assert(!non_bottom_states[MissMain].find(st));
-                    if (marked_Hit_Main==st.ref_state->counter)
-                    {                                                           assert(!non_bottom_states_MultiSub.find(st));
+                  if (marked_Hit_Main==st.ref_state->counter)
+                  {                                                             assert(!non_bottom_states_MultiSub.find(st));
 //std::cerr << "    and consequently, Hit_Main-" << st.ref_state->debug_id(*this) << " is added to MultiSub.\n";
-                      non_bottom_states_MultiSub.add_todo(st);                  assert(!non_bottom_states[ReachAlw].find(st));
-                      st.ref_state->counter=marked_MultiSub;                    assert(!non_bottom_states[XcludeCo].find(st));
-                    }                                                           else  {  assert(marked(ReachAlw)==st.ref_state->counter ||
+                    non_bottom_states_MultiSub.add_todo(st);                    assert(!non_bottom_states[ReachAlw].find(st));
+                    st.ref_state->counter=marked_MultiSub;                      assert(!non_bottom_states[XcludeCo].find(st));
+                  }                                                             else  {  assert(marked(ReachAlw)==st.ref_state->counter ||
                                                                                                 marked(XcludeCo)==st.ref_state->counter ||
                                                                                                 marked_MultiSub==st.ref_state->counter);  }
-                  }
-//std::cerr << "    and consequently, Hit_Main is guaranteed to be empty.\n";
-                  clear(potential_non_bottom_states_Hit_Main);
                 }
-              }
+//std::cerr << "    and consequently, Hit_Main is guaranteed to be empty.\n";
+                clear(potential_non_bottom_states_Hit_Main);
+              }                                                                 else  {  assert(finished!=status[ReachAlw] || finished!=status[XcludeCo] ||
+                                                                                                aborted==status_MultiSub ||
+                                                                                                potential_non_bottom_states_Hit_Main.empty());  }
               if (std::numeric_limits<state_index>::max()!=
                                               no_of_unfinished_states_in_block)
               {                                                                 assert(0<no_of_running_searches);  assert(no_of_running_searches<=2);
                                                                                 assert(aborted!=status[ReachAlw]);  assert(aborted!=status[XcludeCo]);
-                                                                                assert(aborted!=status[MissMain]);  assert(aborted!=status_MultiSub);
                 no_of_unfinished_states_in_block-=
                                     bottom_and_non_bottom_size(current_search); assert(aborted!=status[running_searches[0]]);
                 /* Try to find out whether some other process needs to be    */ assert(finished!=status[running_searches[0]]);
-                /* aborted, now that we have a more strict size bound.       */ assert(aborted!=status_MultiSub);
+                /* aborted, now that we have a more strict size bound.       */ assert(aborted!=status[MissMain]);  assert(aborted!=status_MultiSub);
                 if (abort_if_size_too_large(running_searches[0], ))
                 {
 //std::cerr << "    and consequently, " << debug_coroutine_of(running_searches[0]) << " is aborted.\n";
@@ -6843,7 +5195,6 @@ one_slice_has_finished:
       #undef abort_if_size_too_large
       #undef bottom_and_non_bottom_size
     }
-#endif // #ifdef USE_FOUR_WAY_SPLIT
 
     transition_index accumulate_entries(
                               std::vector<transition_index>& action_counter,
@@ -7214,7 +5565,7 @@ one_slice_has_finished:
                                                                                 #endif
           ++ind;
           for (; bi->block.to_constellation.end()!=ind; ++ind)
-          {
+          {                                                                     assert(!initial_stabilization || ind->is_stable());
             if (!initial_stabilization && !ind->is_stable())
             {
 //std::cerr << "    " << ind->debug_id(*this) << " is already unstable, it and its successors won't be added to Qhat again\n";
@@ -7301,12 +5652,8 @@ one_slice_has_finished:
                 // the transition is not constellation-inert, so mark it
                 mark_BLC_transition(ti);
               }
-              else
-              {                                                                 assert(ti <= ti->start_same_saC);
-                // skip all other constellation-inert transitions
-                // (this is an optimization)
-                ti = ti->start_same_saC;
-              }
+              /* Actually it's enough to mark one transition per saC slice:  */ assert(ti <= ti->start_same_saC);
+              ti = ti->start_same_saC;
             }
             ++si;
           }
@@ -7390,39 +5737,21 @@ one_slice_has_finished:
                             from_block_index->end_states)<=1)
           {
             // a block with 1 state does not need to be split
-            //splitter->make_stable();
+            // We still need to make the splitter stable because it is
+            // expected that all BLC sets are stable by the main/co-split
+            // phase.
+            // The BLC set will not be inserted into Qhat another time, so
+            // it is not necessary to maintain the order of BLC sets (first
+            // stable ones, then unstable ones).
+            splitter->make_stable();
 //std::cerr << "No stabilization is needed because the source block contains only 1 state.\n";
           }
           else
           {                                                                     assert(!is_inert_during_init(first_t) || from_block_index->c.onstellation!=
                                                                                                                  m_states[first_t.to()].block->c.onstellation);
-#ifndef USE_FOUR_WAY_SPLIT
-            // Algorithm 4, line 4.10.
-            state_in_block_pointer* first_unmarked_bottom_state=
-                    not_all_bottom_states_are_touched(from_block_index,splitter
-                                                                                #ifndef NDEBUG
-                                                                                  , splitter->start_marked_BLC
-                                                                                #endif
-                        );
-            if (first_unmarked_bottom_state<
-                                    from_block_index->sta.rt_non_bottom_states)
-            {
-              /* Algorithm 4, line 4.11, and implicitly 4.12, 4.13 and 4.18. */ assert(m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].
-                                                                                                                      block==m_states[first_t.from()].block);
-              block_type* new_block;
-              splitB(from_block_index, splitter,
-                      first_unmarked_bottom_state, splitter->start_marked_BLC,
-                            new_block, null_constellation, null_constellation);
-            }
-            else
-            {
-              make_stable_and_move_to_start_of_BLC(from_block_index, splitter);
-            }
-#else
             four_way_splitB<false, true>(from_block_index, from_block_index->
                                        block.to_constellation.end(), splitter,
                                        null_constellation, null_constellation);
-#endif
           }
         }
         while (m_blocks_with_new_bottom_states.empty());
@@ -7661,7 +5990,6 @@ one_slice_has_finished:
         // place transitions and set pointers to incoming/outgoing transitions
         for (state_index s=0; s<m_aut.num_states(); ++s)
         {                                                                       // mCRL2complexity(&m_states[s], add_work(..., 1), *this);
-#ifdef USE_FOUR_WAY_SPLIT
           if (marked_range<=m_states[s].no_of_outgoing_block_inert_transitions)     // Because every state is touched exactly once,
           {                                                                         // we do not store a physical counter for this.
             mCRL2log(log::error) << "State " << s << " has "
@@ -7672,7 +6000,6 @@ one_slice_has_finished:
                        "Aborting now.\n";
             exit(EXIT_FAILURE);
           }
-#endif
           m_states[s].start_outgoing_transitions=current_outgoing_transitions+
                             m_states[s].no_of_outgoing_block_inert_transitions;
           current_outgoing_transitions+=
@@ -7863,7 +6190,6 @@ one_slice_has_finished:
             for (block_type* const bi : blocks_that_need_refinement)
             {                                                                   assert(nullptr!=bi->block.R);
 //std::cerr << "Now refining " << bi->debug_id(*this) << '\n';
-#ifdef USE_FOUR_WAY_SPLIT
                 four_way_splitB<false, false>(bi,
                         linked_list<BLC_indicators>::end(), // no main splitter
                         linked_list<BLC_indicators>::end(), // no co-splitter
@@ -7875,93 +6201,6 @@ one_slice_has_finished:
                     // initial constellation, so four_way_splitB() can make
                     // the block look normal after it has retrieved the
                     // information.
-#else
-                                                                                assert(m_R.empty());
-              m_R.swap_vec(*bi->block.R);
-              delete bi->block.R;
-              bi->block.R=nullptr;
-              state_in_block_pointer* const first_unmarked_bottom_state=
-                                             bi->c.first_unmarked_bottom_state; assert(bi->start_bottom_states<=first_unmarked_bottom_state);
-              // prepare for next label:
-              // destroy bi->c.first_unmarked_bottom_state; -- trivial
-              new (&bi->c.on) block_type::
-                    constellation_or_first_unmarked_bottom_state::
-                    constellation_and_new_bottom_states(initial_constellation); assert(bi->start_bottom_states!=first_unmarked_bottom_state ||
-                                                                                       !m_R.empty());
-                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                                                                                  // two identical for loops, only the loop variable `s` is different.
-                                                                                  for (const state_in_block_pointer*
-                                                                                                s=bi->start_bottom_states; s!=first_unmarked_bottom_state; ++s)
-                                                                                  { // assign the work to the a-transitions from *s->ref_state with label a
-                                                                                    outgoing_transitions_const_it out_it_end=
-                                                                                       std::next(s->ref_state)==m_states.end() ? m_outgoing_transitions.end()
-                                                                                                         : std::next(s->ref_state)->start_outgoing_transitions;
-                                                                                    outgoing_transitions_const_it
-                                                                                                               out_it=s->ref_state->start_outgoing_transitions;
-                                                                                    assert(out_it<out_it_end);
-                                                                                    for (;;)
-                                                                                    { assert(out_it<=out_it->start_same_saC);
-                                                                                      const transition& t=m_aut.get_transitions()[out_it->ref.transitions];
-                                                                                      if (label_or_divergence(t)==a)
-                                                                                      { out_it_end=out_it->start_same_saC;
-                                                                                        do
-                                                                                        { mCRL2complexity(&m_transitions[out_it->ref.transitions], add_work(
-                                                                                            check_complexity::create_initial_partition__refine_block,1),*this);
-                                                                                        }
-                                                                                        while (++out_it<=out_it_end);
-                                                                                        break;
-                                                                                      }
-                                                                                      else
-                                                                                      { // skip the complete saC slice
-                                                                                        out_it=std::next(out_it->start_same_saC);
-                                                                                        assert(out_it<out_it_end); // we should find some a-transitions
-                                                                                      }
-                                                                                    }
-                                                                                  }
-                                                                                  for (state_in_block_pointer s: m_R)
-                                                                                  { // assign the work to the a-transitions from *s->ref_state with label a
-                                                                                    outgoing_transitions_const_it out_it_end=
-                                                                                       std::next(s.ref_state)==m_states.end() ? m_outgoing_transitions.end()
-                                                                                                          : std::next(s.ref_state)->start_outgoing_transitions;
-                                                                                    outgoing_transitions_const_it
-                                                                                                                out_it=s.ref_state->start_outgoing_transitions;
-                                                                                    assert(out_it<out_it_end);
-                                                                                    for (;;)
-                                                                                    { assert(out_it<=out_it->start_same_saC);
-                                                                                      const transition& t=m_aut.get_transitions()[out_it->ref.transitions];
-                                                                                      if (label_or_divergence(t)==a)
-                                                                                      { out_it_end=out_it->start_same_saC;
-                                                                                        do
-                                                                                        { mCRL2complexity(&m_transitions[out_it->ref.transitions], add_work(
-                                                                                            check_complexity::create_initial_partition__refine_block,1),*this);
-                                                                                        }
-                                                                                        while (++out_it<=out_it_end);
-                                                                                        break;
-                                                                                      }
-                                                                                      else
-                                                                                      { // skip the complete saC slice
-                                                                                        out_it=std::next(out_it->start_same_saC);
-                                                                                        assert(out_it<out_it_end); // we should find some a-transitions
-                                                                                      }
-                                                                                    }
-                                                                                  }
-                                                                                #endif
-              if (first_unmarked_bottom_state<bi->sta.rt_non_bottom_states)
-              {
-                block_type* new_block;
-                splitB<true>(bi, nullptr /* no splitter */,
-                             first_unmarked_bottom_state,
-                             nullptr /* no splitter_end_unmarked_BLC */,
-                             new_block,
-                             null_constellation, null_constellation,
-                             false);
-              }
-              else
-              {                                                                 assert(first_unmarked_bottom_state==bi->sta.rt_non_bottom_states);
-                clear_state_counters(true);
-                m_R.clear();
-              }
-#endif
             }
           }
           while (++blc_it!=temporary_BLC_list.end());
@@ -8338,54 +6577,6 @@ one_slice_has_finished:
               }
             }
 
-#ifndef USE_FOUR_WAY_SPLIT
-            // mark one cotransition from the same source state (if it exists)
-            // If the main transitions are constellation-inert (i.e. they go
-            // from index_block_B to index_block_B), we shall not stabilize
-            // under them, so we shall also not mark these transitions.
-            // (This is also needed to ensure that the BLC set for the special
-            // new-bottom-state split does not contain any spurious markings.)
-            // If the main transitions start in the old constellation, the
-            // co-transitions are constellation-inert and we do not need to
-            // stabilize under them.
-
-            else if (!m_states[t.from()].block->contains_new_bottom_states &&
-                     !source_block_is_singleton &&
-                     (!is_inert_during_init(t) ||
-                      (/* m_states[t.from()].block != index_block_B && */       assert(index_block_B->c.onstellation==old_constellation),
-                       m_states[t.from()].block->c.onstellation!=
-                                                           old_constellation)))
-            {
-              // This is the first transition in the saC-slice
-              // It is not inert, and it has not just become non-inert.
-              // (Note that the constellation of index_block_B has not yet been changed.)
-              // Now we set the pointer to a co-splitter.
-              const outgoing_transitions_it start_old_saC=
-                                                      std::next(start_new_saC);
-              if (start_old_saC < (t.from()+1 >= m_aut.num_states()
-                            ? m_outgoing_transitions.end()
-                            : m_states[t.from()+1].start_outgoing_transitions))
-              {                                                                 assert(start_old_saC<=start_old_saC->start_same_saC);
-                const transition& old_t=m_aut.get_transitions()
-                                         [*start_old_saC->ref.BLC_transitions]; assert(old_t.from() == t.from());
-                if (label_or_divergence(t) == label_or_divergence(old_t) &&
-                    old_constellation==
-                                    m_states[old_t.to()].block->c.onstellation)
-                {
-                  BLC_indicators& ind=*m_transitions[t_index].
-                                        transitions_per_block_to_constellation;
-                  if (ind.is_stable())
-                  {
-                    ind.make_unstable();
-                    // The co-splitter will be moved to its position at the end
-                    // of the BLC list later.
-                  }
-                  mark_BLC_transition(start_old_saC);
-                }
-              }
-            }
-#endif
-
             // Update the doubly linked list L_B->C in blocks as the constellation is split in B and C\B.
             if (update_the_doubly_linked_list_LBC_new_constellation(index_block_B, t, t_index) &&
                 !source_block_is_singleton &&
@@ -8436,25 +6627,6 @@ one_slice_has_finished:
             // there are some transitions to the corresponding co-splitter,
             // so we will have to stabilize the block
             calM_elt->second = ind->end_same_BLC;
-#ifndef USE_FOUR_WAY_SPLIT
-            ind->make_unstable();
-            ind->start_marked_BLC=ind->start_same_BLC;                          // The mCRL2complexity call above assigns work to every transition in ind,
-                                                                                // so we are allowed to mark all transitions at once.
-            if (nullptr!=next_t)
-            {
-              // the co-splitter has already been marked as unstable if there
-              // are transitions from bottom states, but it needs to be marked
-              // always
-              const linked_list<BLC_indicators>::iterator co_ind=
-                              m_transitions[*ind->end_same_BLC].
-                                        transitions_per_block_to_constellation;
-              if (co_ind->is_stable())
-              {
-                co_ind->make_unstable();
-              }                                                                 else  {  assert(co_ind->has_marked_transitions());  }
-                                                                                assert(co_ind->start_same_BLC==ind->end_same_BLC);
-            }
-#endif
             ++calM_elt;
           }
           else
@@ -8486,42 +6658,7 @@ one_slice_has_finished:
             ++no_of_non_constellation_inert_BLC_sets;
 //std::cerr << " There is a tau-co-splitter";
             if (number_of_states_in_block(*index_block_B) > 1)
-            {
-#ifndef USE_FOUR_WAY_SPLIT
-              tau_co_splitter->make_unstable();                                 // We have to give credit for marking all transitions in the splitter at once:
-              tau_co_splitter->start_marked_BLC=
-                                               tau_co_splitter->start_same_BLC; mCRL2complexity(tau_co_splitter, add_work(check_complexity::
-                                                                                     refine_partition_until_it_becomes_stable__prepare_cosplit, max_C), *this);
-              // The routine below has a side effect, as it sets m_R for all bottom states of block B.
-              state_in_block_pointer* first_unmarked_bottom_state=
-               not_all_bottom_states_are_touched(index_block_B, tau_co_splitter
-                                                                                #ifndef NDEBUG
-                                                                                  , tau_co_splitter->start_marked_BLC
-                                                                                #endif
-                            );
-              if (first_unmarked_bottom_state<
-                                       index_block_B->sta.rt_non_bottom_states)
-              {                                                                 assert(m_states[m_aut.get_transitions()
-                                                                                              [*tau_co_splitter->start_same_BLC].from()].block==index_block_B);
-              // Algorithm 1, line 1.10.
-                block_type* new_block;
-                splitB(index_block_B, tau_co_splitter,
-                        first_unmarked_bottom_state,
-                        tau_co_splitter->start_marked_BLC,
-                        new_block,
-                        old_constellation, // needed, because index_block_B
-                              // might be split again later under other labels.
-                        new_constellation
-                        );
-              }
-              else
-              {
-                tau_co_splitter->make_stable();
-                // no need to move the splitter to the beginning of the list,
-                // as we never moved it from there anyway.
-              }
-#else
-                                                                                assert(tau_co_splitter->is_stable());
+            {                                                                   assert(tau_co_splitter->is_stable());
 //std::cerr << "DO A TAU CO SPLIT " << old_constellation << "\n";
               four_way_splitB<true, false>(index_block_B, tau_co_splitter,
                         index_block_B->block.to_constellation.end(),
@@ -8529,7 +6666,6 @@ one_slice_has_finished:
                               // might be split again later under other labels.
                         new_constellation
                         );
-#endif
 //std::cerr << "The new constellation now consists of the blocks:\n";
 //for (const state_in_block_pointer* blk_it=new_constellation->start_const_states;
 //  blk_it!=new_constellation->end_const_states;
@@ -8554,13 +6690,7 @@ one_slice_has_finished:
                           m_transitions[*std::prev(calM_elt.second)].
                                         transitions_per_block_to_constellation; mCRL2complexity(splitter, add_work(check_complexity::
                                                                                     refine_partition_until_it_becomes_stable__execute_main_split,max_C),*this);
-                                                                                assert(splitter->start_same_BLC<calM_elt.second);
-                                                                                assert(splitter->end_same_BLC==calM_elt.second);
-                                                                                #ifndef USE_FOUR_WAY_SPLIT
-                                                                                  assert(!splitter->is_stable());
-                                                                                  assert(splitter->start_same_BLC<=splitter->start_marked_BLC);
-                                                                                  assert(splitter->start_marked_BLC<=splitter->end_same_BLC);
-                                                                                #endif
+                                                                                assert(splitter->end_same_BLC==calM_elt.second); assert(splitter->is_stable());
             calM_elt.second = splitter->start_same_BLC;                         assert(splitter->start_same_BLC<splitter->end_same_BLC);
 
             const transition& first_t=
@@ -8573,13 +6703,6 @@ one_slice_has_finished:
             {
               // a block with 1 state does not need to be split
 //std::cerr << "No main/co-split is needed because the block contains only 1 state.\n";
-              //splitter->make_stable();
-              // The following would require to calculate the co-splitter even
-              // in this case:
-              //if (Bpp->block.to_constellation.end()!=co_splitter)
-              //{
-              //  co_splitter->make_stable();
-              //}
             }
             else if (Bpp->contains_new_bottom_states)
             {
@@ -8587,217 +6710,34 @@ one_slice_has_finished:
               // necessary to spend any work on it now.
               // We will later stabilize it in stabilizeB().
 //std::cerr << "No main/co-split is needed because the block contains new bottom states.\n";
-              //splitter->make_stable();
-              // The following would require to calculate the co-splitter even
-              // in this case:
-              //if (Bpp->block.to_constellation.end()!=co_splitter)
-              //{
-              //  co_splitter->make_stable();
-              //}
+            }
+            else if (is_inert_during_init(first_t) &&
+                     old_constellation==Bpp->c.onstellation)
+            {
+              // The co-splitter would be constellation-inert, so no co-split
+              // is needed
+              four_way_splitB<true, false>(Bpp, splitter,
+                                Bpp->block.to_constellation.end(),
+                                         old_constellation, new_constellation);
             }
             else
             {
-#ifndef USE_FOUR_WAY_SPLIT
-                                                                                assert(splitter->has_marked_transitions());
-                                                                                assert(splitter->start_marked_BLC==splitter->start_same_BLC);
               linked_list<BLC_indicators>::iterator co_splitter=
                                     Bpp->block.to_constellation.prev(splitter);
-              if (Bpp->block.to_constellation.end()!=co_splitter)
-              {                                                                 assert(co_splitter->start_same_BLC<co_splitter->end_same_BLC);
-                const transition& co_t=m_aut.get_transitions()
-                                                [*co_splitter->start_same_BLC]; assert(m_states[co_t.from()].block==Bpp);
-                if (a!=label_or_divergence(co_t) ||
-                    old_constellation!=
-                                     m_states[co_t.to()].block->c.onstellation)
-                {
-                  // This is not the real co-splitter.
-                  co_splitter=Bpp->block.to_constellation.end();
-                }
-                else if (is_inert_during_init(co_t) &&
-                         Bpp->c.onstellation==old_constellation)
-                {                                                               assert(co_splitter->is_stable());
-                  // the co-splitter contains constellation-inert
-                  // transitions, so no stabilisation under this co-splitter is needed.
-                  co_splitter=Bpp->block.to_constellation.end();
-                }
-              }
-              state_in_block_pointer* first_unmarked_bottom_state=
-                      not_all_bottom_states_are_touched(Bpp, splitter
-                                                                                #ifndef NDEBUG
-                                                                                  , splitter->start_marked_BLC
-                                                                                #endif
-                        );
-              if (first_unmarked_bottom_state<Bpp->sta.rt_non_bottom_states)
-              {                                                                 assert(m_states[m_aut.get_transitions()[*splitter->start_same_BLC].from()].
-                                                                                                                  block==Bpp);
-                const BLC_list_iterator_or_null co_splitter_begin=
-                        Bpp->block.to_constellation.end()==co_splitter
-                                       ? nullptr : co_splitter->start_same_BLC;
-                BLC_list_iterator_or_null co_splitter_end=
-                        Bpp->block.to_constellation.end()==co_splitter
-                                         ? nullptr : co_splitter->end_same_BLC;
-              // Algorithm 1, line 1.12.
-                block_type* new_block;
-                Bpp = splitB(Bpp, splitter,
-                                        first_unmarked_bottom_state,
-                                        splitter->start_marked_BLC,
-                                        new_block,
-                                        old_constellation, new_constellation);
-                if (linked_list<BLC_indicators>::end()!=co_splitter)
-                {
-                  // we need to use linked_list<BLC_indicators>::end(), the
-                  // static function, because it is unclear whether Bpp is
-                  // still a valid block (it could be that all states in the
-                  // R-subblock are new bottom states). But even in that case
-                  // we have to declare the co-splitter part of the U-subblock
-                  // stable, so we cannot just skip the loop that comes here:
-
-                  // The former co-splitter has been separated into up to three parts:
-                  // one with transitions starting in the R-subblock (that will be the true co-splitter);
-                  // one with transitions starting in the U-subblock (that actually is already stable);
-                  // one with transitions starting in new bottom states and their predecessors.
-                  co_splitter=linked_list<BLC_indicators>::end();               assert(co_splitter_begin<co_splitter_end);
-                                                                                #ifndef NDEBUG
-                                                                                  int number_of_iterations=0;
-                                                                                #endif
-                  do
-                  {
-                                                                                #ifndef NDEBUG
-                                                                                  // ensure that there are at most 3 iterations in this loop
-                                                                                  // (to keep time complexity within O(1)).
-                                                                                  ++number_of_iterations; assert(number_of_iterations<=3);
-                                                                                #endif
-                    linked_list<BLC_indicators>::iterator candidate=
-                              m_transitions[*std::prev(co_splitter_end)].
-                                        transitions_per_block_to_constellation;
-                    co_splitter_end=candidate->start_same_BLC;
-                    const transition& t=
-                           m_aut.get_transitions()[*candidate->start_same_BLC]; assert(m_states[t.to()].block->c.onstellation==old_constellation);
-                    block_type* const from_block=m_states[t.from()].block;
-                    if (from_block==Bpp)
-                    {                                                           assert(null_block!=Bpp);
-                      /* This is the part that starts in the R-subblock      */ assert(linked_list<BLC_indicators>::end()==co_splitter);
-                      co_splitter=candidate;
-                    }
-                    else if (from_block->contains_new_bottom_states)
-                    {
-                      // This is the part that starts in the new bottom block.
-                      // Don't do anything.
-                      //candidate->make_stable(); // forget state markings
-                    }
-                    else
-                    {
-                      // This is the part that starts in the U-subblock.
-                      // It is actually already stable.
-                      // So we should mark it as such and move it to the
-                      /* beginning of its list of BLC sets.                  */ assert(!candidate->has_marked_transitions());
-                      if (!candidate->is_stable()) // sometimes the checking of
-                            // co-splitters turns this co-splitter part stable,
-                            // as it never has a corresponding splitter
-                      {
-                        candidate->make_stable();
-                      }
-                    }
-                  }
-                  while (co_splitter_begin<co_splitter_end);
-                }
-                if (null_block == Bpp)
-                {
-                  // all bottom states in the R-subblock are new bottom states.
-                  // Then no co-split is needed to stabilize the old bottom
-                  // states in the R-block!
-                  continue;
-                }
-                // Algorithm 1, line 1.13.
-                // Algorithm 1, line 1.14 is implicitly done in the call of
-                // splitB above.
-              }
-              else
-              {
-                splitter->make_stable();
-              }                                                                 assert(!Bpp->contains_new_bottom_states);
-              // Algorithm 1, line 1.17 and line 1.18.
-              if (Bpp->block.to_constellation.end()!=co_splitter)
-              {                                                                 assert(!co_splitter->is_stable());
-                // Algorithm 1, line 1.19.
-                if (1>=number_of_states_in_block(*Bpp))
-                {
-                  //co_splitter->make_stable();
-                }
-                else
-                {
-                  first_unmarked_bottom_state=
-                      not_all_bottom_states_are_touched(Bpp, co_splitter
-                                                                                #ifndef NDEBUG
-                                                                                  , co_splitter->start_marked_BLC
-                                                                                #endif
-                            );
-                  if(first_unmarked_bottom_state<Bpp->sta.rt_non_bottom_states)
-                  {                                                             assert(m_states[m_aut.get_transitions()[*co_splitter->start_same_BLC].from()].
-                                                                                                                                        block==Bpp);
-                    block_type* new_block;
-                    splitB(Bpp, co_splitter,
-                        first_unmarked_bottom_state,
-                        co_splitter->start_marked_BLC,
-                        new_block,
-                        old_constellation, new_constellation);
-                  }
-                  else
-                  {
-                    co_splitter->make_stable();
-                  }
-                }
-                // Algorithm 1, line 1.20 and 1.21. P is updated implicitly when splitting Bpp.
-              }
-              else
-              {                                                                 // check that there is really no co-splitter
-                                                                                #ifndef NDEBUG
-                                                                                  if (!m_branching || !m_aut.is_tau(a) ||
-                                                                                      Bpp->c.onstellation!=old_constellation)
-                                                                                  {
-                                                                                    for (const BLC_indicators& ind : Bpp->block.to_constellation)
-                                                                                    {
-                                                                                      assert(ind.start_same_BLC<ind.end_same_BLC);
-                                                                                      const transition& co_t=m_aut.get_transitions()[*ind.start_same_BLC];
-                                                                                      assert(m_states[co_t.from()].block==Bpp);
-                                                                                      assert(label_or_divergence(co_t)!=a ||
-                                                                                             m_states[co_t.to()].block->c.onstellation!=old_constellation);
-                                                                                    }
-                                                                                  }
-                                                                                #endif
-              }
-#else
-                                                                                assert(splitter->is_stable());
-              if (is_inert_during_init(first_t) &&
-                  old_constellation==Bpp->c.onstellation)
-              {
-                // The co-splitter would be constellation-inert, so no co-split
-                // is needed
-                four_way_splitB<true, false>(Bpp, splitter,
-                                Bpp->block.to_constellation.end(),
-                                         old_constellation, new_constellation);
-              }
-              else
-              {
-                linked_list<BLC_indicators>::iterator co_splitter=
-                                    Bpp->block.to_constellation.prev(splitter);
-                const transition* co_t;
-                if (Bpp->block.to_constellation.end()!=co_splitter &&
-                    (                                                           assert(co_splitter->is_stable()),
+              const transition* co_t;
+              if (Bpp->block.to_constellation.end()!=co_splitter &&
+                  (                                                             assert(co_splitter->is_stable()),
                                                                                 assert(co_splitter->start_same_BLC<co_splitter->end_same_BLC),
-                     co_t=&m_aut.get_transitions()
-                                                [*co_splitter->start_same_BLC], assert(m_states[co_t->from()].block==Bpp),
-                     a==label_or_divergence(*co_t) &&
-                     old_constellation==
+                   co_t=&m_aut.get_transitions()[*co_splitter->start_same_BLC], assert(m_states[co_t->from()].block==Bpp),
+                   a==label_or_divergence(*co_t) &&
+                   old_constellation==
                                    m_states[co_t->to()].block->c.onstellation))
-                {
+              {
 //std::cerr << "Co-splitter: " << co_splitter->debug_id(*this) << '\n';
-                  four_way_splitB<true, true>(Bpp, splitter, co_splitter,
+                four_way_splitB<true, true>(Bpp, splitter, co_splitter,
                                          old_constellation, new_constellation);
-                }
-//else std::cerr << "No stabilization needed because the main splitter of non-inert transitions has no co-splitter.\n";
               }
-#endif
+//else std::cerr << "No stabilization needed because the main splitter of non-inert transitions has no co-splitter.\n";
             }
           }
           while (calM_elt.first < calM_elt.second);
@@ -8915,17 +6855,6 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
             // For example, if CLOCKS_PER_SEC>=     20: >=2 digits
             //              If CLOCKS_PER_SEC>=    200: >=3 digits
             //              If CLOCKS_PER_SEC>=2000000: >=7 digits
-
-        mCRL2log(log::verbose) << "Running times measured using the "
-            #ifdef USE_FOUR_WAY_SPLIT
-                "four-way split"
-            #else
-                "two-way split"
-            #endif
-            #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                " and with counting the cancelled steps in the coroutines"
-            #endif
-            "\n";
 
         double runtime[5];
         runtime[0]=(double) (end_finalizing                        -                        start_SCC)/CLOCKS_PER_SEC; // total time
