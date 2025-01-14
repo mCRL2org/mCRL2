@@ -13,7 +13,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/lps/linearise_allow_block.h"
+#include "../include/mcrl2/lps/linearise_allow_block.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -153,3 +153,5 @@ BOOST_AUTO_TEST_CASE(test_allow)
   bb.push_front(b);
   BOOST_ASSERT(!allow_(allow_ab_abb_cd(), bb, termination_action));
 }
+
+// TODO: extend with tests for block.
