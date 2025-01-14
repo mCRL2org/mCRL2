@@ -13,8 +13,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/process/rename_expression.h"
-#include "mcrl2/lps/linearise_rename.h"
+#include "../../process/include/mcrl2/process/rename_expression.h"
+#include "../include/mcrl2/lps/linearise_rename.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -55,7 +55,7 @@ inline
 rename_expression_list rename_rule_cd()
 {
   rename_expression_list result;
-  result.push_front(rename_expression("a", "b"));
+  result.push_front(rename_expression("c", "d"));
   return result;
 }
 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_rename_action_with_sort)
   auto a = make_action("a", {data::sort_bool::true_()});
   auto b = make_action("b", {data::sort_bool::true_()});
   auto c = make_action("c", {data::variable("x", data::basic_sort("D"))});
-  auto d = make_action("d", {data::variable("x", data::basic_sort("D"))}););
+  auto d = make_action("d", {data::variable("x", data::basic_sort("D"))});
   auto e = make_action("e");
 
   BOOST_CHECK_EQUAL(lps::rename(rename_rule_ab(), a), b);
@@ -143,16 +143,16 @@ BOOST_AUTO_TEST_CASE(test_rename_action_list)
   bc.push_front(b);
 
   action_list bd;
-  bc.push_front(d);
-  bc.push_front(b);
+  bd.push_front(d);
+  bd.push_front(b);
 
   action_list cd;
   cd.push_front(d);
   cd.push_front(c);
 
   action_list dd;
-  cd.push_front(d);
-  cd.push_front(d);
+  dd.push_front(d);
+  dd.push_front(d);
 
   action_list de;
   de.push_front(e);
