@@ -285,13 +285,10 @@ class comm_entry
   /// The function calculates whether the actions in m (consisting of actions and data) occur in a left hand side
   /// of a communication a1|...|ak -> b in C (that is, the names of m are a subbag of a1|...|ak), and the actions
   /// a1|...|ak that are not in m are in n. I.e., there is a subbag o of n such that m+o can communicate.
-  template <typename ConstIterType>
-  bool might_communicate(const action_multiset_t& m,
-      ConstIterType n_first,
-      ConstIterType n_last)
+  bool might_communicate(const action_multiset_t& m, const action_multiset_t& n)
     {
       assert(std::is_sorted(m.begin(), m.end(), action_compare()));
-      assert(std::is_sorted(n_first, n_last, action_compare()));
+      assert(std::is_sorted(n.begin(), n.end(), action_compare()));
 
       /* this function indicates whether the actions in m
          consisting of actions and data occur in C, such that
@@ -310,8 +307,8 @@ class comm_entry
         // before matching all actions in the lhs, we set it to std::nullopt.
         // N.B. when rest[i] becomes empty after matching all actions in the lhs,
         // rest[i].empty() is a meaningful result: we have a successful match.
-        std::vector<std::optional<ConstIterType>>
-          rest(size(), n_first); // pairs of iterator into n; the second element of the pair indicates the end of the range in n.
+        std::vector<std::optional<action_multiset_t::const_iterator>>
+          rest(size(), n.begin()); // pairs of iterator into n; the second element of the pair indicates the end of the range in n.
 
         // check every lhs
         for (std::size_t i = 0; i < size(); ++i)
@@ -326,7 +323,7 @@ class comm_entry
           {
             assert(rest[i] != std::nullopt);
             // .. find them in rest[i]
-            if (*rest[i] == n_last) // no luck
+            if (*rest[i] == n.end()) // no luck
             {
               rest[i] = std::nullopt;
               break;
@@ -338,7 +335,7 @@ class comm_entry
             while (comm_name != rest_name)
             {
               ++(*rest[i]);
-              if (*rest[i] == n_last) // no more
+              if (*rest[i] == n.end()) // no more
               {
                 rest[i] = std::nullopt;
                 break;
@@ -381,8 +378,7 @@ bool maybe_allowed(const process::action_label& a, bool filter_unallowed_actions
 /// \prototype
 inline
 tuple_list makeMultiActionConditionList_aux(
-  action_multiset_t::const_iterator m_first,
-  action_multiset_t::const_iterator m_last,
+  const action_multiset_t& m,
   comm_entry& C,
   const action_multiset_t& r,
   const std::vector<action_name_t>& allowed_actions,
@@ -402,8 +398,7 @@ inline
 tuple_list phi(const action_multiset_t& m,
                const data::data_expression_list& d,
                const action_multiset_t& w,
-               const action_multiset_t::const_iterator& n_first,
-               const action_multiset_t::const_iterator& n_last,
+               const action_multiset_t& n,
                const action_multiset_t& r,
                comm_entry& comm_table,
                const std::vector<action_name_t>& allowed_actions,
@@ -413,15 +408,15 @@ tuple_list phi(const action_multiset_t& m,
 {
   assert(std::is_sorted(m.begin(), m.end(), action_compare()));
   assert(std::is_sorted(w.begin(), w.end(), action_compare()));
-  assert(std::is_sorted(n_first, n_last, action_compare()));
+  assert(std::is_sorted(n.begin(), n.end(), action_compare()));
   assert(std::is_sorted(r.begin(), r.end(), action_compare()));
 
   tuple_list S;
 
   // \exists_{o,c} (\mu(m) \oplus o, c) \in C, with o \subseteq n
-  if (comm_table.might_communicate(m, n_first, n_last))
+  if (comm_table.might_communicate(m, n))
   {
-    if (n_first == n_last) // b \land n = []
+    if (n.empty()) // b \land n = []
     {
       // There is communication expression whose lhs matches m, result is c.
       const process::action_label c = comm_table.can_communicate(m); /* returns process::action_label() if no communication
@@ -433,7 +428,7 @@ tuple_list phi(const action_multiset_t& m,
         // the result of the communication is part of an allow, not in the block set.
         // Calculate communication for multiaction w.
         // T := \overline{\gamma}(w, C)
-        tuple_list T = makeMultiActionConditionList_aux(w.begin(), w.end(),comm_table, r, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
+        tuple_list T = makeMultiActionConditionList_aux(w,comm_table, r, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
 
         // S := \{ (c(d) \oplus r, e) \mid (r,e) \in T \}
         addActionCondition(process::action(c,d), data::sort_bool::true_(), std::move(T), S);
@@ -442,19 +437,20 @@ tuple_list phi(const action_multiset_t& m,
     else
     {
       // n = [a(f)] \oplus o
-      const process::action& a = *n_first;
+      const process::action& a = n.front();
+      const action_multiset_t& n_tail = n.tail();
 
       const data::data_expression condition=pairwise_equal_to(d,a.arguments(),RewriteTerm);
       if (condition==data::sort_bool::false_())
       {
         // a(f) cannot take part in communication as the arguments do not match. Move to w and continue with next action
-        S = phi(m,d,insert(a, w),std::next(n_first), n_last,r,comm_table, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
+        S = phi(m,d,insert(a, w), n_tail, r,comm_table, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
       }
       else
       {
-        tuple_list T=phi(insert(a, m),d,w,std::next(n_first), n_last,r,comm_table, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
+        tuple_list T=phi(insert(a, m),d,w, n_tail,r,comm_table, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
 
-        S = phi(m,d,insert(a, w),std::next(n_first), n_last,r,comm_table,allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
+        S = phi(m,d,insert(a, w), n_tail,r,comm_table,allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
         addActionCondition(process::action(), condition, std::move(T), S);
       }
     }
@@ -463,21 +459,19 @@ tuple_list phi(const action_multiset_t& m,
   return S;
 }
 
-template <typename ConstIterType>
 bool xi(const action_multiset_t& alpha,
-        const ConstIterType& beta_first,
-        const ConstIterType& beta_last,
+        const action_multiset_t& beta,
         comm_entry& comm_table)
 {
   bool result = false;
 
-  if (beta_first == beta_last)
+  if (beta.empty())
   {
     result = comm_table.can_communicate(alpha)!=process::action_label();
   }
   else
   {
-    const action_multiset_t alpha_ = insert(*beta_first, alpha);
+    const action_multiset_t alpha_ = insert(beta.front(), alpha);
 
     if (comm_table.can_communicate(alpha_)!=process::action_label())
     {
@@ -485,46 +479,44 @@ bool xi(const action_multiset_t& alpha,
     }
     else
     {
-      if (comm_table.might_communicate(alpha_,std::next(beta_first), beta_last))
+      const action_multiset_t& beta_tail = beta.tail();
+      if (comm_table.might_communicate(alpha_, beta_tail))
       {
-        result = xi(alpha,std::next(beta_first), beta_last,comm_table);
+        result = xi(alpha, beta_tail, comm_table);
       }
 
-      result = result || xi(alpha,std::next(beta_first), beta_last, comm_table);
+      result = result || xi(alpha, beta_tail, comm_table);
     }
   }
   return result;
 }
 
 inline
-data::data_expression psi(const action_multiset_t& alpha, comm_entry& comm_table, const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
+data::data_expression psi(action_multiset_t alpha, comm_entry& comm_table, const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
   assert(std::is_sorted(alpha.begin(), alpha.end(), action_compare()));
-  action_multiset_t::const_iterator alpha_first = alpha.begin();
-  const action_multiset_t::const_iterator alpha_last = alpha.end();
-
   data::data_expression cond = data::sort_bool::false_();
 
   action_multiset_t actl; // used in inner loop.
-  while (alpha_first != alpha_last)
+  while (!alpha.empty())
   {
-    action_multiset_t::const_iterator beta_first = std::next(alpha_first);
-    const action_multiset_t::const_iterator beta_last = alpha_last;
+    action_multiset_t beta = alpha.tail();
 
-    while (beta_first != beta_last)
+    while (!beta.empty())
     {
       actl = action_multiset_t();
-      actl = insert(*alpha_first, actl);
-      actl = insert(*beta_first, actl);
-      if (comm_table.might_communicate(actl,std::next(beta_first), beta_last) && xi(actl,std::next(beta_first), beta_last,comm_table))
+      actl = insert(alpha.front(), actl);
+      actl = insert(beta.front(), actl);
+      const action_multiset_t& beta_tail = beta.tail();
+      if (comm_table.might_communicate(actl, beta_tail) && xi(actl, beta_tail, comm_table))
       {
         // sort and remove duplicates??
-        cond = data::lazy::or_(cond,pairwise_equal_to(alpha_first->arguments(),beta_first->arguments(),RewriteTerm));
+        cond = data::lazy::or_(cond,pairwise_equal_to(alpha.front().arguments(), beta.front().arguments(), RewriteTerm));
       }
-      beta_first = std::next(beta_first);
+      beta = beta_tail;
     }
 
-    alpha_first = std::next(alpha_first);
+    alpha = alpha.tail();
   }
   cond = data::lazy::not_(cond);
   return cond;
@@ -542,8 +534,7 @@ data::data_expression psi(const action_multiset_t& alpha, comm_entry& comm_table
 /// \param RewriteTerm Data rewriter for simplifying expressions.
 inline
 tuple_list makeMultiActionConditionList_aux(
-  action_multiset_t::const_iterator m_first,
-  action_multiset_t::const_iterator m_last,
+  const action_multiset_t& m,
   comm_entry& C,
   const action_multiset_t& r,
   const std::vector<action_name_t>& allowed_actions,
@@ -557,7 +548,7 @@ tuple_list makeMultiActionConditionList_aux(
   tuple_list S; // result
 
   // if m = [], then S := { (r, \psi(r, C)) }
-  if (m_first == m_last)
+  if (m.empty())
   {
     if (r.empty())
     {
@@ -574,10 +565,11 @@ tuple_list makeMultiActionConditionList_aux(
   else
   {
     // m = [a(d)] \oplus n
-    const process::action& a = *m_first;
+    const process::action& a = m.front();
+    const action_multiset_t& m_tail = m.tail();
 
     // S = \phi(a(d), d, [], n, C, r)
-    S = phi({a}, a.arguments(), action_multiset_t(), std::next(m_first), m_last,
+    S = phi({a}, a.arguments(), action_multiset_t(), m_tail,
             r,C, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
 
     // addActionCondition adds a to every multiaction in T; so if a is not part of any allowed action,
@@ -585,7 +577,7 @@ tuple_list makeMultiActionConditionList_aux(
     if (maybe_allowed(a.label(), filter_unallowed_actions, allowed_actions, blocked_actions))
     {
       // T = \overline{\gamma}(n, C, [a(d)] \oplus r)
-      tuple_list T = makeMultiActionConditionList_aux(std::next(m_first), m_last,C,
+      tuple_list T = makeMultiActionConditionList_aux(m_tail,C,
                            insert(a, r), allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
 
       // S := S \cup \{ (a,true) \oplus t \mid t \in T \}
@@ -622,7 +614,7 @@ tuple_list makeMultiActionConditionList(
   assert(std::is_sorted(m.begin(), m.end(), action_compare()));
   comm_entry comm_table(C);
   const action_multiset_t r;
-  return makeMultiActionConditionList_aux(m.begin(), m.end(), comm_table, r, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
+  return makeMultiActionConditionList_aux(m, comm_table, r, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
 }
 
 /// Get a sorted list of action names that appear in any of the elements of allowlist
