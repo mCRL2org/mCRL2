@@ -28,11 +28,6 @@ namespace mcrl2
 namespace lps
 {
 
-using action_name_t = core::identifier_string;
-using action_multiset_t = process::action_list; // sorted w.r.t. action_compare
-using action_name_multiset_t = core::identifier_string_list; // sorted w.r.t. action_label_compare
-
-
 /// Calculate data expression for pairwise equality of the elements of l1 and l2.
 ///
 /// If the lengths of l1 and l2 differ, or for some index i, the sort l1[i] and l2[i] is different, the pairwise
@@ -69,7 +64,7 @@ data::data_expression pairwise_equal_to(const data::data_expression_list& l1, co
 /// can occur.
 struct tuple_list
 {
-  std::vector < action_multiset_t > actions;
+  std::vector < process::action_list > actions;
   std::vector < data::data_expression > conditions;
 
   std::size_t size() const
@@ -80,11 +75,11 @@ struct tuple_list
 
   tuple_list() = default;
 
-  tuple_list(const std::vector < action_multiset_t>& actions_, const std::vector< data::data_expression >& conditions_)
+  tuple_list(const std::vector < process::action_list>& actions_, const std::vector< data::data_expression >& conditions_)
     : actions(actions_), conditions(conditions_)
   {}
 
-  tuple_list(std::vector < action_multiset_t>&& actions_, std::vector< data::data_expression >&& conditions_)
+  tuple_list(std::vector < process::action_list>&& actions_, std::vector< data::data_expression >&& conditions_)
     : actions(std::move(actions_)), conditions(std::move(conditions_))
   {}
 };
@@ -106,7 +101,7 @@ void addActionCondition(const process::action& a, const data::data_expression& c
   }
   else
   {
-    for (action_multiset_t& m: L.actions)
+    for (process::action_list& m: L.actions)
     {
       m = insert(a, m);
       S.actions.emplace_back(std::move(m));
@@ -132,14 +127,14 @@ class comm_entry
 {
   protected:
     /// Left-hand sides of communication expressions
-    const std::vector<action_name_multiset_t> m_lhs;
+    const std::vector<core::identifier_string_list> m_lhs;
 
     /// Right-hand sides of communication expressions
-    const std::vector<action_name_t> m_rhs;
+    const std::vector<core::identifier_string> m_rhs;
 
     /// Temporary data using in determining whether communication is allowed.
     /// See usages of the data structure below.
-    std::vector<action_name_multiset_t::const_iterator> m_lhs_iters; // offset into lhs
+    std::vector<core::identifier_string_list::const_iterator> m_lhs_iters; // offset into lhs
     std::vector<bool> m_match_failed;
 
     void reset_temporary_data()
@@ -155,7 +150,7 @@ class comm_entry
     /// Returns true if this is the case, false otherwise.
     /// Postcondition: for every i such that m is not contained in lhs[i], match_failed[i] is true.
     /// NB: resets temporary data before performing computations.
-    bool match_multiaction(const action_multiset_t& multi_action) {
+    bool match_multiaction(const process::action_list& multi_action) {
       assert(std::is_sorted(multi_action.begin(), multi_action.end(), action_compare()));
 
       reset_temporary_data();
@@ -201,9 +196,9 @@ class comm_entry
 
     // Initialization of lhs, defined as static function so it can be used in the constructor.
     // Allows lhs to be defined as const.
-    static std::vector < action_name_multiset_t > init_lhs(const process::communication_expression_list& communications)
+    static std::vector < core::identifier_string_list > init_lhs(const process::communication_expression_list& communications)
     {
-      std::vector<action_name_multiset_t> result;
+      std::vector<core::identifier_string_list> result;
       for (const process::communication_expression& l: communications)
       {
         const core::identifier_string_list& names = l.action_name().names();
@@ -215,9 +210,9 @@ class comm_entry
 
     // Initialization of rhs, defined as static function so it can be used in the constructor.
     // Allows rhs to be defined as const.
-    static std::vector <action_name_t> init_rhs(const process::communication_expression_list& communications)
+    static std::vector <core::identifier_string> init_rhs(const process::communication_expression_list& communications)
     {
-      std::vector <action_name_t> result;
+      std::vector <core::identifier_string> result;
       for (const process::communication_expression& l: communications)
       {
         result.push_back(l.name());
@@ -253,7 +248,7 @@ class comm_entry
     /// can take place.
     ///
     /// if \exists_{(b,c) \in C} b = \mu(m), return c, otherwise return action_label()
-    process::action_label can_communicate(const action_multiset_t& m)
+    process::action_label can_communicate(const process::action_list& m)
     {
       assert(std::is_sorted(m.begin(), m.end(), action_compare()));
 
@@ -285,7 +280,7 @@ class comm_entry
   /// The function calculates whether the actions in m (consisting of actions and data) occur in a left hand side
   /// of a communication a1|...|ak -> b in C (that is, the names of m are a subbag of a1|...|ak), and the actions
   /// a1|...|ak that are not in m are in n. I.e., there is a subbag o of n such that m+o can communicate.
-  bool might_communicate(const action_multiset_t& m, const action_multiset_t& n)
+  bool might_communicate(const process::action_list& m, const process::action_list& n)
     {
       assert(std::is_sorted(m.begin(), m.end(), action_compare()));
       assert(std::is_sorted(n.begin(), n.end(), action_compare()));
@@ -307,7 +302,7 @@ class comm_entry
         // before matching all actions in the lhs, we set it to std::nullopt.
         // N.B. when rest[i] becomes empty after matching all actions in the lhs,
         // rest[i].empty() is a meaningful result: we have a successful match.
-        std::vector<std::optional<action_multiset_t::const_iterator>>
+        std::vector<std::optional<process::action_list::const_iterator>>
           rest(size(), n.begin()); // pairs of iterator into n; the second element of the pair indicates the end of the range in n.
 
         // check every lhs
@@ -329,8 +324,8 @@ class comm_entry
               break;
             }
             // get first action in lhs i
-            const action_name_t& comm_name = *m_lhs_iters[i];
-            action_name_t rest_name = (*rest[i])->label().name();
+            const core::identifier_string& comm_name = *m_lhs_iters[i];
+            core::identifier_string rest_name = (*rest[i])->label().name();
             // find it in rest[i]
             while (comm_name != rest_name)
             {
@@ -367,7 +362,7 @@ class comm_entry
 /// Determine if the action is allowable, that is, it is part of an allow expression
 /// and it is not part of a block expression
 inline
-bool maybe_allowed(const process::action_label& a, bool filter_unallowed_actions, const std::vector<action_name_t>& allowed_actions, const std::vector<action_name_t>& blocked_actions)
+bool maybe_allowed(const process::action_label& a, bool filter_unallowed_actions, const std::vector<core::identifier_string>& allowed_actions, const std::vector<core::identifier_string>& blocked_actions)
 {
   assert(std::is_sorted(allowed_actions.begin(), allowed_actions.end(), action_name_compare()));
   assert(std::is_sorted(blocked_actions.begin(), blocked_actions.end(), action_name_compare()));
@@ -378,11 +373,11 @@ bool maybe_allowed(const process::action_label& a, bool filter_unallowed_actions
 /// \prototype
 inline
 tuple_list makeMultiActionConditionList_aux(
-  const action_multiset_t& m,
+  const process::action_list& m,
   comm_entry& C,
-  const action_multiset_t& r,
-  const std::vector<action_name_t>& allowed_actions,
-  const std::vector<action_name_t>& blocked_actions,
+  const process::action_list& r,
+  const std::vector<core::identifier_string>& allowed_actions,
+  const std::vector<core::identifier_string>& blocked_actions,
   bool filter_unallowed_actions,
   const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm);
 
@@ -395,14 +390,14 @@ tuple_list makeMultiActionConditionList_aux(
 /// d is the data parameter of the communication and comm_table contains a list of multiaction action pairs
 /// indicating possible communications.
 inline
-tuple_list phi(const action_multiset_t& m,
+tuple_list phi(const process::action_list& m,
                const data::data_expression_list& d,
-               const action_multiset_t& w,
-               const action_multiset_t& n,
-               const action_multiset_t& r,
+               const process::action_list& w,
+               const process::action_list& n,
+               const process::action_list& r,
                comm_entry& comm_table,
-               const std::vector<action_name_t>& allowed_actions,
-               const std::vector<action_name_t>& blocked_actions,
+               const std::vector<core::identifier_string>& allowed_actions,
+               const std::vector<core::identifier_string>& blocked_actions,
                bool filter_unallowed_actions,
                const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
@@ -438,7 +433,7 @@ tuple_list phi(const action_multiset_t& m,
     {
       // n = [a(f)] \oplus o
       const process::action& a = n.front();
-      const action_multiset_t& n_tail = n.tail();
+      const process::action_list& n_tail = n.tail();
 
       const data::data_expression condition=pairwise_equal_to(d,a.arguments(),RewriteTerm);
       if (condition==data::sort_bool::false_())
@@ -459,8 +454,8 @@ tuple_list phi(const action_multiset_t& m,
   return S;
 }
 
-bool xi(const action_multiset_t& alpha,
-        const action_multiset_t& beta,
+bool xi(const process::action_list& alpha,
+        const process::action_list& beta,
         comm_entry& comm_table)
 {
   bool result = false;
@@ -471,7 +466,7 @@ bool xi(const action_multiset_t& alpha,
   }
   else
   {
-    const action_multiset_t alpha_ = insert(beta.front(), alpha);
+    const process::action_list alpha_ = insert(beta.front(), alpha);
 
     if (comm_table.can_communicate(alpha_)!=process::action_label())
     {
@@ -479,7 +474,7 @@ bool xi(const action_multiset_t& alpha,
     }
     else
     {
-      const action_multiset_t& beta_tail = beta.tail();
+      const process::action_list& beta_tail = beta.tail();
       if (comm_table.might_communicate(alpha_, beta_tail))
       {
         result = xi(alpha, beta_tail, comm_table);
@@ -492,22 +487,22 @@ bool xi(const action_multiset_t& alpha,
 }
 
 inline
-data::data_expression psi(action_multiset_t alpha, comm_entry& comm_table, const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
+data::data_expression psi(process::action_list alpha, comm_entry& comm_table, const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
   assert(std::is_sorted(alpha.begin(), alpha.end(), action_compare()));
   data::data_expression cond = data::sort_bool::false_();
 
-  action_multiset_t actl; // used in inner loop.
+  process::action_list actl; // used in inner loop.
   while (!alpha.empty())
   {
-    action_multiset_t beta = alpha.tail();
+    process::action_list beta = alpha.tail();
 
     while (!beta.empty())
     {
-      actl = action_multiset_t();
+      actl = process::action_list();
       actl = insert(alpha.front(), actl);
       actl = insert(beta.front(), actl);
-      const action_multiset_t& beta_tail = beta.tail();
+      const process::action_list& beta_tail = beta.tail();
       if (comm_table.might_communicate(actl, beta_tail) && xi(actl, beta_tail, comm_table))
       {
         // sort and remove duplicates??
@@ -534,11 +529,11 @@ data::data_expression psi(action_multiset_t alpha, comm_entry& comm_table, const
 /// \param RewriteTerm Data rewriter for simplifying expressions.
 inline
 tuple_list makeMultiActionConditionList_aux(
-  const action_multiset_t& m,
+  const process::action_list& m,
   comm_entry& C,
-  const action_multiset_t& r,
-  const std::vector<action_name_t>& allowed_actions,
-  const std::vector<action_name_t>& blocked_actions,
+  const process::action_list& r,
+  const std::vector<core::identifier_string>& allowed_actions,
+  const std::vector<core::identifier_string>& blocked_actions,
   const bool filter_unallowed_actions,
   const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
@@ -566,10 +561,10 @@ tuple_list makeMultiActionConditionList_aux(
   {
     // m = [a(d)] \oplus n
     const process::action& a = m.front();
-    const action_multiset_t& m_tail = m.tail();
+    const process::action_list& m_tail = m.tail();
 
     // S = \phi(a(d), d, [], n, C, r)
-    S = phi({a}, a.arguments(), action_multiset_t(), m_tail,
+    S = phi({a}, a.arguments(), process::action_list(), m_tail,
             r,C, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
 
     // addActionCondition adds a to every multiaction in T; so if a is not part of any allowed action,
@@ -604,16 +599,16 @@ tuple_list makeMultiActionConditionList_aux(
 /// \param RewriteTerm The rewriter that should be used to simplify the conditions.
 inline
 tuple_list makeMultiActionConditionList(
-  const action_multiset_t& m,
+  const process::action_list& m,
   const process::communication_expression_list& C,
-  const std::vector<action_name_t>& allowed_actions,
-  const std::vector<action_name_t>& blocked_actions,
+  const std::vector<core::identifier_string>& allowed_actions,
+  const std::vector<core::identifier_string>& blocked_actions,
   bool filter_unallowed_actions,
   const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 {
   assert(std::is_sorted(m.begin(), m.end(), action_compare()));
   comm_entry comm_table(C);
-  const action_multiset_t r;
+  const process::action_list r;
   return makeMultiActionConditionList_aux(m, comm_table, r, allowed_actions, blocked_actions, filter_unallowed_actions, RewriteTerm);
 }
 
@@ -622,12 +617,12 @@ tuple_list makeMultiActionConditionList(
 /// We use this to remove possible communication results that are not relevant because they
 /// are guaranteed to be removed from the result after the fact.
 inline
-std::vector<action_name_t> get_actions(const process::action_name_multiset_list& allowlist)
+std::vector<core::identifier_string> get_actions(const process::action_name_multiset_list& allowlist)
 {
-  std::vector<action_name_t> result;
+  std::vector<core::identifier_string> result;
   for (const process::action_name_multiset& l : allowlist)
   {
-    const action_name_multiset_t& names = l.names();
+    const core::identifier_string_list& names = l.names();
     result.insert(result.end(), names.begin(), names.end());
     std::sort(result.begin(), result.end(), action_name_compare());
     auto it = std::unique(result.begin(), result.end());
@@ -677,19 +672,19 @@ void communicationcomposition(
 
   // We precompute a vector of blocked actions and a vector of allowed actions. NB the allowed actions are those actions
   // that appear in any allowed multiaction.
-  std::vector<action_name_t> blocked_actions;
+  std::vector<core::identifier_string> blocked_actions;
   if (is_block)
   {
     blocked_actions = get_actions(allowlist);
   }
-  std::vector<action_name_t> allowed_actions;
+  std::vector<core::identifier_string> allowed_actions;
   if (is_allow)
   {
     allowed_actions = get_actions(allowlist);
     // Ensure that the termination action is always allowed, even when it is not an explicit part of
     // the list of allowed actions.
     // We maintains sort order of the vector
-    std::vector<action_name_t>::iterator it = std::upper_bound(allowed_actions.begin(), allowed_actions.end(), terminationAction.label().name(), action_name_compare());
+    std::vector<core::identifier_string>::iterator it = std::upper_bound(allowed_actions.begin(), allowed_actions.end(), terminationAction.label().name(), action_name_compare());
     allowed_actions.insert(it, terminationAction.label().name());
   }
 

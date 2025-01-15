@@ -17,8 +17,6 @@
 #include "../include/mcrl2/lps/linearise_communication.h"
 #include "../include/mcrl2/lps/parse.h"
 
-//#define SKIP_LONG_TESTS
-
 using namespace mcrl2;
 using namespace mcrl2::process;
 using namespace mcrl2::lps;
@@ -129,30 +127,29 @@ BOOST_AUTO_TEST_CASE(test_multact_19)
   data::rewriter R(data_spec());
 
   action_name_multiset_list allow_set_ = allow_set();
-  tuple_list result = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set_), std::vector<action_name_t>(), true, R);
+  tuple_list result = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set_), std::vector<core::identifier_string>(), true, R);
   BOOST_CHECK_EQUAL(result.size(), 0); // This shows we have a dramatic set size!
 
   allow_set_ = sort_multi_action_labels(process::detail::parse_allow_set("{ a1|a4|a5|a9|a11|a13|a56|a57|a64|a82_r }"));
-  result = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set_), std::vector<action_name_t>(), true, R);
+  result = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set_), std::vector<core::identifier_string>(), true, R);
   BOOST_CHECK_EQUAL(result.size(), 1);
   result = filter_allow(result, allow_set_);
   BOOST_CHECK_EQUAL(result.size(), 1);
 
   allow_set_ = sort_multi_action_labels(process::detail::parse_allow_set("{ a1|a4|a5|a9|a11|a13|a56|a57|a64|a82_r, a1|a4_r|a4_s|a5|a9|a11|a13|a56|a57|a64|a82_r }"));
-  result = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set_), std::vector<action_name_t>(), true, R);
+  result = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set_), std::vector<core::identifier_string>(), true, R);
   BOOST_CHECK_EQUAL(result.size(), 2);
   result = filter_allow(result, allow_set_);
   BOOST_CHECK_EQUAL(result.size(), 2);
 
   allow_set_ = sort_multi_action_labels(process::detail::parse_allow_set("{ a1|a4|a5|a9|a11|a13|a56|a57|a64|a82 }"));
-  result = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set_), std::vector<action_name_t>(), true, R);
+  result = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set_), std::vector<core::identifier_string>(), true, R);
   BOOST_CHECK_EQUAL(result.size(), 0);
   result = filter_allow(result, allow_set_);
   BOOST_CHECK_EQUAL(result.size(), 0);
 
 }
 
-#ifndef SKIP_LONG_TESTS
 BOOST_AUTO_TEST_CASE(test_multact_41a)
 {
   const std::string multiact_41a_string("a22_r(d16)|a22_s(true)|a23_r(d17)|a23_s(true)|a24_r(d18)|a24_s(true)|a25_r(d19)|a25_s(true)|a26_r(d20)|a26_s(true)|a27_r(d21)|a27_s(true)|a28_r(d22)|a28_s(true)|a29_r(d23)|a29_s(true)|a30_r(d24)|a30_s(true)|a31_r(d25)|a31_s(true)|a32_r(d26)|a32_s(d27)|a33_r(d28)|a33_s(d29)|a34_r(d30)|a34_s(d31)|a35_r(d32)|a35_s(d33)|a36_r(d34)|a36_s(d35)|a37_r(d36)|a37_s(d37)|a38_r(d38)|a38_s(d39)|a39_r(d40)|a39_s(d41)|a40_r(d42)|a40_s(d43)|a41_r(d44)|a41_s(d45)|b4");
@@ -163,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_multact_41a)
 
   data::rewriter R(data_spec());
 
-  tuple_list S = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set()), std::vector<action_name_t>(), true, R);
+  tuple_list S = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set()), std::vector<core::identifier_string>(), true, R);
   BOOST_CHECK_EQUAL(S.size(), 1); // This shows we have a dramatic set size for communication result!
   tuple_list result = filter_allow(S, allow_set());
   BOOST_CHECK_EQUAL(result.size(), 0);
@@ -179,8 +176,7 @@ BOOST_AUTO_TEST_CASE(test_multact_41b)
 
   data::rewriter R(data_spec());
 
-  tuple_list S = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set()), std::vector<action_name_t>(), true, R);
+  tuple_list S = makeMultiActionConditionList(actions, comm_set(), get_actions(allow_set()), std::vector<core::identifier_string>(), true, R);
   BOOST_CHECK_EQUAL(S.size(), 0); // This shows we have a dramatic set size for communication result!
 }
-#endif
 
