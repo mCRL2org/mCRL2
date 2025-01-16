@@ -32,9 +32,9 @@ BOOST_GLOBAL_FIXTURE(LogDebug);
 
 /// Return all tuples in l from which the action is in allowed.
 inline
-tuple_list filter_allow(const tuple_list& l, const action_name_multiset_list& allowed)
+lps::detail::tuple_list filter_allow(const lps::detail::tuple_list& l, const action_name_multiset_list& allowed)
 {
-  tuple_list result;
+  lps::detail::tuple_list result;
   for (std::size_t i = 0; i < l.size(); ++i)
   {
     if (allow_(allowed, l.actions[i], action(action_label("Terminate", data::sort_expression_list()), data::data_expression_list())))
@@ -50,14 +50,16 @@ inline
 void run_test_case(const std::string& multiaction_str, const data::data_specification& data_spec,
   const process::action_label_list& act_decls, const action_name_multiset_list& allow_set,
   const communication_expression_list& comm_exprs, std::size_t expected_number_of_multiactions,
-  std::size_t expected_number_of_multiactions_filtered,
-  bool prune_result = true)
+  std::size_t expected_number_of_multiactions_filtered)
 {
+  data::rewriter R(data_spec);
+  const process::action terminate(process::action_label("Terminate", data::sort_expression_list()), data::data_expression_list());
+  lps::detail::apply_communication_algorithm alg(terminate, R, comm_exprs, allow_set, true, false);
+
   const multi_action multiaction(parse_multi_action(multiaction_str, act_decls, data_spec));
   const action_list actions = sort_actions(multiaction.actions());
 
-  data::rewriter R(data_spec);
-  tuple_list result = makeMultiActionConditionList(actions, comm_exprs, get_actions(allow_set), std::vector<core::identifier_string>(), prune_result, R);
+  lps::detail::tuple_list result = alg.apply(actions);
   BOOST_CHECK_EQUAL(result.size(), expected_number_of_multiactions);
 
   result = filter_allow(result, allow_set);
@@ -153,22 +155,6 @@ communication_expression_list comm_set_large()
     "a78_r | a78_s -> a78, a79_r | a79_s -> a79, a80_r | a80_s -> a80, a81_r | a81_s -> a81, a82_r | a82_s -> a82, a83_r | a83_s -> a83 }");
 
   return sort_communications(process::detail::parse_comm_set(comm_string));
-}
-
-// Show that the number of multiactions in the result can grow exponentially without pruning.
-BOOST_AUTO_TEST_CASE(test_multact_19_no_pruning)
-{
-  run_test_case(
-    "a1_r(d1)|a1_s(d2)|a4_r(d3)|a4_s(d4)|a5_r(d5)|a5_s(d6)|a9_r(d7)|a9_s(d8)|a11_r(d9)|a11_s(d10)|a13_r(d9)|a13_s(d11)|"
-    "a56_r(d12)|a56_s(d13)|a57_r(d9)|a57_s(d14)|a64_r(d15)|a64_s(d47)|a82_r",
-    data_spec_large(),
-    action_declarations_large(),
-    allow_set_large(),
-    comm_set_large(),
-    512,
-    0,
-    false
-    );
 }
 
 // Show that the number of multiactions in the result can be dramatically reduced
