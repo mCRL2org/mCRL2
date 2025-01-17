@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/propositional_variable.h
-/// \brief The classes propositional_variable and propositional_variable_instantiation.
+/// \brief The class propositional_variable
 
 #ifndef MCRL2_PBES_PROPOSITIONAL_VARIABLE_H
 #define MCRL2_PBES_PROPOSITIONAL_VARIABLE_H

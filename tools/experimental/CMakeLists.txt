@@ -10,6 +10,7 @@ set(MCRL2_TOOLS
   pbes2cvc4
   pbes2yices
   pbesabsinthe
+  pbesbackelm
   pbespareqelm
   pbespor
   pbessymbolicbisim
