@@ -52,9 +52,9 @@ struct substitute_propositional_variables_builder: public Builder<substitute_pro
     : m_pbes_rewriter(r)
   {}
 
-  void declare_stable()
+  void set_stable(bool b)
   {
-    m_stable=true;
+    m_stable=b;
   }
 
   bool stable() const
@@ -91,9 +91,7 @@ struct substitute_propositional_variables_builder: public Builder<substitute_pro
         }
         sigma[v]=par;
       }
-// std::cerr << "SIMP1 " << m_eq.formula() << "\n";
       pbes_expression p=pbes_rewrite(m_eq.formula(),m_pbes_rewriter,sigma);
-// std::cerr << "SIMP2 " << p << "\n";
       std::set<propositional_variable_instantiation> set=find_propositional_variable_instantiations(p);
       if (std::all_of(set.begin(),
                       set.end(),
@@ -105,6 +103,7 @@ struct substitute_propositional_variables_builder: public Builder<substitute_pro
         m_stable=false;
         return;
       }
+      mCRL2log(log::debug) << "No Replacement in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
       result=x;
       return;
     }
@@ -114,11 +113,12 @@ struct substitute_propositional_variables_builder: public Builder<substitute_pro
 
 void self_substitute(pbes_equation& equation, substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
 {
+  substituter.set_stable(false);
   while (!substituter.stable())
   {
     substituter.set_equation(equation);
     substituter.set_name(equation.variable().name());
-    substituter.declare_stable();
+    substituter.set_stable(true);
     pbes_expression p;
     substituter.apply(p, equation.formula());
     equation.formula()=p;
