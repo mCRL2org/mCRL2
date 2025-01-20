@@ -5460,13 +5460,22 @@ class bisim_partitioner_gj
                                                                                     {
                                                                                       // The work has been assigned successfully, so we can replace this
                                                                                       // entry of initialize_qhat_work_to_assign_later with the last one.
-                                                                                      #ifndef NDEBUG
-                                                                                        bool at_end=
-                                                                                                std::next(qhat_it)==initialize_qhat_work_to_assign_later.end();
-                                                                                      #endif
+                                                                                      //#ifndef NDEBUG
+                                                                                      //  bool at_end=
+                                                                                      //          std::next(qhat_it)==initialize_qhat_work_to_assign_later.end();
+                                                                                      //#endif
                                                                                       *qhat_it=initialize_qhat_work_to_assign_later.back();
-                                                                                      initialize_qhat_work_to_assign_later.pop_back();
-                                                                                      assert(at_end == (qhat_it==initialize_qhat_work_to_assign_later.end()));
+                                                                                      if (std::next(qhat_it)==initialize_qhat_work_to_assign_later.end())
+                                                                                      {
+                                                                                        initialize_qhat_work_to_assign_later.pop_back();
+                                                                                        break;
+                                                                                      }
+                                                                                      else
+                                                                                      {
+                                                                                        initialize_qhat_work_to_assign_later.pop_back();
+                                                                                      }
+                                                                                      // This assert is not allowed in MSVC, as the pop_back above invalidates qhat_it.
+                                                                                      //assert(at_end == (qhat_it==initialize_qhat_work_to_assign_later.end()));
                                                                                     }
                                                                                     else
                                                                                     {
@@ -5509,13 +5518,22 @@ class bisim_partitioner_gj
                                                                                     {
                                                                                       // The work has been assigned successfully, so we can replace this
                                                                                       // entry of stabilize_work_to_assign_later with the last one.
-                                                                                      #ifndef NDEBUG
-                                                                                        bool at_end=
-                                                                                                 std::next(stabilize_it)==stabilize_work_to_assign_later.end();
-                                                                                      #endif
+                                                                                      //#ifndef NDEBUG
+                                                                                      //  bool at_end=
+                                                                                      //           std::next(stabilize_it)==stabilize_work_to_assign_later.end();
+                                                                                      //#endif
                                                                                       *stabilize_it=stabilize_work_to_assign_later.back();
-                                                                                      stabilize_work_to_assign_later.pop_back();
-                                                                                      assert(at_end == (stabilize_it==stabilize_work_to_assign_later.end()));
+                                                                                      if (std::next(stabilize_it) == stabilize_work_to_assign_later.end())
+                                                                                      {
+                                                                                        stabilize_work_to_assign_later.pop_back();
+                                                                                        break;
+                                                                                      }
+                                                                                      else
+                                                                                      {
+                                                                                        stabilize_work_to_assign_later.pop_back();
+                                                                                      }
+                                                                                      // This assert is not allowed in MSVC, as the pop_back above invalidates stabilize_it.
+                                                                                      //assert(at_end == (stabilize_it==stabilize_work_to_assign_later.end()));
                                                                                     }
                                                                                     else
                                                                                     {
@@ -6296,8 +6314,15 @@ class bisim_partitioner_gj
                                                                                 #endif
             calM_elt->first=calM.back().first;
                                                                                 assert(!calM.empty());
-            calM.pop_back();                                                    // MSVC refuses the code below. 
-                                                                                // assert(at_end == (calM_elt==calM.end()));
+            if (std::next(calM_elt) == calM.end())
+            {
+              calM.pop_back();
+              break;
+            }
+            else
+            {
+              calM.pop_back();
+            }
           }
         }
 
