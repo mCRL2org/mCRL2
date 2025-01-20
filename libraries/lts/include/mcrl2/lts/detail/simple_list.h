@@ -101,20 +101,20 @@ namespace detail
     /// elements of different sizes.
     ///
     /// Internally, it keeps a (single-linked) list of large chunks of size
-    /// BLOCKSIZE. Each chunk contains a data area; for all chunks except the
+    /// NR_ELEMENTS*sizeof(T)+sizeof(pointer). Each chunk contains a data area; for all chunks except the
     /// first one, this area is completely in use.
     ///
     /// There is a free list, a (single-linked) list of elements in the chunks
     /// that have been freed.  However, all elements in the free list have to
     /// have the same size as type T.
-    template <class T, std::size_t BLOCKSIZE = 4000>
+    template <class T, std::size_t NR_ELEMENTS = 4000>
     class my_pool
     {                                                                           static_assert(std::is_trivially_destructible<T>::value);
       private:                                                                  static_assert(sizeof(void*) <= sizeof(T));
         class pool_block_t
         {
           public:
-            char data[BLOCKSIZE - sizeof(pool_block_t*)];
+            char data[NR_ELEMENTS*sizeof(T)];
             pool_block_t* next_block;
 
             pool_block_t(pool_block_t* const new_next_block)
