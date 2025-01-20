@@ -403,7 +403,7 @@ void apply(
   bool nodeltaelimination,
   bool ignore_time)
 {
-  assert(!(is_allow && is_block));
+  assert(!(m_is_allow && m_is_block));
 
   /* We follow the implementation of Muck van Weerdenburg, described in
      a note: Calculation of communication with open terms. */
@@ -655,7 +655,7 @@ tuple_list makeMultiActionConditionList_aux(
   const process::action_list& m,
   const process::action_list& r)
 {
-  assert(std::is_sorted(m_first, m_last, action_compare()));
+  assert(std::is_sorted(m.begin(), m.end(), action_compare()));
   assert(std::is_sorted(r.begin(), r.end(), action_compare()));
 
   tuple_list S; // result
