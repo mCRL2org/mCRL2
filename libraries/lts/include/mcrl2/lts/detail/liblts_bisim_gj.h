@@ -6484,10 +6484,12 @@ one_slice_has_finished:
             // all transitions in the old BLC set have moved to the new BLC
             // set; as the old BLC set was stable, so is the new one.
                                                                                 #ifndef NDEBUG
-            /* We can skip this element.                                     */   bool at_end=std::next(calM_elt)==calM.end();
+            /* We can skip this element.                                     */   // bool at_end=std::next(calM_elt)==calM.end();
                                                                                 #endif
             calM_elt->first=calM.back().first;
-            calM.pop_back();                                                    assert(at_end == (calM_elt==calM.end()));
+                                                                                assert(!calM.empty());
+            calM.pop_back();                                                    // MSVC refuses the code below. 
+                                                                                // assert(at_end == (calM_elt==calM.end()));
           }
         }
 
