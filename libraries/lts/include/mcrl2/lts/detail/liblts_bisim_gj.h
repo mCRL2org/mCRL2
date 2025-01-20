@@ -826,7 +826,7 @@ class bisim_partitioner_gj
                                                                                                          const bool check_temporary_complexity_counters,
                                                                                                          const bool check_block_to_constellation = true) const
                                                                                   {
-                                                                                    for(transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
+                                                                                    for(transition_index ti=0; ti<m_transitions.size(); ++ti)
                                                                                     {
                                                                                       const BLC_list_const_iterator btc_ti=
                                                                                                m_transitions[ti].ref_outgoing_transitions->ref.BLC_transitions;
@@ -1132,7 +1132,7 @@ class bisim_partitioner_gj
                                                                                         }
                                                                                       }
                                                                                       if (!initialisation) {
-                                                                                        assert(all_transitions.size()==m_aut.num_transitions());
+                                                                                        assert(all_transitions.size()==m_transitions.size());
                                                                                         assert(actual_no_of_non_constellation_inert_BLC_sets==
                                                                                                                        no_of_non_constellation_inert_BLC_sets);
                                                                                       }
@@ -1291,28 +1291,6 @@ class bisim_partitioner_gj
                                                                                         }
                                                                                         if (b.contains_new_bottom_states)
                                                                                         {
-                                                                                          /* I would like the following to check more closely because in a
-                                                                                             block with new bottom states, one should have...
-                                                                                          if (!eventual_marking_is_ok)
-                                                                                          {
-                                                                                            eventual_marking_is_ok = true;
-                                                                                            for (BLC_list_const_iterator i=ind->start_marked_BLC; i<ind->end_same_BLC; ++i)
-                                                                                            {
-                                                                                              const state_index from = m_aut.get_transitions()[*i].from();
-                                                                                              // assert(m_states[from].block == bi); -- already checked earlier
-                                                                                              if (0 != m_states[from].no_of_outgoing_block_inert_transitions)
-                                                                                              {
-                                                                                                // the state is a non-bottom state
-                                                                                                eventual_marking_is_ok = false;
-                                                                                                break;
-                                                                                              }
-                                                                                            }
-                                                                                            if (eventual_marking_is_ok)
-                                                                                            {
-                                                                                              mCRL2log(log::debug) << "  This is ok because all marked transitions begin in new bottom states of " << bi->debug_id(*this) << ".\n";
-                                                                                              eventual_instability_is_ok = true;
-                                                                                            }
-                                                                                          } */
                                                                                           if (!(eventual_instability_is_ok && eventual_marking_is_ok))
                                                                                           {
                                                                                             mCRL2log(log::debug) << "  This is ok because " << b.debug_id(*this) << " contains new bottom states.\n";
@@ -1593,7 +1571,7 @@ class bisim_partitioner_gj
                                                                                       mCRL2log(log::debug) << "---------------------------------------------------\n";
                                                                                     }
                                                                                     mCRL2log(log::debug) << "++++++++++++++++++++ Transitions ++++++++++++++++++++++++++++\n";
-                                                                                    for(transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
+                                                                                    for(transition_index ti=0; ti<m_transitions.size(); ++ti)
                                                                                     {
                                                                                       const transition& t=m_aut.get_transitions()[ti];
                                                                                       mCRL2log(log::debug) << "Transition " << ti <<": " << t.from()
@@ -1794,32 +1772,34 @@ class bisim_partitioner_gj
         ++block_number;
       }
 
-      // The transitions are most efficiently directly extracted from the
-      // block.to_constellation lists in blocks.
-      typename std::remove_reference<decltype(m_aut.get_transitions())>::type
-                                                                             T;
-      for (state_in_block_pointer*
-            si=m_states_in_blocks.data(); m_states_in_blocks.data_end()!=si;
-                                           si=si->ref_state->block->end_states)
       {
-        const block_type& B=*si->ref_state->block;                              //mCRL2complexity(&B, add_work(..., 1), *this);
+        // The transitions are most efficiently directly extracted from the
+        // block.to_constellation lists in blocks.
+        typename std::remove_reference<decltype(m_aut.get_transitions())>::type
+                                                                             T;
+        for (state_in_block_pointer*
+              si=m_states_in_blocks.data(); m_states_in_blocks.data_end()!=si;
+                                           si=si->ref_state->block->end_states)
+        {
+          const block_type& B=*si->ref_state->block;                            //mCRL2complexity(&B, add_work(..., 1), *this);
                                                                                     // Because every block is touched exactly once, we do not store a
                                                                                     // physical counter for this.
-        for(const BLC_indicators blc_ind: B.block.to_constellation)
-        {                                                                       // mCRL2complexity(&blc_ind, add_work(..., 1), *this);
+          for(const BLC_indicators blc_ind: B.block.to_constellation)
+          {                                                                     // mCRL2complexity(&blc_ind, add_work(..., 1), *this);
                                                                                     // Because every BLC set is touched exactly once, we do not store
                                                                                     // a physical counter for this.
                                                                                 assert(blc_ind.start_same_BLC<blc_ind.end_same_BLC);
-          const transition& t=m_aut.get_transitions()[*blc_ind.start_same_BLC];
-          const state_index new_to=get_eq_class(t.to());
-          if (!is_inert_during_init(t) || B.sta.te_in_reduced_LTS!=new_to)
-          {
-            T.emplace_back(B.sta.te_in_reduced_LTS, t.label(), new_to);
+            const transition&
+                            t=m_aut.get_transitions()[*blc_ind.start_same_BLC];
+            const state_index new_to=get_eq_class(t.to());
+            if (!is_inert_during_init(t) || B.sta.te_in_reduced_LTS!=new_to)
+            {
+              T.emplace_back(B.sta.te_in_reduced_LTS, t.label(), new_to);
+            }
           }
         }
+        m_aut.get_transitions()=std::move(T);
       }
-      m_aut.clear_transitions();
-      T.swap(m_aut.get_transitions());
       //
       // Merge the states, by setting the state labels of each state to the
       // concatenation of the state labels of its equivalence class.
@@ -1840,7 +1820,7 @@ class bisim_partitioner_gj
 
         m_aut.set_num_states(num_eq_classes(), false);                          assert(0==m_aut.num_state_labels());
         //m_aut.clear_state_labels();
-        new_labels.swap(m_aut.state_labels());
+        m_aut.state_labels()=std::move(new_labels);
       }
       else
       {
@@ -2810,180 +2790,6 @@ class bisim_partitioner_gj
       return update_BLC_sets_new_block(old_block_index, new_block_index,
                                          old_constellation, new_constellation);
     }
-
-#if 0
-    // starting an idea to implement a direct five-way-reorder function to move
-    // the states to their destination towards the end of the four-way-split.
-
-    struct slice_to_move
-    {
-      state_in_block_pointer* start_from;
-      state_in_block_pointer* end_from;
-      state_in_block_pointer* start_to;
-      state_in_block_pointer* current_to;
-      state_in_block_pointer* end_to;
-      transition_index counter; // counter value of states that should go into this slice (in particular for non-bottom slices)
-      bool is_bottom_slice; // if this is true, the states are bottom states
-      //bool too_large; // if this is true, we cannot assign work to these states -- better to have a separate variable that indicates the index of the too-large slice
-    };
-    void multi_way_reorder(int number_of_slices, slice_to_move slices[],
-                           int too_large_slice)
-    {                                                                           assert(2<=number_of_slices);  assert(number_of_slices<=6);
-      /* There are up to two bottom subblocks (MissMain and XcludeCo) that   */ assert(0<=too_large_slice);  assert(too_large_slice<number_of_slices);
-      // need to be moved.
-        // a bottom slice is indicated with:
-        // - state_in_block_pointer* a start iterator for the current location
-        // - a start iterator for the desired location
-        // - an end iterator for the desired location
-        // The requirement is to move the states in the range between start and
-        // end iterator to the desired location. We always have start<=desired.
-        // To determine overlap: current_start+(desired_end-desired_start) is
-        // the current end; if that is >desired_start, there is overlap.
-      // There are up to four non-bottom subblocks that need to be moved.
-        // a non-bottom slice is indicated with
-        /* - std::vector<state_in_block_pointer>::iterator a start iterator  */ assert(slices[0].start_to<slices[0].end_to);
-        /*   for the current location                                        */ if (slices[0].is_bottom_slice)  {  assert(!slices[0].too_large);  }
-        /* - a start iterator for the desired location                       */ for (int i=1; i<number_of_slices; ++i) {
-        /* - and end iterator for the desired location                       */   assert(slices[i-1].end_to<=slices[i].start_to);
-      /* Why start and end iterators for the desired location? That makes it */   assert(slices[i].start_to<slices[i].end_to);
-      /* easier to identify what kind of states should go into a hole.       */   if (slices[i].is_bottom_slice)  {  assert(!slices[i].too_large);  }
-      /* The slices should be ordered by desired location in a vector; then  */ }
-      /* we can find a state type based on the location.                     */
-
-one_slice_has_finished:
-      while (2<=number_of_slices)
-      {
-        // find a slice where to take a state from:
-        slice_to_move* current_state_slice=&slices[number_of_slices-1];
-        if (number_of_slices-1==too_large_slice)
-        {
-          --current_state_slice;
-        }
-        state_in_block_pointer* hole;
-        for (;;)
-        {                                                                       assert(current_state_slice->start_from<current_state_slice->end_from);
-          hole=current_state_slice->start_from++;
-          if (!current_state_slice->is_bottom_slice)
-          {
-            hole=hole->ref_state->ref_states_in_blocks;
-          }
-          // Check that the state is not already in an acceptable position:
-          if (current_state_slice->start_to>hole ||
-              hole>current_state_slice->end_to)
-          {
-            // the hole should be filled up with a state from another slice
-            break;
-          }
-          if (current_state_slice->start_from==current_state_slice->end_from)
-          {
-            // all states in the current state slice are already in
-            // acceptable positions, so we can remove it completely
-            --number_of_slices;
-            if (number_of_slices==too_large_slice)
-            {
-              --too_large_slice;
-              slices[too_large_slice]=slices[number_of_slices];
-            }                                                                   else  {  assert(current_state_slice==&slices[number_of_slices]);  }
-            goto one_slice_has_finished;
-          }
-        }
-        fixed_vector<state_type_gj>::iterator state=hole->ref_state;
-
-        // determine the slice that should fill up the hole:
-        slice_to_move* current_hole_slice;                                      assert(current_state_slice->start_to<current_state_slice->end_to);
-        for (current_hole_slice=&slices[0];                                     assert(current_hole_slice<&slices[number_of_slices]);
-             current_hole_slice->end_to<=hole; ++current_hole_slice)
-        {                                                                       assert(current_hole_slice->start_to<=hole);
-        }
-
-        for (;;)
-        {                                                                       assert(current_state_slice!=current_hole_slice);
-                                                                                assert(!current_state_slice->too_large);
-          // find a suitable position for the current state:
-          do
-          {                                                                     assert(current_state_slice->current_to<current_state_slice->end_to);
-            new_pos=current_state_slice->current_to++;
-            new_state=new_pos->ref_state;
-            new_state_slice=slice of new_state; ...
-            // if new_state is a bottom state, we can compare its position with
-            // slices[...].end_from
-            // if new_state is a non-bottom state, we should check its counter
-            // value. If the counter value is not one of the specific values,
-            // it must be in the too-large slice.
-          }
-          while (new_state_slice->start_to<=new_pos &&
-                 new_pos<new_state_slice->end_to);
-          // move the state there:
-          state->ref_state_in_blocks=new_pos;
-          new_pos->ref_state=state;
-          // pick up the state that was in that position
-          state=new_state;
-          current_state_slice=new_state_slice;
-          // if the current state fits into the hole, put it there;
-          // one state has been handled
-          if (current_state_slice!=current_hole_slice)
-          {
-            if (current_state_slice!=&slices[too_large_slice])
-            {
-              continue;
-            }
-            // As the current state is in the too-large slice, start moving the
-            // hole around
-            do
-            {                                                                   assert(current_hole_slice!=&slices[too_large_slice]);
-              // find a state that fits in the hole:
-              do
-              {                                                                 assert(current_hole_slice->start_from<current_hole_slice->end_from);
-                new_hole=current_hole_slice->start_from++;
-                found_state=new_hole->ref_state;
-                new_hole=found_state->ref_states_in_blocks; // actually only needed if found_state is a non-bottom state
-                for (new_hole_slice=&slices[0];                                 assert(new_hole_slice<&slices[number_of_slices]);
-                     new_hole_slice->end_to<=new_hole; ++new_hole_slice)
-                {                                                               assert(new_hole_slice->start_to<=new_hole);
-                }
-              }
-              while (new_hole_slice->start_to<=
-                                           found_state->ref_states_in_blocks &&
-                     found_state->ref_states_in_blocks<new_hole_slice->end_to);
-              // fill the hole with that state:
-              hole->ref_state=found_state;
-              found_state->ref_states_in_blocks=hole;
-              // move the hole to where the state was:
-              hole=new_hole;
-              current_hole_slice=new_hole_slice;
-              // if the current state fits into the hole, put it there
-            }
-            while (current_state_slice!=current_hole_slice);
-          }
-          // Now the current state fits into the hole:
-          state->ref_state_in_blocks=hole;
-          hole->ref_state=state;
-          if (current_state_slice->current_to==current_state_slice->end_to)
-          {
-            // the slice has been completely filled, we can remove it
-            memmove(current_state_slice, current_state_slice+1,
-                    std::distance((void*) (current_state_slice+1),
-                                  (void*) slices[number_of_slices]));
-            if (current_state_slice<=&slices[too_large_slice])
-            {
-              if (current_state_slice==&slices[too_large_slice])
-              {
-                // the slice that was officially too large has already been
-                // filled completely anyway--it seems that it was not so large
-                // after all...
-                too_large_slice=-1;
-              }
-              else
-              {
-                --too_large_slice;
-              }
-            }
-          }
-          break;
-        }
-      }
-    }
-#endif
 
     /// \brief makes incoming transitions from block `MultiSub_block_index` non-block-inert
     void check_incoming_tau_transitions_become_noninert(
@@ -4752,7 +4558,8 @@ one_slice_has_finished:
             if (new_end_bottom_states_MultiSub!=bi->end_states)
             {                                                                   assert(!non_bottom_states_MultiSub.empty());
               /* As MultiSub is not empty, a trivial constellation will      */ assert(bi->start_bottom_states<new_end_bottom_states_MultiSub);
-              // become non-trivial.
+              // become non-trivial.  (The condition in if() needs to be
+              // checked before the subblock for MultiSub is created.)
               constellation_type* const constellation=bi->c.onstellation;
               if (constellation->start_const_states->ref_state->block==
                   std::prev(constellation->end_const_states)->ref_state->block)
@@ -4806,9 +4613,8 @@ one_slice_has_finished:
                                                                                   check_complexity::check_temporary_work();
                                                                                 #endif
               // check transitions that have become non-block-inert:
-              for (state_in_block_pointer*
-                   nst_it=new_end_bottom_states_MultiSub;
-                                              nst_it!=bi->end_states; ++nst_it)
+              state_in_block_pointer* nst_it=new_end_bottom_states_MultiSub;    assert(nst_it!=bi->end_states);
+              do
               {
                 outgoing_transitions_const_it const out_it_end=
                   std::next(nst_it->ref_state)>=m_states.end()
@@ -4848,7 +4654,9 @@ one_slice_has_finished:
                       [has_main_splitter || has_co_splitter /* needed for correctness */
                        ?*out_it->ref.BLC_transitions :out_it->ref.transitions],
                      m_aut.is_tau(m_aut_apply_hidden_label_map(tr->label()))));
-              }                                                                 assert(MultiSub_block_index->start_bottom_states<
+                ++nst_it;
+              }
+              while (nst_it!=bi->end_states);                                   assert(MultiSub_block_index->start_bottom_states<
                                                                                                                MultiSub_block_index->sta.rt_non_bottom_states);
               MultiSub_block_index->contains_new_bottom_states=true;
               m_blocks_with_new_bottom_states.push_back(MultiSub_block_index);
@@ -5451,10 +5259,10 @@ one_slice_has_finished:
                                                                                   assert(ind->start_same_BLC<ind->end_same_BLC);
                                                                                   const transition& first_t = m_aut.get_transitions()[*ind->start_same_BLC];
                                                                                   assert(m_states[first_t.from()].block == bi);
-              /* The BLC set transitions are not constellation-inert, so we  */   assert(!is_inert_during_init(first_t) ||
-              /* need to stabilize under them                                */          bi->c.onstellation!=m_states[first_t.to()].block->c.onstellation);
+            /* The BLC set transitions are not constellation-inert, so we    */   assert(!is_inert_during_init(first_t) ||
+            /* need to stabilize under them                                  */          bi->c.onstellation!=m_states[first_t.to()].block->c.onstellation);
                                                                                 #endif
-              Qhat.emplace_back(ind->start_same_BLC, ind->end_same_BLC);
+            Qhat.emplace_back(ind->start_same_BLC, ind->end_same_BLC);
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                   // The work is assigned to the transitions out of new bottom states in ind.
                                                                                   // Try to find a new bottom state to which to assign it.
@@ -5726,7 +5534,7 @@ one_slice_has_finished:
                                          : "branching ")
                          : "")
            << "bisimulation partitioner created for " << m_aut.num_states()
-           << " states and " << m_aut.num_transitions()
+           << " states and " << m_transitions.size()
            << " transitions (using the experimental algorithm GJ2024).\n";
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
       /* Initialisation. */                                                       check_complexity::init(2 * m_aut.num_states());
@@ -5768,7 +5576,7 @@ one_slice_has_finished:
           todo_stack_actions.push_back(m_aut.tau_label_index());
           count_transitions_per_action[m_aut.tau_label_index()] = 1;
         }
-        for(transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
+        for (transition_index ti=0; ti<m_transitions.size(); ++ti)
         {
           const transition& t=m_aut.get_transitions()[ti];                      // mCRL2complexity(&m_transitions[ti], add_work(..., 1), *this);
                                                                                   // Because every transition is touched exactly once, we do not store a physical counter for this.
@@ -5787,13 +5595,13 @@ one_slice_has_finished:
           --count_transitions_per_action[m_aut.tau_label_index()];
         }
         accumulate_entries(count_transitions_per_action, todo_stack_actions);
-        for (transition_index ti=0; ti<m_aut.num_transitions(); ++ti)
+        for (transition_index ti=0; ti<m_transitions.size(); ++ti)
         {                                                                       // mCRL2complexity(&m_transitions[ti], add_work(..., 1), *this);
                                                                                   // Because every transition is touched exactly once, we do not store a physical counter for this.
           const transition& t=m_aut.get_transitions()[ti];
           const label_index label = label_or_divergence(t,
                                                     m_aut.num_action_labels());
-          transition_index& c=count_transitions_per_action[label];              assert(0 <= c); assert(c < m_aut.num_transitions());
+          transition_index& c=count_transitions_per_action[label];              assert(0 <= c); assert(c < m_transitions.size());
           m_BLC_transitions[c]=ti;
           c++;
         }
@@ -6687,7 +6495,8 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
     if (mCRL2logEnabled(log::verbose))
     {
         const std::clock_t end_finalizing=std::clock();
-        const int prec=std::lrint(std::log10(CLOCKS_PER_SEC)+0.19897000433602);
+        const int prec=static_cast<int>
+                                 (std::log10(CLOCKS_PER_SEC)+0.69897000433602);
             // For example, if CLOCKS_PER_SEC>=     20: >=2 digits
             //              If CLOCKS_PER_SEC>=    200: >=3 digits
             //              If CLOCKS_PER_SEC>=2000000: >=7 digits
@@ -6703,7 +6512,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
             int min[sizeof(runtime)/sizeof(runtime[0])];
             for (unsigned i = 0; i < sizeof(runtime)/sizeof(runtime[0]); ++i)
             {
-                min[i] = trunc(runtime[i] / 60.0);
+                min[i] = static_cast<int>(runtime[i]) / 60;
                 runtime[i] -= 60 * min[i];
             }
             if (min[0]>=60)
@@ -6714,7 +6523,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                     h[i] = min[i] / 60;
                     min[i] %= 60;
                 }
-                int width = trunc(log10(h[0])) + 1;
+                int width = static_cast<int>(std::log10(h[0])) + 1;
 
                 mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
                     << "Time spent on contracting SCCs: " << std::setw(width) << h[1] << "h " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
