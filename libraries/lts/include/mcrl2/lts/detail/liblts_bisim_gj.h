@@ -3400,7 +3400,7 @@ class bisim_partitioner_gj
       /// This macro can be used before the coroutines start or while they run.
       #define abort_if_non_bottom_size_too_large_MultiSub(i)                                                                                   \
           ((                                                                    assert(aborted!=status_MultiSub),                              \
-            non_bottom_states_MultiSub.size()+(i+0)>                                                                                           \
+            non_bottom_states_MultiSub.size()+(i)>                                                                                             \
                                          no_of_unfinished_states_in_block/2) &&                                                                \
            (                                                                    assert(std::numeric_limits<state_index>::max()!=               \
                                                                                                             no_of_unfinished_states_in_block), \
@@ -3422,7 +3422,7 @@ class bisim_partitioner_gj
       ///
       /// This macro can be used while the coroutines run.
       #define abort_if_size_too_large(coroutine, i)                                                                                            \
-          (bottom_and_non_bottom_size((coroutine))+(i+0)>                                                                                      \
+          (bottom_and_non_bottom_size((coroutine))+(i)>                                                                                        \
                                           no_of_unfinished_states_in_block/2 &&                                                                \
            (                                                                    assert(std::numeric_limits<state_index>::max()!=               \
                                                                                                             no_of_unfinished_states_in_block), \
@@ -3520,7 +3520,7 @@ class bisim_partitioner_gj
         }
         ++no_of_finished_searches;
         status[ReachAlw]=finished;
-        abort_if_non_bottom_size_too_large_MultiSub();
+        abort_if_non_bottom_size_too_large_MultiSub(0);
       }
       else if (!abort_if_bottom_size_too_large(ReachAlw))
       {
@@ -3969,7 +3969,7 @@ class bisim_partitioner_gj
                                     bottom_and_non_bottom_size(current_search); assert(aborted!=status[running_searches[0]]);
                 /* Try to find out whether some other process needs to be    */ assert(finished!=status[running_searches[0]]);
                 /* aborted, now that we have a more strict size bound.       */ assert(aborted!=status[MissMain]);  assert(aborted!=status_MultiSub);
-                if (abort_if_size_too_large(running_searches[0], ))
+                if (abort_if_size_too_large(running_searches[0], 0))
                 {
                   // The if test is not necessary, as the result will just
                   // be ignored if 1==no_of_running_searches, because we will
@@ -3987,7 +3987,7 @@ class bisim_partitioner_gj
                 }
                 else if (1<no_of_running_searches && (                          assert(aborted!=status[running_searches[1]]),
                                                                                 assert(finished!=status[running_searches[1]]),
-                         abort_if_size_too_large(running_searches[1], )))
+                         abort_if_size_too_large(running_searches[1], 0)))
                 {
                   // if (1==current_search_index)  { --current_search_index; }
                   // < will be ignored, because the new search index will
@@ -3997,7 +3997,7 @@ class bisim_partitioner_gj
                 }
                 else
                 {
-                  abort_if_non_bottom_size_too_large_MultiSub();
+                  abort_if_non_bottom_size_too_large_MultiSub(0);
                 }
               }
               continue;
@@ -4370,7 +4370,7 @@ class bisim_partitioner_gj
                   // about to be aborted: it may happen that this was exactly
                   // the last transition in the co-splitter, and then the
                   // XcludeCo-coroutine could add state src erroneously.
-                  abort_if_non_bottom_size_too_large_MultiSub();
+                  abort_if_non_bottom_size_too_large_MultiSub(0);
                   break;
                 }                                                               else  {  assert(marked_Hit_Main!=src.ref_state->counter);  }
               }
@@ -6277,51 +6277,60 @@ class bisim_partitioner_gj
 
         // mark all states in main splitters and correct the end-positions of
         // calM entries
-        for (std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> >::
-                        iterator calM_elt=calM.begin(); calM_elt!=calM.end(); )
+        if (calM.begin()!=calM.end())
         {
-          linked_list <BLC_indicators>::iterator ind=m_transitions
+          for (std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> >::
+                                             iterator calM_elt=calM.begin();; )
+          {
+            linked_list <BLC_indicators>::iterator ind=m_transitions
                      [*calM_elt->first].transitions_per_block_to_constellation; mCRL2complexity(ind, add_work(check_complexity::
                                                                                    refine_partition_until_it_becomes_stable__correct_end_of_calM,max_C),*this);
-          /* check if all transitions were moved to the new constellation,   */ assert(ind->start_same_BLC==calM_elt->first);
-          /* or some transitions to the old constellation have remained:     */ assert(!ind->has_marked_transitions());
-          const transition& last_t=
+            /* check if all transitions were moved to the new constellation, */ assert(ind->start_same_BLC==calM_elt->first);
+            /* or some transitions to the old constellation have remained:   */ assert(!ind->has_marked_transitions());
+            const transition& last_t=
                         m_aut.get_transitions()[*std::prev(ind->end_same_BLC)]; assert(m_states[last_t.to()].block->c.onstellation==new_constellation);
                                                                                 assert(ind->start_same_BLC<ind->end_same_BLC);
-          const transition* next_t=nullptr;
-          if ((is_inert_during_init(last_t) &&
-               m_states[last_t.from()].block->c.onstellation==
+            const transition* next_t=nullptr;
+            if ((is_inert_during_init(last_t) &&
+                 m_states[last_t.from()].block->c.onstellation==
                                                           old_constellation     && (assert(m_states[last_t.from()].block!=index_block_B), true)
                                                                            ) ||
-              (ind->end_same_BLC<m_BLC_transitions.data_end() &&
-               (next_t=&m_aut.get_transitions()[*ind->end_same_BLC],
-                m_states[last_t.from()].block==m_states[next_t->from()].block&&
-                label_or_divergence(last_t)==label_or_divergence(*next_t) &&
-                old_constellation==
+                (ind->end_same_BLC<m_BLC_transitions.data_end() &&
+                 (next_t=&m_aut.get_transitions()[*ind->end_same_BLC],
+                  m_states[last_t.from()].block==
+                                              m_states[next_t->from()].block &&
+                  label_or_divergence(last_t)==label_or_divergence(*next_t) &&
+                  old_constellation==
                                 m_states[next_t->to()].block->c.onstellation)))
-          {
-            // there are some transitions to the corresponding co-splitter,
-            // so we will have to stabilize the block
-            calM_elt->second = ind->end_same_BLC;
-            ++calM_elt;
-          }
-          else
-          {
-            // all transitions in the old BLC set have moved to the new BLC
-            // set; as the old BLC set was stable, so is the new one.
-                                                                                #ifndef NDEBUG
-            /* We can skip this element.                                     */   // bool at_end=std::next(calM_elt)==calM.end();
-                                                                                #endif
-            calM_elt->first=calM.back().first;
-                                                                                assert(!calM.empty());
-            if (std::next(calM_elt) == calM.end())
             {
-              calM.pop_back();
-              break;
+              // there are some transitions to the corresponding co-splitter,
+              // so we will have to stabilize the block
+              calM_elt->second = ind->end_same_BLC;
+              ++calM_elt;
+              if (calM_elt==calM.end())
+              {
+                break;
+              }
             }
             else
             {
-              calM.pop_back();
+              // all transitions in the old BLC set have moved to the new BLC
+              // set; as the old BLC set was stable, so is the new one.
+              // We can skip this element.
+              calM_elt->first=calM.back().first;
+              if (std::next(calM_elt) == calM.end())
+              {
+                // to avoid protests by the MSVC compiler we have to do this
+                // check beforehand (if calM_elt points to the last element of
+                // the vector, the standard mandates that the iterator becomes
+                // invalid.)
+                calM.pop_back();
+                break;
+              }
+              else
+              {
+                calM.pop_back();
+              }
             }
           }
         }
