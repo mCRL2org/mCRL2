@@ -11,6 +11,7 @@ set(MCRL2_TOOLS
   pbes2yices
   pbesabsinthe
   pbesbackelm
+  pbesnucheck
   pbespareqelm
   pbespor
   pbessymbolicbisim
