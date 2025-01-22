@@ -152,8 +152,9 @@ void nu_iteration(pbes_equation& equation, substitute_propositional_variables_bu
 pbes_equation eq;
 eq.formula()=true_();
 eq.variable()=equation.variable();
+bool stable=false;
 int i = 0;
-while (i < 3) {
+while (!stable && i < 20) {
 //    pbes_expression sigma;
 //equation.formula()=sigma;
     substituter.set_equation(eq);
@@ -162,15 +163,17 @@ while (i < 3) {
     substituter.apply(p, equation.formula());
   data::data_expression eq_data =atermpp::down_cast<data::data_expression>( detail::pbes2data(eq.formula()));
   data::data_expression p_data =atermpp::down_cast<data::data_expression>( detail::pbes2data(p));
-      mCRL2log(log::debug) << "Equivalent? " << (eq.formula() == p) << "\n";
-      mCRL2log(log::debug) << " --- " << (eq.formula()) << "\n";
-      mCRL2log(log::debug) << " --- " << (p) << "\n";
+//      mCRL2log(log::debug) << "Equivalent? " << (eq.formula() == p) << "\n";
+//      mCRL2log(log::debug) << " --- " << (eq.formula()) << "\n";
+//      mCRL2log(log::debug) << " --- " << (p) << "\n";
       f_bdd_prover.set_formula(data::and_(data::imp(eq_data,p_data),data::imp(p_data,eq_data)));
         data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
         data::detail::Answer v_is_contradiction = f_bdd_prover.is_contradiction();
         if (v_is_tautology == data::detail::answer_yes)
         {
           mCRL2log(log::info) << "Tautology" << std::endl;
+          stable=true;
+          return;
         }
         else if (v_is_contradiction == data::detail::answer_yes)
         {
