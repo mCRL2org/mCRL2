@@ -22,6 +22,8 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 
+#include <map>
+
 namespace mcrl2
 {
 
@@ -39,6 +41,70 @@ Substitution> >
 {
   typedef Builder<substitute_propositional_variables_builder<Builder, Substitution> > super;
   using super::apply; */
+
+// Substitutor to replace predicate variables OTHER than the self-referencing onces to boolean variables
+template <template <class> class Builder>
+struct replace_propositional_variables_builder : public Builder<replace_propositional_variables_builder<Builder>>
+{
+  typedef Builder<replace_propositional_variables_builder<Builder>> super;
+  using super::apply;
+
+  core::identifier_string name;
+  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  data::data_specification data_spec;
+  std::map<data::variable, propositional_variable_instantiation> m_instantiations;
+  bool forward = true;
+
+  explicit replace_propositional_variables_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
+      : m_pbes_rewriter(r)
+  {}
+
+  void set_name(const core::identifier_string& s) { name = s; }
+
+  void set_forward(bool b) { forward = b; }
+
+  std::map<data::variable, propositional_variable_instantiation> instantiations() const { return m_instantiations; }
+
+  template <class T>
+  void apply(T& result, const pbes_expression& d)
+  {
+    if (forward)
+    {
+      super::apply(result, d);
+      return;
+    }
+    if (!data::is_variable(d))
+    {
+      super::apply(result, d);
+      return;
+    }
+
+    auto it = m_instantiations.find(atermpp::down_cast<data::variable>(d));
+    if (!forward && it != m_instantiations.end())
+    {
+      propositional_variable_instantiation pvi = it->second;
+      result = pvi;
+      return;
+    }
+    result = d;
+  }
+
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
+  {
+    if (forward && x.name() != name)
+    {
+      std::string var_name = "a" + std::to_string(m_instantiations.size());
+      data::variable vb1(var_name, data::sort_bool::bool_());
+      m_instantiations.insert({vb1, x});
+      result = vb1;
+      return;
+    }
+    result = x;
+  }
+};
+
+// Substitutor for the self_substitution / iterations
 template <template <class> class Builder>
 struct substitute_propositional_variables_builder : public Builder<substitute_propositional_variables_builder<Builder>>
 {
@@ -108,7 +174,6 @@ void substitute(pbes_equation& into,
     const pbes_equation& by,
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
 {
-  //   substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(by,r);
   substituter.set_equation(by);
   substituter.set_name(into.variable().name());
   pbes_expression p;
@@ -118,23 +183,36 @@ void substitute(pbes_equation& into,
 
 void nu_iteration(pbes_equation& equation,
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
+    replace_propositional_variables_builder<pbes_system::pbes_expression_builder>& replace_substituter,
     data::data_specification data_spec)
 {
+  replace_substituter.set_forward(true);
+  replace_substituter.set_name(equation.variable().name());
+  replace_substituter.apply(equation.formula(), equation.formula());
+
   mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
-  //  A pbes expression expressing the value true
   pbes_equation eq;
-  eq.formula() = true_();
+  if (eq.symbol().is_nu())
+  {
+    eq.formula() = true_();
+  }
+  else
+  {
+    eq.formula() = false_();
+  }
   eq.variable() = equation.variable();
   bool stable = false;
   int i = 0;
   while (!stable && i < 20)
   {
-    //    pbes_expression sigma;
-    // equation.formula()=sigma;
+    mCRL2log(log::info) << eq.variable().name() << ":  " << i << std::endl;
+    // Apply substitution
     substituter.set_equation(eq);
     substituter.set_name(equation.variable().name());
     pbes_expression p;
     substituter.apply(p, equation.formula());
+
+    // Check if the iteration has reached a fixpoint
     data::data_expression eq_data = atermpp::down_cast<data::data_expression>(detail::pbes2data(eq.formula()));
     data::data_expression p_data = atermpp::down_cast<data::data_expression>(detail::pbes2data(p));
     f_bdd_prover.set_formula(data::and_(data::imp(eq_data, p_data), data::imp(p_data, eq_data)));
@@ -154,6 +232,10 @@ void nu_iteration(pbes_equation& equation,
     eq.formula() = p;
     i++;
   }
+
+  replace_substituter.set_forward(false);
+  replace_substituter.apply(equation.formula(), equation.formula());
+
   equation.formula() = eq.formula();
 }
 
@@ -164,15 +246,23 @@ struct pbesnucheck_pbes_backward_substituter
     data::rewriter data_rewriter(p.data(), options.rewrite_strategy);
     simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_rewriter);
+
+    replace_propositional_variables_builder<pbes_system::pbes_expression_builder> replace_substituter(pbes_rewriter);
+
     for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
     {
       // Simplify the equation *i by substituting in itself.
       mCRL2log(log::verbose) << "Investigating the equation for " << i->variable().name() << "\n";
-      nu_iteration(*i, substituter, p.data());
+      nu_iteration(*i, substituter, replace_substituter, p.data());
       for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
       {
         substitute(*j, *i, substituter);
       }
+    }
+    if (!p.equations().empty())
+    {
+      // Remove all but the first equation, as they have been solved
+      p.equations().erase(p.equations().begin() + 1, p.equations().end());
     }
     pbes_rewrite(p, pbes_rewriter);
   }
