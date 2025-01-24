@@ -1,0 +1,8 @@
+act
+  d,a,c,b,e;
+proc
+  P = tau;
+  Q = e;
+  R = sum b1: Bool. (d);
+init
+  block({a}, hide({c}, comm({b | e -> c}, P || ((Q) || (R)))));
