@@ -104,6 +104,41 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
   }
 };
 
+// Substitutor to target specific path
+template <template <class> class Builder>
+struct substitute_propositional_variables_for_bools_builder
+    : public Builder<substitute_propositional_variables_for_bools_builder<Builder>>
+{
+  typedef Builder<substitute_propositional_variables_for_bools_builder<Builder>> super;
+  using super::apply;
+
+  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  pbes_equation m_eq;
+  core::identifier_string name;
+
+  explicit substitute_propositional_variables_for_bools_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
+      : m_pbes_rewriter(r)
+  {}
+
+  void set_equation(const pbes_equation& eq) { m_eq = eq; }
+
+  void set_name(const core::identifier_string& s) { name = s; }
+
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
+  {
+    // TODO: Filter based on index?
+    if (x.name() == m_eq.variable().name())
+    {
+      result = true_();
+    }
+    else
+    {
+      result = false_();
+    }
+  }
+};
+
 // Substitutor for the self_substitution / iterations
 template <template <class> class Builder>
 struct substitute_propositional_variables_builder : public Builder<substitute_propositional_variables_builder<Builder>>
@@ -181,6 +216,72 @@ void substitute(pbes_equation& into,
   into.formula() = p;
 }
 
+// Equation should be in full form.
+void global_invariant_check(pbes_equation& equation,
+    substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
+    data::data_specification data_spec,
+    simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter)
+{
+  if (equation.symbol().is_mu())
+  {
+    return;
+  }
+
+  // Calculate CC
+  pbes_equation eq;
+  eq.formula() = true_();
+  eq.symbol() = equation.symbol();
+  eq.variable() = equation.variable();
+  substituter.set_equation(eq);
+  substituter.set_name(equation.variable().name());
+  pbes_expression cc;
+  substituter.apply(cc, equation.formula());
+
+  bool global_invariant = true;
+  // Calculate if 'true'
+  std::set<propositional_variable_instantiation> set = find_propositional_variable_instantiations(equation.formula());
+  if (std::none_of(set.begin(),
+          set.end(),
+          [=](const propositional_variable_instantiation& v) { return v.name() != equation.variable().name(); }))
+  {
+    // The formula contains another pvi than the current equation, so skip
+    mCRL2log(log::verbose) << "INV: " << equation.variable().name() << " contains other pvi." << "\n";
+    return;
+  }
+  for (propositional_variable_instantiation pvi : set)
+  {
+    // Calculate CC_i
+    data::mutable_indexed_substitution sigma;
+    data::data_expression_list pars = pvi.parameters();
+    for (const data::variable& v : equation.variable().parameters())
+    {
+      data::data_expression par = pars.front();
+      pars.pop_front();
+      if (par.sort() != v.sort())
+      {
+        // Parameters do not match with variables. Ignore this substitution.
+        return;
+      }
+      sigma[v] = par;
+    }
+    pbes_expression cc_i = pbes_rewrite(cc, pbes_rewriter, sigma);
+
+    // TODO: Calculate C_i by doing another substitution
+
+    // Check CC and C_i implies CC_i
+    mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
+    data::data_expression cc_data = atermpp::down_cast<data::data_expression>(detail::pbes2data(cc));
+    data::data_expression cc_i_data = atermpp::down_cast<data::data_expression>(detail::pbes2data(cc_i));
+    // TODO
+    f_bdd_prover.set_formula(data::and_(data::imp(cc_data, cc_i_data), data::imp(cc_i_data, cc_data)));
+  }
+
+  if (global_invariant)
+  {
+    equation.formula() = cc;
+  }
+}
+
 void nu_iteration(pbes_equation& equation,
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
     replace_propositional_variables_builder<pbes_system::pbes_expression_builder>& replace_substituter,
@@ -192,7 +293,7 @@ void nu_iteration(pbes_equation& equation,
 
   mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
   pbes_equation eq;
-  if (eq.symbol().is_nu())
+  if (equation.symbol().is_nu())
   {
     eq.formula() = true_();
   }
@@ -200,10 +301,11 @@ void nu_iteration(pbes_equation& equation,
   {
     eq.formula() = false_();
   }
+  eq.symbol() = equation.symbol();
   eq.variable() = equation.variable();
   bool stable = false;
   int i = 0;
-  while (!stable && i < 20)
+  while (!stable)
   {
     mCRL2log(log::info) << eq.variable().name() << ":  " << i << std::endl;
     // Apply substitution
