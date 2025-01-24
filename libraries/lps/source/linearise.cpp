@@ -354,6 +354,8 @@ class specification_basic_type
       return process::sync(ma.front(),action_list_to_process(ma.tail()));
     }
 
+    /// Convert the process expression to an action list.
+    /// Note: The resulting actions are not sorted.
     static
     action_list to_action_list(const process_expression& p)
     {
@@ -373,6 +375,13 @@ class specification_basic_type
       }
       assert(0);
       return action_list();
+    }
+
+    /// Convert the process expression to a sorted action list.
+    static
+    action_list to_sorted_action_list(const process_expression& p) 
+    { 
+      return sort_actions(to_action_list(p));
     }
 
     static
@@ -4741,37 +4750,25 @@ class specification_basic_type
       return result;
     }
 
-
-    action_list adapt_multiaction_to_stack_rec(
-      const action_list& multiAction,
-      const stacklisttype& stack,
-      const variable_list& vars)
+    /// Adapt multiactions to stack by traversing the list.
+    /// Note: the result is sorted w.r.t action_compare().
+    action_list
+    adapt_multiaction_to_stack(const action_list& multiAction, const stacklisttype& stack, const variable_list& vars)
     {
-      if (multiAction.empty())
-      {
-        return multiAction;
+      action_vector result;
+
+      for (action_list::const_iterator it = multiAction.begin(); it != multiAction.end(); ++it) {
+        const action& act = *it;
+        const data_expression_vector vec(
+            adapt_termlist_to_stack(act.arguments().begin(), act.arguments().end(), stack, vars, variable_list()));
+        result.push_back(action(act.label(), data_expression_list(vec.begin(), vec.end())));
       }
 
-      const action act=action(multiAction.front());
+      // As the arguments change, sort order w.r.t. action_label is preserved, but order w.r.t. arguments is changed.
+      // resort the list.
+      std::sort(result.begin(), result.end(), action_compare());
 
-      action_list result=adapt_multiaction_to_stack_rec(multiAction.tail(),stack,vars);
-
-      const data_expression_vector vec(adapt_termlist_to_stack(
-                            act.arguments().begin(),
-                            act.arguments().end(),
-                            stack,
-                            vars,
-                            variable_list()));
-      result.push_front(action(act.label(),data_expression_list(vec.begin(),vec.end())));
-      return result;
-    }
-
-    action_list adapt_multiaction_to_stack(
-      const action_list& multiAction,
-      const stacklisttype& stack,
-      const variable_list& vars)
-    {
-      return adapt_multiaction_to_stack_rec(multiAction,stack,vars);
+      return action_list(result.begin(), result.end());
     }
 
     data_expression representative_generator_internal(const sort_expression& s, const bool allow_dont_care_var=true)
@@ -5238,7 +5235,9 @@ class specification_basic_type
       const bool has_time,
       const bool is_deadlock_summand)
     {
-      assert(distribution!=stochastic_distribution());
+      assert(distribution != stochastic_distribution());
+      assert(std::is_sorted(multiAction.begin(), multiAction.end(), action_compare()));
+        
       const data_expression rewritten_condition=RewriteTerm(condition);
       if (rewritten_condition==sort_bool::false_())
       {
@@ -5258,7 +5257,7 @@ class specification_basic_type
         action_summands.push_back(stochastic_action_summand(
                                                  sumvars,
                                                  rewritten_condition,
-                                                 has_time?multi_action(multiAction,actTime):multi_action(multiAction),
+                                                 has_time ? multi_action(multiAction, actTime) : multi_action(multiAction),
                                                  procargs,
                                                  stochastic_distribution(distribution.variables(),
                                                                          RewriteTerm(distribution.distribution()))));
@@ -5378,7 +5377,7 @@ class specification_basic_type
         else
         {
           assert(is_tau(t1)||is_action(t1)||is_sync(t1));
-          multiAction=to_action_list(t1);
+          multiAction=to_sorted_action_list(t1);
         }
 
         stochastic_distribution distribution(variable_list(),sort_real::real_one());
@@ -5436,11 +5435,12 @@ class specification_basic_type
       }
       else if (is_action(summandterm))
       {
+        assert(multiAction.empty()); // so the result must be sorted.
         multiAction.push_front(action(summandterm));
       }
       else if (is_sync(summandterm))
       {
-        multiAction=to_action_list(summandterm);
+        multiAction=to_sorted_action_list(summandterm);
       }
       else
       {
@@ -7151,8 +7151,8 @@ class specification_basic_type
        from the underlying GNF */
     {
       // We use action_summands and deadlock_summands as an output.
-      assert(action_summands.size()==0);
-      assert(deadlock_summands.size()==0);
+      assert(action_summands.empty());
+      assert(deadlock_summands.empty());
 
       bool singlecontrolstate=false;
       std::set< process_identifier > reachable_process_identifiers;
@@ -7811,6 +7811,7 @@ class specification_basic_type
 
           if (condition1!=sort_bool::false_())
           {
+            assert(std::is_sorted(multiaction1.begin(), multiaction1.end(), action_compare()));
             action_summands.push_back(stochastic_action_summand(
                                              sumvars1,
                                              condition1,
@@ -7988,6 +7989,7 @@ class specification_basic_type
             condition3=RewriteTerm(condition3);
             if (condition3!=sort_bool::false_())
             {
+              assert(std::is_sorted(multiaction3.begin(), multiaction3.end(), action_compare()));
               action_summands.push_back(stochastic_action_summand(
                                            allsums,
                                            condition3,
