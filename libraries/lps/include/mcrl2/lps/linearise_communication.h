@@ -573,10 +573,10 @@ const process::action& m_terminationAction;
 DataRewriter& m_data_rewriter;
 const process::communication_expression_list m_communications;
 const process::action_name_multiset_list m_allowlist;  // This is a list of list of identifierstring.
-const std::vector<core::identifier_string> m_blocked_actions;
-const std::vector<core::identifier_string> m_allowed_actions;
+const std::vector<core::identifier_string> m_blocked_actions; // used only if m_is_block is set
+const std::vector<core::identifier_string> m_allowed_actions; // used only if m_is_allow is set
 comm_entry m_comm_table;
-const bool m_is_allow;                          // If is_allow or is_block is set, perform inline allow/block filtering.
+const bool m_is_allow;                          // If is_allow or is_block is set, perform inline allow/block filtering. They are mutually exclusive
 const bool m_is_block;
 
 /// Static initialization function to ensure m_allowed_actions can be const.
@@ -633,11 +633,14 @@ return result;
 /// and it is not part of a block expression
 bool maybe_allowed(const process::action_label& a) const
 {
-assert(std::is_sorted(m_allowed_actions.begin(), m_allowed_actions.end(), action_name_compare()));
-assert(std::is_sorted(m_blocked_actions.begin(), m_blocked_actions.end(), action_name_compare()));
-return !(m_is_allow || m_is_block)
-  || (std::binary_search(m_allowed_actions.begin(), m_allowed_actions.end(), a.name(), action_name_compare())
-        && !std::binary_search(m_blocked_actions.begin(), m_blocked_actions.end(), a.name(), action_name_compare()));
+  assert(std::is_sorted(m_allowed_actions.begin(), m_allowed_actions.end(), action_name_compare()));
+  assert(std::is_sorted(m_blocked_actions.begin(), m_blocked_actions.end(), action_name_compare()));
+  assert(!m_is_block || m_allowed_actions.empty());
+  assert(!m_is_allow || m_blocked_actions.empty());
+
+  return !(m_is_allow || m_is_block) 
+    || (m_is_allow && std::binary_search(m_allowed_actions.begin(), m_allowed_actions.end(), a.name(), action_name_compare()))
+    || (m_is_block && !std::binary_search(m_blocked_actions.begin(), m_blocked_actions.end(), a.name(), action_name_compare()));
 }
 
 

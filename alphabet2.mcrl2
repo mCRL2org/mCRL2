@@ -1,0 +1,10 @@
+act
+  a,b,e,c,d;
+
+proc
+  P = ((b | e) + ((true) -> ((d) + (e)) <> (((a) . (b | b | b)) . (b)))) . (e);
+  Q = ((c) . ((sum b1: Bool. ((delta) . ((delta) . (Q)))) + (P))) . (e);
+  R = delta;
+
+init
+  (allow({c | d, b, d, a | e}, Q)) || (block({a}, (R) || (comm({e | e -> b}, P))));

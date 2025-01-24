@@ -1,0 +1,14 @@
+Contents of file l1.mcrl2:
+act
+  d,a,c,b,e;
+proc
+  P = tau;
+  Q = e;
+  R = sum b1: Bool. (d);
+init
+  block({a}, hide({c}, comm({b | e -> c}, rename({d -> c}, (rename({d -> c}, P)) || ((Q) || (R))))));
+Output of mcrl22lps -n: {'has-deadlock': False, 'has-divergence': False}
+Output of mcrl22lps --no-alpha -n: {'has-deadlock': False, 'has-divergence': False}
+Output of lps2lts : {'has-deadlock': False, 'has-nondeterminism': None, 'has-divergence': False, 'actions': set()}
+Output of lps2lts : {'has-deadlock': False, 'has-nondeterminism': None, 'has-divergence': False, 'actions': set()}
+Output of ltscompare -ebisim-gv: {'result': False, 'has-deadlock': False, 'has-divergence': False}
