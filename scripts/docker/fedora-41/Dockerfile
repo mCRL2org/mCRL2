@@ -1,4 +1,4 @@
-FROM fedora:40
+FROM fedora:41
 
 # Install packages needed for compiling and testing the tools
 RUN dnf install -y \
@@ -14,11 +14,10 @@ RUN dnf install -y \
  which \
 # Packages needed for packaging
  rpm-build \
-# Packages needed for documentation
+ # Packages needed for documentation
  doxygen \
  python3 \
  python3-pip \
- python3-sphinx \
  swig \
  texlive-scheme-full
 

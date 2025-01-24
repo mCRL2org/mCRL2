@@ -204,7 +204,8 @@ QProcess* ProcessSystem::createSubprocess(
     const QString& expression,
     bool evidence,
     mcrl2::lts::lts_equivalence equivalence, 
-    SpecType specType)
+    SpecType specType,
+    int enumerationLimit)
 {
   // TODO: This function combines all parameters for the different processes, which is confusing.
   QProcess* subprocess = new QProcess();
@@ -292,7 +293,9 @@ QProcess* ProcessSystem::createSubprocess(
   case SubprocessType::Lpsxsim:
     program = "lpsxsim";
     inputFile = fileSystem->lpsFilePath();
-    arguments << inputFile;
+    arguments << inputFile 
+              << "-Q"
+              << std::to_string(enumerationLimit).c_str();
     break;
 
   case SubprocessType::Lps2lts:
@@ -302,7 +305,9 @@ QProcess* ProcessSystem::createSubprocess(
                                          property.name, evidence);
     arguments << inputFile << outputFile
               << "--strategy=breadth"
-              << "--verbose";
+              << "--verbose"
+              << "-Q"
+              << std::to_string(enumerationLimit).c_str();
     if (fileSystem->enableJittyc())
     {
 #ifdef MCRL2_ENABLE_JITTYC

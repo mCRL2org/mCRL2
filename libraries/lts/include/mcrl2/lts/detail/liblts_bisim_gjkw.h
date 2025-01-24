@@ -360,6 +360,8 @@ class state_info_entry
 
                                                                                     friend class part_state_t;
                                                                                   public:
+                                                                                #endif
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     mutable check_complexity::state_counter_t work_counter;
                                                                                 #endif
 };
@@ -793,12 +795,14 @@ class block_t
                                                                                     /// \details This iterator is required to be able to print identifications
                                                                                     /// for debugging.  It is only available if compiled in Debug mode.
                                                                                     static permutation_const_iter_t permutation_begin()  { return perm_begin; }
-
-                                                                                    mutable check_complexity::block_counter_t work_counter;
                                                                                   private:
                                                                                     static permutation_const_iter_t perm_begin;
 
                                                                                     friend class part_state_t;
+                                                                                #endif
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                  public:
+                                                                                    mutable check_complexity::block_counter_t work_counter;
                                                                                 #endif
 };
 
@@ -1269,7 +1273,7 @@ class succ_entry
         // through the `static` hoop.
         return this_ + 1;
     }
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     /// adds work (for time complexity measurement) to every transition in the
                                                                                     /// slice to which `this_` belongs.
                                                                                     static void slice_add_work_to_transns(succ_const_iter_t this_,
@@ -1298,7 +1302,8 @@ class pred_entry
                                                                                     {
                                                                                         return "transition " + debug_id_short();
                                                                                     }
-
+                                                                                #endif
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     mutable check_complexity::trans_counter_t work_counter;
                                                                                 #endif
 };
@@ -1310,22 +1315,24 @@ class B_to_C_entry
     pred_iter_t pred;
     B_to_C_desc_iter_t B_to_C_slice;
 };
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     /// adds work (for time complexity measurement) to every transition in the
                                                                                     /// slice.
                                                                                     inline void succ_entry::slice_add_work_to_transns(succ_const_iter_t this_,
                                                                                                    enum check_complexity::counter_type ctr, unsigned max_value)
                                                                                     {
                                                                                         succ_const_iter_t iter = this_->slice_begin();
-                                                                                        succ_const_iter_t end = slice_end(this_);
+                                                                                        succ_const_iter_t end = slice_end(this_); (void) end;
                                                                                         assert(iter < end);
                                                                                         mCRL2complexity(iter->B_to_C->pred, add_work(ctr, max_value), );
-                                                                                        while (++iter != end)
-                                                                                        {
-                                                                                            // treat temporary counters specially
-                                                                                            mCRL2complexity(iter->B_to_C->pred,
+                                                                                        #ifndef NDEBUG
+                                                                                            while (++iter != end)
+                                                                                            {
+                                                                                                // treat temporary counters specially
+                                                                                                mCRL2complexity(iter->B_to_C->pred,
                                                                                                                        add_work_notemporary(ctr, max_value), );
-                                                                                        }
+                                                                                            }
+                                                                                        #endif
                                                                                     }
                                                                                 #endif
 /* B_to_C_descriptor is a data type that indicates which slice of states
@@ -1401,7 +1408,8 @@ class B_to_C_descriptor
                                                                                         }
                                                                                         return result;
                                                                                     }
-
+                                                                                #endif
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     /// The function is meant to transfer work temporarily assigned to the
                                                                                     /// B_to_C slice to the transitions in the slice.  It is used during
                                                                                     /// handling of new bottom states, so the work is only assigned to
@@ -1421,8 +1429,19 @@ class B_to_C_descriptor
                                                                                                                      iter->pred->source->block->bottom_begin())
                                                                                             {
                                                                                                 // source state of the transition is a bottom state
+                                                                                                #ifndef NDEBUG
+                                                                                                    if (added)
+                                                                                                    {
+                                                                                                        mCRL2complexity(iter->pred,
+                                                                                                                       add_work_notemporary(ctr, max_value), );
+                                                                                                        continue;
+                                                                                                    }
+                                                                                                #endif
                                                                                                 mCRL2complexity(iter->pred, add_work(ctr, max_value), );
                                                                                                 added = true;
+                                                                                                #ifdef NDEBUG
+                                                                                                    break;
+                                                                                                #endif
                                                                                             }
                                                                                         }
                                                                                         return added;
@@ -1804,7 +1823,10 @@ class bisim_partitioner_gjkw
     bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RfnB,
               const bisim_gjkw::constln_t* SpC,
               const bisim_gjkw::B_to_C_descriptor* FromRed,
-              bool postprocessing                                               ONLY_IF_DEBUG( , const bisim_gjkw::constln_t* NewC = nullptr )
+              bool postprocessing
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    , const bisim_gjkw::constln_t* NewC = nullptr
+                                                                                #endif
                                  );
 
     /*--------- PostprocessNewBottom -- Algorithm 4 of [GJKW 2017] ----------*/

@@ -73,7 +73,7 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
                                                                                 assert(0 != unmarked_bottom_size());
     permutation_iter_t const splitpoint = blue_nonbottom_end +
                                                         unmarked_bottom_size(); assert(splitpoint < end());  assert(begin() < splitpoint);
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     unsigned const max_counter = check_complexity::log_n -
     /* It is not necessary to reset the nottoblue counters; these counters   */                   check_complexity::ilog2((state_type) (splitpoint - begin()));
     /* are anyway only valid for the maybe-blue states.                      */     assert((state_type) (splitpoint - begin()) <= size()/2);
@@ -102,7 +102,7 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
 
     // create a new block for the blue states
     block_t* const NewB = new block_t(constln(), begin(), splitpoint);
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     NewB->work_counter = work_counter;
                                                                                 #endif
     if (BLOCK_NO_SEQNR != seqnr())
@@ -152,7 +152,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                                                 assert(0 != marked_size());
     permutation_iter_t const splitpoint = red_nonbottom_begin +
                                                         unmarked_bottom_size(); assert(begin() < splitpoint);  assert(splitpoint < end());
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     unsigned const max_counter = check_complexity::log_n -
     /* It is not necessary to reset the nottoblue counters; these counters   */                     check_complexity::ilog2((state_type) (end() - splitpoint));
     /* are anyway only valid for the maybe-blue states.                      */     assert((state_type) (end() - splitpoint) <= size() / 2);
@@ -179,7 +179,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
     }
     // create a new block for the red states
     block_t* const NewB = new block_t(constln(), splitpoint, end());
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     NewB->work_counter = work_counter;
                                                                                 #endif
     if (BLOCK_NO_SEQNR != seqnr())
@@ -423,7 +423,7 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
         new_slice = SpB->to_constln.begin();
         /* SpB->SetFromRed(new_slice);                                       */ assert(new_slice->from_block() == SpB);
         slice->begin = SpB->inert_begin();
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     new_slice->work_counter = slice->work_counter;
                                                                                     // We actually change the pointers in the new slice (i. e. the pointers of
                                                                                     // the non-inert transitions) because there are fewer of them; however, we
@@ -440,7 +440,7 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
         new_slice = std::prev(SpB->to_constln.end());
         slice->end = SpB->inert_begin();
         SpB->SetFromRed(slice);
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     new_slice->work_counter = slice->work_counter;
                                                                                     mCRL2complexity(new_slice, add_work(check_complexity::
                                                                                               Register_that_inert_transitions_from_s_go_to_NewC_B_to_C_2_17,
@@ -573,7 +573,7 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s                           
     else if (split < to_C_end)
     {
         // s has both inert and non-inert transitions
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
         /* the out-transitions of s also have to be swapped.                 */     unsigned const max_counter = check_complexity::log_n -
         /* Actually only B_to_C and the target need to be swapped, as the    */                                          check_complexity::ilog2(NewC->size());
         /* constln_slices are (still) identical.                             */     assert(*NewC < *OldC);
@@ -667,7 +667,7 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
                                                            block_t* const NewB)
 {                                                                               assert(RfnB->constln()==NewB->constln());  assert(NewB->end()==RfnB->begin());
     NewB->set_inert_begin_and_end(B_to_C.begin(), B_to_C.begin());
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     unsigned const max_counter = check_complexity::log_n -
                                                                                                                          check_complexity::ilog2(NewB->size());
                                                                                     mCRL2complexity(NewB, add_work(check_complexity::
@@ -839,7 +839,7 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
 {                                                                               assert(RfnB->constln()==NewB->constln());  assert(NewB->begin()==RfnB->end());
     NewB->set_inert_begin_and_end(B_to_C.begin(), B_to_C.begin());
     bool old_fromred_invalid = false;
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     unsigned const max_counter = check_complexity::log_n -
                                                                                                                          check_complexity::ilog2(NewB->size());
                                                                                     mCRL2complexity(NewB, add_work(check_complexity::
@@ -1868,7 +1868,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         //      added
         bisim_gjkw::block_t* const SpB = SpC->split_off_small_block();
         bisim_gjkw::constln_t* const NewC = SpB->constln();
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     unsigned const max_counter = check_complexity::log_n -
         /*-------------------- find predecessors of SpB ---------------------*/                                           check_complexity::ilog2(SpB->size());
                                                                                 #endif
@@ -2023,7 +2023,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                      bisim_gjkw::block_t::get_some_refinable();
             // 2.21: Mark block RfnB as non-refinable
             RfnB->make_nonrefinable();
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     // The work in this loop has to be assigned to the B_to_C-
                                                                                     // slice that contains the transitions from RfnB to NewC.
                                                                                     // Note that this is not FromRed, so we have to find it in a
@@ -2080,7 +2080,10 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
 
             // 2.26: <RedB, BlueB> := Refine(RedB, SpC\SpB, {}, {transitions
             //                                           from RedB to SpC\SpB})
-            RedB = refine(RedB, SpC, RedB->FromRed(SpC), false                  ONLY_IF_DEBUG( , NewC )
+            RedB = refine(RedB, SpC, RedB->FromRed(SpC), false
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    , NewC
+                                                                                #endif
                                                               );
             // 2.27: if RedB contains new bottom states then
             if (0 != RedB->unmarked_bottom_size())
@@ -2114,7 +2117,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
     mCRL2log(log::verbose) << "number of blocks in the quotient: "
                                   << bisim_gjkw::block_t::nr_of_blocks << '\n';
 }
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     namespace bisim_gjkw
                                                                                     {
 /*=============================================================================
@@ -2361,7 +2364,10 @@ template <class LTS_TYPE>
 bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
        bisim_gjkw::block_t* const RfnB, const bisim_gjkw::constln_t* const SpC,
        const bisim_gjkw::B_to_C_descriptor* const FromRed,
-       bool const postprocessing                                                ONLY_IF_DEBUG( , const bisim_gjkw::constln_t* NewC )
+       bool const postprocessing
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                  , const bisim_gjkw::constln_t* NewC
+                                                                                #endif
        )
 {
                                                                                 #ifndef NDEBUG
@@ -2512,7 +2518,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                     {
                         ABORT_OTHER_COROUTINE();
                     }
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     // The state is red.  Depending on the context of refinement, the work done
                                                                                     // on this state is attributed to one or another element of the Kripke
                                                                                     // structure.
@@ -2575,7 +2581,10 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                 // states.
                 RfnB->set_marked_nonbottom_begin(RfnB->marked_nonbottom_end());
                 // RfnB->set_marked_bottom_begin(RfnB->bottom_begin());
-                RedB = RfnB;                                                    ONLY_IF_DEBUG( blue_is_smaller(nullptr, RedB, NewC); )
+                RedB = RfnB;
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    blue_is_smaller(nullptr, RedB, NewC);
+                                                                                #endif
                 TERMINATE_COROUTINE_SUCCESSFULLY();
             }
 
@@ -2657,7 +2666,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                                     blue_begin =
                                         bisim_gjkw::succ_entry::slice_end(mid);
                                 }
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     bisim_gjkw::succ_entry::slice_add_work_to_transns(mid,
                                                                                                 check_complexity::if___s_prime_has_transition_to_SpC_3_23l, 1);
                                                                                 #endif
@@ -2707,7 +2716,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
             bisim_gjkw::block_t* const NewB =
                                  RfnB->split_off_blue(blue_blue_nonbottom_end);
             part_tr.new_blue_block_created(RfnB, NewB);
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     unsigned const max_counter = check_complexity::log_n -
                                                                                                                          check_complexity::ilog2(NewB->size());
                                                                                     mCRL2complexity(NewB,
@@ -2746,7 +2755,10 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
             // 3.38l: end for
             }
 
-            RedB = RfnB;                                                        ONLY_IF_DEBUG( blue_is_smaller(NewB, RedB, NewC); )
+            RedB = RfnB;
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    blue_is_smaller(NewB, RedB, NewC);
+                                                                                #endif
         END_COROUTINE
 
 /*---------------------------- handle red states ----------------------------*/
@@ -2899,7 +2911,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
             // 3.30r: Destroy all temporary data
             RedB = RfnB->split_off_red(RfnB->marked_nonbottom_begin());
             part_tr.new_red_block_created(RfnB, RedB, postprocessing);
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     unsigned const max_counter = check_complexity::log_n -
                                                                                                                          check_complexity::ilog2(RedB->size());
                                                                                     mCRL2complexity(RedB,
@@ -2942,7 +2954,9 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                 }
             // 3.38r: end for
             }                                                                   assert(RfnB->end() < red_end);
-                                                                                ONLY_IF_DEBUG( red_is_smaller(RfnB, RedB); )
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                                                                                    red_is_smaller(RfnB, RedB);
+                                                                                #endif
         END_COROUTINE
     END_COROUTINES_SECTION
 
@@ -3043,7 +3057,7 @@ Line_4_4:
     {
         bisim_gjkw::B_to_C_desc_iter_t const new_slice =
                                                       RfnB->to_constln.begin(); // try to assign the work to the transitions from bottom states in RfnB to C.
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     if (!new_slice->add_work_to_bottom_transns(check_complexity::
                                                                                                        for_all_transitions_from_bottom_states_a_priori_4_4, 1))
                                                                                     {
@@ -3095,7 +3109,7 @@ Line_4_4:
             bisim_gjkw::B_to_C_iter_t const B_iter = SpC->postprocess_begin;    assert(part_tr.B_to_C_end() > B_iter);
             bisim_gjkw::block_t* const B = B_iter->pred->source->block;         assert(B_iter->pred->succ->B_to_C == B_iter);
             bisim_gjkw::B_to_C_desc_iter_t FromRed = B_iter->B_to_C_slice;      assert(FromRed->begin == B_iter);
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     bool postproc_a_posteriori = !FromRed->
                                                                                         add_work_to_bottom_transns(check_complexity::
                                                                                                       for_all_transitions_that_need_postproc_a_priori_4_12, 1);
@@ -3112,11 +3126,12 @@ Line_4_4:
             /* do not refine a trivial block                                 */ assert(0 == B->marked_size());
             if (1 == B->size())
             {                                                                   assert(!postproc_a_posteriori);
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     if (0 != FromRed->work_counter.get_work_counter_4_4())
                                                                                     {
-                                                                                        assert(FromRed->add_work_to_bottom_transns(check_complexity::
-                                                                                                  for_all_transitions_from_bottom_states_a_posteriori_4_4, 1));
+                                                                                        if (!FromRed->add_work_to_bottom_transns(check_complexity::
+                                                                                                   for_all_transitions_from_bottom_states_a_posteriori_4_4, 1))
+                                                                                        {  assert(0);  }
                                                                                         FromRed->work_counter.reset_work_counter_4_4();
                                                                                     }
                                                                                 #endif
@@ -3126,12 +3141,12 @@ Line_4_4:
             // the transitions in FromRed are moved to a new B_to_C slice.
             // Therefore we select some transition from it, to restore the
             // slice afterwards.  Any transition should do.
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     bisim_gjkw::pred_iter_t FromRed_save = FromRed->begin->pred;
                                                                                 #endif
             // 4.14: <RedB, BlueB> := Refine(B, SpC, {}, {transitions to SpC})
             RedB = refine(B, SpC, &*FromRed, true);
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     FromRed = FromRed_save->succ->B_to_C->B_to_C_slice;
                                                                                     if (postproc_a_posteriori && !FromRed->add_work_to_bottom_transns(
                                                                                                   check_complexity::
@@ -3162,7 +3177,7 @@ Line_4_4:
                 if (s->current_constln() < s->succ_end() &&
                                 s->current_constln()->target->constln() == SpC)
                 {
-                                                                                #ifndef NDEBUG
+                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     bisim_gjkw::succ_entry::slice_add_work_to_transns(s->current_constln(),
                                                                                                  check_complexity::for_all_old_bottom_states_s_in_RedB_4_15,1);
                                                                                 #endif

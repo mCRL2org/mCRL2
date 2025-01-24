@@ -73,6 +73,21 @@
 #ifndef _CHECK_COMPLEXITY_H
 #define _CHECK_COMPLEXITY_H
 
+// If the preprocessor constant `COUNT_WORK_BALANCE` is defined, the temporary
+// work is even counted in non-debug modes.  No checks are executed; we only
+// keep enough information to print a grand total at the end.
+// In this mode, we at least need to call `init()`, `finalise_work()`,
+// `cancel_work()`, and `wait()`.  It is not necessary to preserve
+// `add_work_notemporary()`.  The function `print_grand_totals()` prints a
+// verbose message about the number of coroutine steps executed.
+//#define COUNT_WORK_BALANCE
+
+// If the preprocessor constant `TEST_WORK_COUNTER_NAMES` is defined,
+// initialising will print an overview of the defined work counter names (to
+// check whether the constants defined in this file correspond properly with
+// the strings in `check_complexity.cpp`) and terminate.
+//#define TEST_WORK_COUNTER_NAMES
+
 #include <cstring>       // for std::size_t and std::memset()
 #include <cassert>
 #include <cmath>         // for std::log2()
@@ -108,7 +123,7 @@ typedef std::size_t trans_type;
 #define TRANS_TYPE_MIN (std::numeric_limits<trans_type>::min())
 #define TRANS_TYPE_MAX (std::numeric_limits<trans_type>::max())
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
 
 /// \brief type used to store differences between transition counters
 typedef std::make_signed<trans_type>::type signed_trans_type;
@@ -441,8 +456,10 @@ class check_complexity
             TRANS_gj_MAX = create_initial_partition__refine_block
     };
 
+#ifndef NDEBUG
     /// \brief special value for temporary work without changing the balance
     #define DONT_COUNT_TEMPORARY (std::numeric_limits<unsigned char>::max()-1)
+#endif
 
     enum result_type {
         // three magic values to ensure that the result is actually correct...
@@ -492,19 +509,23 @@ class check_complexity
     }
 
   private:
+#ifndef NDEBUG
     /// \brief counter to register the work balance for coroutines
     /// \details Sensible work will be counted positively, and cancelled work
     /// negatively.
     static signed_trans_type sensible_work;
     static trans_type no_of_waiting_cycles;
+    static bool cannot_wait_before_reset;
+#endif
     static trans_type sensible_work_grand_total;
     static trans_type cancelled_work_grand_total;
     static trans_type no_of_waiting_cycles_grand_total;
-    static bool cannot_wait_before_reset;
 
   public:
+#ifndef NDEBUG
     /// \brief printable names of the counter types (for error messages)
     static const char *work_names[TRANS_gj_MAX - BLOCK_MIN + 1];
+#endif
 
     /// \brief do some work that cannot be assigned directly
     /// \details This is meant for a coroutine that has nothing to do
@@ -512,41 +533,53 @@ class check_complexity
     /// transition.
     static void wait(trans_type units = 1)
     {
-      assert(!cannot_wait_before_reset);
-      no_of_waiting_cycles += units;
-      no_of_waiting_cycles_grand_total += units;
+        #ifndef NDEBUG
+            assert(!cannot_wait_before_reset);
+            no_of_waiting_cycles += units;
+        #endif
+        no_of_waiting_cycles_grand_total += units;
     }
 
     static void check_waiting_cycles()
     {
-        assert(0 <= sensible_work &&
-               no_of_waiting_cycles <= (trans_type) sensible_work);
-        no_of_waiting_cycles = 0;
-        cannot_wait_before_reset = true;
+        #ifndef NDEBUG
+            assert(0 <= sensible_work &&
+                   no_of_waiting_cycles <= (trans_type) sensible_work);
+            no_of_waiting_cycles = 0;
+            cannot_wait_before_reset = true;
+        #endif
     }
 
+  private:
     static void finalise_work_units(trans_type units=1)
     {
-        sensible_work += units;
+        #ifndef NDEBUG
+            sensible_work += units;
+        #endif
         sensible_work_grand_total += units;
     }
 
     static void cancel_work_units(trans_type units=1)
     {
-        sensible_work -= units;
+        #ifndef NDEBUG
+            sensible_work -= units;
+        #endif
         cancelled_work_grand_total += units;
     }
 
+  public:
     /// \brief check that not too much superfluous work has been done
     /// \details After having moved all temporary work counters to the normal
     /// counters, this function can be used to ensure that not too much
     /// temporary work is cancelled.
     static void check_temporary_work()
     {
-        assert(-1 <= sensible_work);
-        //assert(0 == no_of_waiting_cycles);
-        sensible_work = 0;
-        cannot_wait_before_reset = false;
+        #ifndef NDEBUG
+            assert(-1 <= sensible_work);
+            //assert(0 == no_of_waiting_cycles);
+            sensible_work = 0;
+            cannot_wait_before_reset = false;
+        #endif
     }
 
     /// \brief subset of counters (to be associated with a state or transition)
@@ -580,10 +613,12 @@ class check_complexity
             assert(FirstTempCounter <= ctr);
             assert(ctr < FirstPostprocessCounter);
             assert(0 == no_of_waiting_cycles);
+#ifndef NDEBUG
             if ((FirstTempCounter != TRANS_MIN_TEMP &&
                  FirstTempCounter != TRANS_dnj_MIN_TEMP &&
                  FirstTempCounter != TRANS_gj_MIN_TEMP) ||
                           DONT_COUNT_TEMPORARY != counters[ctr - FirstCounter])
+#endif
             {
                 assert(counters[ctr - FirstCounter] <= 1);
                 cancel_work_units(counters[ctr - FirstCounter]);
@@ -627,6 +662,7 @@ class check_complexity
         result_type finalise_work(enum counter_type const from,
                           enum counter_type const to, unsigned const max_value)
         {
+#ifndef NDEBUG
             // assert(...) -- see move_work().
             if ((FirstTempCounter != TRANS_MIN_TEMP &&
                  FirstTempCounter != TRANS_dnj_MIN_TEMP &&
@@ -634,17 +670,15 @@ class check_complexity
                          DONT_COUNT_TEMPORARY != counters[from - FirstCounter])
             {
                 finalise_work_units(counters[from - FirstCounter]);
-                if (0<counters[from - FirstCounter])
-                {
-                    mCRL2log(log::debug) << "In finalise_work(), ";
-                }
             }
             else
             {
                 counters[from - FirstCounter] = 1;
-                mCRL2log(log::debug) << "In finalise_work() "
-                                        "(without changing the balance), ";
             }
+#else
+            // The counter value is always != DONT_COUNT_TEMPORARY.
+            finalise_work_units(counters[from - FirstCounter]);
+#endif
             return move_work(from, to, max_value);
         }
 
@@ -673,11 +707,17 @@ class check_complexity
         result_type add_work(enum counter_type const ctr,
                              unsigned const max_value)
         {
+#ifdef NDEBUG
+            if (ctr < FirstTempCounter || ctr >= FirstPostprocessCounter)
+            {
+                return complexity_ok;
+            }
+#else
             if (FirstCounter > ctr || ctr > LastCounter)
             {
-              mCRL2log(log::error) << "Error 20: counter \""
+                mCRL2log(log::error) << "Error 20: counter \""
                    << work_names[ctr - BLOCK_MIN] << "\" is not available in ";
-              return complexity_error;
+                return complexity_error;
             }
             assert(max_value <= (ctr < FirstTempCounter ? log_n : 1U));
             if (counters[ctr - FirstCounter] >= max_value)
@@ -687,11 +727,12 @@ class check_complexity
                                     "maximum value (" << max_value << ") for ";
                 return complexity_error;
             }
+#endif
             counters[ctr - FirstCounter] = max_value;
             return complexity_ok;
         }
 
-
+      protected:
         /// \brief move temporary work to another counter
         /// \details The function moves work from a temporary counter to
         /// another temporary or a normal counter.  It also checks that the new
@@ -713,9 +754,11 @@ class check_complexity
         result_type move_work(enum counter_type const from,
                           enum counter_type const to, unsigned const max_value)
         {
+#ifndef NDEBUG
             assert(FirstTempCounter <= from);
             assert(from < FirstPostprocessCounter);
             assert(FirstCounter <= to);
+            assert(to < FirstTempCounter || FirstPostprocessCounter <= to);
             assert(to <= LastCounter);
             assert(max_value <= (to < FirstTempCounter ? log_n : 1U));
             if (0 == counters[from - FirstCounter])  return complexity_ok;
@@ -743,6 +786,9 @@ class check_complexity
                 counters[to - FirstCounter] = max_value;
                 assert(1 == counters[from - FirstCounter]);
             }
+#else
+            (void) to; (void) max_value; // avoid unused variable warning
+#endif
             counters[from - FirstCounter] = 0;
             //mCRL2log(log::debug) << "moving work from counter \""
             //    << work_names[from - BLOCK_MIN] << "\" to \""
@@ -789,6 +835,7 @@ class check_complexity
         result_type no_temporary_work(unsigned const max_C,
                                       unsigned const max_B)
         {
+#ifndef NDEBUG
             assert(max_C <= max_B);
             for (enum counter_type ctr = BLOCK_MIN;
                        ctr < Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29;
@@ -805,6 +852,9 @@ class check_complexity
                 assert(counters[ctr - BLOCK_MIN] <= max_B);
                 counters[ctr - BLOCK_MIN] = max_B;
             }
+#else
+            (void) max_C; (void) max_B; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
     };
@@ -833,6 +883,7 @@ class check_complexity
         [[nodiscard]]
         result_type no_temporary_work(unsigned const max_targetC)
         {
+#ifndef NDEBUG
             assert(max_targetC <= log_n);
             for (enum counter_type ctr = B_TO_C_MIN;
                     ctr < B_TO_C_MIN_TEMP; ctr = (enum counter_type) (ctr + 1))
@@ -852,9 +903,11 @@ class check_complexity
                 }
             }
             static_assert(B_TO_C_MAX_TEMP == B_TO_C_MAX);
+#else
+            (void) max_targetC; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
-
 
         /// \brief returns the _temporary_ counter associated with line 4.4
         /// \details The counter associated with line 4.4 is used when some
@@ -928,6 +981,7 @@ class check_complexity
         [[nodiscard]]
         result_type no_temporary_work(unsigned const max_B, bool const bottom)
         {
+#ifndef NDEBUG
             assert(max_B <= log_n);
             for (enum counter_type ctr = STATE_MIN;
                      ctr < STATE_MIN_TEMP; ctr = (enum counter_type) (ctr + 1))
@@ -963,6 +1017,9 @@ class check_complexity
                 }
                 counters[ctr - STATE_MIN] = (unsigned) bottom;
             }
+#else
+            (void) max_B; (void) bottom; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
     };
@@ -1008,6 +1065,7 @@ class check_complexity
                           unsigned const max_targetC,
                           unsigned const max_targetB, bool const source_bottom)
         {
+#ifndef NDEBUG
             assert(max_targetC <= max_targetB);
             for (enum counter_type ctr = TRANS_MIN;
                                    ctr < refine_outgoing_transition_3_6_or_23l;
@@ -1058,6 +1116,10 @@ class check_complexity
                 }
                 counters[ctr - TRANS_MIN] = (unsigned) source_bottom;
             }
+#else
+            (void) max_sourceB; (void) max_targetC; (void) max_targetB;
+            (void) source_bottom; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
 
@@ -1084,6 +1146,7 @@ class check_complexity
         result_type add_work_notemporary(enum counter_type const ctr,
                                                       unsigned const max_value)
         {
+#ifndef NDEBUG
             if (TRANS_MIN_TEMP > ctr || ctr > TRANS_MAX_TEMP)
             {
                 return add_work(ctr, max_value);
@@ -1100,6 +1163,10 @@ class check_complexity
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
             return complexity_error;
+#else
+            (void) ctr; (void) max_value;
+            return complexity_ok;
+#endif
         }
     };
 
@@ -1127,6 +1194,7 @@ class check_complexity
         [[nodiscard]]
         result_type no_temporary_work(unsigned const max_block)
         {
+#ifndef NDEBUG
             assert((log_n + 1U) / 2U <= max_block);
             if (max_block > log_n)
             {
@@ -1149,6 +1217,9 @@ class check_complexity
                 assert(counters[ctr - BLOCK_dnj_MIN] <= 1);
                 counters[ctr - BLOCK_dnj_MIN] = 1;
             }
+#else
+            (void) max_block; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
     };
@@ -1176,6 +1247,7 @@ class check_complexity
         result_type no_temporary_work(unsigned const max_block,
                                                              bool const bottom)
         {
+#ifndef NDEBUG
             assert((log_n + 1U) / 2U <= max_block);
             assert(max_block <= log_n);
             for (enum counter_type ctr = STATE_dnj_MIN;
@@ -1197,6 +1269,9 @@ class check_complexity
                 assert(counters[ctr - STATE_dnj_MIN] <= (unsigned) bottom);
                 counters[ctr - STATE_dnj_MIN] = (unsigned) bottom;
             }
+#else
+            (void) max_block; (void) bottom; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
     };
@@ -1222,6 +1297,7 @@ class check_complexity
         [[nodiscard]]
         result_type no_temporary_work(unsigned const max_bunch)
         {
+#ifndef NDEBUG
             assert(max_bunch <= log_n);
             for (enum counter_type ctr = BUNCH_dnj_MIN;
                      ctr <= BUNCH_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
@@ -1229,6 +1305,9 @@ class check_complexity
                 assert(counters[ctr - BUNCH_dnj_MIN] <= max_bunch);
                 counters[ctr - BUNCH_dnj_MIN] = max_bunch;
             }
+#else
+            (void) max_bunch; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
     };
@@ -1256,6 +1335,7 @@ class check_complexity
         [[nodiscard]]
         result_type no_temporary_work(unsigned const max_bunch)
         {
+#ifndef NDEBUG
             assert(max_bunch <= log_n);
             for (enum counter_type ctr = BLOCK_BUNCH_dnj_MIN;
                             ctr < BLOCK_BUNCH_dnj_MIN_TEMP;
@@ -1284,6 +1364,9 @@ class check_complexity
                 assert(counters[ctr - BLOCK_BUNCH_dnj_MIN] <= 0);
             }
             static_assert(BLOCK_BUNCH_dnj_MAX_TEMP == BLOCK_BUNCH_dnj_MAX);
+#else
+            (void) max_bunch; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
 
@@ -1324,6 +1407,7 @@ class check_complexity
         result_type no_temporary_work(unsigned const max_source_block,
                             unsigned const max_target_block, bool const bottom)
         {
+#ifndef NDEBUG
             assert((log_n + 1U) / 2U <= max_source_block);
             assert(max_source_block <= log_n);
             for (enum counter_type ctr = TRANS_dnj_MIN;
@@ -1361,6 +1445,10 @@ class check_complexity
                 }
                 counters[ctr - TRANS_dnj_MIN] = (unsigned) bottom;
             }
+#else
+            (void) max_source_block; (void) max_target_block; (void) bottom;
+            // avoid unused variable warning
+#endif
             return complexity_ok;
         }
 
@@ -1386,6 +1474,7 @@ class check_complexity
         result_type add_work_notemporary(enum counter_type const ctr,
                                                       unsigned const max_value)
         {
+#ifndef NDEBUG
             if (TRANS_dnj_MIN_TEMP > ctr || ctr > TRANS_dnj_MAX_TEMP)
             {
                 return add_work(ctr, max_value);
@@ -1402,6 +1491,10 @@ class check_complexity
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
             return complexity_error;
+#else
+            (void) ctr; (void) max_value; // avoid unused variable warning
+            return complexity_ok;
+#endif
         }
     };
 
@@ -1429,6 +1522,7 @@ class check_complexity
         result_type no_temporary_work(unsigned const max_C,
                                                           unsigned const max_B)
         {
+#ifndef NDEBUG
             assert(max_C <= max_B);
             assert(max_B <= log_n);
             enum counter_type ctr;
@@ -1444,6 +1538,9 @@ class check_complexity
                 assert(counters[ctr - BLOCK_gj_MIN] <= max_B);
                 counters[ctr - BLOCK_gj_MIN] = max_B;
             }
+#else
+            (void) max_C; (void) max_B; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
     };
@@ -1472,6 +1569,7 @@ class check_complexity
         result_type no_temporary_work(unsigned max_sourceC,
                                                           unsigned max_targetC)
         {
+#ifndef NDEBUG
             assert(max_sourceC <= log_n);
             assert(max_targetC <= log_n);
             enum counter_type ctr;
@@ -1487,6 +1585,10 @@ class check_complexity
                 assert(counters[ctr - BLC_gj_MIN] <= max_targetC);
                 counters[ctr - BLC_gj_MIN] = max_targetC;
             }
+#else
+            (void) max_sourceC; (void) max_targetC;
+            // avoid unused variable warning
+#endif
             return complexity_ok;
         }
     };
@@ -1519,6 +1621,7 @@ class check_complexity
         [[nodiscard]]
         result_type no_temporary_work(unsigned const max_B, bool const bottom)
         {
+#ifndef NDEBUG
             assert(max_B <= log_n);
             enum counter_type ctr;
             for (ctr = STATE_gj_MIN ;
@@ -1568,6 +1671,9 @@ class check_complexity
             {
                 assert(counters[ctr - STATE_gj_MIN] <= 1);
             }
+#else
+            (void) max_B; (void) bottom; //avoid unused variable warning
+#endif
             return complexity_ok;
         }
     };
@@ -1613,6 +1719,7 @@ class check_complexity
                           unsigned const max_targetC,
                           unsigned const max_targetB, bool const source_bottom)
         {
+#ifndef NDEBUG
             assert(max_sourceB <= log_n);
             assert(max_targetB <= log_n);
             assert(max_targetC <= max_targetB);
@@ -1680,6 +1787,10 @@ class check_complexity
                     return complexity_error;
                 }
             }
+#else
+            (void) max_sourceB; (void) max_targetC; (void) max_targetB;
+            (void) source_bottom; // avoid unused variable warning
+#endif
             return complexity_ok;
         }
 
@@ -1706,6 +1817,7 @@ class check_complexity
         result_type add_work_notemporary(enum counter_type const ctr,
                                                       unsigned const max_value)
         {
+#ifndef NDEBUG
             if (TRANS_gj_MIN_TEMP > ctr || ctr > TRANS_gj_MAX_TEMP)
             {
                 return add_work(ctr, max_value);
@@ -1722,6 +1834,10 @@ class check_complexity
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
             return complexity_error;
+#else
+            (void) ctr; (void) max_value; // avoid unused variable warning
+            return complexity_ok;
+#endif
         }
     };
 
@@ -1747,12 +1863,14 @@ class check_complexity
         #endif
 
         log_n = ilog2(n);
-        assert(0 == sensible_work);     sensible_work = 0;
+        #ifndef NDEBUG
+            assert(0 == sensible_work);     sensible_work = 0;
+            no_of_waiting_cycles = 0;
+            cannot_wait_before_reset = false;
+        #endif
         sensible_work_grand_total = 0;
         cancelled_work_grand_total = 0;
-        no_of_waiting_cycles = 0;
         no_of_waiting_cycles_grand_total = 0;
-        cannot_wait_before_reset = false;
     }
 
 
@@ -1767,6 +1885,8 @@ class check_complexity
              ((steps)*(trans_type)200+(total))/(total)/2)
         if (0 != overall_total)
         {
+            //auto old_log_level=log::logger::get_reporting_level();
+            //log::logger::set_reporting_level(log::verbose);
             mCRL2log(log::verbose) << "In the coroutines, "
                 << (sensible_work_grand_total + cancelled_work_grand_total)
                 << " states and transitions were inspected.  ";
@@ -1796,6 +1916,10 @@ class check_complexity
             {
                 mCRL2log(log::verbose) << ").\n";
             }
+            //log::logger::set_reporting_level(old_log_level);
+            sensible_work_grand_total=0;
+            cancelled_work_grand_total=0;
+            no_of_waiting_cycles_grand_total=0;
         }
         #undef percentage
     }
@@ -1813,6 +1937,7 @@ class check_complexity
     /// If debugging is off, the macro is translated to do nothing.
     /// \param unit   the unit to which work is assigned
     /// \param call   a function call that assigns work to a counter of `unit`
+#ifndef NDEBUG
     #define mCRL2complexity(unit, call, info_for_debug)                       \
             do                                                                \
             {                                                                 \
@@ -1836,6 +1961,20 @@ class check_complexity
                 }                                                             \
             }                                                                 \
             while (0)
+#else
+    #define mCRL2complexity(unit, call, info_for_debug)                       \
+            do                                                                \
+            {                                                                 \
+                if (check_complexity::complexity_ok !=                        \
+                                               ((unit)->work_counter. call )) \
+                {                                                             \
+                    mCRL2log(log::error) << __FILE__ << ':' << __LINE__       \
+                                          << " Error in mCRL2complexity()\n"; \
+                    exit(EXIT_FAILURE);                                       \
+                }                                                             \
+            }                                                                 \
+            while (0)
+#endif
 
 };
 

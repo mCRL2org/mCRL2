@@ -79,10 +79,21 @@ namespace lts
 namespace detail
 {
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
 
 /// \brief binary logarithm of the state space size, rounded down
 unsigned char check_complexity::log_n = '\0';
+
+/// \brief the number of useful steps in the course of the whole algorithm
+trans_type check_complexity::sensible_work_grand_total = 0;
+
+/// \brief the number of cancelled steps (in aborted coroutines) in the course of the whole algorithm
+trans_type check_complexity::cancelled_work_grand_total = 0;
+
+/// \brief the number of waiting cycles in the course of the whole algorithm
+trans_type check_complexity::no_of_waiting_cycles_grand_total = 0;
+
+#ifndef NDEBUG
 
 /// \brief indicates whether waiting cycles are allowed
 /// \details During finalising all counters of an accounting period, there is
@@ -100,15 +111,6 @@ signed_trans_type check_complexity::sensible_work = 0;
 /// number of waiting cycles should not exceed the sensible work. However, in
 /// contrast to cancelled work, it is not subtracted from the balance.
 trans_type check_complexity::no_of_waiting_cycles = 0;
-
-/// \brief the number of useful steps in the course of the whole algorithm
-trans_type check_complexity::sensible_work_grand_total = 0;
-
-/// \brief the number of cancelled steps (in aborted coroutines) in the course of the whole algorithm
-trans_type check_complexity::cancelled_work_grand_total = 0;
-
-/// \brief the number of waiting cycles in the course of the whole algorithm
-trans_type check_complexity::no_of_waiting_cycles_grand_total = 0;
 
 /// \brief names for complexity counters
 /// \details Every complexity counter (defined in check_complexity.h)
@@ -502,6 +504,8 @@ void check_complexity::test_work_names()
 #endif // #ifdef TEST_WORK_COUNTER_NAMES
 
 #endif // #ifndef NDEBUG
+
+#endif // #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
 
 } // end namespace detail
 } // end namespace lts

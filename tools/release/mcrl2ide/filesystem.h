@@ -473,6 +473,13 @@ class FileSystem : public QObject
   mcrl2::lps::t_lin_method linearisationMethod() const { return this->m_linearisationMethod; }
   void setLinearisationMethod(mcrl2::lps::t_lin_method method) { this->m_linearisationMethod = method; }
 
+  /**
+   * Sets the enumeration limit.
+   */
+  bool enumerationLimit() const { return m_enumerationLimit; }
+  void setEnumerationLimit(int value) { m_enumerationLimit = value; }
+
+
   public slots:
   /**
    * @brief setSaveIntermediateFilesOptions Sets the options on whether
@@ -535,6 +542,7 @@ class FileSystem : public QObject
   // Settings stored in the project file
   bool m_enableJittyc = false;
   mcrl2::lps::t_lin_method m_linearisationMethod = mcrl2::lps::lmRegular;
+  int m_enumerationLimit = 0;
 
 
   /**

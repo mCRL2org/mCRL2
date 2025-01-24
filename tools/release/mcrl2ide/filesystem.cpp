@@ -422,6 +422,9 @@ QDomDocument FileSystem::createNewProjectOptions()
   QDomNode linearisationNode = newProjectOptions.createElement("linearisation_method");
   rootElement.appendChild(linearisationNode);
 
+  QDomNode enumerationLimit = newProjectOptions.createElement("enumeration_limit");
+  rootElement.appendChild(enumerationLimit);
+
   return newProjectOptions;
 }
 
@@ -678,6 +681,12 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
     {
       // Keep the default linearisation method.
     }
+  }
+
+  QDomElement enumerationLimitElement = newProjectOptions.elementsByTagName("enumeration_limit").at(0).toElement();
+  if (!enumerationLimitElement.isNull())
+  {
+    m_enumerationLimit = std::stoi(jittycElement.text().toStdString());
   }
 
   /* get the path to the specification */
