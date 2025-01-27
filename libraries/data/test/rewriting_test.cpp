@@ -1550,3 +1550,43 @@ BOOST_AUTO_TEST_CASE(bound_variables_in_set_comprehension)   // The toolset up t
   }
 }   
 
+BOOST_AUTO_TEST_CASE(bound_variables_in_whr_clause)   // The toolset up to 2025 did not properly rename variables in where clauses
+                                                      // when substituting for these variables when they would occur in the lhs of the rhs
+                                                      // of substitution.
+{             
+  std::string s(
+  "sort D;\n"
+  "map f:D->Bool;\n"
+  "    b:D;\n"
+  "\n"
+  "var x:D;\n"
+  "eqn f(x) = (x==a) whr a=b end;\n"
+  );
+    
+  data::detail::set_enumerator_iteration_limit(5);
+  data_specification specification(parse_data_specification(s));
+    
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  data::variable_vector v;
+  v.push_back(data::variable("a", basic_sort("D")));
+  v.push_back(data::variable("c", basic_sort("D")));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  { 
+    std::cerr << "  Where clause going astray. " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+    
+    data::data_expression e1(parse_data_expression("f(a)", v, specification));
+    data::data_expression f1(parse_data_expression("a == b", v, specification)); // This typically rewrites to true if the declared variable a is confused
+                                                                              // with the variable a in the where clause.
+    data_rewrite_test(R, e1, f1);
+
+    data::data_expression e2(parse_data_expression("f(b)", v, specification)); // rewrites "trivially" to true.
+    data::data_expression f2(parse_data_expression("true", v, specification)); 
+    data_rewrite_test(R, e2, f2);
+
+    data::data_expression e3(parse_data_expression("f(c)", v, specification)); // rewrites "trivially" to c == b.
+    data::data_expression f3(parse_data_expression("c == b", v, specification)); 
+    data_rewrite_test(R, e3, f3);
+  } 
+}   
+
