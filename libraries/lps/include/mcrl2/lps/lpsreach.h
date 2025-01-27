@@ -132,12 +132,14 @@ class lpsreach_algorithm
       data::data_expression_list initial_state(initial_values.begin(), initial_values.end());
 
       m_summand_patterns = compute_read_write_patterns(lpsspec_);
+      mCRL2log(log::debug) << "Original read/write matrix:" << std::endl;
+      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
+
       symbolic::adjust_read_write_patterns(m_summand_patterns, m_options);
 
       m_variable_order = symbolic::compute_variable_order(m_options.variable_order, m_lts.process_parameters.size(), m_summand_patterns);
       mCRL2log(log::debug) << "variable order = " << core::detail::print_list(m_variable_order) << std::endl;
       m_summand_patterns = symbolic::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
-      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
 
       m_lts.process_parameters = symbolic::permute_copy(m_lts.process_parameters, m_variable_order);
       for (const data::variable& param : m_lts.process_parameters)
@@ -163,6 +165,9 @@ class lpsreach_algorithm
       {
         mCRL2log(log::debug) << "=== summand group " << i << " ===\n" << m_lts.summand_groups[i] << std::endl;
       }
+
+      mCRL2log(log::debug) << "Final read/write matrix:" << std::endl;
+      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
     }
 
     /// \brief Computes relprod(U, group).
