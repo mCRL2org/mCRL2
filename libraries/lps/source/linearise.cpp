@@ -7763,13 +7763,14 @@ class specification_basic_type
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list());
 
-        variable_list sumvars1=summand1.summation_variables() + sumvars;
-        action_list multiaction1=summand1.multi_action().actions();
-        data_expression actiontime1=summand1.multi_action().time();
-        data_expression condition1=summand1.condition();
-        const assignment_list& nextstate1=summand1.assignments();
+        variable_list sumvars1 = summand1.summation_variables() + sumvars;
+        const action_list& multiaction1 = summand1.multi_action().actions();
+        assert(std::is_sorted(multiaction1.begin(), multiaction1.end(), action_compare()));
+        data_expression actiontime1 = summand1.multi_action().time();
+        data_expression condition1 = summand1.condition();
+        const assignment_list& nextstate1 = summand1.assignments();
         const stochastic_distribution& distribution1=summand1.distribution();
-        bool has_time=summand1.has_time();
+        bool has_time = summand1.has_time();
 
         if (multiaction1 != action_list({ terminationAction }))
         {
@@ -7811,7 +7812,6 @@ class specification_basic_type
 
           if (condition1!=sort_bool::false_())
           {
-            assert(std::is_sorted(multiaction1.begin(), multiaction1.end(), action_compare()));
             action_summands.push_back(stochastic_action_summand(
                                              sumvars1,
                                              condition1,
