@@ -375,7 +375,8 @@ QProcess* ProcessSystem::createSubprocess(
     arguments << inputFile << "--in=pbes"
               << "--search-strategy=breadth-first"
               << "--solve-strategy=0"
-              << "--verbose";
+              << "--verbose"
+              << QString("-Q") + std::to_string(fileSystem->enumerationLimit()).c_str();
     if (fileSystem->enableJittyc())
     {
 #ifdef MCRL2_ENABLE_JITTYC
@@ -403,7 +404,8 @@ QProcess* ProcessSystem::createSubprocess(
   case SubprocessType::Mcrl2i:
     program = "mcrl2i";
     inputFile = fileSystem->lpsFilePath();
-    arguments << inputFile << "-e" << expression;
+    arguments << inputFile << "-e" << expression 
+              << QString("-Q") + std::to_string(fileSystem->enumerationLimit()).c_str();
 
     connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(rewriteResult(int)));
