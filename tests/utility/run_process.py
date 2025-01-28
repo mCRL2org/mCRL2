@@ -115,7 +115,7 @@ class RunProcess:
                 self._max_memory_used = 0
 
                 # Start a thread to limit the process memory and time usage.
-                def enforce_limits(proc): 
+                def enforce_limits(proc):
                     try:
                         process = psutil.Process(proc.pid)
                         while proc.returncode is None:
@@ -142,7 +142,7 @@ class RunProcess:
 
                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                     future = executor.submit(enforce_limits, proc)
-                                 
+
                     try:
                         stdout, stderr = proc.communicate()
                         self.stdout = stdout.decode("utf-8")
@@ -157,11 +157,11 @@ class RunProcess:
                 if proc.returncode != 0:
                     print(self.stderr)
                     raise ToolRuntimeError(
-                        f"Tool {tool} ended with return code {proc.returncode}"
+                        f"Tool {tool} {arguments} ended with return code {proc.returncode}"
                     )
                 if platform.system() == "Windows" and proc.returncode == -1073740777:
                     raise ToolRuntimeError(
-                        f"Tool {tool} failed with the return code STATUS_INVALID_CRUNTIME_PARAMETER (0xC0000417)"
+                        f"Tool {tool} {arguments} failed with the return code STATUS_INVALID_CRUNTIME_PARAMETER (0xC0000417)"
                     )
                 if platform.system() == "Windows" and proc.returncode == -1073741571:
                     raise StackOverflowError(tool)
