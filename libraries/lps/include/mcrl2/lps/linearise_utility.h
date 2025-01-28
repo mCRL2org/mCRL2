@@ -52,8 +52,10 @@ struct action_label_compare
 /// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
 /// consistent.
 ///
-/// \returns true iff the label of a1 is less than the label of a2 (w.r.t. action_label_compare), or the labels are equal and the arguments of a1 are less than the arguments of a2.
-/// for the latter, we use the standard < comparison.
+/// \returns true iff the label of a1 is less than the label of a2.
+/// The arguments are ignored in this comparison.
+/// The sort order is used for efficient application of process operators such as allow and comm
+/// which are defined in terms of  action names.
 struct action_compare
 {
   bool operator()(const process::action& a1, const process::action& a2) const
@@ -61,8 +63,7 @@ struct action_compare
     const process::action_label& a1_label = a1.label();
     const process::action_label& a2_label = a2.label();
 
-    return action_label_compare()(a1_label, a2_label) ||
-      (a1_label == a2_label && a1.arguments() < a2.arguments());
+    return action_label_compare()(a1_label, a2_label);
   }
 };
 
