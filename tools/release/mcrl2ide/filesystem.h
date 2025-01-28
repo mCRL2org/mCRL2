@@ -476,7 +476,7 @@ class FileSystem : public QObject
   /**
    * Sets the enumeration limit.
    */
-  bool enumerationLimit() const { return m_enumerationLimit; }
+  int enumerationLimit() const { return m_enumerationLimit; }
   void setEnumerationLimit(int value) { m_enumerationLimit = value; }
 
 
