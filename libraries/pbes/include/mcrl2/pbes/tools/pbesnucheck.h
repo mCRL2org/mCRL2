@@ -34,14 +34,9 @@ namespace pbes_system
 struct pbesnucheck_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
-};
 
-/* template <template <class> class Builder, class Substitution>
-struct substitute_propositional_variables_builder: public Builder<substitute_propositional_variables_builder<Builder,
-Substitution> >
-{
-  typedef Builder<substitute_propositional_variables_builder<Builder, Substitution> > super;
-  using super::apply; */
+  bool check_global_invariant = false;
+};
 
 // Substitutor to replace predicate variables OTHER than the self-referencing onces to boolean variables
 template <template <class> class Builder>
@@ -106,7 +101,7 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
   }
 };
 
-// Substitutor to target specific path
+// Substitutor to target specific path, replace our specific pvi with a substituted CC
 template <template <class> class Builder>
 struct substitute_propositional_variables_for_bools_builder
     : public Builder<substitute_propositional_variables_for_bools_builder<Builder>>
@@ -130,11 +125,7 @@ struct substitute_propositional_variables_for_bools_builder
   {
     if (x == m_pvi)
     {
-      //      Leave it
       result = m_replacement;
-      //      auto name = m_pvi.name();
-      //       data::variable(generator(v.name()), v.sort());
-      //    	result = make_exists_(data::variable_list({name}), data::variable(name));
     }
     else
     {
@@ -193,15 +184,10 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
               set.end(),
               [this](const propositional_variable_instantiation& v) { return v.name() != m_eq.variable().name(); }))
       {
-        // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler.
-        //        mCRL2log(log::verbose) << "Replaced in PBES equation for " << name << ":\n" << x << " --> " << p <<
-        //        "\n";
         result = p;
         m_stable = false;
         return;
       }
-      //      mCRL2log(log::debug) << "No Replacement in PBES equation for " << name << ":\n" << x << " --> " << p <<
-      //      "\n";
       result = x;
       return;
     }
@@ -235,8 +221,15 @@ data::data_expression pbestodata(pbes_equation& equation,
   return data_expr;
 }
 
+enum class InvResult
+{
+  INV_TRUE,
+  INV_FALSE,
+  EQ_FALSE
+};
+
 // Equation should be in full form.
-bool global_invariant_check(pbes_equation& equation,
+InvResult global_invariant_check(pbes_equation& equation,
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
     replace_propositional_variables_builder<pbes_system::pbes_expression_builder>& replace_substituter,
     data::data_specification data_spec,
@@ -246,7 +239,7 @@ bool global_invariant_check(pbes_equation& equation,
   mCRL2log(log::verbose) << "INV: " << equation.symbol() << "\n";
   if (equation.symbol().is_mu())
   {
-    return false;
+    return InvResult::INV_FALSE;
   }
 
   // Base check: does it contain the right pvi
@@ -254,7 +247,7 @@ bool global_invariant_check(pbes_equation& equation,
   if (set.size() == 0)
   {
     mCRL2log(log::verbose) << "INV: " << equation.variable().name() << " does not contain any pvi." << "\n";
-    return false;
+    return InvResult::INV_FALSE;
   }
 
   if (std::any_of(set.begin(),
@@ -263,7 +256,7 @@ bool global_invariant_check(pbes_equation& equation,
   {
     // The formula contains another pvi than the current equation, so skip
     mCRL2log(log::verbose) << "INV: " << equation.variable().name() << " contains other pvi." << "\n";
-    return false;
+    return InvResult::INV_FALSE;
   }
 
   // Calculate CC
@@ -297,7 +290,7 @@ bool global_invariant_check(pbes_equation& equation,
       {
         // Parameters do not match with variables. Ignore this substitution.
         mCRL2log(log::verbose) << "INV: No param match for " << v.name() << "\n";
-        return false;
+        return InvResult::INV_FALSE;
       }
       sigma[v] = par;
     }
@@ -308,10 +301,7 @@ bool global_invariant_check(pbes_equation& equation,
     bool_substituter.set_replacement(cc_i);
     pbes_expression c_i;
     bool_substituter.apply(c_i, equation.formula());
-    mCRL2log(log::info) << "c_i: " << c_i << std::endl;
     c_i = pbes_rewrite(c_i, pbes_rewriter, sigma);
-    mCRL2log(log::info) << "c_i: " << c_i << std::endl;
-    mCRL2log(log::info) << "sigma: " << sigma << std::endl;
 
     // Check CC and C_i implies CC_i
     pbes_equation cc_eq;
@@ -320,11 +310,7 @@ bool global_invariant_check(pbes_equation& equation,
     pbes_equation c_i_eq;
     c_i_eq.formula() = c_i;
     data::data_expression c_i_data = pbestodata(c_i_eq, replace_substituter);
-    //    data::data_expression cc_i_data = atermpp::down_cast<data::data_expression>(detail::pbes2data(cc_i));
     bdd_expr = data::and_((c_i_data), bdd_expr);
-    mCRL2log(log::info) << "INV1: " << cc_data << std::endl;
-    mCRL2log(log::info) << "INV2: " << c_i_data << std::endl;
-    //              mCRL2log(log::info) << "INV3: " << cc_i_data << std::endl;
   }
 
   // Add exists
@@ -342,14 +328,13 @@ bool global_invariant_check(pbes_equation& equation,
   if (v_is_contradiction == data::detail::answer_yes)
   {
     mCRL2log(log::error) << "Contradiction for inv checker." << std::endl;
-    global_invariant = false;
-    return false;
+    equation.formula() = false_();
+    return InvResult::EQ_FALSE;
   }
   else if (v_is_tautology == data::detail::answer_no || v_is_tautology == data::detail::answer_undefined)
   {
     mCRL2log(log::info) << "Found some transition that is not an invariant" << std::endl;
-    global_invariant = false;
-    return false;
+    return InvResult::INV_FALSE;
   }
   else if (v_is_tautology == data::detail::answer_yes)
   {
@@ -366,8 +351,9 @@ bool global_invariant_check(pbes_equation& equation,
   if (global_invariant)
   {
     equation.formula() = cc;
+    return InvResult::INV_TRUE;
   }
-  return global_invariant;
+  return InvResult::INV_FALSE;
 }
 
 void nu_iteration(pbes_equation& equation,
@@ -377,10 +363,6 @@ void nu_iteration(pbes_equation& equation,
     simplify_data_rewriter<data::rewriter> pbes_rewriter,
     std::set<data::variable>& global_variables)
 {
-  //  replace_substituter.set_forward(true);
-  //  replace_substituter.set_name(equation.variable().name());
-  //  replace_substituter.apply(equation.formula(), equation.formula());
-
   mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
   pbes_equation eq;
   if (equation.symbol().is_nu())
@@ -399,35 +381,11 @@ void nu_iteration(pbes_equation& equation,
   {
     mCRL2log(log::info) << eq.variable().name() << ":  " << i << std::endl;
 
-    //    pbes_equation eq_inv;
-    //      eq_inv.formula() = eq.formula();
-    //      eq_inv.symbol() = equation.symbol();
-    //      eq_inv.variable() = equation.variable();
-    //      bool global_inv = global_invariant_check(eq, substituter, replace_substituter, data_spec, pbes_rewriter,
-    //      global_variables); if (global_inv)
-    //      {
-    //        eq.formula() = eq_inv.formula();
-    //        break;
-    //    }
-
     // Apply substitution
     substituter.set_equation(eq);
     substituter.set_name(equation.variable().name());
     pbes_expression p;
     substituter.apply(p, equation.formula());
-
-    //    // Invariance check
-    //    //    TODO: Make sure that pvi still exist for the invariant check after initial substitutions
-    //      pbes_equation eq_inv;
-    //      eq_inv.formula() = eq.formula();
-    //      eq_inv.symbol() = equation.symbol();
-    //      eq_inv.variable() = equation.variable();
-    //      bool global_inv = global_invariant_check(eq, substituter, replace_substituter, data_spec, pbes_rewriter,
-    //      global_variables); if (global_inv)
-    //      {
-    //        eq.formula() = eq_inv.formula();
-    //        break;
-    //    }
 
     // Check if the iteration has reached a fixpoint
     pbes_equation p_eq;
@@ -453,9 +411,6 @@ void nu_iteration(pbes_equation& equation,
     i++;
   }
 
-  //  replace_substituter.set_forward(false);
-  //  replace_substituter.apply(equation.formula(), equation.formula());
-
   equation.formula() = eq.formula();
 }
 
@@ -471,14 +426,25 @@ struct pbesnucheck_pbes_backward_substituter
 
     for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
     {
-      // Simplify the equation *i by substituting in itself.
       mCRL2log(log::verbose) << "Investigating the equation for " << i->variable().name() << "\n";
       //  Turn this into a option flag
-      bool global_inv
-          = global_invariant_check(*i, substituter, replace_substituter, p.data(), pbes_rewriter, p.global_variables());
-      //      if (!global_inv) {
-      nu_iteration(*i, substituter, replace_substituter, p.data(), pbes_rewriter, p.global_variables());
-      //      }
+      if (options.check_global_invariant)
+      {
+        InvResult global_inv = global_invariant_check(*i,
+            substituter,
+            replace_substituter,
+            p.data(),
+            pbes_rewriter,
+            p.global_variables());
+        if (global_inv == InvResult::INV_FALSE)
+        {
+          nu_iteration(*i, substituter, replace_substituter, p.data(), pbes_rewriter, p.global_variables());
+        }
+      }
+      else
+      {
+        nu_iteration(*i, substituter, replace_substituter, p.data(), pbes_rewriter, p.global_variables());
+      }
 
       for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
       {
