@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbesnucheck.cpp
+/// \file pbesiteration.cpp
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/pbes_rewriter_tool.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
-#include "mcrl2/pbes/tools/pbesnucheck.h"
+#include "mcrl2/pbes/tools/pbesiteration.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -26,12 +26,12 @@ using pbes_system::tools::pbes_output_tool;
 using pbes_system::tools::pbes_rewriter_tool;
 using data::tools::rewriter_tool;
 
-class pbesnucheck_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>
+class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>
 {
   protected:
     typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>> super;
 
-    pbesnucheck_options m_options;
+    pbesiteration_options m_options;
 
     void parse_options(const command_line_parser& parser) override
     {
@@ -47,9 +47,9 @@ class pbesnucheck_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_to
     }
 
   public:
-    pbesnucheck_tool()
+    pbesiteration_tool()
       : super(
-        "pbesnucheck",
+        "pbesiteration",
         "Jore Booy",
         "Simplify a pbes by checking if the base contraint is an invariant.",
         "Reads a file containing a PBES, and checks if the base contraint always holds to simplify it. If OUTFILE "
@@ -59,12 +59,12 @@ class pbesnucheck_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_to
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbesnucheck parameters:" << std::endl;
+      mCRL2log(verbose) << "pbesiteration parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
       m_options.rewrite_strategy = rewrite_strategy();
-      pbesnucheck(input_filename(),
+      pbesiteration(input_filename(),
                   output_filename(),
                   pbes_input_format(),
                   pbes_output_format(),
@@ -78,5 +78,5 @@ class pbesnucheck_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_to
 
 int main(int argc, char* argv[])
 {
-  return pbesnucheck_tool().execute(argc, argv);
+  return pbesiteration_tool().execute(argc, argv);
 }
