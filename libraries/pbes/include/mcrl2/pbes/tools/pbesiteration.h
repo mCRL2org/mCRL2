@@ -301,7 +301,7 @@ InvResult global_invariant_check(pbes_equation& equation,
     bool_substituter.set_replacement(cc_i);
     pbes_expression c_i;
     bool_substituter.apply(c_i, equation.formula());
-    c_i = pbes_rewrite(c_i, pbes_rewriter, sigma);
+    c_i = pbes_rewrite(c_i, pbes_rewriter);
 
     // Check CC and C_i implies CC_i
     pbes_equation cc_eq;
@@ -414,7 +414,7 @@ void nu_iteration(pbes_equation& equation,
   equation.formula() = eq.formula();
 }
 
-struct pbesiteration_pbes_backward_substituter
+struct pbesiteration_pbes_fixpoint_iterator
 {
   void run(pbes& p, pbesiteration_options options)
   {
@@ -469,8 +469,8 @@ void pbesiteration(const std::string& input_filename,
   load_pbes(p, input_filename, input_format);
   complete_data_specification(p);
   algorithms::normalize(p);
-  pbesiteration_pbes_backward_substituter backward_substituter;
-  backward_substituter.run(p, options);
+  pbesiteration_pbes_fixpoint_iterator fixpoint_iterator;
+  fixpoint_iterator.run(p, options);
   save_pbes(p, output_filename, output_format);
 }
 
