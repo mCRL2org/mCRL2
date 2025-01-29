@@ -79,7 +79,7 @@ public:
   std::string to_string() const
   {
     std::ostringstream out;
-    out << (is_forall() ? "forall " : "exists ") << variable() << ". ";
+    out << (is_forall() ? "forall " : "exists ") << variable() << ": " << variable().sort() << ". ";
     return out.str();
   }
 };
@@ -404,6 +404,8 @@ class pbes_constelm_algorithm
     /// \brief Compares data expressions for equality.
     const PbesRewriter& m_pbes_rewriter;
 
+    class vertex;
+
     /// \brief Represents an edge of the dependency graph. The assignments are stored
     /// implicitly using the 'right' parameter. The condition determines under
     /// what circumstances the influence of the edge is propagated to its target
@@ -463,6 +465,17 @@ class pbes_constelm_algorithm
             out << qv.to_string();
           }
           out << m_target << "  condition = " << condition();
+          out << "; conjunctive context = {";
+          for (const data::variable& var: m_conj_context)
+          {
+            out << var << ": " << var.sort() << ", ";
+          }
+          out << "}; disjunctive context = {";
+          for (const data::variable& var: m_disj_context)
+          {
+            out << var << ": " << var.sort() << ", ";
+          }
+          out << "}";
           return out.str();
         }
 
@@ -491,15 +504,37 @@ class pbes_constelm_algorithm
 
         /// \brief Try to guess which quantifiers of Q can end up directly
         /// before target, when the quantifier inside rewriter is applied.
-        qvar_list quantifier_inside_approximation(const qvar_list& Q) const
+        qvar_list quantifier_inside_approximation(const vertex& source, const DataRewriter& rewr) const
         {
+          const qvar_list& Q = source.quantified_variables();
+          const data::variable_list& par_def = source.variable().parameters();
+          const constraint_map& constraints = source.constraints();
+
+          data::rewriter::substitution_type sigma;
+          detail::make_constelm_substitution(constraints, sigma);
+
           qvar_list result;
           for (auto it = Q.crbegin(); it != Q.crend(); ++it)
           {
+            bool is_forall = it->is_forall();
+            const data::variable& var = it->variable();
             // Variable of a universal quantifier cannot occur in the disjunctive context
             // Variable of an existential quantifier cannot occur in the conjunctive context
-            if (( it->is_forall() && m_disj_context.find(it->variable()) == m_disj_context.end()) ||
-                (!it->is_forall() && m_conj_context.find(it->variable()) == m_conj_context.end()))
+            const std::set<data::variable>& context = is_forall ? m_disj_context : m_conj_context;
+            bool none_occurs_in_context = true;
+
+            auto it_pvi = m_target.parameters().begin();
+            auto it_def = par_def.begin();
+            for (; it_pvi != m_target.parameters().end(); ++it_pvi, ++it_def)
+            {
+              if (context.find(*it_def) != context.end() && data::search_free_variable(rewr(*it_pvi, sigma), var))
+              {
+                none_occurs_in_context = false;
+                break;
+              }
+            }
+
+            if (none_occurs_in_context)
             {
               result.push_front(*it);
             }
@@ -748,9 +783,9 @@ class pbes_constelm_algorithm
     std::string print_edges()
     {
       std::ostringstream out;
-      for (const auto& source: m_edges)
+      for (const auto& [source, targets]: m_edges)
       {
-        for (const auto& e: source.second)
+        for (const edge& e: targets)
         {
           out << e.to_string() << std::endl;
         }
@@ -913,7 +948,7 @@ class pbes_constelm_algorithm
           if (!is_false(needs_update))
           {
             bool changed = v.update(
-                              concat(e.quantifier_inside_approximation(u.quantified_variables()), e.quantified_variables()),
+                              concat(e.quantifier_inside_approximation(u, m_data_rewriter), e.quantified_variables()),
                               e.target().parameters(),
                               u.constraints(),
                               m_data_rewriter);

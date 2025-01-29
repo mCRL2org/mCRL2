@@ -211,6 +211,17 @@ std::string t18 =
 
 std::string x18 = "binding_variables = X(n1,n2: Nat)";
 
+std::string t19 =
+  "pbes nu X(b: Bool) =              \n"
+  "       forall b2: Bool. Y(b, b2); \n"
+  "     mu Y(b,b1: Bool) =           \n"
+  "       val(b == b1) || Y(!b, b1); \n"
+  "                                  \n"
+  "init X(false);                    \n"
+  ;
+
+std::string x19 = "binding_variables = X, Y(b,b1: Bool)";
+
 void test_pbes(const std::string& pbes_spec, const std::string& expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
@@ -273,6 +284,7 @@ BOOST_AUTO_TEST_CASE(test_constelm)
   test_pbes(t15, x15, false);
   test_pbes(t16, x16, true); 
   test_pbes(t17, x17, false);
+  test_pbes(t19, x19, false);
 
   data::detail::set_enumerator_iteration_limit(10); // This final test requires 50*50 enumerations and the default limit of 1000 takes too long.
   test_pbes(t18, x18, true);
