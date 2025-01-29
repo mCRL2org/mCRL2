@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/tools/pbesnucheck.h
+/// \file mcrl2/pbes/tools/pbesiteration.h
 /// \brief This file provides a tool that can simplify PBESs by
 ///        substituting PBES equations for variables in the rhs,
 ///        simplifying the result, and keeping it when it can
 ///        eliminate PBES variables.
 
-#ifndef MCRL2_PBES_TOOLS_PBESNUCHECK_H
-#define MCRL2_PBES_TOOLS_PBESNUCHECK_H
+#ifndef MCRL2_PBES_TOOLS_PBESITERATION_H
+#define MCRL2_PBES_TOOLS_PBESITERATION_H
 
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/pbes/algorithms.h"
@@ -31,7 +31,7 @@ namespace mcrl2
 namespace pbes_system
 {
 
-struct pbesnucheck_options
+struct pbesiteration_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
 
@@ -414,9 +414,9 @@ void nu_iteration(pbes_equation& equation,
   equation.formula() = eq.formula();
 }
 
-struct pbesnucheck_pbes_backward_substituter
+struct pbesiteration_pbes_backward_substituter
 {
-  void run(pbes& p, pbesnucheck_options options)
+  void run(pbes& p, pbesiteration_options options)
   {
     data::rewriter data_rewriter(p.data(), options.rewrite_strategy);
     simplify_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
@@ -459,17 +459,17 @@ struct pbesnucheck_pbes_backward_substituter
   }
 };
 
-void pbesnucheck(const std::string& input_filename,
+void pbesiteration(const std::string& input_filename,
     const std::string& output_filename,
     const utilities::file_format& input_format,
     const utilities::file_format& output_format,
-    pbesnucheck_options options)
+    pbesiteration_options options)
 {
   pbes p;
   load_pbes(p, input_filename, input_format);
   complete_data_specification(p);
   algorithms::normalize(p);
-  pbesnucheck_pbes_backward_substituter backward_substituter;
+  pbesiteration_pbes_backward_substituter backward_substituter;
   backward_substituter.run(p, options);
   save_pbes(p, output_filename, output_format);
 }
@@ -478,4 +478,4 @@ void pbesnucheck(const std::string& input_filename,
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_TOOLS_PBESnucheck_H
+#endif // MCRL2_PBES_TOOLS_PBESITERATION_H
