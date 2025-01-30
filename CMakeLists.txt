@@ -61,6 +61,7 @@ option(MCRL2_ENABLE_MEMORYSANITIZER  "Enable additional memory run-time checks i
 option(MCRL2_ENABLE_THREADSANITIZER  "Enable additional data race run-time checks implemented by the ThreadSanitizer." OFF)
 option(MCRL2_ENABLE_CODE_COVERAGE    "Enable generation of code coverage statistics." OFF)
 option(MCRL2_ENABLE_STD_CHECKS       "Enable libstdc++ and libc++ specific assertions, e.g. safe iterator checks." OFF)
+option(MCRL2_ENABLE_STD_CHECKS_BACKTRACE "Enables backtraces for the STD_CHECKS, only works on Ubuntu 24.04 and macOS" OFF)
 option(MCRL2_ENABLE_SOUNDNESS_CHECKS "Enable extensive soundness checks." ON)
 option(MCRL2_ENABLE_MSVC_CCACHE      "Enable MSVC specific flags to enable building with ccache" OFF)
 option(MCRL2_ENABLE_JITTYC           "Enable the compiling rewriter (jittyc) functionality," ${UNIX})
