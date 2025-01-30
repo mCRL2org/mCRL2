@@ -99,7 +99,7 @@ bool allow_(const process::action_name_multiset_list& allow_list,
 ///
 /// \param encap_list is a list of action_name_multisets of size 1. Its single element contains all the blocked actions.
 /// \param multi_action contains a multiaction a1(d1)|...|an(dn)
-/// \returns true iff
+/// \returns \exists i: ai \in encap_list
 inline
 bool encap(const process::action_name_multiset_list& encaplist, const process::action_list& multiaction)
 {
