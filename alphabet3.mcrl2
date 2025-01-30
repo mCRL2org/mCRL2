@@ -1,7 +1,0 @@
-act  d,a,c,b,e;
-
-proc P = tau;
-     Q = e;
-     R = sum b1: Bool. d;
-
-init hide({c}, block({a}, comm({b | e -> c}, P || Q || R)));
