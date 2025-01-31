@@ -24,6 +24,49 @@ namespace mcrl2
 namespace lps
 {
 
+/// Data structure to store the statistics about summands in a linear process
+struct lps_statistics_t
+{
+  size_t action_summand_count = 0;
+  size_t deadlock_summand_count = 0;
+  size_t total_action_count = 0; // The sum of the number of actions in all the multiactions in the action summands.
+};
+
+/// Print statistics of lps as indented block in YAML format
+inline
+std::string print(const lps_statistics_t& stats, std::size_t indent = 0)
+{
+  std::stringstream ss;
+  std::string indent_str = std::string(indent, ' ');
+
+  ss << indent_str << "action_summand_count: " << stats.action_summand_count << std::endl;
+  ss << indent_str << "deadlock_summand_count: " << stats.deadlock_summand_count << std::endl;
+  ss << indent_str << "total_action_count: " << stats.total_action_count << std::endl;
+  if (stats.action_summand_count > 0)
+  {
+    ss << indent_str << "average multiaction size (total_action_count / action_summand_count): "
+       << static_cast<double>(stats.total_action_count) / static_cast<double>(stats.action_summand_count) << std::endl;
+  }
+  return ss.str();
+}
+
+/// Utility function to calculate the number of summands and the sizes of multiactions in those summands for printing
+/// statistics
+inline
+lps_statistics_t get_statistics(const stochastic_action_summand_vector& action_summands, const deadlock_summand_vector& deadlock_summands)
+{
+  lps_statistics_t statistics;
+  statistics.action_summand_count = action_summands.size();
+  statistics.deadlock_summand_count = deadlock_summands.size();
+
+  for (const auto& s: action_summands)
+  {
+    statistics.total_action_count += s.multi_action().actions().size();
+  }
+
+  return statistics;
+}
+
 struct action_name_compare
 {
   bool operator()(const core::identifier_string& s1, const core::identifier_string& s2) const

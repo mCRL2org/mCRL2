@@ -26,6 +26,15 @@
 */
 
 //mCRL2 data
+
+// The following define allows collecting and printing statistics about the operations performed in the linearizer.
+// Currently, we collect and print information about:
+// the operations performed on processes,
+// the number of summands and the total number of actions in the multications in these summands.
+// Note that all logs are written to std::cout, so if this flag is enabled, tool output can not be streamed through std::cout
+//#define MCRL2_LOG_LPS_LINEARISE_STATISTICS 1
+
+
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/enumerator.h" 
