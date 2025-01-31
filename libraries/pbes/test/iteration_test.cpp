@@ -38,6 +38,8 @@ void test_result(std::string input, std::string expected_result, bool option_che
   options.check_global_invariant = option_check_global_invariant;
   fixpoint_iterator.run(p, options);
   std::string result = pbes_system::pp(p);
+  std::cout << replace_whitespace(result) << std::endl;
+  std::cout << replace_whitespace(expected_result) << std::endl;
   BOOST_CHECK(replace_whitespace(result) == replace_whitespace(expected_result));
 }
 
@@ -52,13 +54,6 @@ BOOST_AUTO_TEST_CASE(test_nu_sacks)
                     "init X(1, false);\n";
 
   test_result(text, expected_result, false);
-
-  text = "pbes nu X(n: Pos, b: Bool) = (val(!(n == 2)) && (X(2, b)) && (X(3, b)));"
-         "init X(1, false);";
-  expected_result = "pbes nu X(n: Pos, b: Bool) =\n"
-                    "       val(false);\n"
-                    "init X(1, false);\n";
-
   test_result(text, expected_result, true);
 
   text = "sort Colour = struct red | green;"

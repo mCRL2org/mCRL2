@@ -59,6 +59,10 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
 
   void set_forward(bool b) { forward = b; }
 
+  void reset_instantiations()
+  {
+    m_instantiations.clear();
+  }
   std::map<data::variable, propositional_variable_instantiation> instantiations() const { return m_instantiations; }
 
   template <class T>
@@ -218,6 +222,7 @@ data::data_expression pbestodata(pbes_equation& equation,
 
   replace_substituter.set_forward(false);
   replace_substituter.apply(expr, equation.formula());
+  replace_substituter.reset_instantiations();
   return data_expr;
 }
 
@@ -276,9 +281,15 @@ InvResult global_invariant_check(pbes_equation& equation,
       pbes_rewriter);
 
   mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
-  data::data_expression bdd_expr = data::true_();
+        mCRL2log(log::verbose) << "INV: PVI set size " << set.size() << "\n";
+  int i = 0;
   for (propositional_variable_instantiation pvi : set)
   {
+    if (i % 5 == 0)
+    {
+      mCRL2log(log::verbose) << "INV: PVI " << i << "begin added now. \n";
+    }
+    i++;
     // Calculate CC_i
     data::mutable_indexed_substitution sigma;
     data::data_expression_list pars = pvi.parameters();
@@ -296,55 +307,63 @@ InvResult global_invariant_check(pbes_equation& equation,
     }
     pbes_expression cc_i = pbes_rewrite(cc, pbes_rewriter, sigma);
 
-    // Calculate C_i => CC_i
+    // Calculate CC and C_i
     bool_substituter.set_pvi(pvi);
-    bool_substituter.set_replacement(cc_i);
+    bool_substituter.set_replacement(false_());
     pbes_expression c_i;
     bool_substituter.apply(c_i, equation.formula());
     c_i = pbes_rewrite(c_i, pbes_rewriter);
 
-    // Check CC and C_i implies CC_i
-    pbes_equation cc_eq;
-    cc_eq.formula() = cc;
-    data::data_expression cc_data = pbestodata(cc_eq, replace_substituter);
+    pbes_equation cc_i_eq;
+    cc_i_eq.formula() = cc_i;
+    data::data_expression cc_i_data = pbestodata(cc_i_eq, replace_substituter);
     pbes_equation c_i_eq;
     c_i_eq.formula() = c_i;
     data::data_expression c_i_data = pbestodata(c_i_eq, replace_substituter);
-    bdd_expr = data::and_((c_i_data), bdd_expr);
-  }
 
-  // Add exists
-  //  pbes_expression base_formula = equation.formula();
-  for (const data::variable& v : global_variables)
-  {
-    bdd_expr = make_exists_(data::variable_list({v}), bdd_expr);
-  }
+    f_bdd_prover.set_formula(c_i_data);
+    data::detail::Answer c_i_is_contradiction = f_bdd_prover.is_contradiction();
+    if (c_i_is_contradiction == data::detail::answer_yes)
+    {
+      mCRL2log(log::verbose) << "Core constraint is not simple (contains pvi)." << std::endl;
+      return InvResult::INV_FALSE;
+    }
 
-  f_bdd_prover.set_formula(bdd_expr);
-  mCRL2log(log::info) << "INV?: " << bdd_expr << std::endl;
+    // Check CC and C_i implies CC_i
+    data::data_expression bdd_expr = data::imp(c_i_data, cc_i_data);
+    // Add exists
+    //  pbes_expression base_formula = equation.formula();
+    for (const data::variable& v : global_variables)
+    {
+      bdd_expr = make_exists_(data::variable_list({v}), bdd_expr);
+    }
 
-  data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
-  data::detail::Answer v_is_contradiction = f_bdd_prover.is_contradiction();
-  if (v_is_contradiction == data::detail::answer_yes)
-  {
-    mCRL2log(log::error) << "Contradiction for inv checker." << std::endl;
-    equation.formula() = false_();
-    return InvResult::EQ_FALSE;
-  }
-  else if (v_is_tautology == data::detail::answer_no || v_is_tautology == data::detail::answer_undefined)
-  {
-    mCRL2log(log::info) << "Found some transition that is not an invariant" << std::endl;
-    return InvResult::INV_FALSE;
-  }
-  else if (v_is_tautology == data::detail::answer_yes)
-  {
-    mCRL2log(log::info) << "This transition is true" << std::endl;
-    global_invariant = true;
-  }
-  else
-  {
-    mCRL2log(log::error) << "No contradiction and no tautology" << std::endl;
-    throw mcrl2::runtime_error("TODO");
+    f_bdd_prover.set_formula(bdd_expr);
+    mCRL2log(log::verbose) << "INV?: " << std::endl;
+
+    data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
+    data::detail::Answer v_is_contradiction = f_bdd_prover.is_contradiction();
+    if (v_is_contradiction == data::detail::answer_yes)
+    {
+      mCRL2log(log::verbose) << "Contradiction for inv checker." << std::endl;
+      equation.formula() = false_();
+      return InvResult::EQ_FALSE;
+    }
+    else if (v_is_tautology == data::detail::answer_no || v_is_tautology == data::detail::answer_undefined)
+    {
+      mCRL2log(log::verbose) << "Found some transition that is not an invariant" << std::endl;
+      return InvResult::INV_FALSE;
+    }
+    else if (v_is_tautology == data::detail::answer_yes)
+    {
+      mCRL2log(log::verbose) << "This transition is true" << std::endl;
+      global_invariant = true;
+    }
+    else
+    {
+      mCRL2log(log::error) << "No contradiction and no tautology" << std::endl;
+      throw mcrl2::runtime_error("TODO");
+    }
   }
 
   mCRL2log(log::info) << "Is global invariant? " << global_invariant << std::endl;
