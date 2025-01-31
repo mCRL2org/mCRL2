@@ -59,10 +59,7 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
 
   void set_forward(bool b) { forward = b; }
 
-  void reset_instantiations()
-  {
-    m_instantiations.clear();
-  }
+  void reset_instantiations() { m_instantiations.clear(); }
   std::map<data::variable, propositional_variable_instantiation> instantiations() const { return m_instantiations; }
 
   template <class T>
@@ -281,7 +278,7 @@ InvResult global_invariant_check(pbes_equation& equation,
       pbes_rewriter);
 
   mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
-        mCRL2log(log::verbose) << "INV: PVI set size " << set.size() << "\n";
+  mCRL2log(log::verbose) << "INV: PVI set size " << set.size() << "\n";
   int i = 0;
   for (propositional_variable_instantiation pvi : set)
   {
@@ -332,7 +329,6 @@ InvResult global_invariant_check(pbes_equation& equation,
     // Check CC and C_i implies CC_i
     data::data_expression bdd_expr = data::imp(c_i_data, cc_i_data);
     // Add exists
-    //  pbes_expression base_formula = equation.formula();
     for (const data::variable& v : global_variables)
     {
       bdd_expr = make_exists_(data::variable_list({v}), bdd_expr);
