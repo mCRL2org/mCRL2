@@ -27,9 +27,11 @@ if (MCRL2_ENABLE_STD_CHECKS)
     # Enable libstdc++ debug checks.
     add_compile_definitions(_GLIBCXX_DEBUG=1)
     add_compile_definitions(_GLIBCXX_DEBUG_PEDANTIC=1)
-    add_compile_definitions(_FORTIFY_SOURCE=3)
     add_compile_definitions(_GLIBCXX_ASSERTIONS=1)
-    add_compile_definitions(_GLIBCXX_DEBUG_BACKTRACE=1)
+
+    if (MCRL2_ENABLE_STD_CHECKS_BACKTRACE)
+      add_compile_definitions(_GLIBCXX_DEBUG_BACKTRACE=1)
+    endif()
   else()
     # For libc++ (the LLVM standard library, what a naming scheme) there is also a debug mode
     add_compile_definitions(_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG)
