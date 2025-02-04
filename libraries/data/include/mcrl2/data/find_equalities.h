@@ -429,9 +429,12 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
   }
 
-  void leave(const data::where_clause&)
+  void leave(const data::where_clause& x)
   {
-    throw mcrl2::runtime_error("not implemented yet!");
+    const variable_list bound_variables(x.declarations().begin(), 
+                                        x.declarations().end(), 
+                                        [](const assignment_expression& a){ return atermpp::down_cast<assignment>(a).lhs();});
+    top().delete_(bound_variables);
   }
 };
 
