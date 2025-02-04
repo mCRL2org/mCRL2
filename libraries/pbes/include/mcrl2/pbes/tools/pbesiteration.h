@@ -92,6 +92,10 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
   {
     if (forward && x.name() != name)
     {
+      // Unsound probably!
+      mCRL2log(log::error) << "Formula contains other (unsolved) PVI instances in the current equation " << std::endl;
+      throw mcrl2::runtime_error("Might be unsound to replace the other pvi with a boolean variable");
+
       std::string var_name = "a" + std::to_string(m_instantiations.size());
       data::variable vb1(var_name, data::sort_bool::bool_());
       m_instantiations.insert({vb1, x});
