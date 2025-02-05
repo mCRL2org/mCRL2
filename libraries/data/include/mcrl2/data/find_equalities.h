@@ -429,8 +429,11 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
   }
 
-  void leave(const data::where_clause& x)
+  void apply(const data::where_clause& x)
   {
+    // Do not search for equalities in the whr part of a where clause, and
+    // remove those equalities that contain variables bound in the where clause.
+    derived().apply(x.body());
     const variable_list bound_variables(x.declarations().begin(), 
                                         x.declarations().end(), 
                                         [](const assignment_expression& a){ return atermpp::down_cast<assignment>(a).lhs();});
