@@ -24,6 +24,26 @@ namespace mcrl2
 namespace lps
 {
 
+  inline
+  std::string log_rename_application(const lps_statistics_t& lps_statistics_before,
+                                   const lps_statistics_t& lps_statistics_after,
+                                   const std::size_t num_rename_expressions,
+                                   size_t indent = 0)
+  {
+    std::string indent_str(indent, ' ');
+    std::ostringstream os;
+
+    os << indent_str << "- operator: rename" << std::endl;
+
+    indent += 2;
+    indent_str = std::string(indent, ' ');
+    os << indent_str << "number of rename expressions: " << num_rename_expressions << std::endl
+       << indent_str << "before:" << std::endl << print(lps_statistics_before, indent+2)
+       << indent_str << "after:" << std::endl << print(lps_statistics_after, indent+2);
+
+    return os.str();
+  }
+
   /// Apply renamings to a single action
   inline
   process::action rename(const process::rename_expression_list& renamings, const process::action& action)
@@ -79,10 +99,19 @@ namespace lps
     const process::rename_expression_list& renamings,
     lps::stochastic_action_summand_vector& action_summands)
   {
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+    lps_statistics_t lps_statistics_before = get_statistics(action_summands);
+#endif
+
     for (auto& action_summand: action_summands)
     {
       action_summand = rename(renamings, action_summand);
     }
+
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+    lps_statistics_t lps_statistics_after = get_statistics(action_summands);
+    std::cout << log_rename_application(lps_statistics_before, lps_statistics_after, renamings.size());
+#endif
   }
 
 } // namespace lps

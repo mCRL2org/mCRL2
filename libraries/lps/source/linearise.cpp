@@ -25,8 +25,6 @@
    the use of this software.
 */
 
-//mCRL2 data
-
 // The following define allows collecting and printing statistics about the operations performed in the linearizer.
 // Currently, we collect and print information about:
 // the operations performed on processes,
@@ -34,7 +32,7 @@
 // Note that all logs are written to std::cout, so if this flag is enabled, tool output can not be streamed through std::cout
 //#define MCRL2_LOG_LPS_LINEARISE_STATISTICS 1
 
-
+//mCRL2 data
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/enumerator.h" 
@@ -7251,6 +7249,26 @@ class specification_basic_type
     /**************** hiding *****************************************/
 
     static
+    std::string log_hide_application(const lps_statistics_t& lps_statistics_before,
+                                     const lps_statistics_t& lps_statistics_after,
+                                     const std::size_t num_hidden_actions,
+                                     size_t indent = 0)
+    {
+      std::string indent_str(indent, ' ');
+      std::ostringstream os;
+
+      os << indent_str << "- operator: hide" << std::endl;
+
+      indent += 2;
+      indent_str = std::string(indent, ' ');
+      os << indent_str << "number of hidden actions: " << num_hidden_actions << std::endl
+         << indent_str << "before:" << std::endl << print(lps_statistics_before, indent+2)
+         << indent_str << "after:" << std::endl << print(lps_statistics_after, indent+2);
+
+      return os.str();
+    }
+
+    static
     action_list hide_(const identifier_string_list& hidelist, const action_list& multiaction)
     {
       action_list resultactionlist;
@@ -7264,12 +7282,16 @@ class specification_basic_type
       }
 
       /* reverse the actionlist to maintain the ordering */
-      return reverse(resultactionlist);
+      resultactionlist = reverse(resultactionlist);
+      return resultactionlist;
     }
 
     static
     void hidecomposition(const identifier_string_list& hidelist, stochastic_action_summand_vector& action_summands)
     {
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+      lps_statistics_t lps_statistics_before = get_statistics(action_summands);
+#endif
       for (stochastic_action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end() ; ++i)
       {
         const action_list acts=hide_(hidelist,i->multi_action().actions());
@@ -7279,6 +7301,11 @@ class specification_basic_type
                           i->assignments(),
                           i->distribution());
       }
+
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+      lps_statistics_t lps_statistics_after = get_statistics(action_summands);
+      std::cout << log_hide_application(lps_statistics_before, lps_statistics_after, hidelist.size());
+#endif
     }
 
     /**************** equalargs ****************************************/
