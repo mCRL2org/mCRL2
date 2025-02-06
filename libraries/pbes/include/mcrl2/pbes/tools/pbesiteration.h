@@ -94,11 +94,10 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
     {
       // Unsound probably!
       mCRL2log(log::error) << "Formula contains other (unsolved) PVI instances in the current equation " << std::endl;
-      throw mcrl2::runtime_error("Might be unsound to replace the other pvi with a boolean variable");
-
-      std::string var_name = "a" + std::to_string(m_instantiations.size());
-      data::variable vb1(var_name, data::sort_bool::bool_());
-      m_instantiations.insert({vb1, x});
+      data::data_expression_list params = x.parameters();
+      data::sort_expression_list sort_list(params);
+      data::sort_expression asdf =  data::function_sort(sort_list, data::bool_());
+      data::function_symbol vb1(x.name(), asdf);
       result = vb1;
       return;
     }
@@ -414,17 +413,11 @@ void nu_iteration(pbes_equation& equation,
     data::data_expression p_data = pbestodata(p_eq, replace_substituter);
     f_bdd_prover.set_formula(data::and_(data::imp(eq_data, p_data), data::imp(p_data, eq_data)));
     data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
-    data::detail::Answer v_is_contradiction = f_bdd_prover.is_contradiction();
     if (v_is_tautology == data::detail::answer_yes)
     {
       mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
       stable = true;
       break;
-    }
-    else if (v_is_contradiction == data::detail::answer_yes)
-    {
-      mCRL2log(log::error) << "Contradiction" << std::endl;
-      throw mcrl2::runtime_error("Iteration was not monotone.");
     }
     eq.formula() = p;
     i++;
