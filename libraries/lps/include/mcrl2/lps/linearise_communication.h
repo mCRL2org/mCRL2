@@ -394,29 +394,6 @@ tuple_list apply(const process::action_list& m)
   return makeMultiActionConditionList_aux(m, r);
 }
 
-std::string log_comm_application(const lps_statistics_t& lps_statistics_before,
-                                 const lps_statistics_t& lps_statistics_after,
-                                 const std::size_t disallowed_summands,
-                                 const std::size_t blocked_summands,
-                                 const std::size_t false_condition_summands,
-                                 const size_t indent = 0) const
-{
-  const std::string indent_str(indent, ' ');
-  std::ostringstream os;
-
-  os << indent_str << "- operator: comm" << std::endl
-     << indent_str << "  number of communication expressions: " << m_communications.size() << std::endl
-     << indent_str << "  number of allow expressions: " << m_allowlist.size() << std::endl
-     << indent_str << "  before:" << print(lps_statistics_before, indent+2)
-     << indent_str << "  after:" << print(lps_statistics_after, indent+2)
-     << indent_str << "  removed from intermediate result:" << std::endl
-     << indent_str << "    disallowed summands: " << disallowed_summands << std::endl
-     << indent_str << "    blocked summands: " << blocked_summands << std::endl
-     << indent_str << "    summands with false condition: " << false_condition_summands << std::endl;
-
-  return os.str();
-}
-
 /// Apply the communication composition to a list of action summands.
 void apply(
   stochastic_action_summand_vector& action_summands,
@@ -594,22 +571,66 @@ comm_entry m_comm_table;
 const bool m_is_allow;                          // If is_allow or is_block is set, perform inline allow/block filtering. They are mutually exclusive
 const bool m_is_block;
 
+std::string log_comm_application(const lps_statistics_t& lps_statistics_before,
+                                 const lps_statistics_t& lps_statistics_after,
+                                 const std::size_t disallowed_summands,
+                                 const std::size_t blocked_summands,
+                                 const std::size_t false_condition_summands,
+                                 size_t indent = 0) const
+{
+  std::string indent_str(indent, ' ');
+  std::ostringstream os;
+
+  os << indent_str << "- operator: comm" << std::endl;
+
+  indent += 2;
+  indent_str = std::string(indent, ' ');
+  os << indent_str << "number of communication expressions: " << m_communications.size() << std::endl;
+  if (m_is_allow)
+  {
+    os << indent_str << "number of allow expressions: " << m_allowlist.size() << std::endl;
+  }
+  if (m_is_block)
+  {
+    os << indent_str << "number of block expressions: " << m_blocked_actions.size() << std::endl;
+  }
+
+  os << indent_str << "before:" << std::endl << print(lps_statistics_before, indent+2)
+     << indent_str << "after:" << std::endl << print(lps_statistics_after, indent+2)
+     << indent_str << "removed from intermediate result:" << std::endl;
+
+  indent += 2;
+  indent_str = std::string(indent, ' ');
+  if (m_is_allow)
+  {
+    os << indent_str << "disallowed summands: " << disallowed_summands << std::endl;
+  }
+  if (m_is_block)
+  {
+    os << indent_str << "blocked summands: " << blocked_summands << std::endl;
+  }
+
+  os << indent_str << "summands with false condition: " << false_condition_summands << std::endl;
+
+  return os.str();
+}
+
 /// Static initialization function to ensure m_allowed_actions can be const.
 static const std::vector<core::identifier_string>
 init_allowed_actions(bool is_allow, const process::action_name_multiset_list& allow_list, const process::action& termination_action)
 {
-std::vector<core::identifier_string> result;
-if (is_allow)
-{
-  result = get_actions(allow_list);
-  // Ensure that the termination action is always allowed, even when it is not an explicit part of
-  // the list of allowed actions.
-  // We maintains sort order of the vector
-  std::vector<core::identifier_string>::iterator it = std::upper_bound(result.begin(), result.end(), termination_action.label().name(), action_name_compare());
-  result.insert(it, termination_action.label().name());
-}
+  std::vector<core::identifier_string> result;
+  if (is_allow)
+  {
+    result = get_actions(allow_list);
+    // Ensure that the termination action is always allowed, even when it is not an explicit part of
+    // the list of allowed actions.
+    // We maintains sort order of the vector
+    std::vector<core::identifier_string>::iterator it = std::upper_bound(result.begin(), result.end(), termination_action.label().name(), action_name_compare());
+    result.insert(it, termination_action.label().name());
+  }
 
-return result;
+  return result;
 }
 
 /// Calculate data expression for pairwise equality of the elements of l1 and l2.
@@ -618,29 +639,29 @@ return result;
 /// match is false, otherwise an expression equivalent to \bigwegde_i (l1[i] == l2[i]) is returned.
 data::data_expression pairwise_equal_to(const data::data_expression_list& l1, const data::data_expression_list& l2) const
 {
-data::data_expression result = data::sort_bool::true_();
+  data::data_expression result = data::sort_bool::true_();
 
-if (l1.size()!=l2.size())
-{
-  result = data::sort_bool::false_();
-}
-
-auto i1 = l1.begin();
-auto i2 = l2.begin();
-
-while (i1 != l1.end() && i2 != l2.end() && result != data::sort_bool::false_())
-{
-  if (i1->sort() != i2->sort())
+  if (l1.size()!=l2.size())
   {
     result = data::sort_bool::false_();
   }
-  else
-  {
-    result = data::lazy::and_(result, m_data_rewriter(equal_to(*i1++, *i2++)));
-  }
-}
 
-return result;
+  auto i1 = l1.begin();
+  auto i2 = l2.begin();
+
+  while (i1 != l1.end() && i2 != l2.end() && result != data::sort_bool::false_())
+  {
+    if (i1->sort() != i2->sort())
+    {
+      result = data::sort_bool::false_();
+    }
+    else
+    {
+      result = data::lazy::and_(result, m_data_rewriter(equal_to(*i1++, *i2++)));
+    }
+  }
+
+  return result;
 }
 
 
