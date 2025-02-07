@@ -107,7 +107,25 @@ class RewriterCompilingJitty: public Rewriter
     // that are used in the compiling rewriter in forall, where and exists.
     std::vector<variable_list> rewriter_binding_variable_lists;
     std::map <variable_list, std::size_t> variable_list_indices1;
-    std::size_t binding_variable_list_index(const variable_list& v);
+
+    // This function assigns a unique index to variable list vl and stores
+    // vl at this position in the vector rewriter_binding_variable_lists. This is
+    // used in the compiling rewriter to obtain this variable again.
+    // Note that the static variable variable_indices is not cleared
+    // during several runs, as generally the variables bound in rewrite
+    // rules do not change.
+    std::size_t binding_variable_list_index(const variable_list& vl)
+    {
+      if (variable_list_indices1.count(vl)>0)
+      {
+        return variable_list_indices1[vl];
+      }
+      const std::size_t index_for_vl=rewriter_binding_variable_lists.size();
+      variable_list_indices1[vl]=index_for_vl;
+      rewriter_binding_variable_lists.push_back(vl);
+      return index_for_vl;
+    }
+
     inline variable_list binding_variable_list_get(const std::size_t i)
     {
       return (rewriter_binding_variable_lists[i]);
@@ -115,24 +133,101 @@ class RewriterCompilingJitty: public Rewriter
 
     // The data structures below are used to store single variables
     // that are bound in lambda, forall and exist operators. When required
-    // in the compiled required, these variables can be retrieved from
-    // the array rewriter_bound_variables. variable_indices0 is used
-    // to prevent double occurrences in the vector.
+    // in the compiling rewriter, these variables can be retrieved from
+    // the array rewriter_bound_variables. Variable_indices0 is used
+    // to find the right place in this vector. It delivers a variable_index_where_stack_pair.
+    // The first variable in this pair indicates the index of the variable.
+    // The where_stack is used as lambda, forall, and exist can be intermixed with bound variables.
+    // Whenever the variable is bound by a where clause, true is put on the stack.
+    // For a variable that is bound otherwise, false is put on the stack.
+
+    struct variable_index_where_stack_pair
+    {
+      std::size_t variable_index;
+      // a stacked value true indicates variable bound in a where. Otherwise the
+      // variable is bound by a lambda, forall or exist. 
+      std::vector<std::string> declaration_stack;
+
+      // Constructor
+      variable_index_where_stack_pair(const std::size_t& vi, const std::vector<std::string>& ds)
+        : variable_index(vi),
+          declaration_stack(ds)
+      {}
+
+      // Default constructor
+      variable_index_where_stack_pair()
+      {}
+    };
+
     std::vector<variable> rewriter_bound_variables;
-    std::map <variable, std::size_t> variable_indices0;
+    std::map <variable, variable_index_where_stack_pair > variable_indices0;
+
+    std::size_t bound_variable_index(const variable& v)
+    {
+      assert(variable_indices0.count(v)>0);
+      assert(variable_indices0[v].declaration_stack.back().empty());
+      return variable_indices0[v].variable_index;
+    }
+
+    // Declare a bound variable, and indicate whether it comes from a where clause in which case
+    // it has a non trivial name. 
+    // When the variable is bound in a lambda, forall or exists, is_where must be set to false.
+    void bound_variable_index_declare(const variable& v, const std::string& name)
+    {
+      if (variable_indices0.count(v)>0)  
+      {
+        variable_indices0[v].declaration_stack.push_back(name);
+        return;
+      }
+      const std::size_t index_for_v=rewriter_bound_variables.size();
+      variable_indices0[v]=variable_index_where_stack_pair(index_for_v,std::vector<std::string>(1,name));
+      rewriter_bound_variables.push_back(v);
+    }
+
+    // Declare a list of variables, which are not variables in a where. 
+    void bound_variables_index_declare(const variable_list& vl)
+    {
+      for(const variable& v: vl)
+      {
+        bound_variable_index_declare(v, "");
+      }
+    }
+
+    void bound_variable_index_undeclare(const variable& v)
+    {
+      assert(variable_indices0.count(v)>0);
+      assert(variable_indices0[v].declaration_stack.size()>0);
+      variable_indices0[v].declaration_stack.pop_back();
+    }
    
+    void bound_variables_index_undeclare(const variable_list& vl)
+    {
+      for(const variable& v: vl)
+      {
+        bound_variable_index_undeclare(v);
+      }
+    }
+
+    const variable& bound_variable_get(const std::size_t i)
+    {
+      assert(i<rewriter_bound_variables.size());
+      return (rewriter_bound_variables[i]);
+    }
+
+    // provides a non empty string if this variable represents a where clause. 
+    std::string bound_variable_stems_from_whr_clause(const variable& v)
+    {
+      assert(variable_indices0.count(v)>0);
+      assert(variable_indices0[v].declaration_stack.size()>0);
+      return variable_indices0[v].declaration_stack.back(); // if true, the variable is bound in a where clause. 
+    }
+
     // The following values are used to locate rewrite functions in the tables of
     // precompiled functions. 
     //   arity_bound -- The maximum occurring arity + 1
     //   index_bound -- The maximum occurring index + 1
     std::size_t arity_bound;
     std::size_t index_bound;
-
-    std::size_t bound_variable_index(const variable& v);
-    variable bound_variable_get(const std::size_t i)
-    {
-      return (rewriter_bound_variables[i]);
-    }
 
     // The two arrays below are intended to contain the precompiled functions used
     // for rewriting. They are used to find the relevant compiled rewriting code quickly. 

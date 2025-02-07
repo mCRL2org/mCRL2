@@ -113,7 +113,7 @@ class pbes
     /// \param data A data specification
     /// \param equations A sequence of pbes equations
     /// \param initial_state A propositional variable instantiation
-    pbes(data::data_specification const& data,
+    pbes(const data::data_specification& data,
          const std::vector<pbes_equation>& equations,
          propositional_variable_instantiation initial_state)
       :
@@ -131,7 +131,7 @@ class pbes
     /// \param equations A sequence of pbes equations
     /// \param global_variables A sequence of free variables
     /// \param initial_state A propositional variable instantiation
-    pbes(data::data_specification const& data,
+    pbes(const data::data_specification& data,
          const std::set<data::variable>& global_variables,
          const std::vector<pbes_equation>& equations,
          propositional_variable_instantiation initial_state)

@@ -30,12 +30,15 @@ void ToolOptionsDialog::updateToolOptions()
   // Load the existing tool options
   ui->enableJittyc->setCheckState(m_fileSystem->enableJittyc() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
   ui->linearsationComboBox->setCurrentText(QString::fromStdString(mcrl2::lps::print_lin_method(m_fileSystem->linearisationMethod())));  
+  ui->enumerationAmountEdit->setText(QString::fromStdString(std::to_string(m_fileSystem->enumerationLimit())));  
 }
 
 void ToolOptionsDialog::saveToolOptions()
 {
   m_fileSystem->setEnableJittyc(ui->enableJittyc->checkState() == Qt::CheckState::Checked);  
   m_fileSystem->setLinearisationMethod(mcrl2::lps::parse_lin_method(ui->linearsationComboBox->currentText().toStdString()));
+  m_fileSystem->setEnumerationLimit(std::stoi(ui->enumerationAmountEdit->text().toStdString()));
+    
 
   // Close the dialog after saving the options.
   close();
@@ -45,6 +48,7 @@ void ToolOptionsDialog::resetToolOptions()
 {
   ui->enableJittyc->setCheckState(Qt::CheckState::Unchecked);
   ui->linearsationComboBox->setCurrentIndex(0);
+  ui->enumerationAmountEdit->setText("10");
 
   saveToolOptions();
 }

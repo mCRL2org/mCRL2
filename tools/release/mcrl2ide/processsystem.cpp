@@ -204,8 +204,7 @@ QProcess* ProcessSystem::createSubprocess(
     const QString& expression,
     bool evidence,
     mcrl2::lts::lts_equivalence equivalence, 
-    SpecType specType,
-    int enumerationLimit)
+    SpecType specType)
 {
   // TODO: This function combines all parameters for the different processes, which is confusing.
   QProcess* subprocess = new QProcess();
@@ -294,8 +293,7 @@ QProcess* ProcessSystem::createSubprocess(
     program = "lpsxsim";
     inputFile = fileSystem->lpsFilePath();
     arguments << inputFile 
-              << "-Q"
-              << std::to_string(enumerationLimit).c_str();
+              << QString("-Q") + std::to_string(fileSystem->enumerationLimit()).c_str();
     break;
 
   case SubprocessType::Lps2lts:
@@ -306,8 +304,7 @@ QProcess* ProcessSystem::createSubprocess(
     arguments << inputFile << outputFile
               << "--strategy=breadth"
               << "--verbose"
-              << "-Q"
-              << std::to_string(enumerationLimit).c_str();
+              << QString("-Q") + std::to_string(fileSystem->enumerationLimit()).c_str();
     if (fileSystem->enableJittyc())
     {
 #ifdef MCRL2_ENABLE_JITTYC
@@ -378,7 +375,8 @@ QProcess* ProcessSystem::createSubprocess(
     arguments << inputFile << "--in=pbes"
               << "--search-strategy=breadth-first"
               << "--solve-strategy=0"
-              << "--verbose";
+              << "--verbose"
+              << QString("-Q") + std::to_string(fileSystem->enumerationLimit()).c_str();
     if (fileSystem->enableJittyc())
     {
 #ifdef MCRL2_ENABLE_JITTYC
@@ -406,7 +404,8 @@ QProcess* ProcessSystem::createSubprocess(
   case SubprocessType::Mcrl2i:
     program = "mcrl2i";
     inputFile = fileSystem->lpsFilePath();
-    arguments << inputFile << "-e" << expression;
+    arguments << inputFile << "-e" << expression 
+              << QString("-Q") + std::to_string(fileSystem->enumerationLimit()).c_str();
 
     connect(subprocess, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(rewriteResult(int)));

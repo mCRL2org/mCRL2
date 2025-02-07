@@ -686,7 +686,14 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   QDomElement enumerationLimitElement = newProjectOptions.elementsByTagName("enumeration_limit").at(0).toElement();
   if (!enumerationLimitElement.isNull())
   {
+    try
+    {
     m_enumerationLimit = std::stoi(jittycElement.text().toStdString());
+    }
+    catch (std::exception& ex)
+    {
+      // Keep the default enumeration limithod.
+    }
   }
 
   /* get the path to the specification */
@@ -987,6 +994,7 @@ bool FileSystem::save(bool forceSave)
     /* save the tool options */
     QDomText jittycValue = projectOptions.createTextNode(m_enableJittyc ? "true" : "false");
     QDomText linearisationValue = projectOptions.createTextNode(QString::fromStdString(mcrl2::lps::print_lin_method(m_linearisationMethod)));
+    QDomText enumerationLimitValue = projectOptions.createTextNode(QString::fromStdString(std::to_string(m_enumerationLimit)));
 
 
     QDomNode jittycNode = projectOptions.elementsByTagName("jittyc").at(0).toElement();
@@ -1020,7 +1028,24 @@ bool FileSystem::save(bool forceSave)
     else
     {
       linearisationNode.replaceChild(linearisationValue, linearisationNode.firstChild());
+    }  
+
+    QDomNode enumerationnNode = projectOptions.elementsByTagName("enumeration_limit").at(0);
+    if (enumerationnNode.isNull())
+    {
+      QDomNode rootNode = projectOptions.elementsByTagName("root").at(0);
+      enumerationnNode = rootNode.appendChild(projectOptions.createElement("enumeration_limit"));
     }
+
+    if (enumerationnNode.firstChild().isNull())
+    {      
+      enumerationnNode.appendChild(enumerationLimitValue);
+    }
+    else
+    {
+      enumerationnNode.replaceChild(enumerationLimitValue, enumerationnNode.firstChild());
+    }
+
 
     updateProjectFile();
 

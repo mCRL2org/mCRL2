@@ -69,7 +69,7 @@ struct t_lin_options
 /// \exception mcrl2::runtime_error Linearisation failed
 mcrl2::lps::stochastic_specification linearise(
   const mcrl2::process::process_specification& type_checked_spec,
-  mcrl2::lps::t_lin_options lin_options = t_lin_options());
+  const mcrl2::lps::t_lin_options& lin_options = t_lin_options());
 
 /// \brief Linearises a process specification from a textual specification
 /// \param[in] text A string containing a process specification
@@ -78,7 +78,7 @@ mcrl2::lps::stochastic_specification linearise(
 /// \exception mcrl2::runtime_error Linearisation failed
 inline mcrl2::lps::stochastic_specification linearise(
   const std::string& text,
-  mcrl2::lps::t_lin_options lin_options = t_lin_options())
+  const mcrl2::lps::t_lin_options& lin_options = t_lin_options())
 {
   mcrl2::process::process_specification spec =
       mcrl2::process::parse_process_specification(text);

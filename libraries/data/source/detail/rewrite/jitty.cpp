@@ -207,6 +207,20 @@ RewriterJitty::~RewriterJitty()
 {
 }
 
+// Find the variables that occur in the lhs and the rhs of the assignments;
+//
+std::set<variable> bound_variables_in_substitution(const jitty_assignments_for_a_rewrite_rule& assignments)
+{
+  std::set<variable> variables_in_substitution;
+  for(std::size_t i=0; i<assignments.size; ++i)
+  {
+    std::set<variable> s=find_free_variables(assignments.assignment[i].term);
+    variables_in_substitution.insert(s.begin(),s.end());
+    variables_in_substitution.insert(assignments.assignment[i].var);
+  }
+  return variables_in_substitution;
+}
+
 void RewriterJitty::subst_values(
             data_expression& result,
             const jitty_assignments_for_a_rewrite_rule& assignments,
@@ -252,13 +266,13 @@ void RewriterJitty::subst_values(
     const binder_type& binder=t1.binding_operator();
     const variable_list& bound_variables=t1.variables();
     // Check that variables in the left and right hand sides of equations do not clash with bound variables.
-    std::set<variable> variables_in_substitution;
-    for(std::size_t i=0; i<assignments.size; ++i)
+    std::set<variable> variables_in_substitution=bound_variables_in_substitution(assignments);
+    /* for(std::size_t i=0; i<assignments.size; ++i)
     {
       std::set<variable> s=find_free_variables(assignments.assignment[i].term);
       variables_in_substitution.insert(s.begin(),s.end());
       variables_in_substitution.insert(assignments.assignment[i].var);
-    }
+    } */
 
     variable_vector new_variables;
     mutable_map_substitution<> sigma;
@@ -293,26 +307,35 @@ void RewriterJitty::subst_values(
     const assignment_expression_list& local_assignments=t1.declarations();
     const data_expression& body=t1.body();
 
-#ifndef NDEBUG
-    // Check that variables in right hand sides of equations do not clash with bound variables.
-    for(std::size_t i=0; i<assignments.size; ++i)
-    {
-      for(const assignment_expression& a: local_assignments)
-      {
-        assert(a[0]!= assignments.assignment[i].var);
-      }
-    }
-#endif
-
+    std::set<variable> variables_in_substitution=bound_variables_in_substitution(assignments);
+    
     assignment_vector new_assignments;
+
+    mutable_map_substitution<> sigma;
+    bool sigma_trivial=true;
 
     for(const assignment_expression& a: local_assignments)
     {
       const assignment& assignment_expr = atermpp::down_cast<assignment>(a);
+      const variable& v=assignment_expr.lhs();
       subst_values(result,assignments,assignment_expr.rhs(),generator);
-      new_assignments.push_back(assignment(assignment_expr.lhs(),result));
+      if (variables_in_substitution.count(v)>0)
+      {
+        // Replace variable in the assignment and in the body by a new variable name.
+        const variable fresh_variable(generator(),v.sort());
+        new_assignments.push_back(assignment(fresh_variable,result));
+        sigma[v]=fresh_variable;
+        sigma_trivial=false;
+      }
+      else
+      {
+        new_assignments.push_back(assignment(v,result));
+      }
     }
-    subst_values(result,assignments,body,generator),
+    subst_values(result,
+                 assignments,
+                 (sigma_trivial?body:replace_variables(body,sigma)),
+                 generator),
     result=where_clause(result, assignment_list(new_assignments.begin(),new_assignments.end()));
     return;
   }

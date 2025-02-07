@@ -32,11 +32,16 @@
 #include "mcrl2/data/real_utilities.h"
 
 // linear process libraries.
-#include "mcrl2/lps/detail/ultimate_delay.h"
-#include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/linearise_allow_block.h"
+#include "mcrl2/lps/linearise_utility.h"
+#include "mcrl2/lps/linearise_rename.h"
+#include "mcrl2/lps/linearise_communication.h"
 #include "mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h"
+#include "mcrl2/lps/sumelm.h"
+
+#include "mcrl2/lps/detail/ultimate_delay.h"
 
 // Process libraries.
 #include "mcrl2/process/alphabet_reduce.h"
@@ -106,7 +111,7 @@ class objectdatatype
       constructor=false;
       processstatus=unknown;
       object=none;
-      canterminate=0;
+      canterminate=false;
       containstime=false;
     }
 
@@ -238,14 +243,14 @@ class specification_basic_type
         terminatedProcId,
         variable_list(),
         seq(terminationAction,delta()),
-        pCRL,0,false);
+        pCRL,false,false);
       delta_process=newprocess(variable_list(),delta(),pCRL,false,false);
       tau_process=newprocess(variable_list(),tau(),pCRL,true,false);
     }
 
     ~specification_basic_type()
     {
-      for (; stack_operations_list!=nullptr;)
+      while (stack_operations_list!=nullptr)
       {
         stackoperations* temp=stack_operations_list->next;
         delete stack_operations_list;
@@ -255,18 +260,8 @@ class specification_basic_type
     }
 
   private:
-    /* data_expression real_zero()
-    {
-      static data_expression zero=sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1());
-      return zero;
-    }
 
-    data_expression real_one()
-    {
-      static data_expression one=sort_real::creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1());
-      return one;
-    } */
-
+    static
     data_expression real_times_optimized(const data_expression& r1, const data_expression& r2)
     {
       if (r1==sort_real::real_zero() || r2==sort_real::real_zero())
@@ -284,7 +279,8 @@ class specification_basic_type
       return sort_real::times(r1,r2);
     }
 
-    process_expression delta_at_zero(void)
+    static
+    process_expression delta_at_zero()
     {
       return at(delta(), sort_real::real_(0));
     }
@@ -344,6 +340,7 @@ class specification_basic_type
       fresh_identifier_generator.add_identifier(str);
     }
 
+    static
     process_expression action_list_to_process(const action_list& ma)
     {
       if (ma.size()==0)
@@ -357,6 +354,9 @@ class specification_basic_type
       return process::sync(ma.front(),action_list_to_process(ma.tail()));
     }
 
+    /// Convert the process expression to an action list.
+    /// Note: The resulting actions are not sorted.
+    static
     action_list to_action_list(const process_expression& p)
     {
       if (is_tau(p))
@@ -377,7 +377,15 @@ class specification_basic_type
       return action_list();
     }
 
-    process::action_label_list getnames(const process_expression& multiAction)
+    /// Convert the process expression to a sorted action list.
+    static
+    action_list to_sorted_action_list(const process_expression& p) 
+    { 
+      return sort_actions(to_action_list(p));
+    }
+
+    static
+    action_label_list getnames(const process_expression& multiAction)
     {
       if (is_action(multiAction))
       {
@@ -433,6 +441,7 @@ class specification_basic_type
       return getparameters_rec(multiAction,occurs_set);
     }
 
+    static
     data_expression_list getarguments(const action_list& multiAction)
     {
       data_expression_list result;
@@ -443,6 +452,7 @@ class specification_basic_type
       return reverse(result);
     }
 
+    static
     action_list makemultiaction(const process::action_label_list& actionIds, const data_expression_list& args)
     {
       action_list result;
@@ -540,6 +550,7 @@ class specification_basic_type
 
     /************ upperpowerof2 *********************************************/
 
+    static
     std::size_t upperpowerof2(std::size_t i)
     /* function yields n for the smallest value n such that
        2^n>=i. This constitutes the number of bits necessary
@@ -749,7 +760,7 @@ class specification_basic_type
           e.identifier(),
           e.formal_parameters(),
           e.expression(),
-          unknown,0,false);
+          unknown,false,false);
       }
     }
 
@@ -759,7 +770,7 @@ class specification_basic_type
       const processstatustype s,
       const bool canterminate,
       const bool containstime,
-      process_identifier& p)
+      process_identifier& p) const
     {
       for(const std::pair<const aterm,objectdatatype>& d: objectdata)
       {
@@ -787,67 +798,22 @@ class specification_basic_type
          because it cannot occur as a string in the input */
 
       process_identifier initprocess(std::string("init"), variable_list());
-      insert_process_declaration(initprocess,variable_list(),init,unknown,0,false);
+      insert_process_declaration(initprocess,variable_list(),init,unknown,false,false);
       return initprocess;
     }
 
   private:
 
     /********** various functions on action and multi actions  ***************/
-    bool actioncompare(const action_label& a1, const action_label& a2)
-    {
-      /* first compare the strings in the actions */
-      if (std::string(a1.name())<std::string(a2.name()))
-      {
-        return true;
-      }
 
-      if (a1.name()==a2.name())
-      {
-        /* the strings are equal; the sorts are used to
-           determine the ordering */
-        return a1.sorts()<a2.sorts();
-      }
 
-      return false;
-    }
-
-    action_list linInsertActionInMultiActionList(
-      const action& act,
-      action_list multiAction)
-    {
-      /* store the action in the multiAction, alphabetically
-         sorted on the actionname in the actionId. Note that
-         the empty multiAction represents tau. */
-
-      if (multiAction.empty())
-      {
-        return action_list({ act });
-      }
-      const action firstAction=multiAction.front();
-
-      /* Actions are compared on the basis of their position
-         in memory, to order them. As the aterm library maintains
-         pointers to objects that are not garbage collected, this
-         is a safe way to do this. */
-      if (actioncompare(act.label(),firstAction.label()))
-      {
-        multiAction.push_front(act);
-        return multiAction;
-      }
-      action_list result= linInsertActionInMultiActionList(
-                          act,
-                          multiAction.tail());
-      result.push_front(firstAction);
-      return result;
-    }
 
     action_list linMergeMultiActionList(const action_list& ma1, const action_list& ma2)
     {
       action_list result=ma2;
       for (const action& a: ma1) 
       {
-        result=linInsertActionInMultiActionList(a,result);
+        result=insert(a,result);
       }
       return result;
     }
@@ -1103,9 +1069,8 @@ class specification_basic_type
       const process_identifier& procDecl,
       const processstatustype status)
     {
-      processstatustype s;
       objectdatatype& object=objectIndex(procDecl);
-      s=object.processstatus;
+      processstatustype s=object.processstatus;
 
       if (s==unknown)
       {
@@ -1272,11 +1237,6 @@ class specification_basic_type
 
     /****************  occursinterm *** occursintermlist ***********/
 
-    bool occursinterm(const variable& var, const data_expression& t) const
-    {
-      return data::search_free_variable(t, var);
-    }
-
     void filter_vars_by_term(
       const data_expression& t,
       const std::set < variable >& vars_set,
@@ -1326,11 +1286,12 @@ class specification_basic_type
       filter_vars_by_termlist(a.begin(),a.end(),vars_set,vars_result_set);
     }
 
-    bool occursintermlist(const variable& var, const data_expression_list& r) const
+    static
+    bool occursintermlist(const variable& var, const data_expression_list& r)
     {
       for (const data_expression& d: r)
       {
-        if (occursinterm(var,d))
+        if (occursinterm(d, var))
         {
           return true;
         }
@@ -1343,7 +1304,7 @@ class specification_basic_type
       std::set<variable> assigned_variables;
       for (const assignment& l: r)
       {
-        if (occursinterm(var,l.rhs()))
+        if (occursinterm(l.rhs(), var))
         {
           return true;
         }
@@ -1419,7 +1380,7 @@ class specification_basic_type
       }
       if (is_if_then(p))
       {
-        return occursinterm(var,if_then(p).condition())||
+        return occursinterm(if_then(p).condition(), var) ||
                occursinpCRLterm(var,if_then(p).then_case(),strict);
       }
 
@@ -1441,13 +1402,13 @@ class specification_basic_type
         if (strict)
         {
           return occursintermlist(var,variable_list_to_data_expression_list(sto.variables())) ||
-                      occursinterm(var,sto.distribution()) ||
+                      occursinterm(sto.distribution(), var) ||
                       occursinpCRLterm(var,sto.operand(),strict);
         }
         else
         {
           return (!occursintermlist(var,variable_list_to_data_expression_list(sto.variables()))) &&
-                      (occursinterm(var,sto.distribution()) ||
+                      (occursinterm(sto.distribution(), var) ||
                        occursinpCRLterm(var,sto.operand(),strict));
         }
       }
@@ -1466,7 +1427,7 @@ class specification_basic_type
       }
       if (is_at(p))
       {
-        return occursinterm(var,at(p).time_stamp()) ||
+        return occursinterm(at(p).time_stamp(), var) ||
                occursinpCRLterm(var,at(p).operand(),strict);
       }
       if (is_delta(p))
@@ -1738,6 +1699,7 @@ class specification_basic_type
     }
 
     /* Remove assignments that do not appear in the parameter list. */
+    static
     assignment_list filter_assignments(const assignment_list& assignments, const variable_list& parameters)
     {
       assignment_vector result;
@@ -1877,6 +1839,7 @@ class specification_basic_type
     }
 
     // Sort the assignments, such that they have the same order as the parameters
+    static
     assignment_list sort_assignments(const assignment_list& ass, const variable_list& parameters)
     {
       std::map<variable,data_expression>assignment_map;
@@ -2399,6 +2362,7 @@ class specification_basic_type
     }
 
 
+   static
    assignment_list parameters_to_assignment_list(const variable_list& parameters, const std::set<variable>& variables_bound_in_sum)
    {
      assignment_vector result;
@@ -3123,6 +3087,7 @@ class specification_basic_type
       return process_expression();
     }
 
+    static
     int match_sequence(
       const std::vector < process_instance_assignment >& s1,
       const std::vector < process_instance_assignment >& s2,
@@ -3868,7 +3833,7 @@ class specification_basic_type
     {
       std::vector <process_identifier> todo;
       todo.push_back(procsIdDecl);
-      for (; !todo.empty() ;)
+      while (!todo.empty())
       {
         const process_identifier pi=todo.back();
         todo.pop_back();
@@ -3967,6 +3932,7 @@ class specification_basic_type
        that no id1 that occurs at the right of the map can occur at the left.
     */
 
+    static
     process_identifier get_last(const process_identifier& id, const std::map< process_identifier, process_identifier >& identifier_identifier_map)
     {
       process_identifier target_id=id;
@@ -3988,6 +3954,7 @@ class specification_basic_type
     }
 
 
+    static
     void set_proc_identifier_map(
             std::map< process_identifier, process_identifier >& identifier_identifier_map,
             const process_identifier& id1_,
@@ -4011,6 +3978,7 @@ class specification_basic_type
       }
     }
 
+    static
     void complete_proc_identifier_map(std::map< process_identifier, process_identifier >& identifier_identifier_map)
     {
       std::map< process_identifier, process_identifier > new_identifier_identifier_map;
@@ -4236,6 +4204,7 @@ class specification_basic_type
 
     /**************** Collectparameterlist ******************************/
 
+    static
     bool alreadypresent(variable& var,const variable_list& vl)
     {
       /* Note: variables can be different, although they have the
@@ -4262,6 +4231,7 @@ class specification_basic_type
       return alreadypresent(var,vl.tail());
     }
 
+    static
     variable_list joinparameters(const variable_list& par1,
                                  const variable_list& par2)
     {
@@ -4385,7 +4355,7 @@ class specification_basic_type
         stacklisttype(const stacklisttype& )=delete;
         stacklisttype& operator=(const stacklisttype& )=delete;
 
-
+        static
         stackoperations* find_suitable_stack_operations(
           const variable_list& parameters,
           stackoperations* stack_operations_list)
@@ -4491,7 +4461,7 @@ class specification_basic_type
     }
 
     data_expression getvar(const variable& var,
-                           const stacklisttype& stack)
+                           const stacklisttype& stack) const
     {
       /* first search whether the variable is a free process variable */
       if (global_variables.count(var)>0)
@@ -4780,37 +4750,25 @@ class specification_basic_type
       return result;
     }
 
-
-    action_list adapt_multiaction_to_stack_rec(
-      const action_list& multiAction,
-      const stacklisttype& stack,
-      const variable_list& vars)
+    /// Adapt multiactions to stack by traversing the list.
+    /// Note: the result is sorted w.r.t action_compare().
+    action_list
+    adapt_multiaction_to_stack(const action_list& multiAction, const stacklisttype& stack, const variable_list& vars)
     {
-      if (multiAction.empty())
-      {
-        return multiAction;
+      action_vector result;
+
+      for (action_list::const_iterator it = multiAction.begin(); it != multiAction.end(); ++it) {
+        const action& act = *it;
+        const data_expression_vector vec(
+            adapt_termlist_to_stack(act.arguments().begin(), act.arguments().end(), stack, vars, variable_list()));
+        result.push_back(action(act.label(), data_expression_list(vec.begin(), vec.end())));
       }
 
-      const action act=action(multiAction.front());
+      // As the arguments change, sort order w.r.t. action_label is preserved, but order w.r.t. arguments is changed.
+      // resort the list.
+      std::sort(result.begin(), result.end(), action_compare());
 
-      action_list result=adapt_multiaction_to_stack_rec(multiAction.tail(),stack,vars);
-
-      const data_expression_vector vec(adapt_termlist_to_stack(
-                            act.arguments().begin(),
-                            act.arguments().end(),
-                            stack,
-                            vars,
-                            variable_list()));
-      result.push_front(action(act.label(),data_expression_list(vec.begin(),vec.end())));
-      return result;
-    }
-
-    action_list adapt_multiaction_to_stack(
-      const action_list& multiAction,
-      const stacklisttype& stack,
-      const variable_list& vars)
-    {
-      return adapt_multiaction_to_stack_rec(multiAction,stack,vars);
+      return action_list(result.begin(), result.end());
     }
 
     data_expression representative_generator_internal(const sort_expression& s, const bool allow_dont_care_var=true)
@@ -5082,6 +5040,7 @@ class specification_basic_type
       return assignment_list({ assignment(stack.stackvar,sf) });
     }
 
+    static
     bool occursin(const variable& name,
                   const variable_list& pars)
     {
@@ -5276,7 +5235,9 @@ class specification_basic_type
       const bool has_time,
       const bool is_deadlock_summand)
     {
-      assert(distribution!=stochastic_distribution());
+      assert(distribution != stochastic_distribution());
+      assert(std::is_sorted(multiAction.begin(), multiAction.end(), action_compare()));
+        
       const data_expression rewritten_condition=RewriteTerm(condition);
       if (rewritten_condition==sort_bool::false_())
       {
@@ -5289,14 +5250,14 @@ class specification_basic_type
                                    deadlock_summands,
                                    deadlock_summand(sumvars,
                                                     rewritten_condition,
-                                                    has_time?deadlock(actTime):deadlock()));
+                                                    has_time?deadlock(actTime):deadlock()),options.ignore_time);
       }
       else
       {
         action_summands.push_back(stochastic_action_summand(
                                                  sumvars,
                                                  rewritten_condition,
-                                                 has_time?multi_action(multiAction,actTime):multi_action(multiAction),
+                                                 has_time ? multi_action(multiAction, actTime) : multi_action(multiAction),
                                                  procargs,
                                                  stochastic_distribution(distribution.variables(),
                                                                          RewriteTerm(distribution.distribution()))));
@@ -5330,7 +5291,7 @@ class specification_basic_type
          list sumvars */
 
       variable_list sumvars;
-      for (; is_sum(summandterm) ;)
+      while (is_sum(summandterm))
       {
         sumvars=sum(summandterm).variables() + sumvars;
         summandterm=sum(summandterm).operand();
@@ -5358,7 +5319,7 @@ class specification_basic_type
       stochastic_distribution cumulative_distribution(variable_list(),sort_real::real_one());
 
       /* The conditions are collected for use. The stochastic operators before the action are ignored */
-      for (; (is_if_then(summandterm)||is_stochastic_operator(summandterm)) ;)
+      while ((is_if_then(summandterm)||is_stochastic_operator(summandterm)))
       {
         if (is_if_then(summandterm))
         {
@@ -5416,7 +5377,7 @@ class specification_basic_type
         else
         {
           assert(is_tau(t1)||is_action(t1)||is_sync(t1));
-          multiAction=to_action_list(t1);
+          multiAction=to_sorted_action_list(t1);
         }
 
         stochastic_distribution distribution(variable_list(),sort_real::real_one());
@@ -5474,11 +5435,12 @@ class specification_basic_type
       }
       else if (is_action(summandterm))
       {
+        assert(multiAction.empty()); // so the result must be sorted.
         multiAction.push_front(action(summandterm));
       }
       else if (is_sync(summandterm))
       {
-        multiAction=to_action_list(summandterm);
+        multiAction=to_sorted_action_list(summandterm);
       }
       else
       {
@@ -5671,7 +5633,7 @@ class specification_basic_type
       return w;
     }
 
-    data::function_symbol find_case_function(std::size_t index, const sort_expression& sort)
+    data::function_symbol find_case_function(std::size_t index, const sort_expression& sort) const
     {
       for (const data::function_symbol& f: enumeratedtypes[index].functions)
       {
@@ -5921,6 +5883,7 @@ class specification_basic_type
       return false;
     }
 
+    static
     data_expression_list extend(const data_expression& c, const data_expression_list& cl)
     {
       return data_expression_list(cl.begin(), 
@@ -6124,6 +6087,7 @@ class specification_basic_type
       return construct_binary_case_tree_rec(n-1,sums,terms,termsort,e);
     }
 
+    static
     bool summandsCanBeClustered(
       const stochastic_action_summand& summand1,
       const stochastic_action_summand& summand2)
@@ -6159,6 +6123,7 @@ class specification_basic_type
       return i2 == multiactionlist2.end();
     }
 
+    static
     data_expression getRHSassignment(const variable& var, const assignment_list& as)
     {
       for (const assignment& a: as)
@@ -7047,6 +7012,7 @@ class specification_basic_type
                               some_summand_has_time?deadlock(resulttime):deadlock());
     }
 
+    static
     sort_expression_list getActionSorts(const action_list& actionlist)
     {
       sort_expression_list resultsorts;
@@ -7185,8 +7151,8 @@ class specification_basic_type
        from the underlying GNF */
     {
       // We use action_summands and deadlock_summands as an output.
-      assert(action_summands.size()==0);
-      assert(deadlock_summands.size()==0);
+      assert(action_summands.empty());
+      assert(deadlock_summands.empty());
 
       bool singlecontrolstate=false;
       std::set< process_identifier > reachable_process_identifiers;
@@ -7275,6 +7241,7 @@ class specification_basic_type
 
     /**************** hiding *****************************************/
 
+    static
     action_list hide_(const identifier_string_list& hidelist, const action_list& multiaction)
     {
       action_list resultactionlist;
@@ -7291,6 +7258,7 @@ class specification_basic_type
       return reverse(resultactionlist);
     }
 
+    static
     void hidecomposition(const identifier_string_list& hidelist, stochastic_action_summand_vector& action_summands)
     {
       for (stochastic_action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end() ; ++i)
@@ -7304,362 +7272,16 @@ class specification_basic_type
       }
     }
 
-    /**************** allow/block *************************************/
-
-    bool implies_condition(const data_expression& c1, const data_expression& c2)
-    {
-      if (c2==sort_bool::true_())
-      {
-        return true;
-      }
-
-      if (c1==sort_bool::false_())
-      {
-        return true;
-      }
-
-      if (c1==sort_bool::true_())
-      {
-        return false;
-      }
-
-      if (c2==sort_bool::false_())
-      {
-        return false;
-      }
-
-      if (c1==c2)
-      {
-        return true;
-      }
-
-      /* Dealing with the conjunctions (&&) first and then the disjunctions (||)
-         yields a 10-fold speed increase compared to the case where first the
-         || occur, and then the &&. This result was measured on the alternating
-         bit protocol, with --regular. */
-
-      if (sort_bool::is_and_application(c2))
-      {
-        return implies_condition(c1,data::binary_left(down_cast<application>(c2))) &&
-               implies_condition(c1,data::binary_right(down_cast<application>(c2)));
-      }
-
-      if (sort_bool::is_or_application(c1))
-      {
-        return implies_condition(data::binary_left(down_cast<application>(c1)),c2) &&
-               implies_condition(data::binary_right(down_cast<application>(c1)),c2);
-      }
-
-      if (sort_bool::is_and_application(c1))
-      {
-        return implies_condition(data::binary_left(down_cast<application>(c1)),c2) ||
-               implies_condition(data::binary_right(down_cast<application>(c1)),c2);
-      }
-
-      if (sort_bool::is_or_application(c2))
-      {
-        return implies_condition(c1,data::binary_left(down_cast<application>(c2))) ||
-               implies_condition(c1,data::binary_right(down_cast<application>(c2)));
-      }
-
-      return false;
-    }
-
-    void insert_timed_delta_summand(
-      const stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands,
-      const deadlock_summand& s)
-    {
-      deadlock_summand_vector result;
-
-      // const variable_list sumvars=s.summation_variables();
-      const data_expression& cond=s.condition();
-      const data_expression& actiontime=s.deadlock().time();
-
-      // First check whether the delta summand is subsumed by an action summands.
-      if (!options.ignore_time)
-      {
-        for (const stochastic_action_summand& as: action_summands)
-        {
-          const data_expression& cond1=as.condition();
-          if (((actiontime==as.multi_action().time()) || (!as.multi_action().has_time())) &&
-              (implies_condition(cond,cond1)))
-          {
-            /* De delta summand is subsumed by action summand as. So, it does not
-               have to be added. */
-
-            return;
-          }
-        }
-      }
-
-      for (deadlock_summand_vector::iterator i=deadlock_summands.begin(); i!=deadlock_summands.end(); ++i)
-      {
-        const deadlock_summand& smmnd=*i;
-        const data_expression& cond1=i->condition();
-        if ((!options.ignore_time) &&
-            ((actiontime==i->deadlock().time()) || (!i->deadlock().has_time())) &&
-            (implies_condition(cond,cond1)))
-        {
-          /* put the summand that was effective in removing
-             this delta summand to the front, such that it
-             is encountered early later on, removing a next
-             delta summand */
-
-          copy(i,deadlock_summands.end(),back_inserter(result));
-          deadlock_summands.swap(result);
-          return;
-        }
-        if (((options.ignore_time)||
-             (((actiontime==smmnd.deadlock().time())|| (!s.deadlock().has_time())) &&
-              (implies_condition(cond1,cond)))))
-        {
-          /* do not add summand to result, as it is superseded by s */
-        }
-        else
-        {
-          result.push_back(smmnd);
-        }
-      }
-
-      result.push_back(s);
-      deadlock_summands.swap(result);
-    }
-
-    static action_name_multiset_list sort_multi_action_labels(const action_name_multiset_list& l)
-    {
-      return action_name_multiset_list(l.begin(),l.end(),[](const action_name_multiset& al){ return sort_action_labels(al); });
-    }
-
-    /// \brief determine whether the multiaction has the same labels as the allow action,
-    //         in which case true is delivered. If multiaction is the action Terminate,
-    //         then true is also returned.
-
-    bool allowsingleaction(const action_name_multiset& allowaction,
-                           const action_list& multiaction)
-    {
-      /* The special cases where multiaction==tau and multiaction=={ Terminated } must have been
-         dealt with separately. */
-      assert(multiaction.size()!=0 && multiaction != action_list({ terminationAction }));
-
-      const identifier_string_list& names=allowaction.names();
-      identifier_string_list::const_iterator i=names.begin();
-
-      for (action_list::const_iterator walker=multiaction.begin();
-           walker!=multiaction.end(); ++walker,++i)
-      {
-        if (i==names.end())
-        {
-          return false;
-        }
-        if (*i!=walker->label().name())
-        {
-          return false;
-        }
-      }
-      return i==names.end();
-    }
-
-    bool allow_(const action_name_multiset_list& allowlist,
-                const action_list& multiaction)
-    {
-      /* The empty multiaction, i.e. tau, is never blocked by allow */
-      if (multiaction.empty())
-      {
-        return true;
-      }
-
-      /* The multiaction is equal to the special Terminate action. This action cannot be blocked. */
-      if (multiaction == action_list({ terminationAction }))
-      {
-        return true;
-      }
-
-      for (action_name_multiset_list::const_iterator i=allowlist.begin();
-           i!=allowlist.end(); ++i)
-      {
-        if (allowsingleaction(*i,multiaction))
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    bool encap(const action_name_multiset_list& encaplist, const action_list& multiaction)
-    {
-      for (const action& a: multiaction)
-      {
-        assert(encaplist.size()==1);
-        for (const identifier_string& s1: encaplist.front().names())
-        {
-          const identifier_string s2=a.label().name();
-          if (s1==s2)
-          {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
-    void allowblockcomposition(
-      const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
-      const bool is_allow,
-      stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands)
-    {
-      /* This function calculates the allow or the block operator,
-         depending on whether is_allow is true */
-
-      stochastic_action_summand_vector sourcesumlist;
-      action_summands.swap(sourcesumlist);
-
-      deadlock_summand_vector resultdeltasumlist;
-      deadlock_summand_vector resultsimpledeltasumlist;
-      deadlock_summands.swap(resultdeltasumlist);
-
-      action_name_multiset_list allowlist((is_allow)?sort_multi_action_labels(allowlist1):allowlist1);
-
-      std::size_t sourcesumlist_length=sourcesumlist.size();
-      if (sourcesumlist_length>2 || is_allow) // This condition prevents this message to be printed
-        // when performing data elimination. In this case the
-        // term delta is linearised, to determine which data
-        // is essential for all processes. In these cases a
-        // message about the block operator is very confusing.
-      {
-        mCRL2log(mcrl2::log::verbose) << "- calculating the " << (is_allow?"allow":"block") <<
-              " operator on " << sourcesumlist.size() << " action summands and " << resultdeltasumlist.size() << " delta summands";
-      }
-
-      /* First add the resulting sums in two separate lists
-         one for actions, and one for delta's. The delta's
-         are added at the end to the actions, where for
-         each delta summand it is determined whether it ought
-         to be added, or is superseded by an action or another
-         delta summand */
-      for (const stochastic_action_summand& smmnd: sourcesumlist)
-      {
-        const variable_list& sumvars=smmnd.summation_variables();
-        const action_list multiaction=smmnd.multi_action().actions();
-        const data_expression& actiontime=smmnd.multi_action().time();
-        const data_expression& condition=smmnd.condition();
-
-        // Explicitly allow the termination action in any allow.
-        if ((is_allow && allow_(allowlist,multiaction)) ||
-            (!is_allow && !encap(allowlist,multiaction)))
-        {
-          action_summands.push_back(smmnd);
-        }
-        else
-        {
-          if (smmnd.has_time())
-          {
-            resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock(actiontime)));
-          }
-          else
-          {
-            // summand has no time.
-            if (condition==sort_bool::true_())
-            {
-              resultsimpledeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
-            }
-            else
-            {
-              resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
-            }
-          }
-        }
-      }
-
-      if (options.nodeltaelimination)
-      {
-        deadlock_summands.swap(resultsimpledeltasumlist);
-        copy(resultdeltasumlist.begin(),resultdeltasumlist.end(),back_inserter(deadlock_summands));
-      }
-      else
-      {
-        if (!options.ignore_time) /* if a delta summand is added, conditional, timed
-                                   delta's are subsumed and do not need to be added */
-        {
-          for (const deadlock_summand& summand: resultsimpledeltasumlist)
-          {
-            insert_timed_delta_summand(action_summands,deadlock_summands,summand);
-          }
-          for (const deadlock_summand& summand: resultdeltasumlist)
-          {
-            insert_timed_delta_summand(action_summands,deadlock_summands,summand);
-          }
-        }
-        else
-        {
-          // Add a true -> delta
-          insert_timed_delta_summand(action_summands,deadlock_summands,deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
-        }
-      }
-      if (mCRL2logEnabled(mcrl2::log::verbose) && (sourcesumlist_length>2 || is_allow))
-      {
-        mCRL2log(mcrl2::log::verbose) << ", resulting in " << action_summands.size() << " action summands and " << deadlock_summands.size() << " delta summands\n";
-      }
-    }
-
-    /**************** renaming ******************************************/
-
-    action rename_action(const rename_expression_list& renamings, const action& act)
-    {
-      const action_label& actionId=act.label();
-      const identifier_string& s=actionId.name();
-      for (const rename_expression& renaming: renamings)
-      {
-        if (s==renaming.source())
-        {
-          return action(action_label(renaming.target(),actionId.sorts()),
-                        act.arguments());
-        }
-      }
-      return act;
-    }
-
-    action_list rename_actions(const rename_expression_list& renamings,
-                               const action_list& multiaction)
-    {
-      action_list resultactionlist;
-
-      for (const action& a: multiaction)
-      {
-        resultactionlist=linInsertActionInMultiActionList(
-                           rename_action(renamings,a),
-                           resultactionlist);
-      }
-      return resultactionlist;
-    }
-
-    void renamecomposition(
-      const rename_expression_list& renamings,
-      stochastic_action_summand_vector& action_summands)
-    {
-      for (stochastic_action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
-      {
-        const action_list actions=rename_actions(renamings,i->multi_action().actions());
-
-        *i= stochastic_action_summand(i->summation_variables(),
-                           i->condition(),
-                           i->multi_action().has_time()?multi_action(actions,i->multi_action().time()):multi_action(actions),
-                           i->assignments(),
-                           i->distribution());
-
-      }
-    }
-
     /**************** equalargs ****************************************/
 
+    static
     bool occursinvarandremove(const variable& var, variable_list& vl)
     {
       bool result=false;
 
       if (vl.empty())
       {
-        return 0;
+        return false;
       }
       vl.pop_front();
       const variable var1=vl.front();
@@ -7743,591 +7365,13 @@ class specification_basic_type
 
     /**************** communication operator composition ****************/
 
-    static action_name_multiset sort_action_labels(const action_name_multiset& actionlabels)
-    {
-      return action_name_multiset(atermpp::sort_list<identifier_string>(
-                                               actionlabels.names(),
-                                               [](const identifier_string& a1, const identifier_string& a2)
-                                                                { return std::string(a1)<std::string(a2); }));
-    }
-
     template <typename List>
-    sort_expression_list get_sorts(const List& l)
+    static sort_expression_list get_sorts(const List& l)
     {
       return sort_expression_list(l.begin(), l.end(), [](const typename List::value_type& d) -> sort_expression {return d.sort();});
     }
 
-    // Check that the sorts of both termlists match.
-    data_expression pairwiseMatch(const data_expression_list& l1, const data_expression_list& l2)
-    {
-      if (l1.size()!=l2.size())
-      {
-        return sort_bool::false_();
-      }
-      data_expression_list::const_iterator i2=l2.begin();
-      data_expression result=sort_bool::true_();
-      for(const data_expression& t1: l1)
-      {
-        if (t1.sort()!=i2->sort())
-        {
-          return sort_bool::false_();
-        }
-        result=lazy::and_(result,RewriteTerm(equal_to(t1,*i2)));
-        ++i2;
-      }
-      return result;
-    }
-
-    // a tuple_list contains pairs of actions (multi-action) and the condition under which this action
-    // can occur.
-    struct tuple_list
-    {
-      std::vector < action_list > actions;
-      std::vector < data_expression > conditions;
-    };
-
-    tuple_list addActionCondition(
-      const action& firstaction,
-      const data_expression& condition,
-      const tuple_list& L,
-      tuple_list S)
-    {
-      /* if firstaction==action(), it should not be added */
-      assert(condition!=sort_bool::false_()); // It makes no sense to add an action with condition false,
-      // as it cannot happen anyhow.
-      for (std::size_t i=0; i<L.actions.size(); ++i)
-      {
-        S.actions.push_back((firstaction!=action())?
-                            linInsertActionInMultiActionList(firstaction,L.actions[i]):
-                            L.actions[i]);
-        S.conditions.push_back(lazy::and_(L.conditions[i],condition));
-      }
-      return S;
-    }
-
-
-    // Type and variables for a somewhat more efficient storage of the
-    // communication function
-
-    class comm_entry
-    {
-      public:
-        // comm_entries are not copyable.
-        comm_entry(const comm_entry& )=delete;
-        comm_entry& operator=(const comm_entry& )=delete;
-
-        std::vector <identifier_string_list> lhs;
-        std::vector <identifier_string> rhs;
-        std::vector <identifier_string_list> tmp;
-        std::vector< bool > match_failed;
-
-        comm_entry(const communication_expression_list& communications)
-        {
-          for (const communication_expression& l: communications)
-          {
-            lhs.push_back(l.action_name().names());
-            rhs.push_back(l.name());
-            tmp.push_back(identifier_string_list());
-            match_failed.push_back(false);
-          }
-        }
-
-        ~comm_entry()
-        {}
-
-        std::size_t size() const
-        {
-          assert(lhs.size()==rhs.size() && rhs.size()==tmp.size() && tmp.size()==match_failed.size());
-          return lhs.size();
-        }
-    };
-
-    process::action_label can_communicate(const action_list& m, comm_entry& comm_table)
-    {
-      /* this function indicates whether the actions in m
-         consisting of actions and data occur in C, such that
-         a communication can take place. If not action_label() is delivered,
-         otherwise the resulting action is the result. */
-      // first copy the left-hand sides of communications for use
-      for (std::size_t i=0; i<comm_table.size(); ++i)
-      {
-        comm_table.tmp[i] = comm_table.lhs[i];
-        comm_table.match_failed[i]=false;
-      }
-
-      // m must match a lhs; check every action
-      for (const action& a: m)
-      {
-        identifier_string actionname=a.label().name();
-
-        // check every lhs for actionname
-        bool comm_ok = false;
-        for (std::size_t i=0; i<comm_table.size(); ++i)
-        {
-          if (comm_table.match_failed[i]) // lhs i does not match
-          {
-            continue;
-          }
-          if (comm_table.tmp[i].empty()) // lhs cannot match actionname
-          {
-            comm_table.match_failed[i]=true;
-            continue;
-          }
-          if (actionname != comm_table.tmp[i].front())
-          {
-            // no match
-            comm_table.match_failed[i] = true;
-          }
-          else
-          {
-            // possible match; on to next action
-            comm_table.tmp[i].pop_front();
-            comm_ok = true;
-          }
-        }
-        if (!comm_ok)   // no (possibly) matching lhs
-        {
-          return action_label();
-        }
-      }
-
-      // there is a lhs containing m; find it
-      for (std::size_t i=0; i<comm_table.size(); ++i)
-      {
-        // lhs i matches only if comm_table[i] is empty
-        if ((!comm_table.match_failed[i]) && comm_table.tmp[i].empty())
-        {
-          if (comm_table.rhs[i] == tau())
-          {
-            throw mcrl2::runtime_error("Cannot linearise a process with a communication operator, containing a communication that results in tau or that has an empty right hand side");
-            return action_label();
-          }
-          return action_label(comm_table.rhs[i],m.front().label().sorts());
-        }
-      }
-      // no match
-      return action_label();
-    }
-
-    static bool might_communicate(const action_list& m,
-                                  comm_entry& comm_table,
-                                  const action_list& n)
-    {
-      /* this function indicates whether the actions in m
-         consisting of actions and data occur in C, such that
-         a communication might take place (i.e. m is a subbag
-         of the lhs of a communication in C).
-         if n is not empty, then all actions of a matching communication
-         that are not in m should be in n (i.e. there must be a
-         subbag o of n such that m+o can communicate. */
-
-      // first copy the left-hand sides of communications for use
-      for (std::size_t i=0; i<comm_table.size(); ++i)
-      {
-        comm_table.match_failed[i]=false;
-        comm_table.tmp[i] = comm_table.lhs[i];
-      }
-
-      // m must be contained in a lhs; check every action
-      for (const action& a: m)
-      {
-        const identifier_string actionname=a.label().name();
-        // check every lhs for actionname
-        bool comm_ok = false;
-        for (std::size_t i=0; i<comm_table.size(); ++i)
-        {
-          if (comm_table.match_failed[i])
-          {
-            continue;
-          }
-          if (comm_table.tmp[i].empty()) // actionname not in here; ignore lhs
-          {
-            comm_table.match_failed[i]=true;
-            continue;
-          }
-
-          identifier_string commname;
-          while (actionname != (commname = comm_table.tmp[i].front()))
-          {
-            // action is not in m, so it should be in n
-            // but all actions in m come before n
-            comm_table.match_failed[i]=true;
-            comm_table.tmp[i]=identifier_string_list();
-            break;
-          }
-          if (actionname==commname) // actionname found
-          {
-            comm_table.tmp[i].pop_front();
-            comm_ok = true;
-          }
-        }
-        if (!comm_ok)
-        {
-          return false;
-        }
-      }
-
-      // the rest of actions of lhs that are not in m should be in n
-      // rest[i] contains the part of n in which lhs i has to find matching actions
-      // rest_is_null[i] contains indications whether rest[i] is NULL.
-      std::vector < action_list > rest(comm_table.size(),n);
-      std::vector < bool > rest_is_null(comm_table.size(),false);
-
-      // check every lhs
-      for (std::size_t i=0; i<comm_table.size(); ++i)
-      {
-        if (comm_table.match_failed[i]) // lhs i did not contain m
-        {
-          continue;
-        }
-        // as long as there are still unmatch actions in lhs i...
-        while (!comm_table.tmp[i].empty())
-        {
-          // .. find them in rest[i]
-          if (rest[i].empty()) // no luck
-          {
-            rest_is_null[i] = true;
-            break;
-          }
-          // get first action in lhs i
-          const identifier_string commname = comm_table.tmp[i].front();
-          identifier_string restname;
-          // find it in rest[i]
-          while (commname!=(restname = rest[i].front().label().name()))
-          {
-            rest[i].pop_front();
-            if (rest[i].empty()) // no more
-            {
-              rest_is_null[i] = true;
-              break;
-            }
-          }
-          if (commname!=restname) // action was not found
-          {
-            break;
-          }
-          // action found; try next
-          rest[i].pop_front();
-          comm_table.tmp[i].pop_front();
-        }
-
-        if (!rest_is_null[i]) // lhs was found in rest[i]
-        {
-          return true;
-        }
-      }
-
-      // no lhs completely matches
-      return false;
-    }
-
-    tuple_list phi(const action_list& m,
-                   const data_expression_list& d,
-                   const action_list& w,
-                   const action_list& n,
-                   const action_list& r,
-                   const bool r_is_null,
-                   comm_entry& comm_table)
-    {
-      /* phi is a function that yields a list of pairs
-         indicating how the actions in m|w|n can communicate.
-         The pairs contain the resulting multi action and
-         a condition on data indicating when communication
-         can take place. In the communication all actions of
-         m, none of w and a subset of n can take part in the
-         communication. d is the data parameter of the communication
-         and C contains a list of multiaction action pairs indicating
-         possible communications */
-
-      if (!might_communicate(m,comm_table,n))
-      {
-        return tuple_list();
-      }
-      if (n.empty())
-      {
-        process::action_label c=can_communicate(m,comm_table); /* returns action_label() if no communication
-                                                                  is possible */
-        if (c!=action_label())
-        {
-          const tuple_list T=makeMultiActionConditionList_aux(w,comm_table,r,r_is_null);
-          return addActionCondition(
-                   (c==action_label()?action():action(c,d)),  //Check. Nil kan niet geleverd worden.
-                   sort_bool::true_(),
-                   T,
-                   tuple_list());
-        }
-        /* c==NULL, actions in m cannot communicate */
-        return tuple_list();
-      }
-      /* if n=[a(f)] \oplus o */
-      const action& firstaction=n.front();
-      const action_list& o=n.tail();
-      const data_expression condition=pairwiseMatch(d,firstaction.arguments());
-      if (condition==sort_bool::false_())
-      {
-        action_list tempw=w;
-        tempw=push_back(tempw,firstaction);
-        return phi(m,d,tempw,o,r,r_is_null,comm_table);
-      }
-      else
-      {
-        action_list tempm=m;
-        tempm=push_back(tempm,firstaction);
-        const tuple_list T=phi(tempm,d,w,o,r,r_is_null,comm_table);
-        action_list tempw=w;
-        tempw=push_back(tempw,firstaction);
-        return addActionCondition(
-                 action(),
-                 condition,
-                 T,
-                 phi(m,d,tempw,o,r,r_is_null,comm_table));
-      }
-    }
-
-    bool xi(const action_list& alpha, const action_list& beta, comm_entry& comm_table)
-    {
-      if (beta.empty())
-      {
-        return can_communicate(alpha,comm_table)!=action_label();
-      }
-      else
-      {
-        const action& a = beta.front();
-        action_list l=alpha;
-        l=push_back(l,a);
-        const action_list& beta_next = beta.tail();
-
-        if (can_communicate(l,comm_table)!=action_label())
-        {
-          return true;
-        }
-        else if (might_communicate(l,comm_table,beta_next))
-        {
-          return xi(l,beta_next,comm_table) || xi(alpha,beta_next,comm_table);
-        }
-        else
-        {
-          return xi(alpha,beta_next,comm_table);
-        }
-      }
-    }
-
-    data_expression psi(const action_list& alpha_in, comm_entry& comm_table)
-    {
-      action_list alpha=reverse(alpha_in);
-      data_expression cond = sort_bool::false_();
-      while (!alpha.empty())
-      {
-        const action a = alpha.front();
-        action_list beta = alpha.tail();
-
-        while (!beta.empty())
-        {
-          const action_list actl({ a, beta.front() });
-          if (might_communicate(actl,comm_table,beta.tail()) && xi(actl,beta.tail(),comm_table))
-          {
-            // sort and remove duplicates??
-            cond = lazy::or_(cond,pairwiseMatch(a.arguments(),beta.front().arguments()));
-          }
-          beta.pop_front();
-        }
-
-        alpha.pop_front();
-      }
-      return lazy::not_(cond);
-    }
-
-    // returns a list of tuples.
-    tuple_list makeMultiActionConditionList_aux(
-      const action_list& multiaction,
-      comm_entry& comm_table,
-      const action_list& r,
-      const bool r_is_null)
-    {
-      /* This is the function gamma(m,C,r) provided
-         by Muck van Weerdenburg in Calculation of
-         Communication with open terms [1]. */
-      if (multiaction.empty())
-      {
-        tuple_list t;
-        t.conditions.push_back((r_is_null)?static_cast<const data_expression&>(sort_bool::true_()):psi(r,comm_table));
-        t.actions.push_back(action_list());
-        return t;
-      }
-
-      const action& firstaction=multiaction.front();
-      const action_list& remainingmultiaction=multiaction.tail(); /* This is m in [1] */
-
-      const tuple_list S=phi(action_list({ firstaction }),
-                             firstaction.arguments(),
-                             action_list(),
-                             remainingmultiaction,
-                             r,r_is_null,comm_table);
-      action_list tempr=r;
-      tempr.push_front(firstaction);
-      const tuple_list T=makeMultiActionConditionList_aux(
-                           remainingmultiaction,comm_table,
-                           (r_is_null) ? action_list({ firstaction }) : tempr, false);
-      return addActionCondition(firstaction,sort_bool::true_(),T,S);
-    }
-
-    tuple_list makeMultiActionConditionList(
-      const action_list& multiaction,
-      const communication_expression_list& communications)
-    {
-      comm_entry comm_table(communications);
-      return makeMultiActionConditionList_aux(multiaction,comm_table,action_list(),true);
-    }
-
-    void communicationcomposition(
-      const communication_expression_list& communications,
-      const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
-      const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
-      const bool is_block,
-      stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands)
-
-    {
-      /* We follow the implementation of Muck van Weerdenburg, described in
-         a note: Calculation of communication with open terms. */
-
-      mCRL2log(mcrl2::log::verbose) <<
-            (is_allow ? "- calculating the communication operator modulo the allow operator on " :
-             is_block ? "- calculating the communication operator modulo the block operator on " :
-                        "- calculating the communication operator on ") << action_summands.size() << " action summands";
-
-      /* first we sort the multiactions in communications */
-      communication_expression_list resultingCommunications;
-
-      for (const communication_expression& comm: communications)
-      {
-        const action_name_multiset& source=comm.action_name();
-        const identifier_string& target=comm.name();
-        resultingCommunications.push_front(communication_expression(sort_action_labels(source),target));
-      }
-      communication_expression_list communications1=resultingCommunications;
-
-      stochastic_action_summand_vector resultsumlist;
-      deadlock_summand_vector resultingDeltaSummands;
-      deadlock_summands.swap(resultingDeltaSummands);
-
-      bool inline_allow = is_allow || is_block;
-      if (inline_allow)
-      {
-        // Inline allow is only supported for ignore_time,
-        // for in other cases generation of delta summands cannot be inlined in any simple way.
-        assert(!options.nodeltaelimination && options.ignore_time);
-        deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
-      }
-      action_name_multiset_list allowlist((is_allow)?sort_multi_action_labels(allowlist1):allowlist1);
-
-      for (const stochastic_action_summand& smmnd: action_summands)
-      {
-        const variable_list& sumvars=smmnd.summation_variables();
-        const action_list multiaction=smmnd.multi_action().actions();
-        const data_expression& condition=smmnd.condition();
-        const assignment_list& nextstate=smmnd.assignments();
-        const stochastic_distribution& dist=smmnd.distribution();
-
-        if (!inline_allow)
-        {
-          /* Recall a delta summand for every non delta summand.
-           * The reason for this is that with communication, the
-           * conditions for summands can become much more complex.
-           * Many of the actions in these summands are replaced by
-           * delta's later on. Due to the more complex conditions it
-           * will be hard to remove them. By adding a default delta
-           * with a simple condition, makes this job much easier
-           * later on, and will in general reduce the number of delta
-           * summands in the whole system */
-
-          /* But first remove free variables from sumvars */
-
-          variable_vector newsumvars_;
-          for (const variable& sumvar: sumvars)
-          {
-            if (occursinterm(sumvar,condition) ||
-                (smmnd.has_time() && occursinterm(sumvar,smmnd.multi_action().time())))
-            {
-              newsumvars_.push_back(sumvar);
-            }
-          }
-          variable_list newsumvars=variable_list(newsumvars_.begin(), newsumvars_.end());
-
-          resultingDeltaSummands.push_back(deadlock_summand(newsumvars,
-                                                            condition,
-                                                            smmnd.multi_action().has_time()?deadlock(smmnd.multi_action().time()):deadlock()));
-        }
-
-        /* the multiactionconditionlist is a list containing
-           tuples, with a multiaction and the condition,
-           expressing whether the multiaction can happen. All
-           conditions exclude each other. Furthermore, the list
-           is not empty. If no communications can take place,
-           the original multiaction is delivered, with condition
-           true. */
-
-        const tuple_list multiactionconditionlist=
-          makeMultiActionConditionList(
-            multiaction,
-            communications1);
-
-        assert(multiactionconditionlist.actions.size()==
-               multiactionconditionlist.conditions.size());
-        for (std::size_t i=0 ; i<multiactionconditionlist.actions.size(); ++i)
-        {
-          const action_list multiaction=multiactionconditionlist.actions[i];
-
-          if (is_allow && !allow_(allowlist,multiaction))
-          {
-            continue;
-          }
-          if (is_block && encap(allowlist,multiaction))
-          {
-            continue;
-          }
-
-          const data_expression communicationcondition=
-            RewriteTerm(multiactionconditionlist.conditions[i]);
-
-          const data_expression newcondition=RewriteTerm(
-                                               lazy::and_(condition,communicationcondition));
-          stochastic_action_summand new_summand(sumvars,
-                                     newcondition,
-                                     smmnd.multi_action().has_time()?multi_action(multiaction, smmnd.multi_action().time()):multi_action(multiaction),
-                                     nextstate,
-                                     dist);
-          if (!options.nosumelm)
-          {
-            if (sumelm(new_summand))
-            {
-              new_summand.condition() = RewriteTerm(new_summand.condition());
-            }
-          }
-
-          if (new_summand.condition()!=sort_bool::false_())
-          {
-            resultsumlist.push_back(new_summand);
-          }
-        }
-
-      }
-
-      /* Now the resulting delta summands must be added again */
-
-      action_summands.swap(resultsumlist);
-
-      if (!inline_allow && !options.nodeltaelimination)
-      {
-        for (const deadlock_summand& summand: resultingDeltaSummands)
-        {
-          insert_timed_delta_summand(action_summands,deadlock_summands,summand);
-        }
-      }
-
-      mCRL2log(mcrl2::log::verbose) << " resulting in " << action_summands.size() << " action summands and " << deadlock_summands.size() << " delta summands\n";
-    }
-
+    static
     bool check_real_variable_occurrence(
       const variable_list& sumvars,
       const data_expression& actiontime,
@@ -8340,7 +7384,7 @@ class specification_basic_type
       if (is_variable(actiontime))
       {
         const variable& t = atermpp::down_cast<variable>(actiontime);
-        if (occursintermlist(t, variable_list_to_data_expression_list(sumvars)) && !occursinterm(t, condition))
+        if (occursintermlist(t, variable_list_to_data_expression_list(sumvars)) && !occursinterm(condition, t))
         {
           return true;
         }
@@ -8408,7 +7452,7 @@ class specification_basic_type
       }
       for (const variable& v: freevars)
       {
-        if (occursinterm(v,result))
+        if (occursinterm(result, v))
         {
           variables.push_front(v);
         }
@@ -8416,7 +7460,7 @@ class specification_basic_type
 
       for (const variable& v: global_variables)
       {
-        if (occursinterm(v,result))
+        if (occursinterm(result, v))
         {
           variables.push_front(v);
         }
@@ -8424,7 +7468,7 @@ class specification_basic_type
 
       for (const variable& v: sumvars)
       {
-        if (occursinterm(v,result))
+        if (occursinterm(result, v))
         {
           used_sumvars.push_front(v);
         }
@@ -8719,17 +7763,18 @@ class specification_basic_type
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list());
 
-        variable_list sumvars1=summand1.summation_variables() + sumvars;
-        action_list multiaction1=summand1.multi_action().actions();
-        data_expression actiontime1=summand1.multi_action().time();
-        data_expression condition1=summand1.condition();
-        const assignment_list& nextstate1=summand1.assignments();
+        variable_list sumvars1 = summand1.summation_variables() + sumvars;
+        const action_list& multiaction1 = summand1.multi_action().actions();
+        assert(std::is_sorted(multiaction1.begin(), multiaction1.end(), action_compare()));
+        data_expression actiontime1 = summand1.multi_action().time();
+        data_expression condition1 = summand1.condition();
+        const assignment_list& nextstate1 = summand1.assignments();
         const stochastic_distribution& distribution1=summand1.distribution();
-        bool has_time=summand1.has_time();
+        bool has_time = summand1.has_time();
 
         if (multiaction1 != action_list({ terminationAction }))
         {
-          if (is_allow && !allow_(allowlist,multiaction1))
+          if (is_allow && !allow_(allowlist,multiaction1,terminationAction))
           {
             continue;
           }
@@ -8833,7 +7878,8 @@ class specification_basic_type
           {
             insert_timed_delta_summand(action_summands,
                                        deadlock_summands,
-                                       deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
+                                       deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()),
+                                       options.ignore_time);
           }
         }
       }
@@ -8896,7 +7942,7 @@ class specification_basic_type
               multiaction3=linMergeMultiActionList(multiaction1,multiaction2);
             }
 
-            if (is_allow && !allow_(allowlist,multiaction3))
+            if (is_allow && !allow_(allowlist,multiaction3,terminationAction))
             {
               continue;
             }
@@ -8943,6 +7989,7 @@ class specification_basic_type
             condition3=RewriteTerm(condition3);
             if (condition3!=sort_bool::false_())
             {
+              assert(std::is_sorted(multiaction3.begin(), multiaction3.end(), action_compare()));
               action_summands.push_back(stochastic_action_summand(
                                            allsums,
                                            condition3,
@@ -9006,7 +8053,8 @@ class specification_basic_type
                                        deadlock_summands,
                                        deadlock_summand(allsums,
                                                         condition3,
-                                                        has_time3?deadlock(action_time3):deadlock()));
+                                                        has_time3?deadlock(action_time3):deadlock()),
+                                       options.ignore_time);
           }
 
         }
@@ -9064,7 +8112,8 @@ class specification_basic_type
                                        deadlock_summands,
                                        deadlock_summand(allsums,
                                                         condition3,
-                                                        has_time3?deadlock(action_time3):deadlock()));
+                                                        has_time3?deadlock(action_time3):deadlock()),
+                                       options.ignore_time);
           }
 
         }
@@ -9107,11 +8156,9 @@ class specification_basic_type
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
 
-      variable_list allpars;
-      allpars=par1 + par3;
+      variable_list allpars = par1 + par3;
 
-      bool inline_allow = is_allow || is_block;
-      if (inline_allow)
+      if (is_allow || is_block)
       {
         // Inline allow is only supported for ignore_time,
         // for in other cases generation of delta summands cannot be inlined in any simple way.
@@ -9363,12 +8410,12 @@ class specification_basic_type
         {
           generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
                                 regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
-          communicationcomposition(comm(par).comm_set(),allow(t).allow_set(),true,false,action_summands,deadlock_summands);
+          communicationcomposition(comm(par).comm_set(),allow(t).allow_set(),true,false,action_summands,deadlock_summands,terminationAction,options.nosumelm,options.nodeltaelimination,options.ignore_time,[this](const data::data_expression& e) { return RewriteTerm(e); });
           return;
         }
 
         generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
-        allowblockcomposition(allow(t).allow_set(),true,action_summands,deadlock_summands);
+        allowblockcomposition(allow(t).allow_set(),true,action_summands,deadlock_summands,terminationAction,options.ignore_time,options.nodeltaelimination);
         return;
       }
 
@@ -9401,13 +8448,13 @@ class specification_basic_type
                                 regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
           // Encode the actions of the block list in one multi action.
           communicationcomposition(comm(par).comm_set(),action_name_multiset_list( { action_name_multiset(block(t).block_set())} ),
-                                                     false,true,action_summands,deadlock_summands);
+                                                     false,true,action_summands,deadlock_summands,terminationAction,options.nosumelm,options.nodeltaelimination,options.ignore_time,[this](const data::data_expression& e) { return RewriteTerm(e); });
           return;
         }
 
         generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         // Encode the actions of the block list in one multi action.
-        allowblockcomposition(action_name_multiset_list({action_name_multiset(block(t).block_set())}),false,action_summands,deadlock_summands);
+        allowblockcomposition(action_name_multiset_list({action_name_multiset(block(t).block_set())}),false,action_summands,deadlock_summands,terminationAction,options.ignore_time,options.nodeltaelimination);
         return;
       }
 
@@ -9415,7 +8462,7 @@ class specification_basic_type
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,process::rename(t).operand(),
                               regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
-        renamecomposition(process::rename(t).rename_set(),action_summands);
+        lps::rename(process::rename(t).rename_set(),action_summands);
         return;
       }
 
@@ -9423,7 +8470,7 @@ class specification_basic_type
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,comm(t).operand(),
                               regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
-        communicationcomposition(comm(t).comm_set(),action_name_multiset_list(),false,false,action_summands,deadlock_summands);
+        communicationcomposition(comm(t).comm_set(),action_name_multiset_list(),false,false,action_summands,deadlock_summands,terminationAction,options.nosumelm,options.nodeltaelimination,options.ignore_time,[this](const data::data_expression& e) { return RewriteTerm(e); });
         return;
       }
 
@@ -9492,11 +8539,12 @@ class specification_basic_type
         {
           ultimate_delay_condition=getUltimateDelayCondition(action_summands,deadlock_summands,pars);
 
-          // The ultimate_delay_condition can be complex. Try to simplify it with a fourier_motzkin reduction.
-          data_expression simplified_ultimate_delay_condition;
-          variable_list reduced_sumvars;
           try
           {
+            // The ultimate_delay_condition can be complex. Try to simplify it with a fourier_motzkin reduction.
+            data_expression simplified_ultimate_delay_condition;
+            variable_list reduced_sumvars;
+
             fourier_motzkin(ultimate_delay_condition.constraint(),
                             ultimate_delay_condition.variables(),
                             simplified_ultimate_delay_condition,
@@ -9871,13 +8919,13 @@ class specification_basic_type
          it prints the process variables that contain time. Furtermore, it returns
          whether there are processes that contain an if-then that will be translated
          to an if-then-else with an delta@0 in the else branch, introducing time */
-      bool stable=0;
+      bool stable=false;
       bool contains_if_then=false;
 
       while (!stable)
       {
         std::set < process_identifier > visited;
-        stable=1;
+        stable=true;
         containstime_rec(procId,&stable,visited,contains_if_then);
       }
       return contains_if_then;
@@ -9913,7 +8961,7 @@ class specification_basic_type
           for(const variable& v: relevant_stochastic_variables)
           {
             new_assignments=push_back(new_assignments,assignment(*i,local_sigma1(v)));
-            i++;
+            ++i;
           }
           data_expression new_distribution = data::replace_variables_capture_avoiding(sto.distribution(),local_sigma1);
 
@@ -11246,7 +10294,7 @@ class specification_basic_type
                       initial_state,
                       initial_stochastic_distribution,
                       dummy_ultimate_delay_condition);
-      allowblockcomposition(action_name_multiset_list({action_name_multiset()}),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
+      allowblockcomposition(action_name_multiset_list({action_name_multiset()}),false,action_summands,deadlock_summands,terminationAction,options.ignore_time,options.nodeltaelimination); // This removes superfluous delta summands.
       if (options.final_cluster)
       {
         cluster_actions(action_summands,deadlock_summands,parameters);
@@ -11261,7 +10309,7 @@ class specification_basic_type
 
 mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
-  mcrl2::lps::t_lin_options lin_options)
+  const mcrl2::lps::t_lin_options& lin_options)
 {
   mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_options.lin_method << "' method.\n";
   mcrl2::process::process_specification input_process=type_checked_spec;

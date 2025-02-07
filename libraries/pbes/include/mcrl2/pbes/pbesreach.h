@@ -296,13 +296,15 @@ class pbesreach_algorithm
       m_initial_state = data::data_expression_list(initial_values.begin(), initial_values.end());
 
       m_summand_patterns = compute_read_write_patterns(m_pbes, m_process_parameters);
+      mCRL2log(log::debug) << "Original read/write matrix:" << std::endl;
+      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
+
       symbolic::adjust_read_write_patterns(m_summand_patterns, m_options);
 
       m_variable_order = symbolic::compute_variable_order(m_options.variable_order, m_process_parameters.size(), m_summand_patterns, true);
       assert(m_variable_order[0] == 0); // It is required that the propositional variable name stays up front
       mCRL2log(log::debug) << "variable order = " << core::detail::print_list(m_variable_order) << std::endl;
       m_summand_patterns = symbolic::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
-      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
 
       m_process_parameters = symbolic::permute_copy(m_process_parameters, m_variable_order);
       m_initial_state = symbolic::permute_copy(m_initial_state, m_variable_order);
@@ -328,6 +330,9 @@ class pbesreach_algorithm
       {
         m_data_index.push_back(symbolic::data_expression_index(param.sort()));
       }
+      
+      mCRL2log(log::debug) << "Final read/write matrix:" << std::endl;
+      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
     }
 
     virtual ~pbesreach_algorithm() {}

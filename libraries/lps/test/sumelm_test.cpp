@@ -374,3 +374,27 @@ BOOST_AUTO_TEST_CASE(test_boolean_variables)
   print_specifications(s0, s1);
 }
 
+///Test case for issue #380
+BOOST_AUTO_TEST_CASE(test_whr_clause)
+{
+  std::clog << "Test case 12 (where clause)" << std::endl;
+  const std::string text(
+    "act a:Nat;\n"
+    "proc P = sum x:Nat.(x==y whr y=3 end) -> a(x). P;\n"
+    "init P;\n"
+  );
+
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm<>(s1).run();
+
+  action_summand_vector v(s1.process().action_summands());
+  for(const action_summand& a: v)
+  {
+    BOOST_CHECK_EQUAL(a.summation_variables().size(), 1u);
+  }
+
+  print_specifications(s0, s1);
+}
+
+
