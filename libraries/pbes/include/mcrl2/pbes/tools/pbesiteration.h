@@ -252,7 +252,7 @@ InvResult global_invariant_check(pbes_equation& equation,
   if (set.size() == 0)
   {
     mCRL2log(log::verbose) << "INV: " << equation.variable().name() << " does not contain any pvi." << "\n";
-    return InvResult::INV_FALSE;
+    return InvResult::INV_TRUE;
   }
 
   if (std::any_of(set.begin(),
