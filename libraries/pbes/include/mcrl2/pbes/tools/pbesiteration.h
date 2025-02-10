@@ -93,10 +93,10 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
     if (forward && x.name() != name)
     {
       // Unsound probably!
-      mCRL2log(log::error) << "Formula contains other (unsolved) PVI instances in the current equation " << std::endl;
+      mCRL2log(log::verbose) << "Formula contains other (unsolved) PVI instances in the current equation " << std::endl;
       data::data_expression_list params = x.parameters();
       data::sort_expression_list sort_list(params);
-      data::sort_expression asdf =  data::function_sort(sort_list, data::bool_());
+      data::sort_expression asdf = data::function_sort(sort_list, data::bool_());
       data::function_symbol vb1(x.name(), asdf);
       result = vb1;
       return;
@@ -273,7 +273,6 @@ InvResult global_invariant_check(pbes_equation& equation,
   substituter.set_name(equation.variable().name());
   pbes_expression cc;
   substituter.apply(cc, equation.formula());
-  cc = pbes_rewrite(cc, pbes_rewriter);
 
   bool global_invariant = false;
 
@@ -411,7 +410,15 @@ void nu_iteration(pbes_equation& equation,
     p_eq.variable() = eq.variable();
     data::data_expression eq_data = pbestodata(eq, replace_substituter);
     data::data_expression p_data = pbestodata(p_eq, replace_substituter);
-    f_bdd_prover.set_formula(data::and_(data::imp(eq_data, p_data), data::imp(p_data, eq_data)));
+    data::data_expression formula = data::and_(data::imp(eq_data, p_data), data::imp(p_data, eq_data));
+
+    // Print an index on how big our expression is
+    std::string formula_str = pp(formula);
+    std::string::difference_type n1 = std::count(formula_str.begin(), formula_str.end(), '|');
+    std::string::difference_type n2 = std::count(formula_str.begin(), formula_str.end(), '&');
+    mCRL2log(log::info) << "Size index:  " << (n1 + n2) << std::endl;
+
+    f_bdd_prover.set_formula(formula);
     data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
     if (v_is_tautology == data::detail::answer_yes)
     {
