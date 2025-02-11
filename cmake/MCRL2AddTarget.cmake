@@ -137,11 +137,6 @@ function(mcrl2_add_gui_tool TARGET_NAME)
   if(MSVC)
     # Change to WIN32 application to avoid spawning a terminal
     set_target_properties(${TARGET_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
-  elseif(UNIX AND NOT APPLE)
-    # Add the desktop file
-    set(DESKTOP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.desktop)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
-    install(FILES ${DESKTOP_FILE} DESTINATION share/applications)
   endif()
 
   # Enable the CMake build system to automatically run MOC/UIC/RCC on source files that need it.
@@ -273,6 +268,11 @@ function(mcrl2_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_F
     set(ICNS_FILE ${CMAKE_SOURCE_DIR}/cmake/packaging/icons/${ICON}.icns)
     set_source_files_properties(${ICNS_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     list(APPEND ${SOURCE_FILES} ${ICNS_FILE})
+  elseif(UNIX)
+    # Add the desktop file
+    set(DESKTOP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.desktop)
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
+    install(FILES ${DESKTOP_FILE} DESTINATION share/applications)
   endif()
   
   set(${SOURCE_FILES} "${${SOURCE_FILES}}" PARENT_SCOPE)
