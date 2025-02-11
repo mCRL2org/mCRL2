@@ -108,5 +108,30 @@ BOOST_AUTO_TEST_CASE(test_nu_sacks)
                     "\n"
                     "init Z(1, dc, red, red);\n";
   test_result(text, expected_result, false);
+  expected_result = "sort Colour = struct red | green;\n"
+                    "Sluice = struct s1 | s2;\n"
+                    "\n"
+                    "map  init_colour: Sluice -> Colour;\n"
+                    "\n"
+                    "var  s: Sluice;\n"
+                    "eqn  init_colour(s)  =  red;\n"
+                    "\n"
+                    "glob dc: Sluice;\n"
+                    "\n"
+                    "pbes nu Z(s3_P: Pos, s_P: Sluice, col_P1,col_P2: Colour) =\n"
+                    "(val(!(s_P == s1)) || val(!(s3_P == 2)) || val(true)) &&\n"
+                    "(val(!(s3_P == 3)) || val(true)) &&\n"
+                    "(val(!(s3_P == 2)) || val(true)) &&\n"
+                    "(val(!(s3_P == 1 && !(col_P1 == green))) || val(true)) &&\n"
+                    "(val(!(s3_P == 1 && col_P1 == green)) || val(true)) &&\n"
+                    "(val(!(s3_P == 1 && !(col_P2 == green))) || val(true)) &&\n"
+                    "(val(!(s3_P == 1 && col_P2 == green)) || val(true)) &&\n"
+                    "(val(!(s3_P == 1 && !(col_P1 == red))) || val(true)) &&\n"
+                    "(val(!(s3_P == 1 && col_P1 == red)) || val(true)) &&\n"
+                    "(val(!(s3_P == 1 && !(col_P2 == red))) || val(true)) &&\n"
+                    "(val(!(s3_P == 1 && col_P2 == red)) || val(true));\n"
+                    "\n"
+                    "init Z(1, dc, red, red);\n";
+  test_result(text, expected_result, true);
   test_result(text, expected_result, true);
 }
