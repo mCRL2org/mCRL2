@@ -273,6 +273,7 @@ InvResult global_invariant_check(pbes_equation& equation,
   substituter.set_name(equation.variable().name());
   pbes_expression cc;
   substituter.apply(cc, equation.formula());
+  cc = pbes_rewrite(cc, pbes_rewriter);
 
   bool global_invariant = false;
 
