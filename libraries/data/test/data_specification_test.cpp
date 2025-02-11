@@ -441,7 +441,7 @@ bool search_alias(const alias_vector& v, const sort_expression& s)
   return false;
 }
 
-void test_system_defined()
+BOOST_AUTO_TEST_CASE(test_system_defined)
 {
   std::clog << "test_system_defined" << std::endl;
 
@@ -514,7 +514,7 @@ void test_system_defined()
   specification.add_alias(alias(basic_sort("Q"), data::structured_sort(constructors)));
 }
 
-void test_utility_functionality()
+BOOST_AUTO_TEST_CASE(test_utility_functionality)
 {
   data_specification spec;
 
@@ -579,7 +579,7 @@ void test_utility_functionality()
   BOOST_CHECK(spec.mappings(a) == spec.mappings(s));
 }
 
-void test_normalisation()
+BOOST_AUTO_TEST_CASE(test_normalisation)
 {
   using namespace mcrl2::data;
   using namespace mcrl2::data::sort_list;
@@ -655,7 +655,7 @@ void test_normalisation()
   BOOST_CHECK(normalize_sorts(s2,specification)==basic_sort("A"));
 }
 
-void test_copy()
+BOOST_AUTO_TEST_CASE(test_copy)
 {
   std::clog << "test_copy" << std::endl;
 
@@ -682,13 +682,13 @@ void test_copy()
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), basic_sort("A")) == sorts.end());
 }
 
-void test_specification()
+BOOST_AUTO_TEST_CASE(test_specification)
 {
   data_specification spec = parse_data_specification("sort D = struct d1|d2;");
   BOOST_CHECK(spec.constructors(basic_sort("D")).size() == 2);
 }
 
-void test_bke()
+BOOST_AUTO_TEST_CASE(test_bke)
 {
   std::cout << "test_bke" << std::endl;
 
@@ -884,7 +884,7 @@ void test_bke()
   }
 }
 
-void test_abuse_of_tail()
+BOOST_AUTO_TEST_CASE(test_abuse_of_tail)
 {
   std::cout << "Test abuse of tail\n";
   const std::string spec_string =
@@ -903,7 +903,7 @@ void test_abuse_of_tail()
   }
 }
 
-void test_merge_data_specifications()
+BOOST_AUTO_TEST_CASE(test_merge_data_specifications)
 {
   std::string DATASPEC =
     "sort D;\n"
@@ -915,7 +915,7 @@ void test_merge_data_specifications()
   BOOST_CHECK(dataspec1 == dataspec3);
 }
 
-void test_standard_sorts_mappings_functions()
+BOOST_AUTO_TEST_CASE(test_standard_sorts_mappings_functions)
 {
    std::set < sort_expression > sorts;
    std::set < function_symbol > constructors;
@@ -939,37 +939,32 @@ std::cerr << "#mappings " << mappings.size() << "\n";
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(test_main)
+
+// The next check tests whether elementary sorts in function symbols occur in data_spec.sorts().
+// The sort natnatpair occurring in Nat64 was forgotten to be added. 
+BOOST_AUTO_TEST_CASE(test_constructors_and_sorts)
 {
-  test_bke();
+  std::cerr << "Test: test_constructors_and_sorts\n";
+  data::data_specification data_spec = data::parse_data_specification(
+    "sort Bit = struct b0(r:Real) | b1;\n"
+    "map  invert: Bit -> Bit;\n"
+    "var  r1: Real;\n"
+    "eqn  invert(b1)= b0(1);\n"
+    "     invert(b0(r1))= b1;\n");
 
-  test_sorts();
+  std::set < sort_expression > sorts;
+  std::set < function_symbol > constructors;
+  std::set <function_symbol > mappings;
 
-  test_constructors();
+  data_spec.get_system_defined_sorts_constructors_and_mappings(sorts, constructors, mappings);
 
-  test_functions();
-
-  test_equations();
-
-  test_is_certainly_finite();
-
-  test_constructor();
-
-  test_system_defined();
-
-  test_utility_functionality();
-
-  test_normalisation();
-
-  test_copy();
-
-  test_specification();
-
-  test_abuse_of_tail();
-
-  test_merge_data_specifications();
-
-  test_standard_sorts_mappings_functions();
+  for(const function_symbol& f: data_spec.constructors()) 
+  {
+    for(const sort_expression& sort: find_sort_expressions(f))
+    {
+      BOOST_CHECK(is_function_sort(sort)||data_spec.sorts().count(sort)>0);
+    }
+  }
 }
 
 
