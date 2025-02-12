@@ -413,12 +413,6 @@ void nu_iteration(pbes_equation& equation,
     data::data_expression p_data = pbestodata(p_eq, replace_substituter);
     data::data_expression formula = data::and_(data::imp(eq_data, p_data), data::imp(p_data, eq_data));
 
-    // Print an index on how big our expression is
-    std::string formula_str = pp(formula);
-    std::string::difference_type n1 = std::count(formula_str.begin(), formula_str.end(), '|');
-    std::string::difference_type n2 = std::count(formula_str.begin(), formula_str.end(), '&');
-    mCRL2log(log::info) << "Size index:  " << (n1 + n2) << std::endl;
-
     f_bdd_prover.set_formula(formula);
     data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
     if (v_is_tautology == data::detail::answer_yes)
