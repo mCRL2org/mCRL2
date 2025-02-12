@@ -3,7 +3,7 @@ Icon=@ICON@
 Name=@TOOLNAME@
 Comment=@DESCRIPTION@
 Type=Application
-Exec=@COMMANDLINE@
+Exec=@TARGET_NAME@
 Categories=Education;Science;
 X-SuSE-translate=true
 
