@@ -3721,8 +3721,10 @@ class bisim_partitioner_gj
                                                                                 assert(!non_bottom_states[MissMain].find(current_source_XcludeCo));
                                                                                 assert(marked(XcludeCo)==current_source_XcludeCo.ref_state->counter ||
                                                                                        marked_MultiSub==current_source_XcludeCo.ref_state->counter);
+
+                                                                                assert(has_main_splitter || has_co_splitter),
             linked_list<BLC_indicators>::const_iterator const current_splitter=
-                m_transitions[                                                  assert(has_main_splitter || has_co_splitter),
+                m_transitions[
                       *current_outgoing_iter_XcludeCo->ref.BLC_transitions].
                                         transitions_per_block_to_constellation; assert(bi->block.to_constellation.end()!=co_splitter);
             if (current_splitter==co_splitter)
