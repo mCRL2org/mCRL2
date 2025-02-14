@@ -3722,7 +3722,7 @@ class bisim_partitioner_gj
                                                                                 assert(marked(XcludeCo)==current_source_XcludeCo.ref_state->counter ||
                                                                                        marked_MultiSub==current_source_XcludeCo.ref_state->counter);
 
-                                                                                assert(has_main_splitter || has_co_splitter),
+                                                                                assert(has_main_splitter || has_co_splitter);
             linked_list<BLC_indicators>::const_iterator const current_splitter=
                 m_transitions[
                       *current_outgoing_iter_XcludeCo->ref.BLC_transitions].
