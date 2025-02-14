@@ -133,6 +133,7 @@ native_translations initialise_native_translation(const data::data_specification
   nt.sorts[sort_nat::nat()] = "Int";
   nt.sorts[sort_int::int_()] = "Int";
   nt.sorts[sort_real::real_()] = "Real";
+nt.sorts[sort_machine_word::machine_word()] = "Int";
 
   std::vector<sort_expression> number_sorts({ sort_pos::pos(), sort_nat::nat(), sort_int::int_(), sort_real::real_() });
   std::set<sort_expression> sorts = dataspec.sorts();
@@ -159,7 +160,7 @@ native_translations initialise_native_translation(const data::data_specification
         nt.set_alternative_name(sort_real::minus(sort, sort), "-");
         nt.set_alternative_name(sort_real::negate(sort), "-");
       }
-      else if(sort == basic_sort("@NatPair"))
+      else if(sort == basic_sort("@NatPair") || sort == basic_sort("@NatNatPair") || sort == basic_sort("@word"))
       {
         // NatPair is not used and its equations upset Z3
         nt.set_native_definition(less(sort));
@@ -237,9 +238,21 @@ native_translations initialise_native_translation(const data::data_specification
   nt.set_native_definition(sort_bool::or_(), "or");
   nt.set_native_definition(sort_bool::implies());
 
-#ifndef MCRL2_ENABLE_MACHINENUMBERS
+nt.set_native_definition(sort_nat::c0(), pp(sort_nat::c0()));
   nt.set_native_definition(sort_pos::c1(), pp(sort_pos::c1()));
-  nt.set_native_definition(sort_nat::c0(), pp(sort_nat::c0()));
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
+  nt.set_native_definition(sort_pos::succpos(), "+ 1");
+  nt.set_native_definition(sort_nat::succ_nat(), "+ 1");
+  variable v1("v1", sort_nat::nat());
+  nt.mappings[sort_nat::natpred()] = data_equation(variable_list({v1}), sort_nat::natpred(v1), sort_int::minus(v1, sort_nat::nat(1)));
+  nt.set_native_definition(sort_machine_word::zero_word(), "0");
+  nt.set_native_definition(sort_machine_word::one_word(), "1");
+  nt.expressions[sort_pos::most_significant_digit()] = pp_translation;
+  nt.expressions[sort_pos::concat_digit()] = pp_translation;
+  nt.expressions[sort_nat::most_significant_digit_nat()] = pp_translation;
+  nt.expressions[sort_nat::concat_digit(sort_nat::nat(), sort_machine_word::machine_word())] = pp_translation;
+  // nt.set_ambiguous(sort_nat::concat_digit())
+#else
   nt.expressions[sort_pos::cdub()] = pp_translation;
   nt.set_native_definition(sort_nat::cnat(), "@id");
 #endif
@@ -251,11 +264,12 @@ native_translations initialise_native_translation(const data::data_specification
   nt.special_recogniser[data::sort_bool::true_()] = "@id";
   nt.special_recogniser[data::sort_bool::false_()] = "not";
   nt.special_recogniser[data::sort_pos::c1()] = "= 1";
-#ifndef MCRL2_ENABLE_MACHINENUMBERS
+nt.special_recogniser[data::sort_nat::c0()] = "= 0";
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
+nt.special_recogniser[sort_pos::succpos()] = ">= 2";
+  nt.special_recogniser[sort_nat::succ_nat()] = ">= 1";
+#else
   nt.special_recogniser[data::sort_pos::cdub()] = ">= 2";
-#endif
-  nt.special_recogniser[data::sort_nat::c0()] = "= 0";
-#ifndef MCRL2_ENABLE_MACHINENUMBERS
   nt.special_recogniser[data::sort_nat::cnat()] = ">= 1";
 #endif
   nt.special_recogniser[data::sort_int::cneg()] = "< 0";
