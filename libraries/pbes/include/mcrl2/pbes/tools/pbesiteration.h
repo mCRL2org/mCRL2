@@ -384,8 +384,16 @@ void nu_iteration(pbes_equation& equation,
     std::set<data::variable>& global_variables,
     bool use_smt)
 {
-  mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
-  smt::smt_solver solv(data_spec);
+  std::optional<smt::smt_solver> solv;
+  std::optional<mcrl2::data::detail::BDD_Prover> f_bdd_prover;
+  if (use_smt)
+  {
+    solv.emplace(data_spec);
+  }
+  else
+  {
+    f_bdd_prover.emplace(data_spec, data::used_data_equation_selector(data_spec));
+  }
   pbes_equation eq;
   if (equation.symbol().is_nu())
   {
@@ -419,7 +427,7 @@ void nu_iteration(pbes_equation& equation,
 
     if (use_smt)
     {
-      smt::answer result = solv.solve(p_eq.variable().parameters(), data::not_(formula), std::chrono::seconds(0));
+      smt::answer result = solv->solve(p_eq.variable().parameters(), data::not_(formula), std::chrono::seconds(0));
       switch (result)
       {
       case smt::answer::UNSAT:
@@ -434,8 +442,8 @@ void nu_iteration(pbes_equation& equation,
     }
     else
     {
-      f_bdd_prover.set_formula(formula);
-      data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
+      f_bdd_prover->set_formula(formula);
+      data::detail::Answer v_is_tautology = f_bdd_prover->is_tautology();
       if (v_is_tautology == data::detail::answer_yes)
       {
         mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
