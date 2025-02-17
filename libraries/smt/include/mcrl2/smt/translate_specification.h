@@ -247,14 +247,13 @@ void translate_native_mappings(OutputStream& out,
                                const std::map<data::structured_sort, std::string>& snm)
 {
   out << "(define-funs-rec (\n";
-  for(const auto& f: nt.mappings)
+  for(const auto& [mapping, eqn]: nt.mappings)
   {
-    const data::function_symbol& mapping = f.first;
-    const data::data_equation& eqn = f.second;
     if(is_higher_order(mapping))
     {
       continue;
     }
+    std::cout << "Outputting " << mapping << ": " << mapping.sort() << " with eqn " << eqn << std::endl;
 
     out << "(" << translate_symbol(mapping, nt) << " ";
     data::data_expression condition = declare_variables_binder(eqn.variables(), out, nt);
@@ -265,10 +264,8 @@ void translate_native_mappings(OutputStream& out,
   out << ")\n";
 
   out << "(\n";
-  for(const auto& f: nt.mappings)
+  for(const auto& [mapping, eqn]: nt.mappings)
   {
-    const data::function_symbol& mapping = f.first;
-    const data::data_equation& eqn = f.second;
     if(is_higher_order(mapping))
     {
       continue;
