@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
+#include "mcrl2/smt/solver.h"
 
 #include <map>
 
@@ -36,6 +37,7 @@ struct pbesiteration_options
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
 
   bool check_global_invariant = false;
+  bool smt = false;
 };
 
 // Substitutor to replace predicate variables OTHER than the self-referencing onces to boolean variables
@@ -379,9 +381,11 @@ void nu_iteration(pbes_equation& equation,
     replace_propositional_variables_builder<pbes_system::pbes_expression_builder>& replace_substituter,
     data::data_specification data_spec,
     simplify_data_rewriter<data::rewriter> pbes_rewriter,
-    std::set<data::variable>& global_variables)
+    std::set<data::variable>& global_variables,
+    bool use_smt)
 {
   mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
+  smt::smt_solver solv(data_spec);
   pbes_equation eq;
   if (equation.symbol().is_nu())
   {
@@ -413,12 +417,34 @@ void nu_iteration(pbes_equation& equation,
     data::data_expression p_data = pbestodata(p_eq, replace_substituter);
     data::data_expression formula = data::and_(data::imp(eq_data, p_data), data::imp(p_data, eq_data));
 
-    f_bdd_prover.set_formula(formula);
-    data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
-    if (v_is_tautology == data::detail::answer_yes)
+    if (use_smt)
     {
-      mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
-      stable = true;
+      smt::answer result = solv.solve(p_eq.variable().parameters(), data::not_(formula), std::chrono::seconds(0));
+      switch (result)
+      {
+      case smt::answer::UNSAT:
+        mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
+        stable = true;
+        break;
+      case smt::answer::SAT:
+        break;
+      case smt::answer::UNKNOWN:
+        break;
+      }
+    }
+    else
+    {
+      f_bdd_prover.set_formula(formula);
+      data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
+      if (v_is_tautology == data::detail::answer_yes)
+      {
+        mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
+        stable = true;
+      }
+    }
+
+    if (stable)
+    {
       break;
     }
     eq.formula() = p;
@@ -452,12 +478,18 @@ struct pbesiteration_pbes_fixpoint_iterator
             p.global_variables());
         if (global_inv == InvResult::INV_FALSE)
         {
-          nu_iteration(*i, substituter, replace_substituter, p.data(), pbes_rewriter, p.global_variables());
+          nu_iteration(*i,
+              substituter,
+              replace_substituter,
+              p.data(),
+              pbes_rewriter,
+              p.global_variables(),
+              options.smt);
         }
       }
       else
       {
-        nu_iteration(*i, substituter, replace_substituter, p.data(), pbes_rewriter, p.global_variables());
+        nu_iteration(*i, substituter, replace_substituter, p.data(), pbes_rewriter, p.global_variables(), options.smt);
       }
 
       for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
