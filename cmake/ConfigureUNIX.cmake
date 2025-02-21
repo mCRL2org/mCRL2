@@ -87,7 +87,7 @@ endif()
 mcrl2_add_cxx_flag(-Wno-switch)
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
-  add_compile_options(-fsanitize=address)
+  add_compile_options(-fsanitize=address,undefined,leak)
   add_compile_options(-fno-omit-frame-pointer)
 endif()
 
@@ -127,7 +127,7 @@ elseif(NOT ${MCRL2_IS_CLANG})
 endif()
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
-  add_link_options(-fsanitize=address)
+  add_link_options(-fsanitize=address,undefined,leak)
 endif()
 
 if(MCRL2_ENABLE_MEMORYSANITIZER)
