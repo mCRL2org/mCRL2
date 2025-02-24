@@ -348,23 +348,30 @@ StateFrmSpecElt
 
 
 StateFrm
-  : DataValExpr                                            // Boolean data expression
-  | '(' StateFrm ')'                                       // Brackets
-  | 'true'                                                 // True
-  | 'false'                                                // False
-  | Id ( '(' DataExprList ')' )?                           // Instantiated PBES variable
-  | 'delay' ( '@' DataExpr )?                              // Delay
-  | 'yaled' ( '@' DataExpr )?                              // Yaled
-  | 'mu' StateVarDecl '.' StateFrm             $right 41   // Minimal fixed point
-  | 'nu' StateVarDecl '.' StateFrm             $right 41   // Maximal fixed point
-  | 'forall' VarsDeclList '.' StateFrm         $right 42   // Universal quantification
-  | 'exists' VarsDeclList '.' StateFrm         $right 42   // Existential quantification
-  | StateFrm '=>' StateFrm              $binary_right 43   // Implication
-  | StateFrm '||' StateFrm              $binary_right 44   // Disjunction
-  | StateFrm '&&' StateFrm              $binary_right 45   // Conjunction
-  | '[' RegFrm ']' StateFrm                    $right 46   // Box modality
-  | '<' RegFrm '>' StateFrm                    $right 46   // Diamond modality
-  | '!' StateFrm                         $unary_right 47   // Negation
+  : DataValExpr                                           // Boolean data expression
+  | '(' StateFrm ')'                                      // Brackets
+  | 'true'                                                // True
+  | 'false'                                               // False
+  | Id ( '(' DataExprList ')' )?                          // Instantiated PBES variable
+  | 'delay' ( '@' DataExpr )?                             // Delay
+  | 'yaled' ( '@' DataExpr )?                             // Yaled
+  | 'mu' StateVarDecl '.' StateFrm             $right 41  // Minimal fixed point
+  | 'nu' StateVarDecl '.' StateFrm             $right 41  // Maximal fixed point
+  | 'forall' VarsDeclList '.' StateFrm         $right 42  // Universal quantification
+  | 'exists' VarsDeclList '.' StateFrm         $right 42  // Existential quantification
+  | 'inf' VarsDeclList '.' StateFrm            $right 42  // The infimum operator (for quantitative formulas)
+  | 'sup' VarsDeclList '.' StateFrm            $right 42  // The supremum operator (for quantitative formulas)
+  | 'sum' VarsDeclList '.' StateFrm            $right 42  // The sum operator (for quantitative formulas)
+  | StateFrm '+' StateFrm               $binary_right 43  // Addition (for quantitative formulas)
+  | DataValExpr '*' StateFrm                   $right 44  // Left constant multiply (for quantitative formulas)
+  | StateFrm '*' DataValExpr                   $right 44  // Right constant multiply (for quantitative formulas)
+  | StateFrm '=>' StateFrm              $binary_right 45  // Implication
+  | StateFrm '||' StateFrm              $binary_right 46  // Disjunction
+  | StateFrm '&&' StateFrm              $binary_right 47  // Conjunction
+  | '[' RegFrm ']' StateFrm                    $right 48  // Box modality
+  | '<' RegFrm '>' StateFrm                    $right 48  // Diamond modality
+  | '-' StateFrm                         $unary_right 48  // Unary minus (for quantitative formulas)
+  | '!' StateFrm                         $unary_right 48  // Negation
   ;
 
 StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;           // PBES variable declaration
