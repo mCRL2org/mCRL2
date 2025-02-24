@@ -1513,7 +1513,7 @@ class part_trans_t
         std::swap(*pos1->B_to_C,*pos2->B_to_C);
  std::cerr << "HIER4\n";
         // swap pointers to contents
-        B_to_C_iter5t const temp_iter(pos1->B_to_C);
+        B_to_C_iter_t const temp_iter(pos1->B_to_C);
  std::cerr << "HIER6\n";
         pos1->B_to_C = pos2->B_to_C;
  std::cerr << "HIER7\n";
