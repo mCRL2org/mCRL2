@@ -498,6 +498,8 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,              
     }
     ++new_B_to_C_slice->end;
     ++old_B_to_C_slice->begin;                                                  assert(new_B_to_C_slice->end == old_B_to_C_slice->begin);
+    swap_B_to_C(pred_iter->succ, new_B_to_C_pos->pred->succ);
+    new_B_to_C_pos->B_to_C_slice = new_B_to_C_slice;
     if (old_B_to_C_slice->begin == old_B_to_C_slice->end)
     {
         // this was the last transition from RfnB to SpC
@@ -510,8 +512,6 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,              
         }                                                                       assert(RfnB->to_constln.begin() == old_B_to_C_slice);
         RfnB->to_constln.erase(old_B_to_C_slice);
     }
-    swap_B_to_C(pred_iter->succ, new_B_to_C_pos->pred->succ);
-    new_B_to_C_pos->B_to_C_slice = new_B_to_C_slice;
     // adapt the outgoing transition array:
     // move the transition to the beginning
     succ_iter_t const old_out_pos = pred_iter->succ;                            assert(succ.end() > old_out_pos);

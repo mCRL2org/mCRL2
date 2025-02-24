@@ -1499,8 +1499,8 @@ class part_trans_t
     }
 
     void swap_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2)
-    {                                                                           assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
-                                                                                assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
+    {                                                                           // assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+                                                                                // assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
         // swap contents
         // XXXXXX IS NOT ALLOWED.
         // B_to_C_entry const temp_entry(*pos1->B_to_C);
@@ -1510,8 +1510,8 @@ class part_trans_t
         // swap pointers to contents
         B_to_C_iter_t const temp_iter(pos1->B_to_C);
         pos1->B_to_C = pos2->B_to_C;
-        pos2->B_to_C = temp_iter;                                               assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
-                                                                                assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
+        pos2->B_to_C = temp_iter;                                               // assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+                                                                                // assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1

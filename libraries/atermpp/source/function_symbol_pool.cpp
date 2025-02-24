@@ -11,6 +11,8 @@
 
 #include "mcrl2/utilities/unused.h"
 
+#include <chrono>
+
 using namespace atermpp;
 using namespace atermpp::detail;
 using namespace mcrl2::utilities;
@@ -193,7 +195,7 @@ void function_symbol_pool::sweep()
 
   std::size_t erased_blocks = 0; //m_symbol_set.get_allocator().consolidate();
 
-  if (EnableGarbageCollectionMetrics)
+  if constexpr (EnableGarbageCollectionMetrics)
   {
     auto sweep_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
 
@@ -209,12 +211,12 @@ void function_symbol_pool::sweep()
     print_performance_statistics(m_symbol_set);
   }
 
-  if (EnableCreationMetrics)
+  if constexpr (EnableCreationMetrics)
   {
     mCRL2log(mcrl2::log::info) << "g_function_symbol_pool: Stores " << size() << " function symbols. create() " << m_function_symbol_metrics.message() << ".\n";
   }
 
-  if (EnableReferenceCountMetrics)
+  if constexpr (EnableReferenceCountMetrics)
   {
     mCRL2log(mcrl2::log::info) << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
   }
