@@ -1499,19 +1499,30 @@ class part_trans_t
     }
 
     void swap_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2)
-    {                                                                           // assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
-                                                                                // assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
+    {                                                                           
+ std::cerr << "HIER1\n";
+                                                                                assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+ std::cerr << "HIER2\n";
+                                                                                assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
+ std::cerr << "HIER3\n";
         // swap contents
         // XXXXXX IS NOT ALLOWED.
         // B_to_C_entry const temp_entry(*pos1->B_to_C);
         // *pos1->B_to_C = *pos2->B_to_C;
         // *pos2->B_to_C = temp_entry;
         std::swap(*pos1->B_to_C,*pos2->B_to_C);
+ std::cerr << "HIER4\n";
         // swap pointers to contents
-        B_to_C_iter_t const temp_iter(pos1->B_to_C);
+        B_to_C_iter5t const temp_iter(pos1->B_to_C);
+ std::cerr << "HIER6\n";
         pos1->B_to_C = pos2->B_to_C;
-        pos2->B_to_C = temp_iter;                                               // assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
-                                                                                // assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
+ std::cerr << "HIER7\n";
+        pos2->B_to_C = temp_iter;                                               
+ std::cerr << "HIER8\n";
+                                                                                assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+ std::cerr << "HIER9\n";
+                                                                                assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
+ std::cerr << "HIERA\n";
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
