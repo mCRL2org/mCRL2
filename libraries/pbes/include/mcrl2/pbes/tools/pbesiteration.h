@@ -25,6 +25,7 @@
 #include "mcrl2/smt/solver.h"
 
 #include <map>
+#include <optional>
 
 namespace mcrl2
 {
