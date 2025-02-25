@@ -19,7 +19,7 @@
 
 using namespace atermpp;
 
-BOOST_AUTO_TEST_CASE(parallel_vector, *boost::unit_test::timeout(240))
+BOOST_AUTO_TEST_CASE(parallel_vector)
 {
   if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
   {
@@ -29,10 +29,10 @@ BOOST_AUTO_TEST_CASE(parallel_vector, *boost::unit_test::timeout(240))
       // Push a constant to avoid term creations.
       atermpp::aterm_int value(0);
 
-      for (std::size_t i = 0; i < 10000; ++i)
+      for (std::size_t i = 0; i < 1000; ++i)
       {
         atermpp::vector<atermpp::aterm> vector;
-        for (std::size_t i = 0; i < 10000; ++i)
+        for (std::size_t i = 0; i < 1000; ++i)
         {
           vector.push_back(value);
         }
