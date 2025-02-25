@@ -88,17 +88,19 @@ mcrl2_add_cxx_flag(-Wno-switch)
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
   add_compile_options(-fsanitize=address,undefined,leak)
-  add_compile_options(-fno-omit-frame-pointer)
+  mcrl2_add_cxx_flag(-fno-omit-frame-pointer)
+  mcrl2_add_cxx_flag(-fsanitize-address-use-after-scope)
+  mcrl2_add_cxx_flag(-fno-sanitize-recover=undefined,address)
 endif()
 
 if(MCRL2_ENABLE_MEMORYSANITIZER)
   add_compile_options(-fsanitize=memory)
-  add_compile_options(-fno-omit-frame-pointer)
+  mcrl2_add_cxx_flag(-fno-omit-frame-pointer)
 endif()
 
 if(MCRL2_ENABLE_THREADSANITIZER)
   add_compile_options(-fsanitize=thread)
-  add_compile_options(-fno-omit-frame-pointer)
+  mcrl2_add_cxx_flag(-fno-omit-frame-pointer)
 endif()
 
 ##---------------------------------------------------
