@@ -95,13 +95,24 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
   {
     if (forward && x.name() != name)
     {
-      // Unsound probably!
+      // Unsound possibly!
       mCRL2log(log::verbose) << "Formula contains other (unsolved) PVI instances in the current equation " << std::endl;
       data::data_expression_list params = x.parameters();
-      data::sort_expression_list sort_list(params);
-      data::sort_expression asdf = data::function_sort(sort_list, data::bool_());
-      data::function_symbol vb1(x.name(), asdf);
-      result = vb1;
+      atermpp::aterm_list term_list;
+      for (const auto& x : params)
+      {
+        term_list.push_front(x.sort());
+      }
+      data::sort_expression_list sort_list(term_list);
+      if (sort_list.size() > 0)
+      {
+        data::sort_expression expr = data::function_sort(sort_list, data::bool_());
+        result = data::function_symbol(x.name(), expr);
+      }
+      else
+      {
+        result = data::variable(x.name(), data::bool_());
+      }
       return;
     }
     result = x;
@@ -377,12 +388,10 @@ InvResult global_invariant_check(pbes_equation& equation,
   return InvResult::INV_FALSE;
 }
 
-void nu_iteration(pbes_equation& equation,
+void perform_iteration(pbes_equation& equation,
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
     replace_propositional_variables_builder<pbes_system::pbes_expression_builder>& replace_substituter,
     data::data_specification data_spec,
-    simplify_data_rewriter<data::rewriter> pbes_rewriter,
-    std::set<data::variable>& global_variables,
     bool use_smt)
 {
   std::optional<smt::smt_solver> solv;
@@ -487,18 +496,12 @@ struct pbesiteration_pbes_fixpoint_iterator
             p.global_variables());
         if (global_inv == InvResult::INV_FALSE)
         {
-          nu_iteration(*i,
-              substituter,
-              replace_substituter,
-              p.data(),
-              pbes_rewriter,
-              p.global_variables(),
-              options.smt);
+          perform_iteration(*i, substituter, replace_substituter, p.data(), options.smt);
         }
       }
       else
       {
-        nu_iteration(*i, substituter, replace_substituter, p.data(), pbes_rewriter, p.global_variables(), options.smt);
+        perform_iteration(*i, substituter, replace_substituter, p.data(), options.smt);
       }
 
       for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
