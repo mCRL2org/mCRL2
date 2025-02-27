@@ -303,7 +303,8 @@ class pbessolve_tool
 
       if (options.optimization > 0)
       {
-        throw mcrl2::runtime_error("Counter example PBES can not be solved with --long-strategy greater than 0.");
+        mCRL2log(mcrl2::log::warning) << "Cannot use partial solving with counter example PBES";
+        options.optimization = 0;
       }
     }
     else if ((!lpsfile.empty() || !ltsfile.empty()))
