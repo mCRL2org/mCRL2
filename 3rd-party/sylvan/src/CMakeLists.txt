@@ -7,6 +7,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 add_library(sylvan
+  STATIC
   lace.c
   sha2.c
   sylvan_bdd.c
@@ -26,5 +27,8 @@ add_library(sylvan
 
 target_include_directories(sylvan PUBLIC .)
 target_link_libraries(sylvan pthread)
+set_target_properties(sylvan 
+  PROPERTIES 
+  POSITION_INDEPENDENT_CODE TRUE)
 
 set(sylvan_include ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

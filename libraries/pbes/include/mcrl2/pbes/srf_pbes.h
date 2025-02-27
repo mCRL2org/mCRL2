@@ -15,8 +15,12 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/join.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_equation.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -213,7 +217,8 @@ std::vector<srf_summand> srf_or(
   data::set_identifier_generator& id_generator,
   const core::identifier_string& X_true,
   const core::identifier_string& X_false,
-  std::vector<srf_equation>& result
+  std::vector<srf_equation>& result,
+  bool merge_simple_expressions
 );
 
 struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
@@ -244,6 +249,9 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
   // The summands of the generated equation
   std::vector<srf_summand> summands;
 
+  /// If true do not introduce a new PBES equation for simple expressions, and instead add them to every summand separately.
+  bool m_merge_simple_expressions = false;
+
   srf_or_traverser(
     std::deque<pbes_equation>& equations_,
     const pbes_equation& eqn_,
@@ -251,14 +259,15 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
     data::set_identifier_generator& id_generator_,
     const core::identifier_string& X_true_,
     const core::identifier_string& X_false_,
-    std::vector<srf_equation>& result_
+    std::vector<srf_equation>& result_,
+    bool merge_simple_expressions
   )
-   : equations(equations_), eqn(eqn_), V(V_), id_generator(id_generator_), X_true(X_true_), X_false(X_false_), result(result_)
+   : equations(equations_), eqn(eqn_), V(V_), id_generator(id_generator_), X_true(X_true_), X_false(X_false_), result(result_), m_merge_simple_expressions(merge_simple_expressions)
   {}
 
   void apply(const and_& x)
   {
-    if (is_simple_expression(x.left()))
+    if (m_merge_simple_expressions && is_simple_expression(x.left()))
     {
       std::size_t size = summands.size();
       apply(x.right());
@@ -267,7 +276,7 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
         i->add_condition(x.left());
       }
     }
-    else if (is_simple_expression(x.right()))
+    else if (m_merge_simple_expressions && is_simple_expression(x.right()))
     {
       std::size_t size = summands.size();
       apply(x.left());
@@ -288,7 +297,7 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
 
   void apply(const exists& x)
   {
-    std::vector<srf_summand> body_summands = srf_or(x.body(), equations, eqn, V + x.variables(), id_generator, X_true, X_false, result);
+    std::vector<srf_summand> body_summands = srf_or(x.body(), equations, eqn, V + x.variables(), id_generator, X_true, X_false, result, m_merge_simple_expressions);
     for (srf_summand& summand: body_summands)
     {
       summand.add_variables(x.variables());
@@ -354,10 +363,11 @@ std::vector<srf_summand> srf_or(
   data::set_identifier_generator& id_generator,
   const core::identifier_string& X_true,
   const core::identifier_string& X_false,
-  std::vector<srf_equation>& result
+  std::vector<srf_equation>& result,
+  bool merge_simple_expressions
 )
 {
-  srf_or_traverser f(equations, eqn, V, id_generator, X_true, X_false, result);
+  srf_or_traverser f(equations, eqn, V, id_generator, X_true, X_false, result, merge_simple_expressions);
   f.apply(phi);
   return std::move(f.summands);
 }
@@ -370,7 +380,8 @@ std::vector<srf_summand> srf_and(
   data::set_identifier_generator& id_generator,
   const core::identifier_string& X_true,
   const core::identifier_string& X_false,
-  std::vector<srf_equation>& result
+  std::vector<srf_equation>& result,
+  bool merge_simple_expressions
 );
 
 struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
@@ -401,6 +412,9 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
   // The summands of the generated equation
   std::vector<srf_summand> summands;
 
+  /// If true do not introduce a new PBES equation for simple expressions, and instead add them to every summand separately.
+  bool m_merge_simple_expressions = false;
+
   srf_and_traverser(
     std::deque<pbes_equation>& equations_,
     const pbes_equation& eqn_,
@@ -408,14 +422,15 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
     data::set_identifier_generator& id_generator_,
     const core::identifier_string& X_true_,
     const core::identifier_string& X_false_,
-    std::vector<srf_equation>& result_
+    std::vector<srf_equation>& result_,
+    bool merge_simple_expressions
   )
-    : equations(equations_), eqn(eqn_), V(V_), id_generator(id_generator_), X_true(X_true_), X_false(X_false_), result(result_)
+    : equations(equations_), eqn(eqn_), V(V_), id_generator(id_generator_), X_true(X_true_), X_false(X_false_), result(result_), m_merge_simple_expressions(merge_simple_expressions)
   {}
 
   void apply(const or_& x)
   {
-    if (is_simple_expression(x.left()))
+    if (m_merge_simple_expressions && is_simple_expression(x.left()))
     {
       std::size_t size = summands.size();
       apply(x.right());
@@ -424,7 +439,7 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
         i->add_condition(detail::make_not(x.left()));
       }
     }
-    else if (is_simple_expression(x.right()))
+    else if (m_merge_simple_expressions && is_simple_expression(x.right()))
     {
       std::size_t size = summands.size();
       apply(x.left());
@@ -445,7 +460,7 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
 
   void apply(const forall& x)
   {
-    std::vector<srf_summand> body_summands = srf_and(x.body(), equations, eqn, V + x.variables(), id_generator, X_true, X_false, result);
+    std::vector<srf_summand> body_summands = srf_and(x.body(), equations, eqn, V + x.variables(), id_generator, X_true, X_false, result, m_merge_simple_expressions);
     for (srf_summand& summand: body_summands)
     {
       summand.add_variables(x.variables());
@@ -511,10 +526,11 @@ std::vector<srf_summand> srf_and(
   data::set_identifier_generator& id_generator,
   const core::identifier_string& X_true,
   const core::identifier_string& X_false,
-  std::vector<srf_equation>& result
+  std::vector<srf_equation>& result,
+  bool merge_simple_expressions
 )
 {
-  srf_and_traverser f(equations, eqn, V, id_generator, X_true, X_false, result);
+  srf_and_traverser f(equations, eqn, V, id_generator, X_true, X_false, result, merge_simple_expressions);
   f.apply(phi);
   return std::move(f.summands);
 }
@@ -631,7 +647,7 @@ class srf_pbes
 /// \brief Converts a PBES into standard recursive form
 /// \pre The pbes p must be normalized
 inline
-srf_pbes pbes2srf(const pbes& p)
+srf_pbes pbes2srf(const pbes& p, bool merge_simple_expressions = true)
 {
   data::set_identifier_generator id_generator;
   for (const core::identifier_string& id: pbes_system::find_identifiers(p))
@@ -656,8 +672,8 @@ srf_pbes pbes2srf(const pbes& p)
     equations.pop_front();
     bool is_conjunctive = detail::is_conjunctive(eqn.formula());
     std::vector<srf_summand> summands = is_conjunctive ?
-      detail::srf_and(eqn.formula(), equations, eqn, eqn.variable().parameters(), id_generator, X_true, X_false, srf_equations) :
-      detail::srf_or(eqn.formula(), equations, eqn, eqn.variable().parameters(), id_generator, X_true, X_false, srf_equations);
+      detail::srf_and(eqn.formula(), equations, eqn, eqn.variable().parameters(), id_generator, X_true, X_false, srf_equations, merge_simple_expressions) :
+      detail::srf_or(eqn.formula(), equations, eqn, eqn.variable().parameters(), id_generator, X_true, X_false, srf_equations, merge_simple_expressions);
     srf_equations.emplace_back(eqn.symbol(), eqn.variable(), summands, is_conjunctive);
   }
 
@@ -665,6 +681,12 @@ srf_pbes pbes2srf(const pbes& p)
 }
 
 } // namespace pbes_system
+
+inline
+bool is_srf(const pbes_system::pbes& pbes, bool merge_simple_expressions = true)
+{
+  return pbes_system::pbes2srf(pbes, merge_simple_expressions).equations().size() == pbes.equations().size() + 2;
+}
 
 } // namespace mcrl2
 
