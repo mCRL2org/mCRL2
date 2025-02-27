@@ -520,7 +520,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
               << std::endl;
         }
       }
-      else if ((!lpsfile.empty() || !ltsfile.empty()))
+      else if (lpsfile.empty() && ltsfile.empty())
       {
         mCRL2log(log::warning)
             << "Warning: the PBES has no counter example information. Did you "
@@ -564,7 +564,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       {
         mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
 
-        if (!has_counter_example || options_.naive_counter_example_instantiation)
+        // If you provide a file, but the PBES has no counter example information, then use the two pass instantiation. This will be useless, but at least the file will be written.
+        if ((!has_counter_example && lpsfile.empty() && ltsfile.empty()) || options_.naive_counter_example_instantiation)
         {
           timer().start("instantiation");
           ldd V = reach.run();
