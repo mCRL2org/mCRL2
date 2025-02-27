@@ -35,7 +35,7 @@
 //mCRL2 data
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
-#include "mcrl2/data/enumerator.h" 
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/real_utilities.h"
 
 // linear process libraries.
@@ -330,17 +330,17 @@ class specification_basic_type
         }
       }
     }
-    objectdatatype& objectIndex(const aterm& o) 
+    objectdatatype& objectIndex(const aterm& o)
     {
       detail_check_objectdata(o);
       return objectdata.find(o)->second;
-    } 
+    }
 
     const objectdatatype& objectIndex(const aterm& o) const
     {
       detail_check_objectdata(o);
       return objectdata.find(o)->second;
-    } 
+    }
 
     void addString(const identifier_string& str)
     {
@@ -386,8 +386,8 @@ class specification_basic_type
 
     /// Convert the process expression to a sorted action list.
     static
-    action_list to_sorted_action_list(const process_expression& p) 
-    { 
+    action_list to_sorted_action_list(const process_expression& p)
+    {
       return sort_actions(to_action_list(p));
     }
 
@@ -489,7 +489,7 @@ class specification_basic_type
       if (isnew)
       {
         objectdatatype object;
-              
+
         // tempvar is needed as objectdata can change during a call
         // of getparameters.
         const variable_list templist=getparameters(multiAction);
@@ -502,7 +502,7 @@ class specification_basic_type
         object.processbody=action_list_to_process(tempvar);
         object.free_variables=std::set<variable>(object.parameters.begin(), object.parameters.end());
         object.free_variables_defined=true;
-        
+
         objectdata[actionnames]=object;
       }
       return objectdata.find(actionnames)->second;
@@ -713,7 +713,7 @@ class specification_basic_type
       object.objectname=str;
       object.object=act;
       object.process_representing_action=process_identifier();
-      
+
       objectdata[actionId]=object;
       return objectdata.find(actionId)->second;
     }
@@ -729,8 +729,8 @@ class specification_basic_type
     /************ storeprocs *************************************************/
 
     objectdatatype& insert_process_declaration(
-      const process_identifier& procId, 
-      const variable_list& parameters,  
+      const process_identifier& procId,
+      const variable_list& parameters,
       const process_expression& body,
       processstatustype s,
       const bool canterminate,
@@ -818,7 +818,7 @@ class specification_basic_type
     action_list linMergeMultiActionList(const action_list& ma1, const action_list& ma2)
     {
       action_list result=ma2;
-      for (const action& a: ma1) 
+      for (const action& a: ma1)
       {
         result=insert(a,result);
       }
@@ -1538,7 +1538,7 @@ class specification_basic_type
       }
       if (is_if_then(p))
       {
-        for(const variable& v: find_free_variables(if_then(p).condition())) 
+        for(const variable& v: find_free_variables(if_then(p).condition()))
         {
           free_variables_in_p.insert(v);
         }
@@ -1897,7 +1897,7 @@ class specification_basic_type
        all variables that are bound by a sum in p by unique
        variables */
 
-   
+
     /* The function below cannot be replace by replace_variables_capture_avoiding although
      * the interfaces are the same. As yet it is unclear why, but the difference shows itself
      * for instance when linearising lift3_final.mcrl2 and lift3_init.mcrl2 */
@@ -1924,7 +1924,7 @@ class specification_basic_type
       {
         process_expression q=substitute_pCRLproc(seq(p).left(),sigma);
         if (q==delta_at_zero())
-        { 
+        {
           return q;
         }
         return seq(q, substitute_pCRLproc(seq(p).right(),sigma));
@@ -2102,8 +2102,8 @@ class specification_basic_type
       const variable_list& parameters,
       const process_expression& body)
     {
-      variable_vector result; 
-      for(const variable& p: parameters) 
+      variable_vector result;
+      for(const variable& p: parameters)
       {
         if (occursinpCRLterm(p,body,false))
         {
@@ -2385,9 +2385,9 @@ class specification_basic_type
 
 
     process_expression bodytovarheadGNF(
-      const process_expression& body, 
+      const process_expression& body,
       const state s,
-      const variable_list& freevars, 
+      const variable_list& freevars,
       const variableposition v,
       const std::set<variable>& variables_bound_in_sum)
     {
@@ -2909,11 +2909,11 @@ class specification_basic_type
 
       throw mcrl2::runtime_error("Internal error. Unexpected process format in distribute condition " + process::pp(body1) +".");
     }
-    
+
     /* This process calculates the equivalent of sum sumvars dist stochvars[distribution] body
        where the distribution occurs in front. This can only be done under limited circumstances.
        Assume we can enumerate the values of sumvars by e1,...,en. Introduce n copies of stochvars,
-       i.e., stochvars1,...,stochvarsn. The new process becomes 
+       i.e., stochvars1,...,stochvarsn. The new process becomes
 
            dist stochvars1,stochvars2,...,stochvarsn
                 [distribution(e1,stochvars1)*distribution(e2,stochvars2)*...*distribution(en,stochvarsn)].
@@ -2925,8 +2925,8 @@ class specification_basic_type
     */
 
     process_expression enumerate_distribution_and_sums(
-                         const variable_list& sumvars, 
-                         const variable_list& stochvars, 
+                         const variable_list& sumvars,
+                         const variable_list& stochvars,
                          const data_expression& distribution,
                          const process_expression& body)
     {
@@ -2937,7 +2937,7 @@ class specification_basic_type
 
 
       std::vector < data_expression_vector > data_vector(1,data_expression_vector());
-      for(const variable& v:sumvars) 
+      for(const variable& v:sumvars)
       {
         std::vector < data_expression_vector > new_data_vector;
 
@@ -2954,13 +2954,13 @@ class specification_basic_type
             new_dv.push_back(d);
             new_data_vector.push_back(new_dv);
           }
-           
+
         }
         data_vector.swap(new_data_vector);
-        
-      } 
+
+      }
       assert(!data_vector.empty());
-      
+
       process_expression resulting_body;
       data_expression resulting_distribution;
       variable_list resulting_stochastic_variables;
@@ -2992,15 +2992,15 @@ class specification_basic_type
           resulting_stochastic_variables=vl;
           result_defined=true;
         }
-      } 
+      }
       /* Put the distribution in front. */
 
       return stochastic_operator(resulting_stochastic_variables, resulting_distribution, resulting_body);
     }
 
     process_expression distribute_sum_over_a_stochastic_operator(
-                         const variable_list& sumvars, 
-                         const variable_list& stochastic_variables, 
+                         const variable_list& sumvars,
+                         const variable_list& stochastic_variables,
                          const data_expression& distribution,
                          const process_expression& body)
     {
@@ -3032,8 +3032,8 @@ class specification_basic_type
         alphaconvert(inner_stoch_vars,sigma,sumvars,data_expression_list());
         const process_expression new_body=substitute_pCRLproc(sto.operand(), sigma);
         const data_expression new_distribution=replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
-        return distribute_sum_over_a_stochastic_operator(sumvars, 
-                                                         stochastic_variables + inner_stoch_vars, 
+        return distribute_sum_over_a_stochastic_operator(sumvars,
+                                                         stochastic_variables + inner_stoch_vars,
                                                          sort_real::times(distribution,new_distribution), new_body);
       }
 
@@ -3225,7 +3225,7 @@ class specification_basic_type
             assert(check_valid_process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())));
             newbody=seq(process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())),newbody);
             const variable_list result=pars1+pars;
-            assert(std::set<variable>(result.begin(),result.end()).size()==result.size()); // all elements in the result are unique. 
+            assert(std::set<variable>(result.begin(),result.end()).size()==result.size()); // all elements in the result are unique.
             return result;
           }
           else
@@ -3245,7 +3245,7 @@ class specification_basic_type
                          const std::set<variable>& variables_bound_in_sum)
     {
       assignment_vector result;
-      for(const variable& v: vl) 
+      for(const variable& v: vl)
       {
         if (variables_bound_in_sum.count(v)>0 && occursinpCRLterm(v,t,false))
         {
@@ -3344,7 +3344,7 @@ class specification_basic_type
         std::set<variable> variables_bound_in_sum_new=variables_bound_in_sum;
         variables_bound_in_sum_new.insert(sto.variables().begin(),sto.variables().end());
         return stochastic_operator(sto.variables(),
-                                   sto.distribution(), 
+                                   sto.distribution(),
                                    create_regular_invocation(sto.operand(),todo,freevars+sto.variables(),variables_bound_in_sum_new));
       }
 
@@ -5078,13 +5078,13 @@ class specification_basic_type
         /* // Check whether it is a stochastic variable.
         if (std::find(stochastic_variables.begin(),stochastic_variables.end(),par)!=pars.end())
         {
-          result.push_back(assignment(par,par)); 
-        } 
+          result.push_back(assignment(par,par));
+        }
         // Otherwise, check that is is an ordinary parameter.
-        else */ 
+        else */
         if (std::find(pars.begin(),pars.end(),par)!=pars.end())
         {
-          result.push_back(par); 
+          result.push_back(par);
         }
         /* otherwise the value of this argument is irrelevant, so
            make it a don't care variable. */
@@ -5112,7 +5112,7 @@ class specification_basic_type
         // Check whether it is a stochastic variable.
         if (std::find(stochastic_variables.begin(),stochastic_variables.end(),par)!=pars.end())
         {
-          result.push_back(assignment(par,par)); 
+          result.push_back(assignment(par,par));
         }
         // Otherwise, check that is is an ordinary parameter.
         else if (std::find(pars.begin(),pars.end(),par)!=pars.end())
@@ -5244,7 +5244,7 @@ class specification_basic_type
     {
       assert(distribution != stochastic_distribution());
       assert(std::is_sorted(multiAction.begin(), multiAction.end(), action_compare()));
-        
+
       const data_expression rewritten_condition=RewriteTerm(condition);
       if (rewritten_condition==sort_bool::false_())
       {
@@ -5893,8 +5893,8 @@ class specification_basic_type
     static
     data_expression_list extend(const data_expression& c, const data_expression_list& cl)
     {
-      return data_expression_list(cl.begin(), 
-                                  cl.end(), 
+      return data_expression_list(cl.begin(),
+                                  cl.end(),
                                   [&c](const data_expression& e)->data_expression { return lazy::and_(c,e);} );
 
     }
@@ -5915,7 +5915,7 @@ class specification_basic_type
       const variable& var,
       const data_expression_list& conditionlist)
     {
-      try 
+      try
       {
         const data_expression unique=representative_generator_internal(var.sort(),false);
         const data_expression newcondition=equal_to(var,unique);
@@ -5923,10 +5923,10 @@ class specification_basic_type
       }
       catch (mcrl2::runtime_error&)
       {
-        // The representative generator failed to find a term of var.sort(). 
+        // The representative generator failed to find a term of var.sort().
         // No condition is generated, meaning that var will be unrestrained. This
         // is correct, and as the var.sort() has no concrete value, this will most
-        // likely not effect matters as state space generation. 
+        // likely not effect matters as state space generation.
         return conditionlist;
       }
     }
@@ -5944,7 +5944,7 @@ class specification_basic_type
         }
         catch (mcrl2::runtime_error&)
         {
-          // No representant for sort v.sort() could be found. No condition is added. 
+          // No representant for sort v.sort() could be found. No condition is added.
         }
       }
       return result;
@@ -6140,7 +6140,7 @@ class specification_basic_type
           return a.rhs();
         }
       }
-      return  var; 
+      return  var;
     }
 
     stochastic_action_summand collect_sum_arg_arg_cond(
@@ -6211,7 +6211,7 @@ class specification_basic_type
              i!=auxpars.end(); ++i, ++j)
         {
           /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          if (sigma(*i)==*i)  // sigma *i is undefined. 
+          if (sigma(*i)==*i)  // sigma *i is undefined.
           {
             sigma[*i]=*j;
           }
@@ -6331,13 +6331,13 @@ class specification_basic_type
             data_expression_list::const_iterator d1=(a1->arguments()).begin();
             for (std::size_t i=1; i<fcnt; ++i, ++d1) {};
             f= *d1;
-            maintain_variables_in_rhs< mutable_map_substitution<> > sigma; 
+            maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
             {
               /* Substitutions are carried out from left to right. The first applicable substitution counts */
-              if (sigma(*i)==*i)  // *i is not assigned in sigma. 
+              if (sigma(*i)==*i)  // *i is not assigned in sigma.
               {
                 sigma[*i]=*j;
               }
@@ -6695,7 +6695,7 @@ class specification_basic_type
                  i!=auxpars.end(); ++i, ++j)
           {
             /* Substitutions are carried out from left to right. The first applicable substitution counts */
-            if (sigma(*i)==*i)  // sigma is not defined for *i. 
+            if (sigma(*i)==*i)  // sigma is not defined for *i.
             {
               sigma[*i]=*j;
             }
@@ -6832,7 +6832,7 @@ class specification_basic_type
              i!=auxpars.end(); ++i, ++j)
         {
           /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          if (sigma(*i)== *i) // sigma is not defined for *i. 
+          if (sigma(*i)== *i) // sigma is not defined for *i.
           {
             sigma[*i]=*j;
           }
@@ -6958,7 +6958,7 @@ class specification_basic_type
             const data_expression_list auxargs= *auxrename_list_args;
             ++auxrename_list_args;
 
-            maintain_variables_in_rhs< mutable_map_substitution<> > sigma; 
+            maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -7611,7 +7611,7 @@ class specification_basic_type
         const variable_list& auxpars=*renamings_par;
         const data_expression_list& auxargs=*renamings_arg;
 
-        maintain_variables_in_rhs< mutable_map_substitution<> > sigma; 
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         data_expression_list::const_iterator j1=auxargs.begin();
         for (variable_list::const_iterator i1=auxpars.begin();
              i1!=auxpars.end(); ++i1, ++j1)
@@ -7644,7 +7644,7 @@ class specification_basic_type
 
       for(const variable& var: var_list)
       {
-        const data::variable v = 
+        const data::variable v =
               get_fresh_variable(std::string(var.name()) + ((hint.empty())?"":"_") + hint, var.sort());
         sigma[var] = v;
       }
@@ -7774,7 +7774,7 @@ class specification_basic_type
       alphaconvert(renameable_variables, sigma, delay1.variables(), data_expression_list());
       // Additionally map the time variable of the second ultimate delay to that of the first.
       sigma[delay2.time_var()]=delay1.time_var();
-      data_expression new_constraint; 
+      data_expression new_constraint;
       optimized_and(new_constraint, delay1.constraint(), replace_variables_capture_avoiding_alt(delay2.constraint(),sigma));
       variable_list new_existential_variables = delay1.variables()+renameable_variables;
 
@@ -7921,6 +7921,42 @@ class specification_basic_type
       }
     }
 
+    static std::string log_leftmerge_application(const lps_statistics_t& lps_statistics_before,
+        const lps_statistics_t& lps_statistics_result_before,
+        const lps_statistics_t& lps_statistics_result_after,
+        const bool is_allow,
+        const bool is_block,
+        const std::size_t num_allow_block_actions,
+        size_t indent = 0)
+    {
+      std::string indent_str(indent, ' ');
+      std::ostringstream os;
+
+      os << indent_str << "- operator: leftmerge" << std::endl;
+
+      indent += 2;
+      indent_str = std::string(indent, ' ');
+      os << indent_str << "is_allow: " << std::boolalpha << is_allow << std::endl;
+      os << indent_str << "is_block: " << std::boolalpha << is_block << std::endl;
+      if (is_allow)
+      {
+        os << indent_str << "number of allow expressions: " << num_allow_block_actions << std::endl;
+      }
+      if (is_block)
+      {
+        os << indent_str << "number of block expressions: " << num_allow_block_actions << std::endl;
+      }
+
+      os << indent_str << "LPS before:" << std::endl
+         << print(lps_statistics_before, indent + 2)
+         << indent_str << "result before:" << std::endl
+         << print(lps_statistics_result_before, indent + 2)
+         << indent_str << "result after:" << std::endl
+         << print(lps_statistics_result_after, indent + 2);
+
+      return os.str();
+    }
+
     void calculate_left_merge(
       const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
@@ -7931,12 +7967,27 @@ class specification_basic_type
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+      lps_statistics_t lps_statistics_before = get_statistics(action_summands1, deadlock_summands1);
+      lps_statistics_t lps_statistics_result_before = get_statistics(action_summands, deadlock_summands);
+#endif
+
       calculate_left_merge_deadlock(ultimate_delay_condition2, deadlock_summands1,
                                     is_allow, is_block, action_summands, deadlock_summands);
       calculate_left_merge_action(ultimate_delay_condition2, action_summands1,
                                     allowlist, is_allow, is_block, action_summands);
-    }
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+      lps_statistics_t lps_statistics_result_after = get_statistics(action_summands, deadlock_summands);
+
+      std::cout << log_leftmerge_application(lps_statistics_before,
+          lps_statistics_result_before,
+          lps_statistics_result_after,
+          is_allow,
+          is_block,
+          (is_block ? allowlist.front().size() : allowlist.size()), 4);
+#endif
+    }
 
 
     void calculate_communication_merge_action_summands(
@@ -8156,6 +8207,41 @@ class specification_basic_type
       }
     }
 
+    static std::string log_communicationmerge_application(const lps_statistics_t& lps1_statistics_before,
+        const lps_statistics_t& lps2_statistics_before,
+        const lps_statistics_t& lps_result_statistics_before,
+        const lps_statistics_t& lps_statistics_after,
+        const bool is_allow,
+        const bool is_block,
+        const std::size_t num_allow_block_actions,
+        size_t indent = 0)
+    {
+      std::string indent_str(indent, ' ');
+      std::ostringstream os;
+
+      os << indent_str << "- operator: communicationmerge" << std::endl;
+
+      indent += 2;
+      indent_str = std::string(indent, ' ');
+      os << indent_str << "is_allow: " << std::boolalpha << is_allow << std::endl;
+      os << indent_str << "is_block: " << std::boolalpha << is_block << std::endl;
+      if (is_allow)
+      {
+        os << indent_str << "number of allow expressions: " << num_allow_block_actions << std::endl;
+      }
+      if (is_block)
+      {
+        os << indent_str << "number of block expressions: " << num_allow_block_actions << std::endl;
+      }
+
+      os << indent_str << "first LPS before:" << std::endl << print(lps1_statistics_before, indent + 2)
+         << indent_str << "second LPS before:" << std::endl << print(lps2_statistics_before, indent + 2)
+         << indent_str << "result LPS before:" << std::endl << print(lps_result_statistics_before, indent + 2)
+         << indent_str << "result LPS after:" << std::endl << print(lps_statistics_after, indent + 2);
+
+      return os.str();
+    }
+
     void calculate_communication_merge(
           const stochastic_action_summand_vector& action_summands1,
           const deadlock_summand_vector& deadlock_summands1,
@@ -8167,10 +8253,23 @@ class specification_basic_type
           stochastic_action_summand_vector& action_summands,
           deadlock_summand_vector& deadlock_summands)
     {
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+      lps_statistics_t lps1_statistics_before = get_statistics(action_summands1, deadlock_summands1);
+      lps_statistics_t lps2_statistics_before = get_statistics(action_summands2, deadlock_summands2);
+      lps_statistics_t lps_result_statistics_before = get_statistics(action_summands, deadlock_summands);
+#endif
+
       calculate_communication_merge_action_summands(action_summands1, action_summands2, allowlist, is_allow, is_block, action_summands);
       calculate_communication_merge_action_deadlock_summands(action_summands1, deadlock_summands2, action_summands, deadlock_summands);
       calculate_communication_merge_action_deadlock_summands(action_summands2, deadlock_summands1, action_summands, deadlock_summands);
       calculate_communication_merge_deadlock_summands(deadlock_summands1, deadlock_summands2, action_summands, deadlock_summands);
+
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+      lps_statistics_t lps_statistics_after = get_statistics(action_summands, deadlock_summands);
+
+      std::cout << log_communicationmerge_application(lps1_statistics_before, lps2_statistics_before, lps_result_statistics_before,
+          lps_statistics_after, is_allow, is_block, (is_block ? allowlist.front().size() : allowlist.size()), 4);
+#endif
     }
 
 
@@ -8221,6 +8320,55 @@ class specification_basic_type
     }
 
 
+    static
+    std::string log_parallelcomposition_application_start(
+                                    const lps_statistics_t& lps1_statistics_before,
+                                    const lps_statistics_t& lps2_statistics_before,
+                                    const bool is_allow,
+                                    const bool is_block,
+                                    const std::size_t num_allow_block_actions,
+                                    size_t indent = 0)
+    {
+      std::string indent_str(indent, ' ');
+      std::ostringstream os;
+
+      os << indent_str << "- operator: parallel" << std::endl;
+
+      indent += 2;
+      indent_str = std::string(indent, ' ');
+      os << indent_str << "is_allow: " << std::boolalpha << is_allow << std::endl;
+      os << indent_str << "is_block: " << std::boolalpha << is_block << std::endl;
+      if (is_allow)
+      {
+        os << indent_str << "number of allow expressions: " << num_allow_block_actions << std::endl;
+      }
+      if (is_block)
+      {
+        os << indent_str << "number of block expressions: " << num_allow_block_actions << std::endl;
+      }
+
+      os << indent_str << "first LPS before:" << std::endl << print(lps1_statistics_before, indent+2)
+         << indent_str << "second LPS before:" << std::endl << print(lps2_statistics_before, indent+2);
+
+      os << indent_str << "subcalls:" << std::endl;
+
+      return os.str();
+    }
+
+  static
+  std::string log_parallelcomposition_application_end(
+                                      const lps_statistics_t& lps_statistics_after,
+                                      size_t indent = 0)
+    {
+      indent += 2;
+      std::string indent_str(indent, ' ');
+      std::ostringstream os;
+
+      os << indent_str << "after:" << std::endl << print(lps_statistics_after, indent+2);
+
+      return os.str();
+    }
+
     void parallelcomposition(
       const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
@@ -8256,6 +8404,13 @@ class specification_basic_type
       // At this point the parameters of pars1 and pars2 are unique, except for
       // those that are constant in both processes.
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+      lps_statistics_t lps1_statistics_before = get_statistics(action_summands1, deadlock_summands1);
+      lps_statistics_t lps2_statistics_before = get_statistics(action_summands2, deadlock_summands2);
+
+      std::cout << log_parallelcomposition_application_start(lps1_statistics_before, lps2_statistics_before, is_allow, is_block, (is_block?allowlist1.front().size():allowlist1.size()));
+#endif
+
       variable_list pars3;
       for (const variable& v: pars2)
       {
@@ -8284,6 +8439,12 @@ class specification_basic_type
       {
         ultimate_delay_condition=combine_ultimate_delays(ultimate_delay_condition1, ultimate_delay_condition2);
       }
+
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+      lps_statistics_t lps_statistics_after = get_statistics(action_summands, deadlock_summands);
+
+      std::cout << log_parallelcomposition_application_end(lps_statistics_after);
+#endif
     }
 
     /**************** GENERaTE LPEmCRL **********************************/
@@ -8296,7 +8457,7 @@ class specification_basic_type
     void generateLPEmCRLterm(
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
-      const process_expression& t,    
+      const process_expression& t,
       const bool regular,
       const bool rename_variables,
       variable_list& pars,
@@ -8311,7 +8472,7 @@ class specification_basic_type
 
         objectdatatype& object=objectIndex(process_instance_assignment(t).identifier());
 
-        // Now apply the assignment in this process to the obtained initial process and the distribution. 
+        // Now apply the assignment in this process to the obtained initial process and the distribution.
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
         for (const assignment& a: process_instance_assignment(t).assignments())
         {
@@ -8319,7 +8480,7 @@ class specification_basic_type
         }
 
         init=replace_variables_capture_avoiding_alt(init,sigma);
-        initial_stochastic_distribution = 
+        initial_stochastic_distribution =
                    stochastic_distribution(
                          initial_stochastic_distribution.variables(),
                          replace_variables_capture_avoiding_alt(initial_stochastic_distribution.distribution(), sigma));
@@ -8349,7 +8510,7 @@ class specification_basic_type
           // stacks are being used.
 
           stochastic_linear_process lps(pars,deadlock_summands,action_summands);
-          stochastic_process_initializer initializer(init,initial_stochastic_distribution); 
+          stochastic_process_initializer initializer(init,initial_stochastic_distribution);
 
           stochastic_specification temporary_spec(data,acts,global_variables,lps,initializer);
           constelm_algorithm < rewriter, stochastic_specification > alg(temporary_spec,rewr);
@@ -8365,7 +8526,7 @@ class specification_basic_type
           }
 
           // Reconstruct the variables from the temporary specification
-          init=temporary_spec.initial_process().expressions();     
+          init=temporary_spec.initial_process().expressions();
           pars=temporary_spec.process().process_parameters();
           assert(init.size()==pars.size());
           // Add all free variables in object.parameters that are not already in the parameter list
@@ -8391,7 +8552,7 @@ class specification_basic_type
         }
         // Now constelm has been applied.
         return;
-      } // End process assignment. 
+      } // End process assignment.
 
       if (is_merge(t))
       {
@@ -8541,7 +8702,7 @@ class specification_basic_type
     /* The result are a list of action summands, deadlock summand, the parameters of this
        linear process and its initial values. A initial stochastic distribution that must
        precede the initial linear process and the ultimate delay condition of this
-       linear process that can be used or be ignored. 
+       linear process that can be used or be ignored.
 
     */
 
@@ -8984,14 +9145,14 @@ class specification_basic_type
           const variable_list new_parameters=object.parameters;
           const stochastic_operator& sto=down_cast<stochastic_operator>(new_process);
           assignment_list new_assignments;
-          
+
           const variable_list relevant_stochastic_variables=parameters_that_occur_in_body(sto.variables(),object.processbody);
           assert(relevant_stochastic_variables.size()<=new_parameters.size());
           // The variables in sto.variables() may clash with local variables u and therefore need to be rename.
           variable_list renamed_sto_variables=sto.variables();
           mutable_indexed_substitution<> local_sigma1;
           alphaconvertprocess(renamed_sto_variables, local_sigma1, t);
-          
+
 
           variable_list::const_iterator i=new_parameters.begin();
           for(const variable& v: relevant_stochastic_variables)
@@ -9005,7 +9166,7 @@ class specification_basic_type
           // Therefore, the assignments must be filtered.
           new_assignments=filter_assignments(new_assignments + u.assignments(),object.parameters);
 
-          // The variables bound in the distribution may conflict 
+          // The variables bound in the distribution may conflict
 
           // Furthermore, the old assignment must be applied to the distribution, when it is moved
           // outside of the process body.
@@ -9642,7 +9803,7 @@ class specification_basic_type
       {
         throw mcrl2::runtime_error("Process " + pp(t.identifier()) + " is unguardedly defined in itself");
       };
-      
+
       visited_processes.insert(t.identifier());
       objectdatatype& object=objectIndex(t.identifier());
       if (is_process_instance_assignment(object.processbody))
@@ -9675,16 +9836,16 @@ class specification_basic_type
  *   All assignments in a process_instance_assignment of the form x=x where
  *   x is not a bound variable are removed.
  *   Furthermore, process occurrences X where X is defined as X=X1, X1=X2...Xn-1=Xn
- *   are replaced by Xn, with the necessary substitutions for data parameters. 
+ *   are replaced by Xn, with the necessary substitutions for data parameters.
  *   The reason for this is that only Xn will become a process in the linear
  *   process, with its own state. Otherwise there is a risk that all process
  *   variables X, X1, X2, etc. have separate states, and worse, for all of them
- *   a copy of the summands will be added. 
+ *   a copy of the summands will be added.
 */
 
 
     /* This function replaces all process instances by a process instance assignment,
-       furthermore, if a process consists of only a process instantionation, i.e., X=Y, it is removed. 
+       furthermore, if a process consists of only a process instantionation, i.e., X=Y, it is removed.
        Nested stochastic operators are merged into one. */
     void transform_process_arguments(
             const process_identifier& procId,
@@ -9702,7 +9863,7 @@ class specification_basic_type
       }
     }
 
-    /* This function replaces all process instances by a process instance assignment and 
+    /* This function replaces all process instances by a process instance assignment and
        merges nested stochastic operators into one.  */
     void transform_process_arguments(const process_identifier& procId)
     {
@@ -9710,10 +9871,10 @@ class specification_basic_type
       transform_process_arguments(procId,visited_processes);
     }
 
-    /* This function replaces all process instances by a process instance assignment 
+    /* This function replaces all process instances by a process instance assignment
        and merges nested stochastic operators into one. */
     process_expression transform_process_arguments_body(
-      const process_expression& t, 
+      const process_expression& t,
       const std::set<variable>& bound_variables,
       std::set<process_identifier>& visited_processes)
     {
@@ -9912,7 +10073,7 @@ class specification_basic_type
     }
 
     process_expression guarantee_that_parameters_have_unique_type_body(
-      const process_expression& t, 
+      const process_expression& t,
       std::set<process_identifier>& visited_processes,
       std::set<identifier_string>& used_variable_names,
       maintain_variables_in_rhs<mutable_map_substitution<> >& parameter_mapping,
@@ -10079,10 +10240,10 @@ class specification_basic_type
 /* -----------------------------   split body  --------------------------- */
 
     process_expression split_body(
-      const process_expression& t, 
+      const process_expression& t,
       std::map < process_identifier,process_identifier >& visited_id,
       std::map < process_expression,process_expression>& visited_proc,
-      const variable_list& parameters)  
+      const variable_list& parameters)
     {
       /* Replace pCRL process terms that occur in the scope of mCRL processes
          by a process identifier. E.g. (a+b)||c is replaced by X||c and
@@ -10205,7 +10366,7 @@ class specification_basic_type
         if (multiaction == action_list({ terminationAction }))
         {
           acts.push_front(terminationAction.label());
-          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) << 
+          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) <<
                            " followed by a deadlock is added to signal termination of the linear process. \n";
           return;
         }
@@ -10296,7 +10457,7 @@ class specification_basic_type
     {
       /* Then select the BPA processes, and check that the others
          are proper parallel processes */
-      transform_process_arguments(init);   // Also merges nested stochastic operators. 
+      transform_process_arguments(init);   // Also merges nested stochastic operators.
       guarantee_that_parameters_have_unique_type(init);
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
@@ -10324,7 +10485,7 @@ class specification_basic_type
       lps::detail::ultimate_delay dummy_ultimate_delay_condition;
       generateLPEmCRL(action_summands,
                       deadlock_summands,
-                      init_, 
+                      init_,
                       options.lin_method!=lmStack,
                       parameters,
                       initial_state,
@@ -10351,14 +10512,14 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   mcrl2::process::process_specification input_process=type_checked_spec;
   data_specification data_spec=input_process.data();
 
-  if (lin_options.balance_summands) // Make a balanced tree of long expressions of the shape p1 + p2 + p3 + ... + p4. 
+  if (lin_options.balance_summands) // Make a balanced tree of long expressions of the shape p1 + p2 + p3 + ... + p4.
                                     // By default the parser provides a skewed tree, and for very long sequences of summands this overflows the
                                     // stack.
   {
     balance_summands(input_process);
   }
 
-  if (lin_options.apply_alphabet_axioms) // Apply alphabet reduction if requested. 
+  if (lin_options.apply_alphabet_axioms) // Apply alphabet reduction if requested.
   {
     alphabet_reduce(input_process, 1000ul);
   }
