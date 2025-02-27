@@ -92,67 +92,24 @@ class objectdatatype
   public:
     identifier_string objectname;
     process::action_label_list multi_action_names;
-    bool constructor;
+    bool constructor=false;
     process_expression representedprocess;
     process_identifier process_representing_action; /* for actions target sort is used to
                                                        indicate the process representing this action. */
     process_expression processbody;
     std::set <variable> free_variables;
-    bool free_variables_defined;
+    bool free_variables_defined=false;
     variable_list parameters;
     variable_list old_parameters;
-    processstatustype processstatus;
-    objecttype object;
-    bool canterminate;
-    bool containstime;
+    processstatustype processstatus=unknown;
+    objecttype object=none;
+    bool canterminate=false;
+    bool containstime=false;
 
-    objectdatatype()
-    {
-      constructor=false;
-      processstatus=unknown;
-      object=none;
-      canterminate=false;
-      containstime=false;
-    }
-
-    objectdatatype(const objectdatatype& o)
-    {
-      objectname=o.objectname;
-      multi_action_names=o.multi_action_names;
-      constructor=o.constructor;
-      representedprocess=o.representedprocess;
-      process_representing_action=o.process_representing_action;
-      processbody=o.processbody;
-      free_variables=o.free_variables;
-      free_variables_defined=o.free_variables_defined;
-      parameters=o.parameters;
-      processstatus=o.processstatus;
-      object=o.object;
-      canterminate=o.canterminate;
-      containstime=o.containstime;
-    }
-
-    const objectdatatype& operator=(const objectdatatype& o)
-    {
-      objectname=o.objectname;
-      multi_action_names=o.multi_action_names;
-      constructor=o.constructor;
-      representedprocess=o.representedprocess;
-      process_representing_action=o.process_representing_action;
-      processbody=o.processbody;
-      free_variables=o.free_variables;
-      free_variables_defined=o.free_variables_defined;
-      parameters=o.parameters;
-      processstatus=o.processstatus;
-      object=o.object;
-      canterminate=o.canterminate;
-      containstime=o.containstime;
-      return (*this);
-    }
-
-    ~objectdatatype()
-    {
-    }
+    objectdatatype()=default;
+    objectdatatype(const objectdatatype& o)=default;
+    const objectdatatype& operator=(const objectdatatype& o)=default;
+    ~objectdatatype()=default;
 };
 
 
