@@ -108,7 +108,7 @@ class objectdatatype
 
     objectdatatype()=default;
     objectdatatype(const objectdatatype& o)=default;
-    const objectdatatype& operator=(const objectdatatype& o)=default;
+    objectdatatype& operator=(const objectdatatype& o)=default;
     ~objectdatatype()=default;
 };
 
