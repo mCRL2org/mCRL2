@@ -499,7 +499,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
     {}
 
     template<typename PbesReachAlgorithm, typename PbesInstAlgorithm>
-    void solve(pbes_system::pbes pbesspec, const symbolic_reachability_options& options_)
+    void solve(pbes_system::pbes pbesspec, symbolic_reachability_options& options_)
     {
       using namespace sylvan::ldds;
 
@@ -507,7 +507,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       if (has_counter_example && options_.solve_strategy != 0)
       {
         // TODO: Cannot use the partial solvers.
-        throw mcrl2::runtime_error("Cannot use partial solving with counter example PBES");
+        mCRL2log(mcrl2::log::warning) << "Cannot use partial solving with counter example PBES";
+        options_.solve_strategy = 0;
       }
       
       if (has_counter_example)
@@ -582,7 +583,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             if (options.max_iterations == 0)
             {
               bool chaining = options.chaining;              
-              if (options.chaining) 
+              if (options.check_strategy && options.chaining) 
               {
                 mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while checking the strategy" << std::endl;
                 chaining = false;
@@ -651,7 +652,10 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
                                 << SG.all_vertices().size() << std::endl;
           bool final_result = run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
           utilities::mcrl2_unused(final_result);
-          assert(result == final_result);
+          if(result != final_result)
+          {
+            throw mcrl2::runtime_error("The result of the first and second passes do not match.");
+          }
         }
       }
     }
