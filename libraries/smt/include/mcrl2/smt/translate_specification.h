@@ -253,7 +253,7 @@ void translate_native_mappings(OutputStream& out,
     {
       continue;
     }
-    std::cout << "Outputting " << mapping << ": " << mapping.sort() << " with eqn " << eqn << std::endl;
+   mCRL2log(log::verbose) << "Outputting " << mapping << ": " << mapping.sort() << " with eqn " << eqn << std::endl;
 
     out << "(" << translate_symbol(mapping, nt) << " ";
     data::data_expression condition = declare_variables_binder(eqn.variables(), out, nt);
