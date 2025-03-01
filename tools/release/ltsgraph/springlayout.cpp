@@ -171,7 +171,7 @@ SpringLayout::~SpringLayout()
   delete m_ui;
 }
 
-SpringLayoutUi* SpringLayout::ui(QAction* advancedDialogAction, CustomQWidget* advancedWidget, QWidget* parent)
+SpringLayoutUi* SpringLayout::ui(QAction* /* advancedDialogAction */, CustomQWidget* advancedWidget, QWidget* parent)
 {
   if (m_ui == nullptr)
   {
@@ -371,7 +371,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool 
 
   // calculate bounding volumes
   {
-    for (int i = 0; i < nodeCount; i++)
+    for (std::size_t i = 0; i < nodeCount; i++)
     {
       std::size_t n = sel ? m_graph.explorationNode(i) : i;
       node_min.setX(std::min(node_min.x(), m_graph.node(n).pos().x()));
@@ -381,7 +381,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool 
     }
 
     // calculate bounding volume
-    for (int i = 0; i < edgeCount; i++)
+    for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t n = sel ? m_graph.explorationEdge(i) : i;
       handle_min.setX(std::min(handle_min.x(), m_graph.handle(n).pos().x()));
@@ -391,7 +391,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool 
     }
 
     // calculate bounding volume
-    for (int i = 0; i < edgeCount; i++)
+    for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t n = sel ? m_graph.explorationEdge(i) : i;
       trans_min.setX(std::min(trans_min.x(), m_graph.transitionLabel(n).pos().x()));
@@ -498,7 +498,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool se
 
   // calculate bounding volumes
   {
-    for (int i = 0; i < nodeCount; i++)
+    for (std::size_t i = 0; i < nodeCount; i++)
     {
       std::size_t n = sel ? m_graph.explorationNode(i) : i;
       node_min.setX(std::min(node_min.x(), m_graph.node(n).pos().x()));
@@ -510,7 +510,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool se
     }
 
     // calculate bounding volume
-    for (int i = 0; i < edgeCount; i++)
+    for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t n = sel ? m_graph.explorationEdge(i) : i;
       handle_min.setX(std::min(handle_min.x(), m_graph.handle(n).pos().x()));
@@ -522,7 +522,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool se
     }
 
     // calculate bounding volume
-    for (int i = 0; i < edgeCount; i++)
+    for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t n = sel ? m_graph.explorationEdge(i) : i;
       trans_min.setX(std::min(trans_min.x(), m_graph.transitionLabel(n).pos().x()));
@@ -899,7 +899,7 @@ void SpringLayout::randomizeZ(float z)
     std::size_t n = exploration ? m_graph.explorationNode(i) : i;
     if (!m_graph.node(n).anchored())
     {
-      float z_offset = fast_frand(-z, z);
+      float z_offset = frand(-z, z);
       m_graph.node(n).pos_mutable().setZ(m_graph.node(n).pos().z() + z_offset);
       m_graph.stateLabel(n).pos_mutable().setZ(m_graph.stateLabel(n).pos().z() + z_offset);
     }

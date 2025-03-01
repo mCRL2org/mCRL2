@@ -16,41 +16,37 @@ namespace RepulsionFunctions
 {
     struct LTSGraph : RepulsionFunction
     {
-        QVector3D diff;
-        float r;
-        QVector3D operator()(const QVector3D& a, const QVector3D& b,
-            const float natlength) override
+        QVector3D operator()(const QVector3D& a, 
+                             const QVector3D& b,
+                             const float natlength) override
         {
-            diff = a - b;
-            r = cube(natlength);
-            r /= cube((std::max)(diff.length() * 0.5f, natlength * 0.1f));
-            diff = diff * r + QVector3D(fast_frand(-0.01f, 0.01f),
-                fast_frand(-0.01f, 0.01f),
-                fast_frand(-0.01f, 0.01f));
-            return diff;
+          QVector3D diff = a - b;
+          float r = cube(natlength);
+          r /= cube(std::max(diff.length() * 0.5f, natlength * 0.1f));
+          // This returned result was randomized by adding a variation of [-0,1,0,1] to the three coordinates.
+          // This has been removed in March 2025. It may have served a purpose. 
+          return diff * r; 
         }
     };
 
     struct ElectricalSpring : RepulsionFunction
     {
-        QVector3D diff;
-        const float scaling = 1e-2f;
-        QVector3D operator()(const QVector3D& a, const QVector3D& b,
-            const float K) override
+        QVector3D operator()(const QVector3D& a, 
+                             const QVector3D& b,
+                             const float K) override
         {
-            diff = a - b;
+            QVector3D diff = a - b;
+            const float scaling = 1e-2f;
             return ((scaling * K * K) /
-                std::max(diff.lengthSquared(), 0.00001f)) *
-                diff;
+                std::max(diff.lengthSquared(), 0.00001f)) * diff;
         }
     };
 
     struct None : RepulsionFunction
     {
-        QVector3D ZERO = { 0, 0, 0 };
-        QVector3D operator()(const QVector3D&, const QVector3D&,
-            const float) override
+        QVector3D operator()(const QVector3D&, const QVector3D&, const float) override
         {
+            const QVector3D ZERO = { 0, 0, 0 };
             return ZERO;
         }
     };
