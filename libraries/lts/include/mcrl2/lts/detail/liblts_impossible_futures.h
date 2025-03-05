@@ -90,7 +90,6 @@ bool check_trace_inclusion(LTS_TYPE& l1,
       if (spec_prime.empty()) // if spec'={} then
       {
         generate_counter_example.save_counter_example(new_counterexample_index, l1);
-        report_statistics(stats);
         detail::antichain_insert(anti_chain_negative, init_l1, detail::collect_reachable_states_via_taus(init_l2, weak_property_cache, weak_reduction));
         return false; //    return false;
       }
@@ -133,10 +132,6 @@ template <typename LTS,
   typename COUNTER_EXAMPLE_CONSTRUCTOR = detail::dummy_counter_example_constructor>
 bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_strategy strategy)
 {
-  // Remove tau-loops from l1 to allow the (impl, spec) => (impl', spec) optimisation.
-  scc_partitioner<LTS> scc_partitioner(l1);
-  scc_partitioner.replace_transition_system(false);
-
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1, l2);
 
@@ -168,13 +163,10 @@ bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_str
     const detail::state_type impl = front.state();
     const detail::set_of_states& spec = front.states();
 
-    if (weak_property_cache.stable(impl) && !std::any_of(spec.begin(),
+    if (!std::any_of(spec.begin(),
             spec.end(),
             [&](const auto& t)
             {
-              // Print the current (impl,spec) pair being inspected
-              std::cout << "Checking (" << impl << ", " << t << ")" << std::endl;
-
               return check_trace_inclusion(l1,
                   weak_property_cache,
                   inner_working,
