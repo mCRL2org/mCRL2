@@ -27,7 +27,8 @@ float quadtreeSqWidth(const QVector2D& vec) { return vec.x()*vec.x(); }
 bool quadtreeEqual(const QVector2D& u, const QVector2D& v) { return (u-v).lengthSquared() < FLT_EPSILON ;}
 
 /// @brief Encode x, y, z in least significant bits in order from least to most 
-std::size_t octreeChildIndex(const QVector3D& rel_pos){
+std::size_t octreeChildIndex(const QVector3D& rel_pos)
+{
     return ((rel_pos.z() > 0.5f) << 2) |
            ((rel_pos.y() > 0.5f) << 1) |
             (rel_pos.x() > 0.5f);
@@ -40,7 +41,8 @@ std::size_t quadtreeChildIndex(const QVector2D& rel_pos){
 }
 
 /// @brief When recursing down the tree updates the bounds appropriately
-void octreeUpdateMinbound(const QVector3D& rel_pos, const QVector3D& extents, QVector3D& minbound){
+void octreeUpdateMinbound(const QVector3D& rel_pos, const QVector3D& extents, QVector3D& minbound)
+{
     if (rel_pos.x() > 0.5) minbound.setX(minbound.x() + extents.x());
     if (rel_pos.y() > 0.5) minbound.setY(minbound.y() + extents.y());
     if (rel_pos.z() > 0.5) minbound.setZ(minbound.z() + extents.z());

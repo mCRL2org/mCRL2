@@ -866,7 +866,11 @@ void SpringLayout::apply()
     m_attrFunc->update();
 
     float stability = std::abs((m_previous_energy - energy) / m_previous_energy);
-    if (stability <= m_stabilityThreshold && (center_of_mass == QVector3D(0, 0, 0) || any_anchored))
+
+
+    // The graph becomes stable if the center of mass is sufficiently close to (0,0,0) or is anchored
+    // and the energy of the graph does not fluctuate too much.
+    if (stability <= m_stabilityThreshold && (center_of_mass.length()<0.0001 || any_anchored))
     {
       m_stabilityCounter++;
       if (m_stabilityCounter >= m_stabilityMaxCount)
