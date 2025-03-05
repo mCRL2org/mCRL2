@@ -47,13 +47,6 @@ void project_transitions(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void*
   }
 }
 
-/// \brief Returns the height of the LDD.
-std::size_t height(const sylvan::ldds::ldd& x)
-{
-  using namespace sylvan::ldds;
-  return sat_one_vector(x).size();
-}
-
 /// \brief Project on all transitions where n is the height of the LDD and action_index the action that we want to keep. (Assumes that action label is the last).
 sylvan::ldds::ldd project_transitions(const sylvan::ldds::ldd& x, std::size_t height, std::size_t action_index)
 {

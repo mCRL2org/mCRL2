@@ -98,7 +98,7 @@ std::string print_map(const MapContainer& v, const std::string& message = "")
   {
     out << "--- " << message << "---" << std::endl;
   }
-  out << "{";
+  out << "{ ";
   for (auto i = v.begin(); i != v.end(); ++i)
   {
     if (i != v.begin())
@@ -107,7 +107,7 @@ std::string print_map(const MapContainer& v, const std::string& message = "")
     }
     out << i->first << " -> " << i->second;
   }
-  out << "}";
+  out << " }";
   return out.str();
 }
 
