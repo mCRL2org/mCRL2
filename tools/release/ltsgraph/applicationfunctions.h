@@ -40,8 +40,9 @@ namespace ApplicationFunctions
             1e-06f; // Always keep ease_floor force applied. May cause jitter
         // precompute
         const float one_minus_ease_floor = 1 - ease_floor;
-        void operator()(QVector3D& pos, const QVector3D& f,
-            const float speed) override
+        void operator()(QVector3D& pos, 
+                        const QVector3D& f,
+                        const float speed) override
         {
             float amplitude = speed * scaling * (*temperature);
             float threshold = speed * thres;

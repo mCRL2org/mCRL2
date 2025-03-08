@@ -344,7 +344,7 @@ void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(b
 
     if (e.is_selfloop())
     {
-      m_hforces[i] += (*m_repFunc)(m_graph.handle(n).pos(), m_graph.node(from).pos(), m_natLength) * m_repulsion;
+      m_hforces[i] += (*m_repFunc)(m_graph.handle(n).pos(), m_graph.node(from).pos(), m_natLength) * m_repulsion*10000;
     }
 
     f = (*m_attrFunc)(m_graph.node(to).pos(), m_graph.node(from).pos(), m_natLength) * m_attraction;
@@ -693,6 +693,12 @@ void SpringLayout::apply()
   if (!m_graph.stable() || m_graph.hasForcedUpdate())
   {
     m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
+    bool sel = m_graph.hasExploration();
+    std::size_t nodeCount = sel ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+    std::size_t edgeCount = sel ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
+
+    bool m_tree_enabled=m_tree_enable_for_large_graphs && (nodeCount+edgeCount)>200;
+
     if (m_graph.hasForcedUpdate())
     {
       m_graph.hasForcedUpdate() = false;
@@ -721,10 +727,6 @@ void SpringLayout::apply()
       m_graph.resetPositions() = false;
       resetPositions();
     }
-
-    bool sel = m_graph.hasExploration();
-    std::size_t nodeCount = sel ? m_graph.explorationNodeCount() : m_graph.nodeCount();
-    std::size_t edgeCount = sel ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
     m_nforces.resize(nodeCount);
     m_sforces.resize(nodeCount);
@@ -834,7 +836,7 @@ void SpringLayout::apply()
     double energy = slicedAverageSqrMagnitude(m_nforces);
     double min = 1e15;
     double max = -1e15;
-    for (auto f : m_nforces)
+    for (const QVector3D& f: m_nforces)
     {
       double mag = f.lengthSquared();
       min = std::min(min, mag);
@@ -856,6 +858,7 @@ void SpringLayout::apply()
     if (m_graph.userIsDragging)
     {
       m_asa.reset();
+      m_graph.userIsDragging=false;
     }
 
     m_max_num_nodes = 0;
@@ -870,6 +873,7 @@ void SpringLayout::apply()
 
     // The graph becomes stable if the center of mass is sufficiently close to (0,0,0) or is anchored
     // and the energy of the graph does not fluctuate too much.
+// std::cerr << "XX: " << center_of_mass.length() << "     " << stability << " StabCount: " << m_stabilityCounter << "   " << energy << "   " << m_previous_energy << " temp:  " << m_annealing_temperature << "\n";
     if (stability <= m_stabilityThreshold && (center_of_mass.length()<0.0001 || any_anchored))
     {
       m_stabilityCounter++;
@@ -929,8 +933,8 @@ void SpringLayout::notifyNewFrame()
 
 void SpringLayout::setTreeEnabled(bool b)
 {
-  m_tree_enabled = b;
-  mCRL2log(mcrl2::log::verbose) << (b ? "Enabled" : "Disabled") << " tree acceleration." << std::endl;
+  m_tree_enable_for_large_graphs = b;
+  mCRL2log(mcrl2::log::verbose) << (b ? "Enabled" : "Disabled") << " tree acceleration for large graphs." << std::endl;
 }
 
 void SpringLayout::setAnnealingEnabled(bool b)
@@ -969,7 +973,7 @@ void SpringLayout::setAccuracy(int v)
 
 void SpringLayout::setAttraction(int v)
 {
-  m_attraction = lerp(v, 1, 0);
+  m_attraction = lerp(v, 0.99, 0.01);
   if (this->m_ui)
   {
     m_ui->m_ui.lbl_attractRepulse->setText(QString::number(1 - m_attraction, 'g', 2));
@@ -980,13 +984,13 @@ void SpringLayout::setAttraction(int v)
 
 void SpringLayout::setRepulsion(int v)
 {
-  m_repulsion = lerp(v, 0, 1);
+  m_repulsion = lerp(v, 0.01, 0.99);
   mCRL2log(mcrl2::log::verbose) << "Set repulsion scale to: " << v << " corresponding to: " << m_repulsion << std::endl;
 }
 
 void SpringLayout::setControlPointWeight(int v)
 {
-  m_controlPointWeight = lerp(v, m_min_controlPointWeight, m_max_controlPointWeight);
+  m_controlPointWeight = 500*lerp(v, m_min_controlPointWeight, m_max_controlPointWeight);
   mCRL2log(mcrl2::log::verbose) << "Set control point weight to: " << m_controlPointWeight << std::endl;
   if (this->m_ui)
   {
@@ -1059,9 +1063,9 @@ class WorkerThread : public QThread
 private:
   bool m_stopped;
   SpringLayout& m_layout;
-  int m_counter = 0;
+  std::size_t m_counter = 0;
 
-  // By default log ever second
+  // By default log every second
   const int m_debug_log_interval = 1000;
 
   // if we have a cycle time longer than 100ms we want an extra message
@@ -1091,7 +1095,6 @@ public:
       else
       {
         m_layout.apply();
-        m_counter++;
         debugLogging();
       }
     }
@@ -1100,6 +1103,7 @@ public:
   /// @brief Only called when a debug configuration is ran.
   void debugLogging()
   {
+    m_counter++;
     int elapsed = m_debug_log_timer.elapsed();
     if (elapsed > m_debug_log_interval)
     {
@@ -1131,8 +1135,8 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, CustomQWidget* advancedDial
   m_ui.sldBalance->setValue(m_layout.repulsion());
   m_ui.sldHandleWeight->setValue(m_layout.controlPointWeight());
   m_ui.sldNatLength->setValue(m_layout.naturalTransitionLength());
+  // m_ui_advanced.chk_enableTree->setChecked(false);
   m_layout.setTreeEnabled(m_ui_advanced.chk_enableTree->isChecked());
-  m_ui_advanced.chk_enableTree->setChecked(false);
 
   m_ui_advanced.sld_spd->setValue(m_layout.speed());
   connect(m_ui_advanced.sld_spd, SIGNAL(valueChanged(int)), this, SLOT(onSpeedChanged(int)));
@@ -1276,6 +1280,7 @@ void SpringLayoutUi::onRepulsionChanged(int value)
 void SpringLayoutUi::onSpeedChanged(int value)
 {
   m_layout.setSpeed(value);
+  layoutRulesChanged();
   update();
 }
 
@@ -1326,14 +1331,14 @@ void SpringLayoutUi::onForceApplicationChanged(int value)
 
 void SpringLayoutUi::onStarted()
 {
-  m_ui.btnStartStop->setText("Stop");
+  m_ui.btnStartStop->setText("Stop shaping");
   m_ui.btnStartStop->setEnabled(true);
   update();
 }
 
 void SpringLayoutUi::onStopped()
 {
-  m_ui.btnStartStop->setText("Start");
+  m_ui.btnStartStop->setText("Start shaping");
   m_ui.btnStartStop->setEnabled(true);
   runningChanged(false);
   update();

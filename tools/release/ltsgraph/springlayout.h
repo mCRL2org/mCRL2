@@ -163,7 +163,7 @@ class SpringLayout
   float m_annealing_temperature = m_no_annealing_temperature;
   float m_accuracy; ///< Controls the Barnes-Hut criterion in the approximation
                     ///< of repulsive forces
-  bool m_tree_enabled;
+  bool m_tree_enable_for_large_graphs = true;
   float m_stabilityThreshold = 1e-3;
   int m_stabilityMaxCount = 3; // Number of iterations in which change has to be within threshold before 'stable'
   int m_stabilityCounter = 0;
@@ -295,9 +295,9 @@ class SpringLayout
     return unlerp(m_natLength, m_min_natLength, m_max_natLength);
   }
 
-  bool treeEnabled() const
+  bool treeEnableForLargeGraphs() const
   {
-    return m_tree_enabled;
+    return m_tree_enable_for_large_graphs;
   }
 
   void notifyNewFrame();

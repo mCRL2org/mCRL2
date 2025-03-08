@@ -217,7 +217,7 @@
       <item>
        <widget class="QPushButton" name="btnStartStop">
         <property name="text">
-         <string>Start</string>
+         <string>Start shaping</string>
         </property>
        </widget>
       </item>

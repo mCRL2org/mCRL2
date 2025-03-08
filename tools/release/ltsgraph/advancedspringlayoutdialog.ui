@@ -52,7 +52,7 @@
         <item>
          <widget class="QLabel" name="lbl_spd">
           <property name="text">
-           <string>Speed:</string>
+           <string>Speed of state movement:</string>
           </property>
          </widget>
         </item>
@@ -109,7 +109,7 @@
         <item>
          <widget class="QLabel" name="lbl_acc">
           <property name="text">
-           <string>Accuracy:</string>
+           <string>Tree accuracy (lower is better):</string>
           </property>
          </widget>
         </item>
@@ -165,7 +165,7 @@
      <item>
       <widget class="QCheckBox" name="chk_enableTree">
        <property name="text">
-        <string>Enable tree acceleration</string>
+        <string>Enable tree acceleration for large graphs</string>
        </property>
        <property name="checked">
         <bool>true</bool>

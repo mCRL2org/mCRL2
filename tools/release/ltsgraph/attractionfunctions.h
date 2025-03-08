@@ -1,10 +1,12 @@
-// Author(s): Ruben Vink
+// Author: Ruben Vink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file attractionfunctions.h
 
 
 #ifndef ATTRACTIONFUNCTIONS_H
@@ -38,7 +40,8 @@ namespace AttractionFunctions
     {
       diff = (a - b);
       dist = std::max(diff.length(), 1.0f);
-      factor = scaling * std::log(dist / (ideal + 1.0f)) / dist;
+      /* factor = scaling * std::log(dist / (ideal + 1.0f)) / dist; */
+      factor = std::max(0.0,std::min(1000.0,(1+(0.8*ideal)*std::log(diff.length()/ideal))/diff.length()));
       return diff * factor;
     }
   };

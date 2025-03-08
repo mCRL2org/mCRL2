@@ -68,6 +68,6 @@ QVector3D slicedAverage(Graph::Graph& graph)
 float slicedAverageSqrMagnitude(std::vector<QVector3D>& forces)
 {
   std::function<float(std::size_t)> func = [&forces](std::size_t i)
-  { return forces[i].lengthSquared(); };
+                                              { return forces[i].lengthSquared(); };
   return _slicedAverage(0, forces.size(), func, 0.0f);
 }
