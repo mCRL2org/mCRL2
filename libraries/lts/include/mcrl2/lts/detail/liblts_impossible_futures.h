@@ -132,6 +132,10 @@ template <typename LTS,
   typename COUNTER_EXAMPLE_CONSTRUCTOR = detail::dummy_counter_example_constructor>
 bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_strategy strategy)
 {
+  // Remove tau-loops from l1 to allow the (impl, spec) => (impl', spec) optimisation.
+  scc_partitioner<LTS> scc_partitioner(l1);
+  scc_partitioner.replace_transition_system(false);
+
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1, l2);
 
@@ -163,7 +167,7 @@ bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_str
     const detail::state_type impl = front.state();
     const detail::set_of_states& spec = front.states();
 
-    if (!std::any_of(spec.begin(),
+    if (weak_property_cache.stable(impl) && !std::any_of(spec.begin(),
             spec.end(),
             [&](const auto& t)
             {
