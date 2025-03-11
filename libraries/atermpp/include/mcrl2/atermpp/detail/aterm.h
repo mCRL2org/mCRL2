@@ -167,7 +167,7 @@ public:
     assert(element != nullptr);
 
     // Only destroy the function symbol.
-    _term_appl& term = *element;
+    _term_appl& term = static_cast<_term_appl&>(*element);
     term.function().~function_symbol();
   }
 
@@ -176,7 +176,7 @@ public:
     assert(element != nullptr);
 
     // Deallocate the memory of this aterm.
-    _term_appl& term = *element;
+    _term_appl& term = static_cast<_term_appl&>(*element);
     m_packed_allocator.deallocate(reinterpret_cast<char*>(element), term_appl_size(term.function().arity()));
   }
 
