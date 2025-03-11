@@ -124,10 +124,9 @@ bool check_trace_inclusion(LTS_TYPE& l1,
 
 namespace detail {
 
-/// \brief This function checks using algorithms in the paper mentioned above
-/// whether transition system l1 is included in transition system l2, in the
-/// sense of trace inclusions, failures inclusion and divergence failures
-/// inclusion.
+/// \brief Checks impossible futures refinement for the given LTSs. Impossible futures are defined in the article:
+/// 
+/// Marc Voorhoeve, Sjouke Mauw. Impossible futures and determinism, Inf. Process. Lett. 80, 2001. 
 template <typename LTS,
   typename COUNTER_EXAMPLE_CONSTRUCTOR = detail::dummy_counter_example_constructor>
 bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_strategy strategy)
