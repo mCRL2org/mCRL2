@@ -93,7 +93,7 @@ public:
     const Key& key() const noexcept { return m_key; }
 
     /// \returns An implicit conversion to the underlying key.
-    operator Key&() { return m_key; }
+    explicit operator Key&() { return m_key; }
   private:
     /// \brief Store the actual key.
     Key m_key;
@@ -123,18 +123,20 @@ public:
 
     key_iterator& operator++()
     {
-      m_current_node = reinterpret_cast<node*>(m_current_node->next());
+      m_current_node = m_current_node->next();
       return *this;
     }
 
+    /// Only allowed whenever it points to an actual node (not before_begin or end)
     reference operator*() const
     {
-      return m_current_node->key();
+      return reinterpret_cast<node*>(m_current_node)->key();
     }
 
+    /// Only allowed whenever it points to an actual node (not before_begin or end)
     pointer operator->() const
     {
-      return &m_current_node->key();
+      return &reinterpret_cast<node*>(m_current_node)->key();
     }
 
     bool operator== (const key_iterator& it) const noexcept
@@ -159,20 +161,20 @@ public:
 
   private:
     explicit key_iterator(node_base* current)
-      : m_current_node(reinterpret_cast<node*>(current))
+      : m_current_node(current)
     {}
 
-    node* get_node() noexcept
+    node_base* get_node() noexcept
     {
       return m_current_node;
     }
 
-    const node* get_node() const noexcept
+    const node_base* get_node() const noexcept
     {
       return m_current_node;
     }
 
-    node* m_current_node = nullptr;
+    node_base* m_current_node = nullptr;
   };
 
 public:
@@ -258,8 +260,8 @@ public:
         if (equals(*it, std::forward<Args>(args)...))
         {
           // Clean up new node and leave bucket as is.          
-          std::allocator_traits<NodeAllocator>::destroy(allocator, new_node);
-          std::allocator_traits<NodeAllocator>::deallocate(allocator, new_node, 1);
+          std::allocator_traits<NodeAllocator>::destroy(allocator, static_cast<Key*>(new_node));
+          std::allocator_traits<NodeAllocator>::deallocate(allocator, static_cast<Key*>(new_node), 1);
           return std::make_pair(it, false);
         }
       }
@@ -275,7 +277,7 @@ public:
   /// \brief Removes the element after the given iterator from the list. The returned iterator
   iterator erase_after(NodeAllocator& allocator, const_iterator it)
   {
-    node* current_node = const_cast<node*>(it.get_node());
+    node_base* current_node = const_cast<node_base*>(it.get_node());
     assert(current_node->next() != nullptr); // Cannot erase after the last node.
 
     // Keep track of the node that we should remove.
@@ -298,7 +300,7 @@ public:
     if (!other.empty())
     {
       assert(begin() != other.begin());
-      node* current_node = const_cast<node*>(pos.get_node());
+      node_base* current_node = const_cast<node_base*>(pos.get_node());
 
       // Increment the position now as we are going to change the current_node.
       ++pos;
@@ -306,7 +308,7 @@ public:
       // Sets the current position to be followed by the other bucket list.
       current_node->set_next(other.m_head.next());
 
-      node* after_pos_node = const_cast<node*>(pos.get_node());
+      node_base* after_pos_node = const_cast<node_base*>(pos.get_node());
       if (after_pos_node != nullptr)
       {
         // Find the last node of the other list.
@@ -317,7 +319,7 @@ public:
         }
 
         // Set the last element of other to the position after pos.
-        node* last = before_end.get_node();
+        node_base* last = before_end.get_node();
         last->set_next(after_pos_node);
       }
 
@@ -333,7 +335,7 @@ public:
     if (!other.empty())
     {
       // Sets the current position to be followed by the other bucket list.
-      node* current_node = const_cast<node*>(pos.get_node());
+      node_base* current_node = const_cast<node_base*>(pos.get_node());
       node_base* next_node = current_node->next();
 
       // Make the other head node the start of our bucket after pos.
