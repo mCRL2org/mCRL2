@@ -260,8 +260,8 @@ public:
         if (equals(*it, std::forward<Args>(args)...))
         {
           // Clean up new node and leave bucket as is.          
-          std::allocator_traits<NodeAllocator>::destroy(allocator, static_cast<Key*>(new_node));
-          std::allocator_traits<NodeAllocator>::deallocate(allocator, static_cast<Key*>(new_node), 1);
+          std::allocator_traits<NodeAllocator>::destroy(allocator, new_node);
+          std::allocator_traits<NodeAllocator>::deallocate(allocator, new_node, 1);
           return std::make_pair(it, false);
         }
       }
