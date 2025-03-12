@@ -93,7 +93,7 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    if (forward && x.name() != name)
+    if (forward)
     {
       // Unsound possibly!
       mCRL2log(log::verbose) << "Formula contains other (unsolved) PVI instances in the current equation " << std::endl;
@@ -106,8 +106,9 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
       data::sort_expression_list sort_list(term_list);
       if (sort_list.size() > 0)
       {
-        data::sort_expression expr = data::function_sort(sort_list, data::bool_());
-        result = data::function_symbol(x.name(), expr);
+        data::sort_expression sort_expr = data::function_sort(sort_list, data::bool_());
+        data::function_symbol fs = data::function_symbol(x.name(), sort_expr);
+        result = data::application(fs, x.parameters());
       }
       else
       {
