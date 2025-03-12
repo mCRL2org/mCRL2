@@ -29,15 +29,5 @@ tools:
     output: []
     args: []
     name: pbes2bool
-  t5:
-    input: [l2]
-    output: [l4]
-    args: [-s]
-    name: pbesiteration
-  t6:
-    input: [l4]
-    output: []
-    args: []
-    name: pbes2bool
 result: |
   result = t3.value['solution'] == t4.value['solution']
