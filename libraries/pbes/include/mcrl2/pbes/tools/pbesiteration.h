@@ -16,6 +16,7 @@
 #define MCRL2_PBES_TOOLS_PBESITERATION_H
 
 #include "mcrl2/data/detail/prover/bdd_prover.h"
+#include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -50,17 +51,21 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
 
   core::identifier_string name;
   simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
-  data::data_specification data_spec;
+  data::variable_list var_list;
   std::map<data::variable, propositional_variable_instantiation> m_instantiations;
   bool forward = true;
 
   explicit replace_propositional_variables_builder(simplify_data_rewriter<data::rewriter>& r)
-      : m_pbes_rewriter(r)
+      :
+        m_pbes_rewriter(r)
   {}
 
   void set_name(const core::identifier_string& s) { name = s; }
 
   void set_forward(bool b) { forward = b; }
+
+  void reset_variable_list() { var_list = data::variable_list({}); }
+  data::variable_list get_variable_list() { return var_list; }
 
   void reset_instantiations() { m_instantiations.clear(); }
   std::map<data::variable, propositional_variable_instantiation> instantiations() const { return m_instantiations; }
@@ -93,7 +98,7 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    if (forward)
+    if (forward && x.name() != name)
     {
       // Unsound possibly!
       mCRL2log(log::verbose) << "Formula contains other (unsolved) PVI instances in the current equation " << std::endl;
@@ -101,7 +106,8 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
       atermpp::aterm_list term_list;
       for (const auto& x : params)
       {
-        term_list.push_front(x.sort());
+        atermpp::aterm sort(x.sort());
+        push_back(term_list, sort);
       }
       data::sort_expression_list sort_list(term_list);
       if (sort_list.size() > 0)
@@ -109,10 +115,14 @@ struct replace_propositional_variables_builder : public Builder<replace_proposit
         data::sort_expression sort_expr = data::function_sort(sort_list, data::bool_());
         data::function_symbol fs = data::function_symbol(x.name(), sort_expr);
         result = data::application(fs, x.parameters());
+        data::variable var = data::variable(x.name(), sort_expr);
+        push_back(var_list, var);
       }
       else
       {
-        result = data::variable(x.name(), data::bool_());
+        data::variable var = data::variable(x.name(), data::bool_());
+        push_back(var_list, var);
+        result = var;
       }
       return;
     }
@@ -432,13 +442,19 @@ void perform_iteration(pbes_equation& equation,
     pbes_equation p_eq;
     p_eq.formula() = p;
     p_eq.variable() = eq.variable();
+    replace_substituter.reset_variable_list();
     data::data_expression eq_data = pbestodata(eq, replace_substituter);
     data::data_expression p_data = pbestodata(p_eq, replace_substituter);
     data::data_expression formula = data::and_(data::imp(eq_data, p_data), data::imp(p_data, eq_data));
 
     if (use_smt)
     {
-      smt::answer result = solv->solve(p_eq.variable().parameters(), data::not_(formula), std::chrono::seconds(0));
+    data::variable_list var_list = p_eq.variable().parameters();
+      for (const auto& x : as_set(replace_substituter.get_variable_list()))
+      {
+        var_list.push_front(x);
+      }
+      smt::answer result = solv->solve(var_list, data::not_(formula), std::chrono::seconds(0));
       switch (result)
       {
       case smt::answer::UNSAT:

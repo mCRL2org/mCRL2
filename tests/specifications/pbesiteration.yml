@@ -5,6 +5,8 @@ nodes:
     type: pbes
   l3:
     type: pbes
+  l4:
+    type: pbes
 
 tools:
   t1:
@@ -24,6 +26,16 @@ tools:
     name: pbes2bool
   t4:
     input: [l3]
+    output: []
+    args: []
+    name: pbes2bool
+  t5:
+    input: [l2]
+    output: [l4]
+    args: [-s]
+    name: pbesiteration
+  t6:
+    input: [l4]
     output: []
     args: []
     name: pbes2bool
