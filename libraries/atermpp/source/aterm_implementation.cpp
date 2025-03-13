@@ -48,4 +48,6 @@ aterm_istream::~aterm_istream() {}
 
 aterm_ostream::~aterm_ostream() {}
 
-typename std::aligned_storage<sizeof(aterm_pool), alignof(aterm_pool)>::type atermpp::detail::g_aterm_pool_storage = {};         
+/// Definition of the extern global term pool.
+alignas(aterm_pool)
+typename std::byte g_aterm_pool_storage[sizeof(aterm_pool)] = {};     
