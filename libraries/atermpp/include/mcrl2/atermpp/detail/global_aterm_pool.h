@@ -20,7 +20,7 @@ namespace detail
 
 /// \brief Storage for a global term pool that is not initialized.
 alignas(aterm_pool)
-extern typename std::byte g_aterm_pool_storage[sizeof(aterm_pool)];
+extern std::byte g_aterm_pool_storage[sizeof(aterm_pool)];
 
 /// \brief A reference to the global term pool storage
 static aterm_pool& g_aterm_pool_instance = *static_cast<aterm_pool*>(static_cast<void*>(&g_aterm_pool_storage));
