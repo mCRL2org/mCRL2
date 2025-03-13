@@ -12,7 +12,7 @@ mcrl2_add_cxx_flag(/EHs)         # From MSDN:  Although Windows and Visual C++ s
                            #     that you use ISO-standard C++ exception handling (/EHs or /EHsc) because 
                            #     it makes code more portable and flexible.
 mcrl2_add_cxx_flag(/bigobj)      # Increases object addressable sections capacity to 4,294,967,296 (2^32), possibly required for template heavy code.
-mcrl2_add_cxx_flag(/std:c++17)   # Enable for conformance checking in Visual Studio 2017 for the C++17 standard.
+mcrl2_add_cxx_flag(/std:c++23)   # Enable for conformance checking in Visual Studio 2017 for the C++17 standard.
 mcrl2_add_cxx_flag(/MP)          # Enable multicore compilation.
 mcrl2_add_cxx_flag(/permissive-) # This option disables permissive behaviors, and sets the /Zc compiler options for strict conformance.
 mcrl2_add_cxx_debug_flag(/W3)    # Increase the warning level.
@@ -21,7 +21,7 @@ mcrl2_add_c_flag(/wd4267)
 mcrl2_add_c_flag(/wd4244)
 mcrl2_add_c_flag(/EHs)
 mcrl2_add_c_flag(/bigobj)
-mcrl2_add_c_flag(/std:c++17)
+mcrl2_add_c_flag(/std:c++23)
 mcrl2_add_c_flag(/MP)
 mcrl2_add_c_flag(/permissive-)
 mcrl2_add_c_debug_flag(/W3)
