@@ -50,4 +50,4 @@ aterm_ostream::~aterm_ostream() {}
 
 /// Definition of the extern global term pool.
 alignas(aterm_pool)
-typename std::byte g_aterm_pool_storage[sizeof(aterm_pool)] = {};     
+std::byte atermpp::detail::g_aterm_pool_storage[sizeof(aterm_pool)] = {};     
