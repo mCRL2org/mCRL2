@@ -10,9 +10,9 @@
 #ifndef MCRL2_ATERMPP_ATERM_IO_H
 #define MCRL2_ATERMPP_ATERM_IO_H
 
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/utilities/type_traits.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/detail/concepts.h"
 
 namespace atermpp
 {
@@ -23,7 +23,10 @@ namespace atermpp
 using aterm_transformer = aterm(const aterm&);
 
 /// \brief The default transformer that maps each term to itself.
-inline aterm identity(const aterm& x) { return x; }
+inline aterm identity(const aterm& x)
+{
+  return x;
+}
 
 /// \brief The general aterm stream interface, which enables the use of a transformer to
 ///        change the written/read terms.
@@ -67,14 +70,31 @@ public:
 // These free functions provide input/output operators for these streams.
 
 /// \brief Sets the given transformer to be applied to following reads.
-inline aterm_istream& operator>>(aterm_istream& stream, aterm_transformer transformer) { stream.set_transformer(transformer); return stream; }
-inline aterm_ostream& operator<<(aterm_ostream& stream, aterm_transformer transformer) { stream.set_transformer(transformer); return stream; }
+inline aterm_istream& operator>>(aterm_istream& stream, aterm_transformer transformer)
+{
+  stream.set_transformer(transformer);
+  return stream;
+}
+inline aterm_ostream& operator<<(aterm_ostream& stream, aterm_transformer transformer)
+{
+  stream.set_transformer(transformer);
+  return stream;
+}
 
 /// \brief Write the given term to the stream.
-inline aterm_ostream& operator<<(aterm_ostream& stream, const aterm& term) { stream.put(term); return stream; }
+inline aterm_ostream& operator<<(aterm_ostream& stream, const aterm& term)
+{
+  stream.put(term);
+  return stream;
+}
 
-/// \brief Read the given term from the stream, but for aterm_list we want to use a specific one that performs validation (defined below).
-inline aterm_istream& operator>>(aterm_istream& stream, aterm& term) { stream.get(term); return stream; }
+/// \brief Read the given term from the stream, but for aterm_list we want to use a specific one that performs
+/// validation (defined below).
+inline aterm_istream& operator>>(aterm_istream& stream, aterm& term)
+{
+  stream.get(term);
+  return stream;
+}
 
 // Utility functions
 
@@ -84,15 +104,12 @@ class aterm_stream_state
 {
 public:
   aterm_stream_state(aterm_stream& stream)
-    : m_stream(stream)
+      : m_stream(stream)
   {
     m_transformer = stream.get_transformer();
   }
 
-  ~aterm_stream_state()
-  {
-    m_stream.set_transformer(m_transformer);
-  }
+  ~aterm_stream_state() { m_stream.set_transformer(m_transformer); }
 
 private:
   aterm_stream& m_stream;
@@ -100,9 +117,8 @@ private:
 };
 
 /// \brief Write any container (that is not an aterm itself) to the stream.
-template<typename T,
-  typename std::enable_if_t<mcrl2::utilities::is_iterable_v<T>, int> = 0,
-  typename std::enable_if_t<!std::is_base_of<aterm, T>::value, int> = 0>
+template <typename T>
+  requires std::ranges::range<T> && (!IsATerm<T>)
 inline aterm_ostream& operator<<(aterm_ostream& stream, const T& container)
 {
   // Write the number of elements, followed by each element in the container.
@@ -117,9 +133,8 @@ inline aterm_ostream& operator<<(aterm_ostream& stream, const T& container)
 }
 
 /// \brief Read any container (that is not an aterm itself) from the stream.
-template<typename T,
-  typename std::enable_if_t<mcrl2::utilities::is_iterable_v<T>, int> = 0,
-  typename std::enable_if_t<!std::is_base_of<aterm, T>::value, int> = 0>
+template <typename T>
+  requires std::ranges::range<T> && (!IsATerm<T>)
 inline aterm_istream& operator>>(aterm_istream& stream, T& container)
 {
   // Insert the next nof_elements into the container.
@@ -137,18 +152,40 @@ inline aterm_istream& operator>>(aterm_istream& stream, T& container)
   return stream;
 }
 
-template<typename T>
-inline aterm_ostream& operator<<(aterm_ostream&& stream, const T& t) { stream << t; return stream; }
+template <typename T>
+inline aterm_ostream& operator<<(aterm_ostream& stream, const T& t)
+{
+  stream << t;
+  return stream;
+}
 
-template<typename T>
-inline aterm_istream& operator>>(aterm_istream&& stream, T& t) { stream >> t; return stream; }
+template <typename T>
+inline aterm_istream& operator>>(aterm_istream& stream, T& t)
+{
+  stream >> t;
+  return stream;
+}
+
+// r-value forwarding to the streaming operators, used for convenience.
+template <typename S, typename T>
+inline S&& operator<<(S&& stream, const T& t)
+{
+  stream << t;
+  return stream;
+}
+
+template <typename S, typename T>
+inline S&& operator>>(S&& stream, T& t)
+{
+  stream >> t;
+  return stream;
+}
 
 /// \brief Sends the name of a function symbol to an ostream.
 /// \param out The out stream.
 /// \param f The function symbol to be output.
 /// \return The stream.
-inline
-std::ostream& operator<<(std::ostream& out, const function_symbol& f)
+inline std::ostream& operator<<(std::ostream& out, const function_symbol& f)
 {
   return out << f.name();
 }
@@ -205,7 +242,6 @@ inline aterm read_appl_from_string(const std::string& s)
   assert(a.type_is_appl());
   return a;
 }
-
 
 } // namespace atermpp
 
