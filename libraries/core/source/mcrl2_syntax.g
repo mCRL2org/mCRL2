@@ -232,29 +232,8 @@ mCRL2SpecElt
   | ProcSpec                                                     // Process specification
   ;
 
-//--- Boolean equation system
-
-BesSpec: BesEqnSpec BesInit ;                                    // Boolean equation system
-
-BesEqnSpec: 'bes' BesEqnDecl+ ;                                  // Boolean equation declaration
-
-BesEqnDecl: FixedPointOperator BesVar '=' BesExpr ';' ;          // Boolean fixed point equation
-
-BesVar: Id ;                                                     // BES variable
-
-BesExpr
-  : BesVar                                                       // Boolean variable
-  | 'true'                                                       // True
-  | 'false'                                                      // False
-  | BesExpr ('=>' $binary_op_right 2) BesExpr                    // Implication
-  | BesExpr ('||' $binary_op_right 3) BesExpr                    // Disjunction
-  | BesExpr ('&&' $binary_op_right 4) BesExpr                    // Conjunction
-  | '!' BesExpr              $unary_right  5                     // Negation
-  | '(' BesExpr ')'                                              // Brackets
-  ;
-
-BesInit: 'init' BesVar ';' ;                                     // Initial BES variable
-
+//BesInit: 'init' BesVar ';' ;                                     // Initial BES variable
+//
 //--- Parameterized Boolean equation systems
 
 PbesSpec: DataSpec? GlobVarSpec? PbesEqnSpec PbesInit ;          // PBES specification
@@ -291,37 +270,6 @@ PbesExpr
   | PbesExpr ('&&' $binary_op_right 24) PbesExpr                 // Conjunction
   | '!' PbesExpr                               $unary_right 25   // Negation
   ;
-
-//--- Real equation system
-
-ResSpec: ResEqnSpec ResInit ;                                    // Real equation system
-
-ResEqnSpec: 'res' ResEqnDecl+ ;                                  // Real equation declaration
-
-ResEqnDecl: FixedPointOperator ResVar '=' ResExpr ';' ;          // Real fixed point equation
-
-ResVar: Id ;                                                     // RES variable
-
-ResExpr
-  : ResVar                                                       // RES variable
-  | DataValExpr                                                  // Real value
-  | 'true'                                                       // True, representing infinity
-  | 'false'                                                      // False, also representing minus infinity
-  | BesExpr ('=>' $binary_op_right 2) BesExpr                    // Implication
-  | BesExpr ('||' $binary_op_right 3) BesExpr                    // Disjunction
-  | BesExpr ('&&' $binary_op_right 4) BesExpr                    // Conjunction
-  | BesExpr ('+' $binary_op_right 4) BesExpr                     // Conjunction
-  | '-' BesExpr              $unary_right  5                     // Unary minus
-  | DataValExpr ('*' $unary_op_right 6) BesExpr                  // Left multiplication with a positive constant
-  | BesExpr ('*' $unary_op_left 6) DataValExpr                   // Right multiplication with a positive constant
-  | 'eqinf' '(' BesExpr ')'                                      // Equal infinity
-  | 'eqninf' '(' BesExpr ')'                                     // Equal to infinity
-  | 'condsm' '(' BesExpr ',' BesExpr ',' BesExpr ')'             // Conditional smaller than 0 with or 
-  | 'condeq' '(' BesExpr ',' BesExpr ',' BesExpr ')'             // Conditional smaller equal 0 with and 
-  | '(' BesExpr ')'                                              // Brackets
-  ;
-
-ResInit: 'init' ResVar ';' ;                                     // Initial BES variable
 
 //--- Parameterized real equation systems
 

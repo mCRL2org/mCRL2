@@ -660,6 +660,8 @@ void Graph::discardExploration()
   {
     node.m_active = false;
   }
+  m_stable = false;
+  m_hasNewFrame = true;
 
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
 }
@@ -680,6 +682,7 @@ void Graph::toggleOpen(std::size_t index)
     else
     {
       m_exploration->expand(index);
+      setStable(false);
     }
     m_forceUpdate = true;
   }

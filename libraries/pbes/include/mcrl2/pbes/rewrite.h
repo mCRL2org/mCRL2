@@ -81,7 +81,7 @@ struct rewrite_pbes_expressions_with_substitution_builder: public Builder<rewrit
 
 template <template <class> class Builder, class Rewriter, class Substitution>
 rewrite_pbes_expressions_with_substitution_builder<Builder, Rewriter, Substitution>
-make_rewrite_pbes_expressions_with_substitution_builder(const Rewriter& R, Substitution sigma)
+make_rewrite_pbes_expressions_with_substitution_builder(const Rewriter& R, Substitution& sigma)
 {
   return rewrite_pbes_expressions_with_substitution_builder<Builder, Rewriter, Substitution>(R, sigma);
 }

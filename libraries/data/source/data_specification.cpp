@@ -318,6 +318,7 @@ void sort_specification::import_system_defined_sort(const sort_expression& sort)
   {
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
     import_system_defined_sort(sort_machine_word::machine_word());
+    import_system_defined_sort(sort_nat::natnatpair());
 #else
     // Nat requires NatPair.
     import_system_defined_sort(sort_nat::natpair());

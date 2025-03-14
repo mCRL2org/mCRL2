@@ -30,6 +30,16 @@ if(POLICY CMP0110)
   cmake_policy(SET CMP0110 NEW)
 endif()
 
+if(POLICY CMP0167)
+  # TODO: We rely on the cmake provided boost package, which is not compatible with the new policy.
+  cmake_policy(SET CMP0167 OLD)
+endif()
+
+if(POLICY CMP0175)
+  # Exactly one of PRE_BUILD, PRE_LINK, or POST_BUILD must be given. Assuming POST_BUILD to preserve backward compatibility.
+  cmake_policy(SET CMP0175 OLD)
+endif()
+
 # This path is used for FindXXX modules and common cmake function definitions.
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 enable_testing()
@@ -81,6 +91,7 @@ mark_as_advanced(
   MCRL2_ENABLE_SOUNDNESS_CHECKS 
   MCRL2_ENABLE_STABLE
   MCRL2_ENABLE_STD_CHECKS
+  MCRL2_ENABLE_STD_CHECKS_BACKTRACE
   MCRL2_ENABLE_THREADSANITIZER
 )
 

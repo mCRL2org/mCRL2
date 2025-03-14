@@ -104,7 +104,7 @@ class term_not_in_normal_form
 
     data_expression& normal_form() const
     {
-      data_expression& local_store = this_rewriter->m_rewrite_stack.new_stack_position();
+      data_expression& local_store = this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();
       rewrite_aux<false>(local_store, m_term, this_rewriter);
       return local_store;
     }
@@ -135,9 +135,9 @@ class delayed_abstraction
 
     data_expression& normal_form() const
     {
-      data_expression& t = this_rewriter->m_rewrite_stack.new_stack_position();
+      data_expression& t = this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();
       make_abstraction(t, m_binding_operator, m_variables, local_rewrite(m_body));
-      data_expression& result = this_rewriter->m_rewrite_stack.new_stack_position();
+      data_expression& result = this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();
       rewrite_abstraction_aux(result, atermpp::down_cast<abstraction>(t),t,this_rewriter);
       return result;
     }

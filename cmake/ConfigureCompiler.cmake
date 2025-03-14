@@ -7,8 +7,8 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
   # We do not test on GCC9 directly, but it used on the mastodont.
-  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 9.0)
-    message(FATAL_ERROR "GCC version must be at least 9.0.")
+  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 11.0)
+    message(FATAL_ERROR "GCC version must be at least 11.0.")
   endif()
   include(ConfigureUNIX)
 
@@ -22,8 +22,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   # The following should actually be version 10.0.1, but then VERSION_LESS does not handle AppleClang 11 correctly.
-  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 10.0)
-    message(FATAL_ERROR "AppleClang version must be at least 10.0.1")
+  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 14.0)
+    message(FATAL_ERROR "AppleClang version must be at least 14.0")
   endif()
   include(ConfigureUNIX)
 else()

@@ -1550,9 +1550,9 @@ BOOST_AUTO_TEST_CASE(bound_variables_in_set_comprehension)   // The toolset up t
   }
 }   
 
-BOOST_AUTO_TEST_CASE(bound_variables_in_whr_clause)   // The toolset up to 2025 did not properly rename variables in where clauses
-                                                      // when substituting for these variables when they would occur in the lhs of the rhs
-                                                      // of substitution.
+BOOST_AUTO_TEST_CASE(bound_variables_in_whr_clause1)   // The toolset up to 2025 did not properly rename variables in where clauses
+                                                       // when substituting for these variables when they would occur in the lhs of the rhs
+                                                       // of substitution.
 {             
   std::string s(
   "sort D;\n"
@@ -1572,7 +1572,7 @@ BOOST_AUTO_TEST_CASE(bound_variables_in_whr_clause)   // The toolset up to 2025 
   v.push_back(data::variable("c", basic_sort("D")));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   { 
-    std::cerr << "  Where clause going astray. " << *strat << std::endl;
+    std::cerr << "  Where clause going astray (1). " << *strat << std::endl;
     data::rewriter R(specification, *strat);
     
     data::data_expression e1(parse_data_expression("f(a)", v, specification));
@@ -1587,6 +1587,32 @@ BOOST_AUTO_TEST_CASE(bound_variables_in_whr_clause)   // The toolset up to 2025 
     data::data_expression e3(parse_data_expression("f(c)", v, specification)); // rewrites "trivially" to c == b.
     data::data_expression f3(parse_data_expression("c == b", v, specification)); 
     data_rewrite_test(R, e3, f3);
+  } 
+}   
+
+BOOST_AUTO_TEST_CASE(bound_variables_in_whr_clause2)   // Another example showing that rewriting where clauses can go astray.
+{             
+  std::string s( 
+  "map f:List(Nat)#Nat->Nat;\n"
+  "\n"
+  "var e,n:Nat;\n"
+  "    L:List(Nat);\n"
+  "eqn f([],n) = n;\n"
+  "    f(e|>L,n) = f(L,a)+n whr a=n+1 end;\n"
+  );
+
+  data::detail::set_enumerator_iteration_limit(5);
+  data_specification specification(parse_data_specification(s));
+    
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  { 
+    std::cerr << "  Where clause going astray (2). " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+    
+    data::data_expression e(parse_data_expression("f([1,2],0)==3", specification));
+    data::data_expression f(parse_data_expression("true", specification)); // The term f([1,2],0) must rewrite to 3. With erroneous where rewriting this will be 4.
+    data_rewrite_test(R, e, f);
   } 
 }   
 

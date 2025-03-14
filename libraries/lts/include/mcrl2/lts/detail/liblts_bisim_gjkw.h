@@ -1501,38 +1501,45 @@ class part_trans_t
     void swap_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2)
     {                                                                           assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
                                                                                 assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
-        // swap contents
-        // XXXXXX IS NOT ALLOWED.
-        // B_to_C_entry const temp_entry(*pos1->B_to_C);
-        // *pos1->B_to_C = *pos2->B_to_C;
-        // *pos2->B_to_C = temp_entry;
-        std::swap(*pos1->B_to_C,*pos2->B_to_C);
-        // swap pointers to contents
-        B_to_C_iter_t const temp_iter(pos1->B_to_C);
-        pos1->B_to_C = pos2->B_to_C;
-        pos2->B_to_C = temp_iter;                                               assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+        if (pos1 != pos2)
+        {
+            // swap contents
+            std::swap(*pos1->B_to_C,*pos2->B_to_C);
+            // swap pointers to contents
+            B_to_C_iter_t const temp_iter(std::move(pos1->B_to_C));
+            pos1->B_to_C = std::move(pos2->B_to_C);
+            pos2->B_to_C = std::move(temp_iter);
+        }                                                                       assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
                                                                                 assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
     }
 
-    // *pos1 -> *pos2 -> *pos3 -> *pos1
+    // *pos1 -> *pos2 -> *pos3 -> *pos1, where pos3 is between pos1 and pos2
     void swap3_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2,
                                                         succ_iter_t const pos3)
-    {                                                                           assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+    {                                                                           assert((pos1->B_to_C <= pos3->B_to_C && pos3->B_to_C <= pos2->B_to_C) ||
+                                                                                       (pos2->B_to_C <= pos3->B_to_C && pos3->B_to_C <= pos1->B_to_C));
+        if (pos2 == pos3 || pos1 == pos3)
+        {
+          swap_B_to_C(pos1, pos2);
+        }
+        else
+        {                                                                       assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
                                                                                 assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
                                                                                 assert(succ.end() > pos3);  assert(pos3->B_to_C->pred->succ == pos3);
-                                                                                assert(pos1 != pos2 || pos1 == pos3);
-        // swap contents
-        B_to_C_entry const temp_entry(*pos1->B_to_C);
-        *pos1->B_to_C = *pos3->B_to_C;
-        *pos3->B_to_C = *pos2->B_to_C;
-        *pos2->B_to_C = temp_entry;
-        // swap pointers to contents
-        B_to_C_iter_t const temp_iter(pos2->B_to_C);
-        pos2->B_to_C = pos3->B_to_C;
-        pos3->B_to_C = pos1->B_to_C;
-        pos1->B_to_C = temp_iter;                                               assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
+                                                                                assert(pos1 != pos2);  assert(pos1 != pos3);  assert(pos2 != pos3);
+            // swap contents
+            B_to_C_entry const temp_entry(std::move(*pos1->B_to_C));
+            *pos1->B_to_C = std::move(*pos3->B_to_C);
+            *pos3->B_to_C = std::move(*pos2->B_to_C);
+            *pos2->B_to_C = std::move(temp_entry);
+            // swap pointers to contents
+            B_to_C_iter_t const temp_iter(std::move(pos2->B_to_C));
+            pos2->B_to_C = std::move(pos3->B_to_C);
+            pos3->B_to_C = std::move(pos1->B_to_C);
+            pos1->B_to_C = std::move(temp_iter);                                assert(succ.end() > pos1);  assert(pos1->B_to_C->pred->succ == pos1);
                                                                                 assert(succ.end() > pos2);  assert(pos2->B_to_C->pred->succ == pos2);
                                                                                 assert(succ.end() > pos3);  assert(pos3->B_to_C->pred->succ == pos3);
+        }
     }
   public:
     part_trans_t(trans_type m)

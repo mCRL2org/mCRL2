@@ -498,6 +498,8 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,              
     }
     ++new_B_to_C_slice->end;
     ++old_B_to_C_slice->begin;                                                  assert(new_B_to_C_slice->end == old_B_to_C_slice->begin);
+    swap_B_to_C(pred_iter->succ, new_B_to_C_pos->pred->succ);
+    new_B_to_C_pos->B_to_C_slice = new_B_to_C_slice;
     if (old_B_to_C_slice->begin == old_B_to_C_slice->end)
     {
         // this was the last transition from RfnB to SpC
@@ -510,8 +512,6 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,              
         }                                                                       assert(RfnB->to_constln.begin() == old_B_to_C_slice);
         RfnB->to_constln.erase(old_B_to_C_slice);
     }
-    swap_B_to_C(pred_iter->succ, new_B_to_C_pos->pred->succ);
-    new_B_to_C_pos->B_to_C_slice = new_B_to_C_slice;
     // adapt the outgoing transition array:
     // move the transition to the beginning
     succ_iter_t const old_out_pos = pred_iter->succ;                            assert(succ.end() > old_out_pos);
@@ -682,7 +682,7 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
             /* Move the transition to a new slice:                           */ assert(succ.end()>succ_iter); assert(succ_iter->B_to_C->pred->succ==succ_iter);
             B_to_C_iter_t const old_pos = succ_iter->B_to_C;
             B_to_C_desc_iter_t const old_B_to_C_slice = old_pos->B_to_C_slice;
-            B_to_C_iter_t const after_new_pos = old_B_to_C_slice->end;          assert(B_to_C.end() > old_pos);
+            B_to_C_iter_t const after_new_pos = old_B_to_C_slice->end;          assert(B_to_C.end() > old_pos);  assert(after_new_pos > old_pos);
                                                                                 assert(old_pos->pred->succ->B_to_C == old_pos);
                                                                                 assert(B_to_C.end() == after_new_pos ||
                                                                                                            after_new_pos->pred->succ->B_to_C == after_new_pos);
@@ -856,7 +856,7 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
             B_to_C_desc_iter_t const old_B_to_C_slice = old_pos->B_to_C_slice;
             B_to_C_iter_t new_pos = old_B_to_C_slice->begin;                    assert(B_to_C.end() > old_pos); assert(old_pos->pred->succ->B_to_C == old_pos);
                                                                                 assert(B_to_C.end() > new_pos); assert(new_pos->pred->succ->B_to_C == new_pos);
-            B_to_C_desc_iter_t new_B_to_C_slice;
+            B_to_C_desc_iter_t new_B_to_C_slice;                                assert(new_pos <= old_pos);
             if (B_to_C.begin() == new_pos ||
                     new_pos[-1].pred->source->block != NewB ||
                         new_pos[-1].pred->succ->target->constln() !=
@@ -2763,7 +2763,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
 
 /*---------------------------- handle red states ----------------------------*/
 
-/// The red coroutine find red states in a block, i. e. states that can reach
+/// The red coroutine finds red states in a block, i. e. states that can reach
 /// the splitter.  It is one of the two coroutines that together implement
 /// the fast refinement of block `RfnB` into states that can reach the splitter
 /// (red states) and those that cannot (blue states).

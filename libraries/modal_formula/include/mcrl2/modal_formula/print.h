@@ -602,6 +602,16 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     enable_val();
   }
 
+  void apply(const data::untyped_data_parameter& x)
+  {
+    disable_val();
+    derived().enter(x);
+    derived().apply(x.name());
+    print_list(x.arguments(), "(", ")", ", ", false);
+    derived().leave(x);
+    enable_val();
+  }
+
   // TODO: merge this function with the version in data/print.h (?)
   void print_assignments(const data::assignment_list& assignments)
   {

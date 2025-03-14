@@ -526,7 +526,6 @@ namespace detail
         {                                                                       assert(!empty());
             return first->prev->data;
         }
-                                                                                #ifndef NDEBUG
                                                                                     [[nodiscard]]
                                                                                     bool check_linked_list() const
                                                                                     {
@@ -550,7 +549,6 @@ namespace detail
                                                                                         }
                                                                                         return first->prev == i.ptr;
                                                                                     }
-                                                                                #endif
         /// \brief construct a new list entry before pos
         /// \details If pos==end(), construct a new list entry at the end
         template<class... Args>

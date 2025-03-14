@@ -84,7 +84,8 @@ class rewrite_stack : protected atermpp::vector<data_expression>
       m_stack_size=m_stack_size-distance;
     }
 
-    data_expression& new_stack_position()
+    template <class T>
+    T& new_stack_position()
     { 
       if (m_stack_size+1>=m_reserved_stack_size)
       { 
@@ -92,7 +93,7 @@ class rewrite_stack : protected atermpp::vector<data_expression>
       }
       data_expression& result=operator[](m_stack_size);
       m_stack_size++;
-      return result;
+      return dynamic_cast<T&>(result);
     }
 
     data_expression& top()

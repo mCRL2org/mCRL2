@@ -426,7 +426,9 @@ private:
       {
         state_flags[s] = false;
       }
-      BL.clear();
+      // BL.clear(); MOET DIT HIER STAAN? Jan Friso. We itereren over BL...
+      // Waarschijnlijk moet het een regel lager, maar bij de enige aanroep wordt
+      // BL ook gecleared. Runnen met safe iterators laat zien dat dit fout is. 
     };
   }
 

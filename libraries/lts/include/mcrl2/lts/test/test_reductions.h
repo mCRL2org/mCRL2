@@ -32,7 +32,7 @@ class expected_sizes
     bool is_deterministic;
 };
 
-static bool test_lts(const std::string& test_description,
+bool test_lts(const std::string& test_description,
               const lts::lts_aut_t& l,
               std::size_t expected_label_count,
               std::size_t expected_state_count,

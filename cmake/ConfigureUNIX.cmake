@@ -27,9 +27,11 @@ if (MCRL2_ENABLE_STD_CHECKS)
     # Enable libstdc++ debug checks.
     add_compile_definitions(_GLIBCXX_DEBUG=1)
     add_compile_definitions(_GLIBCXX_DEBUG_PEDANTIC=1)
-    add_compile_definitions(_FORTIFY_SOURCE=3)
     add_compile_definitions(_GLIBCXX_ASSERTIONS=1)
-    add_compile_definitions(_GLIBCXX_DEBUG_BACKTRACE=1)
+
+    if (MCRL2_ENABLE_STD_CHECKS_BACKTRACE)
+      add_compile_definitions(_GLIBCXX_DEBUG_BACKTRACE=1)
+    endif()
   else()
     # For libc++ (the LLVM standard library, what a naming scheme) there is also a debug mode
     add_compile_definitions(_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG)
@@ -85,18 +87,20 @@ endif()
 mcrl2_add_cxx_flag(-Wno-switch)
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
-  add_compile_options(-fsanitize=address)
-  add_compile_options(-fno-omit-frame-pointer)
+  add_compile_options(-fsanitize=address,undefined,leak)
+  mcrl2_add_cxx_flag(-fno-omit-frame-pointer)
+  mcrl2_add_cxx_flag(-fsanitize-address-use-after-scope)
+  mcrl2_add_cxx_flag(-fno-sanitize-recover=undefined,address)
 endif()
 
 if(MCRL2_ENABLE_MEMORYSANITIZER)
   add_compile_options(-fsanitize=memory)
-  add_compile_options(-fno-omit-frame-pointer)
+  mcrl2_add_cxx_flag(-fno-omit-frame-pointer)
 endif()
 
 if(MCRL2_ENABLE_THREADSANITIZER)
   add_compile_options(-fsanitize=thread)
-  add_compile_options(-fno-omit-frame-pointer)
+  mcrl2_add_cxx_flag(-fno-omit-frame-pointer)
 endif()
 
 ##---------------------------------------------------
@@ -125,7 +129,7 @@ elseif(NOT ${MCRL2_IS_CLANG})
 endif()
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
-  add_link_options(-fsanitize=address)
+  add_link_options(-fsanitize=address,undefined,leak)
 endif()
 
 if(MCRL2_ENABLE_MEMORYSANITIZER)
