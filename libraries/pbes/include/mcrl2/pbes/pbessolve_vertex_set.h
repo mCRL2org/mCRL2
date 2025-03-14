@@ -215,6 +215,13 @@ struct vertex_set
       assert(self_check());
     }
 
+    /// @brief Sorts the set of vertices, but resets the include set.
+    void sort()
+    {
+      std::sort(m_vertices.begin(), m_vertices.end());
+      assert(self_check());
+    }
+
     void clear()
     {
       m_vertices.clear();
@@ -484,6 +491,10 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
     }
   }
   mCRL2log(log::debug) << "Extracted minimal structure graph " << core::detail::print_set(done) << std::endl;
+  for (const auto& index : done) {
+    mCRL2log(log::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
+  }
+
   return done;
 }
 
@@ -542,6 +553,10 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(
     }
   }
   mCRL2log(log::debug) << "\nExtracted minimal structure graph " << core::detail::print_set(done) << std::endl;
+  for (const auto& index : done) {
+    mCRL2log(log::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
+  }
+
   return done;
 }
 
