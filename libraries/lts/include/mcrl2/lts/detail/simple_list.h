@@ -379,10 +379,6 @@ namespace detail
             {
                 return ptr == other.ptr;
             }
-            bool operator!=(const const_iterator& other) const
-            {
-                return !operator==(other);
-            }
         };
 
         /// \brief iterator class for simple_list
@@ -394,8 +390,6 @@ namespace detail
             using typename const_iterator::reference;
             using typename const_iterator::difference_type;
             using typename const_iterator::iterator_category;
-            using const_iterator::operator==;
-            using const_iterator::operator!=;
           protected:
             iterator(entry* const new_ptr) : const_iterator(new_ptr)  {  }
 
@@ -436,8 +430,7 @@ namespace detail
             using typename iterator::iterator_category;
             using iterator::operator*;
             using iterator::operator->;
-            using iterator::operator==;
-            using iterator::operator!=;
+            using const_iterator::operator==;
 
             iterator_or_null() : iterator()  {  }
 
@@ -454,11 +447,6 @@ namespace detail
             {                                                                   assert(nullptr != other);
                 // It is allowed to call this even if is_null().
                 return !is_null() && operator->() == other;
-            }
-
-            bool operator!=(const T* const other) const
-            {
-                return !operator==(other);
             }
 
             void operator=(std::nullptr_t)
@@ -949,12 +937,6 @@ namespace detail
                 ++other_it;
             }
             return end()==other_it;
-        }
-
-
-        bool operator!=(const simple_list& other) const
-        {
-            return !operator==(other);
         }
     };
 
