@@ -16,10 +16,10 @@ template<typename T>
 concept IsATerm = requires(T t)
 {
     /// Term must be derived from the base aterm.
-    std::is_base_of<atermpp::unprotected_aterm_core, T>::value;
+    requires std::is_base_of<atermpp::unprotected_aterm_core, T>::value;
 
     /// aterm cast cannot be applied types derived from aterms where extra fields are added.
-    sizeof(T) == sizeof(atermpp::unprotected_aterm_core);
+    requires sizeof(T) == sizeof(atermpp::unprotected_aterm_core);
 };
 
 template<typename T>
