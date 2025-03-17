@@ -12,7 +12,7 @@
 
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/detail/concepts.h"
+#include "mcrl2/atermpp/concepts.h"
 
 namespace atermpp
 {
