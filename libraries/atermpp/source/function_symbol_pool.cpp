@@ -9,8 +9,6 @@
 
 #include "mcrl2/atermpp/detail/function_symbol_pool.h"
 
-#include "mcrl2/utilities/unused.h"
-
 #include <chrono>
 
 using namespace atermpp;
