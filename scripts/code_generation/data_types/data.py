@@ -707,9 +707,8 @@ ${cases}
 
       /// \\brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      void ${functionname}_application(data_expression& result, const data_expression& a)
+      void ${functionname}_application(data_expression& result, [[maybe_unused]] const data_expression& a)
       {
-        static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==${functionname}());
         ${functionname}_manual_implementation(result${domain_parameters});
@@ -1970,14 +1969,11 @@ class mapping_specification():
         code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
       code += "      /// \\return All system defined mappings for that can be used in mCRL2 specificationis %s\n" % (escape(namespace_string))
       code += "      inline\n"
-      code += "      function_symbol_vector %s_mCRL2_usable_mappings(%s)\n" % (namespace_string, sort_parameters)
+      code += "      function_symbol_vector %s_mCRL2_usable_mappings([[maybe_unused]] %s)\n" % (namespace_string, sort_parameters)
       code += "      {\n"
       code += "        function_symbol_vector result;\n"
       add_mappings_code = self.declarations.mCRL2_usable_functions(spec) + (spec.sort_specification.structured_sort_mapping_code())
-      if add_mappings_code == "":
-        for s in self.declarations.sort_parameters(spec):
-          code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
-      else:
+      if add_mappings_code != "":
         code += add_mappings_code
       code += "        return result;\n"
       code += "      }\n"
@@ -1989,14 +1985,11 @@ class mapping_specification():
         code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
       code += "      /// \\return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for %s\n" % (escape(namespace_string))
       code += "      inline\n"
-      code += "      implementation_map %s_cpp_implementable_mappings(%s)\n" % (namespace_string, sort_parameters)
+      code += "      implementation_map %s_cpp_implementable_mappings([[maybe_unused]] %s)\n" % (namespace_string, sort_parameters)
       code += "      {\n"
       code += "        implementation_map result;\n"
       add_mappings_code = self.declarations.cplusplus_implementable_functions(spec, data_parameters)
-      if add_mappings_code == "":
-        for s in self.declarations.sort_parameters(spec):
-          code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
-      else:
+      if add_mappings_code != "":
         code += add_mappings_code
       code += "        return result;\n"
       code += "      }\n"
@@ -2044,14 +2037,11 @@ class constructor_specification():
       code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
     code += "      /// \\return All system defined constructors for %s.\n" % (escape(namespace_string))
     code += "      inline\n"
-    code += "      function_symbol_vector %s_generate_constructors_code(%s)\n" % (namespace_string,sort_parameters)
+    code += "      function_symbol_vector %s_generate_constructors_code([[maybe_unused]] %s)\n" % (namespace_string,sort_parameters)
     code += "      {\n"
     code += "        function_symbol_vector result;\n"
     add_constructors_code = self.declarations.generator_code(spec) + (spec.sort_specification.structured_sort_constructor_code())
-    if add_constructors_code == "":
-      for s in self.declarations.sort_parameters(spec):
-        code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
-    else:
+    if add_constructors_code != "":
       code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
       code += "%s\n" % (self.declarations.generator_code(spec, True))
     code += "        return result;\n"
@@ -2062,14 +2052,11 @@ class constructor_specification():
       code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
     code += "      /// \\return All system defined constructors that can be used in an mCRL2 specification for %s.\n" % (escape(namespace_string))
     code += "      inline\n"
-    code += "      function_symbol_vector %s_mCRL2_usable_constructors(%s)\n" % (namespace_string,sort_parameters)
+    code += "      function_symbol_vector %s_mCRL2_usable_constructors([[maybe_unused]] %s)\n" % (namespace_string,sort_parameters)
     code += "      {\n"
     code += "        function_symbol_vector result;\n"
     add_constructors_code = self.declarations.mCRL2_usable_functions(spec) + (spec.sort_specification.structured_sort_constructor_code())
-    if add_constructors_code == "":
-      for s in self.declarations.sort_parameters(spec):
-        code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
-    else:
+    if add_constructors_code != "":
       code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
       code += "%s\n" % (self.declarations.mCRL2_usable_functions(spec, True))
     code += "        return result;\n"
@@ -2082,14 +2069,11 @@ class constructor_specification():
       code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
     code += "      /// \\return All system defined constructors that are to be implemented in C++ for %s.\n" % (escape(namespace_string))
     code += "      inline\n"
-    code += "      implementation_map %s_cpp_implementable_constructors(%s)\n" % (namespace_string,sort_parameters)
+    code += "      implementation_map %s_cpp_implementable_constructors([[maybe_unused]] %s)\n" % (namespace_string,sort_parameters)
     code += "      {\n"
     code += "        implementation_map result;\n"
     add_constructors_code = self.declarations.cplusplus_implementable_functions(spec,data_parameters) + (spec.sort_specification.structured_sort_constructor_code())
-    if add_constructors_code == "":
-      for s in self.declarations.sort_parameters(spec):
-        code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
-    else:
+    if add_constructors_code != "":
       code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
       code += "%s\n" % (self.declarations.cplusplus_implementable_functions(spec, data_parameters, True))
     code += "        return result;\n"
