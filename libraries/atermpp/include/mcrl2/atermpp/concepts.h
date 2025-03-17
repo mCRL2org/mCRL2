@@ -11,6 +11,8 @@
 
 #include "mcrl2/atermpp/aterm_core.h"
 
+namespace atermpp {
+
 /// Concept that can be used to indicate that T is of an ATerm type.
 template<typename T>
 concept IsATerm = requires(T t)
@@ -30,3 +32,5 @@ concept IsTermConverter = requires(T t)
     std::is_invocable<T, atermpp::unprotected_aterm_core>::value;
 
 };
+
+} // namespace atermpp
