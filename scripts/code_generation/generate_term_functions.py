@@ -173,7 +173,7 @@ def find_functions(rules):
 # generates C++ code for checking if terms are in the right format
 #
 def generate_soundness_check_functions(rules, filename, skip_list):
-    CHECK_RULE = '''template <IsATerm Term>
+    CHECK_RULE = '''template <atermpp::IsATerm Term>
 bool check_rule_%(name)s([[maybe_unused]] const Term& t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -186,7 +186,7 @@ bool check_rule_%(name)s([[maybe_unused]] const Term& t)
 '''
 
     CHECK_TERM = '''// %(name)s(%(arguments)s)
-template <IsATerm Term>
+template <atermpp::IsATerm Term>
 bool %(check_name)s([[maybe_unused]] const Term& t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
@@ -231,7 +231,7 @@ bool %(check_name)s([[maybe_unused]] const Term& t)
             'name'      : name,
             'body'      : body
         }
-        ptext = ptext + 'template <typename Term> bool check_rule_%s(const Term& t);\n' % rule.name()
+        ptext = ptext + 'template <atermpp::IsATerm Term> bool check_rule_%s(const Term& t);\n' % rule.name()
 
     for f in functions:
         name = f.name()
@@ -268,7 +268,7 @@ bool %(check_name)s([[maybe_unused]] const Term& t)
             'check_name' : f.check_name(),
             'body'       : body
         }
-        ptext = ptext + 'template <typename Term> bool %s(const Term& t);\n' % f.check_name()
+        ptext = ptext + 'template <atermpp::IsATerm Term> bool %s(const Term& t);\n' % f.check_name()
 
     text = ptext + '\n' + text.strip()
     text = text + '\n'
