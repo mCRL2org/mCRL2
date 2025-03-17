@@ -14,7 +14,6 @@
 #define MCRL2_UTILITIES_DETAIL_INDEXED_SET_H
 #pragma once
 
-#include "mcrl2/utilities/unused.h"
 #include "mcrl2/utilities/indexed_set.h"    // necessary for header test. 
 
 namespace mcrl2
@@ -79,8 +78,8 @@ inline typename INDEXED_SET::size_type INDEXED_SET::put_in_hashtable(
   assert(m_hashtable.size() > 0);
 
   new_position = ((m_hasher(key) * detail::PRIME_NUMBER) >> 2) % m_hashtable.size();
+  [[maybe_unused]] // Not used in release mode
   std::size_t start = new_position;
-  utilities::mcrl2_unused(start); // suppress warning in release mode. 
 
   while (true)
   {

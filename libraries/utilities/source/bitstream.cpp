@@ -11,7 +11,6 @@
 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/unused.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/utilities/platform.h"
 
@@ -81,9 +80,8 @@ int_t decode_variablesize_int(ibitstream& stream)
 }
 
 /// \brief Change the current stream to binary mode (no handle of newline characters),
-static void set_stream_binary(const std::string& name, FILE* handle)
+static void set_stream_binary([[maybe_unused]] const std::string& name, [[maybe_unused]] FILE* handle)
 {
-  mcrl2::utilities::mcrl2_unused(name, handle);
 #ifdef MCRL2_PLATFORM_WINDOWS
   if (_setmode(_fileno(handle), _O_BINARY) == -1)
   {
