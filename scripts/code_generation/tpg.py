@@ -1145,8 +1145,8 @@ class VerboseParser(Parser):
         found = "(%d,%d) %s %s"%(token.line, token.column, token.name, token.text)
         return "[%3d][%2d]%s: %s %s %s"%(eatcnt, stackdepth, callernames, found, op, expected)
 
-blank_line_re = re.compile("^\s*$")
-indent_re = re.compile("^\s*")
+blank_line_re = re.compile(r"^\s*$")
+indent_re = re.compile(r"^\s*")
 
 class tpg:
     """ This class contains some TPG classes to make the parsers usable inside and outside the tpg module

@@ -7,6 +7,8 @@
 import re
 import string
 import tpg
+import sys
+
 from types import *
 
 #--------------------------------------------------------#
@@ -16,7 +18,7 @@ from types import *
 
 def read_text(filename):
     try:
-        f = open(filename, 'r')
+        f = open(filename, 'r', encoding='utf-8')
     except IOError as e:
         print(('Unable to open file ' + filename + ' ', e))
         sys.exit(0)
@@ -32,7 +34,7 @@ def read_text(filename):
 
 def read_paragraphs(file):
     text       = read_text(file)
-    paragraphs = re.split('\n\s*\n', text)
+    paragraphs = re.split(r'\n\s*\n', text)
     return paragraphs
 
 #---------------------------------------------------------------#

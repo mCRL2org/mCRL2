@@ -173,10 +173,9 @@ def find_functions(rules):
 # generates C++ code for checking if terms are in the right format
 #
 def generate_soundness_check_functions(rules, filename, skip_list):
-    CHECK_RULE = '''template <typename Term>
-bool check_rule_%(name)s(const Term& t)
+    CHECK_RULE = '''template <IsATerm Term>
+bool check_rule_%(name)s([[maybe_unused]] const Term& t)
 {
-  utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
 %(body)s
 #else
@@ -187,10 +186,9 @@ bool check_rule_%(name)s(const Term& t)
 '''
 
     CHECK_TERM = '''// %(name)s(%(arguments)s)
-template <typename Term>
-bool %(check_name)s(const Term& t)
+template <IsATerm Term>
+bool %(check_name)s([[maybe_unused]] const Term& t)
 {
-  utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
 %(body)s
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -297,7 +295,7 @@ def parse_ebnf(filename):
         clines = [] # comment lines
         glines = [] # grammar lines
         for line in lines:
-            if re.match('\s*//.*', line):
+            if re.match(r'\s*//.*', line):
                 clines.append(line)
             else:
                 glines.append(line)
