@@ -15,6 +15,18 @@
 template<typename T>
 concept IsATerm = requires(T t)
 {
+    /// Term must be derived from the base aterm.
     std::is_base_of<atermpp::unprotected_aterm_core, T>::value;
+
+    /// aterm cast cannot be applied types derived from aterms where extra fields are added.
+    sizeof(T) == sizeof(atermpp::unprotected_aterm_core);
 };
 
+template<typename T>
+concept IsTermConverter = requires(T t)
+{
+    /// Calling the function with an aterm must yield an aterm.
+    std::is_convertible<T, atermpp::unprotected_aterm_core>::value;
+    std::is_invocable<T, atermpp::unprotected_aterm_core>::value;
+
+};
