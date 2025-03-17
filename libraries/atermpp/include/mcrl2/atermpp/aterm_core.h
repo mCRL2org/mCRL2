@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <compare>
 #include <sstream>
 #include "mcrl2/atermpp/detail/aterm_core.h"
 #include "mcrl2/atermpp/type_traits.h"
@@ -85,52 +86,16 @@ public:
     return m_term == t.m_term;
   }
 
-  /// \brief Inequality operator on two unprotected aterms.
-  /// \details See note at the == operator. This operator requires constant time.
-  /// \param t A term to which the current term is compared.
-  /// \return false iff t is equal to the current term.
-  bool operator !=(const unprotected_aterm_core& t) const
-  {
-    return m_term!=t.m_term;
-  }
-
   /// \brief Comparison operator for two unprotected aterms.
-  /// \details This operator requires constant time. It compares
+  /// \details This operator is constant time. It compares
   ///         the addresses where terms are stored. That means
   ///         that the outcome of this operator is only stable
   ///         as long as aterms are not garbage collected.
   /// \param t A term to which the current term is compared.
   /// \return True iff the current term is smaller than the argument.
-  bool operator <(const unprotected_aterm_core& t) const
+  std::strong_ordering operator<=>(const unprotected_aterm_core& t) const
   {
-    return m_term<t.m_term;
-  }
-
-  /// \brief Comparison operator for two unprotected aterms.
-  /// \details This operator requires constant time. See note at the operator <.
-  /// \param t A term to which the current term is compared.
-  /// \return True iff the current term is larger than the argument.
-  bool operator >(const unprotected_aterm_core& t) const
-  {
-    return m_term>t.m_term;
-  }
-
-  /// \brief Comparison operator for two unprotected aterms.
-  /// \details This operator requires constant time. See note at the operator <.
-  /// \param t A term to which the current term is compared.
-  /// \return True iff the current term is smaller or equal than the argument.
-  bool operator <=(const unprotected_aterm_core& t) const
-  {
-    return m_term<=t.m_term;
-  }
-
-  /// \brief Comparison operator for two unprotected aterms.
-  /// \details This operator requires constant time. See note at the operator <.
-  /// \param t A term to which the current term is compared.
-  /// \return True iff the current term is larger or equalthan the argument.
-  bool operator >=(const unprotected_aterm_core& t) const
-  {
-    return m_term>=t.m_term;
+    return m_term<=>t.m_term;
   }
 
   /// \brief Returns true if this term is not equal to the term assigned by
