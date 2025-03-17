@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <atomic>
+#include <compare>
 #include <type_traits>
 
 #include "mcrl2/utilities/tagged_pointer.h"
@@ -180,35 +181,16 @@ public:
     return m_reference.get() != nullptr;
   }
 
+  /// Address equality operator.
   bool operator ==(const shared_reference<T>& other) const noexcept
   {
     return m_reference == other.m_reference;
   }
 
-  bool operator <(const shared_reference<T>& other) const noexcept
+  /// Address comparison operator.
+  std::strong_ordering operator <=>(const shared_reference<T>& other) const noexcept
   {
-    return m_reference < other.m_reference;
-  }
-
-  // Comparison operators follow from equivalence and less than.
-  bool operator !=(const shared_reference<T>& other) const noexcept
-  {
-    return m_reference != other.m_reference;
-  }
-
-  bool operator <=(const shared_reference<T>& other) const noexcept
-  {
-    return m_reference <= other.m_reference;
-  }
-
-  bool operator >(const shared_reference<T>& other) const noexcept
-  {
-    return m_reference > other.m_reference;
-  }
-
-  bool operator >=(const shared_reference& other) const noexcept
-  {
-    return m_reference >= other.m_reference;
+    return m_reference <=> other.m_reference;
   }
 
   T* operator->() const noexcept
