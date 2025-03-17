@@ -15,6 +15,8 @@
 #include "mcrl2/utilities/unordered_set.h"
 #include "mcrl2/utilities/mutex.h"
 
+#include <map>
+
 namespace atermpp
 {
 namespace detail
