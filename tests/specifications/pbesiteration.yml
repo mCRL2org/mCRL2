@@ -5,8 +5,6 @@ nodes:
     type: pbes
   l3:
     type: pbes
-  l4:
-    type: pbes
 
 tools:
   t1:
