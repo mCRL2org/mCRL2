@@ -12,7 +12,6 @@
 #define BOOST_TEST_MODULE down_cast_test
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/utilities/unused.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
 class t1 : public atermpp::aterm
@@ -69,8 +68,8 @@ BOOST_AUTO_TEST_CASE(aterm_down_cast)
   BOOST_CHECK(fxy == fxy_term);
 
   const atermpp::aterm& t1(fxy);
+  [[maybe_unused]]
   const atermpp::aterm& t2 = t1; // See comment above. Test is now useless.
-  mcrl2::utilities::mcrl2_unused(t2);
   f(atermpp::down_cast<t3>(t1));
 }
 
@@ -88,8 +87,8 @@ BOOST_AUTO_TEST_CASE(no_down_cast_needed)
   t2 x2(x1);
   t3 x31(x1);
   t3 x32(x2);
+  [[maybe_unused]]
   const t3& x33(x31);
-  mcrl2::utilities::mcrl2_unused(x33);
 }
 
 BOOST_AUTO_TEST_CASE(function_calls)
