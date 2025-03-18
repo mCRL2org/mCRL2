@@ -30,7 +30,7 @@ namespace detail
 
 // checks
 // 1) if term t satisfies the predicate f
-template <typename Term, typename CheckFunction>
+template <atermpp::IsATerm Term, typename CheckFunction>
 bool check_term_argument(const Term& t, CheckFunction f)
 {
   return f(t);
@@ -40,7 +40,7 @@ bool check_term_argument(const Term& t, CheckFunction f)
 // 1) if term t is a list,
 // 2) if the list has the proper minimum size
 // 3) if all elements of the list satisfy the predicate f
-template <typename Term, typename CheckFunction>
+template <atermpp::IsATerm Term, typename CheckFunction>
 bool check_list_argument(const Term& t, CheckFunction f, unsigned int minimum_size)
 {
   const atermpp::aterm& term(t);
@@ -63,7 +63,7 @@ bool check_list_argument(const Term& t, CheckFunction f, unsigned int minimum_si
   return true;
 }
 
-template <typename Term>
+template <atermpp::IsATerm Term>
 bool check_rule_String(const Term& t)
 {
   const atermpp::aterm& term(t);
@@ -82,7 +82,7 @@ bool check_rule_String(const Term& t)
   return true;
 }
 
-template <typename Term>
+template <atermpp::IsATerm Term>
 bool check_rule_StringOrEmpty(const Term& t)
 {
   const atermpp::aterm& term(t);
@@ -93,17 +93,17 @@ bool check_rule_StringOrEmpty(const Term& t)
   return term.size() <= 0;
 }
 
-template <typename Term>
+template <atermpp::IsATerm Term>
 bool check_rule_Number(const Term& t)
 {
   const atermpp::aterm& term(t);
   return term.type_is_int();
 }
 
-template <typename Term> bool check_rule_DataExpr(const Term& t);
+template <atermpp::IsATerm Term> bool check_rule_DataExpr(const Term& t);
 
 // DataAppl(DataExpr, DataExpr+)
-template <typename Term>
+template <atermpp::IsATerm Term>
 bool check_term_DataAppl(const Term& t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
