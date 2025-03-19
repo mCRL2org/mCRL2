@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_DETAIL_PRINT_UTILITY_H
 #define MCRL2_DATA_DETAIL_PRINT_UTILITY_H
 
-#include "mcrl2/utilities/unused.h"
 #include "mcrl2/core/detail/print_utility.h"
 
 #include "mcrl2/data/bag.h"
@@ -38,10 +37,10 @@ data::data_expression bool_to_numeric(const data::data_expression& e, const data
 }
 
 inline
-data_expression reconstruct_pos_mult(const data_expression& x, const std::vector<char>& result)
+data_expression reconstruct_pos_mult(const data_expression& x, [[maybe_unused]] const std::vector<char>& result)
 {
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
-  utilities::mcrl2_unused(result); // Maybe this part of this printing utility may have to be written. 
+  // Maybe this part of this printing utility may have to be written. 
   return x;
 #else
   data_expression reconstruction_result;

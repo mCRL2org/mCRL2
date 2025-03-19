@@ -206,8 +206,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
         if (state_inserted)
         {
+          [[maybe_unused]]
           std::size_t actual_index = lts.add_probabilistic_state(lts_state);
-          utilities::mcrl2_unused(actual_index);
           assert(actual_index == target_index);
         }
       }
@@ -218,8 +218,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
       if (inserted)
       {
+        [[maybe_unused]]
         std::size_t actual_index = lts.add_action(action);
-        utilities::mcrl2_unused(actual_index);
         assert(actual_index == index);
       }
 
@@ -241,8 +241,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
         if (state_inserted)
         {
+          [[maybe_unused]]
           std::size_t actual_index = lts.add_probabilistic_state(to);
-          utilities::mcrl2_unused(actual_index);
           assert(actual_index == to_index);
         }
 
@@ -253,8 +253,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
         if (inserted)
         {
+          [[maybe_unused]]
           std::size_t actual_index = lts.add_action(action);
-          utilities::mcrl2_unused(actual_index);
           assert(actual_index == index);
         }
       }

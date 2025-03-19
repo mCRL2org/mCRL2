@@ -97,11 +97,11 @@ static const native_translation_t pp_real_translation = [](const data::data_expr
   output_func("(/ " +  data::pp(a[0]) + ".0  " + data::pp(a[1]) + ".0)");
 };
 static const native_translation_t reconstruct_divmod = [](const data::data_expression& e,
+                                                          [[maybe_unused]]
                                                           const std::function<void(std::string)>& output_func,
+                                                          [[maybe_unused]]
                                                           const std::function<void(data::data_expression)>& translate_func)
 {
-utilities::mcrl2_unused(output_func);
-utilities::mcrl2_unused(translate_func);
 #ifndef MCRL2_ENABLE_MACHINENUMBERS
   assert(data::sort_nat::is_first_application(e) || data::sort_nat::is_last_application(e));
   const data::application& a = atermpp::down_cast<data::application>(e);
