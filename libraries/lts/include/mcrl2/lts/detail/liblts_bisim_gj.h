@@ -3628,7 +3628,7 @@ class bisim_partitioner_gj
                         : std::next(src.ref_state)->start_outgoing_transitions; assert(current_outgoing_iter_start_AvoidLrg<current_outgoing_iter_AvoidLrg);
                     continue;
                   }                                                             else  { assert(AvoidLrg!=current_search ||
-                                                                                               large_splitter_iter_MultiSub==co_splitter_iter_end_MultiSub); }
+                                                                                               large_splitter_iter_MultiSub==large_splitter_iter_end_MultiSub); }
                   if (abort_if_size_too_large(current_search, 1))
                   {                                                             assert(running_searches[current_search_index]==current_search);
                     --no_of_running_searches;                                   assert(current_search_index<=no_of_running_searches);
