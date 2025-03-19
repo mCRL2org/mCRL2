@@ -555,7 +555,7 @@ inline void minus_word_manual_implementation(data_expression& result, const data
 inline void monus_word_manual_implementation(data_expression& result, const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  make_machine_number(result, detail::minus_word(
+  make_machine_number(result, detail::monus_word(
                               atermpp::down_cast<machine_number>(e1).value(),
                               atermpp::down_cast<machine_number>(e2).value()));
 }
