@@ -167,17 +167,17 @@ inline aterm_istream& operator>>(aterm_istream& stream, T& t)
 }
 
 // r-value forwarding to the streaming operators, used for convenience.
-template <typename S, typename T>
-inline S&& operator<<(S&& stream, const T& t)
-{
-  stream << t;
+template <typename T>
+inline aterm_ostream&& operator<<(aterm_ostream&& stream, const T& t)
+{  
+  static_cast<aterm_ostream&>(stream) << t;
   return stream;
 }
 
-template <typename S, typename T>
-inline S&& operator>>(S&& stream, T& t)
+template <typename T>
+inline aterm_istream&& operator>>(aterm_istream&& stream, T& t)
 {
-  stream >> t;
+  static_cast<aterm_istream&>(stream) >> t;
   return stream;
 }
 
