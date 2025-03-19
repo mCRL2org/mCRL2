@@ -1274,11 +1274,10 @@ class explorer: public abortable
       ExamineTransition examine_transition = ExamineTransition(),
       StartState start_state = StartState(),
       FinishState finish_state = FinishState(),
+      [[maybe_unused]]
       DiscoverInitialState discover_initial_state = DiscoverInitialState()
     )
     {
-      utilities::mcrl2_unused(discover_initial_state); // silence unused parameter warning
-
       const std::size_t number_of_threads=m_options.number_of_threads;
       assert(number_of_threads>0);
       const std::size_t initialisation_thread_index= (number_of_threads==1?0:1);
