@@ -13,6 +13,7 @@
 #define MCRL2_PBES_PBES_FUNCTIONS_H
 
 #include "mcrl2/pbes/traverser.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
 namespace mcrl2 {
 
@@ -84,14 +85,19 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
   using super::apply;
 
   bool result;
+  bool allow_counter_example_variables = false;
 
-  is_simple_expression_traverser()
-    : result(true)
+  is_simple_expression_traverser(bool allow_counter_example_variables = false)
+    : result(true),
+      allow_counter_example_variables(allow_counter_example_variables)
   {}
 
-  void enter(const propositional_variable_instantiation& /*x*/)
+  void enter(const propositional_variable_instantiation& x)
   {
-    result = false;
+    if (!allow_counter_example_variables || !detail::is_counter_example_instantiation(x))
+    {
+      result = false;
+    }
   }
 };
 /// \endcond
@@ -99,11 +105,12 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
 /// \brief Determines if an expression is a simple expression.
 /// An expression is simple if it is free of propositional variables.
 /// \param x a PBES object
+/// \param allow_ce If true, counter example information is allowed.
 /// \return true if x is a simple expression.
 template <typename T>
-bool is_simple_expression(const T& x)
+bool is_simple_expression(const T& x, bool allow_ce = false)
 {
-  is_simple_expression_traverser f;
+  is_simple_expression_traverser f(allow_ce);
   f.apply(x);
   return f.result;
 }
