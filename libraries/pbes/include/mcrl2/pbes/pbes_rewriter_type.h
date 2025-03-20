@@ -15,12 +15,14 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \brief An enumerated type for the available pbes rewriters
-enum pbes_rewriter_type
+enum class pbes_rewriter_type
 {
   simplify,
   quantifier_all,
@@ -30,106 +32,123 @@ enum pbes_rewriter_type
   prover,
   pfnf,
   ppg,
+  srf,
+  pre_srf,
   bqnf_quantifier
 };
 
 /// \brief Parses a pbes rewriter type
-inline
-pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
+inline pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
 {
   if (type == "simplify")
   {
-    return simplify         ;
+    return pbes_rewriter_type::simplify;
   }
   if (type == "quantifier-all")
   {
-    return quantifier_all   ;
+    return pbes_rewriter_type::quantifier_all;
   }
   if (type == "quantifier-finite")
   {
-    return quantifier_finite;
+    return pbes_rewriter_type::quantifier_finite;
   }
   if (type == "quantifier-inside")
   {
-    return quantifier_inside;
+    return pbes_rewriter_type::quantifier_inside;
   }
   if (type == "quantifier-one-point")
   {
-    return quantifier_one_point;
+    return pbes_rewriter_type::quantifier_one_point;
   }
   if (type == "prover")
   {
-    return prover           ;
+    return pbes_rewriter_type::prover;
   }
   if (type == "pfnf")
   {
-    return pfnf             ;
+    return pbes_rewriter_type::pfnf;
   }
   if (type == "ppg")
   {
-    return ppg              ;
+    return pbes_rewriter_type::ppg;
   }
+  if (type == "srf")
+  {
+    return pbes_rewriter_type::srf;
+  }
+  if (type == "pre-srf")
+  {
+    return pbes_rewriter_type::pre_srf;
+  }
+
   if (type == "bqnf-quantifier")
   {
-    return bqnf_quantifier  ;
+    return pbes_rewriter_type::bqnf_quantifier;
   }
   throw mcrl2::runtime_error("unknown pbes rewriter option " + type);
 }
 
 /// \brief Prints a pbes rewriter type
-inline
-std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
+inline std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
 {
   switch (type)
   {
-    case simplify:
-      return "simplify";
-    case quantifier_all:
-      return "quantifier-all";
-    case quantifier_finite:
-      return "quantifier-finite";
-    case quantifier_inside:
-      return "quantifier-inside";
-    case quantifier_one_point:
-      return "quantifier-one-point";
-    case prover:
-      return "prover";
-    case pfnf:
-      return "pfnf";
-    case ppg:
-      return "ppg";
-    case bqnf_quantifier:
-      return "bqnf-quantifier";
-    default:
-    return "unknown pbes rewriter";
+  case pbes_rewriter_type::simplify:
+    return "simplify";
+  case pbes_rewriter_type::quantifier_all:
+    return "quantifier-all";
+  case pbes_rewriter_type::quantifier_finite:
+    return "quantifier-finite";
+  case pbes_rewriter_type::quantifier_inside:
+    return "quantifier-inside";
+  case pbes_rewriter_type::quantifier_one_point:
+    return "quantifier-one-point";
+  case pbes_rewriter_type::prover:
+    return "prover";
+  case pbes_rewriter_type::pfnf:
+    return "pfnf";
+  case pbes_rewriter_type::ppg:
+    return "ppg";
+  case pbes_rewriter_type::bqnf_quantifier:
+    return "bqnf-quantifier";
+  case pbes_rewriter_type::srf:
+    return "srf";
+  case pbes_rewriter_type::pre_srf:
+    return "pre-srf";    
   }
+
+  return "unknown pbes rewriter";
 }
 
 /// \brief Returns a description of a pbes rewriter
-inline
-std::string description(const pbes_rewriter_type type)
+inline std::string description(const pbes_rewriter_type type)
 {
   switch (type)
   {
-    case simplify          :
-      return "for simplification";
-    case quantifier_all    :
-      return "for eliminating all quantifiers";
-    case quantifier_finite :
-      return "for eliminating finite quantifier variables";
-    case quantifier_inside :
-      return "for pushing quantifiers inside";
-    case quantifier_one_point :
-      return "for one point rule quantifier elimination";
-    case prover            :
-      return "for rewriting using a prover";
-    case pfnf              :
-      return "for rewriting into PFNF normal form";
-    case ppg               :
-      return "for rewriting into Parameterised Parity Game form";
-    case bqnf_quantifier   :
-      return "for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";
+  case pbes_rewriter_type::simplify:
+    return "for simplification";
+  case pbes_rewriter_type::quantifier_all:
+    return "for eliminating all quantifiers";
+  case pbes_rewriter_type::quantifier_finite:
+    return "for eliminating finite quantifier variables";
+  case pbes_rewriter_type::quantifier_inside:
+    return "for pushing quantifiers inside";
+  case pbes_rewriter_type::quantifier_one_point:
+    return "for one point rule quantifier elimination";
+  case pbes_rewriter_type::prover:
+    return "for rewriting using a prover";
+  case pbes_rewriter_type::pfnf:
+    return "for rewriting into PFNF normal form";
+  case pbes_rewriter_type::ppg:
+    return "for rewriting into Parameterised Parity Game form";
+  case pbes_rewriter_type::srf:
+    return "for rewriting into SRF normal form";
+  case pbes_rewriter_type::pre_srf:
+    return "for rewriting into pre-SRF normal form";
+  case pbes_rewriter_type::bqnf_quantifier:
+    return "for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";
   }
+
   throw mcrl2::runtime_error("unknown pbes rewriter");
 }
 
@@ -137,8 +156,7 @@ std::string description(const pbes_rewriter_type type)
 /// \param is An input stream
 /// \param t A rewriter type
 /// \return The input stream
-inline
-std::istream& operator>>(std::istream& is, pbes_rewriter_type& t)
+inline std::istream& operator>>(std::istream& is, pbes_rewriter_type& t)
 {
   std::string s;
   is >> s;
@@ -153,8 +171,7 @@ std::istream& operator>>(std::istream& is, pbes_rewriter_type& t)
   return is;
 }
 
-inline
-std::ostream& operator<<(std::ostream& os, const pbes_rewriter_type t)
+inline std::ostream& operator<<(std::ostream& os, const pbes_rewriter_type t)
 {
   os << print_pbes_rewriter_type(t);
   return os;

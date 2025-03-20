@@ -74,7 +74,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
 
     pbes_rewriter_type default_rewriter() const
     {
-      return quantifier_all;
+      return pbes_rewriter_type::quantifier_all;
     }
 
   public:
