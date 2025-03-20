@@ -21,9 +21,6 @@
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/process/process_expression.h"
 
-// Define the following to add logging of statistics for the calculation of communication.
-//#define MCRL2_COUNT_COMMUNICATION_OPERATIONS
-
 namespace mcrl2
 {
 
@@ -218,6 +215,7 @@ class comm_entry
     comm_entry(const comm_entry& )=delete;
     comm_entry& operator=(const comm_entry& )=delete;
 
+    explicit
     comm_entry(const process::communication_expression_list& communications)
         : m_lhs(init_lhs(communications)),
           m_rhs(init_rhs(communications)),
@@ -414,11 +412,18 @@ void apply(
          m_is_block ? "- calculating the communication operator modulo the block operator on " :
                     "- calculating the communication operator on ") << action_summands.size() << " action summands";
 
-#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
-  mCRL2log(mcrl2::log::info) << "Calculating communication operator using a set of " << m_communications.size() << " communication expressions." << std::endl;
-  mCRL2log(mcrl2::log::info) << "Communication expressions: " << std::endl << core::detail::print_set(m_communications) << std::endl;
-  mCRL2log(mcrl2::log::info) << "Allow list: " << std::endl << core::detail::print_set(m_allowlist) << std::endl;
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+  lps_statistics_t lps_statistics_before = get_statistics(action_summands, deadlock_summands);
+  // number of summands filtered out after construction of intermediate result (all potential results of communication
+  // that may be allowed/are not blocked)
+  std::size_t disallowed_summands = 0;      // removed by allow
+  std::size_t blocked_summands = 0;         // removed by block
+  std::size_t false_condition_summands = 0; // removed because condition is false
 #endif
+
+  mCRL2log(mcrl2::log::trace) << "Calculating communication operator using a set of " << m_communications.size() << " communication expressions." << std::endl;
+  mCRL2log(mcrl2::log::trace) << "Communication expressions: " << std::endl << core::detail::print_set(m_communications) << std::endl;
+  mCRL2log(mcrl2::log::trace) << "Allow list: " << std::endl << core::detail::print_set(m_allowlist) << std::endl;
 
   deadlock_summand_vector resulting_deadlock_summands;
   deadlock_summands.swap(resulting_deadlock_summands);
@@ -476,20 +481,12 @@ void apply(
     // this list in principle contains one summand (unless the condition can be rewritten to false, in which case it
     // is omitted).
 
-#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
-    mCRL2log(mcrl2::log::info) << "Calculating communication on multiaction with " << multiaction.size() << " actions." << std::endl;
-    mCRL2log(mcrl2::log::info) << "  Multiaction: " << process::pp(multiaction) << std::endl;
-#endif
+    mCRL2log(mcrl2::log::trace) << "Calculating communication on multiaction with " << multiaction.size() << " actions." << std::endl;
+    mCRL2log(mcrl2::log::trace) << "  Multiaction: " << process::pp(multiaction) << std::endl;
 
     const tuple_list multiactionconditionlist = apply(multiaction);
 
-#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
-    mCRL2log(mcrl2::log::info) << "Calculating communication on multiaction with " << multiaction.size() << " actions results in " << multiactionconditionlist.size() << " potential summands" << std::endl;
-    std::size_t disallowed_summands = 0;
-    std::size_t blocked_summands = 0;
-    std::size_t false_condition_summands = 0;
-    std::size_t added_summands = 0;
-#endif
+    mCRL2log(mcrl2::log::trace) << "Calculating communication on multiaction with " << multiaction.size() << " actions results in " << multiactionconditionlist.size() << " potential summands" << std::endl;
 
     for (std::size_t i=0 ; i<multiactionconditionlist.size(); ++i)
     {
@@ -498,14 +495,14 @@ void apply(
 
       if (m_is_allow && !allow_(m_allowlist, multiaction,m_terminationAction))
       {
-#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
         ++disallowed_summands;
 #endif
         continue;
       }
       if (m_is_block && encap(m_allowlist,multiaction))
       {
-#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
         ++blocked_summands;
 #endif
         continue;
@@ -528,7 +525,7 @@ void apply(
           new_summand.condition() = m_data_rewriter(new_summand.condition());
         }
       }
-#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
       if (new_summand.condition()==data::sort_bool::false_())
       {
         ++false_condition_summands;
@@ -537,19 +534,8 @@ void apply(
       if (new_summand.condition()!=data::sort_bool::false_())
       {
         resulting_action_summands.push_back(new_summand);
-#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
-        ++added_summands;
-#endif
       }
     }
-
-#ifdef MCRL2_COUNT_COMMUNICATION_OPERATIONS
-     mCRL2log(mcrl2::log::info) << "Statistics of new summands: " << std::endl
-     << "- Disallowed summands: " << disallowed_summands << std::endl
-     << "- Blocked summands: " << blocked_summands << std::endl
-     << "- Summands with false condition: " << false_condition_summands << std::endl
-     << "- New summands added: " << added_summands << std::endl;
-#endif
 
   }
 
@@ -563,6 +549,12 @@ void apply(
       insert_timed_delta_summand(action_summands, deadlock_summands, summand, ignore_time);
     }
   }
+
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+  lps_statistics_t lps_statistics_after = get_statistics(action_summands, deadlock_summands);
+  std::cout << log_comm_application(lps_statistics_before, lps_statistics_after,
+    disallowed_summands, blocked_summands, false_condition_summands);
+#endif
 
   mCRL2log(mcrl2::log::verbose) << " resulting in " << action_summands.size() << " action summands and " << deadlock_summands.size() << " delta summands\n";
 }
@@ -579,22 +571,68 @@ comm_entry m_comm_table;
 const bool m_is_allow;                          // If is_allow or is_block is set, perform inline allow/block filtering. They are mutually exclusive
 const bool m_is_block;
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+std::string log_comm_application(const lps_statistics_t& lps_statistics_before,
+                                 const lps_statistics_t& lps_statistics_after,
+                                 const std::size_t disallowed_summands,
+                                 const std::size_t blocked_summands,
+                                 const std::size_t false_condition_summands,
+                                 size_t indent = 0) const
+{
+  std::string indent_str(indent, ' ');
+  std::ostringstream os;
+
+  os << indent_str << "- operator: comm" << std::endl;
+
+  indent += 2;
+  indent_str = std::string(indent, ' ');
+  os << indent_str << "number of communication expressions: " << m_communications.size() << std::endl;
+  if (m_is_allow)
+  {
+    os << indent_str << "number of allow expressions: " << m_allowlist.size() << std::endl;
+  }
+  if (m_is_block)
+  {
+    os << indent_str << "number of block expressions: " << m_blocked_actions.size() << std::endl;
+  }
+
+  os << indent_str << "before:" << std::endl << print(lps_statistics_before, indent+2)
+     << indent_str << "after:" << std::endl << print(lps_statistics_after, indent+2)
+     << indent_str << "removed from intermediate result:" << std::endl;
+
+  indent += 2;
+  indent_str = std::string(indent, ' ');
+  if (m_is_allow)
+  {
+    os << indent_str << "disallowed summands: " << disallowed_summands << std::endl;
+  }
+  if (m_is_block)
+  {
+    os << indent_str << "blocked summands: " << blocked_summands << std::endl;
+  }
+
+  os << indent_str << "summands with false condition: " << false_condition_summands << std::endl;
+
+  return os.str();
+}
+#endif //MCRL2_LOG_LPS_LINEARISE_STATISTICS
+
 /// Static initialization function to ensure m_allowed_actions can be const.
 static const std::vector<core::identifier_string>
 init_allowed_actions(bool is_allow, const process::action_name_multiset_list& allow_list, const process::action& termination_action)
 {
-std::vector<core::identifier_string> result;
-if (is_allow)
-{
-  result = get_actions(allow_list);
-  // Ensure that the termination action is always allowed, even when it is not an explicit part of
-  // the list of allowed actions.
-  // We maintains sort order of the vector
-  std::vector<core::identifier_string>::iterator it = std::upper_bound(result.begin(), result.end(), termination_action.label().name(), action_name_compare());
-  result.insert(it, termination_action.label().name());
-}
+  std::vector<core::identifier_string> result;
+  if (is_allow)
+  {
+    result = get_actions(allow_list);
+    // Ensure that the termination action is always allowed, even when it is not an explicit part of
+    // the list of allowed actions.
+    // We maintains sort order of the vector
+    std::vector<core::identifier_string>::iterator it = std::upper_bound(result.begin(), result.end(), termination_action.label().name(), action_name_compare());
+    result.insert(it, termination_action.label().name());
+  }
 
-return result;
+  return result;
 }
 
 /// Calculate data expression for pairwise equality of the elements of l1 and l2.
@@ -603,29 +641,29 @@ return result;
 /// match is false, otherwise an expression equivalent to \bigwegde_i (l1[i] == l2[i]) is returned.
 data::data_expression pairwise_equal_to(const data::data_expression_list& l1, const data::data_expression_list& l2) const
 {
-data::data_expression result = data::sort_bool::true_();
+  data::data_expression result = data::sort_bool::true_();
 
-if (l1.size()!=l2.size())
-{
-  result = data::sort_bool::false_();
-}
-
-auto i1 = l1.begin();
-auto i2 = l2.begin();
-
-while (i1 != l1.end() && i2 != l2.end() && result != data::sort_bool::false_())
-{
-  if (i1->sort() != i2->sort())
+  if (l1.size()!=l2.size())
   {
     result = data::sort_bool::false_();
   }
-  else
-  {
-    result = data::lazy::and_(result, m_data_rewriter(equal_to(*i1++, *i2++)));
-  }
-}
 
-return result;
+  auto i1 = l1.begin();
+  auto i2 = l2.begin();
+
+  while (i1 != l1.end() && i2 != l2.end() && result != data::sort_bool::false_())
+  {
+    if (i1->sort() != i2->sort())
+    {
+      result = data::sort_bool::false_();
+    }
+    else
+    {
+      result = data::lazy::and_(result, m_data_rewriter(equal_to(*i1++, *i2++)));
+    }
+  }
+
+  return result;
 }
 
 
