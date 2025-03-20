@@ -9,6 +9,7 @@
 /// \file pbessolvesymbolic.cpp
 
 #include <array>
+#include <cassert>
 #include <iomanip>
 #include <sylvan_ldd.hpp>
 
@@ -18,6 +19,7 @@
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesreach.h"
+#include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/symbolic_pbessolve.h"
 #include "mcrl2/pbes/unify_parameters.h"
@@ -43,8 +45,8 @@ class pbesreach_algorithm_partial : public pbes_system::pbesreach_algorithm
 {
 public:
 
-  pbesreach_algorithm_partial(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_) :
-    pbes_system::pbesreach_algorithm(pbesspec, options_)
+  pbesreach_algorithm_partial(const pbes_system::srf_pbes& pbesspec, data::rewriter rewr, const symbolic_reachability_options& options_) :
+    pbes_system::pbesreach_algorithm(pbesspec, rewr, options_)
   {
     m_Vwon[0] = sylvan::ldds::empty_set();
     m_Vwon[1] = sylvan::ldds::empty_set();
@@ -533,29 +535,31 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       data::mutable_map_substitution<> sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
       pbes_system::detail::replace_global_variables(pbesspec, sigma);
 
-      pbes_system::pbes pbesspec_without_counterexample = pbesspec;
+      auto rewr = symbolic::construct_rewriter(pbesspec.data(), options.rewrite_strategy, pbes_system::find_function_symbols(pbesspec), options.remove_unused_rewrite_rules);
 
-      // Check if the resulting PBES can be used
-      if (!options_.naive_counter_example_instantiation) 
+      pbes_system::srf_pbes_with_ce pre_srf_pbes = preprocess(pbesspec, options, rewr);
+      // Unify the parameters of the original PBES (which has potential counter example information)
+      unify_parameters(pre_srf_pbes, true, options.reset_parameters);
+
+      pbes_system::srf_pbes srf_pbes = pre_srf2srfpbes(pre_srf_pbes);
+      pbesspec = pre_srf_pbes.to_pbes();
+
+      std::cout << srf_pbes.to_pbes() << std::endl;
+
+      if (true)
       {
-        // Unify the parameters of the original PBES (which has potential counter example information)
-        unify_parameters(pbesspec);
+        auto naive_srf = pbes2srf(mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec));
 
-        // If we have counter example information we remove it first.
-        pbesspec_without_counterexample = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec);
-
-        if (has_counter_example && !is_srf(pbesspec_without_counterexample))
-        {
-          throw mcrl2::runtime_error("The PBES after removing counter example information (Zpos and Zneg) is not in SRF form");
-        }
-
-        if (has_counter_example && !has_unified_parameters(pbesspec_without_counterexample))
-        {
-          throw mcrl2::runtime_error("The PBES after removing counter example information does not have unified parameters");
-        }
+        // The naive SRF from the PBES should be same as the SRF from the PBES+.
+        assert(naive_srf == srf_pbes);
       }
 
-      PbesReachAlgorithm reach(pbesspec_without_counterexample, options_);
+      if (has_counter_example && !has_unified_parameters(srf_pbes.to_pbes()))
+      {
+        throw mcrl2::runtime_error("The PBES after removing counter example information does not have unified parameters");
+      }
+
+      PbesReachAlgorithm reach(srf_pbes, rewr, options_);
       if (options.info)
       {
         std::cout << symbolic::print_read_write_patterns(reach.read_write_group_patterns());
@@ -636,7 +640,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           // Based on the result remove the unnecessary equations related to counter example information. 
           mCRL2log(log::verbose) << "Removing unnecessary example information for other player." << std::endl;
           auto pbesspec_simplified = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
-          mCRL2log(log::trace) << pbesspec << std::endl;
+          mCRL2log(log::trace) << pbesspec_simplified << std::endl;
 
           structure_graph SG;
 
