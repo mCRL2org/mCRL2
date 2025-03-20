@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_MACHINE_WORD_H
 #define MCRL2_DATA_DETAIL_MACHINE_WORD_H
 
+#include <assert.h>
 #include <limits>
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/machine_number.h"
@@ -146,6 +147,7 @@ std::size_t times_with_carry_overflow_word(const std::size_t n1, const std::size
 
 inline std::size_t minus_word(const std::size_t n1, const std::size_t n2)
 {
+  assert(n1>n2); // Should not underflow.
   return n1-n2;
 }
 
