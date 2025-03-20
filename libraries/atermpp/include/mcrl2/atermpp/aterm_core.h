@@ -93,7 +93,7 @@ public:
   ///         as long as aterms are not garbage collected.
   /// \param t A term to which the current term is compared.
   /// \return True iff the current term is smaller than the argument.
-  std::strong_ordering operator<=>(const unprotected_aterm_core& t) const
+  std::weak_ordering operator<=>(const unprotected_aterm_core& t) const
   {
     return m_term<=>t.m_term;
   }
