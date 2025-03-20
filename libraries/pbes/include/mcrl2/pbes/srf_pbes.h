@@ -461,7 +461,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
 
   void apply(const forall& x)
   {
-    std::vector<pre_srf_summand<true>> body_summands = srf_and(x.body(),
+    std::vector<pre_srf_summand<allow_ce>> body_summands = srf_and(x.body(),
         equations,
         eqn,
         V + x.variables(),
@@ -522,14 +522,15 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
   void apply(const imp& /* x */) { throw mcrl2::runtime_error("unsupported term!"); }
 };
 
-inline std::vector<pre_srf_summand<true>> srf_and(const pbes_expression& phi,
+template<bool allow_ce>
+inline std::vector<pre_srf_summand<allow_ce>> srf_and(const pbes_expression& phi,
     std::deque<pbes_equation>& equations,
     const pbes_equation& eqn,
     const data::variable_list& V,
     data::set_identifier_generator& id_generator,
     const core::identifier_string& X_true,
     const core::identifier_string& X_false,
-    std::vector<pre_srf_equation<true>>& result,
+    std::vector<pre_srf_equation<allow_ce>>& result,
     bool merge_simple_expressions)
 {
   srf_and_traverser f(equations, eqn, V, id_generator, X_true, X_false, result, merge_simple_expressions);
