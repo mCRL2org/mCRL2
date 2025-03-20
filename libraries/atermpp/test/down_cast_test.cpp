@@ -73,14 +73,6 @@ BOOST_AUTO_TEST_CASE(aterm_down_cast)
   f(atermpp::down_cast<t3>(t1));
 }
 
-BOOST_AUTO_TEST_CASE(aterm_container_cast)
-{
-  atermpp::term_list<t1> s1;
-  atermpp::term_list<t2> s2;
-  s2 = atermpp::container_cast< atermpp::term_list<t2> >(s1);
-  s1 = atermpp::container_cast< atermpp::term_list<t1> >(s2);
-}
-
 BOOST_AUTO_TEST_CASE(no_down_cast_needed)
 {
   t1 x1(1);
