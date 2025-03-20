@@ -465,3 +465,13 @@ BOOST_AUTO_TEST_CASE(parse_state_formula_with_infimum_specification_test)
   std::cout << text1 << std::endl;
   BOOST_CHECK_EQUAL(utilities::remove_whitespace(text), utilities::remove_whitespace(text1));
 }
+
+BOOST_AUTO_TEST_CASE(parse_state_formula_precedence_1801)
+{
+  const std::string text =
+    "<true> exists j: Int. val(j == 0) && val(j == 0)"
+    ;
+
+  // This should type check correctly, the right j should be bound.
+  state_formula_specification x = parse_state_formula_specification(text, false);
+}
