@@ -571,6 +571,7 @@ comm_entry m_comm_table;
 const bool m_is_allow;                          // If is_allow or is_block is set, perform inline allow/block filtering. They are mutually exclusive
 const bool m_is_block;
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
 std::string log_comm_application(const lps_statistics_t& lps_statistics_before,
                                  const lps_statistics_t& lps_statistics_after,
                                  const std::size_t disallowed_summands,
@@ -614,6 +615,7 @@ std::string log_comm_application(const lps_statistics_t& lps_statistics_before,
 
   return os.str();
 }
+#endif //MCRL2_LOG_LPS_LINEARISE_STATISTICS
 
 /// Static initialization function to ensure m_allowed_actions can be const.
 static const std::vector<core::identifier_string>

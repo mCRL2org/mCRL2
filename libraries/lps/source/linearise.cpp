@@ -7205,6 +7205,7 @@ class specification_basic_type
 
     /**************** hiding *****************************************/
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
     static
     std::string log_hide_application(const lps_statistics_t& lps_statistics_before,
                                      const lps_statistics_t& lps_statistics_after,
@@ -7224,6 +7225,7 @@ class specification_basic_type
 
       return os.str();
     }
+#endif // MCRL2_LOG_LPS_LINEARISE_STATISTICS
 
     static
     action_list hide_(const identifier_string_list& hidelist, const action_list& multiaction)
@@ -7878,6 +7880,7 @@ class specification_basic_type
       }
     }
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
     static std::string log_leftmerge_application(const lps_statistics_t& lps_statistics_before,
         const lps_statistics_t& lps_statistics_result_before,
         const lps_statistics_t& lps_statistics_result_after,
@@ -7913,6 +7916,7 @@ class specification_basic_type
 
       return os.str();
     }
+#endif
 
     void calculate_left_merge(
       const stochastic_action_summand_vector& action_summands1,
@@ -8164,6 +8168,7 @@ class specification_basic_type
       }
     }
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
     static std::string log_communicationmerge_application(const lps_statistics_t& lps1_statistics_before,
         const lps_statistics_t& lps2_statistics_before,
         const lps_statistics_t& lps_result_statistics_before,
@@ -8198,6 +8203,7 @@ class specification_basic_type
 
       return os.str();
     }
+#endif
 
     void calculate_communication_merge(
           const stochastic_action_summand_vector& action_summands1,
@@ -8277,6 +8283,7 @@ class specification_basic_type
     }
 
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
     static
     std::string log_parallelcomposition_application_start(
                                     const lps_statistics_t& lps1_statistics_before,
@@ -8325,6 +8332,7 @@ class specification_basic_type
 
       return os.str();
     }
+#endif
 
     void parallelcomposition(
       const stochastic_action_summand_vector& action_summands1,

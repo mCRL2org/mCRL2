@@ -25,6 +25,7 @@ namespace mcrl2
 namespace lps
 {
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
 inline
 std::string log_allow_block_application(const lps_statistics_t& lps_statistics_before,
                                  const lps_statistics_t& lps_statistics_after,
@@ -62,6 +63,7 @@ std::string log_allow_block_application(const lps_statistics_t& lps_statistics_b
 
   return os.str();
 }
+#endif //MCRL2_LOG_LPS_LINEARISE_STATISTICS
 
 /**************** allow/block *************************************/
 

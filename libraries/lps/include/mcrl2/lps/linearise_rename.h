@@ -24,6 +24,7 @@ namespace mcrl2
 namespace lps
 {
 
+#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
   inline
   std::string log_rename_application(const lps_statistics_t& lps_statistics_before,
                                    const lps_statistics_t& lps_statistics_after,
@@ -43,6 +44,7 @@ namespace lps
 
     return os.str();
   }
+#endif
 
   /// Apply renamings to a single action
   inline
