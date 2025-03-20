@@ -12,20 +12,22 @@
 
 #ifdef MCRL2_ENABLE_SYLVAN
 
-#include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/data/merge_data_specifications.h"
+#include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_summand_group.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace_constants_by_variables.h"
 #include "mcrl2/pbes/resolve_name_clashes.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/unify_parameters.h"
-#include "mcrl2/symbolic/symbolic_reachability.h"
 #include "mcrl2/symbolic/print.h"
+#include "mcrl2/symbolic/symbolic_reachability.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/stopwatch.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -33,8 +35,9 @@ namespace mcrl2::pbes_system {
 
 // Returns a data specification containing a structured sort with the names of the propositional variables
 // in the PBES as elements.
+template<bool allow_ce>
 inline
-data::data_specification construct_propositional_variable_data_specification(const pbes_system::srf_pbes& pbesspec, const std::string& sort_name)
+data::data_specification construct_propositional_variable_data_specification(const pbes_system::detail::pre_srf_pbes<allow_ce>& pbesspec, const std::string& sort_name)
 {
   // TODO: it should be possible to add a structured sort to pbesspec.data() directly, but I don't know how
   std::vector<std::string> names;
@@ -68,6 +71,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   return out;
 }
 
+inline
 pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes, std::size_t granularity)
 {
   mCRL2log(log::debug) << "splitting conditions" << std::endl;
@@ -176,6 +180,35 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes, std::s
   return result;
 }
 
+
+/// Applies necessary preprocessing steps to allow the PBES to be solved symbolically.
+inline
+pbes_system::srf_pbes_with_ce preprocess(pbes_system::pbes pbesspec, const symbolic_reachability_options& options, data::rewriter rewr)
+{
+  pbes_system::detail::instantiate_global_variables(pbesspec);
+  normalize(pbesspec);
+
+  if (options.one_point_rule_rewrite)
+  {
+    pbes_system::one_point_rule_rewriter R;
+    pbes_system::replace_pbes_expressions(pbesspec, R, false);
+  }
+
+  if (options.replace_constants_by_variables)
+  {
+    data::mutable_indexed_substitution<> sigma;
+    pbes_system::replace_constants_by_variables(pbesspec, rewr, sigma);
+  }
+
+  auto result = pbes2pre_srf(pbesspec, true);
+
+  // add a sort for the propositional variable names
+  data::data_specification propvar_dataspec = construct_propositional_variable_data_specification(result, "PropositionalVariable");
+  result.data() = data::merge_data_specifications(result.data(), propvar_dataspec);
+
+  return result;
+}
+  
 // Store information per lace worker.
 struct per_worker_information
 {
@@ -223,42 +256,24 @@ class pbesreach_algorithm
       sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<pbesreach_algorithm&, pbes_summand_group&>, false>, &context);
     }
 
-    pbes_system::srf_pbes preprocess(pbes_system::pbes pbesspec, bool make_total)
+    /// Applies further preprocessing steps to the SRF pbes.
+    pbes_system::srf_pbes internal_preprocess(pbes_system::srf_pbes srf_pbes, bool make_total)
     {
-      pbes_system::detail::instantiate_global_variables(pbesspec);
-      normalize(pbesspec);
-
-      if (m_options.one_point_rule_rewrite)
-      {
-        pbes_system::one_point_rule_rewriter R;
-        pbes_system::replace_pbes_expressions(pbesspec, R, false);
-      }
-
-      if (m_options.replace_constants_by_variables)
-      {
-        pbes_system::replace_constants_by_variables(pbesspec, m_rewr, m_sigma);
-      }
-
-      pbes_system::srf_pbes result = pbes2srf(pbesspec, true);
       if (m_options.split_conditions > 0)
       {
-        result = split_conditions(result, m_options.split_conditions);
+        srf_pbes = split_conditions(srf_pbes, m_options.split_conditions);
       }
 
       if (make_total)
       {
-        result.make_total();
+        srf_pbes.make_total();
       }
 
-      unify_parameters(result, m_options.reset_parameters);
-      pbes_system::resolve_summand_variable_name_clashes(result, result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
+      unify_parameters(srf_pbes, false, m_options.reset_parameters);
+      pbes_system::resolve_summand_variable_name_clashes(srf_pbes, srf_pbes.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
 
-      // add a sort for the propositional variable names
-      data::data_specification propvar_dataspec = construct_propositional_variable_data_specification(result, "PropositionalVariable");
-      result.data() = data::merge_data_specifications(result.data(), propvar_dataspec);
-      mCRL2log(log::trace) << "--- srf pbes ---\n" << result.to_pbes() << std::endl;
-
-      return result;
+      mCRL2log(log::trace) << "--- srf pbes ---\n" << srf_pbes.to_pbes() << std::endl;
+      return srf_pbes;
     }
 
     std::string print_size(const sylvan::ldds::ldd& L)
@@ -267,10 +282,10 @@ class pbesreach_algorithm
     }
 
   public:
-    pbesreach_algorithm(const pbes_system::pbes& pbesspec, const symbolic_reachability_options& options_)
+    pbesreach_algorithm(const pbes_system::srf_pbes& srf_pbes, data::rewriter rewr, const symbolic_reachability_options& options_)
       : m_options(options_),
-        m_pbes(preprocess(pbesspec, options_.make_total)),
-        m_rewr(symbolic::construct_rewriter(m_pbes.data(), m_options.rewrite_strategy, pbes_system::find_function_symbols(pbesspec), m_options.remove_unused_rewrite_rules)),
+        m_pbes(internal_preprocess(srf_pbes, options_.make_total)),
+        m_rewr(rewr),
         m_enumerator(m_rewr, m_pbes.data(), m_rewr, m_id_generator, false)
     {
       if (!m_options.srf.empty())
