@@ -39,14 +39,14 @@ class pbes_rewriter_tool: public Tool
     virtual std::set<pbes_system::pbes_rewriter_type> available_rewriters() const
     {
       std::set<pbes_system::pbes_rewriter_type> result;
-      result.insert(pbes_system::simplify);
-      result.insert(pbes_system::quantifier_all);
-      result.insert(pbes_system::quantifier_finite);
-      result.insert(pbes_system::quantifier_inside);
-      result.insert(pbes_system::quantifier_one_point);
-      result.insert(pbes_system::pfnf);
-      result.insert(pbes_system::ppg);
-      result.insert(pbes_system::bqnf_quantifier);
+      result.insert(pbes_system::pbes_rewriter_type::simplify);
+      result.insert(pbes_system::pbes_rewriter_type::quantifier_all);
+      result.insert(pbes_system::pbes_rewriter_type::quantifier_finite);
+      result.insert(pbes_system::pbes_rewriter_type::quantifier_inside);
+      result.insert(pbes_system::pbes_rewriter_type::quantifier_one_point);
+      result.insert(pbes_system::pbes_rewriter_type::pfnf);
+      result.insert(pbes_system::pbes_rewriter_type::ppg);
+      result.insert(pbes_system::pbes_rewriter_type::bqnf_quantifier);
       return result;
     }
 
@@ -55,7 +55,7 @@ class pbes_rewriter_tool: public Tool
     /// \return The string "simplify"
     virtual pbes_system::pbes_rewriter_type default_rewriter() const
     {
-      return pbes_system::simplify;
+      return pbes_system::pbes_rewriter_type::simplify;
     }
 
     /// \brief Add options to an interface description. Also includes
