@@ -13,220 +13,202 @@
 #define MCRL2_PBES_SRF_PBES_H
 
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
-
-inline
-pbes_expression make_not(const pbes_expression& x)
+namespace mcrl2
 {
-  if(data::is_data_expression(x) && data::sort_bool::is_not_application(x))
+
+namespace pbes_system
+{
+
+namespace detail
+{
+
+inline pbes_expression make_not(const pbes_expression& x)
+{
+  if (data::is_data_expression(x) && data::sort_bool::is_not_application(x))
   {
     return data::sort_bool::arg(atermpp::down_cast<data::data_expression>(x));
   }
-  else if(is_not(x))
+  else if (is_not(x))
   {
     return accessors::arg(x);
   }
   return not_(x);
 }
 
-} // namespace detail
-
-class srf_summand
+/// A summand in a srf equation, if allow_ce then counter example information is
+/// allowed. This means that the condition is a `pbes_expression` instead of a
+/// `data_expression`.
+template <bool allow_ce>
+class pre_srf_summand
 {
-  protected:
-    data::variable_list m_parameters;
-    data::data_expression m_condition;
-    propositional_variable_instantiation m_X;
+  using condition_type = std::conditional_t<allow_ce, pbes_expression, data::data_expression>;
+protected:
+  data::variable_list m_parameters;
+  condition_type m_condition;
+  propositional_variable_instantiation m_X;
 
-  public:
-    srf_summand(
-      data::variable_list parameters,
+public:
+  ///
+  pre_srf_summand(data::variable_list parameters,
       const pbes_expression& condition,
-      propositional_variable_instantiation X
-    )
-     : m_parameters(std::move(parameters)), m_condition(detail::pbes2data(condition)), m_X(std::move(X))
-    {}
-
-    const data::variable_list& parameters() const
+      propositional_variable_instantiation X)
+      : m_parameters(std::move(parameters)),
+        m_condition(condition),
+        m_X(std::move(X))
+  {
+    if constexpr (!allow_ce)
     {
-      return m_parameters;
+      m_condition = detail::pbes2data(condition);
     }
+  }
 
-    data::variable_list& parameters()
-    {
-      return m_parameters;
-    }
+  const data::variable_list& parameters() const { return m_parameters; }
 
-    const data::data_expression& condition() const
-    {
-      return m_condition;
-    }
+  data::variable_list& parameters() { return m_parameters; }
 
-    data::data_expression& condition()
-    {
-      return m_condition;
-    }
+  const condition_type& condition() const { return m_condition; }
 
-    const propositional_variable_instantiation& variable() const
-    {
-      return m_X;
-    }
+  condition_type& condition() { return m_condition; }
 
-    propositional_variable_instantiation& variable()
-    {
-      return m_X;
-    }
+  const propositional_variable_instantiation& variable() const { return m_X; }
 
-    void add_variables(const data::variable_list& variables)
-    {
-      m_parameters = variables + m_parameters;
-    }
+  propositional_variable_instantiation& variable() { return m_X; }
 
-    void add_condition(const pbes_expression& f)
-    {
-      m_condition = data::lazy::and_(atermpp::down_cast<data::data_expression>(detail::pbes2data(f)), m_condition);
-    }
+  void add_variables(const data::variable_list& variables) { m_parameters = variables + m_parameters; }
 
-    pbes_expression to_pbes(bool conjunctive) const
+  void add_condition(const pbes_expression& f)
+  {
+    if constexpr (allow_ce)
     {
-      if (conjunctive)
-      {
-        return make_forall_(m_parameters, imp(m_condition, m_X));
-      }
-      else
-      {
-        return make_exists_(m_parameters, and_(m_condition, m_X));
-      }
+      m_condition = pbes_system::and_(f, m_condition);
     }
+    else
+    {
+      m_condition = detail::pbes2data(pbes_system::and_(f, pbes_system::pbes_expression(m_condition)));
+    }
+  }
+
+  pbes_expression to_pbes(bool conjunctive) const
+  {
+    if (conjunctive)
+    {
+      return make_forall_(m_parameters, imp(m_condition, m_X));
+    }
+    else
+    {
+      return make_exists_(m_parameters, and_(m_condition, m_X));
+    }
+  }
 };
 
-inline
-std::ostream& operator<<(std::ostream& out, const srf_summand& summand)
+template <bool allow_ce>
+inline std::ostream& operator<<(std::ostream& out, const pre_srf_summand<allow_ce>& summand)
 {
-  return out << "variables = " << core::detail::print_list(summand.parameters()) << " f = " << summand.condition() << " X = " << summand.variable();
+  return out << "variables = " << core::detail::print_list(summand.parameters()) << " f = " << summand.condition()
+             << " X = " << summand.variable();
 }
 
-class srf_equation
+template <bool allow_ce>
+class pre_srf_equation
 {
-  protected:
-    fixpoint_symbol m_sigma;
-    propositional_variable m_variable;
-    std::vector<srf_summand> m_summands;
-    bool m_conjunctive;
+protected:
+  fixpoint_symbol m_sigma;
+  propositional_variable m_variable;
+  std::vector<pre_srf_summand<allow_ce>> m_summands;
+  bool m_conjunctive;
 
-  public:
-    explicit srf_equation(const fixpoint_symbol& sigma, const propositional_variable& variable, std::vector<srf_summand> summands, bool conjunctive)
-      : m_sigma(sigma), m_variable(variable), m_summands(std::move(summands)), m_conjunctive(conjunctive)
-    {}
+public:
+  explicit pre_srf_equation(const fixpoint_symbol& sigma,
+      const propositional_variable& variable,
+      std::vector<pre_srf_summand<allow_ce>> summands,
+      bool conjunctive)
+      : m_sigma(sigma),
+        m_variable(variable),
+        m_summands(std::move(summands)),
+        m_conjunctive(conjunctive)
+  {}
 
-    const fixpoint_symbol& symbol() const
+  const fixpoint_symbol& symbol() const { return m_sigma; }
+
+  fixpoint_symbol& symbol() { return m_sigma; }
+
+  const propositional_variable& variable() const { return m_variable; }
+
+  propositional_variable& variable() { return m_variable; }
+
+  const std::vector<pre_srf_summand<allow_ce>>& summands() const { return m_summands; }
+
+  std::vector<pre_srf_summand<allow_ce>>& summands() { return m_summands; }
+
+  bool& is_conjunctive() { return m_conjunctive; }
+
+  bool is_conjunctive() const { return m_conjunctive; }
+
+  pbes_equation to_pbes() const
+  {
+    std::vector<pbes_expression> v;
+    for (const auto& summand : m_summands)
     {
-      return m_sigma;
+      v.push_back(summand.to_pbes(m_conjunctive));
     }
+    pbes_expression rhs = m_conjunctive ? join_and(v.begin(), v.end()) : join_or(v.begin(), v.end());
+    return pbes_equation(m_sigma, m_variable, rhs);
+  }
 
-    fixpoint_symbol& symbol()
+  /// Ensures that the equation is total, by adding the summands corresponding to true and false
+  void make_total(const pre_srf_summand<allow_ce>& true_summand, const pre_srf_summand<allow_ce>& false_summand)
+  {
+    if (m_conjunctive)
     {
-      return m_sigma;
+      m_summands.push_back(true_summand);
     }
-
-    const propositional_variable& variable() const
+    else
     {
-      return m_variable;
+      m_summands.push_back(false_summand);
     }
-
-    propositional_variable& variable()
-    {
-      return m_variable;
-    }
-
-    const std::vector<srf_summand>& summands() const
-    {
-      return m_summands;
-    }
-
-    std::vector<srf_summand>& summands()
-    {
-      return m_summands;
-    }
-
-    bool& is_conjunctive()
-    {
-      return m_conjunctive;
-    }
-
-    bool is_conjunctive() const
-    {
-      return m_conjunctive;
-    }
-
-    pbes_equation to_pbes() const
-    {
-      std::vector<pbes_expression> v;
-      for (const srf_summand& summand: m_summands)
-      {
-        v.push_back(summand.to_pbes(m_conjunctive));
-      }
-      pbes_expression rhs = m_conjunctive ? join_and(v.begin(), v.end()) : join_or(v.begin(), v.end());
-      return pbes_equation(m_sigma, m_variable, rhs);
-    }
-
-    void make_total(const srf_summand& true_summand, const srf_summand& false_summand)
-    {
-      if (m_conjunctive)
-      {
-        m_summands.push_back(true_summand);
-      }
-      else
-      {
-        m_summands.push_back(false_summand);
-      }
-    }
+  }
 };
 
-inline
-std::ostream& operator<<(std::ostream& out, const srf_equation& eqn)
+template <bool allow_ce>
+inline std::ostream& operator<<(std::ostream& out, const pre_srf_equation<allow_ce>& eqn)
 {
   out << "srf equation" << std::endl;
-  for (const srf_summand& summand: eqn.summands())
+  for (const auto& summand : eqn.summands())
   {
     out << summand << std::endl;
   }
   return out;
 }
 
-namespace detail {
+template <bool allow_ce>
+std::vector<pre_srf_summand<allow_ce>> srf_or(const pbes_expression& phi,
+    std::deque<pbes_equation>& equations,
+    const pbes_equation& eqn,
+    const data::variable_list& V,
+    data::set_identifier_generator& id_generator,
+    const core::identifier_string& X_true,
+    const core::identifier_string& X_false,
+    std::vector<pre_srf_equation<allow_ce>>& result,
+    bool merge_simple_expressions);
 
-std::vector<srf_summand> srf_or(
-  const pbes_expression& phi,
-  std::deque<pbes_equation>& equations,
-  const pbes_equation& eqn,
-  const data::variable_list& V,
-  data::set_identifier_generator& id_generator,
-  const core::identifier_string& X_true,
-  const core::identifier_string& X_false,
-  std::vector<srf_equation>& result,
-  bool merge_simple_expressions
-);
-
-struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
+template <bool allow_ce>
+struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allow_ce>>
 {
   typedef pbes_expression_traverser<srf_or_traverser> super;
+  using super::apply;
   using super::enter;
   using super::leave;
-  using super::apply;
 
   // The remaining PBES equations
   std::deque<pbes_equation>& equations;
@@ -244,30 +226,36 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
   const core::identifier_string& X_false;
 
   // The equations of the resulting srf PBES
-  std::vector<srf_equation>& result;
+  std::vector<pre_srf_equation<allow_ce>>& result;
 
   // The summands of the generated equation
-  std::vector<srf_summand> summands;
+  std::vector<pre_srf_summand<allow_ce>> summands;
 
-  /// If true do not introduce a new PBES equation for simple expressions, and instead add them to every summand separately.
+  /// If true do not introduce a new PBES equation for simple expressions, and instead add them to every summand
+  /// separately.
   bool m_merge_simple_expressions = false;
 
-  srf_or_traverser(
-    std::deque<pbes_equation>& equations_,
-    const pbes_equation& eqn_,
-    const data::variable_list& V_,
-    data::set_identifier_generator& id_generator_,
-    const core::identifier_string& X_true_,
-    const core::identifier_string& X_false_,
-    std::vector<srf_equation>& result_,
-    bool merge_simple_expressions
-  )
-   : equations(equations_), eqn(eqn_), V(V_), id_generator(id_generator_), X_true(X_true_), X_false(X_false_), result(result_), m_merge_simple_expressions(merge_simple_expressions)
+  srf_or_traverser(std::deque<pbes_equation>& equations_,
+      const pbes_equation& eqn_,
+      const data::variable_list& V_,
+      data::set_identifier_generator& id_generator_,
+      const core::identifier_string& X_true_,
+      const core::identifier_string& X_false_,
+      std::vector<pre_srf_equation<allow_ce>>& result_,
+      bool merge_simple_expressions)
+      : equations(equations_),
+        eqn(eqn_),
+        V(V_),
+        id_generator(id_generator_),
+        X_true(X_true_),
+        X_false(X_false_),
+        result(result_),
+        m_merge_simple_expressions(merge_simple_expressions)
   {}
 
   void apply(const and_& x)
   {
-    if (m_merge_simple_expressions && is_simple_expression(x.left()))
+    if (m_merge_simple_expressions && is_simple_expression(x.left(), allow_ce))
     {
       std::size_t size = summands.size();
       apply(x.right());
@@ -276,7 +264,7 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
         i->add_condition(x.left());
       }
     }
-    else if (m_merge_simple_expressions && is_simple_expression(x.right()))
+    else if (m_merge_simple_expressions && is_simple_expression(x.right(), allow_ce))
     {
       std::size_t size = summands.size();
       apply(x.left());
@@ -291,14 +279,24 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
       equations.push_front(pbes_equation(eqn.symbol(), X1, x));
-      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
+      summands.emplace_back(data::variable_list(),
+          f,
+          propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
     }
   }
 
   void apply(const exists& x)
   {
-    std::vector<srf_summand> body_summands = srf_or(x.body(), equations, eqn, V + x.variables(), id_generator, X_true, X_false, result, m_merge_simple_expressions);
-    for (srf_summand& summand: body_summands)
+    std::vector<pre_srf_summand<allow_ce>> body_summands = srf_or(x.body(),
+        equations,
+        eqn,
+        V + x.variables(),
+        id_generator,
+        X_true,
+        X_false,
+        result,
+        m_merge_simple_expressions);
+    for (auto& summand : body_summands)
     {
       summand.add_variables(x.variables());
     }
@@ -307,7 +305,7 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
 
   void apply(const forall& x)
   {
-    if (is_simple_expression(x.body()))
+    if (is_simple_expression(x.body(), allow_ce))
     {
       const pbes_expression& f = x.body();
       const propositional_variable_instantiation& X = propositional_variable_instantiation(X_true, {});
@@ -319,7 +317,9 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
       equations.push_front(pbes_equation(eqn.symbol(), X1, x));
-      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
+      summands.emplace_back(data::variable_list(),
+          f,
+          propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
     }
   }
 
@@ -331,7 +331,7 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
 
   void apply(const pbes_expression& x)
   {
-    if (is_simple_expression(x))
+    if (is_simple_expression(x, allow_ce))
     {
       const propositional_variable_instantiation& X = propositional_variable_instantiation(X_true, {});
       const pbes_expression& f = x;
@@ -343,53 +343,45 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
     }
   }
 
-  void apply(const not_& /* x */)
-  {
-    throw mcrl2::runtime_error("unsupported term!");
-  }
+  void apply(const not_& /* x */) { throw mcrl2::runtime_error("unsupported term!"); }
 
-  void apply(const imp& /* x */)
-  {
-    throw mcrl2::runtime_error("unsupported term!");
-  }
+  void apply(const imp& /* x */) { throw mcrl2::runtime_error("unsupported term!"); }
 };
 
-inline
-std::vector<srf_summand> srf_or(
-  const pbes_expression& phi,
-  std::deque<pbes_equation>& equations,
-  const pbes_equation& eqn,
-  const data::variable_list& V,
-  data::set_identifier_generator& id_generator,
-  const core::identifier_string& X_true,
-  const core::identifier_string& X_false,
-  std::vector<srf_equation>& result,
-  bool merge_simple_expressions
-)
+template<bool allow_ce>
+inline std::vector<pre_srf_summand<allow_ce>> srf_or(const pbes_expression& phi,
+    std::deque<pbes_equation>& equations,
+    const pbes_equation& eqn,
+    const data::variable_list& V,
+    data::set_identifier_generator& id_generator,
+    const core::identifier_string& X_true,
+    const core::identifier_string& X_false,
+    std::vector<pre_srf_equation<allow_ce>>& result,
+    bool merge_simple_expressions)
 {
-  srf_or_traverser f(equations, eqn, V, id_generator, X_true, X_false, result, merge_simple_expressions);
+  srf_or_traverser<allow_ce> f(equations, eqn, V, id_generator, X_true, X_false, result, merge_simple_expressions);
   f.apply(phi);
   return std::move(f.summands);
 }
 
-std::vector<srf_summand> srf_and(
-  const pbes_expression& phi,
-  std::deque<pbes_equation>& equations,
-  const pbes_equation& eqn,
-  const data::variable_list& V,
-  data::set_identifier_generator& id_generator,
-  const core::identifier_string& X_true,
-  const core::identifier_string& X_false,
-  std::vector<srf_equation>& result,
-  bool merge_simple_expressions
-);
+template<bool allow_ce>
+std::vector<pre_srf_summand<allow_ce>> srf_and(const pbes_expression& phi,
+    std::deque<pbes_equation>& equations,
+    const pbes_equation& eqn,
+    const data::variable_list& V,
+    data::set_identifier_generator& id_generator,
+    const core::identifier_string& X_true,
+    const core::identifier_string& X_false,
+    std::vector<pre_srf_equation<allow_ce>>& result,
+    bool merge_simple_expressions);
 
-struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
+template<bool allow_ce>
+struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<allow_ce>>
 {
   typedef pbes_expression_traverser<srf_and_traverser> super;
+  using super::apply;
   using super::enter;
   using super::leave;
-  using super::apply;
 
   // The remaining PBES equations
   std::deque<pbes_equation>& equations;
@@ -407,30 +399,36 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
   const core::identifier_string& X_false;
 
   // The equations of the resulting srf PBES
-  std::vector<srf_equation>& result;
+  std::vector<pre_srf_equation<allow_ce>>& result;
 
   // The summands of the generated equation
-  std::vector<srf_summand> summands;
+  std::vector<pre_srf_summand<allow_ce>> summands;
 
-  /// If true do not introduce a new PBES equation for simple expressions, and instead add them to every summand separately.
+  /// If true do not introduce a new PBES equation for simple expressions, and instead add them to every summand
+  /// separately.
   bool m_merge_simple_expressions = false;
 
-  srf_and_traverser(
-    std::deque<pbes_equation>& equations_,
-    const pbes_equation& eqn_,
-    const data::variable_list& V_,
-    data::set_identifier_generator& id_generator_,
-    const core::identifier_string& X_true_,
-    const core::identifier_string& X_false_,
-    std::vector<srf_equation>& result_,
-    bool merge_simple_expressions
-  )
-    : equations(equations_), eqn(eqn_), V(V_), id_generator(id_generator_), X_true(X_true_), X_false(X_false_), result(result_), m_merge_simple_expressions(merge_simple_expressions)
+  srf_and_traverser(std::deque<pbes_equation>& equations_,
+      const pbes_equation& eqn_,
+      const data::variable_list& V_,
+      data::set_identifier_generator& id_generator_,
+      const core::identifier_string& X_true_,
+      const core::identifier_string& X_false_,
+      std::vector<pre_srf_equation<allow_ce>>& result_,
+      bool merge_simple_expressions)
+      : equations(equations_),
+        eqn(eqn_),
+        V(V_),
+        id_generator(id_generator_),
+        X_true(X_true_),
+        X_false(X_false_),
+        result(result_),
+        m_merge_simple_expressions(merge_simple_expressions)
   {}
 
   void apply(const or_& x)
   {
-    if (m_merge_simple_expressions && is_simple_expression(x.left()))
+    if (m_merge_simple_expressions && is_simple_expression(x.left(), allow_ce))
     {
       std::size_t size = summands.size();
       apply(x.right());
@@ -439,7 +437,8 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
         i->add_condition(detail::make_not(x.left()));
       }
     }
-    else if (m_merge_simple_expressions && is_simple_expression(x.right()))
+    else if (m_merge_simple_expressions
+             && (allow_ce && is_simple_expression(x.right(), allow_ce)))
     {
       std::size_t size = summands.size();
       apply(x.left());
@@ -454,14 +453,24 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
       equations.push_front(pbes_equation(eqn.symbol(), X1, x));
-      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
+      summands.emplace_back(data::variable_list(),
+          f,
+          propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
     }
   }
 
   void apply(const forall& x)
   {
-    std::vector<srf_summand> body_summands = srf_and(x.body(), equations, eqn, V + x.variables(), id_generator, X_true, X_false, result, m_merge_simple_expressions);
-    for (srf_summand& summand: body_summands)
+    std::vector<pre_srf_summand<true>> body_summands = srf_and(x.body(),
+        equations,
+        eqn,
+        V + x.variables(),
+        id_generator,
+        X_true,
+        X_false,
+        result,
+        m_merge_simple_expressions);
+    for (auto& summand : body_summands)
     {
       summand.add_variables(x.variables());
     }
@@ -482,7 +491,9 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
       equations.push_front(pbes_equation(eqn.symbol(), X1, x));
-      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
+      summands.emplace_back(data::variable_list(),
+          f,
+          propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
     }
   }
 
@@ -494,7 +505,7 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
 
   void apply(const pbes_expression& x)
   {
-    if (is_simple_expression(x))
+    if (is_simple_expression(x, allow_ce))
     {
       const propositional_variable_instantiation& X = propositional_variable_instantiation(X_false, {});
       const pbes_expression& f = x;
@@ -506,37 +517,27 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
     }
   }
 
-  void apply(const not_& /* x */)
-  {
-    throw mcrl2::runtime_error("unsupported term!");
-  }
+  void apply(const not_& /* x */) { throw mcrl2::runtime_error("unsupported term!"); }
 
-  void apply(const imp& /* x */)
-  {
-    throw mcrl2::runtime_error("unsupported term!");
-  }
+  void apply(const imp& /* x */) { throw mcrl2::runtime_error("unsupported term!"); }
 };
 
-inline
-std::vector<srf_summand> srf_and(
-  const pbes_expression& phi,
-  std::deque<pbes_equation>& equations,
-  const pbes_equation& eqn,
-  const data::variable_list& V,
-  data::set_identifier_generator& id_generator,
-  const core::identifier_string& X_true,
-  const core::identifier_string& X_false,
-  std::vector<srf_equation>& result,
-  bool merge_simple_expressions
-)
+inline std::vector<pre_srf_summand<true>> srf_and(const pbes_expression& phi,
+    std::deque<pbes_equation>& equations,
+    const pbes_equation& eqn,
+    const data::variable_list& V,
+    data::set_identifier_generator& id_generator,
+    const core::identifier_string& X_true,
+    const core::identifier_string& X_false,
+    std::vector<pre_srf_equation<true>>& result,
+    bool merge_simple_expressions)
 {
   srf_and_traverser f(equations, eqn, V, id_generator, X_true, X_false, result, merge_simple_expressions);
   f.apply(phi);
   return std::move(f.summands);
 }
 
-inline
-bool is_conjunctive(const pbes_expression& phi)
+inline bool is_conjunctive(const pbes_expression& phi)
 {
   if (is_simple_expression(phi))
   {
@@ -549,14 +550,14 @@ bool is_conjunctive(const pbes_expression& phi)
   else if (is_or(phi))
   {
     const auto& phi_ = atermpp::down_cast<or_>(phi);
-    return (is_simple_expression(phi_.left()) && is_propositional_variable_instantiation(phi_.right())) ||
-           (is_simple_expression(phi_.right()) && is_propositional_variable_instantiation(phi_.left()));
+    return (is_simple_expression(phi_.left()) && is_propositional_variable_instantiation(phi_.right()))
+           || (is_simple_expression(phi_.right()) && is_propositional_variable_instantiation(phi_.left()));
   }
   else if (is_and(phi))
   {
     const auto& phi_ = atermpp::down_cast<and_>(phi);
-    return !((is_simple_expression(phi_.left()) && is_propositional_variable_instantiation(phi_.right())) ||
-             (is_simple_expression(phi_.right()) && is_propositional_variable_instantiation(phi_.left())));
+    return !((is_simple_expression(phi_.left()) && is_propositional_variable_instantiation(phi_.right()))
+             || (is_simple_expression(phi_.right()) && is_propositional_variable_instantiation(phi_.left())));
   }
   else if (is_exists(phi))
   {
@@ -569,121 +570,184 @@ bool is_conjunctive(const pbes_expression& phi)
   throw mcrl2::runtime_error("is_conjunctive: unexpected case " + pbes_system::pp(phi));
 }
 
-} // namespace detail
-
-// explicit representation of a pbes in SRF format
-class srf_pbes
+/// explicit representation of a pbes in SRF format
+///
+/// If allow_ce is true, then counter example expressions are allowed in the
+/// PBES. We refer to this as kind of `pre_srf`. When the counter example
+/// information is replaced by `true` or `false` in every condition, we obtain a
+/// `srf`.
+template <bool allow_ce>
+class pre_srf_pbes
 {
-  protected:
-    data::data_specification m_dataspec;
-    std::vector<srf_equation> m_equations;
-    propositional_variable_instantiation m_initial_state;
+protected:
+  data::data_specification m_dataspec;
+  std::vector<pre_srf_equation<allow_ce>> m_equations;
+  propositional_variable_instantiation m_initial_state;
 
-  public:
-    srf_pbes() = default;
+public:
+  pre_srf_pbes() = default;
 
-    srf_pbes(
-      const data::data_specification& dataspec,
-      std::vector<srf_equation> equations,
-      propositional_variable_instantiation initial_state
-    )
-      : m_dataspec(dataspec), m_equations(std::move(equations)), m_initial_state(std::move(initial_state))
-    {}
+  pre_srf_pbes(const data::data_specification& dataspec,
+      std::vector<pre_srf_equation<allow_ce>> equations,
+      propositional_variable_instantiation initial_state)
+      : m_dataspec(dataspec),
+        m_equations(std::move(equations)),
+        m_initial_state(std::move(initial_state))
+  {}
 
-    const std::vector<srf_equation>& equations() const
+  const std::vector<pre_srf_equation<allow_ce>>& equations() const { return m_equations; }
+
+  std::vector<pre_srf_equation<allow_ce>>& equations() { return m_equations; }
+
+  const propositional_variable_instantiation& initial_state() const { return m_initial_state; }
+
+  propositional_variable_instantiation& initial_state() { return m_initial_state; }
+
+  const data::data_specification& data() const { return m_dataspec; }
+
+  data::data_specification& data() { return m_dataspec; }
+
+  pbes to_pbes() const
+  {
+    std::vector<pbes_equation> v;
+    for (const auto& eqn : equations())
     {
-      return m_equations;
+      v.push_back(eqn.to_pbes());
     }
+    return pbes(m_dataspec, v, m_initial_state);
+  }
 
-    std::vector<srf_equation>& equations()
+  // Adds extra clauses to the equations to enforce that the PBES is in TSRF format
+  // Precondition: the last two equations must be the equations corresponding to false and true
+  void make_total()
+  {
+    std::size_t N = m_equations.size();
+    const auto& false_summand = m_equations[N - 2].summands().front();
+    const auto& true_summand = m_equations[N - 1].summands().front();
+    for (std::size_t i = 0; i < N - 2; i++)
     {
-      return m_equations;
+      m_equations[i].make_total(true_summand, false_summand);
     }
-
-    const propositional_variable_instantiation& initial_state() const
-    {
-      return m_initial_state;
-    }
-
-    propositional_variable_instantiation& initial_state()
-    {
-      return m_initial_state;
-    }
-
-    const data::data_specification& data() const
-    {
-      return m_dataspec;
-    }
-
-    data::data_specification& data()
-    {
-      return m_dataspec;
-    }
-
-    pbes to_pbes() const
-    {
-      std::vector<pbes_equation> v;
-      for (const srf_equation& eqn: equations())
-      {
-        v.push_back(eqn.to_pbes());
-      }
-      return pbes(m_dataspec, v, m_initial_state);
-    }
-
-    // Adds extra clauses to the equations to enforce that the PBES is in TSRF format
-    // Precondition: the last two equations must be the equations corresponding to false and true
-    void make_total()
-    {
-      std::size_t N = m_equations.size();
-      const srf_summand& false_summand = m_equations[N-2].summands().front();
-      const srf_summand& true_summand = m_equations[N-1].summands().front();
-      for (std::size_t i = 0; i < N - 2; i++)
-      {
-        m_equations[i].make_total(true_summand, false_summand);
-      }
-    }
+  }
 };
 
 /// \brief Converts a PBES into standard recursive form
 /// \pre The pbes p must be normalized
-inline
-srf_pbes pbes2srf(const pbes& p, bool merge_simple_expressions = true)
+template<bool allow_ce>
+inline detail::pre_srf_pbes<allow_ce> pbes2pre_srf(const pbes& p, bool merge_simple_expressions = true)
 {
   data::set_identifier_generator id_generator;
-  for (const core::identifier_string& id: pbes_system::find_identifiers(p))
+  for (const core::identifier_string& id : pbes_system::find_identifiers(p))
   {
     id_generator.add_identifier(id);
   }
 
   core::identifier_string X_false = id_generator("X_false");
   core::identifier_string X_true = id_generator("X_true");
-  pbes_equation eqn_false(fixpoint_symbol::mu(), propositional_variable(X_false, {}), or_(data::sort_bool::false_(), propositional_variable_instantiation(X_false, {})));
-  pbes_equation eqn_true(fixpoint_symbol::nu(), propositional_variable(X_true, {}), propositional_variable_instantiation(X_true, {}));
+  pbes_equation eqn_false(fixpoint_symbol::mu(),
+      propositional_variable(X_false, {}),
+      or_(data::sort_bool::false_(), propositional_variable_instantiation(X_false, {})));
+  pbes_equation eqn_true(fixpoint_symbol::nu(),
+      propositional_variable(X_true, {}),
+      propositional_variable_instantiation(X_true, {}));
 
   const auto& p_equations = p.equations();
   std::deque<pbes_equation> equations(p_equations.begin(), p_equations.end());
   equations.emplace_back(eqn_false);
   equations.emplace_back(eqn_true);
 
-  std::vector<srf_equation> srf_equations;
+  std::vector<detail::pre_srf_equation<allow_ce>> srf_equations;
   while (!equations.empty())
   {
     pbes_equation eqn = equations.front();
     equations.pop_front();
     bool is_conjunctive = detail::is_conjunctive(eqn.formula());
-    std::vector<srf_summand> summands = is_conjunctive ?
-      detail::srf_and(eqn.formula(), equations, eqn, eqn.variable().parameters(), id_generator, X_true, X_false, srf_equations, merge_simple_expressions) :
-      detail::srf_or(eqn.formula(), equations, eqn, eqn.variable().parameters(), id_generator, X_true, X_false, srf_equations, merge_simple_expressions);
+    std::vector<detail::pre_srf_summand<allow_ce>> summands = is_conjunctive ? detail::srf_and(eqn.formula(),
+        equations,
+        eqn,
+        eqn.variable().parameters(),
+        id_generator,
+        X_true,
+        X_false,
+        srf_equations,
+        merge_simple_expressions)
+      : detail::srf_or(eqn.formula(),
+        equations,
+        eqn,
+        eqn.variable().parameters(),
+        id_generator,
+        X_true,
+        X_false,
+        srf_equations,
+        merge_simple_expressions);
     srf_equations.emplace_back(eqn.symbol(), eqn.variable(), summands, is_conjunctive);
   }
 
-  return srf_pbes(p.data(), std::vector<srf_equation>(srf_equations.begin(), srf_equations.end()), p.initial_state());
+  return detail::pre_srf_pbes<allow_ce>(p.data(),
+      std::vector<detail::pre_srf_equation<allow_ce>>(srf_equations.begin(), srf_equations.end()),
+      p.initial_state());
+}
+
+} // namespace detail
+
+using srf_summand = detail::pre_srf_summand<false>;
+
+using srf_equation = detail::pre_srf_equation<false>;
+
+/// This is a PBES in SRF format
+using srf_pbes = detail::pre_srf_pbes<false>;
+
+/// This is a PBES in pre-SRF format, where counter example expressions, i.e., propositional variables are allowed in
+/// simple expressions.
+using srf_pbes_with_ce = detail::pre_srf_pbes<true>;
+
+
+/// \brief Converts a pre-SRF PBES into standard recursive form. Note that the
+/// counter example information of the pre_srf_pbes is removed since otherwise
+/// the result is not in SRF.
+inline srf_pbes pre_srf2srfpbes(const srf_pbes_with_ce& p)
+{
+  // Used to remove counter example information
+  detail::subsitute_counterexample f(true, true);
+
+  std::vector<detail::pre_srf_equation<false>> equations;
+  for (const auto& equation : p.equations())
+  {
+    if (!detail::is_counter_example_equation(equation.to_pbes()))
+    {
+      std::vector<detail::pre_srf_summand<false>> summands;
+      for (const auto& summand : equation.summands())
+      {
+        pbes_expression result;
+        f.apply(result, summand.condition());
+        summands.emplace_back(summand.parameters(), result, summand.variable());
+      }
+
+      equations.emplace_back(equation.symbol(), equation.variable(), summands, equation.is_conjunctive());
+    }
+  }
+
+  return srf_pbes(p.data(), equations, p.initial_state());
+}
+
+
+/// \brief Converts a PBES into standard recursive form
+/// \pre The pbes p must be normalized
+inline srf_pbes_with_ce pbes2pre_srf(const pbes& p, bool merge_simple_expressions = true)
+{
+  return detail::pbes2pre_srf<true>(p, merge_simple_expressions);
+}
+
+/// \brief Converts a PBES into standard recursive form
+/// \pre The pbes p must be normalized
+inline srf_pbes pbes2srf(const pbes& p, bool merge_simple_expressions = true)
+{
+  return detail::pbes2pre_srf<false>(p, merge_simple_expressions);
 }
 
 } // namespace pbes_system
 
-inline
-bool is_srf(const pbes_system::pbes& pbes, bool merge_simple_expressions = true)
+inline bool is_srf(const pbes_system::pbes& pbes, bool merge_simple_expressions = true)
 {
   return pbes_system::pbes2srf(pbes, merge_simple_expressions).equations().size() == pbes.equations().size() + 2;
 }
