@@ -213,15 +213,15 @@ class CodeEditor : public QPlainTextEdit
   void changeEvent(QEvent* event) override;
 
   private:
-  bool isSpecificationEditor;
-  bool lightPalette;
+  bool isSpecificationEditor = false;
+  bool lightPalette = false;
   QFont codeFont;
   QFont lineNumberFont;
-  LineNumberArea* lineNumberArea;
-  CodeHighlighter* highlighter;
+  LineNumberArea* lineNumberArea = nullptr;
+  CodeHighlighter* highlighter = nullptr;
 
-  QAction* zoomInAction;
-  QAction* zoomOutAction;
+  QAction* zoomInAction = nullptr;
+  QAction* zoomOutAction = nullptr;
 
   /**
    * @brief setFontSize Sets the font size and tab width
