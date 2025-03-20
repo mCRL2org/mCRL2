@@ -12,7 +12,9 @@
 #ifndef MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_H
 #define MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/assignment.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/find.h"
 
@@ -162,13 +164,14 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::where_clause& x)
   {
-    const auto& declarations = atermpp::container_cast<data::assignment_list>(x.declarations());
+    const auto& declarations = x.declarations();
 
     auto declarations1 = data::assignment_list(
       declarations.begin(),
       declarations.end(),
-      [&](const assignment& a)
+      [&](const assignment_expression& t)
       {
+        const assignment& a = atermpp::down_cast<assignment>(t);
         const data::variable& v = a.lhs();
         const data_expression& x1 = a.rhs();
         // add the assignment [v := v'] to sigma
@@ -183,8 +186,9 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
     make_where_clause(result, body, declarations1);
 
     // remove the assignments [v := v'] from sigma
-    for (const assignment& a: declarations)
+    for (const assignment_expression& t : declarations)
     {
+      const assignment& a = atermpp::down_cast<assignment>(t);
       const variable& v = a.lhs();
       sigma.remove_fresh_variable_assignment(v);
     }
