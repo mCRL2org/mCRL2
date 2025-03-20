@@ -363,9 +363,9 @@ struct expression_traits : public core::term_traits< Expression >
     return atermpp::down_cast<mcrl2::data::application>(e).head();
   }
 
-  static const data_expression_list& variables(const data_expression& a)
+  static const variable_list& variables(const data_expression& a)
   {
-    return atermpp::container_cast<data_expression_list>(atermpp::down_cast<abstraction>(a).variables());
+    return atermpp::down_cast<abstraction>(a).variables();
   }
 
   static const data_expression& body(const data_expression& a)
