@@ -75,7 +75,7 @@ template <typename Term, class Iter, class ATermConverter>
 aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm);
 
 /// \brief Constructs a list starting from first to last. Each element is converted using the TermConverter.
-template <typename Term, class Iter, class ATermConverter>
+template <IsATerm Term, std::input_iterator Iter, IsTermConverter ATermConverter>
 inline void make_list_forward(term_list<Term>& result, Iter first, Iter last, ATermConverter convert_to_aterm);
 
 /// \brief Constructs a list starting from the first iterator element to the last. The result is put into the variable result. 

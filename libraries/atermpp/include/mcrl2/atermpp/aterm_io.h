@@ -157,14 +157,14 @@ template<typename T>
 inline aterm_ostream&& operator<<(aterm_ostream&& stream, const T& t)
 {  
   static_cast<aterm_ostream&>(stream) << t;
-  return stream;
+  return std::move(stream);
 }
 
 template<typename T>
 inline aterm_istream&& operator>>(aterm_istream&& stream, T& t)
 {
   static_cast<aterm_istream&>(stream) >> t;
-  return stream;
+  return std::move(stream);
 }
 
 /// \brief Sends the name of a function symbol to an ostream.

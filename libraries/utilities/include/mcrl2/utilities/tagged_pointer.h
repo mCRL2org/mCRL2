@@ -114,10 +114,14 @@ public:
     return this->get() <=> other.get();
   }
 
-  template<typename Self>
-  auto&& operator*(this Self&& self)
+  const T& operator*() const
   {
-    return std::forward(self).get();
+    return *get();
+  }
+  
+  T& operator*()
+  {
+    return *get();
   }
 
   const T* operator->() const
