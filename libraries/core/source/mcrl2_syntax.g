@@ -12,6 +12,8 @@
 ${declare tokenize}
 ${declare longest_match}
 
+${declare subparser ProcExpr}
+
 //--- Sort expressions and sort declarations
 
 SortExpr
@@ -178,15 +180,15 @@ ProcExpr
   | '(' ProcExpr ')'                                             // Brackets
   | ProcExpr '+' ProcExpr                               $left 1  // Choice operator
   | 'sum' VarsDeclList '.' ProcExpr                    $right 2  // Sum operator
+  | 'dist' VarsDeclList '[' DataExpr ']' '.' ProcExpr  $right 2  // Distribution operator
   | ProcExpr '||'  ProcExpr                            $right 3  // Parallel operator
   | ProcExpr '||_' ProcExpr                            $right 4  // Leftmerge operator
   | DataExprUnit '->' ProcExpr                         $right 5  // If-then operator
-  | DataExprUnit '->'ProcExpr '<>' ProcExpr            $right 6  // If-then-else operator
+  | DataExprUnit '->' ProcExpr '<>' ProcExpr           $right 6  // If-then-else operator
   | ProcExpr '<<' ProcExpr                              $left 8  // Until operator
   | ProcExpr '.' ProcExpr                               $left 9  // Sequential composition operator
   | ProcExpr '@' DataExprUnit                          $left 10  // At operator
   | ProcExpr '|' ProcExpr                              $left 11  // Communication merge
-  | 'dist' VarsDeclList '[' DataExpr ']' '.' ProcExpr  $right 2  // Distribution operator
   ;
 
 //--- Actions
