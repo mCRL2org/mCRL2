@@ -21,6 +21,7 @@ namespace smt
 answer smt_solver::execute_and_check(const std::string& s, const std::chrono::microseconds& timeout) const
 {
   z3.write(s);
+
   std::string result = timeout == std::chrono::microseconds::zero() ? z3.read() : z3.read(timeout);
   if(result.compare(0, 3, "sat") == 0)
   {
@@ -36,7 +37,7 @@ answer smt_solver::execute_and_check(const std::string& s, const std::chrono::mi
   }
   else
   {
-    mCRL2log(log::error) << "Error when checking satisfiability of \n" << s << std::endl;
+    mCRL2log(log::error) << "Error when checking satisfiability of \n" << s.substr(0, 500) << "...." << std::endl;
     throw mcrl2::runtime_error("Got unexpected response from SMT-solver:\n" + result);
   }
 }
