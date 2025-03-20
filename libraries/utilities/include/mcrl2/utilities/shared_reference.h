@@ -188,7 +188,7 @@ public:
   }
 
   /// Address comparison operator.
-  std::strong_ordering operator <=>(const shared_reference<T>& other) const noexcept
+  std::weak_ordering operator <=>(const shared_reference<T>& other) const noexcept
   {
     return m_reference <=> other.m_reference;
   }
