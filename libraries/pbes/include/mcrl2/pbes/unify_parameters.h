@@ -132,14 +132,15 @@ struct unify_parameters_replace_function
   };
 };
 
+/// Unify all parameters of the non counter example related equations.
 inline
-void unify_parameters(pbes& p)
+void unify_parameters(pbes& p, bool ignore_ce_equations = true)
 {
   std::map<core::identifier_string, data::variable_list> propositional_variable_parameters;
   for (const pbes_equation& eqn: p.equations())
   {
     // Ignore the counter example equations for the list of parameters.
-    if (!detail::is_counter_example_equation(eqn))
+    if (!ignore_ce_equations || !detail::is_counter_example_equation(eqn))
     {
       propositional_variable_parameters[eqn.variable().name()] = eqn.variable().parameters();
     }
@@ -165,11 +166,12 @@ void unify_parameters(pbes& p)
   }
 }
 
+template<bool allow_ce>
 inline
-void unify_parameters(srf_pbes& p, bool reset = true)
+void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equations, bool reset = true)
 {
   std::map<core::identifier_string, data::variable_list> propositional_variable_parameters;
-  for (const srf_equation& eqn: p.equations())
+  for (const auto& eqn: p.equations())
   {
     propositional_variable_parameters[eqn.variable().name()] = eqn.variable().parameters();
   }
@@ -177,14 +179,18 @@ void unify_parameters(srf_pbes& p, bool reset = true)
   unify_parameters_replace_function replace(propositional_variable_parameters, p.data(), reset);
 
   // update the equations
-  for (srf_equation& eqn: p.equations())
+  for (auto& eqn: p.equations())
   {
-    for (srf_summand& summand: eqn.summands())
+    // Do not replace the counter example equations
+    if (!detail::is_counter_example_equation(eqn.to_pbes()))
     {
-      summand.variable() = replace(summand.variable());
+      for (auto& summand: eqn.summands())
+      {
+        summand.variable() = replace(summand.variable());
+      }
+      propositional_variable& X = eqn.variable();
+      X = propositional_variable(X.name(), replace.parameters);
     }
-    propositional_variable& X = eqn.variable();
-    X = propositional_variable(X.name(), replace.parameters);
   }
 
   // update the initial state
