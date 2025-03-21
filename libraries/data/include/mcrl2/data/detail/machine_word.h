@@ -145,9 +145,10 @@ std::size_t times_overflow_word(const std::size_t n1, const std::size_t n2);
 
 std::size_t times_with_carry_overflow_word(const std::size_t n1, const std::size_t n2, std::size_t n3);
 
+/// Performs minus modulo the largest std::size_t.
 inline std::size_t minus_word(const std::size_t n1, const std::size_t n2)
 {
-  assert(n1>=n2); // Should not underflow.
+  // In C++ underflow of unsigned integer operators is defined behaviour, and std::size_t is unsigned.
   return n1-n2;
 }
 
