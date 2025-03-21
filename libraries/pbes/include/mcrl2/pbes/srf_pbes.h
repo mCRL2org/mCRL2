@@ -64,12 +64,15 @@ public:
       const pbes_expression& condition,
       propositional_variable_instantiation X)
       : m_parameters(std::move(parameters)),
-        m_condition(condition),
         m_X(std::move(X))
   {
     if constexpr (!allow_ce)
     {
       m_condition = detail::pbes2data(condition);
+    }
+    else
+    {
+      m_condition = condition;
     }
   }
 
@@ -618,10 +621,11 @@ public:
     return pbes(m_dataspec, v, m_initial_state);
   }
 
-  // Adds extra clauses to the equations to enforce that the PBES is in TSRF format
+  // Adds extra clauses to the equations to enforce that the PBES is in total SRF format
   // Precondition: the last two equations must be the equations corresponding to false and true
   void make_total()
   {
+    // TODO: Remove this hack.
     std::size_t N = m_equations.size();
     const auto& false_summand = m_equations[N - 2].summands().front();
     const auto& true_summand = m_equations[N - 1].summands().front();
