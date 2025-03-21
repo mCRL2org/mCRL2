@@ -147,7 +147,7 @@ std::size_t times_with_carry_overflow_word(const std::size_t n1, const std::size
 
 inline std::size_t minus_word(const std::size_t n1, const std::size_t n2)
 {
-  assert(n1>n2); // Should not underflow.
+  assert(n1>=n2); // Should not underflow.
   return n1-n2;
 }
 

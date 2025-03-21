@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(multiplication_and_addition_test)
   rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (const rewrite_strategy strat: strategies)
   {
-    std::cerr << "Multiplicatipon and addition test1: " << strat << std::endl;
+    std::cerr << "Multiplication and addition test1: " << strat << std::endl;
     data::rewriter R(specification, strat);
 
     data::data_expression x = sort_nat::nat(107);
