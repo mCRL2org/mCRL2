@@ -48,9 +48,11 @@ data::data_specification construct_propositional_variable_data_specification(con
 
 struct symbolic_reachability_options: public symbolic::symbolic_reachability_options
 {
+  bool check_strategy = false;
   bool make_total = false;
   bool reset_parameters = false;
   bool aggressive = false;
+  bool naive_counter_example_instantiation = false;
   std::size_t solve_strategy = 0;
   std::size_t split_conditions = 0;
   std::string srf;
@@ -198,6 +200,7 @@ class pbesreach_algorithm
     data::enumerator_algorithm<> m_enumerator;
     data::variable_list m_process_parameters;
     std::size_t m_n;
+    std::unordered_map<core::identifier_string, data::data_expression> m_propvar_map;
     std::vector<symbolic::data_expression_index> m_data_index;
     std::vector<pbes_summand_group> m_summand_groups;
     data::data_expression_list m_initial_state;
@@ -236,7 +239,7 @@ class pbesreach_algorithm
         pbes_system::replace_constants_by_variables(pbesspec, m_rewr, m_sigma);
       }
 
-      pbes_system::srf_pbes result = pbes2srf(pbesspec);
+      pbes_system::srf_pbes result = pbes2srf(pbesspec, true);
       if (m_options.split_conditions > 0)
       {
         result = split_conditions(result, m_options.split_conditions);
@@ -276,10 +279,9 @@ class pbesreach_algorithm
       }
 
       data::basic_sort propvar_sort("PropositionalVariable"); // todo: choose a unique name
-      std::unordered_map<core::identifier_string, data::data_expression> propvar_map;
       for (const auto& equation: m_pbes.equations())
       {
-        propvar_map[equation.variable().name()] = data::function_symbol(equation.variable().name(), propvar_sort);
+        m_propvar_map[equation.variable().name()] = data::function_symbol(equation.variable().name(), propvar_sort);
       }
 
       m_process_parameters = m_pbes.equations().front().variable().parameters();
@@ -288,7 +290,7 @@ class pbesreach_algorithm
 
       // Rewrite the initial expressions to normal form,
       std::vector<data::data_expression> initial_values;
-      for (const data::data_expression& expression : make_state(m_pbes.initial_state(), propvar_map))
+      for (const data::data_expression& expression : make_state(m_pbes.initial_state(), m_propvar_map))
       {
         initial_values.push_back(m_rewr(expression));
       }
@@ -318,7 +320,7 @@ class pbesreach_algorithm
       m_group_patterns = symbolic::compute_summand_group_patterns(m_summand_patterns, groups);
       for (std::size_t j = 0; j < m_group_patterns.size(); j++)
       {
-        m_summand_groups.emplace_back(m_pbes, m_process_parameters, propvar_map, groups[j], m_group_patterns[j], m_summand_patterns, m_variable_order);
+        m_summand_groups.emplace_back(m_pbes, m_process_parameters, m_propvar_map, groups[j], m_group_patterns[j], m_summand_patterns, m_variable_order);
       }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
@@ -517,7 +519,7 @@ class pbesreach_algorithm
       {
         auto& table = m_data_index[i];
 
-        mCRL2log(log::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values."<< std::endl;
+        mCRL2log(log::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values"<< std::endl;
         for (const auto& data : table)
         {
           mCRL2log(log::debug) << table.index(data) << ": " << data << std::endl;
@@ -567,9 +569,19 @@ class pbesreach_algorithm
       return m_pbes;
     }
 
+    data::rewriter rewriter() const
+    {
+      return m_rewr;
+    }
+
     const data::variable_list& process_parameters() const
     {
       return m_process_parameters;
+    }
+
+    const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map() const
+    {
+      return m_propvar_map;
     }
 
     const std::vector<symbolic::data_expression_index>& data_index() const

@@ -15,6 +15,7 @@
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
+#include <optional>
 
 namespace mcrl2 {
 
