@@ -546,7 +546,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
       std::cout << srf_pbes.to_pbes() << std::endl;
 
-      if (true)
+      // Only used for debugging.
       {
         auto naive_srf = pbes2srf(mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec));
 
@@ -651,6 +651,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           pbessolve_options.number_of_threads = options_.max_workers;
 
           PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1, reach.rewriter());
+
+          mcrl2::log::logger::set_reporting_level(log::log_level_t::trace);
 
           // Perform the second instantiation given the proof graph.      
           timer().start("second-instantiation");

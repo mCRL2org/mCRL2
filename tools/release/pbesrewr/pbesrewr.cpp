@@ -15,6 +15,7 @@
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
 #include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/tools/pbesrewr.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
