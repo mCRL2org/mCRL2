@@ -45,8 +45,8 @@ class pbesreach_algorithm_partial : public pbes_system::pbesreach_algorithm
 {
 public:
 
-  pbesreach_algorithm_partial(const pbes_system::srf_pbes& pbesspec, data::rewriter rewr, const symbolic_reachability_options& options_) :
-    pbes_system::pbesreach_algorithm(pbesspec, rewr, options_)
+  pbesreach_algorithm_partial(const pbes_system::srf_pbes& pbesspec, const symbolic_reachability_options& options_) :
+    pbes_system::pbesreach_algorithm(pbesspec, options_)
   {
     m_Vwon[0] = sylvan::ldds::empty_set();
     m_Vwon[1] = sylvan::ldds::empty_set();
@@ -534,32 +534,12 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       // This has to be done consistently with the LPS for the counter examples.
       data::mutable_map_substitution<> sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
       pbes_system::detail::replace_global_variables(pbesspec, sigma);
-
-      auto rewr = symbolic::construct_rewriter(pbesspec.data(), options.rewrite_strategy, pbes_system::find_function_symbols(pbesspec), options.remove_unused_rewrite_rules);
-
-      pbes_system::srf_pbes_with_ce pre_srf_pbes = preprocess(pbesspec, options, rewr);
-      // Unify the parameters of the original PBES (which has potential counter example information)
-      unify_parameters(pre_srf_pbes, true, options.reset_parameters);
+      pbes_system::srf_pbes_with_ce pre_srf_pbes = preprocess(pbesspec, options);
 
       pbes_system::srf_pbes srf_pbes = pre_srf2srfpbes(pre_srf_pbes);
+
       pbesspec = pre_srf_pbes.to_pbes();
-
-      std::cout << srf_pbes.to_pbes() << std::endl;
-
-      // Only used for debugging.
-      {
-        auto naive_srf = pbes2srf(mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec));
-
-        // The naive SRF from the PBES should be same as the SRF from the PBES+.
-        assert(naive_srf == srf_pbes);
-      }
-
-      if (has_counter_example && !has_unified_parameters(srf_pbes.to_pbes()))
-      {
-        throw mcrl2::runtime_error("The PBES after removing counter example information does not have unified parameters");
-      }
-
-      PbesReachAlgorithm reach(srf_pbes, rewr, options_);
+      PbesReachAlgorithm reach(srf_pbes,  options_);
       if (options.info)
       {
         std::cout << symbolic::print_read_write_patterns(reach.read_write_group_patterns());

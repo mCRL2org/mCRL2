@@ -178,11 +178,16 @@ void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equation
 
   unify_parameters_replace_function replace(propositional_variable_parameters, p.data(), reset);
 
+
+  std::size_t N = p.equations().size();
+  const auto& false_summand = p.equations()[N - 2].summands().front();
+  const auto& true_summand = p.equations()[N - 1].summands().front();
+
   // update the equations
   for (auto& eqn: p.equations())
   {
     // Do not replace the counter example equations
-    if (!detail::is_counter_example_equation(eqn.to_pbes()))
+    if (!ignore_ce_equations || !detail::is_counter_example_equation(eqn.to_pbes()))
     {
       for (auto& summand: eqn.summands())
       {
@@ -190,6 +195,18 @@ void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equation
       }
       propositional_variable& X = eqn.variable();
       X = propositional_variable(X.name(), replace.parameters);
+    }
+    else {
+    {
+      // For counter example equations it is important to unify the X_true and X_false.      
+      for (auto& summand: eqn.summands())
+      {
+        if (summand.variable() == false_summand.variable() || summand.variable() == true_summand.variable())
+        {
+          summand.variable() = replace(summand.variable());
+        }
+      }
+    }
     }
   }
 
