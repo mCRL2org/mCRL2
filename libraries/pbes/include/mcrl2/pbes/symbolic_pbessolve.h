@@ -67,7 +67,7 @@ class symbolic_pbessolve_algorithm
       {
         W[alpha] = union_(A, W_1[alpha]);
         W[1 - alpha] = empty_set();
-        strategy[alpha] = union_(union_(A_strategy, strategy_1[alpha]), merge(U, V));
+        strategy[alpha] = union_(union_(A_strategy, strategy_1[alpha]), merge(intersect(U, Vplayer[alpha]), V));
         strategy[1 - alpha] = empty_set();
       }
       else
@@ -77,7 +77,6 @@ class symbolic_pbessolve_algorithm
         std::tie(W[0], W[1], strategy[0], strategy[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
         strategy[1 - alpha] = union_(union_(strategy_1[1 - alpha], B_strategy), strategy[1 - alpha]);
-        strategy[alpha] = strategy_1[alpha];
       }
 
       mCRL2log(log::debug) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
