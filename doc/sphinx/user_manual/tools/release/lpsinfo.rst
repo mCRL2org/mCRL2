@@ -15,3 +15,6 @@ the following information about the LPS is shown:
 * number of action labels
 * number of used versus the number of declared actions
 * number of sorts
+
+
+.. include:: man/lpsinfo.rst

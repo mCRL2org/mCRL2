@@ -47,3 +47,6 @@ Take the the following LPS:
           ;
 
    init P;
+
+
+.. include:: man/lpssuminst.rst

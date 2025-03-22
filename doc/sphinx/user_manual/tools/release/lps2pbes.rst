@@ -46,3 +46,5 @@ This flag can lead to a substantially larger number of equation (but linear in t
 Note that the option ``--check-only`` can be used to check whether the passed
 formula is valid w.r.t. parsing and type checking, without actually generating
 the PBES.
+
+.. include:: man/lps2pbes.rst
