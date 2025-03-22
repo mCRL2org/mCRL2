@@ -19,6 +19,7 @@ _SPHINX_BUILD_TEMP_DIR = '@SPHINX_BUILD_TEMP_DIR@'
 _SPHINX_BUILD_OUT_DIR = '@SPHINX_BUILD_OUT_DIR@'
 
 os.environ['CMAKE_SOURCE_DIR'] = _CMAKE_SOURCE_DIR
+os.environ['MCRL2_MANUAL_PATH'] = '@MCRL2_MANUAL_PATH@'
 
 # -- Path setup --------------------------------------------------------------
 
@@ -29,26 +30,8 @@ sys.path.insert(0, (Path(__file__).parent / '_extensions').as_posix())
 # -- Project information -----------------------------------------------------
 project = 'mCRL2'
 author = 'Technische Universiteit Eindhoven'
-release = '' # populated below
-version = ''
-
-# run CMake on the version file to obtain the current version of mCRL2
-from manual import call
-olddir = os.getcwd()
-try:
-    os.chdir(_CMAKE_SOURCE_DIR)
-    out = call('CMake', ['cmake', '-P',
-        f'{_CMAKE_SOURCE_DIR}/cmake/MCRL2Version.cmake']).decode('utf-8')
-    for line in iter(out.splitlines()):
-        matches = re.findall(r'MCRL2_MAJOR_VERSION ([\S]+)', line)
-        if matches:
-            release = matches[0]
-        matches = re.findall(r'MCRL2_MINOR_VERSION ([\S]+)', line)
-        if matches:
-            version = matches[0]
-finally:
-    os.chdir(olddir)
-version = f'{release}.{version}'
+release = '@MCRL2_MAJOR_VERSION@'
+version = '@MCRL2_MAJOR_VERSION@.@MCRL2_MINOR_VERSION@'
 
 # update copyright from current version
 copyright = f'2011-{datetime.datetime.now().year}, {author}'
@@ -107,7 +90,7 @@ html_sidebars = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_extra_path = ['_doxygen/output/']
+html_extra_path = ['@DOXYGEN_OUTPUT_PATH@', '@MCRL2_MANUAL_PATH@']
 html_js_files = []
 
 # Tweaking how the "last updated" is displayed
@@ -120,7 +103,7 @@ if tags.has('build_doxygen'):
     extensions.append('sphinxcontrib.doxylink')
 
 doxylink = {
-    'mcrl2' : (str(Path(__file__).parent / '_doxygen/mcrl2.tag'), 'doxygen/')
+    'mcrl2' : ('@DOXYGEN_TAG_PATH@', 'doxygen/')
 }
     
 # -- App setup - executed before the build process starts --------------------
