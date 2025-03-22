@@ -10,6 +10,7 @@
 #ifndef MCRL2_UTILITIES_TAGGED_POINTER_H_
 #define MCRL2_UTILITIES_TAGGED_POINTER_H_
 
+#include <compare>
 #include <functional>
 #include <type_traits>
 
@@ -103,49 +104,20 @@ public:
     return get() == nullptr;
   }
 
-  bool operator!=(std::nullptr_t) const
-  {
-    return !(*this == nullptr);
-  }
-
   bool operator==(const tagged_pointer& other) const
   {
     return get() == other.get();
   }
 
-  bool operator!=(const tagged_pointer& other) const
+  std::strong_ordering operator<=>(const tagged_pointer& other) const
   {
-    return !(*this == other);
+    return this->get() <=> other.get();
   }
 
-  bool operator <(const tagged_pointer& other) const noexcept
+  template<typename Self>
+  auto&& operator*(this Self&& self)
   {
-    return get() < other.get();
-  }
-
-  bool operator <=(const tagged_pointer& other) const noexcept
-  {
-    return get() <= other.get();
-  }
-
-  bool operator >(const tagged_pointer& other) const noexcept
-  {
-    return get() > other.get();
-  }
-
-  bool operator >=(const tagged_pointer& other) const noexcept
-  {
-    return get() >= other.get();
-  }
-
-  const T& operator*() const
-  {
-    return *get();
-  }
-
-  T& operator*()
-  {
-    return *get();
+    return std::forward(self).get();
   }
 
   const T* operator->() const
