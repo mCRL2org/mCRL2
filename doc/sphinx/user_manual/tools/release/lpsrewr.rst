@@ -27,3 +27,6 @@ easier if quantifiers are removed.
 A specification of the one point rule rewriter can be found in the
 `developers documentation <https://mcrl2.org/web/developer_manual/developer.html>`_ 
 in the `PBES rewriters <https://mcrl2.org/web/_downloads/fd0ada340742729e33a70a3666632073/pbes-rewriters.pdf>`_ document.
+
+
+.. include:: man/lpsrewr.rst

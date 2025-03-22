@@ -152,3 +152,5 @@ References
   - [1] Stefan Blom and Jan Cornelis van de Pol. Symbolic reachability for process algebras with recursive data types. In J.S. Fitzgerald, A.E. Haxthausen, and H. Yenigun, editors, Theoretical Aspects of Computing \- ICTAC 2008, number Supplement in Lecture Notes in Computer Science, pages 81–95. Springer, August 2008.
   - [2] Jeroen Meijer. Efficient learning and analysis of system behavior. PhD thesis, University of Twente, Netherlands, September 2019.
   - [3] Tom van Dijk, Jaco van de Pol. Sylvan: multi-core framework for decision diagrams. Int. J. Softw. Tools Technol. Transf. 19(6): 675-696 (2017)
+
+.. include:: man/lpsreach.rst
