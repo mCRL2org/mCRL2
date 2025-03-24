@@ -1,4 +1,12 @@
 \usepackage{newtxsf}
+\usepackage{tikz}
+\usepackage{algpseudocode}
+\usetikzlibrary{automata}
+
+% Used by parity game algorithms
+\newcommand{\attrsym}{\ensuremath{\textit{Attr}}}
+\newcommand{\attr}[3][]{\ensuremath{\attrsym^{#1}_{#2}(#3)}}
+
 
 \newcommand{\seq}{\cdot}
 \newcommand{\alt}{+}
@@ -11,7 +19,9 @@
 \newcommand{\act}{\mathit{Act}}
 \newcommand{\mccan}[1]{\langle #1 \rangle}
 \newcommand{\mcall}[1]{[ #1 ]}
+ 
 \newcommand{\sem}[1]{[\![ #1 ]\!]}
+
 \newcommand{\R}{\mathrel{R}}
 \newcommand{\bisim}{\stackrel{\leftrightarrow}{-}}
 \newcommand{\oftype}{\smash{\,:\,}}
