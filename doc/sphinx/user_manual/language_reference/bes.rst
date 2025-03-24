@@ -13,10 +13,6 @@ BES expression
 
 Expressions in a BES can take the following form.
 
-.. dparser:: BesVar BesExpr
-
-Mathematically, we also write the following.
-
 .. math::
 
   f ::= true \mid false \mid X \mid f \land f \mid f \lor f
@@ -24,18 +20,12 @@ Mathematically, we also write the following.
 BES equation
 ------------
 
-Boolean equations are defined according to the following syntax.
-
-.. dparser:: FixedPointOperator BesEqnDecl BesEqnSpec
-
-Mathematically, we also write :math:`(\mu X = f)` or :math:`(\nu X = f)`
+Mathematically we write :math:`(\mu X = f)` or :math:`(\nu X = f)`
 
 BES specification
 -----------------
 
-A Boolean equation system is a sequence of Boolean equations,
-
-.. dparser:: BesInit BesSpec
+A Boolean equation system is a sequence of Boolean equations.
 
 The difference between PBESs and BESs is at the same conceptual level as the
 difference between LPSs and LTSs: PBESs deal with data as first-class objects
