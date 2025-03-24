@@ -41,3 +41,5 @@ Observe that with this initial configuration, $n_r = r$ and $n_w = w$ are invari
   ~\\
   \mathbf{init}\ X(0,0,N)
   \end{array}
+
+:mcrl2_manual:`pbespareqelm`

@@ -5,10 +5,6 @@
 lpsstategraph
 =============
 
-.. include:: man/lpsstategraph.rst
+This tool is almost the same as :ref:`tool-pbessstategraph`, except that it works on linear process specifications.
 
-
-.. include:: man/lpsstategraph.rst
-
-
-.. include:: man/lpsstategraph.rst
+:mcrl2_manual:`lpsstategraph`

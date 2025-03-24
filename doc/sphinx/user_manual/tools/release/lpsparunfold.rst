@@ -62,5 +62,4 @@ All theoretic background can be found in the paper
 
   A\. Stramaglia, J.J.A. Keiren, T. Neele. *Simplifying Process Parameters by Unfolding Algebraic Data Types*. ICTAC 2023. LNCS vol. 14446, pp. 399-416. `(DOI) <https://doi.org/10.1007/978-3-031-47963-2_24>`__
 
-
-.. include:: man/lpsparunfold.rst
+:mcrl2_manual:`lpsparunfold`

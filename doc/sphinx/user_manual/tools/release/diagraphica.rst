@@ -28,4 +28,4 @@ References
           `(DOI) <http://dx.doi.org/10.1109/MCG.2007.121>`_
 
 
-.. include:: man/diagraphica.rst
+:mcrl2_manual:`diagraphica`

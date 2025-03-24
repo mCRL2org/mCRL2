@@ -35,3 +35,5 @@ graph.
 
 To run this tool, the Z3 SMT-solver should be installed and its bin-directory
 has to be added to the PATH variable.
+
+:mcrl2_manual:`pbessolvesymbolicbisim`

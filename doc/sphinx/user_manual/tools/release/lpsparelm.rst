@@ -53,5 +53,4 @@ is the elimination of data from communication protocols. By unfolding the messag
 their individual components, by preventing data to be delivered, :ref:`tool-lpsparelm` can remove all the data
 from the protocol, allowing to investigate its full behaviour, independently of the nature of the data.
 
-
-.. include:: man/lpsparelm.rst
+:mcrl2_manual:`lpsparelm`

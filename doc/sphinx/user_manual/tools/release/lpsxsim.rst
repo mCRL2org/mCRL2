@@ -28,5 +28,4 @@ additional functionalities:
   overview / understanding of what is going on in the system being simulated.
 * Various options can be set.
 
-
-.. include:: man/lpsxsim.rst
+:mcrl2_manual:`lpsxsim`

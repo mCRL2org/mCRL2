@@ -13,4 +13,4 @@ input and output filenames are given,  it reads from standard input and writes
 to standard output.
 
 
-.. include:: man/lpspp.rst
+:mcrl2_manual:`lpspp`
