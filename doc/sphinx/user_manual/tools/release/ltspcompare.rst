@@ -16,5 +16,4 @@ the much faster one by Groote, Rivera-Verduzco and de Vink.
 The intention is to add more equivalences and preorders when efficient
 algorithms for them become available.
 
-
-.. include:: man/ltspcompare.rst
+:mcrl2_manual:`ltspcompare`

@@ -43,5 +43,4 @@ no successor has been expanded.
    :ref:`tool-ltsview` to visualise the structure of large graphs. The tool :ref:`tool-diagraphica`
    is especially designed to inspect the structure of the data occurring in large graphs.
 
-
-.. include:: man/ltsgraph.rst
+:mcrl2_manual:`ltsgraph`

@@ -13,5 +13,4 @@ can use the tool :ref:`tool-txt2pbes`. When the argument for the output location
 is omitted, the tool prints to stdout. When both the arguments for input and
 output locations are omitted, the tool reads from stdin and writes to stdout.
 
-
-.. include:: man/pbespp.rst
+:mcrl2_manual:`pbespp`

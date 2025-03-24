@@ -41,5 +41,4 @@ To perform the dead variable analysis, the algorithm computes a set of control f
 
 The algorithm underlying the tool, including the detection of control flow variables and the construction of local and global control flow graphs, is described in detail in [KWW14]_.
 
-
-.. include:: man/pbesstategraph.rst
+:mcrl2_manual:`pbesstategraph`

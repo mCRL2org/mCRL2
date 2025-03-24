@@ -9,5 +9,4 @@ mcrl2xi is a graphical text editor to write and validate mCRL2 specifications.
 To help the user write correct data specifications, it is also possible to
 rewrite and solve data expressions.
 
-
-.. include:: man/mcrl2xi.rst
+:mcrl2_manual:`mcrl2xi`

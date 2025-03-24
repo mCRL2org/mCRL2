@@ -5,10 +5,4 @@
 pbesinst
 ========
 
-.. include:: man/pbesinst.rst
-
-
-.. include:: man/pbesinst.rst
-
-
-.. include:: man/pbesinst.rst
+:mcrl2_manual:`pbesinst`

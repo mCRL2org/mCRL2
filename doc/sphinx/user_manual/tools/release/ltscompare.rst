@@ -24,5 +24,4 @@ The second useful option is to hide some actions while doing the comparisons
 will only be distinguishing for the input transition systems with the hiding operation
 applied.
 
-
-.. include:: man/ltscompare.rst
+:mcrl2_manual:`ltscompare`

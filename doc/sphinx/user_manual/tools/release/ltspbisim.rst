@@ -14,5 +14,4 @@ algorithms is primarily available for comparison purposes.
 
 It is expected that in the future more probabilistic equivalences will be supported.
 
-
-.. include:: man/ltspbisim.rst
+:mcrl2_manual:`ltspbisim`

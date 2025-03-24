@@ -123,5 +123,4 @@ There are different strategies to generate the equations.
   strategy 2, it can subsequently substitute ``true`` for ``X(38)`` and
   ``X(39)`` in the generated equations.
 
-
-.. include:: man/pbes2bes.rst
+:mcrl2_manual:`pbes2bes`
