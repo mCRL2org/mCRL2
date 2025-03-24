@@ -1,5 +1,4 @@
 .. math::
-   :hidden:
    :nowrap:
    
     \renewcommand{\implies}{\mathop{\Rightarrow}}
@@ -169,5 +168,3 @@ The following rewriters are available
    :mcrl2:`simplify_quantifiers_rewriter   <mcrl2::pbes_system::simplify_quantifiers_rewriter>`        Simplifies quantifier expressions
    :mcrl2:`simplify_rewriter               <mcrl2::pbes_system::simplify_rewriter>`                    Simplifies logical boolean operators
    ==================================================================================================  =========================================================================
-
-.. include:: srf_pbes.rst
