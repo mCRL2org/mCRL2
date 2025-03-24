@@ -12,8 +12,7 @@
 
 #include <deque>
 
-/*! \defgroup PriorityPromotion
-    Classes related to the Priority Promotion for parity games solving algorithm.
+/*! \defgroup PriorityPromotion Classes related to the Priority Promotion for parity games solving algorithm.
 */
 
 /*! \ingroup PriorityPromotion
