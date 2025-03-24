@@ -56,9 +56,10 @@ extensions = [
     'sphinx_rtd_theme',
 ]
 
-imgmath_image_format = 'svg'
 imgmath_font_size = 14
-imgmath_latex_preamble = '\\usepackage{newtxsf}'
+imgmath_image_format = 'svg'
+imgmath_latex_preamble = '\\usepackage{@CMAKE_CURRENT_SOURCE_DIR@/mcrl2_package}'
+imgmath_use_preview = True
 
 myst_enable_extensions = [
     "dollarmath"
@@ -90,7 +91,7 @@ html_sidebars = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_extra_path = ['@DOXYGEN_OUTPUT_PATH@', '@MCRL2_MANUAL_PATH@']
+html_extra_path = ['@DOXYGEN_OUTPUT_PATH@']
 html_js_files = []
 
 # Tweaking how the "last updated" is displayed
@@ -102,26 +103,23 @@ suppress_warnings = ['ref.citation']
 if tags.has('build_doxygen'):
     extensions.append('sphinxcontrib.doxylink')
 
+if tags.has('build_pdflatex'):
+    extensions.append('mcrl2_pdflatex')
+
+if tags.has('build_manual'):
+    extensions.append('mcrl2_manual')
+
 doxylink = {
     'mcrl2' : ('@DOXYGEN_TAG_PATH@', 'doxygen/')
 }
     
 # -- App setup - executed before the build process starts --------------------
 def setup(app):
-    import manual
-    import pdflatex
-
     os.makedirs(_SPHINX_BUILD_TEMP_DIR, mode = 0o755, exist_ok = True)
     os.makedirs(_SPHINX_BUILD_OUT_DIR, mode = 0o755, exist_ok = True)
 
     olddir = os.getcwd()
     try:
         os.chdir(_SPHINX_BUILD_TEMP_DIR)
-
-        if tags.has('build_pdflatex'):
-            pdflatex.generate_pdfs()
-
-        if tags.has('build_manual'):
-            manual.generate_rst(_CMAKE_SOURCE_DIR, _MCRL2_TOOL_PATH, _MCRL2_TOOLS)
     finally:
         os.chdir(olddir)
