@@ -92,13 +92,6 @@ Trace equivalence
 According to *trace equivalence*, two LTSs are equivalent if and only if they
 can perform the same sequences of actions, starting from their initial states.
 
-.. math::
-
-   \newcommand{\Tr}[1]{\mathrm{Tr}(#1)}
-   \newcommand{\Trw}[1]{\mathrm{Tr_w}(#1)}
-   \newcommand{\trans}[1]{\mathop{\stackrel{#1}{\longrightarrow}}}
-   \newcommand{\ttrans}[1]{\mathop{\stackrel{#1}{\Longrightarrow}}}
-
 Formally, for any LTS :math:`(S, A, \to, s_0)` and state :math:`s \in S` we
 define :math:`\Tr{s}` to be the set of traces possible from :math:`s`:
 
