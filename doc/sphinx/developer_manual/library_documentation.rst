@@ -9,12 +9,10 @@ Atermpp
    
    libraries/atermpp/aterm_library
 
-.. include:: libraries/atermpp/articles.rst
 
-BES
-====
-     
-.. include:: libraries/bes/articles.rst
+*PDF documentation*
+
+ * :mcrl2_pdflatex:`mCRL2 Term Library <libraries/atermpp/latex/term_library.tex>`
 
 Core
 ======
@@ -24,8 +22,11 @@ Core
    
    libraries/core/core_library
    libraries/core/common_functionality
+   
 
-.. include:: libraries/core/articles.rst
+*PDF documentation*
+
+ * :mcrl2_pdflatex:`mCRL2 syntax definition <libraries/core/latex/mcrl2_syntax_definition.tex>`
 
 Data
 ======
@@ -35,7 +36,15 @@ Data
    
    libraries/data/data_library
 
-.. include:: libraries/data/articles.rst
+
+*PDF documentation*
+
+* :mcrl2_pdflatex:`Some basic notions concerning the mCRL2 data library <libraries/data/latex/data.tex>`
+* :mcrl2_pdflatex:`Data types for mCRL2 <libraries/data/latex/mcrl2data.tex>`
+* :mcrl2_pdflatex:`Enumerator <libraries/data/latex/enumerator.tex>`
+* :mcrl2_pdflatex:`An algorithm to find a representant for sorts in the context of sort aliases and recursive sorts <libraries/data/latex/algorithm-for-sort-equivalence.tex>`
+* :mcrl2_pdflatex:`substitutions.tex <libraries/data/latex/substitutions.tex>`
+* :mcrl2_pdflatex:`Rewriter Implementation Notes <libraries/data/latex/rewriter.tex>`
 
 GUI
 =====
@@ -45,7 +54,10 @@ GUI
    
    libraries/gui/gui_library
 
-.. include:: libraries/gui/articles.rst
+
+*PDF documentation*
+
+* :mcrl2_pdflatex:`Architecture of mcrl2ide <libraries/gui/latex/architecture_mcrl2ide.tex>`
 
 LPS
 ======
@@ -55,7 +67,18 @@ LPS
    
    libraries/lps/lps_library
 
-.. include:: libraries/lps/articles.rst
+
+*PDF documentation*
+
+* :mcrl2_pdflatex:`A rewriting-strategies-based tool for transforming process-algebraic equations <libraries/lps/latex/lin_impl.tex>`
+* :mcrl2_pdflatex:`Next-state computation templates in state space exploration <libraries/lps/latex/next-state-templates-in-state-space-exploration.tex>`
+* :mcrl2_pdflatex:`lpsconstelm <libraries/lps/latex/lpsconstelm.tex>`
+* :mcrl2_pdflatex:`lps-implementation-notes.tex <libraries/lps/latex/lps-implementation-notes.tex>`
+* :mcrl2_pdflatex:`mcrl2lps.tex <libraries/lps/latex/mcrl2lps.tex>`
+* :mcrl2_pdflatex:`lpsparelm <libraries/lps/latex/lpsparelm.tex>`
+* :mcrl2_pdflatex:`State Space Exploration <libraries/lps/latex/state-space-exploration.tex>`
+* :mcrl2_pdflatex:`lps-implementation-communication-operator.tex <libraries/lps/latex/lps-implementation-communication-operator.tex>`
+* :mcrl2_pdflatex:`Confluence Detection <libraries/lps/latex/confluence-detection.tex>`
 
 LTS
 =====
@@ -65,7 +88,12 @@ LTS
    
    libraries/lts/lts_library
 
-.. include:: libraries/lts/articles.rst
+
+*PDF documentation*
+
+* :mcrl2_pdflatex:`Implementation of LTSGraph3D <libraries/lts/latex/ltsgraph3d_report.tex>`
+* :mcrl2_pdflatex:`Notes on the bisimulation partitioner <libraries/lts/latex/bisimulation-partitioner-notes.tex>`
+
 
 Modal formula
 ================
@@ -83,7 +111,15 @@ PBES
    
    libraries/pbes/pbes_library
 
-.. include:: libraries/pbes/articles.rst
+*PDF documentation*
+
+* :mcrl2_pdflatex:`PBES Abstraction <libraries/pbes/latex/pbes-abstraction.tex>`
+* :mcrl2_pdflatex:`PBES Generation <libraries/pbes/latex/pbes-generation.tex>`
+* :mcrl2_pdflatex:`PBES Implementation Notes <libraries/pbes/latex/pbes-implementation-notes.tex>`
+* :mcrl2_pdflatex:`PBES rewriters <libraries/pbes/latex/pbes-rewriters.tex>`
+* :mcrl2_pdflatex:`PBES Instantiation and Solving <libraries/pbes/latex/pbes-instantiation-solving.tex>`
+* :mcrl2_pdflatex:`kant-pbes-greybox-notes.tex <libraries/pbes/latex/kant-pbes-greybox-notes.tex>`
+* :mcrl2_pdflatex:`Some notes on a BES library <libraries/pbes/latex/bes-libary.tex>`
 
 Process
 =========
@@ -93,7 +129,11 @@ Process
    
    libraries/process/process_library
 
-.. include:: libraries/process/articles.rst
+
+*PDF documentation*
+
+* :mcrl2_pdflatex:`On free variables in process specifications, LPSs and PBESs <libraries/process/latex/global-variables.tex>`
+* :mcrl2_pdflatex:`Process Library Implementation Notes <libraries/process/latex/process-implementation-notes.tex>`
 
 SMT
 ======
@@ -119,10 +159,15 @@ Symbolic
 
    libraries/symbolic/symbolic_library
 
+
+*PDF documentation*
+
+* :mcrl2_pdflatex:`Symbolic Reachability using LDDs <libraries/symbolic/latex/symbolic-reachability.tex>`
+
 Source code reference
 =====================
 
-We generate the complete source code reference using Doxygen, which can be viewed `here <../doxygen/index.html>`_
+We generate the complete source code reference using Doxygen, which can be viewed `here <../doxygen/index.html>`_.
    
 Code generation
 ===============
