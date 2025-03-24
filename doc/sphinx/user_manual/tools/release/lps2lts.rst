@@ -86,5 +86,4 @@ limited a priori.
 [GM14]
   J.F. Groote and M.R. Mousavi. Modeling and analysis of communicating systems. The MIT Press 2014.
 
-
-.. include:: man/lps2lts.rst
+:mcrl2_manual:`lps2lts`

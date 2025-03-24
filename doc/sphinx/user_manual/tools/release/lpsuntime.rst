@@ -29,5 +29,4 @@ The tool transforms this to the following equivalent untimed version:
    \quad \ldots
    \end{array}
 
-
-.. include:: man/lpsuntime.rst
+:mcrl2_manual:`lpsuntime`

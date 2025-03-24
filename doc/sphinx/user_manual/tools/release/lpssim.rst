@@ -64,4 +64,4 @@ following commands can be entered:
   Quit :ref:`tool-lpssim`.
 
 
-.. include:: man/lpssim.rst
+:mcrl2_manual:`lpssim`

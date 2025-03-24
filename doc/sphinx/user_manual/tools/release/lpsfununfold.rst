@@ -96,6 +96,4 @@ These rewrite rules may not be enough to simplify the resulting
 linear process. Using for instance the tool :ref:`tool-lpsactionrename` it is possible to add extra rewrite
 rules, by adding rewrite rules in a rename file and by leaving the rename section empty.
 
-
-
-.. include:: man/lpsfununfold.rst
+:mcrl2_manual:`lpsfundunfold`

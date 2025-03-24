@@ -153,4 +153,4 @@ References
   - [2] Jeroen Meijer. Efficient learning and analysis of system behavior. PhD thesis, University of Twente, Netherlands, September 2019.
   - [3] Tom van Dijk, Jaco van de Pol. Sylvan: multi-core framework for decision diagrams. Int. J. Softw. Tools Technol. Transf. 19(6): 675-696 (2017)
 
-.. include:: man/lpsreach.rst
+:mcrl2_manual:`lpsreach`

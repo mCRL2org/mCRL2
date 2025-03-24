@@ -43,5 +43,4 @@ The result is given by::
 
    init P(0, d1 == d2, d1 == d1, true);
 
-
-.. include:: man/lpsbinary.rst
+:mcrl2_manual:`lpsbinary`
