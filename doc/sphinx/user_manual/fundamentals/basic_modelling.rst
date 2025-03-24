@@ -181,10 +181,11 @@ An action formula `A` over `\act` is associated with a set `\sem{A} \subseteq
 The following common abbreviations are allowed:
 
 .. math::
+   :nowrap:
 
    \begin{align*}
-   \false &= \neg \true & \varphi \lor \chi &= \neg(\neg \varphi \land \neg \chi) \\
-   \mcall{A}\varphi &= \neg \mccan{A} \neg \varphi & \varphi \implies \chi &= \neg \varphi \lor \chi
+      \false &= \neg \true & \varphi \lor \chi &= \neg(\neg \varphi \land \neg \chi) \\
+      \mcall{A}\varphi &= \neg \mccan{A} \neg \varphi & \varphi \implies \chi &= \neg \varphi \lor \chi
    \end{align*}
 
 An HML formula `\varphi` is interpreted over an LTS `T = \langle S, \act,
@@ -193,13 +194,14 @@ An HML formula `\varphi` is interpreted over an LTS `T = \langle S, \act,
 defined as follows.
 
 .. math::
+   :nowrap:
 
-    \begin{align*}
-    \sem{\true}_T &= S \\
-    \sem{\neg\varphi}_T &= S \setminus \sem{\varphi}_T \\
-    \sem{\varphi \land \chi}_T &= \sem{\varphi}_T \cap \sem{\chi}_T \\
-    \sem{\mccan{A}\varphi}_T &= \{ s \in S ~|~ \exists_{s'\in S, a \in \sem{A}}~ s \stackrel{a}{\longrightarrow} s' \land s' \in \sem{\varphi}_T \}
-    \end{align*}
+   \begin{align*}
+      \sem{\true}_T &= S \\
+      \sem{\neg\varphi}_T &= S \setminus \sem{\varphi}_T \\
+      \sem{\varphi \land \chi}_T &= \sem{\varphi}_T \cap \sem{\chi}_T \\
+      \sem{\mccan{A}\varphi}_T &= \{ s \in S ~|~ \exists_{s'\in S, a \in \sem{A}}~ s \stackrel{a}{\longrightarrow} s' \land s' \in \sem{\varphi}_T \}
+   \end{align*}
 
 We say that `T` *satisfies* `\varphi`, denoted `T \models \varphi`, if and only
 if `i \in \sem{\varphi}_T`.

@@ -10,8 +10,8 @@ Every disjunctive vertex that is a deadlock is won by player odd (previously ind
 If we compute the attractors to these won vertices then the resulting graph is total and can be used in the Zielonka algorithm as follows $\textsf{zielonka}(\textsf{preprocess}(V, D, \emptyset, \emptyset))$.
 
 
-```{imgmath}
-\usepackage{algorithm}
+```{math}
+:nowrap:
 
 \begin{algorithmic}[1]
 \Function{Preprocess}{$V, D, W_0, W_1$}
@@ -26,8 +26,9 @@ If we compute the attractors to these won vertices then the resulting graph is t
 \end{algorithmic}
 ```
 
-```{imgmath}
-\usepackage{algorithm}
+With the standard 
+```{math}
+:nowrap:
 
 \begin{algorithmic}[1]
     \Function{Zielonka}{$V$}
@@ -53,32 +54,34 @@ If we compute the attractors to these won vertices then the resulting graph is t
 
 # Solving with strategies
 
-```{math}
-\usepackage{algorithm}
+This algorithms is derived from [1].
 
-\begin{algorithm}
+```{math}
+:nowrap:
+
 \begin{algorithmic}[1]
-\State {\textsc{SolveRecursive}}{$(V)$}
-\State \textbf{if} {$ V = \emptyset$} \textbf{then} \Return {($\emptyset$,\ $\emptyset$,\ $\emptyset$,
- $\emptyset$)}
-\State $m := \min(\{r(v) \mid v \in V\})$
-\State $\alpha := m \mod 2$
-\State $U := \{ v \in V \mid r(v) = m\}$
-\State $A,S :=$ \textsc{Attr$_{\alpha}$}{$(U, V)$}
-\State $W_{0}', W_{1}', S_{0}', S_{1}' := {\textsc{SolveRecursive}}{(V \setminus A)}$
-\If {$W_{1-\alpha}' = \emptyset$} 
-    \State $W_\alpha,W_{1 - \alpha} := A \cup W_{\alpha}', \emptyset$
-    \State $S_\alpha := S \cup S_{\alpha}'\cup \{(u,v) \mid u \in U, v \in V\}$
-    \State $S_{1 - \alpha} := \emptyset$
-\Else
-\State $B,S_B := $\textsc{Attr$_{1 - \alpha}$}{$(W_{1 - \alpha}', V)$}
-\State $W_0, W_1, S_0, S_1 := {\textsc{SolveRecursive}}{(V \setminus B)}$
-    \State $W_{1 - \alpha} := W_{1 - \alpha} \cup B$
-    \State $S_{1 - \alpha} := S_{1 - \alpha}' \cup S_B \cup S_{1 - \alpha}$
-    \State $\textcolor{red}{S_{\alpha} := S_{\alpha}' DELETE}$ \EndIf
-\State \Return {$W_0, W_1, S_0, S_1$}
+    \Function {\textsc{SolveRecursive}}{$V$}
+        \State \textbf{if} {$ V = \emptyset$} \textbf{then} \Return {($\emptyset$,\ $\emptyset$,\ $\emptyset$,$\emptyset$)}
+        \State $m := \min(\{r(v) \mid v \in V\})$
+        \State $\alpha := m \mod 2$
+        \State $U := \{ v \in V \mid r(v) = m\}$
+        \State $A,S :=$ \textsc{Attr$_{\alpha}$}{$(U, V)$}
+        \State $W_{0}', W_{1}', S_{0}', S_{1}' := {\textsc{SolveRecursive}}{(V \setminus A)}$
+        \If {$W_{1-\alpha}' = \emptyset$} 
+            \State $W_\alpha,W_{1 - \alpha} := A \cup W_{\alpha}', \emptyset$
+            \State $S_\alpha := S \cup S_{\alpha}'\cup \{(u,v) \mid u \in U, v \in V\}$
+            \State $S_{1 - \alpha} := \emptyset$
+        \Else
+            \State $B,S_B := $\textsc{Attr$_{1 - \alpha}$}{$(W_{1 - \alpha}', V)$}
+            \State $W_0, W_1, S_0, S_1 := {\textsc{SolveRecursive}}{(V \setminus B)}$
+            \State $W_{1 - \alpha} := W_{1 - \alpha} \cup B$
+            \State $S_{1 - \alpha} := S_{1 - \alpha}' \cup S_B \cup S_{1 - \alpha}$
+        \EndIf
+        \State \Return {$W_0, W_1, S_0, S_1$}
+    \EndFunction
 \end{algorithmic}
-\caption{Solve recursive - with strategies}
-\label{alg:ziel_symbolic_strategies}
-\end{algorithm} 
 ```
+
+# References
+
+  [1] Oliver Friedmann: *Recursive algorithm for parity games requires exponential time*. RAIRO Theor. Informatics Appl. 45(4): 449-457 (2011) [DOI](https://doi.org/10.1051/ita/2011124).

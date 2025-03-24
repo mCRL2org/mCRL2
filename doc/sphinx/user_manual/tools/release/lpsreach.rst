@@ -101,6 +101,7 @@ A set of vectors can be represented by the following function similar to how
 :math:`\mathbb{N} \rightarrow \mathbb{B}` represents a set of natural numbers.
 
 .. math::
+  :nowrap:
 
   \begin{equation*}
     f: \mathbb{N} \times \cdots \times \mathbb{N} \rightarrow \mathbb{B}
@@ -111,6 +112,7 @@ since we can always bidirectionally map from natural numbers to abstract data.
 Now, the we can decompose :math:`f`` on the first argument as follows.
 
 .. math::
+  :nowrap:
 
   \begin{equation*}
     f(x_0, \ldots, x_n) = 
