@@ -11,8 +11,6 @@ set(DOXYGEN_OUTPUT_PATH ${DOXYGEN_BASE}/output/)
 set(DOXYGEN_TAG_PATH ${DOXYGEN_BASE}/mcrl2.tag)
 set(DOXYGEN_INPUT_PATH ${CMAKE_SOURCE_DIR}/libraries/)
 
-set(MCRL2_MANUAL_PATH ${SPHINX_BUILD_ROOT_DIR}/_man/)
-
 set(SPHINX_PARALLEL "-jauto")
 if(CMAKE_BUILD_PARALLEL_LEVEL)
   set(SPHINX_PARALLEL "-j${CMAKE_BUILD_PARALLEL_LEVEL}")
@@ -72,7 +70,6 @@ add_custom_target("doc"
 add_custom_target(cleandoc
   COMMENT "Delete all cached documentation"
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${DOXYGEN_BASE}
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${MCRL2_MANUAL_PATH}
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_OUT_DIR}
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_TEMP_DIR}
   VERBATIM

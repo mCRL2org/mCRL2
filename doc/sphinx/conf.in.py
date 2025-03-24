@@ -13,13 +13,12 @@ import sys
 from pathlib import Path
 
 _CMAKE_SOURCE_DIR = '@CMAKE_SOURCE_DIR@'
-_MCRL2_TOOL_PATH = '@MCRL2_TOOL_PATH@'
-_MCRL2_TOOLS = '@MCRL2_TOOLS@'
 _SPHINX_BUILD_TEMP_DIR = '@SPHINX_BUILD_TEMP_DIR@'
 _SPHINX_BUILD_OUT_DIR = '@SPHINX_BUILD_OUT_DIR@'
 
 os.environ['CMAKE_SOURCE_DIR'] = _CMAKE_SOURCE_DIR
-os.environ['MCRL2_MANUAL_PATH'] = '@MCRL2_MANUAL_PATH@'
+os.environ['MCRL2_TOOLS'] = '@MCRL2_TOOLS@'
+os.environ['MCRL2_TOOL_PATH'] = '@MCRL2_TOOL_PATH@'
 
 # -- Path setup --------------------------------------------------------------
 
@@ -104,10 +103,10 @@ if tags.has('build_doxygen'):
     extensions.append('sphinxcontrib.doxylink')
 
 if tags.has('build_pdflatex'):
-    extensions.append('mcrl2_pdflatex')
+   extensions.append('mcrl2_pdflatex')
 
 if tags.has('build_manual'):
-    extensions.append('mcrl2_manual')
+   extensions.append('mcrl2_manual')
 
 doxylink = {
     'mcrl2' : ('@DOXYGEN_TAG_PATH@', 'doxygen/')
