@@ -19,5 +19,4 @@ the process.
    format contains such information. There are several ways to provide this extra
    required info, see the `-D`, `-l` and `-m` options.
 
-
-.. include:: man/lts2lps.rst
+:mcrl2_manual:`lts2lps`

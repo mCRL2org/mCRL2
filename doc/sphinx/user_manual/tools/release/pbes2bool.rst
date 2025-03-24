@@ -11,5 +11,4 @@ pbes2bool
   the latter. The old functionality of pbes2bool can be found in the deprecated tool 
   :ref:`tool-pbes2booldeprecated`, provided you have installed the deprecated tools.
 
-
-.. include:: man/pbes2bool.rst
+:mcrl2_manual:`pbes2bool`

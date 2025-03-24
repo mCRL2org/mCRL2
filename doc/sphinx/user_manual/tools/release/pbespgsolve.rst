@@ -15,5 +15,4 @@ determines the solution for the initial equation of the (P)BES. That solution
 is then printed to standard output. The tool also accepts a BES or a parity
 game in PGSolver format directly.
 
-
-.. include:: man/pbespgsolve.rst
+:mcrl2_manual:`pbespgsolve`

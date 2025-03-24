@@ -32,5 +32,4 @@ Instantiation of this PBES using tools such as :ref:`tool-pbes2bool` or :ref:`to
 
 The algorithm underlying the tool is described in detail in [OWW09]_.
 
-
-.. include:: man/pbesparelm.rst
+:mcrl2_manual:`pbesparelm`

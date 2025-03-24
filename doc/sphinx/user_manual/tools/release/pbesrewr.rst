@@ -63,5 +63,4 @@ Specifications of the rewriters can be found in the
 `developers documenation <https://mcrl2.org/web/developer_manual/developer.html>`_ in the 
 document about `PBES rewriters <https://mcrl2.org/web/_downloads/fd0ada340742729e33a70a3666632073/pbes-rewriters.pdf>`_.
 
-
-.. include:: man/pbesrewr.rst
+:mcrl2_manual:`pbesrewr`

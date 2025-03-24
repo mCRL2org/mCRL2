@@ -10,5 +10,4 @@ Boolean equation system. It indicates the number of minimal and maximal fixed
 point equations, as well as the alternation depth of the PBES. Optionally, the
 parameterised variables of the PBES can also be listed.
 
-
-.. include:: man/pbesinfo.rst
+:mcrl2_manual:`pbesinfo`
