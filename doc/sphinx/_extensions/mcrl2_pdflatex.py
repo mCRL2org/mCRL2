@@ -29,9 +29,9 @@ def makepdf(src):
         call("pdflatex", ["pdflatex", src])
 
         # Only apply bibtex if a "source.bib" file exists in the directory.
-        #if os.path.isfile(src + ".bib"):
-        #    call("bibtex", ["bibtex", src])
-        #    call("pdflatex", ["pdflatex", src])
+        if os.path.isfile(src + ".bib"):
+            call("bibtex", ["bibtex", src])
+            call("pdflatex", ["pdflatex", src])
 
         call("pdflatex", ["pdflatex", src])
     finally:
