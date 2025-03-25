@@ -1258,7 +1258,7 @@ pbes_expression ltsmin_state::to_pbes_expression() const
     // Create propositional variable instantiation.
     propositional_variable_instantiation expr =
             propositional_variable_instantiation(core::identifier_string(var), parameter_values_list);
-    return workaround::return_std_move(expr);
+    return expr;
 }
 
 
