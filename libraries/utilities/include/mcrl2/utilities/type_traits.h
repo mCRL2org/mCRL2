@@ -60,7 +60,7 @@ struct is_constant_function_yielding
 
 template <typename FunctionType, typename ResultType>
 struct is_constant_function_yielding<FunctionType, ResultType,
-                     typename std::is_convertible<typename std::invoke_result_t<FunctionType()>::type, ResultType> >
+                     typename std::is_convertible<typename std::invoke_result_t<FunctionType>::type, ResultType> >
     : public std::true_type
 {};
 
@@ -72,7 +72,7 @@ struct is_applicable
 
 template <typename FunctionType, typename ArgumentType>
 struct is_applicable<FunctionType, ArgumentType,
-                     typename std::invoke_result_t<FunctionType(ArgumentType)>>
+                     typename std::invoke_result_t<FunctionType, ArgumentType>>
     : public std::true_type
 {};
 
@@ -84,7 +84,7 @@ struct is_applicable2
 
 template <typename FunctionType, typename ArgumentType1, typename ArgumentType2>
 struct is_applicable2<FunctionType, ArgumentType1, ArgumentType2,
-                      typename std::invoke_result_t<FunctionType(ArgumentType1,ArgumentType2)>>
+                      typename std::invoke_result_t<FunctionType, ArgumentType1, ArgumentType2>>
     : public std::true_type
 {};
 
