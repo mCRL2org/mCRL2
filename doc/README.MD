@@ -1,0 +1,7 @@
+# Documentation
+
+This directory contains both the documentation of the toolset, which is presented our [website](mcrl2.org). We use [Doxygen](https://www.doxygen.nl/) to extract the code documentation from the C++ sources as HTML pages, which can be viewed [here](https://mcrl2.org/web/doxygen/index.html), and use a custom theme that is stored in `doxygen-awesome-css`. Furthermore, we use [Sphinx](https://www.sphinx-doc.org/) to extend this C++ reference documentation with user manuals, developer and maintainer documentation written in [ReStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html) and [Myst](https://mystmd.org/) Markdown.
+
+## Building the documentation
+
+In the cmake configuration the build flag `MCRL2_ENABLE_DOC` will introduce the `doc` target that will run the Sphinx build to show the HTML pages in `sphinx/build` of the configured build directory. Furthemore, the targets `MCRL2_ENABLE_DOC_PDFLATEX` and `MCRL2_ENABLE_DOC_MANUAL` will extend the documentation with pdfs generated from `.tex` files automatically, implemented by the `:mcrl2_pdflatex:` role, and the `:mcrl2_manual:` role that generates the man page from the selected tool and generates a corresponding HTML page.
