@@ -16,7 +16,6 @@
 #include "mcrl2/atermpp/aterm_list.h"
 
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/workarounds.h"
 
 namespace atermpp
 {
@@ -318,7 +317,7 @@ namespace detail
   {
     term_list<Term> result_list;
     make_list_backward<Term, Iter, ATermConverter, ATermFilter>(result_list, first, last, convert_to_aterm, aterm_filter);
-    return mcrl2::workaround::return_std_move(result_list);
+    return result_list;
   }
 
   template <class Term, class Iter, class ATermConverter>
@@ -339,7 +338,7 @@ namespace detail
   {
     term_list<Term> result_list;
     make_list_backward<Term, Iter, ATermConverter>(result_list, first, last, convert_to_aterm);
-    return mcrl2::workaround::return_std_move(result_list);
+    return result_list;
   }
 
   // See the note at make_list_backwards for why there are two almost similar version of make_list_forward.
@@ -400,11 +399,11 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
     term_list<Term> result_list;
     make_list_forward<Term, Iter, ATermConverter, ATermFilter>(result_list, first, last, convert_to_aterm, aterm_filter);
-    return mcrl2::workaround::return_std_move(result_list);
+    return result_list;
   }
 
   template < class Term, typename ForwardTraversalIterator, class Transformer >
@@ -479,13 +478,13 @@ namespace detail
       }
     }
   }
-
+  
   template <class Term, class Iter, class ATermConverter>
   inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm)
   {
     term_list<Term> result_list;
     make_list_forward<Term,Iter,ATermConverter>(result_list, first, last, convert_to_aterm);
-    return mcrl2::workaround::return_std_move(result_list);
+    return result_list;
   }
 } // detail
 
