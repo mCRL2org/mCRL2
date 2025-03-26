@@ -49,4 +49,4 @@ References
            `(PDF) <http://www.research.ibm.com/visual/papers/FSM2002.pdf>`_
 
 
-:mcrl2_manual:`ltsview`
+.. mcrl2_manual:: ltsview

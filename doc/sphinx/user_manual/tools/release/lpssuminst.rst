@@ -48,4 +48,4 @@ Take the the following LPS:
 
    init P;
 
-:mcrl2_manual:`lpssuminst`
+.. mcrl2_manual:: lpssuminst

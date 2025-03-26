@@ -57,4 +57,4 @@ by ``lpsconstelm``. For a typical example such as Milner's scheduler, this reduc
 from quadratic to linear in the number of participating processes.
 
 
-:mcrl2_manual:`lpsconstelm`
+..  mcrl2_manual:: lpsconstelm

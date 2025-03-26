@@ -95,4 +95,4 @@ the option `-l/--lin-method`:
   not very effective, because the stack data type is too complex. For symbolic
   analysis, linearisation methods ``regular`` or ``regular2`` can be used.
 
-:mcrl2_manual:`mcrl22lps`
+.. mcrl2_manual:: mcrl22lps

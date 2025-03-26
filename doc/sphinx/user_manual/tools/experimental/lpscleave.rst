@@ -67,4 +67,4 @@ References
 
  [1] Maurice Laveaux, Tim A. C. Willemse. Decomposing Monolithic Processes in a Process Algebra with Multi-actions. ICE 2021: 57-76.
 
-:mcrl2_manual:`lpscleave`
+.. mcrl2_manual:: lpscleave

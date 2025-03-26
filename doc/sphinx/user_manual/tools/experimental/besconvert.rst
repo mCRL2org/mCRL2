@@ -12,4 +12,4 @@ The reductions that can be done are either strong bisimulation reduction or stut
 
 Strong bisimulation reduction of BESs is described in [KW11]_. Correctness of stuttering equivalence for BESs follows from the corresponding results on parity games in [CKW11]_
 
-:mcrl2_manual:`besconvert`
+.. mcrl2_manual:: besconvert

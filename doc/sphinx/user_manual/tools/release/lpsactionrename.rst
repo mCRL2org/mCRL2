@@ -160,4 +160,4 @@ renaming ``a_out`` to ``delta`` using ``^a_out$/delta``, the multi action
 the same multi-action becomes ``c_out``.
 
 
-:mcrl2_manual:`lpsactionrename`
+.. mcrl2_manual:: lpsactionrename

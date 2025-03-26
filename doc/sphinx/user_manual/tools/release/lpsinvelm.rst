@@ -195,4 +195,4 @@ happens when inequalities are used. In such a case, the flag `-n` can be
 used to skip the check that the invariant indeed satisfies the invariant
 properties.
 
-:mcrl2_manual:`lpsinvelm`
+.. mcrl2_manual:: lpsinvelm
