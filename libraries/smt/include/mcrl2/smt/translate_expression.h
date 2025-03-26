@@ -10,6 +10,7 @@
 #define MCRL2_SMT_TRANSLATE_EXPRESSION_H
 
 #include "mcrl2/smt/translate_sort.h"
+#include <cstdio>
 
 namespace mcrl2
 {
@@ -61,6 +62,7 @@ declare_variables_binder(const data::variable_list& vars, OutputStream& out, con
     }
     else if (var.sort() == data::sort_nat::nat())
     {
+
       result = data::lazy::and_(result, greater_equal(var, data::sort_nat::c0()));
     }
   }
@@ -199,9 +201,12 @@ void translate_variable_declaration(const Container& vars,
     const native_translations& nt)
 {
   data::data_expression vars_conditions = data::sort_bool::true_();
+  data::variable_list vars_pos_nat;
   for (const data::variable& v : vars)
   {
     o << "(declare-fun " << translate_identifier(v.name()) << " (";
+
+  mCRL2log(log::debug) << "Make use? 2 " << translate_identifier(v.name()) <<  v.sort() << std::endl;
     data::sort_expression_list domain = data::is_function_sort(v.sort())
                                             ? atermpp::down_cast<data::function_sort>(v.sort()).domain()
                                             : data::sort_expression_list();
@@ -210,18 +215,32 @@ void translate_variable_declaration(const Container& vars,
       translate_sort_expression(s, o, nt);
       o << " ";
       // This does not seem to work when translating variables of a function sort.
-      // if(s == data::sort_pos::pos())
-      // {
-      //   vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_pos::c1()));
-      // }
-      // else if(s == data::sort_nat::nat())
-      // {
-      //   vars_conditions = data::lazy::and_(vars_conditions, greater_equal(s, data::sort_nat::c0()));
-      // }
+       if(s == data::sort_pos::pos())
+       {
+         vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_pos::c1()));
+       }
+       else if(s == data::sort_nat::nat())
+       {
+         vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_nat::c0()));
+       }
+    }
+    if(v.sort() == data::sort_pos::pos())
+    {
+      vars_pos_nat.push_front(v);
+      //         vars_pos_nat = data::lazy::and_(vars_pos_nat, greater_equal(var_int, data::sort_int::int_(1)));
+    }
+    else if(v.sort() == data::sort_nat::nat())
+    {
+      vars_pos_nat.push_front(v);
+      //         vars_pos_nat = data::lazy::and_(vars_pos_nat, greater_equal(var_int, data::sort_int::int_(0)));
     }
     o << ") ";
     translate_sort_expression(v.sort().target_sort(), o, nt);
     o << ")\n";
+  }
+
+  for (const auto& v : vars_pos_nat) {
+    o << "(assert (>= " << v.name() << " " << (v == data::sort_pos::pos() ? 1 : 0) << ") )\n";
   }
   translate_assertion(vars_conditions, o, c, nt);
 }
