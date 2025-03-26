@@ -26,14 +26,8 @@ def makepdf(src):
     log_nonl(f"compiling LaTeX document {src_colored}...")
 
     try:
-        call("pdflatex", ["pdflatex", src])
-
-        # Only apply bibtex if a "source.bib" file exists in the directory.
-        # if os.path.isfile(src + ".bib"):
-        #     call("bibtex", ["bibtex", src])
-        #     call("pdflatex", ["pdflatex", src])
-
-        call("pdflatex", ["pdflatex", src])
+        call("latexmk", ["latexmk", "-f", "-pdf", src])
+        
     finally:
         os.chdir(olddir)
 
@@ -67,4 +61,4 @@ def mcrl2_pdflatex_role(
 def setup(app):
     register_canonical_role("mcrl2_pdflatex", mcrl2_pdflatex_role)
 
-    return {"parallel_read_safe": True, "parallel_write_safe": True}
+    return {"parallel_read_safe": False, "parallel_write_safe": True}
