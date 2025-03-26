@@ -89,8 +89,8 @@ repetition once and obtain a bisimilar system, as shown in
                   (n5) edge node[left]{\a{good}} (n0)
                   (n0) edge[bend left] node[above]{\a{coin}} (n1) 
                   (n1) edge[bend left] node[below]{\a{bad}} (n0)
-                  (n1) edge node{\a{coin}} (n2) 
-                  (n2) edge[bend left=90] node{\a{good}} (n0);
+                  (n1) edge node[below]{\a{coin}} (n2) 
+                  (n2) edge[bend left=90] node[below]{\a{good}} (n0);
          \end{tikzpicture}
    
      - ::
@@ -269,7 +269,7 @@ our fixpoint.
    Consider the following formula, which states that a coffee machine will
    always give coffee after a finite number of steps.
 
-   .. math:: \mu X\,.\, \mccan{\true}\true \land \mcall{\overline{`\a{coffee}`}} X
+   .. math:: \mu X\,.\, \mccan{\true}\true \land \mcall{\overline{\a{coffee}}} X
 
    Note that this formula cannot be expressed using regular expressions. To see
    how the formula works, consider `\hat{X}^0 =\mccan{\true}\true \land
@@ -325,7 +325,27 @@ coins, with on the right the required mCRL2 notation.
 
 .. list-table:: A state accepting coins of all flavour.
 
-   * - .. image:: /_static/tikz/lts_coins.svg
+   * - .. math::
+         :nowrap:
+         
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+
+            [auto,->]
+            \renewcommand{\a}[1]{\textit{#1}}
+            \node[state,initial] (n)  {};
+            \node[state] (e) [below of=n, node distance=2cm] {};
+            \path
+               (n) edge[bend left=60] node[above,rotate=-90]{\scriptsize{\a{coin(c2)}}} (e)
+                     edge node[above,rotate=-90]{\scriptsize{\a{coin(c5)}}} (e)
+                     edge[bend right=60] node[below,rotate=-90]{\scriptsize{\a{coin(c10)}}} (e);
+         \end{tikzpicture}
 
      - ::
 
@@ -352,7 +372,32 @@ equivalent expression using only the plus operator.
 .. _nats:
 .. list-table:: Transition system with an infinite number of transitions. 
 
-   * - .. image:: /_static/tikz/lts_infinite.svg
+   * - .. math::
+         :nowrap:
+
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+
+            [auto,->]
+            \renewcommand{\a}[1]{\textit{#1}}
+            \node[state,initial] (n)  {};
+            \node[state] (e) [below of=n, node distance=4cm] {};
+            \foreach \n/\l in {0/0,1/2,2/4,3/6,4/8}
+            \foreach \x in {-1.75cm+\n*0.5cm}
+            \path[draw,->] (n) .. controls (\x,-2cm)..  (e) 
+               node[sloped,below,pos=0.5]{\scriptsize\a{num(\l)}};
+            \foreach \n in {5,...,11}
+            \foreach \x in {-1.75cm+\n*0.5cm}
+            \path[draw,->,dotted] (n) .. controls (\x,-2cm)..  (e) 
+               node[sloped,below,pos=0.5]{\scriptsize$\cdots$};
+         \end{tikzpicture}
+
      - ::
 
           act num: Nat;
@@ -393,7 +438,33 @@ are as follows:
 .. _picky:
 .. list-table:: A picky coffee machine.
 
-   * - .. image:: /_static/tikz/coffee_machine_picky.svg
+   * - .. math::
+         :nowrap:
+         
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+               
+            [auto,->]
+            \renewcommand{\a}[1]{\textit{#1}}
+            \node[state,initial] (n0) at (0,0) {};
+            \node[state] (n2) at (-2,0) {};
+            \node[state] (n10) at (0,-2) {};
+            \node[state] (n5) at (2,0) {};
+
+            \path[->]
+            (n0) edge[bend right] node[above] {\scriptsize{\a{coin(c2)}}} (n2)
+            (n2) edge[bend right] node[below] {\scriptsize{\a{rej(c2)}}} (n0)
+            (n0) edge[bend left] node[above] {\scriptsize{\a{coin(c5)}}} (n5)
+            (n5) edge[bend left] node[below] {\scriptsize{\a{rej(c5)}}} (n0)
+            (n0) edge[bend left] node[right] {\scriptsize{\a{coin(c10)}}} (n10)
+            (n10) edge[bend left] node[left] {\scriptsize{\a{coffee}}} (n0);
+         \end{tikzpicture}
           
      - ::
 

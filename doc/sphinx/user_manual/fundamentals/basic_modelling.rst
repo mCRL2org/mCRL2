@@ -47,7 +47,7 @@ to give a semantics to the mCRL2 processes we present.
 In graphical depictions of LTSs, states are shown as circles. The initial state
 is marked by an incoming arrow that has no source state. For `s,s'\in S` and
 `a\in\act`, we will write `s \stackrel{a}{\longrightarrow} s'` instead of
-`(s,a,s') \in \rightarrow`.
+`(s,a,s') \in\,\rightarrow`.
 
 
 .. _example1:
@@ -60,7 +60,26 @@ is marked by an incoming arrow that has no source state. For `s,s'\in S` and
    \{(s_0, \a{coin}, s_1), (s_1, \a{coffee}, s_2)\}`, `i=s_0` and `f=s_2`. Its
    graphical representation is as follows:
 
-   .. image:: /_static/tikz/coffee_machine_simple1.svg
+   .. math::
+      :nowrap:
+
+      \begin{tikzpicture}
+         \tikzstyle{every state}=[
+            draw,
+            shape=circle,
+            inner sep=1pt,
+            minimum size=5pt,
+            node distance=1cm,
+            final/.style={double,minimum size=6pt},
+            initial text=]
+
+         [auto,->]
+         \node[state, initial] (n0) {}; 
+         \node[state, right=2cm of n0] (n1) {}; 
+         \node[state, accepting, right=2cm of n1] (n2) {};
+         \path[->] (n0) edge node[above]{\a{coin}} (n1) 
+                   (n1) edge node[above]{\a{coffee}} (n2);
+      \end{tikzpicture}
 
 Sequences and choices
 ---------------------
@@ -84,12 +103,31 @@ the left the semantics of the specification.
 
 .. list-table:: A simple coffee machine.
 
-   * - .. image:: /_static/tikz/coffee_machine_simple2.svg
+   * - .. math::
+         :nowrap:
+
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               node distance=1cm,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+
+            [auto,->]
+            \node[state, initial] (n0) {}; 
+            \node[state, right=2cm of n0] (n1) {}; 
+            \node[state, accepting, right=2cm of n1] (n2) {};
+            \path[->] (n0) edge node[above]{\a{coin}} (n1) 
+                     (n1) edge node[above]{\a{coffee}} (n2);
+         \end{tikzpicture}
 
      - ::
 
-          act coin, coffee;
-          init coin . coffee;
+         act coin, coffee;
+         init coin . coffee;
 
 Note that the ``act`` statement explicitly defines the set `\act` of the LTS on
 the left. The ``init`` statement says that the initial state `i` is a state that
@@ -103,12 +141,36 @@ be expressed as follows:
 .. _coffee2:
 .. list-table:: Another coffee machine.
 
-   * - .. image:: /_static/tikz/coffee_machine_simple2.svg
+   * - .. math::
+         :nowrap:
+
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+
+            [auto,->]
+            \renewcommand{\a}[1]{\textit{#1}}
+            \node[state,initial] (n0) {}; 
+            \node[state, right=2cm of n0] (n1) {}; 
+            \node[state, accepting, right=2cm of n1] (n2) {};
+            \node[state, accepting, below right=2cm of n1] (n3) {};
+            \path[->] 
+                  (n0) edge node[above]{\a{coin}} (n1) 
+                  (n1) edge node[above]{\a{bad}} (n2)
+                  (n1) edge node[below left]{\a{coin}} (n3)
+                  (n3) edge node[right]{\a{good}} (n2)
+                  ;
+         \end{tikzpicture}
 
      - ::
 
-          act coin, good, bad;
-          init coin . (bad + coin . good);
+         act coin, good, bad;
+         init coin . (bad + coin . good);
 
 Again the ``.`` operator is used to indicate sequential execution (after
 inserting a coin, the machine can perform ``bad + coin . good``). Now is
@@ -260,8 +322,46 @@ LTSs are strongly bisimilar iff their initial states are bisimilar.
    In the following diagram, the dotted lines indicate the pairs of nodes that
    are related by a relation `R`.
 
-   .. image:: /_static/tikz/coffee_bisim1.svg
-
+   .. math::
+      :nowrap:
+      
+      \begin{tikzpicture}
+         \tikzstyle{every state}=[
+         draw,
+         shape=circle,
+         inner sep=1pt,
+         minimum size=5pt,
+         final/.style={double,minimum size=6pt},
+         initial text=]
+         [auto,->]
+         \renewcommand{\a}[1]{\textit{#1}}
+         \begin{scope}
+         \node[state,initial] (l1) {};
+         \node[state,below=2cm of l1] (l2) {};
+         \node[state,below=2cm of l2] (l3) {};
+         \path[->] (l1) edge node[left]{\a{coin}} (l2)
+                   (l2) edge node[left]{\a{coffee}} (l3);
+         \end{scope}
+         \begin{scope}[xshift=4cm]
+         \node[state,initial] (r1) {};
+         \node[state,below left=2cm and 2cm of r1] (r2) {};
+         \node[state,below right=2cm and 2cm of r1] (r3) {};
+         \node[state,below left=2cm and 1cm of r2] (r4) {};
+         \node[state,right=2cm of r4] (r5) {};
+         \node[state,right=2cm of r5] (r6) {};
+         \node[state,right=2cm of r6] (r7) {};
+         \path[->] (r1) edge node[left] {\a{coin}} (r2) 
+                        edge node[right]{\a{coin}} (r3)
+                     (r2) edge node[above,rotate=60]{\a{coffee}} (r4) 
+                        edge node[above,rotate=-60]{\a{coffee}} (r5)
+                     (r3) edge node[above,rotate=60]{\a{coffee}} (r6) 
+                        edge node[above,rotate=-60]{\a{coffee}} (r7);
+         \end{scope}
+         \path[dotted,bend right]
+               (l1) edge (r1)
+               (l2) edge (r2) edge (r3)
+               (l3) edge (r4) edge (r5) edge (r6) edge (r7);
+      \end{tikzpicture}
 
    `R` is a bisimulation relation that relates the initial states of the two
    transition systems, hence they are bisimilar.
@@ -279,7 +379,39 @@ bisimilar to `T`.
    In the following diagram, the dotted lines indicate the pairs of states that
    are related by a relation `R`.
 
-   .. image:: /_static/tikz/coffee_bisim2.svg
+   .. math::
+      :nowrap:
+
+      \begin{tikzpicture}
+         \tikzstyle{every state}=[
+            draw,
+            shape=circle,
+            inner sep=1pt,
+            minimum size=5pt,
+            final/.style={double,minimum size=6pt},
+            initial text=]
+         [auto,->]
+         \renewcommand{\a}[1]{\textit{#1}}
+         \node[state,initial] (r1) {};
+         \node[state,below left=2cm of r1] (r2) {};
+         \node[state,below right=2cm of r1] (r3) {};
+         \node[state,below left=2cm and 1cm of r2] (r4) {};
+         \node[state,right=2cm of r4] (r5) {};
+         \node[state,right=1cm of r5] (r6) {};
+         \node[state,right=2cm of r6] (r7) {};
+         \path[->] (r1) edge node[left] {\a{coin}} (r2) 
+                        edge node[right]{\a{coin}} (r3)
+                     (r2) edge node[above,rotate=60]{\a{coffee}} (r4) 
+                        edge node[above,rotate=-60]{\a{coffee}} (r5)
+                     (r3) edge node[above,rotate=60]{\a{coffee}} (r6) 
+                        edge node[above,rotate=-60]{\a{coffee}} (r7);
+
+         \path[dotted,bend right]
+            (r2) edge (r3)
+            (r4) edge (r5) edge (r6) edge (r7) 
+            (r5) edge (r6) edge (r7)
+            (r6) edge (r7); 
+      \end{tikzpicture}  
 
    `R` is a bisimulation relation, so merging all related states will yield a
    smaller, bisimilar transition system (namely the left transition system of
