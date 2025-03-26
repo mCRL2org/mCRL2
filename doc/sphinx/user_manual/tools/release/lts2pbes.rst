@@ -41,4 +41,4 @@ are valid. The tool :ref:`tool-pbes2bool` can generate counter examples without 
 counter-examples are solely based on the provided PBES and they must be manually be related to the original
 transition system.
 
-:mcrl2_manual:`lts2pbes`
+.. mcrl2_manual:: lts2pbes

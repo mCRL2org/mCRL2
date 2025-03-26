@@ -64,4 +64,4 @@ following commands can be entered:
   Quit :ref:`tool-lpssim`.
 
 
-:mcrl2_manual:`lpssim`
+.. mcrl2_manual:: lpssim

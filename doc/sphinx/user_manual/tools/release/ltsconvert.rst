@@ -27,4 +27,4 @@ state space.
    names. This requires that this information is available in the input LTS file
    or that the --lps option is used (see the options sections below).
 
-:mcrl2_manual:`ltsconvert`
+.. mcrl2_manual:: ltsconvert

@@ -61,4 +61,4 @@ The tool transforms this to the following strongly bisimilar LPS
 
    init P(equal, smaller);
 
-:mcrl2_manual:`lpsrealelm`
+.. mcrl2_manual:: lpsrealelm

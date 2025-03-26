@@ -32,4 +32,4 @@ In this example an implicit cast ``Nat2Int`` (i.e. ``Nat2Int(n) == i``) is used
 in order to have compatible types. Because of this, the tool is unable to remove
 the summation over ``n``.
 
-:mcrl2_manual:`lpssumelm`
+.. mcrl2_manual:: lpssumelm

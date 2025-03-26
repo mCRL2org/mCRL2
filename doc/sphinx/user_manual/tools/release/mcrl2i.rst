@@ -10,4 +10,4 @@ language. It supports rewriting of expressions as well as solving Boolean
 expressions using enumeration. Details about each of the commands can be found
 in the manual page below.
 
-:mcrl2_manual:`mcrl2i`
+.. mcrl2_manual:: mcrl2i

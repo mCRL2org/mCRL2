@@ -5,4 +5,4 @@
 pbesinst
 ========
 
-:mcrl2_manual:`pbesinst`
+.. mcrl2_manual:: pbesinst

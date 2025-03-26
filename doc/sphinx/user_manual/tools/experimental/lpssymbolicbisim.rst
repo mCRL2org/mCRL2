@@ -27,4 +27,4 @@ In any case, :ref:`tool-pbessymbolicbisim` is probably more powerful, since its
 abstractions can also rely on the information of the property being checked and
 it does not have to deal with actions and their parameters.
 
-:mcrl2_manual:`lpssymbolicbisim`
+.. mcrl2_manual:: lpssymbolicbisim

@@ -47,4 +47,4 @@ Note that the option ``--check-only`` can be used to check whether the passed
 formula is valid w.r.t. parsing and type checking, without actually generating
 the PBES.
 
-:mcrl2_manual:`lps2pbes`
+.. mcrl2_manual:: lps2pbes

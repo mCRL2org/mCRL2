@@ -32,4 +32,4 @@ slow.
 This tool is only available on macOS and Linux since the Sylvan dependency
 cannot be compiled by Visual Studio.
 
-:mcrl2_manual:`pbessolvesymbolic`
+.. mcrl2_manual:: pbessolvesymbolic

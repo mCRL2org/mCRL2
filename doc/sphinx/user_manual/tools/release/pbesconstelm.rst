@@ -39,4 +39,4 @@ runtime of the tool.
 
 The algorithm underlying the tool is described in detail in [OWW09]_.
 
-:mcrl2_manual:`pbesconstelm`
+.. mcrl2_manual:: pbesconstelm

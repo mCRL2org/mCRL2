@@ -29,4 +29,4 @@ You should note the following
 The picture below shows the setup screen of JTorx. 
 .. image:: _pictures/jtorx-setup.png
 
-:mcrl2_manual:`lps2torx`
+.. mcrl2_manual:: lps2torx

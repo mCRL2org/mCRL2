@@ -116,4 +116,4 @@ Known issues in the 201808.0 release version:
 
 These issues have been fixed in the latest 201908.0 release version
 
-:mcrl2_manual:`mcrl2ide`
+.. mcrl2_manual:: mcrl2ide

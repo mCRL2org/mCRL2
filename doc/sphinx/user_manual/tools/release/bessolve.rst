@@ -25,4 +25,4 @@ Small progress measures
 Note that a BES can also be solved by the tool ``pbessolve``. This tool uses Zielonka's
 algorithm, which often performs better than the ones implemented in ``bessolve``.
 
-:mcrl2_manual:`bessolve`
+.. mcrl2_manual:: bessolve

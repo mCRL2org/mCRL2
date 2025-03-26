@@ -28,4 +28,4 @@ additional functionalities:
   overview / understanding of what is going on in the system being simulated.
 * Various options can be set.
 
-:mcrl2_manual:`lpsxsim`
+.. mcrl2_manual:: lpsxsim
