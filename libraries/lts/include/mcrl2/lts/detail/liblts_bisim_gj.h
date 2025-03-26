@@ -72,7 +72,7 @@ constexpr block_type* null_block=nullptr;
 constexpr transition_index undefined=0;
 
   /// \brief the number of counter values that can be used for one subblock
-  /// \details There are three singular values (`undefined`, `marked_MultiSub`,
+  /// \details There are three singular values (`undefined`, `marked_NewBotSt`,
   /// and `marked_HitSmall`), and the other values needs to be distributed over
   /// three subblocks (ReachAlw, AvoidLrg, and AvoidSml).
   constexpr transition_index marked_range=
@@ -83,7 +83,7 @@ constexpr transition_index undefined=0;
                               // splitter (while it is not empty)
                    AvoidLrg,  // states that cannot inertly reach the
                               // large splitter (while it is not empty)
-                   MultiSub}; // states that can inertly reach multiple of
+                   NewBotSt}; // states that can inertly reach multiple of
                               // the above subblocks
                 // The following values are used only for temporary marking
                 // and are not really associated with a subblock:
@@ -97,16 +97,16 @@ constexpr transition_index undefined=0;
   static inline constexpr transition_index marked(enum subblocks subblock)
   {
     return                                                                      assert(ReachAlw==subblock || AvoidSml==subblock ||
-                                                                                       AvoidLrg==subblock || MultiSub==subblock),
+                                                                                       AvoidLrg==subblock || NewBotSt==subblock),
            marked_range*subblock+1;
   }
 
-  /// counter value to indicate that a state is in the MultiSub subset
-  constexpr transition_index marked_MultiSub=marked(MultiSub);                  static_assert(marked_MultiSub<std::numeric_limits<transition_index>::max());
+  /// counter value to indicate that a state is in the NewBotSt subset
+  constexpr transition_index marked_NewBotSt=marked(NewBotSt);                  static_assert(marked_NewBotSt<std::numeric_limits<transition_index>::max());
 
   /// counter value to indicate that a state has a transition in the small
   ///splitter (so it cannot become part of AvoidSml)
-  constexpr transition_index marked_HitSmall=marked_MultiSub+1;
+  constexpr transition_index marked_HitSmall=marked_NewBotSt+1;
 
   /// \brief checks whether a counter value is a marking for a given subblock
   static inline constexpr bool is_in_marked_range_of
@@ -2659,6 +2659,7 @@ class bisim_partitioner_gj
                                    constellation_type* const old_constellation,
                                    constellation_type* const new_constellation)
     {
+      // Algorithm 2, Line 2.42
       // adapt the BLC sets of a new block B in a way that they are consistent
       /* with the previous version...                                        */ assert(!old_bi->block.to_constellation.empty());
       if (m_branching)
@@ -2750,6 +2751,7 @@ class bisim_partitioner_gj
             constellation_type* const old_constellation,
             constellation_type* const new_constellation)
     {
+      // Algorithm 2, Line 2.41
       constellation_type* const constellation=old_block_index->c.onstellation;  assert(constellation->start_const_states<=start_bottom_states);
                                                                                 assert(start_bottom_states<end_states);
       block_type* const new_block_index=
@@ -2782,13 +2784,14 @@ class bisim_partitioner_gj
       {
         return new_block_index;
       }
+      // Algorithm 2, Line 2.42
       return update_BLC_sets_new_block(old_block_index, new_block_index,
                                          old_constellation, new_constellation);
     }
 
-    /// \brief makes incoming transitions from block `MultiSub_block_index` non-block-inert
+    /// \brief makes incoming transitions from block `NewBotSt_block_index` non-block-inert
     void check_incoming_tau_transitions_become_noninert(
-          block_type* MultiSub_block_index,
+          block_type* NewBotSt_block_index,
           state_in_block_pointer* start_bottom,
           state_in_block_pointer* const end_non_bottom)
     {
@@ -2797,7 +2800,7 @@ class bisim_partitioner_gj
         std::vector<transition>::const_iterator const in_it_end=
            std::next(start_bottom->ref_state)>=m_states.end()
               ? m_aut.get_transitions().end()
-              : std::next(start_bottom->ref_state)->start_incoming_transitions; assert(start_bottom->ref_state->block!=MultiSub_block_index);
+              : std::next(start_bottom->ref_state)->start_incoming_transitions; assert(start_bottom->ref_state->block!=NewBotSt_block_index);
         for (std::vector<transition>::iterator
                  in_it=start_bottom->ref_state->start_incoming_transitions;
                     in_it!=in_it_end &&
@@ -2806,7 +2809,7 @@ class bisim_partitioner_gj
         {
           const fixed_vector<state_type_gj>::iterator
                                            from=m_states.begin()+in_it->from(); assert(m_states[in_it->to()].ref_states_in_blocks==start_bottom);
-          if (MultiSub_block_index==from->block)
+          if (NewBotSt_block_index==from->block)
           {
             // make_transition_non_block_inert(*in_it);
             if (0== --from->no_of_outgoing_block_inert_transitions)
@@ -2901,13 +2904,13 @@ class bisim_partitioner_gj
     /// - **AvoidLrg:** states that cannot inertly reach `large_splitter`,
     ///   although `large_splitter!=nullptr`, and their block-inert
     ///   predecessors
-    /// - **MultiSub:** states that can block-inertly reach multiple of the
+    /// - **NewBotSt:** states that can block-inertly reach multiple of the
     ///   above subsets.  This will include new bottom states and will later
     ///   need to be stabilized under all outgoing BLC sets.
     ///
     /// The bottom states can always be distributed over the first three
     /// subsets; after that, one has to find block-inert predecessors for each
-    /// subset to extend it.  MultiSub mostly starts out empty, but sometimes a
+    /// subset to extend it.  NewBotSt mostly starts out empty, but sometimes a
     /// search in one of the other subsets adds a state to it.
     ///
     /// To ensure that the search through block-inert predecessors is quick, it
@@ -2953,12 +2956,12 @@ class bisim_partitioner_gj
       /// The variable is declared `static` to avoid repeated deallocations and
       /// reallocations while the algorithm runs many refinements.
       ///
-      /// The fourth entry in this array is for MultiSub; it should be in the
+      /// The fourth entry in this array is for NewBotSt; it should be in the
       /// same array to allow to find the three other arrays with coroutine^1,
       /// coroutine^2 and coroutine^3.
       static todo_state_vector non_bottom_states[4];
 
-      #define non_bottom_states_MultiSub non_bottom_states[3]
+      #define non_bottom_states_NewBotSt non_bottom_states[3]
 
       // Non-bottom states have a `counter` field that indicates their subblock
       // status: the field contains the sum of a base value, that indicates
@@ -2975,7 +2978,7 @@ class bisim_partitioner_gj
       state_in_block_pointer* start_bottom_states[4];                           assert(non_bottom_states[ReachAlw].empty());
       start_bottom_states[ReachAlw]=bi->start_bottom_states;                    assert(non_bottom_states[AvoidSml].empty());
       start_bottom_states[AvoidSml]=bi->start_bottom_states;                    assert(non_bottom_states[AvoidLrg].empty());
-      start_bottom_states[AvoidLrg+1]=bi->sta.rt_non_bottom_states;             assert(non_bottom_states_MultiSub.empty());
+      start_bottom_states[AvoidLrg+1]=bi->sta.rt_non_bottom_states;             assert(non_bottom_states_NewBotSt.empty());
       #define bottom_size(coroutine) (                                          assert(ReachAlw==(coroutine)||AvoidSml==(coroutine)||AvoidLrg==(coroutine)),  \
                                                                                 assert(start_bottom_states[(coroutine)]<=start_bottom_states[(coroutine)+1]), \
               static_cast<state_type>                                         \
@@ -2985,12 +2988,12 @@ class bisim_partitioner_gj
               bottom_size((coroutine))+non_bottom_states[(coroutine)].size())
 
       /// \brief next unhandled co-splitter transition
-      /// \details MultiSub may go through the co-splitter transitions at some
+      /// \details NewBotSt may go through the co-splitter transitions at some
       /// point of the algorithm; this iterator is used to store which
-      /// transition MultiSub will handle next.  (The variable is already
+      /// transition NewBotSt will handle next.  (The variable is already
       /// declared here just for initialisation.)
-      BLC_list_iterator large_splitter_iter_MultiSub;
-      BLC_list_const_iterator large_splitter_iter_end_MultiSub;
+      BLC_list_iterator large_splitter_iter_NewBotSt;
+      BLC_list_const_iterator large_splitter_iter_end_NewBotSt;
 
       if (has_small_splitter /* needed for correctness */)
       {                                                                         assert(bi->block.to_constellation.end()!=small_splitter);
@@ -2998,7 +3001,7 @@ class bisim_partitioner_gj
         start_bottom_states[AvoidLrg]=bi->sta.rt_non_bottom_states;             assert(small_splitter->is_stable());
                                                                                 #ifndef NDEBUG
         /* 1. All transitions in the main splitter are looked through.       */   const transition&
-        /*    For each state with a transition in the main splitter, it      */                 main_t=m_aut.get_transitions()[*small_splitter->start_same_BLC];
+        /*    For each state with a transition in the main splitter, it      */                main_t=m_aut.get_transitions()[*small_splitter->start_same_BLC];
         /*    is possible to check whether it has a transition in the        */   assert(bi==m_states[main_t.from()].block);
         /*    co-splitter or not, using the `start_same_saC` pointer.        */
         /*    We distribute the states as described above:                   */
@@ -3030,8 +3033,8 @@ class bisim_partitioner_gj
           /* constellation-inert.                                            */          (new_constellation!=bi->c.onstellation &&
                                                                                           old_constellation!=bi->c.onstellation));
                                                                                 #endif
-          large_splitter_iter_MultiSub=large_splitter->start_same_BLC;          assert(new_constellation==m_states[main_t.to()].block->c.onstellation);
-          large_splitter_iter_end_MultiSub=large_splitter->end_same_BLC;        assert(old_constellation==m_states[co_t.to()].block->c.onstellation);
+          large_splitter_iter_NewBotSt=large_splitter->start_same_BLC;          assert(new_constellation==m_states[main_t.to()].block->c.onstellation);
+          large_splitter_iter_end_NewBotSt=large_splitter->end_same_BLC;        assert(old_constellation==m_states[co_t.to()].block->c.onstellation);
         }
         else
         {                                                                       assert(bi->block.to_constellation.end()==large_splitter);
@@ -3054,11 +3057,13 @@ class bisim_partitioner_gj
                                                                                     }
                                                                                   }
                                                                                 #endif
-          large_splitter_iter_MultiSub=m_BLC_transitions.data_end();
-          large_splitter_iter_end_MultiSub=m_BLC_transitions.data_end();
+          large_splitter_iter_NewBotSt=m_BLC_transitions.data_end();
+          large_splitter_iter_end_NewBotSt=m_BLC_transitions.data_end();
         }
 
-        // Mark all sources of transitions in the main splitter:
+        // Algorithm 2, Lines 2.2--2.10
+        // Move source states of transitions in the small splitter to their
+        // respective subblock:
         BLC_list_iterator splitter_it=small_splitter->start_same_BLC;           assert(splitter_it!=small_splitter->end_same_BLC);
         do
         {                                                                       // mCRL2complexity(&m_transitions[*splitter_it], add_work(...), *this);
@@ -3078,7 +3083,7 @@ class bisim_partitioner_gj
             }
             else if (!has_large_splitter /* needed for correctness */)
             {
-              /* state belongs to ReachAlw                                   */ assert(ReachAlw+1==AvoidSml);
+              /* Algorithm 2, Line 2.2: state belongs to ReachAlw            */ assert(ReachAlw+1==AvoidSml);
               swap_states_in_states_in_block(start_bottom_states[AvoidSml],
                                           src.ref_state->ref_states_in_blocks);
               ++start_bottom_states[AvoidSml];
@@ -3102,14 +3107,14 @@ class bisim_partitioner_gj
             else if (next_target_constln_in_same_saC(src, splitter_it)==
                                                                 large_splitter)
             {
-              /* state belongs to ReachAlw                                   */ assert(ReachAlw+1==AvoidSml);
+              /* Algorithm 2, Line 2.2: state belongs to ReachAlw            */ assert(ReachAlw+1==AvoidSml);
               swap_states_in_states_in_block(start_bottom_states[AvoidSml],
                                           src.ref_state->ref_states_in_blocks);
               ++start_bottom_states[AvoidSml];
             }
             else
             {
-              /* state belongs to AvoidLrg                                   */ assert(AvoidSml+1==AvoidLrg);
+              /* Algorithm 2, Line 2.3: state belongs to AvoidLrg            */ assert(AvoidSml+1==AvoidLrg);
               --start_bottom_states[AvoidSml+1];
               swap_states_in_states_in_block(start_bottom_states[AvoidSml+1],
                                           src.ref_state->ref_states_in_blocks);
@@ -3118,19 +3123,22 @@ class bisim_partitioner_gj
           else
           {
             /* src has outgoing tau transitions; it might end in the         */ assert(bi->sta.rt_non_bottom_states<=src.ref_state->ref_states_in_blocks);
-            /* MultiSub-subblock.                                            */ assert(src.ref_state->ref_states_in_blocks<bi->end_states);
+            /* NewBotSt-subblock.                                            */ assert(src.ref_state->ref_states_in_blocks<bi->end_states);
             if (undefined==src.ref_state->counter)
             {
               if (!has_large_splitter /* needed for correctness */ ||
                   next_target_constln_in_same_saC(src, splitter_it)==
                                                                 large_splitter)
               {
+                // Algorithm 2, Line 2.9
                 src.ref_state->counter=marked(ReachAlw)+
                          src.ref_state->no_of_outgoing_block_inert_transitions; assert(is_in_marked_range_of(src.ref_state->counter, ReachAlw));
+                // Algorithm 2, Line 2.7
                 potential_non_bottom_states[ReachAlw].push_back(src);
               }
               else
               {
+                // Algorithm 2, Line 2.8
                 src.ref_state->counter=marked_HitSmall;
                 potential_non_bottom_states_HitSmall.push_back(src);
                                                                                 #ifndef NDEBUG
@@ -3174,8 +3182,8 @@ class bisim_partitioner_gj
         // states without a transition in the co-splitter.  But we will set
         // `start_bottom_states[AvoidLrg]` only after the for loop below.
 
-        large_splitter_iter_MultiSub=large_splitter->start_same_BLC;
-        large_splitter_iter_end_MultiSub=large_splitter->start_marked_BLC;
+        large_splitter_iter_NewBotSt=large_splitter->start_same_BLC;
+        large_splitter_iter_end_NewBotSt=large_splitter->start_marked_BLC;
 
         for (BLC_list_iterator co_splitter_it=large_splitter->start_marked_BLC;
                 co_splitter_it!=large_splitter->end_same_BLC; ++co_splitter_it)
@@ -3183,7 +3191,7 @@ class bisim_partitioner_gj
           state_in_block_pointer const src=m_states.begin()+                    // for this loop.
                                m_aut.get_transitions()[*co_splitter_it].from(); assert(0==src.ref_state->no_of_outgoing_block_inert_transitions);
                                                                                 assert(bi->start_bottom_states<=src.ref_state->ref_states_in_blocks);
-          /* src is a ReachAlw-bottom state                                  */ assert(src.ref_state->ref_states_in_blocks<bi->sta.rt_non_bottom_states);
+          /* Algorithm 2, Line 2.2: src is a ReachAlw-bottom state           */ assert(src.ref_state->ref_states_in_blocks<bi->sta.rt_non_bottom_states);
           if (start_bottom_states[AvoidSml]<=
                                            src.ref_state->ref_states_in_blocks)
           {
@@ -3192,6 +3200,7 @@ class bisim_partitioner_gj
             ++start_bottom_states[AvoidSml];
           }
         }
+        // Algorithm 2, Line 2.4
         start_bottom_states[AvoidLrg]=start_bottom_states[AvoidSml];
         make_stable_and_move_to_start_of_BLC(bi, large_splitter);
       }
@@ -3226,8 +3235,8 @@ class bisim_partitioner_gj
                                                                                     assert(is_in_marked_range_of(st.ref_state->counter, ReachAlw));
                                                                                   }
                                                                                 #endif
-        large_splitter_iter_MultiSub=m_BLC_transitions.data_end();
-        large_splitter_iter_end_MultiSub=m_BLC_transitions.data_end();
+        large_splitter_iter_NewBotSt=m_BLC_transitions.data_end();
+        large_splitter_iter_end_NewBotSt=m_BLC_transitions.data_end();
       }
 
       /* 2. If the block does not contain non-bottom states, all states have */ assert(bi->start_bottom_states==start_bottom_states[ReachAlw]);
@@ -3238,6 +3247,7 @@ class bisim_partitioner_gj
       //    split off the smaller one.)
       if (bi->sta.rt_non_bottom_states==bi->end_states)
       {
+        // Algorithm 2, Line 2.41--2.42
         block_type* ReachAlw_block_index=null_block;
         constellation_type* const constellation=bi->c.onstellation;
         bool constellation_was_trivial=
@@ -3333,6 +3343,7 @@ class bisim_partitioner_gj
           /* the non-trivial constellations.                                 */                  constellation)==m_non_trivial_constellations.end());
           m_non_trivial_constellations.emplace_back(constellation);
         }
+        // Algorithm 2, Line 2.44
         return ReachAlw_block_index;
       }                                                                         assert(m_branching);
 
@@ -3343,13 +3354,13 @@ class bisim_partitioner_gj
       //      there are ReachAlw-bottom states because every bottom state with
       //      a transition in the main splitter also has a transition in the
       //      co-splitter; then it is clear from the start that AvoidLrg is
-      //      empty.  Potential-AvoidLrg non-bottom states are in MultiSub
+      //      empty.  Potential-AvoidLrg non-bottom states are in NewBotSt
       //      instead.
       //    - It may be that there are no ReachAlw-bottom states but there are
       //      AvoidLrg-bottom states because no bottom state with a transition
       //      in the main splitter has a transition in the co-splitter; then it
       //      is clear from the start that ReachAlw is empty.
-      //      Potential-ReachAlw non-bottom states are in MultiSub instead.
+      //      Potential-ReachAlw non-bottom states are in NewBotSt instead.
       //    Empty subblocks are considered finished.
 
       // 4. We decide whether one of the subblocks is already too large (more
@@ -3359,12 +3370,12 @@ class bisim_partitioner_gj
       /*    (We use variable `no_of_unfinished_states_in_block` to record the*/ assert(non_bottom_states[ReachAlw].empty());
       /*    number of unfinished states as long as there is no aborted       */ assert(non_bottom_states[AvoidSml].empty());
       /*    subblock; as soon as a subblock is aborted, it is set to the     */ assert(non_bottom_states[AvoidLrg].empty());
-      /*    largest possible value to avoid aborting another subblock.)      */ assert(non_bottom_states_MultiSub.empty());
+      /*    largest possible value to avoid aborting another subblock.)      */ assert(non_bottom_states_NewBotSt.empty());
 
       enum { state_checking,
              incoming_inert_transition_checking,
              outgoing_constellation_checking,
-             aborted, finished } status[3], status_MultiSub;
+             aborted, finished } status[3], status_NewBotSt;
       state_in_block_pointer* current_bottom_state_iter[3];
 
       // the number of states in the block that are not yet in finished
@@ -3388,26 +3399,26 @@ class bisim_partitioner_gj
             status[(coroutine)]=aborted,                                                                                                       \
             true))
 
-      /// \brief Abort if there are too many states in subblock MultiSub
+      /// \brief Abort if there are too many states in subblock NewBotSt
       /// \details: If the states, possibly after adding i additional states,
       /// cover more than half of the states in the unfinished subblocks,
-      /// MultiSub can be aborted.  The parameter i allows to apply the test
+      /// NewBotSt can be aborted.  The parameter i allows to apply the test
       /// even before adding a state, to avoid storing data that is immediately
       /// going to be abolished.
       ///
-      /// MultiSub has only non-bottom states, so we need a macro that
+      /// NewBotSt has only non-bottom states, so we need a macro that
       /// is different from the other subblocks.
       ///
       /// This macro can be used before the coroutines start or while they run.
-      #define abort_if_non_bottom_size_too_large_MultiSub(i)                                                                                   \
-          ((                                                                    assert(aborted!=status_MultiSub),                              \
-            non_bottom_states_MultiSub.size()+(i)>                                                                                             \
+      #define abort_if_non_bottom_size_too_large_NewBotSt(i)                                                                                   \
+          ((                                                                    assert(aborted!=status_NewBotSt),                              \
+            non_bottom_states_NewBotSt.size()+(i)>                                                                                             \
                                          no_of_unfinished_states_in_block/2) &&                                                                \
-           (                                                                    assert(std::numeric_limits<state_index>::max()!=               \
+           (/* Algorithm 2, Line 2.12                                        */ assert(std::numeric_limits<state_index>::max()!=               \
                                                                                                             no_of_unfinished_states_in_block), \
             no_of_unfinished_states_in_block=                                                                                                  \
                                        std::numeric_limits<state_index>::max(), assert(m_aut.num_states()<no_of_unfinished_states_in_block/2), \
-            status_MultiSub=aborted,                                                                                                           \
+            status_NewBotSt=aborted,                                                                                                           \
             true))
 
       /// \brief Abort if there are too many states in a subblock
@@ -3425,7 +3436,7 @@ class bisim_partitioner_gj
       #define abort_if_size_too_large(coroutine, i)                                                                                            \
           (bottom_and_non_bottom_size((coroutine))+(i)>                                                                                        \
                                           no_of_unfinished_states_in_block/2 &&                                                                \
-           (                                                                    assert(std::numeric_limits<state_index>::max()!=               \
+           (/* Algorithm 2, Line 2.12                                        */ assert(std::numeric_limits<state_index>::max()!=               \
                                                                                                             no_of_unfinished_states_in_block), \
             no_of_unfinished_states_in_block=                                                                                                  \
                                        std::numeric_limits<state_index>::max(), assert(m_aut.num_states()<no_of_unfinished_states_in_block/2), \
@@ -3433,23 +3444,23 @@ class bisim_partitioner_gj
             non_bottom_states[(coroutine)].clear(),                                                                                            \
             true))
 
-      int no_of_finished_searches=0;      // including the MultiSub-search
-      int no_of_running_searches=0;       // does not include the MultiSub-search
-      enum subblocks running_searches[3]; // does not include the MultiSub-search
+      int no_of_finished_searches=0;      // including the NewBotSt-search
+      int no_of_running_searches=0;       // does not include the NewBotSt-search
+      enum subblocks running_searches[3]; // does not include the NewBotSt-search
 
       if ((!has_small_splitter && has_large_splitter) ||
           0==bottom_size(AvoidSml))
       {                                                                         assert(0==bottom_size(AvoidSml));
         /* AvoidSml is empty and finishes early.  There are no states that   */ assert(potential_non_bottom_states[AvoidSml].empty());
-        // might be moved to MultiSub.
+        // might be moved to NewBotSt.
         if (!has_large_splitter || 0==bottom_size(AvoidLrg))
         {                                                                       assert(0==bottom_size(AvoidLrg));
           //++no_of_finished_searches;
-          //status_MultiSub=finished;
+          //status_NewBotSt=finished;
           // This is a trivial split and nothing needs to be done.
           // If AvoidLrg were not yet finished, it could still happen that
           // some states are found to have a transition in the co-splitter,
-          // so they would yet be added to MultiSub.
+          // so they would yet be added to NewBotSt.
 
           clear_state_counters(potential_non_bottom_states[ReachAlw].begin(),
                               potential_non_bottom_states[ReachAlw].end(), bi);
@@ -3460,6 +3471,7 @@ class bisim_partitioner_gj
                                potential_non_bottom_states_HitSmall.end(), bi);
             clear(potential_non_bottom_states_HitSmall);
           }                                                                     else  {  assert(potential_non_bottom_states_HitSmall.empty());  }
+          // Algorithm 2, Line 2.44
           return bi;
         }
         ++no_of_finished_searches;
@@ -3487,42 +3499,44 @@ class bisim_partitioner_gj
         status[AvoidLrg]=state_checking;
       }
 
-      status_MultiSub=state_checking;
+      status_NewBotSt=state_checking;
       if (0==bottom_size(ReachAlw))
       {
         // ReachAlw is empty and finishes early.  Its non-bottom states are
-        // actually in MultiSub (because they can inertly reach a AvoidLrg- or
-        /* AvoidSml-bottom-state).                                           */ assert(non_bottom_states_MultiSub.empty());
-        non_bottom_states_MultiSub.swap_vec
+        // actually in NewBotSt (because they can inertly reach a AvoidLrg- or
+        /* AvoidSml-bottom-state).                                           */ assert(non_bottom_states_NewBotSt.empty());
+        // Algorithm 2, Line 2.35 left
+        non_bottom_states_NewBotSt.swap_vec
                                        (potential_non_bottom_states[ReachAlw]);
         if (!has_large_splitter || finished==status[AvoidLrg])
         {                                                                       assert(finished==status[AvoidLrg]);
+          // Algorithm 2, Line 2.37 left
           // both ReachAlw and AvoidLrg are empty.  So the HitSmall states must
-          // be in MultiSub.  (MultiSub has not yet been aborted.)
+          // be in NewBotSt.  (NewBotSt has not yet been aborted.)
           if (has_small_splitter && has_large_splitter)
           {
-            if (!non_bottom_states_MultiSub.empty())
+            if (!non_bottom_states_NewBotSt.empty())
             {
-              non_bottom_states_MultiSub.add_todo
+              non_bottom_states_NewBotSt.add_todo
                                  (potential_non_bottom_states_HitSmall.begin(),
                                   potential_non_bottom_states_HitSmall.end());
               clear(potential_non_bottom_states_HitSmall);
             }
             else
             {
-              non_bottom_states_MultiSub.swap_vec
+              non_bottom_states_NewBotSt.swap_vec
                                         (potential_non_bottom_states_HitSmall);
             }
           }                                                                     else  {  assert(potential_non_bottom_states_HitSmall.empty());  }
         }
-        for (state_in_block_pointer st: non_bottom_states_MultiSub)
+        for (state_in_block_pointer st: non_bottom_states_NewBotSt)
         {                                                                       // The work can be assigned to the same main splitter transition(s) that made
                                                                                 // the state get into ReachAlw (depending on whether the source or target
-          st.ref_state->counter=marked_MultiSub;                                // constellation are new, see above).
+          st.ref_state->counter=marked_NewBotSt;                                // constellation are new, see above).
         }
         ++no_of_finished_searches;
         status[ReachAlw]=finished;
-        abort_if_non_bottom_size_too_large_MultiSub(0);
+        abort_if_non_bottom_size_too_large_NewBotSt(0);
       }
       else if (!abort_if_bottom_size_too_large(ReachAlw))
       {
@@ -3544,73 +3558,77 @@ class bisim_partitioner_gj
       //    - The coroutine for the AvoidLrg-subblock needs to check, when all
       //      successors are known to be in the AvoidLrg-subblock, whether the
       //      state has a transition in the co-splitter; if yes, the state is
-      //      actually a new bottom state in the MultiSub-subblock (all its
+      //      actually a new bottom state in the NewBotSt-subblock (all its
       //      inert successors are in AvoidLrg but the state itself is in
-      //      MultiSub).
-      //    - Predecessors of MultiSub-states are immediately added to the
-      //      MultiSub-subblock because for them, having one MultiSub-successor
-      //      is enough.  There is no set of potentially-MultiSub states.
+      //      NewBotSt).
+      //    - Predecessors of NewBotSt-states are immediately added to the
+      //      NewBotSt-subblock because for them, having one NewBotSt-successor
+      //      is enough.  There is no set of potentially-NewBotSt states.
 
       std::vector<transition>::iterator current_source_iter[3],
-                                                  current_source_iter_MultiSub;
+                                                  current_source_iter_NewBotSt;
       std::vector<transition>::const_iterator current_source_iter_end[3],
-                                              current_source_iter_end_MultiSub;
+                                              current_source_iter_end_NewBotSt;
 
       state_in_block_pointer current_source_AvoidLrg;
       outgoing_transitions_const_it current_outgoing_iter_start_AvoidLrg;
-      outgoing_transitions_const_it current_outgoing_iter_AvoidLrg;             assert(large_splitter_iter_MultiSub<=large_splitter_iter_end_MultiSub);
+      outgoing_transitions_const_it current_outgoing_iter_AvoidLrg;             assert(large_splitter_iter_NewBotSt<=large_splitter_iter_end_NewBotSt);
       for (;;)
       {                                                                         assert(2>=no_of_finished_searches);
         state_in_block_pointer* new_start_bottom_states_plus_one[3];
         state_in_block_pointer* new_end_bottom_states_plus_one[2];
         #define new_start_bottom_states(idx) (assert(1<=(idx)), assert((idx)<=3), new_start_bottom_states_plus_one[(idx)-1])
         #define new_end_bottom_states(idx) (assert(1<=(idx)), assert((idx)<=2), new_end_bottom_states_plus_one[(idx)-1])
-        #define new_end_bottom_states_MultiSub (new_start_bottom_states_plus_one[2])
+        #define new_end_bottom_states_NewBotSt (new_start_bottom_states_plus_one[2])
         for (int current_search_index=0; current_search_index<
                                 no_of_running_searches; ++current_search_index)
         {
           const enum subblocks
-                         current_search=running_searches[current_search_index]; assert(0<=current_search);  assert(current_search<MultiSub);
+                         current_search=running_searches[current_search_index]; assert(0<=current_search);  assert(current_search<NewBotSt);
 
           if (incoming_inert_transition_checking==status[current_search])
           {                                                                     assert(current_source_iter[current_search]<
-                                                                                                                      current_source_iter_end[current_search]);
+            /* Algorithm 2, Line 2.15 left                                   */                                       current_source_iter_end[current_search]);
                                                                                 mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(),
                                                                                         current_source_iter[current_search])], add_work(check_complexity::
                                                                                                      simple_splitB_U__handle_transition_to_U_state, 1), *this);
             const transition& tr=*current_source_iter[current_search]++;        assert(m_aut.is_tau(m_aut_apply_hidden_label_map(tr.label())));
             state_in_block_pointer const src=m_states.begin()+tr.from();        assert(m_states[tr.to()].block==bi);
+            // Algorithm 2, Line 2.16 left
             if (src.ref_state->block==bi &&
                 !(m_preserve_divergence && tr.from()==tr.to()))
             {                                                                   assert(!non_bottom_states[ReachAlw].find(src));
                                                                                 assert(!non_bottom_states[AvoidSml].find(src));
                                                                                 assert(!non_bottom_states[AvoidLrg].find(src));
               const transition_index current_counter=src.ref_state->counter;
+              // Algorithm 2, Line 2.17 left
               if(  (   (   undefined==current_counter
                         || (   has_small_splitter && has_large_splitter
                             && marked_HitSmall==current_counter
                             && AvoidSml!=current_search        )                || (assert(marked_HitSmall!=current_counter || AvoidSml==current_search),false)
                                                                 )
-                    && (src.ref_state->counter=marked(current_search)+
+                    && (// Algorithm 2, Line 2.23 left
+                        src.ref_state->counter=marked(current_search)+
                         src.ref_state->no_of_outgoing_block_inert_transitions,  assert(std::find(potential_non_bottom_states[current_search].begin(),
                                                                                                  potential_non_bottom_states[current_search].end(), src)==
-                                                                                                 potential_non_bottom_states[current_search].end()),
+                        /* Algorithm 2, Line 2.22 left                       */                             potential_non_bottom_states[current_search].end()),
                         potential_non_bottom_states[current_search].
                                                              push_back(src),
                         true                                                ))
                  || is_in_marked_range_of(current_counter, current_search)    )
               {                                                                 assert(is_in_marked_range_of(src.ref_state->counter, current_search));
+                // Algorithm 2, Line 2.24 left
                 --src.ref_state->counter;                                       assert(is_in_marked_range_of(src.ref_state->counter, current_search));
-                                                                                assert(!non_bottom_states_MultiSub.find(src));
+                /* Algorithm 2, Line 2.25 left                               */ assert(!non_bottom_states_NewBotSt.find(src));
                 if (marked(current_search)==src.ref_state->counter)
                 {                                                               if (!has_large_splitter) {
                   /* all inert transitions of src point to the current       */   assert(AvoidLrg!=current_search);
                   /* subblock                                                */   if (!has_small_splitter)  {  assert(marked_HitSmall!=current_counter);  }
-                                                                                }
+                  /* Algorithm 2, Line 2.26 left                             */ }
                   if (has_large_splitter &&
                       AvoidLrg==current_search &&
-                      large_splitter_iter_MultiSub!=
-                                              large_splitter_iter_end_MultiSub)
+                      large_splitter_iter_NewBotSt!=
+                                              large_splitter_iter_end_NewBotSt)
                   {                                                             assert(bi->block.to_constellation.end()!=large_splitter);
                     // but AvoidLrg needs to check whether src has a transition
                     // in the large splitter
@@ -3628,7 +3646,7 @@ class bisim_partitioner_gj
                         : std::next(src.ref_state)->start_outgoing_transitions; assert(current_outgoing_iter_start_AvoidLrg<current_outgoing_iter_AvoidLrg);
                     continue;
                   }                                                             else  { assert(AvoidLrg!=current_search ||
-                                                                                               large_splitter_iter_MultiSub==large_splitter_iter_end_MultiSub); }
+                  /* Algorithm 2, Line 2.12                                  */              large_splitter_iter_NewBotSt==large_splitter_iter_end_NewBotSt); }
                   if (abort_if_size_too_large(current_search, 1))
                   {                                                             assert(running_searches[current_search_index]==current_search);
                     --no_of_running_searches;                                   assert(current_search_index<=no_of_running_searches);
@@ -3639,26 +3657,29 @@ class bisim_partitioner_gj
                     --current_search_index;
                     continue;
                   }
+                  // Algorithm 2, Line 2.31 left
                   non_bottom_states[current_search].add_todo(src);
                 }
               }
-              else if (marked_MultiSub!=src.ref_state->counter)
+              // Algorithm 2, Line 2.18 left
+              else if (marked_NewBotSt!=src.ref_state->counter)
               {
                 // The state has block-inert transitions to multiple
                 // subblocks (or it is HitSmall and the current search is
-                /* AvoidSml).  It should be added to MultiSub.               */ assert(!non_bottom_states_MultiSub.find(src));
-                if (aborted!=status_MultiSub &&
-                    !abort_if_non_bottom_size_too_large_MultiSub(1))
+                /* AvoidSml).  It should be added to NewBotSt.               */ assert(!non_bottom_states_NewBotSt.find(src));
+                // Algorithm 2, Line 2.20 left
+                if (aborted!=status_NewBotSt &&
+                    !abort_if_non_bottom_size_too_large_NewBotSt(1))
                 {
-                  // but actually if MultiSub is already aborted, there is no
-                  // need to add the state to MultiSub.  (If the current search
-                  // ends first or second, the state will be added to MultiSub
+                  // but actually if NewBotSt is already aborted, there is no
+                  // need to add the state to NewBotSt.  (If the current search
+                  // ends first or second, the state will be added to NewBotSt
                   // later anyway, but if the current search ends as third we
                   // have saved the assignment.)
-                  src.ref_state->counter=marked_MultiSub;
-                  non_bottom_states_MultiSub.add_todo(src);
+                  src.ref_state->counter=marked_NewBotSt;
+                  non_bottom_states_NewBotSt.add_todo(src);
                 }
-              }                                                                 else {assert(aborted==status_MultiSub||non_bottom_states_MultiSub.find(src));}
+              }                                                                 else {assert(aborted==status_NewBotSt||non_bottom_states_NewBotSt.find(src));}
             }
 
             if (current_source_iter[current_search]!=
@@ -3672,6 +3693,7 @@ class bisim_partitioner_gj
           }
           else if (!has_large_splitter||state_checking==status[current_search])
           {                                                                     assert(state_checking==status[current_search]);
+            // Algorithm 2, Line 2.14 left
             state_in_block_pointer const tgt=
                     current_bottom_state_iter[current_search]<
                                           start_bottom_states[current_search+1]
@@ -3697,7 +3719,7 @@ class bisim_partitioner_gj
           }
           else
           {                                                                     assert(AvoidLrg==current_search);
-                                                                                assert(outgoing_constellation_checking==status[AvoidLrg]);
+            /* Algorithm 2, Line 2.27 left                                   */ assert(outgoing_constellation_checking==status[AvoidLrg]);
                                                                                 assert(current_outgoing_iter_start_AvoidLrg<current_outgoing_iter_AvoidLrg);
                                                                                 assert(m_outgoing_transitions.end()==current_outgoing_iter_AvoidLrg ||
                                                                                        current_outgoing_iter_start_AvoidLrg<
@@ -3725,9 +3747,8 @@ class bisim_partitioner_gj
                                                                                 assert(!non_bottom_states[AvoidLrg].find(current_source_AvoidLrg));
                                                                                 assert(!non_bottom_states[AvoidSml].find(current_source_AvoidLrg));
                                                                                 assert(marked(AvoidLrg)==current_source_AvoidLrg.ref_state->counter ||
-                                                                                       marked_MultiSub==current_source_AvoidLrg.ref_state->counter);
-
-                                                                                assert(has_small_splitter || has_large_splitter);
+                                                                                       marked_NewBotSt==current_source_AvoidLrg.ref_state->counter);
+            /* Algorithm 2, Line 2.28 left                                   */ assert(has_small_splitter || has_large_splitter);
             linked_list<BLC_indicators>::const_iterator const current_splitter=
                 m_transitions[
                       *current_outgoing_iter_AvoidLrg->ref.BLC_transitions].
@@ -3735,24 +3756,25 @@ class bisim_partitioner_gj
             if (current_splitter==large_splitter)
             {
               // The state has a transition in the large splitter, so it should
-              // not be added to AvoidLrg.  Instead, add it to MultiSub:
-              if (marked_MultiSub!=current_source_AvoidLrg.ref_state->counter)
+              // not be added to AvoidLrg.  Instead, add it to NewBotSt:
+              // Algorithm 2, Line 2.29 left
+              if (marked_NewBotSt!=current_source_AvoidLrg.ref_state->counter)
               {
-                // It doesn't happen often that the source is marked MultiSub
+                // It doesn't happen often that the source is marked NewBotSt
                 // exactly while AvoidLrg is running this search -- so we do
-                /* not test this very often.                                 */ assert(!non_bottom_states_MultiSub.find(current_source_AvoidLrg));
-                if (aborted!=status_MultiSub &&
-                    !abort_if_non_bottom_size_too_large_MultiSub(1))
-                {                                                               assert(aborted!=status_MultiSub);
-                  // but actually if MultiSub is already aborted, there is no
-                  // need to add the state to MultiSub.  (If the current search
-                  // ends first or second, the state will be added to MultiSub
+                /* not test this very often.                                 */ assert(!non_bottom_states_NewBotSt.find(current_source_AvoidLrg));
+                if (aborted!=status_NewBotSt &&
+                    !abort_if_non_bottom_size_too_large_NewBotSt(1))
+                {                                                               assert(aborted!=status_NewBotSt);
+                  // but actually if NewBotSt is already aborted, there is no
+                  // need to add the state to NewBotSt.  (If the current search
+                  // ends first or second, the state will be added to NewBotSt
                   // later anyway, but if the current search ends as third we
                   // have saved the assignment.)
-                  current_source_AvoidLrg.ref_state->counter=marked_MultiSub;
-                  non_bottom_states_MultiSub.add_todo(current_source_AvoidLrg);
+                  current_source_AvoidLrg.ref_state->counter=marked_NewBotSt;
+                  non_bottom_states_NewBotSt.add_todo(current_source_AvoidLrg);
                 }
-              }                                                                 else  {  assert(non_bottom_states_MultiSub.find(current_source_AvoidLrg));  }
+              }                                                                 else  {  assert(non_bottom_states_NewBotSt.find(current_source_AvoidLrg));  }
             }
             else if (current_outgoing_iter_AvoidLrg=
                                 current_outgoing_iter_AvoidLrg->start_same_saC,
@@ -3763,7 +3785,7 @@ class bisim_partitioner_gj
                       // (We tried several options to accelerate this test,
                       // e.g. remembering whether `current_source_AvoidLrg`
                       // had been in HitSmall earlier; letting the
-                      // MultiSub-coroutine go through the co-splitter
+                      // NewBotSt-coroutine go through the co-splitter
                       // transitions instead of only waiting to mark them
                       // as "cannot be in AvoidLrg"; even just comparing
                       // `current_splitter==small_splitter`.  But none of these
@@ -3771,6 +3793,7 @@ class bisim_partitioner_gj
                       // with the simpler code.)
                                                                            )
             {                                                                   assert(marked(AvoidLrg)==current_source_AvoidLrg.ref_state->counter);
+              // Algorithm 2, Line 2.12
               if (abort_if_size_too_large(AvoidLrg, 1))
               {                                                                 assert(running_searches[current_search_index]==AvoidLrg);
                 --no_of_running_searches;                                       assert(current_search_index<=no_of_running_searches);
@@ -3781,6 +3804,7 @@ class bisim_partitioner_gj
                 --current_search_index;
                 continue;
               }
+              // Algorithm 2, Line 2.31 left
               non_bottom_states[AvoidLrg].add_todo(current_source_AvoidLrg);
             }
             else
@@ -3802,21 +3826,22 @@ class bisim_partitioner_gj
           }
 
           /* Now we have done one step in the handling of this subblock.  If */ assert(state_checking==status[current_search]);
-          /* we reach this point, it is time to check whether the subblock is*/ assert(MultiSub!=current_search);
+          /* we reach this point, it is time to check whether the subblock is*/ assert(NewBotSt!=current_search);
           // finished.
           if (current_bottom_state_iter[current_search]==
                                        start_bottom_states[current_search+1] &&
               non_bottom_states[current_search].todo_is_empty())
           {
             // the current search is completed. Finish the subblock:
+            // Algorithm 2, Line 2.32 left
             status[current_search]=finished;
             ++no_of_finished_searches;
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                   // Finalise the work distribution here:
                                                                                   // Forget the balance of earlier processes that finished:
-                                                                                  // (If MultiSub is unfinished, the third process does enough work to tilt the
+                                                                                  // (If NewBotSt is unfinished, the third process does enough work to tilt the
                                                                                   // balance into the positive.  If another process is unfinished, then
-                                                                                  // MultiSub and the last process that finished before MultiSub together
+                                                                                  // NewBotSt and the last process that finished before NewBotSt together
                                                                                   // should provide enough credit.)
                                                                                   check_complexity::check_temporary_work();
                                                                                   // move the work from temporary state counters to final ones
@@ -3870,8 +3895,8 @@ class bisim_partitioner_gj
                                                                                     // turned out to be new bottom states.  The states that ended up actually
                                                                                     // in AvoidLrg have already been handled above.  We just go over all states
                                                                                     // again, as only the non-AvoidLrg-states have the relevant counter !=0.
-                                                                                    // (We cannot only go over non_bottom_states_MultiSub because some states
-                                                                                    // may have been handled by AvoidLrg after MultiSub became too large.)
+                                                                                    // (We cannot only go over non_bottom_states_NewBotSt because some states
+                                                                                    // may have been handled by AvoidLrg after NewBotSt became too large.)
                                                                                     for (const state_in_block_pointer*
                                                                                                         s=bi->sta.rt_non_bottom_states; s!=bi->end_states; ++s)
                                                                                     {
@@ -3898,20 +3923,22 @@ class bisim_partitioner_gj
                                                                                     }
                                                                                   } else  {  assert(AvoidLrg!=current_search);  }
                                                                                 #endif
+            // Algorithm 2, Line 2.33 left
             if (3>no_of_finished_searches)
             {
-              /* If MultiSub is not empty, then the following reserve() call */ assert(finished!=status_MultiSub);
+              // Algorithm 2, Line 2.35 left
+              /* If NewBotSt is not empty, then the following reserve() call */ assert(finished!=status_NewBotSt);
               // would reserve an overapproximation of the needed space,
               // because some states likely have moved from current_search to
-              // MultiSub already.  Therefore I do not include it.  Only if
-              // MultiSub.size() is less than what is added to it there may be
-              // multiple reallocations.  Only if MultiSub.size() is less than
+              // NewBotSt already.  Therefore I do not include it.  Only if
+              // NewBotSt.size() is less than what is added to it there may be
+              // multiple reallocations.  Only if NewBotSt.size() is less than
               // 1/3 of what is added to it there will be multiple
               // reallocations.
-              if (non_bottom_states_MultiSub.empty())
+              if (non_bottom_states_NewBotSt.empty())
               {
-                non_bottom_states_MultiSub.reserve
-                           (// non_bottom_states_MultiSub.size()
+                non_bottom_states_NewBotSt.reserve
+                           (// non_bottom_states_NewBotSt.size()
                             +potential_non_bottom_states[current_search].size()
                             -non_bottom_states[current_search].size());
               }
@@ -3920,20 +3947,20 @@ class bisim_partitioner_gj
               {                                                                 // The work in this loop can be assigned to the same transition(s) that made
                                                                                 // st go into `potential_non_bottom_states[current_search]`.  (It can now be
                                                                                 // a final counter, as we know for sure the subblock is not aborted.)
-                if (marked_MultiSub!=st.ref_state->counter)
+                if (marked_NewBotSt!=st.ref_state->counter)
                 {                                                               assert(is_in_marked_range_of(st.ref_state->counter, current_search));
                   if (marked(current_search)!=st.ref_state->counter)
-                  {                                                             assert(!non_bottom_states_MultiSub.find(st));
-                    /* We always add state st to non_bottom_states_MultiSub, */ assert(!non_bottom_states[ReachAlw].find(st));
-                    // even if MultiSub is aborted, because we want to clear
+                  {                                                             assert(!non_bottom_states_NewBotSt.find(st));
+                    /* We always add state st to non_bottom_states_NewBotSt, */ assert(!non_bottom_states[ReachAlw].find(st));
+                    // even if NewBotSt is aborted, because we want to clear
                     // potential_non_bottom_states[current_search].  The
                     // alternative would be to reset the counter to undefined,
                     // but as state st must have an unexplored block-inert
                     // transition to a different subblock, then that subblock
                     // would add it to its own potential_non_bottom_states
                     // later.
-                    non_bottom_states_MultiSub.add_todo(st);                    assert(!non_bottom_states[AvoidLrg].find(st));
-                    st.ref_state->counter=marked_MultiSub;                      assert(!non_bottom_states[AvoidSml].find(st));
+                    non_bottom_states_NewBotSt.add_todo(st);                    assert(!non_bottom_states[AvoidLrg].find(st));
+                    st.ref_state->counter=marked_NewBotSt;                      assert(!non_bottom_states[AvoidSml].find(st));
                   }                                                             else  {  assert(non_bottom_states[current_search].find(st));  }
                 }                                                               else  {  assert(!non_bottom_states[current_search].find(st));  }
               }                                                                 assert(running_searches[current_search_index]==current_search);
@@ -3942,13 +3969,14 @@ class bisim_partitioner_gj
               running_searches[current_search_index]=
                                       running_searches[no_of_running_searches];
               --current_search_index; /* is now -1, 0 or +1 */                  assert((has_small_splitter && has_large_splitter) ||
-                                                                                       potential_non_bottom_states_HitSmall.empty());
+              /* Algorithm 2, Line 2.36 left                                 */        potential_non_bottom_states_HitSmall.empty());
               if (has_small_splitter && has_large_splitter &&
                   finished==status[ReachAlw] && finished==status[AvoidLrg] &&
-                  aborted!=status_MultiSub)
+                  aborted!=status_NewBotSt)
               {                                                                 assert(1>=no_of_running_searches);
-                /* The HitSmall states can be assigned to MultiSub because   */ assert(finished!=status[AvoidSml]);
-                /* they cannot be in ReachAlw or AvoidLrg                    */ assert(finished!=status_MultiSub);
+                // Algorithm 2, Line 2.37 left
+                /* The HitSmall states can be assigned to NewBotSt because   */ assert(finished!=status[AvoidSml]);
+                /* they cannot be in ReachAlw or AvoidLrg                    */ assert(finished!=status_NewBotSt);
                 for (state_in_block_pointer st:
                                           potential_non_bottom_states_HitSmall)
                 {                                                               assert(0<st.ref_state->no_of_outgoing_block_inert_transitions);
@@ -3957,25 +3985,25 @@ class bisim_partitioner_gj
                                                                                 // `potential_non_bottom_states_HitSmall`.
                                                                                 assert(!non_bottom_states[AvoidSml].find(st));
                   if (marked_HitSmall==st.ref_state->counter)
-                  {                                                             assert(!non_bottom_states_MultiSub.find(st));
-                    non_bottom_states_MultiSub.add_todo(st);                    assert(!non_bottom_states[ReachAlw].find(st));
-                    st.ref_state->counter=marked_MultiSub;                      assert(!non_bottom_states[AvoidLrg].find(st));
+                  {                                                             assert(!non_bottom_states_NewBotSt.find(st));
+                    non_bottom_states_NewBotSt.add_todo(st);                    assert(!non_bottom_states[ReachAlw].find(st));
+                    st.ref_state->counter=marked_NewBotSt;                      assert(!non_bottom_states[AvoidLrg].find(st));
                   }                                                             else  {  assert(marked(ReachAlw)==st.ref_state->counter ||
                                                                                                 marked(AvoidLrg)==st.ref_state->counter ||
-                                                                                                marked_MultiSub==st.ref_state->counter);  }
+                                                                                                marked_NewBotSt==st.ref_state->counter);  }
                 }
                 clear(potential_non_bottom_states_HitSmall);
               }                                                                 else  {  assert(finished!=status[ReachAlw] || finished!=status[AvoidLrg] ||
-                                                                                                aborted==status_MultiSub ||
+                                                                                                aborted==status_NewBotSt ||
                                                                                                 potential_non_bottom_states_HitSmall.empty());  }
               if (std::numeric_limits<state_index>::max()!=
                                               no_of_unfinished_states_in_block)
               {                                                                 assert(0<no_of_running_searches);  assert(no_of_running_searches<=2);
-                                                                                assert(aborted!=status[ReachAlw]);  assert(aborted!=status[AvoidLrg]);
+                /* Algorithm 2, Line 2.12                                    */ assert(aborted!=status[ReachAlw]);  assert(aborted!=status[AvoidLrg]);
                 no_of_unfinished_states_in_block-=
                                     bottom_and_non_bottom_size(current_search); assert(aborted!=status[running_searches[0]]);
                 /* Try to find out whether some other process needs to be    */ assert(finished!=status[running_searches[0]]);
-                /* aborted, now that we have a more strict size bound.       */ assert(aborted!=status[AvoidSml]);  assert(aborted!=status_MultiSub);
+                /* aborted, now that we have a more strict size bound.       */ assert(aborted!=status[AvoidSml]);  assert(aborted!=status_NewBotSt);
                 if (abort_if_size_too_large(running_searches[0], 0))
                 {
                   // The if test is not necessary, as the result will just
@@ -4004,14 +4032,15 @@ class bisim_partitioner_gj
                 }
                 else
                 {
-                  abort_if_non_bottom_size_too_large_MultiSub(0);
+                  abort_if_non_bottom_size_too_large_NewBotSt(0);
                 }
               }
               continue;
             }
 
+            // Algorithm 2, Line 2.34
             /* All three subblocks ReachAlw/AvoidLrg/AvoidSml are finished.  */ assert(finished==status[AvoidSml]);  assert(finished==status[AvoidLrg]);
-            /* MultiSub is unfinished.                                       */ assert(finished==status[ReachAlw]);
+            /* NewBotSt is unfinished.                                       */ assert(finished==status[ReachAlw]);
 
             /* Calculate the placement of subblocks:                         */
             new_start_bottom_states(ReachAlw+1)=
@@ -4024,17 +4053,17 @@ class bisim_partitioner_gj
                                             non_bottom_states[AvoidSml].size();
             new_end_bottom_states(AvoidLrg)=
                        new_start_bottom_states(AvoidLrg)+bottom_size(AvoidLrg);
-            new_end_bottom_states_MultiSub=new_end_bottom_states(AvoidLrg)+
+            new_end_bottom_states_NewBotSt=new_end_bottom_states(AvoidLrg)+
                                             non_bottom_states[AvoidLrg].size();
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                   // Finish the accounting.  First check that there were not too many waiting
-                                                                                  // cycles:  (This check may have been done in MultiSub but we cannot be sure;
-                                                                                  // MultiSub may have been aborted earlier.)
+                                                                                  // cycles:  (This check may have been done in NewBotSt but we cannot be sure;
+                                                                                  // NewBotSt may have been aborted earlier.)
                                                                                   check_complexity::check_waiting_cycles();
                                                                                   // After this check we are no longer allowed to wait, and we are allowed to
                                                                                   // cancel work.
                                                                                   if (has_large_splitter) {
-                                                                                    // Cancel work in the whole block. Actually only the work in MultiSub needs
+                                                                                    // Cancel work in the whole block. Actually only the work in NewBotSt needs
                                                                                     // to be cancelled, but the states may not yet have moved there.
                                                                                     for (const state_in_block_pointer*
                                                                                                s=bi->start_bottom_states; s!=bi->sta.rt_non_bottom_states; ++s)
@@ -4086,11 +4115,12 @@ class bisim_partitioner_gj
                                                                                     }
                                                                                   }
                                                                                   // Reset the work balance counters:
-                                                                                  check_complexity::check_temporary_work();
+            /* Algorithm 2, Line 2.39                                        */   check_complexity::check_temporary_work();
                                                                                 #endif
-            if (new_end_bottom_states_MultiSub==bi->end_states)
+            if (new_end_bottom_states_NewBotSt==bi->end_states)
             {
-              // As MultiSub is empty, we do not need to split off one of the
+              // Algorithm 2, Line 2.40
+              // As NewBotSt is empty, we do not need to split off one of the
               // other (non-empty) subblocks. Choose the largest one.
               enum subblocks max_process=AvoidLrg;
               state_index max_size=bottom_and_non_bottom_size(AvoidLrg);
@@ -4106,7 +4136,7 @@ class bisim_partitioner_gj
                 max_size=bottom_and_non_bottom_size(ReachAlw);
                 max_process=ReachAlw;
               }
-              status_MultiSub=finished;
+              status_NewBotSt=finished;
               status[max_process]=aborted;
               // we need to swap the vectors for clearing the state counters:
               clear(potential_non_bottom_states[current_search]);               assert(potential_non_bottom_states[max_process].empty());
@@ -4123,7 +4153,7 @@ class bisim_partitioner_gj
               {
                 clear(potential_non_bottom_states_HitSmall);
               }
-              goto end_for_empty_MultiSub_subblock;
+              goto end_for_empty_NewBotSt_subblock;
             }
 
             constellation_type* const constellation=bi->c.onstellation;
@@ -4135,23 +4165,24 @@ class bisim_partitioner_gj
               m_non_trivial_constellations.emplace_back(constellation);
             }
 
-            // Split off MultiSub -- actually just make *bi smaller
-            block_type* const MultiSub_block_index=bi;
-            bi->start_bottom_states=new_end_bottom_states_MultiSub;             assert(bi->start_bottom_states<bi->end_states);
-            bi->sta.rt_non_bottom_states=new_end_bottom_states_MultiSub;
+            // Algorithm 2, Line 2.41
+            // Split off NewBotSt -- actually just make *bi smaller
+            block_type* const NewBotSt_block_index=bi;
+            bi->start_bottom_states=new_end_bottom_states_NewBotSt;             assert(bi->start_bottom_states<bi->end_states);
+            bi->sta.rt_non_bottom_states=new_end_bottom_states_NewBotSt;
             // We have to clear state counters of the current search because
-            // some of these states may be actually MultiSub-states that have
+            // some of these states may be actually NewBotSt-states that have
             // not yet been identified as such:
             clear_state_counters
                        (potential_non_bottom_states[current_search].begin(),
                         potential_non_bottom_states[current_search].end(), bi);
             clear(potential_non_bottom_states[current_search]);                 assert(potential_non_bottom_states[ReachAlw].empty());
             /* The other processes have finished earlier and transferred     */ assert(potential_non_bottom_states[AvoidLrg].empty());
-            /* their states in potential_non_bottom_states to MultiSub.      */ assert(potential_non_bottom_states[AvoidSml].empty());
-            clear_state_counters(non_bottom_states_MultiSub.begin(),
-                                 non_bottom_states_MultiSub.end(), bi);
-            non_bottom_states_MultiSub.clear();
-            // Some HitSmall states may also be not-yet-found MultiSub states,
+            /* their states in potential_non_bottom_states to NewBotSt.      */ assert(potential_non_bottom_states[AvoidSml].empty());
+            clear_state_counters(non_bottom_states_NewBotSt.begin(),
+                                 non_bottom_states_NewBotSt.end(), bi);
+            non_bottom_states_NewBotSt.clear();
+            // Some HitSmall states may also be not-yet-found NewBotSt states,
             // so we have to clear these state counters as well.
             clear_state_counters
                               (potential_non_bottom_states_HitSmall.begin(),
@@ -4189,7 +4220,7 @@ class bisim_partitioner_gj
                    new_start_bottom_states(AvoidLrg+1), bi,
                    old_constellation, new_constellation);
               check_incoming_tau_transitions_become_noninert
-                                         (MultiSub_block_index,
+                                         (NewBotSt_block_index,
                                           new_start_bottom_states(AvoidLrg),
                                           new_start_bottom_states(AvoidLrg+1));
             }                                                                   else {
@@ -4230,7 +4261,7 @@ class bisim_partitioner_gj
                    new_start_bottom_states(AvoidSml+1), bi,
                    old_constellation, new_constellation);
               check_incoming_tau_transitions_become_noninert
-                                         (MultiSub_block_index,
+                                         (NewBotSt_block_index,
                                           new_start_bottom_states(AvoidSml),
                                           new_start_bottom_states(AvoidSml+1));
             }                                                                   else {
@@ -4258,126 +4289,135 @@ class bisim_partitioner_gj
                    new_start_bottom_states(ReachAlw+1), bi,
                    old_constellation, new_constellation);
               check_incoming_tau_transitions_become_noninert
-                                         (MultiSub_block_index,
+                                         (NewBotSt_block_index,
                                           start_bottom_states[ReachAlw],
                                           new_start_bottom_states(ReachAlw+1));
             }                                                                   else {
                                                                                   assert(0==bottom_size(ReachAlw));assert(non_bottom_states[ReachAlw].empty());
-                                                                                }
-            MultiSub_block_index->contains_new_bottom_states=true;              assert(MultiSub_block_index->start_bottom_states<
-                                                                                                               MultiSub_block_index->sta.rt_non_bottom_states);
-            m_blocks_with_new_bottom_states.push_back(MultiSub_block_index);
+            /* Algorithm 2, Line 2.43                                        */ }
+            NewBotSt_block_index->contains_new_bottom_states=true;              assert(NewBotSt_block_index->start_bottom_states<
+                                                                                                               NewBotSt_block_index->sta.rt_non_bottom_states);
+            m_blocks_with_new_bottom_states.push_back(NewBotSt_block_index);
+            // Algorithm 2, Line 2.44
             return ReachAlw_block_index;
           }
         } // end of inner coroutine loop for the ReachAlw/AvoidLrg/AvoidSml-states
 
-        // Now do one step for the MultiSub-states:
+        // Now do one step for the NewBotSt-states:
 
-        if (incoming_inert_transition_checking==status_MultiSub)
-        {                                                                       assert(current_source_iter_MultiSub<current_source_iter_end_MultiSub);
-                                                                                mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(),
-                                                                                            current_source_iter_MultiSub)], add_work(check_complexity::
+        if (incoming_inert_transition_checking==status_NewBotSt)
+        {                                                                       assert(current_source_iter_NewBotSt<current_source_iter_end_NewBotSt);
+          /* Algorithm 2, Line 2.15 right                                    */ mCRL2complexity(&m_transitions[std::distance(m_aut.get_transitions().begin(),
+                                                                                            current_source_iter_NewBotSt)], add_work(check_complexity::
                                                                                                      simple_splitB_R__handle_transition_to_R_state, 1), *this);
-          const transition& tr=*current_source_iter_MultiSub++;                 assert(m_aut.is_tau(m_aut_apply_hidden_label_map(tr.label())));
+          const transition& tr=*current_source_iter_NewBotSt++;                 assert(m_aut.is_tau(m_aut_apply_hidden_label_map(tr.label())));
           state_in_block_pointer const src=m_states.begin()+tr.from();          assert(m_states[tr.to()].block==bi);
+          // Algorithm 2, Line 2.16 right
           if (src.ref_state->block==bi &&
               !(m_preserve_divergence && tr.from()==tr.to()))
           {
-            if (marked_MultiSub!=src.ref_state->counter)
-            {                                                                   assert(!non_bottom_states_MultiSub.find(src));
-              if (abort_if_non_bottom_size_too_large_MultiSub(1))
+            // Algorithm 2, Line 2.17 right
+            if (marked_NewBotSt!=src.ref_state->counter)
+            {                                                                   assert(!non_bottom_states_NewBotSt.find(src));
+              // Algorithm 2, Line 2.12
+              if (abort_if_non_bottom_size_too_large_NewBotSt(1))
               {
-                // but actually if MultiSub is already aborted, there is no
-                // need to add the state to MultiSub.  (If the state has
+                // but actually if NewBotSt is already aborted, there is no
+                // need to add the state to NewBotSt.  (If the state has
                 // block-inert transitions to other subblocks, it will be added
-                // to MultiSub later anyway, but otherwise we have saved the
+                // to NewBotSt later anyway, but otherwise we have saved the
                 // assignment.)
                 continue;
               }
-              src.ref_state->counter=marked_MultiSub;
-              non_bottom_states_MultiSub.add_todo(src);
-            }                                                                   else  {  assert(non_bottom_states_MultiSub.find(src));  }
+              src.ref_state->counter=marked_NewBotSt;
+              non_bottom_states_NewBotSt.add_todo(src);
+            }                                                                   else  {  assert(non_bottom_states_NewBotSt.find(src));  }
           }
-          if (current_source_iter_MultiSub==current_source_iter_end_MultiSub ||
+          if (current_source_iter_NewBotSt==current_source_iter_end_NewBotSt ||
               !m_aut.is_tau(m_aut_apply_hidden_label_map
-                                      (current_source_iter_MultiSub->label())))
+                                      (current_source_iter_NewBotSt->label())))
           {
-            status_MultiSub=state_checking;
+            status_NewBotSt=state_checking;
           }
         }
-        else if (state_checking==status_MultiSub)
+        else if (state_checking==status_NewBotSt)
         {
-          if (!non_bottom_states_MultiSub.todo_is_empty())
+          // Algorithm 2, Line 2.14 right
+          if (!non_bottom_states_NewBotSt.todo_is_empty())
           {
             state_in_block_pointer
-                               tgt=non_bottom_states_MultiSub.move_from_todo();
+                               tgt=non_bottom_states_NewBotSt.move_from_todo();
             /* Prepare for the sources of tgt to be added to the subblock    */ mCRL2complexity(tgt.ref_state,
                                                                                      add_work(check_complexity::simple_splitB_R__find_predecessors, 1), *this);
-            current_source_iter_MultiSub=
+            current_source_iter_NewBotSt=
                                      tgt.ref_state->start_incoming_transitions;
-            current_source_iter_end_MultiSub=
+            current_source_iter_end_NewBotSt=
                   std::next(tgt.ref_state)>=m_states.end()
                         ? m_aut.get_transitions().end()
                         : std::next(tgt.ref_state)->start_incoming_transitions;
-            if(current_source_iter_MultiSub<current_source_iter_end_MultiSub &&
+            if(current_source_iter_NewBotSt<current_source_iter_end_NewBotSt &&
                 m_aut.is_tau(m_aut_apply_hidden_label_map
-                                      (current_source_iter_MultiSub->label())))
+                                      (current_source_iter_NewBotSt->label())))
             {
-              status_MultiSub=incoming_inert_transition_checking;
+              status_NewBotSt=incoming_inert_transition_checking;
             }
             continue;
           }
+          // Algorithm 2, Line 2.18 right
           if (1>=no_of_finished_searches)
           {
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-            /* Nothing can be done now for the MultiSub-subblock; we just    */   check_complexity::wait();
+            /* Nothing can be done now for the NewBotSt-subblock; we just    */   check_complexity::wait();
             // have to wait for another subblock to give us some initial
-            // MultiSub-state.
+            // NewBotSt-state.
                                                                                 #endif
             continue;
           }
+          // Algorithm 2, Line 2.19 right
           if (has_large_splitter && finished!=status[AvoidLrg] &&
-              large_splitter_iter_MultiSub!=large_splitter_iter_end_MultiSub)
+              large_splitter_iter_NewBotSt!=large_splitter_iter_end_NewBotSt)
           {                                                                     assert(finished==status[ReachAlw]);  assert(finished==status[AvoidSml]);
             // Because we have nothing else to do, we handle one transition in
-            // the co-splitter.  However, it may turn out later that the
-            // transitions actually starts in the aborted subblock, and then we
-            // will have to count this step as a waiting cycle as well.
+            // the co-splitter.
             do
             {
+              // Algorithm 2, Line 2.23 right
               const transition&
-                      t=m_aut.get_transitions()[*large_splitter_iter_MultiSub]; mCRL2complexity(&m_transitions[*large_splitter_iter_MultiSub],
+                      t=m_aut.get_transitions()[*large_splitter_iter_NewBotSt]; mCRL2complexity(&m_transitions[*large_splitter_iter_NewBotSt],
                                                                                           add_work(check_complexity::
                                                                                                    simple_splitB_R__handle_transition_from_R_state, 1), *this);
-              ++large_splitter_iter_MultiSub;
+              ++large_splitter_iter_NewBotSt;
               state_in_block_pointer src=m_states.begin()+t.from();             assert(src.ref_state->block==bi);
+              // Algorithm 2, Line 2.25 right
               if (0==src.ref_state->no_of_outgoing_block_inert_transitions)
               {                                                                 assert(!(start_bottom_states[AvoidLrg]<=src.ref_state->ref_states_in_blocks &&
                                                                                          src.ref_state->ref_states_in_blocks<start_bottom_states[AvoidLrg+1]));
               }
               else
               {
+                // Algorithm 2, Line 2.24 right
                 if ((undefined==src.ref_state->counter) ||
                     is_in_marked_range_of(src.ref_state->counter, AvoidLrg))
                 {                                                               assert(!non_bottom_states[ReachAlw].find(src));
                   /* The only subblocks that src could go to are AvoidLrg    */ assert(!non_bottom_states[AvoidSml].find(src));
-                  /* and MultiSub.  But because it has a transition in the   */ assert(!non_bottom_states[AvoidLrg].find(src));
-                  /* co-splitter, it cannot go to AvoidLrg.                  */ assert(!non_bottom_states_MultiSub.find(src));
-                  src.ref_state->counter=marked_MultiSub;
-                  non_bottom_states_MultiSub.add_todo(src);
+                  /* and NewBotSt.  But because it has a transition in the   */ assert(!non_bottom_states[AvoidLrg].find(src));
+                  /* co-splitter, it cannot go to AvoidLrg.                  */ assert(!non_bottom_states_NewBotSt.find(src));
+                  // Algorithm 2, Line 2.26 right
+                  src.ref_state->counter=marked_NewBotSt;
+                  non_bottom_states_NewBotSt.add_todo(src);
                   if (0==no_of_running_searches)
                   {
-                    // MultiSub is the only running search (and AvoidLrg is not
+                    // NewBotSt is the only running search (and AvoidLrg is not
                     // finished, so it must be aborted), so we can as well
                     // continue this loop until we've found all such states.
-                    // We also know that MultiSub cannot become too large.
+                    // We also know that NewBotSt cannot become too large.
                     continue;
                   }
-                  // We must add state src to MultiSub even if MultiSub is
+                  // We must add state src to NewBotSt even if NewBotSt is
                   // about to be aborted: it may happen that this was exactly
                   // the last transition in the co-splitter, and then the
                   // AvoidLrg-coroutine could add state src erroneously.
-                  abort_if_non_bottom_size_too_large_MultiSub(0);
+                  abort_if_non_bottom_size_too_large_NewBotSt(0);
                   break;
                 }                                                               else  {  assert(marked_HitSmall!=src.ref_state->counter);  }
               }
@@ -4387,11 +4427,11 @@ class bisim_partitioner_gj
               }
             }
             while (                                                             assert(0==no_of_running_searches), assert(aborted==status[AvoidLrg]),
-               large_splitter_iter_MultiSub!=large_splitter_iter_end_MultiSub);
+               large_splitter_iter_NewBotSt!=large_splitter_iter_end_NewBotSt);
           }
           else
           {                                                                     assert(finished==status[AvoidLrg] ||
-                                                                                       large_splitter_iter_MultiSub==large_splitter_iter_end_MultiSub);
+                                                                                       large_splitter_iter_NewBotSt==large_splitter_iter_end_NewBotSt);
                                                                                 // Now check that there were not too many waiting cycles:
                                                                                 #ifndef NDEBUG
                                                                                   check_complexity::check_waiting_cycles();
@@ -4402,25 +4442,27 @@ class bisim_partitioner_gj
                 // At most one of AvoidSml and ReachAlw is not finished.
                 // If AvoidSml is not finished, all states with non-exclusive
                 // block-inert transitions to AvoidLrg or ReachAlw have
-                // been added to MultiSub.  Also all states that would
+                // been added to NewBotSt.  Also all states that would
                 // be in AvoidLrg except for their transition in the
-                // co-splitter have been added to MultiSub.  The search for
+                // co-splitter have been added to NewBotSt.  The search for
                 // AvoidSml-predecessors will not add any further states to
-                // MultiSub.
+                // NewBotSt.
                 // If ReachAlw is not finished, the situation is similar.
-                // Therefore, we can finish MultiSub.
+                // Therefore, we can finish NewBotSt.
             // If finished!=status[AvoidLrg] &&
-            // large_splitter_iter_MultiSub==large_splitter_iter_end_MultiSub:
-                // Until now, AvoidLrg and MultiSub were still running, and it
+            // large_splitter_iter_NewBotSt==large_splitter_iter_end_NewBotSt:
+                // Until now, AvoidLrg and NewBotSt were still running, and it
                 // was unclear which of the two was smaller.  Now it has turned
-                // out that MultiSub has finished all it can do, so AvoidLrg
+                // out that NewBotSt has finished all it can do, so AvoidLrg
                 // shall be aborted.
-            status_MultiSub=finished;                                           assert(3==++no_of_finished_searches);
+            // Algorithm 2, Line 2.21 right
+            status_NewBotSt=finished;                                           assert(3==++no_of_finished_searches);
 
+            // Algorithm 2, Line 2.41
             // Calculate the placement of subblocks, and also clear state
             // counters of the aborted subblock:
-            new_end_bottom_states_MultiSub=bi->end_states-
-                                             non_bottom_states_MultiSub.size();
+            new_end_bottom_states_NewBotSt=bi->end_states-
+                                             non_bottom_states_NewBotSt.size();
 
             if (!has_large_splitter || finished==status[AvoidLrg])
             {                                                                   assert(finished==status[AvoidLrg]);
@@ -4509,7 +4551,7 @@ class bisim_partitioner_gj
                                                                                   // non-bottom states will be in `non_bottom_states[...]`).
                                                                                   {
                                                                                     state_type max_NcludeCo_size=std::distance(
-                                                                                                               new_end_bottom_states_MultiSub, bi->end_states);
+                                                                                                               new_end_bottom_states_NewBotSt, bi->end_states);
                                                                                     max_NcludeCo_size=std::max<state_type>(max_NcludeCo_size, std::distance(
                                                                                           start_bottom_states[ReachAlw], new_start_bottom_states(ReachAlw+1)));
                                                                                     max_NcludeCo_size=std::max<state_type>(max_NcludeCo_size, std::distance(
@@ -4545,7 +4587,7 @@ class bisim_partitioner_gj
                                                                                             cancel_work(check_complexity::
                                                                                             simple_splitB_U__handle_transition_from_potential_U_state), *this);
                                                                                           // We should also finalise the co-splitter transitions handled by
-                                                                                          // MultiSub (which may exist even if MultiSub is empty):
+                                                                                          // NewBotSt (which may exist even if NewBotSt is empty):
                                                                                           mCRL2complexity(&m_transitions[*ti->ref.BLC_transitions],
                                                                                               finalise_work(check_complexity::
                                                                                                             simple_splitB_R__handle_transition_from_R_state,
@@ -4557,16 +4599,16 @@ class bisim_partitioner_gj
                                                                                     } while (++s!=bi->end_states);
                                                                                   }
                                                                                 #endif
-            // split off MultiSub
+            // split off NewBotSt
             // This can be done only after the aborted subblock has cleared
             // its state counters.  But it should be done before the other
-            /* splits, so it is easy to detect which transitions are no      */ assert((state_index) std::distance(new_end_bottom_states_MultiSub,
-            /* longer block-inert.                                           */                            bi->end_states)==non_bottom_states_MultiSub.size());
-            if (new_end_bottom_states_MultiSub!=bi->end_states)
-            {                                                                   assert(!non_bottom_states_MultiSub.empty());
-              /* As MultiSub is not empty, a trivial constellation will      */ assert(bi->start_bottom_states<new_end_bottom_states_MultiSub);
+            /* splits, so it is easy to detect which transitions are no      */ assert((state_index) std::distance(new_end_bottom_states_NewBotSt,
+            /* longer block-inert.                                           */                            bi->end_states)==non_bottom_states_NewBotSt.size());
+            if (new_end_bottom_states_NewBotSt!=bi->end_states)
+            {                                                                   assert(!non_bottom_states_NewBotSt.empty());
+              /* As NewBotSt is not empty, a trivial constellation will      */ assert(bi->start_bottom_states<new_end_bottom_states_NewBotSt);
               // become non-trivial.  (The condition in if() needs to be
-              // checked before the subblock for MultiSub is created.)
+              // checked before the subblock for NewBotSt is created.)
               constellation_type* const constellation=bi->c.onstellation;
               if (constellation->start_const_states->ref_state->block==
                   std::prev(constellation->end_const_states)->ref_state->block)
@@ -4576,26 +4618,26 @@ class bisim_partitioner_gj
                 m_non_trivial_constellations.emplace_back(constellation);
               }
 
-              move_nonbottom_states_to(non_bottom_states_MultiSub,
-                                               new_end_bottom_states_MultiSub
+              move_nonbottom_states_to(non_bottom_states_NewBotSt,
+                                               new_end_bottom_states_NewBotSt
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                   , 0
                                                                                 #endif
                                                                              );
-              non_bottom_states_MultiSub.clear();
-              block_type* const MultiSub_block_index=
+              non_bottom_states_NewBotSt.clear();
+              block_type* const NewBotSt_block_index=
                   create_new_block<!has_small_splitter && !has_large_splitter>
-                             (new_end_bottom_states_MultiSub,
-                              new_end_bottom_states_MultiSub,
+                             (new_end_bottom_states_NewBotSt,
+                              new_end_bottom_states_NewBotSt,
                               bi->end_states, bi,
                               null_constellation, null_constellation);
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-                                                                                  // Finalise the work in MultiSub.  This should be done after calling `
-                                                                                  // check_complexity::check_waiting_cycles()` so MultiSub cannot make its own
+                                                                                  // Finalise the work in NewBotSt.  This should be done after calling `
+                                                                                  // check_complexity::check_waiting_cycles()` so NewBotSt cannot make its own
                                                                                   // waiting time appear small.
                                                                                   const unsigned char max_new_B=check_complexity::log_n-check_complexity::ilog2
-                                                                                      (std::distance(new_end_bottom_states_MultiSub, bi->end_states));
-                                                                                  const state_in_block_pointer* s=new_end_bottom_states_MultiSub;
+                                                                                      (std::distance(new_end_bottom_states_NewBotSt, bi->end_states));
+                                                                                  const state_in_block_pointer* s=new_end_bottom_states_NewBotSt;
                                                                                   do {
                                                                                     mCRL2complexity(s->ref_state, finalise_work(check_complexity::
                                                                                           simple_splitB_R__find_predecessors, check_complexity::
@@ -4620,7 +4662,7 @@ class bisim_partitioner_gj
                                                                                   check_complexity::check_temporary_work();
                                                                                 #endif
               // check transitions that have become non-block-inert:
-              state_in_block_pointer* nst_it=new_end_bottom_states_MultiSub;    assert(nst_it!=bi->end_states);
+              state_in_block_pointer* nst_it=new_end_bottom_states_NewBotSt;    assert(nst_it!=bi->end_states);
               do
               {
                 outgoing_transitions_const_it const out_it_end=
@@ -4639,7 +4681,7 @@ class bisim_partitioner_gj
                   {                                                             assert(is_inert_during_init(*tr));
                     /* This is a transition that has become non-block-inert. */ assert(bi->start_bottom_states<=m_states[tr->to()].ref_states_in_blocks);
                     /* (However, it is still constellation-inert.)           */
-                    /* make_transition_non_inert(*tr)                        */ assert(m_states[tr->to()].ref_states_in_blocks<new_end_bottom_states_MultiSub);
+                    /* make_transition_non_inert(*tr)                        */ assert(m_states[tr->to()].ref_states_in_blocks<new_end_bottom_states_NewBotSt);
                     /* < would just execute the decrement "--" below:        */ assert(0<nst_it->ref_state->no_of_outgoing_block_inert_transitions);
                     if (0== --nst_it->ref_state->
                                         no_of_outgoing_block_inert_transitions)
@@ -4650,7 +4692,7 @@ class bisim_partitioner_gj
                       break;
                     }
                   }                                                             else {
-                                                                                  assert(new_end_bottom_states_MultiSub<=
+                                                                                  assert(new_end_bottom_states_NewBotSt<=
                                                                                                                      m_states[tr->to()].ref_states_in_blocks ||
                                                                                         m_states[tr->to()].ref_states_in_blocks<start_bottom_states[ReachAlw]);
                                                                                 }
@@ -4663,10 +4705,10 @@ class bisim_partitioner_gj
                      m_aut.is_tau(m_aut_apply_hidden_label_map(tr->label()))));
                 ++nst_it;
               }
-              while (nst_it!=bi->end_states);                                   assert(MultiSub_block_index->start_bottom_states<
-                                                                                                               MultiSub_block_index->sta.rt_non_bottom_states);
-              MultiSub_block_index->contains_new_bottom_states=true;
-              m_blocks_with_new_bottom_states.push_back(MultiSub_block_index);
+              while (nst_it!=bi->end_states);                                   assert(NewBotSt_block_index->start_bottom_states<
+              /* Algorithm 2, Line 2.43                                      */                                NewBotSt_block_index->sta.rt_non_bottom_states);
+              NewBotSt_block_index->contains_new_bottom_states=true;
+              m_blocks_with_new_bottom_states.push_back(NewBotSt_block_index);
             }
             else
             {
@@ -4674,7 +4716,7 @@ class bisim_partitioner_gj
                                                                                   // Reset the work balance counters:
                                                                                   check_complexity::check_temporary_work();
                                                                                 #endif
-        end_for_empty_MultiSub_subblock:                                        assert(non_bottom_states_MultiSub.empty());
+        end_for_empty_NewBotSt_subblock:                                        assert(non_bottom_states_NewBotSt.empty());
               constellation_type* const constellation=bi->c.onstellation;
               if (constellation->start_const_states->ref_state->block==
                   std::prev(constellation->end_const_states)->ref_state->block)
@@ -4688,7 +4730,7 @@ class bisim_partitioner_gj
                                                                                                                        new_start_bottom_states(AvoidLrg+1))>1);
               }
             }                                                                   assert(finished!=status[AvoidLrg] || static_cast<state_index>(std::distance
-                                                                                    (new_start_bottom_states(AvoidLrg), new_start_bottom_states(AvoidLrg+1)))==
+            /* Algorithm 2, Line 2.41                                        */     (new_start_bottom_states(AvoidLrg), new_start_bottom_states(AvoidLrg+1)))==
             /* Split off the third subblock (AvoidLrg)                       */                                          bottom_and_non_bottom_size(AvoidLrg));
             if (has_large_splitter && new_start_bottom_states(AvoidLrg)!=
                                            new_start_bottom_states(AvoidLrg+1))
@@ -4863,21 +4905,22 @@ class bisim_partitioner_gj
               }
             }                                                                   else {
                                                                                   assert(0==bottom_size(ReachAlw));assert(non_bottom_states[ReachAlw].empty());
-                                                                                }
+            /* Algorithm 2, Line 2.44                                        */ }
             return ReachAlw_block_index; // leave the function completely, as we have finished.
           }
         }                                                                       else {
-                                                                                  assert(aborted==status_MultiSub);
+                                                                                  assert(aborted==status_NewBotSt);
                                                                                 }
-      } // end of outer coroutine loop for ReachAlw/AvoidSml/AvoidLrg and MultiSub together
+      } // end of outer coroutine loop for ReachAlw/AvoidSml/AvoidLrg and NewBotSt together
 
       #undef bottom_size
       #undef abort_if_bottom_size_too_large
-      #undef abort_if_non_bottom_size_too_large_MultiSub
+      #undef abort_if_non_bottom_size_too_large_NewBotSt
       #undef abort_if_size_too_large
       #undef bottom_and_non_bottom_size
     }
 
+//================================================= Create initial partition ========================================================
     transition_index accumulate_entries(
                               std::vector<transition_index>& action_counter,
                               const std::vector<label_index>& todo_stack) const
@@ -4892,7 +4935,6 @@ class bisim_partitioner_gj
       return sum;
     }
 
-//================================================= Create initial partition ========================================================
     /// \brief create one BLC set for the block starting at `pos`
     /// \details The BLC set is created, inserted into the list
     /// `block.to_constellation` of the block, and the pointers from
@@ -5186,7 +5228,7 @@ class bisim_partitioner_gj
       #undef min_above_pivot
     }
 
-    // Algorithm 4. Stabilize the current partition with respect to the current constellation
+    // Algorithm 3. Stabilize the current partition with respect to the current constellation
     // given that the blocks in m_blocks_with_new_bottom_states do contain new bottom states.
     // Stabilisation is always called after initialisation, i.e., m_aut.get_transitions()[ti].transition refers
     // to a position in m_BLC_transitions, where the transition index of this transition can be found.
@@ -5200,6 +5242,7 @@ class bisim_partitioner_gj
         return;
       }
       // Qhat contains the slices of BLC transitions that still need stabilization
+      // Algorithm 3, Line 3.2
       std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> > Qhat;
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                   std::vector<std::pair<BLC_list_const_iterator, BLC_list_const_iterator> >
@@ -5207,7 +5250,7 @@ class bisim_partitioner_gj
                                                                                   std::vector<std::pair<BLC_list_const_iterator, BLC_list_const_iterator> >
                                                                                                                           stabilize_work_to_assign_later;
                                                                                 #endif
-                                                                                assert(!m_blocks_with_new_bottom_states.empty());
+      /* Algorithm 3, Line 3.3                                               */ assert(!m_blocks_with_new_bottom_states.empty());
       for(block_type* const bi: m_blocks_with_new_bottom_states)
       {                                                                         assert(bi->contains_new_bottom_states);
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
@@ -5221,7 +5264,7 @@ class bisim_partitioner_gj
                                                                                     mCRL2complexity(new_bott_it->ref_state,
                                                                                               add_work(check_complexity::stabilizeB__prepare_block, 1), *this);
                                                                                   }
-                                                                                  while (++new_bott_it<bi->sta.rt_non_bottom_states);
+        /* Algorithm 3, Line 3.7                                             */   while (++new_bott_it<bi->sta.rt_non_bottom_states);
                                                                                 #endif
         bi->contains_new_bottom_states=false;                                   assert(!bi->block.to_constellation.empty());
         if (1>=number_of_states_in_block(*bi))
@@ -5269,6 +5312,7 @@ class bisim_partitioner_gj
                                                                                 #endif
           if constexpr (!initialization)
           {
+            // Algorithm 3, Line 3.4
             Qhat.emplace_back(ind->start_same_BLC, ind->end_same_BLC);
           }
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
@@ -5312,10 +5356,11 @@ class bisim_partitioner_gj
 // 2. Administration: Mark all transitions out of (new) bottom states
         if constexpr (!initialization)
         {
+          // Algorithm 3, Line 3.5
           state_in_block_pointer* si=bi->start_bottom_states;                   assert(si<bi->sta.rt_non_bottom_states);
           do
           {                                                                     mCRL2complexity(si->ref_state, add_work(
-                                                                                         check_complexity::stabilizeB__distribute_states_over_Phat, 1), *this);
+            /* Algorithm 3, Line 3.6                                         */          check_complexity::stabilizeB__distribute_states_over_Phat, 1), *this);
             outgoing_transitions_it end_it=
                   std::next(si->ref_state)>=m_states.end()
                         ? m_outgoing_transitions.end()
@@ -5340,6 +5385,7 @@ class bisim_partitioner_gj
           while (si<bi->sta.rt_non_bottom_states);
         }
       }
+      // Algorithm 3, Line 3.7
       clear(m_blocks_with_new_bottom_states);
 
       bool small_splitter_used_up=false;
@@ -5348,6 +5394,7 @@ class bisim_partitioner_gj
                                                                                   // during initialization, we need to provide the new constellation:
                                                                                   if (initialization) { new_constellation=m_states[0].block->c.onstellation; }
                                                                                 #endif
+      // Algorithm 3, line 3.8
       for (;;)
       {                                                                         // mCRL2complexity(all bottom states, add_work(..., 1), *this);
                                                                                     // not necessary, as the inner loop is always executed
@@ -5357,7 +5404,6 @@ class bisim_partitioner_gj
 //    Do a normal splitB() under this splitter.
 //    If more new bottom states are created, store them in the new m_blocks_with_new_bottom_states.
 
-        // Algorithm 4, line 4.8.
         // inner loop to be executed until further new bottom states are found:
         do
         {
@@ -5370,7 +5416,7 @@ class bisim_partitioner_gj
                                                                                 assert(stabilize_work_to_assign_later.empty());
             return;
           }                                                                     // mCRL2complexity(..., add_work(..., max_C), *this);
-          // Algorithm 4, line 4.9.                                                 // not needed as the inner loop is always executed at least once.
+          // Algorithm 3, line 3.9                                                  // not needed as the inner loop is always executed at least once.
                                                                                 //print_data_structures("New bottom state loop");
                                                                                 assert(check_data_structures("New bottom state loop", false, false));
           std::pair<BLC_list_iterator,BLC_list_iterator>& Qhat_elt=Qhat.back(); assert(check_stability("New bottom state loop", &Qhat));
@@ -5378,6 +5424,7 @@ class bisim_partitioner_gj
           const linked_list<BLC_indicators>::iterator splitter=
                         m_transitions[*std::prev(Qhat_elt.second)].
                                         transitions_per_block_to_constellation; assert(splitter->end_same_BLC==Qhat_elt.second);
+          // Algorithm 3, Line 3.10
           Qhat_elt.second=splitter->start_same_BLC;                             assert(splitter->start_same_BLC<splitter->end_same_BLC);
           const transition& first_t=
                             m_aut.get_transitions()[*splitter->start_same_BLC];
@@ -5414,7 +5461,7 @@ class bisim_partitioner_gj
                                                                                     // state in this slice.
                                                                                     stabilize_work_to_assign_later.emplace_back(splitter->start_same_BLC,
                                                                                                                                 splitter->end_same_BLC);
-                                                                                  }
+          /* Algorithm 3, Line 3.11                                          */   }
                                                                                 #endif
           if (std::distance(from_block_index->start_bottom_states,
                             from_block_index->end_states)<=1)
@@ -5430,7 +5477,7 @@ class bisim_partitioner_gj
           }
           else
           {                                                                     assert(!is_inert_during_init(first_t) || from_block_index->c.onstellation!=
-                                                                                                                 m_states[first_t.to()].block->c.onstellation);
+            /* Algorithm 3, Line 3.12                                        */                                  m_states[first_t.to()].block->c.onstellation);
             if (initialization && !small_splitter_used_up && 1==Qhat.size())
             {
               // During initialization, we visit every transition once as if it
@@ -5459,6 +5506,7 @@ class bisim_partitioner_gj
           {
             Qhat.pop_back(); // invalidates Qhat_elt
           }
+          // Algorithm 3, Line 3.13
         }
         while (m_blocks_with_new_bottom_states.empty());                        assert(1==m_blocks_with_new_bottom_states.size());
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
@@ -5580,7 +5628,7 @@ class bisim_partitioner_gj
                                                                                     mCRL2complexity(new_bott_it->ref_state,
                                                                                               add_work(check_complexity::stabilizeB__prepare_block, 1), *this);
                                                                                   }
-                                                                                  while (++new_bott_it<bi->sta.rt_non_bottom_states);
+        /* Algorithm 3, Line 3.17                                            */   while (++new_bott_it<bi->sta.rt_non_bottom_states);
                                                                                 #endif
         bi->contains_new_bottom_states=false;
         clear(m_blocks_with_new_bottom_states);
@@ -5621,7 +5669,7 @@ class bisim_partitioner_gj
                                                                                   assert(!ind->has_marked_transitions());
                                                                                   assert(ind->start_same_BLC<ind->end_same_BLC);
                                                                                   const transition& first_t = m_aut.get_transitions()[*ind->start_same_BLC];
-                                                                                  assert(m_states[first_t.from()].block == bi);
+          /* Algorithm 3, Line 3.14                                          */   assert(m_states[first_t.from()].block == bi);
           /* The BLC set transitions are not constellation-inert, so we      */   assert(!is_inert_during_init_if_branching(first_t) ||
           /* need to stabilize under them                                    */          bi->c.onstellation!=m_states[first_t.to()].block->c.onstellation);
                                                                                 #endif
@@ -5665,10 +5713,11 @@ class bisim_partitioner_gj
         }
 
 // 2. Administration: Mark all transitions out of (new) bottom states
+        // Algorithm 3, 3.15
         state_in_block_pointer* si=bi->start_bottom_states;                     assert(si<bi->sta.rt_non_bottom_states);
         do
         {                                                                       mCRL2complexity(si->ref_state, add_work(
-                                                                                         check_complexity::stabilizeB__distribute_states_over_Phat, 1), *this);
+          /* Algorithm 3, Line 3.16                                          */          check_complexity::stabilizeB__distribute_states_over_Phat, 1), *this);
           outgoing_transitions_it end_it=
                   std::next(si->ref_state)>=m_states.end()
                         ? m_outgoing_transitions.end()
@@ -5703,9 +5752,9 @@ class bisim_partitioner_gj
                          : "")
            << "bisimulation partitioner created for " << m_aut.num_states()
            << " states and " << m_transitions.size()
-           << " transitions (using the experimental algorithm GJ2024).\n";
+           << " transitions (using the experimental algorithm GJ2025).\n";
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-      /* Initialisation. */                                                       check_complexity::init(2 * m_aut.num_states());
+      /* Algorithm 1, Line 1.2                                               */   check_complexity::init(2 * m_aut.num_states());
                                                                                   // we need ``2*'' because there is one additional call to splitB during initialisation
                                                                                 #endif
       group_transitions_on_tgt_label(m_aut);
@@ -5980,6 +6029,7 @@ class bisim_partitioner_gj
         while (it!=blc_it->end_same_BLC);
       }
       #undef temporary_BLC_list
+      // Algorithm 1, Line 1.2
       initial_block->contains_new_bottom_states = true;
       m_blocks_with_new_bottom_states.push_back(initial_block);
       /* Everything except `m_BLC_transitions` is now completely initialized.*/ //print_data_structures("After initial reading before splitting in the initialisation", true);
@@ -6103,9 +6153,8 @@ class bisim_partitioner_gj
         // pool allocator adds them to the free list)
         temporary_BLC_list.erase(blc_it);
       }
-      // Algorithm 1, line 1.4 is implicitly done in the call to splitB above.
 #endif
-      /* Algorithm 1, line 1.5.                                              */ //print_data_structures("End initialisation");
+      /* Algorithm 1, line 1.3                                               */ //print_data_structures("End initialisation");
                                                                                 assert(check_stability("End initialisation"));
       mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";    assert(check_data_structures("End initialisation", false, false));
       #ifdef INIT_WITHOUT_BLC_SETS
@@ -6192,6 +6241,7 @@ class bisim_partitioner_gj
     /// The smaller the better.
     block_type* select_and_remove_a_block_in_a_non_trivial_constellation()
     {                                                                           assert(!m_non_trivial_constellations.empty());
+      // Algorithm 1, Line 1.5
       // Do the minimal checking, i.e., only check two blocks in a constellation.
       constellation_type* const ci=m_non_trivial_constellations.back();
       block_type* index_block_B=ci->start_const_states->ref_state->block; // The first block.
@@ -6230,12 +6280,12 @@ class bisim_partitioner_gj
 
     void refine_partition_until_it_becomes_stable()
     {
-      // This represents the while loop in Algorithm 1 from line 1.6 to 1.25.
+      // This implements the while loop in Algorithm 1 from line 1.4 to 1.19.
 
       // The instruction below has complexity O(|Act|);
       // calM will contain the m_BLC_transitions slices that need stabilization:
       std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> > calM;
-      // Algorithm 1, line 1.6.
+      // Algorithm 1, line 1.4
       clock_t next_print_time = clock();
       const clock_t rounded_start_time = next_print_time - CLOCKS_PER_SEC/2;
       while (true)
@@ -6317,13 +6367,13 @@ class bisim_partitioner_gj
         {
           break;
         }
-        // Algorithm 1, line 1.7.
+        // Algorithm 1, line 1.5
         block_type* index_block_B=
                     select_and_remove_a_block_in_a_non_trivial_constellation();
         constellation_type* const old_constellation=
                                                  index_block_B->c.onstellation;
 
-        // Algorithm 1, line 1.8.
+        // Algorithm 1, line 1.6
         if (old_constellation->start_const_states->ref_state->block==
             std::prev(old_constellation->end_const_states)->ref_state->block)
         {                                                                       assert(m_non_trivial_constellations.back()==old_constellation);
@@ -6453,6 +6503,7 @@ class bisim_partitioner_gj
               // (unless the source block is a singleton)
               BLC_list_iterator BLC_pos=m_transitions[t_index].
                                  ref_outgoing_transitions->ref.BLC_transitions; assert(t_index == *BLC_pos);
+              // Algorithm 1, Line 1.7
               calM.emplace_back(BLC_pos, BLC_pos);
               // The end-position (the second element in the pair) will need to be corrected later.
             }
@@ -6460,8 +6511,8 @@ class bisim_partitioner_gj
         }
         index_block_B->c.onstellation=new_constellation;
 
-        // mark all states in main splitters and correct the end-positions of
-        // calM entries
+        // Algorithm 1, Line 1.7
+        // correct the end-positions of calM entries
         if (calM.begin()!=calM.end())
         {
           for (std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> >::
@@ -6469,7 +6520,7 @@ class bisim_partitioner_gj
           {
             linked_list <BLC_indicators>::iterator ind=m_transitions
                      [*calM_elt->first].transitions_per_block_to_constellation; mCRL2complexity(ind, add_work(check_complexity::
-                                                                                   refine_partition_until_it_becomes_stable__correct_end_of_calM,max_C),*this);
+            /* Algorithm 1, Line 1.17                                        */    refine_partition_until_it_becomes_stable__correct_end_of_calM,max_C),*this);
             /* check if all transitions were moved to the new constellation, */ assert(ind->start_same_BLC==calM_elt->first);
             /* or some transitions to the old constellation have remained:   */ assert(!ind->has_marked_transitions());
             const transition& last_t=
@@ -6502,8 +6553,7 @@ class bisim_partitioner_gj
               // all transitions in the old BLC set have moved to the new BLC
               // set; as the old BLC set was stable, so is the new one.
               // We can skip this element.
-              calM_elt->first=calM.back().first;
-              if (std::next(calM_elt) == calM.end())
+              if (std::prev(calM.end())==calM_elt)
               {
                 // to avoid protests by the MSVC compiler we have to do this
                 // check beforehand (if calM_elt points to the last element of
@@ -6514,6 +6564,7 @@ class bisim_partitioner_gj
               }
               else
               {
+                calM_elt->first=calM.back().first;
                 calM.pop_back();
               }
             }
@@ -6528,7 +6579,7 @@ class bisim_partitioner_gj
            find_inert_co_transition_for_block(index_block_B,
                                          old_constellation, new_constellation);
 
-          // Algorithm 1, line 1.8.
+          // Algorithm 1, Line 1.8
           if (index_block_B->block.to_constellation.end()!=tau_co_splitter)
           {
             // The tau co-splitter contains transitions that have just become
@@ -6545,28 +6596,28 @@ class bisim_partitioner_gj
             }
           }
         }
-        // Algorithm 1, line 1.9.
+        // Algorithm 1, Line 1.9
         for (std::pair<BLC_list_iterator, BLC_list_iterator> calM_elt: calM)
         {                                                                       // mCRL2complexity(..., add_work(..., max_C), *this);
                                                                                     // not needed as the inner loop is always executed at least once.
                                                                                 //print_data_structures("Main loop");
                                                                                 assert(check_stability("Main loop", &calM, &calM_elt, old_constellation, new_constellation));
                                                                                 assert(check_data_structures("Main loop", false, false));
-          /* Algorithm 1, line 1.11.                                         */ assert(calM_elt.first < calM_elt.second);
+          /* Algorithm 1, Line 1.10                                          */ assert(calM_elt.first < calM_elt.second);
           do
           {
             linked_list<BLC_indicators>::iterator splitter=
                           m_transitions[*std::prev(calM_elt.second)].
                                         transitions_per_block_to_constellation; mCRL2complexity(splitter, add_work(check_complexity::
                                                                                     refine_partition_until_it_becomes_stable__execute_main_split,max_C),*this);
-                                                                                assert(splitter->end_same_BLC==calM_elt.second); assert(splitter->is_stable());
+            /* Algorithm 1, Line 1.11                                        */ assert(splitter->end_same_BLC==calM_elt.second); assert(splitter->is_stable());
             calM_elt.second = splitter->start_same_BLC;                         assert(splitter->start_same_BLC<splitter->end_same_BLC);
 
             const transition& first_t=
                             m_aut.get_transitions()[*splitter->start_same_BLC];
             const label_index a=label_or_divergence(first_t);                   assert(m_states[first_t.to()].block->c.onstellation==new_constellation);
             block_type* Bpp=m_states[first_t.from()].block;                     assert(Bpp->c.onstellation!=new_constellation ||
-                                                                                       !is_inert_during_init(first_t));
+            /* Algorithm 1, Line 1.12                                        */        !is_inert_during_init(first_t));
             if (number_of_states_in_block(*Bpp) <= 1)
             {
               // a block with 1 state does not need to be split
@@ -6577,20 +6628,24 @@ class bisim_partitioner_gj
               // necessary to spend any work on it now.
               // We will later stabilize it in stabilizeB().
             }
+            // Algorithm 1, Line 1.13
             else if (is_inert_during_init(first_t) &&
                      old_constellation==Bpp->c.onstellation)
             {
               // The co-splitter would be constellation-inert, so no co-split
               // is needed
+              // Algorithm 1, Line 1.14
               four_way_splitB<true, false>(Bpp, splitter,
                                 Bpp->block.to_constellation.end(),
                                          old_constellation, new_constellation);
             }
             else
             {
+              // Algorithm 1, Line 1.16
               linked_list<BLC_indicators>::iterator co_splitter=
                                     Bpp->block.to_constellation.prev(splitter);
               const transition* co_t;
+              // Algorithm 1, Line 1.17
               if (Bpp->block.to_constellation.end()!=co_splitter &&
                   (                                                             assert(co_splitter->is_stable()),
                                                                                 assert(co_splitter->start_same_BLC<co_splitter->end_same_BLC),
@@ -6599,15 +6654,17 @@ class bisim_partitioner_gj
                    old_constellation==
                                    m_states[co_t->to()].block->c.onstellation))
               {
+                // Algorithm 1, Line 1.18
                 four_way_splitB<true, true>(Bpp, splitter, co_splitter,
                                          old_constellation, new_constellation);
               }
             }
+            // Algorithm 1, Line 1.9
           }
           while (calM_elt.first < calM_elt.second);
         }                                                                       //print_data_structures("Before stabilize");
                                                                                 assert(check_data_structures("Before stabilize", false, false));
-                                                                                assert(check_stability("Before stabilize"));
+        /* Algorithm 1, Line 1.19                                            */ assert(check_stability("Before stabilize"));
         stabilizeB();
       }
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
@@ -6693,7 +6750,8 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                 "guaranteed that branching bisimulation minimisation runs in "
                 "time O(m log n).\n";
     }
-    // Line 1.2: Find tau-SCCs and contract each of them to a single state
+    // Algorithm 1, Line 1.1: Find tau-SCCs and contract each of them to a
+    // single state
     const std::clock_t start_SCC=std::clock();
     mCRL2log(log::verbose) << "Start SCC\n";
     if (branching)
@@ -6813,7 +6871,6 @@ bool destructive_bisimulation_compare_gj(LTS_TYPE& l1, LTS_TYPE& l2,
     detail::merge(l1, std::move(l2));
     l2.clear(); // No use for l2 anymore.
 
-    // Line 2.1: Find tau-SCCs and contract each of them to a single state
     if (branching)
     {
         detail::scc_partitioner<LTS_TYPE> scc_part(l1);
