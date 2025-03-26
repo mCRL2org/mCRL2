@@ -110,6 +110,7 @@ PBES
    :maxdepth: 1
    
    libraries/pbes/pbes_library
+   libraries/bes/bes_library
 
 *PDF documentation*
 
@@ -119,7 +120,7 @@ PBES
 * :mcrl2_pdflatex:`PBES rewriters <libraries/pbes/latex/pbes-rewriters.tex>`
 * :mcrl2_pdflatex:`PBES Instantiation and Solving <libraries/pbes/latex/pbes-instantiation-solving.tex>`
 * :mcrl2_pdflatex:`kant-pbes-greybox-notes.tex <libraries/pbes/latex/kant-pbes-greybox-notes.tex>`
-* :mcrl2_pdflatex:`Some notes on a BES library <libraries/pbes/latex/bes-libary.tex>`
+* :mcrl2_pdflatex:`Some notes on a BES library <libraries/pbes/latex/bes-library.tex>`
 
 Process
 =========
