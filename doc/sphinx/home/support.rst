@@ -10,7 +10,7 @@ If the documentation pages are unsufficient to find an answer for your question 
   (j.f.groote (at) tue.nl) or the main developer Maurice Laveaux (m.laveaux (at)
   tue.nl).
 - If you think you have found a bug in our tools, you are welcome to
-  `submit a bug at our issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_.
+  submit a bug at our `issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_.
 
 .. important::
 
