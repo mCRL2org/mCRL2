@@ -6528,7 +6528,7 @@ class bisim_partitioner_gj
            find_inert_co_transition_for_block(index_block_B,
                                          old_constellation, new_constellation);
 
-          // Algorithm 1, line 1.19.
+          // Algorithm 1, line 1.8.
           if (index_block_B->block.to_constellation.end()!=tau_co_splitter)
           {
             // The tau co-splitter contains transitions that have just become
@@ -6545,7 +6545,7 @@ class bisim_partitioner_gj
             }
           }
         }
-        // Algorithm 1, line 1.10.
+        // Algorithm 1, line 1.9.
         for (std::pair<BLC_list_iterator, BLC_list_iterator> calM_elt: calM)
         {                                                                       // mCRL2complexity(..., add_work(..., max_C), *this);
                                                                                     // not needed as the inner loop is always executed at least once.
