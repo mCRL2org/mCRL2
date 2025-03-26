@@ -1,10 +1,11 @@
 import os
 import lxml.etree as ET
 
-from sphinx.util import logging
 from sphinx.util.console import term_width_line
-from docutils.parsers.rst.roles import register_canonical_role
-from docutils import nodes
+from sphinx.util.docutils import SphinxDirective
+from sphinx.util import logging
+
+from docutils.parsers.rst import Parser
 
 from library import call
 
@@ -20,7 +21,7 @@ def log_nonl(msg):
 
 
 def generate_manpage(tool, binpath):
-    """Execute the given binary with --generate-xml"""
+    """Execute the given binary with --generate-xml and process the output with the manual.xsl stylesheet"""
     log_nonl(f"Generating manpage for {tool}...")
 
     exe = os.path.join(binpath, tool)
@@ -33,24 +34,33 @@ def generate_manpage(tool, binpath):
     return str(transform(dom))
 
 
-def mcrl2_manual_role(
-    _name, _rawtext, text, lineno, inliner, _options=None, _content=None
-):
+class MCRL2ManualDirective(SphinxDirective):
     """A role to replace the mcrl2_manual by the output of the tools --generate-xml converted into RST"""
-    toolname = text
 
-    if toolname in _MCRL2_TOOLS:
-        return inliner.parse(
-            generate_manpage(toolname, _MCRL2_TOOL_PATH), lineno, inliner, parent=None
-        )
-    else:
-        inliner.document.reporter.severe(
-            f"Tool {toolname} is not part of the build configuration"
-        )
-        return ([], [])
+    required_arguments = 1
+    final_argument_whitespace = True
+
+    def run(self):
+        toolname = self.arguments[0]
+
+        if toolname in _MCRL2_TOOLS:
+            try:
+                return self.parse_text_to_nodes(
+                    generate_manpage(toolname, _MCRL2_TOOL_PATH),
+                    allow_section_headings=True,
+                )
+            except Exception as e:
+                self.state.document.reporter.severe(
+                    f"Failed to generate manual for {toolname}: {e}"
+                )
+        else:
+            self.state.document.reporter.severe(
+                f"Tool {toolname} is not part of the build configuration"
+            )
+        return []
 
 
 def setup(app):
-    register_canonical_role("mcrl2_manual", mcrl2_manual_role)
+    app.add_directive("mcrl2_manual", MCRL2ManualDirective)
 
     return {"parallel_read_safe": True, "parallel_write_safe": True}
