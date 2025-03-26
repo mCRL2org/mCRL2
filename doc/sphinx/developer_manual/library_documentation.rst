@@ -110,7 +110,6 @@ PBES
    :maxdepth: 1
    
    libraries/pbes/pbes_library
-   libraries/bes/bes_library
 
 *PDF documentation*
 
