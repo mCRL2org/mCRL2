@@ -61,7 +61,8 @@ imgmath_latex_preamble = '\\usepackage{@CMAKE_CURRENT_SOURCE_DIR@/mcrl2_package}
 imgmath_use_preview = True
 
 myst_enable_extensions = [
-    "dollarmath"
+    "dollarmath",
+    "colon_fence"
 ]
 
 # List of patterns, relative to source directory, that match files and

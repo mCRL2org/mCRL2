@@ -17,7 +17,6 @@ if(CMAKE_BUILD_PARALLEL_LEVEL)
 endif()
 
 if(MCRL2_ENABLE_DOC_DOXYGEN)
-
   configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
 
   # Configure two doxygen commands (one will have the cleandoc as dependency)
