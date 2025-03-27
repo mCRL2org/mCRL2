@@ -10,7 +10,6 @@
 #define MCRL2_SMT_TRANSLATE_EXPRESSION_H
 
 #include "mcrl2/smt/translate_sort.h"
-#include <cstdio>
 
 namespace mcrl2
 {
@@ -62,7 +61,6 @@ declare_variables_binder(const data::variable_list& vars, OutputStream& out, con
     }
     else if (var.sort() == data::sort_nat::nat())
     {
-
       result = data::lazy::and_(result, greater_equal(var, data::sort_nat::c0()));
     }
   }
@@ -201,12 +199,10 @@ void translate_variable_declaration(const Container& vars,
     const native_translations& nt)
 {
   data::data_expression vars_conditions = data::sort_bool::true_();
-  data::variable_list vars_pos_nat;
   for (const data::variable& v : vars)
   {
     o << "(declare-fun " << translate_identifier(v.name()) << " (";
 
-  mCRL2log(log::debug) << "Make use? 2 " << translate_identifier(v.name()) <<  v.sort() << std::endl;
     data::sort_expression_list domain = data::is_function_sort(v.sort())
                                             ? atermpp::down_cast<data::function_sort>(v.sort()).domain()
                                             : data::sort_expression_list();
@@ -237,7 +233,6 @@ void translate_variable_declaration(const Container& vars,
     translate_sort_expression(v.sort().target_sort(), o, nt);
     o << ")\n";
   }
-
   translate_assertion(vars_conditions, o, c, nt);
 }
 
