@@ -19,8 +19,12 @@
 #include <atomic>
 #include <cstdio>
 #include <ctime>
-#include <format>
 #include <set>
+
+#ifdef __cpp_lib_format
+  #include <format>
+#endif
+
 #include <stdexcept>
 
 namespace mcrl2::log {
@@ -89,7 +93,11 @@ log_level_t log_level_from_string(const std::string_view s)
   }
   else
   {
+#ifdef __cpp_lib_format
     throw std::runtime_error(std::format("Unknown log-level {} provided.", s));
+#else
+    throw std::runtime_error("Unknown log-level " + std::string(s) + " provided.");
+#endif
   }
 }
 
