@@ -235,7 +235,7 @@ public:
 
   /// \brief Constructs an element using the allocator with the given arguments and insert it in the front of the bucket iff it does not already exist.
   /// \returns True iff the insertion took place.
-  /// \threadsafe
+  /// \details threadsafe
   template<typename ...Args,
            typename Equals>
   std::pair<iterator, bool> emplace_front_unique(NodeAllocator& allocator, const Equals& equals, Args&& ...args)
