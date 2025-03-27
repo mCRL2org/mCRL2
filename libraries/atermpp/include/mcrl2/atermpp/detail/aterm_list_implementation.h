@@ -502,7 +502,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
     term_list<Term> result_list;
     make_list_forward<Term, Iter, ATermConverter, ATermFilter>(result_list, first, last, convert_to_aterm, aterm_filter);
@@ -538,8 +538,8 @@ namespace detail
                         }
                       });
   }
-  
-  template <IsATerm Term, std::input_iterator Iter, IsTermConverter ATermConverter>
+
+  template <class Term, class Iter, class ATermConverter>
   inline void make_list_forward(term_list<Term>& result, Iter first, Iter last, ATermConverter convert_aterm)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
@@ -581,7 +581,7 @@ namespace detail
       }
     }
   }
-  
+
   template <class Term, class Iter, class ATermConverter>
   inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm)
   {
