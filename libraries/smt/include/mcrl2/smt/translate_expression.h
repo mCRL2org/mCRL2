@@ -215,33 +215,29 @@ void translate_variable_declaration(const Container& vars,
       translate_sort_expression(s, o, nt);
       o << " ";
       // This does not seem to work when translating variables of a function sort.
-       if(s == data::sort_pos::pos())
-       {
-         vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_pos::c1()));
-       }
-       else if(s == data::sort_nat::nat())
-       {
-         vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_nat::c0()));
-       }
+      // if(s == data::sort_pos::pos())
+      // {
+      //   vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_pos::c1()));
+      // }
+      // else if(s == data::sort_nat::nat())
+      // {
+      //   vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_nat::c0()));
+      // }
     }
+    // Add assertions for positive and natural numbers
     if(v.sort() == data::sort_pos::pos())
     {
-      vars_pos_nat.push_front(v);
-      //         vars_pos_nat = data::lazy::and_(vars_pos_nat, greater_equal(var_int, data::sort_int::int_(1)));
+         vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_pos::c1()));
     }
     else if(v.sort() == data::sort_nat::nat())
     {
-      vars_pos_nat.push_front(v);
-      //         vars_pos_nat = data::lazy::and_(vars_pos_nat, greater_equal(var_int, data::sort_int::int_(0)));
+         vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_nat::c0()));
     }
     o << ") ";
     translate_sort_expression(v.sort().target_sort(), o, nt);
     o << ")\n";
   }
 
-  for (const auto& v : vars_pos_nat) {
-    o << "(assert (>= " << v.name() << " " << (v == data::sort_pos::pos() ? 1 : 0) << ") )\n";
-  }
   translate_assertion(vars_conditions, o, c, nt);
 }
 
