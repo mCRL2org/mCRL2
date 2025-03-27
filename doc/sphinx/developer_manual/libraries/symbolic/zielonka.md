@@ -1,17 +1,18 @@
 # Zielonka
 
-The standard Zielonka solving algorithm, defined in Algorithm requires that every vertex has an outgoing edge.
+The standard Zielonka solving algorithm, defined in [Algorithm](zielonka_algorithm) requires that every vertex has an outgoing edge.
 If this is the case then the graph is called *total*.
 We can achieve this by extending every disjunctive PBES equation with $\textsf{true} \land X_\textsf{false}$ where $X_\textsf{false}$ is defined as $\mu X_\textsf{false} = \textsf{true} \land X_\textsf{false}$ and similarly for the conjunctive PBES equations with $X_\textsf{true}$.
 However, adding these unnecessary transitions can be costly.
 
-Therefore, if we perform the deadlock detection we can avoid extending the PBES and obtain a total graph by performing the preprocessing step described in Algorithm~\ref{alg:preprocess}.
+Therefore, if we perform the deadlock detection we can avoid extending the PBES and obtain a total graph by performing the preprocessing step described in [Algorithm](preprocess_algorithm).
 Every disjunctive vertex that is a deadlock is won by player odd (previously indicated by a transition to $X_\textsf{false}$) and every conjunctive vertex that is a deadlock by player even.
 If we compute the attractors to these won vertices then the resulting graph is total and can be used in the Zielonka algorithm as follows $\textsf{zielonka}(\textsf{preprocess}(V, D, \emptyset, \emptyset))$.
 
 
 ```{math}
 :nowrap:
+:label: preprocess_algorithm
 
 \begin{algorithmic}[1]
 \Function{Preprocess}{$V, D, W_0, W_1$}
@@ -26,9 +27,10 @@ If we compute the attractors to these won vertices then the resulting graph is t
 \end{algorithmic}
 ```
 
-With the standard 
+With the standard Zielonka algorithm defined below:
 ```{math}
 :nowrap:
+:label: zielonka_algorithm
 
 \begin{algorithmic}[1]
     \Function{Zielonka}{$V$}
@@ -52,9 +54,9 @@ With the standard
 \end{algorithmic}
 ```
 
-# Solving with strategies
+## Solving with strategies
 
-This algorithms is derived from [1].
+This algorithm is extended with keeping track of strategies in [1]. A strategy here is simply a relation between vertices, as such can be efficiently overapproximated using symbolic algorithms.
 
 ```{math}
 :nowrap:
