@@ -47,3 +47,8 @@ aterm term_converter(const aterm& input) {
 // static_assert(!IsTermConverter<decltype(not_term_converter)>, "This function is a not a term converter since the argument is not a term");
 // static_assert(!IsTermConverter<decltype(wrong_argument_convert)>, "This function has the wrong arguments");
 static_assert(IsTermConverter<decltype(term_converter)>, "This function has the wrong arguments");
+
+BOOST_AUTO_TEST_CASE(test_static)
+{
+
+}
