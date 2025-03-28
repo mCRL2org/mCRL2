@@ -13,10 +13,12 @@
 #define MCRL2_LPS_LINEARISE_UTILITY_H
 
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/lps/detail/configuration.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/lps/deadlock_summand.h"
 #include "mcrl2/lps/stochastic_action_summand.h"
 
+#include <optional>
 
 namespace mcrl2
 {
@@ -56,11 +58,14 @@ inline
 lps_statistics_t get_statistics(const stochastic_action_summand_vector& action_summands)
 {
   lps_statistics_t statistics;
-  statistics.action_summand_count = action_summands.size();
-
-  for (const auto& s: action_summands)
+  if constexpr (detail::EnableLineariseStatistics)
   {
-    statistics.total_action_count += s.multi_action().actions().size();
+    statistics.action_summand_count = action_summands.size();
+
+    for (const auto& s: action_summands)
+    {
+      statistics.total_action_count += s.multi_action().actions().size();
+    }
   }
 
   return statistics;
