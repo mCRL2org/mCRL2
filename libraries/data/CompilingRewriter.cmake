@@ -22,8 +22,8 @@ if(CMAKE_BUILD_TYPE)
   set(R_CXXFLAGS "${R_CXXFLAGS} ${${R_CXXFLAGS_NAME}}")
 endif()
 
-# Add the MCRL2_JITTYC_ARGUMENTS, and c++17 since it is not included by default.
-set(R_CXXFLAGS "${R_CXXFLAGS} -std=c++17 ${MCRL2_JITTYC_ARGUMENTS}")
+# Add the MCRL2_JITTYC_ARGUMENTS, and c++20 since it is not included by default.
+set(R_CXXFLAGS "${R_CXXFLAGS} -std=c++20 ${MCRL2_JITTYC_ARGUMENTS}")
 
 # Add compiler flags to allow to compile rewritercode with a large number
 # of recursively used templates. The value 2000 is taken
