@@ -22,7 +22,7 @@
 // to create an initial partition.  Only towards the end of initialization, the
 // BLC sets are generated, and then stabilizeB() is called to handle new bottom
 // states that have been found during the separate algorithm.
-#define INIT_WITHOUT_BLC_SETS
+// #define INIT_WITHOUT_BLC_SETS
 
 #include <iomanip> // for std::fixed, std::setprecision(), std::setw()
 #include <ctime> // for std::clock_t, std::clock()
@@ -6012,6 +6012,7 @@ class bisim_partitioner_gj
       }                                                                         assert(lower_i == upper_i);
       initial_block->sta.rt_non_bottom_states = lower_i;
 #ifndef INIT_WITHOUT_BLC_SETS
+      mCRL2log(log::verbose) << "Start refining in the initialisation WITH BLC sets\n";
       for (linked_list<BLC_indicators>::iterator
                                     blc_it=temporary_BLC_list.begin();
                                     temporary_BLC_list.end()!=blc_it; ++blc_it)
@@ -6038,7 +6039,7 @@ class bisim_partitioner_gj
       /* Everything except `m_BLC_transitions` is now completely initialized.*/ //print_data_structures("After initial reading before splitting in the initialisation", true);
                                                                                 assert(check_data_structures("After initial reading before splitting in the initialisation", true, false));
       // The initial partition has been constructed. Continue with the initialisation.
-      mCRL2log(log::verbose) << "Start refining in the initialisation\n";
+      mCRL2log(log::verbose) << "Start refining in the initialisation WITHOUT BLC sets\n";
 
       // We have not yet fully instantiated the BLC sets.
       // Therefore, we run a kind of simplified stabilisation: we do not need
