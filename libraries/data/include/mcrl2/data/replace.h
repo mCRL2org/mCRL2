@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_REPLACE_H
 #define MCRL2_DATA_REPLACE_H
 
+#include "mcrl2/atermpp/concepts.h"
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/replace_capture_avoiding.h"
 
@@ -218,10 +219,9 @@ void replace_variables(T& x,
   core::make_update_apply_builder<data::data_expression_builder>(sigma).update(x);
 }
 
-template <typename T, typename Substitution>
+template <atermpp::IsATerm T, typename Substitution>
 T replace_variables(const T& x,
-                    const Substitution& sigma,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                    const Substitution& sigma
                    )
 {
   T result;
