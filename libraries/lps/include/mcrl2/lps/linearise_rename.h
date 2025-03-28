@@ -12,9 +12,9 @@
 #ifndef MCRL2_LPS_LINEARISE_RENAME_H
 #define MCRL2_LPS_LINEARISE_RENAME_H
 
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/lps/linearise_utility.h"
+#include "mcrl2/lps/detail/configuration.h"
 #include "mcrl2/process/process_expression.h"
 
 
@@ -24,7 +24,6 @@ namespace mcrl2
 namespace lps
 {
 
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
   inline
   std::string log_rename_application(const lps_statistics_t& lps_statistics_before,
                                    const lps_statistics_t& lps_statistics_after,
@@ -44,7 +43,6 @@ namespace lps
 
     return os.str();
   }
-#endif
 
   /// Apply renamings to a single action
   inline
@@ -101,19 +99,19 @@ namespace lps
     const process::rename_expression_list& renamings,
     lps::stochastic_action_summand_vector& action_summands)
   {
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+    [[maybe_unused]]    
     lps_statistics_t lps_statistics_before = get_statistics(action_summands);
-#endif
 
-    for (auto& action_summand: action_summands)
+    for (stochastic_action_summand& action_summand: action_summands)
     {
       action_summand = rename(renamings, action_summand);
     }
 
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-    lps_statistics_t lps_statistics_after = get_statistics(action_summands);
-    std::cout << log_rename_application(lps_statistics_before, lps_statistics_after, renamings.size());
-#endif
+    if constexpr (detail::EnableLineariseStatistics)
+    {
+      lps_statistics_t lps_statistics_after = get_statistics(action_summands);
+      std::cout << log_rename_application(lps_statistics_before, lps_statistics_after, renamings.size());
+    }
   }
 
 } // namespace lps
