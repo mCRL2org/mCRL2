@@ -54,6 +54,10 @@ div.dparser .admonition-title {
 .admonition .admonition-title { background-color: var(--mcrl2-title); }
 .rst-content .admonition { background: var(--mcrl2-light); }
 
+.rst-content .toctree-wrapper ul li > * {
+  margin-top: 0px;
+}
+
 .admonition.admonition-release .admonition-title { display: none; }
 .admonition.admonition-release { margin: 1em 0; font-family: sans-serif; text-align: center; background-color:var(--mcrl2-light); }
 
