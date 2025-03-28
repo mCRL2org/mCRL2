@@ -18,6 +18,8 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/find.h"
 
+#include <ranges>
+
 namespace mcrl2 {
 
 namespace data {
@@ -164,14 +166,13 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::where_clause& x)
   {
-    const auto& declarations = x.declarations();
+    const auto& declarations = x.declarations() | std::views::transform([](const assignment_expression& t) { return atermpp::down_cast<assignment>(t); });
 
     auto declarations1 = data::assignment_list(
       declarations.begin(),
       declarations.end(),
-      [&](const assignment_expression& t)
+      [&](const assignment& a)
       {
-        const assignment& a = atermpp::down_cast<assignment>(t);
         const data::variable& v = a.lhs();
         const data_expression& x1 = a.rhs();
         // add the assignment [v := v'] to sigma
@@ -186,9 +187,8 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
     make_where_clause(result, body, declarations1);
 
     // remove the assignments [v := v'] from sigma
-    for (const assignment_expression& t : declarations)
+    for (const assignment& a : declarations)
     {
-      const assignment& a = atermpp::down_cast<assignment>(t);
       const variable& v = a.lhs();
       sigma.remove_fresh_variable_assignment(v);
     }
