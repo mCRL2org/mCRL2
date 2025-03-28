@@ -537,7 +537,7 @@ namespace detail
                           make_list_forward_helper(reinterpret_cast<term_list<Term>& >(result), p, last, transformer);
                         }
                       });
-  }
+  }  
 
   template <class Term, class Iter, class ATermConverter>
   inline void make_list_forward(term_list<Term>& result, Iter first, Iter last, ATermConverter convert_aterm)
