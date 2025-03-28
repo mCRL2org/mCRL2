@@ -301,7 +301,8 @@ const Derived& down_cast(const Base& t)
   // Runtime check that the cast is valid.
   assert(Derived(static_cast<const aterm&>(t)) != aterm());
 
-  return static_cast<const Derived&>(t);
+  // UB: Only allowed when we constructed an actual Derived type
+  return reinterpret_cast<const Derived&>(t);
 }
 
 /// \brief A cast form an aterm derived class to a class that inherits in (possibly multiple steps) from this class.
@@ -315,7 +316,7 @@ template <IsATerm Derived, IsATerm Base>
 const Derived& vertical_cast(const Base& t)
 {
   // UB: Only allowed when we constructed an actual Derived type
-  return dynamic_cast<const Derived&>(t);
+  return reinterpret_cast<const Derived&>(t);
 }
 
 /// \brief Send the term in textual form to the ostream.
