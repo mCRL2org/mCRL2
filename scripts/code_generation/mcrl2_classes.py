@@ -347,8 +347,8 @@ class FunctionDeclaration:
 
         # compute argument text
         text = self.text
-        text = re.sub('.*\(', '', text)
-        text = re.sub('\).*', '', text)
+        text = re.sub(r'.*\(', '', text)
+        text = re.sub(r'\).*', '', text)
         self.argument_text_ = text
 
         # compute parameters
@@ -358,11 +358,11 @@ class FunctionDeclaration:
             if word == '':
                 continue
             modifiers = []
-            if re.search(r'\*', word) != None:
+            if re.search(r'\*', word) is not None:
                 modifiers.append('*')
-            if re.search(r'&', word) != None:
+            if re.search(r'&', word) is not None:
                 modifiers.append('&')
-            if re.search(r'\bconst\b', word) != None:
+            if re.search(r'\bconst\b', word) is not None:
                 modifiers.append('const')
             word = re.sub(r'\*|&|(\bconst\b)', '', word).strip()
             w = word.split()
@@ -391,7 +391,7 @@ class FunctionDeclaration:
     #
     # 'name'
     def qualified_name(self):
-        return re.sub('\(.*', '', self.text)
+        return re.sub(r'\(.*', '', self.text)
 
     # returns the namespace qualifier of the function
     #
@@ -747,9 +747,9 @@ class Class:
     def __init__(self, aterm, constructor, description, superclass = None, namespace = None, modifiers = ''):
         self.aterm = aterm
         self.description = description
-        name = re.sub('\(.*', '', constructor)
-        arguments = re.sub('.*\(', '(', constructor)
-        self.classname_ = re.sub('\[[^]]*\]', '', name)
+        name = re.sub(r'\(.*', '', constructor)
+        arguments = re.sub(r'.*\(', '(', constructor)
+        self.classname_ = re.sub(r'\[[^]]*\]', '', name)
         self.constructor = FunctionDeclaration(self.classname_ + arguments, namespace)
         self.superclass_ = remove_namespace(superclass)
         self.superclass_namespace_ = extract_namespace(superclass)
@@ -1346,7 +1346,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 def extract_namespace(text):
     if text == None:
         return None
-    text = re.sub('\(.*', '', text)
+    text = re.sub(r'\(.*', '', text)
     pos = text.find(':')
     if pos >= 0:
         return text[:pos]

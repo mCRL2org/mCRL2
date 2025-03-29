@@ -11,7 +11,6 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_H
 
 #include "mcrl2/atermpp/aterm_core.h"
-#include "mcrl2/utilities/unused.h"
 
 #include <array>
 
@@ -49,12 +48,9 @@ public:
   ///        of elements is equal to the template parameter N.
   template<typename Iterator,
            typename std::enable_if<mcrl2::utilities::is_iterator<Iterator>::value>::type* = nullptr>
-  _aterm_appl(const function_symbol& sym, Iterator it, Iterator end)
+  _aterm_appl(const function_symbol& sym, Iterator it, [[maybe_unused]] Iterator end)
     : _aterm(sym)
   {
-    // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
-    mcrl2::utilities::mcrl2_unused(end);
-
     for (std::size_t i = 0; i < N; ++i)
     {
       assert(it != end);
@@ -76,12 +72,9 @@ public:
   /// \brief constructs a term application with the given symbol and its arguments from the iterator.
   template<typename Iterator,
            typename std::enable_if<mcrl2::utilities::is_iterator<Iterator>::value>::type* = nullptr>
-  _aterm_appl(const function_symbol& symbol, Iterator it, Iterator end, bool)
+  _aterm_appl(const function_symbol& symbol, Iterator it, [[maybe_unused]] Iterator end, bool)
     : _aterm(symbol)
   {
-    // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
-    mcrl2::utilities::mcrl2_unused(end);
-
     for (std::size_t i = 0; i < symbol.arity(); ++i)
     {
       // Prevent bound checking, the allocator must make sure that symbol.arity() arguments fit.
