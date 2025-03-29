@@ -10,12 +10,12 @@
 #ifndef MCRL2_UTILITIES_TAGGED_POINTER_H_
 #define MCRL2_UTILITIES_TAGGED_POINTER_H_
 
+#include "mcrl2/utilities/configuration.h"
+#include "mcrl2/utilities/detail/atomic_wrapper.h"
+
 #include <compare>
 #include <functional>
 #include <type_traits>
-
-#include "mcrl2/utilities/configuration.h"
-#include "mcrl2/utilities/detail/atomic_wrapper.h"
 
 namespace mcrl2::utilities
 {
@@ -109,7 +109,7 @@ public:
     return get() == other.get();
   }
 
-  std::strong_ordering operator<=>(const tagged_pointer& other) const
+  std::weak_ordering operator<=>(const tagged_pointer& other) const
   {
     return this->get() <=> other.get();
   }
