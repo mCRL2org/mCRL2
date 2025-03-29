@@ -16,6 +16,8 @@
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/translate_user_notation.h"
 
+#include <ranges>
+
 namespace mcrl2
 {
 
@@ -67,7 +69,8 @@ std::set<process::action_label> find_action_labels(const lps::stochastic_specifi
 
 data::data_expression_list action_summand::next_state(const data::variable_list& process_parameters) const
 {
-  return data::replace_variables(atermpp::container_cast<data::data_expression_list>(process_parameters),
+  // Cast the process parameters to data expressions
+  return data::replace_variables(process_parameters | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); }),
                                  data::assignment_sequence_substitution(assignments()));
 }
 
