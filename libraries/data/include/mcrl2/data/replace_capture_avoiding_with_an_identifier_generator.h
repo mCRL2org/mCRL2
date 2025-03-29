@@ -201,11 +201,11 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator : public Bu
 
       // The original substitution should be applied to the right hand sides of the assignments.
       std::vector<data::assignment> a;
-      std::vector<data::variable>::const_iterator j = v.begin();
-      for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i, ++j)
+      auto j = v.begin();
+      for (auto i = assignments.begin(); i != assignments.end(); ++i, ++j)
       {
         data::data_expression rhs;
-        apply(rhs, i->rhs());
+        apply(rhs, (*i).rhs());
         a.push_back(data::assignment(*j, rhs));
       }
       data::make_where_clause(result, new_body, assignment_list(a.begin(), a.end()));
