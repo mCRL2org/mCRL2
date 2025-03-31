@@ -426,6 +426,8 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
             {
               throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LPS. Did you supply the correct file?");
             }
+
+            // The parameters are [from] + [action_parameters] + [to]
             lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
             std::size_t equation_index = p_index.index(Z.name());
             const pbes_equation& eqn = p.equations()[equation_index];
@@ -463,6 +465,12 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
           }
         }
       }
+
+      if (!check_well_typedness(result))
+      {
+        throw mcrl2::runtime_error("The counter example LPS is not well typed, either wrong file provided or an internal error occurred.");
+      }
+      
       return result;
     }
 
