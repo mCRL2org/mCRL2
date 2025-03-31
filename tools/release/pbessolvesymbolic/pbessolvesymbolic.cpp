@@ -640,8 +640,12 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
           structure_graph SG;
 
-          // TODO: Set options?
+          // Set some options for the second instantiation.
           pbessolve_options pbessolve_options;
+          pbessolve_options.rewrite_strategy = options_.rewrite_strategy;
+          pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
+          pbessolve_options.number_of_threads = options_.max_workers;
+
           PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1, reach.rewriter());
 
           // Perform the second instantiation given the proof graph.      
