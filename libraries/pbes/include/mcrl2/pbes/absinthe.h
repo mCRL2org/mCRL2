@@ -300,14 +300,14 @@ struct absinthe_algorithm
     data::data_expression_list lift(const data::data_expression_list& x)
     {
       data::data_expression_list result;
-      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply_list(result, x);
       return result;
     }
 
     data::variable_list lift(const data::variable_list& x)
     {
       data::variable_list result;
-      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply_list(result, x);
       return result;
     }
 
