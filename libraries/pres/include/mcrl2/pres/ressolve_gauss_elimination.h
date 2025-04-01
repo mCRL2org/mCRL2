@@ -1057,7 +1057,7 @@ public:
   template <class T>
   void apply(T& result, const pres_system::propositional_variable_instantiation& x)
   {
-    pres_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ apply(result, x.parameters()); });
+    pres_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ apply_list(result, x.parameters()); });
     if (m_negate)
     {
       pres_system::optimized_minus(result, result);
