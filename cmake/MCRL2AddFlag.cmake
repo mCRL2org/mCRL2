@@ -6,7 +6,7 @@ function(mcrl2_add_cxx_flag FLAG)
   string(REPLACE "=" "_" FLAG_ACCEPTED  "CXX_${FLAG}_ACCEPTED")
   check_cxx_compiler_flag(${FLAG} ${FLAG_ACCEPTED})
 
-  if(FLAG_ACCEPTED)
+  if(${FLAG_ACCEPTED})
     # This is not really nice, but here we keep track of jittyc compile flags.
     set(MCRL2_JITTYC_ARGUMENTS "${FLAG} ${MCRL2_JITTYC_ARGUMENTS}" CACHE INTERNAL "")
 
@@ -15,26 +15,28 @@ function(mcrl2_add_cxx_flag FLAG)
 endfunction()
 
 function(mcrl2_add_cxx_debug_flag FLAG)
-  check_cxx_compiler_flag(${FLAG} CXX_${FLAG}_ACCEPTED)
+  string(REPLACE "=" "_" FLAG_ACCEPTED  "CXX_DEBUG_${FLAG}_ACCEPTED")
+  check_cxx_compiler_flag(${FLAG} FLAG_ACCEPTED)
 
-  if(CXX_${FLAG}_ACCEPTED)
+  if(${FLAG_ACCEPTED})
     add_compile_options($<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Debug>>:${FLAG}>)
   endif()
 endfunction()
 
 function(mcrl2_add_c_flag FLAG)
-  string(REPLACE "=" "_" FLAG_ACCEPTED  "CXX_${FLAG}_ACCEPTED")
+  string(REPLACE "=" "_" FLAG_ACCEPTED  "C_${FLAG}_ACCEPTED")
   check_c_compiler_flag(${FLAG} ${FLAG_ACCEPTED})
 
-  if(FLAG_ACCEPTED)
+  if(${FLAG_ACCEPTED})
     add_compile_options($<$<COMPILE_LANGUAGE:C>:${FLAG}>)
   endif()
 endfunction()
 
 function(mcrl2_add_c_debug_flag FLAG)
-  check_c_compiler_flag(${FLAG} C_${FLAG}_ACCEPTED)
+  string(REPLACE "=" "_" FLAG_ACCEPTED "C_DEBUG_${FLAG}_ACCEPTED")
+  check_c_compiler_flag(${FLAG} ${FLAG_ACCEPTED})
 
-  if(C_${FLAG}_ACCEPTED)
+  if(${FLAG_ACCEPTED})
     add_compile_options($<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Debug>>:${FLAG}>)
   endif()
 endfunction()
