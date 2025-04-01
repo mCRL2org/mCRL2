@@ -279,7 +279,7 @@ class pbesreach_algorithm
 
       // add a sort for the propositional variable names
       data::data_specification propvar_dataspec = construct_propositional_variable_data_specification(srf_pbes, "PropositionalVariable");
-      srf_pbes.data() = data::merge_data_specifications(m_pbes.data(), propvar_dataspec);
+      srf_pbes.data() = data::merge_data_specifications(srf_pbes.data(), propvar_dataspec);
 
       mCRL2log(log::trace) << "--- srf pbes ---\n" << srf_pbes.to_pbes() << std::endl;
       return srf_pbes;
