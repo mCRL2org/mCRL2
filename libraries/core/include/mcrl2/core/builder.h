@@ -13,6 +13,7 @@
 #define MCRL2_CORE_BUILDER_H
 
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/concepts.h"
 
 namespace mcrl2
 {
@@ -51,7 +52,8 @@ struct builder
   {}
 
   template <typename T>
-  void update(T& x, typename atermpp::disable_if_container<T>::type* = nullptr)
+    requires (!std::ranges::range<T>)
+  void update(T& x)
   {
     msg("non-container visit");
     T result;
@@ -60,8 +62,8 @@ struct builder
   }
 
   // container visit
-  template <typename T>
-  void update(T& x, typename atermpp::enable_if_container<T>::type* = nullptr)
+  template <std::ranges::range T>
+  void update(T& x)
   {
     msg("container visit");
     for (auto& v: x)
@@ -85,7 +87,7 @@ struct builder
   }
 
   // term_list visit copy
-  template <typename T, typename U>
+  template <atermpp::IsATerm T, atermpp::IsATerm U>
   void apply(atermpp::term_list<T>& result, const atermpp::term_list<U>& x)
   {
     msg("term_list traversal");

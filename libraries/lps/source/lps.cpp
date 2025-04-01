@@ -9,6 +9,7 @@
 /// \file lps.cpp
 /// \brief
 
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/parse_impl.h"
@@ -70,8 +71,9 @@ std::set<process::action_label> find_action_labels(const lps::stochastic_specifi
 data::data_expression_list action_summand::next_state(const data::variable_list& process_parameters) const
 {
   // Cast the process parameters to data expressions
-  return data::replace_variables(process_parameters | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); }),
-                                 data::assignment_sequence_substitution(assignments()));
+  auto parameters_as_data_expression = process_parameters | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); });
+  data::data_expression_list parameters_as_data_expression_list(parameters_as_data_expression.begin(), parameters_as_data_expression.end());
+  return data::replace_variables(parameters_as_data_expression_list, data::assignment_sequence_substitution(assignments()));
 }
 
 std::string pp_with_summand_numbers(const specification& x)
