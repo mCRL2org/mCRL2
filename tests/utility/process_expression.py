@@ -33,8 +33,26 @@
 
 import re
 from dataclasses import dataclass
+from typing import NewType, Literal
 
 from .data_expression import DataExpression, Variable
+
+# Type aliases
+ActionName = NewType('ActionName', str)
+OperatorSymbol = Literal["+", ".", "<<", "||_", "||", "|"]
+ProcessConstant = Literal["tau", "delta"]
+
+# Constants
+TAU: ProcessConstant = "tau"
+DELTA: ProcessConstant = "delta"
+
+# Operator symbols
+OP_CHOICE: OperatorSymbol = "+"
+OP_SEQUENCE: OperatorSymbol = "."
+OP_BOUNDED_INIT: OperatorSymbol = "<<"
+OP_LEFT_MERGE: OperatorSymbol = "||_"
+OP_MERGE: OperatorSymbol = "||"
+OP_SYNC: OperatorSymbol = "|"
 
 
 def parse_variable(text: str) -> Variable:
@@ -90,7 +108,7 @@ class ProcessExpression(object):
 @dataclass(frozen=True)
 class Action(ProcessExpression):
     """Represents a basic action in the process algebra."""
-    a: str
+    a: ActionName
 
     def __str__(self) -> str:
         return self.a
@@ -99,12 +117,12 @@ class Action(ProcessExpression):
 @dataclass(frozen=True)
 class MultiAction(ProcessExpression):
     """Represents multiple actions that occur simultaneously."""
-    actions: list[str]
+    actions: list[ActionName]
 
     def __str__(self) -> str:
         if len(self.actions) == 0:
-            return "Tau"
-        return " | ".join(self.actions)
+            return TAU
+        return f" {OP_SYNC} ".join(self.actions)
 
     def __hash__(self) -> int:
         return hash(str(self))
@@ -114,14 +132,14 @@ class MultiAction(ProcessExpression):
 class Delta(ProcessExpression):
     """Represents the deadlock process."""
     def __str__(self) -> str:
-        return "delta"
+        return DELTA
 
 
 @dataclass(frozen=True)
 class Tau(ProcessExpression):
     """Represents the internal (silent) action."""
     def __str__(self) -> str:
-        return "tau"
+        return TAU
 
 
 @dataclass(frozen=True)
@@ -135,9 +153,9 @@ class ProcessInstance(ProcessExpression):
 
     def __str__(self) -> str:
         if self.parameters:
-            return f"{self.identifier.name}({', '.join(map(str, self.parameters))})"
-        else:
-            return self.identifier.name
+            return f"{self.identifier}({', '.join(map(str, self.parameters))})"
+        
+        return str(self.identifier)
 
 
 @dataclass(frozen=True)
@@ -183,7 +201,7 @@ class IfThenElse(ProcessExpression):
 @dataclass(frozen=True)
 class BinaryOperator(ProcessExpression):
     """Base class for all binary operators in the process algebra."""
-    op: str
+    op: OperatorSymbol
     x: ProcessExpression
     y: ProcessExpression
 
@@ -198,7 +216,7 @@ class Choice(BinaryOperator):
     Example: p + q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__("+", x, y)
+        super().__init__(OP_CHOICE, x, y)
 
 
 @dataclass(frozen=True)
@@ -208,7 +226,7 @@ class Seq(BinaryOperator):
     Example: p . q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__(".", x, y)
+        super().__init__(OP_SEQUENCE, x, y)
 
 
 @dataclass(frozen=True)
@@ -218,7 +236,7 @@ class BoundedInit(BinaryOperator):
     Example: p << q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__("<<", x, y)
+        super().__init__(OP_BOUNDED_INIT, x, y)
 
 
 @dataclass(frozen=True)
@@ -228,7 +246,7 @@ class LeftMerge(BinaryOperator):
     Example: p ||_ q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__("||_", x, y)
+        super().__init__(OP_LEFT_MERGE, x, y)
 
 
 @dataclass(frozen=True)
@@ -238,7 +256,7 @@ class Merge(BinaryOperator):
     Example: p || q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__("||", x, y)
+        super().__init__(OP_MERGE, x, y)
 
 
 @dataclass(frozen=True)
@@ -248,7 +266,7 @@ class Sync(BinaryOperator):
     Example: p | q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__("|", x, y)
+        super().__init__(OP_SYNC, x, y)
 
 
 @dataclass(frozen=True)
