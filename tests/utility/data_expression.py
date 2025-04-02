@@ -4,38 +4,36 @@
 # ~ Distributed under the Boost Software License, Version 1.0.
 # ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+from dataclasses import dataclass
 
-class DataExpression(object):
+@dataclass(frozen=True)
+class DataExpression:
     """Base class for all data expressions."""
-    def __init__(self) -> None:
-        pass
+    pass
 
-
+@dataclass(frozen=True)
 class Variable(DataExpression):
     """Represents a named variable with an associated type."""
-    def __init__(self, name: str, _type: str = "Bool") -> None:
-        self.name: str = name
-        self.type: str = _type
+    name: str
+    type: str = "Bool"
 
     def __str__(self) -> str:
         return self.name
 
-
+@dataclass(frozen=True)
 class Integer(DataExpression):
     """Represents an integer value."""
-    def __init__(self, value: str) -> None:
-        self.value: str = value
-        self.type: str = "Int"
+    value: str
+    type: str = "Int"
 
     def __str__(self) -> str:
         return self.value
 
-
+@dataclass(frozen=True)
 class Boolean(DataExpression):
-    """Represents a boolean valuen."""
-    def __init__(self, value: str) -> None:
-        self.value: str = value
-        self.type: str = "Bool"
+    """Represents a boolean value."""
+    value: str
+    type: str = "Bool"
 
     def __str__(self) -> str:
         return self.value

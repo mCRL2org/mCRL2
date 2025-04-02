@@ -32,11 +32,15 @@
 # binit                       |     2      |  y   |
 
 import re
+from dataclasses import dataclass
+
 from .data_expression import DataExpression, Variable
 
 
-# example: 'b: Bool'
 def parse_variable(text: str) -> Variable:
+    """
+    Parse a string representation of a variable with its type.
+    """
     text = text.strip()
     m = re.match(r"([^,:]+)\s*\:(.+)", text)
     assert m is not None
@@ -44,17 +48,22 @@ def parse_variable(text: str) -> Variable:
     return result
 
 
-# example: 'b: Bool, m: Nat'
 def parse_variables(text: str) -> list[Variable]:
+    """
+    Parse a comma-separated list of variable declarations.
+    """
     variables = map(str.strip, text.split(","))
     return list(map(parse_variable, variables))
 
 
-# example: 'P(m: Nat, b: Bool)'
 class ProcessIdentifier(object):
+    """
+    Represents a process identifier with optional parameters.
+    Example: P(m: Nat, b: Bool) represents process P with two parameters.
+    """
     name: str
     variables: list[Variable]
-    
+
     def __init__(self, text: str) -> None:
         m = re.search(r"(\w*)(\(.*\))?", text)
         assert m is not None
@@ -67,38 +76,30 @@ class ProcessIdentifier(object):
 
     def __str__(self) -> str:
         if self.variables:
-            return f"{self.name}({', '.join([f'{x}: {x.type}' for x in self.variables])})"
+            return f"{self.name}({', '.join(f'{x}: {x.type}' for x in self.variables)})"
         else:
             return self.name
 
 
 class ProcessExpression(object):
-    pass
+    """Base class for all process expressions in mCRL2."""
+    def __init__(self) -> None:
+        pass
 
 
+@dataclass(frozen=True)
 class Action(ProcessExpression):
+    """Represents a basic action in the process algebra."""
     a: str
-    
-    def __init__(self, a: str) -> None:
-        self.a = a
 
     def __str__(self) -> str:
         return self.a
 
 
+@dataclass(frozen=True)
 class MultiAction(ProcessExpression):
+    """Represents multiple actions that occur simultaneously."""
     actions: list[str]
-    
-    def __init__(self, actions: list[str]) -> None:
-        self.actions = actions
-
-    def __eq__(self, other: object) -> bool:
-        if type(other) is type(self):
-            return self.__dict__ == other.__dict__
-        return False
-
-    def __ne__(self, other: object) -> bool:
-        return not self.__eq__(other)
 
     def __str__(self) -> str:
         if len(self.actions) == 0:
@@ -109,23 +110,28 @@ class MultiAction(ProcessExpression):
         return hash(str(self))
 
 
+@dataclass(frozen=True)
 class Delta(ProcessExpression):
+    """Represents the deadlock process."""
     def __str__(self) -> str:
         return "delta"
 
 
+@dataclass(frozen=True)
 class Tau(ProcessExpression):
+    """Represents the internal (silent) action."""
     def __str__(self) -> str:
         return "tau"
 
 
+@dataclass(frozen=True)
 class ProcessInstance(ProcessExpression):
+    """
+    Represents a process instantiation with parameters.
+    Example: P(1, true) for a process P with two parameters.
+    """
     identifier: ProcessIdentifier
     parameters: list[DataExpression]
-    
-    def __init__(self, identifier: ProcessIdentifier, parameters: list[DataExpression]) -> None:
-        self.identifier = identifier
-        self.parameters = parameters
 
     def __str__(self) -> str:
         if self.parameters:
@@ -134,188 +140,204 @@ class ProcessInstance(ProcessExpression):
             return self.identifier.name
 
 
+@dataclass(frozen=True)
 class Sum(ProcessExpression):
+    """
+    Represents a sum operator that introduces a variable binding.
+    Example: sum d:D . x
+    """
     d: Variable
     x: ProcessExpression
-    
-    def __init__(self, d: Variable, x: ProcessExpression) -> None:
-        assert isinstance(d, Variable)
-        self.d = d
-        self.x = x
 
     def __str__(self) -> str:
         return f"sum {self.d}: {self.d.type}. ({self.x})"
 
 
+@dataclass(frozen=True)
 class IfThen(ProcessExpression):
+    """
+    Represents a conditional process with one branch.
+    Example: condition -> process
+    """
     c: DataExpression
     x: ProcessExpression
-    
-    def __init__(self, c: DataExpression, x: ProcessExpression) -> None:
-        self.x = x
-        self.c = c
 
     def __str__(self) -> str:
         return f"({self.c}) -> ({self.x})"
 
 
+@dataclass(frozen=True)
 class IfThenElse(ProcessExpression):
+    """
+    Represents a conditional process with two branches.
+    Example: condition -> process1 <> process2
+    """
     c: DataExpression
     x: ProcessExpression
     y: ProcessExpression
-    
-    def __init__(self, c: DataExpression, x: ProcessExpression, y: ProcessExpression) -> None:
-        self.c = c
-        self.x = x
-        self.y = y
 
     def __str__(self) -> str:
         return f"({self.c}) -> ({self.x}) <> ({self.y})"
 
 
+@dataclass(frozen=True)
 class BinaryOperator(ProcessExpression):
+    """Base class for all binary operators in the process algebra."""
     op: str
     x: ProcessExpression
     y: ProcessExpression
-    
-    def __init__(self, op: str, x: ProcessExpression, y: ProcessExpression) -> None:
-        self.op = op
-        self.x = x
-        self.y = y
 
     def __str__(self) -> str:
-        x = self.x
-        y = self.y
-        op = self.op
-        return f"({x}) {op} ({y})"
+        return f"({self.x}) {self.op} ({self.y})"
 
 
+@dataclass(frozen=True)
 class Choice(BinaryOperator):
+    """
+    Represents alternative composition (choice) between processes.
+    Example: p + q
+    """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super(Choice, self).__init__("+", x, y)
+        super().__init__("+", x, y)
 
 
+@dataclass(frozen=True)
 class Seq(BinaryOperator):
+    """
+    Represents sequential composition of processes.
+    Example: p . q
+    """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super(Seq, self).__init__(".", x, y)
+        super().__init__(".", x, y)
 
 
+@dataclass(frozen=True)
 class BoundedInit(BinaryOperator):
+    """
+    Represents bounded initialization between processes.
+    Example: p << q
+    """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super(BoundedInit, self).__init__("<<", x, y)
+        super().__init__("<<", x, y)
 
 
+@dataclass(frozen=True)
 class LeftMerge(BinaryOperator):
+    """
+    Represents left merge parallel composition.
+    Example: p ||_ q
+    """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super(LeftMerge, self).__init__("||_", x, y)
+        super().__init__("||_", x, y)
 
 
+@dataclass(frozen=True)
 class Merge(BinaryOperator):
+    """
+    Represents parallel composition of processes.
+    Example: p || q
+    """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super(Merge, self).__init__("||", x, y)
+        super().__init__("||", x, y)
 
 
+@dataclass(frozen=True)
 class Sync(BinaryOperator):
+    """
+    Represents synchronization of processes.
+    Example: p | q
+    """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super(Sync, self).__init__("|", x, y)
+        super().__init__("|", x, y)
 
 
+@dataclass(frozen=True)
 class At(ProcessExpression):
+    """
+    Represents the at operator for timed processes.
+    Example: p @ t
+    """
     x: ProcessExpression
     t: DataExpression
-    
-    def __init__(self, x: ProcessExpression, t: DataExpression) -> None:
-        self.x = x
-        self.t = t
 
     def __str__(self) -> str:
-        x = self.x
-        t = self.t
-        return f"({x}) @ ({t})"
+        return f"({self.x}) @ ({self.t})"
 
 
+@dataclass(frozen=True)
 class Allow(ProcessExpression):
+    """
+    Represents the allow operator that specifies allowed multi-actions.
+    Example: allow({a|b, c}, p)
+    """
     V: list[MultiAction]
     x: ProcessExpression
-    
-    def __init__(self, V: list[MultiAction], x: ProcessExpression) -> None:
-        self.V = V
-        self.x = x
 
     def __str__(self) -> str:
-        V = self.V
-        x = self.x
-        return f"allow({{{', '.join(map(str, V))}}}, {x})"
+        return f"allow({{{', '.join(map(str, self.V))}}}, {self.x})"
 
 
+@dataclass(frozen=True)
 class Block(ProcessExpression):
+    """
+    Represents the block operator that blocks specified actions.
+    Example: block({a, b}, p)
+    """
     B: list[str]
     x: ProcessExpression
-    
-    def __init__(self, B: list[str], x: ProcessExpression) -> None:
-        self.B = B
-        self.x = x
 
     def __str__(self) -> str:
-        B = self.B
-        x = self.x
-        return f"block({{{', '.join(B)}}}, {x})"
+        return f"block({{{', '.join(self.B)}}}, {self.x})"
 
 
+@dataclass(frozen=True)
 class Comm(ProcessExpression):
+    """
+    Represents the communication operator for renaming action combinations.
+    Example: comm({a|b -> c}, p)
+    """
     C: list[str]
     x: ProcessExpression
-    
-    def __init__(self, C: list[str], x: ProcessExpression) -> None:
-        self.C = C
-        self.x = x
 
     def __str__(self) -> str:
-        C = self.C
-        x = self.x
-        return f"comm({{{', '.join(C)}}}, {x})"
+        return f"comm({{{', '.join(self.C)}}}, {self.x})"
 
 
+@dataclass(frozen=True)
 class Hide(ProcessExpression):
+    """
+    Represents the hide operator that hides specified actions.
+    Example: hide({a, b}, p)
+    """
     I: list[str]
     x: ProcessExpression
-    
-    def __init__(self, I: list[str], x: ProcessExpression) -> None:
-        self.I = I
-        self.x = x
 
     def __str__(self) -> str:
-        I = self.I
-        x = self.x
-        return f"hide({{{', '.join(I)}}}, {x})"
+        return f"hide({{{', '.join(self.I)}}}, {self.x})"
 
 
+@dataclass(frozen=True)
 class Rename(ProcessExpression):
+    """
+    Represents the rename operator for renaming actions.
+    Example: rename({a -> b}, p)
+    """
     R: list[str]
     x: ProcessExpression
-    
-    def __init__(self, R: list[str], x: ProcessExpression) -> None:
-        self.R = R
-        self.x = x
 
     def __str__(self) -> str:
-        x = self.x
-        R = self.R
-        return f"rename({{{', '.join(R)}}}, {x})"
+        return f"rename({{{', '.join(self.R)}}}, {self.x})"
 
 
+@dataclass(frozen=True)
 class StochasticOperator(ProcessExpression):
+    """
+    Represents a stochastic operator with a distribution.
+    Example: dist x:Real[dist]. p
+    """
     v: Variable
     dist: DataExpression
     x: ProcessExpression
-    
-    def __init__(self, v: Variable, dist: DataExpression, x: ProcessExpression) -> None:
-        self.v = v
-        self.dist = dist
-        self.x = x
 
     def __str__(self) -> str:
-        dist = self.dist
-        v = self.v
-        x = self.x
-        return f"dist {v}: {v.type}[{dist}].({x})"
+        return f"dist {self.v}: {self.v.type}[{self.dist}].({self.x})"
