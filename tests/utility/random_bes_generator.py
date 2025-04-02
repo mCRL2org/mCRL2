@@ -1,87 +1,115 @@
 #!/usr/bin/env python
 
-#~ Copyright 2010 Wieger Wesselink.
-#~ Distributed under the Boost Software License, Version 1.0.
-#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+# ~ Copyright 2010 Wieger Wesselink.
+# ~ Distributed under the Boost Software License, Version 1.0.
+# ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import random
+from dataclasses import dataclass
+from typing import List, Union
+from abc import ABC, abstractmethod
 
-class PredicateVariable:
-    def __init__(self, name):
-        self.name = name
+@dataclass(frozen=True)
+class BesFormula(ABC):
+    """Abstract base class for all formula types in a Boolean Equation System."""
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass
 
-    def __repr__(self):
+@dataclass(frozen=True)
+class PredicateVariable(BesFormula):
+    """Represents a predicate variable in a Boolean Equation System."""
+    name: str
+
+    def __repr__(self) -> str:
         return self.name
 
+@dataclass(frozen=True)
 class Equation:
-    def __init__(self, sigma, var, formula):
-        self.sigma = sigma
-        self.var = var
-        self.formula = formula
+    """Represents a single equation in a Boolean Equation System.
+    
+    Contains a fixpoint operator (sigma), variable and a formula.
+    """
+    sigma: str
+    var: PredicateVariable
+    formula: BesFormula
 
-    def __repr__(self):
-        return '%s %s = %s;' % (self.sigma, self.var, self.formula)
+    def __repr__(self) -> str:
+        return f"{self.sigma} {self.var} = {self.formula};"
 
+@dataclass(frozen=True)
 class BooleanEquationSystem:
-    def __init__(self, equations, init):
-        self.equations = equations
-        self.init = init
+    """Represents a complete Boolean Equation System.
+    
+    Contains a list of equations and an initial variable.
+    """
+    equations: List[Equation]
+    init: PredicateVariable
 
-    def __repr__(self):
-        # Note: for the moment we use pbes instead of BooleanEquationSystem, since there is no parser for BESs
-        return 'pbes\n%s\n\ninit %s;' % ('\n'.join(map(str, self.equations)), self.init)
+    def __repr__(self) -> str:
+        return f"pbes\n{'\n'.join(map(str, self.equations))}\n\ninit {self.init};"
 
-class UnaryOperator:
-    def __init__(self, op, x):
-        self.op = op
-        self.x = x
+@dataclass(frozen=True)
+class UnaryOperator(BesFormula):
+    """Represents a unary operator (like negation) in a Boolean formula."""
+    op: str
+    x: BesFormula
 
-    def __repr__(self):
-        x = self.x
-        op = self.op
-        return '%s(%s)' % (op, x)
+    def __repr__(self) -> str:
+        return f"{self.op}({self.x})"
 
-class BinaryOperator:
-    def __init__(self, op, x, y):
-        self.op = op
-        self.x = x
-        self.y = y
+@dataclass(frozen=True)
+class BinaryOperator(BesFormula):
+    """Represents a binary operator (like and, or) in a Boolean formula."""
+    op: str
+    x: BesFormula
+    y: BesFormula
 
-    def __repr__(self):
-        x = self.x
-        y = self.y
-        op = self.op
-        return '(%s) %s (%s)' % (x, op, y)
+    def __repr__(self) -> str:
+        return f"({self.x}) {self.op} ({self.y})"
 
-def not_(x):
-    return UnaryOperator('!', x)
+def not_(x: BesFormula) -> UnaryOperator:
+    """Creates a negation operator for a given formula."""
+    return UnaryOperator("!", x)
 
-def and_(x, y):
-    return BinaryOperator('&&', x, y)
+def and_(x: BesFormula, y: BesFormula) -> BinaryOperator:
+    """Creates a conjunction between two formulas."""
+    return BinaryOperator("&&", x, y)
 
-def or_(x, y):
-    return BinaryOperator('||', x, y)
+def or_(x: BesFormula, y: BesFormula) -> BinaryOperator:
+    """Creates a disjunction between two formulas."""
+    return BinaryOperator("||", x, y)
 
-def implies(x, y):
-    return BinaryOperator('=>', x, y)
+def implies(x: BesFormula, y: BesFormula) -> BinaryOperator:
+    """Creates an implication between two formulas."""
+    return BinaryOperator("=>", x, y)
 
 operators = [implies, not_, and_, or_]
 operators = [and_, or_]
 
-def is_unary(op):
+def is_unary(op) -> bool:
+    """ Checks if the operator is unary. """
     return op in [not_]
 
 # pick a random element x from a set s
 # returns x, (s - {x})
-def pick_element(s):
+def pick_element(s: List[BesFormula]) -> tuple[BesFormula, List[BesFormula]]:
+    """Randomly picks an element from a sequence.
+    
+    Returns a tuple of (picked element, remaining sequence).
+    """
     n = random.randint(0, len(s) - 1)
     x = s[n]
-    s = s[:n] + s[n+1:]
+    s = s[:n] + s[n + 1 :]
     return x, s
 
 # randomly pick n elements from a set s
 # returns a sequence with the selected elements
-def pick_elements(s, n):
+def pick_elements(s: List[BesFormula], n: int) -> List[BesFormula]:
+    """Randomly picks n elements from a sequence.
+    
+    Returns a list of picked elements.
+    """
     result = []
     for _ in range(n):
         x, s = pick_element(s)
@@ -89,13 +117,15 @@ def pick_elements(s, n):
     return result
 
 # Creates n terms
-def make_terms(predvars, n):
+def make_terms(predvars: List[PredicateVariable], n: int) -> List[PredicateVariable]:
+    """Creates n random predicate variable terms from the given set of variables."""
     result = []
     for _ in range(n):
         result.append(predvars[random.randint(0, len(predvars) - 1)])
     return result
 
-def join_terms(terms):
+def join_terms(terms: List[BesFormula]) -> List[BesFormula]:
+    """Combines terms using random operators to create more complex formulas."""
     op = operators[random.randint(0, len(operators) - 1)]
     if is_unary(op):
         x, terms = pick_element(terms)
@@ -107,14 +137,20 @@ def join_terms(terms):
     terms.append(z)
     return terms
 
-def make_bes(equation_count, term_size = 3):
-    predvars = [PredicateVariable('X%d' % i) for i in range(1, equation_count + 1)]
+def make_bes(equation_count: int, term_size: int = 3) -> BooleanEquationSystem:
+    """Generates a random Boolean Equation System.
+    
+    Args:
+        equation_count: Number of equations to generate
+        term_size: Maximum size of terms in each equation
+    """
+    predvars = [PredicateVariable(f"X{i}") for i in range(1, equation_count + 1)]
     equations = []
     for i in range(equation_count):
         terms = make_terms(predvars, random.randint(1, term_size))
         while len(terms) > 1:
             terms = join_terms(terms)
-        sigma, dummy = pick_element(['mu', 'nu'])
+        sigma, dummy = pick_element(["mu", "nu"])
         equations.append(Equation(sigma, predvars[i], terms[0]))
     init = predvars[0]
     return BooleanEquationSystem(equations, init)
