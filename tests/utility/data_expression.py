@@ -5,6 +5,12 @@
 # ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 from dataclasses import dataclass
+from typing import Literal
+
+# Type constants
+TypeLiteral = Literal["Int", "Bool"]
+INT_TYPE: TypeLiteral = "Int"
+BOOL_TYPE: TypeLiteral = "Bool"
 
 @dataclass(frozen=True)
 class DataExpression:
@@ -15,7 +21,7 @@ class DataExpression:
 class Variable(DataExpression):
     """Represents a named variable with an associated type."""
     name: str
-    type: str = "Bool"
+    type: TypeLiteral = BOOL_TYPE
 
     def __str__(self) -> str:
         return self.name
@@ -24,7 +30,7 @@ class Variable(DataExpression):
 class Integer(DataExpression):
     """Represents an integer value."""
     value: str
-    type: str = "Int"
+    type: TypeLiteral = INT_TYPE
 
     def __str__(self) -> str:
         return self.value
@@ -33,7 +39,7 @@ class Integer(DataExpression):
 class Boolean(DataExpression):
     """Represents a boolean value."""
     value: str
-    type: str = "Bool"
+    type: TypeLiteral = BOOL_TYPE
 
     def __str__(self) -> str:
         return self.value

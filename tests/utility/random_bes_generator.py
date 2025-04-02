@@ -6,8 +6,16 @@
 
 import random
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Literal, Callable, TypeAlias
 from abc import ABC, abstractmethod
+
+# Add type aliases for clarity
+FixPoint = Literal["mu", "nu"]
+Operator = Literal["!", "&&", "||", "=>"]
+
+# Constants
+MU: FixPoint = "mu"
+NU: FixPoint = "nu"
 
 @dataclass(frozen=True)
 class BesFormula(ABC):
@@ -15,6 +23,8 @@ class BesFormula(ABC):
     @abstractmethod
     def __repr__(self) -> str:
         pass
+    
+OperatorFunction = Callable[..., BesFormula]
 
 @dataclass(frozen=True)
 class PredicateVariable(BesFormula):
@@ -30,7 +40,7 @@ class Equation:
     
     Contains a fixpoint operator (sigma), variable and a formula.
     """
-    sigma: str
+    sigma: FixPoint
     var: PredicateVariable
     formula: BesFormula
 
@@ -52,7 +62,7 @@ class BooleanEquationSystem:
 @dataclass(frozen=True)
 class UnaryOperator(BesFormula):
     """Represents a unary operator (like negation) in a Boolean formula."""
-    op: str
+    op: Literal["!"]
     x: BesFormula
 
     def __repr__(self) -> str:
@@ -61,7 +71,7 @@ class UnaryOperator(BesFormula):
 @dataclass(frozen=True)
 class BinaryOperator(BesFormula):
     """Represents a binary operator (like and, or) in a Boolean formula."""
-    op: str
+    op: Literal["&&", "||", "=>"]
     x: BesFormula
     y: BesFormula
 
@@ -84,12 +94,12 @@ def implies(x: BesFormula, y: BesFormula) -> BinaryOperator:
     """Creates an implication between two formulas."""
     return BinaryOperator("=>", x, y)
 
-operators = [implies, not_, and_, or_]
-operators = [and_, or_]
+# Single operators list definition
+operators: List[OperatorFunction] = [and_, or_]
 
-def is_unary(op) -> bool:
+def is_unary(op: OperatorFunction) -> bool:
     """ Checks if the operator is unary. """
-    return op in [not_]
+    return op is not_
 
 # pick a random element x from a set s
 # returns x, (s - {x})
@@ -99,9 +109,7 @@ def pick_element(s: List[BesFormula]) -> tuple[BesFormula, List[BesFormula]]:
     Returns a tuple of (picked element, remaining sequence).
     """
     n = random.randint(0, len(s) - 1)
-    x = s[n]
-    s = s[:n] + s[n + 1 :]
-    return x, s
+    return s[n], s[:n] + s[n+1:]
 
 # randomly pick n elements from a set s
 # returns a sequence with the selected elements
@@ -150,7 +158,7 @@ def make_bes(equation_count: int, term_size: int = 3) -> BooleanEquationSystem:
         terms = make_terms(predvars, random.randint(1, term_size))
         while len(terms) > 1:
             terms = join_terms(terms)
-        sigma, dummy = pick_element(["mu", "nu"])
+        sigma = random.choice([MU, NU])
         equations.append(Equation(sigma, predvars[i], terms[0]))
     init = predvars[0]
     return BooleanEquationSystem(equations, init)
