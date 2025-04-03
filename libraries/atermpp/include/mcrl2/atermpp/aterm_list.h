@@ -208,6 +208,15 @@ public:
     assert(!defined() || type_is_list());
   }
 
+  /// \brief Creates a term_list from the elements in the range.
+  template<std::ranges::range R>
+  explicit term_list(R&& r)
+    : aterm(detail::make_list_forward<Term, std::ranges::iterator_t<R>, detail::do_not_convert_term<Term> >
+                (std::ranges::begin(r), std::ranges::end(r), detail::do_not_convert_term<Term>()))
+  {
+    assert(!defined() || type_is_list());
+  }
+
   /// \brief A constructor based on an initializer list.
   /// \details This constructor is not made explicit to conform to initializer lists in standard containers.
   /// \param init The initialiser list.
