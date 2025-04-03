@@ -77,6 +77,6 @@ if(APPLE)
   add_compile_definitions(GL_SILENCE_DEPRECATION)
 endif()
 
-# Enable C++17 for all targets.
-set(CMAKE_CXX_STANDARD 23)
+# Enable C++20 for all targets.
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
