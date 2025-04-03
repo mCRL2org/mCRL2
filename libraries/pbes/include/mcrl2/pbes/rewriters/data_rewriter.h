@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_REWRITERS_DATA_REWRITER_H
 #define MCRL2_PBES_REWRITERS_DATA_REWRITER_H
 
+#include "mcrl2/atermpp/concepts.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/substitutions/no_substitution.h"
 #include "mcrl2/pbes/builder.h"
 
@@ -62,10 +64,12 @@ struct add_data_rewriter: public Builder<Derived>
     : R(R_), sigma(sigma_)
   {}
 
-  template <class T>
+  template <atermpp::IsATerm T>
   void apply(T& result, const data::data_expression& x)
   {
-    data_rewrite(atermpp::reference_cast<data::data_expression>(result), x, R, sigma);
+    data::data_expression result_tmp;
+    data_rewrite(result_tmp, x, R, sigma);
+    result = result_tmp;
   }
 
   template <class T>
