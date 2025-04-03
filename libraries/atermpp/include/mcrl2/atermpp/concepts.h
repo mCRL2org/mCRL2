@@ -23,6 +23,9 @@ concept IsATerm = requires(T t)
 
     /// aterm cast cannot be applied types derived from aterms where extra fields are added.
     requires sizeof(std::remove_reference_t<T>) == sizeof(atermpp::unprotected_aterm_core);
+
+    /// A pointer to a standard-layout class may be converted (with reinterpret_cast) to a pointer to its first non-static data member and vice versa. 
+    requires std::is_standard_layout_v<T>;
 };
 
 /// Concept that can be used to indicate that T is a function that can convert an aterm to another aterm.
@@ -34,16 +37,7 @@ concept IsTermConverter = requires(T t)
     std::is_invocable<std::remove_reference_t<T>, atermpp::unprotected_aterm_core>::value;
 };
 
-/// Concept that can be used to identify C as a container.
-/// TODO: Is term_list a container, and if not, why?
-template<typename C>
-concept IsContainer = requires(C c)
-{
-    /// Container must be a range.
-    requires std::ranges::range<std::remove_reference_t<C>>;
-
-    /// Container must have a value type.
-    typename std::remove_reference_t<C>::value_type;
-};
+static_assert(atermpp::IsATerm<unprotected_aterm_core>, "unprotected_aterm_core must be an aterm");
+static_assert(atermpp::IsATerm<aterm_core>, "aterm_core must be an aterm");
 
 } // namespace atermpp
