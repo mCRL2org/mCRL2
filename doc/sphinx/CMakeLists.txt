@@ -73,9 +73,3 @@ add_custom_target(cleandoc
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${SPHINX_BUILD_TEMP_DIR}
   VERBATIM
 )
-
-if(MCRL2_ENABLE_DOCUMENTATION_MANUAL)
-  if(NOT MCRL2_ENABLE_EXPERIMENTAL or NOT MCRL2_ENABLE_STABLE)
-    message(FATAL_ERROR "The option MCRL2_ENABLE_DOCUMENTATION_MANUAL requires both the stable and experimental tools to be built")
-  endif()
-endif()
