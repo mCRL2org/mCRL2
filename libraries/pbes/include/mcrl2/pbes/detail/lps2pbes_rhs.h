@@ -12,7 +12,9 @@
 #ifndef MCRL2_PBES_DETAIL_LPS2PBES_RHS_H
 #define MCRL2_PBES_DETAIL_LPS2PBES_RHS_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/consistency.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/pbes/detail/lps2pbes_par.h"
 #include "mcrl2/pbes/detail/lps2pbes_sat.h"
 #include "mcrl2/pbes/replace.h"
@@ -174,9 +176,11 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
   {
     typedef TermTraits tr;
     const data::variable_list& d = lps.process_parameters();
-    data::data_expression_list gi1 = data::replace_variables(atermpp::container_cast<data::data_expression_list>(d), data::assignment_sequence_substitution(gi));
+    auto de =  data::data_expression_list(d | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); }));
+
+    data::data_expression_list gi1 = data::replace_variables(de, data::assignment_sequence_substitution(gi));
     auto fi = action_expressions(ai.actions());
-    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + fi + gi1;
+    data::data_expression_list da = data::data_expression_list(de) + fi + gi1;
     propositional_variable_instantiation Pos(Zpos.at(ai).name(), da);
     propositional_variable_instantiation Neg(Zneg.at(ai).name(), da);
     auto right1 = right;
