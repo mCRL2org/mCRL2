@@ -210,14 +210,14 @@ T replace_data_expressions(const T& x,
   return result;
 }
 
-template <typename T, typename Substitution>
-  requires (!atermpp::IsATerm<T>)
-void replace_variables(T& x, const Substitution& sigma)
+template <atermpp::IsATerm T, typename Substitution>
+void replace_variables_update(T& x, const Substitution& sigma)
 {
   core::make_update_apply_builder<data::data_expression_builder>(sigma).update(x);
 }
 
-template <atermpp::IsATerm T, typename Substitution>
+template <typename T, typename Substitution>
+[[nodiscard("resulting term should be assigned")]]
 T replace_variables(const T& x, const Substitution& sigma)
 {
   T result;
@@ -226,17 +226,17 @@ T replace_variables(const T& x, const Substitution& sigma)
 }
 
 template <typename T, typename Substitution>
-void replace_all_variables(T& x,
+void replace_all_variables_update(T& x,
     const Substitution& sigma,
     typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
 {
   core::make_update_apply_builder<data::variable_builder>(sigma).update(x);
 }
 
-template <typename T, typename Substitution>
+template <atermpp::IsATerm T, typename Substitution>
+[[nodiscard("resulting term should be assigned")]]
 T replace_all_variables(const T& x,
-    const Substitution& sigma,
-    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+    const Substitution& sigma)
 {
   T result;
   core::make_update_apply_builder<data::variable_builder>(sigma).apply(result, x);

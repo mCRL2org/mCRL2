@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/data/data_expression.h"
 #define MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 
 #include "mcrl2/data/consistency.h"
@@ -22,6 +24,8 @@
 #ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 #include "mcrl2/data/detail/print_parse_check.h"
 #endif
+
+#include <ranges>
 
 namespace mcrl2 {
 
@@ -300,14 +304,14 @@ struct absinthe_algorithm
     data::data_expression_list lift(const data::data_expression_list& x)
     {
       data::data_expression_list result;
-      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply_list(result, x);
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
       return result;
     }
 
     data::variable_list lift(const data::variable_list& x)
     {
       data::variable_list result;
-      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply_list(result, x);
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
       return result;
     }
 
@@ -359,11 +363,12 @@ struct absinthe_algorithm
       data::data_expression q = data::lazy::join_and(z.begin(), z.end());
       if (m_is_over_approximation)
       {
-        result = make_exists_(variables, and_(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
+        result = make_exists_(variables, and_(q, 
+          propositional_variable_instantiation(x.name(), data::data_expression_list(variables | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); })))));
       }
       else
       {
-        result = make_forall_(variables, imp(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
+        result = make_forall_(variables, imp(q, propositional_variable_instantiation(x.name(), data::data_expression_list(variables | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); })))));
       }
     }
 

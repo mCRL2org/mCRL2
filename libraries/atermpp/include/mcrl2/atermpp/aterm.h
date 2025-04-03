@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/aterm_core.h"
 #include "mcrl2/atermpp/concepts.h"
 #include "mcrl2/atermpp/detail/aterm_appl_iterator.h"
+#include "mcrl2/atermpp/detail/aterm_core.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
 #include "mcrl2/utilities/type_traits.h"
@@ -302,7 +303,7 @@ const Derived& down_cast(const Base& t)
   assert(Derived(static_cast<const aterm&>(t)) != aterm());
 
   // UB: Only allowed when we constructed an actual Derived type
-  return reinterpret_cast<const Derived&>(t);
+  return reinterpret_cast<const Derived&>(reinterpret_cast<const detail::_aterm&>(t));
 }
 
 /// \brief A cast form an aterm derived class to a class that inherits in (possibly multiple steps) from this class.
@@ -315,8 +316,10 @@ template <IsATerm Derived, IsATerm Base>
   requires std::is_base_of_v<std::remove_reference_t<Base>, std::remove_reference_t<Derived>>
 const Derived& vertical_cast(const Base& t)
 {
-  // UB: Only allowed when we constructed an actual Derived type
-  return reinterpret_cast<const Derived&>(t);
+  // Runtime check that the cast is valid.
+  assert(Derived(static_cast<const aterm&>(t)) != aterm());
+  
+  return reinterpret_cast<const Derived&>(reinterpret_cast<const detail::_aterm&>(t));
 }
 
 /// \brief Send the term in textual form to the ostream.
