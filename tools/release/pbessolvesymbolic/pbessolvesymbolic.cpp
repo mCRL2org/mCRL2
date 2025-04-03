@@ -284,7 +284,6 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
     pbes_system::symbolic_reachability_options options;
 
     // Lace options
-    std::size_t lace_n_workers = 1;
     std::size_t lace_dqsize = 1024*1024*4; // set large default
     std::size_t lace_stacksize = 0; // use default
 
@@ -408,7 +407,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       options.srf                                   = parser.option_argument("srf");
       options.rewrite_strategy                      = rewrite_strategy();
       options.dot_file                              = parser.option_argument("dot");
-      lace_n_workers = number_of_threads();
+      options.max_workers                           = number_of_threads();
       if (parser.has_option("lace-dqsize"))
       {
         lace_dqsize = parser.option_argument_as<int>("lace-dqsize");
@@ -653,7 +652,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
     bool run() override
     {
-      lace_init(lace_n_workers, lace_dqsize);
+      lace_init( options.max_workers, lace_dqsize);
       lace_startup(lace_stacksize, nullptr, nullptr);
       sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
       sylvan::sylvan_init_package();
