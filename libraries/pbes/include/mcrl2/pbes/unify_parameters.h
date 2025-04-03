@@ -173,7 +173,10 @@ void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equation
   std::map<core::identifier_string, data::variable_list> propositional_variable_parameters;
   for (const auto& eqn: p.equations())
   {
-    propositional_variable_parameters[eqn.variable().name()] = eqn.variable().parameters();
+    if (!ignore_ce_equations || !detail::is_counter_example_equation(eqn.to_pbes()))
+    {
+      propositional_variable_parameters[eqn.variable().name()] = eqn.variable().parameters();
+    }
   }
 
   unify_parameters_replace_function replace(propositional_variable_parameters, p.data(), reset);
