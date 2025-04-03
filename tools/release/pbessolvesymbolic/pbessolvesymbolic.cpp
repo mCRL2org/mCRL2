@@ -535,7 +535,13 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       pbes_system::detail::replace_global_variables(pbesspec, sigma);
       pbes_system::srf_pbes_with_ce pre_srf_pbes = preprocess(pbesspec, options);
 
+      mCRL2log(log::trace) << "============== Pre-SRF PBES ==============" << std::endl;
+      mCRL2log(log::trace) << pre_srf_pbes.to_pbes() << std::endl;
+
       pbes_system::srf_pbes srf_pbes = pre_srf2srfpbes(pre_srf_pbes);
+
+      mCRL2log(log::trace) << "============== SRF PBES ==============" << std::endl;
+      mCRL2log(log::trace) << srf_pbes.to_pbes() << std::endl;
 
       pbesspec = pre_srf_pbes.to_pbes();
       PbesReachAlgorithm reach(srf_pbes,  options_);
