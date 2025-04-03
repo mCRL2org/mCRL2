@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <compare>
 #include <sstream>
+#include <type_traits>
 #include "mcrl2/atermpp/detail/aterm_core.h"
 #include "mcrl2/atermpp/type_traits.h"
 

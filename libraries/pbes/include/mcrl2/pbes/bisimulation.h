@@ -12,10 +12,14 @@
 #ifndef MCRL2_PBES_BISIMULATION_H
 #define MCRL2_PBES_BISIMULATION_H
 
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/join.h"
+#include <ranges>
+#include <type_traits>
 
 namespace mcrl2
 {
@@ -106,7 +110,9 @@ class bisimulation_algorithm
 
     // creates the substitution v[i] := e[i]
     // pre: v.size() == e.size()
-    void make_substitution(const data::variable_list& v, const data::data_expression_list& e, data::mutable_map_substitution<>& result) const
+    template<std::ranges::range R>
+      requires std::is_same_v<std::ranges::range_value_t<R>, data::data_expression>
+    void make_substitution(const data::variable_list& v, R e, data::mutable_map_substitution<>& result) const
     {
       assert(v.size() == e.size());
       auto vi = v.begin();
@@ -750,7 +756,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         data::variable_list e11(tmp.begin(), tmp.end());
 
         data::mutable_map_substitution<> sigma1;
-        make_substitution(e1, atermpp::container_cast<data::data_expression_list>(e11), sigma1);
+        make_substitution(e1, e11 | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); }), sigma1);
         for (const data::variable& w: e11)
         {
           id_generator.add_identifier(w.name());
