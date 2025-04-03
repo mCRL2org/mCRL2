@@ -12,7 +12,9 @@
 #ifndef MCRL2_PBES_PBESINST_FINITE_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_FINITE_ALGORITHM_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/consistency.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/algorithms.h"
@@ -235,7 +237,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
                     p.add_assignments(di_list, sigma_i, super::R);
                     data::data_expression_list d_copy = rewrite_container(d, super::R, sigma);
                     data::data_expression_list e_copy = rewrite_container(e, super::R, sigma);
-                    data::data_expression_list di_copy = atermpp::container_cast<data::data_expression_list>(di_list);
+                    data::data_expression_list di_copy(di_list | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); }));
                     di_copy = data::replace_free_variables(di_copy, sigma_i);
                     data::data_expression c = make_condition(di_copy, d_copy);
                     core::identifier_string Y = m_rename(Xi, di_copy);
