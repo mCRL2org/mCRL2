@@ -44,7 +44,7 @@ class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
     {
       super::add_options(desc);
       desc.add_option("check-global-invariant",
-                  "check in nu-formulae if the core constraint is a global invariant for each equation", 'g');
+                  "check in nu-formulae if the core constraint is a global invariant for each equation (slow)", 'g');
       desc.add_option("smt",
                   "use SMT-based fixpoint checking instead of EQ-BDD-based checking (limited support)", 's');
     }
@@ -55,7 +55,7 @@ class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
         "pbesiteration",
         "Jore Booy",
         "Simplify a pbes by checking if the base contraint is an invariant.",
-        "Reads a file containing a PBES, and checks if the base contraint always holds to simplify it. If OUTFILE "
+        "Reads a file containing a PBES, and iterates to a solution. If OUTFILE "
         "is not present, standard output is used. If INFILE is not present, standard input is used."
       )
     {}
