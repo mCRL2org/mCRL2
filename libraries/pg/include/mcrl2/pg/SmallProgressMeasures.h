@@ -14,9 +14,7 @@
 #include "mcrl2/pg/LiftingStrategy.h"
 #include "mcrl2/utilities/logger.h"
 
-/*! \defgroup SmallProgressMeasures
-
-    Classes related to the Small Progress Measures parity game solving algoritm.
+/*! \defgroup SmallProgressMeasures Classes related to the Small Progress Measures parity game solving algoritm.
 */
 
 /*! \ingroup SmallProgressMeasures

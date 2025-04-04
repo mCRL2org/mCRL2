@@ -33,3 +33,5 @@ Now, an application of pbesparelm can detect the redundancy of variable
 
 The latter is readily seen to have solution ``true``. As a result, also the
 original equation systems have result ``true``.
+
+.. mcrl2_manual:: pbesabstract

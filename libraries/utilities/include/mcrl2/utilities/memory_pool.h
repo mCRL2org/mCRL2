@@ -76,7 +76,7 @@ public:
   /// \brief Reuses memory from block and allocates a new block when
   ///        no slots are free.
   /// \returns A pointer to a block of memory that can store an object of type T.
-  /// \threadsafe
+  /// \details threadsafe
   T* allocate()
   {
     // Only allow one thread to allocate at the time.

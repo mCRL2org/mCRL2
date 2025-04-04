@@ -12,11 +12,13 @@ import sys
 # used to parse mCRL2 version information from CMake file
 from pathlib import Path
 
-_CMAKE_SOURCE_DIR = os.environ['CMAKE_SOURCE_DIR']
-_MCRL2_TOOL_PATH = os.environ['MCRL2_TOOL_PATH']
-_MCRL2_TOOLS = os.environ['MCRL2_TOOLS']
-_SPHINX_BUILD_TEMP_DIR = os.environ['SPHINX_BUILD_TEMP_DIR']
-_SPHINX_BUILD_OUT_DIR = os.environ['SPHINX_BUILD_OUT_DIR']
+_CMAKE_SOURCE_DIR = '@CMAKE_SOURCE_DIR@'
+_SPHINX_BUILD_TEMP_DIR = '@SPHINX_BUILD_TEMP_DIR@'
+_SPHINX_BUILD_OUT_DIR = '@SPHINX_BUILD_OUT_DIR@'
+
+os.environ['CMAKE_SOURCE_DIR'] = _CMAKE_SOURCE_DIR
+os.environ['MCRL2_TOOLS'] = '@MCRL2_TOOLS@'
+os.environ['MCRL2_TOOL_PATH'] = '@MCRL2_TOOL_PATH@'
 
 # -- Path setup --------------------------------------------------------------
 
@@ -27,26 +29,8 @@ sys.path.insert(0, (Path(__file__).parent / '_extensions').as_posix())
 # -- Project information -----------------------------------------------------
 project = 'mCRL2'
 author = 'Technische Universiteit Eindhoven'
-release = '' # populated below
-version = ''
-
-# run CMake on the version file to obtain the current version of mCRL2
-from manual import call
-olddir = os.getcwd()
-try:
-    os.chdir(_CMAKE_SOURCE_DIR)
-    out = call('CMake', ['cmake', '-P',
-        f'{_CMAKE_SOURCE_DIR}/cmake/MCRL2Version.cmake']).decode('utf-8')
-    for line in iter(out.splitlines()):
-        matches = re.findall(r'MCRL2_MAJOR_VERSION ([\S]+)', line)
-        if matches:
-            release = matches[0]
-        matches = re.findall(r'MCRL2_MINOR_VERSION ([\S]+)', line)
-        if matches:
-            version = matches[0]
-finally:
-    os.chdir(olddir)
-version = f'{release}.{version}'
+release = '@MCRL2_MAJOR_VERSION@'
+version = '@MCRL2_MAJOR_VERSION@.@MCRL2_MINOR_VERSION@'
 
 # update copyright from current version
 copyright = f'2011-{datetime.datetime.now().year}, {author}'
@@ -63,11 +47,22 @@ master_doc = 'index'
 extensions = [
     'mcrl2_dparser',
     'mcrl2_pygment',
+    'myst_parser',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.mathjax',
+    'sphinx.ext.imgmath',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinx_rtd_theme',
+]
+
+imgmath_font_size = 14
+imgmath_image_format = 'svg'
+imgmath_latex_preamble = '\\usepackage{@CMAKE_CURRENT_SOURCE_DIR@/mcrl2_package}'
+imgmath_use_preview = True
+
+myst_enable_extensions = [
+    "dollarmath",
+    "colon_fence"
 ]
 
 # List of patterns, relative to source directory, that match files and
@@ -96,7 +91,7 @@ html_sidebars = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_extra_path = ['_doxygen/output/']
+html_extra_path = ['@DOXYGEN_OUTPUT_PATH@']
 html_js_files = []
 
 # Tweaking how the "last updated" is displayed
@@ -108,26 +103,23 @@ suppress_warnings = ['ref.citation']
 if tags.has('build_doxygen'):
     extensions.append('sphinxcontrib.doxylink')
 
+if tags.has('build_pdflatex'):
+   extensions.append('mcrl2_pdflatex')
+
+if tags.has('build_manual'):
+   extensions.append('mcrl2_manual')
+
 doxylink = {
-    'mcrl2' : (str(Path(__file__).parent / '_doxygen/mcrl2.tag'), 'doxygen/')
+    'mcrl2' : ('@DOXYGEN_TAG_PATH@', 'doxygen/')
 }
     
 # -- App setup - executed before the build process starts --------------------
 def setup(app):
-    import manual
-    import pdflatex
-
     os.makedirs(_SPHINX_BUILD_TEMP_DIR, mode = 0o755, exist_ok = True)
     os.makedirs(_SPHINX_BUILD_OUT_DIR, mode = 0o755, exist_ok = True)
 
     olddir = os.getcwd()
     try:
         os.chdir(_SPHINX_BUILD_TEMP_DIR)
-
-        if tags.has('build_pdflatex'):
-            pdflatex.generate_pdfs()
-
-        if tags.has('build_manual'):
-            manual.generate_rst(_CMAKE_SOURCE_DIR, _MCRL2_TOOL_PATH, _MCRL2_TOOLS)
     finally:
         os.chdir(olddir)

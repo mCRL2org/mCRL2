@@ -20,4 +20,4 @@ subprocess.run(['lps2lts', '-D', '--strategy=highway', '--cached', '--todo-max=1
 
 # Checking the properties below does not work on an ordinary computer, given 
 # the size of the state space. 
-subprocess.run(['lps2pbes', '-v', '-fnodeadlock.mcf', 'commprot.lps', 'commprot.nodeadlock.lps'], stdout=subprocess.PIPE, check=True)
+subprocess.run(['lps2pbes', '-v', '-fnodeadlock.mcf', 'commprot.lps', 'commprot.nodeadlock.pbes'], stdout=subprocess.PIPE, check=True)
