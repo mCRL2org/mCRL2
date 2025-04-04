@@ -364,7 +364,7 @@ class PbessolvesymbolicCounterexampleTest(ProcessTest):
     def create_inputfiles(self, runpath = '.'):
         super(PbessolvesymbolicCounterexampleTest, self).create_inputfiles(runpath)
         filename = f'{self.name}.mcf'
-        formula = random_state_formula_generator.make_srf_modal_formula()
+        formula = random_state_formula_generator.make_modal_formula()
         write_text(filename, str(formula))
         self.inputfiles += [filename]
         
