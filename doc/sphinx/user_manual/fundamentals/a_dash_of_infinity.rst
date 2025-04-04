@@ -1,28 +1,10 @@
 .. default-role:: math
 .. highlight:: mcrl2
-.. math::
- 
-    \newcommand{\seq}{\cdot}
-    \newcommand{\alt}{+}
-    \newcommand{\nat}{\mathbb{N}}
-    \newcommand{\bool}{\mathbb{B}}
-    \newcommand{\true}{\mathbf{true}}
-    \newcommand{\false}{\mathbf{false}}
-    \renewcommand{\a}[1]{\textit{#1}}
-    \renewcommand{\implies}{\mathop{\Rightarrow}}
-    \newcommand{\act}{\mathit{Act}}
-    \newcommand{\mccan}[1]{\langle #1 \rangle}
-    \newcommand{\mcall}[1]{[ #1 ]}
-    \newcommand{\sem}[1]{[\![ #1 ]\!]}
-    \newcommand{\R}{\mathrel{R}}
-    \newcommand{\bisim}{\stackrel{\leftrightarrow}{-}}
-    \newcommand{\oftype}{\smash{\,:\,}}
-    %
-
+   
 A dash of infinity
 ==================
 
-Recursion
+Recursion 
 ---------
 
 So far, our models of coffee machines only modelled a single transaction--after
@@ -38,7 +20,28 @@ operate the machine forever.
 .. _coffee-inf1:
 .. list-table:: An ever-lasting coffee machine.
 
-   * - .. image:: /_static/tikz/coffee_machine.svg
+   * - .. math::
+         :nowrap:
+               
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+            [auto,->]
+            \renewcommand{\a}[1]{\textit{#1}}
+            \scriptsize
+            \node[state,initial] (n0) {P}; 
+            \node[state, right of=n0] (n1) {}; 
+            \node[state, right of=n1] (n2) {};
+            \path (n0) edge[bend left] node[above]{\a{coin}} (n1) 
+                  (n1) edge[bend left] node[below]{\a{bad}} (n0)
+                  (n1) edge node[above]{\a{coin}} (n2) 
+                  (n2) edge[bend left=90] node[below]{\a{good}} (n0);
+         \end{tikzpicture}
 
      - ::
 
@@ -58,7 +61,37 @@ repetition once and obtain a bisimilar system, as shown in
 .. _coffee-inf2:
 .. list-table:: The ever-lasting coffee machine, unfolded once.
 
-   * - .. image:: /_static/tikz/coffee_machine_unfolded.svg
+   * - .. math::
+         :nowrap:
+
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+
+            [auto,->]
+            \renewcommand{\a}[1]{\textit{#1}}
+            \scriptsize
+            
+            \node[state,initial,initial where=right] (n3) {};
+            \node[state, left of=n3] (n4) {};
+            \node[state, left of=n4] (n5) {};
+            \node[state, below of=n5,yshift=-0.5cm] (n0) {P}; 
+            \node[state, right of=n0] (n1) {}; 
+            \node[state, right of=n1] (n2) {};
+            \path (n3) edge node[above]{\a{coin}} (n4) 
+                  (n4) edge node[above]{\a{coin}} (n5)
+                  (n4) edge[bend right] node[right]{\a{bad}} (n0) 
+                  (n5) edge node[left]{\a{good}} (n0)
+                  (n0) edge[bend left] node[above]{\a{coin}} (n1) 
+                  (n1) edge[bend left] node[below]{\a{bad}} (n0)
+                  (n1) edge node[below]{\a{coin}} (n2) 
+                  (n2) edge[bend left=90] node[below]{\a{good}} (n0);
+         \end{tikzpicture}
    
      - ::
 
@@ -177,14 +210,15 @@ The semantics of a formula is now given as the set of states
 `\sem{\varphi}_T^\rho \subseteq S`, defined as follows.
 
 .. math::
+  :nowrap:
 
     \begin{align*}
-    \sem{\true}_T^\rho &= S \\
-    \sem{X}_T^\rho &= \rho(X) \\
-    \sem{\neg\varphi}_T^\rho &= S \setminus \sem{\varphi}_T^\rho \\
-    \sem{\varphi \land \chi}_T^\rho &= \sem{\varphi}_T^\rho \cap \sem{\chi}_T^\rho \\
-    \sem{\mccan{a}\varphi}_T^\rho &= \{ s \in S ~|~ \exists_{s'\in S}~ s \stackrel{a}{\longrightarrow} s' \land s' \in \sem{\varphi}_T^\rho \} \\
-    \sem{\mu X\,.\,\varphi}_T^\rho &= \bigcap \{V \subseteq S ~|~ \sem{\varphi}_T^{\rho[X \mapsto V]} \subseteq V \}
+      \sem{\true}_T^\rho &= S       \\
+      \sem{X}_T^\rho     &= \rho(X) \\
+      \sem{\neg\varphi}_T^\rho        &= S \setminus \sem{\varphi}_T^\rho            \\
+      \sem{\varphi \land \chi}_T^\rho &= \sem{\varphi}_T^\rho \cap \sem{\chi}_T^\rho \\
+      \sem{\mccan{a}\varphi}_T^\rho   &= \{ s \in S ~|~ \exists_{s'\in S}~ s \stackrel{a}{\longrightarrow} s' \land s' \in \sem{\varphi}_T^\rho \} \\
+      \sem{\mu X\,.\,\varphi}_T^\rho  &= \bigcap \{V \subseteq S ~|~ \sem{\varphi}_T^{\rho[X \mapsto V]} \subseteq V \}
     \end{align*}
 
 We say that `T` *satisfies* `\varphi`, denoted `T \models \varphi`, if and only
@@ -235,7 +269,7 @@ our fixpoint.
    Consider the following formula, which states that a coffee machine will
    always give coffee after a finite number of steps.
 
-   .. math:: \mu X\,.\, \mccan{\true}\true \land \mcall{\overline{`\a{coffee}`}} X
+   .. math:: \mu X\,.\, \mccan{\true}\true \land \mcall{\overline{\a{coffee}}} X
 
    Note that this formula cannot be expressed using regular expressions. To see
    how the formula works, consider `\hat{X}^0 =\mccan{\true}\true \land
@@ -291,7 +325,27 @@ coins, with on the right the required mCRL2 notation.
 
 .. list-table:: A state accepting coins of all flavour.
 
-   * - .. image:: /_static/tikz/lts_coins.svg
+   * - .. math::
+         :nowrap:
+         
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+
+            [auto,->]
+            \renewcommand{\a}[1]{\textit{#1}}
+            \node[state,initial] (n)  {};
+            \node[state] (e) [below of=n, node distance=2cm] {};
+            \path
+               (n) edge[bend left=60] node[above,rotate=-90]{\scriptsize{\a{coin(c2)}}} (e)
+                     edge node[above,rotate=-90]{\scriptsize{\a{coin(c5)}}} (e)
+                     edge[bend right=60] node[below,rotate=-90]{\scriptsize{\a{coin(c10)}}} (e);
+         \end{tikzpicture}
 
      - ::
 
@@ -318,7 +372,32 @@ equivalent expression using only the plus operator.
 .. _nats:
 .. list-table:: Transition system with an infinite number of transitions. 
 
-   * - .. image:: /_static/tikz/lts_infinite.svg
+   * - .. math::
+         :nowrap:
+
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+
+            [auto,->]
+            \renewcommand{\a}[1]{\textit{#1}}
+            \node[state,initial] (n)  {};
+            \node[state] (e) [below of=n, node distance=4cm] {};
+            \foreach \n/\l in {0/0,1/2,2/4,3/6,4/8}
+            \foreach \x in {-1.75cm+\n*0.5cm}
+            \path[draw,->] (n) .. controls (\x,-2cm)..  (e) 
+               node[sloped,below,pos=0.5]{\scriptsize\a{num(\l)}};
+            \foreach \n in {5,...,11}
+            \foreach \x in {-1.75cm+\n*0.5cm}
+            \path[draw,->,dotted] (n) .. controls (\x,-2cm)..  (e) 
+               node[sloped,below,pos=0.5]{\scriptsize$\cdots$};
+         \end{tikzpicture}
+
      - ::
 
           act num: Nat;
@@ -359,7 +438,33 @@ are as follows:
 .. _picky:
 .. list-table:: A picky coffee machine.
 
-   * - .. image:: /_static/tikz/coffee_machine_picky.svg
+   * - .. math::
+         :nowrap:
+         
+         \begin{tikzpicture}
+            \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+               
+            [auto,->]
+            \renewcommand{\a}[1]{\textit{#1}}
+            \node[state,initial] (n0) at (0,0) {};
+            \node[state] (n2) at (-2,0) {};
+            \node[state] (n10) at (0,-2) {};
+            \node[state] (n5) at (2,0) {};
+
+            \path[->]
+            (n0) edge[bend right] node[above] {\scriptsize{\a{coin(c2)}}} (n2)
+            (n2) edge[bend right] node[below] {\scriptsize{\a{rej(c2)}}} (n0)
+            (n0) edge[bend left] node[above] {\scriptsize{\a{coin(c5)}}} (n5)
+            (n5) edge[bend left] node[below] {\scriptsize{\a{rej(c5)}}} (n0)
+            (n0) edge[bend left] node[right] {\scriptsize{\a{coin(c10)}}} (n10)
+            (n10) edge[bend left] node[left] {\scriptsize{\a{coffee}}} (n0);
+         \end{tikzpicture}
           
      - ::
 
@@ -474,10 +579,11 @@ most naturally done using quantifiers.
 The following abbreviations may also be used:
 
 .. math::
+   :nowrap:
     
    \begin{align*}
-   A \cap B &= \overline{\overline{A} \cup \overline{B}} &
-   \forall d{:}D. A &= \exists d{:}D. \overline{A}
+      A \cap B &= \overline{\overline{A} \cup \overline{B}} &
+      \forall d{:}D. A &= \exists d{:}D. \overline{A}
    \end{align*}
 
 Since our action formulae may now refer to *data variables*, the meaning
@@ -488,16 +594,17 @@ An action formula `A` over `\act` is associated with a set
 in the following manner. 
 
 .. math::
+   :nowrap:
 
     \begin{align*}
-    \sem{b}{\varepsilon} &= 
-    \{a(v) ~|~ a \in \act \wedge \varepsilon(b)\} \\
-    \sem{a(e)}{\varepsilon} &= \{ a(v) ~|~ v = \varepsilon(e) \} \\
-    \sem{\overline{A}}{\varepsilon} &= 
-    \{ a(v) ~|~ a \in \act \} \setminus \sem{A}{\varepsilon} \\
-    \sem{A \cup B}{\varepsilon} &= \sem{A}{\varepsilon} \cup \sem{B}{\varepsilon} \\
-    \sem{\exists d{:}D. A}{\varepsilon} &= 
-    \bigcup\limits_{v \in D} \sem{A}{\varepsilon[d := v]} 
+      \sem{b}{\varepsilon} &= 
+      \{a(v) ~|~ a \in \act \wedge \varepsilon(b)\} \\
+      \sem{a(e)}{\varepsilon} &= \{ a(v) ~|~ v = \varepsilon(e) \} \\
+      \sem{\overline{A}}{\varepsilon} &= 
+      \{ a(v) ~|~ a \in \act \} \setminus \sem{A}{\varepsilon} \\
+      \sem{A \cup B}{\varepsilon} &= \sem{A}{\varepsilon} \cup \sem{B}{\varepsilon} \\
+      \sem{\exists d{:}D. A}{\varepsilon} &= 
+      \bigcup\limits_{v \in D} \sem{A}{\varepsilon[d := v]} 
     \end{align*}
 
 .. admonition:: Remark
@@ -545,10 +652,11 @@ grammar for Hennessy-Milner logic.
 The following common abbreviations are allowed:
 
 .. math::
+   :nowrap:
 
     \begin{align*}
-    \exists d{:}D. \varphi&= \neg \forall d{:}D. \neg \varphi & \varphi \lor \chi &= \neg(\neg \varphi \land \neg \chi) \\
-    \mcall{`\a{A}`}\varphi &= \neg \mccan{`\a{A}`} \neg \varphi & \varphi \implies \chi &= \neg \varphi \lor \chi
+      \exists d{:}D. \varphi&= \neg \forall d{:}D. \neg \varphi & \varphi \lor \chi &= \neg(\neg \varphi \land \neg \chi) \\
+      \mcall{`\a{A}`}\varphi &= \neg \mccan{`\a{A}`} \neg \varphi & \varphi \implies \chi &= \neg \varphi \lor \chi
     \end{align*}
 
 An HML formula `\varphi` is interpreted over an LTS `T = \langle S,
@@ -558,14 +666,15 @@ states `\sem{\varphi}_T^\varepsilon \subseteq S` of the LTS in which
 the formula holds. It is defined as follows.
 
 .. math::
+   :nowrap:
 
     \begin{align*}
-    \sem{b}_T^\varepsilon &= \{s \in S ~|~ \varepsilon(b) \}\\
-    \sem{\neg\varphi}_T^\varepsilon &= S \setminus \sem{\varphi}_T^\varepsilon \\
-    \sem{\varphi \land \chi}_T^\varepsilon &= \sem{\varphi}_T^\varepsilon \cap \sem{\chi}_T^\varepsilon \\
-    \sem{\exists d{:}D. \varphi}_T^\varepsilon &= 
-    \bigcup\limits_{v \in D} \sem{\varphi}_T^{\varepsilon[d := v]} \\
-    \sem{\mccan{A}\varphi}_T^\varepsilon &= \{ s \in S ~|~ \exists_{s'\in S, a \in \sem{A}{\varepsilon}}~ s \stackrel{a}{\longrightarrow} s' \land s' \in \sem{\varphi}_T^\varepsilon \}
+      \sem{b}_T^\varepsilon &= \{s \in S ~|~ \varepsilon(b) \}\\
+      \sem{\neg\varphi}_T^\varepsilon &= S \setminus \sem{\varphi}_T^\varepsilon \\
+      \sem{\varphi \land \chi}_T^\varepsilon &= \sem{\varphi}_T^\varepsilon \cap \sem{\chi}_T^\varepsilon \\
+      \sem{\exists d{:}D. \varphi}_T^\varepsilon &= 
+      \bigcup\limits_{v \in D} \sem{\varphi}_T^{\varepsilon[d := v]} \\
+      \sem{\mccan{A}\varphi}_T^\varepsilon &= \{ s \in S ~|~ \exists_{s'\in S, a \in \sem{A}{\varepsilon}}~ s \stackrel{a}{\longrightarrow} s' \land s' \in \sem{\varphi}_T^\varepsilon \}
     \end{align*}
 
 We say that `T` *satisfies* `\varphi`, denoted `T \models \varphi`, if and only

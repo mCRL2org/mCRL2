@@ -9,6 +9,9 @@ scripts/code_generation/data_types/codegen.dot
 scripts/code_generation/data_types/codegen.log
 scripts/code_generation/data_types/codegen.pickle
 
+# Configured Sphinx conf.py file
+doc/sphinx/conf.py
+
 # Ignore the standard build directory
 build/
 .cache

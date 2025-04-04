@@ -53,3 +53,5 @@ Similarly it can be done starting from an LTS instead of an LPS::
 
    The interface of pbessolve is not stable yet. In particular the strategies that
    are available through the option `-s` are subject to change.
+
+.. mcrl2_manual:: pbessolve

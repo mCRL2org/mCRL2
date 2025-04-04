@@ -124,7 +124,7 @@ public:
   /// \brief Operator that provides a const reference at the position indicated by index.
   /// \param index The position in the indexed set.
   /// \return The value at position index.
-  /// \threadsafe
+  /// \details threadsafe
   const key_type& operator[](const size_type index) const;
 
   /// \brief Forward iterator which runs through the elements from the lowest to the largest number.

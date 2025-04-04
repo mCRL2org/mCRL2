@@ -13,3 +13,5 @@ and a classical and much slower algorithm by Baier, Engelen and Majster-Cederbau
 algorithms is primarily available for comparison purposes.
 
 It is expected that in the future more probabilistic equivalences will be supported.
+
+.. mcrl2_manual:: ltspbisim

@@ -101,6 +101,7 @@ A set of vectors can be represented by the following function similar to how
 :math:`\mathbb{N} \rightarrow \mathbb{B}` represents a set of natural numbers.
 
 .. math::
+  :nowrap:
 
   \begin{equation*}
     f: \mathbb{N} \times \cdots \times \mathbb{N} \rightarrow \mathbb{B}
@@ -111,6 +112,7 @@ since we can always bidirectionally map from natural numbers to abstract data.
 Now, the we can decompose :math:`f`` on the first argument as follows.
 
 .. math::
+  :nowrap:
 
   \begin{equation*}
     f(x_0, \ldots, x_n) = 
@@ -152,3 +154,5 @@ References
   - [1] Stefan Blom and Jan Cornelis van de Pol. Symbolic reachability for process algebras with recursive data types. In J.S. Fitzgerald, A.E. Haxthausen, and H. Yenigun, editors, Theoretical Aspects of Computing \- ICTAC 2008, number Supplement in Lecture Notes in Computer Science, pages 81–95. Springer, August 2008.
   - [2] Jeroen Meijer. Efficient learning and analysis of system behavior. PhD thesis, University of Twente, Netherlands, September 2019.
   - [3] Tom van Dijk, Jaco van de Pol. Sylvan: multi-core framework for decision diagrams. Int. J. Softw. Tools Technol. Transf. 19(6): 675-696 (2017)
+
+.. mcrl2_manual:: lpsreach

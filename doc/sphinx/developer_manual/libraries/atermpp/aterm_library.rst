@@ -472,13 +472,13 @@ This can be done by creating a class :mcrl2:`Expression` inheriting from an ater
      // Get left argument.
      const Expression& left(const Addition& e) const
      {
-       return down_cast<Expression>((\*this)[0]);
+       return down_cast<Expression>((*this)[0]);
      }
 
      // Get right argument.
      const Expression& right(const Addition& e) const
      {
-       return down_cast<Expression>((\*this)[1]);
+       return down_cast<Expression>((*this)[1]);
      }
 
    }

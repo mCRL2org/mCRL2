@@ -8,12 +8,8 @@
 </xsl:template>
 
 <xsl:template match="tool">
-<xsl:text>:orphan:
-
-.. manpage-</xsl:text><xsl:apply-templates select="name"/>
+<xsl:text>.. manpage-</xsl:text><xsl:apply-templates select="name"/>
 <xsl:text>
-
---------------------------------------------------------------------------------
 
 Usage
 ^^^^^

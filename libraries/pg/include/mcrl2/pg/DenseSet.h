@@ -15,10 +15,7 @@
 #include <memory>
 #include <utility>
 
-/*! \defgroup Containers
-
-    Custom container data structures.
-*/
+//! \defgroup Containers Custom container data structures.
 
 /*! \ingroup Containers
 
