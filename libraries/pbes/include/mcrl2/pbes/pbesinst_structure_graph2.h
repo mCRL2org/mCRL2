@@ -504,9 +504,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     pbesinst_structure_graph_algorithm2(
       const pbessolve_options& options,
       const pbes& p,
-      structure_graph& G
+      structure_graph& G,
+      std::optional<data::rewriter> rewriter = std::nullopt
     )
-      : pbesinst_structure_graph_algorithm(options, p, G),
+      : pbesinst_structure_graph_algorithm(options, p, G, rewriter),
         b(options.number_of_threads+1), find_loops_guard(2), fatal_attractors_guard(2)
     {}
 

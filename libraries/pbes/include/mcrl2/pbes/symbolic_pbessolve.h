@@ -10,9 +10,12 @@
 #ifndef MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 #define MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 
+#include "sylvan_ldd.hpp"
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "symbolic_parity_game.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
@@ -24,19 +27,21 @@ class symbolic_pbessolve_algorithm
 {
   private:
     const symbolic_parity_game& m_G;
+    bool m_check_strategy = false;
 
   public:
-    symbolic_pbessolve_algorithm(const symbolic_parity_game& G) :
-      m_G(G)
+    symbolic_pbessolve_algorithm(const symbolic_parity_game& G, bool check_strategy = false) :
+      m_G(G),
+      m_check_strategy(check_strategy)
     {}
 
-    std::pair<ldd, ldd> zielonka(const ldd& V)
+    std::tuple<ldd, ldd, ldd, ldd> zielonka(const ldd& V)
     {
       using namespace sylvan::ldds;
 
       if (V == empty_set())
       {
-        return { empty_set(), empty_set() };
+        return { empty_set(), empty_set(), empty_set(), empty_set() };
       }
 
       stopwatch timer;
@@ -49,24 +54,29 @@ class symbolic_pbessolve_algorithm
       std::array<const ldd, 2> Vplayer = m_G.players(V);
 
       ldd W[2];
+      ldd strategy[2];
       ldd W_1[2];
+      ldd strategy_1[2];
 
-      ldd A = m_G.safe_attractor(U, alpha, V, Vplayer);
+      const auto [A, A_strategy] = m_G.safe_attractor(U, alpha, V, Vplayer);
       mCRL2log(log::trace) << "A = attractor(" << m_G.print_nodes(U) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(A) << std::endl;
-      std::tie(W_1[0], W_1[1]) = zielonka(minus(V, A));
+      std::tie(W_1[0], W_1[1], strategy_1[0], strategy_1[1]) = zielonka(minus(V, A));
 
       // Original Zielonka version
       if (W_1[1 - alpha] == empty_set())
       {
         W[alpha] = union_(A, W_1[alpha]);
         W[1 - alpha] = empty_set();
+        strategy[alpha] = union_(union_(A_strategy, strategy_1[alpha]), merge(intersect(U, Vplayer[alpha]), V));
+        strategy[1 - alpha] = empty_set();
       }
       else
       {
-        ldd B = m_G.safe_attractor(W_1[1 - alpha], 1 - alpha, V, Vplayer);
+        const auto [B, B_strategy] = m_G.safe_attractor(W_1[1 - alpha], 1 - alpha, V, Vplayer);
         mCRL2log(log::trace) << "B = attractor(" << m_G.print_nodes(W_1[1 - alpha]) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(B) << std::endl;
-        std::tie(W[0], W[1]) = zielonka(minus(V, B));
+        std::tie(W[0], W[1], strategy[0], strategy[1]) = zielonka(minus(V, B));
         W[1 - alpha] = union_(W[1 - alpha], B);
+        strategy[1 - alpha] = union_(union_(strategy_1[1 - alpha], B_strategy), strategy[1 - alpha]);
       }
 
       mCRL2log(log::debug) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
@@ -74,8 +84,11 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::trace) << "\n  --- zielonka solution for ---\n" << m_G.print_graph(V) << std::endl;
       mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(W[0]) << std::endl;
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(W[1]) << std::endl;
+      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
+      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
+
       assert(union_(W[0], W[1]) == V);
-      return { W[0], W[1] };
+      return { W[0], W[1], strategy[0], strategy[1] };
     }
 
   public:
@@ -83,7 +96,8 @@ class symbolic_pbessolve_algorithm
     /// \brief Solve the given game restricted to V with Zielonka's recursive algorithm as solver.
     ///        The remaining parameters are sinks, vertices won by even and odd respectively.
     ///        Terminates early when initial_vertex has been solved.
-    bool solve(const ldd& initial_vertex,
+    /// \returns The winner and W0, W1, S0, S1. Where S0 and S1 are the strategies.
+    std::tuple<bool, ldd, ldd, ldd, ldd> solve(const ldd& initial_vertex,
         const ldd& V,
         const ldd& Vsinks = sylvan::ldds::empty_set(),
         const ldd& W0 = sylvan::ldds::empty_set(),
@@ -93,31 +107,60 @@ class symbolic_pbessolve_algorithm
       stopwatch timer;
       
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning);
+      std::array<ldd, 2> strategy;
+
+      ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning, strategy);
+
       if (includes(winning[0], initial_vertex))
       {
         mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-        return true;
+        mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+        mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+        mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
+        mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
+        return std::make_tuple(true, winning[0], winning[1], strategy[0], strategy[1]);
       }
       else if (includes(winning[1], initial_vertex))
       {
         mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-        return false;
+        mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+        mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+        mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
+        mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
+        return std::make_tuple(false, winning[0], winning[1], strategy[0], strategy[1]);
       }
 
       // If the initial vertex has not yet been won then run the zielonka solver as well.
       mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(V) << std::endl;
-      auto const& [solved0, solved1] = zielonka(Vtotal);
+      auto [solved0, solved1, strategy0, strategy1] = zielonka(Vtotal);
+
+      // Ensure that previously solved sets are included.
+      solved0 = union_(solved0, winning[0]);
+      solved1 = union_(solved1, winning[1]);
+      strategy0 = union_(strategy0, strategy[0]);
+      strategy1 = union_(strategy1, strategy[1]);
+
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solved0) << std::endl;
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solved1) << std::endl;
+      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy0) << std::endl;
+      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy1) << std::endl;
+
       if (includes(solved0, initial_vertex))
       {
-        return true;
+        if (m_check_strategy)
+        {
+          check_strategy(initial_vertex, V, Vsinks, solved0, solved1, false, strategy0);
+        }
+        return std::make_tuple(true, solved0, solved1, strategy0, strategy1);
       }
       else if (includes(solved1, initial_vertex))
       {
-        return false;
+        if (m_check_strategy)
+        {
+          check_strategy(initial_vertex, V, Vsinks, solved0, solved1, true, strategy1);
+        }
+        return std::make_tuple(false, solved0, solved1, strategy0, strategy1);
       }
       else
       {
@@ -138,19 +181,20 @@ class symbolic_pbessolve_algorithm
       // Make the game total.
       using namespace sylvan::ldds;
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
+      std::array<ldd, 2> strategy;
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
       }
 
       // Solve with zielonka twice for the safe sets.
-      ldd solved0 = union_(zielonka(m_G.compute_safe_vertices(0, Vtotal, I)).first, winning[0]);
+      ldd solved0 = union_(std::get<0>(zielonka(m_G.compute_safe_vertices(0, Vtotal, I))), winning[0]);
       if (includes(solved0, initial_vertex))
       {
         return { solved0, winning[1] };
       }
-      ldd solved1 = union_(zielonka(m_G.compute_safe_vertices(1, Vtotal, I)).second, winning[1]);
+      ldd solved1 = union_(std::get<1>(zielonka(m_G.compute_safe_vertices(1, Vtotal, I))), winning[1]);
       return { solved0, solved1 };
     }
 
@@ -170,7 +214,9 @@ class symbolic_pbessolve_algorithm
 
       // Make the game total and removed winning sets.
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
+      std::array<ldd, 2> strategy;
+
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
@@ -220,11 +266,11 @@ class symbolic_pbessolve_algorithm
 
         if (safe_variant)
         {
-          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I));
+          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I).first);
         }
         else
         {
-          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer));
+          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer).first);
         }
       }
 
@@ -250,7 +296,9 @@ class symbolic_pbessolve_algorithm
 
       // Make the game total and removed winning sets.
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
+      std::array<ldd, 2> strategy;
+
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
@@ -307,11 +355,11 @@ class symbolic_pbessolve_algorithm
 
         if (safe_variant)
         {
-          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I));
+          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I).first);
         }
         else
         {
-          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer));
+          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer).first);
         }
       }
 
@@ -334,7 +382,9 @@ class symbolic_pbessolve_algorithm
       stopwatch timer;
 
       std::array<ldd, 2> winning = { W0, W1 };
-      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning);
+      std::array<ldd, 2> strategy;
+
+      ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
         return { winning[0], winning[1] };
@@ -370,11 +420,11 @@ class symbolic_pbessolve_algorithm
           {
             if (safe_variant)
             {
-              winning[alpha] = union_(winning[alpha], m_G.safe_attractor(Z, alpha, Vtotal, Vplayer, I));
+              winning[alpha] = union_(winning[alpha], m_G.safe_attractor(Z, alpha, Vtotal, Vplayer, I).first);
             }
             else
             {
-              winning[alpha] = union_(winning[alpha], m_G.safe_attractor(Z, alpha, Vsafe[alpha], Vplayer));
+              winning[alpha] = union_(winning[alpha], m_G.safe_attractor(Z, alpha, Vsafe[alpha], Vplayer).first);
             }
             mCRL2log(log::debug) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for priority " << c << "\n";
             break;
@@ -391,6 +441,31 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
 
       return { winning[0], winning[1] };
+    }
+
+    /// Checks whether the computed strategy is indeed a correct certificate for the winning partition.
+    ///
+    /// Throws an exception when the strategy is invalid.
+    void check_strategy(const ldd& initial_vertex,
+      const ldd& V,
+      const ldd& Vsinks,
+      const ldd& W0, 
+      const ldd& W1, 
+      bool alpha, 
+      const ldd& strategy)
+    {
+      mCRL2log(log::debug) << "Checking the strategy of the solved parity game..." << std::endl;
+      symbolic_parity_game new_G = m_G.apply_strategy(alpha, strategy);
+      mCRL2log(log::trace) << "Minimal parity game G = " << new_G.print_graph(V) << std::endl;
+      
+
+      symbolic_pbessolve_algorithm check(new_G);
+
+      auto[result, W0_prime, W1_prime, S0, S1] = check.solve(initial_vertex, V, Vsinks);      
+      if (!(W0 == W0_prime && W1 == W1_prime && result != alpha))
+      {
+        throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
+      }
     }
 };
 
