@@ -11,17 +11,21 @@
 #ifndef MCRL2_UTILITIES_LOGGER_H
 #define MCRL2_UTILITIES_LOGGER_H
 
+#include "mcrl2/utilities/noncopyable.h"
+#include "mcrl2/utilities/text_utility.h"
+
+#include <array>
 #include <cassert>
 #include <atomic>
 #include <cstdio>
 #include <ctime>
-#include <map>
-#include <memory>
 #include <set>
-#include <stdexcept>
 
-#include "mcrl2/utilities/noncopyable.h"
-#include "mcrl2/utilities/text_utility.h"
+#ifdef __cpp_lib_format
+  #include <format>
+#endif
+
+#include <stdexcept>
 
 namespace mcrl2::log {
 
@@ -42,16 +46,18 @@ enum log_level_t
 /// \brief Convert log level to string
 /// This string is used to prefix messages in the logging output.
 inline
-std::string log_level_to_string(const log_level_t level)
+std::string_view log_level_to_string(const log_level_t level)
 {
-  static const char* const buffer[] = {"quiet", "error", "warning", "info", "status", "verbose", "debug", "trace"};
-  if ((unsigned) level >= sizeof(buffer) / sizeof(buffer[0]))  return "unknown level";
+  static std::array<std::string_view,87> buffer = { "quiet", "error", "warning", "info", "status", "verbose", "debug", "trace" };
+  if ((unsigned) level >= buffer.size()) {
+    return "unknown level";
+  }
   return buffer[level];
 }
 
 /// \brief Convert string to log level
 inline
-log_level_t log_level_from_string(const std::string& s)
+log_level_t log_level_from_string(const std::string_view s)
 {
   if (s == "quiet")
   {
@@ -87,7 +93,11 @@ log_level_t log_level_from_string(const std::string& s)
   }
   else
   {
-    throw std::runtime_error("Unknown log-level " + s + " provided.");
+#ifdef __cpp_lib_format
+    throw std::runtime_error(std::format("Unknown log-level {} provided.", s));
+#else
+    throw std::runtime_error("Unknown log-level " + std::string(s) + " provided.");
+#endif
   }
 }
 

@@ -120,9 +120,8 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
       data::data_expression value;
       aterm_stream >> value;
 
+      [[ maybe_unused]]
       auto [result, inserted] = lts.data_index.back().insert(value);
-      assert(i == result); utilities::mcrl2_unused(result);
-      assert(inserted); utilities::mcrl2_unused(inserted);
     }
   }
 
@@ -134,9 +133,8 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
     lps::multi_action value;
     aterm_stream >> value;
 
+    [[ maybe_unused]]
     auto [result, inserted] = lts.action_index.insert(value);
-    assert(i == result); utilities::mcrl2_unused(result);
-    assert(inserted); utilities::mcrl2_unused(inserted);
   }
 
   std::size_t number_of_groups = bitstream->read_integer();
