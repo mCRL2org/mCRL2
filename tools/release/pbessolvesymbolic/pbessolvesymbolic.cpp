@@ -622,7 +622,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
           
           // Based on the result remove the unnecessary equations related to counter example information. 
-          mCRL2log(log::verbose) << "Removing unnecessary example information for other player." << std::endl;
+          mCRL2log(log::verbose) << "Removing unnecessary counter example information for other player." << std::endl;
           auto pbesspec_simplified = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
           mCRL2log(log::trace) << pbesspec_simplified << std::endl;
 
