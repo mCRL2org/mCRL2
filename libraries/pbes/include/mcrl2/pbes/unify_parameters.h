@@ -12,12 +12,15 @@
 #ifndef MCRL2_PBES_UNIFY_PARAMETERS_H
 #define MCRL2_PBES_UNIFY_PARAMETERS_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/default_expression_generator.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include <optional>
+#include <type_traits>
 
 namespace mcrl2 {
 
@@ -97,6 +100,44 @@ struct unify_parameters_replace_function
       }
       missing_parameters[eqn_parameters] = missing;
     }
+  }
+
+  pbes_expression convert_ce_prop_var(const pbes_expression& x) const
+  {
+    assert(detail::is_ce_propositional_variable_instantiation(x, true));
+    
+    if (is_or(x))
+    {
+      // (phi__.left() && phi__.right()) || phi_.right()
+      const auto& phi_ = atermpp::down_cast<or_>(x);
+      if (is_and(phi_.left()))
+      {      
+        const auto& phi__ = atermpp::down_cast<and_>(phi_.left());
+
+        return or_(and_(operator()(atermpp::down_cast<propositional_variable_instantiation>(phi__.left())), 
+          operator()(atermpp::down_cast<propositional_variable_instantiation>(phi__.right()))), 
+          operator()(atermpp::down_cast<propositional_variable_instantiation>(phi_.right())));
+      }
+    }
+    if (is_and(x))
+    {
+      // (phi__.left() && phi__.right()) || phi_.right()
+      const auto& phi_ = atermpp::down_cast<and_>(x);
+      if (is_or(phi_.left()))
+      {      
+        const auto& phi__ = atermpp::down_cast<or_>(phi_.left());
+
+        return or_(and_(operator()(atermpp::down_cast<propositional_variable_instantiation>(phi__.left())), 
+          operator()(atermpp::down_cast<propositional_variable_instantiation>(phi__.right()))), 
+          operator()(atermpp::down_cast<propositional_variable_instantiation>(phi_.right())));
+      }
+    }
+    else if (is_propositional_variable_instantiation(x))
+    {
+      return operator()(atermpp::down_cast<propositional_variable_instantiation>(x));
+    }
+
+    std::abort();
   }
 
   propositional_variable_instantiation operator()(const propositional_variable_instantiation& x) const
@@ -194,22 +235,34 @@ void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equation
     {
       for (auto& summand: eqn.summands())
       {
-        summand.variable() = replace(summand.variable());
+        if constexpr (allow_ce)
+        {
+          summand.variable() = replace.convert_ce_prop_var(summand.variable());
+        }
+        else
+        {
+          summand.variable() = replace(summand.variable());
+        }
       }
       propositional_variable& X = eqn.variable();
       X = propositional_variable(X.name(), replace.parameters);
     }
     else {
-    {
       // For counter example equations it is important to unify the X_true and X_false.      
       for (auto& summand: eqn.summands())
       {
         if (summand.variable() == false_summand.variable() || summand.variable() == true_summand.variable())
         {
-          summand.variable() = replace(summand.variable());
+          if constexpr (allow_ce)
+          {
+            summand.variable() = replace.convert_ce_prop_var(summand.variable());
+          }
+          else
+          {
+            summand.variable() = replace(summand.variable());
+          }
         }
       }
-    }
     }
   }
 

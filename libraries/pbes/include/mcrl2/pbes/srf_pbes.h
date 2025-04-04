@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_SRF_PBES_H
 #define MCRL2_PBES_SRF_PBES_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
@@ -23,6 +24,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -47,22 +49,22 @@ inline pbes_expression make_not(const pbes_expression& x)
 }
 
 /// A summand in a srf equation, if allow_ce then counter example information is
-/// allowed. This means that the condition is a `pbes_expression` instead of a
-/// `data_expression`.
+/// allowed is the variable. This means that the variable is a `pbes_expression`
+/// satisfying `is_ce_propositional_variable_instantiation`.
 template <bool allow_ce>
 class pre_srf_summand
 {
+  using propositional_variable_instantiation_type = std::conditional_t<allow_ce, pbes_expression, propositional_variable_instantiation>;
   using condition_type = std::conditional_t<allow_ce, pbes_expression, data::data_expression>;
 protected:
   data::variable_list m_parameters;
   condition_type m_condition;
-  propositional_variable_instantiation m_X;
+  propositional_variable_instantiation_type m_X;
 
 public:
-  ///
   pre_srf_summand(data::variable_list parameters,
       const pbes_expression& condition,
-      propositional_variable_instantiation X)
+      propositional_variable_instantiation_type X)
       : m_parameters(std::move(parameters)),
         m_X(std::move(X))
   {
@@ -84,9 +86,9 @@ public:
 
   condition_type& condition() { return m_condition; }
 
-  const propositional_variable_instantiation& variable() const { return m_X; }
+  const propositional_variable_instantiation_type& variable() const { return m_X; }
 
-  propositional_variable_instantiation& variable() { return m_X; }
+  propositional_variable_instantiation_type& variable() { return m_X; }
 
   void add_variables(const data::variable_list& variables) { m_parameters = variables + m_parameters; }
 
@@ -106,7 +108,7 @@ public:
   {
     if (conjunctive)
     {
-      return make_forall_(m_parameters, imp(m_condition, m_X));
+      return make_forall_(m_parameters, or_(not_(pbes_expression(m_condition)), m_X));
     }
     else
     {
@@ -288,6 +290,23 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
     }
   }
 
+  void apply(const or_& x)
+  {
+    if constexpr (allow_ce)
+    {
+      if (allow_ce && is_ce_propositional_variable_instantiation(x, allow_ce))
+      {
+        const pbes_expression& f = true_();
+        summands.emplace_back(data::variable_list(), f, x);
+        return;
+      }
+    }
+
+    // Continue traversal.
+    apply(x.left());
+    apply(x.right());
+  }
+
   void apply(const exists& x)
   {
     std::vector<pre_srf_summand<allow_ce>> body_summands = srf_or(x.body(),
@@ -430,7 +449,17 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
   {}
 
   void apply(const or_& x)
-  {
+  {    
+    if constexpr (allow_ce)
+    {
+      if (is_ce_propositional_variable_instantiation(x, allow_ce))
+      {
+        const pbes_expression& f = true_();
+        summands.emplace_back(data::variable_list(), f, x);
+        return;
+      }
+    }
+
     if (m_merge_simple_expressions && is_simple_expression(x.left(), allow_ce))
     {
       std::size_t size = summands.size();
@@ -440,11 +469,13 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
         i->add_condition(detail::make_not(x.left()));
       }
     }
-    else if (m_merge_simple_expressions
-             && (allow_ce && is_simple_expression(x.right(), allow_ce)))
+    else if (m_merge_simple_expressions && is_simple_expression(x.right(), allow_ce))
     {
       std::size_t size = summands.size();
-      apply(x.left());
+      if (!is_ce_propositional_variable_instantiation(x.left(), allow_ce))
+      {
+        apply(x.left());
+      }
       for (auto i = summands.begin() + size; i != summands.end(); ++i)
       {
         i->add_condition(detail::make_not(x.right()));
@@ -482,7 +513,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
 
   void apply(const exists& x)
   {
-    if (is_simple_expression(x.body()))
+    if (is_simple_expression(x.body(), allow_ce))
     {
       const pbes_expression& f = x.body();
       const propositional_variable_instantiation& X = propositional_variable_instantiation(X_true, {});
@@ -541,27 +572,28 @@ inline std::vector<pre_srf_summand<allow_ce>> srf_and(const pbes_expression& phi
   return std::move(f.summands);
 }
 
-inline bool is_conjunctive(const pbes_expression& phi)
+inline bool is_conjunctive(const pbes_expression& phi, bool allow_ce)
 {
-  if (is_simple_expression(phi))
-  {
-    return false;
-  }
-  else if (is_propositional_variable_instantiation(phi))
+  if (is_simple_expression(phi, allow_ce))
   {
     return false;
   }
   else if (is_or(phi))
   {
     const auto& phi_ = atermpp::down_cast<or_>(phi);
-    return (is_simple_expression(phi_.left()) && is_propositional_variable_instantiation(phi_.right()))
-           || (is_simple_expression(phi_.right()) && is_propositional_variable_instantiation(phi_.left()));
+    return (is_simple_expression(phi_.left(), allow_ce) && is_ce_propositional_variable_instantiation(phi_.right(), allow_ce))
+           || (is_simple_expression(phi_.right(), allow_ce) && is_ce_propositional_variable_instantiation(phi_.left(), allow_ce));
   }
   else if (is_and(phi))
   {
     const auto& phi_ = atermpp::down_cast<and_>(phi);
-    return !((is_simple_expression(phi_.left()) && is_propositional_variable_instantiation(phi_.right()))
-             || (is_simple_expression(phi_.right()) && is_propositional_variable_instantiation(phi_.left())));
+    bool result = !((is_simple_expression(phi_.left(), allow_ce) && is_ce_propositional_variable_instantiation(phi_.right(), allow_ce))
+             || (is_simple_expression(phi_.right(), allow_ce) && is_ce_propositional_variable_instantiation(phi_.left(), allow_ce)));
+    return result;
+  }
+  else if (is_ce_propositional_variable_instantiation(phi, allow_ce))
+  {
+    return false;
   }
   else if (is_exists(phi))
   {
@@ -666,7 +698,7 @@ inline detail::pre_srf_pbes<allow_ce> pbes2pre_srf(const pbes& p, bool merge_sim
   {
     pbes_equation eqn = equations.front();
     equations.pop_front();
-    bool is_conjunctive = detail::is_conjunctive(eqn.formula());
+    bool is_conjunctive = detail::is_conjunctive(eqn.formula(), allow_ce);
     std::vector<detail::pre_srf_summand<allow_ce>> summands = is_conjunctive ? detail::srf_and(eqn.formula(),
         equations,
         eqn,
@@ -688,9 +720,10 @@ inline detail::pre_srf_pbes<allow_ce> pbes2pre_srf(const pbes& p, bool merge_sim
     srf_equations.emplace_back(eqn.symbol(), eqn.variable(), summands, is_conjunctive);
   }
 
-  return detail::pre_srf_pbes<allow_ce>(p.data(),
+  auto result = detail::pre_srf_pbes<allow_ce>(p.data(),
       std::vector<detail::pre_srf_equation<allow_ce>>(srf_equations.begin(), srf_equations.end()),
       p.initial_state());
+  return result;
 }
 
 } // namespace detail
@@ -714,6 +747,7 @@ inline srf_pbes pre_srf2srfpbes(const srf_pbes_with_ce& p)
 {
   // Used to remove counter example information
   detail::subsitute_counterexample f(true, true);
+  simplify_rewriter simplify;
 
   std::vector<detail::pre_srf_equation<false>> equations;
   for (const auto& equation : p.equations())
@@ -724,8 +758,12 @@ inline srf_pbes pre_srf2srfpbes(const srf_pbes_with_ce& p)
       for (const auto& summand : equation.summands())
       {
         pbes_expression result;
+        f.apply(result, summand.variable());
+        propositional_variable_instantiation variable = atermpp::down_cast<propositional_variable_instantiation>(simplify(result));
+
         f.apply(result, summand.condition());
-        summands.emplace_back(summand.parameters(), result, summand.variable());
+        
+        summands.emplace_back(summand.parameters(), simplify(result), variable);
       }
 
       equations.emplace_back(equation.symbol(), equation.variable(), summands, equation.is_conjunctive());
