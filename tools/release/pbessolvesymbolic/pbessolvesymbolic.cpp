@@ -175,84 +175,86 @@ public:
     std::smatch match;
 
     mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
-
-    replace_propositional_variables(
-        result,
-        psi,
-        [&](const propositional_variable_instantiation& Y) -> pbes_expression
-        {
-          if (std::regex_match(static_cast<const std::string&>(Y.name()), match, mcrl2::pbes_system::detail::positive_or_negative))
+    if (!std::regex_match(static_cast<const std::string&>(X.name()), match, mcrl2::pbes_system::detail::positive_or_negative))
+    {
+      replace_propositional_variables(
+          result,
+          psi,
+          [&](const propositional_variable_instantiation& Y) -> pbes_expression
           {
-            // If Y in L return Y
-            mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
-            return Y;
-          }
-
-          // TODO: This depends on the encoding used in pbesreach.
-          // Determine whether X belongs to player alpha
-          singleton.clear();
-          singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
-
-          std::size_t i = 1;
-          for (const auto& param : X.parameters())
-          {
-            singleton.emplace_back(data_index[i].index(param));
-            ++i;
-          }
-
-          if (sylvan::ldds::member_cube(Valpha, singleton))
-          {
-            // Determine whether (X, Y) is in the strategy.
-
-            // Add the propositional variables.
-            singleton.clear();
-            singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
-            singleton.emplace_back(data_index[0].index(propvar_map.at(Y.name())));
-
-            // Add the interleaved data expressions.
-            std::size_t i = 1;
-            auto param_Y_it = Y.parameters().begin();
-
-
-            for (auto param_X_it = X.parameters().begin(); param_X_it != X.parameters().end(); ++param_X_it)
+            if (std::regex_match(static_cast<const std::string&>(Y.name()), match, mcrl2::pbes_system::detail::positive_or_negative))
             {
-              singleton.emplace_back(data_index[i].index(*param_X_it));
-              singleton.emplace_back(data_index[i].index(*param_Y_it));
-
-              ++param_Y_it;
-              ++i;
-            }
-            
-            if (sylvan::ldds::member_cube(strategy, singleton))
-            {
-              // If Y in E0
-              mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+              // If Y in L return Y
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
               return Y;
             }
-            else
+
+            // TODO: This depends on the encoding used in pbesreach.
+            // Determine whether X belongs to player alpha
+            singleton.clear();
+            singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
+
+            std::size_t i = 1;
+            for (const auto& param : X.parameters())
             {
-              changed = true;
-              if (alpha == 0) 
+              singleton.emplace_back(data_index[i].index(param));
+              ++i;
+            }
+
+            if (sylvan::ldds::member_cube(Valpha, singleton))
+            {
+              // Determine whether (X, Y) is in the strategy.
+
+              // Add the propositional variables.
+              singleton.clear();
+              singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
+              singleton.emplace_back(data_index[0].index(propvar_map.at(Y.name())));
+
+              // Add the interleaved data expressions.
+              std::size_t i = 1;
+              auto param_Y_it = Y.parameters().begin();
+
+
+              for (auto param_X_it = X.parameters().begin(); param_X_it != X.parameters().end(); ++param_X_it)
               {
-                // If Y is not reachable, replace it by false
-                mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
-                return false_();
+                singleton.emplace_back(data_index[i].index(*param_X_it));
+                singleton.emplace_back(data_index[i].index(*param_Y_it));
+
+                ++param_Y_it;
+                ++i;
+              }
+              
+              if (sylvan::ldds::member_cube(strategy, singleton))
+              {
+                // If Y in E0
+                mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+                return Y;
               }
               else
               {
-                // If Y is not reachable, replace it by true
-                mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
-                return true_();
+                changed = true;
+                if (alpha == 0) 
+                {
+                  // If Y is not reachable, replace it by false
+                  mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
+                  return false_();
+                }
+                else
+                {
+                  // If Y is not reachable, replace it by true
+                  mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
+                  return true_();
+                }
               }
             }
+            else
+            {
+                mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+                return Y;
+            }
           }
-          else
-          {
-              mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
-              return Y;
-          }
-        }
-    );
+      );
+    }
 
     if (changed)
     {
