@@ -253,7 +253,7 @@ class reverse_term_list_iterator
     /// \return true if the pointer to this termlist is smaller than the other pointer.
     bool operator <(const reverse_term_list_iterator& other) const
     {
-      return m_position < other.position;
+      return m_position < other.m_position;
     }
 
     /// \brief Comparison of iterators.
