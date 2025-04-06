@@ -328,6 +328,5 @@
   <slot>onAttractionCalculationChanged(int)</slot>
   <slot>onAccuracyChanged(int)</slot>
   <slot>onTreeToggled(bool)</slot>
-  <slot>onForceApplicationChanged(int)</slot>
  </slots>
 </ui>

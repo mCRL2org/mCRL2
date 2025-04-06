@@ -71,7 +71,7 @@ class SimpleAdaptiveSimulatedAnnealing
         << "[ASA] Cooling factor: " << m_cooling_factor << std::endl;
   }
 
-    float getHeatingFactor()
+  float getHeatingFactor()
   {
       return m_heating_factor;
   }
@@ -189,9 +189,9 @@ class SpringLayout
   RepulsionFunction* m_repFunc;
   RepulsionFunctionID m_option_repulsionCalculation;
 
-  std::map<ApplicationFunctionID, ApplicationFunction*> applFuncMap;
+  /* std::map<ApplicationFunctionID, ApplicationFunction*> applFuncMap;
   ApplicationFunction* m_applFunc;
-  ApplicationFunctionID m_option_forceApplication;
+  ApplicationFunctionID m_option_forceApplication; */
 
   bool m_useAnnealing = true;
 
@@ -243,9 +243,6 @@ class SpringLayout
 
   void setRepulsionCalculation(RepulsionFunctionID c);
   RepulsionFunctionID repulsionCalculation();
-
-  void setForceApplication(ApplicationFunctionID c);
-  ApplicationFunctionID forceApplication();
 
   /**
    * @brief Randomly moves nodes along the Z axis, at most [z] units
@@ -425,7 +422,6 @@ class SpringLayoutUi : public QDockWidget
   void onNatLengthChanged(int value);
   void onAttractionCalculationChanged(int value);
   void onRepulsionCalculationChanged(int value);
-  void onForceApplicationChanged(int value);
 
   void onStartStop();
   void onStarted();
