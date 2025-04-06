@@ -22,7 +22,7 @@
 // to create an initial partition.  Only towards the end of initialization, the
 // BLC sets are generated, and then stabilizeB() is called to handle new bottom
 // states that have been found during the separate algorithm.
-// #define INIT_WITHOUT_BLC_SETS
+#define INIT_WITHOUT_BLC_SETS
 
 #include <iomanip> // for std::fixed, std::setprecision(), std::setw()
 #include <ctime> // for std::clock_t, std::clock()
