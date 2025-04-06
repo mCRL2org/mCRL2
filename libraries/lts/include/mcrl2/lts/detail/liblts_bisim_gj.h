@@ -6810,7 +6810,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                        "Time spent on stabilize+refine: " << std::setw(width) << h[3] << "h " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
                        "Time spent on finalizing:       " << std::setw(width) << h[4] << "h " << std::setw(2) << min[4] << "min " << std::setw(prec+3) << runtime[4] << "s\n"
                        "Total CPU time:                 " << std::setw(width) << h[0] << "h " << std::setw(2) << min[0] << "min " << std::setw(prec+3) << runtime[0] << "s\n"
-                       "BENCHMARK TIME: " << end_part-start_SCC << "\n"
+                       "BENCHMARK TIME: " << static_cast<double>(end_part-start_part)/CLOCKS_PER_SEC << "\n"
                     << std::defaultfloat;
             }
             else
@@ -6821,7 +6821,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                        "Time spent on stabilize+refine: " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
                        "Time spent on finalizing:       " << std::setw(2) << min[4] << "min " << std::setw(prec+3) << runtime[4] << "s\n"
                        "Total CPU time:                 " << std::setw(2) << min[0] << "min " << std::setw(prec+3) << runtime[0] << "s\n"
-                       "BENCHMARK TIME: " << end_part-start_SCC << "\n"
+                       "BENCHMARK TIME: " << static_cast<double>(end_part-start_part)/CLOCKS_PER_SEC << "\n"
                     << std::defaultfloat;
             }
         }
@@ -6833,7 +6833,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                    "Time spent on stabilize+refine: " << std::setw(prec+3) << runtime[3] << "s\n"
                    "Time spent on finalizing:       " << std::setw(prec+3) << runtime[4] << "s\n"
                    "Total CPU time:                 " << std::setw(prec+3) << runtime[0] << "s\n"
-                   "BENCHMARK TIME: " << static_cast<double>(end_part-start_SCC)/CLOCKS_PER_SEC << "\n"
+                   "BENCHMARK TIME: " << static_cast<double>(end_part-start_part)/CLOCKS_PER_SEC << "\n"
                 << std::defaultfloat;
         }
     }
