@@ -123,7 +123,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);
           propositional_variable_instantiation fresh_var_instantiation =
-              propositional_variable_instantiation(fresh_varname, atermpp::container_cast<data::data_expression_list>(variable_parameters));
+              propositional_variable_instantiation(fresh_varname, data::data_expression_list(variable_parameters));
           term_type expr;
           if (is_or(qexpr)) {
             if (is_true(phi)) {
@@ -234,7 +234,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);
           propositional_variable_instantiation fresh_var_instantiation =
-              propositional_variable_instantiation(fresh_varname, atermpp::container_cast<data::data_expression_list>(variable_parameters));
+              propositional_variable_instantiation(fresh_varname, data::data_expression_list(variable_parameters));
           term_type expr;
           if (is_true(phi)) {
             expr = fresh_var_instantiation;
@@ -339,7 +339,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);
           propositional_variable_instantiation fresh_var_instantiation =
-              propositional_variable_instantiation(fresh_varname, atermpp::container_cast<data::data_expression_list>(variable_parameters));
+              propositional_variable_instantiation(fresh_varname, data::data_expression_list(variable_parameters));
           // expr = forall (qvars) . phi => fresh_X(d+qvars).
           if (is_or(qexpr)) {
             if (is_true(phi)) {
@@ -451,7 +451,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
           propositional_variable fresh_var =
               propositional_variable(fresh_varname, variable_parameters);
           propositional_variable_instantiation fresh_var_instantiation =
-              propositional_variable_instantiation(fresh_varname, atermpp::container_cast<data::data_expression_list>(variable_parameters));
+              propositional_variable_instantiation(fresh_varname, data::data_expression_list(variable_parameters));
           // expr = forall (qvars) . phi => fresh_X(d+qvars).
           if (is_true(phi)) {
             expr = fresh_var_instantiation;

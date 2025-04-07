@@ -444,9 +444,11 @@ void push_constant_inside(pres_expression& result, const data::data_expression& 
   }
   else if (data::is_data_expression(t))
   {
-    data::sort_real::make_times(atermpp::reference_cast<data::data_expression>(result),
+    data::data_expression tmp;
+    data::sort_real::make_times(tmp,
                                 constant,
                                 atermpp::down_cast<data::data_expression>(t));
+    result=tmp;
   }
   else if (is_condsm(t))
   { 
@@ -1057,7 +1059,7 @@ public:
   template <class T>
   void apply(T& result, const pres_system::propositional_variable_instantiation& x)
   {
-    pres_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ apply_list(result, x.parameters()); });
+    pres_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ apply(result, x.parameters()); });
     if (m_negate)
     {
       pres_system::optimized_minus(result, result);
