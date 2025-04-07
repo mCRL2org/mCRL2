@@ -636,8 +636,6 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
           PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1, reach.rewriter());
 
-          mcrl2::log::logger::set_reporting_level(log::log_level_t::trace);
-
           // Perform the second instantiation given the proof graph.      
           timer().start("second-instantiation");
           second_instantiate.run();
