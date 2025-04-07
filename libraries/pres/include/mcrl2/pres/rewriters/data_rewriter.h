@@ -65,7 +65,9 @@ struct add_data_rewriter: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    data_rewrite(atermpp::reference_cast<data::data_expression>(result), x, R, sigma);
+    data::data_expression tmp;
+    data_rewrite(tmp, x, R, sigma);
+    result = tmp;
   }
 
   template <class T>

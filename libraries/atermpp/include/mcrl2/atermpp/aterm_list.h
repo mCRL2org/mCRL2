@@ -14,6 +14,8 @@
 #include "mcrl2/atermpp/detail/aterm_list.h"
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
 #include "mcrl2/atermpp/type_traits.h"
+#include <ranges>
+#include <type_traits>
 
 namespace atermpp
 {
@@ -210,6 +212,7 @@ public:
 
   /// \brief Creates a term_list from the elements in the range.
   template<std::ranges::range R>
+    requires std::is_convertible_v<std::ranges::range_value_t<R>, Term>
   explicit term_list(R&& r)
     : aterm(detail::make_list_forward<Term, std::ranges::iterator_t<R>, detail::do_not_convert_term<Term> >
                 (std::ranges::begin(r), std::ranges::end(r), detail::do_not_convert_term<Term>()))
