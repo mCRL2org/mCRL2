@@ -2711,7 +2711,6 @@ public:
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     rewr_function_signature(m_stream, index, arity, brackets);
     m_stream << m_padding << "{\n"
-             << m_padding << "  mcrl2::utilities::mcrl2_unused(this_rewriter); // Suppress warning\n";
 //              << m_padding << "  std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";    
     m_padding.indent();
     implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments,data_spec);
@@ -2724,7 +2723,7 @@ public:
     {
       m_stream << m_padding <<
                     "static inline void rewr_" << index << "_" << arity << "_term" 
-                    "(data_expression& result, const application&" << (arity == 0 ? "" : " t") << ", RewriterCompilingJitty* this_rewriter) "
+                    "(data_expression& result, const application&" << (arity == 0 ? "" : " t") << ", [[maybe_unused]] RewriterCompilingJitty* this_rewriter) "
                     "{ rewr_" << index << "_" << arity << "(result";
       for(std::size_t i = 0; i < arity; ++i)
       {
