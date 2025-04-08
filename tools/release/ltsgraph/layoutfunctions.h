@@ -32,13 +32,13 @@ struct RepulsionFunction
 //  a combination of force, temperature, and speed
 // Temperature pointer should point towards temperature variable
 //  of a simulated annealing object
-struct ApplicationFunction
+/* struct ApplicationFunction
 {
     float* temperature = nullptr;
     virtual void operator()(QVector3D& pos, const QVector3D& f,
         const float speed) = 0;
-    virtual void update() {};
-    virtual void reset() {};
-};
+    virtual void update() =0;
+    virtual void reset() =0;
+}; */
 
 #endif

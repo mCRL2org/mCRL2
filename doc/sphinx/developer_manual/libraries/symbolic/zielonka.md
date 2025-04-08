@@ -1,4 +1,4 @@
-# Zielonka
+## Zielonka
 
 The standard Zielonka solving algorithm, defined in [Algorithm](zielonka_algorithm) requires that every vertex has an outgoing edge.
 If this is the case then the graph is called *total*.
@@ -9,59 +9,64 @@ Therefore, if we perform the deadlock detection we can avoid extending the PBES 
 Every disjunctive vertex that is a deadlock is won by player odd (previously indicated by a transition to $X_\textsf{false}$) and every conjunctive vertex that is a deadlock by player even.
 If we compute the attractors to these won vertices then the resulting graph is total and can be used in the Zielonka algorithm as follows $\textsf{zielonka}(\textsf{preprocess}(V, D, \emptyset, \emptyset))$.
 
+````{rst-class} mcrl2_pseudocode
 
-```{math}
-:nowrap:
-:label: preprocess_algorithm
+  ```{math}
+  :nowrap:
+  :label: preprocess_algorithm
 
-\begin{algorithmic}[1]
-\Function{Preprocess}{$V, D, W_0, W_1$}
-	\State {$W'_0 \gets W_0 \cup (D \cap V_1)$}	
-	\State {$W'_1 \gets W_1 \cup (D \cap V_0)$}
-	
-	\State {$W'_0 \gets \attr{0}{W'_0, V}$}
-	\State {$W'_1 \gets \attr{1}{W'_1, V}$}
-	
-	\State \Return $V \setminus (W'_0 \cup W'_1)$
-\EndFunction
-\end{algorithmic}
-```
+  \begin{algorithmic}[1]
+  \Function{Preprocess}{$V, D, W_0, W_1$}
+    \State {$W'_0 \gets W_0 \cup (D \cap V_1)$}	
+    \State {$W'_1 \gets W_1 \cup (D \cap V_0)$}
+    
+    \State {$W'_0 \gets \attr{0}{W'_0, V}$}
+    \State {$W'_1 \gets \attr{1}{W'_1, V}$}
+    
+    \State \Return $V \setminus (W'_0 \cup W'_1)$
+  \EndFunction
+  \end{algorithmic}
+  ```
+````
 
 With the standard Zielonka algorithm defined below:
-```{math}
-:nowrap:
-:label: zielonka_algorithm
+````{rst-class} mcrl2_pseudocode
+  ```{math}
+  :nowrap:
+  :label: zielonka_algorithm
 
-\begin{algorithmic}[1]
-    \Function{Zielonka}{$V$}
-        \If {$V = \emptyset$}
-            \State \Return {$\emptyset, \emptyset$}
-        \EndIf
-        \State $m:=\min (\{r(v)\mid v\in V\})$ 
-        \State $\alpha := m \bmod 2$
-        \State $U:=\{v\in V\mid r(v)=m\}$ 
-        \State $A := \attr{\alpha}{U,V}$
-        \State $W_{0}^{\prime },W_{1}^{\prime}:= \textsc{Zielonka}(V\setminus A)$
-            \If {$W_{1-\alpha }^{\prime }= \emptyset$}
-        \State $W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime},\emptyset$ 
-        \Else
-            \State $B := \attr{1-\alpha}{W_{1-\alpha }^{\prime }, V}$
-            \State $W_{0},W_{1}:=\textsc{Zielonka}(V\setminus B)$ 
-            \State $W_{1-\alpha } := W_{1-\alpha }\cup B$ 
-        \EndIf
-        \State \Return $W_{0},W_{1}$
-    \EndFunction
-\end{algorithmic}
-```
+    \begin{algorithmic}[1]
+        \Function{Zielonka}{$V$}
+            \If {$V = \emptyset$}
+                \State \Return {$\emptyset, \emptyset$}
+            \EndIf
+            \State $m:=\min (\{r(v)\mid v\in V\})$ 
+            \State $\alpha := m \bmod 2$
+            \State $U:=\{v\in V\mid r(v)=m\}$ 
+            \State $A := \attr{\alpha}{U,V}$
+            \State $W_{0}^{\prime },W_{1}^{\prime}:= \textsc{Zielonka}(V\setminus A)$
+                \If {$W_{1-\alpha }^{\prime }= \emptyset$}
+            \State $W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime},\emptyset$ 
+            \Else
+                \State $B := \attr{1-\alpha}{W_{1-\alpha }^{\prime }, V}$
+                \State $W_{0},W_{1}:=\textsc{Zielonka}(V\setminus B)$ 
+                \State $W_{1-\alpha } := W_{1-\alpha }\cup B$ 
+            \EndIf
+            \State \Return $W_{0},W_{1}$
+        \EndFunction
+    \end{algorithmic}
+  ```
+````
 
-## Solving with strategies
+### Solving with strategies
 
 This algorithm is extended with keeping track of strategies in [1]. A strategy here is simply a relation between vertices, as such can be efficiently overapproximated using symbolic algorithms.
 
-```{math}
-:nowrap:
+````{rst-class} mcrl2_pseudocode
+  ```{math}
+  :nowrap:
 
-\begin{algorithmic}[1]
+  \begin{algorithmic}[1]
     \Function {\textsc{SolveRecursive}}{$V$}
         \State \textbf{if} {$ V = \emptyset$} \textbf{then} \Return {($\emptyset$,\ $\emptyset$,\ $\emptyset$,$\emptyset$)}
         \State $m := \min(\{r(v) \mid v \in V\})$
@@ -81,9 +86,10 @@ This algorithm is extended with keeping track of strategies in [1]. A strategy h
         \EndIf
         \State \Return {$W_0, W_1, S_0, S_1$}
     \EndFunction
-\end{algorithmic}
-```
+  \end{algorithmic}
+  ```
+````
 
-# References
+### References
 
   [1] Oliver Friedmann: *Recursive algorithm for parity games requires exponential time*. RAIRO Theor. Informatics Appl. 45(4): 449-457 (2011) [DOI](https://doi.org/10.1051/ita/2011124).

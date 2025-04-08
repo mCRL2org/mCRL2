@@ -12,7 +12,7 @@
   --mcrl2-light:#c3e2d4;
 }
 
-/* Non standard classes */
+/* Change the table layout */
 table.docutils { margin: 0 auto; }
 table.docutils td { padding: 0.3em 0; }
 table.docutils caption { font-family: sans-serif; padding-bottom: 0.5em; border-bottom: 1px solid black; }
@@ -23,6 +23,7 @@ image.image-no-text-wrap {
   white-space: nowrap;
 }
 
+/* Customise the citations */
 .citation {
   display: flex;
   flex-wrap: wrap;
@@ -78,16 +79,28 @@ div.dparser .admonition-title {
     font-variant: small-caps;
 }
 
-/* Custom Layout */
+/* Move equation numbers to the right */
+.eqno {
+  float: right;
+}
+.mcrl2-pseudocode {
+  text-align: left
+}
 
+/* Custom layout for the front page */
 table.frontpage-table td { border: 0; margin: 0; padding: 0; }
 table.teamcity-blurb { margin-top: 1em; width: 100%; }
 table.teamcity-blurb td { border: 0; vertical-align: middle; white-space: normal; }
 
 img.frontpage-logo { margin-top: 1.5em; }
 
+/* Change the width of the page from 50% to 70% */
 .wy-nav-content {
   max-width: 70%
+}
+
+.rst-content code.literal {
+  white-space: nowrap;
 }
 
 .rst-content .note {
@@ -97,10 +110,7 @@ img.frontpage-logo { margin-top: 1.5em; }
   background: var(--mcrl2-title);
 }
 
-.rst-content code.literal {
-  white-space: nowrap;
-}
-
+/* Customise the side bars */
 .wy-menu-vertical p.caption {
   color: var(--mcrl2-title);
 }

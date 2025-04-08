@@ -52,17 +52,6 @@ std::string getName(RepulsionFunctionID c)
   return s;
 }
 
-std::string getName(ApplicationFunctionID c)
-{
-  std::string s = "UNKNOWN";
-  switch (c)
-  {
-    PROC_VAL(ApplicationFunctionID::ltsgraph_appl);
-    PROC_VAL(ApplicationFunctionID::force_directed_appl);
-  }
-  return s;
-}
-
 #undef PROC_VAL
 
 void SimpleAdaptiveSimulatedAnnealing::reset()
@@ -131,10 +120,6 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
       }),
       m_repFunc(repFuncMap[RepulsionFunctionID::ltsgraph_rep]),
       m_option_repulsionCalculation(RepulsionFunctionID::ltsgraph_rep),
-      applFuncMap({{ApplicationFunctionID::ltsgraph_appl, new ApplicationFunctions::LTSGraph()},
-          {ApplicationFunctionID::force_directed_appl, new ApplicationFunctions::ForceDirected()}}),
-      m_applFunc(applFuncMap[ApplicationFunctionID::ltsgraph_appl]),
-      m_option_forceApplication(ApplicationFunctionID::ltsgraph_appl),
       m_glwidget(glwidget)
 {
   m_graph.gv_debug.addVar("Temperature");
@@ -162,8 +147,6 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
   srand(time(nullptr));
   drift_timer.restart();
   m_annealing_temperature = m_useAnnealing ? m_asa.T : m_no_annealing_temperature;
-  applFuncMap[ApplicationFunctionID::force_directed_appl]->temperature = &m_annealing_temperature;
-  applFuncMap[ApplicationFunctionID::ltsgraph_appl]->temperature = &m_annealing_temperature;
 }
 
 SpringLayout::~SpringLayout()
@@ -196,7 +179,6 @@ SpringLayoutUi* SpringLayout::ui(QAction* /* advancedDialogAction */, CustomQWid
     settings->registerVar(advanced_ui.chk_debugDraw, false, true);
     settings->registerVar(advanced_ui.chk_enableTree, true, true);
 
-    settings->registerVar(advanced_ui.cmb_appl, (int)ApplicationFunctionID::force_directed_appl, true);
     settings->registerVar(advanced_ui.cmb_attr, (int)AttractionFunctionID::ltsgraph_attr, true);
     settings->registerVar(advanced_ui.cmb_rep, (int)RepulsionFunctionID::ltsgraph_rep, true);
 
@@ -255,28 +237,6 @@ void SpringLayout::setRepulsionCalculation(RepulsionFunctionID c)
 RepulsionFunctionID SpringLayout::repulsionCalculation()
 {
   return m_option_repulsionCalculation;
-}
-
-void SpringLayout::setForceApplication(ApplicationFunctionID c)
-{
-  if (applFuncMap.find(c) == applFuncMap.end())
-  {
-    mCRL2log(mcrl2::log::debug) << "Unkown force application selected \"" << getName(c)
-                                << "\". Cause may be invalid settings were loaded or selected function "
-                                   "is not implemented."
-                                << std::endl;
-    c = ApplicationFunctionID::force_directed_appl;
-    mCRL2log(mcrl2::log::debug) << "Setting default force application \"" << getName(c) << "\"." << std::endl;
-  }
-
-  m_option_forceApplication = c;
-  m_applFunc = applFuncMap[c];
-  m_applFunc->reset();
-}
-
-ApplicationFunctionID SpringLayout::forceApplication()
-{
-  return m_option_forceApplication;
 }
 
 template <>
@@ -767,7 +727,7 @@ void SpringLayout::apply()
 
       if (!m_graph.node(n).anchored())
       {
-        (*m_applFunc)(m_graph.node(n).pos_mutable(), m_nforces[i], use_speed);
+        ApplicationFunctions::apply_forces(m_graph.node(n).pos_mutable(), m_nforces[i], use_speed, m_annealing_temperature);
         clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }
       else
@@ -810,7 +770,7 @@ void SpringLayout::apply()
 
       if (!m_graph.stateLabel(n).anchored())
       {
-        (*m_applFunc)(m_graph.stateLabel(n).pos_mutable(), m_sforces[i], use_speed);
+        ApplicationFunctions::apply_forces(m_graph.stateLabel(n).pos_mutable(), m_sforces[i], use_speed, m_annealing_temperature);
         m_graph.stateLabel(n).pos_mutable() -= center_of_mass;
         clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
       }
@@ -822,13 +782,13 @@ void SpringLayout::apply()
 
       if (!m_graph.handle(n).anchored())
       {
-        (*m_applFunc)(m_graph.handle(n).pos_mutable(), m_hforces[i], use_speed);
+        ApplicationFunctions::apply_forces(m_graph.handle(n).pos_mutable(), m_hforces[i], use_speed, m_annealing_temperature);
         m_graph.handle(n).pos_mutable() -= center_of_mass;
         clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
-        (*m_applFunc)(m_graph.transitionLabel(n).pos_mutable(), m_lforces[i], use_speed);
+        ApplicationFunctions::apply_forces(m_graph.transitionLabel(n).pos_mutable(), m_lforces[i], use_speed, m_annealing_temperature);
         m_graph.transitionLabel(n).pos_mutable() -= center_of_mass;
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
@@ -864,7 +824,6 @@ void SpringLayout::apply()
     m_max_num_nodes = 0;
     m_total_num_nodes = 0;
 
-    m_applFunc->update();
     m_repFunc->update();
     m_attrFunc->update();
 
@@ -873,7 +832,8 @@ void SpringLayout::apply()
 
     // The graph becomes stable if the center of mass is sufficiently close to (0,0,0) or is anchored
     // and the energy of the graph does not fluctuate too much.
-// std::cerr << "XX: " << center_of_mass.length() << "     " << stability << " StabCount: " << m_stabilityCounter << "   " << energy << "   " << m_previous_energy << " temp:  " << m_annealing_temperature << "\n";
+//std::cerr << "XX: " << center_of_mass.length() << "     " << stability << " StabCount: " << m_stabilityCounter << "   " << energy << "   " << m_previous_energy << " temp:  " << m_annealing_temperature << "\n";
+//std::cerr << "Center of mass: " << center_of_mass.x() << ", " << center_of_mass.y() << ", " << center_of_mass.z() << "\n";
     if (stability <= m_stabilityThreshold && (center_of_mass.length()<0.0001 || any_anchored))
     {
       m_stabilityCounter++;
@@ -1011,8 +971,6 @@ void SpringLayout::setNaturalTransitionLength(int v)
 void SpringLayout::rulesChanged()
 {
   m_graph.setStable(false);
-  setForceApplication(m_option_forceApplication);
-  m_applFunc->reset();
   m_repFunc->reset();
   m_attrFunc->reset();
   m_asa.reset();
@@ -1149,9 +1107,6 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, CustomQWidget* advancedDial
 
   m_ui_advanced.cmb_rep->setCurrentIndex(m_layout.repulsionCalculation());
   connect(m_ui_advanced.cmb_rep, SIGNAL(currentIndexChanged(int)), this, SLOT(onRepulsionCalculationChanged(int)));
-
-  m_ui_advanced.cmb_appl->setCurrentIndex(m_layout.forceApplication());
-  connect(m_ui_advanced.cmb_appl, SIGNAL(currentIndexChanged(int)), this, SLOT(onForceApplicationChanged(int)));
 
   connect(m_ui_advanced.chk_debugDraw, SIGNAL(toggled(bool)), &m_layout.m_glwidget, SLOT(toggleDebugDrawGraphs(bool)));
   connect(m_ui_advanced.chk_annealing, SIGNAL(toggled(bool)), this, SLOT(onAnnealingToggled(bool)));
@@ -1317,14 +1272,6 @@ void SpringLayoutUi::onRepulsionCalculationChanged(int value)
 {
   m_layout.setRepulsionCalculation(static_cast<RepulsionFunctionID>(value));
   m_ui_advanced.cmb_rep->setCurrentIndex((int)m_layout.repulsionCalculation());
-  layoutRulesChanged();
-  update();
-}
-
-void SpringLayoutUi::onForceApplicationChanged(int value)
-{
-  m_layout.setForceApplication(static_cast<ApplicationFunctionID>(value));
-  m_ui_advanced.cmb_appl->setCurrentIndex((int)m_layout.forceApplication());
   layoutRulesChanged();
   update();
 }

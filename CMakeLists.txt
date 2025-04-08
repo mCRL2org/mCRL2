@@ -65,7 +65,6 @@ option(MCRL2_SKIP_LONG_TESTS        "Do not execute tests that take a long time 
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 
 # Advanced options
-option(MCRL2_ENABLE_STABLE           "Enable compilation of stable tools." ON)
 option(MCRL2_ENABLE_ADDRESSSANITIZER "Enable additional memory run-time checks implemented by the AddressSanitizer." OFF)
 option(MCRL2_ENABLE_MEMORYSANITIZER  "Enable additional memory run-time checks implemented by the MemorySanitizer." OFF)
 option(MCRL2_ENABLE_THREADSANITIZER  "Enable additional data race run-time checks implemented by the ThreadSanitizer." OFF)
@@ -89,7 +88,6 @@ mark_as_advanced(
   MCRL2_ENABLE_MSVC_CCACHE
   MCRL2_ENABLE_MULTITHREADING
   MCRL2_ENABLE_SOUNDNESS_CHECKS 
-  MCRL2_ENABLE_STABLE
   MCRL2_ENABLE_STD_CHECKS
   MCRL2_ENABLE_STD_CHECKS_BACKTRACE
   MCRL2_ENABLE_THREADSANITIZER

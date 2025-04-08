@@ -16,7 +16,5 @@ See the document below for a more pseudocode of algorithms for LDDs.
 ```{mcrl2_pdflatex} <Notes on list decision diagrams <latex/list_decision_diagrams.tex>
 ```
 
-## Solving
-
 ```{include} zielonka.md
 ```
