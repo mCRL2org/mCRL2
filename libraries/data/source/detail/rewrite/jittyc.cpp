@@ -2710,12 +2710,10 @@ public:
     std::size_t index = atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     rewr_function_signature(m_stream, index, arity, brackets);
-    m_stream << m_padding << "{\n"
-//              << m_padding << "  std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";    
+    m_stream << m_padding << "{\n";
     m_padding.indent();
     implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments,data_spec);
-//    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n"
-      m_stream << m_padding << "return;\n";
+    m_stream << m_padding << "return;\n";
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 
@@ -2723,7 +2721,7 @@ public:
     {
       m_stream << m_padding <<
                     "static inline void rewr_" << index << "_" << arity << "_term" 
-                    "(data_expression& result, const application&" << (arity == 0 ? "" : " t") << ", [[maybe_unused]] RewriterCompilingJitty* this_rewriter) "
+                    "(data_expression& result, const application&" << (arity == 0 ? "" : " t") << ", RewriterCompilingJitty* this_rewriter) "
                     "{ rewr_" << index << "_" << arity << "(result";
       for(std::size_t i = 0; i < arity; ++i)
       {
