@@ -17,6 +17,7 @@
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/pbessolve_attractors.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
 namespace mcrl2 {
 
@@ -52,23 +53,6 @@ std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure
     }
   }
   return std::make_tuple(min_rank, max_rank, vertex_set(N, M.begin(), M.end()));
-}
-
-/// \brief Guesses if a pbes has counter example information
-inline
-bool has_counter_example_information(const pbes& pbesspec)
-{
-  std::regex re("Z(neg|pos)_(\\d+)_.*");
-  std::smatch match;
-  for (const pbes_equation& eqn: pbesspec.equations())
-  {
-    std::string X = eqn.variable().name();
-    if (std::regex_match(X, match, re))
-    {
-      return true;
-    }
-  }
-  return false;
 }
 
 class solve_structure_graph_algorithm
@@ -362,8 +346,28 @@ class solve_structure_graph_algorithm
         use_toms_optimization(use_toms_optimization_)
     {}
 
+    /// Returns the winning player (alpha)
     inline
     bool solve(structure_graph& G)
+    {
+      auto W = solve_partitions(G);
+
+      bool is_disjunctive;
+      if (W.first.contains(G.initial_vertex()))
+      {
+        is_disjunctive = true;
+      }
+      else
+      {
+        is_disjunctive = false;
+      }
+
+      return is_disjunctive;
+    }
+
+    /// Returns the winning partition
+    inline
+    std::pair<vertex_set, vertex_set> solve_partitions(structure_graph& G)
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
       mCRL2log(log::debug) << G << std::endl;
@@ -383,11 +387,13 @@ class solve_structure_graph_algorithm
       {
         throw mcrl2::runtime_error("No solution found!!!");
       }
+
       if (check_strategy)
       {
         check_solve_recursive_solution(G, is_disjunctive, W.first, W.second);
       }
-      return is_disjunctive;
+
+      return W;
     }
 };
 
@@ -420,6 +426,8 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
             {
               throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LPS. Did you supply the correct file?");
             }
+
+            // The parameters are [from] + [action_parameters] + [to]
             lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
             std::size_t equation_index = p_index.index(Z.name());
             const pbes_equation& eqn = p.equations()[equation_index];
@@ -438,7 +446,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
               condition.push_back(data::equal_to(d1[i], e1[i]));
               next_state_assignments.emplace_back(d1[i], e1[n + m + i]);
             }
-
+              
             process::action_vector actions;
             std::size_t index = 0;
             for (const process::action& a: summand.multi_action().actions())
@@ -457,6 +465,12 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
           }
         }
       }
+
+      if (!check_well_typedness(result))
+      {
+        throw mcrl2::runtime_error("The counter example LPS is not well typed, either wrong file provided or an internal error occurred.");
+      }
+      
       return result;
     }
 
@@ -570,6 +584,37 @@ bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
   bool use_toms_optimization = !check_strategy;
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
   return algorithm.solve(G);
+}
+
+/// Returns a mapping from PBES variable instantations to vertices in the structure graph for vertices won by player alpha.
+inline
+std::pair<bool, std::unordered_map<pbes_expression, structure_graph::index_type>> solve_structure_graph_winning_mapping(structure_graph& G, bool check_strategy = false)
+{
+  bool use_toms_optimization = !check_strategy;
+  solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
+  auto W = algorithm.solve_partitions(G);
+
+  bool is_disjunctive;
+  if (W.first.contains(G.initial_vertex()))
+  {
+    is_disjunctive = true;
+  }
+  else
+  {
+    is_disjunctive = false;
+  }
+
+  // Sorting is necessary for the set intersection computed below.
+  auto& W_alpha = is_disjunctive ? W.first : W.second;
+
+  // Make a mapping from the formula to the index it belongs to.
+  std::unordered_map<pbes_expression, structure_graph::index_type> mapping;
+
+  for (structure_graph::index_type index : W_alpha.vertices()) {
+    mapping.insert(std::make_pair(G.find_vertex(index).formula(), index));
+  }
+
+  return { is_disjunctive, mapping };
 }
 
 inline

@@ -286,7 +286,7 @@ struct standard_recursive_form_command: public pbes_system::detail::pbes_command
     pbes_system::algorithms::normalize(pbesspec);
     pbes_system::algorithms::instantiate_global_variables(pbesspec);
     pbes_system::srf_pbes p = pbes2srf(pbesspec);
-    unify_parameters(p);
+    unify_parameters(p, false);
     pbesspec = p.to_pbes();
     if (!pbesspec.is_well_typed())
     {
