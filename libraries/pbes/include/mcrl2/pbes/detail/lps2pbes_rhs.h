@@ -176,7 +176,7 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
   {
     typedef TermTraits tr;
     const data::variable_list& d = lps.process_parameters();
-    auto de =  data::data_expression_list(d | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); }));
+    auto de =  data::data_expression_list(d);
 
     data::data_expression_list gi1 = data::replace_variables(de, data::assignment_sequence_substitution(gi));
     auto fi = action_expressions(ai.actions());
