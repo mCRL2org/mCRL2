@@ -444,9 +444,11 @@ void push_constant_inside(pres_expression& result, const data::data_expression& 
   }
   else if (data::is_data_expression(t))
   {
-    data::sort_real::make_times(atermpp::reference_cast<data::data_expression>(result),
+    data::data_expression tmp;
+    data::sort_real::make_times(tmp,
                                 constant,
                                 atermpp::down_cast<data::data_expression>(t));
+    result=tmp;
   }
   else if (is_condsm(t))
   { 
