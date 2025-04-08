@@ -102,7 +102,7 @@ class VariableInstanceFormula(Formula):
             return self.variable.name
 
         args = ", ".join(str(arg) for arg in self.arguments)
-        print(f"{self.variable.name}({args})")
+        print(args)
         return f"{self.variable.name}({args})"
 
 
@@ -277,6 +277,9 @@ class RandomStateFormulaGenerator:
         # Base case for recursion
         if max_depth <= 0:
             choices = [TrueFormula(), FalseFormula()]
+            if existing_variables:
+                var_choices = [v for v in existing_variables]
+                choices.extend(var_choices)
             return random.choice(choices)
 
         formula_types = [FormulaType.CONSTANT, FormulaType.BINARY]
@@ -347,12 +350,12 @@ class RandomStateFormulaGenerator:
             if random.random() < 0.3:
                 num_bound_vars = random.randint(1, 3)
                 for i in range(num_bound_vars):
-                    data_type = random.choice(["Nat", "Bool"])
-                    bound_vars.append(DataVariable(f"v{i}", data_type))
+                    type = random.choice(["Nat", "Bool"])
+                    bound_vars.append(DataVariable(f"v{i}", type))
 
-                    if data_type == "Nat":
+                    if type == "Nat":
                         initial.append(make_integer_data_expression([]))
-                    elif data_type == "Bool":
+                    elif type == "Bool":
                         initial.append(make_boolean_data_expression([]))
 
             variable = Variable(var_name, tuple(bound_vars), tuple(initial))
@@ -380,24 +383,78 @@ FORMULAS = '''nu X.<a || b || c || d>X && [a]false
 [true*] [a.(!a && !c)*.c.(!a)*.c]false
 [true*](mu Y. ([!a]Y && <true>true))
 ([true*] nu X. mu Y. nu Z. ([a]X && ([a]false || [!a]Y) && [!a]Z))
-[true*] nu X. mu Y. nu Z. ([a]X && ([a]false || [!a]Y) && [!a]Z)'''
-
-SRF_FORMULAS = '''[true*]<true>true
+[true*] nu X. mu Y. nu Z. ([a]X && ([a]false || [!a]Y) && [!a]Z)
+[true*]<true>true
 <true*.a>true
 nu X. mu Y. (<a>X || <!a>Y)
 nu X. mu Y. (<a>X || <!b>Y)
 nu X. (([!a]X && [b]false))
-nu X. (([!a]X && [c]false))
 [true*.(a + b)]mu X.[!c]X
 [true*]mu X.[a]X
 [!a*.b]false && [!c*.b]false && [!d*.b]false && [true*.c.!a*.b]false
 [true*] [a.(!a && !b)*.b.(!a)*.b]false'''
 
-def make_modal_formula():
-    return random.choice(FORMULAS.split('\n') + SRF_FORMULAS.split('\n'))
+def make_modal_formula() -> str:
+    """ " Generate a random modal formula with actions a, b and c."""
+    if random.random() < 0.5:
+        # Return a random formula from the predefined set
+        return random.choice(FORMULAS.splitlines())
+    
+    return RandomStateFormulaGenerator().generate(
+        action_names=["a", "b", "c"],
+        max_depth=5,
+        max_fixedpoints=3,
+    )
 
-def make_srf_modal_formula():
-    return random.choice(SRF_FORMULAS.split('\n'))
+if __name__ == "__main__":
 
-if __name__ == '__main__':
-    print(make_modal_formula())
+    def main():
+        parser = argparse.ArgumentParser(description="Generate a random state formula.")
+        parser.add_argument(
+            "-a",
+            "--actions",
+            type=str,
+            default="a,b,c",
+            help='Comma-separated list of action names (default: "a,b,c")',
+        )
+        parser.add_argument(
+            "-d",
+            "--depth",
+            type=int,
+            default=5,
+            help="Maximum depth of the formula tree (default: 5)",
+        )
+        parser.add_argument(
+            "-f",
+            "--fixedpoints",
+            type=int,
+            default=2,
+            help="Maximum number of fixed point formulas (default: 2)",
+        )
+        parser.add_argument(
+            "-s", "--seed", type=int, help="Random seed for reproducibility"
+        )
+
+        args = parser.parse_args()
+
+        # Set random seed if provided
+        if args.seed is not None:
+            random.seed(args.seed)
+
+        # Parse action names
+        action_names = args.actions.split(",")
+
+        # Generate the formula
+        formula = RandomStateFormulaGenerator().generate(
+            action_names=action_names,
+            max_depth=args.depth,
+            max_fixedpoints=args.fixedpoints,
+        )
+
+        # Print the formula
+        print(formula)
+
+        return 0
+
+    if __name__ == "__main__":
+        sys.exit(main())
