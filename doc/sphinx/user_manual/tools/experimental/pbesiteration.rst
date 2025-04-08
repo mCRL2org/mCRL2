@@ -132,3 +132,5 @@ Here, we can apply the one-point rule to rewrite all instances of `n1` to `0`.
 Adding `pbesrewr -pquantifier-inside` and `pbesrewr -pquantifier-one-point`
 before solving the PBES resulted in a solving time of 413ms compared to 8m7s
 without the one-point rule.
+
+.. mcrl2_manual:: pbesiteration
