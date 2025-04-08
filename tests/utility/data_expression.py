@@ -25,6 +25,9 @@ class Variable(DataExpression):
 
     def __str__(self) -> str:
         return self.name
+    
+    def parameter(self) -> str:
+        return f"{self.name}: {self.type}"
 
 @dataclass(frozen=True)
 class Integer(DataExpression):
