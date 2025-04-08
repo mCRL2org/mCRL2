@@ -364,11 +364,11 @@ struct absinthe_algorithm
       if (m_is_over_approximation)
       {
         result = make_exists_(variables, and_(q, 
-          propositional_variable_instantiation(x.name(), data::data_expression_list(variables | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); })))));
+          propositional_variable_instantiation(x.name(), data::data_expression_list(variables))));
       }
       else
       {
-        result = make_forall_(variables, imp(q, propositional_variable_instantiation(x.name(), data::data_expression_list(variables | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); })))));
+        result = make_forall_(variables, imp(q, propositional_variable_instantiation(x.name(), data::data_expression_list(variables))));
       }
     }
 
