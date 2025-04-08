@@ -209,7 +209,7 @@ void unify_parameters(pbes& p, bool ignore_ce_equations = true)
 
 template<bool allow_ce>
 inline
-void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equations, bool reset = true)
+void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equations = false, bool reset = true)
 {
   std::map<core::identifier_string, data::variable_list> propositional_variable_parameters;
   for (const auto& eqn: p.equations())

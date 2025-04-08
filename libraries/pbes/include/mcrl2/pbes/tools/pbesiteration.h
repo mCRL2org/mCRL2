@@ -64,7 +64,7 @@ data::data_expression pbestodata(pbes_equation& equation,
   replace_substituter.set_name(equation.variable().name());
   replace_substituter.apply(expr, equation.formula());
 
-  data::data_expression data_expr = atermpp::down_cast<data::data_expression>(detail::pbes2data(expr));
+  data::data_expression data_expr = detail::pbes2data(expr);
 
   replace_substituter.set_forward(false);
   replace_substituter.apply(expr, equation.formula());
