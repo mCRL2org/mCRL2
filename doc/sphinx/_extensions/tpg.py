@@ -52,7 +52,10 @@ __email__ = 'cdelord.fr'
 __url__ = 'http://cdelord.fr/tpg/'
 
 import re
-import sre_parse
+try:
+    sre_parse = re._parser
+except AttributeError:
+    import sre_parse
 import sys
 
 # Python 2/3 compatibility
@@ -1145,8 +1148,8 @@ class VerboseParser(Parser):
         found = "(%d,%d) %s %s"%(token.line, token.column, token.name, token.text)
         return "[%3d][%2d]%s: %s %s %s"%(eatcnt, stackdepth, callernames, found, op, expected)
 
-blank_line_re = re.compile("^\s*$")
-indent_re = re.compile("^\s*")
+blank_line_re = re.compile(r"^\s*$")
+indent_re = re.compile(r"^\s*")
 
 class tpg:
     """ This class contains some TPG classes to make the parsers usable inside and outside the tpg module
@@ -2208,4 +2211,3 @@ class TPGParser(tpg.Parser):
         rules.links_symbols_to_tokens(tokens_from_name)
         for name, code in rules.gen_code():
             yield self.make_code(name, *code)
-
