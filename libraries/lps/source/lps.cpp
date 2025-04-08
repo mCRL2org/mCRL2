@@ -72,9 +72,7 @@ data::data_expression_list action_summand::next_state(const data::variable_list&
 {
   // Cast the process parameters to data expressions
   return data::replace_variables(
-      data::data_expression_list(process_parameters
-                                 | std::views::transform([](const data::variable& v)
-                                     { return atermpp::down_cast<data::data_expression>(v); })),
+      data::data_expression_list(process_parameters),
       data::assignment_sequence_substitution(assignments()));
 }
 
