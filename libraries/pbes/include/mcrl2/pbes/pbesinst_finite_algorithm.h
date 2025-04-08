@@ -237,7 +237,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
                     p.add_assignments(di_list, sigma_i, super::R);
                     data::data_expression_list d_copy = rewrite_container(d, super::R, sigma);
                     data::data_expression_list e_copy = rewrite_container(e, super::R, sigma);
-                    data::data_expression_list di_copy(di_list | std::views::transform([](const data::variable& v) { return atermpp::down_cast<data::data_expression>(v); }));
+                    data::data_expression_list di_copy(di_list);
                     di_copy = data::replace_free_variables(di_copy, sigma_i);
                     data::data_expression c = make_condition(di_copy, d_copy);
                     core::identifier_string Y = m_rename(Xi, di_copy);
