@@ -33,28 +33,30 @@
 
 import re
 from dataclasses import dataclass
-from typing import NewType, Literal
+from typing import NewType
+from enum import Enum
+
+from typeguard import typechecked
 
 from .data_expression import DataExpression, Variable
 
 # Type aliases
 ActionName = NewType('ActionName', str)
-OperatorSymbol = Literal["+", ".", "<<", "||_", "||", "|"]
-ProcessConstant = Literal["tau", "delta"]
 
-# Constants
-TAU: ProcessConstant = "tau"
-DELTA: ProcessConstant = "delta"
+class ProcessConstant(Enum):
+    TAU = "tau"
+    DELTA = "delta"
 
-# Operator symbols
-OP_CHOICE: OperatorSymbol = "+"
-OP_SEQUENCE: OperatorSymbol = "."
-OP_BOUNDED_INIT: OperatorSymbol = "<<"
-OP_LEFT_MERGE: OperatorSymbol = "||_"
-OP_MERGE: OperatorSymbol = "||"
-OP_SYNC: OperatorSymbol = "|"
+class OperatorSymbol(Enum):
+    CHOICE = "+"
+    SEQUENCE = "."
+    BOUNDED_INIT = "<<"
+    LEFT_MERGE = "||_"
+    MERGE = "||"
+    SYNC = "|"
 
 
+@typechecked
 def parse_variable(text: str) -> Variable:
     """
     Parse a string representation of a variable with its type.
@@ -66,6 +68,7 @@ def parse_variable(text: str) -> Variable:
     return result
 
 
+@typechecked
 def parse_variables(text: str) -> list[Variable]:
     """
     Parse a comma-separated list of variable declarations.
@@ -74,6 +77,7 @@ def parse_variables(text: str) -> list[Variable]:
     return list(map(parse_variable, variables))
 
 
+@typechecked
 class ProcessIdentifier(object):
     """
     Represents a process identifier with optional parameters.
@@ -99,12 +103,14 @@ class ProcessIdentifier(object):
             return self.name
 
 
+@typechecked
 class ProcessExpression(object):
     """Base class for all process expressions in mCRL2."""
     def __init__(self) -> None:
         pass
 
 
+@typechecked
 @dataclass(frozen=True)
 class Action(ProcessExpression):
     """Represents a basic action in the process algebra."""
@@ -114,6 +120,7 @@ class Action(ProcessExpression):
         return self.a
 
 
+@typechecked
 @dataclass(frozen=True)
 class MultiAction(ProcessExpression):
     """Represents multiple actions that occur simultaneously."""
@@ -121,27 +128,30 @@ class MultiAction(ProcessExpression):
 
     def __str__(self) -> str:
         if len(self.actions) == 0:
-            return TAU
-        return f" {OP_SYNC} ".join(self.actions)
+            return ProcessConstant.TAU.value
+        return f" {OperatorSymbol.SYNC.value} ".join(self.actions)
 
     def __hash__(self) -> int:
         return hash(str(self))
 
 
+@typechecked
 @dataclass(frozen=True)
 class Delta(ProcessExpression):
     """Represents the deadlock process."""
     def __str__(self) -> str:
-        return DELTA
+        return ProcessConstant.DELTA.value
 
 
+@typechecked
 @dataclass(frozen=True)
 class Tau(ProcessExpression):
     """Represents the internal (silent) action."""
     def __str__(self) -> str:
-        return TAU
+        return ProcessConstant.TAU.value
 
 
+@typechecked
 @dataclass(frozen=True)
 class ProcessInstance(ProcessExpression):
     """
@@ -158,6 +168,7 @@ class ProcessInstance(ProcessExpression):
         return str(self.identifier)
 
 
+@typechecked
 @dataclass(frozen=True)
 class Sum(ProcessExpression):
     """
@@ -171,6 +182,7 @@ class Sum(ProcessExpression):
         return f"sum {self.d}: {self.d.type}. ({self.x})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class IfThen(ProcessExpression):
     """
@@ -184,6 +196,7 @@ class IfThen(ProcessExpression):
         return f"({self.c}) -> ({self.x})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class IfThenElse(ProcessExpression):
     """
@@ -198,6 +211,7 @@ class IfThenElse(ProcessExpression):
         return f"({self.c}) -> ({self.x}) <> ({self.y})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class BinaryOperator(ProcessExpression):
     """Base class for all binary operators in the process algebra."""
@@ -206,9 +220,10 @@ class BinaryOperator(ProcessExpression):
     y: ProcessExpression
 
     def __str__(self) -> str:
-        return f"({self.x}) {self.op} ({self.y})"
+        return f"({self.x}) {self.op.value} ({self.y})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class Choice(BinaryOperator):
     """
@@ -216,9 +231,10 @@ class Choice(BinaryOperator):
     Example: p + q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__(OP_CHOICE, x, y)
+        super().__init__(OperatorSymbol.CHOICE, x, y)
 
 
+@typechecked
 @dataclass(frozen=True)
 class Seq(BinaryOperator):
     """
@@ -226,9 +242,10 @@ class Seq(BinaryOperator):
     Example: p . q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__(OP_SEQUENCE, x, y)
+        super().__init__(OperatorSymbol.SEQUENCE, x, y)
 
 
+@typechecked
 @dataclass(frozen=True)
 class BoundedInit(BinaryOperator):
     """
@@ -236,9 +253,10 @@ class BoundedInit(BinaryOperator):
     Example: p << q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__(OP_BOUNDED_INIT, x, y)
+        super().__init__(OperatorSymbol.BOUNDED_INIT, x, y)
 
 
+@typechecked
 @dataclass(frozen=True)
 class LeftMerge(BinaryOperator):
     """
@@ -246,9 +264,10 @@ class LeftMerge(BinaryOperator):
     Example: p ||_ q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__(OP_LEFT_MERGE, x, y)
+        super().__init__(OperatorSymbol.LEFT_MERGE, x, y)
 
 
+@typechecked
 @dataclass(frozen=True)
 class Merge(BinaryOperator):
     """
@@ -256,9 +275,10 @@ class Merge(BinaryOperator):
     Example: p || q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__(OP_MERGE, x, y)
+        super().__init__(OperatorSymbol.MERGE, x, y)
 
 
+@typechecked
 @dataclass(frozen=True)
 class Sync(BinaryOperator):
     """
@@ -266,9 +286,10 @@ class Sync(BinaryOperator):
     Example: p | q
     """
     def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
-        super().__init__(OP_SYNC, x, y)
+        super().__init__(OperatorSymbol.SYNC, x, y)
 
 
+@typechecked
 @dataclass(frozen=True)
 class At(ProcessExpression):
     """
@@ -282,6 +303,7 @@ class At(ProcessExpression):
         return f"({self.x}) @ ({self.t})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class Allow(ProcessExpression):
     """
@@ -295,6 +317,7 @@ class Allow(ProcessExpression):
         return f"allow({{{', '.join(map(str, self.V))}}}, {self.x})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class Block(ProcessExpression):
     """
@@ -308,6 +331,7 @@ class Block(ProcessExpression):
         return f"block({{{', '.join(self.B)}}}, {self.x})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class Comm(ProcessExpression):
     """
@@ -321,6 +345,7 @@ class Comm(ProcessExpression):
         return f"comm({{{', '.join(self.C)}}}, {self.x})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class Hide(ProcessExpression):
     """
@@ -334,6 +359,7 @@ class Hide(ProcessExpression):
         return f"hide({{{', '.join(self.I)}}}, {self.x})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class Rename(ProcessExpression):
     """
@@ -347,6 +373,7 @@ class Rename(ProcessExpression):
         return f"rename({{{', '.join(self.R)}}}, {self.x})"
 
 
+@typechecked
 @dataclass(frozen=True)
 class StochasticOperator(ProcessExpression):
     """
