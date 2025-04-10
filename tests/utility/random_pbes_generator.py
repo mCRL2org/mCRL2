@@ -7,8 +7,13 @@
 import argparse
 import os
 import random
+from typing import List, Tuple, Union
+
+from typeguard import typechecked
 
 from .text_utility import write_text
+from .pbes import PropositionalVariable, PredicateVariable, Equation, PBES, UnaryOperator, BinaryOperator, Quantifier
+from .data_expression import DataExpression, Boolean, Integer
 
 PREDICATE_INTEGERS = ["m", "n"]
 PREDICATE_BOOLEANS = ["b", "c"]
@@ -19,236 +24,117 @@ BOOLEANS = PREDICATE_BOOLEANS
 # As a convention we use that k, m, n are always natural numbers and
 # b, c, d are always booleans.
 
-
-# Adds a type ':Bool' or ':Nat' to the name of a variable
-def add_type(var):
-    if var in BOOLEANS:
-        return f"{var}:Bool"
-    elif var in INTEGERS:
-        return f"{var}:Nat"
-    return None
-
-
-class Boolean:
-    def __init__(self, value=None):
-        self.value = value
-
-    def __repr__(self):
-        if self.value is None:
-            return "<BOOL>"
-        else:
-            return f"{self.value}"
-
-    def finish(self, freevars, negated, add_val=True):
-        if self.value is None:
-            self.value = make_boolean(freevars, add_val)
-
-
-class Natural:
-    def __init__(self, value=None):
-        self.value = value
-
-    def __repr__(self):
-        if self.value is None:
-            return "<NAT>"
-        else:
-            return f"{self.value}"
-
-    def finish(self, freevars, negated, add_val=True):
-        if self.value is None:
-            self.value = make_natural(freevars, add_val)
-
-
-class PropositionalVariable:
-    def __init__(self, name, args):
-        self.name = name
-        self.args = args
-        self.prefix = ""  # sometimes we need to add a '!' to make a PBES monotonic
-
-    def __repr__(self):
-        if len(self.args) == 0:
-            return f"{self.prefix}{self.name}"
-        return "%s%s(%s)" % (self.prefix, self.name, ", ".join(map(str, self.args)))
-
-    def finish(self, freevars, negated):
-        if negated:
-            self.prefix = "!"
-        add_val = False
-        for a in self.args:
-            a.finish(freevars, negated, add_val)
-
-
-class PredicateVariable:
-    def __init__(self, name, args):
-        self.name = name
-        self.args = args
-
-    def __repr__(self):
-        if len(self.args) == 0:
-            return self.name
-        args = map(add_type, self.args)
-        return "%s(%s)" % (self.name, ", ".join(map(str, args)))
-
-    def finish(self, freevars, negated):
-        pass
-
-
-class Equation:
-    def __init__(self, sigma, var, formula):
-        self.sigma = sigma
-        self.var = var
-        self.formula = formula
-
-    def __repr__(self):
-        return "%s %s = %s;" % (self.sigma, self.var, self.formula)
-
-    def finish(self):
-        freevars = self.var.args
-        negated = False
-        self.formula.finish(freevars, negated)
-
-
-class PBES:
-    def __init__(self, equations, init):
-        self.equations = equations
-        self.init = init
-
-    def __repr__(self):
-        return "pbes\n%s\n\ninit %s;" % ("\n".join(map(str, self.equations)), self.init)
-
-    def finish(self):
-        for e in self.equations:
-            e.finish()
-
-
-class UnaryOperator:
-    def __init__(self, op, x):
-        self.op = op
-        self.x = x
-
-    def __repr__(self):
-        x = self.x
-        op = self.op
-        return "%s(%s)" % (op, x)
-
-    def finish(self, freevars, negated):
-        if self.op == "!":
-            negated = not negated
-        self.x.finish(freevars, negated)
-
-
-class BinaryOperator:
-    def __init__(self, op, x, y):
-        self.op = op
-        self.x = x
-        self.y = y
-
-    def __repr__(self):
-        x = self.x
-        y = self.y
-        op = self.op
-        return "(%s) %s (%s)" % (x, op, y)
-
-    def finish(self, freevars, negated):
-        if self.op == "=>":
-            self.x.finish(freevars, not negated)
-        else:
-            self.x.finish(freevars, negated)
-        self.y.finish(freevars, negated)
-
-
-class Quantifier:
-    def __init__(self, quantor, x, y):
-        self.quantor = quantor
-        self.x = x  # the bound variable
-        self.y = y  # the formula
-
-    def __repr__(self):
-        x = self.x
-        y = self.y
-        quantor = self.quantor
-        return "%s %s.(%s)" % (quantor, add_type(x), y)
-
-    def finish(self, freevars, negated):
-        qvar = []
-        for q in QUANTIFIER_INTEGERS:
-            if not q in freevars:
-                qvar.append(q)
-        if len(qvar) == 0:
-            raise RuntimeError("warning: Quantifier nesting depth exceeded")
-        var, dummy = pick_element(qvar)
-        self.x = var
-        if self.quantor == "exists":
-            self.y = or_(Boolean(make_val("%s < 3" % var)), self.y)
-        else:
-            self.y = and_(Boolean(make_val("%s < 3" % var)), self.y)
-        self.y.finish(freevars + [self.x], negated)
-
-
-def not_(x):
+@typechecked
+def not_(x: Union[DataExpression, PropositionalVariable]) -> UnaryOperator:
+    """
+    Creates a negation operator.
+    """
     return UnaryOperator("!", x)
 
 
-def and_(x, y):
+@typechecked
+def and_(x: Union[DataExpression, PropositionalVariable], y: Union[DataExpression, PropositionalVariable]) -> BinaryOperator:
+    """
+    Creates a conjunction operator.
+    """
     return BinaryOperator("&&", x, y)
 
 
-def or_(x, y):
+@typechecked
+def or_(x: Union[DataExpression, PropositionalVariable], y: Union[DataExpression, PropositionalVariable]) -> BinaryOperator:
+    """
+    Creates a disjunction operator.
+    """
     return BinaryOperator("||", x, y)
 
 
-def implies(x, y):
+@typechecked
+def implies(x: Union[DataExpression, PropositionalVariable], y: Union[DataExpression, PropositionalVariable]) -> BinaryOperator:
+    """
+    Creates an implication operator.
+    """
     return BinaryOperator("=>", x, y)
 
 
-def forall(x):
-    var = Natural()
+@typechecked
+def forall(x: Union[DataExpression, PropositionalVariable]) -> Quantifier:
+    """
+    Creates a universal quantifier.
+    """
+    var = "Natural"
     phi = x
     return Quantifier("forall", var, phi)
 
 
-def exists(x):
-    var = Natural()
+@typechecked
+def exists(x: Union[DataExpression, PropositionalVariable]) -> Quantifier:
+    """
+    Creates an existential quantifier.
+    """
+    var = "Natural"
     phi = x
     return Quantifier("exists", var, phi)
 
 
-def equal_to(x, y):
+@typechecked
+def equal_to(x: Union[DataExpression, PropositionalVariable], y: Union[DataExpression, PropositionalVariable]) -> BinaryOperator:
+    """
+    Creates an equality operator.
+    """
     return BinaryOperator("==", x, y)
 
 
-def not_equal_to(x, y):
+@typechecked
+def not_equal_to(x: Union[DataExpression, PropositionalVariable], y: Union[DataExpression, PropositionalVariable]) -> BinaryOperator:
+    """
+    Creates an inequality operator.
+    """
     return BinaryOperator("!=", x, y)
 
 
-# operators = [not_, forall, exists, and_, or_, implies, equal_to, not_equal_to]
 operators = [not_, and_, or_, implies, forall, exists]
 
 
-def is_boolean_constant(x):
-    return isinstance(x, Boolean) and x.value in ["false", "true"]
+@typechecked
+def is_boolean_constant(x: Union[DataExpression, PropositionalVariable]) -> bool:
+    """
+    Checks if a term is a boolean constant ('true' or 'false').
+    """
+    return isinstance(x, DataExpression) and x.value in ["false", "true"]
 
 
-def is_natural_constant(x):
-    return isinstance(x, Natural) and x.value in ["0", "1"]
+@typechecked
+def is_natural_constant(x: Union[DataExpression, PropositionalVariable]) -> bool:
+    """
+    Checks if a term is a natural constant ('0' or '1').
+    """
+    return isinstance(x, DataExpression) and x.value in ["0", "1"]
 
 
-def is_unary(op):
+@typechecked
+def is_unary(op: Union[UnaryOperator, BinaryOperator]) -> bool:
+    """
+    Checks if an operator is unary.
+    """
     return op in [not_, forall, exists]
 
 
-# pick a random element x from a set s
-# returns x, (s - {x})
-def pick_element(s):
+@typechecked
+def pick_element(s: List[str]) -> Tuple[str, List[str]]:
+    """
+    Picks a random element from a list and removes it.
+    """
     n = random.randint(0, len(s) - 1)
     x = s[n]
     s = s[:n] + s[n + 1 :]
     return x, s
 
 
-# randomly pick n elements from a set s
-# returns a sequence with the selected elements
-def pick_elements(s, n):
+@typechecked
+def pick_elements(s: List[str], n: int) -> List[str]:
+    """
+    Picks multiple random elements from a list.
+    """
     result = []
     for _ in range(n):
         x, s = pick_element(s)
@@ -256,19 +142,20 @@ def pick_elements(s, n):
     return result
 
 
-# with a 100% probability wrap s inside val
-def make_val(s):
-    return "val({})".format(s)
-
-    # n = random.randint(0, 1)
-    # if n == 0:
-    #    return 'val({})'.format(s)
-    # else:
-    #    return s
+@typechecked
+def make_val(s: str) -> str:
+    """
+    Wraps a string in a 'val()' expression.
+    """
+    return f"val({s})"
 
 
-def make_predvar(n, use_integers=True, size=random.randint(0, 2)):
-    name = "X%d" % n
+@typechecked
+def make_predvar(n: int, use_integers: bool = True, size: int = random.randint(0, 2)) -> PredicateVariable:
+    """
+    Creates a predicate variable with random arguments.
+    """
+    name = f"X{n}"
     arguments = []
     variables = (
         PREDICATE_INTEGERS + PREDICATE_BOOLEANS if use_integers else PREDICATE_BOOLEANS
@@ -279,14 +166,19 @@ def make_predvar(n, use_integers=True, size=random.randint(0, 2)):
     return PredicateVariable(name, arguments)
 
 
-# Generates n random predicate variables with 0, 1 or 2 parameters
-def make_predvars(n, use_integers):
+@typechecked
+def make_predvars(n: int, use_integers: bool) -> List[PredicateVariable]:
+    """
+    Creates a list of predicate variables.
+    """
     return [make_predvar(i, use_integers, random.randint(0, 2)) for i in range(n)]
 
 
-# Creates elementary random boolean terms, with free variables
-# from the set freevars.
-def make_atoms(freevars, add_val=True):
+@typechecked
+def make_atoms(freevars: List[str], add_val: bool = True) -> List[str]:
+    """
+    Creates a list of atomic formulas based on free variables.
+    """
     naturals = set(freevars).intersection(set(INTEGERS))
     booleans = set(freevars).intersection(set(BOOLEANS))
     result = []
@@ -306,48 +198,62 @@ def make_atoms(freevars, add_val=True):
     return result
 
 
-def make_boolean(freevars, add_val=True):
+@typechecked
+def make_boolean(freevars: List[str], add_val: bool = True) -> str:
+    """
+    Creates a random boolean formula.
+    """
     atoms = make_atoms(freevars, add_val)
-    x, dummy = pick_element(atoms)
+    x, _ = pick_element(atoms)
     return x
 
 
-def make_natural(freevars, add_val=True):
+@typechecked
+def make_natural(freevars: List[str], add_val: bool = True) -> str:
+    """
+    Creates a random natural number formula.
+    """
     naturals = set(freevars).intersection(set(INTEGERS))
-    result = []
-    result.append("0")
-    result.append("1")
+    result = ["0", "1"]
     for m in naturals:
         result.append(f"{m} + 1")
-    x, dummy = pick_element(result)
+    x, _ = pick_element(result)
     return x
 
 
-# returns instantiations of predicate variables
-def make_predvar_instantiations(predvars):
+@typechecked
+def make_predvar_instantiations(predvars: List[PredicateVariable]) -> List[PropositionalVariable]:
+    """
+    Instantiates predicate variables as propositional variables.
+    """
     result = []
     for X in predvars:
         args = []
         for a in X.args:
             if a in BOOLEANS:
-                args.append(Boolean())
+                args.append(Boolean("true"))
             elif a in INTEGERS:
-                args.append(Natural())
+                args.append(Integer("0"))
         result.append(PropositionalVariable(X.name, args))
     return result
 
 
-# Creates m boolean terms, and n propositional variable instantiations.
-def make_terms(predvars, m, n):
-    result = []
-    for i in range(m):
-        result.append(Boolean())
+@typechecked
+def make_terms(predvars: List[PredicateVariable], m: int, n: int) -> List[Union[DataExpression, PropositionalVariable]]:
+    """
+    Creates a list of terms for a PBES equation.
+    """
+    result = [Boolean("true") for _ in range(m)]
     inst = make_predvar_instantiations(predvars)
-    result = result + pick_elements(inst, n)
+    result += pick_elements(inst, n)
     return result
 
 
-def join_terms(terms):
+@typechecked
+def join_terms(terms: List[Union[DataExpression, PropositionalVariable]]) -> List[Union[DataExpression, PropositionalVariable]]:
+    """
+    Combines terms using random operators.
+    """
     op = operators[random.randint(0, len(operators) - 1)]
     if is_unary(op):
         x, terms = pick_element(terms)
@@ -360,13 +266,17 @@ def join_terms(terms):
     return terms
 
 
+@typechecked
 def make_pbes(
-    equation_count,
-    atom_count=5,
-    propvar_count=3,
-    use_quantifiers=True,
-    use_integers=True,
-):
+    equation_count: int,
+    atom_count: int = 5,
+    propvar_count: int = 3,
+    use_quantifiers: bool = True,
+    use_integers: bool = True,
+) -> PBES:
+    """
+    Generates a random PBES.
+    """
     global operators
     if use_quantifiers:
         operators = [not_, and_, or_, implies, not_, and_, or_, implies, forall, exists]
@@ -380,7 +290,7 @@ def make_pbes(
                 terms = make_terms(predvars, atom_count, propvar_count)
                 while len(terms) > 1:
                     terms = join_terms(terms)
-                sigma, dummy = pick_element(["mu", "nu"])
+                sigma, _ = pick_element(["mu", "nu"])
                 equations.append(Equation(sigma, predvars[i], terms[0]))
             X = predvars[0]
             args = []
@@ -391,14 +301,16 @@ def make_pbes(
                     args.append("0")
             init = PropositionalVariable(X.name, args)
             p = PBES(equations, init)
-            p.finish()
             return p
-        except Exception as inst:
-            # print inst
+        except Exception:
             pass
 
 
-def main():
+@typechecked
+def main() -> None:
+    """
+    Main function to generate random PBES instances and write them to files.
+    """
     cmdline_parser = argparse.ArgumentParser()
     cmdline_parser.add_argument(
         "destination", metavar="DIR", type=str, help="the output directory"
