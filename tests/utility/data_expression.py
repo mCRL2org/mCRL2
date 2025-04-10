@@ -14,6 +14,7 @@ class Sort(Enum):
     """Sorts of data expressions"""
 
     INT = "Int"
+    NAT = "Nat"
     BOOL = "Bool"
 
 
@@ -43,8 +44,20 @@ class Variable(DataExpression):
 
 @typechecked
 @dataclass(frozen=True)
+class Natural(DataExpression):
+    """Represents an natural number."""
+
+    value: str
+    type: Sort = Sort.NAT
+
+    def __str__(self) -> str:
+        return self.value
+
+
+@typechecked
+@dataclass(frozen=True)
 class Integer(DataExpression):
-    """Represents an integer value."""
+    """Represents an integer."""
 
     value: str
     type: Sort = Sort.INT
