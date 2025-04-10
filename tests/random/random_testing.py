@@ -420,7 +420,7 @@ class BesTest(RandomTest):
         self.term_size = 3
 
     def create_inputfiles(self, runpath = '.'):
-        filename = '{0}.txt'.format(self.name, self.settings)
+        filename = '{0}.txt'.format(self.name)
         p = make_bes(self.equation_count, self.term_size)
         write_text(filename, str(p))
         self.inputfiles += [filename]
