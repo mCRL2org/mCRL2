@@ -1438,8 +1438,6 @@ class RewriterCompilingJitty::ImplementTree
     std::stringstream head;
     std::stringstream arguments;
 
-// XXXXXX
-
     std::string headlocvar;
     if (!is_variable(a.head()))
     {
@@ -1507,9 +1505,9 @@ class RewriterCompilingJitty::ImplementTree
     {
       assert(is_application(a.head()));
       std::string headvar="head" + std::to_string(m_locvar_counter++);
-      s << m_padding << "data_expression& /*XX1*/" << headvar << " = this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();\n";
-      write_delayed_application_to_stream_in_normal_form(code_string,headvar,
+      write_delayed_application_to_stream_in_normal_form(s,headvar,
                       down_cast<application>(a.head()),startarg, result_types, type_of_code_variables);
+      code_string << headvar;
     }
 
     for(const data_expression& t: a)

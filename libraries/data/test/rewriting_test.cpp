@@ -1616,3 +1616,52 @@ BOOST_AUTO_TEST_CASE(bound_variables_in_whr_clause2)   // Another example showin
   } 
 }   
 
+BOOST_AUTO_TEST_CASE(compile_complex_application)   // Compilation of a term: h(p')(c') > 0 with h a function did not work well after revision of the rewriter. 
+{  
+  std::string s( 
+    "sort Products  = struct Android | MacOS | Windows;\n"
+    "\n"
+    "sort Producer = struct Steve | Bill | Larry | Sergey;\n"
+    "     Supplies = Producer -> Products -> Nat;\n"
+    "\n"
+    "map initial_supplies: Supplies;\n"
+    "var\n"
+    "  p: Producer;\n"
+    "  c: Products;\n"
+    "eqn\n"
+    "  initial_supplies(p)(c) = 0;\n"
+    "\n"
+    "map update_supplies: Supplies # Producer # Products -> Supplies;\n"
+    "var\n"
+    "  h: Supplies;\n"
+    "  p: Producer;\n"
+    "  c: Products;\n"
+    "eqn\n"
+    "  update_supplies(h,p,c) = h[p -> h(p)[c -> h(p)(c)+1] ];\n"
+    "\n"
+    "map update_order: Producer # Products # List(Producer) # Supplies -> List(Producer);\n"
+    "var\n"
+    "  p,p': Producer;\n"
+    "  l,l': List(Producer);\n"
+    "  c: Products;\n"
+    "  h: Supplies;\n"
+    "eqn\n"
+    "  update_order(p,c,[],h) = [p];\n"
+    "  (forall c':Products. (c' > c) => h(p')(c') == 0) ->  update_order(p,c,p'|>l,h) = p|>p'|>l;\n"
+    "  (exists c':Products. (c' > c && h(p')(c') > 0))  ->  update_order(p,c,p'|>l,h) = p'|>update_order(p,c,l,h);\n"
+  );
+    
+  // data::detail::set_enumerator_iteration_limit(5);
+  data_specification specification(parse_data_specification(s));
+    
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  { 
+    std::cerr << " Compilation of function application to multiple arguments. " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+    
+    data::data_expression e(parse_data_expression("update_supplies(initial_supplies,Steve,MacOs)!=initial_supplies", specification));
+    data::data_expression f(parse_data_expression("true", specification)); 
+    data_rewrite_test(R, e, f);
+  } 
+}
