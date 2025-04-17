@@ -1660,7 +1660,7 @@ BOOST_AUTO_TEST_CASE(compile_complex_application)   // Compilation of a term: h(
     std::cerr << " Compilation of function application to multiple arguments. " << *strat << std::endl;
     data::rewriter R(specification, *strat);
     
-    data::data_expression e(parse_data_expression("update_supplies(initial_supplies,Steve,MacOs)!=initial_supplies", specification));
+    data::data_expression e(parse_data_expression("update_supplies(initial_supplies,Steve,MacOS)!=initial_supplies", specification));
     data::data_expression f(parse_data_expression("true", specification)); 
     data_rewrite_test(R, e, f);
   } 

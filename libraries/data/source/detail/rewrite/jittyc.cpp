@@ -1512,11 +1512,20 @@ class RewriterCompilingJitty::ImplementTree
 
     for(const data_expression& t: a)
     {
-      std::string locvar="locvar" + std::to_string(m_locvar_counter++);
-      s << m_padding << "data_expression& " << locvar << " = /* XX2 */ this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();\n";
-      result_types << ",";
-      code_string << ", " << locvar;
-      calc_inner_term(s, locvar, t, startarg, true, result_types, type_of_code_variables);
+      if (is_variable(t))
+      {
+        code_string << ", ";
+        result_types << ", ";
+        calc_inner_term(code_string, "", down_cast<variable>(t), startarg, true, result_types, type_of_code_variables);
+      }
+      else
+      {
+        std::string locvar="locvar" + std::to_string(m_locvar_counter++);
+        s << m_padding << "data_expression& " << locvar << " = /* XX2 */ this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();\n";
+        result_types << ",";
+        code_string << ", " << locvar;
+        calc_inner_term(s, locvar, t, startarg, true, result_types, type_of_code_variables);
+      }
     }
 
     std::string result_type_str = delayed_application(arity) + "<" + result_types.str() + ">";
