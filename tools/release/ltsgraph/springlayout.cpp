@@ -603,7 +603,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::none>(bool sel,
     std::size_t n = sel ? m_graph.explorationEdge(i) : i;
     for (std::size_t j = i + 1; j < edgeCount; ++j)
     {
-      std::size_t m = sel ? m_graph.explorationNode(j) : j;
+      std::size_t m = sel ? m_graph.explorationEdge(j) : j;
       f = (*m_repFunc)(m_graph.handle(n).pos(), m_graph.handle(m).pos(), m_natLength) * repulsion_force_control_point;
       m_hforces[i] += f;
       m_hforces[j] -= f;
