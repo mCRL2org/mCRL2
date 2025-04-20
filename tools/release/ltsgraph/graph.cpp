@@ -516,69 +516,6 @@ void Graph::saveXML(const QString& filename)
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);
 }
 
-NodeNode& Graph::node(std::size_t index)
-{
-  return m_nodes[index];
-}
-
-Node& Graph::handle(std::size_t edge)
-{
-  return m_handles[edge];
-}
-
-LabelNode& Graph::transitionLabel(std::size_t edge)
-{
-  return m_transitionLabelnodes[edge];
-}
-
-LabelNode& Graph::stateLabel(std::size_t index)
-{
-  return m_stateLabelnodes[index];
-}
-
-const Edge& Graph::edge(std::size_t index) const
-{
-  return m_edges[index];
-}
-
-const NodeNode& Graph::node(std::size_t index) const
-{
-  return m_nodes[index];
-}
-
-const Node& Graph::handle(std::size_t edge) const
-{
-  return m_handles[edge];
-}
-
-const LabelNode& Graph::transitionLabel(std::size_t edge) const
-{
-  return m_transitionLabelnodes[edge];
-}
-
-const LabelNode& Graph::stateLabel(std::size_t index) const
-{
-  return m_stateLabelnodes[index];
-}
-
-const QString& Graph::transitionLabelstring(std::size_t labelindex) const
-{
-  if (labelindex >= m_transitionLabels.size())
-  {
-    return m_empty;
-  }
-  return m_transitionLabels[labelindex].label();
-}
-
-const QString& Graph::stateLabelstring(std::size_t labelindex) const
-{
-  if (labelindex >= m_stateLabels.size())
-  {
-    return m_empty;
-  }
-  return m_stateLabels[labelindex];
-}
-
 void Graph::clip(const QVector3D& min, const QVector3D& max)
 {
   lockForRead(
@@ -704,12 +641,13 @@ bool Graph::isClosable(std::size_t index)
   // active node count:
   // Todo: improve this
   std::size_t count = 0;
-  for (std::size_t nodeId : m_exploration->nodes) {
+  for (std::size_t nodeId : m_exploration->nodes) 
+  {
     if (m_nodes[nodeId].m_active)
     {
       ++count;
     }
-}
+  }
 
   NodeNode& node = m_nodes[index];
   bool toggleable =
@@ -739,11 +677,13 @@ bool Graph::hasExploration() const
 
 std::size_t Graph::explorationEdge(std::size_t index) const
 {
+  assert(index<m_exploration->edges.size());
   return m_exploration->edges[index];
 }
 
 std::size_t Graph::explorationNode(std::size_t index) const
 {
+  assert(index<m_exploration->nodes.size());
   return m_exploration->nodes[index];
 }
 
@@ -933,14 +873,14 @@ void GraphView::addVar(std::string name)
 void GraphView::draw(QPainter& painter)
 {
     
-    for (int j = 0; j < m_plots.size(); j++)
+    for (std::size_t j = 0; j < m_plots.size(); j++)
     {
       auto& vec = m_plots[j];
       if (vec.size() < 1) continue;
       int row = j / m_cols;
       int col = j % m_cols;
       std::string graph_title;
-      for (int i = 0; i < vec.size(); i++) {
+      for (std::size_t i = 0; i < vec.size(); i++) {
         graph_title += vec[i].var;
         if (i < vec.size() - 1)
         {

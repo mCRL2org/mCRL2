@@ -20,18 +20,20 @@
 #ifndef SPRINGLAYOUT_H
 #define SPRINGLAYOUT_H
 
+#include <map>
+
 #include <QDockWidget>
+#include <QtOpenGL>
+#include <QElapsedTimer>
+
 #include "ui_springlayout.h"
 #include "ui_advancedspringlayoutdialog.h"
-#include <QtOpenGL>
 
 #include "glwidget.h"
 #include "layoututility.h"
 #include "attractionfunctions.h"
 #include "repulsionfunctions.h"
-#include "applicationfunctions.h"
-#include <map>
-#include <QElapsedTimer>
+#include "applicationfunction.h"
 
 namespace Graph
 {
@@ -154,9 +156,13 @@ class SpringLayout
   const float m_min_natLength = 0.0f;
   const float m_max_natLength = 100.0f;
   float m_natLength; ///< The natural length of springs.
-  const float m_min_controlPointWeight = 0.0f;
-  const float m_max_controlPointWeight = 0.8f;
-  float m_controlPointWeight; ///< The handle repulsion wight factor.
+  /* const float m_min_controlPointWeight = 0.0f;
+  const float m_max_controlPointWeight = 10.0f;
+  float m_controlPointWeight; ///< The handle repulsion weight factor. */
+  const float m_min_handleDeviation = 0.0f;
+  const float m_max_handleDeviation = 30.0f;
+  float m_handleDeviation; ///< The natural distance of a transition handle from its straight position between the states it connect. */
+  const float m_labelDistance = 3.0; ///< The distance of a label to the handle */
   const float m_min_accuracy = 5.0f;
   const float m_max_accuracy = 0.0f;
   float m_no_annealing_temperature = 1.0f;
@@ -164,8 +170,8 @@ class SpringLayout
   float m_accuracy; ///< Controls the Barnes-Hut criterion in the approximation
                     ///< of repulsive forces
   bool m_tree_enable_for_large_graphs = true;
-  float m_stabilityThreshold = 1e-3;
-  int m_stabilityMaxCount = 3; // Number of iterations in which change has to be within threshold before 'stable'
+  float m_stabilityThreshold = 1e-4;
+  int m_stabilityMaxCount = 500; // Number of iterations in which change has to be within threshold before 'stable'
   int m_stabilityCounter = 0;
   float m_previous_energy = 1e25;
   std::vector<QVector3D> m_nforces, m_hforces, m_lforces,
@@ -210,7 +216,7 @@ class SpringLayout
    * @return QVector3D Force exerted by all particles on particle @e a
    */
   template <typename TreeType>
-  QVector3D approxRepulsionForce(const QVector3D& a, TreeType& tree);
+  QVector3D approxRepulsionForce(const QVector3D& a, TreeType& tree, const float ideal_distance);
 
   void forceAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount,
                          TreeMode treeMode, ThreadingMode threadingMode);
@@ -282,10 +288,10 @@ class SpringLayout
   {
     return unlerp(m_repulsion, m_min_repulsion, m_max_repulsion);
   }
-  int controlPointWeight() const
+  int handleDeviation() const
   {
-    return unlerp(m_controlPointWeight, m_min_controlPointWeight,
-                  m_max_controlPointWeight);
+    return unlerp(m_handleDeviation, m_min_handleDeviation,
+                  m_max_handleDeviation);
   }
   int naturalTransitionLength() const
   {

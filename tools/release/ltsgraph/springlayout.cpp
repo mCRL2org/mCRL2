@@ -103,7 +103,7 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
       m_attraction(0.13f),
       m_repulsion(50.0f),
       m_natLength(50.0f),
-      m_controlPointWeight(0.001f),
+      m_handleDeviation(10.0f),
       m_graph(graph),
       m_ui(nullptr),
       attrFuncMap({
@@ -122,11 +122,11 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
       m_option_repulsionCalculation(RepulsionFunctionID::ltsgraph_rep),
       m_glwidget(glwidget)
 {
-  m_graph.gv_debug.addVar("Temperature");
+  m_graph.gv_debug.addVar("Stability");
   m_graph.gv_debug.addVar("Energy");
   m_graph.gv_debug.addVar("min energy");
   m_graph.gv_debug.addVar("max energy");
-  m_graph.gv_debug.addToPlot(0, 0, {"Temperature", QBrush(Qt::red, Qt::SolidPattern), QPen(Qt::red, 1)});
+  m_graph.gv_debug.addToPlot(0, 0, {"Stability", QBrush(Qt::red, Qt::SolidPattern), QPen(Qt::red, 1)});
 
   m_graph.gv_debug.addToPlot(1,
       0,
@@ -165,7 +165,7 @@ SpringLayoutUi* SpringLayout::ui(QAction* /* advancedDialogAction */, CustomQWid
     Ui::AdvancedSpringLayoutDialog& advanced_ui = m_ui->m_ui_advanced;
     Ui::DockWidgetLayout& ui = m_ui->m_ui;
     settings->registerVar(ui.sldBalance, unlerp(0.5f, 0, 1));
-    settings->registerVar(ui.sldHandleWeight, unlerp(0.1, m_min_controlPointWeight, m_max_controlPointWeight));
+    settings->registerVar(ui.sldHandleWeight, unlerp(5.0, m_min_handleDeviation, m_max_handleDeviation));
     settings->registerVar(ui.sldNatLength, unlerp(20, m_min_natLength, m_max_natLength));
 
     settings->registerVar(advanced_ui.sld_acc, unlerp(1.2f, m_min_accuracy, m_max_accuracy), true);
@@ -175,7 +175,7 @@ SpringLayoutUi* SpringLayout::ui(QAction* /* advancedDialogAction */, CustomQWid
             m_speed_inverse_scale_func(m_max_speed)),
         true);
 
-    settings->registerVar(advanced_ui.chk_annealing, true, true);
+    settings->registerVar(advanced_ui.chk_annealing, false, true);
     settings->registerVar(advanced_ui.chk_debugDraw, false, true);
     settings->registerVar(advanced_ui.chk_enableTree, true, true);
 
@@ -189,7 +189,7 @@ SpringLayoutUi* SpringLayout::ui(QAction* /* advancedDialogAction */, CustomQWid
     settings->registerVar(advanced_ui.txt_stab_thres, QString::number(m_stabilityThreshold), true);
     settings->registerVar(advanced_ui.txt_stab_iters, QString::number(m_stabilityMaxCount), true);
 
-    m_ui->m_ui.dispHandleWeight->setText(QString::number(m_controlPointWeight, 'g', 3));
+    m_ui->m_ui.dispHandleWeight->setText(QString::number(m_handleDeviation, 'g', 3));
     m_ui->m_ui.dispNatLength->setText(QString::number(m_natLength, 'g', 3));
   }
   return m_ui;
@@ -240,14 +240,14 @@ RepulsionFunctionID SpringLayout::repulsionCalculation()
 }
 
 template <>
-QVector3D SpringLayout::approxRepulsionForce<Octree>(const QVector3D& a, Octree& tree)
+QVector3D SpringLayout::approxRepulsionForce<Octree>(const QVector3D& a, Octree& tree, const float ideal_distance)
 {
   QVector3D force(0, 0, 0);
   std::size_t num_nodes = 0;
   auto& super_nodes = tree.getSuperNodes(a);
   for (auto super_node : super_nodes)
   {
-    force += super_node->children * (*m_repFunc)(a, super_node->pos, m_natLength);
+    force += super_node->children * (*m_repFunc)(a, super_node->pos, ideal_distance);
   }
   force *= m_repulsion;
   num_nodes = super_nodes.size();
@@ -258,14 +258,14 @@ QVector3D SpringLayout::approxRepulsionForce<Octree>(const QVector3D& a, Octree&
 }
 
 template <>
-QVector3D SpringLayout::approxRepulsionForce<Quadtree>(const QVector3D& a, Quadtree& tree)
+QVector3D SpringLayout::approxRepulsionForce<Quadtree>(const QVector3D& a, Quadtree& tree,  const float ideal_distance)
 {
   QVector3D force(0, 0, 0);
   std::size_t num_nodes = 0;
   auto& super_nodes = tree.getSuperNodes({a.x(), a.y()});
   for (auto super_node : super_nodes)
   {
-    force += super_node->children * (*m_repFunc)(a, {super_node->pos.x(), super_node->pos.y(), 0}, m_natLength);
+    force += super_node->children * (*m_repFunc)(a, {super_node->pos.x(), super_node->pos.y(), 0}, ideal_distance);
   }
   force *= m_repulsion;
   num_nodes = super_nodes.size();
@@ -286,7 +286,7 @@ void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(b
     std::size_t n = sel ? m_graph.explorationNode(i) : i;
     nodeLocations[n] = i;
     m_nforces[i] = {0, 0, 0};
-    m_sforces[i] = (*m_attrFunc)(m_graph.node(n).pos(), m_graph.stateLabel(n).pos(), 0.0) * m_attraction;
+    m_sforces[i] = (*m_attrFunc)(m_graph.node(n).pos(), m_graph.stateLabel(n).pos(), m_labelDistance) * m_attraction;
   }
 
   QVector3D f;
@@ -304,18 +304,17 @@ void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(b
 
     if (e.is_selfloop())
     {
-      m_hforces[i] += (*m_repFunc)(m_graph.handle(n).pos(), m_graph.node(from).pos(), m_natLength) * m_repulsion*10000;
+      m_hforces[i] += (*m_repFunc)(m_graph.handle(n).pos(), m_graph.node(from).pos(), 10*m_handleDeviation) * m_repulsion;
     }
 
     f = (*m_attrFunc)(m_graph.node(to).pos(), m_graph.node(from).pos(), m_natLength) * m_attraction;
     m_nforces[nodeLocations[from]] += f;
     m_nforces[nodeLocations[to]] -= f;
 
-    f = (*m_attrFunc)((m_graph.node(to).pos() + m_graph.node(from).pos()) / 2.0, m_graph.handle(n).pos(), 0.0)
-        * m_attraction;
+    f = (*m_attrFunc)((m_graph.node(to).pos() + m_graph.node(from).pos()) / 2.0, m_graph.handle(n).pos(), m_handleDeviation) * m_attraction;
     m_hforces[i] += f;
 
-    f = (*m_attrFunc)(m_graph.handle(n).pos(), m_graph.transitionLabel(n).pos(), 0.0) * m_attraction;
+    f = (*m_attrFunc)(m_graph.handle(n).pos(), m_graph.transitionLabel(n).pos(), m_labelDistance) * m_attraction;
     m_lforces[i] += f;
   }
 }
@@ -420,7 +419,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool 
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationNode(i) : i;
-    m_nforces[i] += approxRepulsionForce<Quadtree>(m_graph.node(n).pos(), m_node_tree2D);
+    m_nforces[i] += approxRepulsionForce<Quadtree>(m_graph.node(n).pos(), m_node_tree2D, m_natLength);
   }
 
   for (std::size_t i = 0; i < edgeCount; ++i)
@@ -435,15 +434,15 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool 
   m_trans_tree2D.calculatePositions();
 
   // approximate repulsive forces
-  float temp = m_repulsion;
-  m_repulsion *= m_controlPointWeight;
+  // float temp = m_repulsion;
+  // m_repulsion *= m_handleDeviation; 
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationEdge(i) : i;
-    m_hforces[i] += approxRepulsionForce<Quadtree>(m_graph.handle(n).pos(), m_handle_tree2D);
-    m_lforces[i] += approxRepulsionForce<Quadtree>(m_graph.transitionLabel(n).pos(), m_trans_tree2D);
+    m_hforces[i] += approxRepulsionForce<Quadtree>(m_graph.handle(n).pos(), m_handle_tree2D, m_handleDeviation);
+    m_lforces[i] += approxRepulsionForce<Quadtree>(m_graph.transitionLabel(n).pos(), m_trans_tree2D, m_labelDistance);
   }
-  m_repulsion = temp;
+  // m_repulsion = temp;
 }
 
 template <>
@@ -551,7 +550,7 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool se
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationNode(i) : i;
-    m_nforces[i] += approxRepulsionForce<Octree>(m_graph.node(n).pos(), m_node_tree);
+    m_nforces[i] += approxRepulsionForce<Octree>(m_graph.node(n).pos(), m_node_tree, m_natLength);
   }
 
   for (std::size_t i = 0; i < edgeCount; ++i)
@@ -564,22 +563,16 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool se
   m_handle_tree.calculatePositions();
   m_trans_tree.calculatePositions();
 
-  // approximate repulsive forces
-  const float temp = m_repulsion;
-  m_repulsion *= m_controlPointWeight;
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationEdge(i) : i;
-    m_hforces[i] += approxRepulsionForce<Octree>(m_graph.handle(n).pos(), m_handle_tree);
-    m_lforces[i] += approxRepulsionForce<Octree>(m_graph.transitionLabel(n).pos(), m_trans_tree);
+    m_hforces[i] += approxRepulsionForce<Octree>(m_graph.handle(n).pos(), m_handle_tree, m_handleDeviation);
+    m_lforces[i] += approxRepulsionForce<Octree>(m_graph.transitionLabel(n).pos(), m_trans_tree, m_labelDistance);
   }
-  m_repulsion = temp;
 }
 
 template <>
-void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::none>(bool sel,
-    std::size_t nodeCount,
-    std::size_t edgeCount)
+void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::none>(bool sel, std::size_t nodeCount, std::size_t edgeCount)
 {
   // used for storing intermediate results
   QVector3D f;
@@ -597,19 +590,17 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::none>(bool sel,
   }
 
   // repulsive forces
-  const float repulsion_force_control_point = m_repulsion * m_controlPointWeight;
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     std::size_t n = sel ? m_graph.explorationEdge(i) : i;
     for (std::size_t j = i + 1; j < edgeCount; ++j)
     {
       std::size_t m = sel ? m_graph.explorationEdge(j) : j;
-      f = (*m_repFunc)(m_graph.handle(n).pos(), m_graph.handle(m).pos(), m_natLength) * repulsion_force_control_point;
+      f = (*m_repFunc)(m_graph.handle(n).pos(), m_graph.handle(m).pos(), m_handleDeviation) * m_repulsion;
       m_hforces[i] += f;
       m_hforces[j] -= f;
 
-      f = (*m_repFunc)(m_graph.transitionLabel(n).pos(), m_graph.transitionLabel(m).pos(), m_natLength)
-          * repulsion_force_control_point;
+      f = (*m_repFunc)(m_graph.transitionLabel(n).pos(), m_graph.transitionLabel(m).pos(), m_labelDistance) * m_repulsion;
       m_lforces[i] += f;
       m_lforces[j] -= f;
     }
@@ -649,7 +640,6 @@ void SpringLayout::apply()
 {
   assert(m_attrFunc);
   assert(m_repFunc);
-  assert(m_attrFunc);
   if (!m_graph.stable() || m_graph.hasForcedUpdate())
   {
     m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
@@ -793,7 +783,7 @@ void SpringLayout::apply()
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
-    double energy = slicedAverageSqrMagnitude(m_nforces);
+    double energy = slicedAverageSqrMagnitude(m_nforces); //+slicedAverageSqrMagnitude(m_hforces);
     double min = 1e15;
     double max = -1e15;
     for (const QVector3D& f: m_nforces)
@@ -801,14 +791,6 @@ void SpringLayout::apply()
       double mag = f.lengthSquared();
       min = std::min(min, mag);
       max = std::max(max, mag);
-    }
-    if (m_glwidget.getDebugDrawGraphs())
-    {
-      m_graph.gv_debug.logVar("Temperature", m_asa.T);
-      m_graph.gv_debug.logVar("Energy", energy);
-
-      m_graph.gv_debug.logVar("min energy", min);
-      m_graph.gv_debug.logVar("max energy", max);
     }
     if (m_useAnnealing)
     {
@@ -827,14 +809,23 @@ void SpringLayout::apply()
     m_repFunc->update();
     m_attrFunc->update();
 
-    float stability = std::abs((m_previous_energy - energy) / m_previous_energy);
+    // float stability = std::abs((m_previous_energy - energy) / m_previous_energy);
+    float stability = std::abs(m_previous_energy - energy)/(edgeCount+nodeCount);
 
+    if (m_glwidget.getDebugDrawGraphs())
+    {
+      m_graph.gv_debug.logVar("Stability", stability);
+      m_graph.gv_debug.logVar("Energy", energy);
+
+      m_graph.gv_debug.logVar("min energy", min);
+      m_graph.gv_debug.logVar("max energy", max);
+    }
 
     // The graph becomes stable if the center of mass is sufficiently close to (0,0,0) or is anchored
     // and the energy of the graph does not fluctuate too much.
-//std::cerr << "XX: " << center_of_mass.length() << "     " << stability << " StabCount: " << m_stabilityCounter << "   " << energy << "   " << m_previous_energy << " temp:  " << m_annealing_temperature << "\n";
-//std::cerr << "Center of mass: " << center_of_mass.x() << ", " << center_of_mass.y() << ", " << center_of_mass.z() << "\n";
-    if (stability <= m_stabilityThreshold && (center_of_mass.length()<0.0001 || any_anchored))
+// std::cerr << "XX: " << center_of_mass.length() << "     " << stability << " StabCount: " << m_stabilityCounter << "   " << energy << "   " << m_previous_energy << " temp:  " << m_annealing_temperature << "\n";
+// std::cerr << "Center of mass: " << center_of_mass.x() << ", " << center_of_mass.y() << ", " << center_of_mass.z() << "\n";
+    if (stability <= m_stabilityThreshold && (center_of_mass.length()<0.01 || any_anchored))
     {
       m_stabilityCounter++;
       if (m_stabilityCounter >= m_stabilityMaxCount)
@@ -950,11 +941,11 @@ void SpringLayout::setRepulsion(int v)
 
 void SpringLayout::setControlPointWeight(int v)
 {
-  m_controlPointWeight = 500*lerp(v, m_min_controlPointWeight, m_max_controlPointWeight);
-  mCRL2log(mcrl2::log::verbose) << "Set control point weight to: " << m_controlPointWeight << std::endl;
+  m_handleDeviation = lerp(v, m_min_handleDeviation, m_max_handleDeviation);
+  mCRL2log(mcrl2::log::verbose) << "Set the handle deviation to: " << m_handleDeviation << std::endl;
   if (this->m_ui)
   {
-    m_ui->m_ui.dispHandleWeight->setText(QString::number(m_controlPointWeight, 'g', 3));
+    m_ui->m_ui.dispHandleWeight->setText(QString::number(m_handleDeviation, 'g', 3));
   }
 }
 
@@ -974,6 +965,7 @@ void SpringLayout::rulesChanged()
   m_repFunc->reset();
   m_attrFunc->reset();
   m_asa.reset();
+  m_stabilityCounter=0;
 }
 
 void SpringLayout::resetPositions()
@@ -1091,7 +1083,7 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, CustomQWidget* advancedDial
   m_ui_advanced_dialog->hide();
 
   m_ui.sldBalance->setValue(m_layout.repulsion());
-  m_ui.sldHandleWeight->setValue(m_layout.controlPointWeight());
+  m_ui.sldHandleWeight->setValue(m_layout.handleDeviation());
   m_ui.sldNatLength->setValue(m_layout.naturalTransitionLength());
   // m_ui_advanced.chk_enableTree->setChecked(false);
   m_layout.setTreeEnabled(m_ui_advanced.chk_enableTree->isChecked());

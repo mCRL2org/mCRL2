@@ -582,31 +582,91 @@ class Graph
      *        If the index is not valid, an empty string is returned.
      * @param labelindex The index of the label.
      */
-    const QString& transitionLabelstring(std::size_t labelindex) const;
+    inline const QString& transitionLabelstring(std::size_t labelindex) const
+    {
+      if (labelindex >= m_transitionLabels.size())
+      {
+        return m_empty;
+      }
+      return m_transitionLabels[labelindex].label();
+    }
+    
 
     /**
      * @brief Returns the string representation of the state label with index @e labelindex.
      *        If the index is not valid, an empty string is returned.
      * @param labelindex The index of the label.
      */
-    const QString& stateLabelstring(std::size_t labelindex) const;
+    inline const QString& stateLabelstring(std::size_t labelindex) const
+    {
+      if (labelindex >= m_stateLabels.size())
+      {
+        return m_empty;
+      }
+      return m_stateLabels[labelindex];
+    }
+    
 
     bool userIsDragging = false;
 
     /// Accessors
 
-    Node& handle(std::size_t edge);
-    NodeNode& node(std::size_t index);
-    LabelNode& stateLabel(std::size_t index);
-    LabelNode& transitionLabel(std::size_t edge);
+    inline Node& handle(std::size_t edge)
+    { 
+      assert(edge<m_handles.size());
+      return m_handles[edge];
+    }   
 
+    inline NodeNode& node(std::size_t index)
+    { 
+      assert(index<m_nodes.size());
+      return m_nodes[index];
+    } 
+      
+    inline LabelNode& transitionLabel(std::size_t edge)
+    { 
+      assert(edge<m_transitionLabelnodes.size());
+      return m_transitionLabelnodes[edge];
+    }
+    
+    inline LabelNode& stateLabel(std::size_t index)
+    { 
+      assert(index<m_stateLabelnodes.size());
+      return m_stateLabelnodes[index];
+    }
+    
     /// Getters
 
-    const Edge& edge(std::size_t index) const;
-    const Node& handle(std::size_t edge) const;
-    const NodeNode& node(std::size_t index) const;
-    const LabelNode& stateLabel(std::size_t index) const;
-    const LabelNode& transitionLabel(std::size_t edge) const;
+    inline const Edge& edge(std::size_t index) const
+    { 
+      assert(index<m_edges.size());
+      return m_edges[index]; 
+    } 
+      
+    inline const NodeNode& node(std::size_t index) const
+    {
+      assert(index<m_nodes.size());
+      return m_nodes[index];
+    } 
+    
+    inline const Node& handle(std::size_t edge) const
+    {
+      assert(edge<m_handles.size());
+      return m_handles[edge];
+    }
+    
+    inline const LabelNode& transitionLabel(std::size_t edge) const
+    {
+      assert(edge<m_transitionLabelnodes.size());
+      return m_transitionLabelnodes[edge];
+    }
+    
+    inline const LabelNode& stateLabel(std::size_t index) const
+    {
+      assert(index<m_stateLabelnodes.size());
+      return m_stateLabelnodes[index];
+    }
+    
     bool isBridge(std::size_t index) const; ///< Returns whether a given node forms a bridge in the exploration
 
     std::size_t initialState() const;
