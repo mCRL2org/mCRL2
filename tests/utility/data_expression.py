@@ -17,7 +17,9 @@ class Sort(Enum):
     NAT = "Nat"
     BOOL = "Bool"
 
-
+    def __str__(self) -> str:
+        return self.value
+    
 @typechecked
 @dataclass(frozen=True)
 class DataExpression:
@@ -39,7 +41,7 @@ class Variable(DataExpression):
 
     def parameter(self) -> str:
         """Returns a "d: D" string representation of the variable."""
-        return f"{self.name}: {self.type.value}"
+        return f"{self.name}: {self.type}"
 
 
 @typechecked

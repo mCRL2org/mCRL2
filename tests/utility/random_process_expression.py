@@ -7,6 +7,7 @@
 import copy
 import random
 import re
+from typing import List, Optional, Union, Dict, Set, Callable, Any, TypeVar
 
 import tests.utility.random_data_expression as random_data_expression
 from .process_expression import (
@@ -20,10 +21,8 @@ from .process_expression import (
     IfThenElse,
     Choice,
     Seq,
-    Sync,
     Merge,
     LeftMerge,
-    BoundedInit,
     Allow,
     Block,
     Comm,
@@ -43,10 +42,10 @@ class DistVariableGenerator(object):
     TODO: Check if variable clashes between nested dists are allowed.
     """
 
-    n = 0
+    n: int = 0
 
     @staticmethod
-    def generate():
+    def generate() -> Variable:
         result = Variable(f"x{DistVariableGenerator.n}", Sort.BOOL)
         DistVariableGenerator.n += 1
         return result
@@ -57,11 +56,11 @@ class ProcessEquation:
     Represents a process equation with a left-hand side (lhs) and a right-hand side (rhs).
     """
 
-    def __init__(self, lhs, rhs):
-        self.lhs = lhs
-        self.rhs = rhs
+    def __init__(self, lhs: ProcessIdentifier, rhs: ProcessExpression):
+        self.lhs: ProcessIdentifier = lhs
+        self.rhs: ProcessExpression = rhs
 
-    def __str__(self):
+    def __str__(self) -> str:
         lhs = self.lhs
         rhs = self.rhs
         return f"{lhs} = {rhs};"
@@ -88,14 +87,14 @@ class ProcessSpecification:
         return f"{actspec}\n{procspec}\n{initspec}"
 
 
-def remove_postfix(name):
+def remove_postfix(name: str) -> str:
     """
     Removes the numeric postfix from a name.
     """
     return re.sub(r"\d+$", "", name)
 
 
-def make_variable(forbidden_variables):
+def make_variable(forbidden_variables: List[Variable]) -> Variable:
     """
     Creates a new variable that does not clash with the given forbidden variables.
     """
@@ -118,7 +117,7 @@ def default_value(v: Variable) -> DataExpression:
     raise RuntimeError(f"default_value: only Bool and Int are supported! {v.type}")
 
 
-def make_multi_action1(actions, size):
+def make_multi_action1(actions: List[str], size: int) -> MultiAction:
     """
     Creates a multi-action consisting of a random selection of actions.
     """
@@ -128,7 +127,7 @@ def make_multi_action1(actions, size):
     return MultiAction(sorted(result))
 
 
-def expression_size(x):
+def expression_size(x: Union[ProcessExpression, MultiAction]) -> int:
     """
     Returns the size of a process expression.
     """
@@ -144,8 +143,12 @@ def expression_size(x):
 
 
 def select_generators(
-    generators, actions, process_identifiers, is_guarded, size
-):
+    generators: Dict["ProcGenerator", int],
+    actions: List[str],
+    process_identifiers: List[ProcessIdentifier],
+    is_guarded: bool,
+    size: int,
+) -> List["ProcGenerator"]:
     """
     Returns the generator functions capable of producing a random process expression
     that satisfies the given constraints.
@@ -167,7 +170,10 @@ def select_generators(
 
     r = []
     for x in result:
-        r = r + [x] * generators[x]
+        for k, v in generators.items():
+            if isinstance(x, k):
+                r = r + [x] * v
+
     return r
 
 
@@ -178,12 +184,12 @@ class ProcGenerator:
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict["ProcGenerator", int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> ProcessExpression:
         """
         Generates a process expression based on the specific implementation.
         """
@@ -197,12 +203,12 @@ class SumGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> Sum:
         d = make_variable(variables)
         x = make_process_expression(
             process_expression_generators,
@@ -221,12 +227,12 @@ class ActionGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> Action:
         a = random.choice(actions)
         return Action(a)
 
@@ -238,12 +244,12 @@ class MultiActionGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> MultiAction:
         n = random.randint(2, 4)
         result = [random.choice(actions) for _ in range(n)]
         return MultiAction(sorted(result))
@@ -256,12 +262,12 @@ class ProcessInstanceGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> ProcessInstance:
         P = random.choice(process_identifiers)
         parameters = []
         for v in P.variables:
@@ -285,12 +291,12 @@ class DeltaGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> Delta:
         return Delta()
 
 
@@ -301,12 +307,12 @@ class TauGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> Tau:
         return Tau()
 
 
@@ -317,12 +323,12 @@ class DistGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> StochasticOperator:
         d = DistVariableGenerator.generate()
         x = make_process_expression(
             process_expression_generators,
@@ -343,12 +349,12 @@ class IfThenGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> IfThen:
         c = "true"
         x = make_process_expression(
             process_expression_generators,
@@ -367,12 +373,12 @@ class IfThenElseGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> IfThenElse:
         c = "true"
         x, y = make_two_process_expressions(
             process_expression_generators,
@@ -391,12 +397,12 @@ class ChoiceGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> Choice:
         x, y = make_two_process_expressions(
             process_expression_generators,
             actions,
@@ -414,12 +420,12 @@ class SeqGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> Seq:
         x = make_process_expression(
             process_expression_generators,
             actions,
@@ -444,12 +450,12 @@ class LeftMergeGenerator(ProcGenerator):
 
     def generate(
         self,
-        process_expression_generators,
-        actions,
-        process_identifiers,
-        variables,
-        size,
-    ):
+        process_expression_generators: Dict[ProcGenerator, int],
+        actions: List[str],
+        process_identifiers: List[ProcessIdentifier],
+        variables: List[Variable],
+        size: int,
+    ) -> LeftMerge:
         x = make_process_expression(
             process_expression_generators,
             actions,
@@ -467,7 +473,7 @@ class LeftMergeGenerator(ProcGenerator):
         return LeftMerge(x, y)
 
 
-def make_hide_set(actions, size):
+def make_hide_set(actions: List[str], size: int) -> List[str]:
     """
     Creates a set of actions to hide.
     """
@@ -476,7 +482,7 @@ def make_hide_set(actions, size):
     return random.sample(actions, size)
 
 
-def make_hide(actions, x):
+def make_hide(actions: List[str], x: ProcessExpression) -> Hide:
     """
     Wraps a process expression with a hide operator.
     """
@@ -484,7 +490,7 @@ def make_hide(actions, x):
     return Hide(I, x)
 
 
-def make_rename_set(actions, size):
+def make_rename_set(actions: List[str], size: int) -> List[str]:
     """
     Creates a set of rename mappings.
     """
@@ -500,7 +506,7 @@ def make_rename_set(actions, size):
     return result
 
 
-def make_rename(actions, x):
+def make_rename(actions: List[str], x: ProcessExpression) -> Rename:
     """
     Wraps a process expression with a rename operator.
     """
@@ -508,7 +514,7 @@ def make_rename(actions, x):
     return Rename(R, x)
 
 
-def make_comm_set(actions, size):
+def make_comm_set(actions: List[str], size: int) -> List[str]:
     """
     Creates a set of communication mappings.
     """
@@ -527,7 +533,7 @@ def make_comm_set(actions, size):
     return result
 
 
-def make_comm(actions, x):
+def make_comm(actions: List[str], x: ProcessExpression) -> Comm:
     """
     Wraps a process expression with a communication operator.
     """
@@ -535,7 +541,7 @@ def make_comm(actions, x):
     return Comm(C, x)
 
 
-def make_allow_set(actions, size):
+def make_allow_set(actions: List[str], size: int) -> List[MultiAction]:
     """
     Creates a set of allowed multi-actions.
     """
@@ -547,7 +553,7 @@ def make_allow_set(actions, size):
     return list(result)
 
 
-def make_allow(actions, x):
+def make_allow(actions: List[str], x: ProcessExpression) -> Allow:
     """
     Wraps a process expression with an allow operator.
     """
@@ -555,22 +561,22 @@ def make_allow(actions, x):
     return Allow(V, x)
 
 
-default_process_expression_generators = {
-    ActionGenerator(): 8,
-    DeltaGenerator(): 1,
-    TauGenerator(): 1,
-    ProcessInstanceGenerator(): 2,
-    SumGenerator(): 2,
-    IfThenGenerator(): 2,
-    IfThenElseGenerator(): 2,
-    ChoiceGenerator(): 5,
-    SeqGenerator(): 5,
-    MultiActionGenerator(): 1,
-    DistGenerator(): 0,
+default_process_expression_generators: Dict[ProcGenerator, int] = {
+    ActionGenerator: 8,
+    DeltaGenerator: 1,
+    TauGenerator: 1,
+    ProcessInstanceGenerator: 2,
+    SumGenerator: 2,
+    IfThenGenerator: 2,
+    IfThenElseGenerator: 2,
+    ChoiceGenerator: 5,
+    SeqGenerator: 5,
+    MultiActionGenerator: 1,
+    DistGenerator: 0,
 }
 
 
-def make_block(actions, x):
+def make_block(actions: List[str], x: ProcessExpression) -> Block:
     """
     Wraps a process expression with a block operator.
     """
@@ -578,7 +584,7 @@ def make_block(actions, x):
     return Block(B, x)
 
 
-def make_block_set(actions, size):
+def make_block_set(actions: List[str], size: int) -> List[str]:
     """
     Creates a set of blocked actions.
     """
@@ -586,12 +592,12 @@ def make_block_set(actions, size):
 
 
 def make_process_expression(
-    process_expression_generators,
-    actions,
-    process_identifiers,
-    variables,
-    size,
-):
+    process_expression_generators: Dict[ProcGenerator, int],
+    actions: List[str],
+    process_identifiers: List[ProcessIdentifier],
+    variables: List[Variable],
+    size: int,
+) -> ProcessExpression:
     """
     Generates a random process expression.
     """
@@ -617,12 +623,12 @@ def make_process_expression(
 
 
 def make_two_process_expressions(
-    process_expression_generators,
-    actions,
-    process_identifiers,
-    variables,
-    size,
-):
+    process_expression_generators: Dict[ProcGenerator, int],
+    actions: List[str],
+    process_identifiers: List[ProcessIdentifier],
+    variables: List[Variable],
+    size: int,
+) -> tuple[ProcessExpression, ProcessExpression]:
     """
     Generates two random process expressions.
     """
@@ -646,11 +652,11 @@ def make_two_process_expressions(
 
 
 def make_parallel_process_expression(
-    actions,
-    process_expressions,
-    size,
-    parallel_operator_generators=None,
-):
+    actions: List[str],
+    process_expressions: List[ProcessExpression],
+    size: int,
+    parallel_operator_generators: Optional[List[Callable]] = None,
+) -> ProcessExpression:
     """
     Generates a random process expression by wrapping parallel operators around elements of process_expressions.
     """
@@ -680,11 +686,11 @@ def make_parallel_process_expression(
 
 
 def make_parallel_process_expression_old(
-    actions,
-    process_expressions,
-    size,
-    parallel_operator_generators=None,
-):
+    actions: List[str],
+    process_expressions: List[ProcessExpression],
+    size: int,
+    parallel_operator_generators: Optional[List[Callable]] = None,
+) -> ProcessExpression:
     """
     Generates a random process expression by wrapping parallel operators around elements of process_expressions
     using an older method.
@@ -717,7 +723,7 @@ def make_parallel_process_expression_old(
     return x
 
 
-default_parallel_operator_generators = [
+default_parallel_operator_generators: List[Callable] = [
     make_block,
     make_hide,
     make_rename,
@@ -726,12 +732,12 @@ default_parallel_operator_generators = [
 ]
 
 
-def parse_variable(text: str):
+def parse_variable(text: str) -> Variable:
     """
     Parses a string representation of a variable with its type.
     """
     text = text.strip()
-    m = re.match(r'([^,:]+)\s*\:(.+)', text)
+    m = re.match(r"([^,:]+)\s*\:(.+)", text)
     assert m is not None
     result = Variable(m.group(1).strip(), m.group(2).strip())
     return result
@@ -741,19 +747,19 @@ def parse_variables(text: str) -> list[Variable]:
     """
     Parses a comma-separated list of variable declarations.
     """
-    variables = map(str.strip, text.split(','))
+    variables = map(str.strip, text.split(","))
     return list(map(parse_variable, variables))
 
 
 def make_process_specification(
-    parallel_operator_generators=None,
-    process_expression_generators=None,
-    actions=None,
-    process_identifiers=None,
-    size=13,
-    init=None,
-    generate_process_parameters=False,
-):
+    parallel_operator_generators: Optional[List[Callable]] = None,
+    process_expression_generators: Optional[Dict[ProcGenerator, int]] = None,
+    actions: Optional[List[str]] = None,
+    process_identifiers_names: Optional[List[str]] = None,
+    size: int = 13,
+    init: Optional[ProcessExpression] = None,
+    generate_process_parameters: bool = False,
+) -> ProcessSpecification:
     """
     Generates a random process specification.
     """
@@ -763,16 +769,16 @@ def make_process_specification(
         process_expression_generators = default_process_expression_generators
     if actions is None:
         actions = ["a", "b", "c", "d"]
-    if process_identifiers is None:
-        process_identifiers = ["P", "Q", "R"]
-        
-    process_identifiers = list(map(ProcessIdentifier, process_identifiers))
+    if process_identifiers_names is None:
+        process_identifiers_names = ["P", "Q", "R"]
+    process_identifiers = list(map(ProcessIdentifier, process_identifiers_names))
+
     if generate_process_parameters:
         V = parse_variables("c1: Bool, c2: Bool, c3: Bool, i1: Int, i2: Int, i3: Int")
         for i, P in enumerate(process_identifiers):
             if not P.variables:
                 n = random.randint(0, 3)
-                process_identifiers[i].variables = random.sample(V, n)
+                process_identifiers[i] = variables = random.sample(V, n)
 
     variables = []
     equations = []
@@ -788,7 +794,7 @@ def make_process_specification(
     n = random.randint(0, 5)
     if not init:
         process_instances = [
-            ProcessInstance(x, list(map(default_value, x.variables))) 
+            ProcessInstance(x, list(map(default_value, x.variables)))
             for x in process_identifiers
         ]
         init = make_parallel_process_expression(
