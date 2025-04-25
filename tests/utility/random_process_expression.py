@@ -137,14 +137,14 @@ def expression_size(x):
     result = 0
     if isinstance(x, ProcessExpression) and not isinstance(x, StochasticOperator):
         result = result + 1
-    for key, value in vars(x).items():
+    for _, value in vars(x).items():
         if isinstance(value, ProcessExpression):
             result = result + expression_size(value)
     return result
 
 
 def select_generators(
-    generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size
+    generators, actions, process_identifiers, is_guarded, size
 ):
     """
     Returns the generator functions capable of producing a random process expression
@@ -182,8 +182,6 @@ class ProcGenerator:
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         """
@@ -203,8 +201,6 @@ class SumGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         d = make_variable(variables)
@@ -213,8 +209,6 @@ class SumGenerator(ProcGenerator):
             actions,
             process_identifiers,
             variables + [d],
-            is_pcrl,
-            is_guarded,
             size - 1,
         )
         return Sum(d, x)
@@ -231,8 +225,6 @@ class ActionGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         a = random.choice(actions)
@@ -250,8 +242,6 @@ class MultiActionGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         n = random.randint(2, 4)
@@ -270,8 +260,6 @@ class ProcessInstanceGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         P = random.choice(process_identifiers)
@@ -301,8 +289,6 @@ class DeltaGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         return Delta()
@@ -319,8 +305,6 @@ class TauGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         return Tau()
@@ -337,8 +321,6 @@ class DistGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         d = DistVariableGenerator.generate()
@@ -347,8 +329,6 @@ class DistGenerator(ProcGenerator):
             actions,
             process_identifiers,
             variables,
-            is_pcrl,
-            is_guarded,
             size - 1,
         )
         distributions = [f"1/2", f"if({d.name},1/4,3/4)"]
@@ -367,8 +347,6 @@ class IfThenGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         c = "true"
@@ -377,8 +355,6 @@ class IfThenGenerator(ProcGenerator):
             actions,
             process_identifiers,
             variables,
-            is_pcrl,
-            is_guarded,
             size - 1,
         )
         return IfThen(c, x)
@@ -395,8 +371,6 @@ class IfThenElseGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         c = "true"
@@ -405,8 +379,6 @@ class IfThenElseGenerator(ProcGenerator):
             actions,
             process_identifiers,
             variables,
-            is_pcrl,
-            is_guarded,
             size - 1,
         )
         return IfThenElse(c, x, y)
@@ -423,8 +395,6 @@ class ChoiceGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         x, y = make_two_process_expressions(
@@ -432,8 +402,6 @@ class ChoiceGenerator(ProcGenerator):
             actions,
             process_identifiers,
             variables,
-            is_pcrl,
-            is_guarded,
             size - 1,
         )
         return Choice(x, y)
@@ -450,8 +418,6 @@ class SeqGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         x = make_process_expression(
@@ -459,8 +425,6 @@ class SeqGenerator(ProcGenerator):
             actions,
             process_identifiers,
             variables,
-            is_pcrl,
-            is_guarded,
             size - 2,
         )
         y = make_process_expression(
@@ -468,8 +432,6 @@ class SeqGenerator(ProcGenerator):
             actions,
             process_identifiers,
             variables,
-            is_pcrl,
-            False,
             size - expression_size(x) - 1,
         )
         return Seq(x, y)
@@ -486,8 +448,6 @@ class LeftMergeGenerator(ProcGenerator):
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     ):
         x = make_process_expression(
@@ -495,8 +455,6 @@ class LeftMergeGenerator(ProcGenerator):
             actions,
             process_identifiers,
             variables,
-            is_pcrl,
-            is_guarded,
             size - 2,
         )
         y = make_process_expression(
@@ -504,8 +462,6 @@ class LeftMergeGenerator(ProcGenerator):
             actions,
             process_identifiers,
             variables,
-            is_pcrl,
-            False,
             size - expression_size(x) - 1,
         )
         return LeftMerge(x, y)
@@ -540,7 +496,7 @@ def make_rename_set(actions, size):
         a, b = random.sample(A, 2)
         A.remove(a)
         A.remove(b)
-        result.append('{} -> {}'.format(a, b))
+        result.append(f"{a} -> {b}")
     return result
 
 
@@ -567,7 +523,7 @@ def make_comm_set(actions, size):
         if a != b:
             A.remove(b)
         c = random.choice(list(A))
-        result.append('{} | {} -> {}'.format(a, b, c))
+        result.append(f"{a} | {b} -> {c}")
     return result
 
 
@@ -634,8 +590,6 @@ def make_process_expression(
     actions,
     process_identifiers,
     variables,
-    is_pcrl,
-    is_guarded,
     size,
 ):
     """
@@ -645,10 +599,8 @@ def make_process_expression(
         process_expression_generators,
         actions,
         process_identifiers,
-        variables,
-        is_pcrl,
-        is_guarded,
-        size,
+        size=size,
+        is_guarded=True,
     )
     generator = random.choice(generators)
     result = generator.generate(
@@ -656,8 +608,6 @@ def make_process_expression(
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size,
     )
     if expression_size(result) > size:
@@ -671,8 +621,6 @@ def make_two_process_expressions(
     actions,
     process_identifiers,
     variables,
-    is_pcrl,
-    is_guarded,
     size,
 ):
     """
@@ -685,8 +633,6 @@ def make_two_process_expressions(
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         n,
     )
     y = make_process_expression(
@@ -694,8 +640,6 @@ def make_two_process_expressions(
         actions,
         process_identifiers,
         variables,
-        is_pcrl,
-        is_guarded,
         size - expression_size(x),
     )
     return x, y
@@ -705,17 +649,19 @@ def make_parallel_process_expression(
     actions,
     process_expressions,
     size,
-    parallel_operator_generators=[
-        make_block,
-        make_hide,
-        make_rename,
-        make_comm,
-        make_allow,
-    ],
+    parallel_operator_generators=None,
 ):
     """
     Generates a random process expression by wrapping parallel operators around elements of process_expressions.
     """
+    if parallel_operator_generators is None:
+        parallel_operator_generators = [
+            make_block,
+            make_hide,
+            make_rename,
+            make_comm,
+            make_allow,
+        ]
     V = copy.deepcopy(process_expressions)
     x = None
     while len(V) > 1 or size > 0:
@@ -737,18 +683,20 @@ def make_parallel_process_expression_old(
     actions,
     process_expressions,
     size,
-    parallel_operator_generators=[
-        make_block,
-        make_hide,
-        make_rename,
-        make_comm,
-        make_allow,
-    ],
+    parallel_operator_generators=None,
 ):
     """
     Generates a random process expression by wrapping parallel operators around elements of process_expressions
     using an older method.
     """
+    if parallel_operator_generators is None:
+        parallel_operator_generators = [
+            make_block,
+            make_hide,
+            make_rename,
+            make_comm,
+            make_allow,
+        ]
     V = copy.deepcopy(process_expressions)
     x = None
     while len(V) > 0:
@@ -798,10 +746,10 @@ def parse_variables(text: str) -> list[Variable]:
 
 
 def make_process_specification(
-    parallel_operator_generators=default_parallel_operator_generators,
-    process_expression_generators=default_process_expression_generators,
-    actions=["a", "b", "c", "d"],
-    process_identifiers=["P", "Q", "R"],
+    parallel_operator_generators=None,
+    process_expression_generators=None,
+    actions=None,
+    process_identifiers=None,
     size=13,
     init=None,
     generate_process_parameters=False,
@@ -809,6 +757,15 @@ def make_process_specification(
     """
     Generates a random process specification.
     """
+    if parallel_operator_generators is None:
+        parallel_operator_generators = default_parallel_operator_generators
+    if process_expression_generators is None:
+        process_expression_generators = default_process_expression_generators
+    if actions is None:
+        actions = ["a", "b", "c", "d"]
+    if process_identifiers is None:
+        process_identifiers = ["P", "Q", "R"]
+        
     process_identifiers = list(map(ProcessIdentifier, process_identifiers))
     if generate_process_parameters:
         V = parse_variables("c1: Bool, c2: Bool, c3: Bool, i1: Int, i2: Int, i3: Int")
@@ -817,9 +774,7 @@ def make_process_specification(
                 n = random.randint(0, 3)
                 process_identifiers[i].variables = random.sample(V, n)
 
-    is_guarded = True
     variables = []
-    is_pcrl = True
     equations = []
     for P in process_identifiers:
         x = make_process_expression(
@@ -827,15 +782,13 @@ def make_process_specification(
             actions,
             process_identifiers,
             variables + P.variables,
-            is_pcrl,
-            is_guarded,
             size,
         )
         equations.append(ProcessEquation(P, x))
     n = random.randint(0, 5)
     if not init:
         process_instances = [
-            ProcessInstance(x, list(map(default_value, x.variables)))
+            ProcessInstance(x, list(map(default_value, x.variables))) 
             for x in process_identifiers
         ]
         init = make_parallel_process_expression(
