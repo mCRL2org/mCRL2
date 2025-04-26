@@ -823,8 +823,6 @@ void SpringLayout::apply()
 
     // The graph becomes stable if the center of mass is sufficiently close to (0,0,0) or is anchored
     // and the energy of the graph does not fluctuate too much.
-// std::cerr << "XX: " << center_of_mass.length() << "     " << stability << " StabCount: " << m_stabilityCounter << "   " << energy << "   " << m_previous_energy << " temp:  " << m_annealing_temperature << "\n";
-// std::cerr << "Center of mass: " << center_of_mass.x() << ", " << center_of_mass.y() << ", " << center_of_mass.z() << "\n";
     if (stability <= m_stabilityThreshold && (center_of_mass.length()<0.01 || any_anchored))
     {
       m_stabilityCounter++;
@@ -879,7 +877,11 @@ void SpringLayout::randomizeZ(float z)
 
 void SpringLayout::notifyNewFrame()
 {
-  m_graph.hasNewFrame(true);
+  if (!m_graph.hasNewFrame())
+  {
+    m_graph.hasNewFrame(true);
+    m_ui->m_thread->signal_draw_new_frame();
+  }
 }
 
 void SpringLayout::setTreeEnabled(bool b)
@@ -957,6 +959,7 @@ void SpringLayout::setNaturalTransitionLength(int v)
   {
     m_ui->m_ui.dispNatLength->setText(QString::number(m_natLength, 'g', 3));
   }
+  m_glwidget.update();
 }
 
 void SpringLayout::rulesChanged()
@@ -998,79 +1001,13 @@ void SpringLayout::resetPositions()
       m_graph.handle(n).pos_mutable() = m_graph.transitionLabel(n).pos();
     }
   }
-  m_graph.hasNewFrame(true);
-  m_graph.setStable(false);
-  m_asa.reset();
+  rulesChanged();
   m_graph.unlock(GRAPH_LOCK_TRACE);
 }
 
 //
 // SpringLayoutUi
 //
-
-class WorkerThread : public QThread
-{
-private:
-  bool m_stopped;
-  SpringLayout& m_layout;
-  std::size_t m_counter = 0;
-
-  // By default log every second
-  const int m_debug_log_interval = 1000;
-
-  // if we have a cycle time longer than 100ms we want an extra message
-  const int m_debug_max_cycle_time = 100;
-  QElapsedTimer m_debug_log_timer;
-
-public:
-  WorkerThread(SpringLayout& layout, QObject* parent = nullptr)
-      : QThread(parent),
-        m_stopped(false),
-        m_layout(layout)
-  {
-    mCRL2log(mcrl2::log::debug) << "Workerthread will output debug messages to this stream." << std::endl;
-    m_debug_log_timer.start();
-  }
-
-  void stop() { m_stopped = true; }
-
-  void run() override
-  {
-    while (!m_stopped)
-    {
-      if (m_layout.isStable())
-      {
-        msleep(50); // We don't want to keep computing if the layout is stable
-      }
-      else
-      {
-        m_layout.apply();
-        debugLogging();
-      }
-    }
-  }
-
-  /// @brief Only called when a debug configuration is ran.
-  void debugLogging()
-  {
-    m_counter++;
-    int elapsed = m_debug_log_timer.elapsed();
-    if (elapsed > m_debug_log_interval)
-    {
-      mCRL2log(mcrl2::log::debug) << "Worker thread performed " << m_counter << " cycles in " << elapsed
-                                  << "ms. ASA temperature: " << m_layout.m_asa.T;
-      if ((float)elapsed / m_counter > m_debug_max_cycle_time)
-      {
-        mCRL2log(mcrl2::log::debug) << " - NB: This is longer than the set expected maximum " << m_debug_max_cycle_time
-                                    << "ms per cycle. ";
-      }
-      mCRL2log(mcrl2::log::debug) << std::endl;
-      // reset debugging
-      m_debug_log_timer.restart();
-      m_counter = 0;
-    }
-  }
-};
 
 SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, CustomQWidget* advancedDialogWidget, QWidget* parent)
     : QDockWidget(parent),
@@ -1133,10 +1070,12 @@ SpringLayoutUi::~SpringLayoutUi()
     m_thread->wait();
   }
 }
-/// @brief Notifies layout that rules have changed
-void SpringLayoutUi::layoutRulesChanged()
+/// @brief Notifies layout that rules have changed and redraw the graph.
+void SpringLayoutUi::layoutChanged()
 {
   m_layout.rulesChanged();
+  m_layout.m_graph.hasNewFrame(true);
+  m_layout.m_glwidget.update(); // Redraw the graph.
 }
 
 QByteArray SpringLayoutUi::settings()
@@ -1147,7 +1086,7 @@ QByteArray SpringLayoutUi::settings()
 void SpringLayoutUi::setSettings(QByteArray state)
 {
   SettingsManager::getSettings("SpringLayoutUi")->load(state);
-  layoutRulesChanged();
+  layoutChanged();
 }
 
 void SpringLayoutUi::onProgressThresholdChanged(const QString& text)
@@ -1208,64 +1147,63 @@ void SpringLayoutUi::onStabilityIterationsChanged(const QString& text)
 void SpringLayoutUi::onResetPositionsPressed()
 {
   m_layout.resetPositions();
+  layoutChanged();
 }
 
 void SpringLayoutUi::onAttractionChanged(int value)
 {
   m_layout.setAttraction(value);
-  layoutRulesChanged();
-  update();
+  layoutChanged();
+  // update();
 }
 
 void SpringLayoutUi::onRepulsionChanged(int value)
 {
   m_layout.setRepulsion(value);
-  layoutRulesChanged();
-  update();
+  layoutChanged();
+  // update();
 }
 
 void SpringLayoutUi::onSpeedChanged(int value)
 {
   m_layout.setSpeed(value);
-  layoutRulesChanged();
-  update();
+  layoutChanged();
+  // update();
 }
 
 void SpringLayoutUi::onAccuracyChanged(int value)
 {
   m_layout.setAccuracy(value);
-  layoutRulesChanged();
-  update();
+  layoutChanged();
+  // update();
 }
 
 void SpringLayoutUi::onHandleWeightChanged(int value)
 {
   m_layout.setControlPointWeight(value);
-  layoutRulesChanged();
-  update();
+  layoutChanged();
+  // update();
 }
 
 void SpringLayoutUi::onNatLengthChanged(int value)
 {
   m_layout.setNaturalTransitionLength(value);
-  layoutRulesChanged();
-  update();
+  layoutChanged();
+  // update();
 }
 
 void SpringLayoutUi::onAttractionCalculationChanged(int value)
 {
   m_layout.setAttractionCalculation(static_cast<AttractionFunctionID>(value));
   m_ui_advanced.cmb_attr->setCurrentIndex((int)m_layout.attractionCalculation());
-  layoutRulesChanged();
-  update();
+  layoutChanged();
 }
 
 void SpringLayoutUi::onRepulsionCalculationChanged(int value)
 {
   m_layout.setRepulsionCalculation(static_cast<RepulsionFunctionID>(value));
   m_ui_advanced.cmb_rep->setCurrentIndex((int)m_layout.repulsionCalculation());
-  layoutRulesChanged();
-  update();
+  layoutChanged();
 }
 
 void SpringLayoutUi::onStarted()
@@ -1283,6 +1221,11 @@ void SpringLayoutUi::onStopped()
   update();
 }
 
+void SpringLayoutUi::onDrawNewFrame()
+{
+  m_layout.m_glwidget.update();
+}
+
 void SpringLayoutUi::onTreeToggled(bool b)
 {
   m_layout.setTreeEnabled(b);
@@ -1292,6 +1235,7 @@ void SpringLayoutUi::onTreeToggled(bool b)
 void SpringLayoutUi::onAnnealingToggled(bool b)
 {
   m_layout.setAnnealingEnabled(b);
+  update();
 }
 
 void SpringLayoutUi::onStartStop()
@@ -1300,10 +1244,11 @@ void SpringLayoutUi::onStartStop()
   if (m_thread == nullptr)
   {
     emit runningChanged(true);
-    layoutRulesChanged(); // force update
+    layoutChanged(); // force update
     m_thread = new WorkerThread(m_layout, this);
     m_thread->connect(m_thread, SIGNAL(started()), this, SLOT(onStarted()));
     m_thread->connect(m_thread, SIGNAL(finished()), this, SLOT(onStopped()));
+    m_thread->connect(m_thread, &WorkerThread::draw_new_frame, this, &SpringLayoutUi::onDrawNewFrame);
     m_thread->start();
   }
   else

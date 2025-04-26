@@ -159,13 +159,6 @@ void MainWindow::on3DChanged(bool enabled)
   }
 }
 
-void MainWindow::paintEvent(QPaintEvent* event)
-{
-    setUpdatesEnabled(false);
-    QMainWindow::paintEvent(event);
-    setUpdatesEnabled(true);
-}
-
 void MainWindow::onExplore(bool enabled)
 {
   if (enabled)

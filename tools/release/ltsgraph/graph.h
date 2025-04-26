@@ -686,8 +686,15 @@ class Graph
       return m_stable;
     }
 
-    void hasNewFrame(bool b) { m_hasNewFrame = b; }
-    bool& hasNewFrame(){ return m_hasNewFrame; }
+    void hasNewFrame(bool b) 
+    { 
+      m_hasNewFrame = b; 
+    }
+
+    bool hasNewFrame() const 
+    { 
+      return m_hasNewFrame; 
+    }
 
     bool& hasForcedUpdate()
     {

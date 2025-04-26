@@ -77,6 +77,18 @@ class GLWidget : public QOpenGLWidget
    * @brief Processes mouse click events.
    * @param e The mouse event.
    */
+  bool event(QEvent* e) override
+  {
+    mCRL2log(mcrl2::log::debug) << "Processing Qt event " << e->type() << "\n";
+
+    // call super's event. 
+    return QOpenGLWidget::event(e);
+  } 
+
+  /**
+   * @brief Processes mouse click events.
+   * @param e The mouse event.
+   */
   void mousePressEvent(QMouseEvent* e) override;
 
   /**
@@ -283,7 +295,7 @@ class GLWidget : public QOpenGLWidget
       false; ///< Indicates wheter painting node by the used is enabled.
   /* bool m_is_threedimensional = false; ///< Indicates that the scene should be
                                       ///< viewed in 3D, as opposed to 2D. */
-  bool m_has_new_frame = false;
+  // bool m_has_new_frame = false;  // Does not seem to be used.
   bool m_drawDebugGraphs = false; ///< Drawing debug graphs can be turned on/off
                                   ///< in advanced layout dialog
 
