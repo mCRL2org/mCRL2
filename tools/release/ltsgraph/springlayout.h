@@ -42,68 +42,6 @@ class WorkerThread;
 class SpringLayoutUi;
 class CustomQWidget;
 
-
-class SimpleAdaptiveSimulatedAnnealing
-{
-  public:
-  float T = 1.0f;
-  bool calculateTemperature(float new_energy);
-  void reset();
-    
-  int getProgressThreshold()
-  {
-    return m_progress_threshold;
-  }
-
-  void setProgressThreshold(int progress_threshold)
-  {
-    m_progress_threshold = progress_threshold;
-    mCRL2log(mcrl2::log::debug)
-        << "[ASA] Progress threshold: " << m_progress_threshold << std::endl;
-  }
-
-  float getCoolingFactor()
-  {
-    return m_cooling_factor;
-  }
-
-  void setCoolingFactor(float cooling_factor)
-  {
-    m_cooling_factor = cooling_factor;
-    mCRL2log(mcrl2::log::debug)
-        << "[ASA] Cooling factor: " << m_cooling_factor << std::endl;
-  }
-
-  float getHeatingFactor()
-  {
-      return m_heating_factor;
-  }
-
-   void setHeatingFactor(float heating_factor)
-  {
-     m_heating_factor = heating_factor;
-     mCRL2log(mcrl2::log::debug)
-         << "[ASA] Heating factor: " << m_heating_factor << std::endl;
-  }
-
-
-
-  private:
-  // Interactive quality variables
-  const float m_minimum_temperature = 1e-4f;
-  const float m_reset_temperature = 1.0f;
-
-  // Adaptive variables
-  int m_progress_threshold = 5;
-  float m_cooling_factor = 0.98f;
-  float m_heating_factor = 1.2f;
-
-  // Storage variables
-  float m_prev_energy = -1;
-  float m_temperature = m_reset_temperature;
-  int m_progress = 0;
-};
-
 class SpringLayout
 {
   friend class SpringLayoutUi;
@@ -156,17 +94,12 @@ class SpringLayout
   const float m_min_natLength = 0.0f;
   const float m_max_natLength = 100.0f;
   float m_natLength; ///< The natural length of springs.
-  /* const float m_min_controlPointWeight = 0.0f;
-  const float m_max_controlPointWeight = 10.0f;
-  float m_controlPointWeight; ///< The handle repulsion weight factor. */
   const float m_min_handleDeviation = 0.0f;
   const float m_max_handleDeviation = 30.0f;
   float m_handleDeviation; ///< The natural distance of a transition handle from its straight position between the states it connect. */
   const float m_labelDistance = 3.0; ///< The distance of a label to the handle */
   const float m_min_accuracy = 5.0f;
   const float m_max_accuracy = 0.0f;
-  float m_no_annealing_temperature = 1.0f;
-  float m_annealing_temperature = m_no_annealing_temperature;
   float m_accuracy; ///< Controls the Barnes-Hut criterion in the approximation
                     ///< of repulsive forces
   bool m_tree_enable_for_large_graphs = true;
@@ -195,15 +128,6 @@ class SpringLayout
   std::map<RepulsionFunctionID, RepulsionFunction*> repFuncMap;
   RepulsionFunction* m_repFunc;
   RepulsionFunctionID m_option_repulsionCalculation;
-
-  /* std::map<ApplicationFunctionID, ApplicationFunction*> applFuncMap;
-  ApplicationFunction* m_applFunc;
-  ApplicationFunctionID m_option_forceApplication; */
-
-  bool m_useAnnealing = true;
-
-  public:
-  SimpleAdaptiveSimulatedAnnealing m_asa;
 
   private:
   /**
@@ -307,7 +231,6 @@ class SpringLayout
 
   void notifyNewFrame();
   void setTreeEnabled(bool b);
-  void setAnnealingEnabled(bool b);
   void setSpeed(int v);
   void setAccuracy(int v);
   void setAttraction(int v);
@@ -370,16 +293,8 @@ class WorkerThread : public QThread
   Q_OBJECT
 
 private:
-  bool m_stopped;
   SpringLayout& m_layout;
-  std::size_t m_counter = 0;
-
-  // By default log every second
-  const int m_debug_log_interval = 1000;
-
-  // if we have a cycle time longer than 100ms we want an extra message
-  const int m_debug_max_cycle_time = 100;
-  QElapsedTimer m_debug_log_timer;
+  bool m_stopped=false;
 
 public:
   signals:
@@ -388,10 +303,8 @@ public:
 public:
   WorkerThread(SpringLayout& layout, QObject* parent = nullptr)
       : QThread(parent),
-        m_stopped(false),
         m_layout(layout)
   {
-    m_debug_log_timer.start();
     m_layout.m_glwidget.update();
   }
 
@@ -416,29 +329,7 @@ public:
       else
       {
         m_layout.apply();
-        debugLogging();
       }
-    }
-  }
-
-  /// @brief Only called when a debug configuration is ran.
-  void debugLogging()
-  {
-    m_counter++;
-    int elapsed = m_debug_log_timer.elapsed();
-    if (elapsed > m_debug_log_interval)
-    {
-      mCRL2log(mcrl2::log::debug) << "Worker thread performed " << m_counter << " cycles in " << elapsed
-                                  << "ms. ASA temperature: " << m_layout.m_asa.T;
-      if ((float)elapsed / m_counter > m_debug_max_cycle_time)
-      {
-        mCRL2log(mcrl2::log::debug) << " - NB: This is longer than the set expected maximum " << m_debug_max_cycle_time
-                                    << "ms per cycle. ";
-      }
-      mCRL2log(mcrl2::log::debug) << std::endl;
-      // reset debugging
-      m_debug_log_timer.restart();
-      m_counter = 0;
     }
   }
 };
@@ -496,9 +387,6 @@ class SpringLayoutUi : public QDockWidget
   void runningChanged(bool);
 
   public slots:
-  void onProgressThresholdChanged(const QString&);
-  void onHeatingFactorChanged(const QString&);
-  void onCoolingFactorChanged(const QString&);
   void onStabilityThresholdChanged(const QString&);
   void onStabilityIterationsChanged(const QString&);
   void onResetPositionsPressed();
@@ -518,7 +406,6 @@ class SpringLayoutUi : public QDockWidget
   void onDrawNewFrame();
 
   void onTreeToggled(bool);
-  void onAnnealingToggled(bool);
   void setActive(bool active);
   void onAdvancedDialogShow(bool);
 

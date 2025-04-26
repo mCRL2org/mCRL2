@@ -11,8 +11,6 @@ struct AttractionFunction
 {
     virtual QVector3D operator()(const QVector3D& a, const QVector3D& b,
         const float ideal) = 0;
-    void update() {};
-    void reset() {};
 };
 
 // Defines abstract repulsion function
@@ -22,23 +20,6 @@ struct RepulsionFunction
 {
     virtual QVector3D operator()(const QVector3D& a, const QVector3D& b,
         const float ideal) = 0;
-    virtual void update() {};
-    virtual void reset() {};
 };
-
-
-// Defines abstract application function
-// Operator (&pos, force, speed) should update pos according to
-//  a combination of force, temperature, and speed
-// Temperature pointer should point towards temperature variable
-//  of a simulated annealing object
-/* struct ApplicationFunction
-{
-    float* temperature = nullptr;
-    virtual void operator()(QVector3D& pos, const QVector3D& f,
-        const float speed) = 0;
-    virtual void update() =0;
-    virtual void reset() =0;
-}; */
 
 #endif

@@ -54,40 +54,6 @@ std::string getName(RepulsionFunctionID c)
 
 #undef PROC_VAL
 
-void SimpleAdaptiveSimulatedAnnealing::reset()
-{
-  m_temperature = m_reset_temperature;
-  m_progress = 0;
-  m_prev_energy = -1;
-  T = m_temperature;
-}
-
-bool SimpleAdaptiveSimulatedAnnealing::calculateTemperature(float new_energy)
-{
-  if (new_energy < m_prev_energy * 0.995)
-  {
-    m_progress++;
-    if (m_progress >= m_progress_threshold)
-    {
-      m_temperature = std::max(m_temperature, m_minimum_temperature);
-      m_temperature *= m_heating_factor;
-      m_progress = 0;
-    }
-  }
-  else if (new_energy < m_prev_energy)
-  {
-    // still made some progress possibly, but we do nothing
-  }
-  else
-  {
-    m_progress = 0;
-    m_temperature *= m_cooling_factor;
-  }
-  T = std::max(m_minimum_temperature, m_temperature);
-  m_prev_energy = new_energy;
-  return false; // Simple => no checking for stable configuration
-}
-
 //
 // SpringLayout
 //
@@ -146,7 +112,6 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
 
   srand(time(nullptr));
   drift_timer.restart();
-  m_annealing_temperature = m_useAnnealing ? m_asa.T : m_no_annealing_temperature;
 }
 
 SpringLayout::~SpringLayout()
@@ -175,16 +140,11 @@ SpringLayoutUi* SpringLayout::ui(QAction* /* advancedDialogAction */, CustomQWid
             m_speed_inverse_scale_func(m_max_speed)),
         true);
 
-    settings->registerVar(advanced_ui.chk_annealing, false, true);
     settings->registerVar(advanced_ui.chk_debugDraw, false, true);
     settings->registerVar(advanced_ui.chk_enableTree, true, true);
 
     settings->registerVar(advanced_ui.cmb_attr, (int)AttractionFunctionID::ltsgraph_attr, true);
     settings->registerVar(advanced_ui.cmb_rep, (int)RepulsionFunctionID::ltsgraph_rep, true);
-
-    settings->registerVar(advanced_ui.txt_cooling_factor, QString::number(m_asa.getCoolingFactor()), true);
-    settings->registerVar(advanced_ui.txt_heating_factor, QString::number(m_asa.getHeatingFactor()), true);
-    settings->registerVar(advanced_ui.txt_progress_threshold, QString::number(m_asa.getProgressThreshold()), true);
 
     settings->registerVar(advanced_ui.txt_stab_thres, QString::number(m_stabilityThreshold), true);
     settings->registerVar(advanced_ui.txt_stab_iters, QString::number(m_stabilityMaxCount), true);
@@ -209,7 +169,6 @@ void SpringLayout::setAttractionCalculation(AttractionFunctionID c)
 
   m_option_attractionCalculation = c;
   m_attrFunc = attrFuncMap[c];
-  m_attrFunc->reset();
 }
 
 AttractionFunctionID SpringLayout::attractionCalculation()
@@ -231,7 +190,6 @@ void SpringLayout::setRepulsionCalculation(RepulsionFunctionID c)
 
   m_option_repulsionCalculation = c;
   m_repFunc = repFuncMap[c];
-  m_repFunc->reset();
 }
 
 RepulsionFunctionID SpringLayout::repulsionCalculation()
@@ -652,7 +610,6 @@ void SpringLayout::apply()
     if (m_graph.hasForcedUpdate())
     {
       m_graph.hasForcedUpdate() = false;
-      m_asa.reset();
     }
 
     if (m_graph.scrambleZ())
@@ -717,7 +674,7 @@ void SpringLayout::apply()
 
       if (!m_graph.node(n).anchored())
       {
-        ApplicationFunctions::apply_forces(m_graph.node(n).pos_mutable(), m_nforces[i], use_speed, m_annealing_temperature);
+        ApplicationFunctions::apply_forces(m_graph.node(n).pos_mutable(), m_nforces[i], use_speed);
         clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }
       else
@@ -760,7 +717,7 @@ void SpringLayout::apply()
 
       if (!m_graph.stateLabel(n).anchored())
       {
-        ApplicationFunctions::apply_forces(m_graph.stateLabel(n).pos_mutable(), m_sforces[i], use_speed, m_annealing_temperature);
+        ApplicationFunctions::apply_forces(m_graph.stateLabel(n).pos_mutable(), m_sforces[i], use_speed);
         m_graph.stateLabel(n).pos_mutable() -= center_of_mass;
         clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
       }
@@ -772,13 +729,13 @@ void SpringLayout::apply()
 
       if (!m_graph.handle(n).anchored())
       {
-        ApplicationFunctions::apply_forces(m_graph.handle(n).pos_mutable(), m_hforces[i], use_speed, m_annealing_temperature);
+        ApplicationFunctions::apply_forces(m_graph.handle(n).pos_mutable(), m_hforces[i], use_speed);
         m_graph.handle(n).pos_mutable() -= center_of_mass;
         clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
-        ApplicationFunctions::apply_forces(m_graph.transitionLabel(n).pos_mutable(), m_lforces[i], use_speed, m_annealing_temperature);
+        ApplicationFunctions::apply_forces(m_graph.transitionLabel(n).pos_mutable(), m_lforces[i], use_speed);
         m_graph.transitionLabel(n).pos_mutable() -= center_of_mass;
         clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
@@ -792,22 +749,13 @@ void SpringLayout::apply()
       min = std::min(min, mag);
       max = std::max(max, mag);
     }
-    if (m_useAnnealing)
-    {
-      m_asa.calculateTemperature(energy);
-      m_annealing_temperature = m_asa.T;
-    }
     if (m_graph.userIsDragging)
     {
-      m_asa.reset();
       m_graph.userIsDragging=false;
     }
 
     m_max_num_nodes = 0;
     m_total_num_nodes = 0;
-
-    m_repFunc->update();
-    m_attrFunc->update();
 
     // float stability = std::abs((m_previous_energy - energy) / m_previous_energy);
     float stability = std::abs(m_previous_energy - energy)/(edgeCount+nodeCount);
@@ -871,7 +819,6 @@ void SpringLayout::randomizeZ(float z)
       m_graph.handle(n).pos_mutable() = m_graph.transitionLabel(n).pos();
     }
   }
-  m_asa.reset();
   m_graph.unlock(GRAPH_LOCK_TRACE);
 }
 
@@ -888,19 +835,6 @@ void SpringLayout::setTreeEnabled(bool b)
 {
   m_tree_enable_for_large_graphs = b;
   mCRL2log(mcrl2::log::verbose) << (b ? "Enabled" : "Disabled") << " tree acceleration for large graphs." << std::endl;
-}
-
-void SpringLayout::setAnnealingEnabled(bool b)
-{
-  m_useAnnealing = b;
-  if (m_useAnnealing)
-  {
-    m_annealing_temperature = m_asa.T;
-  }
-  else
-  {
-    m_annealing_temperature = m_no_annealing_temperature;
-  }
 }
 
 void SpringLayout::setSpeed(int v)
@@ -965,9 +899,6 @@ void SpringLayout::setNaturalTransitionLength(int v)
 void SpringLayout::rulesChanged()
 {
   m_graph.setStable(false);
-  m_repFunc->reset();
-  m_attrFunc->reset();
-  m_asa.reset();
   m_stabilityCounter=0;
 }
 
@@ -1038,16 +969,8 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, CustomQWidget* advancedDial
   connect(m_ui_advanced.cmb_rep, SIGNAL(currentIndexChanged(int)), this, SLOT(onRepulsionCalculationChanged(int)));
 
   connect(m_ui_advanced.chk_debugDraw, SIGNAL(toggled(bool)), &m_layout.m_glwidget, SLOT(toggleDebugDrawGraphs(bool)));
-  connect(m_ui_advanced.chk_annealing, SIGNAL(toggled(bool)), this, SLOT(onAnnealingToggled(bool)));
 
   connect(m_ui_advanced.chk_enableTree, SIGNAL(toggled(bool)), this, SLOT(onTreeToggled(bool)));
-
-  connect(m_ui_advanced.txt_progress_threshold,
-      &QLineEdit::textChanged,
-      this,
-      &SpringLayoutUi::onProgressThresholdChanged);
-  connect(m_ui_advanced.txt_heating_factor, &QLineEdit::textChanged, this, &SpringLayoutUi::onHeatingFactorChanged);
-  connect(m_ui_advanced.txt_cooling_factor, &QLineEdit::textChanged, this, &SpringLayoutUi::onCoolingFactorChanged);
 
   connect(m_ui_advanced.txt_stab_thres, &QLineEdit::textChanged, this, &SpringLayoutUi::onStabilityThresholdChanged);
   connect(m_ui_advanced.txt_stab_iters, &QLineEdit::textChanged, this, &SpringLayoutUi::onStabilityIterationsChanged);
@@ -1087,39 +1010,6 @@ void SpringLayoutUi::setSettings(QByteArray state)
 {
   SettingsManager::getSettings("SpringLayoutUi")->load(state);
   layoutChanged();
-}
-
-void SpringLayoutUi::onProgressThresholdChanged(const QString& text)
-{
-  bool success;
-  int num = text.toInt(&success);
-  if (success && num > 0)
-  {
-    m_layout.m_asa.setProgressThreshold(num);
-    mCRL2log(mcrl2::log::debug) << "Setting progress threshold to: " << num << std::endl;
-  }
-}
-
-void SpringLayoutUi::onHeatingFactorChanged(const QString& text)
-{
-  bool success;
-  float num = text.toFloat(&success);
-  if (success && num > 0)
-  {
-    m_layout.m_asa.setHeatingFactor(num);
-    mCRL2log(mcrl2::log::debug) << "Setting heating factor to: " << num << std::endl;
-  }
-}
-
-void SpringLayoutUi::onCoolingFactorChanged(const QString& text)
-{
-  bool success;
-  float num = text.toFloat(&success);
-  if (success && num > 0)
-  {
-    m_layout.m_asa.setCoolingFactor(num);
-    mCRL2log(mcrl2::log::debug) << "Setting cooling factor to: " << num << std::endl;
-  }
 }
 
 void SpringLayoutUi::onStabilityThresholdChanged(const QString& text)
@@ -1229,12 +1119,6 @@ void SpringLayoutUi::onDrawNewFrame()
 void SpringLayoutUi::onTreeToggled(bool b)
 {
   m_layout.setTreeEnabled(b);
-  update();
-}
-
-void SpringLayoutUi::onAnnealingToggled(bool b)
-{
-  m_layout.setAnnealingEnabled(b);
   update();
 }
 
