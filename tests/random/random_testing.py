@@ -72,17 +72,17 @@ class StochasticProcessTest(ProcessTest):
     def __init__(self, name, _ymlfile, settings):
         super(StochasticProcessTest, self).__init__(name, _ymlfile, settings)
         self.process_expression_generators = {
-            random_process_expression.ActionGenerator: 8,
-            random_process_expression.DeltaGenerator: 1,
-            random_process_expression.TauGenerator: 1,
-            random_process_expression.ProcessInstanceGenerator: 2,
-            random_process_expression.SumGenerator: 2,
-            random_process_expression.IfThenGenerator: 2,
-            random_process_expression.IfThenElseGenerator: 2,
-            random_process_expression.ChoiceGenerator: 5,
-            random_process_expression.SeqGenerator: 5,
-            random_process_expression.MultiActionGenerator: 1,
-            random_process_expression.DistGenerator: 3,
+            random_process_expression.ActionGenerator(): 8,
+            random_process_expression.DeltaGenerator(): 1,
+            random_process_expression.TauGenerator(): 1,
+            random_process_expression.ProcessInstanceGenerator(): 2,
+            random_process_expression.SumGenerator(): 2,
+            random_process_expression.IfThenGenerator(): 2,
+            random_process_expression.IfThenElseGenerator(): 2,
+            random_process_expression.ChoiceGenerator(): 5,
+            random_process_expression.SeqGenerator(): 5,
+            random_process_expression.MultiActionGenerator(): 1,
+            random_process_expression.DistGenerator(): 3,
         }
 
 # generates random process with higher probability of tau transitions
@@ -92,17 +92,17 @@ class ProcessTauTest(ProcessTest):
         self.actions = ['a', 'b', 'c']
         self.init = r'hide({a}, allow({a, b, c}, P || Q || R))'
         self.process_expression_generators = {
-                        random_process_expression.ActionGenerator: 8,
-                        random_process_expression.DeltaGenerator: 1,
-                        random_process_expression.TauGenerator: 4,
-                        random_process_expression.ProcessInstanceGenerator: 1,
-                        random_process_expression.SumGenerator: 0,
-                        random_process_expression.IfThenGenerator: 0,
-                        random_process_expression.IfThenElseGenerator: 0,
-                        random_process_expression.ChoiceGenerator: 5,
-                        random_process_expression.SeqGenerator: 5,
-                        random_process_expression.MultiActionGenerator: 1,
-                        random_process_expression.DistGenerator: 0,
+                        random_process_expression.ActionGenerator(): 8,
+                        random_process_expression.DeltaGenerator(): 1,
+                        random_process_expression.TauGenerator(): 4,
+                        random_process_expression.ProcessInstanceGenerator(): 1,
+                        random_process_expression.SumGenerator(): 0,
+                        random_process_expression.IfThenGenerator(): 0,
+                        random_process_expression.IfThenElseGenerator(): 0,
+                        random_process_expression.ChoiceGenerator(): 5,
+                        random_process_expression.SeqGenerator(): 5,
+                        random_process_expression.MultiActionGenerator(): 1,
+                        random_process_expression.DistGenerator(): 0,
                              }
 
 class AlphabetReduceTest(ProcessTest):

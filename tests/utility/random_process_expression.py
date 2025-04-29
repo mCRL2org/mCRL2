@@ -9,6 +9,8 @@ import random
 import re
 from typing import List, Optional, Union, Dict, Callable
 
+from typeguard import typechecked
+
 import tests.utility.random_data_expression as random_data_expression
 from .process_expression import (
     Action,
@@ -36,6 +38,7 @@ from .data_expression import Variable, Boolean, Integer, DataExpression
 from .data_expression import Sort
 
 
+@typechecked
 class DistVariableGenerator(object):
     """
     Generate unique dist variables.
@@ -51,6 +54,7 @@ class DistVariableGenerator(object):
         return result
 
 
+@typechecked
 class ProcessEquation:
     """
     Represents a process equation with a left-hand side (lhs) and a right-hand side (rhs).
@@ -66,6 +70,7 @@ class ProcessEquation:
         return f"{lhs} = {rhs};"
 
 
+@typechecked
 class ProcessSpecification:
     """
     Represents a process specification consisting of actions, equations, and an initial state.
@@ -87,6 +92,7 @@ class ProcessSpecification:
         return f"{actspec}\n{procspec}\n{initspec}"
 
 
+@typechecked
 def remove_postfix(name: str) -> str:
     """
     Removes the numeric postfix from a name.
@@ -94,6 +100,7 @@ def remove_postfix(name: str) -> str:
     return re.sub(r"\d+$", "", name)
 
 
+@typechecked
 def make_variable(forbidden_variables: List[Variable]) -> Variable:
     """
     Creates a new variable that does not clash with the given forbidden variables.
@@ -105,6 +112,7 @@ def make_variable(forbidden_variables: List[Variable]) -> Variable:
             return Variable(name, Sort.BOOL)
 
 
+@typechecked
 def default_value(v: Variable) -> DataExpression:
     """
     Returns a default value for the given variable.
@@ -117,6 +125,7 @@ def default_value(v: Variable) -> DataExpression:
     raise RuntimeError(f"default_value: only Bool and Int are supported! {v.type}")
 
 
+@typechecked
 def make_multi_action1(actions: List[str], size: int) -> MultiAction:
     """
     Creates a multi-action consisting of a random selection of actions.
@@ -127,6 +136,7 @@ def make_multi_action1(actions: List[str], size: int) -> MultiAction:
     return MultiAction(sorted(result))
 
 
+@typechecked
 def expression_size(x: Union[ProcessExpression, MultiAction]) -> int:
     """
     Returns the size of a process expression.
@@ -142,6 +152,7 @@ def expression_size(x: Union[ProcessExpression, MultiAction]) -> int:
     return result
 
 
+@typechecked
 def select_generators(
     generators: Dict["ProcGenerator", int],
     actions: List[str],
@@ -171,12 +182,13 @@ def select_generators(
     r = []
     for x in result:
         for k, v in generators.items():
-            if isinstance(x, k):
+            if type(x) is type (k):
                 r = r + [x] * v
 
     return r
 
 
+@typechecked
 class ProcGenerator:
     """
     Base class for generating process expressions.
@@ -196,6 +208,7 @@ class ProcGenerator:
         raise NotImplementedError("Subclasses must implement the generate method.")
 
 
+@typechecked
 class SumGenerator(ProcGenerator):
     """
     Generates a summation process expression.
@@ -220,6 +233,7 @@ class SumGenerator(ProcGenerator):
         return Sum(d, x)
 
 
+@typechecked
 class ActionGenerator(ProcGenerator):
     """
     Generates an action process expression.
@@ -237,6 +251,7 @@ class ActionGenerator(ProcGenerator):
         return Action(a)
 
 
+@typechecked
 class MultiActionGenerator(ProcGenerator):
     """
     Generates a multi-action process expression.
@@ -255,6 +270,7 @@ class MultiActionGenerator(ProcGenerator):
         return MultiAction(sorted(result))
 
 
+@typechecked
 class ProcessInstanceGenerator(ProcGenerator):
     """
     Generates a process instance expression.
@@ -284,6 +300,7 @@ class ProcessInstanceGenerator(ProcGenerator):
         return ProcessInstance(P, parameters)
 
 
+@typechecked
 class DeltaGenerator(ProcGenerator):
     """
     Generates a delta process expression.
@@ -300,6 +317,7 @@ class DeltaGenerator(ProcGenerator):
         return Delta()
 
 
+@typechecked
 class TauGenerator(ProcGenerator):
     """
     Generates a tau process expression.
@@ -316,6 +334,7 @@ class TauGenerator(ProcGenerator):
         return Tau()
 
 
+@typechecked
 class DistGenerator(ProcGenerator):
     """
     Generates a stochastic operator process expression.
@@ -342,6 +361,7 @@ class DistGenerator(ProcGenerator):
         return StochasticOperator(d, dist, IfThen(d.name, x))
 
 
+@typechecked
 class IfThenGenerator(ProcGenerator):
     """
     Generates an if-then process expression.
@@ -366,6 +386,7 @@ class IfThenGenerator(ProcGenerator):
         return IfThen(c, x)
 
 
+@typechecked
 class IfThenElseGenerator(ProcGenerator):
     """
     Generates an if-then-else process expression.
@@ -390,6 +411,7 @@ class IfThenElseGenerator(ProcGenerator):
         return IfThenElse(c, x, y)
 
 
+@typechecked
 class ChoiceGenerator(ProcGenerator):
     """
     Generates a choice process expression.
@@ -413,6 +435,7 @@ class ChoiceGenerator(ProcGenerator):
         return Choice(x, y)
 
 
+@typechecked
 class SeqGenerator(ProcGenerator):
     """
     Generates a sequential process expression.
@@ -443,6 +466,7 @@ class SeqGenerator(ProcGenerator):
         return Seq(x, y)
 
 
+@typechecked
 class LeftMergeGenerator(ProcGenerator):
     """
     Generates a left-merge process expression.
@@ -473,6 +497,7 @@ class LeftMergeGenerator(ProcGenerator):
         return LeftMerge(x, y)
 
 
+@typechecked
 def make_hide_set(actions: List[str], size: int) -> List[str]:
     """
     Creates a set of actions to hide.
@@ -482,6 +507,7 @@ def make_hide_set(actions: List[str], size: int) -> List[str]:
     return random.sample(actions, size)
 
 
+@typechecked
 def make_hide(actions: List[str], x: ProcessExpression) -> Hide:
     """
     Wraps a process expression with a hide operator.
@@ -490,6 +516,7 @@ def make_hide(actions: List[str], x: ProcessExpression) -> Hide:
     return Hide(I, x)
 
 
+@typechecked
 def make_rename_set(actions: List[str], size: int) -> List[str]:
     """
     Creates a set of rename mappings.
@@ -506,6 +533,7 @@ def make_rename_set(actions: List[str], size: int) -> List[str]:
     return result
 
 
+@typechecked
 def make_rename(actions: List[str], x: ProcessExpression) -> Rename:
     """
     Wraps a process expression with a rename operator.
@@ -514,6 +542,7 @@ def make_rename(actions: List[str], x: ProcessExpression) -> Rename:
     return Rename(R, x)
 
 
+@typechecked
 def make_comm_set(actions: List[str], size: int) -> List[str]:
     """
     Creates a set of communication mappings.
@@ -533,6 +562,7 @@ def make_comm_set(actions: List[str], size: int) -> List[str]:
     return result
 
 
+@typechecked
 def make_comm(actions: List[str], x: ProcessExpression) -> Comm:
     """
     Wraps a process expression with a communication operator.
@@ -541,6 +571,7 @@ def make_comm(actions: List[str], x: ProcessExpression) -> Comm:
     return Comm(C, x)
 
 
+@typechecked
 def make_allow_set(actions: List[str], size: int) -> List[MultiAction]:
     """
     Creates a set of allowed multi-actions.
@@ -553,6 +584,7 @@ def make_allow_set(actions: List[str], size: int) -> List[MultiAction]:
     return list(result)
 
 
+@typechecked
 def make_allow(actions: List[str], x: ProcessExpression) -> Allow:
     """
     Wraps a process expression with an allow operator.
@@ -562,20 +594,21 @@ def make_allow(actions: List[str], x: ProcessExpression) -> Allow:
 
 
 default_process_expression_generators: Dict[ProcGenerator, int] = {
-    ActionGenerator: 8,
-    DeltaGenerator: 1,
-    TauGenerator: 1,
-    ProcessInstanceGenerator: 2,
-    SumGenerator: 2,
-    IfThenGenerator: 2,
-    IfThenElseGenerator: 2,
-    ChoiceGenerator: 5,
-    SeqGenerator: 5,
-    MultiActionGenerator: 1,
-    DistGenerator: 0,
+    ActionGenerator(): 8,
+    DeltaGenerator(): 1,
+    TauGenerator(): 1,
+    ProcessInstanceGenerator(): 2,
+    SumGenerator(): 2,
+    IfThenGenerator(): 2,
+    IfThenElseGenerator(): 2,
+    ChoiceGenerator(): 5,
+    SeqGenerator(): 5,
+    MultiActionGenerator(): 1,
+    DistGenerator(): 0,
 }
 
 
+@typechecked
 def make_block(actions: List[str], x: ProcessExpression) -> Block:
     """
     Wraps a process expression with a block operator.
@@ -584,6 +617,7 @@ def make_block(actions: List[str], x: ProcessExpression) -> Block:
     return Block(B, x)
 
 
+@typechecked
 def make_block_set(actions: List[str], size: int) -> List[str]:
     """
     Creates a set of blocked actions.
@@ -591,6 +625,7 @@ def make_block_set(actions: List[str], size: int) -> List[str]:
     return random.sample(actions, size)
 
 
+@typechecked
 def make_process_expression(
     process_expression_generators: Dict[ProcGenerator, int],
     actions: List[str],
@@ -622,6 +657,7 @@ def make_process_expression(
     return result
 
 
+@typechecked
 def make_two_process_expressions(
     process_expression_generators: Dict[ProcGenerator, int],
     actions: List[str],
@@ -651,6 +687,7 @@ def make_two_process_expressions(
     return x, y
 
 
+@typechecked
 def make_parallel_process_expression(
     actions: List[str],
     process_expressions: List[ProcessExpression],
@@ -685,6 +722,7 @@ def make_parallel_process_expression(
     return V[0]
 
 
+@typechecked
 def make_parallel_process_expression_old(
     actions: List[str],
     process_expressions: List[ProcessExpression],
@@ -706,7 +744,7 @@ def make_parallel_process_expression_old(
     V = copy.deepcopy(process_expressions)
     x = None
     while len(V) > 0:
-        if x == None:
+        if x is None:
             p, q = random.sample(V, 2)
             V.remove(p)
             V.remove(q)
@@ -732,6 +770,7 @@ default_parallel_operator_generators: List[Callable] = [
 ]
 
 
+@typechecked
 def parse_variable(text: str) -> Variable:
     """
     Parses a string representation of a variable with its type.
@@ -739,10 +778,11 @@ def parse_variable(text: str) -> Variable:
     text = text.strip()
     m = re.match(r"([^,:]+)\s*\:(.+)", text)
     assert m is not None
-    result = Variable(m.group(1).strip(), m.group(2).strip())
+    result = Variable(m.group(1).strip(), Sort(m.group(2).strip()))
     return result
 
 
+@typechecked
 def parse_variables(text: str) -> list[Variable]:
     """
     Parses a comma-separated list of variable declarations.
@@ -751,6 +791,7 @@ def parse_variables(text: str) -> list[Variable]:
     return list(map(parse_variable, variables))
 
 
+@typechecked
 def make_process_specification(
     parallel_operator_generators: Optional[List[Callable]] = None,
     process_expression_generators: Optional[Dict[ProcGenerator, int]] = None,
@@ -774,23 +815,25 @@ def make_process_specification(
     process_identifiers = list(map(ProcessIdentifier, process_identifiers_names))
 
     if generate_process_parameters:
-        V = parse_variables("c1: Bool, c2: Bool, c3: Bool, i1: Int, i2: Int, i3: Int")
-        for i, P in enumerate(process_identifiers):
-            if not P.variables:
+        variables = parse_variables(
+            "c1: Bool, c2: Bool, c3: Bool, i1: Int, i2: Int, i3: Int"
+        )
+        for i, process in enumerate(process_identifiers):
+            if not process.variables:
                 n = random.randint(0, 3)
-                process_identifiers[i] = variables = random.sample(V, n)
+                process_identifiers[i].variables = random.sample(variables, n)
 
     variables = []
     equations = []
-    for P in process_identifiers:
+    for process in process_identifiers:
         x = make_process_expression(
             process_expression_generators,
             actions,
             process_identifiers,
-            variables + P.variables,
+            variables + process.variables,
             size,
         )
-        equations.append(ProcessEquation(P, x))
+        equations.append(ProcessEquation(process, x))
     n = random.randint(0, 5)
     if not init:
         process_instances = [
