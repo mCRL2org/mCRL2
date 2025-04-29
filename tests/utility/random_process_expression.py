@@ -7,7 +7,7 @@
 import copy
 import random
 import re
-from typing import List, Optional, Union, Dict, Set, Callable, Any, TypeVar
+from typing import List, Optional, Union, Dict, Callable
 
 import tests.utility.random_data_expression as random_data_expression
 from .process_expression import (

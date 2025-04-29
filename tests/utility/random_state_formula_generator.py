@@ -277,9 +277,6 @@ class RandomStateFormulaGenerator:
         # Base case for recursion
         if max_depth <= 0:
             choices = [TrueFormula(), FalseFormula()]
-            if existing_variables:
-                var_choices = [v for v in existing_variables]
-                choices.extend(var_choices)
             return random.choice(choices)
 
         formula_types = [FormulaType.CONSTANT, FormulaType.BINARY]
