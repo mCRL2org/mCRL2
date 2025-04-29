@@ -163,9 +163,9 @@ class ProcessInstance(ProcessExpression):
 
     def __str__(self) -> str:
         if self.parameters:
-            return f"{self.identifier}({', '.join(map(str, self.parameters))})"
+            return f"{self.identifier.name}({', '.join(map(str, self.parameters))})"
         
-        return str(self.identifier)
+        return str(self.identifier.name)
 
 
 @typechecked
