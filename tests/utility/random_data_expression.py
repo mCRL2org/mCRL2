@@ -13,7 +13,7 @@ from .data_expression import Boolean, Integer, Variable, Sort
 
 @typechecked
 def make_boolean_data_expression(variables: List[Variable]) -> Boolean:
-    """" Simple generator for boolean data expressions. """
+    """ Simple generator for boolean data expressions. """
     integers = [x for x in variables if x.type == Sort.INT]
     booleans = [x for x in variables if x.type == Sort.BOOL]
     result = booleans[:]
@@ -30,7 +30,7 @@ def make_boolean_data_expression(variables: List[Variable]) -> Boolean:
 
 @typechecked
 def make_integer_data_expression(variables: List[Variable]) -> Integer:
-    """" Simple generator for integer data expressions. """
+    """ Simple generator for integer data expressions. """
     integers = [x for x in variables if x.type == Sort.INT]
     result = integers[:]
     for m in integers:
