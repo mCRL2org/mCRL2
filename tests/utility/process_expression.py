@@ -386,3 +386,15 @@ class StochasticOperator(ProcessExpression):
 
     def __str__(self) -> str:
         return f"dist {self.v}: {self.v.type}[{self.dist}].({self.x})"
+    
+@typechecked
+@dataclass(frozen=True)
+class Literal(ProcessExpression):
+    """
+    Represents a literal process expression.
+    Example: 1
+    """
+    value: str
+
+    def __str__(self) -> str:
+        return self.value

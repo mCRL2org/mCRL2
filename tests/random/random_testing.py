@@ -16,6 +16,7 @@ import traceback
 # Makes sure that the script can find the modules when ran directly.
 sys.path.append(os.path.join(os.path.dirname(__file__),'../../'))
 
+from tests.utility.process_expression import Literal
 import tests.utility.random_process_expression as random_process_expression
 import tests.utility.random_state_formula_generator as random_state_formula_generator
 from tests.utility.random_bes_generator import make_bes
@@ -90,7 +91,7 @@ class ProcessTauTest(ProcessTest):
     def __init__(self, name, testfile, settings):
         super(ProcessTauTest, self).__init__(name, testfile, settings)
         self.actions = ['a', 'b', 'c']
-        self.init = r'hide({a}, allow({a, b, c}, P || Q || R))'
+        self.init = Literal(r'hide({a}, allow({a, b, c}, P || Q || R))')
         self.process_expression_generators = {
                         random_process_expression.ActionGenerator(): 8,
                         random_process_expression.DeltaGenerator(): 1,
