@@ -1,6 +1,6 @@
 # This script can be used to find Python and specific modules.
 
-find_package(Python 3.9.0)
+find_package(Python 3.10.0)
 
 if(Python_FOUND)
   if(PythonModules_FIND_COMPONENTS)
