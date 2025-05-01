@@ -184,12 +184,39 @@ ProcExpr
   | ProcExpr '||'  ProcExpr                            $right 3  // Parallel operator
   | ProcExpr '||_' ProcExpr                            $right 4  // Leftmerge operator
   | DataExprUnit '->' ProcExpr                         $right 5  // If-then operator
-  | DataExprUnit '->' ProcExpr '<>' ProcExpr           $right 6  // If-then-else operator
+  | DataExprUnit IfThen ProcExpr                       $right 5  // If-then-else operator
   | ProcExpr '<<' ProcExpr                              $left 8  // Until operator
   | ProcExpr '.' ProcExpr                               $left 9  // Sequential composition operator
   | ProcExpr '@' DataExprUnit                          $left 10  // At operator
   | ProcExpr '|' ProcExpr                              $left 11  // Communication merge
   ;
+
+// Process expressions that do not contain if expressions.
+ProcExprNoIf 
+  : Action                                                           // Action or process instantiation
+  | Id '(' AssignmentList? ')'                                       // Process assignment
+  | 'delta'                                                          // Delta, deadlock, inaction
+  | 'tau'                                                            // Tau, hidden action, empty multi-action
+  | 'block' '(' ActIdSet ',' ProcExprNoIf ')'                        // Block or encapsulation operator
+  | 'allow' '(' MultActIdSet ',' ProcExprNoIf ')'                    // Allow operator
+  | 'hide' '(' ActIdSet ',' ProcExprNoIf ')'                         // Hiding operator
+  | 'rename' '(' RenExprSet ',' ProcExprNoIf ')'                     // Action renaming operator
+  | 'comm' '(' CommExprSet ',' ProcExprNoIf ')'                      // Communication operator
+  | '(' ProcExprNoIf ')'                                             // Brackets
+  | ProcExprNoIf '+' ProcExprNoIf                           $left 1  // Choice operator
+  | 'sum' VarsDeclList '.' ProcExprNoIf                    $right 2  // Sum operator
+  | 'dist' VarsDeclList '[' DataExpr ']' '.' ProcExprNoIf  $right 2  // Distribution operator
+  | ProcExprNoIf '||'  ProcExprNoIf                        $right 3  // Parallel operator
+  | ProcExprNoIf '||_' ProcExprNoIf                        $right 4  // Leftmerge operator
+  | DataExprUnit IfThen ProcExpr                           $right 5  // If-then-else operator
+  | ProcExprNoIf '<<' ProcExprNoIf                          $left 8  // Until operator
+  | ProcExprNoIf '.' ProcExprNoIf                           $left 9  // Sequential composition operator
+  | ProcExprNoIf '@' DataExprUnit                          $left 10  // At operator
+  | ProcExprNoIf '|' ProcExprNoIf                          $left 11  // Communication merge
+  ;
+
+IfThen
+  : '->' ProcExprNoIf '<>' ;                                          // Auxiliary if-then-else
 
 //--- Actions
 
