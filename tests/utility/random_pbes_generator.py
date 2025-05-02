@@ -394,31 +394,31 @@ def make_pbes(
     else:
         operators = [not_, and_, or_, implies]
 
-    predvars = make_predvars(equation_count, use_integers)
-    equations = []
-    for i in range(equation_count):
-        terms = make_terms(predvars, atom_count, propvar_count)
-        while len(terms) > 1:
-            terms = join_terms(terms)
-        sigma, dummy = pick_element(["mu", "nu"])
-        while True:
-            try:
+    while True:
+        try:
+            predvars = make_predvars(equation_count, use_integers)
+            equations = []
+            for i in range(equation_count):
+                terms = make_terms(predvars, atom_count, propvar_count)
+                while len(terms) > 1:
+                    terms = join_terms(terms)
+                sigma, dummy = pick_element(["mu", "nu"])
                 equations.append(Equation(sigma, predvars[i], terms[0]))
-                break
-            except RuntimeError as e:
-                print(e)
-                pass
 
-    X = predvars[0]
-    args = []
-    for a in X.args:
-        if a in BOOLEANS:
-            args.append("true")
-        elif a in INTEGERS:
-            args.append("0")
-    init = PropositionalVariable(X.name, args)
-    p = PBES(equations, init)
-    p.finish()
+            X = predvars[0]
+            args = []
+            for a in X.args:
+                if a in BOOLEANS:
+                    args.append("true")
+                elif a in INTEGERS:
+                    args.append("0")
+            init = PropositionalVariable(X.name, args)
+            p = PBES(equations, init)
+            p.finish()
+        except RuntimeError as e:
+            print(e)
+            pass
+
     return p
 
 
