@@ -998,7 +998,7 @@ void SpringLayoutUi::layoutChanged()
 {
   m_layout.rulesChanged();
   m_layout.m_graph.hasNewFrame(true);
-  m_layout.m_glwidget.update(); // Redraw the graph.
+  m_layout.m_glwidget.update(); // Redraw the graph. */
 }
 
 QByteArray SpringLayoutUi::settings()
@@ -1044,42 +1044,36 @@ void SpringLayoutUi::onAttractionChanged(int value)
 {
   m_layout.setAttraction(value);
   layoutChanged();
-  // update();
 }
 
 void SpringLayoutUi::onRepulsionChanged(int value)
 {
   m_layout.setRepulsion(value);
   layoutChanged();
-  // update();
 }
 
 void SpringLayoutUi::onSpeedChanged(int value)
 {
   m_layout.setSpeed(value);
   layoutChanged();
-  // update();
 }
 
 void SpringLayoutUi::onAccuracyChanged(int value)
 {
   m_layout.setAccuracy(value);
   layoutChanged();
-  // update();
 }
 
 void SpringLayoutUi::onHandleWeightChanged(int value)
 {
   m_layout.setControlPointWeight(value);
   layoutChanged();
-  // update();
 }
 
 void SpringLayoutUi::onNatLengthChanged(int value)
 {
   m_layout.setNaturalTransitionLength(value);
   layoutChanged();
-  // update();
 }
 
 void SpringLayoutUi::onAttractionCalculationChanged(int value)
@@ -1100,7 +1094,7 @@ void SpringLayoutUi::onStarted()
 {
   m_ui.btnStartStop->setText("Stop shaping");
   m_ui.btnStartStop->setEnabled(true);
-  update();
+  layoutChanged();
 }
 
 void SpringLayoutUi::onStopped()

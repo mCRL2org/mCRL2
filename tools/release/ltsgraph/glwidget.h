@@ -195,79 +195,80 @@ class GLWidget : public QOpenGLWidget
   /// Slots for various UI interactions.
   void setLimitTransLabels(int a)
   {
-    // m_textLimitTransLabelsYYY = a;
     m_scene.m_textLimitTransLabels = a;
+    rebuild();
   }
 
   void setLimitStateLabels(int a)
   {
-    // m_textLimitStateLabels = a;
     m_scene.m_textLimitStateLabels = a;
+    rebuild();
   }
 
   void setLimitStateNumbers(int a)
   {
-    // m_textLimitStateNumbers = a;
     m_scene.m_textLimitStateNumbers = a;
+    rebuild();
   }
 
   void toggleDebugDrawGraphs(bool show)
   {
     m_drawDebugGraphs = show;
+    rebuild();
   }
 
   void toggleTransitionLabels(bool show)
   {
     m_scene.setDrawTransitionLabels(show);
-    update();
+    rebuild();
   }
 
   void toggleStateLabels(bool show)
   {
     m_scene.setDrawStateLabels(show);
-    update();
+    rebuild();
   }
 
   void toggleStateNumbers(bool show)
   {
     m_scene.setDrawStateNumbers(show);
-    update();
+    rebuild();
   }
 
   void toggleSelfLoops(bool show)
   {
     m_scene.setDrawSelfLoops(show);
-    update();
+    rebuild();
   }
 
   void toggleInitialMarking(bool show)
   {
     m_scene.setDrawInitialMarking(show);
-    update();
+    rebuild(); 
   }
 
   void toggleFog(bool enabled)
   {
     m_scene.setDrawFog(enabled);
-    update();
+    rebuild();
   }
 
   void setNodeSize(int size)
   {
     m_scene.setNodeSize(size);
-    update();
+    rebuild();
   }
 
   void setFontSize(int size)
   {
     m_scene.setFontSize(size);
-    update();
+    rebuild();
   }
 
   void setFogDensity(int value)
   {
     m_scene.setFogDistance(value);
-    update();
+    rebuild();
   }
 
   /**
@@ -299,9 +300,6 @@ class GLWidget : public QOpenGLWidget
   bool m_drawDebugGraphs = false; ///< Drawing debug graphs can be turned on/off
                                   ///< in advanced layout dialog
 
-  /* int m_textLimitTransLabels = 200;
-  int m_textLimitStateLabels = 200;
-  int m_textLimitStateNumbers = 200; */
   std::list<GLScene::Selection>
       m_selections; ///< A list of the objects under the cursor.
 
