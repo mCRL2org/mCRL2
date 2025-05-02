@@ -169,8 +169,9 @@ void simulation::load(const std::string& filename)
     // Replay the trace using the generator.
     if (!match_trace_probabilistic_state(trace))
     {
-      throw mcrl2::runtime_error("Failed to perform action " + pp(trace.current_action()) + " at position "
-                                 + std::to_string(m_full_trace.size() - 1) + " from the trace loaded from " + filename + ".");
+      trace.decrease_position();
+      throw mcrl2::runtime_error("Failed to match action " + pp(trace.current_action()) + " at position "
+                                 + std::to_string(m_full_trace.size() - 1) + " from the trace loaded from " + filename + " with the behaviour of the process.");
     }
   }
 }

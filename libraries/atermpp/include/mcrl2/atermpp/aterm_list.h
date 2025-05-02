@@ -505,7 +505,7 @@ template <typename Term>
 inline
 term_list<Term> reverse(const term_list<Term>& l);
 
-/// \brief Returns the list with the elements sorted according to the <-operator on the addresses of terms. 
+/// \brief Returns the list with the elements sorted according to given ordering which is by default the ordering of addresses of terms. 
 /// \param l A list.
 /// \param ordering An total orderings relation on Term, by default the ordering relation on Terms. 
 /// \details This operator has complexity nlog n where n is the size of the list.
@@ -514,6 +514,19 @@ template <typename Term>
 inline
 term_list<Term> sort_list(const term_list<Term>& l, 
                           const std::function<bool(const Term&, const Term&)>& ordering 
+                                      = [](const Term& t1, const Term& t2){ return t1<t2;});
+
+/// \brief Returns the merged list sorted according to the <-operator, which is by default the ordering of addresses of terms. 
+/// \param l1 An ordered list.
+/// \param l2 Another ordered list.
+/// \param ordering An total orderings relation on Term, by default the ordering relation on Terms. 
+/// \details This operator is linear in the cumulative length of l1 and l2. In debug mode it checks whether l1 and l2 are ordered.
+/// \return The sorted list.
+template <typename Term>
+inline
+term_list<Term> merge_lists(const term_list<Term>& l1, 
+                            const term_list<Term>& l2,
+                            const std::function<bool(const Term&, const Term&)>& ordering 
                                       = [](const Term& t1, const Term& t2){ return t1<t2;});
 
 

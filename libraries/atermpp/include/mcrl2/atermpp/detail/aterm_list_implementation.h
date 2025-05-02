@@ -179,6 +179,109 @@ term_list<Term> sort_list(const term_list<Term>& l,
   return result;
 }
 
+template <typename Term>
+inline
+term_list<Term> merge_lists(const term_list<Term>& l1, 
+                            const term_list<Term>& l2,
+                            const std::function<bool(const Term&, const Term&)>& ordering 
+                                  /* = [](const Term& t1, const Term& t2){ return t1<t2;}*/ )
+{
+  const std::size_t len1 = l1.size();
+  const std::size_t len2 = l2.size();
+  if (len1==0)
+  {
+    assert(l2==sort_list(l2,ordering));
+    return l2;
+  }
+  if (len2==0)
+  {
+    assert(l1==sort_list(l1,ordering));
+    return l1;
+  }
+
+  // The resulting list
+  term_list<Term> result;
+
+  term_list<Term> i1=l1;
+  term_list<Term> i2=l2;
+  if (len1+len2 < LengthOfShortList)
+  {
+    // The list is short, use the stack for temporal storage.
+    Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len1+len2);
+
+    // Collect all elements of list in buffer.
+    std::size_t j=0;
+    while (!i1.empty() && !i2.empty())
+    {
+      if (ordering(i1.front(),i2.front()))
+      {
+        new (buffer+j) Term(i1.front());
+        i1.pop_front();
+      }
+      else
+      {
+        new (buffer+j) Term(i2.front());
+        i2.pop_front();
+      }
+      ++j;
+    }
+    if (i1.empty())
+    {
+      result=i2;
+    }
+    else
+    {
+      assert(i2.empty());
+      result=i1;
+    }
+
+    // Insert elements at the front of the list.
+    while (j>0)
+    {
+      j=j-1;
+      result.push_front(buffer[j]);
+      buffer[j].~Term();    // Explicitly call the destructor, as an mCRL2 stack allocator does not do that itself. . 
+    }
+  }
+  else
+  {
+    // The list is long. Use the heap to store intermediate data.
+    std::vector<Term> buffer;
+    buffer.reserve(len1+len2);
+
+    while (!i1.empty() && !i2.empty())
+    { 
+      if (ordering(i1.front(),i2.front()))
+      { 
+        buffer.push_back(i1.front());
+        i1.pop_front();
+      }
+      else
+      { 
+        buffer.push_back(i2.front());
+        i2.pop_front();
+      }
+    }
+    if (i1.empty())
+    { 
+      result=i2;
+    }
+    else
+    { 
+      assert(i2.empty());
+      result=i1;
+    }
+
+    // Insert elements at the front of the list
+    for (typename std::vector<Term>::reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
+    {
+      result.push_front(*i);
+    }
+  }
+  assert(result.size()==len1+len2);
+  assert(result==sort_list(result,ordering));
+  return result; 
+}
 
 template <typename Term>
 inline
