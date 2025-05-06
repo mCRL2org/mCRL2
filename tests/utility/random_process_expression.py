@@ -87,6 +87,7 @@ class ProcessSpecification:
         init = self.init
 
         actspec = f"act\n  {','.join(actions)};\n"
+        # Python 3.10 does not support backslash inside f-string interpolation.
         newline = "\n  "
         procspec = f"proc\n  {newline.join(map(str, equations))}\n"
         initspec = f"init\n  {str(init)};"
