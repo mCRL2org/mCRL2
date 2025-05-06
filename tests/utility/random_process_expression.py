@@ -87,7 +87,8 @@ class ProcessSpecification:
         init = self.init
 
         actspec = f"act\n  {','.join(actions)};\n"
-        procspec = f"proc\n  {'\n  '.join(map(str, equations))}\n"
+        newline = "\n  "
+        procspec = f"proc\n  {newline.join(map(str, equations))}\n"
         initspec = f"init\n  {str(init)};"
         return f"{actspec}\n{procspec}\n{initspec}"
 
