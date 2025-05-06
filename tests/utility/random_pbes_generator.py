@@ -177,6 +177,11 @@ class BinaryOperator:
             self.x.finish(freevars, negated)
         self.y.finish(freevars, negated)
 
+class QuantifierDepthExceededError(BaseException):
+    """ Exception raised when the quantifier nesting depth is exceeded. """
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
 
 class Quantifier:
     def __init__(self, quantor, x, y):
@@ -193,10 +198,10 @@ class Quantifier:
     def finish(self, freevars, negated):
         qvar = []
         for q in QUANTIFIER_INTEGERS:
-            if not q in freevars:
+            if q not in freevars:
                 qvar.append(q)
         if len(qvar) == 0:
-            raise RuntimeError("warning: Quantifier nesting depth exceeded")
+            raise QuantifierDepthExceededError("warning: Quantifier nesting depth exceeded")
         var, dummy = pick_element(qvar)
         self.x = var
         if self.quantor == "exists":
@@ -394,7 +399,15 @@ def make_pbes(
     else:
         operators = [not_, and_, or_, implies]
 
-    while True:
+    retries = 10
+    while retries > 0:
+        retries -= 1
+
+        if retries == 0:
+            # Remove the quantifiers
+            print("Limit reached, removing quantifiers")
+            operators = [not_, and_, or_, implies]
+
         try:
             predvars = make_predvars(equation_count, use_integers)
             equations = []
@@ -415,8 +428,7 @@ def make_pbes(
             init = PropositionalVariable(X.name, args)
             p = PBES(equations, init)
             p.finish()
-        except RuntimeError as e:
-            print(e)
+        except QuantifierDepthExceededError:
             pass
 
     return p
