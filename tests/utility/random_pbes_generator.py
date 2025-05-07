@@ -128,7 +128,9 @@ class PBES:
 
     @typechecked
     def __repr__(self) -> str:
-        return f"pbes\n{'\n'.join(map(str, self.equations))}\n\ninit {self.init};"
+        # Python 3.10 does not allow backslash inside f-string interpolation.
+        newline = "\n"
+        return f"pbes\n{newline.join(map(str, self.equations))}\n\ninit {self.init};"
 
     @typechecked
     def finish(self) -> None:
