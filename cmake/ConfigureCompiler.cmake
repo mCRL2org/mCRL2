@@ -1,7 +1,7 @@
 # Perform compiler-specific compiler configuration
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19.20)
-    message(FATAL_ERROR "MSVC version 19.20 (aka MSVC 2019 v16.0) is required.")
+  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19.31)
+    message(FATAL_ERROR "MSVC version 19.31 (aka MSVC 2022 v17.1) is required.")
   endif()
   include(ConfigureMSVC)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -14,8 +14,8 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
-  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 14.0)
-    message(FATAL_ERROR "Clang version must be at least 14.0.")
+  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 16.0)
+    message(FATAL_ERROR "Clang version must be at least 16.0.")
   endif()
   set(MCRL2_IS_CLANG 1)
   include(ConfigureUNIX)
