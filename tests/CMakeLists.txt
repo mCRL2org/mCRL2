@@ -1,4 +1,4 @@
-find_package(PythonModules COMPONENTS yaml psutil REQUIRED)
+find_package(PythonRequirements)
 
 # The workspace is used for temporary files (it is the directory where the test script is executed from).
 set(WORKSPACE ${CMAKE_CURRENT_BINARY_DIR}/workspace)
