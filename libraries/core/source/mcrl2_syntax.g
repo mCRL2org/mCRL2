@@ -185,10 +185,10 @@ ProcExpr
   | ProcExpr '||_' ProcExpr                            $right 4  // Leftmerge operator
   | DataExprUnit '->' ProcExpr                         $right 5  // If-then operator
   | DataExprUnit IfThen ProcExpr                       $right 5  // If-then-else operator
-  | ProcExpr '<<' ProcExpr                              $left 8  // Until operator
-  | ProcExpr '.' ProcExpr                               $left 9  // Sequential composition operator
-  | ProcExpr '@' DataExprUnit                          $left 10  // At operator
-  | ProcExpr '|' ProcExpr                              $left 11  // Communication merge
+  | ProcExpr '<<' ProcExpr                              $left 6  // Until operator
+  | ProcExpr '.' ProcExpr                              $right 7  // Sequential composition operator
+  | ProcExpr '@' DataExprUnit                          $left  8  // At operator
+  | ProcExpr '|' ProcExpr                              $left  9  // Communication merge
   ;
 
 // Process expressions that do not contain if expressions.
@@ -197,22 +197,22 @@ ProcExprNoIf
   | Id '(' AssignmentList? ')'                                       // Process assignment
   | 'delta'                                                          // Delta, deadlock, inaction
   | 'tau'                                                            // Tau, hidden action, empty multi-action
-  | 'block' '(' ActIdSet ',' ProcExprNoIf ')'                        // Block or encapsulation operator
-  | 'allow' '(' MultActIdSet ',' ProcExprNoIf ')'                    // Allow operator
-  | 'hide' '(' ActIdSet ',' ProcExprNoIf ')'                         // Hiding operator
-  | 'rename' '(' RenExprSet ',' ProcExprNoIf ')'                     // Action renaming operator
-  | 'comm' '(' CommExprSet ',' ProcExprNoIf ')'                      // Communication operator
-  | '(' ProcExprNoIf ')'                                             // Brackets
+  | 'block' '(' ActIdSet ',' ProcExpr ')'                             // Block or encapsulation operator
+  | 'allow' '(' MultActIdSet ',' ProcExpr ')'                        // Allow operator
+  | 'hide' '(' ActIdSet ',' ProcExpr ')'                             // Hiding operator
+  | 'rename' '(' RenExprSet ',' ProcExpr ')'                         // Action renaming operator
+  | 'comm' '(' CommExprSet ',' ProcExpr ')'                          // Communication operator
+  | '(' ProcExpr ')'                                                 // Brackets
   | ProcExprNoIf '+' ProcExprNoIf                           $left 1  // Choice operator
   | 'sum' VarsDeclList '.' ProcExprNoIf                    $right 2  // Sum operator
   | 'dist' VarsDeclList '[' DataExpr ']' '.' ProcExprNoIf  $right 2  // Distribution operator
   | ProcExprNoIf '||'  ProcExprNoIf                        $right 3  // Parallel operator
   | ProcExprNoIf '||_' ProcExprNoIf                        $right 4  // Leftmerge operator
   | DataExprUnit IfThen ProcExprNoIf                       $right 5  // If-then-else operator
-  | ProcExprNoIf '<<' ProcExprNoIf                          $left 8  // Until operator
-  | ProcExprNoIf '.' ProcExprNoIf                           $left 9  // Sequential composition operator
-  | ProcExprNoIf '@' DataExprUnit                          $left 10  // At operator
-  | ProcExprNoIf '|' ProcExprNoIf                          $left 11  // Communication merge
+  | ProcExprNoIf '<<' ProcExprNoIf                          $left 6  // Until operator
+  | ProcExprNoIf '.' ProcExprNoIf                           $left 7  // Sequential composition operator
+  | ProcExprNoIf '@' DataExprUnit                           $left 8  // At operator
+  | ProcExprNoIf '|' ProcExprNoIf                           $left 9  // Communication merge
   ;
 
 IfThen
@@ -384,23 +384,23 @@ StateFrm
   | Id ( '(' DataExprList ')' )?                                 // Instantiated PBES variable
   | 'delay' ( '@' DataExpr )?                                    // Delay
   | 'yaled' ( '@' DataExpr )?                                    // Yaled
-  | 'mu' StateVarDecl '.' StateFrm                    $right 41  // Minimal fixed point
-  | 'nu' StateVarDecl '.' StateFrm                    $right 41  // Maximal fixed point
-  | 'forall' VarsDeclList '.' StateFrm                $right 42  // Universal quantification
-  | 'exists' VarsDeclList '.' StateFrm                $right 42  // Existential quantification
-  | 'inf' VarsDeclList '.' StateFrm                   $right 42  // The infimum operator (for quantitative formulas)
-  | 'sup' VarsDeclList '.' StateFrm                   $right 42  // The supremum operator (for quantitative formulas)
-  | 'sum' VarsDeclList '.' StateFrm                   $right 42  // The sum operator (for quantitative formulas)
-  | StateFrm '+' StateFrm                             $right 43  // Addition (for quantitative formulas)
-  | DataValExpr '*' StateFrm                          $right 44  // Left constant multiply (for quantitative formulas)
-  | StateFrm '*' DataValExpr                           $left 44  // Right constant multiply (for quantitative formulas)
-  | StateFrm '=>' StateFrm                            $right 45  // Implication
-  | StateFrm '||' StateFrm                            $right 46  // Disjunction
-  | StateFrm '&&' StateFrm                            $right 47  // Conjunction
-  | '[' RegFrm ']' StateFrm                           $right 48  // Box modality
-  | '<' RegFrm '>' StateFrm                           $right 48  // Diamond modality
-  | '-' StateFrm                                      $right 48  // Unary minus (for quantitative formulas)
-  | '!' StateFrm                                      $right 48  // Negation
+  | 'mu' StateVarDecl '.' StateFrm                     $right 1  // Minimal fixed point
+  | 'nu' StateVarDecl '.' StateFrm                     $right 1  // Maximal fixed point
+  | 'forall' VarsDeclList '.' StateFrm                 $right 2  // Universal quantification
+  | 'exists' VarsDeclList '.' StateFrm                 $right 2  // Existential quantification
+  | 'inf' VarsDeclList '.' StateFrm                    $right 2  // The infimum operator (for quantitative formulas)
+  | 'sup' VarsDeclList '.' StateFrm                    $right 2  // The supremum operator (for quantitative formulas)
+  | 'sum' VarsDeclList '.' StateFrm                    $right 2  // The sum operator (for quantitative formulas)
+  | StateFrm '+' StateFrm                              $right 3  // Addition (for quantitative formulas)
+  | StateFrm '=>' StateFrm                             $right 4  // Implication
+  | StateFrm '||' StateFrm                             $right 5  // Disjunction
+  | StateFrm '&&' StateFrm                             $right 6  // Conjunction
+  | DataValExpr '*' StateFrm                           $right 7  // Left constant multiply (for quantitative formulas)
+  | StateFrm '*' DataValExpr                            $left 7  // Right constant multiply (for quantitative formulas)
+  | '[' RegFrm ']' StateFrm                            $right 8  // Box modality
+  | '<' RegFrm '>' StateFrm                            $right 8  // Diamond modality
+  | '-' StateFrm                                       $right 9  // Unary minus (for quantitative formulas)
+  | '!' StateFrm                                       $right 9  // Negation
   ;
 
 StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;           // PBES variable declaration
