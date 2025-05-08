@@ -107,7 +107,11 @@ endif()
 if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(OpenGL     QUIET REQUIRED)
   find_package(CVC3       QUIET)
-  find_package(Qt6 6.2.4 COMPONENTS Core OpenGL OpenGLWidgets Widgets Xml Gui QUIET REQUIRED)
+  find_package(Qt6 6.2.4 COMPONENTS Core OpenGL OpenGLWidgets Widgets Xml Gui QUIET)
+
+  if (NOT Qt6_FOUND)
+    message(FATAL_ERROR "Qt6 can not be found, or its version is below version 6.2.4. If you do not wish to build the GUI tools, set MCRL2_ENABLE_GUI_TOOLS to OFF. Otherwise, see the build instructions on the mCRL2 website on how to set up Qt6.")
+  endif()
 	
   # The directories for components are derived from Qt6_DIR, as such they can be marked as advanced.
   mark_as_advanced(Qt6_DIR Qt6Core_DIR Qt6OpenGL_DIR Qt6OpenGLWidgets_DIR Qt6Widgets_DIR Qt6Xml_DIR Qt6Gui_DIR)
