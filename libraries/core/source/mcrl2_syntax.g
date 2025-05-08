@@ -208,7 +208,7 @@ ProcExprNoIf
   | 'dist' VarsDeclList '[' DataExpr ']' '.' ProcExprNoIf  $right 2  // Distribution operator
   | ProcExprNoIf '||'  ProcExprNoIf                        $right 3  // Parallel operator
   | ProcExprNoIf '||_' ProcExprNoIf                        $right 4  // Leftmerge operator
-  | DataExprUnit IfThen ProcExprNoIf                           $right 5  // If-then-else operator
+  | DataExprUnit IfThen ProcExprNoIf                       $right 5  // If-then-else operator
   | ProcExprNoIf '<<' ProcExprNoIf                          $left 8  // Until operator
   | ProcExprNoIf '.' ProcExprNoIf                           $left 9  // Sequential composition operator
   | ProcExprNoIf '@' DataExprUnit                          $left 10  // At operator
