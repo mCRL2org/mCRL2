@@ -4,6 +4,7 @@
 # ~ Distributed under the Boost Software License, Version 1.0.
 # ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import os
 import time
 import psutil
 import subprocess
@@ -89,7 +90,7 @@ class RunProcess:
         Run the process tool with the given arguments, using at most max_memory MB of memory, and max_time seconds
         """
 
-        if platform.system() == "Windows":
+        if platform.system() == "Windows" and os.path.splitext(tool)[1] == "":
             # Don't display the Windows GPF dialog if the invoked program dies.
             # See comp.os.ms-windows.programmer.win32
             # How to suppress crash notification dialog?, Raymond Chen Jan 14,2004 -
