@@ -115,11 +115,13 @@ def run(args):
     print(f'final solution has {cost} zeroes')
 
     # print the command with optimum reordering
-    opts = [f'--memory-limit={args.memory_limit}', '--rewriter=jitty']
+    opts = [f'--memory-limit={args.memory_limit}', f'--rewriter={args.rewriter}']
     if args.cached:
         opts.append('--cached')
     if args.chaining:
         opts.append('--chaining')
+    if args.deadlock:
+        opts.append('--deadlock')
     if args.saturation:
         opts.append('--saturation')
     if args.verbose:
@@ -136,12 +138,14 @@ def main():
     cmdline_parser = argparse.ArgumentParser(description='Simple script for experimenting with variable orders.')
     cmdline_parser.add_argument('lpsfile', metavar='FILE', type=str, help='an .lps file')
     cmdline_parser.add_argument('iterations', help="the number of iterations of hill climbing", type=int, default=1000, nargs='?')
-    cmdline_parser.add_argument('--groups', help="none or simple", default='none')
     cmdline_parser.add_argument('--cached', help="directly passed to lpsreach", action='store_true')
     cmdline_parser.add_argument('--chaining', help="directly passed to lpsreach", action='store_true')
+    cmdline_parser.add_argument('--deadlock', help="directly passed to lpsreach", action='store_true')
+    cmdline_parser.add_argument('--groups', help="none or simple", default='none')
+    cmdline_parser.add_argument('-m', '--memory-limit', help="directly passed to lpsreach", type=int, default=3)
+    cmdline_parser.add_argument('-r', '--rewriter', help="directly passed to lpsreach", type=str, default='jitty')
     cmdline_parser.add_argument('--saturation', help="directly passed to lpsreach", action='store_true')
     cmdline_parser.add_argument('-v', '--verbose', help="directly passed to lpsreac", action='store_true')
-    cmdline_parser.add_argument('-m', '--memory-limit', help="directly passed to lpsreach", type=int, default=3)
     cmdline_parser.add_argument('--path', help="Path to the mCRL2 installation that should be used", type=dir_path)
     args = cmdline_parser.parse_args()
     run(args)
