@@ -143,7 +143,6 @@ void MainWindow::on3DChanged(bool enabled)
 {
   m_glwidget->set3D(enabled);
   
-  m_layout->m_asa.reset();
   // For 3D mode there is no limit and otherwise the z-dimension is limited to 0.
   QVector3D limit{INFINITY, INFINITY, INFINITY};
   if (!enabled)
@@ -157,13 +156,6 @@ void MainWindow::on3DChanged(bool enabled)
   {
     m_graph.scrambleZ() = true;
   }
-}
-
-void MainWindow::paintEvent(QPaintEvent* event)
-{
-    setUpdatesEnabled(false);
-    QMainWindow::paintEvent(event);
-    setUpdatesEnabled(true);
 }
 
 void MainWindow::onExplore(bool enabled)

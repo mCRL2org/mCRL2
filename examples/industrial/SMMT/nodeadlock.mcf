@@ -1,0 +1,6 @@
+% This formula expresses that there is no deadlock
+% for all reachable states.
+
+% Note that this formula does not hold on block.
+
+[true*]<true>true
