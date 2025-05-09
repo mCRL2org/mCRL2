@@ -22,6 +22,7 @@
 #include "mcrl2/lps/replace_constants_by_variables.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/symbolic_lts.h"
+#include "mcrl2/lps/detail/replace_global_variables.h"
 #include "mcrl2/symbolic/ordering.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
@@ -91,6 +92,10 @@ class lpsreach_algorithm
     Specification preprocess(const Specification& lpsspec)
     {
       Specification result = lpsspec;
+      if (m_options.replace_dont_care)
+      {
+        lps::detail::replace_global_variables(result);
+      }
       lps::detail::instantiate_global_variables(result);
       lps::order_summand_variables(result);
       resolve_summand_variable_name_clashes(result); // N.B. This is a required preprocessing step.
