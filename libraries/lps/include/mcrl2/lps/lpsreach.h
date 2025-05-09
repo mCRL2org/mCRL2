@@ -283,6 +283,7 @@ class lpsreach_algorithm
       ldd visited = empty_set();
       ldd todo = x;
       ldd deadlocks = empty_set();
+      ldd potential_deadlocks = empty_set();
 
       while (todo != empty_set() && (m_options.max_iterations == 0 || iteration_count < m_options.max_iterations))
       {
@@ -291,13 +292,14 @@ class lpsreach_algorithm
         mCRL2log(log::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
         mCRL2log(log::trace) << "todo = " << print_states(m_lts.data_index, todo) << std::endl;
 
-        std::tie(visited, todo, deadlocks) = step(visited, todo, true, m_options.detect_deadlocks);
+        std::tie(visited, todo, potential_deadlocks) = step(visited, todo, true, m_options.detect_deadlocks);
 
         mCRL2log(log::verbose) << "explored " << std::setw(12) << print_size(union_(visited, todo)) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
         if (m_options.detect_deadlocks)
         {
+          deadlocks = union_(deadlocks, potential_deadlocks);
           mCRL2log(log::verbose) << "found " << std::setw(12) << print_size(deadlocks) << " deadlocks" << std::endl;
         }
 

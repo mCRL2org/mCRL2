@@ -1,23 +1,5 @@
 .. default-role:: math
 .. highlight:: mcrl2
-.. math::
- 
-    \newcommand{\seq}{\cdot}
-    \newcommand{\alt}{+}
-    \newcommand{\nat}{\mathbb{N}}
-    \newcommand{\bool}{\mathbb{B}}
-    \newcommand{\true}{\mathbf{true}}
-    \newcommand{\false}{\mathbf{false}}
-    \renewcommand{\a}[1]{\textit{#1}}
-    \renewcommand{\implies}{\mathop{\Rightarrow}}
-    \newcommand{\act}{\mathit{Act}}
-    \newcommand{\mccan}[1]{\langle #1 \rangle}
-    \newcommand{\mcall}[1]{[ #1 ]}
-    \newcommand{\sem}[1]{[\![ #1 ]\!]}
-    \newcommand{\R}{\mathrel{R}}
-    \newcommand{\bisim}{\stackrel{\leftrightarrow}{-}}
-    \newcommand{\oftype}{\smash{\,:\,}}
-    %
 
 Compositionality
 ================
@@ -54,7 +36,23 @@ The **deadlock process** (``delta``)
 
   .. list-table:: The deadlock process.
 
-     * - .. image:: /_static/tikz/lts_delta.svg
+     * - .. math::
+          :nowrap:          
+          
+            \begin{tikzpicture}
+                \tikzstyle{every state}=[
+                    draw,
+                    shape=circle,
+                    inner sep=1pt,
+                    minimum size=5pt,
+                    final/.style={double,minimum size=6pt},
+                    initial text=]
+
+                [auto,->]
+                \renewcommand{\a}[1]{\textit{#1}}
+                \node[state,initial] (a0) {}; 
+            \end{tikzpicture}
+
        - ::
 
             init delta;
@@ -66,7 +64,25 @@ The **deadlock process** (``delta``)
 
   .. list-table:: Actions are processes.
 
-     * - .. image:: /_static/tikz/lts_action.svg
+     * - .. math::
+          :nowrap:
+            
+            \begin{tikzpicture}
+                \tikzstyle{every state}=[
+                    draw,
+                    shape=circle,
+                    inner sep=1pt,
+                    minimum size=5pt,
+                    final/.style={double,minimum size=6pt},
+                    initial text=]
+            
+                [->,auto,node distance=1.5cm]
+                \renewcommand{\a}[1]{\textit{#1}}
+                \node[state,initial] (a0) {}; 
+                \node[state,final,right of=a0] (a1) {};
+                \path (a0) edge node[above] {\a{coffee}} (a1);
+            \end{tikzpicture}
+
        - ::
 
             act coffee;
@@ -93,7 +109,39 @@ on processes in mCRL2.
 
   .. list-table:: Sequential composition.
 
-     * - .. image:: /_static/tikz/lts_sequential.svg
+     * - .. math::
+          :nowrap:
+          
+            \begin{tikzpicture}
+                \tikzstyle{every state}=[
+                    draw,
+                    shape=circle,
+                    inner sep=1pt,
+                    minimum size=5pt,
+                    final/.style={double,minimum size=6pt},
+                    initial text=]
+            
+                [->,auto,node distance=1.5cm]
+                \renewcommand{\a}[1]{\textit{#1}}
+                \node[state,initial] (a0) {}; 
+                \node[state, final, right of=a0] (a1) {};
+                \node[state,initial,right of=a1] (b0) {}; 
+                \node[state, final, right of=b0] (b1) {};
+                \node[state,initial,below of=a0] (c0) {}; 
+                \node[state,        right of=c0] (c1) {};
+                \node[state,initial,below of=c0] (n0) {}; 
+                \node[state, right of=n0] (n1) {}; 
+                \node[state,final,right of=n1] (n2) {};
+                \node[state,initial,below of=n0] (m0) {}; 
+                \node[state, right of=m0] (m1) {}; 
+                \node[state,       right of=m1] (m2) {};
+                \path (n0) edge node{\a{coin}} (n1) (n1) edge node{\a{coffee}} (n2)
+                        (m0) edge node{\a{coin}} (m1) (m1) edge node{\a{coin}} (m2)
+                        (a0) node[below]{\ttfamily P} (a0) edge node{\a{coin}} (a1)
+                        (b0) node[below]{\ttfamily Q} (b0) edge node{\a{coffee}} (b1)
+                        (c0) node[below]{\ttfamily R} (c0) edge node{\a{coin}} (c1);
+            \end{tikzpicture}
+
        - ::
 
             act coin, coffee;
@@ -113,7 +161,31 @@ on processes in mCRL2.
 
   .. list-table:: Alternative composition.
 
-     * - .. image:: /_static/tikz/lts_alternative.svg
+     * - .. math::
+          :nowrap:
+        
+            \begin{tikzpicture}
+                \tikzstyle{every state}=[
+                    draw,
+                    shape=circle,
+                    inner sep=1pt,
+                    minimum size=5pt,
+                    final/.style={double,minimum size=6pt},
+                    initial text=] 
+
+                [->,auto,node distance=1.5cm]
+                \renewcommand{\a}[1]{\textit{#1}}
+                \node[state,initial] (a0) {}; 
+                \node[state, final, right of=a0] (a1) {};
+                \node[state,initial,right of=a1] (b0) {}; 
+                \node[state,initial,below of=a0,yshift=-1cm] (n0) {}; 
+                \node[state, right of=n0,yshift=0.5cm] (n1) {}; 
+                \node[state,final,right of=n0,yshift=-0.5cm] (n2) {};
+                \path (n0) edge node[above]{\a{coffee}} (n1) edge node[below]{\a{coffee}} (n2)
+                        (n1) edge[loop right] node{\a{coffee}} (n1)
+                        (a0) node[below]{\ttfamily P} (a0) edge node{\a{coffee}} (a1)
+                        (b0) node[below]{\ttfamily Q} (b0) edge[loop right] node{\a{coffee}} (b0);
+            \end{tikzpicture}
 
        - ::
 
@@ -143,7 +215,32 @@ on processes in mCRL2.
 
   .. list-table:: Summation.
 
-     * - .. image:: /_static/tikz/lts_summation.svg
+     * - .. math::
+          :nowrap:
+          
+            \begin{tikzpicture}
+                \tikzstyle{every state}=[
+                    draw,
+                    shape=circle,
+                    inner sep=1pt,
+                    minimum size=5pt,
+                    final/.style={double,minimum size=6pt},
+                    initial text=] 
+
+                [->,auto,node distance=1.5cm]
+                \renewcommand{\a}[1]{\textit{#1}}
+                \node[state,initial] (a0) {}; 
+                \node[state, final, right of=a0] (a1) {};
+                \node[state,initial,below of=a0] (b0) {}; 
+                \node[state, final, right of=b0] (b1) {};
+                \node[state,initial,right of=a1] (c0) {}; 
+                \node[state, final, below of=c0] (c1) {};
+                \path (a0) node[below]{\ttfamily P} (a0) edge[bend left] node{\a{coffee}} (a1)
+                                                            edge[bend right] node[below]{\a{coffee}} (a1)
+                        (b0) node[below]{\ttfamily Q} (b0) edge[bend left] node{\a{good}} (b1)
+                                                            edge[bend right] node[below]{\a{bad}} (b1)
+                        (c0) node[above]{\ttfamily R} (c0) edge node[above,rotate=-90]{\a{good}} (c1);
+            \end{tikzpicture}
 
        - ::
 
@@ -167,7 +264,30 @@ on processes in mCRL2.
 
   .. list-table:: Parallel composition.
 
-     * - .. image:: /_static/tikz/lts_parallel.svg
+     * - .. math::
+          :nowrap:
+        
+            \begin{tikzpicture}
+                \tikzstyle{every state}=[
+                    draw,
+                    shape=circle,
+                    inner sep=1pt,
+                    minimum size=5pt,
+                    final/.style={double,minimum size=6pt},
+                    initial text=]
+
+                [->,auto,node distance=1.5cm]
+                \renewcommand{\a}[1]{\textit{#1}}
+                \node[state] [label=above:M] (n0) {};
+                \node[state] [below of=n0,left of=n0] (n1) {};
+                \node[state] [below of=n0,right of=n0] (n2) {};
+                \node[state, final] [below of=n1,right of=n1] (n3) {};
+                \path (n0) edge node[left]{\a{a}} (n1)
+                        (n0) edge node[right]{\a{b}} (n2)
+                        (n0) edge node[right]{$\a{a}|\a{b}$} (n3)
+                        (n1) edge node[left]{\a{b}} (n3)
+                        (n2) edge node[right]{\a{a}} (n3);
+            \end{tikzpicture}
 
        - ::
 
@@ -192,7 +312,42 @@ on processes in mCRL2.
   .. _comm-operator:
   .. list-table:: Communication operator.
 
-     * - .. image:: /_static/tikz/lts_communication.svg
+     * - .. math::
+          :nowrap:
+          
+            \begin{tikzpicture}
+                \tikzstyle{every state}=[
+                    draw,
+                    shape=circle,
+                    inner sep=1pt,
+                    minimum size=5pt,
+                    final/.style={double,minimum size=6pt},
+                    initial text=]
+
+                [->,auto,node distance=1.5cm]
+                \renewcommand{\a}[1]{\textit{#1}}
+                \node[state] [initial] (n0) {};
+                \node[state] [below of=n0] (n1) {};
+                \node[state] [right of=n0] (n2) {};
+                \node[state, final] [below of=n2] (n3) {};
+                \path (n0) edge node[left]{\a{a}(1)} (n1)
+                        (n0) edge node{\a{b}(1)} (n2)
+                        (n0) edge node[above=0mm,sloped]{\a{c}(1)} (n3)
+                        (n1) edge node[below]{\a{b}(1)} (n3)
+                        (n2) edge node{\a{a}(1)} (n3);
+
+                \begin{scope}[yshift=-3cm]
+                \node[state] [initial] (n0) {};
+                \node[state] [below of=n0] (n1) {};
+                \node[state] [right of=n0] (n2) {};
+                \node[state, final] [below of=n2] (n3) {};
+                \path (n0) edge node[left]{\a{a}(1)} (n1)
+                        (n0) edge node{\a{b}(2)} (n2)
+                        (n0) edge node[above=0mm,sloped]{$\a{a}(1)|\a{b}(2)$} (n3)
+                        (n1) edge node[below]{\a{b}(2)} (n3)
+                        (n2) edge node{\a{a}(1)} (n3);
+                \end{scope}
+            \end{tikzpicture}
 
        - ::
 
@@ -223,7 +378,34 @@ on processes in mCRL2.
 
   .. list-table:: Allow operator.
 
-     * - .. image:: /_static/tikz/lts_allow.svg
+     * - .. math::
+          :nowrap:
+
+          \begin{tikzpicture}
+               \tikzstyle{every state}=[
+                    draw,
+                    shape=circle,
+                    inner sep=1pt,
+                    minimum size=5pt,
+                    final/.style={double,minimum size=6pt},
+                    initial text=]
+
+               [->,auto]
+               \renewcommand{\a}[1]{\textit{#1}}
+               \node[state] [initial] (n0) {};
+               \node[state] [below of=n0] (n1) {};
+               \node[state, final] [right of=n1] (n3) {};
+               \path (n0) edge node[left]{\a{a}} (n1)
+                         (n0) edge node[above=0mm,sloped]{\a{c}} (n3);
+
+               \begin{scope}[yshift=-2cm]
+               \node[state] [initial] (n0) {};
+               \node[state] [below of=n0] (n1) {};
+               \node[state, final] [right of=n1] (n3) {};
+               \path (n0) edge node[left]{\a{a}} (n1)
+                         (n0) edge node[above=0mm,sloped]{$\a{a}|\a{b}$} (n3);
+               \end{scope}
+          \end{tikzpicture}
 
        - ::
 
@@ -286,7 +468,74 @@ The corresponding statespaces are shown below. On the right hand side, the
 statespace of the parallel composition is shown. The two black transitions are
 all that remain when communication and blocking are applied.
 
-.. image:: /_static/tikz/lts_coffee_machine.svg
+.. math::
+     :nowrap:
+     
+     \begin{tikzpicture}
+          \tikzstyle{every state}=[
+               draw,
+               shape=circle,
+               inner sep=1pt,
+               minimum size=5pt,
+               final/.style={double,minimum size=6pt},
+               initial text=]
+          
+          [->,auto]
+          \renewcommand{\a}[1]{\textit{#1}}
+          \begin{scope}[yshift=1cm]
+          \node[state] [label=above:M] (n0) {};
+          \node[state] [below of=n0] (n1) {};
+          \node[state] [below of=n1] (n2) {};
+          \path (n0) edge[left] node{\a{coin}} (n1)
+                    (n1) edge[left] node{\a{coin}} (n2)
+                    (n1) edge[bend right=90] node[right]{\a{bad}} (n0)
+                    (n2) edge[bend right=90] node[right]{\a{good}} (n0);
+          \end{scope}
+          \begin{scope}[xshift=3cm]
+          \node[state] [label=left:U] (n0) {};
+          \node[left of=n0] {\color{red}$\|$};
+          \node[state] [right of=n0] (n1) {};
+          \path (n0) edge node{\a{coin}} (n1)
+                    (n1) edge[bend left=90] node{\a{good}} (n0)
+                    (n1) edge[bend right=90] node[above]{\a{bad}} (n0);
+          \end{scope}
+          \begin{scope}[hide/.style={draw=gray},node distance=2cm,xshift=6cm,yshift=2cm]
+          \node[state] [label=left:UM] (n00) {};  \node[state] [right of=n00,hide] (n10) {};
+          \node[state,hide] [below of=n00]    (n01) {};  \node[state] [right of=n01] (n11) {};
+          \node[state,hide] [below of=n01]    (n02) {};  \node[state] [right of=n02,hide] (n12) {};
+          \node[left of=n01,node distance=1cm] {\color{red}$=$};
+          \path (n00) edge[hide] (n10)
+                    (n10) edge[hide,bend left=20] (n00)
+                    (n10) edge[hide,bend right=20] (n00)
+                    (n01) edge[hide] (n11)
+                    (n11) edge[hide,bend left=20] (n01)
+                    (n11) edge[hide,bend right=20] (n01)
+                    (n02) edge[hide] (n12)
+                    (n12) edge[hide,bend left=20] (n02)
+                    (n12) edge[hide,bend right=20] (n02)
+                    (n00) edge[hide] (n01)
+                    (n01) edge[hide,bend left=20] (n00)
+                    (n01) edge[hide] (n02)
+                    (n02) edge[hide,bend left=20] (n00)
+                    (n10) edge[hide] (n11)
+                    (n11) edge[hide,bend right=20] (n10)
+                    (n11) edge[hide] (n12)
+                    (n12) edge[hide,bend right=20] (n10)
+                    (n01) edge[hide, bend left=20] (n12)
+                    (n12) edge[hide, bend left=20] (n01)
+                    (n10) edge[hide, bend left=20] (n01)
+                    (n10) edge[hide, bend right=20] (n01)
+                    (n01) edge[hide] (n10)
+                    (n11) edge[hide, bend left=20] (n02)
+                    (n11) edge[hide, bend right=20] (n02)
+                    (n12) edge[hide, bend left=5] (n00)
+                    (n12) edge[hide, bend right=5] (n00)
+                    (n02) edge[hide] (n10)
+                    (n00) edge[hide, bend right=20] (n11)
+                    (n00) edge[bend left=20] node[right]{\a{pay}} (n11)
+                    (n11) edge node[left]{\a{boo}} (n00);
+          \end{scope}
+     \end{tikzpicture}
 
 It is obvious from this picture that you get what you pay for: good coffee is
 not achievable for this user. The picture also illustrates that synchronicity of

@@ -85,3 +85,5 @@ limited a priori.
   T.A.N. Engels, J.F. Groote, M.J. van Weerdenburg and T.A.C. Willemse. Search algorithms for automated validation. Journal of Logic and Algebraic Programming 78(4), 274-287, 2009.
 [GM14]
   J.F. Groote and M.R. Mousavi. Modeling and analysis of communicating systems. The MIT Press 2014.
+
+.. mcrl2_manual:: lps2lts

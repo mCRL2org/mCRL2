@@ -202,6 +202,7 @@ void translate_variable_declaration(const Container& vars,
   for (const data::variable& v : vars)
   {
     o << "(declare-fun " << translate_identifier(v.name()) << " (";
+
     data::sort_expression_list domain = data::is_function_sort(v.sort())
                                             ? atermpp::down_cast<data::function_sort>(v.sort()).domain()
                                             : data::sort_expression_list();
@@ -216,8 +217,17 @@ void translate_variable_declaration(const Container& vars,
       // }
       // else if(s == data::sort_nat::nat())
       // {
-      //   vars_conditions = data::lazy::and_(vars_conditions, greater_equal(s, data::sort_nat::c0()));
+      //   vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_nat::c0()));
       // }
+    }
+    // Add assertions for positive and natural numbers
+    if(v.sort() == data::sort_pos::pos())
+    {
+         vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_pos::c1()));
+    }
+    else if(v.sort() == data::sort_nat::nat())
+    {
+         vars_conditions = data::lazy::and_(vars_conditions, greater_equal(v, data::sort_nat::c0()));
     }
     o << ") ";
     translate_sort_expression(v.sort().target_sort(), o, nt);

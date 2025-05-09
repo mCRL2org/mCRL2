@@ -30,19 +30,13 @@ namespace AttractionFunctions
 {
   struct LTSGraph : AttractionFunction
   {
-    QVector3D diff = { 0, 0, 0 };
-    const float scaling = 1e3f;
-    float dist = 0.0f;
-    float factor = 0.0f;
     QVector3D operator()(const QVector3D& a, 
                          const QVector3D& b,
                          const float ideal) override
     {
-      diff = (a - b);
-      dist = std::max(diff.length(), 1.0f);
-      /* factor = scaling * std::log(dist / (ideal + 1.0f)) / dist; */
-      factor = std::max(0.0,std::min(1000.0,(1+(0.8*ideal)*std::log(diff.length()/ideal))/diff.length()));
-      return diff * factor;
+      QVector3D diff=(a-b);
+      float factor = 2-ideal/diff.length();
+      return std::max(-1000.0f,factor)*diff;
     }
   };
 

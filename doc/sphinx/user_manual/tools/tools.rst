@@ -71,4 +71,5 @@ External tools
 
 The tools given below are not part of the toolset, but are standalone tools that have mCRL2-related functionalities.
 
+* A VSCode `extension <https://marketplace.visualstudio.com/items/?itemName=CptWesley.mcrl2>`_ similar to the `mcrl2ide`, allowing visualisation, simulation and verification.
 * A tool for generating LaTeX from a mu-calculus formula in the mCRL2 syntax: `GitHub <https://github.com/TarVK/mCRL2-formatter>`_, `Web app <https://tarvk.github.io/mCRL2-formatter/demo/build/>`_.

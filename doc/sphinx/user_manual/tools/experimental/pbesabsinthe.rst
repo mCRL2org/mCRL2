@@ -40,3 +40,5 @@ This file is passed to the tool using the option `-a`.
 The tool attempts to automatically generate abstractions of functions that were
 not specified by the user. The data specification and the right hand sides of the
 function mapping are merged with the data specification of the input PBES.
+
+.. mcrl2_manual:: pbesabsinthe

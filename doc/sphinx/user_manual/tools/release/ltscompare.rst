@@ -23,3 +23,5 @@ The second useful option is to hide some actions while doing the comparisons
 (option ``--tau=`` followed by a comma separated list of actions). Counter examples
 will only be distinguishing for the input transition systems with the hiding operation
 applied.
+
+.. mcrl2_manual:: ltscompare

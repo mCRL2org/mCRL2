@@ -1,6 +1,4 @@
-if(MCRL2_ENABLE_STABLE)
-  add_subdirectory(release)
-endif()
+add_subdirectory(release)
 
 if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory(experimental)

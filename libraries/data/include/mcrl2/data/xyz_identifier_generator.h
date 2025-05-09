@@ -53,7 +53,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
           break;
         }
       }
-      return m_index < 0 ? std::string(1, m_char) : m_char + std::to_string(m_index);
+      return m_index < 0 ? std::string(1, m_char) : std::string(1, m_char) + std::to_string(m_index);
     }
 
   public:

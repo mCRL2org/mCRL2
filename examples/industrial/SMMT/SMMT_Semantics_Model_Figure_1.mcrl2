@@ -1,0 +1,724 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% The State Machine Modelling Tool (SMMT) is a toolset and associated language for modelling  %%
+%% systems using a UML statechart-like language and generating executable code from models     %%
+%% written in SMMT. It was developed at Canon Production Printing and, at the time of writing, %%
+%% it has been used to generate production-grade code for over 30 software components.         %%
+%%                                                                                             %%
+%% An initial formalisation of the SMMT language was written by Jordi van Laarhoven, as part   %%
+%% of his MSc thesis:                                                                          %%
+%%                                                                                             %%
+%%   Jordi van Laarhoven: Formalising the State Machine Modelling Tool (SMMT), MSc thesis,     %%
+%%   Eindhoven University of Technology, 2023.                                                 %%
+%%                                                                                             %%     
+%% A reworked version, explaining the sequential fragment of SMMT was presented at FMICS:      %%
+%%                                                                                             %%
+%%   Jordi E. P. M. van Laarhoven, Olav Bunte, Louis C. M. van Gool, Tim A. C. Willemse:       %%
+%%   Formalising the Industrial Language SMMT in mCRL2. FMICS 2024: 63-79                      %%
+%%                                                                                             %%
+%% An extended version, covering both the sequential and parallel fragment of SMMT was         %%
+%% submitted for journal publication.                                                          %%
+%%                                                                                             %%
+%% This file contains the mCRL2 formalisation of the fragment covered in the extended version  %%
+%% and it instantiates it with a concrete SMMT model included in that submission (viz., the    %%
+%% model depicted in Figure 1 of the submission). Translating other SMMT models to mCRL2 can   %%
+%% be done by simply replacing the specifics in the section "Figure 1" below.                  %%
+%%                                                                                             %%
+%% We stress that Figure 1 is for illustration-purposes only and as such does not occur        %%
+%% in production software at Canon Production Printing. For reasons of confidentiality, none   %%
+%% of the production-grade models used at Canon Production Printing can be made available.     %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+sort
+  Pair = struct p(p_ex : List(State), p_d : List(DoEvent));
+  OEH = struct oeh(doEvents : List(DoEvent), target : State);
+  Transition = struct tra(onEvent : OnEvent, doEvents : List(DoEvent), target : State);
+  LState = struct states(ss_ss : List(State), ss_cs : List(State), ss_ps : List(State), ss_js : List(State));
+  Spec = struct sm(OnEvents : List(OnEvent),
+					DoEvents : List(DoEvent),
+					States : LState,
+					EntryStates : List(State),
+					Children : State -> List(State),
+					Transitions: State -> List(Transition),
+					Joins: State -> List(State),
+					CondEntryHandlers : State -> List(Transition),
+					OtherEntryHandlers : State -> List(OEH),
+					ExitHandlers : State -> List(DoEvent)
+				);
+
+  RichSpec = struct rsm(StateMachine: Spec,
+						Descendants: State -> List(State),
+						ESDescendants: State -> List(State),
+						Parent: State -> List(State),
+						Roots: List(State),
+						Ancestors: State -> List(State),
+						Participants: State -> OnEvent -> List(State),
+						EnabledEvents: State -> List(OnEvent),
+						SpecifiedEvents: State -> FSet(OnEvent)
+					);
+					
+map smmt_rich_spec: RichSpec;
+eqn smmt_rich_spec = rsm(smmt_spec, descendants(smmt_spec), esdescendants(smmt_spec), parent(smmt_spec), roots(smmt_spec), ancestors(smmt_spec), participants(smmt_spec), enabled_events(smmt_spec), specified_events(smmt_spec));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% AUXILIARY FUNCTIONS %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+map descendants: Spec -> (State -> List(State));
+    descendants_: Spec -> (List(State) -> List(State));
+var 
+  s: State;
+  l: List(State);
+  spec: Spec;
+eqn
+  descendants(spec)(s) = descendants_(spec)([s]);
+  descendants_(spec)([]) = [];
+  descendants_(spec)(s|>l) = s|>descendants_(spec)(Children(spec)(s))++descendants_(spec)(l);
+
+map esdescendants: Spec -> (State -> List(State));
+    esdescendants_: Spec -> (List(State) -> List(State));
+var 
+  s: State;
+  l: List(State);
+  spec: Spec;
+eqn
+  esdescendants(spec)(s) = esdescendants_(spec)(Children(spec)(s));
+  esdescendants_(spec)([]) = [];
+  s in EntryStates(spec)    -> esdescendants_(spec)(s|>l) = s|>esdescendants_(spec)(Children(spec)(s)) ++ esdescendants_(spec)(l); 
+  !(s in EntryStates(spec)) -> esdescendants_(spec)(s|>l) = esdescendants_(spec)(l); 
+
+map parent: Spec -> (State -> List(State));
+    parent_: Spec # List(State) -> (State -> List(State));
+var
+  s,s': State;
+  l: List(State);
+  spec: Spec;
+eqn
+  parent(spec)(s) = parent_(spec,ss_cs(States(spec)) ++ ss_ps(States(spec)) ++ ss_js(States(spec)))(s);
+  parent_(spec,[])(s) = [];
+  (s in Children(spec)(s'))  ->  parent_(spec,s'|>l)(s)  = [s'];
+  !(s in Children(spec)(s')) ->  parent_(spec,s'|>l)(s)  = parent_(spec,l)(s);
+
+map roots: Spec -> List(State);
+    roots_: Spec -> List(State) -> List(State);
+var
+  spec: Spec;
+  s: State;
+  l: List(State);
+eqn
+  roots(spec) = roots_(spec)(ss_ss(States(spec)) ++ ss_cs(States(spec)) ++ ss_ps(States(spec)));
+  roots_(spec)([]) = [];
+  (parent(spec)(s) == []) -> roots_(spec)(s|>l) = s |> roots_(spec)(l);  
+  (parent(spec)(s) != []) -> roots_(spec)(s|>l) = roots_(spec)(l);  
+
+map ancestors: Spec -> (State -> List(State));
+var
+  s: State;
+  spec: Spec;
+eqn
+ ( parent(spec)(s) == [])  -> ancestors(spec)(s) = [];
+ ( parent(spec)(s) != [])  -> ancestors(spec)(s) =  parent(spec)(s) ++ ancestors(spec)(head(parent(spec)(s)));
+
+map enabled_events: Spec -> (State -> List(OnEvent));
+    extract_events: List(Transition) -> List(OnEvent);
+var
+  s: State;
+  tr: Transition;
+  l: List(Transition);
+  spec: Spec;
+eqn
+  enabled_events(spec)(s) = extract_events(Transitions(spec)(s));
+  extract_events([]) = [];
+  extract_events(tr|>l) = onEvent(tr)|>extract_events(l);
+
+map specified_events: Spec -> (State -> FSet(OnEvent));
+    specified_events_: Spec -> (List(State) -> FSet(OnEvent));
+    extract_events_fset: List(Transition) -> FSet(OnEvent);
+var
+  s: State;
+  l: List(State);
+  tr: Transition;
+  trl: List(Transition);
+  spec: Spec;
+eqn
+  specified_events(spec)(s) = specified_events_(spec)(descendants(spec)(s));
+  specified_events_(spec)([]) = {};
+  specified_events_(spec)(s|>l) = extract_events_fset(Transitions(spec)(s)) + specified_events_(spec)(l);
+  extract_events_fset([]) = {};
+  extract_events_fset(tr|>trl) = {onEvent(tr)} + extract_events_fset(trl);
+
+map participants: Spec -> (State -> OnEvent -> List(State));
+    participating_children: Spec -> (List(State) -> OnEvent -> List(State));
+var
+  s: State;
+  l: List(State);
+  ev: OnEvent;
+  spec: Spec;
+eqn
+  s in ss_ps(States(spec)) -> participants(spec)(s)(ev) = participating_children(spec)(Children(spec)(s))(ev); 
+  !(s in ss_ps(States(spec))) -> participants(spec)(s)(ev) = [];
+  participating_children(spec)([])(ev) = [];
+  ev in specified_events(spec)(s) -> participating_children(spec)(s|>l)(ev) = s |> participating_children(spec)(l)(ev);
+  !(ev in specified_events(spec)(s)) -> participating_children(spec)(s|>l)(ev) = participating_children(spec)(l)(ev);
+
+map PotentiallyExecutable: RichSpec -> OnEvent -> List(State) -> Bool;
+var
+  spec: RichSpec;
+  l: List(State);
+  s: State;
+  ev: OnEvent;
+eqn
+  PotentiallyExecutable(spec)(ev)([]) = false;
+  (ev in EnabledEvents(spec)(s))  -> PotentiallyExecutable(spec)(ev)(s|>l) = true;
+  !(ev in EnabledEvents(spec)(s)) -> PotentiallyExecutable(spec)(ev)(s|>l) = PotentiallyExecutable(spec)(ev)(l);
+
+map AllStates: RichSpec -> List(State);
+var
+  spec: RichSpec;
+eqn
+  AllStates(spec) = ss_ss(states_) ++ ss_cs(states_) ++ ss_ps(states_) ++ ss_js(states_) whr states_ = States(StateMachine(spec)) end;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% END AUXILIARY FUNCTIONS %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%
+%%%%% SUPPORT %%%%%
+%%%%%%%%%%%%%%%%%%%
+
+%% idea: Support(spec)(Approx1)(Approx2)(event)
+map Support: RichSpec -> OnEvent -> List(State) -> List(State);
+    Support_: RichSpec -> OnEvent -> Bool -> List(State) # List(State) # List(State) -> List(State);
+var
+  spec: RichSpec;
+  l,l',l'' : List(State);
+  s,s': State;
+  ev: OnEvent;
+  b: Bool;
+eqn  
+  Support(spec)(ev)(l) = Support_(spec)(ev)(true)(l,l,[]);
+  Support_(spec)(ev)(true)([],l',l'') = l';
+  Support_(spec)(ev)(false)([],l',l'') = Support_(spec)(ev)(true)(l'',l'',[]);
+  Keep(spec)(ev)(l')(s)  -> Support_(spec)(ev)(b)(s|>l,l',l'') = Support_(spec)(ev)(b)(l,l',s |> l'');
+  !Keep(spec)(ev)(l')(s) -> Support_(spec)(ev)(b)(s|>l,l',l'') = Support_(spec)(ev)(false)(l,l',l'');
+
+map ActiveSupport: RichSpec -> OnEvent -> List(State) -> List(State);
+    ExtractActiveTransitions: RichSpec -> List(State) # List(State) -> List(State);
+var
+  spec: RichSpec;
+  ev: OnEvent;
+  s: State;
+  l,l': List(State);
+eqn
+  ActiveSupport(spec)(ev)(l) = ExtractActiveTransitions(spec)(SUP,SUP) whr SUP = Support(spec)(ev)(l) end;
+  ExtractActiveTransitions(spec)([],l') = [];
+  list_intersect( Children(StateMachine(spec))(s), l') != [] -> ExtractActiveTransitions(spec)(s|>l,l') = ExtractActiveTransitions(spec)(l,l');
+  list_intersect( Children(StateMachine(spec))(s), l') == [] -> ExtractActiveTransitions(spec)(s|>l,l') = s|>ExtractActiveTransitions(spec)(l,l');
+
+map Keep: RichSpec -> OnEvent -> List(State) -> State -> Bool;
+    AncestorClosed': RichSpec -> List(State) -> State -> Bool;
+    EnabledEvent': RichSpec -> OnEvent -> List(State) -> State -> Bool;
+    ParticipantRequirement': RichSpec -> OnEvent -> List(State) -> State -> Bool;
+var
+  s: State;
+  l: List(State);
+  ev: OnEvent;
+  spec: RichSpec;
+eqn
+  Keep(spec)(ev)(l)(s) =  AncestorClosed'(spec)(l)(s)
+                       && EnabledEvent'(spec)(ev)(l)(s)
+                       && ParticipantRequirement'(spec)(ev)(l)(s);
+
+  Parent(spec)(s) == [] -> AncestorClosed'(spec)(l)(s) = true;
+  Parent(spec)(s) != [] -> AncestorClosed'(spec)(l)(s) = head(Parent(spec)(s)) in l ;
+  EnabledEvent'(spec)(ev)(l)(s) = PotentiallyExecutable(spec)(ev)(list_intersect(Descendants(spec)(s),l));
+
+  (Parent(spec)(s) == [] || !(head(Parent(spec)(s)) in ss_ps(States(StateMachine(spec))))) -> ParticipantRequirement'(spec)(ev)(l)(s) = true;
+  (Parent(spec)(s) != [] && head(Parent(spec)(s)) in ss_ps(States(StateMachine(spec))) && s in Participants(spec)(head(Parent(spec)(s)))(ev)) -> ParticipantRequirement'(spec)(ev)(l)(s) = subset(Participants(spec)(head(Parent(spec)(s)))(ev), l);
+  (Parent(spec)(s) != [] && head(Parent(spec)(s)) in ss_ps(States(StateMachine(spec))) && !(s in Participants(spec)(head(Parent(spec)(s)))(ev))) -> ParticipantRequirement'(spec)(ev)(l)(s) = true;
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% END SUPPORT %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% EXECUTION STATE VALIDITY AND UPDATE %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+map validity: RichSpec -> List(State) -> Bool;
+var 
+  spec: RichSpec;
+  l: List(State);
+eqn
+  validity(spec)(l) =  UniqueRoot(spec)(l)   %%%% TW: Add requirement that l is ancestor-closed
+                    && CompositeStateRequirement(spec)(l)
+                    && ParallelStateRequirement(spec)(l)
+                    && JointStateRequirement(spec)(l);
+
+map UniqueRoot: RichSpec -> List(State) -> Bool;
+    UniqueRoot_: RichSpec -> Nat -> List(State) -> Nat;
+var
+  spec: RichSpec;
+  l: List(State);
+  s: State;
+  n: Nat;
+eqn
+  UniqueRoot(spec)(l) = UniqueRoot_(spec)(0)(l) == 1;
+  UniqueRoot_(spec)(n)([]) = n;
+  (s in Roots(spec))  -> UniqueRoot_(spec)(n)(s|>l) = UniqueRoot_(spec)(n+1)(l);
+  !(s in Roots(spec)) -> UniqueRoot_(spec)(n)(s|>l) = UniqueRoot_(spec)(n)(l);
+
+map CompositeStateRequirement: RichSpec -> List(State) -> Bool;
+    CompositeStateRequirement_: RichSpec -> List(State) -> List(State) -> Bool;
+var
+  spec: RichSpec;
+  l,l': List(State);
+  s: State;
+eqn
+  CompositeStateRequirement(spec)(l) = CompositeStateRequirement_(spec)(l)(l);
+  CompositeStateRequirement_(spec)(l)([]) = true;
+  ( s in ss_cs(States(StateMachine(spec))) && (#list_intersect( Children(StateMachine(spec))(s), l) == 1))  -> 
+                                    CompositeStateRequirement_(spec)(l)(s|>l') = CompositeStateRequirement_(spec)(l)(l');
+
+  ( s in ss_cs(States(StateMachine(spec))) && (#list_intersect( Children(StateMachine(spec))(s), l) != 1))  -> 
+                                    CompositeStateRequirement_(spec)(l)(s|>l') = false;
+
+  !( s in ss_cs(States(StateMachine(spec)))) -> CompositeStateRequirement_(spec)(l)(s|>l') = 
+                                                   CompositeStateRequirement_(spec)(l)(l');
+
+map ParallelStateRequirement: RichSpec -> List(State) -> Bool;
+    ParallelStateRequirement_: RichSpec -> List(State) -> List(State) -> Bool;
+var
+  spec: RichSpec;
+  l,l': List(State);
+  s: State;
+eqn
+  ParallelStateRequirement(spec)(l) = ParallelStateRequirement_(spec)(l)(l);
+  ParallelStateRequirement_(spec)(l)([]) = true;
+  (s in ss_ps(States(StateMachine(spec))) && subset( list_intersect( Children(StateMachine(spec))(s), EntryStates(StateMachine(spec))), l)) -> 
+                                    ParallelStateRequirement_(spec)(l)(s|>l') = ParallelStateRequirement_(spec)(l)(l');
+  (s in ss_ps(States(StateMachine(spec))) && !subset( list_intersect( Children(StateMachine(spec))(s), EntryStates(StateMachine(spec))), l)) -> 
+                                    ParallelStateRequirement_(spec)(l)(s|>l') = false;
+  (!(s in ss_ps(States(StateMachine(spec)))) ) -> 
+                                    ParallelStateRequirement_(spec)(l)(s|>l') = ParallelStateRequirement_(spec)(l)(l');
+ 
+map JointStateRequirement: RichSpec -> List(State) -> Bool;
+    JointStateRequirement_: RichSpec -> List(State) -> List(State) -> Bool;
+var
+  spec: RichSpec;
+  l,l': List(State);
+  s: State;
+eqn
+  JointStateRequirement(spec)(l) = JointStateRequirement_(spec)(l)(l);
+  JointStateRequirement_(spec)(l)([]) = (forall v:State. (v in ss_js(States(StateMachine(spec))) && subset(Joins(StateMachine(spec))(v), l)) => v in l);
+  ( s in ss_js(States(StateMachine(spec))) && (subset( Joins(StateMachine(spec))(s), l) => s in l))  -> 
+                                                JointStateRequirement_(spec)(l)(s|>l') = JointStateRequirement_(spec)(l)(l');
+  ( s in ss_js(States(StateMachine(spec))) && !(subset( Joins(StateMachine(spec))(s), l) => s in l))  -> 
+                                                JointStateRequirement_(spec)(l)(s|>l') = false;
+  !( s in ss_js(States(StateMachine(spec))) ) -> JointStateRequirement_(spec)(l)(s|>l') = 
+                                                   JointStateRequirement_(spec)(l)(l');
+
+   
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% END EXECUTION STATE VALIDITY %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% EXECUTION STATE UPDATE %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% consistent_states(spec)(l) holds true iff the (ancestor-closed) list l %%%%
+%%%% has exactly one root and composite states have ≤1 child                %%%%
+%%%% iff the target states do not conflict                                  %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+map consistent_states: RichSpec -> List(State) -> Bool;
+var
+  spec: RichSpec;
+  l: List(State);
+eqn
+  consistent_states(spec)(l) =  UniqueRoot(spec)(l)
+                              && WeakCompositeStateRequirement(spec)(l);
+
+map WeakCompositeStateRequirement: RichSpec -> List(State) -> Bool;
+    WeakCompositeStateRequirement_: RichSpec -> List(State) -> List(State) -> Bool;
+var
+  spec: RichSpec;
+  l,l': List(State);
+  s: State;
+eqn
+  WeakCompositeStateRequirement(spec)(l) = WeakCompositeStateRequirement_(spec)(l)(l);
+  WeakCompositeStateRequirement_(spec)(l)([]) = true;
+  ( s in ss_cs(States(StateMachine(spec))) && #list_intersect( Children(StateMachine(spec))(s), l) <= 1  )  -> 
+                                 WeakCompositeStateRequirement_(spec)(l)(s|>l') = WeakCompositeStateRequirement_(spec)(l)(l');
+  ( s in ss_cs(States(StateMachine(spec))) && #list_intersect( Children(StateMachine(spec))(s), l) > 1  )  -> 
+                                 WeakCompositeStateRequirement_(spec)(l)(s|>l') = false;
+  !( s in ss_cs(States(StateMachine(spec)))) -> WeakCompositeStateRequirement_(spec)(l)(s|>l') = 
+                                                   WeakCompositeStateRequirement_(spec)(l)(l');
+
+
+map Get_Targets: RichSpec -> OnEvent -> List(State) -> List(State);
+    Get_Target_: RichSpec -> OnEvent -> List(Transition) -> List(State);
+var
+  spec: RichSpec;
+  l: List(State);
+  s: State;
+  ev: OnEvent;
+  lt: List(Transition);
+  tr: Transition;
+eqn
+  Get_Targets(spec)(ev)([]) = [];
+  Get_Targets(spec)(ev)(s|>l) = Get_Target_(spec)(ev)(Transitions(StateMachine(spec))(s)) ++ Get_Targets(spec)(ev)(l);
+  Get_Target_(spec)(ev)([]) = [];
+  ev == onEvent(tr) -> Get_Target_(spec)(ev)(tr|>lt) = [target(tr)];
+  ev != onEvent(tr) -> Get_Target_(spec)(ev)(tr|>lt) = Get_Target_(spec)(ev)(lt);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Updating the state                                                                         %%%%
+%%%% Execution_State_Update(spec)(l)(l') computes a new execution state based on                %%%%
+%%%% the current execution state l, and the target states l' (which we assume to be consistent) %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+map Execution_State_Update: RichSpec -> List(State) -> List(State) -> List(State);
+var
+  spec: RichSpec;
+  l,l': List(State);
+eqn
+  Execution_State_Update(spec)(l)(l') = sort_states(get_unique(JoinStateClosure(spec)(EntryStateClosure(spec)(AddConsistentStates(spec)(l)(Ancestor_closure(spec)(l'))))),AllStates(spec));
+
+map Ancestor_closure: RichSpec -> List(State) -> List(State);
+    Ancestor_closure_: RichSpec -> List(State) -> List(State) -> List(State);
+var
+  spec: RichSpec;
+  l,l': List(State);
+  s: State;
+eqn
+  Ancestor_closure(spec)(l) = get_unique(Ancestor_closure_(spec)(l)(l));
+  Ancestor_closure_(spec)([])(l') = [];
+  Ancestor_closure_(spec)(s|>l)(l') = s|>Ancestors(spec)(s) ++ Ancestor_closure_(spec)(l)(l');
+
+map AddConsistentStates: RichSpec -> List(State) -> List(State) -> List(State);
+var
+  spec: RichSpec;
+  l,l': List(State);
+  s: State;
+eqn
+  AddConsistentStates(spec)([])(l') = l';
+  (!(s in ss_js(States(StateMachine(spec)))) && consistent_states(spec)(get_unique(Ancestor_closure(spec)([s]) ++ l')))  -> AddConsistentStates(spec)(s|>l)(l') = 
+                                                   AddConsistentStates(spec)(l)(get_unique(Ancestor_closure(spec)([s]) ++ l'));
+  ((s in ss_js(States(StateMachine(spec)))) || !consistent_states(spec)(get_unique(Ancestor_closure(spec)([s]) ++ l')))  -> AddConsistentStates(spec)(s|>l)(l') = 
+                                                   AddConsistentStates(spec)(l)(l') ;
+
+map EntryStateClosure: RichSpec -> List(State) -> List(State);
+    EntryStateClosure_: RichSpec -> List(State) -> List(State) -> List(State);
+var
+  spec: RichSpec;
+  l,l': List(State);
+  s: State;
+eqn
+  EntryStateClosure(spec)(l) = EntryStateClosure_(spec)(l)(l);
+  EntryStateClosure_(spec)([])(l') = [];
+
+  (s in ss_cs(States(StateMachine(spec))) && list_intersect(Children(StateMachine(spec))(s),l') != [])  ->
+         EntryStateClosure_(spec)(s|>l)(l') = s|>EntryStateClosure_(spec)(l)(l');
+  (s in ss_cs(States(StateMachine(spec))) && list_intersect(Children(StateMachine(spec))(s),l') == [])  ->
+         EntryStateClosure_(spec)(s|>l)(l') = s|>ESDescendants(spec)(s) ++ EntryStateClosure_(spec)(l)(l');
+  (!(s in ss_cs(States(StateMachine(spec)))) && s in ss_ps(States(StateMachine(spec))) && subset( list_intersect(Children(StateMachine(spec))(s), EntryStates(StateMachine(spec))),l')) ->
+         EntryStateClosure_(spec)(s|>l)(l') = s|>EntryStateClosure_(spec)(l)(l');
+  (!(s in ss_cs(States(StateMachine(spec)))) && s in ss_ps(States(StateMachine(spec))) && !subset( list_intersect(Children(StateMachine(spec))(s), EntryStates(StateMachine(spec))),l')) ->
+         EntryStateClosure_(spec)(s|>l)(l') = s|>GeneralisedESDescendants(spec)(Children(StateMachine(spec))(s))(l') ++ EntryStateClosure_(spec)(l)(l');
+  (!(s in ss_cs(States(StateMachine(spec)))) && !(s in ss_ps(States(StateMachine(spec))))) ->
+         EntryStateClosure_(spec)(s|>l)(l') = s|>EntryStateClosure_(spec)(l)(l');
+
+
+map GeneralisedESDescendants: RichSpec -> List(State) -> List(State) -> List(State);
+var
+  spec: RichSpec;
+  l,l': List(State);
+  s: State;
+eqn
+  GeneralisedESDescendants(spec)([])(l') = [];
+  (s in ss_js(States(StateMachine(spec))) || s in l')  -> GeneralisedESDescendants(spec)(s|>l)(l') = 
+                                                            GeneralisedESDescendants(spec)(l)(l');
+  !(s in ss_js(States(StateMachine(spec))) || s in l') -> GeneralisedESDescendants(spec)(s|>l)(l') = 
+                                                 s |> ESDescendants(spec)(s) ++ GeneralisedESDescendants(spec)(l)(l');
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% The below is robust for models in which Joint States can be related to other Joint States %%%%%
+%%%%% It thus somewhat generalises the exposition in the paper                                  %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+map JoinStateClosure: RichSpec -> List(State) -> List(State);
+    JoinStateClosure_: RichSpec -> Bool -> List(State) # List(State) -> List(State);
+var
+  spec: RichSpec;
+  l,l',l'': List(State);
+  s,s': State;
+  b: Bool;
+eqn
+  JoinStateClosure(spec)(l) = JoinStateClosure_(spec)(true)(ss_js(States(StateMachine(spec))),l);
+  JoinStateClosure_(spec)(true)([],l') = l';
+  JoinStateClosure_(spec)(false)([],l') = JoinStateClosure_(spec)(true)(list_minus_state( ss_js(States(StateMachine(spec))),l'),l');
+  subset(Joins(StateMachine(spec))(s),l')  -> JoinStateClosure_(spec)(b)(s|>l,l') = JoinStateClosure_(spec)(false)(l,s|>l');
+  !subset(Joins(StateMachine(spec))(s),l') -> JoinStateClosure_(spec)(b)(s|>l,l') = JoinStateClosure_(spec)(b)(l,l');
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% END EXECUTION STATE VALIDITY AND UPDATE %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% INITIAL EXECUTION STATE %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+map INIT: RichSpec -> List(State);
+    INIT_: RichSpec -> List(State) -> List(State);
+var
+  spec: RichSpec;
+  l: List(State);
+  s: State;
+eqn
+  INIT(spec) = sort_states(JoinStateClosure(spec)(INIT_(spec)(Roots(spec))),AllStates(spec));
+  INIT_(spec)([]) = [];
+  (s in EntryStates(StateMachine(spec)))  -> INIT_(spec)(s|>l) = s|>ESDescendants(spec)(s); 
+  !(s in EntryStates(StateMachine(spec))) -> INIT_(spec)(s|>l) = INIT_(spec)(l);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% END INITIAL EXECUTION STATE %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SIMPLE PARALLEL MODEL: FIGURE 1 IN THE ASSOCIATED PAPER %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+sort
+
+CustomType = struct a;
+	OnEvent = struct ev_submit_job | ev_applied_cc | ev_applied_sc | ev_finish_job;
+	DoEvent = struct re_ready;
+	State = struct st_printing | st_cc | st_pre_cc | st_post_cc | st_sc | st_pre_sc | st_post_sc | st_joint_cc_sc | st_idle | st_INTERNAL;
+
+map child_relation : State -> List(State);
+eqn child_relation(st_printing) = [st_cc, st_sc, st_joint_cc_sc];
+	child_relation(st_cc) = [st_pre_cc, st_post_cc];
+	child_relation(st_pre_cc) = [];
+	child_relation(st_post_cc) = [];
+	child_relation(st_sc) = [st_pre_sc, st_post_sc];
+	child_relation(st_pre_sc) = [];
+	child_relation(st_post_sc) = [];
+	child_relation(st_joint_cc_sc) = [];
+	child_relation(st_idle) = [];
+	child_relation(st_INTERNAL) = [];
+
+map transition_relation : State -> List(Transition);
+eqn transition_relation(st_printing) = [];
+	transition_relation(st_cc) = [];
+	transition_relation(st_pre_cc) = [tra(ev_applied_cc, [], st_post_cc)];
+	transition_relation(st_post_cc) = [];
+	transition_relation(st_sc) = [];
+	transition_relation(st_pre_sc) = [tra(ev_applied_sc, [], st_post_sc)];
+	transition_relation(st_post_sc) = [];
+	transition_relation(st_joint_cc_sc) = [tra(ev_finish_job, [], st_idle)];
+	transition_relation(st_idle) = [tra(ev_submit_job, [], st_printing)];
+	transition_relation(st_INTERNAL) = [];
+
+map join_relation : State -> List(State);
+eqn join_relation(st_printing) = [];
+	join_relation(st_cc) = [];
+	join_relation(st_pre_cc) = [];
+	join_relation(st_post_cc) = [];
+	join_relation(st_sc) = [];
+	join_relation(st_pre_sc) = [];
+	join_relation(st_post_sc) = [];
+	join_relation(st_joint_cc_sc) = [st_post_cc, st_post_sc];
+	join_relation(st_idle) = [];
+	join_relation(st_INTERNAL) = [];
+
+map cond_entry_handler : State -> List(Transition);
+eqn cond_entry_handler(st_printing) = [];
+	cond_entry_handler(st_cc) = [];
+	cond_entry_handler(st_pre_cc) = [];
+	cond_entry_handler(st_post_cc) = [];
+	cond_entry_handler(st_sc) = [];
+	cond_entry_handler(st_pre_sc) = [];
+	cond_entry_handler(st_post_sc) = [];
+	cond_entry_handler(st_joint_cc_sc) = [];
+	cond_entry_handler(st_idle) = [];
+	cond_entry_handler(st_INTERNAL) = [];
+
+map other_entry_handler : State -> List(OEH);
+eqn other_entry_handler(st_printing) = [];
+	other_entry_handler(st_cc) = [];
+	other_entry_handler(st_pre_cc) = [];
+	other_entry_handler(st_post_cc) = [];
+	other_entry_handler(st_sc) = [];
+	other_entry_handler(st_pre_sc) = [];
+	other_entry_handler(st_post_sc) = [];
+	other_entry_handler(st_joint_cc_sc) = [];
+	other_entry_handler(st_idle) = [];
+	other_entry_handler(st_INTERNAL) = [];
+
+map exit_handler : State -> List(DoEvent);
+eqn exit_handler(st_printing) = [];
+	exit_handler(st_cc) = [];
+	exit_handler(st_pre_cc) = [];
+	exit_handler(st_post_cc) = [];
+	exit_handler(st_sc) = [];
+	exit_handler(st_pre_sc) = [];
+	exit_handler(st_post_sc) = [];
+	exit_handler(st_joint_cc_sc) = [re_ready];
+	exit_handler(st_idle) = [];
+	exit_handler(st_INTERNAL) = [];
+
+map smmt_spec : Spec;
+eqn smmt_spec = sm(
+	[ev_submit_job, ev_applied_cc, ev_applied_sc, ev_finish_job],
+	[re_ready],
+	states(
+		[st_pre_cc, st_post_cc, st_pre_sc, st_post_sc, st_idle],
+		[st_cc, st_sc],
+		[st_printing],
+		[st_joint_cc_sc]
+	),
+	[st_idle, st_cc, st_pre_cc, st_sc, st_pre_sc],
+	child_relation,
+	transition_relation,
+	join_relation,
+	cond_entry_handler,
+	other_entry_handler,
+	exit_handler
+);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% END OF SIMPLE PARALLEL MODEL: FIGURE 1 IN THE ASSOCIATED PAPER %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% AUXILIARY DEFINITIONS %%%
+%%% List Interaction      %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+map subset : List(State) # List(State) -> Bool;
+var s : State;
+	ls, ls' : List(State);
+eqn subset([], ls') = true;
+	!(s in ls') -> subset(s |> ls, ls') = false;
+	(s in ls') -> subset(s |> ls, ls') = subset(ls, ls');
+
+map get_unique : List(State) -> List(State);
+var S : List(State);
+eqn get_unique(S) = get_unique_helper(S, []);
+
+map get_unique_helper : List(State) # List(State) -> List(State);
+var s : State;
+	ls1, ls2 : List(State);
+eqn get_unique_helper([], ls2) = [];
+ (s in ls2) ->  get_unique_helper(s |> ls1, ls2) = get_unique_helper(ls1,ls2);
+!(s in ls2) ->  get_unique_helper(s |> ls1, ls2) = s|> get_unique_helper(ls1,s |> ls2);
+
+map list_minus_state : List(State) # List(State) -> List(State);
+var s : State;
+	ls1, ls2 : List(State);
+eqn list_minus_state([], ls2) = [];
+	!(s in ls2) -> list_minus_state(s |> ls1, ls2) = s |> list_minus_state(ls1, ls2);
+	(s in ls2) -> list_minus_state(s |> ls1, ls2) = list_minus_state(ls1, ls2);
+
+map list_minus_doevent : List(DoEvent) # DoEvent -> List(DoEvent);
+var d, d' : DoEvent;
+	ld : List(DoEvent);
+eqn list_minus_doevent([], d') = [];
+	d != d' -> list_minus_doevent(d |> ld, d') = d |> list_minus_doevent(ld, d');
+	d == d' -> list_minus_doevent(d |> ld, d') = list_minus_doevent(ld, d');
+
+map ft : List(Transition) -> List(Transition);
+var t : Transition;
+	lt : List(Transition);
+eqn ft([]) = [];
+	(target(t) != st_INTERNAL) -> ft(t |> lt) = t |> ft(lt);
+	(target(t) == st_INTERNAL) -> ft(t |> lt) = ft(lt);
+
+map sort_states : List(State) # List(State) -> List(State);
+var s : State;
+	ls, ex : List(State);
+eqn sort_states(ex, []) = [];
+	s in ex -> sort_states(ex, s |> ls) = s |> sort_states(ex, ls);
+	!(s in ex) -> sort_states(ex, s |> ls) = sort_states(ex, ls);
+
+map list_union : List(State) # List(State) -> List(State);
+var ls, ls' : List(State);
+	s : State;
+eqn list_union(ls, ls') = get_unique(ls ++ ls');
+
+map list_intersect : List(State) # List(State) -> List(State);
+var ls, ls' : List(State);
+	s : State;
+eqn list_intersect([], ls') = [];
+	(s in ls') -> list_intersect(s |> ls, ls') = s |> list_intersect(ls, ls');
+	!(s in ls') -> list_intersect(s |> ls, ls') = list_intersect(ls, ls');
+
+map overlap : List(State) # List(State) -> Bool;
+var s : State;
+	ls, ls' : List(State);
+eqn overlap([], ls') = false;
+	(s in ls') -> overlap(s |> ls, ls') = true;
+	!(s in ls') -> overlap(s |> ls, ls') = overlap(ls, ls');
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% END AUXILIARY DEFINITIONS %%%
+%%% List Interaction          %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% MAIN PROCESS                %%%
+%%% A simple LPE-like structure %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+act FAIL; 
+
+proc F = FAIL.F();
+
+act action,fail: OnEvent; 
+
+proc SM(sp: RichSpec, PEX: List(State))
+=
+  sum ev:OnEvent. (PotentiallyExecutable(sp)(ev)(PEX) && ActiveSupport(sp)(ev)(PEX) != [] && validity(sp)(PEX) ) -> 
+   (sum l:List(State). (l == Get_Targets(sp)(ev)(ActiveSupport(sp)(ev)(PEX))) ->
+                     (consistent_states(sp)(Ancestor_closure(sp)(Get_Targets(sp)(ev)(ActiveSupport(sp)(ev)(PEX)))) ->  action(ev). SM(sp, Execution_State_Update(sp)(PEX)(l))
+                                                                                       <> action(ev).F))
+  <> action(ev).F
++
+  (!validity(sp)(PEX)) -> FAIL. SM()
+;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% INITIALISATION                 %%%
+%%% smmt_rich_spec is the concrete %%%
+%%% SMMT model that is passed to   %%%
+%%% process SM                     %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+init SM(smmt_rich_spec, INIT(smmt_rich_spec));

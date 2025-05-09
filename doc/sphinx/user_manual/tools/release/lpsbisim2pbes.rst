@@ -15,3 +15,5 @@ A precise definition of the construction of the PBES can be found in [CBPW07]_.
 .. [CBPW07] T. Chen, B. Ploeger, J. van de Pol, and T. A. C. Willemse:
    Equivalence Checking for Infinite Systems using Parameterized Boolean
    Equation Systems, in CONCUR 2007, vol. 4703 of LNCS, pp. 120–135.
+
+.. mcrl2_manual:: lpsbisim2pbes

@@ -33,10 +33,12 @@
 #include "mcrl2/lts/detail/liblts_ready_sim.h"
 #include "mcrl2/lts/detail/liblts_failures_refinement.h"
 #include "mcrl2/lts/detail/liblts_coupledsim.h"
+#include "mcrl2/lts/detail/liblts_impossible_futures.h"
 #include "mcrl2/lts/detail/tree_set.h"
 #include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_preorder.h"
 #include "mcrl2/lts/sigref.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -874,7 +876,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
 {
   switch (pre)
   {
-    case lts_pre_sim:
+    case lts_preorder::lts_pre_sim:
     {
       // Merge this LTS and l and store the result in this LTS.
       // In the resulting LTS, the initial state i of l will have the
@@ -892,7 +894,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
 
       return sp.in_preorder(l1.initial_state(),init_l2);
     }
-    case lts_pre_ready_sim:
+    case lts_preorder::lts_pre_ready_sim:
     {
       // Merge this LTS and l and store the result in this LTS.
       // In the resulting LTS, the initial state i of l will have the
@@ -910,7 +912,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
 
       return rsp.in_preorder(l1.initial_state(),init_l2);
     }
-    case lts_pre_trace:
+    case lts_preorder::lts_pre_trace:
     {
       // Preprocessing: reduce modulo strong bisimulation equivalence.
       // This is not strictly necessary, but may reduce time/memory
@@ -929,9 +931,9 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       detail::bisimulation_reduce_dnj(l2,false);
 
       // Trace preorder now corresponds to simulation preorder
-      return destructive_compare(l1, l2, lts_pre_sim, generate_counter_example, counter_example_file, structured_output, strategy);
+      return destructive_compare(l1, l2, lts_preorder::lts_pre_sim, generate_counter_example, counter_example_file, structured_output, strategy);
     }
-    case lts_pre_weak_trace:
+    case lts_preorder::lts_pre_weak_trace:
     {
       // Eliminate silent steps of first LTS
       detail::bisimulation_reduce_dnj(l1,true,false);
@@ -942,9 +944,9 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       detail::tau_star_reduce(l2);
 
       // Weak trace preorder now corresponds to strong trace preorder
-      return destructive_compare(l1, l2, lts_pre_trace, generate_counter_example, counter_example_file, structured_output, strategy);
+      return destructive_compare(l1, l2, lts_preorder::lts_pre_trace, generate_counter_example, counter_example_file, structured_output, strategy);
     }
-    case lts_pre_trace_anti_chain:
+    case lts_preorder::lts_pre_trace_anti_chain:
     {
       if (generate_counter_example)
       {
@@ -953,7 +955,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       }
       return destructive_refinement_checker(l1, l2, refinement_type::trace, false, strategy, preprocess);
     }
-    case lts_pre_weak_trace_anti_chain:
+    case lts_preorder::lts_pre_weak_trace_anti_chain:
     {
       if (generate_counter_example)
       {
@@ -962,7 +964,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       }
       return destructive_refinement_checker(l1, l2, refinement_type::trace, true, strategy, preprocess);
     }
-    case lts_pre_failures_refinement:
+    case lts_preorder::lts_pre_failures_refinement:
     {
       if (generate_counter_example)
       {
@@ -971,7 +973,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       }
       return destructive_refinement_checker(l1, l2, refinement_type::failures, false, strategy, preprocess);
     }
-    case lts_pre_weak_failures_refinement:
+    case lts_preorder::lts_pre_weak_failures_refinement:
     {
       if (generate_counter_example)
       {
@@ -980,7 +982,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       }
       return destructive_refinement_checker(l1, l2, refinement_type::failures, true, strategy, preprocess);
     }
-    case lts_pre_failures_divergence_refinement:
+    case lts_preorder::lts_pre_failures_divergence_refinement:
     {
       if (generate_counter_example)
       {
@@ -988,6 +990,14 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
         return destructive_refinement_checker(l1, l2, refinement_type::failures_divergence, true, strategy, preprocess, cec);
       }
       return destructive_refinement_checker(l1, l2, refinement_type::failures_divergence, true, strategy, preprocess);
+    }
+    case lts_preorder::lts_pre_impossible_futures:
+    {
+      return detail::destructive_impossible_futures(l1, l2, strategy);
+    }
+    case lts_preorder::lts_pre_none:
+    {
+      throw new mcrl2::runtime_error("Expected a valid preorder");
     }
     default:
       mCRL2log(log::error) << "Comparison for this preorder is not available\n";

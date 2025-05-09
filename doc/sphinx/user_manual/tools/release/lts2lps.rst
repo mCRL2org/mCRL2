@@ -18,3 +18,5 @@ the process.
    and has no action declarations, these must be provided separately. Only the .lts
    format contains such information. There are several ways to provide this extra
    required info, see the `-D`, `-l` and `-m` options.
+
+.. mcrl2_manual:: lts2lps
