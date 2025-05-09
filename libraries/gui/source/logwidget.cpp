@@ -17,7 +17,7 @@ void LogRelay::output(const log_level_t level,
                       const std::string& msg, 
                       const bool /* print_time_information */)
 {
-  emit logMessage(QString::fromStdString(log_level_to_string(level)),
+  emit logMessage(QString::fromStdString(log_level_to_string(level).data()),
                   QDateTime::fromSecsSinceEpoch(timestamp), 
                   QString::fromStdString(msg));
 }

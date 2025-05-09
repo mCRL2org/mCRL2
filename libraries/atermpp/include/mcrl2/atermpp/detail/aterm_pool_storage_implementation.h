@@ -11,12 +11,11 @@
 #define MCRL2_ATERMPP_ATERM_POOL_STORAGE_IMPLEMENTION_H
 #pragma once
 
-#include <type_traits>
-#include <cstring>
 #include "mcrl2/utilities/stack_array.h"
 #include "mcrl2/atermpp/detail/aterm_pool.h"
 
-
+#include <type_traits>
+#include <cstring>
 
 namespace atermpp
 {
@@ -32,11 +31,8 @@ template<std::size_t N,
          typename std::enable_if<std::is_convertible<
                                     typename std::invoke_result<TermConverter, typename InputIterator::value_type>::type,
                                     aterm>::value, void>::type* = nullptr>
-inline std::array<unprotected_aterm_core, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
-{
-  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
-  mcrl2::utilities::mcrl2_unused(end);
- 
+inline std::array<unprotected_aterm_core, N> construct_arguments(InputIterator it, [[maybe_unused]] InputIterator end, TermConverter converter)
+{ 
   // Copy the arguments into this array.
   std::array<unprotected_aterm_core, N> arguments;
   for (size_t i = 0; i < N; ++i)
@@ -62,11 +58,8 @@ template<std::size_t N,
                                                                 typename InputIterator::value_type&,
                                                                 typename InputIterator::value_type>::type,
                                     void>::value, void>::type* = nullptr>
-inline std::array<unprotected_aterm_core, N> construct_arguments(InputIterator it, InputIterator end, TermConverter converter)
-{
-  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
-  mcrl2::utilities::mcrl2_unused(end);
- 
+inline std::array<unprotected_aterm_core, N> construct_arguments(InputIterator it, [[maybe_unused]] InputIterator end, TermConverter converter)
+{ 
   // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
   std::array<unprotected_aterm_core, N> arguments;
   for (size_t i = 0; i < N; ++i)
@@ -130,9 +123,9 @@ ATERM_POOL_STORAGE::aterm_pool_storage(aterm_pool& pool) :
 ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::add_deletion_hook(function_symbol sym, term_callback callback)
 {
-  for (const auto& hook : m_deletion_hooks)
+  for ([[maybe_unused]] 
+    const auto& hook : m_deletion_hooks)
   {
-    mcrl2::utilities::mcrl2_unused(hook);
     assert(hook.first != sym);
   }
   m_deletion_hooks.emplace_back(sym, callback);
@@ -252,11 +245,9 @@ bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
                                         const function_symbol& symbol,
                                         TermConverter converter,
                                         InputIterator it,
+                                        [[maybe_unused]] // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
                                         InputIterator end)
-{
-  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
-  mcrl2::utilities::mcrl2_unused(end);
- 
+{ 
   MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm_core, symbol.arity());
   for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
@@ -282,11 +273,9 @@ bool ATERM_POOL_STORAGE::create_appl_dynamic(aterm& term,
                                              const function_symbol& symbol,
                                              TermConverter converter,
                                              InputIterator it,
+                                             [[maybe_unused]] // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
                                              InputIterator end)
-{
-  // The end is only used for debugging to ensure that the arity and std::distance(it, end) match.
-  mcrl2::utilities::mcrl2_unused(end);
- 
+{ 
   MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm_core, symbol.arity());
   for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
