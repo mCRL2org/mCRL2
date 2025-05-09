@@ -7,8 +7,30 @@
 from dataclasses import dataclass
 from typing import List, Union
 from typeguard import typechecked
+from enum import Enum
 
 from .data_expression import Variable, DataExpression
+
+class QuantifierType(Enum):
+    FORALL = "forall"
+    EXISTS = "exists"
+
+class UnaryOperatorType(Enum):
+    NOT = "!"
+
+class BinaryOperatorType(Enum):
+    AND = "&&"
+    OR = "||"
+    IMPLIES = "=>"
+    EQUAL = "=="
+    NOT_EQUAL = "!="
+
+class FixpointType(Enum):
+    """
+    Represents two fixpoint types in PBES equations.
+    """
+    MU = "mu"  # Least fixpoint
+    NU = "nu"  # Greatest fixpoint
 
 @typechecked
 @dataclass(frozen=True)
@@ -47,12 +69,12 @@ class Equation:
     """
     Represents an equation in a PBES.
     """
-    sigma: str
+    sigma: FixpointType
     var: PredicateVariable
     formula: Union[DataExpression, PropositionalVariable]
 
     def __repr__(self) -> str:
-        return f"{self.sigma} {self.var} = {self.formula};"
+        return f"{self.sigma.value} {self.var} = {self.formula};"
 
 
 @typechecked
@@ -75,11 +97,11 @@ class UnaryOperator:
     """
     Represents a unary operator applied to a term.
     """
-    op: str
+    op: UnaryOperatorType
     x: Union[DataExpression, PropositionalVariable]
 
     def __repr__(self) -> str:
-        return f"{self.op}({self.x})"
+        return f"{self.op.value}({self.x})"
 
 
 @typechecked
@@ -88,13 +110,12 @@ class BinaryOperator:
     """
     Represents a binary operator applied to two terms.
     """
-    op: str
+    op: BinaryOperatorType
     x: Union[DataExpression, PropositionalVariable]
     y: Union[DataExpression, PropositionalVariable]
 
     def __repr__(self) -> str:
-        return f"({self.x}) {self.op} ({self.y})"
-
+        return f"({self.x}) {self.op.value} ({self.y})"
 
 @typechecked
 @dataclass(frozen=True)
@@ -102,9 +123,9 @@ class Quantifier:
     """
     Represents a quantifier (forall or exists) applied to a formula.
     """
-    quantifier: str
+    quantifier: QuantifierType
     x: str  # the bound variable
     y: Union[DataExpression, PropositionalVariable]  # the formula
 
     def __repr__(self) -> str:
-        return f"{self.quantifier} {self.x}.({self.y})"
+        return f"{self.quantifier.value} {self.x}.({self.y})"
