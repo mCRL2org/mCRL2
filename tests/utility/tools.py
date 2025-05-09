@@ -160,10 +160,17 @@ class Tool(object):
 
 
     def execute(self, timeout, memlimit, verbose):
-        args = self.arguments()
-        name = os.path.join(self.toolpath, self.name)
+        args = []
+        if self.name.endswith('.py'):
+            # If it is a python script then the toolpath is the Python interpreter.
+            args = [self.name]
+            name = self.toolpath
+        else:
+            name = os.path.join(self.toolpath, self.name)
         if verbose:
             print('Executing ' + ' '.join([name] + args + self.args))
+            
+        args.extend(self.arguments())
 
         process = RunProcess(name, args + self.args, memlimit, timeout)
    
@@ -301,7 +308,7 @@ class LtscompareTool(Tool):
         return args
 
 class ToolFactory(object):
-    def create_tool(self, label, name, toolpath, input_nodes, output_nodes, args):
+    def create_tool(self, label, name, toolpath, input_nodes, output_nodes, args, python_path):
         if name in ['lps2pbes', 'lps2pres']:
             return Lps2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2pbes':
@@ -319,6 +326,6 @@ class ToolFactory(object):
         elif name == 'ltscompare':
             return LtscompareTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'ltscombine_naive.py':
-            return Tool(label, name, os.path.join(os.path.abspath(os.path.dirname(__file__)), '../scripts/'), input_nodes, output_nodes, args)
+            return Tool(label, os.path.join(os.path.abspath(os.path.dirname(__file__)), '../scripts/', name), python_path, input_nodes, output_nodes, [] + args)
     
         return Tool(label, name, toolpath, input_nodes, output_nodes, args)
