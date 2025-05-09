@@ -21,7 +21,7 @@ foreach(type "random" "regression")
     set(EXTRA_ARGS "${EXTRA_ARGS};-r 10")
   endif()
 
-  execute_process(COMMAND ${Python_EXECUTABLE} ${testrunner} --names ${EXTRA_ARGS}
+  execute_process(COMMAND ${Python_EXECUTABLE} ${testrunner} --names ${EXTRA_ARGS} --python ${Python_EXECUTABLE}
     WORKING_DIRECTORY ${WORKSPACE}
     OUTPUT_VARIABLE available_tests
     OUTPUT_STRIP_TRAILING_WHITESPACE
