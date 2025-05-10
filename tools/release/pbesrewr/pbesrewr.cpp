@@ -8,12 +8,14 @@
 //
 /// \file pbesrewr.cpp
 
+#include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/pbes_rewriter_tool.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
 #include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/tools/pbesrewr.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -34,7 +36,7 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
     std::set<pbes_system::pbes_rewriter_type> available_rewriters() const override
     {
       std::set<pbes_system::pbes_rewriter_type> result = super::available_rewriters();
-      result.insert(pbes_system::quantifier_one_point);
+      result.insert(pbes_system::pbes_rewriter_type::quantifier_one_point);
       return result;
     }
 

@@ -79,7 +79,7 @@ public:
           expr = disj;
         }
       }
-      m_condition = data::sort_bool::not_(atermpp::down_cast<data::data_expression>(pbes2data(cond)));
+      m_condition = data::sort_bool::not_(pbes2data(cond));
     }
     else if(is_and(expr))
     {
@@ -96,7 +96,7 @@ public:
           expr = conj;
         }
       }
-      m_condition = atermpp::down_cast<data::data_expression>(pbes2data(cond));
+      m_condition = pbes2data(cond);
     }
     else
     {
@@ -189,7 +189,7 @@ public:
     {
       // Set the equation to disjunctive to prevent negation of simple_formula
       m_is_conjunctive = false;
-      simple_formula = atermpp::down_cast<data::data_expression>(pbes2data(rhs));
+      simple_formula = pbes2data(rhs);
     }
     else if(is_and(rhs))
     {
@@ -200,7 +200,7 @@ public:
       {
         if(is_simple_expression(expr))
         {
-          data::data_expression data_expr = atermpp::down_cast<data::data_expression>(pbes2data(expr));
+          data::data_expression data_expr = pbes2data(expr);
           optimized_and(simple_formula, simple_formula, data_expr);
         }
         else
@@ -224,7 +224,7 @@ public:
       {
         if(is_simple_expression(expr))
         {
-          data::data_expression data_expr = atermpp::down_cast<data::data_expression>(pbes2data(expr));
+          data::data_expression data_expr = pbes2data(expr);
           optimized_or(simple_formula, simple_formula, data_expr);
         }
         else
