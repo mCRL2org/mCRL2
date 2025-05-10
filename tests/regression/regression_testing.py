@@ -140,6 +140,7 @@ def main(tests):
     cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
     cmdline_parser.add_argument('-o', '--output', dest='output', metavar='o', action='store', help='Run the tests in the given directory')
     cmdline_parser.add_argument('-e', '--experimental', dest='experimental', action='store_true', help='Run regression tests using experimental tools.')
+    cmdline_parser.add_argument('-i', '--python', dest='python', action='store', help='Sets the path to the Python interpreter that is used.')
 
     args = cmdline_parser.parse_args()
     if args.names:

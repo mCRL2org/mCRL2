@@ -3,11 +3,11 @@
 Testing
 =======
 
-For tests can be run the python packages yaml and psutil need to be installed. 
+For tests can be run the python packages listed in `requirements.txt` need to be installed. 
 
 * This can be done using pip as follows:
 
-   pip install pyyaml psutil
+   pip install -r requirements.txt
 
 Before executing tests, make sure that your build has been configured
 with the value of ``MCRL2_ENABLE_TESTS`` set to ``YES`` and that
