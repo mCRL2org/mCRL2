@@ -43,12 +43,7 @@ public:
 
         for (auto&& assignment : assignments)
         {
-            assert(it != m_process_parameters.end());
-            if (data::is_variable(assignment.rhs()) && m_global_variables.count(atermpp::down_cast<data::variable>(assignment.rhs())) > 0)
-            {
-
-            }
-            else
+            if (!data::is_variable(assignment.rhs()) || m_global_variables.count(atermpp::down_cast<data::variable>(assignment.rhs())) == 0)
             {
                 // Otherwise, keep the global variable assignment
                 result_assignments.emplace_back(assignment);
