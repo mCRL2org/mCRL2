@@ -187,8 +187,8 @@ ProcExpr
   | DataExprUnit IfThen ProcExpr                       $right 4  // If-then-else operator
   | ProcExpr '<<' ProcExpr                              $left 5  // Until operator
   | ProcExpr '.' ProcExpr                              $right 6  // Sequential composition operator
-  | ProcExpr '@' DataExprUnit                          $left  7  // At operator
-  | ProcExpr '|' ProcExpr                              $left  8  // Communication merge
+  | ProcExpr '@' DataExprUnit                           $left 7  // At operator
+  | ProcExpr '|' ProcExpr                               $left 8  // Communication merge
   ;
 
 // Process expressions that do not contain if expressions.
@@ -210,7 +210,7 @@ ProcExprNoIf
   | ProcExprNoIf '||_' ProcExprNoIf                        $right 3  // Leftmerge operator
   | DataExprUnit IfThen ProcExprNoIf                       $right 4  // If-then-else operator
   | ProcExprNoIf '<<' ProcExprNoIf                          $left 5  // Until operator
-  | ProcExprNoIf '.' ProcExprNoIf                           $left 6  // Sequential composition operator
+  | ProcExprNoIf '.' ProcExprNoIf                          $right 6  // Sequential composition operator
   | ProcExprNoIf '@' DataExprUnit                           $left 7  // At operator
   | ProcExprNoIf '|' ProcExprNoIf                           $left 8  // Communication merge
   ;
