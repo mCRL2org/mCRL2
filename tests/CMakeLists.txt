@@ -39,7 +39,7 @@ foreach(type "random" "regression")
 
     add_test(NAME ${targetname}
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/workspace
-             COMMAND ${Python_EXECUTABLE} ${testrunner} ${EXTRA_ARGS} --toolpath ${MCRL2_TOOL_PATH} --pattern ${testname})
+             COMMAND ${Python_EXECUTABLE} ${testrunner} ${EXTRA_ARGS} --toolpath ${MCRL2_TOOL_PATH} --pattern ${testname} --python ${Python_EXECUTABLE})
     set_tests_properties(${targetname} PROPERTIES LABELS ${type})
   endforeach()
 endforeach()
