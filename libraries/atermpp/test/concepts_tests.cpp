@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file concepts.cpp
-/// \brief Demonstraties the usage of the algorithms library.
+/// \brief Demonstrates the usage of the algorithms library.
 
 #include "mcrl2/atermpp/function_symbol.h"
 #define BOOST_TEST_MODULE aterm_concepts_test
