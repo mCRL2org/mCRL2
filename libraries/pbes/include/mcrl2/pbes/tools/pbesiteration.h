@@ -43,8 +43,6 @@ struct pbesiteration_options
   bool smt = false;
 };
 
-
-
 void substitute(pbes_equation& into,
     const pbes_equation& by,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
@@ -57,7 +55,8 @@ void substitute(pbes_equation& into,
 }
 
 data::data_expression pbestodata(pbes_equation& equation,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>& replace_substituter)
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
+        replace_substituter)
 {
   pbes_expression expr;
   replace_substituter.set_forward(true);
@@ -82,7 +81,8 @@ enum class InvResult
 // Equation should be in full form.
 InvResult global_invariant_check(pbes_equation& equation,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>& replace_substituter,
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
+        replace_substituter,
     data::data_specification data_spec,
     simplify_data_rewriter<data::rewriter> pbes_rewriter,
     std::set<data::variable>& global_variables)
@@ -222,7 +222,8 @@ InvResult global_invariant_check(pbes_equation& equation,
 
 void perform_iteration(pbes_equation& equation,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>& replace_substituter,
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
+        replace_substituter,
     data::data_specification data_spec,
     bool use_smt)
 {
@@ -266,7 +267,16 @@ void perform_iteration(pbes_equation& equation,
     replace_substituter.reset_variable_list();
     data::data_expression eq_data = pbestodata(eq, replace_substituter);
     data::data_expression p_data = pbestodata(p_eq, replace_substituter);
-    data::data_expression formula = data::and_(data::imp(eq_data, p_data), data::imp(p_data, eq_data));
+    data::data_expression formula;
+    // Due to mononicity, only one way implication needs to be tested
+    if (equation.symbol().is_nu())
+    {
+      formula = data::imp(eq_data, p_data);
+    }
+    else
+    {
+      formula = data::imp(p_data, eq_data);
+    }
 
     if (use_smt)
     {
@@ -320,7 +330,8 @@ struct pbesiteration_pbes_fixpoint_iterator
     simplify_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_rewriter);
 
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder> replace_substituter(pbes_rewriter);
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>
+        replace_substituter(pbes_rewriter);
 
     for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
     {
