@@ -18,7 +18,10 @@
 #include "mcrl2/lts/state_space_generator.h"
 #include "mcrl2/process/merge_action_specifications.h"
 
+#include <condition_variable>
 #include <chrono>
+#include <cstddef>
+#include <mutex>
 #include <queue>
 
 using state_t = std::size_t;
@@ -43,7 +46,7 @@ public:
 /// \param syncs The list of synchronisations
 /// \param actions The list of actions to be matched.
 /// \returns The index of the matching synchronisation, or max value when no matching synchronisation is found.
-size_t get_sync(std::vector<core::identifier_string_list>& syncs, core::identifier_string_list& action_names)
+size_t get_sync(const std::vector<core::identifier_string_list>& syncs, const core::identifier_string_list& action_names)
 {
   // A synchronising action must consist of two or more action labels
   if (action_names.size() < 2)
@@ -83,7 +86,7 @@ core::identifier_string_list sorted_action_name_list(const process::action_list&
 /// \param blocks The list of blocked actions.
 /// \param actions The list of actions to be checked.
 /// \returns Whether the list of actions contains a blocked action.
-bool is_blocked(std::vector<core::identifier_string> blocks, process::action_list actions)
+bool is_blocked(const std::vector<core::identifier_string>& blocks, const process::action_list& actions)
 {
   // tau actions can not be blocked
   if (actions.empty() || blocks.empty())
@@ -116,7 +119,7 @@ bool is_blocked(std::vector<core::identifier_string> blocks, process::action_lis
 /// \param actions The list of actions to be matched.
 /// \returns Whether the list of actions is matched by an allowed multi-action
 ///          from the list of allowed multi-actions.
-bool is_allowed(const std::vector<core::identifier_string_list>& allowed, core::identifier_string_list& action_names)
+bool is_allowed(const std::vector<core::identifier_string_list>& allowed, const core::identifier_string_list& action_names)
 {
   // If the list is empty, all actions are allowed
   // tau actions are always allowed
@@ -141,10 +144,10 @@ bool is_allowed(const std::vector<core::identifier_string_list>& allowed, core::
 ///
 /// \param tau_actions The action names to be hidden.
 /// \param label The existing action label.
-void hide_actions(const std::vector<core::identifier_string>& tau_actions, lps::multi_action* label)
+void hide_actions(const std::vector<core::identifier_string>& tau_actions, lps::multi_action& label)
 {
   process::action_vector new_multi_action;
-  for (const process::action& a : label->actions())
+  for (const process::action& a : label.actions())
   {
     if (std::find_if(tau_actions.begin(),
             tau_actions.end(),
@@ -154,7 +157,8 @@ void hide_actions(const std::vector<core::identifier_string>& tau_actions, lps::
       new_multi_action.push_back(a);
     }
   }
-  *label = lps::multi_action(process::action_list(new_multi_action.begin(), new_multi_action.end()));
+  
+  label = lps::multi_action(process::action_list(new_multi_action.begin(), new_multi_action.end()));
 }
 
 /// \brief Checks whether the arguments of each of the actions of the
@@ -222,6 +226,7 @@ public:
   }
 };
 
+/// \brief A thread that computes the states of the LTS.
 class state_thread
 {
 public:
@@ -242,94 +247,82 @@ public:
   {}
 
   void operator()(lts::lts_builder* lts_builder,
-      std::queue<std::size_t>* queue,
-      lts::detail::progress_monitor* progress_monitor,
-      mcrl2::utilities::indexed_set<std::vector<state_t>>* states,
-      std::size_t* number_of_threads,
-      std::mutex* lts_builder_mutex,
-      std::mutex* queue_mutex,
-      std::mutex* progress_mutex,
-      std::mutex* states_mutex,
-      bool* completed,
+      std::queue<std::size_t>& queue,
+      lts::detail::progress_monitor& progress_monitor,
+      mcrl2::utilities::indexed_set<std::vector<state_t>>& states,
+      std::size_t number_of_threads,
+      std::mutex& lts_builder_mutex,
+      std::mutex& queue_mutex,
+      std::mutex& progress_mutex,
+      std::mutex& states_mutex,
+      std::condition_variable& queue_cond,
+      std::size_t& busy,
       std::size_t thread_nr)
   {
     while (true)
     {
-      if (compute_state(lts_builder,
+      std::unique_lock<std::mutex> queue_lock(queue_mutex);
+      
+      // Wait if queue is empty but threads are still working
+      while (queue.empty())
+      {
+        busy--;
+        if (busy > 0)
+        {
+          // Some threads are still busy, wait for them to add work
+          queue_cond.wait(queue_lock);
+        }
+        else
+        {
+          // All threads completed and queue is empty, exit
+          return;
+        }
+      }
+      
+      busy++;
+
+      // Process the state
+      compute_state(lts_builder,
               queue,
               progress_monitor,
               states,
               number_of_threads,
               lts_builder_mutex,
-              queue_mutex,
+              queue_lock,
               progress_mutex,
-              states_mutex))
-      {
-        completed[thread_nr] = false;
-        progress_mutex->lock();
-
-        states_mutex->lock();
-        std::size_t state_size = states->size();
-        states_mutex->unlock();
-
-        queue_mutex->lock();
-        std::size_t queue_size = queue->size();
-        queue_mutex->unlock();
-
-
-        progress_monitor->finish_state(state_size, queue_size, *number_of_threads);
-        progress_mutex->unlock();
-      }
-      else
-      {
-        completed[thread_nr] = true;
-        if (std::all_of(completed, completed + *number_of_threads, [](bool b) { return b; }))
-        {
-          break;
-        }
-        // Wait for other threads to finish first run to prevent early shutdown
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      }
+              states_mutex);
     }
   }
 
 private:
-  std::vector<lts::lts_lts_t>& lts;
-  std::vector<core::identifier_string_list>& syncs;
-  std::vector<core::identifier_string>& resulting_actions;
-  std::vector<core::identifier_string>& blocks;
-  std::vector<core::identifier_string>& hiden;
-  std::vector<core::identifier_string_list>& allow;
-  std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
-
-  bool compute_state(lts::lts_builder* lts_builder,
-      std::queue<std::size_t>* queue,
-      lts::detail::progress_monitor* progress_monitor,
-      mcrl2::utilities::indexed_set<std::vector<state_t>>* states,
-      std::size_t* number_of_threads,
-      std::mutex* lts_builder_mutex,
-      std::mutex* queue_mutex,
-      std::mutex* progress_mutex,
-      std::mutex* states_mutex)
+  const std::vector<lts::lts_lts_t>& lts;
+  const std::vector<core::identifier_string_list>& syncs;
+  const std::vector<core::identifier_string>& resulting_actions;
+  const std::vector<core::identifier_string>& blocks;
+  const std::vector<core::identifier_string>& hiden;
+  const std::vector<core::identifier_string_list>& allow;
+  const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
+  
+  /// \returns True iff at least one state was computed.
+  void compute_state(lts::lts_builder* lts_builder,
+      std::queue<std::size_t>& queue,
+      lts::detail::progress_monitor& progress_monitor,
+      mcrl2::utilities::indexed_set<std::vector<state_t>>& states,
+      const std::size_t& number_of_threads,
+      std::mutex& lts_builder_mutex,
+      std::unique_lock<std::mutex>& queue_lock,
+      std::mutex& progress_mutex,
+      std::mutex& states_mutex)
   {
-    queue_mutex->lock();
-    if (queue->empty())
-    {
-      queue_mutex->unlock();
-      return false;
-    }
-
     // Take the next pair from the queue.
-    // std::cout << "oops" << std::endl;
-    std::size_t state_index = queue->front();
+    std::size_t state_index = queue.front();
 
-    states_mutex->lock();
-    std::vector<state_t> state = (*states)[state_index];    
-    states_mutex->unlock();
+    std::unique_lock state_lock(states_mutex);
+    std::vector<state_t> state = states[state_index];    
+    state_lock.unlock();
 
-    queue->pop();
-    queue_mutex->unlock();
-    // std::cout << "huts" << std::endl;
+    queue.pop();
+    queue_lock.unlock();
 
     // List of new outgoing transitions from this state, combined from the states
     // state[0] to state[i]
@@ -447,27 +440,27 @@ private:
         }
 
         // Hide actions in transition label
-        hide_actions(hiden, &new_label);
+        hide_actions(hiden, new_label);
 
-        states_mutex->lock();
+        std::unique_lock state_lock(states_mutex);
         // Add new state
-        const auto [new_state, inserted] = states->insert(combo.second);
-        states_mutex->unlock();
+        const auto [new_state, inserted] = states.insert(combo.second);
+        state_lock.unlock();
+
         if (inserted)
         {
-          queue_mutex->lock();
-          queue->push(new_state);
-          queue_mutex->unlock();
+          queue_lock.lock();          
+          queue.push(new_state);
+          queue_lock.unlock();
         }
 
         // Add the transition with the remaining actions
-        progress_mutex->lock();
-        progress_monitor->examine_transition();
-        progress_mutex->unlock();
+        std::unique_lock progress_lock(progress_mutex);
+        progress_monitor.examine_transition();
+        progress_lock.unlock();
 
-        lts_builder_mutex->lock();
-        lts_builder->add_transition(state_index, new_label, new_state, *number_of_threads);
-        lts_builder_mutex->unlock();
+        std::unique_lock builder_lock(lts_builder_mutex);
+        lts_builder->add_transition(state_index, new_label, new_state, number_of_threads);
       }
       else
       {
@@ -482,31 +475,29 @@ private:
         }
 
         // Hide actions in transition label
-        hide_actions(hiden, &combo.first);
+        hide_actions(hiden, combo.first);
 
         // Add new state
-        states_mutex->lock();
-        const auto [new_state, inserted] = states->insert(combo.second);
-        states_mutex->unlock();
+        states_mutex.lock();
+        const auto [new_state, inserted] = states.insert(combo.second);
+        states_mutex.unlock();
         if (inserted)
         {
-          queue_mutex->lock();
-          queue->push(new_state);
-          queue_mutex->unlock();
+          queue_lock.lock();
+          queue.push(new_state);
+          queue_lock.unlock();
         }
 
         // Add the transition with the remaining actions
-        progress_mutex->lock();
-        progress_monitor->examine_transition();
-        progress_mutex->unlock();
+        progress_mutex.lock();
+        progress_monitor.examine_transition();
+        progress_mutex.unlock();
 
-        lts_builder_mutex->lock();
-        lts_builder->add_transition(state_index, combo.first, new_state, *number_of_threads);
-        lts_builder_mutex->unlock();
+        lts_builder_mutex.lock();
+        lts_builder->add_transition(state_index, combo.first, new_state, number_of_threads);
+        lts_builder_mutex.unlock();
       }
     }
-
-    return true;
   }
 };
 
@@ -571,25 +562,29 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   std::mutex progress_mutex;
   std::mutex states_mutex;
 
+  // Used to signal busy and empty queue.
+  std::condition_variable queue_cond;
+  std::size_t busy = nr_of_threads;
+
   std::vector<std::thread> threads;
-  bool* completed = new bool[nr_of_threads];
-  std::fill(completed, completed + nr_of_threads, false);
 
   for (size_t i = 0; i < nr_of_threads; i++)
   {
     state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow, outgoing_transitions);
-    threads.emplace_back(std::thread(thread,
-        lts_builder,
-        &queue,
-        &progress_monitor,
-        &states,
-        &nr_of_threads,
-        &builder_mutex,
-        &queue_mutex,
-        &progress_mutex,
-        &states_mutex,
-        completed,
-        i));
+    threads.emplace_back(std::thread([&]  {
+          thread(lts_builder,
+            queue,
+            progress_monitor,
+            states,
+            nr_of_threads,
+            builder_mutex,
+            queue_mutex,
+            progress_mutex,
+            states_mutex,
+            queue_cond,
+            busy,
+            i);
+        }));
   }
 
   for (size_t i = 0; i < nr_of_threads; i++)
