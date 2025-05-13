@@ -16,6 +16,7 @@ ${declare subparser ProcExpr}
 
 //--- Sort expressions and sort declarations
 
+
 SortExpr
   : 'Bool'                                                       // Booleans
   | 'Pos'                                                        // Positive numbers
@@ -30,7 +31,7 @@ SortExpr
   | Id                                                           // Sort reference
   | '(' SortExpr ')'                                             // Sort expression with parentheses
   | 'struct' ConstrDeclList                                      // Structured sort
-  | SortExpr '->' SortExpr                             $right 0  // Function sort
+  | SortExpr '->' SortExpr                             $right 0  // Function sort (book encodes priorities of '#' and '->' in the rules)
   | SortExpr '#' SortExpr                               $left 1  // Product sort
   ;
 
@@ -182,13 +183,13 @@ ProcExpr
   | 'sum' VarsDeclList '.' ProcExpr                    $right 2  // Sum operator
   | 'dist' VarsDeclList '[' DataExpr ']' '.' ProcExpr  $right 2  // Distribution operator
   | ProcExpr '||'  ProcExpr                            $right 3  // Parallel operator
-  | ProcExpr '||_' ProcExpr                            $right 3  // Leftmerge operator
-  | DataExprUnit '->' ProcExpr                         $right 4  // If-then operator
-  | DataExprUnit IfThen ProcExpr                       $right 4  // If-then-else operator
-  | ProcExpr '<<' ProcExpr                              $left 5  // Until operator
-  | ProcExpr '.' ProcExpr                              $right 6  // Sequential composition operator
-  | ProcExpr '@' DataExprUnit                           $left 7  // At operator
-  | ProcExpr '|' ProcExpr                               $left 8  // Communication merge
+  | ProcExpr '||_' ProcExpr                            $right 4  // Leftmerge operator
+  | DataExprUnit '->' ProcExpr                         $right 5  // If-then operator
+  | DataExprUnit IfThen ProcExpr                       $right 5  // If-then-else operator
+  | ProcExpr '<<' ProcExpr                              $left 6  // Until operator
+  | ProcExpr '.' ProcExpr                              $right 7  // Sequential composition operator
+  | ProcExpr '@' DataExprUnit                           $left 8  // At operator
+  | ProcExpr '|' ProcExpr                               $left 9  // Communication merge
   ;
 
 // Process expressions that do not contain if expressions.
@@ -207,12 +208,12 @@ ProcExprNoIf
   | 'sum' VarsDeclList '.' ProcExprNoIf                    $right 2  // Sum operator
   | 'dist' VarsDeclList '[' DataExpr ']' '.' ProcExprNoIf  $right 2  // Distribution operator
   | ProcExprNoIf '||'  ProcExprNoIf                        $right 3  // Parallel operator
-  | ProcExprNoIf '||_' ProcExprNoIf                        $right 3  // Leftmerge operator
-  | DataExprUnit IfThen ProcExprNoIf                       $right 4  // If-then-else operator
-  | ProcExprNoIf '<<' ProcExprNoIf                          $left 5  // Until operator
-  | ProcExprNoIf '.' ProcExprNoIf                          $right 6  // Sequential composition operator
-  | ProcExprNoIf '@' DataExprUnit                           $left 7  // At operator
-  | ProcExprNoIf '|' ProcExprNoIf                           $left 8  // Communication merge
+  | ProcExprNoIf '||_' ProcExprNoIf                        $right 4  // Leftmerge operator (has priority 3 in book, but that is inconsistent with ProcExpr)
+  | DataExprUnit IfThen ProcExprNoIf                       $right 5  // If-then-else operator
+  | ProcExprNoIf '<<' ProcExprNoIf                          $left 6  // Until operator
+  | ProcExprNoIf '.' ProcExprNoIf                          $right 7  // Sequential composition operator
+  | ProcExprNoIf '@' DataExprUnit                           $left 8  // At operator
+  | ProcExprNoIf '|' ProcExprNoIf                           $left 9  // Communication merge
   ;
 
 IfThen
@@ -259,7 +260,7 @@ mCRL2SpecElt
   | ProcSpec                                                     // Process specification
   ;
 
-//BesInit: 'init' BesVar ';' ;                                     // Initial BES variable
+//BesInit: 'init' BesVar ';' ;                                   // Initial BES variable
 //
 //--- Parameterized Boolean equation systems
 
@@ -282,6 +283,8 @@ PbesInit: 'init' PropVarInst ';' ;                               // Initial PBES
 
 DataValExpr: 'val' '(' DataExpr ')' $left 20 ;                   // Marked data expression
 
+// BesSpec has been removed
+
 PbesExpr
   :
   DataValExpr                                                    // Boolean data expression
@@ -289,8 +292,8 @@ PbesExpr
   | 'true'                                                       // True
   | 'false'                                                      // False
   | Id ( '(' DataExprList ')' )?                                 // Instantiated PBES variable or data application
-  | 'forall' VarsDeclList '.' PbesExpr                $right  1  // Universal quantifier
-  | 'exists' VarsDeclList '.' PbesExpr                $right  1  // Existential quantifier
+  | 'forall' VarsDeclList '.' PbesExpr                $right  0  // Universal quantifier
+  | 'exists' VarsDeclList '.' PbesExpr                $right  0  // Existential quantifier
   | PbesExpr '=>'  PbesExpr                           $right  2  // Implication
   | PbesExpr '||'  PbesExpr                           $right  3  // Disjunction
   | PbesExpr '&&'  PbesExpr                           $right  4  // Conjunction
@@ -317,9 +320,9 @@ PresExpr
   | 'eqninf' '(' PresExpr ')'                                    // Equal to infinity
   | 'condsm' '(' PresExpr ',' PresExpr ',' PresExpr ')'          // Conditional smaller than 0 with or. 
   | 'condeq' '(' PresExpr ',' PresExpr ',' PresExpr ')'          // Conditional smaller equal 0 with and. 
-  | 'inf' VarsDeclList '.' PresExpr                   $right  1  // Infimum operator
-  | 'sup' VarsDeclList '.' PresExpr                   $right  1  // Supremum operator
-  | 'sum' VarsDeclList '.' PresExpr                   $right  1  // Sum operator
+  | 'inf' VarsDeclList '.' PresExpr                   $right  0  // Infimum operator
+  | 'sup' VarsDeclList '.' PresExpr                   $right  0  // Supremum operator
+  | 'sum' VarsDeclList '.' PresExpr                   $right  0  // Sum operator
   | PresExpr '+' PresExpr                             $right  2  // Addition
   | PresExpr '=>' PresExpr                            $right  3  // Implication
   | PresExpr '||' PresExpr                            $right  4  // Disjunction
@@ -338,8 +341,8 @@ ActFrm
   | '(' ActFrm ')'                                               // Brackets
   | 'true'                                                       // True
   | 'false'                                                      // False
-  | 'forall' VarsDeclList '.' ActFrm                  $right  1  // Universal quantifier
-  | 'exists' VarsDeclList '.' ActFrm                  $right  1  // Existential quantifier
+  | 'forall' VarsDeclList '.' ActFrm                  $right  0  // Universal quantifier
+  | 'exists' VarsDeclList '.' ActFrm                  $right  0  // Existential quantifier
   | ActFrm '=>' ActFrm                                $right  2  // Implication
   | ActFrm '||' ActFrm                                $right  3  // Union of actions
   | ActFrm '&&' ActFrm                                $right  4  // Intersection of actions
@@ -354,8 +357,8 @@ RegFrm
   | '(' RegFrm ')'                                               // Brackets
   | RegFrm '+'  RegFrm                                 $left  1  // Alternative composition
   | RegFrm '.'  RegFrm                                $right  2  // Sequential composition
-  | RegFrm '*'                                         $left  3  // Iteration
-  | RegFrm '+'                                         $left  3  // Nonempty iteration
+  | RegFrm '*'                                         $left  3  // Iteration (must be $left because that is the non-terminal)
+  | RegFrm '+'                                         $left  3  // Nonempty iteration (must be $left because that is the non-terminal)
   ;
 
 //--- State formula specification
@@ -377,7 +380,7 @@ StateFrmSpecElt
 
 
 StateFrm
-  : DataValExpr                                                  // Boolean data expression
+  : DataValExpr                                                  // Boolean data expression (no priority, is not ambiguous)
   | '(' StateFrm ')'                                             // Brackets
   | 'true'                                                       // True
   | 'false'                                                      // False
@@ -429,7 +432,7 @@ IdList: Id ( ',' Id )* ;                                         // List of iden
 
 Id: "[A-Za-z_][A-Za-z_0-9']*" $term -1 ;                         // Identifier
 
-Number: "0|([1-9][0-9]*)" $term -1 ;                             // Number
+Number: "0|([1-9][0-9]*)" $term -1 ;                             // Positive number
 
 //--- Whitespace
 
