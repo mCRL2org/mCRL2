@@ -14,6 +14,7 @@ set(MCRL2_TOOLS
   pbesiteration
   pbespareqelm
   pbespor
+  pbespathreduction
   pbessymbolicbisim
   presconstelm
   presinfo
