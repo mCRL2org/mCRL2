@@ -146,8 +146,9 @@ void binary_aterm_ostream::put(const aterm& term)
         if (!is_output)
         {
           // Only regular terms (not output) are shared and as such need a unique index.
+          [[maybe_unused]]
           bool assigned = m_terms.insert(current.term).second;
-          assert(assigned); mcrl2_unused(assigned); // This term should have a new index assigned.
+          assert(assigned); // This term should have a new index assigned.
           m_term_index_width = static_cast<std::uint8_t>(std::log2(m_terms.size()) + 1);
         }
 

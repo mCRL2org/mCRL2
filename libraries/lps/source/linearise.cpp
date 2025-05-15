@@ -1320,7 +1320,7 @@ class specification_basic_type
       const std::set < variable >& vars_set,
       std::set < variable >& vars_result_set)
     {
-      const data_expression_list& l=atermpp::container_cast<data_expression_list>(parameters);
+      const auto& l= parameters | std::views::transform([](const variable& v) { return atermpp::down_cast<data_expression>(v); });
       filter_vars_by_termlist(l.begin(),l.end(),vars_set,vars_result_set);
       for (const assignment& a: assignments)
       {
