@@ -38,6 +38,7 @@ class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
       super::parse_options(parser);
       m_options.check_global_invariant = parser.has_option("check-global-invariant");
       m_options.smt = parser.has_option("smt");
+      m_options.early_stopping = parser.has_option("early-stopping");
     }
 
     void add_options(interface_description& desc) override
@@ -47,6 +48,9 @@ class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
                   "check in nu-formulae if the core constraint is a global invariant for each equation (slow)", 'g');
       desc.add_option("smt",
                   "use SMT-based fixpoint checking instead of EQ-BDD-based checking (limited support)", 's');
+      desc.add_option("early-stopping",
+                  "stop early based on the initial state data parameters", 'e');
+
     }
 
   public:
