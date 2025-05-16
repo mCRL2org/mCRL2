@@ -31,6 +31,38 @@ struct pbespathreduction_options
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
 };
 
+// Substitutor to target specific path, replace our specific pvi with true/false
+template <template <class> class Builder>
+struct substitute_propositional_variables_for_true_false_builder
+    : public Builder<substitute_propositional_variables_for_true_false_builder<Builder>>
+{
+  typedef Builder<substitute_propositional_variables_for_true_false_builder<Builder>> super;
+  using super::apply;
+
+  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  propositional_variable_instantiation m_pvi;
+  pbes_expression m_replacement;
+
+  explicit substitute_propositional_variables_for_true_false_builder(
+      simplify_quantifiers_data_rewriter<data::rewriter>& r)
+      : m_pbes_rewriter(r)
+  {}
+
+  void set_pvi(const propositional_variable_instantiation x) { m_pvi = x; }
+  void set_replacement(const pbes_expression x) { m_replacement = x; }
+
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
+  {
+    if (x == m_pvi)
+    {
+      result = m_replacement;
+    } else {
+      result = x;
+    }
+  }
+};
+
 template <template <class> class Builder>
 struct substitute_propositional_variables_builder : public Builder<substitute_propositional_variables_builder<Builder>>
 {
@@ -40,10 +72,12 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
   pbes_equation m_eq;
   core::identifier_string name;
   simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder> m_pvi_substituter;
   bool m_stable = false;
 
   explicit substitute_propositional_variables_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
-      : m_pbes_rewriter(r)
+      : m_pbes_rewriter(r),
+        m_pvi_substituter(r)
   {}
 
   void set_stable(bool b) { m_stable = b; }
@@ -75,7 +109,21 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
       }
       pbes_expression p = pbes_rewrite(m_eq.formula(), m_pbes_rewriter, sigma);
       std::set<propositional_variable_instantiation> set = find_propositional_variable_instantiations(p);
-      std::set<propositional_variable_instantiation> original_set = find_propositional_variable_instantiations(m_eq);
+
+      if (auto it = set.find(x); it != set.end())
+      {
+        mCRL2log(log::debug) << "Need to replace this with true/false" << pp(x) << "\n";
+        mCRL2log(log::debug) << p << "\n";
+
+        // pbes_expression p_;
+        m_pvi_substituter.set_pvi(x);
+        m_pvi_substituter.set_replacement(m_eq.symbol().is_nu() ? true_() : false_());
+        m_pvi_substituter.apply(p, p);
+
+        mCRL2log(log::debug) << p << "\n";
+
+        mCRL2log(log::debug) << "- - - - - - - - - - - - - - - - - - - - \n";
+      }
       if (set.size() <= 1)
       {
         // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler.
