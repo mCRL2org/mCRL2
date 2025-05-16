@@ -181,9 +181,11 @@ static void test_regex1()
 
   stochastic_specification spec = lps::linearise(SPEC);
   // This should rename a_out and ac_out, leaving the rest
+std::cerr << "ACTION LABESL1 " << pp(spec.action_labels()) << "\n";
   stochastic_specification new_spec = action_rename(std::regex("^([^b]*)_out"), "out_$1", spec);
 
   BOOST_CHECK(check_well_typedness(new_spec));
+std::cerr << "ACTION LABESL2 " << pp(new_spec.action_labels()) << "\n";
   BOOST_CHECK(std::string(new_spec.action_labels().front().name()) == "out_a");
   BOOST_CHECK(std::string(new_spec.action_labels().tail().front().name()) == "b_out");
   BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().front().name()) == "cout");
@@ -191,7 +193,7 @@ static void test_regex1()
   BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().tail().tail().front().name()) == "out_ac");
 
   BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "out_a|ab_out"; }));
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "ab_out|out_a"; }));
   BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
                               [](const action_summand& as){ return lps::pp(as.multi_action()) == "b_out"; }));
   BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),

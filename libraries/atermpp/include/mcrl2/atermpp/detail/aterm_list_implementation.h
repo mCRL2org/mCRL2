@@ -181,6 +181,86 @@ term_list<Term> sort_list(const term_list<Term>& l,
 
 template <typename Term>
 inline
+term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l, 
+                             const std::function<bool(const Term&, const Term&)>& ordering 
+                                  /* = [](const Term& t1, const Term& t2){ return t1<t2;}*/ )
+{
+  if (l.empty() || ordering(t,l.front()))
+  {
+    return insert(t,l);
+  }
+  
+  const std::size_t len = l.size();
+ 
+  // The resulting list
+  term_list<Term> result=l;
+
+  if (len < LengthOfShortList)
+  {
+    // The list is short, use the stack for temporal storage.
+    Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
+
+    // Collect all elements of list in buffer.
+    std::size_t j=0;
+    while (!result.empty())
+    {
+      if (ordering(t,l.front()))
+      {
+        break;
+      }
+      else
+      {
+        new (buffer+j) Term(result.front()); // A mcrl2 stack allocator does not handle construction by default. 
+        result.pop_front();
+        ++j;
+      }
+    }
+    
+    result.push_front(t);
+
+    // Insert elements at the front of the list.
+    while (j>0)
+    {
+      j=j-1;
+      result.push_front(buffer[j]);
+      buffer[j].~Term();    // Explicitly call the destructor, as an mCRL2 stack allocator does not do that itself. . 
+    }
+  }
+  else
+  {
+    // The list is long. Use the heap to store intermediate data.
+    std::vector<Term> buffer;
+    buffer.reserve(len);
+
+    while (!result.empty())
+    {
+      if (ordering(t,l.front()))
+      {
+        break;
+      }
+      else
+      {
+        buffer.push_back(result.front());
+        result.pop_front();
+      }
+    }
+
+    result.push_front(t);
+
+    // Insert elements at the front of the list
+    for (typename std::vector<Term>::reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
+    {
+      result.push_front(*i);
+    }
+  }
+  assert(result.size()==len+1);
+  assert(is_sorted(result,ordering));
+  return result;
+}
+
+
+template <typename Term>
+inline
 term_list<Term> merge_lists(const term_list<Term>& l1, 
                             const term_list<Term>& l2,
                             const std::function<bool(const Term&, const Term&)>& ordering 
@@ -190,12 +270,12 @@ term_list<Term> merge_lists(const term_list<Term>& l1,
   const std::size_t len2 = l2.size();
   if (len1==0)
   {
-    assert(l2==sort_list(l2,ordering));
+    assert(is_sorted(l2,ordering));
     return l2;
   }
   if (len2==0)
   {
-    assert(l1==sort_list(l1,ordering));
+    assert(is_sorted(l1,ordering));
     return l1;
   }
 
@@ -279,7 +359,7 @@ term_list<Term> merge_lists(const term_list<Term>& l1,
     }
   }
   assert(result.size()==len1+len2);
-  assert(result==sort_list(result,ordering));
+  assert(is_sorted(result,ordering));
   return result; 
 }
 

@@ -795,19 +795,23 @@ stochastic_specification action_rename(
   for(const process::action_label& act: lps_old_spec.action_labels())
   {
     process::action_label new_action_label(detail::rename_action_label(act, matching_regex, replacing_fmt));
+// std::cerr << "NEW ACTION LABEL " << new_action_label << "\n";
     if (std::string(new_action_label.name()).empty())
     {
       throw mcrl2::runtime_error("After renaming the action " + std::string(act.name()) + " becomes empty, which is not allowed.");
     }
-    if(std::string(new_action_label.name()) != "delta" && std::string(new_action_label.name()) != "tau" &&
+    if (std::string(new_action_label.name()) != "delta" && std::string(new_action_label.name()) != "tau" &&
         new_actions_set.find(new_action_label) == new_actions_set.end())
     {
+//std::cerr << "INSERTED " << new_action_label << "\n";
       // The list of actions should not contain delta and tau actions and also no duplicates.
       new_actions_set.insert(new_action_label);
       new_actions.push_front(new_action_label);
     }
   }
+// std::cerr << "NEW ACTIONS IN " << pp(new_actions) << "\n";
   new_actions = reverse(new_actions);
+// std::cerr << "NEW ACTIONS OUT " << pp(new_actions) << "\n";
 
   // The list of new actions summands is initially empty
   std::vector<stochastic_action_summand> new_action_summands;
@@ -838,6 +842,7 @@ stochastic_specification action_rename(
     if(!becomes_deadlock_summand)
     {
       new_action_list = reverse(new_action_list);
+      // new_action_list = sort_list(new_action_list);
       multi_action new_multi_action(new_action_list, as.multi_action().time());
 
       // Copy most of the old information, only the multi action has changed

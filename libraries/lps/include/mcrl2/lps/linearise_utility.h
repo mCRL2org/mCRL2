@@ -81,6 +81,8 @@ lps_statistics_t get_statistics(const stochastic_action_summand_vector& action_s
   return statistics;
 }
 
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+
 struct action_name_compare
 {
   bool operator()(const core::identifier_string& s1, const core::identifier_string& s2) const

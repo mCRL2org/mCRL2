@@ -318,6 +318,7 @@ class lts: public LTS_BASE
      *          these are set to the default action label. */
     void set_num_action_labels(const labels_size_type n)
     {
+// std::cerr << "SEt NUMBER OF ACTION LABELS " << n << " m_action_labels.size() " << m_action_labels.size()  << "\n";
       m_action_labels.resize(n);
       assert(m_action_labels.size()>0 && m_action_labels[const_tau_label_index]==ACTION_LABEL_T::tau_action());
     } 
@@ -369,6 +370,7 @@ class lts: public LTS_BASE
      * \return The number of the added label. */
     labels_size_type add_action(const ACTION_LABEL_T& label)
     {
+// std::cerr << "ADD ACTION LABEL " << label << " m_action_labels.size() " << m_action_labels.size()  << "\n";
       if (label==ACTION_LABEL_T::tau_action())
       {
         return const_tau_label_index;
@@ -376,6 +378,7 @@ class lts: public LTS_BASE
       assert(std::find(m_action_labels.begin(),m_action_labels.end(),label)==m_action_labels.end()); // Action labels must be unique. 
       const labels_size_type label_index=m_action_labels.size();
       m_action_labels.push_back(label);
+// std::cerr << "ADD ACTION LABEL INDEX " << label_index << "\n";
       return label_index;
     }
 
@@ -410,6 +413,7 @@ class lts: public LTS_BASE
      
     void set_action_label(const labels_size_type action, const ACTION_LABEL_T& label)
     {
+// std::cerr << "SET ACTION LABEL " << label << "   " << action << "\n";
       assert(action<m_action_labels.size());
       assert((action==const_tau_label_index) == (label==ACTION_LABEL_T::tau_action())); // a tau action is always stored at index 0.
       assert(m_action_labels[action] == label ||

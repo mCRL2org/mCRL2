@@ -60,6 +60,7 @@ void run_linearisation_instance(const std::string& spec, const t_lin_options& op
   lps::stochastic_specification s=linearise(spec, options);
   BOOST_CHECK(s != lps::stochastic_specification());
 
+std::cerr << "STATESPECY " << s << "\n";
   lts::lts_aut_t result = translate_lps_to_lts<lts::lts_aut_t>(s);
   BOOST_CHECK(lts::compare(result, expected_statespace, lts::lts_eq_bisim));
 }

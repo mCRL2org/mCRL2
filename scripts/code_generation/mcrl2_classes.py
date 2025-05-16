@@ -172,7 +172,7 @@ stochastic_process_initializer(const data::data_expression_list& expressions, co
 '''
 
 PROCESS_CLASSES = r'''
-action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                       : public atermpp::aterm | CI   | ActId              | An action label
+action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                       : public atermpp::aterm | CIU  | ActId              | An action label
 process_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SMW | ProcSpec    | A process specification
 process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm | CIUs | ProcVarId          | A process identifier
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm | CI   | ProcEqn            | A process equation
@@ -184,7 +184,7 @@ untyped_multi_action(const data::untyped_data_parameter_list& actions)          
 
 PROCESS_EXPRESSION_CLASSES = r'''
 process_expression()                                                                                                                    : public atermpp::aterm              | XIC | ProcExpr                 | A process expression
-action(const action_label& label, const data::data_expression_list& arguments)                                                          : public process::process_expression | EIC | Action                   | An action
+action(const action_label& label, const data::data_expression_list& arguments)                                                          : public process::process_expression | EICU | Action                   | An action
 process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)                             : public process::process_expression | EI  | Process                  | A process
 process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)                             : public process::process_expression | EI  | ProcessAssignment        | A process assignment
 delta()                                                                                                                                 : public process::process_expression | EI  | Delta                    | The value delta

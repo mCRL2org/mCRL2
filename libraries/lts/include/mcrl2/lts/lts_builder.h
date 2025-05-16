@@ -40,15 +40,18 @@ struct lts_builder
     m_actions.emplace(std::make_pair(tau, m_actions.size()));
   }
 
-  std::size_t add_action(const lps::multi_action& a)
+  bool add_action(const lps::multi_action& a)
   {
-    lps::multi_action sorted_multi_action(a.sort_actions());
+    assert(is_sorted(a.actions()));
+    return m_actions.emplace(std::make_pair(a,m_actions.size())).first->second;
+
+    /* lps::multi_action sorted_multi_action(a.sort_actions());
     auto i = m_actions.find(sorted_multi_action);
     if (i == m_actions.end())
     {
       i = m_actions.emplace(std::make_pair(sorted_multi_action, m_actions.size())).first;
     }
-    return i->second;
+    return i->second; */
   }
 
   // Add a transition to the LTS

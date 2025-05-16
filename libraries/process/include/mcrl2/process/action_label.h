@@ -63,6 +63,31 @@ class action_label: public atermpp::aterm
     {
       return atermpp::down_cast<data::sort_expression_list>((*this)[1]);
     }
+//--- start user section action_label ---//
+    bool operator<(const action_label& other) const  // compare on the action label string instead of its address.
+    {
+      if (name()==other.name())
+      {
+        return sorts()<other.sorts();
+      }
+      return static_cast<std::string>(name())<static_cast<std::string>(other.name());
+    }
+
+    bool operator<=(const action_label& other) const
+    {
+      return !(other<*this);
+    }
+
+    bool operator>(const action_label& other) const
+    {
+      return other< *this;
+    }
+
+    bool operator>=(const action_label& other) const
+    {
+      return other<= *this;
+    }
+//--- end user section action_label ---//
 };
 
 /// \\brief Make_action_label constructs a new term into a given address.

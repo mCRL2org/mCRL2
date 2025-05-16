@@ -7,7 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/multi_action.h
-/// \brief Multi-action class.
+/// \brief Multi-action class. Multi-actions are internally sorted on the action labels.
+///        They are not sorted on their arguments. 
 
 #ifndef MCRL2_LPS_MULTI_ACTION_H
 #define MCRL2_LPS_MULTI_ACTION_H
@@ -50,8 +51,10 @@ class multi_action: public atermpp::aterm
     /// \brief Constructor
     explicit multi_action(const process::action_list& actions = process::action_list(), 
                           data::data_expression time = data::undefined_real())
-      : atermpp::aterm(core::detail::function_symbol_TimedMultAct(), actions, time)
+      : atermpp::aterm(core::detail::function_symbol_TimedMultAct(), atermpp::sort_list(actions), time)
     {
+// std::cerr << "ARG ACTIONS1 " << pp(actions) << "\n";
+// std::cerr << "NEW ACTIONS2 " << pp(this->actions()) << "\n";
       assert(data::sort_real::is_real(time.sort()));
     }
 
@@ -61,6 +64,9 @@ class multi_action: public atermpp::aterm
       : atermpp::aterm(term)
     {
       assert(core::detail::check_term_TimedMultAct(*this));
+      assert(atermpp::is_sorted<process::action>(actions(),
+                                                 [](const process::action& a1, const process::action& a2)
+                                                            { return a1.label()<a2.label();}));
     }
 
     /// \brief Constructor
@@ -80,22 +86,22 @@ class multi_action: public atermpp::aterm
     multi_action operator+(const multi_action& other) const
     {
       assert(time() == other.time());
-      return multi_action(actions() + other.actions(), time());
+      return multi_action(merge_lists(actions(),other.actions()), time());
     }
 
     /// \brief Returns the multiaction in which the list of actions is sorted. 
     /// \return A multi-action with a sorted list.
-    multi_action sort_actions() const
+    /* multi_action sort_actions() const
     {
       return multi_action(atermpp::sort_list(actions()),time());
-    }
+    }  */
 
     bool operator==(const multi_action& other) const
     {
       return time()==other.time() && atermpp::sort_list(actions())==atermpp::sort_list(other.actions());
     }
-
-   //--- end user section multi_action ---//
+   
+//--- end user section multi_action ---//
 };
 
 /// \\brief Make_multi_action constructs a new term into a given address.

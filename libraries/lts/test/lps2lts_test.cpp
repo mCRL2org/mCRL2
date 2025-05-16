@@ -113,8 +113,8 @@ void check_lts(
   BOOST_CHECK_EQUAL(result.num_states(), expected_states);
   BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
   BOOST_CHECK_EQUAL(result.num_action_labels(), expected_labels);
-
-  std::remove(outputfile.c_str());
+std::cerr << "OUTPUFILE REMOVE NEXT LINE " << outputfile << "\n";
+  // std::remove(outputfile.c_str());
 }
 
 static void check_lps2lts_specification(const std::string& specification,

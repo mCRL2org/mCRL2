@@ -173,6 +173,18 @@ class action: public process_expression
     {
       return atermpp::down_cast<data::data_expression_list>((*this)[1]);
     }
+//--- start user section action ---//
+
+    bool operator<(const action& other) const
+    {
+      if (label()==other.label())
+      {
+        return arguments()<other.arguments();
+      }
+      return label()<other.label();
+    }
+
+//--- end user section action ---//
 };
 
 /// \\brief Make_action constructs a new term into a given address.
