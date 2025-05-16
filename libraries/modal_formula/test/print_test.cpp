@@ -65,4 +65,6 @@ BOOST_AUTO_TEST_CASE(test_abp)
   run_test_case("exists d: Nat. val(d < 0)", lpsspec);
   run_test_case("exists d: Nat. val(d < 0) || val(d + 1 == 5)", lpsspec);
   run_test_case("mu X. X || val(3 > 2)", lpsspec);  // Check whether val is printed properly after a fixed point without parameters. 
+  run_test_case("<true . true @ 5>true",lpsspec);   // This formula was parsed as (true.true)@5 at some point, which was clearly incorrect. 
+
 }
