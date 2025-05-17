@@ -61,7 +61,6 @@ bool is_timed(const state_formula& x)
 {
   detail::is_timed_traverser f;
   f.apply(x);
-std::cerr << "Is timed " << atermpp::aterm(x) << "\nRESULT: " << f.result << "\n";
   return f.result;
 }
 
