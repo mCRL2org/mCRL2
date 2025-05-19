@@ -1523,10 +1523,7 @@ class specification_basic_type
           aux_variable_set.erase(v);
         }
         
-        for(const variable& v: aux_variable_set)
-        {
-          free_variables_in_p.insert(v);
-        }
+        free_variables_in_p.insert(aux_variable_set.begin(), aux_variable_set.end());
         return;
       }
 
@@ -1545,10 +1542,7 @@ class specification_basic_type
           aux_variable_set.erase(v);
         }
         
-        for(const variable& v: aux_variable_set)
-        {
-          free_variables_in_p.insert(v);
-        }
+        free_variables_in_p.insert(aux_variable_set.begin(), aux_variable_set.end());
         return;
       }
 
