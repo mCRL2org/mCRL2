@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_UNIFY_PARAMETERS_H
 #define MCRL2_PBES_UNIFY_PARAMETERS_H
 
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/default_expression_generator.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -20,7 +19,6 @@
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include <optional>
-#include <type_traits>
 
 namespace mcrl2 {
 
@@ -46,8 +44,8 @@ struct unify_parameters_replace_function
   // reuse this vector for constructing new parameters
   mutable std::vector<data::data_expression> tmp_parameters;
 
-  // If true then the newly introduced parameters will be reset to a default value instead of copying the value.
-  bool m_reset = true;
+  /// Indicates that instantiations of parameters are reset to a default value.
+  bool m_reset;
 
   data::variable_list compute_parameters()
   {
@@ -71,7 +69,7 @@ struct unify_parameters_replace_function
   unify_parameters_replace_function(
     const std::map<core::identifier_string, data::variable_list>& propositional_variable_parameters_,
     const data::data_specification& dataspec,
-    bool reset = true
+    bool reset
   )
     : propositional_variable_parameters(propositional_variable_parameters_), generator(dataspec), m_reset(reset)
   {
@@ -102,44 +100,7 @@ struct unify_parameters_replace_function
     }
   }
 
-  pbes_expression convert_ce_prop_var(const pbes_expression& x) const
-  {
-    assert(detail::is_ce_propositional_variable_instantiation(x, true));
-    
-    if (is_or(x))
-    {
-      // (phi__.left() && phi__.right()) || phi_.right()
-      const auto& phi_ = atermpp::down_cast<or_>(x);
-      if (is_and(phi_.left()))
-      {      
-        const auto& phi__ = atermpp::down_cast<and_>(phi_.left());
-
-        return or_(and_(operator()(atermpp::down_cast<propositional_variable_instantiation>(phi__.left())), 
-          operator()(atermpp::down_cast<propositional_variable_instantiation>(phi__.right()))), 
-          operator()(atermpp::down_cast<propositional_variable_instantiation>(phi_.right())));
-      }
-    }
-    if (is_and(x))
-    {
-      // (phi__.left() && phi__.right()) || phi_.right()
-      const auto& phi_ = atermpp::down_cast<and_>(x);
-      if (is_or(phi_.left()))
-      {      
-        const auto& phi__ = atermpp::down_cast<or_>(phi_.left());
-
-        return or_(and_(operator()(atermpp::down_cast<propositional_variable_instantiation>(phi__.left())), 
-          operator()(atermpp::down_cast<propositional_variable_instantiation>(phi__.right()))), 
-          operator()(atermpp::down_cast<propositional_variable_instantiation>(phi_.right())));
-      }
-    }
-    else if (is_propositional_variable_instantiation(x))
-    {
-      return operator()(atermpp::down_cast<propositional_variable_instantiation>(x));
-    }
-
-    std::abort();
-  }
-
+  // If `reset` is true then the newly introduced parameters will be reset to a default value instead of copying the value.
   propositional_variable_instantiation operator()(const propositional_variable_instantiation& x) const
   {
     if (detail::is_counter_example_instantiation(x))
@@ -156,6 +117,7 @@ struct unify_parameters_replace_function
       std::size_t pos = parameter_positions[*i];
       tmp_parameters[pos] = *j;
     }
+
     for (const data::variable& v: missing_parameters[variables])
     {
       std::size_t pos = parameter_positions[v];
@@ -169,13 +131,14 @@ struct unify_parameters_replace_function
         tmp_parameters[pos] = v;
       }
     }
+
     return propositional_variable_instantiation(x.name(), data::data_expression_list(tmp_parameters.begin(), tmp_parameters.end()));
   };
 };
 
-/// Unify all parameters of the non counter example related equations.
+/// Unify all parameters of the equations, optionally ignoring the equations related to counter example information.
 inline
-void unify_parameters(pbes& p, bool ignore_ce_equations = true)
+void unify_parameters(pbes& p, bool ignore_ce_equations, bool reset)
 {
   std::map<core::identifier_string, data::variable_list> propositional_variable_parameters;
   for (const pbes_equation& eqn: p.equations())
@@ -187,7 +150,8 @@ void unify_parameters(pbes& p, bool ignore_ce_equations = true)
     }
   }
 
-  unify_parameters_replace_function replace(propositional_variable_parameters, p.data());
+  unify_parameters_replace_function replace(propositional_variable_parameters, p.data(), reset);
+  unify_parameters_replace_function replace_reset(propositional_variable_parameters, p.data(), true);
 
   // update the right hand sides of the equations
   replace_propositional_variables(p, replace);
@@ -209,7 +173,7 @@ void unify_parameters(pbes& p, bool ignore_ce_equations = true)
 
 template<bool allow_ce>
 inline
-void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equations = false, bool reset = true)
+void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equations, bool reset)
 {
   std::map<core::identifier_string, data::variable_list> propositional_variable_parameters;
   for (const auto& eqn: p.equations())
@@ -221,7 +185,6 @@ void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equation
   }
 
   unify_parameters_replace_function replace(propositional_variable_parameters, p.data(), reset);
-
 
   std::size_t N = p.equations().size();
   const auto& false_summand = p.equations()[N - 2].summands().front();
@@ -235,32 +198,20 @@ void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equation
     {
       for (auto& summand: eqn.summands())
       {
-        if constexpr (allow_ce)
-        {
-          summand.variable() = replace.convert_ce_prop_var(summand.variable());
-        }
-        else
-        {
-          summand.variable() = replace(summand.variable());
-        }
+        summand.variable() = replace(summand.variable());
       }
       propositional_variable& X = eqn.variable();
       X = propositional_variable(X.name(), replace.parameters);
     }
-    else {
-      // For counter example equations it is important to unify the X_true and X_false.      
+    else 
+    {
+      // For counter example equations it is important to unify the X_true and X_false, for which we introduce default values because counter example
+      // equations do not have unified parameters.    
       for (auto& summand: eqn.summands())
       {
         if (summand.variable() == false_summand.variable() || summand.variable() == true_summand.variable())
         {
-          if constexpr (allow_ce)
-          {
-            summand.variable() = replace.convert_ce_prop_var(summand.variable());
-          }
-          else
-          {
-            summand.variable() = replace(summand.variable());
-          }
+          summand.variable() = replace_reset(summand.variable());
         }
       }
     }
