@@ -52,7 +52,7 @@ class ppg_visitor
     virtual bool visit_simple_expression(const pbes_expression& e)
     {
       //std::clog << "visit_simple_expression: " << print_brief(e) << std::endl;
-      bool result = is_simple_expression(e);
+      bool result = is_simple_expression(e, true);
       return result;
     }
 

@@ -87,7 +87,7 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
   bool result;
   bool allow_counter_example_variables = false;
 
-  is_simple_expression_traverser(bool allow_counter_example_variables = false)
+  is_simple_expression_traverser(bool allow_counter_example_variables)
     : result(true),
       allow_counter_example_variables(allow_counter_example_variables)
   {}
@@ -108,7 +108,7 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
 /// \param allow_ce If true, counter example information is allowed.
 /// \return true if x is a simple expression.
 template <typename T>
-bool is_simple_expression(const T& x, bool allow_ce = false)
+bool is_simple_expression(const T& x, bool allow_ce)
 {
   is_simple_expression_traverser f(allow_ce);
   f.apply(x);
@@ -120,7 +120,7 @@ bool is_simple_expression(const T& x, bool allow_ce = false)
 /// \return True if it is a disjunction and not a simple expression
 inline bool is_non_simple_disjunct(const pbes_expression& t)
 {
-  return is_pbes_or(t) && !is_simple_expression(t);
+  return is_pbes_or(t) && !is_simple_expression(t, true);
 }
 
 /// \brief Test for a conjunction
@@ -128,7 +128,7 @@ inline bool is_non_simple_disjunct(const pbes_expression& t)
 /// \return True if it is a conjunction and not a simple expression
 inline bool is_non_simple_conjunct(const pbes_expression& t)
 {
-  return is_pbes_and(t) && !is_simple_expression(t);
+  return is_pbes_and(t) && !is_simple_expression(t, true);
 }
 
 /// \brief Splits a disjunction into a sequence of operands.
