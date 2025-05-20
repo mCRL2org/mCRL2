@@ -1,33 +1,80 @@
 #!/usr/bin/env python
 
-#~ Copyright 2012-2017 Wieger Wesselink.
-#~ Distributed under the Boost Software License, Version 1.0.
-#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+# ~ Copyright 2012-2017 Wieger Wesselink.
+# ~ Distributed under the Boost Software License, Version 1.0.
+# ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-class DataExpression(object):
-    def __init__(self):
-        pass
+from dataclasses import dataclass
+from enum import Enum
 
+from typeguard import typechecked
+
+
+class Sort(Enum):
+    """Sorts of data expressions"""
+
+    INT = "Int"
+    NAT = "Nat"
+    BOOL = "Bool"
+
+    def __str__(self) -> str:
+        return self.value
+    
+@typechecked
+@dataclass(frozen=True)
+class DataExpression:
+    """Base class for all data expressions."""
+
+    pass
+
+
+@typechecked
+@dataclass(frozen=True)
 class Variable(DataExpression):
-    def __init__(self, name: str, _type: str = 'Bool'):
-        self.name = name
-        self.type = _type
+    """Represents a named variable with an associated type."""
 
-    def __str__(self):
+    name: str
+    type: Sort
+
+    def __str__(self) -> str:
         return self.name
 
-class Integer(DataExpression):
-    def __init__(self, value: str):
-        self.value = value
-        self.type = 'Int'
+    def parameter(self) -> str:
+        """Returns a "d: D" string representation of the variable."""
+        return f"{self.name}: {self.type}"
 
-    def __str__(self):
+
+@typechecked
+@dataclass(frozen=True)
+class Natural(DataExpression):
+    """Represents an natural number."""
+
+    value: str
+    type: Sort = Sort.NAT
+
+    def __str__(self) -> str:
         return self.value
 
-class Boolean(DataExpression):
-    def __init__(self, value: str):
-        self.value = value
-        self.type = 'Bool'
 
-    def __str__(self):
+@typechecked
+@dataclass(frozen=True)
+class Integer(DataExpression):
+    """Represents an integer."""
+
+    value: str
+    type: Sort = Sort.INT
+
+    def __str__(self) -> str:
+        return self.value
+
+
+@typechecked
+@dataclass(frozen=True)
+class Boolean(DataExpression):
+    """Represents a boolean value."""
+
+    value: str
+    type: Sort = Sort.BOOL
+
+    def __str__(self) -> str:
         return self.value

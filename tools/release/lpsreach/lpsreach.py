@@ -138,7 +138,6 @@ def main():
     cmdline_parser = argparse.ArgumentParser(description='Simple script for experimenting with variable orders.')
     cmdline_parser.add_argument('lpsfile', metavar='FILE', type=str, help='an .lps file')
     cmdline_parser.add_argument('iterations', help="the number of iterations of hill climbing", type=int, default=1000, nargs='?')
-
     cmdline_parser.add_argument('--cached', help="directly passed to lpsreach", action='store_true')
     cmdline_parser.add_argument('--chaining', help="directly passed to lpsreach", action='store_true')
     cmdline_parser.add_argument('--deadlock', help="directly passed to lpsreach", action='store_true')

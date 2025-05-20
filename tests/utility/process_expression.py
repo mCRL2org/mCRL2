@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-#~ Copyright 2012-2017 Wieger Wesselink.
-#~ Distributed under the Boost Software License, Version 1.0.
-#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+# ~ Copyright 2012-2017 Wieger Wesselink.
+# ~ Distributed under the Boost Software License, Version 1.0.
+# ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-#--------------------------------------------------
+# --------------------------------------------------
 # expression                  | #children  | pcrl |
-#--------------------------------------------------
+# --------------------------------------------------
 # Action                      |     0      |  y   |
 # Delta                       |     0      |  y   |
 # Tau                         |     0      |  y   |
@@ -24,33 +24,70 @@
 # Sync                        |     2      |  n   |
 # Merge                       |     2      |  n   |
 # LeftMerge                   |     2      |  n   |
-#--------------------------------------------------
+# --------------------------------------------------
 # unsupported                                     |
-#--------------------------------------------------
+# --------------------------------------------------
 # process_instance_assignment |     0      |  y   |
 # At                          |     1      |  y   |
 # binit                       |     2      |  y   |
 
 import re
+from dataclasses import dataclass
+from typing import NewType
+from enum import Enum
+
+from typeguard import typechecked
+
 from .data_expression import DataExpression, Variable
 
-# example: 'b: Bool'
-def parse_variable(text: str):
+# Type aliases
+ActionName = NewType('ActionName', str)
+
+class ProcessConstant(Enum):
+    TAU = "tau"
+    DELTA = "delta"
+
+class OperatorSymbol(Enum):
+    CHOICE = "+"
+    SEQUENCE = "."
+    BOUNDED_INIT = "<<"
+    LEFT_MERGE = "||_"
+    MERGE = "||"
+    SYNC = "|"
+
+
+@typechecked
+def parse_variable(text: str) -> Variable:
+    """
+    Parse a string representation of a variable with its type.
+    """
     text = text.strip()
-    m = re.match(r'([^,:]+)\s*\:(.+)', text)
+    m = re.match(r"([^,:]+)\s*\:(.+)", text)
     assert m is not None
     result = Variable(m.group(1).strip(), m.group(2).strip())
     return result
 
-# example: 'b: Bool, m: Nat'
+
+@typechecked
 def parse_variables(text: str) -> list[Variable]:
-    variables = map(str.strip, text.split(','))
+    """
+    Parse a comma-separated list of variable declarations.
+    """
+    variables = map(str.strip, text.split(","))
     return list(map(parse_variable, variables))
 
-# example: 'P(m: Nat, b: Bool)'
+
+@typechecked
 class ProcessIdentifier(object):
-    def __init__(self, text: str):
-        m = re.search(r'(\w*)(\(.*\))?', text)
+    """
+    Represents a process identifier with optional parameters.
+    Example: P(m: Nat, b: Bool) represents process P with two parameters.
+    """
+    name: str
+    variables: list[Variable]
+
+    def __init__(self, text: str) -> None:
+        m = re.search(r"(\w*)(\(.*\))?", text)
         assert m is not None
         self.name = m.group(1)
         if m.group(2):
@@ -59,191 +96,305 @@ class ProcessIdentifier(object):
         else:
             self.variables = []
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.variables:
-            return '{}({})'.format(self.name, ', '.join([f'{x}: {x.type}' for x in self.variables]))
+            return f"{self.name}({', '.join(f'{x}: {x.type}' for x in self.variables)})"
         else:
             return self.name
 
+
+@typechecked
 class ProcessExpression(object):
-    pass
+    """Base class for all process expressions in mCRL2."""
+    def __init__(self) -> None:
+        pass
 
+
+@typechecked
+@dataclass(frozen=True)
 class Action(ProcessExpression):
-    def __init__(self, a):
-        self.a = a
+    """Represents a basic action in the process algebra."""
+    a: ActionName
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.a
 
+
+@typechecked
+@dataclass(frozen=True)
 class MultiAction(ProcessExpression):
-    def __init__(self, actions):
-        self.actions = actions
+    """Represents multiple actions that occur simultaneously."""
+    actions: list[ActionName]
 
-    def __eq__(self, other):
-        if type(other) is type(self):
-            return self.__dict__ == other.__dict__
-        return False
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __str__(self):
+    def __str__(self) -> str:
         if len(self.actions) == 0:
-            return 'Tau'
-        return ' | '.join(self.actions)
+            return ProcessConstant.TAU.value
+        return f" {OperatorSymbol.SYNC.value} ".join(self.actions)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(str(self))
 
+
+@typechecked
+@dataclass(frozen=True)
 class Delta(ProcessExpression):
-    def __str__(self):
-        return 'delta'
+    """Represents the deadlock process."""
+    def __str__(self) -> str:
+        return ProcessConstant.DELTA.value
 
+
+@typechecked
+@dataclass(frozen=True)
 class Tau(ProcessExpression):
-    def __str__(self):
-        return 'tau'
+    """Represents the internal (silent) action."""
+    def __str__(self) -> str:
+        return ProcessConstant.TAU.value
 
+
+@typechecked
+@dataclass(frozen=True)
 class ProcessInstance(ProcessExpression):
-    def __init__(self, identifier: ProcessIdentifier, parameters: list[DataExpression]):
-        self.identifier = identifier
-        self.parameters = parameters
+    """
+    Represents a process instantiation with parameters.
+    Example: P(1, true) for a process P with two parameters.
+    """
+    identifier: ProcessIdentifier
+    parameters: list[DataExpression]
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.parameters:
-            return '{}({})'.format(self.identifier.name, ', '.join(map(str, self.parameters)))
-        else:
-            return self.identifier.name
+            return f"{self.identifier.name}({', '.join(map(str, self.parameters))})"
+        
+        return str(self.identifier.name)
 
+
+@typechecked
+@dataclass(frozen=True)
 class Sum(ProcessExpression):
-    def __init__(self, d, x):
-        assert isinstance(d, Variable)
-        self.d = d
-        self.x = x
+    """
+    Represents a sum operator that introduces a variable binding.
+    Example: sum d:D . x
+    """
+    d: Variable
+    x: ProcessExpression
 
-    def __str__(self):
-        return f'sum {self.d}: {self.d.type}. ({self.x})'
+    def __str__(self) -> str:
+        return f"sum {self.d}: {self.d.type}. ({self.x})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class IfThen(ProcessExpression):
-    def __init__(self, c, x):
-        self.x = x
-        self.c = c
+    """
+    Represents a conditional process with one branch.
+    Example: condition -> process
+    """
+    c: DataExpression
+    x: ProcessExpression
 
-    def __str__(self):
-        return f'({self.c}) -> ({self.x})'
+    def __str__(self) -> str:
+        return f"({self.c}) -> ({self.x})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class IfThenElse(ProcessExpression):
-    def __init__(self, c, x, y):
-        self.c = c
-        self.x = x
-        self.y = y
+    """
+    Represents a conditional process with two branches.
+    Example: condition -> process1 <> process2
+    """
+    c: DataExpression
+    x: ProcessExpression
+    y: ProcessExpression
 
-    def __str__(self):
-        return f'({self.c}) -> ({self.x}) <> ({self.y})'
+    def __str__(self) -> str:
+        return f"({self.c}) -> ({self.x}) <> ({self.y})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class BinaryOperator(ProcessExpression):
-    def __init__(self, op, x, y):
-        self.op = op
-        self.x = x
-        self.y = y
+    """Base class for all binary operators in the process algebra."""
+    op: OperatorSymbol
+    x: ProcessExpression
+    y: ProcessExpression
 
-    def __str__(self):
-        x = self.x
-        y = self.y
-        op = self.op
-        return '({}) {} ({})'.format(x, op, y)
+    def __str__(self) -> str:
+        return f"({self.x}) {self.op.value} ({self.y})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class Choice(BinaryOperator):
-    def __init__(self, x, y):
-        super(Choice, self).__init__('+', x, y)
+    """
+    Represents alternative composition (choice) between processes.
+    Example: p + q
+    """
+    def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
+        super().__init__(OperatorSymbol.CHOICE, x, y)
 
+
+@typechecked
+@dataclass(frozen=True)
 class Seq(BinaryOperator):
-    def __init__(self, x, y):
-        super(Seq, self).__init__('.', x, y)
+    """
+    Represents sequential composition of processes.
+    Example: p . q
+    """
+    def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
+        super().__init__(OperatorSymbol.SEQUENCE, x, y)
 
+
+@typechecked
+@dataclass(frozen=True)
 class BoundedInit(BinaryOperator):
-    def __init__(self, x, y):
-        super(BoundedInit, self).__init__('<<', x, y)
+    """
+    Represents bounded initialization between processes.
+    Example: p << q
+    """
+    def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
+        super().__init__(OperatorSymbol.BOUNDED_INIT, x, y)
 
+
+@typechecked
+@dataclass(frozen=True)
 class LeftMerge(BinaryOperator):
-    def __init__(self, x, y):
-        super(LeftMerge, self).__init__('||_', x, y)
+    """
+    Represents left merge parallel composition.
+    Example: p ||_ q
+    """
+    def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
+        super().__init__(OperatorSymbol.LEFT_MERGE, x, y)
 
+
+@typechecked
+@dataclass(frozen=True)
 class Merge(BinaryOperator):
-    def __init__(self, x, y):
-        super(Merge, self).__init__('||', x, y)
+    """
+    Represents parallel composition of processes.
+    Example: p || q
+    """
+    def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
+        super().__init__(OperatorSymbol.MERGE, x, y)
 
+
+@typechecked
+@dataclass(frozen=True)
 class Sync(BinaryOperator):
-    def __init__(self, x, y):
-        super(Sync, self).__init__('|', x, y)
+    """
+    Represents synchronization of processes.
+    Example: p | q
+    """
+    def __init__(self, x: ProcessExpression, y: ProcessExpression) -> None:
+        super().__init__(OperatorSymbol.SYNC, x, y)
 
+
+@typechecked
+@dataclass(frozen=True)
 class At(ProcessExpression):
-    def __init__(self, x, t):
-        self.x = x
-        self.t = t
+    """
+    Represents the at operator for timed processes.
+    Example: p @ t
+    """
+    x: ProcessExpression
+    t: DataExpression
 
-    def __str__(self):
-        x = self.x
-        t = self.t
-        return '({}) @ ({})'.format(x, t)
+    def __str__(self) -> str:
+        return f"({self.x}) @ ({self.t})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class Allow(ProcessExpression):
-    def __init__(self, V, x):
-        self.V = V
-        self.x = x
+    """
+    Represents the allow operator that specifies allowed multi-actions.
+    Example: allow({a|b, c}, p)
+    """
+    V: list[MultiAction]
+    x: ProcessExpression
 
-    def __str__(self):
-        V = self.V
-        x = self.x
-        return 'allow({{{}}}, {})'.format(', '.join(map(str, V)), x)
+    def __str__(self) -> str:
+        return f"allow({{{', '.join(map(str, self.V))}}}, {self.x})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class Block(ProcessExpression):
-    def __init__(self, B, x):
-        self.B = B
-        self.x = x
+    """
+    Represents the block operator that blocks specified actions.
+    Example: block({a, b}, p)
+    """
+    B: list[str]
+    x: ProcessExpression
 
-    def __str__(self):
-        B = self.B
-        x = self.x
-        return 'block({{{}}}, {})'.format(', '.join(B), x)
+    def __str__(self) -> str:
+        return f"block({{{', '.join(self.B)}}}, {self.x})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class Comm(ProcessExpression):
-    def __init__(self, C, x):
-        self.C = C
-        self.x = x
+    """
+    Represents the communication operator for renaming action combinations.
+    Example: comm({a|b -> c}, p)
+    """
+    C: list[str]
+    x: ProcessExpression
 
-    def __str__(self):
-        C = self.C
-        x = self.x
-        return 'comm({{{}}}, {})'.format(', '.join(C), x)
+    def __str__(self) -> str:
+        return f"comm({{{', '.join(self.C)}}}, {self.x})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class Hide(ProcessExpression):
-    def __init__(self, I, x):
-        self.I = I
-        self.x = x
+    """
+    Represents the hide operator that hides specified actions.
+    Example: hide({a, b}, p)
+    """
+    I: list[str]
+    x: ProcessExpression
 
-    def __str__(self):
-        I = self.I
-        x = self.x
-        return 'hide({{{}}}, {})'.format(', '.join(I), x)
+    def __str__(self) -> str:
+        return f"hide({{{', '.join(self.I)}}}, {self.x})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class Rename(ProcessExpression):
-    def __init__(self, R, x):
-        self.R = R
-        self.x = x
+    """
+    Represents the rename operator for renaming actions.
+    Example: rename({a -> b}, p)
+    """
+    R: list[str]
+    x: ProcessExpression
 
-    def __str__(self):
-        x = self.x
-        R = self.R
-        return 'rename({{{}}}, {})'.format(', '.join(R), x)
+    def __str__(self) -> str:
+        return f"rename({{{', '.join(self.R)}}}, {self.x})"
 
+
+@typechecked
+@dataclass(frozen=True)
 class StochasticOperator(ProcessExpression):
-    def __init__(self, v, dist, x):
-        self.v = v
-        self.dist = dist
-        self.x = x
+    """
+    Represents a stochastic operator with a distribution.
+    Example: dist x:Real[dist]. p
+    """
+    v: Variable
+    dist: DataExpression
+    x: ProcessExpression
 
-    def __str__(self):
-        dist = self.dist
-        v = self.v
-        x = self.x
-        return 'dist {}: {}[{}].({})'.format(v, v.type, dist, x)
+    def __str__(self) -> str:
+        return f"dist {self.v}: {self.v.type}[{self.dist}].({self.x})"
+    
+@typechecked
+@dataclass(frozen=True)
+class Literal(ProcessExpression):
+    """
+    Represents a literal process expression.
+    Example: 1
+    """
+    value: str
+
+    def __str__(self) -> str:
+        return self.value

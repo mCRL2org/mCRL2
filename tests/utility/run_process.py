@@ -4,6 +4,7 @@
 # ~ Distributed under the Boost Software License, Version 1.0.
 # ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import os
 import time
 import psutil
 import subprocess
@@ -99,7 +100,8 @@ class RunProcess:
             ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
             subprocess_flags = 0x8000000  # win32con.CREATE_NO_WINDOW?
 
-            tool += ".exe"
+            if not tool.endswith(".exe"):
+                tool += ".exe"
         else:
             subprocess_flags = 0
 

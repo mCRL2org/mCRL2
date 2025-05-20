@@ -16,6 +16,7 @@ import traceback
 # Makes sure that the script can find the modules when ran directly.
 sys.path.append(os.path.join(os.path.dirname(__file__),'../../'))
 
+from tests.utility.process_expression import Literal
 import tests.utility.random_process_expression as random_process_expression
 import tests.utility.random_state_formula_generator as random_state_formula_generator
 from tests.utility.random_bes_generator import make_bes
@@ -72,37 +73,37 @@ class StochasticProcessTest(ProcessTest):
     def __init__(self, name, _ymlfile, settings):
         super(StochasticProcessTest, self).__init__(name, _ymlfile, settings)
         self.process_expression_generators = {
-                               random_process_expression.make_action          : 8,
-                               random_process_expression.make_delta           : 1,
-                               random_process_expression.make_tau             : 1,
-                               random_process_expression.make_process_instance: 2,
-                               random_process_expression.make_sum             : 2,
-                               random_process_expression.make_if_then         : 2,
-                               random_process_expression.make_if_then_else    : 2,
-                               random_process_expression.make_choice          : 5,
-                               random_process_expression.make_seq             : 5,
-                               random_process_expression.make_multi_action    : 1,
-                               random_process_expression.make_dist            : 3,
-                            }
+            random_process_expression.ActionGenerator(): 8,
+            random_process_expression.DeltaGenerator(): 1,
+            random_process_expression.TauGenerator(): 1,
+            random_process_expression.ProcessInstanceGenerator(): 2,
+            random_process_expression.SumGenerator(): 2,
+            random_process_expression.IfThenGenerator(): 2,
+            random_process_expression.IfThenElseGenerator(): 2,
+            random_process_expression.ChoiceGenerator(): 5,
+            random_process_expression.SeqGenerator(): 5,
+            random_process_expression.MultiActionGenerator(): 1,
+            random_process_expression.DistGenerator(): 3,
+        }
 
 # generates random process with higher probability of tau transitions
 class ProcessTauTest(ProcessTest):
     def __init__(self, name, testfile, settings):
         super(ProcessTauTest, self).__init__(name, testfile, settings)
         self.actions = ['a', 'b', 'c']
-        self.init = r'hide({a}, allow({a, b, c}, P || Q || R))'
+        self.init = Literal(r'hide({a}, allow({a, b, c}, P || Q || R))')
         self.process_expression_generators = {
-                               random_process_expression.make_action: 8,
-                               random_process_expression.make_delta: 1,
-                               random_process_expression.make_tau: 4,
-                               random_process_expression.make_process_instance: 1,
-                               random_process_expression.make_sum: 0,
-                               random_process_expression.make_if_then: 0,
-                               random_process_expression.make_if_then_else: 0,
-                               random_process_expression.make_choice: 5,
-                               random_process_expression.make_seq: 5,
-                               random_process_expression.make_multi_action: 1,
-                               random_process_expression.make_dist: 0,
+                        random_process_expression.ActionGenerator(): 8,
+                        random_process_expression.DeltaGenerator(): 1,
+                        random_process_expression.TauGenerator(): 4,
+                        random_process_expression.ProcessInstanceGenerator(): 1,
+                        random_process_expression.SumGenerator(): 0,
+                        random_process_expression.IfThenGenerator(): 0,
+                        random_process_expression.IfThenElseGenerator(): 0,
+                        random_process_expression.ChoiceGenerator(): 5,
+                        random_process_expression.SeqGenerator(): 5,
+                        random_process_expression.MultiActionGenerator(): 1,
+                        random_process_expression.DistGenerator(): 0,
                              }
 
 class AlphabetReduceTest(ProcessTest):
@@ -420,7 +421,7 @@ class BesTest(RandomTest):
         self.term_size = 3
 
     def create_inputfiles(self, runpath = '.'):
-        filename = '{0}.txt'.format(self.name, self.settings)
+        filename = '{0}.txt'.format(self.name)
         p = make_bes(self.equation_count, self.term_size)
         write_text(filename, str(p))
         self.inputfiles += [filename]
@@ -555,6 +556,7 @@ def main():
     cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
     cmdline_parser.add_argument('-o', '--output', dest='output', metavar='o', action='store', help='Run the tests in the given directory')
     cmdline_parser.add_argument('-e', '--experimental', dest='experimental', action='store_true', help='Run random tests using experimental tools.')
+    cmdline_parser.add_argument('-i', '--python', dest='python', action='store', help='Sets the path to the Python interpreter that is used.')
 
     args = cmdline_parser.parse_args()
     tests = available_tests
@@ -565,11 +567,22 @@ def main():
         print_names(tests)
         return
     
+    python_path = None
+    if args.python:
+        # Check if the given path exists
+        python_path = args.python
+    else:
+        python_path = shutil.which("python3")
+    
+    if python_path is None:
+        print("Cannot find python in the PATH environment, and --python was not supplied")
+        sys.exit(-1)
+
     if not args.toolpath:
         print("To run tests the --toolpath argument is required")
         sys.exit(-1)
        
-    settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
+    settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True, 'python_path': python_path}
 
     repeats = range(int(args.repetitions))
 
