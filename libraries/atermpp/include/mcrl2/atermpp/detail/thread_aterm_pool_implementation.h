@@ -138,12 +138,11 @@ void thread_aterm_pool::register_variable(aterm_core* variable)
     m_variables->resize();
   }
 
+[[maybe_unused]]
   auto [it, inserted] = m_variables->insert(variable);
 
   // The variable must be inserted.
   assert(inserted);
-  mcrl2::utilities::mcrl2_unused(it);
-  mcrl2::utilities::mcrl2_unused(inserted);
 }
 
 void thread_aterm_pool::deregister_variable(aterm_core* variable)
@@ -161,12 +160,12 @@ void thread_aterm_pool::register_container(aterm_container* container)
   {
     m_containers->resize();
   }
+
+  [[maybe_unused]]
   auto [it, inserted] = m_containers->insert(container);
   
   // The container must be inserted.
   assert(inserted);
-  mcrl2::utilities::mcrl2_unused(it);
-  mcrl2::utilities::mcrl2_unused(inserted);
 }
 
 void thread_aterm_pool::deregister_container(aterm_container* container)

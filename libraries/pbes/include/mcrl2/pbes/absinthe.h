@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/data/data_expression.h"
 #define MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 
 #include "mcrl2/data/consistency.h"
@@ -22,6 +24,8 @@
 #ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 #include "mcrl2/data/detail/print_parse_check.h"
 #endif
+
+#include <ranges>
 
 namespace mcrl2 {
 
@@ -359,11 +363,12 @@ struct absinthe_algorithm
       data::data_expression q = data::lazy::join_and(z.begin(), z.end());
       if (m_is_over_approximation)
       {
-        result = make_exists_(variables, and_(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
+        result = make_exists_(variables, and_(q, 
+          propositional_variable_instantiation(x.name(), data::data_expression_list(variables))));
       }
       else
       {
-        result = make_forall_(variables, imp(q, propositional_variable_instantiation(x.name(), atermpp::container_cast<data::data_expression_list>(variables))));
+        result = make_forall_(variables, imp(q, propositional_variable_instantiation(x.name(), data::data_expression_list(variables))));
       }
     }
 

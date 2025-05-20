@@ -296,18 +296,14 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     assert(top().check_guards(x, R));
   }
 
-  void leave(const pbes_system::not_& x)
+  void leave( [[maybe_unused]] const pbes_system::not_& x)
   {
-    utilities::mcrl2_unused(x);
-
     top().negate();
     assert(top().check_guards(x, R));
   }
 
-  void leave(const pbes_system::and_& x)
+  void leave( [[maybe_unused]] const pbes_system::and_& x)
   {
-    utilities::mcrl2_unused(x);
-
     guard_expression right = pop();
     guard_expression left = pop();
     pbes_expression new_condition;
@@ -338,10 +334,8 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     assert(top().check_guards(x, R));
   }
 
-  void leave(const pbes_system::or_& x)
+  void leave([[maybe_unused]] const pbes_system::or_& x)
   {
-    utilities::mcrl2_unused(x);
-
     guard_expression right = pop();
     guard_expression left = pop();
     pbes_expression new_condition;
@@ -375,11 +369,9 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     }
     assert(top().check_guards(x, R));
   }
-
-  void leave(const pbes_system::imp& x)
+ 
+  void leave( [[maybe_unused]] const pbes_system::imp& x)
   {
-    utilities::mcrl2_unused(x);
-
     guard_expression right = pop();
     guard_expression left = pop();
     left.negate();
