@@ -58,55 +58,6 @@ bool has_counter_example_information(const pbes& pbesspec)
   return false;
 }
 
-/// \brief If allow_ce the expression of the shape (X && Zpos) || Zneg or (X || Zneg) && Zpos
-///        else it must be just an instantiation X
-inline bool is_ce_propositional_variable_instantiation(const pbes_expression& phi, bool allow_ce)
-{
-  if (allow_ce)
-  {
-    /// (X && Zpos) || Zneg 
-    if (is_or(phi))
-    {
-      const auto& phi_ = atermpp::down_cast<or_>(phi);
-      if (is_propositional_variable_instantiation(phi_.right()) && is_counter_example_instantiation(atermpp::down_cast<propositional_variable_instantiation>(phi_.right())))
-      {
-        if (is_and(phi_.left()))
-        {
-          const auto& phi__ = atermpp::down_cast<and_>(phi_.left());
-          bool result = is_propositional_variable_instantiation(phi__.left()) 
-            && is_propositional_variable_instantiation(phi__.right()) 
-            && is_counter_example_instantiation(atermpp::down_cast<propositional_variable_instantiation>(phi__.right()));
-          return result;
-        }
-      }
-    }
-
-    /// (X || Zneg) && Zpos
-    if (is_and(phi))
-    {
-      const auto& phi_ = atermpp::down_cast<and_>(phi);
-      if (is_propositional_variable_instantiation(phi_.right()) && is_counter_example_instantiation(atermpp::down_cast<propositional_variable_instantiation>(phi_.right())))
-      {
-        if (is_or(phi_.left()))
-        {
-          const auto& phi__ = atermpp::down_cast<or_>(phi_.left());
-          bool result = is_propositional_variable_instantiation(phi__.left()) 
-            && is_propositional_variable_instantiation(phi__.right())
-            && is_counter_example_instantiation(atermpp::down_cast<propositional_variable_instantiation>(phi__.right()));
-          return result;
-        }
-      }
-    }
-  }
-  
-  if (is_propositional_variable_instantiation(phi))
-  {
-    return true;
-  }
-  
-  return false;
-}
-
 struct subsitute_counterexample: public pbes_expression_builder<subsitute_counterexample>
 {
   typedef pbes_expression_builder<subsitute_counterexample> super;

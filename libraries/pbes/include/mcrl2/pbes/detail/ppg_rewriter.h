@@ -129,7 +129,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
   void apply(const pbes_system::forall& x)
   {
     this->enter(x);
-    bool simple_body = is_simple_expression(x.body());
+    bool simple_body = is_simple_expression(x.body(), true);
     if (simple_body)
     {
       expression_stack.push(x);
@@ -172,7 +172,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
   void apply(const pbes_system::exists& x)
   {
     this->enter(x);
-    bool simple_body = is_simple_expression(x.body());
+    bool simple_body = is_simple_expression(x.body(), true);
     if (simple_body)
     {
       expression_stack.push(x);
@@ -215,7 +215,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
   void apply(const pbes_system::and_& x)
   {
     this->enter(x);
-    bool is_simple = is_simple_expression(x);
+    bool is_simple = is_simple_expression(x, true);
     if (is_simple)
     {
       expression_stack.push(x);
@@ -253,7 +253,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
         std::size_t count = 0;
         for(const pbes_expression& conjunct: conjuncts)
         {
-          if (!is_simple_expression(conjunct))
+          if (!is_simple_expression(conjunct, true))
           {
             count++;
             if (count > 1 || !is_propositional_variable_instantiation(conjunct))
@@ -269,7 +269,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
           std::vector<pbes_expression> new_conjuncts;
           for(const pbes_expression& conjunct : conjuncts)
           {
-            if (is_simple_expression(conjunct))
+            if (is_simple_expression(conjunct, true))
             {
               simple_conjuncts.push_back(conjunct);
             }
@@ -305,7 +305,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
   void apply(const pbes_system::or_& x)
   {
     this->enter(x);
-    bool is_simple = is_simple_expression(x);
+    bool is_simple = is_simple_expression(x, true);
     if (is_simple)
     {
       expression_stack.push(x);
@@ -343,7 +343,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
         std::size_t count = 0;
         for(const pbes_expression& disjunct: disjuncts)
         {
-          if (!is_simple_expression(disjunct))
+          if (!is_simple_expression(disjunct, true))
           {
             count++;
             if (count > 1 || !is_propositional_variable_instantiation(disjunct))
@@ -359,7 +359,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
           std::vector<pbes_expression> new_disjuncts;
           for(const pbes_expression& disjunct : disjuncts)
           {
-            if (is_simple_expression(disjunct))
+            if (is_simple_expression(disjunct, true))
             {
               simple_disjuncts.push_back(disjunct);
             }

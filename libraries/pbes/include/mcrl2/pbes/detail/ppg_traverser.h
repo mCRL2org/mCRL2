@@ -69,18 +69,18 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
 
   void enter(const not_& x)
   {
-    result = result && is_simple_expression(x);
+    result = result && is_simple_expression(x, true);
   }
 
   void enter(const imp& x)
   {
-    result = result && is_simple_expression(x);
+    result = result && is_simple_expression(x, true);
   }
 
   void enter(const pbes_system::forall& x)
   {
     expression_mode mode = mode_stack.top();
-    bool simple_body = is_simple_expression(x.body());
+    bool simple_body = is_simple_expression(x.body(), true);
     if (!simple_body)
     {
       //std::clog << "Note: 'forall' in mode " << print_mode(mode) << std::endl;
@@ -110,7 +110,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
   void enter(const pbes_system::exists& x)
   {
     expression_mode mode = mode_stack.top();
-    bool simple_body = is_simple_expression(x.body());
+    bool simple_body = is_simple_expression(x.body(), true);
     if (!simple_body)
     {
       //std::clog << "Note: 'exists' in mode " << print_mode(mode) << std::endl;
@@ -141,7 +141,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
   void enter(const pbes_system::and_& x)
   {
     expression_mode mode = mode_stack.top();
-    bool is_simple = is_simple_expression(x);
+    bool is_simple = is_simple_expression(x, true);
     if (!is_simple)
     {
       //std::clog << "Note: 'and' in mode " << print_mode(mode) << std::endl;
@@ -164,7 +164,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
         std::vector<pbes_expression> conjuncts = split_conjuncts(x);
         for(const pbes_expression& conjunct : conjuncts)
         {
-          if (!is_simple_expression(conjunct))
+          if (!is_simple_expression(conjunct, true))
           {
             //std::clog << "and: " << core::pp(*it) << std::endl;
             count++;
@@ -193,7 +193,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
   void enter(const pbes_system::or_& x)
   {
     expression_mode mode = mode_stack.top();
-    bool is_simple = is_simple_expression(x);
+    bool is_simple = is_simple_expression(x, true);
     if (!is_simple)
     {
       //std::clog << "Note: 'or' in mode " << print_mode(mode) << std::endl;
@@ -214,7 +214,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
         std::vector<pbes_expression>  disjuncts = split_disjuncts(x);
         for(const pbes_expression& disjunct : disjuncts)
         {
-          if (!is_simple_expression(disjunct))
+          if (!is_simple_expression(disjunct, true))
           {
             count++;
             if (count > 1 || !is_propositional_variable_instantiation(disjunct))

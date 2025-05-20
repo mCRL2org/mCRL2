@@ -62,7 +62,7 @@ struct bqnf_visitor
   {
     if (is_propositional_variable_instantiation(e)) {
       return std::string("PropVar ") + std::string(atermpp::down_cast<propositional_variable_instantiation>(e).name());
-    } else if (is_simple_expression(e)) {
+    } else if (is_simple_expression(e, true)) {
       return "SimpleExpr";
     } else if (is_and(e)) {
       return "And";
@@ -87,11 +87,11 @@ struct bqnf_visitor
   static bool is_inner_and(const pbes_expression& e)
   {
     bool result = true;
-    if (!(is_propositional_variable_instantiation(e) || is_simple_expression(e))) {
+    if (!(is_propositional_variable_instantiation(e) || is_simple_expression(e, true))) {
       if (is_and(e)) {
         pbes_expression l = pbes_system::accessors::left(e);
         pbes_expression r = pbes_system::accessors::right(e);
-        if (is_simple_expression(l)) {
+        if (is_simple_expression(l, true)) {
           result = is_inner_and(r);
         } else {
           result = false;
@@ -111,11 +111,11 @@ struct bqnf_visitor
   static bool is_inner_implies(const pbes_expression& e)
   {
     bool result = true;
-    if (!(is_propositional_variable_instantiation(e) || is_simple_expression(e))) {
+    if (!(is_propositional_variable_instantiation(e) || is_simple_expression(e, true))) {
       if (is_or(e) || is_imp(e)) {
         pbes_expression l = pbes_system::accessors::left(e);
         pbes_expression r = pbes_system::accessors::right(e);
-        if (is_simple_expression(l)) {
+        if (is_simple_expression(l, true)) {
           result = is_inner_implies(r);
         } else {
           result = false;
@@ -182,7 +182,7 @@ struct bqnf_visitor
   {
     inc_indent();
     bool result = true;
-    if (is_propositional_variable_instantiation(e) || is_simple_expression(e)) {
+    if (is_propositional_variable_instantiation(e) || is_simple_expression(e, true)) {
       // std::clog << pp(e) << std::endl;
     } else {
       result = false;
@@ -211,7 +211,7 @@ struct bqnf_visitor
     if (is_and(e)) {
       pbes_expression l = pbes_system::accessors::left(e);
       pbes_expression r = pbes_system::accessors::right(e);
-      if (is_simple_expression(l)) {
+      if (is_simple_expression(l, true)) {
         result &= visit_simple_expression(sigma, var, l);
         // std::clog << pp(l) << " /\\ " << std::endl;
         result &= visit_inner_and(sigma, var, r);
@@ -292,7 +292,7 @@ struct bqnf_visitor
     if (is_or(qexpr) || is_imp(qexpr)) {
       pbes_expression l = pbes_system::accessors::left(qexpr);
       pbes_expression r = pbes_system::accessors::right(qexpr);
-      if (is_simple_expression(l)) {
+      if (is_simple_expression(l, true)) {
         result &= visit_simple_expression(sigma, var, l);
         // std::clog << pp(l) << (is_or(qexpr) ? " \\/ " : " => ") << std::endl;
         result &= visit_or(sigma, var, r);
@@ -354,7 +354,7 @@ struct bqnf_visitor
     if (is_or(qexpr) || is_imp(qexpr)) {
       pbes_expression l = pbes_system::accessors::left(qexpr);
       pbes_expression r = pbes_system::accessors::right(qexpr);
-      if (is_simple_expression(l)) {
+      if (is_simple_expression(l, true)) {
         result &= visit_simple_expression(sigma, var, l);
         // std::clog << pp(l) << (is_or(qexpr) ? " \\/ " : " => ") << std::endl;
         result &= visit_bqnf_expression(sigma, var, r);
@@ -390,7 +390,7 @@ struct bqnf_visitor
     if (is_and(qexpr)) {
       pbes_expression l = pbes_system::accessors::left(qexpr);
       pbes_expression r = pbes_system::accessors::right(qexpr);
-      if (is_simple_expression(l)) {
+      if (is_simple_expression(l, true)) {
         result &= visit_simple_expression(sigma, var, l);
         result &= visit_bqnf_expression(sigma, var, r);
       } else {
@@ -439,7 +439,7 @@ struct bqnf_visitor
   {
     inc_indent();
     bool result = true;
-    if (is_simple_expression(e)) {
+    if (is_simple_expression(e, true)) {
       result = true;
     } else if (is_forall(e) || is_exists(e)) {
       result &= visit_bounded_quantifier(sigma, var, e);

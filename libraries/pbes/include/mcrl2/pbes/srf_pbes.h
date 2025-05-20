@@ -54,17 +54,16 @@ inline pbes_expression make_not(const pbes_expression& x)
 template <bool allow_ce>
 class pre_srf_summand
 {
-  using propositional_variable_instantiation_type = std::conditional_t<allow_ce, pbes_expression, propositional_variable_instantiation>;
   using condition_type = std::conditional_t<allow_ce, pbes_expression, data::data_expression>;
 protected:
   data::variable_list m_parameters;
   condition_type m_condition;
-  propositional_variable_instantiation_type m_X;
+  propositional_variable_instantiation m_X;
 
 public:
   pre_srf_summand(data::variable_list parameters,
       const pbes_expression& condition,
-      propositional_variable_instantiation_type X)
+      propositional_variable_instantiation X)
       : m_parameters(std::move(parameters)),
         m_X(std::move(X))
   {
@@ -86,9 +85,9 @@ public:
 
   condition_type& condition() { return m_condition; }
 
-  const propositional_variable_instantiation_type& variable() const { return m_X; }
+  const propositional_variable_instantiation& variable() const { return m_X; }
 
-  propositional_variable_instantiation_type& variable() { return m_X; }
+  propositional_variable_instantiation& variable() { return m_X; }
 
   void add_variables(const data::variable_list& variables) { m_parameters = variables + m_parameters; }
 
@@ -290,23 +289,6 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
     }
   }
 
-  void apply(const or_& x)
-  {
-    if constexpr (allow_ce)
-    {
-      if (allow_ce && is_ce_propositional_variable_instantiation(x, allow_ce))
-      {
-        const pbes_expression& f = true_();
-        summands.emplace_back(data::variable_list(), f, x);
-        return;
-      }
-    }
-
-    // Continue traversal.
-    apply(x.left());
-    apply(x.right());
-  }
-
   void apply(const exists& x)
   {
     std::vector<pre_srf_summand<allow_ce>> body_summands = srf_or(x.body(),
@@ -450,16 +432,6 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
 
   void apply(const or_& x)
   {    
-    if constexpr (allow_ce)
-    {
-      if (is_ce_propositional_variable_instantiation(x, allow_ce))
-      {
-        const pbes_expression& f = true_();
-        summands.emplace_back(data::variable_list(), f, x);
-        return;
-      }
-    }
-
     if (m_merge_simple_expressions && is_simple_expression(x.left(), allow_ce))
     {
       std::size_t size = summands.size();
@@ -472,10 +444,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
     else if (m_merge_simple_expressions && is_simple_expression(x.right(), allow_ce))
     {
       std::size_t size = summands.size();
-      if (!is_ce_propositional_variable_instantiation(x.left(), allow_ce))
-      {
-        apply(x.left());
-      }
+      apply(x.left());
       for (auto i = summands.begin() + size; i != summands.end(); ++i)
       {
         i->add_condition(detail::make_not(x.right()));
@@ -578,22 +547,22 @@ inline bool is_conjunctive(const pbes_expression& phi, bool allow_ce)
   {
     return false;
   }
+  else if (is_propositional_variable_instantiation(phi))
+  {
+    return false;
+  }
   else if (is_or(phi))
   {
     const auto& phi_ = atermpp::down_cast<or_>(phi);
-    return (is_simple_expression(phi_.left(), allow_ce) && is_ce_propositional_variable_instantiation(phi_.right(), allow_ce))
-           || (is_simple_expression(phi_.right(), allow_ce) && is_ce_propositional_variable_instantiation(phi_.left(), allow_ce));
+    return (is_simple_expression(phi_.left(), allow_ce) && is_propositional_variable_instantiation(phi_.right()))
+           || (is_simple_expression(phi_.right(), allow_ce) && is_propositional_variable_instantiation(phi_.left()));
   }
   else if (is_and(phi))
   {
     const auto& phi_ = atermpp::down_cast<and_>(phi);
-    bool result = !((is_simple_expression(phi_.left(), allow_ce) && is_ce_propositional_variable_instantiation(phi_.right(), allow_ce))
-             || (is_simple_expression(phi_.right(), allow_ce) && is_ce_propositional_variable_instantiation(phi_.left(), allow_ce)));
+    bool result = !((is_simple_expression(phi_.left(), allow_ce) && is_propositional_variable_instantiation(phi_.right()))
+             || (is_simple_expression(phi_.right(), allow_ce) && is_propositional_variable_instantiation(phi_.left())));
     return result;
-  }
-  else if (is_ce_propositional_variable_instantiation(phi, allow_ce))
-  {
-    return false;
   }
   else if (is_exists(phi))
   {
