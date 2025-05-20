@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-# Copyright 2021 Wieger Wesselink.
+# Copyright 2021-2025 Wieger Wesselink, Jeroen Keiren
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import argparse
-import os
 import pathlib
 import random
 import re
@@ -86,8 +85,8 @@ def is_used(entry: str):
     return "1"
 
 def parse_read_write_matrix(text):
-    m = re.search(r'read/write patterns compacted\n(.*)\nNone?', text, flags=re.DOTALL)
-    rows = [re.sub(r'^\s*\d+\s*', '', line) for line in m.group(1).split('\n')]
+    match = re.search(r'read/write patterns compacted\n(.*)\nNone?', text, flags=re.DOTALL)
+    rows = [re.sub(r'^\s*\d+\s*', '', line) for line in match.group(1).split('\n')]
     n = len(rows)
     m = len(rows[0])
     columns = [[is_used(rows[i][j]) for i in range(n)] for j in range(m)]
@@ -108,14 +107,14 @@ def run(args):
     permutation = maximize_cost(columns, args.iterations)
 
     # check the permutation
-    [lpsreach, '--info', f'--groups={args.groups}', '--reorder="{}"'.format(' '.join(list(map(str, permutation)))), args.lpsfile]
+    cmd = [lpsreach, '--info', f'--groups={args.groups}', '--reorder={}'.format(' '.join(list(map(str, permutation)))), args.lpsfile]
     text = run_command(cmd)
     columns = parse_read_write_matrix(text)
     cost = compute_cost(columns)
     print(f'final solution has {cost} zeroes')
 
     # print the command with optimum reordering
-    opts = [f'--memory-limit={args.memory_limit}', f'--rewriter={args.rewriter}']
+    opts = [f'--memory-limit={args.memory_limit}', f'--rewriter={args.rewriter}', f'--threads={args.threads}', f'--groups={args.groups}']
     if args.cached:
         opts.append('--cached')
     if args.chaining:
@@ -126,8 +125,9 @@ def run(args):
         opts.append('--saturation')
     if args.verbose:
         opts.append('--verbose')
+        opts.append('--print-nodesize')
 
-    cmd = [lpsreach] + opts + [f'--groups={args.groups}', '--reorder={}'.format(' '.join(list(map(str, permutation)))), args.lpsfile]
+    cmd = [lpsreach] + opts + ['--reorder={}'.format(' '.join(list(map(str, permutation)))), args.lpsfile]
     print(' '.join(map(str, cmd)))
 
     subprocess.run(cmd)
@@ -138,6 +138,7 @@ def main():
     cmdline_parser = argparse.ArgumentParser(description='Simple script for experimenting with variable orders.')
     cmdline_parser.add_argument('lpsfile', metavar='FILE', type=str, help='an .lps file')
     cmdline_parser.add_argument('iterations', help="the number of iterations of hill climbing", type=int, default=1000, nargs='?')
+
     cmdline_parser.add_argument('--cached', help="directly passed to lpsreach", action='store_true')
     cmdline_parser.add_argument('--chaining', help="directly passed to lpsreach", action='store_true')
     cmdline_parser.add_argument('--deadlock', help="directly passed to lpsreach", action='store_true')
@@ -145,7 +146,9 @@ def main():
     cmdline_parser.add_argument('-m', '--memory-limit', help="directly passed to lpsreach", type=int, default=3)
     cmdline_parser.add_argument('-r', '--rewriter', help="directly passed to lpsreach", type=str, default='jitty')
     cmdline_parser.add_argument('--saturation', help="directly passed to lpsreach", action='store_true')
-    cmdline_parser.add_argument('-v', '--verbose', help="directly passed to lpsreac", action='store_true')
+    cmdline_parser.add_argument('--threads', help="directly passed to pbessolvesymbolic", type=int, default=1)
+    cmdline_parser.add_argument('-v', '--verbose', help="directly passed to lpsreach", action='store_true')
+
     cmdline_parser.add_argument('--path', help="Path to the mCRL2 installation that should be used", type=dir_path)
     args = cmdline_parser.parse_args()
     run(args)
