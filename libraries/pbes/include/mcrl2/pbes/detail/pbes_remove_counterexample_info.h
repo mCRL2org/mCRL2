@@ -10,6 +10,7 @@
 #ifndef MCRL2_PBES_DETAIL_PBES_REMOVE_COUNTEREXAMPLE_INFO_H
 #define MCRL2_PBES_DETAIL_PBES_REMOVE_COUNTEREXAMPLE_INFO_H
 
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/builder.h"
@@ -17,6 +18,7 @@
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 
 #include <regex>
+#include <string>
  
 namespace mcrl2::pbes_system::detail
 {  
@@ -25,23 +27,41 @@ static std::regex positive("Zpos_(\\d+)_.*");
 static std::regex negative("Zneg_(\\d+)_.*");
 static std::regex positive_or_negative("Z(neg|pos)_(\\d+)_.*");
 
+/// \brief Returns true iff the name is Zpos, name must be a counter example name.
+inline
+bool is_counter_example_positive(const core::identifier_string& name)
+{
+  std::smatch match;
+  std::string name_str = name;
+  return std::regex_match(name_str, match, positive);
+}
+
+inline
+bool is_counter_example_name(const core::identifier_string& name)
+{
+  std::smatch match;
+  std::string name_str = name;
+  return std::regex_match(name_str, match, positive_or_negative);
+}
+
+inline
+bool is_counter_example_variable(const propositional_variable& X)
+{
+  return is_counter_example_name(X.name());
+}
 
 /// \brief Guesses if the PBES equation is a counter example equation
 inline
 bool is_counter_example_equation(const pbes_equation& equation)
 {
-  std::smatch match;
-  std::string X = equation.variable().name();
-  return std::regex_match(X, match, positive_or_negative);
+  return is_counter_example_variable(equation.variable());
 }
 
 /// \brief Guesses if the PBES variable instantiation is for counter example equation
 inline
 bool is_counter_example_instantiation(const propositional_variable_instantiation& inst)
 {
-  std::smatch match;
-  std::string X = inst.name();
-  return std::regex_match(X, match, positive_or_negative);
+  return is_counter_example_name(inst.name());
 }
 
 /// \brief Guesses if a pbes has counter example information

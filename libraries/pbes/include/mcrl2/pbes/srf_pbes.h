@@ -161,6 +161,18 @@ public:
 
   pbes_equation to_pbes() const
   {
+    if (is_counter_example_variable(variable()))
+    {
+      if (is_counter_example_positive(variable().name()))
+      {
+        return pbes_equation(m_sigma, m_variable, true_());
+      }
+      else
+      {
+        return pbes_equation(m_sigma, m_variable, false_());
+      }
+    }
+
     std::vector<pbes_expression> v;
     for (const auto& summand : m_summands)
     {
