@@ -631,7 +631,7 @@ public:
     {
       v.push_back(eqn.to_pbes());
     }
-    return pbes(m_dataspec, v, m_initial_state);
+    return pbes(m_dataspec, std::set<data::variable>(), v, m_initial_state);
   }
 
   // Adds extra clauses to the equations to enforce that the PBES is in total SRF format
