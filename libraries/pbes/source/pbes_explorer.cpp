@@ -320,7 +320,7 @@ std::vector<pbes_expression> lts_info::split_expression_and_substitute_variables
 {
     std::vector<pbes_expression> result;
     std::vector<pbes_expression> parts;
-    if (is_simple_expression(e, true))
+    if (is_simple_expression(e, false))
     {
         result.push_back(e);
     }
@@ -357,7 +357,7 @@ std::vector<pbes_expression> lts_info::split_expression_and_substitute_variables
                 pbes_expression expr = this->variable_expression[varname];
 
                 if ((priority == current_priority) &&
-                    (current_type == type || is_simple_expression(expr, true) || count_variables(expr) <= 1) &&
+                    (current_type == type || is_simple_expression(expr, false) || count_variables(expr) <= 1) &&
                     vars_stack.find(varname) == vars_stack.end())
                 {
                     // The associated equation has the same priority and operation type as the current equation,

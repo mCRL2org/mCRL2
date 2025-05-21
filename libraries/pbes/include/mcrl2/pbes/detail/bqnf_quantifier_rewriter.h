@@ -39,7 +39,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// \return the filtered expression.
     virtual pbes_expression filter(const pbes_expression& e, const std::set<data::variable>& d)
     {
-      assert(is_simple_expression(e));
+      assert(is_simple_expression(e, false));
       pbes_expression empty;
       if (is_data(e))
       {
@@ -207,7 +207,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       }
       // forall qvars . qexpr
       pbes_expression result;
-      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr, true)) {
+      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr, false)) {
         // forall d . phi | forall d . X(e)
         result = e;
       } else {
@@ -216,7 +216,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
         if (is_or(qexpr) || is_imp(qexpr)) {
           pbes_expression l = pbes_system::accessors::left(qexpr);
           pbes_expression r = pbes_system::accessors::right(qexpr);
-          if (is_simple_expression(l, true)) {
+          if (is_simple_expression(l, false)) {
             phi = l;
             psi = r;
           }
@@ -376,7 +376,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     {
       //std::clog << "rewrite_bqnf_expression: " << pp(e) << std::endl;
       pbes_expression result;
-      if (is_propositional_variable_instantiation(e) || is_simple_expression(e, true)) {
+      if (is_propositional_variable_instantiation(e) || is_simple_expression(e, false)) {
         // Eqn of the form sigma X(d: D) = phi && Y(h(d, l)), with phi a simple formula.
         // Add sigma X(d) = e.
         result = e;

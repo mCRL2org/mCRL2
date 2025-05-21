@@ -185,6 +185,7 @@ void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equation
   }
 
   unify_parameters_replace_function replace(propositional_variable_parameters, p.data(), reset);
+  unify_parameters_replace_function replace_reset(propositional_variable_parameters, p.data(), true);
 
   std::size_t N = p.equations().size();
   const auto& false_summand = p.equations()[N - 2].summands().front();

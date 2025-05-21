@@ -94,7 +94,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       bool result = true;
       inc_indent();
       //indent(); std::clog << "visit_inner_implies: " << print_brief(e) << std::endl;
-      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr)) {
+      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr, false)) {
         // Eqn of the form sigma X(d: D) = Forall l: D . phi => Y(h(d, l)), with phi a simple formula.
         // Add sigma X(d) = e.
         equation_type eqn = equation_type(sigma, var, e);
@@ -105,7 +105,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         if (is_or(qexpr) || is_imp(qexpr)) {
           term_type l = pbes_system::accessors::left(qexpr);
           term_type r = pbes_system::accessors::right(qexpr);
-          if (is_simple_expression(l)) {
+          if (is_simple_expression(l, false)) {
             phi = l;
             psi = r;
           }
@@ -203,7 +203,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       bool result = true;
       inc_indent();
       //indent(); std::clog << "visit_inner_and: " << print_brief(e) << std::endl;
-      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr)) {
+      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr, false)) {
         // Eqn of the form sigma X(d: D) = Exists l: D . phi && Y(h(d, l)), with phi a simple formula.
         // Add sigma X(d) = e.
         equation_type eqn = equation_type(sigma, var, e);
@@ -215,7 +215,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         if (is_and(qexpr)) {
           term_type l = pbes_system::accessors::left(qexpr);
           term_type r = pbes_system::accessors::right(qexpr);
-          bool l_is_simple = is_simple_expression(l);
+          bool l_is_simple = is_simple_expression(l, false);
           if (l_is_simple) {
             phi = l;
             psi = r;
@@ -315,7 +315,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       term_type expr;
       equation_type eqn = dummy;
 
-      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr)) {
+      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr, false)) {
         // Eqn of the form phi => Y(h(d, l)), with phi a simple formula.
         expr = e;
       } else {
@@ -324,7 +324,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         if (is_or(qexpr) || is_imp(qexpr)) {
           term_type l = pbes_system::accessors::left(qexpr);
           term_type r = pbes_system::accessors::right(qexpr);
-          if (is_simple_expression(l)) {
+          if (is_simple_expression(l, false)) {
             phi = l;
             psi = r;
           }
@@ -427,7 +427,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       term_type expr;
       equation_type eqn = dummy;
 
-      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr)) {
+      if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr, false)) {
         // Eqn of the form phi && Y(h(d, l)), with phi a simple formula.
         expr = e;
       } else {
@@ -436,7 +436,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         if (is_and(qexpr)) {
           term_type l = pbes_system::accessors::left(qexpr);
           term_type r = pbes_system::accessors::right(qexpr);
-          if (is_simple_expression(l)) {
+          if (is_simple_expression(l, false)) {
             phi = l;
             psi = r;
           }
@@ -517,7 +517,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     {
       inc_indent();
       //indent(); std::clog << "visit_bqnf_expression: " << print_brief(e) << std::endl;
-      if (is_propositional_variable_instantiation(e) || is_simple_expression(e)) {
+      if (is_propositional_variable_instantiation(e) || is_simple_expression(e, false)) {
         // Eqn of the form sigma X(d: D) = phi && Y(h(d, l)), with phi a simple formula.
         // Add sigma X(d) = e.
         equation_type eqn = equation_type(sigma, var, e);
@@ -545,7 +545,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       const propositional_variable& var = eqn.variable();
       const term_type& e = eqn.formula();
       //std::clog << "visit_bqnf_equation: rewrite equation: " << pp(sigma) << " " << var.name() << " = ..." << std::endl;
-      if (is_propositional_variable_instantiation(e) || is_simple_expression(e)) {
+      if (is_propositional_variable_instantiation(e) || is_simple_expression(e, false)) {
         // Eqn of the form sigma X(d: D) = g(d) && Y(h(d)), with g(d) a simple formula
         // Add eqn
         equations.push_back(eqn);

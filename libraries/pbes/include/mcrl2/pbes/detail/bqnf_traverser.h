@@ -48,7 +48,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
   void enter(const pbes_system::forall& x)
   {
     expression_mode mode = mode_stack.top();
-    bool simple_body = is_simple_expression(x.body(), true);
+    bool simple_body = is_simple_expression(x.body(), false);
     if (!simple_body)
     {
       switch(mode)
@@ -82,7 +82,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
   void enter(const pbes_system::exists& x)
   {
     expression_mode mode = mode_stack.top();
-    bool simple_body = is_simple_expression(x.body(), true);
+    bool simple_body = is_simple_expression(x.body(), false);
     if (!simple_body)
     {
       switch(mode)
@@ -113,7 +113,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
   void enter(const pbes_system::and_& x)
   {
     expression_mode mode = mode_stack.top();
-    bool is_simple = is_simple_expression(x, true);
+    bool is_simple = is_simple_expression(x, false);
     if (!is_simple)
     {
       switch(mode)
@@ -128,7 +128,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
         std::size_t count = 0;
         for(const pbes_expression& conjunct: split_conjuncts(x))
         {
-          if (!is_simple_expression(conjunct, true))
+          if (!is_simple_expression(conjunct, false))
           {
             count++;
           }
@@ -146,7 +146,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
         std::size_t count = 0;
         for(const pbes_expression& conjunct : split_conjuncts(x))
         {
-          if (!is_simple_expression(conjunct, true))
+          if (!is_simple_expression(conjunct, false))
           {
             count++;
             if (count > 1 || !is_propositional_variable_instantiation(conjunct))
@@ -173,7 +173,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
   void enter(const pbes_system::or_& x)
   {
     expression_mode mode = mode_stack.top();
-    bool is_simple = is_simple_expression(x, true);
+    bool is_simple = is_simple_expression(x, false);
     if (!is_simple)
     {
       switch(mode)
@@ -190,7 +190,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
         std::size_t count = 0;
         for(const pbes_expression& disjunct: split_disjuncts(x))
         {
-          if (!is_simple_expression(disjunct, true))
+          if (!is_simple_expression(disjunct, false))
           {
             count++;
           }
