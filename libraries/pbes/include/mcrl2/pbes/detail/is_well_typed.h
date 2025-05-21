@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_IS_WELL_TYPED_H
 #define MCRL2_PBES_DETAIL_IS_WELL_TYPED_H
 
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/pbes/traverser.h"
 #include <boost/iterator/transform_iterator.hpp>
@@ -257,8 +258,11 @@ bool is_well_typed_equation(const pbes_equation& eqn,
   }
 
   // check 7)
-  if (!utilities::detail::set_intersection(declared_global_variables, quantifier_variables).empty())
+  auto intersection = utilities::detail::set_intersection(declared_global_variables, quantifier_variables);
+  if (!intersection.empty())
   {
+    mCRL2log(log::trace) << eqn << std::endl;
+    mCRL2log(log::info) << core::detail::print_container(intersection) << std::endl;
     mCRL2log(log::error) << "pbes::is_well_typed() failed: the declared free variables and the quantifier variables have collisions" << std::endl;
     return false;
   }
