@@ -269,7 +269,7 @@ struct unify_parameters_command: public pbes_system::detail::pbes_command
   void execute() override
   {
     pbes_system::detail::pbes_command::execute();
-    pbes_system::unify_parameters(pbesspec);
+    pbes_system::unify_parameters(pbesspec, false, false);
     pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
@@ -286,7 +286,7 @@ struct standard_recursive_form_command: public pbes_system::detail::pbes_command
     pbes_system::algorithms::normalize(pbesspec);
     pbes_system::algorithms::instantiate_global_variables(pbesspec);
     pbes_system::srf_pbes p = pbes2srf(pbesspec);
-    unify_parameters(p, false);
+    unify_parameters(p, false, true);
     pbesspec = p.to_pbes();
     if (!pbesspec.is_well_typed())
     {
