@@ -1381,7 +1381,7 @@ class partial_order_reduction_algorithm
        m_solver(options.use_smt_solver ? new smt::smt_solver(p.data()) : nullptr),
        m_options(options)
     {
-      unify_parameters(m_pbes);
+      unify_parameters(m_pbes, false, true);
 
       // initialize m_parameters and m_parameter_positions
       const data::variable_list& parameters = m_pbes.equations().front().variable().parameters();
