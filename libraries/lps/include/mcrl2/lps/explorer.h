@@ -15,6 +15,7 @@
 #include <random>
 #include <thread>
 #include <type_traits>
+#include "mcrl2/data/find_quantifier_variables.h"
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/skip.h"
 #include "mcrl2/atermpp/standard_containers/deque.h"
@@ -633,6 +634,12 @@ class explorer: public abortable
         data::remove_assignments(sigma, m_process_parameters);
         data::remove_assignments(sigma, summand.variables);
         data::data_expression reduced_condition = rewr(summand.condition, sigma);
+
+        if (!data::find_quantifier_variables(p_expression).empty()) 
+        {
+          mCRL2log(log::info) << "The condition contains quantifiers, which means that rewriting to normal form could fail when the quantifier enumeration limit is too low. Use ---qlimit/-Q to increase the limit." << std::endl;
+        }
+
         throw data::enumerator_error("Condition " + data::pp(reduced_condition) +
                                      " does not rewrite to true or false. \nCulprit: "
                                      + printed_condition.substr(0,300)
