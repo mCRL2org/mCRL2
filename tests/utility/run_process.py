@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ~ Copyright 2014 Sjoerd Cranen, Wieger Wesselink
+# ~ Copyright 2014-2025 Sjoerd Cranen, Wieger Wesselink, Maurice Laveaux
 # ~ Distributed under the Boost Software License, Version 1.0.
 # ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
@@ -140,20 +140,15 @@ class RunProcess:
 
                     except psutil.NoSuchProcess as _:
                         # The tool finished before we could acquire the pid
-                        None
+                        pass
 
                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                     future = executor.submit(enforce_limits, proc)
 
-                    try:
-                        stdout, stderr = proc.communicate()
-                        self.stdout = stdout.decode("utf-8")
-                        self.stderr = stderr.decode("utf-8")
-                        self.returncode = proc.returncode
-                    except Exception as _:
-                        self.stdout = "Unreadable mess"
-                        self.stderr = "Unreadable mess"
-
+                    stdout, stderr = proc.communicate()
+                    self.stdout = stdout.decode("utf-8", errors="replace")
+                    self.stderr = stderr.decode("utf-8", errors="replace")
+                    self.returncode = proc.returncode
                     future.result()
 
                 if proc.returncode != 0:
