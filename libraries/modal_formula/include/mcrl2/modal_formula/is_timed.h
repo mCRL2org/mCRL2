@@ -22,9 +22,9 @@ namespace detail {
 
 /// \brief Function that determines if a state formula is time dependent
 // \brief Visitor for checking if a state formula is timed.
-struct is_timed_traverser: public state_formula_traverser<is_timed_traverser>
+struct is_timed_traverser: public action_label_traverser<is_timed_traverser>
 {
-  typedef state_formula_traverser<is_timed_traverser> super;
+  typedef action_label_traverser<is_timed_traverser> super;
   using super::enter;
   using super::leave;
   using super::apply;

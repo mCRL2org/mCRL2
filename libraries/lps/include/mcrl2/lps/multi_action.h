@@ -87,11 +87,12 @@ class multi_action: public atermpp::aterm
     /// \return A multi-action with a sorted list.
     multi_action sort_actions() const
     {
-      if (actions().size()<=1)  // There is almost always only one action. 
-      {
-        return *this;
-      }
       return multi_action(atermpp::sort_list(actions()),time());
+    }
+
+    bool operator==(const multi_action& other) const
+    {
+      return time()==other.time() && atermpp::sort_list(actions())==atermpp::sort_list(other.actions());
     }
 
    //--- end user section multi_action ---//

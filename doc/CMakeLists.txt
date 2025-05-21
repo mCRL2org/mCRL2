@@ -1,7 +1,6 @@
-find_package(PythonModules COMPONENTS sphinx REQUIRED)
+find_package(PythonRequirements)
 
 find_program(DVISVGM_EXECUTABLE dvisvgm)
-
 if (NOT DVISVGM_EXECUTABLE)
     message(FATAL_ERROR "dvisvgm not found, cannot build documentation.")
 endif()

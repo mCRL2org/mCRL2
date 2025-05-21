@@ -5,22 +5,17 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import random
+from typing import List
 
-from .data_expression import Boolean, Integer, Variable
+from typeguard import typechecked
 
-def is_list_of(l, types):
-    if not isinstance(l, list):
-        return False
-    for x in l:
-        if not isinstance(x, types):
-            return False
-    return True
+from .data_expression import Boolean, Integer, Variable, Sort
 
-# Simple generator for boolean data expressions.
-def make_boolean_data_expression(variables):
-    assert is_list_of(variables, Variable)
-    integers = [x for x in variables if x.type == 'Int']
-    booleans = [x for x in variables if x.type == 'Bool']
+@typechecked
+def make_boolean_data_expression(variables: List[Variable]) -> Boolean:
+    """ Simple generator for boolean data expressions. """
+    integers = [x for x in variables if x.type == Sort.INT]
+    booleans = [x for x in variables if x.type == Sort.BOOL]
     result = booleans[:]
     for m in integers:
         result.append(Boolean(f'{m} > 0'))
@@ -33,10 +28,10 @@ def make_boolean_data_expression(variables):
     result.append(Boolean('false'))
     return random.choice(result)
 
-# Simple generator for integer data expressions.
-def make_integer_data_expression(variables):
-    assert is_list_of(variables, Variable)
-    integers = [x for x in variables if x.type == 'Int']
+@typechecked
+def make_integer_data_expression(variables: List[Variable]) -> Integer:
+    """ Simple generator for integer data expressions. """
+    integers = [x for x in variables if x.type == Sort.INT]
     result = integers[:]
     for m in integers:
         for n in integers + [Integer('1'), Integer('2')]:

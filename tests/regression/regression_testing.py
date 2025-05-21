@@ -9,6 +9,7 @@ import os
 import re
 import sys
 import traceback
+import shutil
 
 # Makes sure that the script can find the modules when ran directly.
 sys.path.append(os.path.join(os.path.dirname(__file__),'../../'))
@@ -140,13 +141,21 @@ def main(tests):
     cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
     cmdline_parser.add_argument('-o', '--output', dest='output', metavar='o', action='store', help='Run the tests in the given directory')
     cmdline_parser.add_argument('-e', '--experimental', dest='experimental', action='store_true', help='Run regression tests using experimental tools.')
+    cmdline_parser.add_argument('-i', '--python', dest='python', action='store', help='Sets the path to the Python interpreter that is used.')
 
     args = cmdline_parser.parse_args()
     if args.names:
         print_names(tests)
         return
     
-    settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
+    python_path = None
+    if args.python:
+        # Check if the given path exists
+        python_path = args.python
+    else:
+        python_path = shutil.which("python3")
+    
+    settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True, 'python_path': python_path}
 
     if args.output:
         if not os.path.exists(args.output):

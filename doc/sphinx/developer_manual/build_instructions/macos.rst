@@ -24,7 +24,7 @@ provided websites to acquire them individually.
 
 .. note::
 
-    If Qt cannot be found automaticall, for example when it is installed using the official installer, then the cmake variable ``Qt6_DIR`` must be set to the install directory followed by ``/lib/cmake/Qt6``.
+    If Qt cannot be found automatically, for example when it is installed using the official installer, then the cmake variable ``Qt6_DIR`` must be set to the install directory followed by ``/lib/cmake/Qt6``.
 
 A user-friendly command-line interface is provided by the ``ccmake``
 executable. Example usage is as follows (from the directory
@@ -46,3 +46,12 @@ using 4 cores, use::
   ``mcrl22lps``, for instance, use::
 
     make mcrl22lps
+
+.. warning::
+
+  On newer macOS versions it might be that the compiled GUI tools fail to
+  launch. This is due to them being killed with an error related to running
+  unsigned code. This issue can be resolved by manually signing the resulting
+  mCRL2app using the following command::
+
+    sudo codesign --force --deep -s - mCRL2.app

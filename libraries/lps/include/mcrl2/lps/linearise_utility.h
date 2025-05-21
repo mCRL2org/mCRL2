@@ -62,7 +62,7 @@ lps_statistics_t get_statistics(const stochastic_action_summand_vector& action_s
   {
     statistics.action_summand_count = action_summands.size();
 
-    for (const auto& s: action_summands)
+    for (const action_summand& s: action_summands)
     {
       statistics.total_action_count += s.multi_action().actions().size();
     }
@@ -101,7 +101,7 @@ struct action_label_compare
     const core::identifier_string& a2_name = a2.name();
 
     return action_name_compare()(a1_name, a2_name) ||
-      (a1_name == a2_name && a1.sorts() < a2.sorts());
+                       (a1_name == a2_name && a1.sorts() < a2.sorts());
   }
 };
 

@@ -61,6 +61,7 @@ class YmlTest(object):
         self.ymlfile = ymlfile
         self.inputfiles = inputfiles
         self.settings = settings
+        self.python_path = settings['python_path']
         self.verbose = settings.get("verbose", True)
         self.toolpath = settings.get("toolpath", "")
         self.cleanup_files = settings.get("cleanup_files", False)
@@ -173,6 +174,7 @@ class YmlTest(object):
                 input_nodes,
                 output_nodes,
                 data["args"],
+                self.python_path,
             )
         )
 

@@ -15,7 +15,6 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/untyped_multi_action.h"
-// #include "mcrl2/lps/multi_action.h"
 
 namespace mcrl2
 {

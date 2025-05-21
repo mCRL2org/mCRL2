@@ -151,25 +151,15 @@ struct process_actions: public process::detail::action_actions
     return parse_RenExprList(node.child(1));
   }
 
-  bool is_proc_expr_sum(const core::parse_node& node) const
+  bool is_process_expression(const std::string& s) const
   {
-    return (symbol_name(node).find("ProcExpr") == 0) && (node.child_count() == 3) && (symbol_name(node.child(0)) == "sum") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".");
-  }
-
-  bool is_proc_expr_if(const core::parse_node& node) const
-  {
-    return (symbol_name(node).find("ProcExpr") == 0) && (node.child_count() == 2) && (symbol_name(node.child(0)) == "DataExprUnit") && (node.child(1).string() == "->");
-  }
-
-  bool is_proc_expr_else(const core::parse_node& node) const
-  {
-    return (symbol_name(node).find("ProcExpr") == 0) && (node.child_count() == 3) && is_proc_expr_if(node.child(0)) && (symbol_name(node.child(1)) == "ProcExpr") && (node.child(2).string() == "<>");
+    return s == "ProcExpr" || s == "ProcExprNoIf";
   }
 
   bool is_proc_expr_stochastic_operator(const core::parse_node& node) const
   {
-    return (symbol_name(node).find("ProcExpr") == 0) && (node.child_count() == 6) && (symbol_name(node.child(0)) == "dist") && (symbol_name(node.child(1)) == "VarsDeclList") &&
-           (symbol_name(node.child(2)) == "[") && (symbol_name(node.child(3)) == "DataExpr") && (symbol_name(node.child(4)) == "]") && (symbol_name(node.child(5)) == ".");
+    return is_process_expression(symbol_name(node)) && (node.child_count() == 7) && (symbol_name(node.child(0)) == "dist") && (symbol_name(node.child(1)) == "VarsDeclList") &&
+           (symbol_name(node.child(2)) == "[") && (symbol_name(node.child(3)) == "DataExpr") && (symbol_name(node.child(4)) == "]") && (symbol_name(node.child(5)) == ".") && is_process_expression(symbol_name(node.child(6)));
   }
 
   // override
@@ -184,23 +174,23 @@ struct process_actions: public process::detail::action_actions
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return untyped_process_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return tau(); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "allow") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "MultActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::allow(parse_MultActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "hide") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::hide(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "rename") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "RenExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::rename(parse_RenExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "comm") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "CommExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return process::comm(parse_CommExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "ProcExpr") && (symbol_name(node.child(2)) == ")")) { return parse_ProcExpr(node.child(1)); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "ProcExpr")) { return choice(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "ProcExpr")) { return merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "||_") && (symbol_name(node.child(2)) == "ProcExpr")) { return left_merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "ProcExpr")) { return seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "<<") && (symbol_name(node.child(2)) == "ProcExpr")) { return bounded_init(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExpr(node.child(0)), parse_DataExprUnit(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (node.child(1).string() == "|") && (symbol_name(node.child(2)) == "ProcExpr")) { return sync(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 2) && is_proc_expr_if(node.child(0)) && (symbol_name(node.child(1)) == "ProcExpr")) { return if_then(parse_DataExprUnit(node.child(0).child(0)), parse_ProcExpr(node.child(1))); }
-    else if ((node.child_count() == 2) && is_proc_expr_else(node.child(0)) && (symbol_name(node.child(1)) == "ProcExpr")) { return if_then_else(parse_DataExprUnit(node.child(0).child(0).child(0)), parse_ProcExpr(node.child(0).child(1)), parse_ProcExpr(node.child(1))); }
-    else if ((node.child_count() == 2) && is_proc_expr_sum(node.child(0)) && (symbol_name(node.child(1)) == "ProcExpr")) { return sum(parse_VarsDeclList(node.child(0).child(1)), parse_ProcExpr(node.child(1))); }
-    else if ((node.child_count() == 2) && is_proc_expr_stochastic_operator(node.child(0)) && (symbol_name(node.child(1)) == "ProcExpr")) { return stochastic_operator(parse_VarsDeclList(node.child(0).child(1)), parse_DataExpr(node.child(0).child(3)), parse_ProcExpr(node.child(1))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && is_process_expression(symbol_name(node.child(4))) && (symbol_name(node.child(5)) == ")")) { return process::block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "allow") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "MultActIdSet") && (symbol_name(node.child(3)) == ",") && is_process_expression(symbol_name(node.child(4))) && (symbol_name(node.child(5)) == ")")) { return process::allow(parse_MultActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "hide") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && is_process_expression(symbol_name(node.child(4))) && (symbol_name(node.child(5)) == ")")) { return process::hide(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "rename") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "RenExprSet") && (symbol_name(node.child(3)) == ",") && is_process_expression(symbol_name(node.child(4))) && (symbol_name(node.child(5)) == ")")) { return process::rename(parse_RenExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "comm") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "CommExprSet") && (symbol_name(node.child(3)) == ",") && is_process_expression(symbol_name(node.child(4))) && (symbol_name(node.child(5)) == ")")) { return process::comm(parse_CommExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && is_process_expression(symbol_name(node.child(1))) && (symbol_name(node.child(2)) == ")")) { return parse_ProcExpr(node.child(1)); }
+    else if ((node.child_count() == 3) && is_process_expression(symbol_name(node.child(0))) && (node.child(1).string() == "+") && is_process_expression(symbol_name(node.child(2)))) { return choice(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && is_process_expression(symbol_name(node.child(0))) && (node.child(1).string() == "||") && is_process_expression(symbol_name(node.child(2)))) { return merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && is_process_expression(symbol_name(node.child(0))) && (node.child(1).string() == "||_") && is_process_expression(symbol_name(node.child(2)))) { return left_merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && is_process_expression(symbol_name(node.child(0))) && (node.child(1).string() == ".") && is_process_expression(symbol_name(node.child(2)))) { return seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && is_process_expression(symbol_name(node.child(0))) && (node.child(1).string() == "<<") && is_process_expression(symbol_name(node.child(2)))) { return bounded_init(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && is_process_expression(symbol_name(node.child(0))) && (node.child(1).string() == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExpr(node.child(0)), parse_DataExprUnit(node.child(2))); }
+    else if ((node.child_count() == 3) && is_process_expression(symbol_name(node.child(0))) && (node.child(1).string() == "|") && is_process_expression(symbol_name(node.child(2)))) { return sync(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExprUnit") && (node.child(1).string() == "->") && is_process_expression(symbol_name(node.child(2)))) { return if_then(parse_DataExprUnit(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "IfThen") && node.child(1).child(0).string() == "->" && is_process_expression(symbol_name(node.child(1).child(1))) && (node.child(1).child(2).string() == "<>") && is_process_expression(symbol_name(node.child(2)))) { return if_then_else(parse_DataExprUnit(node.child(0)), parse_ProcExpr(node.child(1).child(1)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "sum") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && is_process_expression(symbol_name(node.child(3)))) { return sum(parse_VarsDeclList(node.child(1)), parse_ProcExpr(node.child(3))); }
+    else if ((node.child_count() == 7) && is_proc_expr_stochastic_operator(node)) { return stochastic_operator(parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3)), parse_ProcExpr(node.child(6))); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 

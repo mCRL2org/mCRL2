@@ -42,7 +42,7 @@ struct MoveRecord
     if (toggleLocked)
     {
       node->set_locked(!node->locked());
-      m_graph->hasNewFrame() = true;
+      m_graph->hasNewFrame(true);
     }
     node->set_anchored(node->locked());
   }
@@ -268,7 +268,7 @@ void GLWidget::updateSelection()
   if (needupdate)
   {
     m_graph.hasNewFrame(true);
-    // update();
+    update();
   }
 }
 

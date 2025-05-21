@@ -339,7 +339,7 @@ const Derived& down_cast(const Base& t,
                                                  !std::is_base_of<Derived, Base>::value>::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
-                "aterm cast can only be applied ot types derived from aterms where no extra fields are added");
+                "aterm cast can only be applied to types derived from aterms where no extra fields are added");
   assert(Derived(static_cast<const aterm&>(t)) != aterm());
   return reinterpret_cast<const Derived&>(t);
 }

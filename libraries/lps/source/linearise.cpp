@@ -1515,28 +1515,34 @@ class specification_basic_type
 
       if (is_sum(p))
       {
-        find_free_variables_process(sum(p).operand(),free_variables_in_p);
+        std::set<variable> aux_variable_set;
+        find_free_variables_process(sum(p).operand(),aux_variable_set);
 
         for(const variable& v: static_cast<const sum&>(p).variables())
         {
-          free_variables_in_p.erase(v);
+          aux_variable_set.erase(v);
         }
+        
+        free_variables_in_p.insert(aux_variable_set.begin(), aux_variable_set.end());
         return;
       }
 
       if (is_stochastic_operator(p))
       {
         const stochastic_operator& sto=down_cast<const stochastic_operator>(p);
-        find_free_variables_process(sto.operand(),free_variables_in_p);
+        std::set<variable> aux_variable_set;
+        find_free_variables_process(sto.operand(),aux_variable_set);
         for(const variable& v: find_free_variables(sto.distribution()))
         {
-          free_variables_in_p.insert(v);
+          aux_variable_set.insert(v);
         }
 
         for(const variable& v: sto.variables())
         {
-          free_variables_in_p.erase(v);
+          aux_variable_set.erase(v);
         }
+        
+        free_variables_in_p.insert(aux_variable_set.begin(), aux_variable_set.end());
         return;
       }
 
@@ -1723,8 +1729,7 @@ class specification_basic_type
          The standard substitutions do not take this parameterlist into account, as it stands.
       */
 
-      assert(replacelhs==0 || replacelhs==1);
-      assert(replacerhs==0 || replacerhs==1);
+      assert(replacelhs || replacerhs);
       if (parameters.empty())
       {
         assert(assignments.empty());
@@ -1749,7 +1754,7 @@ class specification_basic_type
           }
           if (replacerhs)
           {
-            rhs=/* data::*/replace_variables_capture_avoiding_alt(rhs,sigma);
+            rhs=replace_variables_capture_avoiding_alt(rhs,sigma);
           }
 
           assignment_list result=
@@ -1779,7 +1784,7 @@ class specification_basic_type
       }
       if (replacerhs)
       {
-        rhs=/* data::*/replace_variables_capture_avoiding_alt(rhs,sigma);
+        rhs=replace_variables_capture_avoiding_alt(rhs,sigma);
       }
 
       if (lhs==rhs)
@@ -1857,12 +1862,13 @@ class specification_basic_type
 
     /* The function below cannot be replace by replace_variables_capture_avoiding although
      * the interfaces are the same. As yet it is unclear why, but the difference shows itself
-     * for instance when linearising lift3_final.mcrl2 and lift3_init.mcrl2 */
+     * for instance when linearising lift3-final.mcrl2 and lift3_init.mcrl2 */
     template <class Substitution>
     process_expression substitute_pCRLproc(
       const process_expression& p,
       Substitution& sigma)
     {
+      // return process::replace_variables_capture_avoiding(p, sigma, fresh_identifier_generator);
       if (is_choice(p))
       {
         process_expression left=substitute_pCRLproc(choice(p).left(),sigma);
@@ -1885,12 +1891,6 @@ class specification_basic_type
           return q;
         }
         return seq(q, substitute_pCRLproc(seq(p).right(),sigma));
-      }
-      if (is_sync(p))
-      {
-        return process::sync(
-                 substitute_pCRLproc(process::sync(p).left(),sigma),
-                 substitute_pCRLproc(process::sync(p).right(),sigma));
       }
       if (is_if_then(p))
       {
@@ -1976,13 +1976,13 @@ class specification_basic_type
       if (is_action(p))
       {
         return action(action(p).label(),
-                      /* data::*/replace_variables_capture_avoiding_alt(action(p).arguments(), sigma));
+                      replace_variables_capture_avoiding_alt(action(p).arguments(), sigma));
       }
 
       if (is_at(p))
       {
         return at(substitute_pCRLproc(at(p).operand(),sigma),
-                  /* data::*/replace_variables_capture_avoiding_alt(at(p).time_stamp(),sigma));
+                      replace_variables_capture_avoiding_alt(at(p).time_stamp(),sigma));
       }
 
       if (is_delta(p))
@@ -2003,7 +2003,7 @@ class specification_basic_type
       }
 
       throw mcrl2::runtime_error("Internal error: expect a pCRL process (2) " + process::pp(p));
-      return process_expression();
+      return process_expression(); 
     }
 
 
@@ -4890,8 +4890,8 @@ class specification_basic_type
 
       if (is_process_instance_assignment(t))
       {
-        const process_identifier procId=process_instance_assignment(t).identifier();
-        const assignment_list t1=process_instance_assignment(t).assignments();
+        const process_identifier& procId=process_instance_assignment(t).identifier();
+        const assignment_list& t1=process_instance_assignment(t).assignments();
         return push_regular(procId,
                             t1,
                             stack,

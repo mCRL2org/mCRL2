@@ -42,14 +42,21 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   using super::print_variables;
 
   bool m_print_summand_numbers;
+  std::string m_process_name;
 
   printer()
-    : m_print_summand_numbers(false)
+    : m_print_summand_numbers(false), 
+      m_process_name("P")
   {}
 
   bool& print_summand_numbers()
   {
   	return m_print_summand_numbers;
+  }
+
+  std::string& process_name()
+  {
+    return m_process_name;
   }
 
   template <typename Container>
@@ -161,7 +168,8 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().apply(x.multi_action());
     derived().print(" .\n         ");
     print_distribution(x);
-    derived().print("P(");
+    derived().print(m_process_name);
+    derived().print("(");
     print_assignments(x.assignments(), true, "", "", ", ");
     derived().print(")");
     derived().leave(x);
@@ -180,7 +188,8 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   void apply(const lps::process_initializer& x)
   {
     derived().enter(x);
-    derived().print("init P");
+    derived().print("init ");
+    derived().print(m_process_name);
     print_variables(x.expressions(), false);
     derived().print(";");
     derived().leave(x);
@@ -195,7 +204,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
       derived().apply(x.distribution());
       derived().print(" . ");
     }
-    derived().print("P");
+    derived().print(m_process_name);
     print_variables(x.expressions(), false);
     derived().print(";");
     derived().leave(x);
@@ -206,7 +215,8 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   void print_linear_process(const LinearProcess& x)
   {
     derived().enter(x);
-    derived().print("proc P");
+    derived().print("proc ");
+    derived().print(m_process_name);
     print_variables(x.process_parameters(), true, true, false, "(", ")", ", ");
 
     if (m_print_summand_numbers)

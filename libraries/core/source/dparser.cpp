@@ -179,6 +179,8 @@ parser::parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn, D_SyntaxError
   m_parser->initial_globals = this;
   m_parser->save_parse_tree = 1;
   m_parser->initial_scope = nullptr;
+  m_parser->dont_compare_stacks = 1;
+  m_parser->dont_use_deep_priorities_for_disambiguation = 1;
   m_parser->dont_use_greediness_for_disambiguation = 1;
   m_parser->dont_use_height_for_disambiguation = 1;
   if (ambiguity_fn)
