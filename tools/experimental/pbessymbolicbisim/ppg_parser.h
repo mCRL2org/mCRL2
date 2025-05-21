@@ -69,7 +69,7 @@ public:
       pbes_expression cond = false_();
       for(const pbes_expression& disj: split_disjuncts(expr))
       {
-        if(is_simple_expression(disj))
+        if(is_simple_expression(disj, false))
         {
           optimized_or(cond, cond, disj);
         }
@@ -86,7 +86,7 @@ public:
       pbes_expression cond = true_();
       for(const pbes_expression& conj: split_conjuncts(expr))
       {
-        if(is_simple_expression(conj))
+        if(is_simple_expression(conj, false))
         {
           optimized_and(cond, cond, conj);
         }
@@ -185,7 +185,7 @@ public:
   {
     const pbes_expression& rhs = eq.formula();
     data::data_expression simple_formula;
-    if(is_simple_expression(rhs))
+    if(is_simple_expression(rhs, false))
     {
       // Set the equation to disjunctive to prevent negation of simple_formula
       m_is_conjunctive = false;
@@ -198,7 +198,7 @@ public:
       simple_formula = data::sort_bool::true_();
       for(const pbes_expression& expr: conjuncts)
       {
-        if(is_simple_expression(expr))
+        if(is_simple_expression(expr, false))
         {
           data::data_expression data_expr = pbes2data(expr);
           optimized_and(simple_formula, simple_formula, data_expr);
@@ -222,7 +222,7 @@ public:
       simple_formula = data::sort_bool::false_();
       for(const pbes_expression& expr: disjuncts)
       {
-        if(is_simple_expression(expr))
+        if(is_simple_expression(expr, false))
         {
           data::data_expression data_expr = pbes2data(expr);
           optimized_or(simple_formula, simple_formula, data_expr);

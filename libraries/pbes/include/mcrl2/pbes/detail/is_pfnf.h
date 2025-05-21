@@ -50,7 +50,7 @@ void split_or(const pbes_expression& expr, std::vector<pbes_expression>& result)
 inline
 bool is_pfnf_simple_expression(const pbes_expression& x)
 {
-  return is_simple_expression(x, true) || data::is_data_expression(x);
+  return is_simple_expression(x, false) || data::is_data_expression(x);
 }
 
 inline
