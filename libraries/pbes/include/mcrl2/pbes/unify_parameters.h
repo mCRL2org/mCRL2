@@ -157,7 +157,7 @@ void unify_parameters(pbes& p, bool ignore_ce_equations, bool reset)
   replace_propositional_variables(p, replace);
 
   // update the initial state
-  p.initial_state() = replace(p.initial_state());
+  p.initial_state() = replace_reset(p.initial_state());
 
   // update the left hand sides of the equations
   for (pbes_equation& eqn: p.equations())
@@ -219,7 +219,7 @@ void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equation
   }
 
   // update the initial state
-  p.initial_state() = replace(p.initial_state());
+  p.initial_state() = replace_reset(p.initial_state());
 }
 
 /// \returns true iff all PBES equations have the same parameter list.
