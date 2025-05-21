@@ -206,6 +206,8 @@ pbes_system::srf_pbes_with_ce preprocess(pbes_system::pbes pbesspec, const symbo
   
   // Unify the parameters of the original PBES (which has potential counter example information)
   unify_parameters(result, true, options.reset_parameters);
+  
+  pbes_system::resolve_summand_variable_name_clashes(result, result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
 
   return result;
 }
@@ -274,8 +276,6 @@ class pbesreach_algorithm
       {
         throw mcrl2::runtime_error("The PBES after removing counter example information does not have unified parameters");
       }
-
-      pbes_system::resolve_summand_variable_name_clashes(srf_pbes, srf_pbes.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
 
       // add a sort for the propositional variable names
       data::data_specification propvar_dataspec = construct_propositional_variable_data_specification(srf_pbes, "PropositionalVariable");
