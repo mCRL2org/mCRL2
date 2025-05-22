@@ -330,7 +330,7 @@ void eqelm(pbes& p,
   // pbes rewriter
   switch (rewriter_type)
   {
-    case simplify:
+    case pbes_rewriter_type::simplify:
     {
       typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
       pbes_rewriter pbesr(datar);
@@ -338,10 +338,10 @@ void eqelm(pbes& p,
       algorithm.run(p, ignore_initial_state);
       break;
     }
-    case quantifier_all:
-    case quantifier_finite:
+    case pbes_rewriter_type::quantifier_all:
+    case pbes_rewriter_type::quantifier_finite:
     {
-      bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
+      bool enumerate_infinite_sorts = (rewriter_type == pbes_rewriter_type::quantifier_all);
       enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_eqelm_algorithm<pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, ignore_initial_state);

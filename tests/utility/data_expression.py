@@ -38,6 +38,9 @@ class Variable(DataExpression):
 
     def __str__(self) -> str:
         return self.name
+    
+    def parameter(self) -> str:
+        return f"{self.name}: {self.type}"
 
     def parameter(self) -> str:
         """Returns a "d: D" string representation of the variable."""

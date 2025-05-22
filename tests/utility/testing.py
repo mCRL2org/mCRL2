@@ -182,8 +182,8 @@ class YmlTest(object):
         input_nodes = [node for node in self.input_nodes if node.value is None]
         if len(input_nodes) != len(inputfiles):
             raise RuntimeError(
-                "Invalid number of input files provided: expected {0}, got {1}".format(
-                    len(input_nodes), len(inputfiles)
+                "Tool {}, Invalid number of input files provided: expected {}, got {}".format(
+                    self, len(input_nodes), len(inputfiles)
                 )
             )
         for i in range(len(inputfiles)):

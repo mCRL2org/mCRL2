@@ -265,7 +265,7 @@ class symbolic_exploration_algorithm
     pbes_expression F_or(const pbes_expression& x)
     {
       pbes_expression result;
-      if (is_simple_expression(x))
+      if (is_simple_expression(x, false))
       {
         result = false_();
       }
@@ -311,7 +311,7 @@ class symbolic_exploration_algorithm
     pbes_expression F_and(const pbes_expression& x)
     {
       pbes_expression result;
-      if (is_simple_expression(x))
+      if (is_simple_expression(x, false))
       {
         result = true_();
       }

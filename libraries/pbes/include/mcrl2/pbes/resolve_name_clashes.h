@@ -22,8 +22,9 @@ namespace pbes_system {
 
 namespace detail {
 
+template<bool allow_ce>
 inline
-void resolve_summand_variable_name_clashes(srf_summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
+void resolve_summand_variable_name_clashes(pre_srf_summand<allow_ce>& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
 {
   const data::variable_list& summation_variables = summand.parameters();
   std::set<core::identifier_string> names = lps::detail::variable_name_clashes(summation_variables, process_parameter_names);
@@ -37,8 +38,20 @@ void resolve_summand_variable_name_clashes(srf_summand& summand, const std::set<
         sigma[v] = data::variable(generator(v.name()), v.sort());
       }
     }
+
     summand.parameters() = lps::replace_all_variables(summand.parameters(), sigma);
-    summand.condition() = lps::replace_all_variables(summand.condition(), sigma);
+
+    if constexpr (allow_ce)
+    {
+      // Replace on pbes_expressions
+      summand.condition() = pbes_system::replace_all_variables(summand.condition(), sigma);
+    }
+    else
+    {
+      // Replace on data expressions.
+      summand.condition() = lps::replace_all_variables(summand.condition(), sigma);
+    }
+    
     summand.variable() = pbes_system::replace_all_variables(summand.variable(), sigma);
   }
 }
@@ -46,15 +59,16 @@ void resolve_summand_variable_name_clashes(srf_summand& summand, const std::set<
 } // namespace detail
 
 /// \brief Renames summand variables such that there are no name clashes between summand variables and process parameters
+template<bool allow_ce>
 inline
-void resolve_summand_variable_name_clashes(srf_pbes& pbesspec, const data::variable_list& process_parameters)
+void resolve_summand_variable_name_clashes(detail::pre_srf_pbes<allow_ce>& pbesspec, const data::variable_list& process_parameters)
 {
   std::set<core::identifier_string> process_parameter_names = lps::detail::variable_names(process_parameters);
 
   data::set_identifier_generator generator;
 
-  // Here we cannot yet convert the full  srf_pbes to pbes since it's not well typed, so instead find the identifiers separately.
-  for (const srf_equation& eq : pbesspec.equations())
+  // Here we cannot yet convert the full srf_pbes to pbes since it's not well typed, so instead find the identifiers separately.
+  for (const detail::pre_srf_equation<allow_ce>& eq : pbesspec.equations())
   {
     generator.add_identifiers(pbes_system::find_identifiers(eq.to_pbes()));
   }

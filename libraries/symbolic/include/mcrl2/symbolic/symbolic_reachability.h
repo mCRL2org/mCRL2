@@ -16,10 +16,11 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/undefined.h"
-#include "mcrl2/utilities/stopwatch.h"
 #include "mcrl2/symbolic/alternative_relprod.h"
 #include "mcrl2/symbolic/summand_group.h"
+#include "mcrl2/utilities/stopwatch.h"
 
 #include <sylvan_ldd.hpp>
 
@@ -100,11 +101,10 @@ data::rewriter construct_rewriter(const data::data_specification& dataspec, data
 }
 
 template <typename EnumeratorElement>
-void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
+void check_enumerator_solution(const EnumeratorElement& p, const summand_group& summand)
 {
   if (p.expression() != data::sort_bool::true_())
-  {
-    // TODO: print the problematic expression in the same way it is done in lps2lts(?)
+  {    
     throw data::enumerator_error("Expression does not rewrite to true or false: " + data::pp(p.expression()));
   }
 }

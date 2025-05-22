@@ -20,6 +20,7 @@
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/pbes/replace_capture_avoiding_with_an_identifier_generator.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/utilities/skip.h"
@@ -1380,7 +1381,7 @@ class partial_order_reduction_algorithm
        m_solver(options.use_smt_solver ? new smt::smt_solver(p.data()) : nullptr),
        m_options(options)
     {
-      unify_parameters(m_pbes);
+      unify_parameters(m_pbes, false, true);
 
       // initialize m_parameters and m_parameter_positions
       const data::variable_list& parameters = m_pbes.equations().front().variable().parameters();

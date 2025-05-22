@@ -18,16 +18,19 @@
 #include "mcrl2/pbes/detail/ppg_traverser.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
+#include "mcrl2/pbes/srf_pbes.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
+inline
 void pbesrewr(const std::string& input_filename,
               const std::string& output_filename,
               const utilities::file_format& input_format,
@@ -45,34 +48,34 @@ void pbesrewr(const std::string& input_filename,
   // pbes rewriter
   switch (rewriter_type)
   {
-    case simplify:
+    case pbes_rewriter_type::simplify:
     {
       simplify_quantifiers_data_rewriter<data::rewriter> pbesr(datar);
       //simplify_data_rewriter<data::rewriter> pbesr(datar);
       pbes_rewrite(p, pbesr);
       break;
     }
-    case quantifier_all:
+    case pbes_rewriter_type::quantifier_all:
     {
       bool enumerate_infinite_sorts = true;
       enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_rewrite(p, pbesr);
       break;
     }
-    case quantifier_finite:
+    case pbes_rewriter_type::quantifier_finite:
     {
       bool enumerate_infinite_sorts = false;
       enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
       pbes_rewrite(p, pbesr);
       break;
     }
-    case quantifier_inside:
+    case pbes_rewriter_type::quantifier_inside:
     {
       quantifiers_inside_rewriter pbesr;
       pbes_rewrite(p, pbesr);
       break;
     }
-    case quantifier_one_point:
+    case pbes_rewriter_type::quantifier_one_point:
     {
       // apply the one point rule rewriter
       one_point_rule_rewriter pbesr;
@@ -84,14 +87,14 @@ void pbesrewr(const std::string& input_filename,
       pbes_rewrite(p, simp);
       break;
     }
-    case pfnf:
+    case pbes_rewriter_type::pfnf:
     {
       pfnf_rewriter pbesr;
       pbes_system::normalize(p);
       pbes_rewrite(p, pbesr);
       break;
     }
-    case ppg:
+    case pbes_rewriter_type::ppg:
     {
       //bool bqnf = detail::is_bqnf(p);
       //std::clog << "bqnf_traverser says: p is " << (bqnf ? "" : "NOT ") << "in BQNF." << std::endl;
@@ -114,21 +117,25 @@ void pbesrewr(const std::string& input_filename,
       }
       break;
     }
-    case bqnf_quantifier:
+    case pbes_rewriter_type::srf:
+    {
+      auto result = pbes2srf(p);    
+      save_pbes(result.to_pbes(), output_filename, output_format);  
+    }
+    case pbes_rewriter_type::pre_srf:
+    {
+      auto result = pbes2pre_srf(p);
+      save_pbes(result.to_pbes(), output_filename, output_format);      
+    }
+    case pbes_rewriter_type::bqnf_quantifier:
     {
       bqnf_rewriter pbesr;
       pbes_rewrite(p, pbesr);
       break;
     }
-    case prover:
-    default:
-    {
-      // Just ignore.
-      assert(false);  // The PBES rewriter cannot be activated through
-      // the commandline. So, we cannot end up here.
-      break;
-    }
   }
+
+  
   save_pbes(p, output_filename, output_format);
 }
 
