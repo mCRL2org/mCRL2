@@ -190,7 +190,7 @@ class function_declaration():
     self.original_namespace = ""
 
   def __eq__(self, other):
-    if (hasattr(other, "id") and hasattr(other, "label") and hasattr(other, "namespace") and 
+    if (hasattr(other, "id") and hasattr(other, "label") and hasattr(other, "namespace") and
             hasattr(other, "original_namespace") and hasattr(other, "internextern") and hasattr(other, "definedby")):
       return (self.id == other.id and self.label == other.label and self.namespace == other.namespace and self.original_namespace == other.original_namespace and
               self.internextern == other.internextern and self.definedby == other.definedby)
@@ -237,7 +237,7 @@ class function_declaration():
     return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
 
   def mCRL2_usable_functions(self, spec, function_declarations):
-    if self.namespace != self.original_namespace or self.namespace != function_declarations.namespace or self.namespace != spec.namespace: # or self.internextern.is_internal(): Also functions declared internal are externally usable, as they can occur in lps's en pbes's that are sometimes typechecked, for instance when merging two specifications. 
+    if self.namespace != self.original_namespace or self.namespace != function_declarations.namespace or self.namespace != spec.namespace: # or self.internextern.is_internal(): Also functions declared internal are externally usable, as they can occur in lps's en pbes's that are sometimes typechecked, for instance when merging two specifications.
       return ""
 
     sort_params = self.sort_expression.sort_parameters(spec)
@@ -733,13 +733,13 @@ ${cases}
           return ""
         CODE_TEMPLATE = Template('''
       /// \\brief The data expression of an application of the function symbol ${namestring}.
-      /// \\details This function is to be implemented manually. 
+      /// \\details This function is to be implemented manually.
       ${dataparameterstring}
       /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
       inline
       void ${functionname}_manual_implementation(data_expression& result, ${parameters});\n
 
-      /// \\brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \\brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void ${functionname}_application(data_expression& result, const data_expression& a1)
       {
@@ -809,7 +809,7 @@ ${cases}
 
           return self.polymorphic_function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec)) + \
                  self.polymorphic_function_recogniser(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec)) + \
-                 self.function_application_code(self.sort_expression_list.elements[0], True) 
+                 self.function_application_code(self.sort_expression_list.elements[0], True)
 
     class multi_function_declaration_list():
       def __init__(self, elements):
@@ -2259,7 +2259,7 @@ class specification():
     if self.namespace != "undefined" and self.namespace != "":
       return self.namespace
     else:
-      return self.origin_file[:len(self.origin_file)-5]
+      return self.origin_file.stem
 
   def set_namespace(self):
     if (len(self.sort_specification.declarations.elements) == 0):
@@ -2306,8 +2306,8 @@ class specification():
     code += "/// This file was generated from the data sort specification\n"
     code += "/// mcrl2/data/build/%s.spec.\n" % (remove_underscore(self.get_namespace()))
     code += "\n"
-    code += "#ifndef MCRL2_DATA_%s_H\n" % (infilename.removesuffix(".spec").upper())
-    code += "#define MCRL2_DATA_%s_H\n\n" % (infilename.removesuffix(".spec").upper())
+    code += "#ifndef MCRL2_DATA_%s_H\n" % (infilename.stem.upper())
+    code += "#define MCRL2_DATA_%s_H\n\n" % (infilename.stem.upper())
     code += "#include \"functional\"    // std::function\n"
     code += "#include \"mcrl2/utilities/exception.h\"\n"
     code += "#include \"mcrl2/data/basic_sort.h\"\n"
@@ -2349,7 +2349,7 @@ class specification():
     code += "} // namespace mcrl2\n\n"
     code += ("#include \"mcrl2/data/detail/%s.h\" // This file contains the manual implementations of rewrite functions.\n" % (remove_underscore(self.get_namespace()))
                  if self.has_cplusplus_implementable_code() else "")
-    code += "#endif // MCRL2_DATA_%s_H\n" % (infilename.removesuffix(".spec").upper())
+    code += "#endif // MCRL2_DATA_%s_H\n" % (infilename.stem.upper())
     code = code.replace("__", "_")
     p = re.compile('sort_([A-Za-z0-9]*)_([ ]|:)')
     code = p.sub(r'sort_\1\2', code)

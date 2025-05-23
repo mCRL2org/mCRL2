@@ -9,7 +9,7 @@
 % Specification of the FBag data sort, denoting finite bags.
 % Note that the specification relies on the underlying data type S to have a total ordering.
 %
-% The definition of an FBag originally had the shape 
+% The definition of an FBag originally had the shape
 %
 % sort FBag(S) <"fbag"> = struct {:} <"empty"> | @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3">;
 %
@@ -19,9 +19,9 @@
 %
 % Also changed @fbag_insert to become the constructor and @fbag_cons to become a map. All bags should have
 % their elements in a list with @fbag_cons as head symbol be ordered. This is not the case in lists with @fbag_insert.
-% If the @fbag_cons would be a constructor illegal lists would be constructed when evaluationg quantifications and 
-% sum operators. Now it is the case that too many bags will be generated when evaluating for instance a sum operator, 
-% but they are at least not incorrect. 
+% If the @fbag_cons would be a constructor illegal lists would be constructed when evaluationg quantifications and
+% sum operators. Now it is the case that too many bags will be generated when evaluating for instance a sum operator,
+% but they are at least not incorrect.
 
 #using S
 #include bool.spec
@@ -42,6 +42,7 @@ map  @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag
      * <"intersection"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                                                             external defined_by_rewrite_rules;
      - <"difference"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                                                               external defined_by_rewrite_rules;
      # <"count_all"> : FBag(S) <"arg"> -> Nat                                                                                         external defined_by_rewrite_rules;
+     pick <"pick">: FBag(S) <"arg"> -> S                                                    external defined_by_rewrite_rules;
 
 
 var  d: S;
@@ -95,3 +96,4 @@ eqn  ==(@fbag_cons(d, p, b), {:})  =  false;
      #({:}) = @c0;
      #(@fbag_cons(d,p,{:})) = Pos2Nat(p);
      #(@fbag_cons(d,p,@fbag_cons(e,q,b))) = Pos2Nat(@plus_pos(p,Nat2Pos(#(@fbag_cons(e,q,b)))));
+     pick(@fbag_cons(d,p,b)) = d;

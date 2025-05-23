@@ -638,6 +638,68 @@ namespace mcrl2 {
       {
         return is_application(e) && is_count_function_symbol(atermpp::down_cast<application>(e).head());
       }
+
+      /// \brief Generate identifier pick.
+      /// \return Identifier pick.
+      inline
+      const core::identifier_string& pick_name()
+      {
+        static core::identifier_string pick_name = core::identifier_string("pick");
+        return pick_name;
+      }
+
+      /// \brief Constructor for function symbol pick.
+      /// \param s A sort expression.
+      /// \return Function symbol pick.
+      inline
+      function_symbol pick(const sort_expression& s)
+      {
+        function_symbol pick(pick_name(), make_function_sort_(fset(s), s));
+        return pick;
+      }
+
+      /// \brief Recogniser for function pick.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching pick.
+      inline
+      bool is_pick_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e).name() == pick_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol pick.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      /// \return Application of pick to a number of arguments.
+      inline
+      application pick(const sort_expression& s, const data_expression& arg0)
+      {
+        return sort_fset::pick(s)(arg0);
+      }
+
+      /// \brief Make an application of function symbol pick.
+      /// \param result The data expression where the pick expression is put.
+      /// \param s A sort expression.
+      /// \param arg0 A data expression.
+      inline
+      void make_pick(data_expression& result, const sort_expression& s, const data_expression& arg0)
+      {
+        make_application(result, sort_fset::pick(s),arg0);
+      }
+
+      /// \brief Recogniser for application of pick.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol pick to a
+      ///     number of arguments.
+      inline
+      bool is_pick_application(const atermpp::aterm& e)
+      {
+        return is_application(e) && is_pick_function_symbol(atermpp::down_cast<application>(e).head());
+      }
       /// \brief Give all system defined mappings for fset
       /// \param s A sort expression
       /// \return All system defined mappings for fset
@@ -652,6 +714,7 @@ namespace mcrl2 {
         result.push_back(sort_fset::union_(s));
         result.push_back(sort_fset::intersection(s));
         result.push_back(sort_fset::count(s));
+        result.push_back(sort_fset::pick(s));
         return result;
       }
       
@@ -683,6 +746,7 @@ namespace mcrl2 {
         result.push_back(sort_fset::union_(s));
         result.push_back(sort_fset::intersection(s));
         result.push_back(sort_fset::count(s));
+        result.push_back(sort_fset::pick(s));
         return result;
       }
 
@@ -767,7 +831,7 @@ namespace mcrl2 {
       inline
       const data_expression& arg(const data_expression& e)
       {
-        assert(is_count_application(e));
+        assert(is_count_application(e) || is_pick_application(e));
         return atermpp::down_cast<application>(e)[0];
       }
 
@@ -819,6 +883,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list(), count(s, empty(s)), sort_nat::c0()));
         result.push_back(data_equation(variable_list({vd, vs}), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
         result.push_back(data_equation(variable_list({vs, vt}), not_equal_to(vs, vt), sort_bool::not_(equal_to(vs, vt))));
+        result.push_back(data_equation(variable_list({vd, vs}), pick(s, cons_(s, vd, vs)), vd));
         return result;
       }
 

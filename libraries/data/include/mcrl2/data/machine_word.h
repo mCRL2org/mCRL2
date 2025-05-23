@@ -173,14 +173,14 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@succ_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@succ_word to a number of arguments.
       inline
       void succ_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void succ_word_application(data_expression& result, const data_expression& a1)
       {
@@ -529,14 +529,14 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@equals_zero_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@equals_zero_word to a number of arguments.
       inline
       void equals_zero_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void equals_zero_word_application(data_expression& result, const data_expression& a1)
       {
@@ -610,14 +610,14 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@not_equals_zero_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@not_equals_zero_word to a number of arguments.
       inline
       void not_equals_zero_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void not_equals_zero_word_application(data_expression& result, const data_expression& a1)
       {
@@ -691,14 +691,14 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@equals_one_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@equals_one_word to a number of arguments.
       inline
       void equals_one_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void equals_one_word_application(data_expression& result, const data_expression& a1)
       {
@@ -772,14 +772,14 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@equals_max_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@equals_max_word to a number of arguments.
       inline
       void equals_max_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void equals_max_word_application(data_expression& result, const data_expression& a1)
       {
@@ -855,7 +855,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@add_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_word to a number of arguments.
@@ -863,7 +863,7 @@ namespace mcrl2 {
       void add_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void add_word_application(data_expression& result, const data_expression& a1)
       {
@@ -939,7 +939,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@add_with_carry_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_with_carry_word to a number of arguments.
@@ -947,7 +947,7 @@ namespace mcrl2 {
       void add_with_carry_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void add_with_carry_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1023,7 +1023,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@add_overflow_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_overflow_word to a number of arguments.
@@ -1031,7 +1031,7 @@ namespace mcrl2 {
       void add_overflow_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void add_overflow_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1107,7 +1107,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@add_with_carry_overflow_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_with_carry_overflow_word to a number of arguments.
@@ -1115,7 +1115,7 @@ namespace mcrl2 {
       void add_with_carry_overflow_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void add_with_carry_overflow_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1191,7 +1191,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@times_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@times_word to a number of arguments.
@@ -1199,7 +1199,7 @@ namespace mcrl2 {
       void times_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void times_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1277,7 +1277,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@times_with_carry_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -1286,7 +1286,7 @@ namespace mcrl2 {
       void times_with_carry_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void times_with_carry_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1362,7 +1362,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@times_overflow_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@times_overflow_word to a number of arguments.
@@ -1370,7 +1370,7 @@ namespace mcrl2 {
       void times_overflow_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void times_overflow_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1448,7 +1448,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@times_with_carry_overflow_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -1457,7 +1457,7 @@ namespace mcrl2 {
       void times_with_carry_overflow_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void times_with_carry_overflow_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1533,7 +1533,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@minus_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@minus_word to a number of arguments.
@@ -1541,7 +1541,7 @@ namespace mcrl2 {
       void minus_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void minus_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1617,7 +1617,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@monus_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@monus_word to a number of arguments.
@@ -1625,7 +1625,7 @@ namespace mcrl2 {
       void monus_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void monus_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1701,7 +1701,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@div_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@div_word to a number of arguments.
@@ -1709,7 +1709,7 @@ namespace mcrl2 {
       void div_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void div_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1785,7 +1785,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@mod_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@mod_word to a number of arguments.
@@ -1793,7 +1793,7 @@ namespace mcrl2 {
       void mod_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void mod_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1867,14 +1867,14 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_word to a number of arguments.
       inline
       void sqrt_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void sqrt_word_application(data_expression& result, const data_expression& a1)
       {
@@ -1952,7 +1952,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@div_doubleword.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -1961,7 +1961,7 @@ namespace mcrl2 {
       void div_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void div_doubleword_application(data_expression& result, const data_expression& a1)
       {
@@ -2041,7 +2041,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@div_double_doubleword.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -2051,7 +2051,7 @@ namespace mcrl2 {
       void div_double_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void div_double_doubleword_application(data_expression& result, const data_expression& a1)
       {
@@ -2133,7 +2133,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@div_triple_doubleword.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -2144,7 +2144,7 @@ namespace mcrl2 {
       void div_triple_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void div_triple_doubleword_application(data_expression& result, const data_expression& a1)
       {
@@ -2222,7 +2222,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@mod_doubleword.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -2231,7 +2231,7 @@ namespace mcrl2 {
       void mod_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void mod_doubleword_application(data_expression& result, const data_expression& a1)
       {
@@ -2307,7 +2307,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_doubleword.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_doubleword to a number of arguments.
@@ -2315,7 +2315,7 @@ namespace mcrl2 {
       void sqrt_doubleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void sqrt_doubleword_application(data_expression& result, const data_expression& a1)
       {
@@ -2393,7 +2393,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_tripleword.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -2402,7 +2402,7 @@ namespace mcrl2 {
       void sqrt_tripleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void sqrt_tripleword_application(data_expression& result, const data_expression& a1)
       {
@@ -2480,7 +2480,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_tripleword_overflow.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -2489,7 +2489,7 @@ namespace mcrl2 {
       void sqrt_tripleword_overflow_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void sqrt_tripleword_overflow_application(data_expression& result, const data_expression& a1)
       {
@@ -2569,7 +2569,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_quadrupleword.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -2579,7 +2579,7 @@ namespace mcrl2 {
       void sqrt_quadrupleword_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void sqrt_quadrupleword_application(data_expression& result, const data_expression& a1)
       {
@@ -2659,7 +2659,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_quadrupleword_overflow.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -2669,7 +2669,7 @@ namespace mcrl2 {
       void sqrt_quadrupleword_overflow_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void sqrt_quadrupleword_overflow_application(data_expression& result, const data_expression& a1)
       {
@@ -2743,14 +2743,14 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@pred_word.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@pred_word to a number of arguments.
       inline
       void pred_word_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void pred_word_application(data_expression& result, const data_expression& a1)
       {
@@ -2826,7 +2826,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@equal.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@equal to a number of arguments.
@@ -2834,7 +2834,7 @@ namespace mcrl2 {
       void equal_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void equal_word_application(data_expression& result, const data_expression& a1)
       {
@@ -2910,7 +2910,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@not_equal.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@not_equal to a number of arguments.
@@ -2918,7 +2918,7 @@ namespace mcrl2 {
       void not_equal_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void not_equal_word_application(data_expression& result, const data_expression& a1)
       {
@@ -2994,7 +2994,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@less.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@less to a number of arguments.
@@ -3002,7 +3002,7 @@ namespace mcrl2 {
       void less_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void less_word_application(data_expression& result, const data_expression& a1)
       {
@@ -3078,7 +3078,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@less_equal.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@less_equal to a number of arguments.
@@ -3086,7 +3086,7 @@ namespace mcrl2 {
       void less_equal_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void less_equal_word_application(data_expression& result, const data_expression& a1)
       {
@@ -3162,7 +3162,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@greater.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@greater to a number of arguments.
@@ -3170,7 +3170,7 @@ namespace mcrl2 {
       void greater_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void greater_word_application(data_expression& result, const data_expression& a1)
       {
@@ -3246,7 +3246,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@greater_equal.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@greater_equal to a number of arguments.
@@ -3254,7 +3254,7 @@ namespace mcrl2 {
       void greater_equal_word_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void greater_equal_word_application(data_expression& result, const data_expression& a1)
       {
@@ -3328,14 +3328,14 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@rightmost_bit.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@rightmost_bit to a number of arguments.
       inline
       void rightmost_bit_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void rightmost_bit_application(data_expression& result, const data_expression& a1)
       {
@@ -3411,7 +3411,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@shift_right.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@shift_right to a number of arguments.
@@ -3419,7 +3419,7 @@ namespace mcrl2 {
       void shift_right_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void shift_right_application(data_expression& result, const data_expression& a1)
       {
