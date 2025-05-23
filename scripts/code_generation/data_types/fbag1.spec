@@ -43,7 +43,7 @@ map @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(
     * <"intersection"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                   external defined_by_rewrite_rules;
     - <"difference"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                     external defined_by_rewrite_rules;
     # <"count_all"> : FBag(S) <"arg"> -> Nat                                               external defined_by_rewrite_rules;
-
+    pick <"pick">: FBag(S) <"arg"> -> S                                                    external defined_by_rewrite_rules;
 
 var d: S;
     e: S;
@@ -94,3 +94,4 @@ eqn ==(@fbag_cons(d, p, b), {:})  =  false;
     #({:}) = @c0;
     #(@fbag_cons(d,p,{:})) = @cNat(p);
     #(@fbag_cons(d,p,@fbag_cons(e,q,b))) = @cNat(@addc(false,p,Nat2Pos(#(@fbag_cons(e,q,b)))));
+    pick(@fbag_cons(d,p,b)) = d;
