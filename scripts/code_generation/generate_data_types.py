@@ -8,21 +8,19 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 import os
+import pathlib
+import subprocess
 import sys
-from subprocess import call
 from argparse import ArgumentParser
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-
+SCRIPT_DIR = pathlib.Path(__file__).parent.resolve()
 
 # Obtain the names of all files with the extension .spec in
 # the current directory
-def get_specifications():
-    specs = []
-    for file in os.listdir("."):
-        base, ext = os.path.splitext(file)
-        if ext == ".spec":
-            specs.append(base)
+def get_specifications(p: pathlib.Path):
+    assert(p.is_dir())
+    files = list(p.glob('*.spec'))
+    specs = [str(spec.stem) for spec in files]
     return specs
 
 
@@ -39,20 +37,22 @@ def main():
     )
     options = option_parser.parse_args()
 
-    arguments = ""
+    arguments = []
     if options.verbose:
-        arguments += " -v"
+        arguments.append("-v")
     if options.debug:
-        arguments += " -d"
+        arguments.append("-d")
 
     # N.B. The script only works if the .spec files are in the current directory!
-    os.chdir(os.path.join(SCRIPT_DIR, "data_types"))
-    specs = get_specifications()
+    data_types_dir = SCRIPT_DIR.joinpath("data_types")
+    os.chdir(data_types_dir)
+    specs = get_specifications(data_types_dir)
     for spec in specs:
         print(f"Generating code for {spec}")
-        cmd = f"{sys.executable} ./codegen.py {arguments} {spec}.spec ../../../libraries/data/include/mcrl2/data/{spec}.h"
-        retcode = call(cmd, shell=True)
-        if retcode != 0:
+        cmd = [f"{sys.executable}", data_types_dir.joinpath("codegen.py")] + arguments + [f"{spec}.spec", f"../../../libraries/data/include/mcrl2/data/{spec}.h"]
+
+        completed_process = subprocess.run(cmd)
+        if completed_process.returncode != 0:
             raise RuntimeError(
                 f"Failed to generate code for {spec}. Aborting... (while executing command {cmd})"
             )
