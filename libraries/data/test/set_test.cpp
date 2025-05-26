@@ -41,10 +41,10 @@ void test_expression(const std::string& evaluate, const std::string& expected, d
   if (rd1!=rd2)
   {
     std::cerr << "------------------------------------------------------\n";
-    std::cerr << "Evaluating: " << evaluate << "\n";
-    std::cerr << "Result: " << rd1 << "\n";
-    std::cerr << "Expected result: " << expected << "\n";
-    std::cerr << "Evaluated expected result " << rd2 << "\n";
+    std::cerr << "Evaluating: " << d1 << " of sort " << d1.sort() << "\n";
+    std::cerr << "Result: " << rd1 << " of sort " << rd1.sort() << "\n";
+    std::cerr << "Expected result: " << d2 << " of sort " << d2.sort() << "\n";
+    std::cerr << "Evaluated expected result " << rd2 << " of sort " << rd2.sort() <<"\n";
     BOOST_CHECK(rd1 == rd2);
     std::cerr << "------------------------------------------------------\n";
   }
@@ -55,6 +55,7 @@ void set_expression_test()
   data::data_specification specification;
 
   specification.add_context_sort(sort_pos::pos());
+  specification.add_context_sort(sort_fset::fset(sort_pos::pos()));
   specification.add_context_sort(sort_set::set_(sort_pos::pos()));
   specification.add_context_sort(sort_set::set_(sort_bool::bool_()));
 
@@ -81,26 +82,11 @@ void set_expression_test()
   data_expression t1d2a = parse_data_expression("{2,1}");
   BOOST_CHECK(normaliser(t1d1a) != normaliser(t1d2a));
 
-  data_expression t2d1 = parse_data_expression("{1,2} == {1,2}");
-  data_expression t2d2 = parse_data_expression("true");
-  BOOST_CHECK(normaliser(t2d1) == normaliser(t2d2));
-
-  data_expression t2d1a = parse_data_expression("{1,2,3} == {1,2,1}");
-  data_expression t2d2a = parse_data_expression("false");
-  BOOST_CHECK(normaliser(t2d1a) == normaliser(t2d2a));
-
-  data_expression t3d1 = parse_data_expression("({1,2} != {2,3})");
-  data_expression t3d2 = parse_data_expression("true");
-  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d2));
-
-  data_expression t4d1 = parse_data_expression("(!{1,2}) == {1,2}");
-  data_expression t4d2 = parse_data_expression("false");
-  BOOST_CHECK(normaliser(t4d1) == normaliser(t4d2));
-
-  data_expression t5d1 = parse_data_expression("(!!{1,2}) == {2,1}");
-  data_expression t5d2 = parse_data_expression("true");
-  BOOST_CHECK(normaliser(t5d1) == normaliser(t5d2));
-
+  test_expression("{1,2} == {1,2}", "true", normaliser);
+  test_expression("{1,2,3} == {1,2,1}", "false", normaliser);
+  test_expression("({1,2} != {2,3})", "true", normaliser);
+  test_expression("(!{1,2}) == {1,2}", "false", normaliser);
+  test_expression("(!!{1,2}) == {2,1}", "true", normaliser);
 
   data_expression e = parse_data_expression("{20}", v);
   BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));
@@ -108,12 +94,18 @@ void set_expression_test()
   e = parse_data_expression("{20, 30, 40}", v);
   BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));
 
+  test_expression("pick({20})", "20", normaliser);
+  test_expression("pick({true})", "true", normaliser);
+  test_expression("pick({20}) + 1", "21", normaliser);
+  test_expression("pick({20}) == 20", "true", normaliser);
+  test_expression("#({20})", "Pos2Nat(1)", normaliser);
+
   test_expression("{} == { b: Bool | true } - { true, false }","true",normaliser);
 
   test_expression("{ b: Bool | true } - { true, false } == {}","true", normaliser);
 
   // Check the operation == on sets.
-  test_expression("{} == ({true} - {true})","true",normaliser);  // {true}-{true} is a trick to type {} == {}. 
+  test_expression("{} == ({true} - {true})","true",normaliser);  // {true}-{true} is a trick to type {} == {}.
   test_expression("{} == {false}", "false",normaliser);
   test_expression("{} == {true}", "false",normaliser);
   test_expression("{true} == {true}", "true",normaliser);
@@ -123,7 +115,7 @@ void set_expression_test()
   test_expression("{false, true} == {true, false}", "true",normaliser);
 
   // Check the operation < on sets.
-  test_expression("{} < ({true} - {true})","false",normaliser);  // {true}-{true} is a trick to type {} == {}. 
+  test_expression("{} < ({true} - {true})","false",normaliser);  // {true}-{true} is a trick to type {} == {}.
   test_expression("{true} < {false}", "false",normaliser);
   test_expression("{false} < {true}", "false",normaliser);
   test_expression("{true} < {true}", "false",normaliser);
@@ -172,4 +164,3 @@ BOOST_AUTO_TEST_CASE(test_main)
 {
   set_expression_test();
 }
-
