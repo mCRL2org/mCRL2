@@ -20,23 +20,9 @@
 
 using namespace mcrl2;
 
-inline
-data::sort_expression pos()
-{
-  return data::sort_pos::pos();
-}
-
-inline
-data::sort_expression nat()
-{
-  return data::sort_nat::nat();
-}
-
-inline
-data::sort_expression list(const data::sort_expression& x)
-{
-  return data::sort_list::list(x);
-}
+using data::sort_pos::pos;
+using data::sort_nat::nat;
+using data::sort_list::list;
 
 inline
 data::variable var(const std::string& name, const data::sort_expression& sort)
@@ -149,6 +135,8 @@ void test_data_expression(const std::string& de_in,
     {
       BOOST_CHECK_NO_THROW(x = data::typecheck_data_expression(x, variable_context));
       BOOST_CHECK_NE(x, data::data_expression());
+
+      std::clog << "  inferred type: " << pp(x.sort()) << " (after typechecking) " << std::endl;
 
       std::string de_out = data::pp(x);
       //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
@@ -320,6 +308,16 @@ BOOST_AUTO_TEST_CASE(test_list_is_list_nat)
   test_data_expression("x == y", { var("x", list(pos())),  var("y", list(nat())) }, false);
 }
 
+BOOST_AUTO_TEST_CASE(test_head_list_zero)
+{
+  test_data_expression("head([0])", true, "Nat");
+}
+
+BOOST_AUTO_TEST_CASE(test_head_list_zero_one)
+{
+  test_data_expression("head([0, 1])", true, "Nat");
+}
+
 BOOST_AUTO_TEST_CASE(test_emptyset)
 {
   test_data_expression("{}", true);
@@ -355,6 +353,21 @@ BOOST_AUTO_TEST_CASE(test_set_comprehension)
   test_data_expression("{ x: Nat | x mod 2 == 0 }", true, "Set(Nat)");
 }
 
+BOOST_AUTO_TEST_CASE(test_fset_count)
+{
+  test_data_expression("#{ true, false }", true, "Nat");
+}
+
+BOOST_AUTO_TEST_CASE(test_fset_pick_bool)
+{
+  test_data_expression("pick({ true, false })", true, "Bool");
+}
+
+BOOST_AUTO_TEST_CASE(test_fset_pick_nat)
+{
+  test_data_expression("pick({ 0, 1 })", true, "Nat");
+}
+
 BOOST_AUTO_TEST_CASE(test_emptybag)
 {
   test_data_expression("{:}", true);
@@ -372,6 +385,16 @@ BOOST_AUTO_TEST_CASE(test_bag_true_false)
 BOOST_AUTO_TEST_CASE(test_bag_numbers)
 {
   test_data_expression("{ 1: 1, 2: 2, -8: 8 }", true, "FBag(Int)");
+}
+
+BOOST_AUTO_TEST_CASE(test_fbag_count_numbers)
+{
+  test_data_expression("#{ 1: 1, 2: 2, -8: 8 }", true, "Nat");
+}
+
+BOOST_AUTO_TEST_CASE(test_fbag_pick_numbers)
+{
+  test_data_expression("pick({ 1: 1, 2: 2, -8: 8 })", true, "Int");
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_comprehension)
@@ -1652,4 +1675,3 @@ BOOST_AUTO_TEST_CASE(test_sort_aliases)
     BOOST_CHECK(result == expected_result);
   }
 }
-
