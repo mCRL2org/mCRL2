@@ -34,13 +34,13 @@ cons {} <"empty"> : FSet(S)                                                     
 map  @fset_cons <"cons_"> : S <"left"> # FSet(S) <"right"> -> FSet(S)                                                                       internal defined_by_rewrite_rules;
      @fset_cinsert <"cinsert">: S <"arg1"> # Bool <"arg2"> # FSet(S) <"arg3"> -> FSet(S)                                                    internal defined_by_rewrite_rules;
      in <"in">: S <"left"> # FSet(S) <"right"> -> Bool                                                                                      external defined_by_rewrite_rules;
-%     @fset_union <"fset_union"> : (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S)              internal defined_by_rewrite_rules;
-%     @fset_inter <"fset_intersection">: (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S)        internal defined_by_rewrite_rules;
+%     @fset_union <"fset_union"> : (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S)             internal defined_by_rewrite_rules;
+%     @fset_inter <"fset_intersection">: (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S)       internal defined_by_rewrite_rules;
      - <"difference">: FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S)                                                                      external defined_by_rewrite_rules;
      + <"union_"> : FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S)                                                                         external defined_by_rewrite_rules;
      * <"intersection"> : FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S)                                                                   external defined_by_rewrite_rules;
      # <"count"> : FSet(S) <"arg"> -> Nat                                                                                                   external defined_by_rewrite_rules;
-     pick <"pick">: FSet(S) <"arg"> -> S external defined_by_rewrite_rules;
+     pick <"pick">: FSet(S) <"arg"> -> S                                                                                                    external defined_by_rewrite_rules;
 
 var d:S;
     e:S;
