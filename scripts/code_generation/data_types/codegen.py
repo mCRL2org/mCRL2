@@ -803,15 +803,15 @@ class Parser(Parsing.Lr):
 
         # First make sure the needed separators are surrounded by spaces
         # Some parts always need to get extra whitespace
-        input = re.sub('(->|[();,])', r" \1 ", input)
+        input = re.sub(r'(->|[();,])', r" \1 ", input)
         # needs to get whitespace if it is not followed by "include"
-        input = re.sub('(#)(?!(include|using|supertypeof))', r" \1 ", input)
+        input = re.sub(r'(#)(?!(include|using|supertypeof))', r" \1 ", input)
         # surround : with whitespace except if preceded by { (for {:})
         input = re.sub(r'([^{])(\:)', r"\1 \2 ", input)
         # < needs to get whitespace if it starts a label
-        input = re.sub('(<\")(?=\w)', r"\1 ", input)
+        input = re.sub(r'(<\")(?=\w)', r"\1 ", input)
         # > needs to get whitespace if it ends a label
-        input = re.sub('(?<=\w)(\">)', r" \1", input)
+        input = re.sub(r'(?<=\w)(\">)', r" \1", input)
 
         # Split the input at whitespace, producing the tokens
         p: re.Pattern = re.compile(r'\s+')
@@ -849,7 +849,7 @@ def read_text(filename):
 # returns the contents of the file 'filename' as a list of paragraphs
 def read_paragraphs(file):
     text       = read_text(file)
-    paragraphs = re.split('\n\s*\n', text)
+    paragraphs = re.split(r'\n\s*\n', text)
     return paragraphs
 
 #
