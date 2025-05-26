@@ -1334,6 +1334,50 @@ bool mcrl2::data::data_type_checker::match_fset_insert(const function_sort& type
   return true;
 }
 
+bool mcrl2::data::data_type_checker::match_fset_fbag_pick(const function_sort& type, sort_expression& result) const
+{
+  //tries to sort out the types of pick operations (FSet(S)->S or FBag(S)->S)
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  sort_expression result_type = type.codomain();
+  const sort_expression_list& argument_types = type.domain();
+  if (argument_types.size() != 1)
+  {
+    return false;
+  }
+
+  sort_expression argument_type = argument_types.front();
+  if (is_basic_sort(argument_type))
+  {
+    argument_type = UnwindType(argument_type);
+  }
+  if (!(sort_fset::is_fset(argument_type)||sort_fbag::is_fbag(argument_type)))
+  {
+    return false;
+  }
+
+  sort_expression element_type = down_cast<container_sort>(argument_type).element_sort();
+
+  sort_expression new_result_type;
+  if (!UnifyMinType(result_type, element_type, new_result_type))
+  {
+    return false;
+  }
+  result_type = new_result_type;
+
+  if (sort_fset::is_fset(argument_type))
+  {
+    result = function_sort({ sort_expression(sort_fset::fset(sort_expression(result_type))) },result_type);
+  }
+  else
+  {
+    assert(sort_fbag::is_fbag(argument_type));
+    result = function_sort({ sort_expression(sort_fbag::fbag(sort_expression(result_type))) },result_type);
+  }
+
+  return true;
+}
+
 bool mcrl2::data::data_type_checker::match_fbag_cinsert(const function_sort& type, sort_expression& result) const
 {
   sort_expression_list Args=type.domain();
@@ -2221,6 +2265,16 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     Type=NewType;
   }
 
+  if (sort_fset::pick_name()==data_term_name)
+  {
+    sort_expression NewType;
+    if (!match_fset_fbag_pick(atermpp::down_cast<function_sort>(Type), NewType))
+    {
+      throw mcrl2::runtime_error("The function pick has incompatible argument type " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
+    }
+    Type=NewType;
+  }
+
   if (sort_fbag::cinsert_name()==data_term_name)
   {
     sort_expression NewType;
@@ -2230,8 +2284,6 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     }
     Type=NewType;
   }
-
-
 
   if (sort_set::complement_name()==data_term_name)
   {
@@ -3295,16 +3347,16 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     if (is_function_sort(UnwindType(NewType)))
     {
       // Code below is a hack as sometimes the type of the returned numeral is not equal
-      // to the PosType that is requested. Hence, a typecast must be added explicitly. 
+      // to the PosType that is requested. Hence, a typecast must be added explicitly.
       const sort_expression s=DataTerm.sort();
-      if (PosType !=data::untyped_sort() && s != PosType && 
-             (s == sort_int::int_() || s == sort_pos::pos() || s == sort_nat::nat() || s == sort_real::real_())) 
+      if (PosType !=data::untyped_sort() && s != PosType &&
+             (s == sort_int::int_() || s == sort_pos::pos() || s == sort_nat::nat() || s == sort_real::real_()))
       {
         return UpCastNumericType(PosType, atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain(),
                                        DataTerm,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
       }
-      // end of the explicit upcast hack. Continuing with the original code. 
-      return atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain();  
+      // end of the explicit upcast hack. Continuing with the original code.
+      return atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain();
     }
 
     sort_expression temp_type;
@@ -3927,28 +3979,28 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   //Numbers
   add_system_constants_and_functions(sort_pos::pos_mCRL2_usable_constructors());
   add_system_constants_and_functions(sort_pos::pos_mCRL2_usable_mappings());
-  assert(system_constants.find(sort_pos::c1().name())!=system_constants.end());   
-                                         // This function is explicitly required by the typechecker. 
-                                         // It adds it and then typechecks the terms containing this function. 
+  assert(system_constants.find(sort_pos::c1().name())!=system_constants.end());
+                                         // This function is explicitly required by the typechecker.
+                                         // It adds it and then typechecks the terms containing this function.
   add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_constructors());
   add_system_constants_and_functions(sort_nat::nat_mCRL2_usable_mappings());
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
-  assert(system_functions.find(sort_nat::pos2nat().name())!=system_functions.end());   
+  assert(system_functions.find(sort_nat::pos2nat().name())!=system_functions.end());
 #else
-  assert(system_functions.find(sort_nat::cnat().name())!=system_functions.end());   
+  assert(system_functions.find(sort_nat::cnat().name())!=system_functions.end());
 #endif
-                                         // This function is explicitly required by the typechecker. 
-                                         // It adds it and then typechecks the terms containing this function. 
+                                         // This function is explicitly required by the typechecker.
+                                         // It adds it and then typechecks the terms containing this function.
   add_system_constants_and_functions(sort_int::int_mCRL2_usable_constructors());
   add_system_constants_and_functions(sort_int::int_mCRL2_usable_mappings());
-  assert(system_functions.find(sort_int::cint().name())!=system_functions.end());   
-                                         // This function is explicitly required by the typechecker. 
-                                         // It adds it and then typechecks the terms containing this function. 
+  assert(system_functions.find(sort_int::cint().name())!=system_functions.end());
+                                         // This function is explicitly required by the typechecker.
+                                         // It adds it and then typechecks the terms containing this function.
   add_system_constants_and_functions(sort_real::real_mCRL2_usable_constructors());
   add_system_constants_and_functions(sort_real::real_mCRL2_usable_mappings());
-  assert(system_functions.find(sort_real::creal().name())!=system_functions.end());   
-                                           // This function is explicitly required by the typechecker. 
-                                           // It adds it and then typechecks the terms containing this function. 
+  assert(system_functions.find(sort_real::creal().name())!=system_functions.end());
+                                           // This function is explicitly required by the typechecker.
+                                           // It adds it and then typechecks the terms containing this function.
 
   //Lists
   add_system_constants_and_functions(sort_list::list_mCRL2_usable_constructors(data::untyped_sort()));
@@ -3981,7 +4033,7 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   // add_system_function(sort_set::union_(data::untyped_sort()));
   // add_system_function(sort_set::difference(data::untyped_sort()));
   // add_system_function(sort_set::intersection(data::untyped_sort()));
-  add_system_function(sort_set::complement(data::untyped_sort())); 
+  add_system_function(sort_set::complement(data::untyped_sort()));
 
   //FBags
   add_system_constants_and_functions(sort_fbag::fbag_mCRL2_usable_constructors(data::untyped_sort()));
@@ -4091,10 +4143,10 @@ void mcrl2::data::data_type_checker::read_sort(const sort_expression& sort_expr)
     return;
   }
 
-  if (is_structured_sort(sort_expr)) 
+  if (is_structured_sort(sort_expr))
   {
     // The map below is used to warn that there are projections with the same name
-    // in this structured sort. This hardly ever serves a purpose and gives rise confusion. 
+    // in this structured sort. This hardly ever serves a purpose and gives rise confusion.
     std::map<core::identifier_string, sort_expression> duplicate_projections_warner;
     const structured_sort& struct_sort = atermpp::down_cast<structured_sort>(sort_expr);
     for (const structured_sort_constructor& constr: struct_sort.constructors())
@@ -4122,7 +4174,7 @@ void mcrl2::data::data_type_checker::read_sort(const sort_expression& sort_expr)
         {
           mCRL2log(warning) << "Warning. Projection function " << proj.name() << " occurs multiple times with different sorts in " << struct_sort << ". " << std::endl;
         }
-        else 
+        else
         {
           duplicate_projections_warner[proj.name()]=proj.sort();
         }
