@@ -31,8 +31,8 @@
 
 sort FBag(S) <"fbag">;
 
-cons {:} <"empty"> : FBag(S)                                                                                                         external defined_by_rewrite_rules;
-     @fbag_insert <"insert"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S)                                               internal defined_by_rewrite_rules;
+cons {:} <"empty"> : FBag(S)                                                                                                          external defined_by_rewrite_rules;
+     @fbag_insert <"insert"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S)                                                internal defined_by_rewrite_rules;
 
 map  @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S)                                                   internal defined_by_rewrite_rules;
      @fbag_cinsert <"cinsert"> : S <"arg1"> # Nat <"arg2"> # FBag(S) <"arg3"> -> FBag(S)                                              internal defined_by_rewrite_rules;
@@ -42,7 +42,7 @@ map  @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag
      * <"intersection"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                                                             external defined_by_rewrite_rules;
      - <"difference"> : FBag(S) <"left"> # FBag(S) <"right"> -> FBag(S)                                                               external defined_by_rewrite_rules;
      # <"count_all"> : FBag(S) <"arg"> -> Nat                                                                                         external defined_by_rewrite_rules;
-     pick <"pick">: FBag(S) <"arg"> -> S                                                    external defined_by_rewrite_rules;
+     pick <"pick">: FBag(S) <"arg"> -> S                                                                                              external defined_by_rewrite_rules;
 
 
 var  d: S;
@@ -52,7 +52,6 @@ var  d: S;
      n: Nat;
      b: FBag(S);
      c: FBag(S);
-     s: FSet(S);
      f: S -> Nat;
      g: S -> Nat;
 eqn  ==(@fbag_cons(d, p, b), {:})  =  false;

@@ -920,7 +920,6 @@ namespace mcrl2 {
         variable vn("n",sort_nat::nat());
         variable vb("b",fbag(s));
         variable vc("c",fbag(s));
-        variable vs("s",sort_fset::fset(s));
         variable vf("f",make_function_sort_(s, sort_nat::nat()));
         variable vg("g",make_function_sort_(s, sort_nat::nat()));
 
