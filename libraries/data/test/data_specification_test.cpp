@@ -218,7 +218,7 @@ std::cerr << "#constructors " << spec.constructors().size() << "\n";
 
   spec.remove_constructor(i);
   std::for_each(il.begin(), il.end(), [&spec1](const function_symbol& f){ spec1.remove_constructor(f); });
-  
+
   BOOST_CHECK(compare_for_equality(spec, spec1));
 }
 
@@ -271,8 +271,8 @@ std::cerr << "#mappings " << spec.mappings().size() << "\n";
 
   data::function_symbol i("i", s0);
   spec.add_mapping(i);
-  function_symbol_vector il {i}; 
-  std::for_each(il.begin(), il.end(), [&spec1](const function_symbol& f){ spec1.add_mapping(f); }); 
+  function_symbol_vector il {i};
+  std::for_each(il.begin(), il.end(), [&spec1](const function_symbol& f){ spec1.add_mapping(f); });
   compare_for_equality(spec, spec1);
 
   std::for_each(il.begin(), il.end(), [&spec](const function_symbol& f){ spec.remove_mapping(f); });
@@ -302,14 +302,14 @@ void test_equations()
   BOOST_CHECK(compare_for_equality(spec, spec1));
   spec.add_equation(fxx);
   data_equation_vector fxxl {fxx};
-  std::for_each(fxxl.begin(), fxxl.end(), [&spec1](const data_equation& eqn){ spec1.add_equation(eqn); }); 
+  std::for_each(fxxl.begin(), fxxl.end(), [&spec1](const data_equation& eqn){ spec1.add_equation(eqn); });
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   data_equation fxf(xl, x, fx, f);
   data_equation_vector fxfl {fxf};
   spec.add_equation(fxf);
-  std::for_each(fxfl.begin(), fxfl.end(), [&spec1](const data_equation& eqn){ spec1.add_equation(eqn); }); 
+  std::for_each(fxfl.begin(), fxfl.end(), [&spec1](const data_equation& eqn){ spec1.add_equation(eqn); });
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
@@ -317,7 +317,7 @@ void test_equations()
   BOOST_CHECK(result.size() == 2);
   BOOST_CHECK(std::find(result.begin(), result.end(), fxf) != result.end());
   BOOST_CHECK(std::find(result.begin(), result.end(), fxx) != result.end());
-  std::for_each(fxfl.begin(), fxfl.end(), [&spec](const data_equation& eqn){ spec.remove_equation(eqn); }); 
+  std::for_each(fxfl.begin(), fxfl.end(), [&spec](const data_equation& eqn){ spec.remove_equation(eqn); });
   spec1.remove_equation(fxf);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 }
@@ -931,17 +931,17 @@ std::cerr << "#mappings " << mappings.size() << "\n";
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
    BOOST_CHECK(sorts.size()==11);
    BOOST_CHECK(constructors.size()==19);
-   BOOST_CHECK(mappings.size()==320);
+   BOOST_CHECK(mappings.size()==322);
 #else
    BOOST_CHECK(sorts.size()==10);
    BOOST_CHECK(constructors.size()==17);
-   BOOST_CHECK(mappings.size()==231);
+   BOOST_CHECK(mappings.size()==233);
 #endif
 }
 
 
 // The next check tests whether elementary sorts in function symbols occur in data_spec.sorts().
-// The sort natnatpair occurring in Nat64 was forgotten to be added. 
+// The sort natnatpair occurring in Nat64 was forgotten to be added.
 BOOST_AUTO_TEST_CASE(test_constructors_and_sorts)
 {
   std::cerr << "Test: test_constructors_and_sorts\n";
@@ -958,7 +958,7 @@ BOOST_AUTO_TEST_CASE(test_constructors_and_sorts)
 
   data_spec.get_system_defined_sorts_constructors_and_mappings(sorts, constructors, mappings);
 
-  for(const function_symbol& f: data_spec.constructors()) 
+  for(const function_symbol& f: data_spec.constructors())
   {
     for(const sort_expression& sort: find_sort_expressions(f))
     {
@@ -966,5 +966,3 @@ BOOST_AUTO_TEST_CASE(test_constructors_and_sorts)
     }
   }
 }
-
-
