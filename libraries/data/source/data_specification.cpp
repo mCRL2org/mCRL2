@@ -355,6 +355,7 @@ void sort_specification::import_system_defined_sort(const sort_expression& sort)
     }
     else if (sort_fset::is_fset(sort))
     {
+      import_system_defined_sort(sort_nat::nat());
     }
     else if (sort_bag::is_bag(sort))
     {
@@ -362,7 +363,7 @@ void sort_specification::import_system_defined_sort(const sort_expression& sort)
       import_system_defined_sort(sort_nat::nat()); // Required for bags.
       import_system_defined_sort(sort_set::set_(element_sort));
       import_system_defined_sort(sort_fbag::fbag(element_sort));
-      
+
       // Add the function sort element_sort->Nat to the specification
       sort_expression_list element_sorts ;
       element_sorts.push_front(element_sort);
@@ -371,6 +372,7 @@ void sort_specification::import_system_defined_sort(const sort_expression& sort)
     else if (sort_fbag::is_fbag(sort))
     {
       import_system_defined_sort(sort_nat::nat()); // Required for bags.
+      import_system_defined_sort(sort_fset::fset(sort));
     }
   }
   else if (is_structured_sort(sort))
