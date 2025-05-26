@@ -1,0 +1,30 @@
+nodes:
+  l1:
+    type: mcrl2
+  l2:
+    type: lps
+  l3:
+    type: lps
+  l3:
+    type: mcrl2
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lpspp
+  t3:
+    input: [l3]
+    output: [l4]
+    args: []
+    name: mcrl22lps
+
+result: |
+  result = True
+
