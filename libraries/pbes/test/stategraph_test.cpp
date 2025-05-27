@@ -12,7 +12,9 @@
 #define BOOST_TEST_MODULE stategraph_test
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
+// Without this check_guards() simply returns true.
+#define MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
+
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -145,9 +147,9 @@ void test_guard(const std::string& pbesspec, const std::string& X, const std::st
   f.apply(x1);
   BOOST_CHECK(f.expression_stack.back().check_guards(x1, R));
 
-//  pbes_expression g = detail::guard(X1, x1);
-//  std::string result = pbes_system::pp(g);
-//  check_result(X, result, expected_result, "");
+  pbes_expression g = detail::guard(X1, x1);
+  std::string result = pbes_system::pp(g);
+  check_result(X, result, expected_result, "");
 }
 
 BOOST_AUTO_TEST_CASE(test_guard1)
