@@ -33,6 +33,7 @@
 //#define MCRL2_LOG_LPS_LINEARISE_STATISTICS 1
 
 //mCRL2 data
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/enumerator.h"
@@ -4890,8 +4891,8 @@ class specification_basic_type
 
       if (is_process_instance_assignment(t))
       {
-        const process_identifier& procId=process_instance_assignment(t).identifier();
-        const assignment_list& t1=process_instance_assignment(t).assignments();
+        const process_identifier& procId=atermpp::down_cast<process_instance_assignment>(t).identifier();
+        const assignment_list& t1=atermpp::down_cast<process_instance_assignment>(t).assignments();
         return push_regular(procId,
                             t1,
                             stack,
@@ -9778,7 +9779,8 @@ class specification_basic_type
                                                  visited_processes);
 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
-        for (const assignment& a: process_instance_assignment(t).assignments())
+        process_instance_assignment assign(t);
+        for (const assignment& a: assign.assignments())
         {
           sigma[a.lhs()]=a.rhs();
         }
