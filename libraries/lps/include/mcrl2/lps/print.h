@@ -13,6 +13,7 @@
 #define MCRL2_LPS_PRINT_H
 
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/traverser.h"
 #include "mcrl2/process/print.h"
 
@@ -214,9 +215,15 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   template <typename LinearProcess>
   void print_linear_process(const LinearProcess& x)
   {
+    // Generate a unique process name with P as prefix
+    data::set_identifier_generator generator;
+    generator.add_identifiers(find_identifiers(x));
+    m_process_name = generator("P");
+
     derived().enter(x);
     derived().print("proc ");
     derived().print(m_process_name);
+
     print_variables(x.process_parameters(), true, true, false, "(", ")", ", ");
 
     if (m_print_summand_numbers)
