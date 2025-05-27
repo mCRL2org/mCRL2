@@ -256,8 +256,7 @@ public:
       std::mutex& progress_mutex,
       std::mutex& states_mutex,
       std::condition_variable& queue_cond,
-      std::size_t& busy,
-      std::size_t thread_nr)
+      std::size_t& busy)
   {
     while (true)
     {
@@ -582,8 +581,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
             progress_mutex,
             states_mutex,
             queue_cond,
-            busy,
-            i);
+            busy);
         }));
   }
 

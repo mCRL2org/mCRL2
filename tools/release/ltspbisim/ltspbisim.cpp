@@ -178,6 +178,7 @@ class ltsconvert_tool : public input_output_tool
         {
           mCRL2log(warning) << "Cannot determine type of output. Assuming .aut.\n";
         }
+        [[fallthrough]];
         case lts_aut:
         case lts_aut_probabilistic:
         {

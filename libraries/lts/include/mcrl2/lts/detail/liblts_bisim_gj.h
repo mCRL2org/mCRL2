@@ -5821,7 +5821,7 @@ class bisim_partitioner_gj
           const transition& t=m_aut.get_transitions()[ti];
           const label_index label = label_or_divergence(t,
                                                     m_aut.num_action_labels());
-          transition_index& c=count_transitions_per_action[label];              assert(0 <= c); assert(c < m_transitions.size());
+          transition_index& c=count_transitions_per_action[label];              assert(c < m_transitions.size());
           m_BLC_transitions[c]=ti;
           c++;
         }
