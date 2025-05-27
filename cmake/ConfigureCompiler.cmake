@@ -88,9 +88,6 @@ add_debug_compile_definitions(MCRL2_ABSINTHE_CHECK_EXPRESSIONS)
 add_debug_compile_definitions(PARANOID_CHECK)
 add_compile_definitions(MCRL2_EXTENDED_TESTS)
 
-# TODO: This should be MCRL2_ENABLE_MULTITHREADING
-add_compile_definitions(WITH_THREADS)
-
 # These are defines that can be enabled for additional debug printing
 #add_compile_definitions(MCRL2_DEBUG_EXPRESSION_BUILDER)
 #add_compile_definitions(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG)
