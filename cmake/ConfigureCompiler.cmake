@@ -83,12 +83,12 @@ add_compile_definitions(BRANCH_BIS_EXPERIMENT_JFG)
 
 # Enable all macros defined in the code used for debugging purposes.
 add_debug_compile_definitions(MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
-add_debug_compile_definitions(MCRL2_LPS_PARELM_DEBUG)
 add_debug_compile_definitions(MCRL2_ABSINTHE_CHECK_EXPRESSIONS)
 add_debug_compile_definitions(PARANOID_CHECK)
 add_compile_definitions(MCRL2_EXTENDED_TESTS)
 
 # These are defines that can be enabled for additional debug printing
+#add_compile_definitions(MCRL2_LPS_PARELM_DEBUG)
 #add_compile_definitions(MCRL2_DEBUG_EXPRESSION_BUILDER)
 #add_compile_definitions(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG)
 #add_compile_definitions(MCRL2_PFNF_VISITOR_DEBUG)
