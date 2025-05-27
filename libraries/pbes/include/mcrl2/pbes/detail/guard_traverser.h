@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
@@ -31,7 +32,7 @@ namespace detail {
 inline
 pbes_expression guard_s(const pbes_expression& x)
 {
-  if (is_simple_expression(x))
+  if (is_simple_expression(x, false))
   {
     return x;
   }
@@ -44,9 +45,11 @@ pbes_expression guard_s(const pbes_expression& x)
 inline
 pbes_expression guard_n(const pbes_expression& x)
 {
-  if (is_simple_expression(x))
+  if (is_simple_expression(x, false))
   {
-    return data::optimized_not(x);
+    pbes_expression result;
+    data::optimized_not(result, x);
+    return result;
   }
   else
   {
@@ -80,10 +83,13 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
   {
     return false_();
   }
-  else if (pbes_system::is_not(x))
+  
+  pbes_expression result;
+  if (pbes_system::is_not(x))
   {
     pbes_expression phi = pbes_system::not_(atermpp::aterm(x)).operand();
-    return data::optimized_not(guard_impl(X, phi));
+    data::optimized_not(result, guard_impl(X, phi));
+    return result;
   }
   else if (pbes_system::is_and(x))
   {
@@ -91,12 +97,13 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
     pbes_expression psi = pbes_system::and_(atermpp::aterm(x)).right();
     if (has_propositional_variable(psi, X))
     {
-      return data::optimized_and(guard_s(phi), guard_impl(X, psi));
+      data::optimized_and(result, guard_s(phi), guard_impl(X, psi));
     }
     else
     {
-      return data::optimized_and(guard_s(psi), guard_impl(X, phi));
+      data::optimized_and(result, guard_s(psi), guard_impl(X, phi));
     }
+    return result;
   }
   else if (pbes_system::is_or(x))
   {
@@ -104,13 +111,15 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
     pbes_expression psi = pbes_system::or_(atermpp::aterm(x)).right();
     if (has_propositional_variable(psi, X))
     {
-      return data::optimized_and(guard_n(phi), guard_impl(X, psi));
+      data::optimized_and(result, guard_n(phi), guard_impl(X, psi));
     }
     else
     {
-      return data::optimized_and(guard_n(psi), guard_impl(X, phi));
+      data::optimized_and(result, guard_n(psi), guard_impl(X, phi));
     }
+    return result;
   }
+
   else if (pbes_system::is_imp(x))
   {
     pbes_expression phi = pbes_system::imp(atermpp::aterm(x)).left();
@@ -127,8 +136,9 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
     pbes_expression phi = pbes_system::exists(atermpp::aterm(x)).body();
     return guard_impl(X, phi);
   }
+
   throw mcrl2::runtime_error("guard_impl: unknown term " + pbes_system::pp(x));
-  return pbes_expression();
+  return result;
 }
 
 // Direct implementation of the definition, to be used for checking results.
@@ -194,7 +204,7 @@ struct guard_expression
   template <typename PbesRewriter>
   bool check_guards(const pbes_expression& x, PbesRewriter R) const
   {
-    mCRL2log(log::debug, "stategraph") << "check_guards: x = " << pbes_system::pp(x) << std::endl;
+    mCRL2log(log::debug) << "check_guards: x = " << pbes_system::pp(x) << std::endl;
     bool result = true;
     for (auto i = guards.begin(); i != guards.end(); ++i)
     {
@@ -206,8 +216,8 @@ struct guard_expression
         if (pbes_rewrite(g1, R) != pbes_rewrite(g2, R))
         {
           result = false;
-mCRL2log(log::debug, "stategraph") << " g1 = " << g1 << " g2 = " << g2 << std::endl;
-          mCRL2log(log::debug, "stategraph") << "guard error: X = " << X << " g1 = " << pbes_rewrite(g1, R) << " g2 = " << pbes_rewrite(g2, R) << std::endl;
+          mCRL2log(log::debug) << " g1 = " << g1 << " g2 = " << g2 << std::endl;
+          mCRL2log(log::debug) << "guard error: X = " << X << " g1 = " << pbes_rewrite(g1, R) << " g2 = " << pbes_rewrite(g2, R) << std::endl;
         }
       }
       catch (mcrl2::runtime_error&)
