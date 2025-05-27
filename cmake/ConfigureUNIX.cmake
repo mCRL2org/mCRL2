@@ -83,6 +83,9 @@ if(NOT ${MCRL2_IS_CLANG})
   endif()
 endif()
 
+# Enable clang-tidy static analysis.
+#set(CMAKE_CXX_CLANG_TIDY clang-tidy)
+
 # This prevents warnings in the dnj bisimulation algorithm.
 mcrl2_add_cxx_flag(-Wno-switch)
 
