@@ -12,8 +12,6 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
-#define MCRL2_ABSINTHE_CHECK_EXPRESSIONS
-
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/pbes/builder.h"
