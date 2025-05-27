@@ -12,9 +12,6 @@
 #define BOOST_TEST_MODULE stategraph_test
 #include <boost/test/included/unit_test.hpp>
 
-// Without this check_guards() simply returns true.
-#define MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
-
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/txt2pbes.h"
