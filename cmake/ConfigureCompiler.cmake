@@ -77,6 +77,76 @@ if(APPLE)
   add_compile_definitions(GL_SILENCE_DEPRECATION)
 endif()
 
+# Enable the new JFG branching bisimulation algorithm.
+add_compile_definitions(BRANCH_BIS_EXPERIMENT_JFG)
+
+
+# Enable all macros defined in the code used for debugging purposes.
+add_debug_compile_definitions(MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
+add_debug_compile_definitions(MCRL2_LPS_PARELM_DEBUG)
+add_debug_compile_definitions(MCRL2_ABSINTHE_CHECK_EXPRESSIONS)
+add_debug_compile_definitions(PARANOID_CHECK)
+add_compile_definitions(MCRL2_EXTENDED_TESTS)
+
+# TODO: This should be MCRL2_ENABLE_MULTITHREADING
+add_compile_definitions(WITH_THREADS)
+
+# These are defines that can be enabled for additional debug printing
+#add_compile_definitions(MCRL2_DEBUG_EXPRESSION_BUILDER)
+#add_compile_definitions(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG)
+#add_compile_definitions(MCRL2_PFNF_VISITOR_DEBUG)
+#add_compile_definitions(MCRL2_SMALL_PROGRESS_MEASURES_DEBUG)
+#add_compile_definitions(MCRL2_LOG_ENUMERATOR)
+#add_compile_definitions(MCRL2_ENUMERATOR_COUNT_REWRITE_CALLS)
+#add_compile_definitions(MCRL2_PRINT_REWRITE_STEPS)
+#add_compile_definitions(MCRL2_EQUAL_MULTI_ACTIONS_DEBUG)
+#add_compile_definitions(MCRL2_LOG_LPS_LINEARISE_STATISTICS)
+#add_compile_definitions(MCRL2_BES2PGSOLVER_PRINT_VARIABLE_NAMES)
+
+# TODO: These belong the the dnj algorithm.
+#add_compile_definitions(TEST_WORK_COUNTER_NAMES)
+#add_compile_definitions(USE_SIMPLE_LIST)
+#add_compile_definitions(USE_POOL_ALLOCATOR)
+#add_compile_definitions(INIT_WITHOUT_BLC_SETS)
+
+# TODO: Is this still needed?
+#add_compile_definitions(MCRL2_PGSOLVER_ENABLED)
+
+# Enable the new JFG branching bisimulation algorithm.
+add_compile_definitions(BRANCH_BIS_EXPERIMENT_JFG)
+
+
+# Enable all macros defined in the code used for debugging purposes.
+add_debug_compile_definitions(MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
+add_debug_compile_definitions(MCRL2_LPS_PARELM_DEBUG)
+add_debug_compile_definitions(MCRL2_ABSINTHE_CHECK_EXPRESSIONS)
+add_debug_compile_definitions(PARANOID_CHECK)
+add_compile_definitions(MCRL2_EXTENDED_TESTS)
+
+# TODO: This should be MCRL2_ENABLE_MULTITHREADING
+add_compile_definitions(WITH_THREADS)
+
+# These are defines that can be enabled for additional debug printing
+#add_compile_definitions(MCRL2_DEBUG_EXPRESSION_BUILDER)
+#add_compile_definitions(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG)
+#add_compile_definitions(MCRL2_PFNF_VISITOR_DEBUG)
+#add_compile_definitions(MCRL2_SMALL_PROGRESS_MEASURES_DEBUG)
+#add_compile_definitions(MCRL2_LOG_ENUMERATOR)
+#add_compile_definitions(MCRL2_ENUMERATOR_COUNT_REWRITE_CALLS)
+#add_compile_definitions(MCRL2_PRINT_REWRITE_STEPS)
+#add_compile_definitions(MCRL2_EQUAL_MULTI_ACTIONS_DEBUG)
+#add_compile_definitions(MCRL2_LOG_LPS_LINEARISE_STATISTICS)
+#add_compile_definitions(MCRL2_BES2PGSOLVER_PRINT_VARIABLE_NAMES)
+
+# TODO: These belong the the dnj algorithm.
+#add_compile_definitions(TEST_WORK_COUNTER_NAMES)
+#add_compile_definitions(USE_SIMPLE_LIST)
+#add_compile_definitions(USE_POOL_ALLOCATOR)
+#add_compile_definitions(INIT_WITHOUT_BLC_SETS)
+
+# TODO: Is this still needed?
+#add_compile_definitions(MCRL2_PGSOLVER_ENABLED)
+
 # Enable C++20 for all targets.
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
