@@ -19,6 +19,8 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
+#include <cstddef>
+#include <numeric>
 
 namespace mcrl2
 {
@@ -127,6 +129,66 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
   }
 };
 
+std::set<propositional_variable_instantiation> filter_pvis(const propositional_variable_instantiation& needle,
+    const std::set<propositional_variable_instantiation>& haystack)
+{
+  std::set<propositional_variable_instantiation> result;
+
+  std::copy_if(haystack.begin(),
+      haystack.end(),
+      std::inserter(result, result.end()),
+      [&](const propositional_variable_instantiation& v)
+      {
+        if (v.name() != needle.name())
+          return false;
+
+        const auto& v_params = as_vector(v.parameters());
+        const auto& needle_params = as_vector(needle.parameters());
+
+        if (v_params.size() != needle_params.size())
+          return false;
+
+        for (std::size_t i = 0; i < v_params.size(); ++i)
+        {
+          if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
+          {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+  return result;
+}
+
+bool pvi_in_set(const propositional_variable_instantiation needle,
+    const std::set<propositional_variable_instantiation> haystack)
+{
+  return std::any_of(haystack.begin(),
+      haystack.end(),
+      [&](const propositional_variable_instantiation& v)
+      {
+        if (v.name() != needle.name())
+          return false;
+
+        const auto& v_params = as_vector(v.parameters());
+        const auto& needle_params = as_vector(needle.parameters());
+
+        if (v_params.size() != needle_params.size())
+          return false;
+
+        for (size_t i = 0; i < v_params.size(); i++)
+        {
+          if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
+          {
+            return false;
+          }
+        }
+        return true;
+      });
+}
+
 void self_substitute(pbes_equation& equation,
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
     simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter)
@@ -167,16 +229,18 @@ void self_substitute(pbes_equation& equation,
         std::set<propositional_variable_instantiation> phi_set = find_propositional_variable_instantiations(phi);
 
         // (2) replace all reoccuring with true (nu) and false (mu)
-        if (auto it = phi_set.find(cur_x); it != phi_set.end())
+        // if (auto it = phi_set.find(cur_x); it != phi_set.end())
+        auto gauss_set =  filter_pvis(cur_x, phi_set);
+        for (auto gauss_pvi : gauss_set)
         {
-          mCRL2log(log::debug) << "Need to replace this with true/false" << pp(cur_x) << "\n";
+          mCRL2log(log::debug) << "Need to replace this with true/false " << pp(gauss_pvi) << "\n";
           mCRL2log(log::debug) << phi << "\n";
 
           // pbes_expression p_;
-          pvi_substituter.set_pvi(cur_x);
+          pvi_substituter.set_pvi(gauss_pvi);
           pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
           pvi_substituter.apply(phi, phi);
-          phi_set.erase(cur_x);
+          phi_set.erase(gauss_pvi);
 
           mCRL2log(log::debug) << phi << "\n";
 
@@ -194,11 +258,7 @@ void self_substitute(pbes_equation& equation,
             mCRL2log(log::verbose) << itr << "\n";
           }
 
-          if (auto it = path.find(new_x); it != path.end())
-          // if (std::any_of(path.begin(),
-          //         path.end(),
-          //         [new_x](const propositional_variable_instantiation& v)
-          //         { return v.name() == new_x.name() && v.parameters() == new_x.parameters(); }))
+          if (pvi_in_set(new_x, path))
           {
             // We have already seen this, so we are in a loop.
             mCRL2log(log::debug) << "Loop, seen " << new_x << " in path after " << cur_x << "    " << phi << "\n";
@@ -237,6 +297,7 @@ void self_substitute(pbes_equation& equation,
         }
         else
         {
+          mCRL2log(log::debug) << "Not simpler: " << cur_x << " \n-->\n " << phi << "\n";
           pvi_done = true;
         }
         if (pvi_done)
