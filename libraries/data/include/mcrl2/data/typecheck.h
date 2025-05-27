@@ -68,7 +68,7 @@ class data_type_checker: public sort_type_checker
 
     /** \brief     Yields a type checked equation list, and sets the types in the equations right.
      *             If not successful an exception is thrown.
-     *  \param[in] eqns The list of equations that is type checked and updated. 
+     *  \param[in] eqns The list of equations that is type checked and updated.
      **/
     void operator()(data_equation_vector& eqns);
 
@@ -224,6 +224,7 @@ class data_type_checker: public sort_type_checker
     bool MatchFalseFunction(const function_sort& type, sort_expression& result) const;
     bool MatchListSetBagOpIn(const function_sort& type, sort_expression& result) const;
     bool match_fset_insert(const function_sort& type, sort_expression& result) const;
+    bool match_fset_fbag_pick(const function_sort& type, sort_expression& result) const;
     bool match_fbag_cinsert(const function_sort& type, sort_expression& result) const;
     bool UnifyElementSort(sort_expression& Arg1, sort_expression& Arg2, sort_expression& result) const;
     bool MatchSetBagOpUnionDiffIntersect(const core::identifier_string& data_term_name, const function_sort& type, sort_expression& result) const;

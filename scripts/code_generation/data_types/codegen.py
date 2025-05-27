@@ -37,23 +37,26 @@
 #
 #===============================================================================
 
-import sys
-import re
+import logging
+logger = logging.getLogger(__name__)
+
 from optparse import OptionParser
 import parsing as Parsing
+import pathlib
+import re
+import sys
 
 from data import *
 
 context = None
-current_file = ""
+current_file: pathlib.Path|None = None
 
 # Verbose printing of message
-def printVerbose(string, object):
-  if verbose:
-    print(("%s: %s" % (string, str(object))))
+def printVerbose(string: str, object):
+  logging.info(f"{string}:{str(object)}")
 
 #===============================================================================
-# Tokens/precedences. 
+# Tokens/precedences.
 
 # Precedences
 # -> Associates to the right
@@ -151,8 +154,8 @@ class TokenDefinedByCode(Parsing.Token):
 # identifiers
 class TokenID(Parsing.Token):
     "%token id"
-    def __init__(self, parser, s):
-        Parsing.Token.__init__(self, parser)
+    def __init__(self, s):
+        Parsing.Token.__init__(self)
         self.data = identifier(s)
 
     def __str__(self):
@@ -162,7 +165,7 @@ class TokenID(Parsing.Token):
 # Nonterminals, with associated productions.  In traditional BNF, the following
 # productions would look something like:
 # Result ::= UsingSpec
-# UsingSpec ::= "using UsingList IncludesSpec 
+# UsingSpec ::= "using UsingList IncludesSpec
 #          | IncludesSpec
 # UsingList ::= ID
 #          | UsingSpec ID
@@ -177,7 +180,7 @@ class TokenID(Parsing.Token):
 #          | Subtypes Subtype
 # Subtype ::= "#supertypeof" ID
 # Spec ::= SortSpec FunctionSpec VarSpec EqnSpec
-# SortSpec ::= "sort" SortDecls        
+# SortSpec ::= "sort" SortDecls
 # FunctionSpec ::= MapSpec
 #                | ConsSpec MapSpec
 # ConsSpec ::= "cons" OpDecls
@@ -201,7 +204,7 @@ class TokenID(Parsing.Token):
 #           | OpDecls OpDecl ";"
 # OpDecl ::= ID Label ":" SortExpr InternalExternal DefinedBy
 # InternalExternal ::= "internal" | "external"
-# DefinedBy ::= "defined_by_rewrite_rules" | "defined_by_code" 
+# DefinedBy ::= "defined_by_rewrite_rules" | "defined_by_code"
 # EqnDecls ::= EqnDecl
 #            | EqnDecls EqnDecl
 # EqnDecl ::= DataExpr "=" DataExpr
@@ -490,7 +493,7 @@ class StructDecl(Parsing.Nonterm):
         printVerbose("StructDecl", self.data)
 
 # VarDecls ::= VarDecl
-#            | VarDecls VarDecl   
+#            | VarDecls VarDecl
 class VarDecls(Parsing.Nonterm):
     "%nonterm"
     def reduceVarDecl(self, vardecl, semicolon):
@@ -535,10 +538,10 @@ class OpDecl(Parsing.Nonterm):
         self.data = function_declaration(id.data, sortexpr.data, label.data, internal_external.data, defined_by.data)
         printVerbose("OpDecl", self.data)
 
-    # Hack for count on lists, a list cannot be internal or defined by code. 
+    # Hack for count on lists, a list cannot be internal or defined by code.
     def reduceCount(self, hash, label, colon, sortexpr, internal_external, defined_by):
         "%reduce hash Label colon SortExpr InternalExternal DefinedBy"
-        id = TokenID(parser, "#")
+        id = TokenID("#")
         self.data = function_declaration(id.data, sortexpr.data, label.data, internal_external.data, defined_by.data)
         printVerbose("OpDecl", self.data)
 
@@ -640,7 +643,7 @@ class DataExprPrimary(Parsing.Nonterm):
     # Hack for allowing application of list count
     def reduceCount(self, hash):
         "%reduce hash"
-        id = TokenID(parser, "#")
+        id = TokenID("#")
         self.data = function_symbol(id.data)
         printVerbose("DataExprPrimary", self.data)
 
@@ -761,14 +764,15 @@ class Label(Parsing.Nonterm):
 # the superclass from Parsing.Lr to Parsing.Glr, then, run this program with
 # verbosity enabled.
 class Parser(Parsing.Lr):
-    def __init__(self, spec):
+    def __init__(self, spec: Parsing.Spec):
       Parsing.Lr.__init__(self, spec)
 
     # Brain-dead scanner.  The scanner does not have to be a method of this
     # class, so for more complex parsers it is no problem to separate the
     # scanner into a separate module.
-    def scan(self, input):
-        syms = {"->"      : TokenArrow,
+    def scan(self, input: str):
+        syms: dict[str, type[Parsing.Token]] = {
+                "->"      : TokenArrow,
                 "|"       : TokenMid,
                 "#include": TokenInclude,
                 "#using"  : TokenUsing,
@@ -799,27 +803,26 @@ class Parser(Parsing.Lr):
 
         # First make sure the needed separators are surrounded by spaces
         # Some parts always need to get extra whitespace
-        input = re.sub('(->|[();,])', r" \1 ", input)
+        input = re.sub(r'(->|[();,])', r" \1 ", input)
         # needs to get whitespace if it is not followed by "include"
-        input = re.sub('(#)(?!(include|using|supertypeof))', r" \1 ", input)
+        input = re.sub(r'(#)(?!(include|using|supertypeof))', r" \1 ", input)
         # surround : with whitespace except if preceded by { (for {:})
         input = re.sub(r'([^{])(\:)', r"\1 \2 ", input)
         # < needs to get whitespace if it starts a label
-        input = re.sub('(<\")(?=\w)', r"\1 ", input)
+        input = re.sub(r'(<\")(?=\w)', r"\1 ", input)
         # > needs to get whitespace if it ends a label
-        input = re.sub('(?<=\w)(\">)', r" \1", input)
+        input = re.sub(r'(?<=\w)(\">)', r" \1", input)
 
         # Split the input at whitespace, producing the tokens
-        p=re.compile(r'\s+')
-        if verbose:
-          print("split input: %s" % (p.split(input)))
+        p: re.Pattern = re.compile(r'\s+')
+        logging.info(f"split input: {p.split(input)}")
 
         for word in p.split(input):
           if word != '':
              if word in syms:
-                token = syms[word](self)
+                token = syms[word]()
              else:
-                token = TokenID(parser, word)
+                token = TokenID(word)
              # Feed token to parser.
              self.token(token)
         # Tell the parser that the end of input has been reached.
@@ -846,7 +849,7 @@ def read_text(filename):
 # returns the contents of the file 'filename' as a list of paragraphs
 def read_paragraphs(file):
     text       = read_text(file)
-    paragraphs = re.split('\n\s*\n', text)
+    paragraphs = re.split(r'\n\s*\n', text)
     return paragraphs
 
 #
@@ -887,7 +890,7 @@ def get_includes(input):
 # This parses the input file and removes comment lines from it
 # Furthermore, we use context from files that are included, therefore these
 # have to be parsed first.
-def parse_spec(infilename):
+def parse_spec(infilename: pathlib.Path):
     global outputcode
     global parser
     global includes_table
@@ -912,8 +915,6 @@ def parse_spec(infilename):
 # -------------------------------------------------------#
 def main():
     global context
-    global verbose
-    global debug
     usage = "usage: %prog [options] infile outfile"
     option_parser = OptionParser(usage)
     option_parser.add_option("-v", "--verbose", action="store_true", help="give verbose output")
@@ -921,27 +922,25 @@ def main():
     (options, args) = option_parser.parse_args()
 
     if options.verbose:
-        verbose = True
+        logger.setLevel(logging.INFO)
 
     if options.debug:
-        verbose = True
-        debug = True
+        logger.setLevel(logging.DEBUG)
         parser.verbose = True
 
     if len(args) > 0:
-        infilename = args[0]
-        outfilename = args[1]
-        try:
-            infile = open(infilename)
-            outfile = open(outfilename, "w")
-        except IOError as e:
-            print("Unable to open file ", infilename, "or", outfilename, " ", e)
-            return
+        infilename = pathlib.Path(args[0])
+        outfilename = pathlib.Path(args[1])
+        if not infilename.is_file():
+            raise RuntimeError(f"Input file {infilename} does not exist.")
+        if not outfilename.is_file():
+            raise RuntimeError(f"Output file {outfilename} does not exist.")
 
         # Parse specification in infilename and write the code to outfile
         parse_spec(infilename)
         outputcode = context.code(infilename)
-        outfile.write(outputcode)
+        with open(outfilename, 'w') as outfile:
+            outfile.write(outputcode)
 
     else:
         option_parser.print_help()
@@ -954,7 +953,7 @@ def main():
 
 # Introspect this module to generate a parser.  Enable all the bells and
 # whistles.
-spec = Parsing.Spec(sys.modules[__name__],
+spec: Parsing.Spec = Parsing.Spec(sys.modules[__name__],
                     pickleFile="codegen.pickle",
                     skinny=False,
                     logFile="codegen.log",
@@ -964,16 +963,13 @@ spec = Parsing.Spec(sys.modules[__name__],
 # Create a parser that uses the parser tables encapsulated by spec.  In this
 # program, we are only creating one parser instance, but it is possible for
 # multiple parsers to use the same Spec simultaneously.
-parser = Parser(spec)
+parser: Parser = Parser(spec)
 
 
 #
 # Global variables to collect needed information during parsing.
 #
-verbose = False       # Switch on verbose output?
-debug = False         # Switch on debug output? 
 includes_table = {}   # Maps sorts to include files
 
 if __name__ == "__main__":
     main()
-

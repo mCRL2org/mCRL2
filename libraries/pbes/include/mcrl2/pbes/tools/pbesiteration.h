@@ -41,9 +41,8 @@ struct pbesiteration_options
 
   bool check_global_invariant = false;
   bool smt = false;
+  bool early_stopping = false;
 };
-
-
 
 void substitute(pbes_equation& into,
     const pbes_equation& by,
@@ -57,7 +56,8 @@ void substitute(pbes_equation& into,
 }
 
 data::data_expression pbestodata(pbes_equation& equation,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>& replace_substituter)
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
+        replace_substituter)
 {
   pbes_expression expr;
   replace_substituter.set_forward(true);
@@ -82,7 +82,8 @@ enum class InvResult
 // Equation should be in full form.
 InvResult global_invariant_check(pbes_equation& equation,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>& replace_substituter,
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
+        replace_substituter,
     data::data_specification data_spec,
     simplify_data_rewriter<data::rewriter> pbes_rewriter,
     std::set<data::variable>& global_variables)
@@ -222,13 +223,15 @@ InvResult global_invariant_check(pbes_equation& equation,
 
 void perform_iteration(pbes_equation& equation,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>& replace_substituter,
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
+        replace_substituter,
     data::data_specification data_spec,
-    bool use_smt)
+    pbesiteration_options options,
+    propositional_variable_instantiation initial_state)
 {
   std::optional<smt::smt_solver> solv;
   std::optional<mcrl2::data::detail::BDD_Prover> f_bdd_prover;
-  if (use_smt)
+  if (options.smt)
   {
     solv.emplace(data_spec);
   }
@@ -266,9 +269,18 @@ void perform_iteration(pbes_equation& equation,
     replace_substituter.reset_variable_list();
     data::data_expression eq_data = pbestodata(eq, replace_substituter);
     data::data_expression p_data = pbestodata(p_eq, replace_substituter);
-    data::data_expression formula = data::and_(data::imp(eq_data, p_data), data::imp(p_data, eq_data));
+    data::data_expression formula;
+    // Due to mononicity, only one way implication needs to be tested
+    if (equation.symbol().is_nu())
+    {
+      formula = data::imp(eq_data, p_data);
+    }
+    else
+    {
+      formula = data::imp(p_data, eq_data);
+    }
 
-    if (use_smt)
+    if (options.smt)
     {
       data::variable_list var_list = p_eq.variable().parameters();
       for (const auto& x : as_set(replace_substituter.get_variable_list()))
@@ -301,6 +313,52 @@ void perform_iteration(pbes_equation& equation,
       }
     }
 
+    // Stop iterating if (mu) the equation is true for the initial variable or (nu) the equation is false for the
+    // initial variable
+    if (!stable && options.early_stopping && initial_state.name() == eq.variable().name())
+    {
+      pbes_equation init_eq = eq;
+      init_eq.formula() = initial_state;
+      substitute(init_eq, eq, substituter);
+      data::data_expression init_data = pbestodata(init_eq, replace_substituter);
+
+      if (options.smt)
+      {
+        mCRL2log(log::verbose) << eq.variable().name() << ": SMT init check for " << i << " started." << std::endl;
+        data::data_expression smt_data = init_eq.symbol().is_mu() ? data::not_(init_data) : init_data;
+        smt::answer result = solv->solve({}, smt_data, std::chrono::seconds(0));
+        switch (result)
+        {
+        case smt::answer::UNSAT:
+          mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
+          stable = true;
+          break;
+        case smt::answer::SAT:
+          break;
+        case smt::answer::UNKNOWN:
+          break;
+        }
+      }
+      else
+      {
+        f_bdd_prover->set_formula(init_data);
+        mCRL2log(log::verbose) << eq.variable().name() << ": EQ-BDD init check for " << i << " started." << std::endl;
+        data::detail::Answer v_is_tautology = f_bdd_prover->is_tautology();
+        data::detail::Answer v_is_contradiction = f_bdd_prover->is_contradiction();
+
+        mCRL2log(log::verbose) << eq.variable().name() << ": EQ-BDD tauto? "
+                               << (v_is_tautology == data::detail::answer_yes) << std::endl;
+        mCRL2log(log::verbose) << eq.variable().name() << ": EQ-BDD contra? "
+                               << (v_is_contradiction == data::detail::answer_yes) << std::endl;
+        if (init_eq.symbol().is_mu() ? v_is_tautology == data::detail::answer_yes
+                                     : v_is_contradiction == data::detail::answer_yes)
+        {
+          mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
+          stable = true;
+        }
+      }
+    }
+
     if (stable)
     {
       break;
@@ -320,7 +378,8 @@ struct pbesiteration_pbes_fixpoint_iterator
     simplify_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_rewriter);
 
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder> replace_substituter(pbes_rewriter);
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>
+        replace_substituter(pbes_rewriter);
 
     for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
     {
@@ -335,12 +394,12 @@ struct pbesiteration_pbes_fixpoint_iterator
             p.global_variables());
         if (global_inv == InvResult::INV_FALSE)
         {
-          perform_iteration(*i, substituter, replace_substituter, p.data(), options.smt);
+          perform_iteration(*i, substituter, replace_substituter, p.data(), options, p.initial_state());
         }
       }
       else
       {
-        perform_iteration(*i, substituter, replace_substituter, p.data(), options.smt);
+        perform_iteration(*i, substituter, replace_substituter, p.data(), options, p.initial_state());
       }
 
       for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)

@@ -260,14 +260,14 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@is_not_an_update.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@is_not_an_update to a number of arguments.
       inline
       void is_not_a_function_update_manual_implementation(data_expression& result, const data_expression& arg0);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void is_not_a_function_update_application(data_expression& result, const data_expression& a1)
       {
@@ -348,7 +348,7 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@if_always_else.
-      /// \details This function is to be implemented manually. 
+      /// \details This function is to be implemented manually.
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
@@ -357,7 +357,7 @@ namespace mcrl2 {
       void if_always_else_manual_implementation(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
 
 
-      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters. 
+      /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
       void if_always_else_application(data_expression& result, const data_expression& a1)
       {
