@@ -23,7 +23,6 @@ typedef core::term_traits<pbes_expression> tr;
 void test_join()
 {
   propositional_variable X("X");
-  const pbes_expression& Z1 = propositional_variable_instantiation(X.name());
   const pbes_expression& Z2(propositional_variable_instantiation(X.name()));
   pbes_expression Z3;
   Z3 = propositional_variable_instantiation(X.name());
@@ -34,24 +33,6 @@ void test_join()
   s.insert(propositional_variable_instantiation("X2"));
   pbes_expression x = join_or(s.begin(), s.end());
   std::cout << "x = " << pbes_system::pp(x) << std::endl;
-
-#ifdef MCRL2_JOIN_TEST
-// The gcc compiler gives the following error:
-//
-// D:\mcrl2\libraries\core\include/mcrl2/utilities/detail/join.h:54:22: error: call
-// of overloaded 'pbes_expression(const mcrl2::pbes_system::propositional_variable&)' is
-// ambiguous
-//
-// This seems to be triggered by an incorrect optimization, in which the return
-// type of the function false_() is discarded.
-//
-  std::set<propositional_variable> sv;
-  sv.insert(propositional_variable("X1"));
-  sv.insert(propositional_variable("X2"));
-  x = join_or(sv.begin(), sv.end());
-  std::cout << "x = " << pbes_system::pp(x) << std::endl;
-#endif
-
 }
 
 void test_expressions()
