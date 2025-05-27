@@ -9,8 +9,6 @@
 /// \file constelm_test.cpp
 /// \brief Add your file description here.
 
-//#define MCRL2_LPSCONSTELM_DEBUG
-
 #define BOOST_TEST_MODULE constelm_test
 #include <boost/algorithm/string.hpp>
 #include <boost/test/included/unit_test.hpp>
