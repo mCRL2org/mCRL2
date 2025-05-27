@@ -41,6 +41,7 @@ function(mcrl2_add_c_debug_flag FLAG)
   endif()
 endfunction()
 
+# Adds linker flags whenever they are supported by the compiler.
 function(mcrl2_add_link_options FLAGS)
   check_cxx_compiler_flag(${FLAGS} LINKER_${FLAGS}_ACCEPTED)
 
@@ -49,10 +50,16 @@ function(mcrl2_add_link_options FLAGS)
   endif()
 endfunction()
 
+# Adds linker options for the Debug configuration.
 function(mcrl2_add_debug_link_options FLAGS)
   check_cxx_compiler_flag(${FLAGS} LINKER_${FLAGS}_ACCEPTED)
 
   if(LINKER_${FLAGS}_ACCEPTED)
     add_compile_options($<$<CONFIG:Debug>:${FLAGS}>)
   endif()
+endfunction()
+
+# Adds compile definitions for the Debug configuration.
+function(add_debug_compile_definitions FLAGS)
+  add_compile_definitions($<$<CONFIG:Debug>:${FLAGS}>)
 endfunction()
