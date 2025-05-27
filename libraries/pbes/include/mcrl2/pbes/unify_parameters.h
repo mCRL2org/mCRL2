@@ -136,7 +136,9 @@ struct unify_parameters_replace_function
   };
 };
 
-/// Unify all parameters of the equations, optionally ignoring the equations related to counter example information.
+/// Unify all parameters of the equations, optionally ignoring the equations
+/// related to counter example information. Finally, if reset is true, reset the
+/// newly introduced parameters to a default value.
 inline
 void unify_parameters(pbes& p, bool ignore_ce_equations, bool reset)
 {
@@ -171,6 +173,7 @@ void unify_parameters(pbes& p, bool ignore_ce_equations, bool reset)
   }
 }
 
+/// See `unify_parameters(pbes&, bool, bool)` for a description of the parameters.
 template<bool allow_ce>
 inline
 void unify_parameters(detail::pre_srf_pbes<allow_ce>& p, bool ignore_ce_equations, bool reset)
