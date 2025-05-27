@@ -16,8 +16,6 @@
  * \author Jan Friso Groote, Bas Ploeger, Muck van Weerdenburg
  */
 
-#define BRANCH_BIS_EXPERIMENT_JFG
-
 #ifndef MCRL2_LTS_LTS_ALGORITHM_H
 #define MCRL2_LTS_LTS_ALGORITHM_H
 
