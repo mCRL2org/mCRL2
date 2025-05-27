@@ -9,9 +9,6 @@
 
 #define BOOST_TEST_MODULE typecheck_test
 
-// Some tests rely on type check failures, so we have to set this flag.
-#define MCRL2_DISABLE_TYPECHECK_ASSERTIONS
-
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/data_io.h"
