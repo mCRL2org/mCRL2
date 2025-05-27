@@ -56,4 +56,4 @@ RUN cd ~/mcrl2-build \
     && ctest . -j${THREADS} 
 
 # 7. Build the documentation
-RUN cd ~/mcrl2-build && make doc 
+RUN cd ~/mcrl2-build && make doxygen && make doc 

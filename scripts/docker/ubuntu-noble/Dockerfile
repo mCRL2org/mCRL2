@@ -67,4 +67,4 @@ RUN cd ~/mcrl2-build \
 
 # 7. Build the documentation
 RUN . ~/mcrl2-venv/bin/activate \
- && cd ~/mcrl2-build && make doc 
+ && cd ~/mcrl2-build && make doxygen && make doc 

@@ -1,4 +1,4 @@
-FROM fedora:41
+FROM fedora:42
 
 # Install packages needed for compiling and testing the tools
 RUN dnf install -y \
@@ -58,4 +58,4 @@ RUN cd ~/mcrl2-build \
     && ctest . -j${THREADS}
 
 # Build the documentation
-RUN cd ~/mcrl2-build && make doc
+RUN cd ~/mcrl2-build && make doxygen && make doc
