@@ -33,7 +33,9 @@ add_compile_definitions(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES) # Enables templ
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)                 # Prevents many CRT deprecation warnings, especially in dparser.
 add_compile_definitions(BOOST_ALL_NO_LIB=1) # Tells the config system not to automatically select which libraries to link against. Normally if a compiler supports #pragma lib, 
                                             # then the correct library build variant will be automatically selected and linked against, simply by the act of including one of 
-                                            # that library's headers. This macro turns that feature off. 
+                                            # that library's headers. This macro turns that feature off.
+add_debug_compile_definitions(_MSVC_STL_HARDENING=1) # Checks for some instances of undefined behavior at runtime and reports them to the user.
+add_debug_compile_definitions(_MSVC_STL_DESTRUCTOR_TOMBSTONES=1) # Another new safety feature we have added is destructor tombstones, which help mitigate use-after-free mistakes. 
 
 if(MCRL2_ENABLE_ADDRESS_SANITIZER)
   mcrl2_add_c_flag(/fsanitize=address)
