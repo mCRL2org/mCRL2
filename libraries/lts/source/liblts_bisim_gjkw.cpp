@@ -26,8 +26,6 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_utilities.h"
 
-#define PARANOID_CHECK
-
 namespace mcrl2
 {
 namespace lts
