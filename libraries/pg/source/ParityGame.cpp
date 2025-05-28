@@ -292,7 +292,7 @@ void ParityGame::swap(ParityGame &pg)
     swap(cardinality_, pg.cardinality_);
 }
 
-#ifdef WITH_THREADS
+#ifdef MCRL2_ENABLE_MULTITHREADING
 void ParityGame::make_subgame_threads( const ParityGame &game,
                                        const verti *verts,
                                        const verti nvert,
@@ -313,4 +313,4 @@ void ParityGame::make_subgame_threads( const ParityGame &game,
     // FIXME: parallellize this?
     recalculate_cardinalities(nvert);
 }
-#endif
+#endif // MCRL2_ENABLE_MULTITHREADING

@@ -13,8 +13,6 @@
  * \author Jan Friso Groote, Bas Ploeger, Muck van Weerdenburg, Jeroen Keiren
  */
 
-#define BRANCH_BIS_EXPERIMENT_JFG
-
 #ifndef MCRL2_LTS_LTS_EQUIVALENCE_H
 #define MCRL2_LTS_LTS_EQUIVALENCE_H
 
