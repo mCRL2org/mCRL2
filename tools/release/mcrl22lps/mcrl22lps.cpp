@@ -15,9 +15,6 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 
-// #include "gc.h"  Required for ad hoc garbage collection. This is possible with ATcollect,
-// useful to find garbage collection problems.
-
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::data::tools::rewriter_tool;
 
@@ -206,12 +203,6 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
         }
         return true;
       }
-
-      /* if (!noalpha)  // Apply alphabet reduction. 
-      {
-        alphabet_reduce(spec, 1000ul);
-      } */
-
 
       //store the result
       mcrl2::lps::stochastic_specification linear_spec(mcrl2::lps::linearise(spec, m_linearisation_options));
