@@ -173,10 +173,9 @@ def find_functions(rules):
 # generates C++ code for checking if terms are in the right format
 #
 def generate_soundness_check_functions(rules, filename, skip_list):
-    CHECK_RULE = '''template <typename Term>
-bool check_rule_%(name)s(const Term& t)
+    CHECK_RULE = '''template <atermpp::IsATerm Term>
+bool check_rule_%(name)s([[maybe_unused]] const Term& t)
 {
-  utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
 %(body)s
 #else
@@ -187,10 +186,9 @@ bool check_rule_%(name)s(const Term& t)
 '''
 
     CHECK_TERM = '''// %(name)s(%(arguments)s)
-template <typename Term>
-bool %(check_name)s(const Term& t)
+template <atermpp::IsATerm Term>
+bool %(check_name)s([[maybe_unused]] const Term& t)
 {
-  utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
 %(body)s
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -233,7 +231,7 @@ bool %(check_name)s(const Term& t)
             'name'      : name,
             'body'      : body
         }
-        ptext = ptext + 'template <typename Term> bool check_rule_%s(const Term& t);\n' % rule.name()
+        ptext = ptext + 'template <atermpp::IsATerm Term> bool check_rule_%s(const Term& t);\n' % rule.name()
 
     for f in functions:
         name = f.name()
@@ -270,7 +268,7 @@ bool %(check_name)s(const Term& t)
             'check_name' : f.check_name(),
             'body'       : body
         }
-        ptext = ptext + 'template <typename Term> bool %s(const Term& t);\n' % f.check_name()
+        ptext = ptext + 'template <atermpp::IsATerm Term> bool %s(const Term& t);\n' % f.check_name()
 
     text = ptext + '\n' + text.strip()
     text = text + '\n'
@@ -297,7 +295,7 @@ def parse_ebnf(filename):
         clines = [] # comment lines
         glines = [] # grammar lines
         for line in lines:
-            if re.match('\s*//.*', line):
+            if re.match(r'\s*//.*', line):
                 clines.append(line)
             else:
                 glines.append(line)
