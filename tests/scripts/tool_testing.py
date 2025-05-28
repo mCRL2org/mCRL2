@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2015 Wieger Wesselink.
+# Copyright 2015-2025 Wieger Wesselink, Maurice Laveaux
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
@@ -355,21 +355,21 @@ def main(tests):
     cmdline_parser.add_argument(
         "-m", "--max_workers", action="store", default=1, type=int
     )
+    cmdline_parser.add_argument("--names", action="store_true")
+    cmdline_parser.add_argument("--verbose", default=False, action="store_true")
     cmdline_parser.add_argument(
-        "--names", action='store_true'
-    )  
-    cmdline_parser.add_argument(
-        "--verbose", default=False, action='store_true'
-    )  
-    cmdline_parser.add_argument(
-        "--experimental", action='store_true', help="Enable testing of experimental tests"
-    )    
-    cmdline_parser.add_argument(
-        "--pattern", action="store", default="", type=str
+        "--experimental",
+        action="store_true",
+        help="Enable testing of experimental tests",
     )
-    cmdline_parser.add_argument("--jittyc", action='store_true', help="Enables tests using the -rjittyc flag")
+    cmdline_parser.add_argument("--pattern", action="store", default="", type=str)
     cmdline_parser.add_argument(
-        "-cvc3", action='store_true', help="Enables tests using the -zcvc flag, requires CVC3"
+        "--jittyc", action="store_true", help="Enables tests using the -rjittyc flag"
+    )
+    cmdline_parser.add_argument(
+        "-cvc3",
+        action="store_true",
+        help="Enables tests using the -zcvc flag, requires CVC3",
     )
 
     args = cmdline_parser.parse_args()
@@ -386,12 +386,15 @@ def main(tests):
             names += test.toolname + "\n"
         print(names)
         return
-    
+
     for example, rename_spec, mcrl2_file in [
-        ("abp", "act renamed;\n var x:D;\n rename r1(x) => renamed;", os.path.join(MCRL2_ROOT, "examples/academic/abp/abp.mcrl2")), 
+        (
+            "abp",
+            "act renamed;\n var x:D;\n rename r1(x) => renamed;",
+            os.path.join(MCRL2_ROOT, "examples/academic/abp/abp.mcrl2"),
+        ),
         # ("dice", "act renamed;\n var x:Bool;\n rename b1(x) => renamed;", os.path.join(MCRL2_ROOT, "examples/probabilistic/coins_simulate_dice/dice.mcrl2"))
-        ]:
-        
+    ]:
         print(f"Write intermediate files into {output}", flush=True)
         name, _ = os.path.splitext(os.path.basename(mcrl2_file))
         lps_file = os.path.join(output, f"{name}.lps")
@@ -426,10 +429,11 @@ def main(tests):
         run_test(os.path.join(args.toolpath, "mcrl22lps"), ["-D", mcrl2_file, lps_file])
         run_test(os.path.join(args.toolpath, "lps2lts"), [lps_file, lts_file])
         run_test(
-            os.path.join(args.toolpath, "lps2pbes"), [lps_file, "-f", mcf_file, pbes_file]
+            os.path.join(args.toolpath, "lps2pbes"),
+            [lps_file, "-f", mcf_file, pbes_file],
         )
         run_test(os.path.join(args.toolpath, "lpspp"), [lps_file, txtlps_file])
-        
+
         run_test(os.path.join(args.toolpath, "pbespp"), [pbes_file, txtpbes_file])
         run_test(os.path.join(args.toolpath, "pbes2bes"), [pbes_file, bes_file])
 
@@ -465,12 +469,17 @@ def main(tests):
                             print(f"Skipped cvc test {test.toolname} {arguments}")
                             continue
                         if args.pattern not in test.toolname:
-                            print(f"Skipped tool {test.toolname} with does not fit pattern {args.pattern}")
+                            print(
+                                f"Skipped tool {test.toolname} with does not fit pattern {args.pattern}"
+                            )
                             continue
-                        if not args.experimental and test.toolname in ["besconvert", "pbespareqelm", "lpsrealelm"]:
+                        if not args.experimental and test.toolname in [
+                            "besconvert",
+                            "pbespareqelm",
+                            "lpsrealelm",
+                        ]:
                             print(f"Skipped experimental tool {test.toolname}")
                             continue
-
 
                         if args.verbose:
                             print(f"Executing {test.toolname} {arguments}", flush=True)
@@ -486,9 +495,12 @@ def main(tests):
                     try:
                         future.result()
                         if args.verbose:
-                            print(f"{name} {(100 - len(name))*'.'} ok", flush=True)
+                            print(f"{name} {(100 - len(name)) * '.'} ok", flush=True)
                     except Exception as e:
-                        print(f"{name} {(100 - len(name))*'.'} failed \n  {e}", flush=True)
+                        print(
+                            f"{name} {(100 - len(name)) * '.'} failed \n  {e}",
+                            flush=True,
+                        )
                         failed.append(name)
 
                 print("Failed tests...")

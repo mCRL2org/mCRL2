@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 
+# Copyright 2024-2025 Maurice Laveaux
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+
 import argparse
 import os
-import subprocess
 import sys
 import concurrent.futures
 
 # Makes sure that the script can find the modules when ran directly.
-sys.path.append(os.path.join(os.path.dirname(__file__),'../../'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from tests.utility.run_process import RunProcess, TimeExceededError
 
+
 def main():
-    """Finds all the .mcrl2 files in the example directory and tries to parse them with mcrl22lps."""
+    """Execute all the run.py scripts in the example directory."""
 
     # Parse some configuration options
     parser = argparse.ArgumentParser(
@@ -23,9 +27,7 @@ def main():
     parser.add_argument("-m", "--max_workers", action="store", default=1, type=int)
     parser.add_argument("-i", "--timeout", action="store", default=60, type=int)
     parser.add_argument("-r", "--jittyc", action="store_true")
-    parser.add_argument(
-        "-t", "--toolpath", action="store", type=str, required=True
-    )
+    parser.add_argument("-t", "--toolpath", action="store", type=str, required=True)
 
     args = parser.parse_args()
 
@@ -37,12 +39,12 @@ def main():
         arguments = [path]
         if args.jittyc:
             arguments += ["-rjittyc"]
-        
+
         # Change the working directory to the script path
         os.chdir(os.path.dirname(path))
 
         # Strip the extension since the Runprocess adds it again
-        python,_ = os.path.splitext(sys.executable)
+        python, _ = os.path.splitext(sys.executable)
 
         process = RunProcess(python, arguments, 2000, args.timeout)
         return process.stdout
@@ -75,19 +77,25 @@ def main():
                 if isinstance(future.exception(), TimeExceededError):
                     # Ignore timeouts, they are not errors.
                     print(
-                        f"[{finished}/{len(run_scripts)}] Example {path} timed out", 
-                        flush=True
+                        f"[{finished}/{len(run_scripts)}] Example {path} timed out",
+                        flush=True,
                     )
                 else:
                     print(
-                        f"[{finished}/{len(run_scripts)}] Example {path} failed with {future.exception()}", 
-                        flush=True
+                        f"[{finished}/{len(run_scripts)}] Example {path} failed with {future.exception()}",
+                        flush=True,
                     )
                     failed.append(path)
             elif future.cancelled():
-                print(f"[{finished}/{len(run_scripts)}] Example {path} was cancelled", flush=True)
+                print(
+                    f"[{finished}/{len(run_scripts)}] Example {path} was cancelled",
+                    flush=True,
+                )
             else:
-                print(f"[{finished}/{len(run_scripts)}] Finished example {path}", flush=True)
+                print(
+                    f"[{finished}/{len(run_scripts)}] Finished example {path}",
+                    flush=True,
+                )
 
             finished += 1
 
@@ -97,6 +105,7 @@ def main():
 
         if failed:
             sys.exit(-1)
+
 
 if __name__ == "__main__":
     main()
