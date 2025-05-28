@@ -230,11 +230,12 @@ void self_substitute(pbes_equation& equation,
 
         // (2) replace all reoccuring with true (nu) and false (mu)
         // if (auto it = phi_set.find(cur_x); it != phi_set.end())
-        auto gauss_set =  filter_pvis(cur_x, phi_set);
+        auto gauss_set = filter_pvis(cur_x, phi_set);
         for (auto gauss_pvi : gauss_set)
         {
           mCRL2log(log::debug) << "Need to replace this with true/false " << pp(gauss_pvi) << "\n";
           mCRL2log(log::debug) << phi << "\n";
+          mCRL2log(log::debug) << equation.formula() << "\n";
 
           // pbes_expression p_;
           pvi_substituter.set_pvi(gauss_pvi);
@@ -269,6 +270,9 @@ void self_substitute(pbes_equation& equation,
             pvi_substituter.set_pvi(new_x);
             pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
             pvi_substituter.apply(result, phi);
+            pvi_substituter.set_pvi(cur_x);
+            pvi_substituter.set_replacement(result);
+            pvi_substituter.apply(equation.formula(), equation.formula());
 
             mCRL2log(log::verbose) << "new_phi " << result << "\n";
             stable = false;
@@ -279,10 +283,9 @@ void self_substitute(pbes_equation& equation,
             // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler.
             mCRL2log(log::debug) << "Replaced in PBES equation for " << cur_x << "\n-->\n"
                                  << phi << "\n[" << new_x << "]\n";
-            result = phi;
             stable = false;
             pvi_substituter.set_pvi(cur_x);
-            pvi_substituter.set_replacement(result);
+            pvi_substituter.set_replacement(phi);
             pvi_substituter.apply(equation.formula(), equation.formula());
             cur_x = new_x;
             path.insert(new_x);
@@ -290,14 +293,17 @@ void self_substitute(pbes_equation& equation,
         }
         else if (phi_set.size() == 0)
         {
-          result = phi;
+          pvi_substituter.set_pvi(cur_x);
+          pvi_substituter.set_replacement(phi);
+          pvi_substituter.apply(equation.formula(), equation.formula());
           stable = false;
           mCRL2log(log::debug) << "Replaced in PBES equation for " << cur_x << ":\n" << x << " \n-->\n " << phi << "\n";
           pvi_done = true;
         }
         else
         {
-          mCRL2log(log::debug) << "Not simpler: " << cur_x << " \n-->\n " << phi << "\n";
+          mCRL2log(log::debug) << "Not simpler: " << cur_x << " \n-->\n " << phi << " and size " << phi_set.size()
+                               << "\n";
           pvi_done = true;
         }
         if (pvi_done)
@@ -307,11 +313,10 @@ void self_substitute(pbes_equation& equation,
         }
       }
 
-      mCRL2log(log::verbose) << "Ultimate result: replace \n" << x << "\n with \n" << result << "\n";
-      mCRL2log(log::debug) << "in \n" << equation.formula() << "\n";
-      pvi_substituter.set_pvi(cur_x);
-      pvi_substituter.set_replacement(result);
-      pvi_substituter.apply(equation.formula(), equation.formula());
+      std::set<propositional_variable_instantiation> set
+          = find_propositional_variable_instantiations(equation.formula());
+
+      mCRL2log(log::verbose) << "New set size: " << set.size() << "\n";
 
       // Simplify
       equation.formula() = pbes_rewrite(equation.formula(), pbes_rewriter);
