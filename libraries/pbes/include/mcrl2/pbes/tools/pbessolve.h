@@ -268,11 +268,6 @@ class pbessolve_tool
     {
       options.optimization = m_short_strategy;
     }
-
-    if (options.optimization > 0 && options.number_of_threads > 1)
-    {
-      throw mcrl2::runtime_error("Strategy " + std::to_string(options.optimization) + " can only be used in single thread mode.");
-    }
     
     if (has_counter_example && options.optimization > 0)
     {      
