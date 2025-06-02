@@ -385,7 +385,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       options.aggressive                            = parser.has_option("aggressive");
       options.cached                                = parser.has_option("cached");
       options.chaining                              = parser.has_option("chaining");
-      options.check_strategy = parser.has_option("check-strategy");
+      options.check_strategy                        = parser.has_option("check-strategy");
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.print_exact                           = parser.has_option("print-exact");
       options.print_nodesize                        = parser.has_option("print-nodesize");
@@ -510,7 +510,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       if (has_counter_example && options_.solve_strategy != 0)
       {
         // TODO: Cannot use the partial solvers.
-        mCRL2log(mcrl2::log::warning) << "Cannot use partial solving with counter example PBES";
+        mCRL2log(mcrl2::log::warning) << "Warning: Cannot use partial solving with PBES that has counter example information, using solving strategy 0 instead." << std::endl;
         options_.solve_strategy = 0;
       }
       
@@ -523,7 +523,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
               << std::endl;
         }
       }
-      else if (lpsfile.empty() && ltsfile.empty())
+      else if (!lpsfile.empty() || !ltsfile.empty())
       {
         mCRL2log(log::warning)
             << "Warning: the PBES has no counter example information. Did you "

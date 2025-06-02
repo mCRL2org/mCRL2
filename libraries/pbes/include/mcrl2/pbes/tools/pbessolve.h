@@ -107,6 +107,8 @@ class pbessolve_tool
   typedef parallel_tool<rewriter_tool<pbes_input_tool<input_tool>>> super;
 
   pbessolve_options options;
+  int m_short_strategy = 0;
+  int m_long_strategy = 0;
   std::string lpsfile;
   std::string ltsfile;
   std::string evidence_file;
@@ -225,12 +227,61 @@ class pbessolve_tool
 
     if (parser.has_option("long-strategy"))
     {
-      options.optimization = parser.option_argument_as<int>("long-strategy");
+      m_long_strategy = parser.option_argument_as<int>("long-strategy");
     }
     else
     {
-      options.optimization = parser.option_argument_as<int>("solve-strategy");
-      if (options.optimization == 0)
+      m_short_strategy = parser.option_argument_as<int>("solve-strategy");
+    }
+  }
+
+  std::set<utilities::file_format> available_input_formats() const override
+  {
+    return {pbes_system::pbes_format_internal()};
+  }
+
+  public:
+  pbessolve_tool(const std::string& toolname)
+      : super(toolname, "Wieger Wesselink",
+              "Generate a BES from a PBES and solve it. ",
+              "Solves (P)BES from INFILE. "
+              "If INFILE is not present, stdin is used. "
+              "The PBES is first instantiated into a parity game, "
+              "which is then solved using Zielonka's algorithm. "
+              "It supports the generation of a witness or counter "
+              "example for the property encoded by the PBES.")
+  {
+  }
+
+  template <typename PbesInstAlgorithm, typename PbesInstAlgorithmCE>
+  void run_algorithm(pbes_system::pbes& pbesspec,
+    const data::mutable_map_substitution<>& sigma)
+  {
+    bool has_counter_example = detail::has_counter_example_information(pbesspec);
+
+    // Handle tool options here because now we know whether the PBES has counter example information.
+    if (m_long_strategy > 0)
+    {
+      options.optimization = m_long_strategy;
+    }
+    else
+    {
+      options.optimization = m_short_strategy;
+    }
+
+    if (options.optimization > 0 && options.number_of_threads > 1)
+    {
+      throw mcrl2::runtime_error("Strategy " + std::to_string(options.optimization) + " can only be used in single thread mode.");
+    }
+    
+    if (has_counter_example && options.optimization > 0)
+    {      
+        mCRL2log(mcrl2::log::warning) << "Warning: Cannot use partial solving with PBES that has counter example information, using strategy 0 instead." << std::endl;
+        options.optimization = 0;
+    }
+    else 
+    {
+      if (!has_counter_example && options.optimization == 0)
       {
         options.optimization = 2;
       }
@@ -263,35 +314,7 @@ class pbessolve_tool
                                 "strategies less than 2."
                              << std::endl;
     }
-    if (options.optimization == 8 && options.number_of_threads > 1)
-    {
-      throw mcrl2::runtime_error("Strategy " + std::to_string(options.optimization) + " can only be used in single thread mode.");
-    }
-  }
 
-  std::set<utilities::file_format> available_input_formats() const override
-  {
-    return {pbes_system::pbes_format_internal()};
-  }
-
-  public:
-  pbessolve_tool(const std::string& toolname)
-      : super(toolname, "Wieger Wesselink",
-              "Generate a BES from a PBES and solve it. ",
-              "Solves (P)BES from INFILE. "
-              "If INFILE is not present, stdin is used. "
-              "The PBES is first instantiated into a parity game, "
-              "which is then solved using Zielonka's algorithm. "
-              "It supports the generation of a witness or counter "
-              "example for the property encoded by the PBES.")
-  {
-  }
-
-  template <typename PbesInstAlgorithm, typename PbesInstAlgorithmCE>
-  void run_algorithm(pbes_system::pbes& pbesspec,
-    const data::mutable_map_substitution<>& sigma)
-  {
-    bool has_counter_example = detail::has_counter_example_information(pbesspec);
     if (has_counter_example)
     {
       if (lpsfile.empty() && ltsfile.empty())
@@ -300,19 +323,12 @@ class pbessolve_tool
             << "Warning: the PBES has counter example information, but no witness will be generated due to lack of --file"
             << std::endl;
       }
-
-      if (options.optimization > 0)
-      {
-        mCRL2log(mcrl2::log::warning) << "Cannot use partial solving with counter example PBES";
-        options.optimization = 0;
-      }
     }
     else if ((!lpsfile.empty() || !ltsfile.empty()))
     {
       mCRL2log(log::warning)
           << "Warning: the PBES has no counter example information. Did you "
-            "use the"
-            " --counter-example option when generating the PBES?"
+            "use the --counter-example option when generating the PBES?"
           << std::endl;
     }
 
