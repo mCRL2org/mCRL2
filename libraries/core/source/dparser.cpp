@@ -9,11 +9,15 @@
 /// \file mcrl2/core/dparser.cpp
 /// \brief add your file description here.
 
+#include "mcrl2/core/dparser.h"
 #include <d.h>
 #include "mcrl2/core/detail/dparser_functions.h"
 #include "mcrl2/utilities/logger.h"
 #include <iomanip>
 #include <locale>
+
+// This macro is used to convert a D_ParseNode pointer to a PNode pointer, copied from dparser.c.
+#define D_ParseNode_to_PNode(_apn) ((PNode *)(D_PN(_apn, -(sizeof(PNode) - sizeof(D_ParseNode)))))
 
 extern "C"
 {
@@ -37,6 +41,11 @@ int parse_node::symbol() const
 int parse_node::child_count() const
 {
   return d_get_number_of_children(node);
+}
+
+int parse_node::priority() const
+{
+  return D_ParseNode_to_PNode(node)->priority;
 }
 
 // 0 <= i < child_count()
@@ -335,96 +344,35 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
 {
   core::parser_table table(parser_tables_mcrl2);
 
-  // resolve PbesExpr ambiguities
-  if (is_all_of_type(v, n, "PbesExpr", table))
+  // There are at least two nodes.
+  core::parse_node candidate(v[0]);
+
+  // Indicates that that the candidate is actually higher priority than another node.
+  bool chosen_candidate = true;
+  for (int i = 1; i < n; ++i)
   {
-    D_ParseNode* result = nullptr;
-    for (int i = 0; i < n; i++)
-    {
-      core::parse_node node(v[i]);
-      if (table.symbol_name(node.child(0)) == "Id")
+    core::parse_node vi(v[i]);
+    if (table.symbol_name(vi) == table.symbol_name(candidate))
+    {    
+      if (vi.priority() == candidate.priority()) 
       {
-        return v[i];
+        // There are two nodes with the same priority.
+        mCRL2log(log::trace) << "Two candidates with the same priority." << std::endl;
+        chosen_candidate = false;
       }
-      else if (table.symbol_name(node.child(0)) != "DataExpr")
+
+      if (vi.priority() > candidate.priority()) 
       {
-        result = v[i];
+        mCRL2log(log::trace) << "Selecting " << i << " as the parse tree with higher priority" << std::endl;
+        candidate = vi;
       }
     }
-    if (result)
-    {
-      return result;
-    }
-    return v[0];
   }
 
-  // resolve ActFrm ambiguities
-  if (is_all_of_type(v, n, "ActFrm", table))
-  {
-//print_ambiguous_nodes(v, n, "ActFrm", table);
-    D_ParseNode* result = nullptr;
-    for (int i = 0; i < n; i++)
-    {
-      core::parse_node node(v[i]);
-      if (table.symbol_name(node.child(0)) == "MultAct")
-      {
-//print_chosen_node(v[i], table);
-        return v[i];
-      }
-      else if (table.symbol_name(node.child(0)) != "DataExpr")
-      {
-        result = v[i];
-      }
-    }
-    if (result)
-    {
-//print_chosen_node(result, table);
-      return result;
-    }
-//print_chosen_node(v[0], table);
-    return v[0];
-  }
-
-  // resolve StateFrm ambiguities
-  if (is_all_of_type(v, n, "StateFrm", table))
-  {
-//print_ambiguous_nodes(v, n, "StateFrm", table);
-    D_ParseNode* result = nullptr;
-    for (int i = 0; i < n; i++)
-    {
-      core::parse_node node(v[i]);
-      if (table.symbol_name(node.child(0)) == "Id")
-      {
-//print_chosen_node(v[i], table);
-        return v[i];
-      }
-      else if (table.symbol_name(node.child(0)) != "DataExpr")
-      {
-        result = v[i];
-      }
-    }
-    if (result)
-    {
-//print_chosen_node(result, table);
-      return result;
-    }
-//print_chosen_node(v[0], table);
-    return v[0];
-  }
-
-  // resolve RegFrm ambiguities
-  if (is_all_of_type(v, n, "RegFrm", table))
-  {
-//print_ambiguous_nodes(v, n, "RegFrm", table);
-    for (int i = 0; i < n; i++)
-    {
-      core::parse_node node(v[i]);
-      if (table.symbol_name(node.child(0)) == "RegFrm" || table.symbol_name(node.child(0)) == "(")
-      {
-//print_chosen_node(v[i], table);
-        return v[i];
-      }
-    }
+  if (chosen_candidate) {
+    // The candidate has a higher priority than the other nodes.
+    mCRL2log(log::trace) << "The parse tree with the highest priority: " << candidate.tree() << std::endl;
+    return candidate.node;
   }
 
   // If we reach this point, then the ambiguity is unresolved. We print all
@@ -435,6 +383,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
     mCRL2log(log::verbose) << "Ambiguity: " << vi.tree() << std::endl;
     mCRL2log(log::debug) << "Ambiguity: " << table.tree(vi) << std::endl;
   }
+  
   throw mcrl2::runtime_error("Unresolved ambiguity.");
 }
 

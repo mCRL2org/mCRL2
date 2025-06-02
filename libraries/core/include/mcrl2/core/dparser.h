@@ -93,6 +93,8 @@ struct parse_node
 
   int symbol() const;
   int child_count() const;
+  /// \brief Returns the priority of the rule assocated with this parse node.
+  int priority() const;
 
   // 0 <= i < child_count()
   parse_node child(int i) const;
