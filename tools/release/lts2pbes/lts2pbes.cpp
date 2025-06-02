@@ -105,6 +105,10 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       {
         formfilename = parser.option_argument("formula");
       }
+      else 
+      {
+        throw mcrl2::runtime_error("The option --formula=FILE must be provided to pass the modal formula that is used in the translation.");      
+      }
 
       preprocess_modal_operators = parser.options.count("preprocess-modal-operators") > 0;
       generate_counter_example = parser.options.count("counter-example") > 0;
@@ -118,9 +122,9 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
         TOOLNAME,
         AUTHOR,
         "translates an LTS into an PBES",
-        "Translates an LTS in INFILE and writes the resulting PBES to "
-        "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
-        "present, standard input is used.")
+        "Translates an LTS in INFILE and the given modal formula FILE,"
+        "and writes the resulting PBES to OUTFILE. If OUTFILE is not present, standard"
+        "output is used. If INFILE is not present, standard input is used.")
     {}
 
   public:

@@ -64,6 +64,10 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
       {
         formula_filename = parser.option_argument("formula");
       }
+      else 
+      {
+        throw mcrl2::runtime_error("The option --formula=FILE must be provided to pass the modal formula that is used in the translation.");      
+      }
       preprocess_modal_operators = parser.options.count("preprocess-modal-operators") > 0;
       structured  = parser.options.count("structured") > 0;
       timed       = parser.options.count("timed") > 0;
