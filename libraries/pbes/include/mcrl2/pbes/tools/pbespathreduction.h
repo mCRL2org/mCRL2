@@ -129,8 +129,20 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
   }
 };
 
+/// \brief Returns all data variables that occur in a range of expressions
+/// \param[in] container a container with expressions
+/// \return All data variables that occur in the term t
+template <typename Container>
+std::vector<propositional_variable_instantiation> count_propositional_variable_instantiations(
+    Container const& container)
+{
+  std::vector<propositional_variable_instantiation> result;
+  pbes_system::find_propositional_variable_instantiations(container, std::inserter(result, result.end()));
+  return result;
+}
+
 std::set<propositional_variable_instantiation> filter_pvis(const propositional_variable_instantiation& needle,
-    const std::set<propositional_variable_instantiation>& haystack)
+    const std::vector<propositional_variable_instantiation>& haystack)
 {
   std::set<propositional_variable_instantiation> result;
 
@@ -197,7 +209,8 @@ void self_substitute(pbes_equation& equation,
   while (!stable)
   {
     stable = true;
-    std::set<propositional_variable_instantiation> set = find_propositional_variable_instantiations(equation.formula());
+    std::vector<propositional_variable_instantiation> set
+        = count_propositional_variable_instantiations(equation.formula());
     for (propositional_variable_instantiation x : set)
     {
       // Check if during the substitution of the other pvi this one got cancelled out
@@ -226,7 +239,7 @@ void self_substitute(pbes_equation& equation,
           sigma[v] = par;
         }
         pbes_expression phi = pbes_rewrite(equation.formula(), pbes_rewriter, sigma);
-        std::set<propositional_variable_instantiation> phi_set = find_propositional_variable_instantiations(phi);
+        std::vector<propositional_variable_instantiation> phi_set = count_propositional_variable_instantiations(phi);
 
         // (2) replace all reoccuring with true (nu) and false (mu)
         // if (auto it = phi_set.find(cur_x); it != phi_set.end())
@@ -241,7 +254,14 @@ void self_substitute(pbes_equation& equation,
           pvi_substituter.set_pvi(gauss_pvi);
           pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
           pvi_substituter.apply(phi, phi);
-          phi_set.erase(gauss_pvi);
+          // phi_set.erase(gauss_pvi);
+          // std::vector<int> bar;
+
+          // copy only positive numbers:
+          std::copy_if(phi_set.begin(),
+              phi_set.end(),
+              std::back_inserter(phi_set),
+              [gauss_pvi](propositional_variable_instantiation pvi) { return pvi != gauss_pvi; });
 
           mCRL2log(log::debug) << phi << "\n";
 
@@ -313,8 +333,8 @@ void self_substitute(pbes_equation& equation,
         }
       }
 
-      std::set<propositional_variable_instantiation> set
-          = find_propositional_variable_instantiations(equation.formula());
+      std::vector<propositional_variable_instantiation> set
+          = count_propositional_variable_instantiations(equation.formula());
 
       mCRL2log(log::verbose) << "New set size: " << set.size() << "\n";
 
