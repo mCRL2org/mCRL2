@@ -380,7 +380,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   for (int i = 0; i < n; ++i)
   {
     core::parse_node vi(v[i]);
-    mCRL2log(log::verbose) << "Ambiguity: " << vi.tree() << std::endl;
+    mCRL2log(log::info) << "Ambiguity: " << vi.tree() << std::endl;
     mCRL2log(log::debug) << "Ambiguity: " << table.tree(vi) << std::endl;
   }
   
