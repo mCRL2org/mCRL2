@@ -344,11 +344,31 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
 {
   core::parser_table table(parser_tables_mcrl2);
 
+  // Maurice:
+  //
+  // Our grammar is ambiguous for RegFrm and ActFrm with brackets, an RegFrm expression (a && b) can be parsed as both RegFrm(ActFrm) and ActFrm(ActFrm) using either rule
+  // RegFrm :: '(' RegFrm ')' | ActFrm or rule ActFrm :: '(' ActFrm ')' | Id.
+  //
+  // Introducing a ActFrmNoBrackets doesn't work since rule priorities are only applied to recursive applications of the rule, i.e., T :: T && T, and not T :: U && U, and U :: T.
+  //
+  // Instead we take the parse tree that starts with RegFrm(ActFrm).  
+  for (int i = 1; i < n; ++i)
+  {
+    core::parse_node vi(v[i]);
+    if (table.symbol_name(vi) == "RegFrm" && table.symbol_name(vi.child(0)) == "ActFrm")
+    {
+      mCRL2log(log::trace) << "Prioritising the bracket rule for RegFrm." << std::endl;
+      return vi.node;
+    }
+  }
+
+  // Maurice: We should take the parse tree with the lowest priority at the root and not the highest priority.
+  // in the expression a * b + c, the parse tree (a * b) + c has "+" as root, and not "*", which would be a * (b + c), whereas * has a higher priority than +.
   // There are at least two nodes.
   core::parse_node candidate(v[0]);
-  mCRL2log(log::trace) << "First candidate " << candidate.tree() << " with priority " << candidate.priority() << " and height " << candidate.height() << std::endl;
+  mCRL2log(log::trace) << "First candidate " << candidate.tree() << " with priority " << candidate.priority() << std::endl;
 
-  // Indicates that that the candidate is actually higher priority than another node.
+  // Indicates that that the candidate is actually lower priority than another node.
   bool chosen_candidate = true;
   for (int i = 1; i < n; ++i)
   {
@@ -362,17 +382,17 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
         chosen_candidate = false;
       }
 
-      if (vi.priority() > candidate.priority()) 
+      if (vi.priority() < candidate.priority()) 
       {
-        mCRL2log(log::trace) << "Selecting " << vi.tree() << " as the parse tree with higher priority " << vi.priority() <<  std::endl;
+        mCRL2log(log::trace) << "Selecting " << vi.tree() << " as the parse tree with lower priority " << vi.priority() <<  std::endl;
         candidate = vi;
       }
     }
   }
 
   if (chosen_candidate) {
-    // The candidate has a higher priority than the other nodes.
-    mCRL2log(log::trace) << "The parse tree with the highest priority and/or height: " << candidate.tree() << std::endl;
+    // The candidate has a lower priority than the other nodes.
+    mCRL2log(log::trace) << "The parse tree with the lowest priority: " << candidate.tree() << std::endl;
     return candidate.node;
   }
 

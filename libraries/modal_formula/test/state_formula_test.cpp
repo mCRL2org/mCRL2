@@ -9,6 +9,8 @@
 /// \file rename_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/utilities/exception.h"
+#include <boost/core/no_exceptions_support.hpp>
 #define MCRL2_STATE_FORMULA_BUILDER_DEBUG
 
 #define BOOST_TEST_MODULE state_formula
@@ -472,6 +474,6 @@ BOOST_AUTO_TEST_CASE(parse_state_formula_precedence_1801)
     "<true> exists j: Int. val(j == 0) && val(j == 0)"
     ;
 
-  // This should type check correctly, the right j should be bound.
-  state_formula_specification x = parse_state_formula_specification(text, false);
+  // This should fail, the right j is not bound by the exist, because the <true> has precedence over the conjunction.
+  BOOST_CHECK_THROW(parse_state_formula_specification(text, false), mcrl2::runtime_error);
 }
