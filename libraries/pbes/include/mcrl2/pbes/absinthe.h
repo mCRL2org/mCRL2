@@ -20,10 +20,7 @@
 #include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
-
-#ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 #include "mcrl2/data/detail/print_parse_check.h"
-#endif
 
 #include <ranges>
 
@@ -52,17 +49,11 @@ namespace detail {
     return dataspec;
   }
 
-#ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
   template <typename T>
   inline void absinthe_check_expression(const T& x)
   {
     data::detail::print_parse_check(x, absinthe_data_specification());
   }
-#else
-  template <typename T>
-  inline void absinthe_check_expression(const T&)
-  {}
-#endif
 
   // Returns true if f appears as a structured sort constructor in dataspec.
   inline

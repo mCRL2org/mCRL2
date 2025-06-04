@@ -1016,7 +1016,7 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                                                                                     /// nonbottom state can reach a subset of them.
                                                                                     void part_trans_t::assert_stability(const part_state_t& part_st) const
                                                                                     {
-                                                                                        #ifdef PARANOID_CHECK
+                                                                                        #ifdef MCRL2_GJKW_PARANOID_CHECK
                                                                                             std::vector<state_info_const_ptr> part_st_predecessors;
                                                                                         #endif
                                                                                         // count the nontrivial constellations (to check later whether every
@@ -1076,7 +1076,7 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                                                                                                 state_type nr_of_inert_successors =
                                                                                                                                B->inert_end()-B->inert_begin();
                                                                                                 permutation_const_iter_t s_iter;
-                                                                                                #ifdef PARANOID_CHECK
+                                                                                                #ifdef MCRL2_GJKW_PARANOID_CHECK
                                                                                                     state_type nr_of_inert_predecessors=nr_of_inert_successors;
                                                                                                     // make sure that every non-bottom state can reach some
                                                                                                     // bottom  state  in  the  block.   This  is  done  using
@@ -1336,7 +1336,7 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                                                                                                         // counted.
                                                                                                         assert(0 != nr_of_reachable_constlns);
 
-                                                                                                        #ifdef PARANOID_CHECK
+                                                                                                        #ifdef MCRL2_GJKW_PARANOID_CHECK
                                                                                                             // assert that s can reach a bottom state
                                                                                                             assert(STATE_TYPE_MAX == s->notblue);
                                                                                                             const_cast<state_type&>(s->notblue) = 1;
@@ -1372,7 +1372,7 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                                                                                                         assert(pred_iter->source->block != B);
                                                                                                     // end for
                                                                                                     }
-                                                                                                    #ifndef PARANOID_CHECK
+                                                                                                    #ifndef MCRL2_GJKW_PARANOID_CHECK
                                                                                                         // for all inert predecessors of s do
                                                                                                         for (pred_const_iter_t pred_iter=s->inert_pred_begin();
                                                                                                                   pred_iter < s->inert_pred_end(); ++pred_iter)
