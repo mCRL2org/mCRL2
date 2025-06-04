@@ -1,5 +1,25 @@
 ---
-Checks: "clang-analyzer-*"
+Checks: "clang-analyzer-*,
+    bug-prone-*,
+    modernize-avoid-bind,
+    modernize-avoid-c-arrays,
+    modernize-concat-nested-namespaces,
+    modernize-deprecated-headers,
+    modernize-deprecated-ios-base-aliases,
+    modernize-loop-convert,
+    modernize-make-shared,
+    modernize-make-unique,
+    modernize-pass-by-value,
+    modernize-raw-string-literal,
+    modernize-redundant-void-arg,
+    modernize-replace-random-shuffle,
+    modernize-shrink-to-fit,
+    modernize-use-noexcept,
+    modernize-use-nullptr,
+    modernize-use-override,
+    modernize-use-std-numbers,
+    modernize-use-starts-ends-with,
+    modernize-use-ranges"
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 FormatStyle:     none
