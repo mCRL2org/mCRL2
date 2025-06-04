@@ -309,6 +309,14 @@ class pbessolve_tool
                                 "strategies less than 2."
                              << std::endl;
     }
+    if (options.optimization == 8 && has_counter_example)
+    {
+      throw mcrl2::runtime_error("optimisation 8 cannot be used with a PBES that has counter example information");
+    }
+    if (options.optimization == 8 && options.number_of_threads > 1)
+    {
+      throw mcrl2::runtime_error("optimisation 8 does not work correctly with multiple threads, using 1 thread instead.");
+    }
 
     if (has_counter_example)
     {
