@@ -25,27 +25,37 @@ namespace action_formulas
 namespace detail
 {
 
+
 struct action_formula_actions: public lps::detail::multi_action_actions
 {
   explicit action_formula_actions(const core::parser& parser_)
     : lps::detail::multi_action_actions(parser_)
   {}
 
+  // Helper function to check if a node represents an action formula
+  bool is_action_formula_node(const core::parse_node& node) const
+  {
+    const std::string name = symbol_name(node);
+    return name == "ActFrm" || name == "ActFrmNoBrackets";
+  }
+
   action_formulas::action_formula parse_ActFrm(const core::parse_node& node) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "MultAct")) { return process::untyped_multi_action(parse_ActionList(node.child(0))); }
+    else if ((node.child_count() == 1) && is_action_formula_node(node.child(0))) { return parse_ActFrm(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return action_formulas::action_formula(parse_Id(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataExpr")) { return parse_DataExpr(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return action_formulas::true_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return action_formulas::false_(); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "ActFrm")) { return action_formulas::not_(parse_ActFrm(node.child(1))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ActFrm") && (node.child(1).string() == "=>") && (symbol_name(node.child(2)) == "ActFrm")) { return action_formulas::imp(parse_ActFrm(node.child(0)), parse_ActFrm(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ActFrm") && (node.child(1).string() == "&&") && (symbol_name(node.child(2)) == "ActFrm")) { return action_formulas::and_(parse_ActFrm(node.child(0)), parse_ActFrm(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ActFrm") && (node.child(1).string() == "||") && (symbol_name(node.child(2)) == "ActFrm")) { return action_formulas::or_(parse_ActFrm(node.child(0)), parse_ActFrm(node.child(2))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ActFrm")) { return action_formulas::forall(parse_VarsDeclList(node.child(1)), parse_ActFrm(node.child(3))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ActFrm")) { return action_formulas::exists(parse_VarsDeclList(node.child(1)), parse_ActFrm(node.child(3))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ActFrm") && (node.child(1).string() == "@") && (symbol_name(node.child(2)) == "DataExpr")) { return action_formulas::at(parse_ActFrm(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "ActFrm") && (symbol_name(node.child(2)) == ")")) { return parse_ActFrm(node.child(1)); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && is_action_formula_node(node.child(1))) { return action_formulas::not_(parse_ActFrm(node.child(1))); }
+    else if ((node.child_count() == 3) && is_action_formula_node(node.child(0)) && (node.child(1).string() == "=>") && is_action_formula_node(node.child(2))) { return action_formulas::imp(parse_ActFrm(node.child(0)), parse_ActFrm(node.child(2))); }
+    else if ((node.child_count() == 3) && is_action_formula_node(node.child(0)) && (node.child(1).string() == "&&") && is_action_formula_node(node.child(2))) { return action_formulas::and_(parse_ActFrm(node.child(0)), parse_ActFrm(node.child(2))); }
+    else if ((node.child_count() == 3) && is_action_formula_node(node.child(0)) && (node.child(1).string() == "||") && is_action_formula_node(node.child(2))) { return action_formulas::or_(parse_ActFrm(node.child(0)), parse_ActFrm(node.child(2))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && is_action_formula_node(node.child(3))) { return action_formulas::forall(parse_VarsDeclList(node.child(1)), parse_ActFrm(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && is_action_formula_node(node.child(3))) { return action_formulas::exists(parse_VarsDeclList(node.child(1)), parse_ActFrm(node.child(3))); }
+    else if ((node.child_count() == 3) && is_action_formula_node(node.child(0)) && (node.child(1).string() == "@") && (symbol_name(node.child(2)) == "DataExpr")) { return action_formulas::at(parse_ActFrm(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && is_action_formula_node(node.child(1)) && (symbol_name(node.child(2)) == ")")) { return parse_ActFrm(node.child(1)); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
@@ -68,12 +78,13 @@ struct regular_formula_actions: public action_formulas::detail::action_formula_a
 
   regular_formulas::regular_formula parse_RegFrm(const core::parse_node& node) const
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActFrm")) { return parse_ActFrm(node.child(0)); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActFrmNoBrackets")) { return parse_ActFrm(node.child(0)); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == ")")) { return parse_RegFrm(node.child(1)); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "*")) { return trans_or_nil(parse_RegFrm(node.child(0))); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "+")) { return trans(parse_RegFrm(node.child(0))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (node.child(1).string() == ".") && (symbol_name(node.child(2)) == "RegFrm")) { return untyped_regular_formula(core::identifier_string("."), parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (node.child(1).string() == "+") && (symbol_name(node.child(2)) == "RegFrm")) { return untyped_regular_formula(core::identifier_string("+"), parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
+    std::abort();
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
