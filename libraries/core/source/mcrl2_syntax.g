@@ -335,9 +335,10 @@ PresExpr
 
 //--- Action formulas
 
-ActFrmNoBrackets
+ActFrm
   : DataValExpr                                                  // Boolean data expression
   | MultAct                                                      // Multi-action
+  | '(' ActFrm ')'                                               // Brackets
   | 'true'                                                       // True
   | 'false'                                                      // False
   | 'forall' VarsDeclList '.' ActFrm                  $right  0  // Universal quantifier
@@ -349,15 +350,10 @@ ActFrmNoBrackets
   | '!' ActFrm                                        $right  6  // Negation
   ;
 
-ActFrm 
-  : ActFrmNoBrackets
-  | '(' ActFrm ')'                                               // Brackets
-  ;
-
 //--- Regular formulas
 
 RegFrm
-  : ActFrmNoBrackets                                             // Action formula
+  : ActFrm                                                       // Action formula
   | '(' RegFrm ')'                                               // Brackets
   | RegFrm '+'  RegFrm                                 $left  1  // Alternative composition
   | RegFrm '.'  RegFrm                                $right  2  // Sequential composition
