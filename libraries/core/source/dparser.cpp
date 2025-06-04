@@ -379,11 +379,11 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   for (int i = 0; i < n; ++i)
   {
     core::parse_node vi(v[i]);
-    mCRL2log(log::info) << "Ambiguity: " << vi.tree() << std::endl;
-    mCRL2log(log::debug) << "Ambiguity: " << table.tree(vi) << std::endl;
+    mCRL2log(log::info) << "Candidate: " << vi.tree() << std::endl;
+    mCRL2log(log::debug) << "Candidate (verbose): " << table.tree(vi) << std::endl;
   }
   
-  throw mcrl2::runtime_error("Unresolved ambiguity.");
+  throw mcrl2::runtime_error("Failed to parse the input. Several ambiguous parse trees where found, see the candidates above.");
 }
 
 static void log_location(struct D_Parser *ap)
