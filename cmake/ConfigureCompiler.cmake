@@ -80,12 +80,10 @@ endif()
 # Enable the new JFG branching bisimulation algorithm.
 add_compile_definitions(BRANCH_BIS_EXPERIMENT_JFG)
 
-
 # Enable all macros defined in the code used for debugging purposes.
 add_debug_compile_definitions(MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
-add_debug_compile_definitions(MCRL2_ABSINTHE_CHECK_EXPRESSIONS)
-add_debug_compile_definitions(PARANOID_CHECK)
-add_compile_definitions(MCRL2_EXTENDED_TESTS)
+#add_debug_compile_definitions(MCRL2_GJKW_PARANOID_CHECK)
+#add_compile_definitions(MCRL2_EXTENDED_TESTS)
 
 # These are defines that can be enabled for additional debug printing
 #add_compile_definitions(MCRL2_LPS_PARELM_DEBUG)
