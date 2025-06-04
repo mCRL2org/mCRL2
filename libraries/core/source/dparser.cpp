@@ -346,6 +346,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
 
   // There are at least two nodes.
   core::parse_node candidate(v[0]);
+  mCRL2log(log::trace) << "First candidate " << candidate.tree() << " with priority " << candidate.priority() << " and height " << candidate.height() << std::endl;
 
   // Indicates that that the candidate is actually higher priority than another node.
   bool chosen_candidate = true;
@@ -363,7 +364,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
 
       if (vi.priority() > candidate.priority()) 
       {
-        mCRL2log(log::trace) << "Selecting " << i << " as the parse tree with higher priority" << std::endl;
+        mCRL2log(log::trace) << "Selecting " << vi.tree() << " as the parse tree with higher priority " << vi.priority() <<  std::endl;
         candidate = vi;
       }
     }
@@ -371,7 +372,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
 
   if (chosen_candidate) {
     // The candidate has a higher priority than the other nodes.
-    mCRL2log(log::trace) << "The parse tree with the highest priority: " << candidate.tree() << std::endl;
+    mCRL2log(log::trace) << "The parse tree with the highest priority and/or height: " << candidate.tree() << std::endl;
     return candidate.node;
   }
 
