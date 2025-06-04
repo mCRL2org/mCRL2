@@ -507,7 +507,7 @@ void StaticGraph::swap(StaticGraph &g)
     std::swap(edge_dir_, g.edge_dir_);
 }
 
-#ifdef WITH_THREADS
+#ifdef MCRL2_ENABLE_MULTITHREADING
 void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
                                          const verti *verts,
                                          const verti num_vertices,
@@ -600,4 +600,4 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
         predecessor_index_[v] = e;
     }
 }
-#endif
+#endif // MCRL2_ENABLE_MULTITHREADING
