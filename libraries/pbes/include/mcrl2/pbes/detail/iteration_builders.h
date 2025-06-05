@@ -27,7 +27,7 @@ struct replace_other_propositional_variables_with_functions_builder
   core::identifier_string name;
   simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
   data::variable_list var_list;
-  std::map<data::variable, propositional_variable_instantiation> m_instantiations;
+  std::map<data::data_expression, propositional_variable_instantiation> m_instantiations;
   bool forward = true;
 
   explicit replace_other_propositional_variables_with_functions_builder(simplify_data_rewriter<data::rewriter>& r)
@@ -42,7 +42,10 @@ struct replace_other_propositional_variables_with_functions_builder
   data::variable_list get_variable_list() { return var_list; }
 
   void reset_instantiations() { m_instantiations.clear(); }
-  std::map<data::variable, propositional_variable_instantiation> instantiations() const { return m_instantiations; }
+  std::map<data::data_expression, propositional_variable_instantiation> instantiations() const
+  {
+    return m_instantiations;
+  }
 
   template <class T>
   void apply(T& result, const pbes_expression& d)
@@ -52,18 +55,17 @@ struct replace_other_propositional_variables_with_functions_builder
       super::apply(result, d);
       return;
     }
-    if (!data::is_variable(d))
+    if (!(data::is_variable(d) || data::is_application(d)))
     {
       super::apply(result, d);
       return;
     }
 
-    auto it = m_instantiations.find(atermpp::down_cast<data::variable>(d));
+    auto it = m_instantiations.find(atermpp::down_cast<data::data_expression>(d));
     if (it != m_instantiations.end())
     {
       propositional_variable_instantiation pvi = it->second;
       result = pvi;
-      m_instantiations.erase(it);
       return;
     }
     result = d;
@@ -72,19 +74,20 @@ struct replace_other_propositional_variables_with_functions_builder
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    if (forward && x.name() != name)
+    if (forward)
     {
       // This could be unsound, replacing a PVI instance with a function symbol + parameters is not proven.
       // Based on uninterpreted functions theory (for BDDs for instance)
-      mCRL2log(log::debug) << "Formula contains other (unsolved) PVI instances in the current equation " << std::endl;
       data::data_expression_list params = x.parameters();
       atermpp::aterm_list term_list;
       for (const auto& x : params)
       {
         atermpp::aterm sort(x.sort());
-        push_back(term_list, sort);
+        term_list.push_front(sort);
       }
+      reverse(term_list);
       data::sort_expression_list sort_list(term_list);
+
       if (sort_list.size() > 0)
       {
         data::sort_expression sort_expr = data::function_sort(sort_list, data::sort_bool::bool_());
@@ -92,12 +95,14 @@ struct replace_other_propositional_variables_with_functions_builder
         result = data::application(fs, x.parameters());
         data::variable var = data::variable(x.name(), sort_expr);
         push_back(var_list, var);
+        m_instantiations.insert({data::application(fs, x.parameters()), x});
       }
       else
       {
         data::variable var = data::variable(x.name(), data::sort_bool::bool_());
         push_back(var_list, var);
         result = var;
+        m_instantiations.insert({var, x});
       }
       return;
     }

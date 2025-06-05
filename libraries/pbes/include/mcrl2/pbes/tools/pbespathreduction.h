@@ -15,10 +15,15 @@
 #ifndef MCRL2_PBES_TOOLS_PBESPATHREDUCTION_H
 #define MCRL2_PBES_TOOLS_PBESPATHREDUCTION_H
 
+#include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
+#include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/detail/iteration_builders.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
+#include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 #include <cstddef>
 #include <numeric>
 
@@ -201,11 +206,45 @@ bool pvi_in_set(const propositional_variable_instantiation needle,
       });
 }
 
+data::data_expression pbestodata(pbes_expression& expr,
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
+        replace_substituter)
+{
+  pbes_expression asdf;
+  replace_substituter.reset_instantiations();
+  replace_substituter.set_forward(true);
+  // replace_substituter.set_name(equation.variable().name());
+  replace_substituter.apply(asdf, expr);
+
+  data::data_expression data_expr = atermpp::down_cast<data::data_expression>(detail::pbes2data(asdf));
+
+  return data_expr;
+}
+
+pbes_expression datatopbes(data::data_expression& data_expr,
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
+        replace_substituter)
+{
+  pbes_expression expr;
+  replace_substituter.set_forward(false);
+  replace_substituter.apply(expr, detail::data2pbes<pbes_expression>(data_expr));
+  replace_substituter.reset_instantiations();
+  return expr;
+}
+
 void self_substitute(pbes_equation& equation,
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
+        replace_substituter,
     simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter)
 {
   bool stable = false;
+
+  std::shared_ptr<data::detail::BDD_Simplifier> f_bdd_simplifier(
+      std::shared_ptr<data::detail::BDD_Simplifier>(new data::detail::BDD_Simplifier()));
+  // std::shared_ptr<data::detail::BDD_Path_Eliminator> f_bdd_simplifier(
+  //     std::shared_ptr<data::detail::BDD_Path_Eliminator>(new
+  //     data::detail::BDD_Path_Eliminator(data::detail::solver_type_z3)));
   while (!stable)
   {
     stable = true;
@@ -213,13 +252,16 @@ void self_substitute(pbes_equation& equation,
         = count_propositional_variable_instantiations(equation.formula());
     for (propositional_variable_instantiation x : set)
     {
+      if (equation.variable().name() != x.name())
+        continue;
       // Check if during the substitution of the other pvi this one got cancelled out
       std::set<propositional_variable_instantiation> path = {x};
+
       propositional_variable_instantiation cur_x = x;
       pbes_expression result = x;
 
-      mCRL2log(log::verbose) << " -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n"
-                             << equation.formula() << "\n\nStart " << (cur_x) << "\n";
+      mCRL2log(log::debug) << " -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n"
+                           << equation.formula() << "\n\nStart " << (cur_x) << "\n";
       bool pvi_done = false;
       while (!pvi_done)
       {
@@ -239,6 +281,10 @@ void self_substitute(pbes_equation& equation,
           sigma[v] = par;
         }
         pbes_expression phi = pbes_rewrite(equation.formula(), pbes_rewriter, sigma);
+        // Simplify
+        data::data_expression expr = pbestodata(phi, replace_substituter);
+        expr = f_bdd_simplifier->simplify(expr);
+        phi = datatopbes(expr, replace_substituter);
         std::vector<propositional_variable_instantiation> phi_set = count_propositional_variable_instantiations(phi);
 
         // (2) replace all reoccuring with true (nu) and false (mu)
@@ -254,29 +300,23 @@ void self_substitute(pbes_equation& equation,
           pvi_substituter.set_pvi(gauss_pvi);
           pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
           pvi_substituter.apply(phi, phi);
-          // phi_set.erase(gauss_pvi);
-          // std::vector<int> bar;
-
-          // copy only positive numbers:
-          std::copy_if(phi_set.begin(),
-              phi_set.end(),
-              std::back_inserter(phi_set),
-              [gauss_pvi](propositional_variable_instantiation pvi) { return pvi != gauss_pvi; });
 
           mCRL2log(log::debug) << phi << "\n";
 
           mCRL2log(log::debug) << "- - - - - - - - - - - - - - - - - - - - \n";
         }
 
+        phi_set = count_propositional_variable_instantiations(phi);
+
         // (3) check if simpler
-        if (phi_set.size() == 1)
+        if (phi_set.size() == 1 && (*phi_set.begin()).name() == equation.variable().name())
         {
           propositional_variable_instantiation new_x = *phi_set.begin();
 
           mCRL2log(log::debug) << "Trying loop " << new_x << " in path with \n";
           for (auto itr : path)
           {
-            mCRL2log(log::verbose) << itr << "\n";
+            mCRL2log(log::debug) << itr << "\n";
           }
 
           if (pvi_in_set(new_x, path))
@@ -294,7 +334,7 @@ void self_substitute(pbes_equation& equation,
             pvi_substituter.set_replacement(result);
             pvi_substituter.apply(equation.formula(), equation.formula());
 
-            mCRL2log(log::verbose) << "new_phi " << result << "\n";
+            mCRL2log(log::debug) << "new_phi " << result << "\n";
             stable = false;
             pvi_done = true;
           }
@@ -336,10 +376,14 @@ void self_substitute(pbes_equation& equation,
       std::vector<propositional_variable_instantiation> set
           = count_propositional_variable_instantiations(equation.formula());
 
-      mCRL2log(log::verbose) << "New set size: " << set.size() << "\n";
+      mCRL2log(log::debug) << "New set size: " << set.size() << "\n";
 
       // Simplify
       equation.formula() = pbes_rewrite(equation.formula(), pbes_rewriter);
+
+      data::data_expression expr = pbestodata(equation.formula(), replace_substituter);
+      expr = f_bdd_simplifier->simplify(expr);
+      equation.formula() = datatopbes(expr, replace_substituter);
     }
   }
   mCRL2log(log::verbose) << "\n" << equation.variable() << "\n is stable! \n\n\n";
@@ -362,21 +406,32 @@ struct pbespathreduction_pbes_backward_substituter
   {
     data::rewriter data_rewriter(p.data(), options.rewrite_strategy);
     simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
+    simplify_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_rewriter);
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder> pvi_substituter(
         pbes_rewriter);
+
+    // data::rewriter datap_rewriter(p.data(), mcrl2::data::jitty_prover);
+    // simplify_quantifiers_data_rewriter<data::rewriter> pbesp_rewriter(datap_rewriter);
+
+    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>
+        replace_substituter(pbes_rewriter2);
     for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
     {
       mCRL2log(log::verbose) << "Investigating the equation for " << i->variable().name() << "\n";
-      self_substitute(*i, pvi_substituter, pbes_rewriter);
+      self_substitute(*i, pvi_substituter, replace_substituter, pbes_rewriter);
 
       std::set<propositional_variable_instantiation> pvi_set
           = find_propositional_variable_instantiations((*i).formula());
+      mCRL2log(log::verbose) << "How many are left? " << pvi_set.size() << "\n";
+
+      // (*i).formula() = pbes_rewrite((*i).formula(), pbesp_rewriter);
+
       if (pvi_set.size() == 0)
       {
         for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
         {
-          substitute(*j, *i, substituter);
+          // substitute(*j, *i, substituter);
         }
       }
     }
