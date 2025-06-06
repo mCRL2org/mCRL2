@@ -75,6 +75,11 @@ struct add_simplify: public Builder<Derived>
     {
       return;
     }
+    if (data::is_data_expression(result) && data::is_data_expression(right)) 
+    {
+      data::sort_bool::make_and_(reinterpret_cast<data::data_expression&>(result), reinterpret_cast<data::data_expression&>(result), reinterpret_cast<data::data_expression&>(right));
+      return;
+    }
     make_and_(result,result, right);
   }
 
@@ -102,6 +107,11 @@ struct add_simplify: public Builder<Derived>
     }
     if (is_false(right) || result==right)
     {
+      return;
+    }
+    if (data::is_data_expression(result) && data::is_data_expression(right)) 
+    {
+      data::sort_bool::make_or_(reinterpret_cast<data::data_expression&>(result), reinterpret_cast<data::data_expression&>(result), reinterpret_cast<data::data_expression&>(right));
       return;
     }
     make_or_(result,result, right);
