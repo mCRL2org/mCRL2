@@ -1,8 +1,0 @@
-<root>
- <spec>Peterson_spec.mcrl2</spec>
- <properties>
-  <property>No deadlock</property>
-  <property>Mutual Exclusion</property>
-  <property>Reachable</property>
- </properties>
-</root>
