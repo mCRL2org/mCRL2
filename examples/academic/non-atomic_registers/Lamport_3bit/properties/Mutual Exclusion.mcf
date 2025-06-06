@@ -1,3 +1,0 @@
-forall tid, tid': TID.
-    val(valid_tid(tid) && valid_tid(tid') && tid != tid') =>
-        [true*]!(<crit(tid)>true && <crit(tid')>true)

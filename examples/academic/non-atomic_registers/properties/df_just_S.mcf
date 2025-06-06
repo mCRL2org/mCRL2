@@ -1,0 +1,12 @@
+% Deadlock freedom, with justness and concurrency relation S
+!(<true*>exists tid: TID. (val(valid_tid(tid)) && <label(nc(tid))><(!(label(c(tid))))*>
+nu X. (forall a: Label. (val(nonblock(a)) => (
+	<label(a)>true => (
+		<(!(exists tid: TID. val(valid_tid(tid)) && label(c(tid))))*>(
+		exists a': Label. (
+			val((a' in elimS(a)) && !(is_c(a'))) && (
+				<label(a')>X
+			)
+		))
+	)
+)))))

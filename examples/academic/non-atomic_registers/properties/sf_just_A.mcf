@@ -1,0 +1,16 @@
+% Starvation freedom, with justness and concurrency relation A
+forall tid: TID. (
+	val(valid_tid(tid)) =>(
+		!(<true*.label(nc(tid))>
+		nu X. (forall a: Label. (val(nonblock(a)) => (
+			<label(a)>true => (
+				<(!(label(c(tid))))*>(
+				exists a': Label. (
+					val((a' in elimA(a)) && a' != c(tid)) && (
+						<label(a')>X
+					)
+				))
+			)
+		))))
+	)
+)

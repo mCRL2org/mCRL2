@@ -1,0 +1,492 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Aravind's BLRU algorithm with minor modification %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Register definitions (id's; minimum, and maximum values)
+sort
+	RID = struct flag(rtid: TID) | stage(rtid:TID) | date(rtid: TID);
+var
+    rid: RID;
+    tid: TID;
+    d: Data;
+eqn
+    MAX(flag(tid)) = 1;
+    MAX(stage(tid)) = 1;
+    MAX(date(tid)) = Int2Nat((2 * NUM) - 1);
+    MIN(rid)  = 0;
+
+%% Algorithm specific actions or function definitions
+act
+	crit, noncrit: TID;
+	line: TID # Nat;
+
+%% Threads executing the algorithm 
+proc
+	Thread(tid: TID) = 
+		noncrit(tid)|label(nc(tid)).
+		Thread_1(tid);
+
+	% 1: flag[i] := 1
+	Thread_1(tid: TID) =
+		start_write_s(tid, flag(tid), 1)|line(tid, 1).
+		finish_write_r(tid, flag(tid))|line(tid, 1).
+		% go into the first instance of the repeat-loop
+		Thread_3(tid);
+
+	% 3: stage[i] := 0
+	Thread_3(tid: TID) =
+		start_write_s(tid, stage(tid), 0)|line(tid, 3).
+		finish_write_r(tid, stage(tid))|line(tid, 3).
+		(tid == MIN_TID) -> (
+			% special case to avoid unguarded recursion
+			Thread_4(tid, MIN_TID + 1)
+		) <> (
+			Thread_4(tid, MIN_TID)
+	);
+
+	% 4: await forall j != i: flag[j] = 0 or (date[i] < date[j] and stage[j] = 0)
+	Thread_4(tid: TID, j: TID) =
+		(j > MAX_TID) -> (
+			Thread_5(tid)
+		) <> (
+			start_read_s(tid, flag(j))|line(tid, 5).
+			sum fj: Data.
+			finish_read_r(tid, flag(j), fj)|line(tid, 5).
+			start_read_s(tid, date(tid))|line(tid, 5).
+			sum di: Data.
+			finish_read_r(tid, date(tid), di)|line(tid, 5).
+			start_read_s(tid, date(j))|line(tid, 5).
+			sum dj: Data.
+			finish_read_r(tid, date(j), dj)|line(tid, 5).
+			start_read_s(tid, stage(j))|line(tid, 5).
+			sum sj: Data.
+			finish_read_r(tid, stage(j), sj)|line(tid, 5).
+			(fj == 0 || (di < dj) && sj == 0) -> (
+				(tid == j + 1) -> (
+					% special case to avoid unguarded recursion on the next loop
+					Thread_4(tid, j + 2)
+				) <> (
+					Thread_4(tid, j + 1)
+				)
+			) <>  (
+				Thread_4(tid, j)
+			)
+		);
+
+	% 5: stage[i] := 1
+	Thread_5(tid: TID) =
+		start_write_s(tid, stage(tid), 1)|line(tid, 5).
+		finish_write_r(tid, stage(tid))|line(tid, 5).
+		(tid == MIN_TID) -> (
+			Thread_6(tid, MIN_TID + 1)
+		) <> (
+			Thread_6(tid, MIN_TID)
+		);
+
+	% 6: until forall j != i: stage[j] = 0
+	Thread_6(tid: TID, j: TID) =
+		(j > MAX_TID) -> (
+			Thread_7(tid)
+		) <> (
+			start_read_s(tid, stage(j))|line(tid, 6).
+			sum sj: Data.
+			finish_read_r(tid, stage(j), sj)|line(tid, 6).
+			(sj == 0) -> (
+				(tid == j + 1) -> (
+					% special case to avoid unguarded recursion
+					Thread_6(tid, j + 2)
+				) <> (
+					Thread_6(tid, j + 1)
+				)
+			) <> (
+				% not all threads have stage = 0, so take the repeat-loop again
+				Thread_3(tid)
+			)
+		);
+
+	% 7: critical section
+	Thread_7(tid: TID) =
+		crit(tid)|label(c(tid)).
+		Thread_8_sum(tid, MIN_TID, MIN(date(tid)));	
+
+	% 8: date[i] := max(date[0], ..., date[N - 1]) + 1
+	% first: loop, collect the max
+	Thread_8_sum(tid: TID, j: TID, m: Data) =
+		(j > MAX_TID) -> (
+			Thread_8_write(tid, m)
+		) <> (
+			start_read_s(tid, date(j))|line(tid, 8).
+			sum dj: Data.
+			finish_read_r(tid, date(j), dj)|line(tid, 8).
+			Thread_8_sum(tid, j + 1, max(m, dj))
+		); 
+
+	% second: write the new value
+	Thread_8_write(tid: TID, m: Data) =
+		start_write_s(tid, date(tid), m + 1)|line(tid, 8).
+		finish_write_r(tid, date(tid))|line(tid, 8).
+		Thread_9(tid);
+
+	% 9: if date[i] >= MAX(date[i]) then
+	Thread_9(tid: TID) =
+		start_read_s(tid, date(tid))|line(tid, 9).
+		sum di: Data.
+		finish_read_r(tid, date(tid), di)|line(tid, 9).
+		(di >= MAX(date(tid))) -> (
+			Thread_10(tid, MIN_TID)
+		) <> (
+			Thread_11(tid)
+		);
+
+	% 10: forall j: date[j] := j
+	Thread_10(tid: TID, j: TID) =
+		(j > MAX_TID) -> (
+			Thread_11(tid)
+		) <> (
+			start_write_s(tid, date(j), j)|line(tid, 10).
+			finish_write_r(tid, date(j))|line(tid, 10).
+			Thread_10(tid, j + 1)
+		);
+
+	% 11: stage[i] := 0
+	Thread_11(tid: TID) =
+		start_write_s(tid, stage(tid), 0)|line(tid, 11).
+		finish_write_r(tid, stage(tid))|line(tid, 11).
+		Thread_12(tid);
+
+	% 12: flag[i] := 0
+	Thread_12(tid: TID) =
+		start_write_s(tid, flag(tid), 0)|line(tid, 12).
+		finish_write_r(tid, flag(tid))|line(tid, 12).
+		Thread(tid);
+
+init
+	hide({
+		line, crit, noncrit,
+		start_read, finish_read,
+		start_write, finish_write,
+		order_read, order_write
+		},
+    allow({
+		crit|label, noncrit|label,
+        start_read|label|line, finish_read|label|line,
+        start_write|label|line, finish_write|label|line,
+        order_read|label, order_write|label
+        },
+    comm({
+        start_read_s  | start_read_r  -> start_read,
+        finish_read_s | finish_read_r -> finish_read,
+        start_write_s  | start_write_r  -> start_write,
+        finish_write_s | finish_write_r -> finish_write
+        }, 
+	%% Initialization of the threads and registers
+      	Thread(0) || Safe_Register(flag(0), 0) || Safe_Register(stage(0), 0) || Safe_Register(date(0), 0) 
+	 || Thread(1) || Safe_Register(flag(1), 0) || Safe_Register(stage(1), 0) || Safe_Register(date(1), 1) 
+	 || Thread(2) || Safe_Register(flag(2), 0) || Safe_Register(stage(2), 0) || Safe_Register(date(2), 2)
+  ))); 
+
+%% Define the number of registers
+eqn
+	NUM = 3;
+
+%% Definition of labels
+sort
+	Label = struct
+		sr(ltid: TID, lrid: RID)?is_sr |
+		fr(ltid: TID, lrid: RID, ldata: Data)?is_fr |
+		sw(ltid: TID, lrid: RID, ldata: Data)?is_sw |
+		fw(ltid: TID, lrid: RID)?is_fw |
+		or(ltid: TID, lrid: RID)?is_or |
+		ow(ltid: TID, lrid: RID)?is_ow |
+		c(ltid: TID)?is_c |
+		nc(ltid: TID)?is_nc;
+
+%% Define block
+eqn
+	Block = {a : Label | is_nc(a)};
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% For most applications, nothing below here needs to be altered.   %%
+%% It contains the register definitions, the RID and TID data types,%%
+%% and the standard actions that are part of the model.             %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+sort
+    TID = Nat;
+map
+	NUM: Nat;
+    MIN_TID, MAX_TID: TID;
+    valid_tid: TID -> Bool;
+var
+    tid: TID;
+eqn
+    MIN_TID = 0;
+    MAX_TID = Int2Nat(NUM - 1);
+    valid_tid(tid) = MIN_TID <= tid && tid <= MAX_TID;
+
+sort
+    Data = Nat;
+map
+    MIN, MAX, INIT: RID -> Data;
+    valid_data: RID # Data -> Bool;
+var
+    d: Data;
+    rid: RID;
+eqn
+    valid_data(rid, d) = MIN(rid) <= d && d <= MAX(rid);
+
+act 
+    start_read_s, start_read_r, start_read: TID # RID;
+    finish_read_s, finish_read_r, finish_read: TID # RID # Data;
+    start_write_s, start_write_r, start_write: TID # RID # Data;
+    finish_write_s, finish_write_r, finish_write: TID # RID;
+    order_read, order_write: TID # RID;
+	label: Label;
+
+map
+	Block: Set(Label);
+	nonblock: Label -> Bool;
+
+var
+	a: Label;
+eqn
+	nonblock(a) = !(a in Block);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Justness definitions %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+map
+	elimT: Label -> Set(Label);
+	elimS: Label -> Set(Label);
+	elimI: Label -> Set(Label);
+	elimA: Label -> Set(Label);
+
+var
+	a: Label;
+eqn
+	elimT(a) = { b : Label | ltid(a) == ltid(b)};
+	!(is_sr(a) || is_sw(a)) -> elimS(a) = elimT(a);
+	(is_sr(a) || is_sw(a)) -> elimS(a) = elimT(a) + {b : Label | is_sw(b) && lrid(a) == lrid(b)};
+	!(is_sw(a)) -> elimI(a) = elimS(a);
+	(is_sw(a)) -> elimI(a) = elimS(a) + {b : Label | is_sr(b) && lrid(a) == lrid(b)};
+	!(is_sr(a)) -> elimA(a) = elimI(a);
+	(is_sr(a)) -> elimA(a) = elimI(a) + {b : Label | is_sr(b) && lrid(a) == lrid(b)};
+
+%%%%%%%%%%%%%%%%%%%%
+%% Safe Registers %%
+%%%%%%%%%%%%%%%%%%%%
+sort
+    Overlapping = TID -> Bool;
+map
+    ALL_OVERLAPPING: Overlapping;
+var
+    tid: TID;
+eqn
+    ALL_OVERLAPPING(tid) = true;
+
+sort
+    Status_safe = struct status_safe(
+					stored: Data,
+					next: Data,
+					initial: Data,
+					overlap: Overlapping,
+					readers: Set(TID), 
+					writers: Set(TID));
+    
+map 
+    INIT_Status_safe: Data -> Status_safe;
+    start_reading: Status_safe # TID -> Status_safe;
+    finish_reading: Status_safe # TID -> Status_safe;
+    start_writing: Status_safe # TID # Data -> Status_safe;
+    finish_writing: Status_safe # TID # Data -> Status_safe;
+    overlapping_write: Status_safe # TID -> Bool;
+	stored_val: Status_safe -> Data;
+    
+var
+    tid: TID;
+    rid: RID;
+    o: Overlapping;
+	rs, ws: Set(TID),
+    s,n,i,d: Data;
+eqn 
+    INIT_Status_safe(s) = status_safe(s, s, s, ALL_OVERLAPPING, {}, {});
+    start_reading(status_safe(s, n, i, o, rs, ws), tid) = 
+        status_safe(s, n, i, o[tid -> ws != {}], rs + {tid}, ws);
+    finish_reading(status_safe(s, n, i, o, rs, ws), tid) = 
+        status_safe(s, n, i, o[tid -> true], rs - {tid}, ws);
+    ws == {} -> start_writing(status_safe(s, n, i, o, rs, ws), tid, d) = 
+        status_safe(s, d, i, ALL_OVERLAPPING[tid -> false], rs, ws + {tid});
+    ws != {} -> start_writing(status_safe(s, n, i, o, rs, ws), tid, d) = 
+        status_safe(s, i, i, ALL_OVERLAPPING,rs, ws + {tid});
+    finish_writing(status_safe(s, n, i, o, rs, ws), tid, d) = 
+        status_safe(d, i, i, o[tid->true], rs, ws - {tid});
+    overlapping_write(status_safe(s, n, i, o, rs, ws), tid) = o(tid);
+
+proc
+    Safe_Register(rid: RID, d: Data) = Register_safe(rid,INIT_Status_safe(d));
+
+    Register_safe(rid: RID, s: Status_safe) =
+          sum tid: TID. valid_tid(tid) -> (
+			((!(tid in readers(s) || tid in writers(s))) -> (
+            	( start_read_r(tid,rid)|label(sr(tid, rid)).Register_safe(s=start_reading(s, tid)) )
+            	+ ( sum d: Data. valid_data(rid, d) ->(
+                	start_write_r(tid,rid,d)|label(sw(tid,rid,d)).Register_safe(s=start_writing(s, tid, d)) ) )
+			))
+            + ( overlapping_write(s, tid) -> (
+                sum d: Data. valid_data(rid, d) ->(
+                     ((tid in readers(s)) -> finish_read_s(tid,rid,d)|label(fr(tid,rid,d)).Register_safe(s=finish_reading(s, tid)))
+                     + ((tid in writers(s)) -> finish_write_s(tid,rid)|label(fw(tid,rid)).Register_safe(s=finish_writing(s, tid, d)) ) )
+                ) <> ( 
+					 ((tid in readers(s)) -> finish_read_s(tid,rid,stored(s))|label(fr(tid,rid,stored(s))).Register_safe(s=finish_reading(s, tid)))
+                     + ((tid in writers(s)) -> finish_write_s(tid,rid)|label(fw(tid,rid)).Register_safe(s=finish_writing(s, tid, next(s)) ) ) ) ));
+
+%%%%%%%%%%%%%%%%%%%%%%%     
+%% Regular registers %%
+%%%%%%%%%%%%%%%%%%%%%%%
+sort
+    Possible_values = TID -> Set(Data);
+map
+    ALL_EMPTY: Possible_values;
+	ALL_INIT: Data -> (TID -> Data);
+	add_readers: Possible_values # Set(TID) # Data -> Possible_values;
+	add_readers_step: Possible_values # Set(TID) # TID # Data -> Possible_values;
+var
+    tid: TID;
+    pv: Possible_values;
+    d: Data;
+	st: Set(TID);
+eqn
+    ALL_EMPTY(tid) = {};
+	ALL_INIT(d)(tid) = d;
+	add_readers(pv, st, d) = add_readers_step(pv, st, MIN_TID, d);
+	(valid_tid(tid) && !(tid in st)) -> add_readers_step(pv, st, tid, d) = add_readers_step(pv, st, tid + 1, d);
+	(valid_tid(tid) && (tid in st)) -> add_readers_step(pv, st, tid, d) = add_readers_step(pv[tid -> pv(tid) + {d}], st, tid + 1, d);
+	(!valid_tid(tid)) -> add_readers_step(pv, st, tid, d) = pv;
+
+sort
+    Status_regular = struct status_regular(
+						stored: Data,
+						initial: Data, 
+						rpos: Possible_values, 
+						curvals: Bag(Data), 
+						record:  TID -> Data, 
+						readers: Set(TID), 
+						writers: Set(TID),
+						pending: Set(TID));
+
+
+map
+    INIT_Status_regular: Data -> Status_regular;
+    
+    start_reading: Status_regular # TID -> Status_regular;
+    finish_reading: Status_regular # TID -> Status_regular;
+    pos_val: Status_regular # TID -> Set(Data);
+    start_writing: Status_regular # TID # Data -> Status_regular;
+    finish_writing: Status_regular # TID -> Status_regular;
+    order_writing: Status_regular # TID -> Status_regular;
+    
+var
+    tid: TID;
+    rid: RID;
+    s, i, d: Data;
+    rp: Possible_values;
+    cv: Bag(Data);
+    rec: TID -> Data;
+	rs, ws, ps: Set(TID);
+        
+eqn
+    INIT_Status_regular(d) = status_regular(d, d, ALL_EMPTY, {:}, ALL_INIT(d), {}, {}, {}); 
+    
+    start_reading(status_regular(s, i, rp, cv, rec, rs, ws, ps), tid) =
+        status_regular(s, i, rp[tid -> Bag2Set(cv) + {s}], cv, rec, rs + {tid}, ws, ps);
+    finish_reading(status_regular(s, i, rp, cv, rec, rs, ws, ps), tid) =
+        status_regular(s, i, rp[tid -> {}], cv, rec, rs - {tid}, ws, ps);
+    pos_val(status_regular(s, i, rp, cv, rec, rs, ws, ps), tid) =
+        rp(tid);
+    start_writing(status_regular(s, i, rp, cv, rec, rs, ws, ps), tid, d) =
+        status_regular(s, i, add_readers(rp, rs, d), cv + {d:1}, rec[tid -> d], rs, ws + {tid}, ps + {tid});
+    finish_writing(status_regular(s, i, rp, cv, rec, rs, ws, ps), tid) =
+        status_regular(s, i, rp, cv - {rec(tid):1}, rec[tid -> i], rs, ws - {tid}, ps);
+    order_writing(status_regular(s, i, rp, cv, rec, rs, ws, ps), tid) =
+        status_regular(rec(tid), i, rp, cv, rec, rs, ws, ps - {tid});
+    
+proc
+    Regular_Register(rid: RID, d: Data) = Register_regular(rid, INIT_Status_regular(d));
+
+    Register_regular(rid: RID, s: Status_regular) =
+    	sum tid: TID. valid_tid(tid) -> (
+		(!(tid in readers(s) || tid in writers(s)) -> (
+        	( start_read_r(tid, rid)|label(sr(tid,rid)).Register_regular(s=start_reading(s, tid)))
+        	+ ( sum d: Data. valid_data(rid, d) ->
+            	( start_write_r(tid, rid, d)|label(sw(tid,rid,d)).Register_regular(s=start_writing(s, tid, d)) ) ) ))
+        + ((tid in readers(s)) -> ( sum d: Data. (valid_data(rid, d) && d in pos_val(s, tid)) ->
+            ( finish_read_s(tid, rid, d)|label(fr(tid,rid,d)).Register_regular(s=finish_reading(s,tid)) ) ))
+        + ( (tid in writers(s) && tid in pending(s)) ->
+            ( order_write(tid,rid)|label(ow(tid,rid)).Register_regular(s=order_writing(s,tid)) ) )
+        + ( (tid in writers(s) && !(tid in pending(s))) ->
+            ( finish_write_s(tid, rid)|label(fw(tid,rid)).Register_regular(s=finish_writing(s,tid)) ) ) )
+    ;
+
+%%%%%%%%%%%%%%%%%%%%%%
+%% Atomic Registers %%
+%%%%%%%%%%%%%%%%%%%%%%
+sort
+    Status_atomic = struct status_atomic(
+						stored: Data,
+						initial: Data,
+						record:TID->Data, 
+						readers:Set(TID), 
+						writers:Set(TID),
+						pending:Set(TID));
+    
+map 
+    INIT_Status_atomic: Data -> Status_atomic;
+
+    start_reading: Status_atomic # TID -> Status_atomic;
+    order_reading: Status_atomic # TID -> Status_atomic;
+    finish_reading: Status_atomic # TID -> Status_atomic;
+    start_writing: Status_atomic # TID # Data -> Status_atomic;
+	order_writing: Status_atomic # TID -> Status_atomic;
+    finish_writing: Status_atomic # TID -> Status_atomic;
+    
+var
+    tid: TID;
+    rid: RID;
+    rs,ws,ps: Set(TID);
+    rec: TID->Data;
+    s,i,d: Data;
+eqn 
+    INIT_Status_atomic(d) = status_atomic(d, d, ALL_INIT(d),{},{}, {});
+        
+    start_reading(status_atomic(s, i, rec, rs, ws, ps), tid) = 
+        status_atomic(s, i, rec, rs + {tid}, ws, ps + {tid});
+    order_reading(status_atomic(s, i, rec, rs, ws, ps), tid) =
+            status_atomic(s, i, rec[tid -> s], rs, ws, ps - {tid});
+    finish_reading(status_atomic(s, i, rec, rs, ws, ps), tid) = 
+        status_atomic(s, i, rec[tid->i], rs - {tid}, ws, ps);
+    start_writing(status_atomic(s, i, rec, rs, ws, ps), tid, d) = 
+        status_atomic(s, i, rec[tid -> d], rs, ws + {tid}, ps + {tid});
+	order_writing(status_atomic(s, i, rec, rs, ws, ps), tid) =
+		status_atomic(rec(tid), i, rec[tid -> i], rs, ws, ps - {tid});
+    finish_writing(status_atomic(s, i, rec, rs, ws, ps), tid) = 
+        status_atomic(s, i, rec, rs, ws - {tid}, ps);
+
+proc
+    Atomic_Register(rid: RID, d: Data) = Register_atomic(rid,INIT_Status_atomic(d));
+
+    Register_atomic(rid: RID, s: Status_atomic) =
+    	sum tid: TID. valid_tid(tid) -> (
+      ( (!(tid in readers(s) || tid in writers(s))) ->
+              (start_read_r(tid,rid)|label(sr(tid,rid)).Register_atomic(s=start_reading(s, tid))))
+        + ( (!(tid in writers(s) || tid in writers(s))) -> (
+                  sum d: Data. valid_data(rid, d) ->
+          ( start_write_r(tid,rid,d)|label(sw(tid,rid,d)).Register_atomic(s=start_writing(s, tid, d)) ) ) )
+        + ( (tid in readers(s) && tid in pending(s)) ->
+          order_read(tid,rid)|label(or(tid,rid)).Register_atomic(s=order_reading(s,tid)) )
+        + ( (tid in writers(s) && tid in pending(s)) ->
+            order_write(tid,rid)|label(ow(tid,rid)).Register_atomic(s=order_writing(s,tid)) )
+        + ( (tid in readers(s) && !(tid in pending(s))) ->
+              finish_read_s(tid,rid,record(s)(tid))|label(fr(tid,rid,record(s)(tid))).Register_atomic(s=finish_reading(s,tid)) )
+        + ( (tid in writers(s) && !(tid in pending(s))) ->
+              finish_write_s(tid,rid)|label(fw(tid,rid)).Register_atomic(s=finish_writing(s,tid)) ) )
+    ;
