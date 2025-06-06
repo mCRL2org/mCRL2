@@ -41,12 +41,6 @@ struct replace_other_propositional_variables_with_functions_builder
   void reset_variable_list() { var_list = data::variable_list({}); }
   data::variable_list get_variable_list() { return var_list; }
 
-  void reset_instantiations() { m_instantiations.clear(); }
-  std::map<data::data_expression, propositional_variable_instantiation> instantiations() const
-  {
-    return m_instantiations;
-  }
-
   template <class T>
   void apply(T& result, const pbes_expression& d)
   {
@@ -61,14 +55,49 @@ struct replace_other_propositional_variables_with_functions_builder
       return;
     }
 
-    auto it = m_instantiations.find(atermpp::down_cast<data::data_expression>(d));
-    if (it != m_instantiations.end())
+    if (data::is_variable(d))
     {
-      propositional_variable_instantiation pvi = it->second;
-      result = pvi;
-      return;
+      data::variable da = atermpp::down_cast<data::variable>(d);
+
+      for (auto var : var_list)
+      {
+        if (var.name() == da.name())
+        {
+          propositional_variable_instantiation pvi(da.name());
+          result = pvi;
+          return;
+        }
+      }
     }
-    result = d;
+    if (data::is_application(d))
+    {
+      data::application da = atermpp::down_cast<data::application>(d);
+
+      da.head();
+
+      if (data::is_function_symbol(da.head()))
+      {
+        data::function_symbol fname = atermpp::down_cast<data::function_symbol>(da.head());
+        for (auto var : var_list)
+        {
+          if (var.name() == fname.name())
+          {
+            data::data_expression_list params;
+            for (auto param : da)
+            {
+              params.push_front(param);
+            }
+            params = reverse(params);
+
+            propositional_variable_instantiation pvi(fname.name(), params);
+            result = pvi;
+            return;
+          }
+        }
+
+      }
+    }
+    super::apply(result, d);
   }
 
   template <class T>
@@ -94,15 +123,13 @@ struct replace_other_propositional_variables_with_functions_builder
         data::function_symbol fs = data::function_symbol(x.name(), sort_expr);
         result = data::application(fs, x.parameters());
         data::variable var = data::variable(x.name(), sort_expr);
-        push_back(var_list, var);
-        m_instantiations.insert({data::application(fs, x.parameters()), x});
+        var_list.push_front(var);
       }
       else
       {
         data::variable var = data::variable(x.name(), data::sort_bool::bool_());
-        push_back(var_list, var);
+        var_list.push_front(var);
         result = var;
-        m_instantiations.insert({var, x});
       }
       return;
     }
