@@ -14,12 +14,25 @@ Checks: "clang-analyzer-*,
     modernize-redundant-void-arg,
     modernize-replace-random-shuffle,
     modernize-shrink-to-fit,
+    modernize-use-bool-literals,
+    modernize-use-constraints,
+    modernize-use-default-member-init,
+    modernize-use-designated-initializers,
+    modernize-use-emplace,
+    modernize-use-equals-default,
+    modernize-use-equals-delete
+    modernize-use-integer-sign-comparison,
+    modernize-use-nodiscard,
     modernize-use-noexcept,
     modernize-use-nullptr,
     modernize-use-override,
-    modernize-use-std-numbers,
+    modernize-use-ranges,
     modernize-use-starts-ends-with,
-    modernize-use-ranges"
+    modernize-use-std-numbers,
+    modernize-use-std-numbers,
+    modernize-use-transparent-functors,
+    modernize-use-uncaught-exceptions,
+    modernize-use-using"
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 FormatStyle:     none
