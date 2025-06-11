@@ -42,8 +42,7 @@ def main():
 
     mcrl22lps_path = shutil.which("mcrl22lps")
     lps2pbes_path = shutil.which("lps2pbes")
-    mcrl2ide_path = shutil.which("mcrl2ide")
-
+    
     def run_example(path, index):
         print(f"[{index}] Running {path}", flush=True)
 
