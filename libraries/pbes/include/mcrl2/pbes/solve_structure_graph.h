@@ -402,76 +402,82 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
   protected:
     static lps::specification create_counter_example_lps(structure_graph& G, const std::set<structure_graph::index_type>& V, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
     {
-      lps::specification result = lpsspec;
-      result.process().action_summands().clear();
-      result.process().deadlock_summands().clear();
-      auto& action_summands = result.process().action_summands();
-      std::regex re("Z(neg|pos)_(\\d+)_.*");
-      std::size_t n = lpsspec.process().process_parameters().size();
+      try {
+        lps::specification result = lpsspec;
+        result.process().action_summands().clear();
+        result.process().deadlock_summands().clear();
+        auto& action_summands = result.process().action_summands();
+        std::regex re("Z(neg|pos)_(\\d+)_.*");
+        std::size_t n = lpsspec.process().process_parameters().size();
 
-      for (structure_graph::index_type vi: V)
-      {
-        const auto& v = G.find_vertex(vi);
-        if (is_propositional_variable_instantiation(v.formula()))
+        for (structure_graph::index_type vi: V)
         {
-          // The variable Z below should be a reference, but this leads to crashes with the GCC compiler (March 2022).
-          // JFG: I think this is a GCC problem, which may resolve itself in due time. 
-          const auto Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula());
-          std::string Zname = Z.name();
-          std::smatch match;
-          if (std::regex_match(Zname, match, re))
+          const auto& v = G.find_vertex(vi);
+          if (is_propositional_variable_instantiation(v.formula()))
           {
-            std::size_t summand_index = std::stoul(match.at(2));
-            if (summand_index >= lpsspec.process().action_summands().size())
+            // The variable Z below should be a reference, but this leads to crashes with the GCC compiler (March 2022).
+            // JFG: I think this is a GCC problem, which may resolve itself in due time. 
+            const auto Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula());
+            std::string Zname = Z.name();
+            std::smatch match;
+            if (std::regex_match(Zname, match, re))
             {
-              throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LPS. Did you supply the correct file?");
+              std::size_t summand_index = std::stoul(match[2]);
+              if (summand_index >= lpsspec.process().action_summands().size())
+              {
+                throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LPS. Did you supply the correct file?");
+              }
+
+              // The parameters are [from] + [action_parameters] + [to]
+              lps::action_summand summand = lpsspec.process().action_summands().at(summand_index);
+              std::size_t equation_index = p_index.index(Z.name());
+              const pbes_equation& eqn = p.equations().at(equation_index);
+              const data::variable_list& d = eqn.variable().parameters();
+              data::variable_vector d1(d.begin(), d.end());
+
+              const data::data_expression_list& e = Z.parameters();
+              data::data_expression_vector e1(e.begin(), e.end());
+
+              data::data_expression_vector condition;
+              data::assignment_vector next_state_assignments;
+              std::size_t m = d.size() - 2 * n;
+
+              for (std::size_t i = 0; i < n; i++)
+              {
+                condition.push_back(data::equal_to(d1.at(i), e1.at(i)));
+                next_state_assignments.emplace_back(d1.at(i), e1.at(n + m + i));
+              }
+                
+              process::action_vector actions;
+              std::size_t index = 0;
+              for (const process::action& a: summand.multi_action().actions())
+              {
+                process::action a1(a.label(), data::data_expression_list(e1.begin() + n + index, e1.begin() + n + index + a.arguments().size()));
+                actions.push_back(a1);
+                index = index + a.arguments().size();
+              }
+
+              summand.summation_variables() = data::variable_list();
+              summand.condition() = data::join_and(condition.begin(), condition.end());
+              summand.multi_action() = lps::multi_action(process::action_list(actions.begin(), actions.end()),summand.multi_action().time());
+              summand.assignments() = data::assignment_list(next_state_assignments.begin(), next_state_assignments.end());
+
+              action_summands.push_back(summand);
             }
-
-            // The parameters are [from] + [action_parameters] + [to]
-            lps::action_summand summand = lpsspec.process().action_summands().at(summand_index);
-            std::size_t equation_index = p_index.index(Z.name());
-            const pbes_equation& eqn = p.equations().at(equation_index);
-            const data::variable_list& d = eqn.variable().parameters();
-            data::variable_vector d1(d.begin(), d.end());
-
-            const data::data_expression_list& e = Z.parameters();
-            data::data_expression_vector e1(e.begin(), e.end());
-
-            data::data_expression_vector condition;
-            data::assignment_vector next_state_assignments;
-            std::size_t m = d.size() - 2 * n;
-
-            for (std::size_t i = 0; i < n; i++)
-            {
-              condition.push_back(data::equal_to(d1.at(i), e1.at(i)));
-              next_state_assignments.emplace_back(d1.at(i), e1.at(n + m + i));
-            }
-              
-            process::action_vector actions;
-            std::size_t index = 0;
-            for (const process::action& a: summand.multi_action().actions())
-            {
-              process::action a1(a.label(), data::data_expression_list(e1.begin() + n + index, e1.begin() + n + index + a.arguments().size()));
-              actions.push_back(a1);
-              index = index + a.arguments().size();
-            }
-
-            summand.summation_variables() = data::variable_list();
-            summand.condition() = data::join_and(condition.begin(), condition.end());
-            summand.multi_action() = lps::multi_action(process::action_list(actions.begin(), actions.end()),summand.multi_action().time());
-            summand.assignments() = data::assignment_list(next_state_assignments.begin(), next_state_assignments.end());
-
-            action_summands.push_back(summand);
           }
         }
-      }
 
-      if (!check_well_typedness(result))
-      {
-        throw mcrl2::runtime_error("The counter example LPS is not well typed, either wrong file provided or an internal error occurred.");
+        if (!check_well_typedness(result))
+        {
+          throw mcrl2::runtime_error("The counter example LPS is not well typed, either wrong file provided or an internal error occurred.");
+        }
+        
+        return result;
       }
-      
-      return result;
+      catch (const std::exception& e)
+      {
+        throw mcrl2::runtime_error(std::string("Counter-example cannot be reconstructed from this LPS. ") + e.what());
+      }
     }
 
   public:
