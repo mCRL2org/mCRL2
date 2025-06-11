@@ -1,5 +1,0 @@
-python3 generate_traverser_functions.py	
-python3 generate_template_overloads.py	
-python3 generate_traversers.py		
-python3 generate_classes.py		
-python3 generate_term_functions.py	
