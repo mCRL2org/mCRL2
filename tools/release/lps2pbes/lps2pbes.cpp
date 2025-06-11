@@ -9,12 +9,38 @@
 /// \file lps2pbes.cpp
 /// \brief Add your file description here.
 
-#include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/pbes/tools.h"
-#include "mcrl2/pbes/pbes_output_tool.h"
 #include "mcrl2/lps/io.h"
-#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/modal_formula/parse.h"
+
+namespace mcrl2 {
+
+namespace pbes_system {
+
+namespace detail
+{
+/// \brief Prints a warning if formula contains an action that is not used in lpsspec.
+inline void check_lps2pbes_actions(const state_formulas::state_formula& formula, const lps::stochastic_specification& lpsspec)
+{
+  std::set<process::action_label> used_lps_actions = lps::find_action_labels(lpsspec.process());
+  std::set<process::action_label> used_state_formula_actions = state_formulas::find_action_labels(formula);
+  std::set<process::action_label> diff = utilities::detail::set_difference(used_state_formula_actions, used_lps_actions);
+  if (!diff.empty())
+  {
+    mCRL2log(log::warning) << "Warning: the modal formula contains an action "
+                           << *diff.begin()
+                           << " that does not appear in the LPS!" << std::endl;
+  }
+}
+
+} // namespace detail
+
+} // namespace pbes_system
+
+} // namespace mcrl2
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -95,7 +121,8 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
     {}
 
     bool run() override
-    {
+    {     
+      
       if (print_ast) 
       {
         lps::stochastic_specification lpsspec;
@@ -118,17 +145,51 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
         return true;
       }
 
-      lps2pbes(input_filename(),
-               output_filename(),
-               pbes_output_format(),
-               formula_filename,
-               timed,
-               structured,
-               unoptimized,
-               preprocess_modal_operators,
-               generate_counter_example,
-               check_only
-             );
+      if (formula_filename.empty())
+      {
+        throw mcrl2::runtime_error("No modal formula provided by passing option --formula (-f)");
+      }
+      if (input_filename().empty())
+      {
+        mCRL2log(log::verbose) << "Reading LPS from stdin..." << std::endl;
+      }
+      else
+      {
+        mCRL2log(log::verbose) << "Reading LPS from file '" <<  input_filename() << "'..." << std::endl;
+      }
+      lps::specification plain_lpsspec;
+      load_lps(plain_lpsspec, input_filename());  // Read as a non stochastic lps, because lps2pbes cannot handle stochastic lps's.
+      lps::stochastic_specification lpsspec(plain_lpsspec);
+      mCRL2log(log::verbose) << "Reading input from file '" <<  formula_filename << "'..." << std::endl;
+      std::ifstream from(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
+      if (!from)
+      {
+        throw mcrl2::runtime_error("Cannot open state formula file: " + formula_filename);
+      }
+      std::string text = utilities::read_text(from);
+      const bool formula_is_quantitative = false;
+      state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
+      pbes_system::detail::check_lps2pbes_actions(formspec.formula(), lpsspec);
+      mCRL2log(log::verbose) << "Converting state formula and LPS to a PBES..." << std::endl;
+      pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
+
+      if (check_only)
+      {
+        mCRL2log(mcrl2::log::info)
+          << "The file '" << formula_filename
+          << "' contains a well-formed state formula" << std::endl;
+        return true;
+      }
+
+      if (output_filename().empty())
+      {
+        mCRL2log(log::verbose) << "Writing PBES to stdout..." << std::endl;
+      }
+      else
+      {
+        mCRL2log(log::verbose) << "Writing PBES to file '" <<  output_filename() << "'..." << std::endl;
+      }
+      save_pbes(result, output_filename(), pbes_output_format());
       return true;
     }
 

@@ -9,18 +9,22 @@
 /// \file complps2pbes.cpp
 /// \brief Add your file description here.
 
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/modal_formula/algorithms.h"
+#include "mcrl2/pbes/complps2pbes.h"
+#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/process/parse.h"
+#include "mcrl2/process/process_specification.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
-using bes::tools::pbes_output_tool;
 
-class complps2pbes_tool : public pbes_output_tool<input_output_tool>
+class complps2pbes_tool : public mcrl2::pbes_system::tools::pbes_output_tool<input_output_tool>
 {
     typedef pbes_output_tool<input_output_tool> super;
 
@@ -62,12 +66,54 @@ class complps2pbes_tool : public pbes_output_tool<input_output_tool>
     {}
 
     bool run()
-    {
-      complps2pbes(input_filename(),
-                   output_filename(),
-                   pbes_output_format(),
-                   formfilename
-                  );
+    {  
+      if (formfilename.empty())
+      {
+        throw mcrl2::runtime_error("option -f is not specified");
+      }
+
+      // load mCRL2 specification
+      std::string text;
+      if (input_filename().empty())
+      {
+        mCRL2log(log::verbose) << "reading mCRL2 specification from stdin..." << std::endl;
+        text = utilities::read_text(std::cin);
+      }
+      else
+      {
+        mCRL2log(log::verbose) << "reading mCRL2 specification from file '" <<  input_filename() << "'..." << std::endl;
+        std::ifstream from(input_filename().c_str());
+        text = utilities::read_text(from);
+      }
+      // TODO: check if alpha reduction should be applied
+      process::process_specification procspec = process::parse_process_specification(text);
+      lps::stochastic_specification spec = lps::linearise(procspec);
+      lps::specification temp_spec = remove_stochastic_operators(lps::linearise(procspec)); // Just to check that there are no stochastic operators. 
+
+      // load state formula
+      mCRL2log(log::verbose) << "reading formula from file '" <<  formfilename << "'..." << std::endl;
+      std::ifstream instream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
+      if (!instream)
+      {
+        throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
+      }
+      const bool formula_is_quantitative = false;
+      state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(instream, spec, formula_is_quantitative);
+      instream.close();
+
+      pbes result = complps2pbes(procspec, formula);
+
+      // save the result
+      if (output_filename().empty())
+      {
+        mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
+      }
+      else
+      {
+        mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename() << "'..." << std::endl;
+      }
+      
+      save_pbes(result, output_filename(), m_pbes_output_format);
       return true;
     }
 

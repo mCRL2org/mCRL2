@@ -13,7 +13,9 @@
 #define TOOLNAME "txt2lps"
 #define AUTHOR "Wieger Wesselink"
 
-#include "mcrl2/lps/tools.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -36,8 +38,15 @@ class txt2lps_tool : public input_output_tool
     {}
 
     bool run() override
-    {
-      lps::txt2lps(input_filename(), output_filename());
+    {      
+      lps::stochastic_specification spec;
+      std::ifstream ifs(input_filename());
+      if (!ifs.good())
+      {
+        throw mcrl2::runtime_error("Could not open file " + input_filename() + ".");
+      }
+      parse_lps(ifs, spec);
+      save_lps(spec, output_filename());
       return true;
     }
 

@@ -9,16 +9,20 @@
 /// \file lpsinvelm.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/lps/invelm_algorithm.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/data/prover_tool.h"
-#include "mcrl2/lps/tools.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::log;
+using namespace mcrl2::lps;
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
@@ -173,20 +177,64 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     bool run()
     {
-      return lps::lpsinvelm(m_input_filename,
-                            m_output_filename,
-                            m_invariant_file_name,
-                            m_dot_file_name,
-                            rewrite_strategy(),
-                            solver_type(),
-                            m_no_check,
-                            m_no_elimination,
-                            m_simplify_all,
-                            m_all_violations,
-                            m_counter_example,
-                            m_path_eliminator,
-                            m_apply_induction,
-                            m_time_limit);
+      stochastic_specification spec;
+      data::data_expression invariant;
+
+      load_lps(spec, m_input_filename);
+
+      if (!m_invariant_file_name.empty())
+      {
+        std::ifstream instream(m_invariant_file_name.c_str());
+
+        if (!instream.is_open())
+        {
+          throw mcrl2::runtime_error("cannot open input file '" + m_invariant_file_name + "'");
+        }
+
+        mCRL2log(log::verbose) << "parsing input file '" <<  m_invariant_file_name << "'..." << std::endl;
+
+        data::variable_list& parameters=spec.process().process_parameters();
+        invariant = data::parse_data_expression(instream, parameters, spec.data());
+
+        instream.close();
+      }
+      else
+      {
+        throw mcrl2::runtime_error("A file containing an invariant must be specified using the option --invariant=INVFILE.");
+      }
+
+      if (m_no_check)
+      {
+        mCRL2log(log::warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
+      }
+      else
+      {
+        mcrl2::lps::detail::Invariant_Checker<stochastic_specification> v_invariant_checker(spec,
+                                              m_rewrite_strategy,
+                                              m_time_limit,
+                                              m_path_eliminator,
+                                              m_solver_type,
+                                              m_apply_induction,
+                                              m_counter_example,
+                                              m_all_violations,
+                                              m_dot_file_name);
+
+        if (!v_invariant_checker.check_invariant(invariant))
+        {
+          return false; // The invariant was checked and found invalid.
+        }
+      }
+
+      invelm_algorithm<stochastic_specification> algorithm(spec,
+                                  rewrite_strategy(),
+                                  m_time_limit,
+                                  m_path_eliminator,
+                                  m_solver_type,
+                                  m_apply_induction,
+                                  m_simplify_all);
+      algorithm.run(invariant, !m_no_elimination);
+      save_lps(spec, output_filename());
+      return true;
     }
 };
 

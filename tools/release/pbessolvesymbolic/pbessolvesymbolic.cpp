@@ -17,6 +17,7 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
@@ -29,7 +30,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/power_of_two.h"
-#include "mcrl2/pbes/tools/pbessolve.h"
 #include "mcrl2/utilities/unused.h"
 
 using namespace mcrl2;
@@ -643,7 +643,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
           mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
                                 << SG.all_vertices().size() << std::endl;
-          bool final_result = run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
+          bool final_result = pbes_system::detail::run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
           utilities::mcrl2_unused(final_result);
           if (result != final_result)
           {

@@ -17,7 +17,6 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 
-
 namespace mcrl2
 {
 

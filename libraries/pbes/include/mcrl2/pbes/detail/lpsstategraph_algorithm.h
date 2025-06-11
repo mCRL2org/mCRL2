@@ -195,41 +195,6 @@ void lps_reset_variables(lpsstategraph_algorithm& algorithm,
 
 } // namespace detail
 
-/// \brief Apply the stategraph algorithm
-/// \param p A PBES to which the algorithm is applied.
-/// \param options The options for the algorithm.
-inline
-void lpsstategraph(lps::specification& lpsspec, const pbesstategraph_options& options)
-{
-  if (options.use_global_variant)
-  {
-    throw mcrl2::runtime_error("The use global variant option is not supported in lpsstategraph!");
-  }
-  if (options.print_influence_graph)
-  {
-    throw mcrl2::runtime_error("The print influence graph option is not supported in lpsstategraph!");
-  }
-  lps::detail::instantiate_global_variables(lpsspec);
-  detail::lpsstategraph_algorithm algorithm(lpsspec, options);
-  algorithm.run();
-  lpsspec = algorithm.result();
-}
-
-void lpsstategraph(const std::string& input_filename,
-                   const std::string& output_filename,
-                   const pbesstategraph_options& options)
-{
-  lps::specification lpsspec;
-  lps::load_lps(lpsspec, input_filename);
-  lpsstategraph(lpsspec, options);
-  lps::save_lps(lpsspec, output_filename);
-  if (!lps::detail::is_well_typed(lpsspec))
-  {
-    mCRL2log(log::error) << "lpsstategraph error: not well typed!" << std::endl;
-    mCRL2log(log::error) << pp(lpsspec) << std::endl;
-  }
-}
-
 } // namespace pbes_system
 
 } // namespace mcrl2

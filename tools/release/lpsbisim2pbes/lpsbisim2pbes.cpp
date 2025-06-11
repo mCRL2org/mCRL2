@@ -8,9 +8,14 @@
 //
 /// \file lpsbisim2pbes.cpp
 
-#include "mcrl2/utilities/input_input_output_tool.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/bisimulation_type.h"
+#include "mcrl2/pbes/bisimulation.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/utilities/input_input_output_tool.h"
+
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -77,13 +82,32 @@ class lpsbisim2pbes_tool: public super
       mCRL2log(verbose) << "  bisimulation :         " << m_bisimulation_type << std::endl;
       mCRL2log(verbose) << "  normalize    :         " << m_normalize << std::endl;
 
-      lpsbisim2pbes(input_filename1(),
-                    input_filename2(),
-                    output_filename(),
-                    pbes_output_format(),
-                    m_bisimulation_type,
-                    m_normalize
-                  );
+      lps::specification M;
+      lps::specification S;
+
+      load_lps(M, input_filename1());
+      load_lps(S, input_filename2());
+      pbes result;
+      switch (m_bisimulation_type)
+      {
+        case strong_bisim:
+          result = strong_bisimulation(M, S);
+          break;
+        case weak_bisim:
+          result = weak_bisimulation(M, S);
+          break;
+        case branching_bisim:
+          result = branching_bisimulation(M, S);
+          break;
+        case branching_sim:
+          result = branching_simulation_equivalence(M, S);
+          break;
+      }
+      if (m_normalize)
+      {
+        algorithms::normalize(result);
+      }
+      save_pbes(result, output_filename(), pbes_output_format());
       return true;
     }
 };

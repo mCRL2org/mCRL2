@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink; Threads are added by Jan Friso Groote
+// Author(s): Maurice Laveaux
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,12 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbessolve_parallel.cpp
-/// \brief This tool transforms an .lps file into a labelled transition system.
-///        Optionally, it can be run with multiple treads.
 
-#ifndef MCRL2_PBES_TOOLS_PBESSOLVE_H
-#define MCRL2_PBES_TOOLS_PBESSOLVE_H
+#ifndef MCRL2_PBES_DETAIL_PBESSOLVE_ALGORITHM_H
+#define MCRL2_PBES_DETAIL_PBESSOLVE_ALGORITHM_H
 
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/utilities/exception.h"
@@ -28,14 +25,7 @@
 #include "mcrl2/pbes/pbesinst_lazy_counter_example.h"
 #include "mcrl2/pbes/pbesinst_structure_graph2.h"
 
-using namespace mcrl2;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::utilities::tools;
-using mcrl2::pbes_system::tools::pbes_input_tool;
-using mcrl2::data::tools::rewriter_tool;
-using mcrl2::utilities::tools::input_tool;
-using utilities::tools::parallel_tool;
-
+namespace mcrl2::pbes_system::detail {
 
 inline
 bool run_solve(const pbes_system::pbes& pbesspec, 
@@ -101,6 +91,14 @@ bool run_solve(const pbes_system::pbes& pbesspec,
 
   return result;
 }
+
+using namespace mcrl2;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::utilities::tools;
+using mcrl2::pbes_system::tools::pbes_input_tool;
+using mcrl2::data::tools::rewriter_tool;
+using mcrl2::utilities::tools::input_tool;
+using utilities::tools::parallel_tool;
 
 class pbessolve_tool
     : public parallel_tool<rewriter_tool<pbes_input_tool<input_tool>>>
@@ -288,7 +286,7 @@ class pbessolve_tool
       instantiate.run();
       timer().finish("instantiation");
 
-      run_solve(pbesspec, sigma, G, instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
+      detail::run_solve(pbesspec, sigma, G, instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
     }
     else
     {
@@ -330,7 +328,7 @@ class pbessolve_tool
       mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
                              << G.all_vertices().size() << std::endl;
       
-      bool final_result = run_solve(pbesspec, sigma, G, second_instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
+      bool final_result = detail::run_solve(pbesspec, sigma, G, second_instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
       if(result != final_result) {
         throw mcrl2::runtime_error("The result of the second instantiation does not match the first instantiation. This is a bug in the tool!");
       }
@@ -422,4 +420,6 @@ class pbessolve_tool
   }
 };
 
-#endif // MCRL2_PBES_TOOLS_PBESSOLVE_H
+} // mcrl2::pbes_system::detail
+
+#endif // MCRL2_PBES_DETAIL_PBESSOLVE_ALGORITHM_H

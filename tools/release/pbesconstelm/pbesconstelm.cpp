@@ -8,12 +8,12 @@
 //
 /// \file pbesconstelm.cpp
 
+#include "mcrl2/pbes/constelm.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/pbes_rewriter_tool.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
-#include "mcrl2/pbes/tools.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -69,17 +69,15 @@ class pbes_constelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
       mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
+                  
+      // load the pbes
+      pbes p;
+      load_pbes(p, input_filename(), pbes_input_format());
 
-      pbesconstelm(input_filename(),
-                   output_filename(),
-                   pbes_input_format(),
-                   pbes_output_format(),
-                   rewrite_strategy(),
-                   rewriter_type(),
-                   m_compute_conditions,
-                   m_remove_redundant_equations,
-                   m_check_quantifiers
-                  );
+      constelm(p, rewrite_strategy(), rewriter_type(), m_compute_conditions, m_remove_redundant_equations, m_check_quantifiers);
+
+      // save the result
+      save_pbes(p, output_filename(), pbes_output_format());
       return true;
     }
 

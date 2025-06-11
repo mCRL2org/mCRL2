@@ -7,12 +7,20 @@
 /// \file lpsrewr.cpp
 /// \brief Tool for rewriting a linear process specification.
 
-#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/lps_rewriter_tool.h"
-#include "mcrl2/lps/tools.h"
+#include "mcrl2/lps/lps_rewriter_type.h"
+#include "mcrl2/lps/one_point_rule_rewrite.h"
+#include "mcrl2/lps/remove.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/rewriters/one_point_condition_rewrite.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
+using namespace mcrl2::lps;
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using mcrl2::utilities::tools::input_output_tool;
@@ -45,12 +53,31 @@ class lps_rewriter : public lps_rewriter_tool<rewriter_tool< input_output_tool >
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  lps rewriter:       " << m_lps_rewriter_type << std::endl;
 
-
-      lps::lpsrewr(input_filename(),
-                   output_filename(),
-                   rewrite_strategy(),
-                   rewriter_type()
-                 );
+      stochastic_specification spec;
+      load_lps(spec, input_filename());
+      switch (rewriter_type())
+      {
+        case simplify:
+        {
+          mcrl2::data::rewriter R(spec.data(), rewrite_strategy());
+          lps::rewrite(spec, R);
+          break;
+        }
+        case quantifier_one_point:
+        {
+          one_point_rule_rewrite(spec);
+          break;
+        }
+        case condition_one_point:
+        {
+          mcrl2::data::rewriter R(spec.data(), rewrite_strategy());
+          lps::one_point_condition_rewrite(spec, R);
+          break;
+        }
+      }
+      lps::remove_trivial_summands(spec);
+      lps::remove_redundant_assignments(spec);
+      save_lps(spec, output_filename());
       return true;
     }
 

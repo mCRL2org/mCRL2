@@ -11,8 +11,9 @@
 #define NAME "lpspp"
 #define AUTHOR "Aad Mathijssen and Jeroen Keiren"
 
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/lps/tools.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
@@ -37,11 +38,40 @@ class lpspp_tool: public input_output_tool
 
     bool run() override
     {
-      lps::lpspp(input_filename(),
-                 output_filename(),
-                 m_print_summand_numbers,
-                 m_format
-                );
+      lps::stochastic_specification spec;
+      load_lps(spec, input_filename());
+
+      mCRL2log(log::verbose) << "printing LPS from "
+                        << (input_filename().empty()?"standard input":input_filename())
+                        << " to " << (output_filename().empty()?"standard output":output_filename())
+                        << " in the " << core::pp_format_to_string(m_format) << " format" << std::endl;
+
+      std::string text;
+      if (m_format == core::print_internal)
+      {
+        text = pp(specification_to_aterm(spec));
+      }
+      else
+      {
+        text = m_print_summand_numbers ? lps::pp_with_summand_numbers(spec) : lps::pp(spec);
+      }
+      if (output_filename().empty())
+      {
+        std::cout << text;
+      }
+      else
+      {
+        std::ofstream output_stream(output_filename().c_str());
+        if (output_stream)
+        {
+          output_stream << text;
+          output_stream.close();
+        }
+        else
+        {
+          throw mcrl2::runtime_error("could not open output file " + output_filename() + " for writing");
+        }
+      }
       return true;
     }
 

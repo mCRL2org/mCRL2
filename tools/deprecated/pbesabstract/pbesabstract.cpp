@@ -8,11 +8,13 @@
 //
 /// \file pbesabstract.cpp
 
-#include <boost/algorithm/string.hpp>
-#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/pbes/abstract.h"
+#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/utilities/input_output_tool.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -90,13 +92,20 @@ class pbes_abstract_tool: public pbes_input_tool<pbes_output_tool<input_output_t
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  parameters:         " << m_parameter_selection << std::endl;
 
-      pbesabstract(input_filename(),
-                   output_filename(),
-                   pbes_input_format(),
-                   pbes_output_format(),
-                   m_parameter_selection,
-                   m_value_true
-                 );
+    // load the pbes
+      pbes p;
+      load_pbes(p, input_filename(), pbes_input_format());
+
+      // TODO: let pbesabstract handle ! and => properly
+      if (!is_normalized(p))
+      {
+        algorithms::normalize(p);
+      }
+
+      // run the algorithm
+      pbes_abstract_algorithm algorithm;
+      pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, m_parameter_selection);
+      algorithm.run(p, parameter_map, m_value_true);
       return true;
     }
 };

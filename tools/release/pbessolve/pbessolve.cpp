@@ -8,9 +8,9 @@
 //
 /// \file pbessolve.cpp
 
-#include "mcrl2/pbes/tools/pbessolve.h"
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 
 int main(int argc, char* argv[])
 {
-  return pbessolve_tool("pbessolve").execute(argc, argv);
+  return mcrl2::pbes_system::detail::pbessolve_tool("pbessolve").execute(argc, argv);
 }
