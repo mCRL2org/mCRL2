@@ -391,7 +391,7 @@ class pbessolve_tool
       
       bool final_result = run_solve(pbesspec, sigma, G, second_instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
       if(result != final_result) {
-        throw mcrl2::runtime_error("The result of the second instantiation does not match the first instantiation. This is a bug in mCRL2.");
+        throw mcrl2::runtime_error("The result of the second instantiation does not match the first instantiation. This is a bug in the tool!");
       }
     }
   }
