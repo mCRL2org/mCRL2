@@ -8,14 +8,16 @@
 //
 /// \file lpssumelm.cpp
 
-#include "mcrl2/lps/tools.h"
-
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/lps/sumelm.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
+using namespace mcrl2::lps;
 using namespace mcrl2::log;
 
 class sumelm_tool: public input_output_tool
@@ -50,11 +52,17 @@ class sumelm_tool: public input_output_tool
         m_decluster(false)
     {}
 
-    ///Reads a specification from input_file,
-    ///applies sum elimination to it and writes the result to output_file.
+    /// Reads a specification from input_file,
+    /// applies sum elimination to it and writes the result to output_file.
     bool run()
-    {
-      mcrl2::lps::lpssumelm(m_input_filename, m_output_filename, m_decluster);
+    {      
+      stochastic_specification spec;
+      load_lps(spec, input_filename());
+
+      sumelm_algorithm<stochastic_specification>(spec, m_decluster).run();
+
+      mCRL2log(log::debug) << "Sum elimination completed, saving to " <<  output_filename() << std::endl;
+      save_lps(spec, output_filename());
       return true;
     }
 

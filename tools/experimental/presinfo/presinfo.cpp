@@ -9,23 +9,10 @@
 /// \file presinfo.cpp
 /// \brief Tool that displays information about a PRES.
 
-// ======================================================================
-//
-// file          : presinfo
-// date          : 11-04-2007
-// version       : 0.1.0
-//
-// author(s)     : Alexander van Dam <avandam@damdonk.nl>
-//
-// ======================================================================
-
-//C++
-#include <exception>
-
-//MCRL2-specific
-#include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/pres/tools.h"
+#include "mcrl2/pres/detail/pres_property_map.h"
+#include "mcrl2/pres/io.h"
 #include "mcrl2/pres/pres_input_tool.h"
+#include "mcrl2/utilities/input_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -78,12 +65,41 @@ class presinfo_tool: public pres_input_tool<input_tool>
     /// - Give error
     bool run() override
     {
-      pres_system::pres_expression b;
-      presinfo(input_filename(),
-               input_file_message(),
-               pres_input_format(),
-               opt_full
-              );
+      pres p;
+      load_pres(p, input_filename(), pres_input_format());
+
+      pres_system::detail::pres_property_map info(p);
+
+      // Show file from which PRES was read
+      std::cout << input_file_message() << "\n\n";
+
+      // Show number of equations
+      std::cout << "Number of equations:     " << p.equations().size() << std::endl;
+
+      // Show number of mu's with the predicate variables from the mu's
+      std::cout << "Number of mu's:          " << info["mu_equation_count"] << std::endl;
+
+      // Show number of nu's with the predicate variables from the nu's
+      std::cout << "Number of nu's:          " << info["nu_equation_count"] << std::endl;
+
+      // Show number of nu's with the predicate variables from the nu's
+      std::cout << "Block nesting depth:     " << info["block_nesting_depth"] << std::endl;
+
+      // Show if PRES is closed and well formed
+      std::cout << "The PRES is closed:      " << std::flush;
+      std::cout << (p.is_closed() ? "yes" : "no ") << std::endl;
+      std::cout << "The PRES is well formed: " << std::flush;
+      std::cout << (p.is_well_typed() ? "yes" : "no ") << std::endl;
+
+      // Show binding variables with their signature
+      if (opt_full)
+      {
+        std::cout << "Predicate variables:\n";
+        for (std::vector<pres_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          std::cout << core::pp(i->symbol()) << "." << pres_system::pp(i->variable()) << std::endl;
+        }
+      }
       return true;
     }
 };

@@ -8,11 +8,14 @@
 //
 /// \file lpsuntime.cpp
 
-#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/lps/tools.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/lps/untime.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
-
+using namespace mcrl2;
+using namespace mcrl2::lps;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::data::tools;
@@ -69,8 +72,12 @@ class untime_tool: public rewriter_tool< input_output_tool >
     {}
 
     bool run()
-    {
-      mcrl2::lps::lpsuntime(m_input_filename, m_output_filename, add_invariants, apply_fourier_motzkin, m_rewrite_strategy);
+    {      
+      stochastic_specification spec;
+      load_lps(spec, m_input_filename);
+      data::rewriter rewr(spec.data(),m_rewrite_strategy);
+      untime_algorithm<stochastic_specification>(spec, add_invariants, apply_fourier_motzkin, rewr).run();
+      save_lps(spec, m_output_filename);
       return true;
     }
 

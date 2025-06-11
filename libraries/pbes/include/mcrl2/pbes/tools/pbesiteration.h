@@ -414,21 +414,6 @@ struct pbesiteration_pbes_fixpoint_iterator
   }
 };
 
-void pbesiteration(const std::string& input_filename,
-    const std::string& output_filename,
-    const utilities::file_format& input_format,
-    const utilities::file_format& output_format,
-    pbesiteration_options options)
-{
-  pbes p;
-  load_pbes(p, input_filename, input_format);
-  complete_data_specification(p);
-  algorithms::normalize(p);
-  pbesiteration_pbes_fixpoint_iterator fixpoint_iterator;
-  fixpoint_iterator.run(p, options);
-  save_pbes(p, output_filename, output_format);
-}
-
 } // namespace pbes_system
 
 } // namespace mcrl2

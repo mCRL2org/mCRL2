@@ -71,12 +71,14 @@ class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
       m_options.rewrite_strategy = rewrite_strategy();
-      pbesiteration(input_filename(),
-                  output_filename(),
-                  pbes_input_format(),
-                  pbes_output_format(),
-                  m_options
-                 );
+                 
+      pbes p;
+      load_pbes(p, input_filename(), pbes_input_format());
+      complete_data_specification(p);
+      algorithms::normalize(p);
+      pbesiteration_pbes_fixpoint_iterator fixpoint_iterator;
+      fixpoint_iterator.run(p, m_options);
+      save_pbes(p, output_filename(), pbes_output_format());
 
       return true;
     }

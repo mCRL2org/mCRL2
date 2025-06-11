@@ -1,19 +1,10 @@
-if(MCRL2_ENABLE_EXPERIMENTAL)
-  set(EXPERIMENTAL_TOOLS
-  source/experimental_tools.cpp
-  source/experimental_tools2.cpp)
-endif()
-
 mcrl2_add_library(mcrl2_pbes
   SOURCES
     source/algorithms.cpp
     source/pbes.cpp
     source/io.cpp
-    source/tools.cpp
-    source/tools2.cpp
     source/pbes_explorer.cpp
     source/pgsolver.cpp
-    ${EXPERIMENTAL_TOOLS}
   DPARSER_SOURCES
     source/pg_syntax.g
   DEPENDS

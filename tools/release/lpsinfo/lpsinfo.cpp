@@ -8,7 +8,9 @@
 //
 /// \file ./lpsinfo.cpp
 
-#include "mcrl2/lps/tools.h"
+#include "mcrl2/lps/detail/specification_property_map.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/utilities/input_tool.h"
 
 using namespace mcrl2;
@@ -35,12 +37,13 @@ class lpsinfo_tool: public input_tool
 
     bool run() override
     {
-      lpsinfo(input_filename(),
-              input_file_message()
-             );
+      stochastic_specification spec;
+      load_lps(spec, input_filename());
+      lps::detail::specification_property_map<stochastic_specification> info(spec);
+      std::cout << input_file_message() << "\n\n";
+      std::cout << info.info();
       return true;
     }
-
 };
 
 int main(int argc, char** argv)

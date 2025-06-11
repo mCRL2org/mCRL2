@@ -9,10 +9,9 @@
 /// \file ./txt2pres.cpp
 /// \brief Parse a textual description of a PRES.
 
-//mCRL2 specific
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/pres/tools.h"
 #include "mcrl2/pres/pres_output_tool.h"
+#include "mcrl2/pres/txt2pres.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -53,11 +52,26 @@ class txt2pres_tool: public pres_output_tool<input_output_tool>
 
     bool run() override
     {
-      txt2pres(input_filename(),
-               output_filename(),
-               pres_output_format(),
-               m_normalize
-              );
+      pres p;
+      if (input_filename().empty())
+      {
+        //parse specification from stdin
+        mCRL2log(log::verbose) << "reading input from stdin..." << std::endl;
+        p = txt2pres(std::cin, m_normalize);
+      }
+      else
+      {
+        //parse specification from input filename
+        mCRL2log(log::verbose) << "reading input from file '" <<  input_filename() << "'..." << std::endl;
+        std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
+        if (!instream)
+        {
+          throw mcrl2::runtime_error("cannot open input file: " + input_filename());
+        }
+        p = txt2pres(instream, m_normalize);
+        instream.close();
+      }
+      save_pres(p, output_filename(), pres_output_format());
       return true;
     }
 };
