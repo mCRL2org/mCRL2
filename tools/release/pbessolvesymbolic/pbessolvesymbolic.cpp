@@ -645,9 +645,9 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
                                 << SG.all_vertices().size() << std::endl;
           bool final_result = run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
           utilities::mcrl2_unused(final_result);
-          if(result != final_result)
+          if (result != final_result)
           {
-            throw mcrl2::runtime_error("The result of the first and second passes do not match.");
+            throw mcrl2::runtime_error("The result of the first and second instantiations do not match, this is a bug in the tool!");
           }
         }
       }

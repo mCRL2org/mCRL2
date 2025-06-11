@@ -28,7 +28,10 @@ can be generated as follows::
 Note that ``lps2pbes`` is called with the option `-c` to include counter example
 information in the generated PBES. Also note that the specification ``abp.lps`` that was used
 to create the PBES is passed as an argument to pbessolve with the option `--file`. It
-is needed to construct the counter example.
+is needed to construct the counter example. Furthermore, the counter example information is
+encoded into the PBES using special PBES variables, whose structure must be preserved *exactly* by
+transformations applied to the PBES. In particular, transformations such as `pbesparelm` create a 
+PBES that is no longer suitable for counter example generation.
 
 If the instantiation of the PBES takes too much time or is too large to fit in
 main memory an alternative solving technique that uses symbolic
