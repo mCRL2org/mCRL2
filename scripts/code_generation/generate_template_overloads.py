@@ -16,6 +16,7 @@ file_map = {
   'data' : MCRL2_ROOT + 'libraries/data/source/data.cpp',
   'lps' : MCRL2_ROOT + 'libraries/lps/source/lps.cpp',
   'pbes_system' : MCRL2_ROOT + 'libraries/pbes/source/pbes.cpp',
+  'pres_system' : MCRL2_ROOT + 'libraries/pres/source/pres.cpp',
   'process' : MCRL2_ROOT + 'libraries/process/source/process.cpp',
   'regular_formulas' : MCRL2_ROOT + 'libraries/modal_formula/source/modal_formula.cpp',
   'state_formulas' : MCRL2_ROOT + 'libraries/modal_formula/source/modal_formula.cpp',
@@ -43,6 +44,13 @@ pbes_system::propositional_variable_list
 pbes_system::propositional_variable_vector
 pbes_system::propositional_variable_instantiation_list
 pbes_system::propositional_variable_instantiation_vector
+pres_system::pres_equation_vector
+pres_system::pres_expression_list
+pres_system::pres_expression_vector
+pres_system::propositional_variable_list
+pres_system::propositional_variable_vector
+pres_system::propositional_variable_instantiation_list
+pres_system::propositional_variable_instantiation_vector
 process::action_list
 process::action_vector
 process::action_label_list
@@ -72,6 +80,9 @@ process::process_specification
 pbes_system::pbes_equation_vector
 pbes_system::pbes
 pbes_system::pbes_expression
+pres_system::pres_equation_vector
+pres_system::pres
+pres_system::pres_expression
 state_formulas::state_formula
 '''
 
@@ -81,6 +92,8 @@ data::data_equation
 lps::multi_action
 pbes_system::pbes
 pbes_system::pbes_expression
+pres_system::pres
+pres_system::pres_expression
 process::action
 process::process_expression
 process::process_specification
@@ -94,6 +107,7 @@ data::sort_expression
 lps::specification
 lps::stochastic_specification
 pbes_system::pbes
+pres_system::pres
 process::action_label_list
 process::process_equation_vector
 process::process_expression
@@ -115,6 +129,7 @@ lps::stochastic_specification
 lps::deadlock
 lps::multi_action
 pbes_system::pbes
+pres_system::pres
 process::action
 state_formulas::state_formula
 '''
@@ -133,6 +148,9 @@ lps::stochastic_process_initializer
 pbes_system::pbes
 pbes_system::pbes_expression
 pbes_system::pbes_equation
+pres_system::pres
+pres_system::pres_expression
+pres_system::pres_equation
 process::action
 process::process_specification
 state_formulas::state_formula
@@ -143,10 +161,15 @@ data::data_equation
 lps::specification
 lps::stochastic_specification
 pbes_system::pbes
+pres_system::pres
 '''
 
 FIND_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES = '''
 pbes_system::pbes_expression
+'''
+
+FIND_PRES_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES = '''
+pres_system::pres_expression
 '''
 
 FIND_IDENTIFIERS_CLASSNAMES = '''
@@ -155,6 +178,7 @@ lps::specification
 lps::stochastic_specification
 process::process_specification
 pbes_system::pbes_expression
+pres_system::pres_expression
 state_formulas::state_formula
 '''
 
@@ -169,10 +193,11 @@ state_formulas::state_formula
 SEARCH_VARIABLE_CLASSNAMES = '''
 data::data_expression
 pbes_system::pbes_expression
+pres_system::pres_expression
 '''
 
 def has_specification(type):
-    return type.endswith('specification') or type.endswith('pbes')
+    return type.endswith('specification') or type.endswith('pbes') or type.endswith('pres')
 
 def is_modifiable(type):
     if type in modifiability_map:
@@ -183,7 +208,11 @@ def is_modifiable(type):
         return True
     elif type.endswith('pbes'):
         return True
+    elif type.endswith('pres'):
+        return True
     elif type.endswith('vector<pbes_equation>'):
+        return True
+    elif type.endswith('vector<pres_equation>'):
         return True
     raise Exception('Unknown type %s!' % type)
 
@@ -265,6 +294,9 @@ generate_traverser_overloads(classnames, 'find_function_symbols', 'std::set<data
 
 classnames = FIND_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES.strip().split()
 generate_traverser_overloads(classnames, 'find_propositional_variable_instantiations', 'std::set<pbes_system::propositional_variable_instantiation>', [], code_map)
+
+classnames = FIND_PRES_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES.strip().split()
+generate_traverser_overloads(classnames, 'find_propositional_variable_instantiations', 'std::set<pres_system::propositional_variable_instantiation>', [], code_map)
 
 classnames = FIND_IDENTIFIERS_CLASSNAMES.strip().split()
 generate_traverser_overloads(classnames, 'find_identifiers', 'std::set<core::identifier_string>', [], code_map)
