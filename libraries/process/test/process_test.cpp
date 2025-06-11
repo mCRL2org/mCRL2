@@ -222,13 +222,13 @@ void test_linear(const std::string& text, bool result = true)
 }
 
 // Test case supplied by Frank Stappers. A segmentation fault is reported on Suse 64 bit.
-void test_data_spec()
+BOOST_AUTO_TEST_CASE(test_data_spec)
 {
   process_specification spec = parse_process_specification("sort  X; init tau;");
   data::pp(spec.data());
 }
 
-void test_guarded()
+BOOST_AUTO_TEST_CASE(test_guarded)
 {
   std::string PROCSPEC =
     "act a;                  \n"
@@ -313,8 +313,4 @@ BOOST_AUTO_TEST_CASE(test_main)
   test_linear(CASE13b);
   test_linear(CASE14, false);
   test_linear(CASE15);
-
-  test_data_spec();
-
-  test_guarded();
 }

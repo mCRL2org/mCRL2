@@ -49,7 +49,7 @@ data::variable bool_(const std::string& name)
   return data::variable(core::identifier_string(name), data::sort_bool::bool_());
 }
 
-void test_find()
+BOOST_AUTO_TEST_CASE(test_find)
 {
   process_expression x = parse_process_expression("a(m).P(0)", DATA_DECL, PROC_DECL);
 
@@ -65,7 +65,7 @@ void test_find()
 
 }
 
-void test_free_variables()
+BOOST_AUTO_TEST_CASE(test_free_variables)
 {
   data::variable b = bool_("b");
   data::data_expression_list d = { b };
@@ -75,10 +75,4 @@ void test_free_variables()
   std::set<data::variable> free_variables = process::find_free_variables(pi);
   std::cout << "free variables: " << core::detail::print_set(free_variables) << std::endl;
   BOOST_CHECK(free_variables.find(b) != free_variables.end());
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_find();
-  test_free_variables();
 }

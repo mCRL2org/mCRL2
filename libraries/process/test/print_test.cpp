@@ -10,7 +10,6 @@
 /// \brief Regression test for parsing process expressions
 
 #define BOOST_TEST_MODULE print_test
-
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/process/parse.h"
@@ -19,7 +18,7 @@
 using namespace mcrl2;
 using namespace mcrl2::process;
 
-void test_comm()
+BOOST_AUTO_TEST_CASE(test_comm)
 {
   std::string text =
     "act  a,b,c;\n"
@@ -28,7 +27,7 @@ void test_comm()
     ;
 
   process_specification p = parse_process_specification(text);
-  std::string text1 = process::pp(p);
+  std::string text1 = process::pp(p, true);
   std::cout << text << std::endl;
   std::cout << "---" << std::endl;
   std::cout << text1 << std::endl;
@@ -36,7 +35,7 @@ void test_comm()
   BOOST_CHECK(text == text1);
 }
 
-void test_procinst()
+BOOST_AUTO_TEST_CASE(test_procinst)
 {
   std::string text =
     "act  a,b;\n"
@@ -47,7 +46,7 @@ void test_procinst()
     ;
 
   process_specification p = parse_process_specification(text);
-  std::string text1 = process::pp(p);
+  std::string text1 = process::pp(p, true);
   std::cout << text << std::endl;
   std::cout << "---" << std::endl;
   std::cout << text1 << std::endl;
@@ -55,7 +54,7 @@ void test_procinst()
   BOOST_CHECK(text == text1);
 }
 
-void test_action_name_multiset()
+BOOST_AUTO_TEST_CASE(test_action_name_multiset)
 {
   std::vector<core::identifier_string> v;
   v.push_back(core::identifier_string("a"));
@@ -63,7 +62,7 @@ void test_action_name_multiset()
   v.push_back(core::identifier_string("c"));
   core::identifier_string_list l(v.begin(), v.end());
   action_name_multiset A(l);
-  std::string text = process::pp(A);
+  std::string text = process::pp(A, true);
   BOOST_CHECK(text == "a | b | c");
 
   atermpp::term_list<action_name_multiset> w;
@@ -93,7 +92,7 @@ void test_process_expression(const std::string& expression, const std::string& e
   check_result(expression, result, expected_result, "process::pp");
 }
 
-void test_process_expressions()
+BOOST_AUTO_TEST_CASE(test_process_expressions)
 {
   std::string SPEC = "act c; init true -> c;";
   process_specification procspec = parse_process_specification(SPEC);
@@ -102,12 +101,4 @@ void test_process_expressions()
   test_process_expression("false -> (true -> tau) <> delta", "false -> (true -> tau) <> delta");
   test_process_expression("false -> true -> tau <> delta", "false -> true -> tau <> delta");
   test_process_expression("false -> true -> a <> b <> c", "false -> (true -> a <> b) <> c");
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_comm();
-  test_procinst();
-  test_action_name_multiset();
-  test_process_expressions();
 }
