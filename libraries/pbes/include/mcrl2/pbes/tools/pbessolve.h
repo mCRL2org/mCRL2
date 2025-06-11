@@ -13,6 +13,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESSOLVE_H
 #define MCRL2_PBES_TOOLS_PBESSOLVE_H
 
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/parallel_tool.h"
@@ -389,8 +390,9 @@ class pbessolve_tool
                              << G.all_vertices().size() << std::endl;
       
       bool final_result = run_solve(pbesspec, sigma, G, second_instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
-      utilities::mcrl2_unused(final_result);
-      assert(result == final_result);
+      if(result != final_result) {
+        throw mcrl2::runtime_error("The result of the second instantiation does not match the first instantiation. This is a bug in mCRL2.");
+      }
     }
   }
 
