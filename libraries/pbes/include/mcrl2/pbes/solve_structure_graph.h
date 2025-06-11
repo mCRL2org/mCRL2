@@ -421,16 +421,16 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
           std::smatch match;
           if (std::regex_match(Zname, match, re))
           {
-            std::size_t summand_index = std::stoul(match[2]);
+            std::size_t summand_index = std::stoul(match.at(2));
             if (summand_index >= lpsspec.process().action_summands().size())
             {
               throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LPS. Did you supply the correct file?");
             }
 
             // The parameters are [from] + [action_parameters] + [to]
-            lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
+            lps::action_summand summand = lpsspec.process().action_summands().at(summand_index);
             std::size_t equation_index = p_index.index(Z.name());
-            const pbes_equation& eqn = p.equations()[equation_index];
+            const pbes_equation& eqn = p.equations().at(equation_index);
             const data::variable_list& d = eqn.variable().parameters();
             data::variable_vector d1(d.begin(), d.end());
 
@@ -443,8 +443,8 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
 
             for (std::size_t i = 0; i < n; i++)
             {
-              condition.push_back(data::equal_to(d1[i], e1[i]));
-              next_state_assignments.emplace_back(d1[i], e1[n + m + i]);
+              condition.push_back(data::equal_to(d1.at(i), e1.at(i)));
+              next_state_assignments.emplace_back(d1.at(i), e1.at(n + m + i));
             }
               
             process::action_vector actions;
