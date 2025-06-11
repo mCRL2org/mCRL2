@@ -8,12 +8,12 @@
 //
 /// \file presconstelm.cpp
 
+#include "mcrl2/pres/constelm.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pres/pres_rewriter_tool.h"
 #include "mcrl2/pres/pres_input_tool.h"
 #include "mcrl2/pres/pres_output_tool.h"
-#include "mcrl2/pres/tools.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -70,16 +70,16 @@ class pres_constelm_tool: public pres_input_tool<pres_output_tool<pres_rewriter_
       mCRL2log(verbose) << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
       mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
 
-      presconstelm(input_filename(),
-                   output_filename(),
-                   pres_input_format(),
-                   pres_output_format(),
-                   rewrite_strategy(),
-                   rewriter_type(),
-                   m_compute_conditions,
-                   m_remove_redundant_equations,
-                   m_check_quantifiers
-                  );
+      // load the pres
+      pres p;
+      load_pres(p, input_filename(), pres_input_format());
+
+      constelm(p, rewrite_strategy(), rewriter_type(), m_compute_conditions, m_remove_redundant_equations, m_check_quantifiers);
+
+      // save the result
+      save_pres(p, output_filename(), pres_output_format());
+
+
       return true;
     }
 

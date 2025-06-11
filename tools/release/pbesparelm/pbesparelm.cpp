@@ -11,10 +11,11 @@
 // #define MCRL2_PBES_CONSTELM_DEBUG
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -46,12 +47,15 @@ class pbes_parelm_tool: public pbes_input_tool<pbes_output_tool<input_output_too
       mCRL2log(verbose) << "pbesparelm parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+                
+      // load the pbes
+      pbes p;
+      load_pbes(p, input_filename(), pbes_input_format());
 
-      pbesparelm(input_filename(),
-                 output_filename(),
-                 pbes_input_format(),
-                 pbes_output_format()
-                );
+      parelm(p);
+
+      // save the result
+      save_pbes(p, output_filename(), pbes_output_format());
 
       return true;
     }

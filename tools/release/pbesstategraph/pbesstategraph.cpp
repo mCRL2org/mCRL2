@@ -8,11 +8,12 @@
 //
 /// \file pbesstategraph.cpp
 
-#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
-#include "mcrl2/pbes/tools.h"
+#include "mcrl2/pbes/stategraph.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -87,11 +88,17 @@ class pbes_stategraph_tool: public pbes_input_tool<pbes_output_tool<rewriter_too
       mCRL2log(verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
       mCRL2log(verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
 
-      pbesstategraph(input_filename(),
-                     output_filename(),
-                     pbes_input_format(),
-                     pbes_output_format(),
-                     options);
+      pbes p;
+      load_pbes(p, input_filename(), pbes_input_format());
+
+      stategraph(p, options);
+
+      save_pbes(p, output_filename(), pbes_output_format(), false);
+      if (!p.is_well_typed())
+      {
+        mCRL2log(log::error) << "pbesstategraph error: not well typed!" << std::endl;
+        mCRL2log(log::error) << pp(p) << std::endl;
+      }
       return true;
     }
 };

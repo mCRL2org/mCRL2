@@ -8,10 +8,12 @@
 //
 /// \file pbesabsint.cpp
 
-#include "mcrl2/pbes/tools.h"
-#include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/pbes/absinthe_strategy.h"
+#include "mcrl2/pbes/absinthe.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
+#include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -80,15 +82,32 @@ class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_t
       mCRL2log(verbose) << "  abstraction file:       " << m_abstraction_file << std::endl;
       mCRL2log(verbose) << "  approximation strategy: " << print_absinthe_strategy(m_strategy) << std::endl;
 
-      pbesabsinthe(input_filename(),
-                   output_filename(),
-                   pbes_input_format(),
-                   pbes_output_format(),
-                   m_abstraction_file,
-                   m_strategy,
-                   m_print_used_function_symbols,
-                   m_enable_logging
-                 );
+      // load the pbes
+      pbes p;
+      load_pbes(p, input_filename(), pbes_input_format());
+
+      if (m_print_used_function_symbols)
+      {
+        pbes_system::detail::print_used_function_symbols(p);
+      }
+
+      std::string abstraction_text;
+      if (!m_abstraction_file.empty())
+      {
+        abstraction_text = utilities::read_text(m_abstraction_file);
+      }
+
+      bool over_approximation = (m_strategy == absinthe_over);
+
+      absinthe_algorithm algorithm;
+      if (m_enable_logging)
+      {
+        algorithm.enable_logging();
+      }
+      algorithm.run(p, abstraction_text, over_approximation);
+
+      // save the result
+      save_pbes(p, output_filename(), pbes_output_format());
       return true;
     }
 

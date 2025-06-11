@@ -9,7 +9,6 @@
 /// \file lpsstategraph.cpp
 
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/lps/tools.h"
 #include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/pbes/detail/lpsstategraph_algorithm.h"
 #include "mcrl2/pbes/io.h"
@@ -82,7 +81,26 @@ class lpsstategraph_tool: public rewriter_tool<input_output_tool>
       mCRL2log(verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
       mCRL2log(verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
 
-      lpsstategraph(input_filename(), output_filename(), options);
+      lps::specification lpsspec;
+      lps::load_lps(lpsspec, input_filename());
+      if (options.use_global_variant)
+      {
+        throw mcrl2::runtime_error("The use global variant option is not supported in lpsstategraph!");
+      }
+      if (options.print_influence_graph)
+      {
+        throw mcrl2::runtime_error("The print influence graph option is not supported in lpsstategraph!");
+      }
+      lps::detail::instantiate_global_variables(lpsspec);
+      pbes_system::detail::lpsstategraph_algorithm algorithm(lpsspec, options);
+      algorithm.run();
+      lpsspec = algorithm.result();
+      lps::save_lps(lpsspec, output_filename());
+      if (!lps::detail::is_well_typed(lpsspec))
+      {
+        mCRL2log(log::error) << "lpsstategraph error: not well typed!" << std::endl;
+        mCRL2log(log::error) << pp(lpsspec) << std::endl;
+      }
       return true;
     }
 };

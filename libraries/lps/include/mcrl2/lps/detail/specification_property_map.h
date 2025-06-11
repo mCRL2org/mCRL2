@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_linear_process.h"
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 

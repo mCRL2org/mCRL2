@@ -3,8 +3,6 @@ mcrl2_add_library(mcrl2_pres
     source/algorithms.cpp
     source/io.cpp
     source/pres.cpp
-    source/tools.cpp
-    source/tools2.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data
