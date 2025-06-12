@@ -27,6 +27,14 @@
 
 namespace mcrl2::pbes_system::detail {
 
+using namespace mcrl2;
+using namespace mcrl2::pbes_system;
+using namespace mcrl2::utilities::tools;
+using mcrl2::pbes_system::tools::pbes_input_tool;
+using mcrl2::data::tools::rewriter_tool;
+using mcrl2::utilities::tools::input_tool;
+using utilities::tools::parallel_tool;
+
 inline
 bool run_solve(const pbes_system::pbes& pbesspec, 
   const data::mutable_map_substitution<>& sigma,
@@ -91,14 +99,6 @@ bool run_solve(const pbes_system::pbes& pbesspec,
 
   return result;
 }
-
-using namespace mcrl2;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::utilities::tools;
-using mcrl2::pbes_system::tools::pbes_input_tool;
-using mcrl2::data::tools::rewriter_tool;
-using mcrl2::utilities::tools::input_tool;
-using utilities::tools::parallel_tool;
 
 class pbessolve_tool
     : public parallel_tool<rewriter_tool<pbes_input_tool<input_tool>>>
@@ -419,6 +419,18 @@ class pbessolve_tool
     return true;
   }
 };
+
+inline
+bool pbessolve(const pbes& p)
+{
+  pbessolve_options options;
+  pbes pbesspec = p;
+  pbes_system::algorithms::normalize(pbesspec);
+  structure_graph G;
+  pbesinst_structure_graph_algorithm algorithm(options, pbesspec, G);
+  algorithm.run();
+  return solve_structure_graph(G);
+}
 
 } // mcrl2::pbes_system::detail
 
