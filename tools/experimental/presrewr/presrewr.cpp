@@ -8,13 +8,19 @@
 //
 /// \file presrewr.cpp
 
-#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/pres/tools.h"
-#include "mcrl2/pres/tools/presrewr.h"
-#include "mcrl2/pres/pres_rewriter_tool.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/pres/io.h"
 #include "mcrl2/pres/pres_input_tool.h"
 #include "mcrl2/pres/pres_output_tool.h"
+#include "mcrl2/pres/pres_rewriter_tool.h"
+#include "mcrl2/pres/pres_rewriter_type.h"
+#include "mcrl2/pres/rewrite.h"
+#include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pres/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pres/rewriters/quantifiers_inside_rewriter.h"
+#include "mcrl2/pres/rewriters/simplify_rewriter.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -60,13 +66,57 @@ class pres_rewriter : public pres_input_tool<pres_output_tool<pres_rewriter_tool
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  pres rewriter:      " << m_pres_rewriter_type << std::endl;
 
-      pres_system::presrewr(input_filename(),
-                            output_filename(),
-                            pres_input_format(),
-                            pres_output_format(),
-                            rewrite_strategy(),
-                            rewriter_type()
-                           );
+      // load the pres
+      pres p;
+      load_pres(p, input_filename(), pres_input_format());
+
+      // data rewriter
+      data::rewriter datar(p.data(), rewrite_strategy());
+
+      // pres rewriter
+      switch (rewriter_type())
+      {
+        case simplify:
+        {
+          // simplify_quantifiers_data_rewriter<data::rewriter> presr(datar);
+          simplify_data_rewriter<data::rewriter> presr(p.data(), datar);
+          pres_rewrite(p, presr);
+          break;
+        }
+        case quantifier_all:
+        {
+          bool enumerate_infinite_sorts = true;
+          enumerate_quantifiers_rewriter presr(datar, p.data(), enumerate_infinite_sorts);
+          pres_rewrite(p, presr);
+          break;
+        }
+        case quantifier_finite:
+        {
+          bool enumerate_infinite_sorts = false;
+          enumerate_quantifiers_rewriter presr(datar, p.data(), enumerate_infinite_sorts);
+          pres_rewrite(p, presr);
+          break;
+        }
+        case quantifier_inside:
+        {
+          quantifiers_inside_rewriter presr;
+          pres_rewrite(p, presr);
+          break;
+        }
+        case quantifier_one_point:
+        {
+          // apply the one point rule rewriter
+          one_point_rule_rewriter presr;
+          bool innermost = false;
+          replace_pres_expressions(p, presr, innermost); // use replace, since the one point rule rewriter does the recursion itself
+
+          // post processing: apply the simplifying rewriter
+          simplify_data_rewriter<data::rewriter> simp(p.data(), datar);
+          pres_rewrite(p, simp);
+          break;
+        }
+      }
+      save_pres(p, output_filename(), m_pres_output_format);
       return true;
     }
 

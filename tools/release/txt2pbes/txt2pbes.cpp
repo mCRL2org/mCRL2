@@ -13,9 +13,10 @@
 #define AUTHOR "Aad Mathijssen, Wieger Wesselink"
 
 //mCRL2 specific
-#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
+#include "mcrl2/pbes/txt2pbes.h"
+
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -55,11 +56,26 @@ class txt2pbes_tool: public pbes_output_tool<input_output_tool>
 
     bool run() override
     {
-      txt2pbes(input_filename(),
-               output_filename(),
-               pbes_output_format(),
-               m_normalize
-              );
+      pbes p;
+      if (input_filename().empty())
+      {
+        //parse specification from stdin
+        mCRL2log(log::verbose) << "reading input from stdin..." << std::endl;
+        p = txt2pbes(std::cin, m_normalize);
+      }
+      else
+      {
+        //parse specification from input filename
+        mCRL2log(log::verbose) << "reading input from file '" <<  input_filename() << "'..." << std::endl;
+        std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
+        if (!instream)
+        {
+          throw mcrl2::runtime_error("cannot open input file: " + input_filename());
+        }
+        p = txt2pbes(instream, m_normalize);
+        instream.close();
+      }
+      save_pbes(p, output_filename(), pbes_output_format());
       return true;
     }
 };

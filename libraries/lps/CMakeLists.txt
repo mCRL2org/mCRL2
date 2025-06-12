@@ -2,7 +2,6 @@ mcrl2_add_library(mcrl2_lps
   SOURCES
     source/lps.cpp
     source/lps_io.cpp
-    source/tools.cpp
     source/linearise.cpp
     source/lpsparunfoldlib.cpp
     source/symbolic_lts_io.cpp

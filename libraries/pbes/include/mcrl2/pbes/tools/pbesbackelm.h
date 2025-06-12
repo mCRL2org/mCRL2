@@ -111,6 +111,7 @@ struct substitute_propositional_variables_builder: public Builder<substitute_pro
   }
 };
 
+inline
 void self_substitute(pbes_equation& equation, substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
 {
   substituter.set_stable(false);
@@ -125,6 +126,7 @@ void self_substitute(pbes_equation& equation, substitute_propositional_variables
   }
 }
 
+inline
 void substitute(pbes_equation& into, const pbes_equation& by, substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
 {
   // substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(by,r);
@@ -157,21 +159,6 @@ struct pbesbackelm_pbes_backward_substituter
     pbes_rewrite(p, pbes_rewriter);
   }
 };
-
-void pbesbackelm(const std::string& input_filename,
-             const std::string& output_filename,
-             const utilities::file_format& input_format,
-             const utilities::file_format& output_format,
-             pbesbackelm_options options
-            )
-{
-  pbes p;
-  load_pbes(p, input_filename, input_format);
-  algorithms::normalize(p);
-  pbesbackelm_pbes_backward_substituter backward_substituter;
-  backward_substituter.run(p, options);
-  save_pbes(p, output_filename, output_format);
-}
 
 } // namespace pbes_system
 

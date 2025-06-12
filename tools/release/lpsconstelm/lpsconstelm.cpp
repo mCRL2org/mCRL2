@@ -8,10 +8,11 @@
 //
 /// \file ./lpsconstelm.cpp
 
-//mCRL2
-#include "mcrl2/lps/tools.h"
-#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/lps/constelm.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -79,14 +80,27 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run() override
     {
-      lpsconstelm(input_filename(),
-                  output_filename(),
-                  rewrite_strategy(),
-                  m_instantiate_free_variables,
-                  m_ignore_conditions,
-                  m_remove_trivial_summands,
-                  m_remove_singleton_sorts
-                );
+      lps::stochastic_specification spec;
+      load_lps(spec, input_filename());
+      mcrl2::data::rewriter R(spec.data(), rewrite_strategy());
+      lps::constelm_algorithm<data::rewriter, stochastic_specification> algorithm(spec, R);
+
+      // preprocess: remove single element sorts
+      if (m_remove_singleton_sorts)
+      {
+        algorithm.remove_singleton_sorts();
+      }
+
+      // apply constelm
+      algorithm.run(m_instantiate_free_variables, m_ignore_conditions);
+
+      // postprocess: remove trivial summands
+      if (m_remove_trivial_summands)
+      {
+        algorithm.remove_trivial_summands();
+      }
+
+      save_lps(spec, output_filename());
       return true;
     }
 

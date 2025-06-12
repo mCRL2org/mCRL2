@@ -9,14 +9,19 @@
 /// \file lpsbinary.cpp
 /// \brief The binary tool, this runs the binary algorithm.
 
-#include "mcrl2/lps/tools.h"
-
+#include "mcrl2/lps/binary.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/data/rewriter.h"
 
+using namespace mcrl2;
+using namespace mcrl2::lps;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using mcrl2::data::tools::rewriter_tool;
+
 
 class binary_tool: public rewriter_tool<input_output_tool>
 {
@@ -65,7 +70,12 @@ class binary_tool: public rewriter_tool<input_output_tool>
 
     bool run()
     {
-      mcrl2::lps::lpsbinary(m_input_filename, m_output_filename, m_parameter_selection);
+      stochastic_specification spec;
+      load_lps(spec, m_input_filename);
+      data::rewriter r(spec.data());
+
+      lps::binary_algorithm<data::rewriter, stochastic_specification>(spec, r, m_parameter_selection).run();
+      save_lps(spec, m_output_filename);
       return true;
     }
 

@@ -11,10 +11,10 @@
 // #define MCRL2_PRES_CONSTELM_DEBUG
 // #define MCRL2_PRES_EXPRESSION_BUILDER_DEBUG
 
+#include "mcrl2/pres/parelm.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pres/pres_output_tool.h"
 #include "mcrl2/pres/pres_input_tool.h"
-#include "mcrl2/pres/tools.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -47,11 +47,14 @@ class pres_parelm_tool: public pres_input_tool<pres_output_tool<input_output_too
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
-      presparelm(input_filename(),
-                 output_filename(),
-                 pres_input_format(),
-                 pres_output_format()
-                );
+      // load the pres
+      pres p;
+      load_pres(p, input_filename(), pres_input_format());
+
+      parelm(p);
+
+      // save the result
+      save_pres(p, output_filename(), pres_output_format());
 
       return true;
     }

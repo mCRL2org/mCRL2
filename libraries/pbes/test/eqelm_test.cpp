@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE eqelm_test
 #include <boost/test/included/unit_test.hpp>
-#include "mcrl2/pbes/detail/pbessolve.h"
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
