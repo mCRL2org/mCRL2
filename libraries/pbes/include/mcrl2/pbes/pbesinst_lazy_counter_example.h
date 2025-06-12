@@ -64,7 +64,7 @@ static void rewrite_star(pbes_expression& result,
         {
           // The strategy is defined so only explore the strategy edge.
           auto v = G.strategy(u);
-          if (G.rank(v) == undefined_vertex())
+          if (G.rank(v) == data::undefined_index())
           {
             if (!mcrl2::utilities::detail::contains(done, v))
             {
@@ -83,7 +83,7 @@ static void rewrite_star(pbes_expression& result,
           // Explore all edges.
           for (structure_graph::index_type v : G.all_successors(u))
           {
-            if (G.rank(v) == undefined_vertex())
+            if (G.rank(v) == data::undefined_index())
             {
               if (!mcrl2::utilities::detail::contains(done, v))
               {
@@ -104,7 +104,7 @@ static void rewrite_star(pbes_expression& result,
         // Explore all edges.
         for (structure_graph::index_type v : G.all_successors(u))
         {
-          if (G.rank(v) == undefined_vertex())
+          if (G.rank(v) == data::undefined_index())
           {
             if (!mcrl2::utilities::detail::contains(done, v))
             {
@@ -119,8 +119,6 @@ static void rewrite_star(pbes_expression& result,
           }
         }
       }
-
-      break;
     }
   }
 
