@@ -1,4 +1,4 @@
 % Reachability of the critical section
 [true*]
-forall tid: TID. val(valid_tid(tid)) => 
-    [label(nc(tid)).(!label(c(tid)))*]<true*.label(c(tid))>true
+forall tid: TID. (val(valid_tid(tid)) => 
+    [label(nc(tid)).(!label(c(tid)))*]<true*.label(c(tid))>true)
