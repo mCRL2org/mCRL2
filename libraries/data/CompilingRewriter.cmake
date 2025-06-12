@@ -43,6 +43,11 @@ endif()
 # Add the other definitions that were added using add_definitions to build flags
 get_directory_property(R_COMPILER_DEFINITIONS COMPILE_DEFINITIONS)
 foreach(d ${R_COMPILER_DEFINITIONS})
+  # Ignore definitions that contain generator expressions
+  if (d MATCHES "\\$")
+    continue()
+  endif()
+  
   set(R_CXXFLAGS "${R_CXXFLAGS} -D${d}")
 endforeach()
 

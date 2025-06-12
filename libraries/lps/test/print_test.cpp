@@ -73,35 +73,6 @@ BOOST_AUTO_TEST_CASE(no_summands)
   BOOST_CHECK(s.find("delta @ 0") != std::string::npos);
 }
 
-#ifdef MCRL2_PRINT_PROBLEM_CASES
-void test_specification(const std::string& spec_text)
-{
-  specification x = parse_linear_process_specification(spec_text);
-
-  std::string s1 = lps::pp(x);
-  std::string s2 = lps::print(x);
-  if (s1 != s2)
-  {
-    std::clog << "--- testing spec ---" << std::endl;
-    std::clog << "<pp>   " << s1 << std::endl;
-    std::clog << "<print>" << s2 << std::endl;
-    BOOST_CHECK(s1 == s2);
-  }
-}
-
-BOOST_AUTO_TEST_CASE(problem_cases)
-{
-  std::string SPEC;
-
-  SPEC =
-    "act  a: Bool;         \n"
-    "proc P =  a(true) . P;\n"
-    "init P;               \n"
-    ;
-  test_specification(SPEC);
-}
-#endif
-
 BOOST_AUTO_TEST_CASE(ticket_1208)
 {
   std::string text =

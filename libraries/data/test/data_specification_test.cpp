@@ -868,7 +868,8 @@ BOOST_AUTO_TEST_CASE(test_bke)
     const sort_expression& s = a.reference();
     if (is_structured_sort(s))
     {
-      for (const structured_sort_constructor& constructor: structured_sort(s).constructors())
+      structured_sort sort(s);
+      for (const structured_sort_constructor& constructor: sort.constructors())
       {
         for (const structured_sort_constructor_argument& argument: constructor.arguments())
         {
