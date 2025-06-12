@@ -14,7 +14,7 @@
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/bisimulation.h"
-#include "mcrl2/pbes/detail/pbessolve.h"
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
