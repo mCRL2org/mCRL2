@@ -18,7 +18,7 @@
 
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/pbes/detail/pbessolve.h"
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rewrite.h"

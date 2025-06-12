@@ -12,7 +12,7 @@
 #define BOOST_TEST_MODULE pfnf_rewriter_test
 #include <boost/test/included/unit_test.hpp>
 
-#include "mcrl2/pbes/detail/pbessolve.h"
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/detail/pfnf_print.h"
 #include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/rewrite.h"
