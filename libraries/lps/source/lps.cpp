@@ -9,12 +9,15 @@
 /// \file lps.cpp
 /// \brief
 
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/parse_impl.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/translate_user_notation.h"
+
+#include <ranges>
 
 namespace mcrl2
 {
@@ -67,8 +70,10 @@ std::set<process::action_label> find_action_labels(const lps::stochastic_specifi
 
 data::data_expression_list action_summand::next_state(const data::variable_list& process_parameters) const
 {
-  return data::replace_variables(atermpp::container_cast<data::data_expression_list>(process_parameters),
-                                 data::assignment_sequence_substitution(assignments()));
+  // Cast the process parameters to data expressions
+  return data::replace_variables(
+      data::data_expression_list(process_parameters),
+      data::assignment_sequence_substitution(assignments()));
 }
 
 std::string pp_with_summand_numbers(const specification& x)
