@@ -335,6 +335,9 @@ void self_substitute(pbes_equation& equation,
       int depth = 0;
       while (!pvi_done)
       {
+        if (depth > 0) {
+          stable = false;
+        }
         depth = depth + 1;
         if (depth >= max_depth)
         {
@@ -527,7 +530,7 @@ struct pbespathreduction_pbes_backward_substituter
       {
         for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
         {
-          // substitute(*j, *i, substituter);
+          substitute(*j, *i, substituter);
         }
       }
     }
