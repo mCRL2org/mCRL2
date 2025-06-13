@@ -366,7 +366,6 @@ void self_substitute(pbes_equation& equation,
           }
           sigma[v] = par;
         }
-        mCRL2log(log::verbose) << "Initial REWRITE \n";
         pbes_expression phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
 
         std::vector<propositional_variable_instantiation> phi_set = count_propositional_variable_instantiations(phi);
@@ -394,7 +393,6 @@ void self_substitute(pbes_equation& equation,
 
         if (phi_set.size() < 50)
         {
-          mCRL2log(log::verbose) << "FIRST REWRITE \n";
           phi = pbes_rewrite(phi, pbes_rewriter);
         }
         // data::data_expression expr = pbestodata(phi, replace_substituter);
@@ -480,7 +478,6 @@ void self_substitute(pbes_equation& equation,
       // Simplify
       if (set.size() < 50)
       {
-        mCRL2log(log::verbose) << "SECOND REWRITE \n";
         equation.formula() = pbes_rewrite(equation.formula(), pbes_rewriter);
       }
 
