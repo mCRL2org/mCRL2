@@ -391,9 +391,12 @@ void self_substitute(pbes_equation& equation,
 
         // Simplify
 
-        if (phi_set.size() < 50)
+        phi_set = count_propositional_variable_instantiations(phi);
+        std::set<propositional_variable_instantiation> set(phi_set.begin(), phi_set.end());
+        if (set.size() == 1)
         {
           phi = pbes_rewrite(phi, pbes_rewriter);
+          phi_set = count_propositional_variable_instantiations(phi);
         }
         // data::data_expression expr = pbestodata(phi, replace_substituter);
         // f_bdd_prover.set_formula(expr);
@@ -402,7 +405,6 @@ void self_substitute(pbes_equation& equation,
 
         // if_substituter.apply(phi, phi);
 
-        phi_set = count_propositional_variable_instantiations(phi);
 
         // (3) check if simpler
         if (phi_set.size() == 1 && (*phi_set.begin()).name() == equation.variable().name())
