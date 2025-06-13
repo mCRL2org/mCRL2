@@ -100,7 +100,7 @@ class RunProcess:
             ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
             subprocess_flags = 0x8000000  # win32con.CREATE_NO_WINDOW?
 
-            if not tool.endswith(".exe"):
+            if not tool.lower().endswith(".exe"):
                 tool += ".exe"
         else:
             subprocess_flags = 0
