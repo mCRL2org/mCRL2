@@ -38,7 +38,7 @@ nu X(pA:Position=pos(upperMiddle + 1, 1),pB:Position=pos(upperMiddle + 1, N), fe
 			)))
 		) && X(pos(c,r), pB, fences)) &&
 
-		forall c,r:Pos.(val(c <= N) && val(r <= N)) => [movePawn(P2, c, r)] (
+		forall c,r:Pos.((val(c <= N) && val(r <= N)) => ([movePawn(P2, c, r)] (
 		(
 			% Move to adjacent place
 			(val(c == col(pB) + 1) && val(r == row(pB)))
@@ -75,7 +75,7 @@ nu X(pA:Position=pos(upperMiddle + 1, 1),pB:Position=pos(upperMiddle + 1, N), fe
 					|| (isBlocked(pA, pos(col(pB), row(pB) + 2), fences) && col(pB) == col(pA) && row(pB) + 1 == row(pA))
 				)
 			)))
-		) && X(pA, pos(c,r), fences)) &&
+		) && X(pA, pos(c,r), fences))) &&
 	forall t:Turn.forall c,r:Pos.forall d:Direction.[addFence(t, c, r, d)] X(pA, pB, {fpos(c, r, d)} + fences) &&
 	[!(exists t:Turn. exists c,r:Pos. exists d:Direction.
 		(val(c <= N) && val(r <= N))
@@ -84,5 +84,5 @@ nu X(pA:Position=pos(upperMiddle + 1, 1),pB:Position=pos(upperMiddle + 1, N), fe
 			movePawn(P2, c, r) ||
 			addFence(t, c, r, d)
 		)
-	)] X(pA, pB, fences)
+	)] X(pA, pB, fences))
 )

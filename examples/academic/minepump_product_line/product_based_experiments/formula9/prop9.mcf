@@ -14,11 +14,11 @@ nu A(b:Bool = false,c:Bool=false).
   )
 &&
   (val(b && c) =>
-    ( [true*.methaneRise]mu Y. [!methaneLower]Y &&  <true>true )
+    ( [true*.methaneRise]mu Y. ([!methaneLower]Y &&  <true>true) )
   )
 &&
   (val(b && !c) =>
-    !( [true*.methaneRise]mu Y. [!methaneLower]Y &&  <true>true )
+    !( [true*.methaneRise]mu Y. ([!methaneLower]Y &&  <true>true) )
   )
 )
 
