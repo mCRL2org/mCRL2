@@ -145,10 +145,10 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
 
   pbes_equation m_eq;
   core::identifier_string name;
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
   bool m_stable = false;
 
-  explicit substitute_propositional_variables_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
+  explicit substitute_propositional_variables_builder(simplify_data_rewriter<data::rewriter>& r)
       : m_pbes_rewriter(r)
   {}
 
@@ -336,10 +336,6 @@ void self_substitute(pbes_equation& equation,
       int depth = 0;
       while (!pvi_done)
       {
-        if (depth == 1)
-        {
-          stable = false;
-        }
         depth = depth + 1;
         if (depth >= max_depth)
         {
@@ -393,18 +389,16 @@ void self_substitute(pbes_equation& equation,
 
         phi_set = count_propositional_variable_instantiations(phi);
         std::set<propositional_variable_instantiation> set(phi_set.begin(), phi_set.end());
-        if (set.size() == 1)
+        if (phi_set.size() < 50)
         {
           phi = pbes_rewrite(phi, pbes_rewriter);
+          if_substituter.apply(phi, phi);
           phi_set = count_propositional_variable_instantiations(phi);
         }
         // data::data_expression expr = pbestodata(phi, replace_substituter);
         // f_bdd_prover.set_formula(expr);
         // expr = f_bdd_prover.get_bdd();
         // phi = datatopbes(expr, if_substituter, replace_substituter);
-
-        // if_substituter.apply(phi, phi);
-
 
         // (3) check if simpler
         if (phi_set.size() == 1 && (*phi_set.begin()).name() == equation.variable().name())
@@ -463,6 +457,10 @@ void self_substitute(pbes_equation& equation,
           mCRL2log(log::debug) << "Not simpler: " << cur_x << " \n-->\n " << phi << " and size " << phi_set.size()
                                << "\n";
           pvi_done = true;
+          if (depth > 1)
+          {
+            stable = false;
+          }
         }
         if (pvi_done)
         {
@@ -481,10 +479,10 @@ void self_substitute(pbes_equation& equation,
       if (set.size() < 50)
       {
         equation.formula() = pbes_rewrite(equation.formula(), pbes_rewriter);
+        if_substituter.apply(equation.formula(), equation.formula());
       }
 
       // equation.formula() = pbes_rewrite(equation.formula(), pbes_prover_rewriter);
-      // if_substituter.apply(equation.formula(), equation.formula());
       // equation.formula() = pbes_rewrite(equation.formula(), pbes_rewriter);
     }
   }
@@ -513,7 +511,7 @@ struct pbespathreduction_pbes_backward_substituter
     simplify_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
     simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
     // simplify_data_rewriter<data::rewriter> pbes_prover_rewriter(data_prover_rewriter);
-    substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_rewriter);
+    substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_default_rewriter);
     rewrite_if_builder<pbes_system::pbes_expression_builder> if_rewriter(pbes_rewriter);
     // rewrite_if_builder<data::data_expression_builder> if_rewriter(data_rewriter);
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder> pvi_substituter(
