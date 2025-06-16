@@ -2,8 +2,9 @@
 
 This directory contains models of multi-writer multi-reader safe, regular and atomic registers and their applications in the verification of several mutual exclusion algorithms.
 These models are described in *Just Verification of Mutual Exclusion Algorithms* by Rob van Glabbeek, Bas Luttik and Myrthe Spronck (2025), and extend models previously described in *Process-Algebraic Models of Multi-Writer Multi-Reader Non-Atomic Registers* by Myrthe Spronck and Bas Luttik (2023).
-
 The previous versions of these models can be found in commit 972629b.
+
+Results reported in the 2025 paper were obtained using mCRL2 version 202407.1.700c1fb726M (Release).
 
 In the folder *properties*, the following properties are given as modal mu-calculus formulae:
 * Absence of deadlocks from the LTS (no_dead.mcf)
@@ -38,11 +39,13 @@ To add further algorithms, any of the above .mcrl2 files can be modified as foll
 To run a verification:
 * The models are all given with all registers being safe. To verify with regular or atomic registers, replace Safe_Register(...) with Regular_Register(...) or Atomic_Register(...) everywhere it is used in the initial process.
 * Then use the run.py script. It requires two arguments, which must be given in order: the name of the model (without .mcrl2 extension) and the name of the property (without .mcf extension)
+
 Note that some of these verifications may take a long time to run.
 
 In addition to the models described above, there are two mCRL2 IDE projects for models that are only referenced in *Process-Algebraic Models of Multi-Writer Multi-Reader Non-Atomic Registers*:
 * Szymanski_3bit_linear_wait_with_semaphore, abbreviated as Szymanski_3bitlw_sem, was used to produce a counterexample showing that Szymanski_3bit_linear_wait does not guarantee mutual exclusion for three threads and atomic registers.
 * Szymanski_flag_with_bits_protected_exit, abbreviated as Szymanski_fwb_pe, does guarantee mutual exclusion for three threads and atomic registers, but does not guarantee mutual exclusion for three threads with regular or safe registers.
+  
 Since these models use actions that the models and properties presented in *Just Verification of Mutual Exclusion Algorithms* do not account for, these are left in their previous form.
 
 
