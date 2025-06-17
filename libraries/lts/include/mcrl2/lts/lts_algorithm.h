@@ -993,11 +993,15 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     }
     case lts_preorder::lts_pre_impossible_futures:
     {
-      return detail::destructive_impossible_futures(l1, l2, strategy, "counter_example_impossible_futures", counter_example_file, structured_output);
+      if (generate_counter_example)
+      {        
+        return detail::destructive_impossible_futures<detail::counter_example_constructor>(l1, l2, strategy, counter_example_file, generate_counter_example, structured_output); 
+      }
+      return detail::destructive_impossible_futures(l1, l2, strategy, counter_example_file, false, structured_output);
     }
     case lts_preorder::lts_pre_none:
     {
-      throw new mcrl2::runtime_error("Expected a valid preorder");
+      throw mcrl2::runtime_error("Expected a valid preorder");
     }
     default:
       mCRL2log(log::error) << "Comparison for this preorder is not available\n";
