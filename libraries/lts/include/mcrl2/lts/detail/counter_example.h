@@ -20,6 +20,7 @@
 
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/trace.h"
+#include <cstddef>
 
 
 namespace mcrl2
@@ -107,25 +108,7 @@ class counter_example_constructor
     template < class LTS_TYPE >
     void save_counter_example(index_type index, const LTS_TYPE& l, const std::vector<size_t>& extra_actions=std::vector<size_t>()) const
     {
-      // We first store the label indices in reverse order in a stack.
-      std::stack< index_type > reversed_label_indices;
-      for(index_type current_index=index; 
-          current_index!=m_root_index; 
-          current_index=m_backward_tree[current_index].previous_entry_index())
-      {
-        reversed_label_indices.push(m_backward_tree[current_index].label_index());
-      }
-
-      trace result;
-      while (!reversed_label_indices.empty())
-      {
-        result.add_action(mcrl2::lps::multi_action(mcrl2::process::action(
-                                mcrl2::process::action_label(
-                                       core::identifier_string(mcrl2::lts::pp(l.action_label(reversed_label_indices.top()))),
-                                       mcrl2::data::sort_expression_list()),
-                                mcrl2::data::data_expression_list())));
-        reversed_label_indices.pop();
-      }
+      trace result = get_trace(l, index);
 
       /* Add the actions in extra actions. */
       for(const size_t& a: extra_actions)
@@ -150,6 +133,30 @@ class counter_example_constructor
         }
         mCRL2log(log::verbose) << "Saved trace to file " + filename + "\n";
         result.save(filename);
+      }
+    }
+
+    /// \brief This function returns the trace from the root to the current index.
+    template < class LTS_TYPE >
+    trace get_trace(const LTS_TYPE& l, index_type index) const {
+      // We first store the label indices in reverse order in a stack.
+      std::stack< index_type > reversed_label_indices;
+      for(index_type current_index=index; 
+          current_index!=m_root_index; 
+          current_index=m_backward_tree[current_index].previous_entry_index())
+      {
+        reversed_label_indices.push(m_backward_tree[current_index].label_index());
+      }
+
+      trace result;
+      while (!reversed_label_indices.empty())
+      {
+        result.add_action(mcrl2::lps::multi_action(mcrl2::process::action(
+                                mcrl2::process::action_label(
+                                       core::identifier_string(mcrl2::lts::pp(l.action_label(reversed_label_indices.top()))),
+                                       mcrl2::data::sort_expression_list()),
+                                mcrl2::data::data_expression_list())));
+        reversed_label_indices.pop();
       }
     }
 
@@ -190,6 +197,12 @@ class dummy_counter_example_constructor
     void save_counter_example(index_type /* index */, const LTS_TYPE& /*l*/, const std::vector<size_t>& /* extra_actions */ =std::vector<size_t>()) const
     {
       // This dummy counter example generator intentionally does not save anything.
+    }
+
+    template < class LTS_TYPE >
+    trace get_trace(const LTS_TYPE&, index_type) const
+    {
+      return trace();  // This returns an empty trace.
     }
 
     /// \brief This function indicates that this is a dummy counterexample class and that no counterexample is required.

@@ -19,7 +19,7 @@
 
 namespace mcrl2::lts
 {
-  
+
 template <typename LTS_TYPE, typename COUNTER_EXAMPLE_CONSTRUCTOR>
 bool check_trace_inclusion(LTS_TYPE& l1,
     const detail::lts_cache<LTS_TYPE>& weak_property_cache,
@@ -45,22 +45,22 @@ bool check_trace_inclusion(LTS_TYPE& l1,
   detail::antichain_insert(anti_chain,
       working.front().state(),
       working.front().states()); // antichain := antichain united with (impl,spec);
-                        // This line occurs at another place in the code than in
-                        // the original algorithm, where insertion in the anti-chain
-                        // was too late, causing too many impl-spec pairs to be investigated.
+                                 // This line occurs at another place in the code than in
+                                 // the original algorithm, where insertion in the anti-chain
+                                 // was too late, causing too many impl-spec pairs to be investigated.
 
   while (!working.empty()) // while working!=empty
   {
     // pop (impl,spec) from working;
-    detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>
-        impl_spec = working.front();
+    detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR> impl_spec = working.front();
     stats.max_working = std::max(working.size(), stats.max_working);
     stats.max_antichain = std::max(anti_chain.size(), stats.max_antichain);
     working.pop_front(); // At this point it could be checked whether impl_spec still exists in anti_chain.
                          // Small scale experiments show that this is a little bit more expensive than doing the
                          // explicit check below.
 
-    if (detail::antichain_include_inverse(anti_chain_negative, impl_spec.state(), impl_spec.states())) {
+    if (detail::antichain_include_inverse(anti_chain_negative, impl_spec.state(), impl_spec.states()))
+    {
       return false;
     }
 
@@ -90,16 +90,19 @@ bool check_trace_inclusion(LTS_TYPE& l1,
       if (spec_prime.empty()) // if spec'={} then
       {
         generate_counter_example.save_counter_example(new_counterexample_index, l1);
-        detail::antichain_insert(anti_chain_negative, init_l1, detail::collect_reachable_states_via_taus(init_l2, weak_property_cache, weak_reduction));
+        detail::antichain_insert(anti_chain_negative,
+            init_l1,
+            detail::collect_reachable_states_via_taus(init_l2, weak_property_cache, weak_reduction));
         return false; //    return false;
       }
-      
+
       // if (impl',spec') in antichain is not true then
       ++stats.antichain_inserts;
       const detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR> impl_spec_counterex(t.to(),
           spec_prime,
           new_counterexample_index);
-      if (!detail::antichain_include(anti_chain_positive, t.to(), spec_prime) && detail::antichain_insert(anti_chain, t.to(), spec_prime))
+      if (!detail::antichain_include(anti_chain_positive, t.to(), spec_prime)
+          && detail::antichain_insert(anti_chain, t.to(), spec_prime))
       {
         ++stats.antichain_misses;
         if (strategy == lps::exploration_strategy::es_breadth)
@@ -170,18 +173,24 @@ void write_counter_example(std::ostream& stream, const trace& initial_trace, con
 
 namespace detail {
 
-/// \brief Checks impossible futures refinement for the given LTSs. Impossible futures are defined in the article:
+/// \brief Checks impossible futures refinement for the given LTSs. 
 /// 
-/// Marc Voorhoeve, Sjouke Mauw. Impossible futures and determinism, Inf. Process. Lett. 80, 2001. 
-template <typename LTS,
-  typename COUNTER_EXAMPLE_CONSTRUCTOR = detail::dummy_counter_example_constructor>
-bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_strategy strategy, const std::string& name, const std::string& counter_example_file, const bool structured_output)
+/// Impossible futures are defined in the article:
+///
+/// Marc Voorhoeve, Sjouke Mauw. Impossible futures and determinism, Inf. Process. Lett. 80, 2001.
+template <typename LTS, typename COUNTER_EXAMPLE_CONSTRUCTOR = detail::dummy_counter_example_constructor>
+bool destructive_impossible_futures(LTS& l1,
+    LTS& l2,
+    const lps::exploration_strategy strategy,
+    const std::string& counter_example_file,
+    bool generate_counter_example2,
+    bool structured_output)
 {
   // Merge this LTS and l and store the result in this LTS.
   // In the resulting LTS, the initial state i of l will have the
   // state number i + N where N is the number of states in this LTS (before the merge).
   // The initial state of l1 is 0, and the initial state of l2 is l1.num_states().
-  
+
   // Remove tau-loops from l1 to allow the (impl, spec) => (impl', spec) optimisation.
   scc_partitioner<LTS> scc_partitioner(l1);
   scc_partitioner.replace_transition_system(false);
@@ -191,21 +200,27 @@ bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_str
 
   const detail::lts_cache<LTS> weak_property_cache(l1, true);
 
-  std::deque<state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> working = std::deque(
-      {state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>(l1.initial_state(),
+  std::deque<state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> working
+      = std::deque({state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>(l1.initial_state(),
           detail::collect_reachable_states_via_taus(init_l2, weak_property_cache, true),
           COUNTER_EXAMPLE_CONSTRUCTOR())});
   detail::anti_chain_type anti_chain;
-  detail::antichain_insert(anti_chain, working.front().state(), working.front().states()); // antichain := antichain united with (impl,spec);
-  refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> stats(anti_chain, working);
+  detail::antichain_insert(anti_chain,
+      working.front().state(),
+      working.front().states()); // antichain := antichain united with (impl,spec);
+  refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> stats(
+      anti_chain,
+      working);
 
   // Used for the weak trace refinement checks
   detail::anti_chain_type positive_anti_chain;
   detail::anti_chain_type negative_anti_chain;
   detail::anti_chain_type inner_anti_chain;
   std::deque<state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> inner_working;
-  refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> inner_stats(inner_anti_chain, inner_working);
-  
+  refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> inner_stats(
+      inner_anti_chain,
+      inner_working);
+
   COUNTER_EXAMPLE_CONSTRUCTOR generate_counter_example = COUNTER_EXAMPLE_CONSTRUCTOR();
   COUNTER_EXAMPLE_CONSTRUCTOR inner_generate_counterexample = COUNTER_EXAMPLE_CONSTRUCTOR();
   std::vector<trace> inner_counter_examples;
@@ -219,7 +234,8 @@ bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_str
     const detail::state_type impl = front.state();
     const detail::set_of_states& spec = front.states();
 
-    if (weak_property_cache.stable(impl) && !std::any_of(spec.begin(),
+    if (weak_property_cache.stable(impl)
+        && !std::any_of(spec.begin(),
             spec.end(),
             [&](const auto& t)
             {
@@ -236,32 +252,40 @@ bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_str
                   true,
                   strategy);
 
-              inner_counter_examples.emplace_back(inner_generate_counterexample.get_trace());
+              inner_counter_examples.emplace_back(
+                  inner_generate_counterexample.get_trace(l1, inner_generate_counterexample.root_index()));
             }))
     {
-      // Construct the counter example.
-      if (structured_output)
+      if (generate_counter_example2)
       {
-        write_counter_example(std::cout, generate_counter_example.get_trace(), inner_counter_examples);
-      }
-      else
-      {
-        std::ofstream file(counter_example_file);
-        if (!file)
+        // Construct the counter example.
+        if (structured_output)
         {
-          throw mcrl2::runtime_error("Could not open file " + counter_example_file);
+          write_counter_example(std::cout,
+              generate_counter_example.get_trace(l1, generate_counter_example.root_index()),
+              inner_counter_examples);
         }
+        else
+        {
+          std::ofstream file(counter_example_file);
+          if (!file)
+          {
+            throw mcrl2::runtime_error("Could not open file " + counter_example_file);
+          }
 
-        write_counter_example(file, generate_counter_example.get_trace(), inner_counter_examples);
+          write_counter_example(file,
+              generate_counter_example.get_trace(l1, generate_counter_example.root_index()),
+              inner_counter_examples);
+        }
       }
-      
+
       return false;
     }
 
     for (const transition& t : weak_property_cache.transitions(impl))
     {
       const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index
-          = generate_counter_example.add_transition(t.label(), impl_spec.counter_example_index());
+          = generate_counter_example.add_transition(t.label(), front.counter_example_index());
 
       detail::set_of_states spec_prime;
       if (l1.is_tau(l1.apply_hidden_label_map(t.label())))
@@ -283,28 +307,35 @@ bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_str
 
       if (spec_prime.empty())
       {
-        // Construct the counter example.
-        if (structured_output)
+        if (generate_counter_example2)
         {
-          write_counter_example(std::cout, generate_counter_example.get_trace(), std::vector<trace>());
-        }
-        else
-        {
-          std::ofstream file(counter_example_file);
-          if (!file)
+          // Construct the counter example.
+          if (structured_output)
           {
-            throw mcrl2::runtime_error("Could not open file " + counter_example_file);
+            write_counter_example(std::cout,
+                generate_counter_example.get_trace(l1, generate_counter_example.root_index()),
+                std::vector<trace>());
           }
-          
-          write_counter_example(file, generate_counter_example.get_trace(), std::vector<trace>());
+          else
+          {
+            std::ofstream file(counter_example_file);
+            if (!file)
+            {
+              throw mcrl2::runtime_error("Could not open file " + counter_example_file);
+            }
+
+            write_counter_example(file,
+                generate_counter_example.get_trace(l1, generate_counter_example.root_index()),
+                std::vector<trace>());
+          }
         }
+        
         return false;
       }
 
-      auto impl_spec_counterex
-          = state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>(t.to(),
-              spec_prime,
-              COUNTER_EXAMPLE_CONSTRUCTOR());
+      auto impl_spec_counterex = state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>(t.to(),
+          spec_prime,
+          COUNTER_EXAMPLE_CONSTRUCTOR());
 
       ++stats.antichain_inserts;
       if (detail::antichain_insert(anti_chain, t.to(), spec_prime))
@@ -327,8 +358,8 @@ bool destructive_impossible_futures(LTS& l1, LTS& l2, const lps::exploration_str
   return true;
 }
 
-}
+} // namespace detail
 
-} // namespace mcrl2::lts::detail
+} // namespace mcrl2::lts
 
 #endif // LIBLTS_IMPOSSIBLE_FUTURES_H
