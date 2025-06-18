@@ -41,7 +41,7 @@ namespace detail
  * strategy passed as parameter a_rewrite_strategy. The parameter
  * a_rewrite_strategy can be set to either
  * GS_REWR_data::jitty or GS_REWR_data::jittyC. To limit the
- * number of milliseconds spent on proving a single formula, a time limit
+ * number of seconds spent on proving a single formula, a time limit
  * can be set. If the time limit is set to 0, no time limit will be
  * enforced. The parameter a_apply_induction indicates whether or
  * induction on lists is applied. The constructor
@@ -119,7 +119,7 @@ class BDD_Prover: protected rewriter
     /// \brief A flag that indicates whether or not the formala Prover::f_formula is a contradiction.
     Answer f_contradiction;
 
-    /// \brief An integer representing the maximal amount of milliseconds to be spent on processing a formula.
+    /// \brief An integer representing the maximal amount of seconds to be spent on processing a formula.
     const double f_time_limit;
 
     /// \brief A timestamp representing the moment when the maximal amount of milliseconds has been spent on processing the current formula.
