@@ -355,7 +355,7 @@ class pbesinst_lazy_algorithm
                              const pbes_expression& psi
                             )
     {  
-      if (m_options.optimization >= 1)
+      if (m_options.optimization >= partial_solve_strategy::remove_self_loops)
       {
         rewrite_true_false(result, symbol, X, psi);
       }

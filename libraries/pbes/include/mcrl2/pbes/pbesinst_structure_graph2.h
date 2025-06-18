@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/pbesinst_find_loops.h"
 #include "mcrl2/pbes/pbesinst_partial_solve.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
+#include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/utilities/stopwatch.h"
 
 namespace mcrl2 {
@@ -564,7 +565,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       stopwatch timer;
 
       bool report = false;
-      if (m_options.optimization == 3)
+      if (m_options.optimization == partial_solve_strategy::propagate_solved_equations_using_attractor)
       {
         if (S_guard[0](S[0].size()))
         {
@@ -578,7 +579,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
         assert(strategies_are_set_in_solved_nodes());
       }
-      else if (m_options.optimization == 4 && (m_options.aggressive || find_loops_guard(m_iteration_count)))
+      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_using_fatal_attractor && (m_options.aggressive || find_loops_guard(m_iteration_count)))
       {
         mCRL2log(log::verbose) << "start partial solving\n"; report = true;
 
@@ -587,29 +588,29 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         assert(strategies_are_set_in_solved_nodes());
 
       }
-      else if ((5 <= m_options.optimization && m_options.optimization <= 7) && (m_options.aggressive || fatal_attractors_guard(m_iteration_count)))
+      else if ((partial_solve_strategy::solve_subgames_using_fatal_attractor_local <= m_options.optimization && m_options.optimization <= partial_solve_strategy::solve_subgames_using_solver) && (m_options.aggressive || fatal_attractors_guard(m_iteration_count)))
       {
         mCRL2log(log::verbose) << "start partial solving\n"; report = true;
 
         simple_structure_graph G(m_graph_builder.vertices());
-        if (m_options.optimization == 5)
+        if (m_options.optimization == partial_solve_strategy::solve_subgames_using_fatal_attractor_local)
         {
           detail::fatal_attractors(G, S, tau, m_iteration_count); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
-        else if (m_options.optimization == 6)
+        else if (m_options.optimization == partial_solve_strategy::solve_subgames_using_fatal_attractor_original)
         {
           detail::fatal_attractors_original(G, S, tau, m_iteration_count); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
-        else if (m_options.optimization == 7)
+        else if (m_options.optimization == partial_solve_strategy::solve_subgames_using_solver)
         {
           m_graph_builder.finalize();
           detail::partial_solve(m_graph_builder.m_graph, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
       }
-      else if (m_options.optimization == 8 && (m_options.aggressive || find_loops_guard(m_iteration_count)))
+      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_original && (m_options.aggressive || find_loops_guard(m_iteration_count)))
       {        
         mCRL2log(log::verbose) << "start partial solving\n"; report = true;
 

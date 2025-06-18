@@ -13,6 +13,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESSOLVE_H
 #define MCRL2_PBES_TOOLS_PBESSOLVE_H
 
+#include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/logger.h"
@@ -109,7 +110,7 @@ class pbessolve_tool
 
   pbessolve_options options;
   int m_short_strategy = 0;
-  int m_long_strategy = 0;
+  partial_solve_strategy m_long_strategy = partial_solve_strategy::no_optimisation;
   std::string lpsfile;
   std::string ltsfile;
   std::string evidence_file;
@@ -156,18 +157,18 @@ class pbessolve_tool
         's');
     desc.add_hidden_option(
         "long-strategy",
-        utilities::make_enum_argument<int>("STRATEGY")
-            .add_value_desc(0, "Do not apply any optimizations.")
-            .add_value_desc(1, "Remove self loops.")
-            .add_value_desc(2, "Propagate solved equations using substitution.")
-            .add_value_desc(3, "Propagate solved equations using an attractor.")
-            .add_value_desc(4, "Detect winning loops using a fatal attractor.")
+        utilities::make_enum_argument<partial_solve_strategy>("STRATEGY")
+            .add_value_desc(partial_solve_strategy::no_optimisation, "Do not apply any optimizations.")
+            .add_value_desc(partial_solve_strategy::remove_self_loops, "Remove self loops.")
+            .add_value_desc(partial_solve_strategy::propagate_solved_equations_using_substitution, "Propagate solved equations using substitution.")
+            .add_value_desc(partial_solve_strategy::propagate_solved_equations_using_attractor, "Propagate solved equations using an attractor.")
+            .add_value_desc(partial_solve_strategy::detect_winning_loops_using_fatal_attractor, "Detect winning loops using a fatal attractor.")
             .add_value_desc(
-                5, "Solve subgames using a fatal attractor (local version).")
+                partial_solve_strategy::solve_subgames_using_fatal_attractor_local, "Solve subgames using a fatal attractor (local version).")
             .add_value_desc(
-                6, "Solve subgames using a fatal attractor (original version).")
-            .add_value_desc(7, "Solve subgames using the solver.")
-            .add_value_desc(8, "Detect winning loops (original version)."
+                partial_solve_strategy::solve_subgames_using_fatal_attractor_original, "Solve subgames using a fatal attractor (original version).")
+            .add_value_desc(partial_solve_strategy::solve_subgames_using_solver, "Solve subgames using the solver.")
+            .add_value_desc(partial_solve_strategy::detect_winning_loops_original, "Detect winning loops (original version)."
                                " N.B. This optimization does not work "
                                "correctly in combination with counter examples."
                                " It may also cause stack overflow."),
@@ -228,7 +229,7 @@ class pbessolve_tool
 
     if (parser.has_option("long-strategy"))
     {
-      m_long_strategy = parser.option_argument_as<int>("long-strategy");
+      m_long_strategy = parser.option_argument_as<partial_solve_strategy>("long-strategy");
     }
     else
     {
@@ -261,60 +262,56 @@ class pbessolve_tool
     bool has_counter_example = detail::has_counter_example_information(pbesspec);
 
     // Handle tool options here because now we know whether the PBES has counter example information.
-    if (m_long_strategy > 0)
+    if (m_long_strategy > partial_solve_strategy::no_optimisation)
     {
       options.optimization = m_long_strategy;
     }
     else
     {
-      options.optimization = m_short_strategy;
-    }
-    
-    if (has_counter_example && options.optimization > 0)
-    {      
-        mCRL2log(mcrl2::log::warning) << "Warning: Cannot use partial solving with PBES that has counter example information, using strategy 0 instead." << std::endl;
-        options.optimization = 0;
-    }
-    else 
-    {
-      if (!has_counter_example && options.optimization == 0)
+      if (m_short_strategy == 0)
       {
-        options.optimization = 2;
+        options.optimization = partial_solve_strategy::propagate_solved_equations_using_substitution;
       }
-      else if (options.optimization == 1)
+      else if (m_short_strategy == 1)
       {
-        options.optimization = 3;
+        options.optimization = partial_solve_strategy::propagate_solved_equations_using_attractor;
       }
-      else if (options.optimization == 2)
+      else if (m_short_strategy == 2)
       {
-        options.optimization = 4;
+        options.optimization = partial_solve_strategy::detect_winning_loops_using_fatal_attractor;
       }
-      else if (options.optimization == 3)
+      else if (m_short_strategy == 3)
       {
-        options.optimization = 6;
+        options.optimization = partial_solve_strategy::solve_subgames_using_fatal_attractor_original;
       }
-      else if (options.optimization == 4)
+      else if (m_short_strategy == 4)
       {
-        options.optimization = 7;
+        options.optimization = partial_solve_strategy::solve_subgames_using_solver;
       }
     }
 
-    if (options.optimization < 0 || options.optimization > 8)
+    if (has_counter_example)
+    {      
+        mCRL2log(mcrl2::log::warning) << "Warning: Cannot use partial solving with PBES that has counter example information, using strategy 0 instead." << std::endl;
+        options.optimization = partial_solve_strategy::no_optimisation;
+    }    
+
+    if (options.optimization < partial_solve_strategy::no_optimisation || options.optimization >  partial_solve_strategy::detect_winning_loops_original)
     {
       throw mcrl2::runtime_error("Invalid strategy " +
-                                 std::to_string(options.optimization));
+                                 std::to_string(static_cast<int>(options.optimization)));
     }
-    if (options.prune_todo_list && options.optimization < 2)
+    if (options.prune_todo_list && options.optimization < partial_solve_strategy::propagate_solved_equations_using_substitution)
     {
       mCRL2log(log::warning) << "Option --prune-todo-list has no effect for "
                                 "strategies less than 2."
                              << std::endl;
     }
-    if (options.optimization == 8 && has_counter_example)
+    if (options.optimization == partial_solve_strategy::detect_winning_loops_original && has_counter_example)
     {
       throw mcrl2::runtime_error("optimisation 8 cannot be used with a PBES that has counter example information");
     }
-    if (options.optimization == 8 && options.number_of_threads > 1)
+    if (options.optimization == partial_solve_strategy::detect_winning_loops_original && options.number_of_threads > 1)
     {
       throw mcrl2::runtime_error("optimisation 8 does not work correctly with multiple threads, using 1 thread instead.");
     }
@@ -411,7 +408,7 @@ class pbessolve_tool
       pbes_system::detail::replace_global_variables(pbesspec, sigma);
     }
 
-    if (options.optimization <= 1)
+    if (options.optimization <= partial_solve_strategy::remove_self_loops)
     {
       run_algorithm<pbesinst_structure_graph_algorithm, pbesinst_counter_example_structure_graph_algorithm>(pbesspec, sigma);
     }
