@@ -9,8 +9,6 @@
 /// \file parelm_test.cpp
 /// \brief Add your file description here.
 
-//#define MCRL2_LPS_PARELM_DEBUG
-
 #define BOOST_TEST_MODULE parelm_test
 #include <boost/algorithm/string.hpp>
 #include <boost/test/included/unit_test.hpp>

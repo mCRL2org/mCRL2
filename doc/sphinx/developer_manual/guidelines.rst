@@ -164,6 +164,26 @@ Platform independence
 The source code must compile on the actively supported platforms
 and supported build tools on those platforms.
 
+Feature macros
+^^^^^^^^^^^^^^
+
+Mmacros should be avoided whenever possible and replaced by global `constexpr`
+boolean variables. However, in the cases that macros are unavoidable (i.e.,
+require introducing templates) they should be used as follows. The macro should
+be named ``MCRL2_`` as explained above and in the code we are allowed to check
+for them with ``#ifdef`` blocks, where the corresponding ``#endif`` has a
+comment stating which macro is being tested. However, we do not allow macros to
+be defined in the code itself, but only by the build system. This can be done by
+adding a ``add_compile_definitions`` command to the ``ConfigureCompiler.cmake``
+file.
+
+Formatting
+^^^^^^^^^^^
+
+The code should be formatted according to the mCRL2 coding style, this can be
+(partially) enforced by running `clang-format
+<https://clang.llvm.org/docs/ClangFormat.html>`_ on the code.
+
 Committing changes
 ------------------
 When committing changes, the following guidelines should be adhered to:
@@ -171,7 +191,7 @@ When committing changes, the following guidelines should be adhered to:
 * Make sure the updated code successfully compiles, installs, and passes all
   tests.
 * Enter a clear commit message.
-* Whenever a commit solves a Trac ticket, the commit message must refer to the
+* Whenever a commit solves a Github ticket, the commit message must refer to the
   ticket by its number, formatted as `fixes #n`, where `n` represents the ticket
   number. This automatically closes the ticket with a reference to the commit
   number and message.
