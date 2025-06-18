@@ -470,12 +470,15 @@ void self_substitute(pbes_equation& equation,
       mCRL2log(log::verbose) << "New set size: " << set.size() << "\n";
 
       // Simplify
-      equation.formula() = simplify_expr(equation.formula(),
-          options,
-          if_substituter,
-          replace_substituter,
-          pbes_rewriter,
-          f_bdd_prover);
+      if (!options.use_bdd_simplifier)
+      {
+        equation.formula() = simplify_expr(equation.formula(),
+            options,
+            if_substituter,
+            replace_substituter,
+            pbes_rewriter,
+            f_bdd_prover);
+      }
     }
   }
   mCRL2log(log::verbose) << "\n" << equation.variable() << "\n is stable! \n\n\n";
