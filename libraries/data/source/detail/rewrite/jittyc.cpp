@@ -2710,13 +2710,10 @@ public:
     std::size_t index = atermpp::detail::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     rewr_function_signature(m_stream, index, arity, brackets);
-    m_stream << m_padding << "{\n"
-             << m_padding << "  mcrl2::utilities::mcrl2_unused(this_rewriter); // Suppress warning\n";
-//              << m_padding << "  std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";    
+    m_stream << m_padding << "{\n";
     m_padding.indent();
     implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments,data_spec);
-//    m_stream << m_padding << "this_rewriter->m_rewrite_stack.reset_stack_size(old_stack_size);\n"
-      m_stream << m_padding << "return;\n";
+    m_stream << m_padding << "return;\n";
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 

@@ -212,8 +212,6 @@ class pres
     /// \return The set of binding variables of the pres.
     std::set<propositional_variable> binding_variables() const
     {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
       std::set<propositional_variable> result;
       for (const pres_equation& eqn: equations())
       {
