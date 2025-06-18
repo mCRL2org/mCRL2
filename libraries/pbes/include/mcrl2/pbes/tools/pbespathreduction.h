@@ -37,6 +37,7 @@ struct pbespathreduction_options
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   bool use_bdd_simplifier = false;
   double bdd_timeout = 0.25;
+  bool back_substitution = true;
 };
 
 // Substitutor to target specific path, replace our specific pvi with true/false
@@ -534,7 +535,7 @@ struct pbespathreduction_pbes_backward_substituter
           = find_propositional_variable_instantiations((*i).formula());
       mCRL2log(log::verbose) << "How many are left? " << pvi_set.size() << "\n";
 
-      if (pvi_set.size() == 0)
+      if (pvi_set.size() == 0 && options.back_substitution)
       {
         for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
         {

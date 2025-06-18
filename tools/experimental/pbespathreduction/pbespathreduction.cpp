@@ -41,6 +41,7 @@ class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
         m_options.use_bdd_simplifier = true;
         m_options.bdd_timeout = parser.option_argument_as<double>("use-bdd-simplifier");
       }
+        m_options.back_substitution = !parser.has_option("no-back-substitution");
     }
 
     void add_options(interface_description& desc) override
@@ -49,6 +50,11 @@ class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
       desc.add_option("use-bdd-simplifier", utilities::make_optional_argument("TIMEOUT", "0.25"),
                   "Use the BDD solver in the simplifier step. "
                   "The timeout should be given in seconds (0 = no timeout).", 'b'); 
+      desc.add_option("no-back-substitution",
+                  "Do not substitute the solution to an equation backwards if the number "
+                  "of predicate variable instances in the equation is zero. "
+                  "In some cases, this makes solving the equation faster. However, "
+                  "less paths can be reduced.", 's');
     }
 
   public:
