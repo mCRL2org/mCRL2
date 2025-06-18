@@ -36,11 +36,19 @@ class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
+      if(parser.has_option("use-bdd-simplifier"))
+      {
+        m_options.use_bdd_simplifier = true;
+        m_options.bdd_timeout = parser.option_argument_as<double>("use-bdd-simplifier");
+      }
     }
 
     void add_options(interface_description& desc) override
     {
       super::add_options(desc);
+      desc.add_option("use-bdd-simplifier", utilities::make_optional_argument("TIMEOUT", "0.25"),
+                  "Use the BDD solver in the simplifier step. "
+                  "The timeout should be given in seconds (0 = no timeout).", 'b'); 
     }
 
   public:
