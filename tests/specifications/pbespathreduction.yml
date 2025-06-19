@@ -5,6 +5,8 @@ nodes:
     type: pbes
   l3:
     type: pbes
+  l4:
+    type: pbes
 
 tools:
   t1:
@@ -27,5 +29,15 @@ tools:
     output: []
     args: []
     name: pbes2bool
+  t5:
+    input: [l2]
+    output: [l4]
+    args: [-b]
+    name: pbespathreduction
+  t6:
+    input: [l4]
+    output: []
+    args: []
+    name: pbes2bool
 result: |
-  result = t3.value['solution'] == t4.value['solution']
+  result = t3.value['solution'] == t4.value['solution'] and t4.value['solution'] == t6.value['solution']
