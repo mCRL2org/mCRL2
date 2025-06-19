@@ -341,7 +341,8 @@ static void compute_liveness(Scanner *scanner) {
   }
 }
 
-static uint32 trans_hash_fn(ScanStateTransition *a, hash_fns_t *fns) {
+static uint32 trans_hash_fn(void *input, hash_fns_t *fns) {
+  ScanStateTransition *a = (ScanStateTransition *)input;
   uint h = 0, i;
 
   if (!fns->data[0])
@@ -350,7 +351,10 @@ static uint32 trans_hash_fn(ScanStateTransition *a, hash_fns_t *fns) {
   return h;
 }
 
-static int trans_cmp_fn(ScanStateTransition *a, ScanStateTransition *b, hash_fns_t *fns) {
+static int trans_cmp_fn(void *left, void *right, hash_fns_t *fns) {
+  ScanStateTransition *a = (ScanStateTransition *)left;
+  ScanStateTransition *b = (ScanStateTransition *)right;
+
   uint i;
 
   if (!fns->data[0])

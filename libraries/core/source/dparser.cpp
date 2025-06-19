@@ -24,7 +24,7 @@ PNode* D_ParseNode_to_PNode(D_ParseNode* _apn)
     return nullptr;
   }
 
-  return reinterpret_cast<PNode*>(_apn) - (sizeof(PNode) - sizeof(D_ParseNode));
+  return reinterpret_cast<PNode*>(reinterpret_cast<char*>(_apn) - (sizeof(PNode) - sizeof(D_ParseNode)));
 }
 
 

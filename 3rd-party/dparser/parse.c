@@ -103,7 +103,7 @@ void PP(Parser *pp, PNode *p) {
 }
 
 /// Maurice: fixed undefined behaviour in the following macro that was computing x + -y on unsigned types.
-#define D_ParseNode_to_PNode(_apn) ((PNode *)((_apn == NULL ? NULL : (char *)(_x) - (sizeof(PNode) - sizeof(D_ParseNode))))
+#define D_ParseNode_to_PNode(_apn) ((PNode *)((_apn == NULL ? NULL : (char *)(_apn) - (sizeof(PNode) - sizeof(D_ParseNode)))))
 #define PNode_to_D_ParseNode(_apn) ((D_ParseNode *)&((PNode *)(_apn))->parse_node)
 
 D_ParseNode *d_get_child(D_ParseNode *apn, int child) {
