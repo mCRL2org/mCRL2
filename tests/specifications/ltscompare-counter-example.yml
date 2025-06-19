@@ -49,13 +49,18 @@ tools:
     output: [l5]
     args: [-enone]
     name: ltsconvert
+  t7:
+    input: [l4]
+    output: [l6]
+    args: [-enone]
+    name: ltsconvert
   t8:
     input: [l5, l7]
     output: [l8]
     args: []
     name: lts2pbes
   t9:
-    input: [l4, l7]
+    input: [l6, l7]
     output: [l9]
     args: []
     name: lts2pbes
