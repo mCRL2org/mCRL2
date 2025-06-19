@@ -16,8 +16,17 @@
 #include <iomanip>
 #include <locale>
 
-// This macro is used to convert a D_ParseNode pointer to a PNode pointer, copied from dparser.c.
-#define D_ParseNode_to_PNode(_apn) ((PNode *)(D_PN(_apn, -(sizeof(PNode) - sizeof(D_ParseNode)))))
+// This corresponds to the D_ParseNode_to_PNode macro in parse.c.
+PNode* D_ParseNode_to_PNode(D_ParseNode* _apn)
+{
+  if (_apn == nullptr)
+  {
+    return nullptr;
+  }
+
+  return reinterpret_cast<PNode*>(_apn) - (sizeof(PNode) - sizeof(D_ParseNode));
+}
+
 
 extern "C"
 {
