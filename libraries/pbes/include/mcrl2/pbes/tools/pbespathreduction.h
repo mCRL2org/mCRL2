@@ -38,6 +38,7 @@ struct pbespathreduction_options
   bool use_bdd_simplifier = false;
   double bdd_timeout = 0.25;
   bool back_substitution = true;
+  int max_depth = 15;
 };
 
 // Substitutor to target specific path, replace our specific pvi with true/false
@@ -93,16 +94,13 @@ struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
     {
       data::application da = atermpp::down_cast<data::application>(x);
 
-      mCRL2log(log::debug) << "IS APPLICATION " << da << " \n";
       if (data::is_function_symbol(da.head()))
       {
         data::function_symbol fname = atermpp::down_cast<data::function_symbol>(da.head());
-        mCRL2log(log::debug) << "IS FUNCTION SYMBOL " << fname << " \n";
         if (fname.name() == atermpp::aterm_string("if") && (da.head().sort().target_sort() == data::bool_()))
         {
           res = data::or_(data::and_(da[0], simpl_data(da[1])), data::and_(data::not_(da[0]), simpl_data(da[2])));
           res = atermpp::down_cast<data::data_expression>(m_pbes_rewriter(res));
-          mCRL2log(log::debug) << "DOING SOMETHING " << res << " \n";
         }
       }
     }
@@ -339,21 +337,11 @@ void self_substitute(pbes_equation& equation,
       mCRL2log(log::debug) << " -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n"
                            << equation.formula() << "\n\nStart " << (cur_x) << "\n";
       bool pvi_done = false;
-      int max_depth = 15;
       int depth = 0;
       while (!pvi_done)
       {
         depth = depth + 1;
-        if (depth >= max_depth)
-        {
-          stable_set.insert(x);
-          stable_set.insert(cur_x);
-          pvi_done = true;
-          pvi_substituter.set_pvi(cur_x);
-          pvi_substituter.set_replacement(x);
-          pvi_substituter.apply(equation.formula(), equation.formula());
-          break;
-        }
+
         // (1) simplify
         data::mutable_indexed_substitution sigma;
         data::data_expression_list pars = cur_x.parameters();
@@ -460,6 +448,16 @@ void self_substitute(pbes_equation& equation,
         if (pvi_done)
         {
           mCRL2log(log::debug) << "Nothing further to do\n";
+          break;
+        }
+        else if (depth > options.max_depth)
+        {
+          stable_set.insert(x);
+          stable_set.insert(cur_x);
+          pvi_done = true;
+          pvi_substituter.set_pvi(cur_x);
+          pvi_substituter.set_replacement(x);
+          pvi_substituter.apply(equation.formula(), equation.formula());
           break;
         }
       }
