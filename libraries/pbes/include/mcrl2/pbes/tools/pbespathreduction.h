@@ -20,11 +20,9 @@
 #include "mcrl2/pbes/detail/iteration_builders.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 #include <cstddef>
-#include <numeric>
 
 namespace mcrl2
 {
@@ -221,7 +219,7 @@ std::set<propositional_variable_instantiation> filter_pvis(const propositional_v
   return result;
 }
 
-bool pvi_in_set(const propositional_variable_instantiation needle,
+inline bool pvi_in_set(const propositional_variable_instantiation needle,
     const std::set<propositional_variable_instantiation> haystack)
 {
   return std::any_of(haystack.begin(),
@@ -248,7 +246,7 @@ bool pvi_in_set(const propositional_variable_instantiation needle,
       });
 }
 
-data::data_expression pbestodata(pbes_expression& expr,
+inline data::data_expression pbestodata(pbes_expression& expr,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
         replace_substituter)
 {
@@ -262,7 +260,7 @@ data::data_expression pbestodata(pbes_expression& expr,
   return data_expr;
 }
 
-pbes_expression datatopbes(data::data_expression& data_expr,
+inline pbes_expression datatopbes(data::data_expression& data_expr,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
         replace_substituter)
@@ -276,7 +274,7 @@ pbes_expression datatopbes(data::data_expression& data_expr,
   return res;
 }
 
-pbes_expression simplify_expr(pbes_expression& phi,
+inline pbes_expression simplify_expr(pbes_expression& phi,
     pbespathreduction_options options,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
@@ -304,7 +302,7 @@ pbes_expression simplify_expr(pbes_expression& phi,
   return phi;
 }
 
-void self_substitute(pbes_equation& equation,
+inline void self_substitute(pbes_equation& equation,
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
@@ -483,7 +481,7 @@ void self_substitute(pbes_equation& equation,
   mCRL2log(log::verbose) << "\n" << equation.variable() << "\n is stable! \n\n\n";
 }
 
-void substitute(pbes_equation& into,
+inline void substitute(pbes_equation& into,
     const pbes_equation& by,
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
 {
