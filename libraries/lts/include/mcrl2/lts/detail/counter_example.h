@@ -72,7 +72,7 @@ class counter_example_constructor
     std::deque< action_index_pair > m_backward_tree;
     const std::string m_name;
     const std::string m_counter_example_file;
-    const bool m_structured_output;
+    const bool m_structured_output = false;
   
   public:
     /// \brief Constructor
@@ -158,6 +158,7 @@ class counter_example_constructor
                                 mcrl2::data::data_expression_list())));
         reversed_label_indices.pop();
       }
+      return result;
     }
 
     /// \brief This function indicates that this is not a dummy counterexample class and that a serious counterexample is required.

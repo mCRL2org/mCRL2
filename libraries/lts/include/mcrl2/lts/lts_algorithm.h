@@ -995,7 +995,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {
       if (generate_counter_example)
       {        
-        return detail::destructive_impossible_futures<detail::counter_example_constructor>(l1, l2, strategy, counter_example_file, generate_counter_example, structured_output); 
+        return detail::destructive_impossible_futures(l1, l2, strategy, counter_example_file, generate_counter_example, structured_output); 
       }
       return detail::destructive_impossible_futures(l1, l2, strategy, counter_example_file, false, structured_output);
     }
