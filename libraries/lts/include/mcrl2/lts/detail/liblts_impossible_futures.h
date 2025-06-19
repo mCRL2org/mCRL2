@@ -14,21 +14,24 @@
 #include <boost/container/vector.hpp>
 #include <deque>
 
+#include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/counter_example.h"
 #include "mcrl2/lts/detail/liblts_failures_refinement.h"
 
 namespace mcrl2::lts
 {
 
-template <typename LTS_TYPE, typename COUNTER_EXAMPLE_CONSTRUCTOR>
+using state_type_if = detail::state_states_counter_example_index_triple<detail::counter_example_constructor>;
+
+template <typename LTS_TYPE>
 bool check_trace_inclusion(LTS_TYPE& l1,
     const detail::lts_cache<LTS_TYPE>& weak_property_cache,
-    std::deque<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>>& working,
-    refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>>& stats,
+    std::deque<state_type_if>& working,
+    refinement_statistics<state_type_if>& stats,
     detail::anti_chain_type& anti_chain,
     detail::anti_chain_type& anti_chain_positive,
     detail::anti_chain_type& anti_chain_negative,
-    COUNTER_EXAMPLE_CONSTRUCTOR& generate_counter_example,
+    detail::counter_example_constructor& generate_counter_example,
     detail::state_type init_l1,
     detail::state_type init_l2,
     bool weak_reduction,
@@ -36,7 +39,7 @@ bool check_trace_inclusion(LTS_TYPE& l1,
 {
   // let working be a stack containg the triple (init1,{s|init2-->s},root_index);
   working.clear();
-  working.push_back({detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>(init_l1,
+  working.push_back({state_type_if(init_l1,
       detail::collect_reachable_states_via_taus(init_l2, weak_property_cache, weak_reduction),
       generate_counter_example.root_index())});
 
@@ -52,7 +55,7 @@ bool check_trace_inclusion(LTS_TYPE& l1,
   while (!working.empty()) // while working!=empty
   {
     // pop (impl,spec) from working;
-    detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR> impl_spec = working.front();
+    state_type_if impl_spec = working.front();
     stats.max_working = std::max(working.size(), stats.max_working);
     stats.max_antichain = std::max(anti_chain.size(), stats.max_antichain);
     working.pop_front(); // At this point it could be checked whether impl_spec still exists in anti_chain.
@@ -66,7 +69,7 @@ bool check_trace_inclusion(LTS_TYPE& l1,
 
     for (const transition& t : weak_property_cache.transitions(impl_spec.state()))
     {
-      const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index
+      const typename detail::counter_example_constructor::index_type new_counterexample_index
           = generate_counter_example.add_transition(t.label(), impl_spec.counter_example_index());
 
       detail::set_of_states spec_prime;
@@ -76,7 +79,7 @@ bool check_trace_inclusion(LTS_TYPE& l1,
       }
       else
       { // spec' := {s' | exists s in spec. s-e->s'};
-        for (const detail::state_type s : impl_spec.states())
+        for (const auto& s : impl_spec.states())
         {
           detail::set_of_states reachable_states_from_s_via_e = detail::collect_reachable_states_via_an_action(s,
               l1.apply_hidden_label_map(t.label()),
@@ -98,7 +101,7 @@ bool check_trace_inclusion(LTS_TYPE& l1,
 
       // if (impl',spec') in antichain is not true then
       ++stats.antichain_inserts;
-      const detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR> impl_spec_counterex(t.to(),
+      const state_type_if impl_spec_counterex(t.to(),
           spec_prime,
           new_counterexample_index);
       if (!detail::antichain_include(anti_chain_positive, t.to(), spec_prime)
@@ -178,7 +181,7 @@ namespace detail {
 /// Impossible futures are defined in the article:
 ///
 /// Marc Voorhoeve, Sjouke Mauw. Impossible futures and determinism, Inf. Process. Lett. 80, 2001.
-template <typename LTS, typename COUNTER_EXAMPLE_CONSTRUCTOR = detail::dummy_counter_example_constructor>
+template <typename LTS>
 bool destructive_impossible_futures(LTS& l1,
     LTS& l2,
     const lps::exploration_strategy strategy,
@@ -200,15 +203,24 @@ bool destructive_impossible_futures(LTS& l1,
 
   const detail::lts_cache<LTS> weak_property_cache(l1, true);
 
-  std::deque<state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> working
-      = std::deque({state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>(l1.initial_state(),
+  // The name and output are not used anyway.
+  detail::counter_example_constructor generate_counter_example("impossible_futures",
+      counter_example_file,
+      structured_output);
+
+  detail::counter_example_constructor inner_generate_counterexample("trace",
+      counter_example_file,
+      structured_output);
+
+  std::deque<state_type_if> working
+      = std::deque({state_type_if(l1.initial_state(),
           detail::collect_reachable_states_via_taus(init_l2, weak_property_cache, true),
-          COUNTER_EXAMPLE_CONSTRUCTOR())});
+          generate_counter_example.root_index())});
   detail::anti_chain_type anti_chain;
   detail::antichain_insert(anti_chain,
       working.front().state(),
       working.front().states()); // antichain := antichain united with (impl,spec);
-  refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> stats(
+  refinement_statistics<state_type_if> stats(
       anti_chain,
       working);
 
@@ -216,13 +228,11 @@ bool destructive_impossible_futures(LTS& l1,
   detail::anti_chain_type positive_anti_chain;
   detail::anti_chain_type negative_anti_chain;
   detail::anti_chain_type inner_anti_chain;
-  std::deque<state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> inner_working;
-  refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> inner_stats(
+  std::deque<state_type_if> inner_working;
+  refinement_statistics<state_type_if> inner_stats(
       inner_anti_chain,
       inner_working);
 
-  COUNTER_EXAMPLE_CONSTRUCTOR generate_counter_example = COUNTER_EXAMPLE_CONSTRUCTOR();
-  COUNTER_EXAMPLE_CONSTRUCTOR inner_generate_counterexample = COUNTER_EXAMPLE_CONSTRUCTOR();
   std::vector<trace> inner_counter_examples;
 
   while (!working.empty())
@@ -284,7 +294,7 @@ bool destructive_impossible_futures(LTS& l1,
 
     for (const transition& t : weak_property_cache.transitions(impl))
     {
-      const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index
+      const typename counter_example_constructor::index_type new_counterexample_index
           = generate_counter_example.add_transition(t.label(), front.counter_example_index());
 
       detail::set_of_states spec_prime;
@@ -294,7 +304,7 @@ bool destructive_impossible_futures(LTS& l1,
       }
       else
       {
-        for (const detail::state_type s : spec)
+        for (const detail::state_type& s : spec)
         {
           detail::set_of_states reachable_states_from_s_via_e = detail::collect_reachable_states_via_an_action(s,
               l1.apply_hidden_label_map(t.label()),
@@ -333,9 +343,9 @@ bool destructive_impossible_futures(LTS& l1,
         return false;
       }
 
-      auto impl_spec_counterex = state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>(t.to(),
+      state_states_counter_example_index_triple<counter_example_constructor> impl_spec_counterex = detail::state_states_counter_example_index_triple<detail::counter_example_constructor>(t.to(),
           spec_prime,
-          COUNTER_EXAMPLE_CONSTRUCTOR());
+          new_counterexample_index);
 
       ++stats.antichain_inserts;
       if (detail::antichain_insert(anti_chain, t.to(), spec_prime))
