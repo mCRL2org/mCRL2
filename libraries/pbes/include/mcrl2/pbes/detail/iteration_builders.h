@@ -27,7 +27,7 @@ struct replace_other_propositional_variables_with_functions_builder
   core::identifier_string name;
   simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
   data::variable_list var_list;
-  std::map<data::variable, propositional_variable_instantiation> m_instantiations;
+  std::map<data::data_expression, propositional_variable_instantiation> m_instantiations;
   bool forward = true;
 
   explicit replace_other_propositional_variables_with_functions_builder(simplify_data_rewriter<data::rewriter>& r)
@@ -41,9 +41,6 @@ struct replace_other_propositional_variables_with_functions_builder
   void reset_variable_list() { var_list = data::variable_list({}); }
   data::variable_list get_variable_list() { return var_list; }
 
-  void reset_instantiations() { m_instantiations.clear(); }
-  std::map<data::variable, propositional_variable_instantiation> instantiations() const { return m_instantiations; }
-
   template <class T>
   void apply(T& result, const pbes_expression& d)
   {
@@ -52,51 +49,86 @@ struct replace_other_propositional_variables_with_functions_builder
       super::apply(result, d);
       return;
     }
-    if (!data::is_variable(d))
+    if (!(data::is_variable(d) || data::is_application(d)))
     {
       super::apply(result, d);
       return;
     }
 
-    auto it = m_instantiations.find(atermpp::down_cast<data::variable>(d));
-    if (it != m_instantiations.end())
+    if (data::is_variable(d))
     {
-      propositional_variable_instantiation pvi = it->second;
-      result = pvi;
-      m_instantiations.erase(it);
-      return;
+      data::variable da = atermpp::down_cast<data::variable>(d);
+
+      for (auto var : var_list)
+      {
+        if (var.name() == da.name())
+        {
+          propositional_variable_instantiation pvi(da.name());
+          result = pvi;
+          return;
+        }
+      }
     }
-    result = d;
+    if (data::is_application(d))
+    {
+      data::application da = atermpp::down_cast<data::application>(d);
+
+      da.head();
+
+      if (data::is_function_symbol(da.head()))
+      {
+        data::function_symbol fname = atermpp::down_cast<data::function_symbol>(da.head());
+        for (auto var : var_list)
+        {
+          if (var.name() == fname.name())
+          {
+            data::data_expression_list params;
+            for (auto param : da)
+            {
+              params.push_front(param);
+            }
+            params = reverse(params);
+
+            propositional_variable_instantiation pvi(fname.name(), params);
+            result = pvi;
+            return;
+          }
+        }
+
+      }
+    }
+    super::apply(result, d);
   }
 
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    if (forward && x.name() != name)
+    if (forward)
     {
       // This could be unsound, replacing a PVI instance with a function symbol + parameters is not proven.
       // Based on uninterpreted functions theory (for BDDs for instance)
-      mCRL2log(log::debug) << "Formula contains other (unsolved) PVI instances in the current equation " << std::endl;
       data::data_expression_list params = x.parameters();
       atermpp::aterm_list term_list;
       for (const auto& x : params)
       {
         atermpp::aterm sort(x.sort());
-        push_back(term_list, sort);
+        term_list.push_front(sort);
       }
+      reverse(term_list);
       data::sort_expression_list sort_list(term_list);
+
       if (sort_list.size() > 0)
       {
         data::sort_expression sort_expr = data::function_sort(sort_list, data::sort_bool::bool_());
         data::function_symbol fs = data::function_symbol(x.name(), sort_expr);
         result = data::application(fs, x.parameters());
         data::variable var = data::variable(x.name(), sort_expr);
-        push_back(var_list, var);
+        var_list.push_front(var);
       }
       else
       {
         data::variable var = data::variable(x.name(), data::sort_bool::bool_());
-        push_back(var_list, var);
+        var_list.push_front(var);
         result = var;
       }
       return;

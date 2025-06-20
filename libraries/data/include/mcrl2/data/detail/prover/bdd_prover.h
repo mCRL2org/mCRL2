@@ -14,6 +14,8 @@
 
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/induction.h"
+#include <chrono>
+#include <ratio>
 
 namespace mcrl2
 {
@@ -118,10 +120,10 @@ class BDD_Prover: protected rewriter
     Answer f_contradiction;
 
     /// \brief An integer representing the maximal amount of seconds to be spent on processing a formula.
-    const int f_time_limit;
+    const double f_time_limit;
 
-    /// \brief A timestamp representing the moment when the maximal amount of seconds has been spent on processing the current formula.
-    time_t f_deadline;
+    /// \brief A timestamp representing the moment when the maximal amount of milliseconds has been spent on processing the current formula.
+    std::chrono::milliseconds f_deadline;
 
   private:
     /// \brief A flag indicating whether or not induction on lists is applied.
@@ -147,7 +149,7 @@ class BDD_Prover: protected rewriter
     /// \brief Constructs the EQ-BDD corresponding to the formula Prover::f_formula.
     void build_bdd()
     {
-      f_deadline = time(nullptr) + f_time_limit;
+      f_deadline = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() + std::chrono::milliseconds(int(f_time_limit * 1000)));
 
       data_expression v_previous_1;
       data_expression v_previous_2;
@@ -185,7 +187,7 @@ class BDD_Prover: protected rewriter
     data_expression bdd_down(const data_expression& formula, const size_t a_indent=0)
     {
 
-      if (f_time_limit != 0 && (f_deadline - time(nullptr)) <= 0)
+      if (f_time_limit != 0 && (f_deadline <= std::chrono::system_clock::now().time_since_epoch()))
       {
         mCRL2log(log::debug) << "The time limit has passed." << std::endl;
         return formula;
@@ -250,7 +252,10 @@ class BDD_Prover: protected rewriter
     {
       time_t v_new_time_limit;
 
-      v_new_time_limit = f_deadline - time(nullptr);
+      v_new_time_limit = (f_deadline
+                          - std::chrono::duration_cast<std::chrono::milliseconds>(
+                              std::chrono::system_clock::now().time_since_epoch()))
+                             .count();
       if (v_new_time_limit > 0 || f_time_limit == 0)
       {
         mCRL2log(log::debug) << "Simplifying the BDD:" << std::endl;
@@ -466,7 +471,7 @@ class BDD_Prover: protected rewriter
       const data_specification& data_spec,
       const used_data_equation_selector& equations_selector,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
-      int a_time_limit = 0,
+      double a_time_limit = 0,
       bool a_path_eliminator = false,
       smt_solver_type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
@@ -506,7 +511,7 @@ class BDD_Prover: protected rewriter
                       << "  Full: " << f_full << "," << std::endl;
     }
 
-    BDD_Prover(const rewriter& r, int time_limit = 0, bool apply_induction = false)
+    BDD_Prover(const rewriter& r, double time_limit = 0, bool apply_induction = false)
     : rewriter(r),
       f_time_limit(time_limit),
       f_apply_induction(apply_induction),

@@ -305,6 +305,10 @@ class PbespareqelmTest(PbesTest):
     def __init__(self, name, settings):
         super(PbespareqelmTest, self).__init__(name, ymlfile('pbespareqelm'), settings)
 
+class PbespathreductionTest(PbesTest):
+    def __init__(self, name, settings):
+        super(PbespathreductionTest, self).__init__(name, ymlfile('pbespathreduction'), settings)
+
 class Pbespor1Test(PbesTest):
     def __init__(self, name, settings):
         super(Pbespor1Test, self).__init__(name, ymlfile('pbespor1'), settings)
@@ -502,6 +506,7 @@ available_tests = {
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
     'pbesiteration'                               : lambda name, settings: PbesiterationTest(name, settings)                                              ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
+    'pbespathreduction'                           : lambda name, settings: PbespathreductionTest(name, settings)                                            ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
     'pbesrewr-pfnf'                               : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                                        ,
     'pbesrewr-quantifier-all'                     : lambda name, settings: PbesrewrTest(name, 'quantifier-all', settings)                              ,
