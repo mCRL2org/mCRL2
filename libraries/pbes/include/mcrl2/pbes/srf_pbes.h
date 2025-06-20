@@ -48,9 +48,8 @@ inline pbes_expression make_not(const pbes_expression& x)
   return not_(x);
 }
 
-/// A summand in a srf equation, if allow_ce then counter example information is
-/// allowed is the variable. This means that the variable is a `pbes_expression`
-/// satisfying `is_ce_propositional_variable_instantiation`.
+/// A summand in a srf equation, if allow_ce is true then counter example information is
+/// allowed in the condition. This means that the condition contains propositional variables.
 template <bool allow_ce>
 class pre_srf_summand
 {
@@ -99,7 +98,7 @@ public:
     }
     else
     {
-      m_condition = detail::pbes2data(pbes_system::and_(f, pbes_system::pbes_expression(m_condition)));
+      m_condition = data::and_(pbes2data(f), m_condition);
     }
   }
 
