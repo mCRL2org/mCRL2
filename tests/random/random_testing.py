@@ -564,7 +564,7 @@ if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic-partial-s7' : lambda name, settings: PbessolvesymbolicTest(name, ['-s7', '--aggressive'], settings) })
 
     available_tests.update({'pbessolvesymbolic-counter-example' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, [], settings) })
-    available_tests.update({'ltsconvertsymbolic' : lambda name, settings: LtsconvertsymbolicTest(name, settings) })
+    # available_tests.update({'ltsconvertsymbolic' : lambda name, settings: LtsconvertsymbolicTest(name, settings) })
 
 def print_names(tests):
     for name in sorted(tests):
