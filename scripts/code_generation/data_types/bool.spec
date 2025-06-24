@@ -30,7 +30,6 @@ eqn !(true) = false;
     ||(b,false) = b;
     ||(true,b) = true;
     ||(false,b) = b;
-    ||(b,b) = b;
     =>(b,true) = true;
     =>(b,false) = !(b);
     =>(true,b) = b;
