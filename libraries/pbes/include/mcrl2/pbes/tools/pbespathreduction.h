@@ -207,7 +207,8 @@ std::set<propositional_variable_instantiation> filter_pvis(const propositional_v
 
         for (std::size_t i = 0; i < v_params.size(); ++i)
         {
-          if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
+          if (v_params[i] != needle_params[i])
+          // if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
           {
             return false;
           }
@@ -237,7 +238,8 @@ inline bool pvi_in_set(const propositional_variable_instantiation needle,
 
         for (size_t i = 0; i < v_params.size(); i++)
         {
-          if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
+          if (v_params[i] != needle_params[i])
+          // if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
           {
             return false;
           }
