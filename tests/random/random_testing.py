@@ -167,10 +167,15 @@ class LtsCombineTest(ProcessTest):
 
 class LtscompareCounterexampleTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, hide_actions, settings):
-        assert equivalence_type in ['bisim', 'branching-bisim', 'trace']
+        assert equivalence_type in ['bisim', 'branching-bisim', 'trace', 'impossible-futures']
         super(LtscompareCounterexampleTest, self).__init__(name, ymlfile('ltscompare-counter-example'), settings)
-        self.add_command_line_options('t4', ['-e' + equivalence_type])
-        self.add_command_line_options('t5', ['-e' + equivalence_type])
+
+        if equivalence_type == 'impossible-futures':
+            self.add_command_line_options('t4', ['-p' + equivalence_type])
+            self.add_command_line_options('t5', ['-p' + equivalence_type])
+        else:
+            self.add_command_line_options('t4', ['-e' + equivalence_type])
+            self.add_command_line_options('t5', ['-e' + equivalence_type])
 
         if hide_actions:
             self.add_command_line_options('t4', ['--tau=b'])
@@ -493,6 +498,7 @@ available_tests = {
     'ltscompare-trace'                            : lambda name, settings: LtscompareTest(name, 'trace', settings)                                     ,
     'ltscompare-trace-counter-example'            : lambda name, settings: LtscompareCounterexampleTest(name, 'trace', False, settings)                ,
     'ltscompare-trace-counter-example-hidden'     : lambda name, settings: LtscompareCounterexampleTest(name, 'trace', True, settings)                 ,
+    'ltscompare-impossible-futures-counter-example' : lambda name, settings: LtscompareCounterexampleTest(name, 'impossible-futures', True, settings)                ,
     'ltscompare-weak-trace'                       : lambda name, settings: LtscompareTest(name, 'weak-trace', settings)                                ,
     'bisimulation-bisim'                          : lambda name, settings: BisimulationTest(name, 'bisim', settings)                                   ,
     'bisimulation-bisim-gv'                       : lambda name, settings: BisimulationTest(name, 'bisim-gv', settings)                                ,

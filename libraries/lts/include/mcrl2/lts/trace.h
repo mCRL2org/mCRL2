@@ -649,6 +649,22 @@ class trace
 
 };
 
+/// \brief Output operator for a trace.
+/// \details Outputs the trace in plain text format with actions separated by dots.
+/// \param[in] os The output stream to write to.
+/// \param[in] t The trace to output.
+/// \return The output stream.
+inline std::ostream& operator<<(std::ostream& os, const trace& t)
+{
+  std::string sep;
+  for (std::size_t i = 0; i < t.number_of_actions(); ++i)
+  {
+    os << sep << pp(t.actions()[i]);
+    sep = ".";
+  }
+  return os;
+}
+
 }
 }
 #endif  // MCRL2_LTS_TRACE_H
