@@ -1,0 +1,7 @@
+pbes
+nu X0(c:Bool, m:Nat) = (((X1) && ((val(m > 0)) || ((val(false)) || (val(c))))) && (X2)) && ((X0(m > 0, 1)) || (val(false)));
+nu X1 = ((!(forall v:Nat.((val(v < 3)) && (X0(v < 3, v + 1))))) && (val(true))) => (((forall t:Nat.((val(t < 3)) && (val(t > 1)))) => ((!X2) => ((!X3(false, 0)) => (val(true))))) && (val(true)));
+mu X2 = (exists u:Nat.((val(u < 3)) || (val(u < 2)))) => ((!((exists v:Nat.((val(v < 3)) || ((!X2) && (val(v < 3))))) || ((!X3(true, 0)) || (!X1)))) || ((val(true)) => (val(false))));
+mu X3(b:Bool, n:Nat) = (!(!(val(false)))) || (((exists t:Nat.((val(t < 3)) || (!(!(!X2))))) => (!(exists u:Nat.((val(u < 3)) || (val(u == n)))))) || (exists v:Nat.((val(v < 3)) || ((!(X0(v > 1, n + 1))) => ((X3(b, 1)) && ((val(b)) && (val(v == n))))))));
+
+init X0(true, 0);

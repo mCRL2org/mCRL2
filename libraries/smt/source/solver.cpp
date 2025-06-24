@@ -37,7 +37,9 @@ answer smt_solver::execute_and_check(const std::string& s, const std::chrono::mi
   }
   else
   {
-    mCRL2log(log::error) << "Error when checking satisfiability of \n" << s.substr(0, 500) << "...." << std::endl;
+    mCRL2log(log::error) << "Error when checking satisfiability of \n" << s.substr(0, 500) ;
+    mCRL2log(log::debug) << s.substr(500);
+    mCRL2log(log::error) << std::endl;
     throw mcrl2::runtime_error("Got unexpected response from SMT-solver:\n" + result);
   }
 }
@@ -48,7 +50,10 @@ smt_solver::smt_solver(const data::data_specification& dataspec)
 {
   std::ostringstream out;
   translate_data_specification(dataspec, out, m_cache, m_native);
-  z3.write(out.str());
+
+  auto str = out.str();
+    mCRL2log(log::debug) << "Sort \n" << str << std::endl;
+  z3.write(str);
 }
 
 answer smt_solver::solve(const data::variable_list& vars, const data::data_expression& expr, const std::chrono::microseconds& timeout)
