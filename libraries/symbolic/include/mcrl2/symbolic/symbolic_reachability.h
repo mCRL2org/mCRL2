@@ -101,7 +101,7 @@ data::rewriter construct_rewriter(const data::data_specification& dataspec, data
 }
 
 template <typename EnumeratorElement>
-void check_enumerator_solution(const EnumeratorElement& p, const summand_group& summand)
+void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
 {
   if (p.expression() != data::sort_bool::true_())
   {    
