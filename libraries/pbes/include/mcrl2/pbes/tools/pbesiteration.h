@@ -68,7 +68,6 @@ data::data_expression pbestodata(pbes_equation& equation,
 
   replace_substituter.set_forward(false);
   replace_substituter.apply(expr, equation.formula());
-  replace_substituter.reset_instantiations();
   return data_expr;
 }
 
