@@ -12,8 +12,11 @@
 #ifndef MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
+
+#include <ranges>
 
 namespace mcrl2 {
 
@@ -182,8 +185,8 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator : public Bu
 
     template <class T>
     void apply(T& result, const data::where_clause& x)
-    {
-      const auto& assignments = atermpp::container_cast<data::assignment_list>(x.declarations());
+    {      
+      const auto& assignments = x.declarations() | std::views::transform([](const data::assignment_expression& t) { return atermpp::down_cast<data::assignment>(t); });
       std::vector<data::variable> tmp;
       for (const data::assignment& a: assignments)
       {
@@ -198,11 +201,11 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator : public Bu
 
       // The original substitution should be applied to the right hand sides of the assignments.
       std::vector<data::assignment> a;
-      std::vector<data::variable>::const_iterator j = v.begin();
-      for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i, ++j)
+      auto j = v.begin();
+      for (auto i = assignments.begin(); i != assignments.end(); ++i, ++j)
       {
         data::data_expression rhs;
-        apply(rhs, i->rhs());
+        apply(rhs, (*i).rhs());
         a.push_back(data::assignment(*j, rhs));
       }
       data::make_where_clause(result, new_body, assignment_list(a.begin(), a.end()));

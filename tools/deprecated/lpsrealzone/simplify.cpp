@@ -179,7 +179,7 @@ namespace data
       global_variable_counter++;
       condition=sort_bool::and_(condition,equal_to(v,ta));
       vars.push_front(v);
-      return workaround::return_std_move(v);
+      return v;
     }
 
     data_expression_vector new_args;
