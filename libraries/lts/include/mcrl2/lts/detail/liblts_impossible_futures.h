@@ -144,25 +144,15 @@ write_counter_example(std::ostream& stream, const trace& initial_trace, const st
     {
       if (!first_action)
       {
-        stream << " . tau* . ";
-      }
-      else
-      {
-        stream << " tau* . ";
-        first_action = false;
+        stream << " . ";
       }
 
-      if (action.actions().size() == 0)
-      {
-        stream << "tau*"; // Use "tau" for empty actions
-      }
-      else
-      {
-        stream << action;
-      }
+      stream << action;
+
+      first_action = false;
     }
 
-    stream << ". tau*>(";
+    stream << ">(";
   }
 
   bool first_trace = true;
@@ -188,17 +178,10 @@ write_counter_example(std::ostream& stream, const trace& initial_trace, const st
         first_action = false;
       }
 
-      if (action.actions().size() == 0)
-      {
-        stream << "tau*"; // Use "tau" for empty actions
-      }
-      else
-      {
-        stream << action;
-      }      
+      stream << action; 
     }
 
-    stream << ". tau*]false";
+    stream << "]false";
     first_trace = false;
   }
 
