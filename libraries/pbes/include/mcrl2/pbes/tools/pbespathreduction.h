@@ -257,7 +257,7 @@ inline data::data_expression pbestodata(pbes_expression& expr,
   replace_substituter.set_forward(true);
   replace_substituter.apply(asdf, expr);
 
-  data::data_expression data_expr = atermpp::down_cast<data::data_expression>(detail::pbes2data(asdf));
+  data::data_expression data_expr = detail::pbes2data(asdf);
 
   return data_expr;
 }
