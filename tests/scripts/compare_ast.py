@@ -1,6 +1,7 @@
 import os
 import glob
 import difflib
+import sys
 
 def compare_txt_files():
     # Get the examples directory path relative to current script
@@ -49,11 +50,13 @@ def compare_txt_files():
                     for line in diff:
                         print(line)
                     print("-" * 50)
+                    sys.exit(1)
                 else:
                     print(f"No differences found between {txt_file} and {old_file}")
                     
             except Exception as e:
                 print(f"Error comparing {txt_file} and {old_file}: {e}")
+                sys.exit(1)
         else:
             print(f"No corresponding _old.txt file found for {txt_file}")
     
