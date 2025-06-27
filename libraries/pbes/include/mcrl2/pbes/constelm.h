@@ -141,6 +141,12 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   std::vector<stack_elem> condition_fv_stack;
   std::list<pbes_expression> quantified_context;
 
+  template <class... Args>
+  void emplace(Args&&... args)
+  {
+    condition_fv_stack.emplace_back(std::forward<Args>(args)...);
+  }
+
   void push(const stack_elem& x)
   {
     condition_fv_stack.push_back(x);
@@ -158,14 +164,22 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
 
   stack_elem pop()
   {
-    stack_elem result = top();
+    // As the last element of the stack is removed anyway, we move the element
+    // out of the stack. This avoids (rather expensive) allocation and deallocation
+    // of a temporary stack_elem.
+    // This cost was observed during profiling (Jeroen Keiren, 27/6/2025)
+    stack_elem result = std::move(condition_fv_stack.back());
     condition_fv_stack.pop_back();
     return result;
   }
 
-  // N.B. As a side effect ec1 and ec2 are changed!!!
-  void merge_conditions(stack_elem& ec1, bool negate1,
-                        stack_elem& ec2, bool negate2,
+  // Merge conditions of stack elements ec1 and ec2 into ec.
+  // As construction and destruction of edges (in particular edge details)
+  // is expensive (observed by Jeroen Keiren, 27/6/2025), and ec1 and ec2 are
+  // not used in the calling context, we here explicitly accept them as
+  // rvalue reference; this allows us to move the edges out of ec1 and ec2.
+  void merge_conditions(stack_elem&& ec1, bool negate1,
+                        stack_elem&& ec2, bool negate2,
                         stack_elem& ec, bool is_conjunctive
                        )
   {
@@ -175,7 +189,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
       details.conditions.insert(negate2 ? ec2.Cneg : ec2.Cpos);
       (is_conjunctive ? details.conjunctive_context_FV : details.disjunctive_context_FV)
         .insert(ec2.FV.begin(), ec2.FV.end());
-      ec.edges.insert(i);
+      ec.edges.insert(std::move(i));
     }
     for (auto& i: ec2.edges)
     {
@@ -183,7 +197,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
       details.conditions.insert(negate1 ? ec1.Cneg : ec1.Cpos);
       (is_conjunctive ? details.conjunctive_context_FV : details.disjunctive_context_FV)
         .insert(ec1.FV.begin(), ec1.FV.end());
-      ec.edges.insert(i);
+      ec.edges.insert(std::move(i));
     }
   }
 
@@ -224,7 +238,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     data::data_expression cond_not;
     data::optimized_not(cond_not, x);
 
-    push(stack_elem(x, cond_not, data::find_free_variables(x)));
+    emplace(x, cond_not, data::find_free_variables(x));
   }
 
   void leave(const not_&)
@@ -241,10 +255,9 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     data::optimized_and(cond_and, ec_left.Cpos, ec_right.Cpos);
     data::optimized_or(cond_or, ec_left.Cneg, ec_right.Cneg);
 
-    stack_elem ec(cond_and, cond_or,
+    emplace(cond_and, cond_or,
       utilities::detail::set_union(ec_left.FV, ec_right.FV));
-    merge_conditions(ec_left, false, ec_right, false, ec, true);
-    push(ec);
+    merge_conditions(std::move(ec_left), false, std::move(ec_right), false, top(), true);
   }
 
   void leave(const or_&)
@@ -257,10 +270,9 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     data::optimized_and(cond_and, ec_left.Cneg, ec_right.Cneg);
     data::optimized_or(cond_or, ec_left.Cpos, ec_right.Cpos);
 
-    stack_elem ec(cond_or, cond_and,
+    emplace(cond_or, cond_and,
       utilities::detail::set_union(ec_left.FV, ec_right.FV));
-    merge_conditions(ec_left, true, ec_right, true, ec, false);
-    push(ec);
+    merge_conditions(std::move(ec_left), true, std::move(ec_right), true, top(), false);
   }
 
   void leave(const imp&)
@@ -273,10 +285,9 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     data::optimized_or(cond_or, ec_left.Cneg, ec_right.Cpos);
     data::optimized_and(cond_and, ec_left.Cpos, ec_right.Cneg);
 
-    stack_elem ec(cond_or, cond_and,
+    emplace(cond_or, cond_and,
       utilities::detail::set_union(ec_left.FV, ec_right.FV));;
-    merge_conditions(ec_left, false, ec_right, true, ec, false);
-    push(ec);
+    merge_conditions(std::move(ec_left), false, std::move(ec_right), true, top(), false);
   }
 
   void leave(const forall& x)
@@ -290,7 +301,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
       // Update the conditions
       std::set<data::data_expression> new_conditions;
       for(const data::data_expression& e: cond_set)
-      {        
+      {
         data::data_expression t;
         data::optimized_exists(t, x.variables(), e, true);
         new_conditions.insert(t);
@@ -371,11 +382,10 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     QPVI Q_X_e{qvars, x};
 
     // Store the QPVI and the condition true
-    stack_elem ec(data::sort_bool::true_(), data::sort_bool::true_(), data::find_free_variables(x.parameters()));
-    ec.edges.insert(std::make_pair(Q_X_e,
+    emplace(data::sort_bool::true_(), data::sort_bool::true_(), data::find_free_variables(x.parameters()));
+    top().edges.emplace(Q_X_e,
       edge_details{std::set<data::data_expression>{data::sort_bool::true_()},
-        std::set<data::variable>{}, std::set<data::variable>{}}));
-    push(ec);
+        std::set<data::variable>{}, std::set<data::variable>{}});
   }
 
   const edge_map& result() const
