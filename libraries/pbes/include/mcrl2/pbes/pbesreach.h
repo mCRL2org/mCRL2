@@ -185,8 +185,6 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes, std::s
 inline
 pbes_system::srf_pbes_with_ce preprocess(pbes_system::pbes pbesspec, const symbolic_reachability_options& options)
 {
-  auto rewr = symbolic::construct_rewriter(pbesspec.data(), options.rewrite_strategy, pbes_system::find_function_symbols(pbesspec), options.remove_unused_rewrite_rules);
-
   pbes_system::detail::instantiate_global_variables(pbesspec);
   normalize(pbesspec);
 
@@ -199,6 +197,7 @@ pbes_system::srf_pbes_with_ce preprocess(pbes_system::pbes pbesspec, const symbo
   if (options.replace_constants_by_variables)
   {
     data::mutable_indexed_substitution<> sigma;
+    auto rewr = symbolic::construct_rewriter(pbesspec.data(), options.rewrite_strategy, pbes_system::find_function_symbols(pbesspec), options.remove_unused_rewrite_rules);
     pbes_system::replace_constants_by_variables(pbesspec, rewr, sigma);
   }
 
