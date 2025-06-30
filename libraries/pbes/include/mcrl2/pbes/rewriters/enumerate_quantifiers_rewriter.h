@@ -103,7 +103,9 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                 sigma,
                 [&](const enumerator_element& p)
                 {
-                  data::optimized_and(result, result, p.expression());
+                  pbes_expression result_;
+                  data::optimized_and(result_, result, p.expression());
+                  derived().apply(result, result_);
                   return is_false(result);
                 },
                 is_true,
@@ -128,8 +130,10 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                 sigma,
                 [&](const enumerator_element& p)
                 {
-                  data::optimized_or(result, result, p.expression());
-                  return is_true(result);
+                  pbes_expression result_;
+                  data::optimized_or(result_, result, p.expression());
+                  derived().apply(result, result_);
+                  return is_false(result);
                 },
                 is_false,
                 is_true
@@ -345,4 +349,3 @@ struct enumerate_quantifiers_rewriter
 } // namespace mcrl2
 
 #endif // MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
-
