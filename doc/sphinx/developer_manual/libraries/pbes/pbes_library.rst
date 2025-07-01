@@ -1,8 +1,6 @@
 .. math::
    :nowrap:
    
-    \renewcommand{\implies}{\mathop{\Rightarrow}}
-
 Parameterised Boolean Equation Systems
 ======================================
 
@@ -168,3 +166,65 @@ The following rewriters are available
    :mcrl2:`simplify_quantifiers_rewriter   <mcrl2::pbes_system::simplify_quantifiers_rewriter>`        Simplifies quantifier expressions
    :mcrl2:`simplify_rewriter               <mcrl2::pbes_system::simplify_rewriter>`                    Simplifies logical boolean operators
    ==================================================================================================  =========================================================================
+
+
+Standard recursive form
+------------------------
+
+The standard recursive form (SRF) is a normal form for PBESs whose structure is similar to that of a linear process specification (LPS).
+A PBES :math:`\mathcal{E}` is in standard recursive form (SRF) iff for all :math:`\sigma_i X_i(d:D) = \varphi \in \mathcal{E}`, where
+:math:`\varphi` is either disjunctive or conjunctive, i.e., the equation for :math:`X_i` has the shape:
+
+.. math::
+
+  \sigma_i X_i(d:D) = \bigvee\limits_{j \in J_i} \exists e_j: E_j . f_{ij}(d,e_j) \land X_{g_{ij}}(h_{ij}(d, e_j))
+
+or
+
+.. math::
+
+  \sigma_i X_i(d:D) = \bigwedge\limits_{j \in J_i} \forall e_j: E_j . f_{ij}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j)),
+
+where :math:`d = (d_1, \ldots, d_m)`. Below the transformation rules for converting a PBES to standard recursive form are given.
+
+.. math::
+   :nowrap:   
+
+   \begin{alignat*}{3}
+   & R_{\lor,\sigma}(f, V)                       && = &&\; \langle \exists d \ap \singletonD \ldotp f \land X_\TRUE(\singletonelem), \emptyset \rangle\\ 
+   & R_{\lor,\sigma}(X(e), V)                    && = &&\; \langle \exists d \ap \singletonD \ldotp \mathit{true} \land X(e), \emptyset \rangle\\
+   & R_{\lor,\sigma}(\varphi \land f, V)         && = &&\; \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f \land f_i \land X_i(g_i), \PBES^\varphi \rangle \\
+   & ~                                           && ~ &&\; \quad \text{where } \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle = R_{\lor,\sigma}(\varphi, V)\\  
+   & R_{\lor,\sigma}(f \land \varphi, V)         && = &&\; \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f \land f_i \land X_i(g_i), \PBES^\varphi \rangle \\
+   & ~                                           && ~ &&\; \quad \text{where } \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle = R_{\lor,\sigma}(\varphi, V)\\
+   & R_{\lor,\sigma}(\varphi \land \psi, V)      && = &&\; \langle \exists d \ap \singletonD \ldotp \mathit{true} \land \tilde{X}(V), (\sigma\tilde{X}(V) = \varphi \land \psi) \rangle \\
+   & ~                                           && ~ &&\; \quad \text{where } \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle = R_{\lor,\sigma}(\varphi, V)\\
+   & ~                                           && ~ &&\; \quad \phantom{\text{where }} \langle \bigvee_{i \in I^\psi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\psi \rangle = R_{\lor,\sigma}(\psi, V)\\
+   & R_{\lor,\sigma}(\varphi \lor \psi, V)       && = &&\; \langle \bigvee_{i \in I^\varphi \cup I^\psi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi\PBES^\psi \rangle\\
+   & R_{\lor,\sigma}(\forall W\ldotp f, V)       && = &&\; \langle \exists d \ap \singletonD \ldotp (\forall W\ldotp f) \land X_\TRUE(\singletonelem), \emptyset \rangle\\
+   & R_{\lor,\sigma}(\forall W\ldotp \varphi, V) && = &&\; \langle \exists d \ap \singletonD \ldotp \mathit{true} \land \tilde{X}(V), (\sigma\tilde{X}(V) = \forall W \ldotp \varphi) \rangle\\
+   & R_{\lor,\sigma}(\exists W\ldotp \varphi, V)    && = &&\; \langle \bigvee_{i \in I^\varphi} \exists {W \cup W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle\\
+   & ~                                           && ~ &&\; \quad \text{where } \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle = R_{\lor,\sigma}(\varphi, V \cup W)       
+   \end{alignat*}
+
+Where :math:`R_\land` is defined dually to :math:`R_\lor`.
+
+.. math::
+   :nowrap: 
+
+   \begin{alignat*}{3}
+   & R_{\land,\sigma}(f, V)                       && = &&\; \langle \forall d \ap \singletonD \ldotp \neg f \Rightarrow X_\FALSE(\singletonelem), \emptyset \rangle\\
+   & R_{\land,\sigma}(X(e), V)                    && = &&\; \langle \forall d \ap \singletonD \ldotp \mathit{true} \Rightarrow X(e), \emptyset \rangle\\
+   & R_{\land,\sigma}(\varphi \land \psi, V)      && = &&\; \langle \bigwedge_{i \in I^\varphi \cup I^\psi} \forall {W_i} \ldotp f_i \Rightarrow X_i(g_i), \PBES^\varphi\PBES^\psi \rangle\\
+   & R_{\land,\sigma}(\varphi \lor f, V)          && = &&\; \langle \bigwedge_{i \in I^\varphi} \forall {W_i} \ldotp (\neg f \land f_i) \Rightarrow X_i(g_i), \PBES^\varphi \rangle \\
+   & ~                                            && ~ &&\; \quad \text{where } \langle \bigwedge_{i \in I^\varphi} \forall {W_i} \ldotp f_i \Rightarrow X_i(g_i), \PBES^\varphi \rangle = R_{\land,\sigma}(\varphi, V)\\
+   & R_{\land,\sigma}(f \lor \varphi, V)          && = &&\; \langle \bigwedge_{i \in I^\varphi} \forall {W_i} \ldotp (\neg f \land f_i) \Rightarrow X_i(g_i), \PBES^\varphi \rangle \\
+   & ~                                            && ~ &&\; \quad \text{where } \langle \bigwedge_{i \in I^\varphi} \forall {W_i} \ldotp f_i \Rightarrow X_i(g_i), \PBES^\varphi \rangle = R_{\land,\sigma}(\varphi, V)\\
+   & R_{\land,\sigma}(\varphi \lor \psi, V)       && = &&\; \langle \forall d \ap \singletonD \ldotp \mathit{true} \Rightarrow \tilde{X}(V), (\sigma\tilde{X}(V) = \varphi \lor \psi) \rangle\\
+   & ~                                            && ~ &&\; \quad \text{where } \langle \bigwedge_{i \in I^\varphi} \forall {W_i} \ldotp f_i \Rightarrow X_i(g_i), \PBES^\varphi \rangle = R_{\land,\sigma}(\varphi, V)\\
+   & ~                                            && ~ &&\; \quad \phantom{\text{where }} \langle \bigwedge_{i \in I^\psi} \forall {W_i} \ldotp f_i \Rightarrow X_i(g_i), \PBES^\psi \rangle = R_{\land,\sigma}(\psi, V)\\
+   & R_{\land,\sigma}(\forall W\ldotp \varphi, V)    && = &&\; \langle \bigwedge_{i \in I^\varphi} \forall {W \cup W_i} \ldotp f_i \Rightarrow X_i(g_i), \PBES^\varphi \rangle\\
+   & ~                                            && ~ &&\; \quad \text{where } \langle \bigwedge_{i \in I^\varphi} \forall {W_i} \ldotp f_i \Rightarrow X_i(g_i), \PBES^\varphi \rangle = R_{\land,\sigma}(\varphi, V \cup W)\\
+   & R_{\land,\sigma}(\exists W\ldotp f, V)       && = &&\; \langle \forall d \ap \singletonD \ldotp (\exists W\ldotp f) \Rightarrow X_\FALSE(\singletonelem), \emptyset \rangle\\
+   & R_{\land,\sigma}(\exists W\ldotp \varphi, V) && = &&\; \langle \forall d \ap \singletonD \ldotp \mathit{true} \Rightarrow \tilde{X}(V), (\sigma\tilde{X}(V) = \exists W \ldotp \varphi) \rangle
+   \end{alignat*} 
