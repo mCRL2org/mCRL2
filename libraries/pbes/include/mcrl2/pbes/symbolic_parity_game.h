@@ -659,22 +659,30 @@ class symbolic_parity_game
 
         if (is_odd == alpha)
         {
-          // Compute the projection vector based on the read and write parameters of the summand group.
-          std::vector<std::uint32_t> projection(sylvan::ldds::height(strategy), 0);
-
-          for (const auto& read_idx : group.read)
+          if (strategy != sylvan::ldds::empty_set())
           {
-            projection[2*read_idx] = 1;
-          }
+            // Compute the projection vector based on the read and write parameters of the summand group.
+            std::vector<std::uint32_t> projection(sylvan::ldds::height(strategy), 0);
 
-          for (const auto& write_idx : group.write)
+            for (const auto& read_idx : group.read)
+            {
+              projection[2*read_idx] = 1;
+            }
+
+            for (const auto& write_idx : group.write)
+            {
+              projection[2*write_idx+1] = 1;
+            }
+
+            ldd projected_strategy = sylvan::ldds::project(strategy, sylvan::ldds::cube(projection));
+
+            group.L = sylvan::ldds::intersect(group.L, projected_strategy);
+          }
+          else
           {
-            projection[2*write_idx+1] = 1;
+            // Deal with the special case that the strategy is empty.
+            group.L = sylvan::ldds::empty_set();
           }
-
-          ldd projected_strategy = sylvan::ldds::project(strategy, sylvan::ldds::cube(projection));
-
-          group.L = sylvan::ldds::intersect(group.L, projected_strategy);
         }
         mCRL2log(log::trace) << "L = " << print_relation(m_data_index, group.L, group.read, group.write) << std::endl;
           
