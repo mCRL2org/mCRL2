@@ -1,4 +1,32 @@
 ===============================================================================
+Changes between toolset releases 202507.0 and 202407.1:
+===============================================================================
+
+This release focuses mostly on improving the usability androbustness of the
+toolset. The symbolic solving tool 'pbessolvesymbolic' has been extended with
+the ability to generate counter examples, and generating counter examples in
+'pbessolve' has been made more efficient. Furthermore, linearisation of
+specifications with complex allow sets has been made vastly more efficient.
+
+The grammar used in the toolset has been changed to be in line with the
+corresponding book, mainly with respect to the operator precedence. This should
+result in less inconsistenties, but have brought some significant changes to how
+for example quantifiers are parsed in modal mu-formulas. The changes are
+detailed in the language documentation on our website.
+
+24 issues were resolved 1 external pull request has been accepted since the last
+release.
+
+List of other changes:
+  - A new branching bisimulation algorithm was introduce in ltscompare and
+    ltsconvert, available under the flag 'dpbranching-bisim-gj'. This variant
+    uses less memory and is occassionally faster than the default 'dnj'
+    algorithm.
+  - mcrl2ide can now set the enumeration limit for tools, which must sometimes
+    be increased to when rewriting expressions with quantifiers since it limits
+    the amount of values that are enumerated.
+
+===============================================================================
 Changes between toolset releases 202407.1 and 202407.0:
 ===============================================================================
 
