@@ -228,3 +228,31 @@ Where :math:`R_\land` is defined dually to :math:`R_\lor`.
    & R_{\land,\sigma}(\exists W\ldotp f, V)       && = &&\; \langle \forall d \ap \singletonD \ldotp (\exists W\ldotp f) \Rightarrow X_\FALSE(\singletonelem), \emptyset \rangle\\
    & R_{\land,\sigma}(\exists W\ldotp \varphi, V) && = &&\; \langle \forall d \ap \singletonD \ldotp \mathit{true} \Rightarrow \tilde{X}(V), (\sigma\tilde{X}(V) = \exists W \ldotp \varphi) \rangle
    \end{alignat*} 
+
+For the `pbessolvesymbolic` we have introduced a so-called pre-SRF form where
+all :math:`f_{ij}` can contain propositional variables related to identifying
+counter example information, these are called `Zpos` and `Zneg` by convention.
+In the transformation from PBES to pre-SRF we have the rules above, where all
+`f` might contain these propositional variables, and in addition to that we
+introduce the following rules (subsuming the corresponding original rules):
+
+.. math::
+   :nowrap:
+
+   \begin{align*}
+   & R_{\lor,\sigma}((\bigvee_{i \in I} f_i) \lor (\bigvee_{j \in J} \varphi_j), V)       && = &&\; \langle
+   (\bigvee_{i \in I} f_i \land X_{\mathit{true}}) \lor \bigvee_{k \in \bigcup_{j \in J} I^{\varphi_j}} \exists {W_i} \ldotp (\lnot \bigvee_{i \in I} f_i) \land f_k \land
+   X_k(g_k), \PBES^\varphi\PBES^\psi \rangle\\
+   \end{align*}
+
+and dually for :math:`R_{\land,\sigma}`:
+
+.. math::
+   :nowrap:
+
+   
+   \begin{align*}
+   R_{\land,\sigma}((\bigwedge_{i \in I} f_i) \land (\bigwedge_{j \in J} \varphi_j), V)      & =  \langle   \left(
+   \bigwedge_{i \in I} (\lnot f_i \implies X_{\mathit{false}}) \right) \land \bigwedge_{k \in \bigcup_{j \in J} I^{\varphi_j}} \forall {W_k} \ldotp (\bigwedge_{i \in I} f_i ) \land f_k
+   \implies X_k(g_k), \PBES^{\varphi_{1}}\cdots \PBES^{\varphi_{|J|}} \rangle\\
+   \end{align*}
