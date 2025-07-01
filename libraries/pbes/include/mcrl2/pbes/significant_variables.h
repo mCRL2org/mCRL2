@@ -38,7 +38,7 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
   // Pop the top element of result_stack and return it
   std::set<data::variable> pop()
   {
-    std::set<data::variable> result = result_stack.back();
+    std::set<data::variable> result = std::move(result_stack.back());
     result_stack.pop_back();
     return result;
   }
@@ -55,12 +55,13 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
     return result_stack.back();
   }
 
-  // Pops two elements A1 and A2 from the stack, and pushes back union(A1, A2)
+  // Merges the two alements A1 and A2 at the top of the stack into a single
+  // stack element representing union(A1, A2)
   void join()
   {
     std::set<data::variable> right = pop();
-    std::set<data::variable> left = pop();
-    push(utilities::detail::set_union(left, right));
+    // left == top(), the (previously) second element on the stack.
+    top().insert(std::make_move_iterator(right.begin()), std::make_move_iterator(right.end()));
   }
 
   void leave(const and_& /* x */)
@@ -112,7 +113,7 @@ std::set<data::variable> significant_variables(const pbes_expression& x)
 {
   detail::significant_variables_traverser f;
   f.apply(x);
-  return f.result_stack.back();
+  return f.pop();
 }
 
 } // namespace pbes_system
