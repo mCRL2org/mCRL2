@@ -153,11 +153,13 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
         {
           auto result = pbes2srf(p);    
           save_pbes(result.to_pbes(), output_filename(), m_pbes_output_format);  
+          break;
         }
         case pbes_rewriter_type::pre_srf:
         {
           auto result = pbes2pre_srf(p);
-          save_pbes(result.to_pbes(), output_filename(), m_pbes_output_format);      
+          save_pbes(result.to_pbes(), output_filename(), m_pbes_output_format);  
+          break;    
         }
         case pbes_rewriter_type::bqnf_quantifier:
         {
