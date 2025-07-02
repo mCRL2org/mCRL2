@@ -25,6 +25,8 @@ List of other changes:
   - mcrl2ide can now set the enumeration limit for tools, which must sometimes
     be increased to when rewriting expressions with quantifiers since it limits
     the amount of values that are enumerated.
+  - Introduced the tool lpsfununfold which, similarly to lpsparunfold, can unfold
+    a parameter of a function type with a finite domain into multiple parameters.
 
 ===============================================================================
 Changes between toolset releases 202407.1 and 202407.0:
