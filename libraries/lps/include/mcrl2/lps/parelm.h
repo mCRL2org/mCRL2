@@ -174,7 +174,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       for (const data::variable& process_parameter: process_parameters)
       {
 #ifdef MCRL2_LPS_PARELM_DEBUG
-        std::clog << "vertex " << index << " = " << data::pp(*i) << std::endl;
+        std::clog << "vertex " << index << " = " << data::pp(process_parameter) << std::endl;
 #endif
         m[process_parameter] = index++;
       }
