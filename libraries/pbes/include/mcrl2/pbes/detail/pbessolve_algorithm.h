@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux
+// Author(s): Wieger Wesselink, Maurice Laveaux; Threads are added by Jan Friso Groote 
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
