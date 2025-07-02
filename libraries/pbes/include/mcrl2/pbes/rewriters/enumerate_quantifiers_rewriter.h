@@ -94,18 +94,11 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     assert(&result!=&phi);
     atermpp::vector<data::data_expression> undo = undo_substitution(v);
     result = true_();
-#ifndef NDEBUG
-    pbes_expression phi_; 
-    derived().apply(phi_, phi);
-    assert(phi_==phi); // phi is assumed to be rewritten. 
-#endif
     E.enumerate(enumerator_element(v, phi),
                 sigma,
                 [&](const enumerator_element& p)
                 {
-                  pbes_expression result_;
-                  data::optimized_and(result_, result, p.expression());
-                  derived().apply(result, result_);
+                  data::optimized_and(result, result, p.expression());
                   return is_false(result);
                 },
                 is_true,
@@ -121,18 +114,11 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     assert(&result!=&phi);
     atermpp::vector<data::data_expression> undo = undo_substitution(v);
     result = false_();
-#ifndef NDEBUG
-    pbes_expression phi_; 
-    derived().apply(phi_, phi);
-    assert(phi_==phi); // phi is assumed to be rewritten. 
-#endif
     E.enumerate(enumerator_element(v, phi),
                 sigma,
                 [&](const enumerator_element& p)
                 {
-                  pbes_expression result_;
-                  data::optimized_or(result_, result, p.expression());
-                  derived().apply(result, result_);
+                  data::optimized_or(result, result, p.expression());
                   return is_false(result);
                 },
                 is_false,
