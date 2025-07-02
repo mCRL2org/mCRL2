@@ -73,7 +73,6 @@ class txt2pbes_tool: public pbes_output_tool<input_output_tool>
           throw mcrl2::runtime_error("cannot open input file: " + input_filename());
         }
         p = txt2pbes(instream, m_normalize);
-        instream.close();
       }
       save_pbes(p, output_filename(), pbes_output_format());
       return true;
