@@ -35,6 +35,7 @@ message(STATUS "** Installing to:   ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "** CMake version:   ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION}")
 message(STATUS "** C++ compiler:    ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "** C compiler:      ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
+message(STATUS "** Architecture:    ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 message(STATUS "**")
 message(STATUS "** Boost:  ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.")
 

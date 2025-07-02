@@ -116,14 +116,6 @@ if(APPLE)
 
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size,${MCRL2_OSX_STACK_SIZE}")
   set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
-
-  if (NOT DEFINED CMAKE_APPLE_SILICON_PROCESSOR) 
-    set(CMAKE_APPLE_SILICON_PROCESSOR "x86_64" CACHE STRING "Select whether the generated code is x86_64 or arm64" FORCE) 
-  else()
-    set(CMAKE_APPLE_SILICON_PROCESSOR "arm64" CACHE STRING "Select whether the generated code is x86_64 or arm64" FORCE)
-  endif()
-  set_property(CACHE CMAKE_APPLE_SILICON_PROCESSOR PROPERTY STRINGS "x86_64" "arm64")
-  set(CMAKE_OSX_ARCHITECTURES ${CMAKE_APPLE_SILICON_PROCESSOR} CACHE INTERNAL "" FORCE)
 elseif(NOT ${MCRL2_IS_CLANG})
   mcrl2_add_link_options(-Wl,--as-needed)
 
