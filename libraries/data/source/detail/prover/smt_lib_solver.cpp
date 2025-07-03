@@ -7,13 +7,10 @@
 
 using namespace mcrl2::log;
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
-{
-namespace prover
+
+
+
+namespace mcrl2::data::detail::prover
 {
 template < typename T >
 bool binary_smt_solver< T >::execute(std::string const& benchmark)
@@ -154,8 +151,8 @@ template class binary_smt_solver< z3_smt_solver >;
 // instantiate for ario prover
 template class binary_smt_solver< ario_smt_solver >;
 }
-}
-}
-}
+
+
+
 #endif
 

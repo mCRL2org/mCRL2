@@ -23,10 +23,9 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
-namespace ltsmin
-{
 
-namespace test
+
+namespace ltsmin::test
 {
 
 class explorer : public mcrl2::pbes_system::explorer {
@@ -209,9 +208,9 @@ void explorer::bfs()
     }
 }
 
-} // namespace test
+} // namespace ltsmin::test
 
-} // namespace ltsmin
+
 
 
 void run_pbes_explorer(const std::string& pbes_text, int num_parts, int num_groups, int num_states, int num_transitions,

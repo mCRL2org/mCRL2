@@ -11,9 +11,9 @@
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/print.h"
 
-namespace mcrl2 {
 
-namespace core {
+
+namespace mcrl2::core {
 
 namespace detail {
 
@@ -359,6 +359,6 @@ const atermpp::aterm core::detail::default_values::SortCons = core::detail::defa
   const atermpp::aterm core::detail::default_values::PRExpr = core::detail::default_value_PRExpr();
 //--- end generated default value definitions ---//
 
-} // namespace core
+} // namespace mcrl2::core
 
-} // namespace mcrl2
+

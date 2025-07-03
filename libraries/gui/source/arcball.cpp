@@ -18,9 +18,8 @@
   #define M_PI 3.14159265358979323846264338327950288
 #endif
 
-namespace mcrl2
-{
-namespace gui
+
+namespace mcrl2::gui
 {
 
 /// \brief Compute the projection of the point p on a sphere that covers the viewport
@@ -80,5 +79,5 @@ void applyRotation(const QQuaternion& rotation, bool reverse)
   glRotatef(2 * angle, rotation.x(), rotation.y(), rotation.z());
 }
 
-} // namespace gui
-} // namespace mcrl2
+} // namespace mcrl2::gui
+

@@ -16,11 +16,9 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::log;
 
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+
+
+namespace mcrl2::lts::detail
 {
 
 lts_type guess_format(std::string const& s, const bool be_verbose/*=true*/)
@@ -222,6 +220,6 @@ std::string lts_extensions_as_string(const std::set<lts_type>& supported)
   return lts_extensions_as_string(",",supported);
 }
 
-} // namespace detail
-} //lts
-} //data
+} // namespace mcrl2::lts::detail
+//lts
+//data

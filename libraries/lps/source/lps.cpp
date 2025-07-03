@@ -19,10 +19,9 @@
 
 #include <ranges>
 
-namespace mcrl2
-{
 
-namespace lps
+
+namespace mcrl2::lps
 {
 
 //--- start generated lps overloads ---//
@@ -162,6 +161,6 @@ void complete_action_rename_specification(action_rename_specification& x, const 
 
 } // namespace detail
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+

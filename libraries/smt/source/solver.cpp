@@ -13,9 +13,8 @@
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/smt/unfold_pattern_matching.h"
 
-namespace mcrl2
-{
-namespace smt
+
+namespace mcrl2::smt
 {
 
 answer smt_solver::execute_and_check(const std::string& s, const std::chrono::microseconds& timeout) const
@@ -309,5 +308,5 @@ nt.special_recogniser[sort_pos::succpos()] = ">= 2";
 }
 
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
+

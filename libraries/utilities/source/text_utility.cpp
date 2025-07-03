@@ -15,10 +15,9 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 
-namespace mcrl2
-{
 
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \brief Split a string into paragraphs.
@@ -225,6 +224,6 @@ void trim(std::string& text)
   boost::trim(text);
 }
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+

@@ -23,11 +23,9 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::log;
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 #ifndef NDEBUG
@@ -667,5 +665,5 @@ bool isValidRewriteRule(const data_equation& data_eqn)
 }
 
 }
-}
-}
+
+

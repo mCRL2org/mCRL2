@@ -12,9 +12,9 @@
 #include "mcrl2/lts/parse.h"
 #include "mcrl2/lts/detail/liblts_swap_to_from_probabilistic_lts.h"
 
-namespace mcrl2 {
 
-namespace lts {
+
+namespace mcrl2::lts {
 
 struct fsm_writer
 {
@@ -217,6 +217,6 @@ void lts_fsm_t::save(const std::string& filename) const
 }
 
 
-} // namespace lts
+} // namespace mcrl2::lts
 
-} // namespace mcrl2
+

@@ -12,9 +12,8 @@
 #include "mcrl2/utilities/platform.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 template <typename Iter>
@@ -1081,5 +1080,5 @@ void command_line_parser::process_default_options(interface_description& d)
     }
   }
 }
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
+

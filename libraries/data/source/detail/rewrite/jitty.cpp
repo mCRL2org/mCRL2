@@ -25,11 +25,9 @@ using namespace mcrl2::log;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 // The function below is intended to remove the auxiliary function this_term_is_in_normal_form from a term
@@ -942,5 +940,5 @@ rewrite_strategy RewriterJitty::getStrategy()
   return jitty;
 }
 }
-}
-}
+
+

@@ -16,10 +16,9 @@ using namespace atermpp;
 
 namespace mcrl2
 {
-namespace data
-{
 
-namespace detail
+
+namespace data::detail
 {
 
 void variable_context::typecheck_variable(const data_type_checker& typechecker, const variable& v) const
@@ -71,8 +70,8 @@ inline atermpp::term_list<S> insert_sort_unique(const atermpp::term_list<S>& lis
   return list;
 }
 
-} // namespace detail
-} // namespace data
+} // namespace data::detail
+
 
 // ------------------------------  Here starts the new class based data expression checker -----------------------
 
@@ -4645,9 +4644,8 @@ const data_specification mcrl2::data::data_type_checker::operator()() const
 
 
 
-namespace data
-{
-namespace detail
+
+namespace data::detail
 {
 
 static sort_expression_list GetVarTypes(variable_list VarDecls)
@@ -4757,6 +4755,6 @@ static sort_expression MinType(const sort_expression_list& TypeList)
   return TypeList.front();
 }
 
-} //namespace detail
-} //namespace data
+} // namespace data::detail
+
 }

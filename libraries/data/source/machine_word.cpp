@@ -14,16 +14,13 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include "mcrl2/data/detail/machine_word.h"
 
-namespace mcrl2
-{
 
-namespace data
-{
 
-namespace sort_machine_word
-{
 
-namespace detail
+
+
+
+namespace mcrl2::data::sort_machine_word::detail
 {
 
 /* Below standard operations on machine numbers are implemented.  */
@@ -131,10 +128,10 @@ std::size_t sqrt_quadrupleword_overflow(const std::size_t n1, const std::size_t 
 
 } // end namespace detail 
 
-} // namespace sort_machine_word
 
-} // namespace data
 
-} // namespace mcrl2
+
+
+
 
 

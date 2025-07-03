@@ -33,9 +33,9 @@ extern "C"
   extern D_ParserTables parser_tables_mcrl2;
 }
 
-namespace mcrl2 {
 
-namespace core {
+
+namespace mcrl2::core {
 
 std::string parse_node::add_context(const std::string& message) const
 {
@@ -505,7 +505,7 @@ void parser::custom_parse_error(const std::string& message) const
   mCRL2log(log::error) << message << std::endl;
 }
 
-} // namespace core
+} // namespace mcrl2::core
 
-} // namespace mcrl2
+
 
