@@ -1538,8 +1538,6 @@ interface_description::file_argument make_file_argument(std::string const& name)
   return interface_description::file_argument(name);
 }
 
-#if !defined(__COMMAND_LINE_INTERFACE__)
-
 template <>
 inline command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
   m_interface(d), m_continue(true), options(m_options), arguments(m_arguments)
@@ -1549,7 +1547,8 @@ inline command_line_parser::command_line_parser(interface_description& d, const 
 
   process_default_options(d);
 }
-# ifndef __CYGWIN__ // std::wstring is not available for Cygwin
+
+#ifndef __CYGWIN__ // std::wstring is not available for Cygwin
 template <>
 inline command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
   m_interface(d), m_continue(true), options(m_options), arguments(m_arguments)
@@ -1559,8 +1558,8 @@ inline command_line_parser::command_line_parser(interface_description& d, const 
 
   process_default_options(d);
 }
-# endif // __CYGWIN__
-#endif
+#endif // __CYGWIN__
+
 /// \endcond
 } // namespace utilities
 } // namespace mcrl2
