@@ -17,10 +17,7 @@
 #include "mcrl2/data/detail/variable_context.h"
 #include "mcrl2/data/sort_type_checker.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 class data_type_checker: public sort_type_checker
@@ -369,8 +366,6 @@ data_expression typecheck_untyped_data_parameter(data_type_checker& typechecker,
 
 typedef atermpp::term_list<sort_expression_list> sorts_list;
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_TYPECHECK_H

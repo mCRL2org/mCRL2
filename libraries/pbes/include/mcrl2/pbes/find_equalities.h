@@ -15,9 +15,9 @@
 #include "mcrl2/data/find_equalities.h"
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -120,8 +120,8 @@ std::map<data::variable, std::set<data::data_expression> > find_inequalities(con
   return f.top().inequalities.assignments;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_FIND_EQUALITIES_H

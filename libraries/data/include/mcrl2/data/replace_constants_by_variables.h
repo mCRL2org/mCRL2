@@ -15,11 +15,8 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/builder.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 /// \brief Replace each constant data application c by a fresh variable v, and add extend the substitution sigma
 /// with the assignment v := r(c). This can be used in rewriting, to avoid that c is rewritten by the rewriter
@@ -67,10 +64,6 @@ struct replace_constants_by_variables_builder: public Builder<replace_constants_
   }
 };
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_REPLACE_CONSTANTS_BY_VARIABLES_H

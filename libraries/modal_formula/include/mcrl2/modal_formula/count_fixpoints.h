@@ -14,9 +14,8 @@
 
 #include "mcrl2/modal_formula/traverser.h"
 
-namespace mcrl2 {
-
-namespace state_formulas {
+namespace mcrl2::state_formulas
+{
 
 /// \cond INTERNAL_DOCS
 //
@@ -61,8 +60,6 @@ std::size_t count_fixpoints(const state_formula& x)
   return f.result;
 }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_COUNT_FIXPOINTS_H

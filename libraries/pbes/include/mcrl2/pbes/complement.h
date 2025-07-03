@@ -29,10 +29,9 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 /// \cond INTERNAL_DOCS
@@ -93,8 +92,8 @@ pbes_expression complement(const pbes_expression& x)
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_COMPLEMENT_H

@@ -14,10 +14,7 @@
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Algorithm class for elimination of constant parameters
@@ -274,8 +271,6 @@ void constelm(Specification& spec, const DataRewriter& R, bool instantiate_globa
   algorithm.run(instantiate_global_variables);
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_CONSTELM_H

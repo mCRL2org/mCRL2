@@ -16,10 +16,7 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \cond INTERNAL_DOCS
@@ -196,8 +193,6 @@ T normalize(const T& x,
   return result;
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_NORMALIZE_H

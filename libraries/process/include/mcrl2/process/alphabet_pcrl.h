@@ -14,9 +14,7 @@
 
 #include "mcrl2/process/detail/pcrl_equation_cache.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process {
 
 namespace detail {
 
@@ -132,8 +130,8 @@ multi_action_name_set alphabet_pcrl(const process_expression& x, const std::map<
   return f.result;
 }
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_ALPHABET_PCRL_H

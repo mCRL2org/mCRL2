@@ -17,10 +17,7 @@
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace sort_list
@@ -423,9 +420,9 @@ application fbag(const sort_expression& s, const data_expression_list& range)
 }
 } // namespace sort_fbag
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif
 

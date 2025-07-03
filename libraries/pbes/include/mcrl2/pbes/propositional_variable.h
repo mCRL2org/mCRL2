@@ -15,10 +15,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/parse.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 //--- start generated class propositional_variable ---//
@@ -124,8 +121,6 @@ inline void swap(propositional_variable& t1, propositional_variable& t2)
 std::string pp(const propositional_variable_list& x, bool precedence_aware = true);
 std::string pp(const propositional_variable_vector& x, bool precedence_aware = true);
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_PROPOSITIONAL_VARIABLE_H

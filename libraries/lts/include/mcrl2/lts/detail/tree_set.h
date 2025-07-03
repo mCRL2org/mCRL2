@@ -13,9 +13,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 class tree_set_store
 {
@@ -55,5 +53,5 @@ class tree_set_store
     ptrdiff_t set_set_tag(ptrdiff_t set);
 };
 }
-}
+
 #endif

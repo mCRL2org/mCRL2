@@ -17,11 +17,11 @@
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/utilities/detail/command.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 /// \brief Command that operates on a PBES
 struct pbes_command: public utilities::detail::command
@@ -58,10 +58,10 @@ struct pbes_rewriter_command: public pbes_command
   {}
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_PBES_COMMAND_H

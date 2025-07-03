@@ -18,10 +18,7 @@
 #include "mcrl2/pres/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pres/rewriters/simplify_quantifiers_rewriter.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 /// \brief Creates a substitution function for the presinst rewriter.
@@ -255,8 +252,8 @@ class presinst_algorithm
     }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PRESINST_ALGORITHM_H

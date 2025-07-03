@@ -14,9 +14,9 @@
 
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 
-namespace mcrl2 {
 
-namespace process {
+
+namespace mcrl2::process {
 
 struct push_block_cache
 {
@@ -367,8 +367,8 @@ process_expression push_block(const core::identifier_string_list& B,
   return detail::push_block(B1, x, equations, W, id_generator);
 }
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H

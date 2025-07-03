@@ -14,9 +14,7 @@
 
 #include "mcrl2/lps/action_summand.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 /// \brief LPS summand containing a multi-action.
 class stochastic_action_summand: public action_summand
@@ -128,8 +126,8 @@ atermpp::aterm action_summand_to_aterm(const stochastic_action_summand& s)
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_STOCHASTIC_ACTION_SUMMAND_H

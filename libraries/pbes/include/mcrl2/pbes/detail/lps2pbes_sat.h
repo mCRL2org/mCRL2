@@ -17,11 +17,11 @@
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 template <typename TermTraits>
 typename TermTraits::term_type Sat(const lps::multi_action& a,
@@ -174,10 +174,10 @@ typename TermTraits::term_type Sat(const lps::multi_action& a,
   return f.top();
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LPS2PBES_SAT_H

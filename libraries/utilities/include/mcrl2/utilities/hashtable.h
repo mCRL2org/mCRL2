@@ -13,9 +13,7 @@
 
 #include "mcrl2/utilities/unordered_map.h"
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief A set that assigns each element an unique index.
@@ -168,7 +166,7 @@ private:
 };
 
 } // end namespace utilities
-} // end namespace mcrl2
+ // end namespace mcrl2
 
 #include "mcrl2/utilities/detail/hashtable.h"
 

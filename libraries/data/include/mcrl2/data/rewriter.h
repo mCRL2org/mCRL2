@@ -16,10 +16,7 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/expression_traits.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
@@ -237,8 +234,8 @@ class rewriter: public basic_rewriter<data_expression>
     }
 };
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_REWRITER_H

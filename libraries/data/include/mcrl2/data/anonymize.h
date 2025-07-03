@@ -16,9 +16,9 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2 {
 
-namespace data {
+
+namespace mcrl2::data {
 
 namespace detail {
 
@@ -228,8 +228,8 @@ void anonymize(data_specification& dataspec)
   std::cout << dataspec << std::endl;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_ANONYMIZE_H

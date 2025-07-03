@@ -16,9 +16,7 @@
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
 
-namespace mcrl2 {
-
-namespace lts {
+namespace mcrl2::lts {
 
 /// \brief Removes the last element from state s
 inline
@@ -361,8 +359,8 @@ std::unique_ptr<lts_builder> create_lts_builder(const lps::specification& lpsspe
   }
 }
 
-} // namespace lts
+} // namespace mcrl2::lts
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LTS_BUILDER_H

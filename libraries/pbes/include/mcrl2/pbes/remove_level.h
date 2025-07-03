@@ -15,10 +15,9 @@
 #include <string>
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 /// \brief BES variable remove level when generating a BES from a PBES.
@@ -92,8 +91,8 @@ std::string description(const remove_level s)
   throw mcrl2::runtime_error("unknown remove level");
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REMOVE_LEVEL_H

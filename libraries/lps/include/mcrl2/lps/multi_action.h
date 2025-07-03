@@ -15,10 +15,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/process/process_expression.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 // prototype declaration
@@ -389,9 +386,9 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 namespace std
 {

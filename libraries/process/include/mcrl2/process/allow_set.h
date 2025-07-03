@@ -15,9 +15,7 @@
 #include "mcrl2/process/alphabet_operations.h"
 #include "mcrl2/process/utility.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process {
 
 struct allow_set;
 std::ostream& operator<<(std::ostream& out, const allow_set& x);
@@ -334,8 +332,8 @@ allow_set subsets(const allow_set& x)
 
 } // namespace alphabet_operations
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_ALLOW_SET_H

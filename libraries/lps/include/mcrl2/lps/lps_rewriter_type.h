@@ -15,9 +15,8 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 /// \brief An enumerated type for the available lps rewriters
 enum lps_rewriter_type
@@ -106,8 +105,6 @@ std::ostream& operator<<(std::ostream& os, const lps_rewriter_type t)
   return os;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_LPS_REWRITER_TYPE_H

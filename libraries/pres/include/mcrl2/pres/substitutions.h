@@ -15,9 +15,9 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pres/replace.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 /** \brief Substitution function for propositional variables
  *
@@ -190,8 +190,8 @@ class propositional_variable_substitution
     }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_SUBSTITUTIONS_H

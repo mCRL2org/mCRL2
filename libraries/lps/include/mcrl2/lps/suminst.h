@@ -18,9 +18,7 @@
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Return a set with all finite sorts in data specification s.
@@ -214,8 +212,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
 
 }; // suminst_algorithm
 
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_SUMINST_H
 

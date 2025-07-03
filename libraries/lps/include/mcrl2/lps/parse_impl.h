@@ -17,11 +17,7 @@
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/parse_impl.h"
 
-namespace mcrl2 {
-
-namespace lps {
-
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 struct multi_action_actions: public process::detail::action_actions
@@ -130,10 +126,6 @@ struct action_rename_actions: public process::detail::action_actions
   }
 };
 
-} // namespace detail
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif // MCRL2_LPS_PARSE_IMPL_H

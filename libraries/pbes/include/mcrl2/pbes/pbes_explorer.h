@@ -20,10 +20,9 @@
 using mcrl2::data::data_expression;
 using mcrl2::data::variable;
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -633,8 +632,8 @@ public:
 
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBES_EXPLORER_H

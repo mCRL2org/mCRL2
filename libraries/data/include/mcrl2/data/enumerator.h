@@ -19,10 +19,7 @@
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
 #include "mcrl2/utilities/math.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -1072,8 +1069,6 @@ data_expression_vector enumerate_expressions(const sort_expression& s,
   return enumerate_expressions(s, dataspec, rewr, id_generator);
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_ENUMERATOR_H

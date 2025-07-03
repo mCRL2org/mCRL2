@@ -16,9 +16,9 @@
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \cond INTERNAL_DOCS
 //
@@ -162,8 +162,8 @@ data::mutable_map_substitution<> make_fresh_variable_substitution(const data::va
 
 } // namespace detail
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_DETAIL_LPS2PBES_UTILITY_H

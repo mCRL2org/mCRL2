@@ -15,10 +15,7 @@
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/core/detail/function_symbols.h"
 
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /// \brief String type of the LPS library.
@@ -69,10 +66,7 @@ identifier_string empty_identifier_string()
   return atermpp::empty_string();
 }
 
-} // namespace core
-
-} // namespace mcrl2
-
+} // namespace mcrl2::core
 
 namespace std {
 

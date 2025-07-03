@@ -15,9 +15,7 @@
 #include <cstddef>
 #include "mcrl2/utilities/logger.h"
 
-namespace mcrl2 {
-
-namespace utilities {
+namespace mcrl2::utilities {
 
 /// \brief Displays progress messages for a task that performs a fixed number of steps.
 class progress_meter
@@ -50,8 +48,8 @@ class progress_meter
     }
 };
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_UTILITIES_PROGRESS_METER_H

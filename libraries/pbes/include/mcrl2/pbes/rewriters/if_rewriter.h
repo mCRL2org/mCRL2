@@ -16,9 +16,9 @@
 #include "mcrl2/data/rewriters/if_rewriter.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -60,8 +60,8 @@ class if_rewriter
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REWRITERS_IF_REWRITER_H

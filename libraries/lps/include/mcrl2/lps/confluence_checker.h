@@ -122,12 +122,7 @@
 
     If there already is an action named ctau present in the LPS passed as parameter a_lps, an error will be reported. */
 
-
-namespace mcrl2
-{
-namespace lps
-{
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 /**
@@ -952,7 +947,6 @@ void Confluence_Checker<Specification>::check_confluence_and_mark(const data::da
   f_intermediate = std::vector<std::size_t>();
 }
 
-} // namespace detail
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
+
 #endif

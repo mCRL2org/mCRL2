@@ -15,9 +15,9 @@
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \brief Visitor for printing the root node of a PBES.
 struct print_brief_traverser: public pbes_expression_traverser<print_brief_traverser>
@@ -187,8 +187,8 @@ std::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool s
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBES_FUNCTIONS_H

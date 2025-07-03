@@ -14,9 +14,7 @@
 
 #include "mcrl2/modal_formula/state_formula.h"
 
-namespace mcrl2 {
-
-namespace state_formulas {
+namespace mcrl2::state_formulas {
 
 class state_formula_specification
 {
@@ -100,8 +98,8 @@ std::ostream& operator<<(std::ostream& out, const state_formula_specification& x
 }
 //--- end generated classes ---//
 
-} // namespace state_formulas
+} // namespace mcrl2::state_formulas
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_MODAL_FORMULA_STATE_FORMULA_SPECIFICATION_H

@@ -16,10 +16,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated class variable ---//
@@ -117,10 +114,7 @@ std::set<data::variable> find_all_variables(const data::variable& x);
 std::set<data::variable> find_all_variables(const data::variable_list& x);
 std::set<core::identifier_string> find_identifiers(const data::variable_list& x);
 
-} // namespace data
-
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 namespace std 
 {

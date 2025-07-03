@@ -15,9 +15,7 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 //--- start generated lps rewrite code ---//
 /// \\brief Rewrites all embedded expressions in an object x
@@ -79,8 +77,8 @@ T rewrite(const T& x,
 }
 //--- end generated lps rewrite code ---//
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_REWRITE_H

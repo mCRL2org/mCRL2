@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated class action_name_multiset ---//
@@ -98,8 +95,8 @@ inline void swap(action_name_multiset& t1, action_name_multiset& t2)
 }
 //--- end generated class action_name_multiset ---//
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_ACTION_NAME_MULTISET_H

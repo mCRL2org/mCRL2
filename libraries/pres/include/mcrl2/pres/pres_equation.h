@@ -16,10 +16,7 @@
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pres/pres_expression.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 typedef pbes_system::fixpoint_symbol fixpoint_symbol;
@@ -186,8 +183,8 @@ std::string pp(const pres_equation_vector& x, bool precedence_aware = true);
 void normalize_sorts(pres_equation_vector& x, const data::sort_specification& sortspec);
 std::set<data::variable> find_free_variables(const pres_system::pres_equation& x);
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PRES_EQUATION_H

@@ -15,10 +15,7 @@
 #include "mcrl2/modal_formula/negate_variables.h"
 #include "mcrl2/modal_formula/traverser.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
+namespace mcrl2::state_formulas
 {
 
 /// \cond INTERNAL_DOCS
@@ -441,8 +438,6 @@ T normalize(const T& x, bool quantitative = false, bool negated = false, typenam
   return result;
 }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_NORMALIZE_H

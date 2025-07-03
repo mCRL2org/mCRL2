@@ -19,9 +19,7 @@
 #include <string>
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief LTS preorder relations.
@@ -204,8 +202,7 @@ std::string description(const lts_preorder pre)
   }
 }
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif // MCRL2_LTS_LTS_PREORDER_H
 

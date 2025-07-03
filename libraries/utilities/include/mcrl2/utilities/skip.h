@@ -12,9 +12,8 @@
 #ifndef MCRL2_UTILITIES_SKIP_H
 #define MCRL2_UTILITIES_SKIP_H
 
-namespace mcrl2 {
-
-namespace utilities {
+namespace mcrl2::utilities
+{
 
 /// \brief The skip operation with a variable number of arguments
 struct skip
@@ -23,8 +22,6 @@ struct skip
   void operator()(const Args&...) const {}
 };
 
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_SKIP_H

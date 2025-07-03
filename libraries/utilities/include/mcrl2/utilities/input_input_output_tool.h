@@ -14,13 +14,11 @@
 
 #include "mcrl2/utilities/input_input_tool.h"
 
-namespace mcrl2
-{
 
-namespace utilities
-{
 
-namespace tools
+
+
+namespace mcrl2::utilities::tools
 {
 
 /// \brief Base class for tools that take two files as input,
@@ -97,10 +95,10 @@ class input_input_output_tool: public input_input_tool
     }
 };
 
-} // namespace tools
+} // namespace mcrl2::utilities::tools
 
-} // namespace utilities
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_UTILITIES_INPUT_INPUT_OUTPUT_TOOL_H

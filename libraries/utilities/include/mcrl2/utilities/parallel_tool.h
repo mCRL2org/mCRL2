@@ -15,13 +15,7 @@
 #include "mcrl2/utilities/configuration.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2
-{
-
-namespace utilities
-{
-
-namespace tools
+namespace mcrl2::utilities::tools
 {
 
 /// \brief Base class for tools that are using multiple threads.
@@ -90,10 +84,6 @@ class parallel_tool: public Tool
     }
 };
 
-} // namespace tools
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::tools
 
 #endif // MCRL2_UTILITIES_PARALLEL_TOOL_H

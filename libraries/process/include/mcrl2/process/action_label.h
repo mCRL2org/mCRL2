@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated class action_label ---//
@@ -114,8 +111,8 @@ std::string pp(const action_label_vector& x, bool precedence_aware = true);
 action_label_list normalize_sorts(const action_label_list& x, const data::sort_specification& sortspec);
 std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x);
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_ACTION_LABEL_H

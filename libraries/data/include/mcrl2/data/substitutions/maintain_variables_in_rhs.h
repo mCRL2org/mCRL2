@@ -19,10 +19,8 @@
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
 
-namespace mcrl2 {
-
-namespace data {
-
+namespace mcrl2::data
+{
 
 /// \brief Wrapper that extends any substitution to a substitution maintaining the vars in its rhs. 
 /// \details This substitution assumes a function variable -> std::size_t, that, for
@@ -131,8 +129,6 @@ class maintain_variables_in_rhs: public Substitution
 
 };
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_MAINTAIN_VARIABLES_IN_RHS_H

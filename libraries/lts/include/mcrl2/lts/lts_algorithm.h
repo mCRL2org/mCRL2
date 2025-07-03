@@ -38,9 +38,7 @@
 #include "mcrl2/lts/sigref.h"
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief Applies a reduction algorithm to this LTS.
@@ -1159,8 +1157,8 @@ void determinise(LTS_TYPE& l)
   assert(is_deterministic(l));
 }
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
+
 
 #endif // MCRL2_LTS_LTS_ALGORITHM_H
 

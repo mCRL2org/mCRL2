@@ -20,9 +20,9 @@
 #include "mcrl2/pres/pressolve_options.h"
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -513,8 +513,8 @@ class ressolve_by_numerical_iteration_directed
     }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_RESSOLVE_NUMERICAL_DIRECTED_H

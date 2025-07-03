@@ -65,11 +65,7 @@
 
 #define USE_POOL_ALLOCATOR
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 
@@ -1085,7 +1081,7 @@ namespace detail
 #endif
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 
 #endif // ifndef SIMPLE_LIST_H

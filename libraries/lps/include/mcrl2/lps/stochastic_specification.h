@@ -13,9 +13,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_linear_process.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 class stochastic_specification;
 void complete_data_specification(stochastic_specification& spec);
@@ -143,8 +141,8 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_STOCHASTIC_SPECIFICATION_H

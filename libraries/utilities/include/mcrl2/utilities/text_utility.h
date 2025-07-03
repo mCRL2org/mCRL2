@@ -20,10 +20,9 @@
 #include <string>
 #include <vector>
 
-namespace mcrl2
-{
 
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \brief Checks whether the input only contains proper ascii characters,
@@ -193,8 +192,8 @@ inline std::string number2string(std::size_t number)
   return std::string(buffer); 
 }  
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_UTILITIES_TEXT_UTILITY_H

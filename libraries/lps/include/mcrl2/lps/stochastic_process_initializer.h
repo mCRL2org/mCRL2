@@ -14,9 +14,7 @@
 
 #include "mcrl2/lps/process_initializer.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 /// \brief A stochastic process initializer
 class stochastic_process_initializer: public process_initializer
@@ -94,8 +92,8 @@ inline void swap(stochastic_process_initializer& t1, stochastic_process_initiali
 // template function overloads
 std::set<data::variable> find_free_variables(const lps::stochastic_process_initializer& x);
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_STOCHASTIC_PROCESS_INITIALIZER_H

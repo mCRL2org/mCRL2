@@ -14,10 +14,7 @@
 
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /**
@@ -81,8 +78,6 @@ make_apply_traverser()
   return apply_traverser<Traverser>();
 }
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_TRAVERSER_H

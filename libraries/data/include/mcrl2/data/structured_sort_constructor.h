@@ -15,10 +15,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/structured_sort_constructor_argument.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 class structured_sort;
@@ -234,8 +231,8 @@ inline void swap(structured_sort_constructor& t1, structured_sort_constructor& t
 std::string pp(const structured_sort_constructor_list& x);
 std::string pp(const structured_sort_constructor_vector& x);
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_H

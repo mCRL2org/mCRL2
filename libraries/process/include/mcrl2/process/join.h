@@ -14,9 +14,8 @@
 
 #include "mcrl2/process/process_expression.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 /// \brief Splits a choice into a set of operands
 /// Given a process expression of the form p1 + p2 + .... + pn, this will yield a
@@ -50,8 +49,6 @@ process_expression join_summands(FwdIt first, FwdIt last)
   }, delta_);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_JOIN_H

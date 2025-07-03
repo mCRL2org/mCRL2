@@ -18,10 +18,7 @@
 #include "mcrl2/process/detail/process_context.h"
 #include "mcrl2/process/normalize_sorts.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 inline
@@ -711,8 +708,6 @@ process_expression typecheck_process_expression(const process_expression& x,
   return type_checker(x, current_equation);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_TYPECHECK_H

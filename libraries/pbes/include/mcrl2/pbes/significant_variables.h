@@ -14,9 +14,8 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -116,8 +115,6 @@ std::set<data::variable> significant_variables(const pbes_expression& x)
   return f.pop();
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_SIGNIFICANT_VARIABLES_H

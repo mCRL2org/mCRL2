@@ -19,10 +19,7 @@
 namespace mcrl2
 {
 
-namespace action_formulas
-{
-
-namespace detail
+namespace action_formulas::detail
 {
 
 struct action_formula_actions: public lps::detail::multi_action_actions
@@ -50,14 +47,9 @@ struct action_formula_actions: public lps::detail::multi_action_actions
   }
 };
 
-} // namespace detail
+} // namespace action_formulas::detail
 
-} // namespace action_formulas
-
-namespace regular_formulas
-{
-
-namespace detail
+namespace regular_formulas::detail
 {
 
 struct regular_formula_actions: public action_formulas::detail::action_formula_actions
@@ -78,14 +70,9 @@ struct regular_formula_actions: public action_formulas::detail::action_formula_a
   }
 };
 
-} // namespace detail
+} // namespace regular_formulas::detail
 
-} // namespace regular_formulas
-
-namespace state_formulas
-{
-
-namespace detail
+namespace state_formulas::detail
 {
 
 struct untyped_state_formula_specification: public data::untyped_data_specification
@@ -222,9 +209,7 @@ struct state_formula_actions: public regular_formulas::detail::regular_formula_a
   }
 };
 
-} // namespace detail
-
-} // namespace state_formulas
+} // namespace state_formulas::detail
 
 } // namespace mcrl2
 

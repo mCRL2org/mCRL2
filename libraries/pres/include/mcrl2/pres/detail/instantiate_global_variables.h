@@ -15,13 +15,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pres/replace.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
-{
-
-namespace detail
+namespace mcrl2::pres_system::detail
 {
 
 /// \brief Applies a global variable substitution to a PRES.
@@ -65,10 +59,10 @@ data::mutable_map_substitution<> instantiate_global_variables(pres& p)
   return sigma;
 }
 
-} // namespace detail
+} // namespace mcrl2::pres_system::detail
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H

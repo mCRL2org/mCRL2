@@ -14,9 +14,9 @@
 
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2 {
 
-namespace data {
+
+namespace mcrl2::data {
 
 //--- start generated class untyped_data_parameter ---//
 /// \\brief An untyped parameter
@@ -106,8 +106,8 @@ inline void swap(untyped_data_parameter& t1, untyped_data_parameter& t2)
 }
 //--- end generated class untyped_data_parameter ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_UNTYPED_DATA_PARAMETER_H

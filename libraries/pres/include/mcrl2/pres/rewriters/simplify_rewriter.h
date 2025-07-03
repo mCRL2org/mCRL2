@@ -15,9 +15,7 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/pres/rewriters/data_rewriter.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -858,8 +856,8 @@ struct simplify_data_rewriter
   }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REWRITERS_SIMPLIFY_REWRITER_H

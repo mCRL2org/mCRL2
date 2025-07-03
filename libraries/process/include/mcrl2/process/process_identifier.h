@@ -14,10 +14,7 @@
 
 #include "mcrl2/process/action_name_multiset.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated class process_identifier ---//
@@ -118,8 +115,8 @@ std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
 void normalize_sorts(process_identifier_vector& x, const data::sort_specification& sortspec);
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

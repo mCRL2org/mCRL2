@@ -15,9 +15,8 @@
 #include "mcrl2/process/alphabet_operations.h"
 #include "mcrl2/process/utility.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -275,8 +274,6 @@ multi_action_name_set alphabet(const process_expression& x, const std::vector<pr
   return detail::alphabet(x, equations, W).alphabet;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ALPHABET_H

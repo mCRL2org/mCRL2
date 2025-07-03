@@ -14,11 +14,8 @@
 
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 /// \brief Returns the names of a set of data variables.
 /// \param variables A set of data variables
@@ -63,10 +60,6 @@ std::set<std::string> variable_name_strings(const std::set<data::variable>& vari
   return result;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_FIND_H

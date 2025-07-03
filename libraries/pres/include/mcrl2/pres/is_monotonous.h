@@ -14,10 +14,9 @@
 
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 /// \brief Returns true if the pres expression is monotonous.
@@ -193,8 +192,8 @@ bool is_monotonous(const pres& p)
   return true;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_IS_MONOTONOUS_H

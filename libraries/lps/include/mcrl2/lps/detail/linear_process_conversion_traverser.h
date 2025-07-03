@@ -15,13 +15,7 @@
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/is_linear.h"
 
-namespace mcrl2
-{
-
-namespace process
-{
-
-namespace detail
+namespace mcrl2::process::detail
 {
 
 // TODO: join the stochastic and non-stochastic versions of the traversers
@@ -838,10 +832,6 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   }
 };
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_TRAVERSER_H

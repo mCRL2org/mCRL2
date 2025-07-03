@@ -15,9 +15,8 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/is_simple_substitution.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 namespace detail {
 
@@ -174,8 +173,6 @@ bool is_simple_substitution(const enumerator_substitution& sigma)
   return true;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_ENUMERATOR_SUBSTITUTION_H

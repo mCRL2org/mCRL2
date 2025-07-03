@@ -15,9 +15,7 @@
 #include "mcrl2/data/find_equalities.h"
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -146,8 +144,8 @@ std::map<data::variable, std::set<data::data_expression> > find_inequalities(con
   return f.top().inequalities.assignments;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_FIND_EQUALITIES_H

@@ -17,10 +17,7 @@
 #include "mcrl2/pres/replace.h"
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 namespace detail
@@ -1049,8 +1046,8 @@ void constelm(pres& p,
   }
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_CONSTELM_H

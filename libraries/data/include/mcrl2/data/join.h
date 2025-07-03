@@ -15,10 +15,7 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/utilities/detail/join.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
   /// \brief Returns or applied to the sequence of data expressions [first, last)
@@ -73,8 +70,6 @@ namespace data
     return result;
   }
 
-} // namespace data
-
-} // namespace mcrl2
+  } // namespace mcrl2::data
 
 #endif // MCRL2_DATA_JOIN_H

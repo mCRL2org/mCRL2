@@ -16,9 +16,9 @@
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 /// \cond INTERNAL_DOCS
 //
@@ -162,8 +162,8 @@ data::mutable_map_substitution<> make_fresh_variable_substitution(const data::va
 
 } // namespace detail
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_DETAIL_LPS2PRES_UTILITY_H

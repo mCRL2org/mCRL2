@@ -14,9 +14,7 @@
 #include "mcrl2/smt/native_translation.h"
 #include "mcrl2/smt/translation_error.h"
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 
 inline
@@ -196,7 +194,6 @@ public:
   }
 };
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif

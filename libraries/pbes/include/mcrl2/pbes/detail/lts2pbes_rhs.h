@@ -18,11 +18,11 @@
 #include "mcrl2/pbes/detail/lts2pbes_lts.h"
 #include "mcrl2/utilities/progress_meter.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 typedef lts::lts_lts_t::states_size_type lts2pbes_state_type;
 
@@ -421,10 +421,10 @@ pbes_expression RHS(const state_formulas::state_formula& x,
   return f.top();
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LTS2PBES_RHS_H

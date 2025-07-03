@@ -15,10 +15,7 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/process/untyped_multi_action.h"
 
-namespace mcrl2
-{
-
-namespace action_formulas
+namespace mcrl2::action_formulas
 {
 
 //--- start generated classes ---//
@@ -827,8 +824,6 @@ inline void swap(multi_action& t1, multi_action& t2)
 // template function overloads
 std::set<data::variable> find_all_variables(const action_formulas::action_formula& x);
 
-} // namespace action_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::action_formulas
 
 #endif // MCRL2_MODAL_FORMULA_ACTION_FORMULA_H

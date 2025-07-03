@@ -30,10 +30,7 @@
 #include <mach-o/dyld.h>
 #endif
 
-namespace mcrl2
-{
-
-namespace utilities
+namespace mcrl2::utilities
 {
 
     /// \brief Returns the basename of a tool.
@@ -86,8 +83,5 @@ namespace utilities
       return path;
     }
 }
-
-}
-
 
 #endif //MCRL2_BASENAME_H

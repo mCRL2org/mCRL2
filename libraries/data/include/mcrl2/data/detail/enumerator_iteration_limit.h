@@ -15,11 +15,8 @@
 
 #include <cstddef>
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 // Stores the maximum number of iterations that may be performed during enumeration.
 template <class T> // note, T is only a dummy
@@ -44,10 +41,6 @@ std::size_t get_enumerator_iteration_limit()
   return enumerator_iteration_limit<std::size_t>::max_enumerator_iterations;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_ENUMERATOR_ITERATION_LIMIT_H

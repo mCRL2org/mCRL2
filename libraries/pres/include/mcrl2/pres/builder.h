@@ -15,10 +15,7 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 /// \brief Builder class
@@ -1054,8 +1051,8 @@ struct pres_expression_builder: public add_pres_expressions<pres_system::pres_ex
 };
 //--- end generated add_pres_expressions code ---//
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_BUILDER_H

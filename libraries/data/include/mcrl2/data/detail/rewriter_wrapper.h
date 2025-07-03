@@ -16,12 +16,7 @@
 
 #include "mcrl2/data/rewriter.h"
 
-namespace mcrl2
-{
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 struct rewriter_wrapper
@@ -61,9 +56,6 @@ struct rewriter_wrapper
     Rewriter* m_rewriter;
 };
 
-
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H

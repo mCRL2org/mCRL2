@@ -17,9 +17,7 @@
 #include "mcrl2/data/substitutions/variable_substitution.h"
 #include "mcrl2/smt/utilities.h"
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 
 /**
@@ -329,7 +327,6 @@ void unfold_pattern_matching(const data::data_specification& dataspec, native_tr
   }
 }
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif

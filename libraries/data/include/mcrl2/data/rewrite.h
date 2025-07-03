@@ -14,9 +14,7 @@
 
 #include "mcrl2/data/builder.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 namespace detail
 {
@@ -143,8 +141,8 @@ T rewrite(const T& x,
 }
 //--- end generated data rewrite code ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_REWRITE_H

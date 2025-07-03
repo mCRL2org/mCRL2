@@ -14,10 +14,9 @@
 
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 /// \brief Traversal class for pres_expressions. Used as a base class for pres_expression_traverser.
@@ -1178,8 +1177,8 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<data
 };
 //--- end generated add_traverser_identifier_strings code ---//
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_TRAVERSER_H

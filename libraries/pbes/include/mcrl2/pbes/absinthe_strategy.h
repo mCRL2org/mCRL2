@@ -15,9 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 /// The approximation strategies of the absinthe tool.
 enum absinthe_strategy
@@ -95,8 +93,8 @@ std::string description(const absinthe_strategy strategy)
   throw mcrl2::runtime_error("unknown absinthe strategy");
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_ABSINTHE_STRATEGY_H

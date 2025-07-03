@@ -15,11 +15,8 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 inline
 void print_parse_check(const sort_expression& x, const data_specification& dataspec = data_specification())
@@ -50,10 +47,6 @@ void print_parse_check(const data_expression& x, const data_specification& datas
   }
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_PRINT_PARSE_CHECK_H

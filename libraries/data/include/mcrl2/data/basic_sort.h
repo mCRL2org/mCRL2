@@ -14,10 +14,9 @@
 
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 //--- start generated class basic_sort ---//
@@ -93,9 +92,9 @@ typedef atermpp::term_list<basic_sort> basic_sort_list;
 /// \brief vector of basic sorts
 typedef std::vector<basic_sort> basic_sort_vector;
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_BASIC_SORT_H
 

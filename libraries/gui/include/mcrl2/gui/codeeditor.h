@@ -16,13 +16,7 @@
 
 #include "mcrl2/gui/utilities.h"
 
-namespace mcrl2
-{
-
-namespace gui
-{
-
-namespace qt
+namespace mcrl2::gui::qt
 {
 
 /**
@@ -288,10 +282,6 @@ class CodeEditor : public QPlainTextEdit
   void updateLineNumberArea(const QRect& rect, int dy);
 };
 
-} // namespace qt
-
-} // namespace gui
-
-} // namespace mcrl2
+} // namespace mcrl2::gui::qt
 
 #endif // CODEEDITOR_H

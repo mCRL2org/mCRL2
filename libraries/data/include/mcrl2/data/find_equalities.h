@@ -15,9 +15,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/find.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 namespace detail {
 
@@ -502,8 +500,8 @@ std::string print_inequalities(const std::map<variable, std::set<data_expression
   return print_set(result);
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_FIND_EQUALITIES_H

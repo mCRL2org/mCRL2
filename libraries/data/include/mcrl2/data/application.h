@@ -16,10 +16,8 @@
 #ifndef MCRL2_DATA_APPLICATION_H
 #define MCRL2_DATA_APPLICATION_H
 
-namespace mcrl2
-{
 
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -762,8 +760,8 @@ const data_expression& binary_right1(const data_expression & x)
   return y[1];
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_APPLICATION_H

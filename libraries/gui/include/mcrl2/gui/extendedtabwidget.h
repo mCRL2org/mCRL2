@@ -12,14 +12,7 @@
 
 #include <QTabWidget>
 
-
-namespace mcrl2
-{
-
-namespace gui
-{
-
-namespace qt
+namespace mcrl2::gui::qt
 {
 
 class ExtendedTabWidget : public QTabWidget
@@ -47,10 +40,6 @@ public slots:
 
 };
 
-} // namespace qt
-
-} // namespace gui
-
-} // namespace mcrl2
+} // namespace mcrl2::gui::qt
 
 #endif // MCRL2_UTILITIES_EXTENDEDTABWIDGET_H

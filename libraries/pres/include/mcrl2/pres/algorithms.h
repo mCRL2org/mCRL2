@@ -15,11 +15,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
-
-namespace algorithms {
+namespace mcrl2::pres_system::algorithms {
 
 /// \brief Removes parameters from propositional variable instantiations in a pres expression
 /// \param x A PRES library object that does not derive from atermpp::aterm
@@ -66,10 +62,10 @@ std::vector<propositional_variable> remove_unreachable_variables(pres& p);
 std::set<data::variable> significant_variables(const pres_expression& x);
 
 
-} // namespace algorithms
+} // namespace mcrl2::pres_system::algorithms
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_ALGORITHMS_H

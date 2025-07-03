@@ -16,10 +16,7 @@
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 class pbes_equation;
@@ -189,8 +186,6 @@ std::string pp(const pbes_equation_vector& x);
 void normalize_sorts(pbes_equation_vector& x, const data::sort_specification& sortspec);
 std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x);
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_PBES_EQUATION_H

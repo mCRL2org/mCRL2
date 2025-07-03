@@ -15,10 +15,7 @@
 #include "mcrl2/data/container_type.h"
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated class container_sort ---//
@@ -97,9 +94,9 @@ typedef atermpp::term_list<container_sort> container_sort_list;
 ///
 typedef std::vector<container_sort> container_sort_vector;
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_CONTAINER_SORT_H
 

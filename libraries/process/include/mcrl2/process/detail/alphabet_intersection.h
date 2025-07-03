@@ -14,11 +14,8 @@
 
 #include "mcrl2/process/alphabet.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 template <typename Derived, typename Node = alphabet_node>
 struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
@@ -134,10 +131,6 @@ multi_action_name_set alphabet_intersection(const process_expression& x, const s
   std::set<process_identifier> W;
   return detail::alphabet_intersection(x, equations, W, A).alphabet;
 }
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_ALPHABET_INTERSECTION_H

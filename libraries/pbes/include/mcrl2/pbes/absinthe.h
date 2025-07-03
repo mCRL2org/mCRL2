@@ -20,14 +20,13 @@
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/data/detail/print_parse_check.h"
 
-namespace mcrl2 {
+namespace mcrl2::pbes_system
+{
 
-namespace pbes_system {
-
-  template <typename Term>
-  std::string print_term(const Term& x)
-  {
-    return data::pp(x) + " " + data::pp(x);
+template <typename Term>
+std::string print_term(const Term& x)
+{
+  return data::pp(x) + " " + data::pp(x);
   }
 
   template <typename Term>
@@ -1043,8 +1042,6 @@ struct absinthe_algorithm
   }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_ABSINTHE_H

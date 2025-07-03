@@ -19,9 +19,8 @@
 
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2 {
-
-namespace utilities {
+namespace mcrl2::utilities
+{
 
 namespace detail {
 
@@ -118,8 +117,6 @@ std::vector<std::size_t> parse_natural_number_sequence(const std::string& text)
   return result;
 }
 
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_PARSE_NUMBERS_H

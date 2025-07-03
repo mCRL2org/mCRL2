@@ -18,10 +18,7 @@
 #include "mcrl2/lps/stochastic_distribution.h"
 #include "mcrl2/process/action_label.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief A process initializer
@@ -112,8 +109,8 @@ inline void swap(process_initializer& t1, process_initializer& t2)
 std::set<data::variable> find_free_variables(const lps::process_initializer& x);
 std::set<process::action_label> find_action_labels(const lps::process_initializer& x);
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_PROCESS_INITIALIZER_H

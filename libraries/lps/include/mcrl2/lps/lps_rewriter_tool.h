@@ -16,13 +16,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/lps/lps_rewriter_type.h"
 
-namespace mcrl2
-{
-
-namespace lps
-{
-
-namespace tools
+namespace mcrl2::lps::tools
 {
 
 /// \brief Base class for filter tools that use a lps rewriter.
@@ -112,10 +106,6 @@ class lps_rewriter_tool: public Tool
     }
 };
 
-} // namespace tools
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps::tools
 
 #endif // MCRL2_LPS_LPS_REWRITER_TOOL_H

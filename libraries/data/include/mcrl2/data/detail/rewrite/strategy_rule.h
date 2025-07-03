@@ -13,11 +13,9 @@
 
 #include "mcrl2/data/data_equation.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 /// \brief Is either a rewrite rule to be matched or an index that should be rewritten.
@@ -120,9 +118,9 @@ class strategy
 /// \brief Creates a strategy for given set of rewrite rules with head symbol f.
 strategy create_strategy(data_equation_list rules);
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
+
+
 
 #endif // MCRL2_DATA_DETAIL_REWRITE_STRATEGY_RULE_H
 

@@ -16,11 +16,11 @@
 #include "mcrl2/pres/traverser.h"
 #include <boost/iterator/transform_iterator.hpp>
 
-namespace mcrl2 {
 
-namespace pres_system {
 
-namespace detail {
+
+
+namespace mcrl2::pres_system::detail {
 
 /// Visitor for collecting the quantifier variables that occur in a pres expression.
 struct find_quantifier_variables_traverser: public pres_expression_traverser<find_quantifier_variables_traverser>
@@ -364,10 +364,10 @@ bool is_well_typed_pres(const std::set<data::sort_expression>& declared_sorts,
   return true;
 }
 
-} // namespace detail
+} // namespace mcrl2::pres_system::detail
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_DETAIL_IS_WELL_TYPED_H

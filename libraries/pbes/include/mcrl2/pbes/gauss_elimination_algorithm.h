@@ -14,10 +14,7 @@
 
 #include "mcrl2/pbes/replace.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Algorithm class for the Gauss elimination algorithm for solving
@@ -113,8 +110,6 @@ struct approximate
   }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_GAUSS_ELIMINATION_ALGORITHM_H

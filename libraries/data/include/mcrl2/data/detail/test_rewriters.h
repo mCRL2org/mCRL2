@@ -19,11 +19,8 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 // Normalizes conjunctions and disjunctions.
 template <typename Derived>
@@ -250,11 +247,7 @@ data_expression I(const data_expression& x)
   return x;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_TEST_REWRITERS_H
 

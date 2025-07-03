@@ -17,9 +17,7 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/standard.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 namespace detail {
 
@@ -230,8 +228,8 @@ T if_rewrite(const T& x, typename std::enable_if< std::is_base_of< atermpp::ater
   return result;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_REWRITERS_IF_REWRITER_H

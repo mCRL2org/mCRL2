@@ -13,10 +13,7 @@
 
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \cond INTERNAL_DOCS
@@ -350,8 +347,6 @@ void remove_pbes_parameters(pbes& x,
 }
 /// \endcond
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REMOVE_PARAMETERS_H

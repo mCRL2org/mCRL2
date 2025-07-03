@@ -17,9 +17,8 @@
 #include "mcrl2/process/expand_process_instance_assignments.h"
 #include "mcrl2/process/is_multi_action.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -745,8 +744,6 @@ process_expression push_allow(const process_expression& x,
   return node.expression;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_ALLOW_H

@@ -13,11 +13,7 @@
 
 #include "mcrl2/lts/lts_utilities.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 //Replace sequences tau* a tau* by a single action a.
@@ -284,6 +280,5 @@ void tau_star_reduce(lts< STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS >& l)
 }
 
 }
-}
-}
+
 #endif // _LIBLTS_TAUSTARREDUCE_H

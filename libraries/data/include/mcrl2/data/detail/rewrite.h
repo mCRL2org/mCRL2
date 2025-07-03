@@ -16,11 +16,9 @@
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 /**
@@ -301,8 +299,8 @@ inline std::size_t get_direct_arity(const data::function_symbol& op)
   return 0;
 }
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
+
+
 
 #endif

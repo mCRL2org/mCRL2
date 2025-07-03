@@ -14,9 +14,7 @@
 
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 //--- start generated class stochastic_distribution ---//
 /// \\brief A stochastic distribution
@@ -109,8 +107,8 @@ inline void swap(stochastic_distribution& t1, stochastic_distribution& t2)
 }
 //--- end generated class stochastic_distribution ---//
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_STOCHASTIC_DISTRIBUTION_H

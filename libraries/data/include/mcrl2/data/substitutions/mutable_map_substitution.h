@@ -15,9 +15,9 @@
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
 
-namespace mcrl2 {
 
-namespace data {
+
+namespace mcrl2::data {
 
 /// \brief Generic substitution function. The substitution is stored as a mapping
 /// of variables to expressions. The substitution is mutable, meaning that substitutions
@@ -216,8 +216,8 @@ bool is_simple_substitution(const mutable_map_substitution<AssociativeContainer>
   return true;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_MUTABLE_MAP_SUBSTITUTION_H

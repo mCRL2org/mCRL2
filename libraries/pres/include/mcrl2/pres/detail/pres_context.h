@@ -15,11 +15,11 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
 
-namespace detail {
+
+
+namespace mcrl2::pres_system::detail {
 
 class pres_context
 {
@@ -67,10 +67,10 @@ class pres_context
     }
 };
 
-} // namespace detail
+} // namespace mcrl2::pres_system::detail
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_DETAIL_PRES_CONTEXT_H

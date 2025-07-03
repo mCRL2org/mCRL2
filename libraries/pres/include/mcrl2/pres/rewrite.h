@@ -15,9 +15,9 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/pres/builder.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail
 {
@@ -207,8 +207,8 @@ T pres_rewrite(const T& x,
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REWRITE_H

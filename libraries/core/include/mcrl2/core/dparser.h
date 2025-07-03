@@ -25,11 +25,8 @@ typedef void (*D_SyntaxErrorFn)(struct D_Parser *);
 typedef struct D_ParseNode *(*D_AmbiguityFn)(struct D_Parser *,
                int n, struct D_ParseNode **v);
 
-
-
-namespace mcrl2 {
-
-namespace core {
+namespace mcrl2::core
+{
 
 namespace detail
 {
@@ -200,8 +197,6 @@ struct parser
   }
 };
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_DPARSER_H

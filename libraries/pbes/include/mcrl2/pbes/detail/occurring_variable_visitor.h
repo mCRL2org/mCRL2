@@ -14,13 +14,7 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
-{
-
-namespace detail
+namespace mcrl2::pbes_system::detail
 {
 
 struct occurring_variable_visitor: public pbes_expression_traverser<occurring_variable_visitor>
@@ -38,10 +32,6 @@ struct occurring_variable_visitor: public pbes_expression_traverser<occurring_va
   }
 };
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_OCCURRING_VARIABLE_VISITOR_H

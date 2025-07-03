@@ -19,9 +19,7 @@
 
 #include <string>
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief Contains empty state values, used for lts's without state valued.
@@ -66,9 +64,7 @@ inline std::string pp(const state_label_empty& )
   return "empty";
 }
 
-
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif
 

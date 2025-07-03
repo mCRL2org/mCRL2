@@ -16,10 +16,7 @@
 #include "mcrl2/process/add_binding.h"
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 namespace detail
@@ -299,8 +296,6 @@ const process_equation& find_equation(const std::vector<process_equation>& equat
   throw mcrl2::runtime_error("unknown process identifier " + process::pp(id));
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_FIND_H

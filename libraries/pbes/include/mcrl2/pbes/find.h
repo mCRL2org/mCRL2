@@ -15,10 +15,7 @@
 #include "mcrl2/pbes/add_binding.h"
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -221,8 +218,8 @@ bool search_variable(const T& x, const data::variable& v)
   return f.found;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_FIND_H

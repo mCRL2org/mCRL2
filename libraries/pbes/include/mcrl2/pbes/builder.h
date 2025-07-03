@@ -15,10 +15,7 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Builder class
@@ -662,8 +659,6 @@ struct pbes_expression_builder: public add_pbes_expressions<pbes_system::pbes_ex
 };
 //--- end generated add_pbes_expressions code ---//
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_BUILDER_H

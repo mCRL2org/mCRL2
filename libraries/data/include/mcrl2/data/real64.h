@@ -28,18 +28,14 @@
 #include "mcrl2/data/nat64.h"
 #include "mcrl2/data/int64.h"
 
-namespace mcrl2 {
-
-  namespace data {
-
     /// \brief Namespace for system defined sort real_.
-    namespace sort_real {
+namespace mcrl2::data::sort_real
+{
 
-      inline
-      const core::identifier_string& real_name()
-      {
-        static core::identifier_string real_name = core::identifier_string("Real");
-        return real_name;
+inline const core::identifier_string& real_name()
+{
+  static core::identifier_string real_name = core::identifier_string("Real");
+  return real_name;
       }
 
       /// \brief Constructor for sort expression Real.
@@ -2056,10 +2052,6 @@ namespace mcrl2 {
         return result;
       }
 
-    } // namespace sort_real_
-
-  } // namespace data
-
-} // namespace mcrl2
+      } // namespace mcrl2::data::sort_real
 
 #endif // MCRL2_DATA_REAL64_H

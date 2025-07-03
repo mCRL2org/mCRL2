@@ -21,11 +21,7 @@
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/probabilistic_state.h"
 
-
-namespace mcrl2
-{
-
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief A class that contains a labelled transition system.
@@ -209,6 +205,6 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 };
 
 }
-}
+
 
 #endif // MCRL2_LTS_LTS_H

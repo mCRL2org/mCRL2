@@ -12,9 +12,7 @@
 
 #include "mcrl2/utilities/configuration.h"
 
-namespace atermpp
-{
-namespace detail
+namespace atermpp::detail
 {
 
 /// \brief Enable garbage collection.
@@ -38,7 +36,7 @@ constexpr static bool EnableCreationMetrics = false;
 /// \brief Keep track of the number of variables registered.
 constexpr static bool EnableVariableRegistrationMetrics = false;
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif // MCRL2_ATERMPP_ATERM_CONFIGURATION_H

@@ -15,9 +15,9 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \cond INTERNAL_DOCS
 /// \brief Visitor for checking if a pbes expression is in BES form.
@@ -59,8 +59,8 @@ void check_whether_argument_is_a_well_formed_bes(const pbes_expression& x)
   f.apply(x);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_DETAIL_CHECK_WELL_FORMED_BES_H

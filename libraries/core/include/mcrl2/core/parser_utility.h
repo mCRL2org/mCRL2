@@ -14,9 +14,8 @@
 
 #include "mcrl2/core/parse.h"
 
-namespace mcrl2 {
-
-namespace core {
+namespace mcrl2::core
+{
 
 namespace detail {
 
@@ -225,8 +224,6 @@ void warn_left_merge_merge(const parse_node& /* node */)
   // core::detail::foreach_parse_node(node, core::detail::find_left_merge_merge(parser_tables_mcrl2));
 }
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_PARSER_UTILITY_H

@@ -15,10 +15,7 @@
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/process/typecheck.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 class multi_action_type_checker
@@ -162,9 +159,6 @@ action_rename_specification typecheck_action_rename_specification(
   return typechecker(arspec, lpsspec);
 }
 
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_TYPECHECK_H

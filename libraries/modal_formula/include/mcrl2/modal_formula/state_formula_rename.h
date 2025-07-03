@@ -14,10 +14,7 @@
 
 #include "mcrl2/modal_formula/replace.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
+namespace mcrl2::state_formulas
 {
 
 /// Visitor that renames predicate variables using the specified identifier generator.
@@ -197,8 +194,6 @@ state_formula rename_variables(const state_formula& f, const std::set<core::iden
   return result;
 }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_STATE_FORMULA_RENAME_H

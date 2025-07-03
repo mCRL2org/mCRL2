@@ -15,10 +15,7 @@
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/application.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief function symbol.
@@ -102,9 +99,7 @@ inline void swap(lambda& t1, lambda& t2)
 }
 //--- end generated class lambda ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_LAMBDA_H
 

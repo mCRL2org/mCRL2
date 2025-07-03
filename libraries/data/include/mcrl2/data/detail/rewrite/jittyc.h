@@ -24,11 +24,7 @@
 
 #ifdef MCRL2_ENABLE_JITTYC
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 typedef std::vector < sort_expression_list> sort_list_vector;
@@ -312,8 +308,6 @@ struct rewriter_interface
   void (*rewrite_cleanup)();
 };
 
-}
-}
 }
 
 #endif // MCRL2_ENABLE_JITTYC

@@ -25,9 +25,7 @@
 #include "mcrl2/lps/probabilistic_data_expression.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief This class contains state labels for an labelled transition system in .lts format.
@@ -427,8 +425,7 @@ class probabilistic_lts_lts_t :
      */
     void save(const std::string& filename) const;
 };
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 namespace std
 {

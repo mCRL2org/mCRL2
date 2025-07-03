@@ -18,13 +18,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief Returns the sorts of a sequence of parameters.
@@ -199,10 +193,6 @@ bool check_data_spec_sorts(const Container& container, const SortContainer& sort
   return true;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_DATA_UTILITY_H

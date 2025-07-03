@@ -15,9 +15,7 @@
 #include "mcrl2/data/anonymize.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -84,8 +82,8 @@ void anonymize(pbes& pbesspec)
   f.update(pbesspec);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_ANONYMIZE_H

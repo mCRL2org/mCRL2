@@ -15,10 +15,7 @@
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -254,8 +251,6 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_UNTIME_H

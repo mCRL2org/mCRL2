@@ -27,11 +27,7 @@
 #include <vector>
 #include <cassert>
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template <class T>
@@ -74,7 +70,7 @@ public:
 };
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 
 #endif // #ifndef FIXED_VECTOR_H

@@ -14,9 +14,9 @@
 
 #include "mcrl2/pres/pres_expression.h"
 
-namespace mcrl2 {
 
-namespace core {
+
+namespace mcrl2::core {
 
 /// \brief Contains type information for terms.
 template <typename T>
@@ -119,8 +119,8 @@ struct term_traits_optimized<pres_system::pres_expression>: public core::term_tr
   } */
 };
 
-} // namespace core
+} // namespace mcrl2::core
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_DETAIL_TERM_TRAITS_OPTIMIZED_H

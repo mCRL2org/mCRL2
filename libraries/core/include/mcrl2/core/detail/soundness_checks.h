@@ -19,13 +19,7 @@
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/core/detail/function_symbols.h"
 
-namespace mcrl2
-{
-
-namespace core
-{
-
-namespace detail
+namespace mcrl2::core::detail
 {
 
 // checks
@@ -6679,9 +6673,6 @@ bool check_term_PRESCondEq([[maybe_unused]] const Term& t)
 }
 //--- end generated code ---//
 
-} // namespace detail
+} // namespace mcrl2::core::detail
 
-} // namespace core
-
-} // namespace mcrl2
 #endif // MCRL2_CORE_DETAIL_SOUNDNESS_CHECKS_H

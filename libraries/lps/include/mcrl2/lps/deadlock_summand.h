@@ -16,9 +16,7 @@
 #include "mcrl2/lps/stochastic_distribution.h"
 #include "mcrl2/lps/summand.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 /// \brief LPS summand containing a deadlock.
 class deadlock_summand: public summand_base
@@ -119,8 +117,8 @@ atermpp::aterm deadlock_summand_to_aterm(const deadlock_summand& s)
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_DEADLOCK_SUMMAND_H

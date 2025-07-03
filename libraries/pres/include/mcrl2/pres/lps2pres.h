@@ -23,10 +23,9 @@
 #include "mcrl2/pres/is_monotonous.h"
 #include "mcrl2/process/merge_action_specifications.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 /// \brief Algorithm for translating a state formula and a timed stochastic specification to a pres.
@@ -243,8 +242,8 @@ pres lps2pres(const std::string& spec_text,
   return lps2pres(lpsspec, f, timed, structured, unoptimized, preprocess_modal_operators, check_only);
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_LPS2PRES_H

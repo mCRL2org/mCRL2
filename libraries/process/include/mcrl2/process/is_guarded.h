@@ -14,9 +14,8 @@
 
 #include "mcrl2/process/find.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -100,8 +99,6 @@ bool is_guarded(const process_expression& x, const std::vector<process_equation>
   return detail::is_guarded(x, equations, W);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_GUARDED_H

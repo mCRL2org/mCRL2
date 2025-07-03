@@ -14,9 +14,9 @@
 
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \brief A rewriter that brings PBES expressions into PFNF normal form.
 class pfnf_rewriter
@@ -49,8 +49,8 @@ class pfnf_rewriter
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REWRITERS_PFNF_REWRITER_H

@@ -19,10 +19,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/map_substitution.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 // Functions below should be made available in the data library.
@@ -2126,8 +2123,6 @@ inline data_expression rewrite_with_memory(
   return i->second;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_LINEAR_INEQUALITY_H

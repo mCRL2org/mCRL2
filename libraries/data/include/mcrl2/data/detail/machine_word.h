@@ -18,13 +18,7 @@
 #include "mcrl2/data/machine_number.h"
 #include "mcrl2/data/machine_word.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace sort_machine_word
+namespace mcrl2::data::sort_machine_word
 {
 
 namespace detail
@@ -805,11 +799,11 @@ inline void shift_right_manual_implementation(data_expression& result, const dat
 }
 
 
-} // namespace sort_machine_word
+} // namespace mcrl2::data::sort_machine_word
 
-} // namespace data
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_DATA_MACHINE_NUMBER_H
 

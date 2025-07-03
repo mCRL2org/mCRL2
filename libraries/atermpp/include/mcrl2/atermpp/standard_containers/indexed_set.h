@@ -69,11 +69,8 @@ public:
 
 } // end namespace atermppp
 
-namespace mcrl2 {
-
-namespace utilities {
-
-namespace detail {
+namespace mcrl2::utilities::detail
+{
 
 // Specialization of a function defined in mcrl2/utilities/detail/container_utility.h.
 // In utilities, atermpp is not known. 
@@ -90,12 +87,6 @@ bool contains(const atermpp::indexed_set<Key, ThreadSafe, Hash, Equals, Allocato
   return c.find(v, thread_index) != c.end(thread_index);
 }
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
-
-
+} // namespace mcrl2::utilities::detail
 
 #endif // MCRL2_ATERMPP_INDEXED_SET_H

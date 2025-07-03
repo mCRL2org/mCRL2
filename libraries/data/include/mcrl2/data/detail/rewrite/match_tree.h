@@ -15,11 +15,7 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/machine_number.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// This is a list where variables and aterm ints can be stored.
@@ -702,10 +698,6 @@ std::ostream& operator<<(std::ostream& s, const match_tree& t)
   return s;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_MATCH_TREE_H

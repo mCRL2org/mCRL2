@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/real.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Base class for LPS summands.
@@ -78,8 +75,8 @@ class summand_base
     }
 };
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_SUMMAND_H

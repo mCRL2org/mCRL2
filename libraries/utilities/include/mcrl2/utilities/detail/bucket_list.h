@@ -15,11 +15,7 @@
 #include <iterator>
 #include <memory>
 
-namespace mcrl2
-{
-namespace utilities
-{
-namespace detail
+namespace mcrl2::utilities::detail
 {
 
 struct Sentinel{};
@@ -374,8 +370,8 @@ private:
   node_base m_head;
 };
 
-} // namespace detail
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities::detail
+
+
 
 #endif // MCRL2_UTILITIES_DETAIL_BUCKETLIST_H_

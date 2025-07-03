@@ -15,9 +15,7 @@
 #include <deque>
 #include "mcrl2/pbes/structure_graph.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 struct deque_vertex_set
 {
@@ -582,8 +580,8 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
   }
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESSOLVE_VERTEX_SET_H

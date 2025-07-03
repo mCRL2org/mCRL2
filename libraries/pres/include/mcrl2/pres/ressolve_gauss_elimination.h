@@ -18,9 +18,9 @@
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pres/builder.h" 
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 /// \brief A builder that substitutes an expression for a propositional variable instantiation in a pres expression. 
 ///
@@ -1282,8 +1282,8 @@ std::cerr << ".";
     } 
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_RESSOLVE_GAUSS_ELIMINATION_H

@@ -14,11 +14,11 @@
 
 #include "mcrl2/lts/lts_lts.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 inline
 std::ostream& operator<<(std::ostream& out, const lts::lts_lts_t& ltsspec)
@@ -124,10 +124,10 @@ std::ostream& operator<<(std::ostream& out, const lts2pbes_lts& ltsspec)
   return out;
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LTS2PBES_LTS_H

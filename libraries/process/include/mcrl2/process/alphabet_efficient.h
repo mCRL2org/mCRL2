@@ -14,9 +14,8 @@
 
 #include "mcrl2/process/alphabet.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -131,8 +130,6 @@ multi_action_name_set alphabet_efficient(const process_expression& x, const std:
   return detail::alphabet_efficient(x, equations, W).alphabet;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ALPHABET_EFFICIENT_H

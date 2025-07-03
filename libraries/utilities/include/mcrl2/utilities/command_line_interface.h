@@ -21,9 +21,7 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/toolset_version.h"
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 class interface_description;
@@ -1561,7 +1559,6 @@ inline command_line_parser::command_line_parser(interface_description& d, const 
 #endif // __CYGWIN__
 
 /// \endcond
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif

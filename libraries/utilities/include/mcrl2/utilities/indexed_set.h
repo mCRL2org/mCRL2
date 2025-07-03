@@ -16,9 +16,8 @@
 #include "mcrl2/utilities/detail/atomic_wrapper.h"
 #include "mcrl2/utilities/shared_mutex.h"
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \brief A set that assigns each element an unique index.
@@ -236,7 +235,7 @@ public:
 };
 
 } // end namespace utilities
-} // end namespace mcrl2
+// end namespace mcrl2
 
 #include "mcrl2/utilities/detail/indexed_set.h"
 

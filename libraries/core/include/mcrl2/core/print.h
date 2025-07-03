@@ -16,9 +16,8 @@
 #include "mcrl2/core/print_format.h"
 #include "mcrl2/core/traverser.h"
 
-namespace mcrl2
-{
-namespace core
+
+namespace mcrl2::core
 {
 
 /// \cond INTERNAL_DOCS
@@ -233,8 +232,8 @@ std::string pp(const T& x, bool precedence_aware = true)
   return out.str();
 }
 
-} // namespace core
+} // namespace mcrl2::core
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_CORE_PRINT_H

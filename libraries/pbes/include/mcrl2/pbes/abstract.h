@@ -16,10 +16,9 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -142,8 +141,8 @@ class pbes_abstract_algorithm
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_ABSTRACT_H

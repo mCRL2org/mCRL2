@@ -14,9 +14,8 @@
 
 #include "mcrl2/data/function_symbol.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 inline
 void on_delete_function_symbol(const atermpp::aterm& t)
@@ -36,8 +35,6 @@ void register_function_symbol_hooks()
   add_deletion_hook(core::detail::function_symbol_OpId(), on_delete_function_symbol);
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_INDEX_TRAITS_H

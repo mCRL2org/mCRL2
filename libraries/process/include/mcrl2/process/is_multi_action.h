@@ -15,9 +15,8 @@
 #include "mcrl2/process/multi_action_name.h"
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -63,8 +62,6 @@ multi_action_name sync_multi_action_name(const sync& x)
   return f.result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_MULTI_ACTION_H

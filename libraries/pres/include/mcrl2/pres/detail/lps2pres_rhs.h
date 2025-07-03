@@ -17,11 +17,11 @@
 #include "mcrl2/pres/detail/lps2pres_sat.h"
 #include "mcrl2/pres/replace.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
 
-namespace detail {
+
+
+namespace mcrl2::pres_system::detail {
 
 struct lps2pres_parameters
 {
@@ -629,10 +629,10 @@ typename TermTraits::term_type RHS_structured(const state_formulas::state_formul
   return f.top();
 }
 
-} // namespace detail
+} // namespace mcrl2::pres_system::detail
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_DETAIL_LPS2PRES_RHS_H

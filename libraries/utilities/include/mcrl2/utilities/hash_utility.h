@@ -22,11 +22,7 @@
 #include <vector>
 #include <map>
 
-namespace mcrl2
-{
-namespace utilities
-{
-namespace detail
+namespace mcrl2::utilities::detail
 {
 
 inline std::size_t hash_combine(const std::size_t h1, const std::size_t h2)
@@ -46,8 +42,8 @@ inline std::size_t hash_combine_cheap(const std::size_t seed, const std::size_t 
 }
 
 } //end namespace detail
-} //end namespace utilities
-} //end namespace mcrl2
+ //end namespace utilities
+ //end namespace mcrl2
 
 namespace std
 {

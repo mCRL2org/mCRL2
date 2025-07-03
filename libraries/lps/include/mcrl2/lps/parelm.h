@@ -17,10 +17,7 @@
 #include "mcrl2/utilities/reachable_nodes.h"
 #include <boost/integer.hpp>
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -276,8 +273,8 @@ void parelm(Specification& spec, bool variant1 = true)
   algorithm.run(variant1);
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_PARELM_H

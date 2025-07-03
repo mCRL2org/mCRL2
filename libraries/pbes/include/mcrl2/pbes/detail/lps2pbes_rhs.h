@@ -19,11 +19,11 @@
 #include "mcrl2/pbes/detail/lps2pbes_sat.h"
 #include "mcrl2/pbes/replace.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 struct lps2pbes_parameters
 {
@@ -655,10 +655,10 @@ typename TermTraits::term_type RHS_structured(const state_formulas::state_formul
   return f.top();
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LPS2PBES_RHS_H

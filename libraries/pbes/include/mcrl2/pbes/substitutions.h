@@ -15,9 +15,7 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/replace.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 /** \brief Substitution function for propositional variables
  *
@@ -190,8 +188,8 @@ class propositional_variable_substitution
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_SUBSTITUTIONS_H

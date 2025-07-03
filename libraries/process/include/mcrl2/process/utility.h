@@ -19,9 +19,7 @@
 #include "mcrl2/process/replace.h"
 #include "mcrl2/utilities/sequence.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process {
 
 /// \brief Returns true if x is a pCRL expression. N.B. This test depends on the assumption that
 /// in mCRL2 a top level pCRL expression may never contain a non-pCRL expression.
@@ -129,8 +127,8 @@ process_expression make_block(const core::identifier_string_list& B, const proce
   }
 }
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_UTILITY_H

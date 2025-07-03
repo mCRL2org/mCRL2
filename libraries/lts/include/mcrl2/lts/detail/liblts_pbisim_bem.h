@@ -13,11 +13,7 @@
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/lts/detail/liblts_plts_merge.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template < class LTS_TYPE>
@@ -854,8 +850,6 @@ bool destructive_probabilistic_bisimulation_compare_bem(
     initial_probabilistic_state_key_l1);
 }
 
-}  // namespace detail
-}  // namespace lts
-}  // namespace mcrl2
+} // namespace mcrl2::lts::detail
 
 #endif // _LIBLTS_PBISIM_BEM_H

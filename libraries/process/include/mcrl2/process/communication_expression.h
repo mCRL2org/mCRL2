@@ -14,10 +14,7 @@
 
 #include "mcrl2/process/action_name_multiset.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated class communication_expression ---//
@@ -108,8 +105,8 @@ inline void swap(communication_expression& t1, communication_expression& t2)
 }
 //--- end generated class communication_expression ---//
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_COMMUNICATION_EXPRESSION_H

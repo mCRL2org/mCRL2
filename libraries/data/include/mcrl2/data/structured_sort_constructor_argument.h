@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/function_symbol.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated class structured_sort_constructor_argument ---//
@@ -124,9 +121,7 @@ inline void swap(structured_sort_constructor_argument& t1, structured_sort_const
 }
 //--- end generated class structured_sort_constructor_argument ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_ARGUMENT_H
 

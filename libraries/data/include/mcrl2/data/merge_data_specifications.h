@@ -14,9 +14,8 @@
 
 #include "mcrl2/data/typecheck.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 /// \brief Merges two data specifications.  Throws an exception if conflicts are detected.
 /// \details If the data specifications have equal aliases, types, constructors or functions these are merged.
@@ -89,8 +88,6 @@ data_specification merge_data_specifications(const data_specification& dataspec1
   return result;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_MERGE_DATA_SPECIFICATIONS_H

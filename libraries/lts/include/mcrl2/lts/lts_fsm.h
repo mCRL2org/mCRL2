@@ -23,9 +23,7 @@
 #include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/action_label_string.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief This class contains state labels for the fsm format.
@@ -298,7 +296,6 @@ class probabilistic_lts_fsm_t :
     void save(const std::string& filename) const;
 };
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif

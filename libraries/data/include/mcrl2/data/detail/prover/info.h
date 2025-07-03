@@ -15,11 +15,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/rewriter.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 enum Compare_Result
@@ -243,8 +239,6 @@ class Info
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

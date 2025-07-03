@@ -15,11 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief The enumeration type smt_solver_type enumerates all available SMT solvers.
@@ -86,8 +82,6 @@ std::string description(const smt_solver_type s)
   }
 }
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_PROVER_SOLVER_TYPE_H

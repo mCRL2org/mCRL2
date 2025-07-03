@@ -14,10 +14,7 @@
 
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 /// \brief Maintains a multiset of bound data variables during traversal
@@ -126,8 +123,8 @@ struct add_data_variable_builder_binding: public add_data_variable_binding<Build
   }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_ADD_BINDING_H

@@ -12,13 +12,7 @@
 #ifndef MCRL2_UTILITIES_DETAIL_IOTA_H
 #define MCRL2_UTILITIES_DETAIL_IOTA_H
 
-namespace mcrl2
-{
-
-namespace utilities
-{
-
-namespace detail
+namespace mcrl2::utilities::detail
 {
 
 /// \brief Generates the sequence value, value + 1, ... and writes it to the sequence [first, last)
@@ -34,10 +28,6 @@ void iota(Iter first, Iter last, T value)
   }
 }
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::detail
 
 #endif // MCRL2_UTILITIES_DETAIL_IOTA_H

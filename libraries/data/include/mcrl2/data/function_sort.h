@@ -14,10 +14,9 @@
 
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 //--- start generated class function_sort ---//
@@ -194,9 +193,9 @@ inline function_sort make_function_sort_(const sort_expression& dom1,
   return function_sort({ dom1, dom2, dom3, dom4, dom5, dom6 }, codomain);
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 namespace std
 {

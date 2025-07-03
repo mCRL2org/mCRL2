@@ -15,9 +15,7 @@
 #include "mcrl2/data/join.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 template <typename Specification>
@@ -71,8 +69,8 @@ class decluster_algorithm: public detail::lps_algorithm<Specification>
 
 }; // decluster_algorithm
 
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
+
 
 #endif // MCRL2_LPS_DECLUSTER_H
 

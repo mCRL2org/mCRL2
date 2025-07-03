@@ -20,11 +20,8 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/untyped_data_specification.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 struct sort_expression_actions: public core::default_parser_actions
 {
@@ -466,10 +463,6 @@ struct data_specification_actions: public data_expression_actions
   }
 };
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_PARSE_IMPL_H

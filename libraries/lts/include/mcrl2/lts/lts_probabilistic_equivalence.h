@@ -19,9 +19,7 @@
 #include <string>
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief LTS equivalence relations.
@@ -214,8 +212,8 @@ inline std::string description(const lts_probabilistic_preorder& pre)
   }
 }
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
+
 
 #endif // MCRL2_LTS_LTS_PROBABILISTIC_EQUIVALENCE_H
 

@@ -24,9 +24,7 @@
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/atermpp/aterm.h"
 
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 template < class STATE, class PROBABILITY >
@@ -105,8 +103,8 @@ class state_probability_pair
 
 };
 
-} // namespace lps
-} // namespace mcrl2 
+} // namespace mcrl2::lps
+
 
 namespace std
 {

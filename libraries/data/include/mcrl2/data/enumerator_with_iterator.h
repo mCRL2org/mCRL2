@@ -15,9 +15,8 @@
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/data/enumerator.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 struct is_not_false
 {
@@ -450,8 +449,6 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_ca
     }
 };
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_ENUMERATOR_WITH_ITERATOR_H

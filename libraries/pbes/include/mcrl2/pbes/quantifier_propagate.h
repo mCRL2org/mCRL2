@@ -16,9 +16,9 @@
 
 #include <queue>
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -408,8 +408,8 @@ pbes quantifier_propagate(const pbes& p)
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_QUANTIFIER_PROPAGATE_H

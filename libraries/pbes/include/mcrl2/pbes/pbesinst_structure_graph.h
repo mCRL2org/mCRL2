@@ -20,9 +20,9 @@
 #include "mcrl2/pbes/structure_graph_builder.h"
 #include "mcrl2/utilities/logger.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \brief Variant of pbesinst that will compute a structure graph for a PBES.
 /// The result will be put in the structure graph that is passed in the constructor.
@@ -143,8 +143,8 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESINST_STRUCTURE_GRAPH_H

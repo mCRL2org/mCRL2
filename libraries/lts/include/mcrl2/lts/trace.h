@@ -22,13 +22,11 @@
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lts/lts_lts.h"
 
-namespace mcrl2
-{
 /** \brief The namespace for traces.
 * \details The namespace trace contains all data structures and members of the
 * trace library.
 */
-namespace lts
+namespace mcrl2::lts
 {
 
 
@@ -666,5 +664,5 @@ inline std::ostream& operator<<(std::ostream& os, const trace& t)
 }
 
 }
-}
+
 #endif  // MCRL2_LTS_TRACE_H

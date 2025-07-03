@@ -30,14 +30,11 @@
 #include "mcrl2/lts/lts_type.h"
 
 
-namespace mcrl2
-{
-
 /** \brief The main LTS namespace.
  * \details This namespace contains all data structures and members of the LTS
  * library.
  */
-namespace lts
+namespace mcrl2::lts
 {
 
 class lts_default_base
@@ -668,6 +665,6 @@ class lts: public LTS_BASE
 };
 
 }
-}
+
 
 #endif // MCRL2_LTS_LTS_H

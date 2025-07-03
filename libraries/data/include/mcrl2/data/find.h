@@ -16,10 +16,7 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/traverser.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -482,8 +479,6 @@ bool search_data_expression(Container const& container, const data_expression& s
   return data_expressions.find(s) != data_expressions.end();
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_FIND_H

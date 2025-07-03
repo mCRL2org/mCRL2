@@ -14,11 +14,7 @@
 #include "mcrl2/lts/detail/embedded_list.h"
 #include "mcrl2/lts/detail/liblts_plts_merge.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template < class LTS_TYPE>
@@ -1399,6 +1395,6 @@ bool destructive_probabilistic_bisimulation_compare_grv(
 }
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 #endif //_LIBLTS_PBISIM_GRV_H

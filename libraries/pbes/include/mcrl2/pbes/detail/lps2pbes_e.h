@@ -14,11 +14,11 @@
 
 #include "mcrl2/pbes/detail/lps2pbes_rhs.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 template <typename TermTraits, typename Parameters>
 void E(const state_formulas::state_formula& x,
@@ -317,10 +317,10 @@ void E_structured(const state_formulas::state_formula& x,
   result.insert(result.end(), f.top().begin(), f.top().end());
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LPS2PBES_E_H

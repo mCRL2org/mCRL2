@@ -16,10 +16,7 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/untyped_multi_action.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 // Adds sort expression traversal to a builder
@@ -1807,8 +1804,6 @@ struct process_identifier_builder: public add_process_identifiers<core::builder,
 };
 //--- end generated add_process_identifiers code ---//
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_BUILDER_H

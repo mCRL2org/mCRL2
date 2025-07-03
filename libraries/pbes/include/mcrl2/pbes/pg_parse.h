@@ -23,10 +23,9 @@ extern "C"
   extern D_ParserTables parser_tables_pg;
 }
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 typedef unsigned long long identifier_t;
@@ -251,8 +250,8 @@ inline void parse_pgsolver(const std::string& filename, pbes& b, bool maxpg = tr
   }
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_BES_PG_PARSE_H

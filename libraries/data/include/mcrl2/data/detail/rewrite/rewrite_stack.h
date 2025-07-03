@@ -23,11 +23,7 @@
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// This is an exception that is thrown when the rewrite 
@@ -131,9 +127,7 @@ class rewrite_stack : protected atermpp::vector<data_expression>
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_REWRITE_STACK_H
 

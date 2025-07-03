@@ -23,10 +23,7 @@
 #include "mcrl2/lps/state_probability_pair.h"
 
 
-namespace mcrl2
-{
-
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief A class that contains a probabilistic state.
@@ -360,8 +357,8 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_state<STATE, PRO
 
 
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
+
 
 namespace std
 {

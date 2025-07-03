@@ -17,11 +17,11 @@
 #include "mcrl2/pbes/detail/stategraph_split.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 inline
 pbes_expression stategraph_not(const pbes_expression& x)
@@ -257,10 +257,10 @@ class stategraph_simplify_rewriter
     }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H

@@ -15,9 +15,9 @@
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/pbes/structure_graph.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 // A structure graph
 class simple_structure_graph
@@ -107,8 +107,8 @@ std::ostream& operator<<(std::ostream& out, const simple_structure_graph& G)
   return print_structure_graph(out, G);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_SIMPLE_STRUCTURE_GRAPH_H

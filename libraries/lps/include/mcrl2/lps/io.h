@@ -18,10 +18,7 @@
 
 #include <fstream>
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Writes LPS to the stream.
@@ -108,8 +105,6 @@ void load_lps(Specification& spec, const std::string& filename)
   load_lps(spec, ifs, filename);
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_IO_H

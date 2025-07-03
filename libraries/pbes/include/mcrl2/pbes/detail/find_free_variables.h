@@ -14,13 +14,11 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 struct find_free_variables_traverser: public pbes_expression_traverser<find_free_variables_traverser>
@@ -129,10 +127,10 @@ std::set<data::variable> find_free_variables(const pbes_expression& x, const dat
   return f.result;
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_FIND_FREE_VARIABLES_H

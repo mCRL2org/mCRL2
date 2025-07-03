@@ -13,11 +13,9 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/function_update.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 template <template <class> class Traverser>
@@ -202,7 +200,7 @@ inline void rewrite_all_arguments(data_expression& result, const application& t,
 } 
 
 }
-}
-}
+
+
 
 #endif // REWRITE_JITTY_JITTYC_COMMON_H

@@ -17,13 +17,7 @@
 #include <set>
 #include <vector>
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief Returns true if the sequence [first, last) contains duplicates.
@@ -101,10 +95,6 @@ bool sequence_empty_intersection(Sequence s1, Sequence s2)
   return true;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_SEQUENCE_ALGORITHM_H

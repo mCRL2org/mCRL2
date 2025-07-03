@@ -16,9 +16,8 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/process/replace_capture_avoiding.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
@@ -287,11 +286,8 @@ stochastic_distribution replace_variables_capture_avoiding(
     id_generator.add_identifier(v.name());
   } 
   return lps::replace_variables_capture_avoiding(x, pars, sigma, id_generator);
-} 
+}
 
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_REPLACE_CAPTURE_AVOIDING_H

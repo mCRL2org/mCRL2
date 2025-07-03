@@ -15,10 +15,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pres/replace_capture_avoiding.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 namespace detail {
@@ -286,9 +283,9 @@ T replace_pres_expressions(const T& x,
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #ifndef MCRL2_PRES_SUBSTITUTIONS_H
 #include "mcrl2/pres/substitutions.h"

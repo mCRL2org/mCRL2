@@ -14,12 +14,7 @@
 #include <set>
 #include "mcrl2/lts/transition.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 inline std::size_t apply_hidden_labels(const std::size_t n, const std::set<std::size_t>& hidden_action_set)
@@ -192,7 +187,7 @@ class compare_transitions_target
 };
 
 } // detail
-} // lts
-} // mcrl2
+// lts
+// mcrl2
 
 #endif

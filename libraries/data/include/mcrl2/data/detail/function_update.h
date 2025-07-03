@@ -15,9 +15,7 @@
 
 #include "mcrl2/data/find.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 // Prototype. 
@@ -56,7 +54,6 @@ inline void if_always_else_manual_implementation(data_expression& result, const 
   return;
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_DETAIL_FUNCTION_UPDATE_H

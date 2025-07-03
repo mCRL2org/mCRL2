@@ -16,9 +16,7 @@
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/lps/stochastic_process_initializer.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 namespace detail {
 
@@ -95,8 +93,8 @@ std::ostream& operator<<(std::ostream& out, const stochastic_linear_process& x)
 std::set<data::variable> find_all_variables(const lps::stochastic_linear_process& x);
 std::set<data::variable> find_free_variables(const lps::stochastic_linear_process& x);
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_STOCHASTIC_LINEAR_PROCESS_H

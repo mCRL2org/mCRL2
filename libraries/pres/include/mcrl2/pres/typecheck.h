@@ -16,10 +16,9 @@
 #include "mcrl2/pres/detail/pres_context.h"
 #include "mcrl2/pres/normalize_sorts.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 namespace detail
@@ -408,8 +407,8 @@ pres_expression typecheck_pres_expression(pres_expression& x,
   }
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_TYPECHECK_H

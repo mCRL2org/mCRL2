@@ -14,10 +14,7 @@
 
 #include "mcrl2/modal_formula/action_formula.h"
 
-namespace mcrl2
-{
-
-namespace regular_formulas
+namespace mcrl2::regular_formulas
 {
 
 //--- start generated classes ---//
@@ -483,8 +480,8 @@ inline void swap(untyped_regular_formula& t1, untyped_regular_formula& t2)
 }
 //--- end generated classes ---//
 
-} // namespace regular_formulas
+} // namespace mcrl2::regular_formulas
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_MODAL_FORMULA_REGULAR_FORMULA_H

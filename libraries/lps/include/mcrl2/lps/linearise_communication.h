@@ -23,10 +23,7 @@
 
 #include <optional>
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -925,8 +922,8 @@ inline void communicationcomposition(const process::communication_expression_lis
       .apply(action_summands, deadlock_summands, nosumelm, nodeltaelimination, ignore_time);
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_LINEARISE_COMMUNICATION_H

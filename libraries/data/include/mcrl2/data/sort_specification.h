@@ -16,9 +16,7 @@
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/structured_sort.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 /// \cond INTERNAL_DOC
@@ -325,8 +323,8 @@ class sort_specification
 }
 ;
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_SORT_SPECIFICATION_H
