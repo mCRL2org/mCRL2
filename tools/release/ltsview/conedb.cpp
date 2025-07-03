@@ -12,8 +12,8 @@
 #include "conedb.h"
 #include "mathutils.h"
 
-#define ohash(k1,k2,b,m) ((k1*11408669 + k2*97416181 + b*71053447) & m)
-#define thash(k,tb,m) ((k*11408669 + tb*97416181) & m)
+#define ohash(k1,k2,b,m) (((k1)*11408669 + (k2)*97416181 + (b)*71053447) & (m))
+#define thash(k,tb,m) (((k)*11408669 + (tb)*97416181) & (m))
 #define BOT_BIT 1
 #define TOP_BIT 2
 

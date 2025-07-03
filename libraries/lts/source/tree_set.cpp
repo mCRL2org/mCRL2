@@ -20,7 +20,7 @@
 #define TAGS_BLOCK 15000
 #define BUCKETS_BLOCK 25000
 // simple hash function; uses two large primes
-#define hash(l,r,m) (36425657*l + 77673689*r) & m
+#define hash(l,r,m) ((36425657*(l) + 77673689*(r)) & (m))
 
 namespace mcrl2
 {
