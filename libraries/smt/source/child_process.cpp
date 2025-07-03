@@ -28,9 +28,8 @@
 #include <cerrno>
 
 
-namespace mcrl2
-{
-namespace smt
+
+namespace mcrl2::smt
 {
 
 #ifdef MCRL2_PLATFORM_WINDOWS
@@ -308,5 +307,5 @@ child_process::~child_process()
 #endif // MCRL2_PLATFORM_WINDOWS
 
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
+

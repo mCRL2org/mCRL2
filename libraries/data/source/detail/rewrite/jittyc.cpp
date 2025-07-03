@@ -33,11 +33,9 @@ using namespace mcrl2::core::detail;
 using namespace atermpp;
 using namespace mcrl2::log;
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 // Some compilers can only deal with a limited number of nested curly brackets. 
@@ -3232,7 +3230,7 @@ rewrite_strategy RewriterCompilingJitty::getStrategy()
 }
 
 }
-}
-}
+
+
 
 #endif

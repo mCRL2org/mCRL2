@@ -15,10 +15,9 @@
 #include "mcrl2/pres/io.h"
 #include "mcrl2/pres/parse.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 const std::vector<utilities::file_format>& pres_file_formats()
@@ -341,6 +340,6 @@ atermpp::aterm pres_to_aterm(const pres& p)
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+

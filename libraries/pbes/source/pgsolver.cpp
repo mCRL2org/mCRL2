@@ -13,10 +13,9 @@
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/normal_forms.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 typedef std::map<core::identifier_string, std::size_t> variable_map;
@@ -154,6 +153,6 @@ void save_bes_pgsolver(const pbes& bes, std::ostream& stream, bool maxpg)
   bes2pgsolver(bes_standard_form.equations().begin(), bes_standard_form.equations().end(), stream, maxpg);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+

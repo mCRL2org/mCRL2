@@ -11,8 +11,8 @@
 #include "mcrl2/utilities/logger.h"
 #include <cassert>
 
-namespace mcrl2 {
-  namespace log {
+
+namespace mcrl2::log {
 
   std::string format_time(const time_t* t)
   {
@@ -163,5 +163,5 @@ namespace mcrl2 {
     return result.str();
   }
 
-  } // namespace log
-} // namespace mcrl2
+} // namespace mcrl2::log
+

@@ -26,11 +26,9 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_utilities.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+
+
+namespace mcrl2::lts::detail
 {
 namespace bisim_gjkw
 {
@@ -3270,5 +3268,5 @@ template class bisim_partitioner_gjkw<lts_aut_t>;
 template class bisim_partitioner_gjkw<lts_fsm_t>;
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2

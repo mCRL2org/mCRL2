@@ -17,10 +17,9 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/normal_forms.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 const std::vector<utilities::file_format>& pbes_file_formats()
@@ -351,6 +350,6 @@ atermpp::aterm pbes_to_aterm(const pbes& p)
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+

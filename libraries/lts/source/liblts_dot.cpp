@@ -14,9 +14,8 @@
 
 using namespace mcrl2::core;
 
-namespace mcrl2
-{
-namespace lts
+
+namespace mcrl2::lts
 {
 
 void probabilistic_lts_dot_t::save(std::ostream& os) const
@@ -127,4 +126,4 @@ void lts_dot_t::save(const std::string& filename) const
 }
 
 }
-}
+

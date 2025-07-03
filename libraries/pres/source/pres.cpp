@@ -19,10 +19,9 @@
 #include "mcrl2/pres/print.h"
 #include "mcrl2/pres/translate_user_notation.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 //--- start generated pres_system overloads ---//
@@ -178,7 +177,7 @@ pres_expression parse_pres_expression(const std::string& text)
 
 } // namespace detail
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 

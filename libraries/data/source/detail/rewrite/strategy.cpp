@@ -11,11 +11,9 @@
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 class dependencies_rewrite_rule_pair
@@ -253,6 +251,6 @@ strategy RewriterJitty::create_strategy(const function_symbol& f, const data_equ
   }
 }
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
+
+

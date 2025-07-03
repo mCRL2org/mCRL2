@@ -546,9 +546,8 @@ static void write_to_aut(const lts_aut_t& l, std::ostream& os)
   }
 }
 
-namespace mcrl2
-{
-namespace lts
+
+namespace mcrl2::lts
 {
 
 void probabilistic_lts_aut_t::load(const std::string& filename)
@@ -643,4 +642,4 @@ void lts_aut_t::save(std::string const& filename) const
 
 
 }
-}
+
