@@ -15,10 +15,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/file_utility.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 void save_bes_pgsolver(const pbes& bes, std::ostream& stream, bool maxpg = true);
@@ -101,8 +98,8 @@ void load_pbes(pbes& pbes,
                const std::string& filename,
                utilities::file_format format = utilities::file_format());
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_IO_H

@@ -15,10 +15,7 @@
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief Returns true if the term t is a basic sort
@@ -143,9 +140,9 @@ std::string pp(const sort_expression_list& x, bool precedence_aware = true);
 std::string pp(const sort_expression_vector& x, bool precedence_aware = true);
 std::set<data::sort_expression> find_sort_expressions(const data::sort_expression& x);
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 namespace std
 {

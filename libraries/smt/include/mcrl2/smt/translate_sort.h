@@ -12,9 +12,7 @@
 #include "mcrl2/data/traverser.h"
 #include "mcrl2/smt/utilities.h"
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 namespace detail
 {
@@ -99,7 +97,6 @@ void translate_sort_expression(const T& x, OutputStream& o, const native_transla
   detail::make_translate_sort_expression_traverser<data::sort_expression_traverser>(o, nt, snm).apply(x);
 }
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif

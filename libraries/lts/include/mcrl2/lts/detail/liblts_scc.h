@@ -14,9 +14,7 @@
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 namespace detail
@@ -398,5 +396,5 @@ void scc_reduce(LTS_TYPE& l,const bool preserve_divergence_loops = false)
 }
 
 }
-}
+
 #endif // _LIBLTS_SCC_H

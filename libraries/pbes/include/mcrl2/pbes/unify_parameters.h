@@ -20,9 +20,7 @@
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include <optional>
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 struct unify_parameters_replace_function
 {
@@ -248,8 +246,8 @@ bool has_unified_parameters(const pbes& pbes)
   return true;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_UNIFY_PARAMETERS_H

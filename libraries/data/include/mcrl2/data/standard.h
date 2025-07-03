@@ -16,11 +16,7 @@
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/data_equation.h"
 
-
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 // predeclare
@@ -446,7 +442,7 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
   return result;
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
+
 
 #endif // MCRL2_DATA_STANDARD_H

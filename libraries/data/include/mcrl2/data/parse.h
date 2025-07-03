@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/typecheck.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail {
@@ -470,8 +467,8 @@ std::pair<std::string, data_expression_list> parse_variable(std::string const& t
 } // namespace detail
 /// \endcond
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_PARSE_H

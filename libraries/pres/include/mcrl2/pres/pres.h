@@ -16,11 +16,8 @@
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/pres/pres_equation.h"
 
-namespace mcrl2
-{
-
 /// \brief The main namespace for the PRES library.
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 class pres;
@@ -332,8 +329,8 @@ bool operator==(const pres& p1, const pres& p2)
   return pres_to_aterm(p1) == pres_to_aterm(p2);
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PRES_H

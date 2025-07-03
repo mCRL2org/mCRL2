@@ -14,9 +14,7 @@
 
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 struct pbes_equation_index
 {
@@ -92,8 +90,8 @@ std::ostream& operator<<(std::ostream& out, const pbes_equation_index& index)
   return out;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBES_EQUATION_INDEX_H

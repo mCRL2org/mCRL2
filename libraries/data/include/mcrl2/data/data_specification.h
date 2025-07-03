@@ -15,10 +15,9 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/sort_specification.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 // template function overloads
@@ -919,8 +918,8 @@ std::set<core::identifier_string> function_and_mapping_identifiers(const data_sp
   return result;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H

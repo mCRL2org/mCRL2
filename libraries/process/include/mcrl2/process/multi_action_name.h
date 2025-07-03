@@ -15,9 +15,8 @@
 #include "mcrl2/atermpp/aterm_io_text.h"
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 /// \brief Represents the name of a multi action
 struct multi_action_name: public std::multiset<core::identifier_string>
@@ -88,8 +87,6 @@ std::ostream& operator<<(std::ostream& out, const multi_action_name_set& A)
   return out << pp(A);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_MULTI_ACTION_NAME_H

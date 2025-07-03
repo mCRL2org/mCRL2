@@ -14,11 +14,7 @@
 
 #include <string>
 
-namespace mcrl2 {
-
-namespace lps {
-
-namespace detail {
+namespace mcrl2::lps::detail {
 
 inline
 std::string NO_DEADLOCK()
@@ -32,10 +28,10 @@ std::string NO_LIVELOCK()
   return "[true*]<true>true";
 }
 
-} // namespace detail
+} // namespace mcrl2::lps::detail
 
-} // namespace lps
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_MODAL_FORMULA_DETAIL_TEST_INPUT_H

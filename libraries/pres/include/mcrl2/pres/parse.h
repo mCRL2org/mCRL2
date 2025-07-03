@@ -18,10 +18,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/join.hpp>
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 namespace detail
@@ -132,8 +131,8 @@ pres_expression parse_pres_expression(const std::string& text,
   return parse_pres_expression(text, presspec.data(), variables, propositional_variables, type_check, translate_user_notation, normalize_sorts);
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PARSE_H

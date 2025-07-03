@@ -17,9 +17,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pbes/search_strategy.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 ///  \brief Enumeration of partial strategies for solving PBESs.
 enum class partial_solve_strategy {
@@ -96,8 +94,8 @@ std::ostream& operator<<(std::ostream& out, const pbessolve_options& options)
   return out;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESSOLVE_OPTIONS_H

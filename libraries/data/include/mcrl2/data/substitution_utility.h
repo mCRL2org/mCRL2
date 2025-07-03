@@ -15,9 +15,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 /// \brief Adds assignments [v := e] to the substitution sigma for each variable in v.
 template <typename VariableSequence, typename DataExpressionSequence>
@@ -44,8 +42,8 @@ void remove_assignments(data::mutable_indexed_substitution<>& sigma, const Varia
   }
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_SUBSTITUTION_UTILITY_H

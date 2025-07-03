@@ -20,13 +20,7 @@ namespace Ui
   class LogWidget;
 }
 
-namespace mcrl2
-{
-
-namespace gui
-{
-
-namespace qt
+namespace mcrl2::gui::qt
 {
 
 class LogRelay : public QObject, public output_policy
@@ -60,10 +54,6 @@ class LogWidget: public QWidget
     QSize m_sizeHint;
 };
 
-} // namespace qt
-
-} // namespace gui
-
-} // namespace mcrl2
+} // namespace mcrl2::gui::qt
 
 #endif // MCRL2_UTILITIES_LOGWIDGET_H

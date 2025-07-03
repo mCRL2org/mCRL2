@@ -21,11 +21,7 @@
 #include "mcrl2/data/bag_comprehension.h"
 #include "mcrl2/data/untyped_set_or_bag_comprehension.h"
 
-
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief Maintains a multiset of bound data variables during traversal
@@ -183,8 +179,6 @@ struct add_data_variable_builder_binding: public add_data_variable_binding<Build
   }
 };
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_ADD_BINDING_H

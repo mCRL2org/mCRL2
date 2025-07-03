@@ -28,11 +28,7 @@
 /// checked for disjointness. The function Disjointness_Checker::disjoint indicates whether the two summands with numbers
 /// n_1 and n_2 are syntactically disjoint.
 
-namespace mcrl2
-{
-namespace lps
-{
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 class Disjointness_Checker
@@ -190,8 +186,6 @@ bool Disjointness_Checker::disjoint(std::size_t n1, std::size_t n2)
   return v_used_1_changed_2 && v_used_2_changed_1 && v_changed_1_changed_2;
 }
 
-} // namespace detail
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif

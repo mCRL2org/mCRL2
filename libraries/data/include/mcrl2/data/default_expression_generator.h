@@ -14,9 +14,7 @@
 
 #include "mcrl2/data/representative_generator.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 /// \brief Expression generator that caches values.
 class default_expression_generator
@@ -46,8 +44,8 @@ class default_expression_generator
     }
 };
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_DEFAULT_EXPRESSION_GENERATOR_H

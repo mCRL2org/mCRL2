@@ -16,10 +16,7 @@
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/invariant_checker.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// The class invariant_eliminator is initialized with an LPS using the constructor
@@ -138,8 +135,6 @@ class invelm_algorithm: public detail::lps_algorithm<Specification>
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_INVELM_ALGORITHM_H

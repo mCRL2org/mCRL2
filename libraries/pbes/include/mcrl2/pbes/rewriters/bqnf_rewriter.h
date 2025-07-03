@@ -14,9 +14,9 @@
 
 #include "mcrl2/pbes/detail/bqnf_quantifier_rewriter.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \brief A rewriter that rewrites universal quantifiers over conjuncts
 /// in BQNF expressions to conjuncts over universal quantifiers.
@@ -69,8 +69,8 @@ private:
     std::unique_ptr<pbes_system::detail::bqnf_quantifier_rewriter> bqnf_quantifier_rewriter;
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REWRITERS_BQNF_REWRITER_H

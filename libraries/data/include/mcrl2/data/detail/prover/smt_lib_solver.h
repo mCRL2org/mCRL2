@@ -20,11 +20,7 @@
 #include <unistd.h>
 #endif
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 /// The class SMT_LIB_Solver is a base class for SMT solvers that read the SMT-LIB format
 /// [Silvio Ranise and Cesare Tinelli. The SMT-LIB Standard: Version 1.1. Technical Report, Department of Computer
@@ -970,8 +966,6 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
 #endif
 } // namespace prover
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

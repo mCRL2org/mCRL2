@@ -15,11 +15,8 @@
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/set.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 /// \brief Create the finite set { x }, with x a data expression.
 inline
@@ -56,10 +53,6 @@ sort_expression get_set_sort(const container_sort& x)
   return x.element_sort();
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_DATA_CONSTRUCTION_H

@@ -15,10 +15,7 @@
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_symbol.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 // predeclare
@@ -159,9 +156,9 @@ data::data_equation translate_user_notation(const data::data_equation& x);
 std::set<data::sort_expression> find_sort_expressions(const data::data_equation& x);
 std::set<data::function_symbol> find_function_symbols(const data::data_equation& x);
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_DATA_EQUATION_H
 

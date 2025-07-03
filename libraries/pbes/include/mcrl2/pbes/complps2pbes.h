@@ -17,9 +17,7 @@
 #include "mcrl2/process/is_communicating_lpe.h"
 #include "mcrl2/process/is_linear.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 inline
 pbes_system::pbes complps2pbes(const process::process_specification& procspec, const state_formulas::state_formula& /* formula */)
@@ -40,8 +38,8 @@ pbes_system::pbes complps2pbes(const process::process_specification& procspec, c
   return pbes_system::pbes();
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_COMPLPS2PBES_H

@@ -13,9 +13,7 @@
 #include "mcrl2/utilities/cache_policy.h"
 #include "mcrl2/utilities/unordered_map.h"
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief A cache keeps track of key-value pairs similar to a map. The difference is that a cache
@@ -154,7 +152,6 @@ using fifo_function_cache = function_cache<
   F,
   Args>;
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_FIXED_SIZE_CACHE_H

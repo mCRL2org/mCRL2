@@ -15,9 +15,8 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/replace.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -199,8 +198,6 @@ void remove_duplicate_equations(process_specification& procspec)
   f.run();
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_REMOVE_EQUATIONS_H

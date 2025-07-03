@@ -16,9 +16,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/experimental/type_checker.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 typedef std::map<untyped_sort_variable, sort_expression> sort_substitution;
 typedef std::pair<sort_substitution, int> solution; // the second element is the cost of the solution
@@ -1365,8 +1363,8 @@ constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& 
   return p;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_EXPERIMENTAL_TYPE_CHECK_TREE_H

@@ -15,9 +15,7 @@
 #include "mcrl2/data/replace_constants_by_variables.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -64,8 +62,8 @@ T replace_constants_by_variables(const T& x,
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REPLACE_CONSTANTS_BY_VARIABLES_H

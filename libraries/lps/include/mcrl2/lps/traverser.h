@@ -17,10 +17,7 @@
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 //--- start generated add_traverser_sort_expressions code ---//
@@ -600,8 +597,6 @@ struct action_label_traverser: public add_traverser_action_labels<process::actio
 };
 //--- end generated add_traverser_action_labels code ---//
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_TRAVERSER_H

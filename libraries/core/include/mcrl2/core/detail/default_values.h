@@ -14,11 +14,8 @@
 
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2 {
-
-namespace core {
-
-namespace detail {
+namespace mcrl2::core::detail
+{
 
 //----------------------------------------------------------------------------------------------//
 // Part 1: functions for creating default values.
@@ -1777,10 +1774,6 @@ static const atermpp::aterm SortCons;
 //--- end generated variables ---//
 };
 
-} // namespace detail
-
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core::detail
 
 #endif // MCRL2_CORE_DETAIL_DEFAULT_VALUES_H

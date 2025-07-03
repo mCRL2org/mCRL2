@@ -15,11 +15,11 @@
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 class global_reset_variables_algorithm;
 pbes_expression reset_variables(global_reset_variables_algorithm& algorithm, const pbes_expression& x, const stategraph_equation& eq_X);
@@ -394,10 +394,10 @@ pbes_expression reset_variables(global_reset_variables_algorithm& algorithm, con
   return f.top();
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_RESET_VARIABLES_H

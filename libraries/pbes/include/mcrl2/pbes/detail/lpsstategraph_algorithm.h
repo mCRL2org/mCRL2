@@ -18,11 +18,11 @@
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 class lpsstategraph_algorithm;
 void lps_reset_variables(lpsstategraph_algorithm& algorithm,
@@ -193,10 +193,10 @@ void lps_reset_variables(lpsstategraph_algorithm& algorithm,
   f.apply(x);
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LPSSTATEGRAPH_ALGORITHM_H

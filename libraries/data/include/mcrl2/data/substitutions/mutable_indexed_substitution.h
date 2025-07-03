@@ -25,9 +25,7 @@
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 /// \brief Generic substitution function.
 /// \details This substitution assumes a function variable -> std::size_t, that, for
@@ -311,8 +309,8 @@ std::multiset<variable> substitution_variables(const mutable_indexed_substitutio
   return sigma.variables_occurring_in_right_hand_sides();
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_MUTABLE_INDEXED_SUBSTITUTION_H

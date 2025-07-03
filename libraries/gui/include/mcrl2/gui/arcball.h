@@ -13,17 +13,13 @@
 #include <QVector3D>
 #include <cmath>
 
-namespace mcrl2
-{
-
-namespace gui
+namespace mcrl2::gui
 {
 
 QQuaternion arcballRotation(const QPoint& p1, const QPoint& p2);
 
 void applyRotation(const QQuaternion& rotation, bool reverse = false);
 
-} // namespace gui
-} // namespace mcrl2
+} // namespace mcrl2::gui
 
 #endif // MCRL2_UTILITIES_ARCBALL_H

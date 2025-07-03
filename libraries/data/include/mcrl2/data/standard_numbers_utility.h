@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/standard_utility.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \cond INTERNAL_DOCS
@@ -854,9 +851,7 @@ inline bool is_convertible(const sort_expression& s1, const sort_expression& s2)
   return true;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif
 

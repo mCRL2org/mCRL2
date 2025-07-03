@@ -15,13 +15,11 @@
 #ifndef MCRL2_PBES_DETAIL_PARITY_GAME_OUTPUT_H
 #define MCRL2_PBES_DETAIL_PARITY_GAME_OUTPUT_H
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 /// A class that generates python code for a parity game, such
@@ -210,10 +208,10 @@ class parity_game_output: public parity_game_generator
     }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_PARITY_GAME_OUTPUT_H

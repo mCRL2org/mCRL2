@@ -24,11 +24,7 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_dot.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 /** \brief Translate a fraction given as a data_expression to a representation
@@ -978,8 +974,6 @@ inline void lts_convert(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, PRO
 
 // ======================  END ACTUAL CONVERSIONS  =============================
 
-} // namespace detail
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts::detail
 
 #endif

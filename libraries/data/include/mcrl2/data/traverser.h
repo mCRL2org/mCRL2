@@ -27,10 +27,9 @@
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/machine_number.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 // Adds sort expression traversal to a traverser
@@ -1124,8 +1123,8 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<core
 };
 //--- end generated add_traverser_identifier_strings code ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_TRAVERSER_H

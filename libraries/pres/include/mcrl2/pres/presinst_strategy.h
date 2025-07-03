@@ -15,9 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system {
 
 /// \brief presinst transformation strategies
 enum presinst_strategy
@@ -97,8 +95,8 @@ std::string description(const presinst_strategy strategy)
   throw mcrl2::runtime_error("unknown presinst strategy");
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PRESINST_STRATEGY_H

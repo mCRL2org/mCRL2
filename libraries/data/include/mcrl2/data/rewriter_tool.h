@@ -16,13 +16,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace tools
+namespace mcrl2::data::tools
 {
 
 /// \brief Base class for tools that use a rewriter.
@@ -124,10 +118,10 @@ class rewriter_tool: public Tool
     }
 };
 
-} // namespace tools
+} // namespace mcrl2::data::tools
 
-} // namespace data
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_DATA_REWRITER_TOOL_H

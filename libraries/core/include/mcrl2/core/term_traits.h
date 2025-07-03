@@ -12,10 +12,7 @@
 #ifndef MCRL2_CORE_TERM_TRAITS_H
 #define MCRL2_CORE_TERM_TRAITS_H
 
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /// \brief Contains type information for terms.
@@ -24,8 +21,6 @@ struct term_traits
 {
 };
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_TERM_TRAITS_H

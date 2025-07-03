@@ -15,16 +15,14 @@
 
 #include <string>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief  Get the toolset revision
 /// \return A string representation of the toolset revision
 std::string get_toolset_version();
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
+
 
 #endif // MCRL2_UTILITIES_TOOLSET_VERSION_H

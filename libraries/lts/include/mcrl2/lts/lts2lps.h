@@ -17,10 +17,7 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 
-
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 using namespace mcrl2::lps;
@@ -97,7 +94,6 @@ lps::specification transform_lts2lps(const lts_fsm_t& l1,
   return transform_lts2lps(l2);
 }
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif // MCRL2_LTS_LTS2LPS_H

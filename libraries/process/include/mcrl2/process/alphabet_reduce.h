@@ -14,9 +14,8 @@
 
 #include "mcrl2/process/process_specification.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 /// \brief Applies alphabet reduction to a process specification.
 /// \param procspec A process specification
@@ -26,8 +25,6 @@ namespace process {
 /// of equations is big.
 void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equation_limit = (std::numeric_limits<size_t>::max)());
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ALPHABET_REDUCE_H

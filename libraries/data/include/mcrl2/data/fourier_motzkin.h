@@ -17,10 +17,7 @@
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/detail/linear_inequalities_utilities.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 
@@ -350,8 +347,6 @@ struct fourier_motzkin_sigma
     }
 };
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_FOURIER_MOTZKIN_H

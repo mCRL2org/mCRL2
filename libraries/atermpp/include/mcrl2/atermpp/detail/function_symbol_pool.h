@@ -17,9 +17,7 @@
 
 #include <map>
 
-namespace atermpp
-{
-namespace detail
+namespace atermpp::detail
 {
 
 /// \brief This class stores a set of function symbols.
@@ -106,8 +104,8 @@ private:
 };
 
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif // DETAIL_FUNCTION_SYMBOL_POOL_H
 

@@ -15,10 +15,7 @@
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief Identifier generator that stores the identifiers of the
@@ -134,8 +131,6 @@ class multiset_identifier_generator: public identifier_generator<>
     }
 };
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SET_IDENTIFIER_GENERATOR_H

@@ -32,11 +32,7 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template <class LTS_TYPE>
@@ -175,9 +171,6 @@ void plts_merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   }
   l1.add_probabilistic_state(new_initial_prob_state_l2);
 }
-} // namespace detail
-} // namespace lts
-} // namespace mcrl2
-
+} // namespace mcrl2::lts::detail
 
 #endif  // MCRL2_LTS_LIBLTS_PLTS_MERGE_H

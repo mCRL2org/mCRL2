@@ -16,9 +16,8 @@
 #include "mcrl2/process/join.h"
 #include "mcrl2/utilities/detail/join.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail
 {
@@ -68,8 +67,6 @@ T balance_summands(const T& x, typename std::enable_if<std::is_base_of<atermpp::
   return result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_BALANCE_NESTING_DEPTH_H

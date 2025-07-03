@@ -16,9 +16,8 @@
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -141,8 +140,6 @@ process_expression parse_process_expression(const std::string& text,
   return x;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_PARSE_H

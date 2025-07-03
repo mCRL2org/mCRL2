@@ -19,10 +19,7 @@
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated classes ---//
@@ -1819,9 +1816,7 @@ bool equal_signatures(const action& a, const action& b)
   return std::equal(a_args.begin(), a_args.end(), b_args.begin(), [](const data::data_expression& x, const data::data_expression& y) { return x.sort() == y.sort(); });
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 namespace std
 {

@@ -14,13 +14,11 @@
 
 #include "mcrl2/core/print.h"
 
-namespace mcrl2
-{
 
-namespace core
-{
 
-namespace detail
+
+
+namespace mcrl2::core::detail
 {
 
 /// \brief Creates a string representation of a container using the pp pretty print function.
@@ -123,10 +121,10 @@ std::string print_arguments(const Container& v)
   return print_container(v, "(", ")", "", false, false);
 }
 
-} // namespace detail
+} // namespace mcrl2::core::detail
 
-} // namespace core
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_CORE_DETAIL_PRINT_UTILITY_H

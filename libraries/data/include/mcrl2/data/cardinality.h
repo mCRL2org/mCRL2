@@ -14,9 +14,7 @@
 
 #include "mcrl2/data/enumerator.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 class cardinality_calculator
@@ -93,7 +91,7 @@ class cardinality_calculator
     }
 };
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
+
       
 #endif // MCRL2_DATA_CARDINALITY_H

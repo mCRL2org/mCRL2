@@ -14,11 +14,9 @@
 #include <QObject>
 #include <QPair>
 
-namespace mcrl2
-{
-namespace gui
-{
-namespace qt
+
+
+namespace mcrl2::gui::qt
 {
 
 /*
@@ -91,8 +89,8 @@ class SettingEnum : public SettingInt
     QList<Item> m_items;
 };
 
-} // namespace qt
-} // namespace gui
-} // namespace mcrl2
+} // namespace mcrl2::gui::qt
+
+
 
 #endif // MCRL2_UTILITIES_SETTING_H

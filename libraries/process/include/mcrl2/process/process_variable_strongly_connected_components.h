@@ -14,9 +14,7 @@
 
 #include "mcrl2/process/find.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process {
 
 namespace detail {
 
@@ -302,8 +300,8 @@ std::vector<std::set<process_identifier> > process_variable_strongly_connected_c
   return algorithm.run(equations, init);
 }
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_PROCESS_VARIABLE_STRONGLY_CONNECTED_COMPONENTS_H

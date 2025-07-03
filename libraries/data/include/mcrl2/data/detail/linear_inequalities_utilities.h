@@ -16,13 +16,7 @@
 
 #include "mcrl2/data/linear_inequalities.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 inline data_expression negate_inequality(const data_expression& e)
@@ -258,10 +252,5 @@ inline void split_condition(
 }
 
 } // end namespace detail
-
-
-} // namespace data
-
-} // namespace mcrl2
 
 #endif // MCRL2_LPSREALELM_DETAIL_LINEAR_INEQUALITY_UTILITIES_H

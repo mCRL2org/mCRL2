@@ -36,11 +36,7 @@
 #include "mcrl2/lts/detail/liblts_weak_bisim.h"
 #include "mcrl2/lts/transition.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
   const unsigned char NODE_ATK = 0;  // placeholder indicating node is an attacker node
   const unsigned char NODE_DEF = 1;  // placeholder indicating a node, which is alwas reachable as coupling.
@@ -587,7 +583,7 @@ template <class LTS_TYPE>
 
     return similar;
   }
-}  // end namespace detail
-}  // end namespace lts
-}  // end namespace mclr
+  } // namespace mcrl2::lts::detail
+    // end namespace lts
+    // end namespace mclr
 #endif  // _LIBLTS_COUPLED_SIM_H

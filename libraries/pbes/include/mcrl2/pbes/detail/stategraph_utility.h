@@ -14,11 +14,11 @@
 
 #include "mcrl2/pbes/pbes_equation.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 inline
 std::string print_equation(const pbes_equation& eq)
@@ -72,10 +72,10 @@ std::string print_pbes_expressions(const std::set<pbes_expression>& v)
   return out.str();
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_UTILITY_H

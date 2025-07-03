@@ -14,11 +14,7 @@
 
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /** \brief A base class for simplifying binary decision diagrams.
@@ -66,8 +62,6 @@ class BDD_Simplifier
       return a_bdd;
     }
 };
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

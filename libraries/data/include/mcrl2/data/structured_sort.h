@@ -16,10 +16,7 @@
 #include "mcrl2/data/standard_numbers_utility.h"
 #include "mcrl2/data/structured_sort_constructor.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \cond INTERNAL_DOCS
@@ -467,9 +464,9 @@ inline void swap(structured_sort& t1, structured_sort& t2)
 }
 //--- end generated class structured_sort ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_STRUCTURED_SORT_H
 

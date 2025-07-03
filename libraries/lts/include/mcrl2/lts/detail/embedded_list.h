@@ -14,11 +14,7 @@
 #include <cassert>
 #include <vector>
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 // The list type below embeds a list in existing data structures. 
@@ -301,6 +297,6 @@ class embedded_list
 };
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 #endif //_EMBEDDED_LIST_H

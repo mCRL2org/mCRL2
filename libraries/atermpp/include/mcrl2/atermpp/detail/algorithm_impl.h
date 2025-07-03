@@ -14,10 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 
-namespace atermpp
-{
-
-namespace detail
+namespace atermpp::detail
 {
 /// \brief Applies the function f to all children of a.
 /// \param a A term
@@ -243,8 +240,8 @@ void partial_find_all_if_impl(const aterm& t, MatchPredicate match, StopPredicat
   }
 }
 
-} // namespace detail
+} // namespace atermpp::detail
 
-} // namespace atermpp
+
 
 #endif // MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H

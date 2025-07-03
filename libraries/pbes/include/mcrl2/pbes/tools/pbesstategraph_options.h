@@ -15,9 +15,9 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/utilities/execution_timer.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 struct pbesstategraph_options
 {
@@ -51,8 +51,8 @@ struct pbesstategraph_options
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_TOOLS_PBESSTATEGRAPH_OPTIONS_H

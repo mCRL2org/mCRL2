@@ -14,9 +14,8 @@
 
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 class data_type_checker;
 
@@ -103,8 +102,6 @@ class variable_context
 
 } // namespace detail
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_DETAIL_VARIABLE_CONTEXT_H

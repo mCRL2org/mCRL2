@@ -32,11 +32,7 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/lts/lts.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template <class LTS_TYPE>
@@ -134,9 +130,6 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   }
 
 }
-} // namespace detail
-} // namespace lts
-} // namespace mcrl2
-
+} // namespace mcrl2::lts::detail
 
 #endif

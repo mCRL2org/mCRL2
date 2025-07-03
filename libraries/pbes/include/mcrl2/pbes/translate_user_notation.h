@@ -15,10 +15,7 @@
 #include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 template <typename T>
@@ -39,8 +36,6 @@ T translate_user_notation(const T& x,
   return result;
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_TRANSLATE_USER_NOTATION_H

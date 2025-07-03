@@ -16,10 +16,7 @@
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/detail/parameter_selection.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 // Compute the number of booleans needed to represent a set of size n.
@@ -427,8 +424,6 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_BINARY_H

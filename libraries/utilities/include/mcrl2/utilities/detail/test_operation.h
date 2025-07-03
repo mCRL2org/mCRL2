@@ -16,13 +16,7 @@
 #include <iostream>
 #include <string>
 
-namespace mcrl2
-{
-
-namespace utilities
-{
-
-namespace detail
+namespace mcrl2::utilities::detail
 {
 
 template <typename T>
@@ -85,10 +79,6 @@ bool test_operation(
   return test_operation(expr1, expr2, parse, comp, op, opname, [](const auto& T) { return T; }, "");
 }
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::detail
 
 #endif // MCRL2_UTILITIES_DETAIL_TEST_OPERATION_H

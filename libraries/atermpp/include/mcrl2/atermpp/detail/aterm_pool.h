@@ -15,9 +15,8 @@
 
 #include "mcrl2/utilities/shared_mutex.h"
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 /// Define several specializations of the term pool storage objects.
@@ -245,8 +244,8 @@ thread_aterm_pool_interface::~thread_aterm_pool_interface()
   unregister();
 }
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #include "aterm_pool_implementation.h"
 #include "aterm_pool_storage_implementation.h"

@@ -15,10 +15,7 @@
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/process/process_specification.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 /// \brief Maintains a multiset of bound data variables during traversal
@@ -123,8 +120,6 @@ struct add_data_variable_builder_binding: public add_data_variable_binding<Build
   }
 };
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ADD_BINDING_H

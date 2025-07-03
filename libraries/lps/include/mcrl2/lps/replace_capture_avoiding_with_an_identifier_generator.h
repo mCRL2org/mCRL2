@@ -16,9 +16,8 @@
 #include "mcrl2/lps/builder.h"
 #include "mcrl2/process/replace_capture_avoiding_with_an_identifier_generator.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
@@ -167,8 +166,6 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
 }
 //--- end generated lps replace_capture_avoiding_with_identifier_generator code ---//
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H

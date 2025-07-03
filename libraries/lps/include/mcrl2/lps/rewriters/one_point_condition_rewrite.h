@@ -20,9 +20,8 @@
 #include "mcrl2/lps/rewriters/data_rewriter.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
@@ -180,9 +179,7 @@ T one_point_condition_rewrite(const T& x, const DataRewriter& R, typename std::e
   return result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_DETAIL_ONE_POINT_CONDITION_REWRITE_H
 

@@ -23,9 +23,7 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief This class contains strings to be used as values for action labels in lts's.
@@ -202,8 +200,7 @@ inline std::string pp(const action_label_string& l)
   return l;
 }
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 namespace std
 {

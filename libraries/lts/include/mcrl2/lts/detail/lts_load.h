@@ -16,11 +16,11 @@
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/lts/lts_io.h"
 
-namespace mcrl2 {
 
-namespace lts {
 
-namespace detail {
+
+
+namespace mcrl2::lts::detail {
 
 inline
 void add_options(utilities::interface_description& desc)
@@ -129,10 +129,10 @@ lps::stochastic_specification extract_specification(const LTS_TYPE& l)
   return lps::stochastic_specification(l.data(), l.action_label_declarations(), global_variables, lps, initial_process);
 }
 
-} // namespace detail
+} // namespace mcrl2::lts::detail
 
-} // namespace lts
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_LTS_DETAIL_LTS_LOAD_H

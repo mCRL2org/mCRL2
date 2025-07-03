@@ -17,9 +17,9 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 using sylvan::ldds::ldd;
 
@@ -469,9 +469,9 @@ class symbolic_pbessolve_algorithm
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_ENABLE_SYLVAN
 

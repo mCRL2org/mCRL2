@@ -14,10 +14,7 @@
 
 #include "mcrl2/atermpp/type_traits.h"
 
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /// \brief Traverser that defines functions for maintaining bound variables.
@@ -83,8 +80,6 @@ class add_binding : public TraverserOrBuilder<Derived>
     }
 };
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_ADD_BINDING_H

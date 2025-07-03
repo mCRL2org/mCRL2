@@ -15,10 +15,7 @@
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -627,8 +624,6 @@ void optimized_exists_no_empty_domain(Term& result, const VariableSequence& l, c
   detail::optimized_exists(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_OPTIMIZED_BOOLEAN_OPERATORS_H

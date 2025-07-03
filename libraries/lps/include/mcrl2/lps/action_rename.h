@@ -44,10 +44,7 @@
 // <ActionRenameSpec>
 //                ::= ActionRenameSpec(<DataSpec>, <ActSpec>, <ActionRenameRules>)
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 //                ::= ActionRenameRule(<DataVarId>*, <DataExprOrNil>,
@@ -271,13 +268,8 @@ atermpp::aterm action_rename_specification_to_aterm(const action_rename_specific
 }
 
 }
-}
 
-
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \cond INTERNAL_DOCS
@@ -862,9 +854,7 @@ stochastic_specification action_rename(
   return lps_new_spec;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 namespace std
 {

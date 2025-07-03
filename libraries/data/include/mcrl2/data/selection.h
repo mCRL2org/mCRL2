@@ -16,10 +16,9 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/fset.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 /** \brief Component for selecting a subset of equations that are actually used in an encompassing specification
@@ -188,8 +187,8 @@ class used_data_equation_selector
     }
 };
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_SELECTION_H

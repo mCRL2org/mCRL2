@@ -33,11 +33,7 @@
 #include "mcrl2/lts/detail/simple_list.h"
 #define linked_list simple_list
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template <class LTS_TYPE> class bisim_partitioner_gj;
@@ -6916,8 +6912,8 @@ inline bool bisimulation_compare_gj(const LTS_TYPE& l1, const LTS_TYPE& l2,
 
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 
 #undef linked_list
 #endif // ifndef LIBLTS_BISIM_GJ_H

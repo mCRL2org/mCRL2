@@ -16,10 +16,9 @@
 #include "mcrl2/pres/builder.h"
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 /// \cond INTERNAL_DOCS
@@ -196,8 +195,8 @@ T normalize(const T& x,
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_NORMALIZE_H

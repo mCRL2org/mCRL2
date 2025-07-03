@@ -15,10 +15,7 @@
 #include <iterator>
 #include <vector>
 
-namespace mcrl2
-{
-
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \cond INTERNAL_DOCS
@@ -104,8 +101,6 @@ void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f)
   foreach_sequence(X, i, f, detail::foreach_sequence_assign());
 }
 
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_SEQUENCE_H

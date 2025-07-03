@@ -16,9 +16,7 @@
 #include "mcrl2/pres/add_binding.h"
 #include "mcrl2/pres/builder.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -133,8 +131,8 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
 }
 //--- end generated pres_system replace_capture_avoiding_with_identifier_generator code ---//
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H

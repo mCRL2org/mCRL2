@@ -14,11 +14,7 @@
 
 #include "mcrl2/data/detail/prover/info.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief Base class for classes that provide functionality to modify or create terms.
@@ -221,8 +217,6 @@ class Manipulator
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

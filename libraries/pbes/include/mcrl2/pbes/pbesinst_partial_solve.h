@@ -17,11 +17,11 @@
 #include "mcrl2/pbes/solve_structure_graph.h"
 #include "mcrl2/pbes/structure_graph_builder.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 inline
 void partial_solve(structure_graph& G,
@@ -109,10 +109,10 @@ void partial_solve(structure_graph& G,
   mCRL2log(log::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_PBESINST_PARTIAL_SOLVE_H

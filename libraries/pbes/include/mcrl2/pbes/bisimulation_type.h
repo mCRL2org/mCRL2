@@ -15,9 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 /// \brief An enumerated type for the available bisimulation types
 enum bisimulation_type
@@ -100,8 +98,8 @@ std::ostream& operator<<(std::ostream& os, const bisimulation_type t)
 }
 
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_BISIMULATION_TYPE_H

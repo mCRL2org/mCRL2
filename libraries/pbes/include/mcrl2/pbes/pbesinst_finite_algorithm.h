@@ -22,10 +22,7 @@
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Data structure for storing the indices of the variables that should be expanded by the finite pbesinst algorithm.
@@ -437,8 +434,6 @@ void pbesinst_finite(pbes& p, data::rewrite_strategy rewrite_strategy, const std
   }
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_PBESINST_FINITE_ALGORITHM_H

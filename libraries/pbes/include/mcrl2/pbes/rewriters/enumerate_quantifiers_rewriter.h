@@ -18,9 +18,8 @@
 #include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -330,8 +329,6 @@ struct enumerate_quantifiers_rewriter
     }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H

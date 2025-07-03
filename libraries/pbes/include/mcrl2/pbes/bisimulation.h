@@ -21,10 +21,9 @@
 #include <ranges>
 #include <type_traits>
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 /// \brief Base class for bisimulation algorithms.
@@ -891,8 +890,8 @@ pbes branching_simulation_equivalence(const lps::specification& model, const lps
   return branching_simulation_equivalence_algorithm().run(model, spec);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_BISIMULATION_H

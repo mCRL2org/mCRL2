@@ -20,9 +20,7 @@
 #include <type_traits>
 #include <mutex>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief The memory pool allocates elements of size T from blocks.
@@ -233,7 +231,7 @@ private:
 
 };
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
+
 
 #endif // MCRL2_UTILITIES_MEMORY_POOL_H_

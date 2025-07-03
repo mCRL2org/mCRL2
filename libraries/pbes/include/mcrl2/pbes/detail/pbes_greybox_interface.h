@@ -18,11 +18,11 @@
 // This include is necessary for ltsmin related workarounds.
 #include "mcrl2/lps/ltsmin.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
   /// A class that provides initial state and successors functions for PBESs,
   /// allowing to explore the PBES as a transition system, where states are
@@ -255,10 +255,10 @@ namespace detail {
 
   };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_PBES_GREYBOX_INTERFACE_H

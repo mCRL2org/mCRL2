@@ -14,12 +14,7 @@
 
 #include "mcrl2/lts/detail/liblts_sim.h"
 
-
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template <class LTS_TYPE>
@@ -292,8 +287,7 @@ ready_sim_partitioner<LTS_TYPE>::~ready_sim_partitioner()
   delete forall2;
 }
 
- 
-} // namespace detail
-} // namespace lts
-} // namespacemcrl2
+} // namespace mcrl2::lts::detail
+
+// namespacemcrl2
 #endif

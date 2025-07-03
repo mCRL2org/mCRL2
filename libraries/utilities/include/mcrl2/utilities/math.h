@@ -16,9 +16,7 @@
 #include <cmath>
 #include <cstdlib>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 // Compute base 2 logarithm of n, by checking which is the leftmost
@@ -56,9 +54,7 @@ std::size_t power_size_t(const std::size_t n_in, const std::size_t m_in)
   return result;
 }
 
-} // namespace utilities
-} // namespace mcrl2
-
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_MATH_H
 

@@ -30,11 +30,7 @@
 #include <windows.h>
 #endif // MCRL2_PLATFORM_WINDOWS
 
-namespace mcrl2
-{
-namespace gui
-{
-namespace qt
+namespace mcrl2::gui::qt
 {
 
 class HelpMenu : public QMenu
@@ -201,8 +197,6 @@ class qt_tool: public Tool
     virtual ~qt_tool() {}
 };
 
-} // namespace qt
-} // namespace gui
-} // namespace mcrl2
+} // namespace mcrl2::gui::qt
 
 #endif // MCRL2_UTILITIES_QT_TOOL_H

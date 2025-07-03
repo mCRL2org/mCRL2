@@ -19,9 +19,8 @@
 
 #include "mcrl2/utilities/tagged_pointer.h"
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \brief Enable to count the number of reference count changes.
@@ -236,8 +235,8 @@ private:
   mutable utilities::tagged_pointer<T> m_reference;
 };
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
+
 
 namespace std
 {

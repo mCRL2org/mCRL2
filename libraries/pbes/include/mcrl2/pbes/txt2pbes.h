@@ -16,10 +16,7 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/parse.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Parses a PBES specification from an input stream
@@ -50,8 +47,6 @@ pbes txt2pbes(const std::string& text, bool normalize = true)
   return txt2pbes(from, normalize);
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_TXT2PBES_H

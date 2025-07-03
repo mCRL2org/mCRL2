@@ -14,9 +14,9 @@
 
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -100,8 +100,8 @@ std::vector<propositional_variable> remove_unreachable_variables(pres& p)
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REMOVE_EQUATIONS_H

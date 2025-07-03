@@ -20,9 +20,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -331,8 +329,8 @@ std::ostream& operator<<(std::ostream& out, const structure_graph& G)
   return print_structure_graph(out, G);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_STRUCTURE_GRAPH_H

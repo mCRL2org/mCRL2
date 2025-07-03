@@ -14,10 +14,7 @@
 
 #include "mcrl2/modal_formula/regular_formula.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
+namespace mcrl2::state_formulas
 {
 
 //--- start generated classes ---//
@@ -1905,8 +1902,8 @@ std::set<core::identifier_string> find_identifiers(const state_formulas::state_f
 std::set<process::action_label> find_action_labels(const state_formulas::state_formula& x);
 bool find_nil(const state_formulas::state_formula& x);
 
-} // namespace state_formulas
+} // namespace mcrl2::state_formulas
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_MODAL_FORMULA_STATE_FORMULA_H

@@ -29,10 +29,9 @@
 #include <map>
 #include <optional>
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 struct pbesiteration_options
@@ -414,8 +413,8 @@ struct pbesiteration_pbes_fixpoint_iterator
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_TOOLS_PBESITERATION_H

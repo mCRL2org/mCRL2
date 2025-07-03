@@ -16,11 +16,8 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"
 
-namespace mcrl2 {
-
-namespace utilities {
-
-namespace detail {
+namespace mcrl2::utilities::detail
+{
 
 /// \brief Reads text from the file filename, or from stdin if filename equals "-".
 inline
@@ -60,10 +57,6 @@ void write_text(const std::string& filename, const std::string& text)
   }
 }
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::detail
 
 #endif // MCRL2_UTILITIES_DETAIL_IO_H

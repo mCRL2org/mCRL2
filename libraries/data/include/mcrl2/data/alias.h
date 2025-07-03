@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/basic_sort.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated class alias ---//
@@ -103,9 +100,7 @@ inline void swap(alias& t1, alias& t2)
 }
 //--- end generated class alias ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_ALIAS_H
 

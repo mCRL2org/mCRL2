@@ -22,10 +22,7 @@
 
 #include "mcrl2/utilities/big_numbers.h"
 
-
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /** \brief This class contains labels for probabilistic transistions, consisting of a numerator and a denominator
@@ -313,8 +310,7 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_arbitrary_precis
   return out << pp(x);
 }
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 namespace std
 {

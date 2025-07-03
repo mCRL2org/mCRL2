@@ -16,12 +16,7 @@
 #include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template < class STATE_LABEL_T, class ACTION_LABEL_T, class PROBABILISTIC_STATE_T, class LTS_BASE >
@@ -73,7 +68,7 @@ void translate_to_probabilistic_lts(
 }
 
 } // detail
-} // lts
-} // mcrl2
+// lts
+// mcrl2
 
 #endif  // MCRL2_LTS_DETAIL_SWAP_TO_FROM_PROBABILISTIC_LTS_H

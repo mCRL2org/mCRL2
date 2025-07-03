@@ -15,9 +15,9 @@
 #include "mcrl2/data/substitutions/no_substitution.h"
 #include "mcrl2/pres/builder.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -150,8 +150,8 @@ struct data_rewriter
   }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REWRITERS_DATA_REWRITER_H

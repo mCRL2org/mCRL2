@@ -15,9 +15,9 @@
 #include "mcrl2/data/untyped_data_specification.h"
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 struct untyped_pres
 {
@@ -39,8 +39,8 @@ struct untyped_pres
   }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_UNTYPED_PRES_H

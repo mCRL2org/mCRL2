@@ -95,12 +95,7 @@
 
 #include "mcrl2/utilities/logger.h"
 
-
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 /// \brief type used to store state (numbers and) counts
@@ -1985,7 +1980,7 @@ class check_complexity
 #endif // ifndef NDEBUG
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 
 #endif // ifndef _COUNT_ITERATIONS_H

@@ -16,9 +16,7 @@
 
 #include "mcrl2/lts/lts_utilities.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief A signature is a pair of an action label and a block */
@@ -464,7 +462,6 @@ public:
   }
 };
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif // MCRL2_LTS_SIGREF_H

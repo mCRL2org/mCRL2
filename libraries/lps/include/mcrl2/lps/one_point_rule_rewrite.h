@@ -15,9 +15,7 @@
 #include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 namespace detail {
 
@@ -61,8 +59,8 @@ T one_point_rule_rewrite(const T& x, typename std::enable_if<std::is_base_of<ate
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_ONE_POINT_RULE_REWRITE_H

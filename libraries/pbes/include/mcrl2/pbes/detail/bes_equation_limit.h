@@ -18,13 +18,11 @@
 #include <limits>
 #include <stdexcept>
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 template <class T> // note, T is only a dummy
@@ -51,10 +49,10 @@ void check_bes_equation_limit(std::size_t size)
   }
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_BES_EQUATION_LIMIT_H

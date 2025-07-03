@@ -32,9 +32,8 @@ namespace mcrl2::log {
 #define MCRL2_JITTYC_AVAILABLE
 #endif
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 /// \brief Generates possible values of the data type (at most max_size).
 inline
@@ -1029,8 +1028,6 @@ class pins
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_LTSMIN_H

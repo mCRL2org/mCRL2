@@ -17,11 +17,7 @@
 #include <chrono>
 #include <ratio>
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /** \brief A prover that uses EQ-BDDs.
@@ -649,8 +645,6 @@ class BDD_Prover: protected rewriter
 
 
 };
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

@@ -17,10 +17,7 @@
 #include <vector>
 #include <list>
 
-namespace atermpp
-{
-
-namespace detail
+namespace atermpp::detail
 {
 
 // Condition for recognising types that represent containers
@@ -65,9 +62,9 @@ template < typename T >
 struct is_set_impl< std::multiset< T > > :public std::true_type
   { };
 
-} // namespace detail
+} // namespace atermpp::detail
 
-} // namespace atermpp
+
 
 #endif // ATERMPP_DETAIL_TYPE_TRAITS_H
 

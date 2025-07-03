@@ -7,11 +7,7 @@
 
 #include <boost/concept/detail/concept_def.hpp>
 
-namespace mcrl2
-{
-namespace data
-{
-namespace concepts
+namespace mcrl2::data::concepts
 {
 
 BOOST_concept(Substitution,(S)) :
@@ -88,9 +84,9 @@ BOOST_concept(Enumerator,(E)) : boost_concepts::ForwardTraversal< E >
     s = *e;
   }
 };
-} // namespace concepts
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::concepts
+
+
 
 #include <boost/concept/detail/concept_undef.hpp>
 

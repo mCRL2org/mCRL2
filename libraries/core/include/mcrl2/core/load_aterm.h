@@ -15,9 +15,8 @@
 #include "mcrl2/atermpp/aterm_io_binary.h"
 #include "mcrl2/atermpp/aterm_io_text.h"
 
-namespace mcrl2 {
-
-namespace core {
+namespace mcrl2::core
+{
 
 namespace detail {
 
@@ -73,8 +72,6 @@ atermpp::aterm load_aterm(std::istream& stream,
   return result;
 }
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_LOAD_ATERM_H

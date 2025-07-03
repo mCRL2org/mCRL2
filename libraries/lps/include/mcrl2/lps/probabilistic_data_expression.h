@@ -22,10 +22,7 @@
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/data/rewriter.h"
 
-
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -549,9 +546,7 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_data_expression&
   return out << static_cast<data::data_expression>(x);
 }
 
-
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 namespace std
 {

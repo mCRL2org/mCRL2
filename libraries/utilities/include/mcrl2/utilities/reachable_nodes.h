@@ -20,9 +20,8 @@
 #include <iterator>
 #include <vector>
 
-namespace mcrl2 {
-
-namespace utilities {
+namespace mcrl2::utilities
+{
 
 /// \cond INTERNAL_DOCS
 namespace detail
@@ -77,8 +76,6 @@ std::vector<std::size_t> reachable_nodes(const Graph& g, Iter first, Iter last)
   return result;
 }
 
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_REACHABLE_NODES_H

@@ -16,10 +16,7 @@
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/replace_capture_avoiding.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -328,8 +325,6 @@ T substitute_sorts(const T& x,
   return result;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REPLACE_H

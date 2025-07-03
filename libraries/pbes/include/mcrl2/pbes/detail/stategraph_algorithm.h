@@ -16,11 +16,11 @@
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/sequence.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 inline
 std::string print_index(std::size_t index)
@@ -941,10 +941,10 @@ class stategraph_algorithm
     }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_ALGORITHM_H

@@ -16,13 +16,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
-{
-
-namespace tools
+namespace mcrl2::pbes_system::tools
 {
 
 /// \brief Base class for filter tools that use a pbes rewriter.
@@ -118,10 +112,10 @@ class pbes_rewriter_tool: public Tool
     }
 };
 
-} // namespace tools
+} // namespace mcrl2::pbes_system::tools
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_PBES_REWRITER_TOOL_H

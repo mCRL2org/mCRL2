@@ -14,10 +14,7 @@
 
 #include "mcrl2/lps/stochastic_specification.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Maintains a multiset of bound data variables during traversal
@@ -159,8 +156,6 @@ struct add_data_variable_builder_binding: public add_data_variable_binding<Build
   }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_ADD_BINDING_H

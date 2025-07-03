@@ -15,10 +15,7 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/sort_specification.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -159,8 +156,6 @@ inline sort_expression normalize_sorts(const structured_sort& x,
 }
 */
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_NORMALIZE_SORTS_H

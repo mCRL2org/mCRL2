@@ -15,11 +15,8 @@
 #include <string>
 #include <vector>
 
-namespace mcrl2 {
-
-namespace utilities {
-
-namespace detail {
+namespace mcrl2::utilities::detail
+{
 
 /// \brief
 struct command
@@ -44,10 +41,6 @@ struct command
   virtual ~command() = default;
 };
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::detail
 
 #endif // MCRL2_UTILITIES_DETAIL_COMMAND_H
