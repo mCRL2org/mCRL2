@@ -17,11 +17,11 @@
 #include "mcrl2/pres/typecheck.h"
 #include "mcrl2/pres/untyped_pres.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
 
-namespace detail
+
+
+namespace mcrl2::pres_system::detail
 {
 
 struct pres_actions: public data::detail::data_specification_actions
@@ -104,10 +104,10 @@ struct pres_actions: public data::detail::data_specification_actions
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pres_system::detail
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_PARSE_IMPL_H

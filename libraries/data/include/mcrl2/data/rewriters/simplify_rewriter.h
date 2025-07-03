@@ -16,9 +16,8 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 namespace detail {
 
@@ -159,9 +158,7 @@ T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm,
   return result;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITER_H
 

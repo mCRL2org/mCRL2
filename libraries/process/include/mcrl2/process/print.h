@@ -15,9 +15,8 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 constexpr inline int precedence(const choice&)              { return 1; }
 constexpr inline int precedence(const sum&)                 { return 2; }
@@ -493,8 +492,6 @@ std::string pp(const T& x, bool precedence_aware = true)
   return out.str();
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_PRINT_H

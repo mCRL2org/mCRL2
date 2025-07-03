@@ -13,9 +13,7 @@
 #include <string>
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 enum exploration_strategy { es_none,
@@ -123,7 +121,6 @@ inline std::string description(const exploration_strategy strat)
   }
 }
 
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_EXPLORATION_STRATEGY_H

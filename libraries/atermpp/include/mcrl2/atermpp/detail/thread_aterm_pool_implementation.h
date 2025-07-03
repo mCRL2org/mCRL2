@@ -17,9 +17,8 @@
 #include "mcrl2/atermpp/detail/index_traits.h"
 
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 function_symbol thread_aterm_pool::create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions)
@@ -224,7 +223,7 @@ std::size_t thread_aterm_pool::protection_set_size() const
   return result;
 }
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif // ATERMPP_DETAIL_ATERM_POOL_IMPLEMENTATION_H

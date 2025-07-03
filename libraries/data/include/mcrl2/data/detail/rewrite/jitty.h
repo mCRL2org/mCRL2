@@ -14,11 +14,9 @@
 #include "mcrl2/data/detail/rewrite/rewrite_stack.h"
 #include "mcrl2/data/detail/rewrite/strategy_rule.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 struct jitty_variable_assignment_for_a_rewrite_rule
@@ -147,8 +145,8 @@ class RewriterJitty: public Rewriter
 ///          when rewriting to avoid to rewrite too often.
 data_expression remove_normal_form_function(const data_expression& t);
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
+
+
 
 #endif

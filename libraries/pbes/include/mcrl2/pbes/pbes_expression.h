@@ -16,10 +16,7 @@
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 //--- start generated classes ---//
@@ -1070,14 +1067,9 @@ data::variable_list free_variables(const pbes_expression& x)
   return data::variable_list(v.begin(), v.end());
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
-
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /// \brief Contains type information for pbes expressions.
@@ -1453,9 +1445,7 @@ struct term_traits<pbes_system::pbes_expression>
   }
 };
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 namespace std
 {

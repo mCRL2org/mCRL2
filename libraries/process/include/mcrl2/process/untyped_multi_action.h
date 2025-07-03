@@ -14,9 +14,8 @@
 
 #include "mcrl2/data/untyped_data_parameter.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 //--- start generated class untyped_multi_action ---//
 /// \\brief An untyped multi action or data application
@@ -96,8 +95,6 @@ inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
 }
 //--- end generated class untyped_multi_action ---//
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_UNTYPED_MULTI_ACTION_H

@@ -26,9 +26,7 @@ extern "C"
   extern D_ParserTables parser_tables_dot;
 }
 
-namespace mcrl2
-{
-namespace core
+namespace mcrl2::core
 {
 
 class parse_node_exception : public mcrl2::runtime_error
@@ -284,7 +282,6 @@ bool is_user_identifier(std::string const& s)
   return true;
 }
 
-} // namespace core
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_PARSE_H

@@ -15,10 +15,7 @@
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 template <typename T>
@@ -42,8 +39,6 @@ T normalize_sorts(const T& x,
  
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_NORMALIZE_SORTS_H

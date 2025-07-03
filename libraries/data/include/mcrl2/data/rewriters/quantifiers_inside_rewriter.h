@@ -17,9 +17,8 @@
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 namespace detail {
 
@@ -333,8 +332,6 @@ T quantifiers_inside_rewrite(const T& x, typename std::enable_if< std::is_base_o
   return result;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REWRITERS_QUANTIFIERS_INSIDE_REWRITER_H

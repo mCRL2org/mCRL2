@@ -15,13 +15,7 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/process/process_expression.h"
 
-namespace mcrl2
-{
-
-namespace lps
-{
-
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 /// \brief Returns true if the sorts of the given actions are contained in sorts.
@@ -82,10 +76,6 @@ bool check_action_label_sorts(const process::action_label_list& action_labels, c
   return true;
 }
 
-} // namespace detail
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif // MCRL2_LPS_DETAIL_ACTION_UTILITY_H

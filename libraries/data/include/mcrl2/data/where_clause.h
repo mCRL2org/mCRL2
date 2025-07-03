@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/assignment.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated class where_clause ---//
@@ -100,9 +97,7 @@ inline void swap(where_clause& t1, where_clause& t2)
 }
 //--- end generated class where_clause ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_WHERE_CLAUSE_H
 

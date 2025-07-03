@@ -15,11 +15,8 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
-namespace mcrl2 {
-
-namespace core {
-
-namespace detail {
+namespace mcrl2::core::detail
+{
 
 //----------------------------------------------------------------------------------------------//
 // Part 1: functions for creating function symbols.
@@ -1540,10 +1537,6 @@ static const atermpp::function_symbol SortCons;
 //--- end generated variables ---//
 };
 
-} // namespace detail
-
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core::detail
 
 #endif // MCRL2_CORE_DETAIL_FUNCTION_SYMBOLS_H

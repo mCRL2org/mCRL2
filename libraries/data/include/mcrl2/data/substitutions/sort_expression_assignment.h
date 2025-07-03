@@ -15,9 +15,8 @@
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 /// \brief Substitution that maps a sort expression to a sort expression.
 struct sort_expression_assignment
@@ -43,9 +42,6 @@ struct sort_expression_assignment
   }
 };
 
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_SORT_EXPRESSION_ASSIGNMENT_H

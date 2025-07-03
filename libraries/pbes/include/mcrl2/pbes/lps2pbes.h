@@ -23,10 +23,9 @@
 #include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/process/merge_action_specifications.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 /// \brief Algorithm for translating a state formula and a timed specification to a pbes.
@@ -287,8 +286,8 @@ pbes lps2pbes(const std::string& spec_text,
   return lps2pbes(lpsspec, f, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_LPS2PBES_H

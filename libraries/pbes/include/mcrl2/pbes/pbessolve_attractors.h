@@ -14,9 +14,7 @@
 
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 // Does not set a strategy
 struct no_strategy
@@ -184,8 +182,8 @@ vertex_set attr_default_with_tau(const StructureGraph& G, vertex_set A, std::siz
   return attr_default_generic(G, A, alpha, global_local_strategy<StructureGraph>(G, tau, alpha));
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESSOLVE_ATTRACTORS_H

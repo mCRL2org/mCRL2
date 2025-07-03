@@ -14,9 +14,8 @@
 
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -100,8 +99,6 @@ std::vector<propositional_variable> remove_unreachable_variables(pbes& p)
   return result;
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REMOVE_EQUATIONS_H

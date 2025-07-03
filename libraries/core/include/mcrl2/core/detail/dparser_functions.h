@@ -19,11 +19,8 @@
 struct D_ParseNode;
 struct D_Parser;
 
-namespace mcrl2 {
-
-namespace core {
-
-namespace detail {
+namespace mcrl2::core::detail
+{
 
 /// \brief Function for resolving ambiguities in the '_ -> _ <> _' operator for
 /// process expressions.
@@ -32,10 +29,6 @@ struct D_ParseNode* ambiguity_fn(struct D_Parser*, int, struct D_ParseNode**);
 /// \brief Custom syntax error function that prints both the line number and the column.
 void syntax_error_fn(struct D_Parser *ap);
 
-} // namespace detail
-
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core::detail
 
 #endif // MCRL2_CORE_DETAIL_DPARSER_FUNCTIONS_H

@@ -16,9 +16,8 @@
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 /// \brief An adapter that makes an arbitrary substitution function mutable.
 template <typename Substitution>
@@ -180,8 +179,6 @@ class mutable_substitution_composer<mutable_indexed_substitution<VariableType, E
     }
 };
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_MUTABLE_SUBSTITUTION_COMPOSER_H

@@ -15,11 +15,11 @@
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 // Vertex in the graph of LCFP parameters
 class LCFP_vertex
@@ -769,10 +769,10 @@ struct global_control_flow_graph: public control_flow_graph<global_control_flow_
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_GRAPH_H

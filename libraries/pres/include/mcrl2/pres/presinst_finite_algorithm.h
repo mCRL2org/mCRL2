@@ -20,10 +20,9 @@
 #include "mcrl2/pres/join.h"
 #include "mcrl2/pres/rewriters/data_rewriter.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 /// \brief Data structure for storing the indices of the variables that should be expanded by the finite presinst algorithm.
@@ -435,8 +434,8 @@ void presinst_finite(pres& p, data::rewrite_strategy rewrite_strategy, const std
   }
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PRESINST_FINITE_ALGORITHM_H

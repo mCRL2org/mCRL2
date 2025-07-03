@@ -14,9 +14,7 @@
 
 #include "mcrl2/pbes/pbes_expression.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)
 /// \param first Start of a sequence of pbes expressions
@@ -126,8 +124,8 @@ inline pbes_expression optimized_join_and(FwdIt first, FwdIt last)
                                  true_());
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_JOIN_H

@@ -20,13 +20,11 @@
 #include "mcrl2/data/print.h"
 #endif
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Represents a quantifier Qv:V. If the bool is true it is a forall, otherwise an exists.
@@ -148,19 +146,17 @@ struct pfnf_traverser_expression
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Concatenates two containers
@@ -460,10 +456,10 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_PFNF_TRAVERSER_H

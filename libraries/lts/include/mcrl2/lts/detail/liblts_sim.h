@@ -17,11 +17,7 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_dot.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template <class LTS_TYPE>
@@ -1088,10 +1084,8 @@ std::string sim_partitioner<LTS_TYPE>::print_reverse_topological_sort(const std:
     }
   result << "]" << std::endl;
   return result.str();
-} 
+}
 
+} // namespace mcrl2::lts::detail
 
-} // namespace detail
-} // namespace lts
-} // namespace mcrl2
 #endif

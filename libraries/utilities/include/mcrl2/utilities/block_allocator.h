@@ -15,9 +15,8 @@
 #include <memory>
 #include <stddef.h>
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \brief The block allocator provides the allocator interface for the memory pool class.
@@ -68,7 +67,7 @@ public:
   block_allocator& operator=(block_allocator&&) = default;
 };
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
+
 
 #endif

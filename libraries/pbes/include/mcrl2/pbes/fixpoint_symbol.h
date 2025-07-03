@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 //--- start generated class fixpoint_symbol ---//
@@ -100,8 +97,8 @@ inline void swap(fixpoint_symbol& t1, fixpoint_symbol& t2)
 }
 //--- end generated class fixpoint_symbol ---//
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_FIXPOINT_SYMBOL_H

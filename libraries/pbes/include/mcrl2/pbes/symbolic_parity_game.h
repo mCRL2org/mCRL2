@@ -23,9 +23,9 @@
 
 #include "sylvan_ldd.hpp"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 using sylvan::ldds::ldd;
 
@@ -775,9 +775,9 @@ private:
     } 
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_ENABLE_SYLVAN
 

@@ -15,9 +15,7 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/is_simple_substitution.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 /// \brief Substitution that maps data variables to data expressions. The substitution is stored as an
 /// assignment_list.
@@ -61,8 +59,8 @@ bool is_simple_substitution(const assignment_sequence_substitution& sigma)
   return true;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_ASSIGNMENT_SEQUENCE_SUBSTITUTION_H

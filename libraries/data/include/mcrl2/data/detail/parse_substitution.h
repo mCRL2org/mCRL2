@@ -14,13 +14,7 @@
 
 #include "mcrl2/data/parse.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief Parses a string of the form "b: Bool := true, n: Nat := 0", and adds
@@ -46,10 +40,6 @@ void parse_substitution(std::string text, MutableSubstitution& sigma, const data
   }
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_PARSE_SUBSTITUTION_H

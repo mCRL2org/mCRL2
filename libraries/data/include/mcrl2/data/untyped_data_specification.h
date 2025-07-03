@@ -14,9 +14,7 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 struct untyped_data_specification
 {
@@ -59,8 +57,8 @@ struct untyped_data_specification
   }
 };
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_UNTYPED_DATA_SPECIFICATION_H

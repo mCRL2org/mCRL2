@@ -14,10 +14,7 @@
 
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Maintains a multiset of bound data variables during traversal
@@ -116,8 +113,8 @@ struct add_data_variable_builder_binding: public add_data_variable_binding<Build
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_ADD_BINDING_H

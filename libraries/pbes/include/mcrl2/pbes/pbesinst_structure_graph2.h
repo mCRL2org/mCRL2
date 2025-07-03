@@ -22,9 +22,9 @@
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/utilities/stopwatch.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -660,8 +660,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H

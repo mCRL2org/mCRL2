@@ -20,10 +20,7 @@
 
 #include "mcrl2/lts/lts_lts.h"
 
-namespace mcrl2
-{
-
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief Sorts the transitions using a sort style.
@@ -828,7 +825,6 @@ void unmark_explicit_divergence_transitions(LTS_TYPE& l, const std::size_t diver
 
 } // namespace detail
 
-}
 }
 
 #endif // MCRL2_LTS_LTS_UTILITIES_H

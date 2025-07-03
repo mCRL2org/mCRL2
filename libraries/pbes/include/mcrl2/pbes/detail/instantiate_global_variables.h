@@ -15,13 +15,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/replace.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
-{
-
-namespace detail
+namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Applies a global variable substitution to a PBES.
@@ -65,10 +59,6 @@ data::mutable_map_substitution<> instantiate_global_variables(pbes& p)
   return sigma;
 }
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H

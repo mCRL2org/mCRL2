@@ -18,13 +18,7 @@
 #include <fstream>
 #include <vector>
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief Static initialisation of rewrite strategies used for testing.
@@ -58,10 +52,6 @@ const std::vector<data::rewrite_strategy>& get_test_rewrite_strategies(const boo
   return rewrite_strategies;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_REWRITE_STRATEGIES_H

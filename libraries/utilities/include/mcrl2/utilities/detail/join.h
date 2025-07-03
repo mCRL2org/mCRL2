@@ -14,13 +14,11 @@
 
 #include <iterator>
 
-namespace mcrl2
-{
 
-namespace utilities
-{
 
-namespace detail
+
+
+namespace mcrl2::utilities::detail
 {
 
 /// \brief Splits a binary tree T into a sequence, and writes the result to the output range
@@ -90,10 +88,10 @@ T join_balanced(RndIt first, RndIt last, BinaryOperation op)
   return op(left, right);
 }
 
-} // namespace detail
+} // namespace mcrl2::utilities::detail
 
-} // namespace utilities
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_UTILITIES_DETAIL_JOIN_H

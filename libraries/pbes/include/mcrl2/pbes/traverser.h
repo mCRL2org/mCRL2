@@ -14,10 +14,7 @@
 
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Traversal class for pbes_expressions. Used as a base class for pbes_expression_traverser.
@@ -727,8 +724,6 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<data
 };
 //--- end generated add_traverser_identifier_strings code ---//
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_TRAVERSER_H

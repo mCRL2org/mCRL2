@@ -14,9 +14,9 @@
 
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -123,8 +123,8 @@ std::set<data::variable> significant_variables(const pres_expression& x)
   return f.result_stack.back();
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_SIGNIFICANT_VARIABLES_H

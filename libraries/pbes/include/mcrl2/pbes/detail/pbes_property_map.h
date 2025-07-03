@@ -17,13 +17,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-namespace mcrl2
-{
-
-namespace pbes_system
-{
-
-namespace detail
+namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Stores the following properties of a linear process specification:
@@ -210,10 +204,6 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
     }
 };
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_PBES_PROPERTY_MAP_H

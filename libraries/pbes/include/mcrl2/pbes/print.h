@@ -15,9 +15,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 constexpr inline int precedence(const forall&) { return 21; }
 constexpr inline int precedence(const exists&) { return 21; }
@@ -259,8 +257,8 @@ std::string pp(const T& x, bool precedence_aware = true)
   return out.str();
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PRINT_H

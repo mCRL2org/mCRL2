@@ -22,13 +22,7 @@
 #include "mcrl2/lts/trace.h"
 #include <cstddef>
 
-
-namespace mcrl2
-{
-namespace lts
-{
-
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 
@@ -220,8 +214,6 @@ class dummy_counter_example_constructor
     }
 };
 
-} // namespace detail
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts::detail
 
 #endif // _LIBLTS_COUNTER_EXAMPLE_H

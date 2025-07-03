@@ -31,11 +31,7 @@
 #include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief include something in Debug mode
@@ -2101,7 +2097,7 @@ inline bool state_info_entry::surely_has_no_transition_to(
 
 } // end namespace bisim_gjkw
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 
 #endif // ifndef _LIBLTS_BISIM_GJKW_H

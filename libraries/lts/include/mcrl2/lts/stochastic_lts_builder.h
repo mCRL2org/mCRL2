@@ -14,9 +14,7 @@
 
 #include "mcrl2/lts/lts_builder.h"
 
-namespace mcrl2 {
-
-namespace lts {
+namespace mcrl2::lts {
 
 struct stochastic_lts_builder
 {
@@ -316,8 +314,8 @@ std::unique_ptr<stochastic_lts_builder> create_stochastic_lts_builder(const lps:
   }
 }
 
-} // namespace lts
+} // namespace mcrl2::lts
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LTS_STOCHASTIC_LTS_BUILDER_H

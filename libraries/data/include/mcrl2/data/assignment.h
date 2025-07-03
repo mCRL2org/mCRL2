@@ -15,10 +15,7 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/data/untyped_identifier.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated classes ---//
@@ -324,9 +321,9 @@ data_expression_list right_hand_sides(const assignment_list& x)
 std::string pp(const assignment_list& x, bool precedence_aware = true);
 std::string pp(const assignment_vector& x, bool precedence_aware = true);
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_ASSIGNMENT_H
 

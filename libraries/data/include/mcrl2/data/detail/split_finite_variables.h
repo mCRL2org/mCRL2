@@ -14,11 +14,8 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 /// \brief Splits the variables in a subset with finite sort, with infinite sort and those that are not used according to a filter. 
 /// \param variables A sequence of data variables.
@@ -134,10 +131,6 @@ void split_enumerable_variables(data::variable_list variables,
   }
 } */
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_SPLIT_FINITE_VARIABLES_H

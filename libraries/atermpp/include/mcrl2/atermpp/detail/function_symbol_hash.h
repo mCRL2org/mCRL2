@@ -44,9 +44,7 @@ struct hash<atermpp::detail::_function_symbol>
 
 } // namespace std
 
-namespace atermpp
-{
-namespace detail
+namespace atermpp::detail
 {
 
 /// \brief Computes the hash for given function symbol objects and for the
@@ -92,7 +90,7 @@ bool function_symbol_equals::operator()(const _function_symbol& symbol, const st
   return (symbol.name() == name) && (symbol.arity() == arity);
 }
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif // MCRL2_ATERMPP_DETAIL_FUNCTION_SYMBOL_HASH_H_

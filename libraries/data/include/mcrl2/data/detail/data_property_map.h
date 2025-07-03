@@ -14,13 +14,7 @@
 
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief Base class for storing properties of mCRL2 types.
@@ -319,10 +313,6 @@ bool compare_property_maps(const std::string& message, const PropertyMap& map1, 
   return result.empty();
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H

@@ -15,10 +15,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/state_formula.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
+namespace mcrl2::state_formulas
 {
 
 /// \brief Returns true if the state formula is monotonous.
@@ -173,8 +170,8 @@ bool is_monotonous(const state_formula& f)
   return is_monotonous(f, non_negated_variables, negated_variables);
 }
 
-} // namespace state_formulas
+} // namespace mcrl2::state_formulas
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_MODAL_FORMULA_IS_MONOTONOUS_H

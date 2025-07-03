@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/print.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Represents a deadlock
@@ -115,8 +112,8 @@ inline void swap(deadlock& t1, deadlock& t2)
 std::set<data::variable> find_all_variables(const lps::deadlock& x);
 std::set<data::variable> find_free_variables(const lps::deadlock& x);
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_DEADLOCK_H

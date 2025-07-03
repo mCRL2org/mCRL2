@@ -16,9 +16,9 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/join.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -329,8 +329,8 @@ class quantifiers_inside_rewriter
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REWRITERS_QUANTIFIERS_INSIDE_REWRITER_H

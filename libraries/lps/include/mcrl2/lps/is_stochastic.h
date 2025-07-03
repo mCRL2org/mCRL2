@@ -14,9 +14,8 @@
 
 #include "mcrl2/lps/traverser.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
@@ -54,8 +53,6 @@ bool is_stochastic(const T& x)
   return f.result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_IS_STOCHASTIC_H

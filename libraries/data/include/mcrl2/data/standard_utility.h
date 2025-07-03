@@ -17,10 +17,9 @@
 #include "mcrl2/data/real.h"
 #include "mcrl2/utilities/detail/join.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 namespace sort_bool
@@ -266,9 +265,9 @@ inline std::list<data_expression> split_conjunction(const data_expression& condi
   return clauses;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif
 

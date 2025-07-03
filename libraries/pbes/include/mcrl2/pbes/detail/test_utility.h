@@ -13,13 +13,11 @@
 
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Returns a data variable of type Nat with a given name
@@ -64,10 +62,10 @@ propositional_variable_instantiation propvarinst(const std::string& name, const 
   return propositional_variable_instantiation(core::identifier_string(name), parameters);
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_TEST_UTILITY_H

@@ -34,10 +34,9 @@
 #include "mcrl2/data/where_clause.h"
 
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 // Adds sort expression traversal to a builder
@@ -947,8 +946,8 @@ struct variable_builder: public add_variables<core::builder, Derived>
 };
 //--- end generated add_variables code ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_BUILDER_H

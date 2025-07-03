@@ -24,11 +24,7 @@
 #include "mcrl2/modal_formula/state_formula.h"
 #include <fstream>
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 template <class LTS_TYPE>
 class bisim_partitioner_minimal_depth
@@ -655,7 +651,6 @@ bool destructive_bisimulation_compare_minimal_depth(LTS_TYPE& l1, LTS_TYPE& l2, 
   return false;
 }
 
-} // namespace detail
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts::detail
+
 #endif

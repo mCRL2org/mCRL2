@@ -15,10 +15,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/replace_capture_avoiding.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 namespace detail {
@@ -286,9 +283,9 @@ T replace_pbes_expressions(const T& x,
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #ifndef MCRL2_PBES_SUBSTITUTIONS_H
 #include "mcrl2/pbes/substitutions.h"

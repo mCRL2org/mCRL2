@@ -15,10 +15,7 @@
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated class rename_expression ---//
@@ -109,8 +106,8 @@ inline void swap(rename_expression& t1, rename_expression& t2)
 }
 //--- end generated class rename_expression ---//
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_RENAME_EXPRESSION_H

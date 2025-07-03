@@ -15,11 +15,8 @@
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
-namespace mcrl2
-{
-
 /// \brief The main namespace for the PBES library.
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 class pbes;
@@ -324,8 +321,8 @@ bool operator==(const pbes& p1, const pbes& p2)
   return pbes_to_aterm(p1) == pbes_to_aterm(p2);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBES_H

@@ -25,21 +25,16 @@
 #include "mcrl2/utilities/hash_utility.h"
 
 // Prototype.
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 class big_natural_number;
 
 inline std::string pp(const big_natural_number& l);
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
-
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 namespace detail
 {
@@ -822,8 +817,7 @@ inline void swap(big_natural_number& x, big_natural_number& y)
   x.m_number.swap(y.m_number);
 }
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 namespace std
 {
@@ -841,9 +835,7 @@ struct hash< mcrl2::utilities::big_natural_number >
   
 } // namespace std
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 /* \brief A pretty print operator on action labels, returning it as a string.
 */
@@ -853,9 +845,7 @@ inline std::string pp(const big_natural_number& l)
   s << l;
   return s.str();
 }
-}  // namespace utilities
-}  // namespace mcrl2
-
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_BIG_NUMBERS_H
 

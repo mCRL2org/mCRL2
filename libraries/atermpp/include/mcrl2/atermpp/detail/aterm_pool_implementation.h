@@ -15,10 +15,7 @@
 #include "aterm_pool.h"
 #include "aterm_pool_storage_implementation.h"   // For store_in_argument_array. 
 
-
-namespace atermpp
-{
-namespace detail
+namespace atermpp::detail
 {
 
 aterm_pool::aterm_pool() :
@@ -428,7 +425,7 @@ std::size_t aterm_pool::protection_set_size() const
   return result;
 }
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif // ATERMPP_DETAIL_ATERM_POOL_IMPLEMENTATION_H

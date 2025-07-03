@@ -16,10 +16,7 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Algorithm class for the eqelm algorithm
@@ -352,8 +349,8 @@ void eqelm(pbes& p,
   }
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_EQELM_H

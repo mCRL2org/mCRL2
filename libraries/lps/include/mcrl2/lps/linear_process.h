@@ -16,10 +16,7 @@
 #include "mcrl2/lps/deadlock_summand.h"
 // #include "mcrl2/lps/process_initializer.h" Is not used in this file. 
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -273,8 +270,8 @@ std::set<data::variable> find_all_variables(const lps::linear_process& x);
 std::set<data::variable> find_free_variables(const lps::linear_process& x);
 std::set<process::action_label> find_action_labels(const lps::linear_process& x);
  
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_LINEAR_PROCESS_H

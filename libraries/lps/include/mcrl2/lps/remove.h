@@ -14,10 +14,7 @@
 
 #include "mcrl2/lps/replace.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -253,8 +250,8 @@ void remove_redundant_assignments(Specification& lpsspec)
   }
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_REMOVE_H

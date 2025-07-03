@@ -17,11 +17,7 @@
 
 #include "mcrl2/data/index_traits.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail {
 
 // transforms DataVarId to DataVarIdNoIndex
 // transforms OpId to OpIdNoIndex
@@ -63,10 +59,10 @@ atermpp::aterm remove_index(const atermpp::aterm& x)
   return atermpp::bottom_up_replace(x, detail::remove_index_impl);
 }
 
-} // namespace detail
+} // namespace mcrl2::data::detail
 
-} // namespace data
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_DATA_DETAIL_IO_H

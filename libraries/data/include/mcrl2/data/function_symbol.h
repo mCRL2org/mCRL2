@@ -14,10 +14,9 @@
 
 #include "mcrl2/data/application.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 typedef std::pair<core::identifier_string, sort_expression> function_symbol_key_type;
@@ -115,9 +114,9 @@ std::string pp(const function_symbol_list& x, bool precedence_aware = true);
 std::string pp(const function_symbol_vector& x, bool precedence_aware = true);
 std::set<data::variable> find_all_variables(const data::function_symbol& x);
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_FUNCTION_SYMBOL_H
 

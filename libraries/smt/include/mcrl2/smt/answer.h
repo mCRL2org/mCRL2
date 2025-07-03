@@ -13,9 +13,7 @@
 
 #include <iostream>
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 
 enum answer
@@ -37,7 +35,6 @@ std::ostream& operator<<(std::ostream& out, const answer& a)
   }
 }
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif // MCRL2_SMT_ANSWER_H

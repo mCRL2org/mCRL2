@@ -15,11 +15,8 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/action_label.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 class action_context
 {
@@ -94,10 +91,6 @@ class action_context
     }
 };
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_ACTION_CONTEXT_H

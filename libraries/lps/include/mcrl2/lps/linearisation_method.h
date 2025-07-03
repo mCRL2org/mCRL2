@@ -14,10 +14,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief The available linearisation methods
@@ -99,7 +96,6 @@ std::ostream& operator<<(std::ostream& os, const t_lin_method l)
   return os;
 }
 
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_LINEARISATION_METHOD_H

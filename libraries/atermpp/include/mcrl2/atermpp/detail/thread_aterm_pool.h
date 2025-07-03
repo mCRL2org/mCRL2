@@ -17,9 +17,8 @@
 
 #include <atomic>
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 /// \brief This is a thread's specific access to the global aterm pool which ensures that
@@ -140,8 +139,8 @@ private:
 /// \brief A reference to the thread local term pool storage
 thread_aterm_pool& g_thread_term_pool();
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #include "thread_aterm_pool_implementation.h"
 

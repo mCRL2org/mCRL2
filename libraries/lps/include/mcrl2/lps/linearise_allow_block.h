@@ -19,10 +19,7 @@
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/process/process_expression.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 inline std::string log_allow_block_application(const lps_statistics_t& lps_statistics_before,
@@ -307,8 +304,6 @@ inline void allowblockcomposition(
   }
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_LINEARISE_ALLLOW_BLOCK_H

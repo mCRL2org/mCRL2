@@ -22,10 +22,7 @@
 #include "mcrl2/process/untyped_multi_action.h"
 // #include "mcrl2/process/timed_multi_action.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated add_traverser_sort_expressions code ---//
@@ -1923,8 +1920,6 @@ struct action_label_traverser: public add_traverser_action_labels<core::traverse
 };
 //--- end generated add_traverser_action_labels code ---//
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_TRAVERSER_H

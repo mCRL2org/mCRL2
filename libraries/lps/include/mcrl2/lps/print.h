@@ -17,10 +17,7 @@
 #include "mcrl2/lps/traverser.h"
 #include "mcrl2/process/print.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -352,8 +349,6 @@ std::string pp(const T& x, bool precedence_aware = true)
   return out.str();
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_PRINT_H

@@ -15,9 +15,9 @@
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \brief Apply the stategraph algorithm
 /// \param p A PBES to which the algorithm is applied.
@@ -50,8 +50,8 @@ void stategraph(pbes& p, const pbesstategraph_options& options)
   }
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_STATEGRAPH_H

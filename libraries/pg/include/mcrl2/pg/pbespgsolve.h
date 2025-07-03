@@ -21,9 +21,9 @@
 #include "mcrl2/pg/PriorityPromotionSolver.h"
 #include "mcrl2/utilities/execution_timer.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 enum pbespg_solver_type
 {
@@ -275,8 +275,8 @@ bool pbespgsolve(pbes& p, utilities::execution_timer& timer, const pbespgsolve_o
   return algorithm.run(p);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESPGSOLVE_H

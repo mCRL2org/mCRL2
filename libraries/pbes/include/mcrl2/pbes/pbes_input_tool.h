@@ -16,13 +16,11 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/io.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace tools
+
+
+namespace mcrl2::pbes_system::tools
 {
 
 /// \brief Base class for filter tools that take a pbes as input.
@@ -138,10 +136,10 @@ class pbes_input_tool: public Tool
     }
 };
 
-} // namespace tools
+} // namespace mcrl2::pbes_system::tools
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_PBES_INPUT_TOOL_H

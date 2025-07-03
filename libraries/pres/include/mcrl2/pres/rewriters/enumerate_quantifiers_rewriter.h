@@ -19,9 +19,9 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pres/rewriters/simplify_rewriter.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -412,9 +412,9 @@ struct enumerate_quantifiers_rewriter
     }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
 

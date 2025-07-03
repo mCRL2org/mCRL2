@@ -14,9 +14,8 @@
 
 #include <iostream>
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 /// \brief An empty struct that is used to denote the absence of a substitution.
 /// Used for rewriters.
@@ -30,8 +29,6 @@ std::ostream& operator<<(std::ostream& out, const no_substitution&)
   return out << "[]";
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_NO_SUBSTITUTION_H

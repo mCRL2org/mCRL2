@@ -13,10 +13,9 @@
 
 #include "mcrl2/pres/builder.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 /// \cond INTERNAL_DOCS
@@ -350,8 +349,8 @@ void remove_pres_parameters(pres& x,
 }
 /// \endcond
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REMOVE_PARAMETERS_H

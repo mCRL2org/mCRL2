@@ -14,11 +14,11 @@
 
 #include "mcrl2/lps/linear_process.h"
 
-namespace mcrl2 {
 
-namespace lps {
 
-namespace detail {
+
+
+namespace mcrl2::lps::detail {
 
 /// \brief Adds a time parameter t to s if needed and returns the result. The time t
 /// is chosen such that it doesn't appear in context.
@@ -87,10 +87,10 @@ void make_timed_lps(LINEAR_PROCESS& lps,
   }
 }
 
-} // namespace detail
+} // namespace mcrl2::lps::detail
 
-} // namespace lps
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_LPS_DETAIL_MAKE_TIMED_LPS_H

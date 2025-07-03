@@ -17,10 +17,7 @@
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/standard_container_utility.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail {
@@ -2559,8 +2556,6 @@ std::string pp(const T& x, bool precendence_aware = true)
   return out.str();
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif

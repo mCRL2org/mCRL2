@@ -26,18 +26,14 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/machine_word.h"
 
-namespace mcrl2 {
-
-  namespace data {
-
     /// \brief Namespace for system defined sort pos.
-    namespace sort_pos {
+namespace mcrl2::data::sort_pos
+{
 
-      inline
-      const core::identifier_string& pos_name()
-      {
-        static core::identifier_string pos_name = core::identifier_string("Pos");
-        return pos_name;
+inline const core::identifier_string& pos_name()
+{
+  static core::identifier_string pos_name = core::identifier_string("Pos");
+  return pos_name;
       }
 
       /// \brief Constructor for sort expression Pos.
@@ -1290,10 +1286,6 @@ namespace mcrl2 {
         return result;
       }
 
-    } // namespace sort_pos
-
-  } // namespace data
-
-} // namespace mcrl2
+      } // namespace mcrl2::data::sort_pos
 
 #endif // MCRL2_DATA_POS64_H

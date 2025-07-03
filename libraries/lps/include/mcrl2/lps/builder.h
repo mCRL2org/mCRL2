@@ -15,10 +15,7 @@
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 // Adds sort expression traversal to a builder
@@ -492,8 +489,6 @@ struct variable_builder: public add_variables<process::data_expression_builder, 
 };
 //--- end generated add_variables code ---//
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_BUILDER_H

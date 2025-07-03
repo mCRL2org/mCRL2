@@ -14,9 +14,7 @@
 
 #include "mcrl2/pbes/parse.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 /// \brief Parses a sequence of pbes expressions. The format of the text is as
 /// follows:
@@ -236,8 +234,8 @@ pbes_expression parse_pbes_expression(const std::string& expr, const std::string
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_DETAIL_PARSE_H

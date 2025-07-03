@@ -15,10 +15,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 typedef std::pair<atermpp::aterm, atermpp::aterm> machine_number_key_type;
@@ -109,9 +106,7 @@ std::string pp(const machine_number_list& x, bool precedence_aware = true);
 std::string pp(const machine_number_vector& x, bool precedence_aware = true);
 std::set<data::variable> find_all_variables(const data::machine_number& x);
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_MACHINE_NUMBER_H
 

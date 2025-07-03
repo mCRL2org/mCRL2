@@ -16,9 +16,7 @@
 
 #include "mcrl2/utilities/indexed_set.h"    // necessary for header test. 
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 namespace detail
 {
@@ -292,8 +290,8 @@ inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(cons
 #undef INDEXED_SET 
 
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_UTILITIES_DETAIL_INDEXED_SET_H

@@ -13,9 +13,8 @@
 #include <cstddef>
 #include <string>
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \brief A helper class to keep track of the number of hits and misses for cache-like data structures.
@@ -44,8 +43,8 @@ private:
 
 };
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
+
 
 
 #endif // MCRL2_UTILITIES_CACHE_METRIC_H

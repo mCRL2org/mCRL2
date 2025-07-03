@@ -15,10 +15,9 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 /// \brief An enumerated type for the available pbes rewriters
@@ -177,8 +176,8 @@ inline std::ostream& operator<<(std::ostream& os, const pbes_rewriter_type t)
   return os;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBES_REWRITER_TYPE_H

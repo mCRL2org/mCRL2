@@ -14,13 +14,7 @@
 #include <QWidget>
 #include <QTextEdit>
 
-namespace mcrl2
-{
-
-namespace gui
-{
-
-namespace qt
+namespace mcrl2::gui::qt
 {
 
 /**
@@ -66,10 +60,6 @@ void swapItemsAt(QList<T>& input, std::size_t from, std::size_t to)
 #endif
 }
 
-} // namespace qt
-
-} // namespace gui
-
-} // namespace mcrl2
+} // namespace mcrl2::gui::qt
 
 #endif // MCRL2_GUI_UTILITIES_H

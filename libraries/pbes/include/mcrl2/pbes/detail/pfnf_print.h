@@ -15,9 +15,9 @@
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/print.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -151,8 +151,8 @@ std::string pfnf_pp(const T& x, bool precedence_aware = true)
   return out.str();
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_DETAIL_PFNF_PRINT_H

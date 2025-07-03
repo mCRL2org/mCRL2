@@ -18,11 +18,7 @@
 #include "mcrl2/data/cardinality.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
-namespace mcrl2
-{
-
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 /// \brief The propositional variable is taken from a pbes_system. 
@@ -1972,14 +1968,9 @@ typedef atermpp::term_list<pbes_system::propositional_variable> propositional_va
 /// \\brief vector of propositional_variables
 typedef std::vector<pbes_system::propositional_variable>    propositional_variable_vector;
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
-
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /// \brief Contains type information for pres expressions.
@@ -2445,9 +2436,9 @@ struct term_traits<pres_system::pres_expression>
   }
 };
 
-} // namespace core
+} // namespace mcrl2::core
 
-} // namespace mcrl2
+
 
 namespace std
 {

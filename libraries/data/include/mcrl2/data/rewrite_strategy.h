@@ -4,9 +4,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief The strategy of the rewriter.
@@ -100,7 +98,6 @@ inline std::string description(const rewrite_strategy s)
   }
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REWRITE_STRATEGY_H

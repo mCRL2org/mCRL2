@@ -21,10 +21,7 @@
 #include "mcrl2/atermpp/function_symbol_generator.h"
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 class enumerator_identifier_generator
@@ -52,10 +49,6 @@ class enumerator_identifier_generator
     }
 };
 
-
-} // namespace data
-
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_DETAIL_ENUMERATOR_IDENTIFIER_GENERATOR_H

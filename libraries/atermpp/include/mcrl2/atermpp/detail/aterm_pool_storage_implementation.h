@@ -17,9 +17,8 @@
 #include <type_traits>
 #include <cstring>
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 /// \brief Construct the proxy where its arguments are given by applying the converter
@@ -459,7 +458,7 @@ bool ATERM_POOL_STORAGE::verify_term(const _aterm& term)
 #undef ATERM_POOL_STORAGE_TEMPLATES
 #undef ATERM_POOL_STORAGE
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif

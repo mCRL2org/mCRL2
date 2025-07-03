@@ -15,11 +15,7 @@
 #include "mcrl2/process/multi_action_name.h"
 #include "mcrl2/process/parse.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail {
 
 // Removes surrounding braces from a string.
 inline
@@ -205,10 +201,10 @@ rename_expression_list parse_rename_set(const std::string& text)
   return rename_expression_list(result.begin(), result.end());
 }
 
-} // namespace detail
+} // namespace mcrl2::process::detail
 
-} // namespace process
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PROCESS_DETAIL_ALPHABET_PARSE_H

@@ -14,11 +14,7 @@
 
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 class RewriterProver: public Rewriter
@@ -113,8 +109,6 @@ class RewriterProver: public Rewriter
     }
 };
 
-}
-}
 }
 
 #endif

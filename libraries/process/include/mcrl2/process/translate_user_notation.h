@@ -15,10 +15,7 @@
 #include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 template <typename T>
@@ -39,8 +36,6 @@ T translate_user_notation(const T& x,
   return result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_TRANSLATE_USER_NOTATION_H

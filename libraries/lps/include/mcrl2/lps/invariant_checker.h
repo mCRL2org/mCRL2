@@ -61,11 +61,7 @@
 /// parameter a_invariant holds for the initial state and all the generated formulas are tautologies according to the
 /// prover, it is an invariant.
 
-namespace mcrl2
-{
-namespace lps
-{
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 template <typename Specification>
@@ -290,8 +286,6 @@ bool Invariant_Checker<Specification>::check_invariant(const data::data_expressi
   return v_result;
 }
 
-} // namespace detail
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif

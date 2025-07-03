@@ -15,9 +15,7 @@
 #include "mcrl2/data/untyped_data_specification.h"
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 struct untyped_pbes
 {
@@ -37,8 +35,8 @@ struct untyped_pbes
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_UNTYPED_PBES_H

@@ -17,11 +17,11 @@
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/pres/detail/lps2pres_utility.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
 
-namespace detail {
+
+
+namespace mcrl2::pres_system::detail {
 
 template <typename TermTraits>
 typename TermTraits::term_type Sat(const lps::multi_action& a,
@@ -174,10 +174,10 @@ typename TermTraits::term_type Sat(const lps::multi_action& a,
   return f.top();
 }
 
-} // namespace detail
+} // namespace mcrl2::pres_system::detail
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_DETAIL_LPS2PRES_SAT_H

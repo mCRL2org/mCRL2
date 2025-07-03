@@ -14,9 +14,8 @@
 
 #include "mcrl2/process/utility.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -95,8 +94,6 @@ process_instance expand_assignments(const process::process_instance_assignment& 
   return process_instance(x.identifier(), data::data_expression_list(e.begin(), e.end()));
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_EXPAND_PROCESS_INSTANCE_ASSIGNMENTS_H

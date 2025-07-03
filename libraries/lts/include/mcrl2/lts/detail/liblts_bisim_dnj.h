@@ -92,11 +92,7 @@
 
 #include <cstddef>   // for std::size_t
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief include something in Debug mode
@@ -4985,7 +4981,7 @@ inline bool bisimulation_compare_dnj(const LTS_TYPE& l1, const LTS_TYPE& l2,
 ///@} (end of group part_interface)
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 
 #endif // ifndef LIBLTS_BISIM_DNJ_H

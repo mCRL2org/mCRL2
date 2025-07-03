@@ -14,10 +14,7 @@
 
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 namespace detail
@@ -395,8 +392,6 @@ bool is_linear(const process_expression& x, const process_equation& eqn)
   return f.is_linear(x);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_LINEAR_H

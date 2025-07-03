@@ -19,11 +19,11 @@
 
 #include "mcrl2/pbes/detail/bqnf_visitor.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 struct bqnf2ppg_rewriter: public bqnf_visitor
   {
@@ -559,10 +559,10 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
 
   };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_BQNF2PPG_REWRITER_H

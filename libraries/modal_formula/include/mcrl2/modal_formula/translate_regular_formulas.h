@@ -16,9 +16,7 @@
 
 namespace mcrl2 {
 
-namespace regular_formulas {
-
-namespace detail {
+namespace regular_formulas::detail {
 
 /** \brief     Translate regular formulas in terms of state and action formulas.
  *  \param[in] state_frm An aterm representation of a state formula according
@@ -29,9 +27,9 @@ namespace detail {
  **/
 mcrl2::state_formulas::state_formula translate_reg_frms(const mcrl2::state_formulas::state_formula& state_frm);
 
-} // namespace detail
+} // namespace regular_formulas::detail
 
-} // namespace regular_formulas
+
 
 namespace state_formulas {
 

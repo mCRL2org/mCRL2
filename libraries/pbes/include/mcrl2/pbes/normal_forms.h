@@ -14,10 +14,7 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -311,8 +308,6 @@ void make_standard_form(pbes& eqn, bool recursive_form = false)
   eqn.equations() = t.m_equations;
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_NORMAL_FORMS_H

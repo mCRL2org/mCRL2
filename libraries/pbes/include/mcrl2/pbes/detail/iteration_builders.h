@@ -7,13 +7,11 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 // Substitutor to replace predicate variables OTHER than the self-referencing onces to functions from params to booleans
@@ -231,10 +229,10 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif

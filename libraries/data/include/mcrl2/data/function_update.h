@@ -25,9 +25,9 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bool.h"
 
-namespace mcrl2 {
 
-  namespace data {
+
+  namespace mcrl2::data {
 
       /// \brief Give all system defined constructors for function_update.
       /// \return All system defined constructors for function_update.
@@ -487,9 +487,9 @@ namespace mcrl2 {
         return result;
       }
 
-  } // namespace data
+  } // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #include "mcrl2/data/detail/function_update.h" // This file contains the manual implementations of rewrite functions.
 #endif // MCRL2_DATA_FUNCTION_UPDATE_H

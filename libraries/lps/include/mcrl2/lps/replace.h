@@ -16,10 +16,7 @@
 #include "mcrl2/lps/replace_capture_avoiding.h"
 #include "mcrl2/process/replace.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail {
@@ -295,8 +292,6 @@ void replace_summand_variables(specification& spec, data::mutable_map_substituti
   }
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_REPLACE_H

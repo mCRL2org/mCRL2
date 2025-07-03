@@ -15,9 +15,8 @@
 #include "mcrl2/data/rewriters/data_rewriter.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
@@ -62,9 +61,7 @@ struct data_rewriter
   }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_REWRITERS_DATA_REWRITER_H
 

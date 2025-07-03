@@ -21,11 +21,7 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_dot.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 /** \brief Reduce LTS l with respect to (divergence-preserving) weak bisimulation.
@@ -108,6 +104,6 @@ bool weak_bisimulation_compare(
 }
 
 }
-}
-}
+
+
 #endif  // #define _LIBLTS_WEAK_BISIM_H

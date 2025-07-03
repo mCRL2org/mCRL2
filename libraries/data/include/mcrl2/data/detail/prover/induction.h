@@ -17,11 +17,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 /// The class Induction generates statements corresponding to
 
@@ -205,8 +201,6 @@ class Induction
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

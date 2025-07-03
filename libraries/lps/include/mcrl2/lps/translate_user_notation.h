@@ -15,10 +15,7 @@
 #include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 template <typename T>
@@ -39,8 +36,6 @@ T translate_user_notation(const T& x,
   return result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_TRANSLATE_USER_NOTATION_H

@@ -17,11 +17,8 @@
 #include "mcrl2/process/rename_expression.h"
 #include "mcrl2/utilities/sequence.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace alphabet_operations {
+namespace mcrl2::process::alphabet_operations
+{
 
 //-----------------------------------------------------//
 // multi_action_name operations
@@ -777,10 +774,6 @@ multi_action_name_set allow(const action_name_multiset_list& V, const multi_acti
   return result;
 }
 
-} // namespace alphabet_operations
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::alphabet_operations
 
 #endif // MCRL2_PROCESS_ALPHABET_OPERATIONS_H

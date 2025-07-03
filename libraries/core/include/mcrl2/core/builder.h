@@ -15,10 +15,9 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/concepts.h"
 
-namespace mcrl2
-{
 
-namespace core
+
+namespace mcrl2::core
 {
 
 #ifdef MCRL2_DEBUG_EXPRESSION_BUILDER
@@ -237,8 +236,8 @@ make_update_apply_builder_arg1(const Function& f)
   return update_apply_builder_arg1<Builder, Function, Arg1>(f);
 }
 
-} // namespace core
+} // namespace mcrl2::core
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_CORE_BUILDER_H

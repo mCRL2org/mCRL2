@@ -14,9 +14,9 @@
 
 #include "mcrl2/pres/parse.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 /// \brief Parses a sequence of pres expressions. The format of the text is as
 /// follows:
@@ -237,8 +237,8 @@ pres_expression parse_pres_expression(const std::string& expr, const std::string
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_DETAIL_PARSE_H

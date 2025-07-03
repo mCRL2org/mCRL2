@@ -15,11 +15,8 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace algorithms {
+namespace mcrl2::pbes_system::algorithms
+{
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
 /// \param x A PBES library object that does not derive from atermpp::aterm
@@ -64,10 +61,6 @@ std::vector<propositional_variable> remove_unreachable_variables(pbes& p);
 /// \brief Returns the significant variables of a pbes expression.
 std::set<data::variable> significant_variables(const pbes_expression& x);
 
-} // namespace algorithms
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::algorithms
 
 #endif // MCRL2_PBES_ALGORITHMS_H

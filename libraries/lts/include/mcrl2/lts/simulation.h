@@ -12,10 +12,7 @@
 #include "mcrl2/lps/explorer.h"
 #include "mcrl2/lts/trace.h"
 
-namespace mcrl2
-{
-
-namespace lps  // TODO: This should become lts. We should not declare objects in namespace lps within the lts library. 
+namespace mcrl2::lps  // TODO: This should become lts. We should not declare objects in namespace lps within the lts library. 
 {
 
 /// \brief Simulation process.
@@ -99,8 +96,8 @@ class simulation : protected explorer<true, false, stochastic_specification>
 
 };
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif

@@ -15,7 +15,7 @@
 
 // Forward declaration of mcrl2::pbes_system::pbes, which may or may not be
 // defined later depending on whether mCRL2 support is compiled in.
-namespace mcrl2 { namespace pbes_system { class pbes; } }
+ namespace mcrl2::pbes_system { class pbes; } 
 
 #if __GNUC__ >= 3
 #   define ATTR_PACKED  __attribute__((__packed__))

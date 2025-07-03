@@ -19,10 +19,7 @@
 #include <string>
 #include <vector>
 
-namespace mcrl2
-{
-
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief Generate a random alphanumeric character
@@ -76,8 +73,6 @@ std::string temporary_filename(std::string const& prefix = "")
   return result;
 }
 
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_TEST_UTILITIES_H

@@ -28,21 +28,17 @@
 #include "mcrl2/data/pos64.h"
 #include "mcrl2/data/nat64.h"
 
-namespace mcrl2 {
-
-  namespace data {
-
     /// \brief Namespace for system defined sort list.
-    namespace sort_list {
+namespace mcrl2::data::sort_list
+{
 
-      /// \brief Constructor for sort expression List(S)
-      /// \param s A sort expression
-      /// \return Sort expression list(s)
-      inline
-      container_sort list(const sort_expression& s)
-      {
-        container_sort list(list_container(), s);
-        return list;
+/// \brief Constructor for sort expression List(S)
+/// \param s A sort expression
+/// \return Sort expression list(s)
+inline container_sort list(const sort_expression& s)
+{
+  container_sort list(list_container(), s);
+  return list;
       }
 
       /// \brief Recogniser for sort expression List(s)
@@ -898,10 +894,6 @@ namespace mcrl2 {
         return result;
       }
 
-    } // namespace sort_list
-
-  } // namespace data
-
-} // namespace mcrl2
+      } // namespace mcrl2::data::sort_list
 
 #endif // MCRL2_DATA_LIST64_H

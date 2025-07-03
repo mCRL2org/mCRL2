@@ -16,10 +16,7 @@
 #include "mcrl2/data/standard_container_utility.h"
 #include "mcrl2/data/standard_utility.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -194,8 +191,8 @@ data_equation translate_user_notation_data_equation(const data_equation& x)
 }
 } // namespace detail
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_TRANSLATE_USER_NOTATION_H

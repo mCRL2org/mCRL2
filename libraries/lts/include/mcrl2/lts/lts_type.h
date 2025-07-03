@@ -16,14 +16,11 @@
 #ifndef MCRL2_LTS_LTS_TYPE_H
 #define MCRL2_LTS_LTS_TYPE_H
 
-namespace mcrl2
-{
-
 /** \brief The main LTS namespace.
  * \details This namespace contains all data structures and members of the LTS
  * library.
  */
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief The enumerated type lts_type contains an index for every type
@@ -48,6 +45,6 @@ enum lts_type
 };
 
 }
-}
+
 
 #endif // MCRL2_LTS_LTS_TYPE_H

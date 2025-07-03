@@ -18,10 +18,9 @@
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include <iomanip>
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 /// \brief Class for generating a BES from a PBES. This BES can be interpreted as
@@ -466,8 +465,8 @@ class parity_game_generator
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PARITY_GAME_GENERATOR_H

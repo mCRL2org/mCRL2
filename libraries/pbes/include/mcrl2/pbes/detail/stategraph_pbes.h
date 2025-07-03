@@ -17,11 +17,11 @@
 #include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 class predicate_variable
 {
@@ -590,10 +590,10 @@ std::vector<stategraph_equation>::const_iterator find_equation(const stategraph_
   return equations.end();
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_PBES_H

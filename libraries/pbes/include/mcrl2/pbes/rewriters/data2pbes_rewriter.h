@@ -15,9 +15,9 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -162,8 +162,8 @@ class data2pbes_rewriter
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REWRITERS_DATA2PBES_REWRITER_H

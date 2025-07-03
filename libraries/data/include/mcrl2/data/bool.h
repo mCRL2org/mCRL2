@@ -24,12 +24,12 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard.h"
 
-namespace mcrl2 {
 
-  namespace data {
 
-    /// \brief Namespace for system defined sort bool_.
-    namespace sort_bool {
+  
+
+/// \brief Namespace for system defined sort bool_.
+namespace mcrl2::data::sort_bool {
 
       inline
       const core::identifier_string& bool_name()
@@ -534,10 +534,6 @@ namespace mcrl2 {
         return result;
       }
 
-    } // namespace sort_bool_
-
-  } // namespace data
-
-} // namespace mcrl2
+} // namespace sort_bool_
 
 #endif // MCRL2_DATA_BOOL_H

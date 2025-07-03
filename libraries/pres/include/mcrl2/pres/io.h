@@ -15,10 +15,9 @@
 #include "mcrl2/pres/pres.h"
 #include "mcrl2/utilities/file_utility.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 const std::vector<utilities::file_format>& pres_file_formats();
@@ -95,8 +94,8 @@ void load_pres(pres& pres,
                const std::string& filename,
                utilities::file_format format = utilities::file_format());
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_IO_H
