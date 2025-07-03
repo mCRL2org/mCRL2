@@ -8,6 +8,7 @@
 //
 /// \file lpsreach.cpp
 
+#include <cstddef>
 #include <sylvan_ldd.hpp>
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/lpsreach.h"
@@ -31,7 +32,7 @@ class lpsreach_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 
     // Lace options
     std::size_t lace_n_workers = 1;
-    std::size_t lace_dqsize = 1024*1024*4; // set large default
+    std::size_t lace_dqsize = static_cast<long>(1024*1024)*4; // set large default
     std::size_t lace_stacksize = 0; // use default
 
     // Sylvan options
