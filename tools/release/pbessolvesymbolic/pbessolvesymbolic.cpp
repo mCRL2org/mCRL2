@@ -151,13 +151,13 @@ public:
     bool _alpha,
     const std::unordered_map<core::identifier_string, data::data_expression>& _propvar_map,
     const std::vector<symbolic::data_expression_index>& _data_index,
-    const sylvan::ldds::ldd& _Valpha,
+    const sylvan::ldds::ldd& Valpha,
     const sylvan::ldds::ldd& S,
     std::optional<data::rewriter> rewriter = std::nullopt)
     : pbesinst_structure_graph_algorithm(options, p, G, rewriter),
       alpha(_alpha),
       strategy(S),
-      Valpha(_Valpha),
+      Valpha(Valpha),
       data_index(_data_index),
       propvar_map(_propvar_map)
   {}
