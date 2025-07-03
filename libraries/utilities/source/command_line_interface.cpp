@@ -6,7 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#define __COMMAND_LINE_INTERFACE__
 #include <locale>
 #include <regex>
 
