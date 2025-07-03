@@ -12,8 +12,6 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
-#define MCRL2_ABSINTHE_CHECK_EXPRESSIONS
-
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/consistency.h"
@@ -21,8 +19,6 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/data/detail/print_parse_check.h"
-
-#include <ranges>
 
 namespace mcrl2 {
 
