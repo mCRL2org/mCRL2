@@ -4,8 +4,6 @@ Checks: "-*,
     bugprone-*,
     -bugprone-easily-swappable-parameters,
     modernize-avoid-bind,
-    modernize-concat-nested-namespaces,
-    "
-WarningsAsErrors: ''
-HeaderFilterRegex: ''
-FormatStyle:     none
+    modernize-concat-nested-namespaces"
+WarningsAsErrors: 'false'
+HeaderFilterRegex: '.'
