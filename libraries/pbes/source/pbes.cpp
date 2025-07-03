@@ -18,10 +18,9 @@
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/translate_user_notation.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 //--- start generated pbes_system overloads ---//
@@ -169,7 +168,7 @@ pbes_expression parse_pbes_expression(const std::string& text)
 
 } // namespace detail
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 

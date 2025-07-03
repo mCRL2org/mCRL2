@@ -16,11 +16,11 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/modal_formula/parse.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 /// \brief Prints a warning if formula contains an action that is not used in lpsspec.
 inline void check_lps2pbes_actions(const state_formulas::state_formula& formula, const lps::stochastic_specification& lpsspec)
@@ -36,11 +36,11 @@ inline void check_lps2pbes_actions(const state_formulas::state_formula& formula,
   }
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

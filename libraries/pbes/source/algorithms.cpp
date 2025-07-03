@@ -15,13 +15,11 @@
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/significant_variables.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace algorithms {
+
+
+namespace mcrl2::pbes_system::algorithms {
 
 void remove_parameters(pbes& x, const std::set<data::variable>& to_be_removed)
 {
@@ -70,9 +68,9 @@ std::set<data::variable> significant_variables(const pbes_expression& x)
   return pbes_system::significant_variables(x);
 }
 
-} // namespace algorithms
+} // namespace mcrl2::pbes_system::algorithms
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 

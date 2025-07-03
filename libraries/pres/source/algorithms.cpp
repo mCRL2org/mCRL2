@@ -15,13 +15,11 @@
 #include "mcrl2/pres/remove_parameters.h"
 #include "mcrl2/pres/significant_variables.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
-{
 
-namespace algorithms {
+
+
+namespace mcrl2::pres_system::algorithms {
 
 void remove_parameters(pres& x, const std::set<data::variable>& to_be_removed)
 {
@@ -70,9 +68,9 @@ std::set<data::variable> significant_variables(const pres_expression& x)
   return pres_system::significant_variables(x);
 } 
 
-} // namespace algorithms
+} // namespace mcrl2::pres_system::algorithms
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 

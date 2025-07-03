@@ -15,10 +15,9 @@
 #include "mcrl2/process/remove_equations.h"
 
 
-namespace mcrl2
-{
 
-namespace process
+
+namespace mcrl2::process
 {
 
 //--- start generated process overloads ---//
@@ -160,7 +159,7 @@ void complete_process_specification(process_specification& x, bool alpha_reduce)
 
 } // namespace detail
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 

@@ -1,38 +1,11 @@
 ---
-Checks: "clang-analyzer-*,
-    bug-prone-*,
+Checks: "-*,
+    boost-use-to-string,
+    bugprone-*,
+    -bugprone-easily-swappable-parameters,
     modernize-avoid-bind,
-    modernize-avoid-c-arrays,
     modernize-concat-nested-namespaces,
-    modernize-deprecated-headers,
-    modernize-deprecated-ios-base-aliases,
-    modernize-loop-convert,
-    modernize-make-shared,
-    modernize-make-unique,
-    modernize-pass-by-value,
-    modernize-raw-string-literal,
-    modernize-redundant-void-arg,
-    modernize-replace-random-shuffle,
-    modernize-shrink-to-fit,
-    modernize-use-bool-literals,
-    modernize-use-constraints,
-    modernize-use-default-member-init,
-    modernize-use-designated-initializers,
-    modernize-use-emplace,
-    modernize-use-equals-default,
-    modernize-use-equals-delete
-    modernize-use-integer-sign-comparison,
-    modernize-use-nodiscard,
-    modernize-use-noexcept,
-    modernize-use-nullptr,
-    modernize-use-override,
-    modernize-use-ranges,
-    modernize-use-starts-ends-with,
-    modernize-use-std-numbers,
-    modernize-use-std-numbers,
-    modernize-use-transparent-functors,
-    modernize-use-uncaught-exceptions,
-    modernize-use-using"
+    "
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 FormatStyle:     none
