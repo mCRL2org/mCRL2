@@ -111,7 +111,7 @@ private:
     if (std::string op = mcrl2::data::pp(opid);
       "!=" == op) 
     {
-      return u8"≠";
+      return reinterpret_cast<const char*>(u8"≠");
     }
     else if ("==" == op) 
     {
@@ -119,15 +119,15 @@ private:
     }
     else if ("<=" == op) 
     {
-      return u8"≤";
+      return reinterpret_cast<const char*>(u8"≤");
     }
     else if ("&&" == op) 
     {
-      return u8"∧";
+      return reinterpret_cast<const char*>(u8"∧");
     }
     else if ("||" == op) 
     {
-      return u8"∨";
+      return reinterpret_cast<const char*>(u8"∨");
     }
     else if ("@cReal" == op) 
     { 
@@ -165,7 +165,7 @@ private:
     {
       const data::application& appl = atermpp::down_cast<data::application>(e);
       return object{
-        {"op", u8"¬"},
+        {"op", reinterpret_cast<const char*>(u8"¬")},
         {"exp", convert_data_expression(appl[0])}
       };
     }
@@ -183,7 +183,7 @@ private:
       const data::application& appl = atermpp::down_cast<data::application>(e);
       return object{
         {"left", convert_data_expression(appl[1])},
-        {"op", u8"≤"},
+        {"op", reinterpret_cast<const char*>(u8"≤")},
         {"right", convert_data_expression(appl[0])}
       };
     }
