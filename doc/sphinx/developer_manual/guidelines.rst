@@ -167,7 +167,7 @@ and supported build tools on those platforms.
 Feature macros
 ^^^^^^^^^^^^^^
 
-Mmacros should be avoided whenever possible and replaced by global `constexpr`
+Macros should be avoided whenever possible and replaced by global `constexpr`
 boolean variables. However, in the cases that macros are unavoidable (i.e.,
 require introducing templates) they should be used as follows. The macro should
 be named ``MCRL2_`` as explained above and in the code we are allowed to check
@@ -183,6 +183,13 @@ Formatting
 The code should be formatted according to the mCRL2 coding style, this can be
 (partially) enforced by running `clang-format
 <https://clang.llvm.org/docs/ClangFormat.html>`_ on the code.
+
+Clang-tidy
+^^^^^^^^^^
+
+The clang-tidy tool can be used to check (and sometimes refactor) various outdated and/or inefficient code constructs, the exact checks are listed in the `.clang-tidy` file in the root of the repository.
+These checks can be ran by using the command `run-clang-tidy -p <build_dir> -fix -format`, note that the build directory should contain the `compile_commands.json`, which can
+be obtained by setting `CMAKE_EXPORT_COMPILE_COMMANDS`. This cmake option is not available for project builds, such as Visual Studio.
 
 Committing changes
 ------------------
