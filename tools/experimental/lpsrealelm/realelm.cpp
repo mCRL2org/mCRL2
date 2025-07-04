@@ -211,8 +211,7 @@ static void move_real_parameters_out_of_actions(stochastic_specification& s,
              replaced_variables,
              real_parameters));
        }
-       new_actions.push_back(
-           process::action(a.label(), data_expression_list(resulting_data.begin(), resulting_data.end())));
+       new_actions.emplace_back(a.label(), data_expression_list(resulting_data.begin(), resulting_data.end()));
      }
 
      if (replaced_variables.empty())
@@ -237,16 +236,14 @@ static void move_real_parameters_out_of_actions(stochastic_specification& s,
            {
              new_replaced_args.push_back(replace_free_variables(k, sigma));
            }
-           new_replaced_actions.push_back(process::action(j->label(),data_expression_list(new_replaced_args.begin(),new_replaced_args.end())));
+           new_replaced_actions.emplace_back(j->label(),
+               data_expression_list(new_replaced_args.begin(), new_replaced_args.end()));
          }
          const process::action_list new_action_list(new_replaced_actions.begin(),new_replaced_actions.end());
-         new_action_summands.push_back(action_summand(
-                                          i.summation_variables(),
-                                          r(sort_bool::and_(data::replace_free_variables(new_condition,sigma),i.condition())),
-                                          (i.has_time()?
-                                             multi_action(new_action_list,i.multi_action().time()):
-                                             multi_action(new_action_list)),
-                                          i.assignments()));
+         new_action_summands.emplace_back(action_summand(i.summation_variables(),
+             r(sort_bool::and_(data::replace_free_variables(new_condition, sigma), i.condition())),
+             (i.has_time() ? multi_action(new_action_list, i.multi_action().time()) : multi_action(new_action_list)),
+             i.assignments()));
        }
      }
   }
@@ -292,7 +289,7 @@ static void normalize_specification(
         // into inequalities.
         for (const data_expression& k : *j_r)
         {
-          inequalities.push_back(linear_inequality(k, r));
+          inequalities.emplace_back(k, r);
         }
 
         // Determine all variables that occur in the sum operator, but not in the
@@ -417,7 +414,7 @@ static void normalize_specification(
         // into inequalities.
         for (const data_expression& k : *j_r)
         {
-          inequalities.push_back(linear_inequality(k, r));
+          inequalities.emplace_back(k, r);
         }
 
         // We can apply Fourier-Motzkin to eliminate the real variables from
@@ -674,9 +671,9 @@ static void add_summand(summand_information& summand_info,
 
   if (summand_info.is_delta_summand())
   {
-    deadlock_summands.push_back(deadlock_summand(get_nonreal_variables(summand_info.get_summand().summation_variables()),
-                                                 new_condition,
-                                                 deadlock(summand_info.get_deadlock()).time()));
+    deadlock_summands.emplace_back(get_nonreal_variables(summand_info.get_summand().summation_variables()),
+        new_condition,
+        deadlock(summand_info.get_deadlock()).time());
   }
   else
   { // Summand is not delta.
@@ -709,12 +706,11 @@ static void add_summand(summand_information& summand_info,
       new_actions=reverse(resulting_actions);
     }
     const lps::summand_base& s=summand_info.get_summand();
-    action_summands.push_back(
-                   stochastic_action_summand(get_nonreal_variables(s.summation_variables()),
-                                             new_condition,
-                                             multi_action(new_actions,summand_info.get_multi_action().time()),
-                                             nextstate,
-                                             summand_info.get_distribution()));
+    action_summands.emplace_back(get_nonreal_variables(s.summation_variables()),
+        new_condition,
+        multi_action(new_actions, summand_info.get_multi_action().time()),
+        nextstate,
+        summand_info.get_distribution());
   }
 }
 

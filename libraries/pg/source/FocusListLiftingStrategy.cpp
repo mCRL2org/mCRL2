@@ -31,7 +31,7 @@ void FocusListLiftingStrategy::lifted(verti vertex)
         lls_.lifted(vertex);
         if (focus_list_.size() < focus_list_.capacity())
         {
-            focus_list_.push_back(std::make_pair(vertex, initial_credit));
+          focus_list_.emplace_back(vertex, initial_credit);
         }
     }
     else /* phase_ == 2 */

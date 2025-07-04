@@ -30,12 +30,13 @@ void test_representative_generator()
                                    );
 
   std::vector< data::structured_sort_constructor_argument > arguments;
-  arguments.push_back(structured_sort_constructor_argument("s", basic_sort("E")));
-  arguments.push_back(structured_sort_constructor_argument("n", sort_nat::nat()));
+  arguments.emplace_back("s", basic_sort("E"));
+  arguments.emplace_back("n", sort_nat::nat());
 
   std::vector< structured_sort_constructor > constructors;
-  constructors.push_back(structured_sort_constructor("d", structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1)));
-  constructors.push_back(structured_sort_constructor("e", structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.begin() + 2)));
+  constructors.emplace_back("d", structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1));
+  constructors.emplace_back("e",
+      structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.begin() + 2));
 
   specification.add_alias(alias(basic_sort("D"), structured_sort(structured_sort_constructor_list(constructors.begin(), constructors.begin() + 1))));
   specification.add_alias(alias(basic_sort("E"), structured_sort(structured_sort_constructor_list(constructors.begin() + 1, constructors.begin() + 2))));

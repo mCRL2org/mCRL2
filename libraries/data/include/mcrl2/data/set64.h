@@ -1276,62 +1276,108 @@ namespace mcrl2::data::sort_set {
     variable vc("c",s);
 
     data_equation_vector result;
-    result.push_back(data_equation(variable_list({vs}), set_fset(s, vs), constructor(s, false_function(s), vs)));
-    result.push_back(data_equation(variable_list({vf}), sort_set::set_comprehension(s, vf), constructor(s, vf, sort_fset::empty(s))));
-    result.push_back(data_equation(variable_list({ve, vf, vs}), in(s, ve, constructor(s, vf, vs)), not_equal_to(vf(ve), in(s, ve, vs))));
-    result.push_back(data_equation(variable_list({vf, vg, vs, vt}), equal_to(constructor(s, vf, vs), constructor(s, vg, vt)), forall(variable_list({vc}), equal_to(equal_to(vf(vc), vg(vc)), equal_to(in(s, vc, vs), in(s, vc, vt))))));
-    result.push_back(data_equation(variable_list({vx, vy}), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
-    result.push_back(data_equation(variable_list({vx, vy}), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
-    result.push_back(data_equation(variable_list({vf, vs}), complement(s, constructor(s, vf, vs)), constructor(s, not_function(s, vf), vs)));
-    result.push_back(data_equation(variable_list({vx}), union_(s, vx, vx), vx));
-    result.push_back(data_equation(variable_list({vx, vy}), union_(s, vx, union_(s, vx, vy)), union_(s, vx, vy)));
-    result.push_back(data_equation(variable_list({vx, vy}), union_(s, vx, union_(s, vy, vx)), union_(s, vy, vx)));
-    result.push_back(data_equation(variable_list({vx, vy}), union_(s, union_(s, vx, vy), vx), union_(s, vx, vy)));
-    result.push_back(data_equation(variable_list({vx, vy}), union_(s, union_(s, vy, vx), vx), union_(s, vy, vx)));
-    result.push_back(data_equation(variable_list({vf, vg, vs, vt}), union_(s, constructor(s, vf, vs), constructor(s, vg, vt)), constructor(s, or_function(s, vf, vg), fset_union(s, vf, vg, vs, vt))));
-    result.push_back(data_equation(variable_list({vx}), intersection(s, vx, vx), vx));
-    result.push_back(data_equation(variable_list({vx, vy}), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
-    result.push_back(data_equation(variable_list({vx, vy}), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx)));
-    result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
-    result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
-    result.push_back(data_equation(variable_list({vf, vg, vs, vt}), intersection(s, constructor(s, vf, vs), constructor(s, vg, vt)), constructor(s, and_function(s, vf, vg), fset_intersection(s, vf, vg, vs, vt))));
-    result.push_back(data_equation(variable_list({vx}), intersection(s, sort_fset::empty(s), vx), sort_fset::empty(s)));
-    result.push_back(data_equation(variable_list({vd, vs, vx}), intersection(s, sort_fset::cons_(s, vd, vs), vx), if_(in(s, vd, vx), sort_fset::cons_(s, vd, intersection(s, vs, vx)), intersection(s, vs, vx))));
-    result.push_back(data_equation(variable_list({vs, vx}), intersection(s, vx, vs), intersection(s, vs, vx)));
-    result.push_back(data_equation(variable_list({vx, vy}), difference(s, vx, vy), intersection(s, vx, complement(s, vy))));
-    result.push_back(data_equation(variable_list({vs, vx}), difference(s, vs, vx), intersection(s, vs, complement(s, vx))));
-    result.push_back(data_equation(variable_list({ve}), false_function(s, ve), sort_bool::false_()));
-    result.push_back(data_equation(variable_list({ve}), true_function(s, ve), sort_bool::true_()));
-    result.push_back(data_equation(variable_list(), equal_to(false_function(s), true_function(s)), sort_bool::false_()));
-    result.push_back(data_equation(variable_list(), equal_to(true_function(s), false_function(s)), sort_bool::false_()));
-    result.push_back(data_equation(variable_list({ve, vf}), not_function(s, vf)(ve), sort_bool::not_(vf(ve))));
-    result.push_back(data_equation(variable_list(), not_function(s, false_function(s)), true_function(s)));
-    result.push_back(data_equation(variable_list(), not_function(s, true_function(s)), false_function(s)));
-    result.push_back(data_equation(variable_list({ve, vf, vg}), and_function(s, vf, vg)(ve), sort_bool::and_(vf(ve), vg(ve))));
-    result.push_back(data_equation(variable_list({vf}), and_function(s, vf, vf), vf));
-    result.push_back(data_equation(variable_list({vf}), and_function(s, vf, false_function(s)), false_function(s)));
-    result.push_back(data_equation(variable_list({vf}), and_function(s, false_function(s), vf), false_function(s)));
-    result.push_back(data_equation(variable_list({vf}), and_function(s, vf, true_function(s)), vf));
-    result.push_back(data_equation(variable_list({vf}), and_function(s, true_function(s), vf), vf));
-    result.push_back(data_equation(variable_list({vf}), or_function(s, vf, vf), vf));
-    result.push_back(data_equation(variable_list({vf}), or_function(s, vf, false_function(s)), vf));
-    result.push_back(data_equation(variable_list({vf}), or_function(s, false_function(s), vf), vf));
-    result.push_back(data_equation(variable_list({vf}), or_function(s, vf, true_function(s)), true_function(s)));
-    result.push_back(data_equation(variable_list({vf}), or_function(s, true_function(s), vf), true_function(s)));
-    result.push_back(data_equation(variable_list({ve, vf, vg}), or_function(s, vf, vg)(ve), sort_bool::or_(vf(ve), vg(ve))));
-    result.push_back(data_equation(variable_list({vs, vt}), fset_union(s, false_function(s), false_function(s), vs, vt), union_(s, vs, vt)));
-    result.push_back(data_equation(variable_list({vf, vg}), fset_union(s, vf, vg, sort_fset::empty(s), sort_fset::empty(s)), sort_fset::empty(s)));
-    result.push_back(data_equation(variable_list({vd, vf, vg, vs}), fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::empty(s)), sort_fset::cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, sort_fset::empty(s)))));
-    result.push_back(data_equation(variable_list({ve, vf, vg, vt}), fset_union(s, vf, vg, sort_fset::empty(s), sort_fset::cons_(s, ve, vt)), sort_fset::cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, sort_fset::empty(s), vt))));
-    result.push_back(data_equation(variable_list({vd, vf, vg, vs, vt}), fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, vd, vt)), sort_fset::cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_union(s, vf, vg, vs, vt))));
-    result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(vd, ve), fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, ve, vt)), sort_fset::cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, sort_fset::cons_(s, ve, vt)))));
-    result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(ve, vd), fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, ve, vt)), sort_fset::cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), vt))));
-    result.push_back(data_equation(variable_list({vf, vg}), fset_intersection(s, vf, vg, sort_fset::empty(s), sort_fset::empty(s)), sort_fset::empty(s)));
-    result.push_back(data_equation(variable_list({vd, vf, vg, vs}), fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::empty(s)), sort_fset::cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, sort_fset::empty(s)))));
-    result.push_back(data_equation(variable_list({ve, vf, vg, vt}), fset_intersection(s, vf, vg, sort_fset::empty(s), sort_fset::cons_(s, ve, vt)), sort_fset::cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, sort_fset::empty(s), vt))));
-    result.push_back(data_equation(variable_list({vd, vf, vg, vs, vt}), fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, vd, vt)), sort_fset::cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_intersection(s, vf, vg, vs, vt))));
-    result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(vd, ve), fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, ve, vt)), sort_fset::cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, sort_fset::cons_(s, ve, vt)))));
-    result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(ve, vd), fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, ve, vt)), sort_fset::cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), vt))));
+    result.emplace_back(variable_list({vs}), set_fset(s, vs), constructor(s, false_function(s), vs));
+    result.emplace_back(variable_list({vf}),
+        sort_set::set_comprehension(s, vf),
+        constructor(s, vf, sort_fset::empty(s)));
+    result.emplace_back(variable_list({ve, vf, vs}),
+        in(s, ve, constructor(s, vf, vs)),
+        not_equal_to(vf(ve), in(s, ve, vs)));
+    result.emplace_back(variable_list({vf, vg, vs, vt}),
+        equal_to(constructor(s, vf, vs), constructor(s, vg, vt)),
+        forall(variable_list({vc}), equal_to(equal_to(vf(vc), vg(vc)), equal_to(in(s, vc, vs), in(s, vc, vt)))));
+    result.emplace_back(variable_list({vx, vy}),
+        less(vx, vy),
+        sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy)));
+    result.emplace_back(variable_list({vx, vy}), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx));
+    result.emplace_back(variable_list({vf, vs}),
+        complement(s, constructor(s, vf, vs)),
+        constructor(s, not_function(s, vf), vs));
+    result.emplace_back(variable_list({vx}), union_(s, vx, vx), vx);
+    result.emplace_back(variable_list({vx, vy}), union_(s, vx, union_(s, vx, vy)), union_(s, vx, vy));
+    result.emplace_back(variable_list({vx, vy}), union_(s, vx, union_(s, vy, vx)), union_(s, vy, vx));
+    result.emplace_back(variable_list({vx, vy}), union_(s, union_(s, vx, vy), vx), union_(s, vx, vy));
+    result.emplace_back(variable_list({vx, vy}), union_(s, union_(s, vy, vx), vx), union_(s, vy, vx));
+    result.emplace_back(variable_list({vf, vg, vs, vt}),
+        union_(s, constructor(s, vf, vs), constructor(s, vg, vt)),
+        constructor(s, or_function(s, vf, vg), fset_union(s, vf, vg, vs, vt)));
+    result.emplace_back(variable_list({vx}), intersection(s, vx, vx), vx);
+    result.emplace_back(variable_list({vx, vy}), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy));
+    result.emplace_back(variable_list({vx, vy}), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx));
+    result.emplace_back(variable_list({vx, vy}), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy));
+    result.emplace_back(variable_list({vx, vy}), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx));
+    result.emplace_back(variable_list({vf, vg, vs, vt}),
+        intersection(s, constructor(s, vf, vs), constructor(s, vg, vt)),
+        constructor(s, and_function(s, vf, vg), fset_intersection(s, vf, vg, vs, vt)));
+    result.emplace_back(variable_list({vx}), intersection(s, sort_fset::empty(s), vx), sort_fset::empty(s));
+    result.emplace_back(variable_list({vd, vs, vx}),
+        intersection(s, sort_fset::cons_(s, vd, vs), vx),
+        if_(in(s, vd, vx), sort_fset::cons_(s, vd, intersection(s, vs, vx)), intersection(s, vs, vx)));
+    result.emplace_back(variable_list({vs, vx}), intersection(s, vx, vs), intersection(s, vs, vx));
+    result.emplace_back(variable_list({vx, vy}), difference(s, vx, vy), intersection(s, vx, complement(s, vy)));
+    result.emplace_back(variable_list({vs, vx}), difference(s, vs, vx), intersection(s, vs, complement(s, vx)));
+    result.emplace_back(variable_list({ve}), false_function(s, ve), sort_bool::false_());
+    result.emplace_back(variable_list({ve}), true_function(s, ve), sort_bool::true_());
+    result.emplace_back(variable_list(), equal_to(false_function(s), true_function(s)), sort_bool::false_());
+    result.emplace_back(variable_list(), equal_to(true_function(s), false_function(s)), sort_bool::false_());
+    result.emplace_back(variable_list({ve, vf}), not_function(s, vf)(ve), sort_bool::not_(vf(ve)));
+    result.emplace_back(variable_list(), not_function(s, false_function(s)), true_function(s));
+    result.emplace_back(variable_list(), not_function(s, true_function(s)), false_function(s));
+    result.emplace_back(variable_list({ve, vf, vg}), and_function(s, vf, vg)(ve), sort_bool::and_(vf(ve), vg(ve)));
+    result.emplace_back(variable_list({vf}), and_function(s, vf, vf), vf);
+    result.emplace_back(variable_list({vf}), and_function(s, vf, false_function(s)), false_function(s));
+    result.emplace_back(variable_list({vf}), and_function(s, false_function(s), vf), false_function(s));
+    result.emplace_back(variable_list({vf}), and_function(s, vf, true_function(s)), vf);
+    result.emplace_back(variable_list({vf}), and_function(s, true_function(s), vf), vf);
+    result.emplace_back(variable_list({vf}), or_function(s, vf, vf), vf);
+    result.emplace_back(variable_list({vf}), or_function(s, vf, false_function(s)), vf);
+    result.emplace_back(variable_list({vf}), or_function(s, false_function(s), vf), vf);
+    result.emplace_back(variable_list({vf}), or_function(s, vf, true_function(s)), true_function(s));
+    result.emplace_back(variable_list({vf}), or_function(s, true_function(s), vf), true_function(s));
+    result.emplace_back(variable_list({ve, vf, vg}), or_function(s, vf, vg)(ve), sort_bool::or_(vf(ve), vg(ve)));
+    result.emplace_back(variable_list({vs, vt}),
+        fset_union(s, false_function(s), false_function(s), vs, vt),
+        union_(s, vs, vt));
+    result.emplace_back(variable_list({vf, vg}),
+        fset_union(s, vf, vg, sort_fset::empty(s), sort_fset::empty(s)),
+        sort_fset::empty(s));
+    result.emplace_back(variable_list({vd, vf, vg, vs}),
+        fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::empty(s)),
+        sort_fset::cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, sort_fset::empty(s))));
+    result.emplace_back(variable_list({ve, vf, vg, vt}),
+        fset_union(s, vf, vg, sort_fset::empty(s), sort_fset::cons_(s, ve, vt)),
+        sort_fset::cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, sort_fset::empty(s), vt)));
+    result.emplace_back(variable_list({vd, vf, vg, vs, vt}),
+        fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, vd, vt)),
+        sort_fset::cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_union(s, vf, vg, vs, vt)));
+    result.emplace_back(variable_list({vd, ve, vf, vg, vs, vt}),
+        less(vd, ve),
+        fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, ve, vt)),
+        sort_fset::cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, sort_fset::cons_(s, ve, vt))));
+    result.emplace_back(variable_list({vd, ve, vf, vg, vs, vt}),
+        less(ve, vd),
+        fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, ve, vt)),
+        sort_fset::cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, sort_fset::cons_(s, vd, vs), vt)));
+    result.emplace_back(variable_list({vf, vg}),
+        fset_intersection(s, vf, vg, sort_fset::empty(s), sort_fset::empty(s)),
+        sort_fset::empty(s));
+    result.emplace_back(variable_list({vd, vf, vg, vs}),
+        fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::empty(s)),
+        sort_fset::cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, sort_fset::empty(s))));
+    result.emplace_back(variable_list({ve, vf, vg, vt}),
+        fset_intersection(s, vf, vg, sort_fset::empty(s), sort_fset::cons_(s, ve, vt)),
+        sort_fset::cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, sort_fset::empty(s), vt)));
+    result.emplace_back(variable_list({vd, vf, vg, vs, vt}),
+        fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, vd, vt)),
+        sort_fset::cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_intersection(s, vf, vg, vs, vt)));
+    result.emplace_back(variable_list({vd, ve, vf, vg, vs, vt}),
+        less(vd, ve),
+        fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, ve, vt)),
+        sort_fset::cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, sort_fset::cons_(s, ve, vt))));
+    result.emplace_back(variable_list({vd, ve, vf, vg, vs, vt}),
+        less(ve, vd),
+        fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), sort_fset::cons_(s, ve, vt)),
+        sort_fset::cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, sort_fset::cons_(s, vd, vs), vt)));
     return result;
   }
 

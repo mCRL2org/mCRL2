@@ -76,7 +76,7 @@ std::vector<data::variable> parse_lps_parameter_selection(const data::variable_l
       continue;
     }
 
-    selections.push_back(std::make_pair(what[1], what[2]));
+    selections.emplace_back(what[1], what[2]);
   }
 
   find_matching_parameters(params, dataspec, selections, std::inserter(result, result.end()));

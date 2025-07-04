@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(bool_rewrite_test)
     data_rewrite_test(R, implies(false_(), true_()), true_());
 
     data::variable_vector v;
-    v.push_back(data::variable("b", bool_()));
-    v.push_back(data::variable("c", bool_()));
+    v.emplace_back("b", bool_());
+    v.emplace_back("c", bool_());
     data::data_expression e(parse_data_expression("b&&(b&&c)", v));
     data_rewrite_test(R, e, e);
   }
@@ -529,29 +529,30 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
 
   std::vector< structured_sort_constructor_argument > arguments;
 
-  arguments.push_back(structured_sort_constructor_argument("a0", bool_()));
-  arguments.push_back(structured_sort_constructor_argument(static_cast<sort_expression const&>(bool_())));
-  arguments.push_back(structured_sort_constructor_argument("n0", sort_nat::nat()));
-  arguments.push_back(structured_sort_constructor_argument("n1", sort_nat::nat()));
+  arguments.emplace_back("a0", bool_());
+  arguments.emplace_back(static_cast<sort_expression const&>(bool_()));
+  arguments.emplace_back("n0", sort_nat::nat());
+  arguments.emplace_back("n1", sort_nat::nat());
 
   std::vector< structured_sort_constructor > constructors;
   // without arguments or recogniser
   //  c0
-  constructors.push_back(structured_sort_constructor("c0"));
+  constructors.emplace_back("c0");
   // without arguments, with recogniser
   //  c1?is_one
-  constructors.push_back(structured_sort_constructor("c1", std::string("is_one")));
+  constructors.emplace_back("c1", std::string("is_one"));
   // with arguments, without recogniser
   //  a(a0 : A)
-  constructors.push_back(structured_sort_constructor("a",
-                         structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1)));
+  constructors.emplace_back("a", structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1));
   // two arguments, with recogniser
   //  b(B)?is_b
-  constructors.push_back(structured_sort_constructor("b",
-                         structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
+  constructors.emplace_back("b",
+      structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.begin() + 2),
+      "is_b");
   //  c(n0 : Nat, n1 : Nat)?is_c
-  constructors.push_back(structured_sort_constructor("c",
-                         structured_sort_constructor_argument_list(arguments.begin() + 2, arguments.end()), "is_c"));
+  constructors.emplace_back("c",
+      structured_sort_constructor_argument_list(arguments.begin() + 2, arguments.end()),
+      "is_c");
 
   data::structured_sort ls(constructors);
 
@@ -1568,8 +1569,8 @@ BOOST_AUTO_TEST_CASE(bound_variables_in_whr_clause1)   // The toolset up to 2025
     
   rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   data::variable_vector v;
-  v.push_back(data::variable("a", basic_sort("D")));
-  v.push_back(data::variable("c", basic_sort("D")));
+  v.emplace_back("a", basic_sort("D"));
+  v.emplace_back("c", basic_sort("D"));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   { 
     std::cerr << "  Where clause going astray (1). " << *strat << std::endl;

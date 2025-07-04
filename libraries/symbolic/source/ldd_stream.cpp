@@ -25,8 +25,8 @@ struct node_iterator
 public:
   node_iterator(const ldd& U, mcrl2::utilities::indexed_set<sylvan::ldds::ldd>& nodes)
    : m_nodes(nodes)
-  {    
-    m_stack.emplace(std::make_pair(U, false));
+  {
+    m_stack.emplace(U, false);
     this->operator++();
   }
 
@@ -47,11 +47,11 @@ public:
         // Add children and continue.        
         if (m_nodes.find(current.first.down()) == m_nodes.end())
         {
-          m_stack.push(std::make_pair(current.first.down(), false));
+          m_stack.emplace(current.first.down(), false);
         }
         if (m_nodes.find(current.first.right()) == m_nodes.end())
         {
-          m_stack.push(std::make_pair(current.first.right(), false));
+          m_stack.emplace(current.first.right(), false);
         }
         current.second = true; // Next time, we can actually process current.
       }

@@ -101,7 +101,7 @@ struct separate_equations_command: public process::detail::process_command
     text = q.second;
 
     // N.B. Don't forget isolated 'eqn' sections without a preceding 'var'.
-    all_keywords.push_back("eqn");
+    all_keywords.emplace_back("eqn");
     q = utilities::detail::separate_keyword_section(text, "eqn", all_keywords, repeat_keyword);
     var_text = var_text + "\n" + q.first;
     text = q.second;
@@ -118,7 +118,7 @@ struct separate_equations_command: public process::detail::process_command
     std::string act_text = q.first;
     text = q.second;
 
-    all_keywords.push_back("eqn");
+    all_keywords.emplace_back("eqn");
     q = utilities::detail::separate_keyword_section(text, "eqn", all_keywords, repeat_keyword);
     std::string eqn_text = q.first;
     std::string sort_text = q.second;

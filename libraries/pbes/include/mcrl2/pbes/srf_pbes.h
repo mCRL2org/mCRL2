@@ -355,7 +355,7 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
       const propositional_variable& X = eqn.variable();
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
-      equations.push_front(pbes_equation(eqn.symbol(), X1, x));
+      equations.emplace_front(eqn.symbol(), X1, x);
       summands.emplace_back(data::variable_list(),
           f,
           propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
@@ -442,7 +442,7 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
       const propositional_variable& X = eqn.variable();
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
-      equations.push_front(pbes_equation(eqn.symbol(), X1, x));
+      equations.emplace_front(eqn.symbol(), X1, x);
       summands.emplace_back(data::variable_list(),
           f,
           propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
@@ -581,7 +581,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
       const propositional_variable& X = eqn.variable();
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
-      equations.push_front(pbes_equation(eqn.symbol(), X1, x));
+      equations.emplace_front(eqn.symbol(), X1, x);
       summands.emplace_back(data::variable_list(),
           f,
           propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
@@ -672,7 +672,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
       const propositional_variable& X = eqn.variable();
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
-      equations.push_front(pbes_equation(eqn.symbol(), X1, x));
+      equations.emplace_front(eqn.symbol(), X1, x);
       summands.emplace_back(data::variable_list(),
           f,
           propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));

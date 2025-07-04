@@ -113,9 +113,9 @@ BOOST_AUTO_TEST_CASE(test_assignment_list)
   data::variable e3("e3", data::basic_sort("D"));
 
   data::assignment_vector l;
-  l.push_back(data::assignment(d1, e1));
-  l.push_back(data::assignment(e1, e2));
-  l.push_back(data::assignment(e2, e3));
+  l.emplace_back(d1, e1);
+  l.emplace_back(e1, e2);
+  l.emplace_back(e2, e3);
 
   data::data_expression t  = and_(equal_to(d1, e1), not_equal_to(e2, d3));
   data::data_expression t0 = and_(equal_to(e1, e2), not_equal_to(e3, d3));

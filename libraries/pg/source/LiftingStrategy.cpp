@@ -85,9 +85,9 @@ LiftingStrategyFactory *
     std::string::size_type i, j;
     for (i = 0; (j = description.find(':', i)) != std::string::npos; i = j + 1)
     {
-        parts.push_back(std::string(description, i, j - i));
+      parts.emplace_back(description, i, j - i);
     }
-    parts.push_back(std::string(description, i, j));
+    parts.emplace_back(description, i, j);
 
     std::string case_ = tolower(parts[0]);
     if ( case_ == "linear" || case_ == "lin" )

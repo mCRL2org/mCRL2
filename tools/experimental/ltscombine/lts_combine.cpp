@@ -352,7 +352,7 @@ private:
         }
         // Add new state for state i
         old_states.push_back(lts::to(transition));
-        new_combos.push_back(std::make_pair(label, old_states));
+        new_combos.emplace_back(label, old_states);
 
         // Add transition t to the existing multi-action from each combo
         for (auto& combo : combos)
@@ -376,7 +376,7 @@ private:
           // Create new action label from multi-action of combo and transition t
           // lts::action_label_lts new_label(lps::multi_action(label.actions() + combo.first.actions()));
 
-          new_combos.push_back(std::make_pair(label + combo.first, new_states));
+          new_combos.emplace_back(label + combo.first, new_states);
         }
       }
 
@@ -514,7 +514,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
   for (const lts::lts_lts_t& lt : lts)
   {
-    outgoing_transitions.push_back(lts::outgoing_transitions_per_state_t(lt.get_transitions(), lt.num_states(), true));
+    outgoing_transitions.emplace_back(lt.get_transitions(), lt.num_states(), true);
   }
 
   // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).
@@ -569,7 +569,9 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   for (size_t i = 0; i < nr_of_threads; i++)
   {
     state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow, outgoing_transitions);
-    threads.emplace_back(std::thread([&]  {
+    threads.emplace_back(
+        [&]
+        {
           thread(lts_builder,
             queue,
             progress_monitor,
@@ -581,7 +583,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
             states_mutex,
             queue_cond,
             busy);
-        }));
+        });
   }
 
   for (size_t i = 0; i < nr_of_threads; i++)

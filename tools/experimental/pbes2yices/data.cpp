@@ -620,7 +620,7 @@ static std::string match_pattern(
         for (const std::string& constructor_field_name : constructor_field_names)
         {
           case_arguments.push_back("(" + constructor_field_name + " " + arguments[i] + ")");
-          term_variables.push_back(variable(argument_variable_generator("v"), sort_bool::bool_()));
+          term_variables.emplace_back(argument_variable_generator("v"), sort_bool::bool_());
         }
 
         std::vector<variable> case_argument_variables = base_argument_variables;
@@ -732,7 +732,7 @@ static std::string construct_function_definition(data::function_symbol function,
   {
     core::identifier_string name = argument_variable_generator("v");
     arguments.push_back(name);
-    argument_variables.push_back(variable(name, i));
+    argument_variables.emplace_back(name, i);
   }
   data_expression pattern = application(function, argument_variables.begin(), argument_variables.end());
   

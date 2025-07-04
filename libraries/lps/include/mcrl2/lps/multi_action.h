@@ -338,7 +338,7 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   while (first != va.end())
   {
     action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
-    intervals.push_back(std::make_pair(first, next));
+    intervals.emplace_back(first, next);
     first = next;
   }
 
@@ -376,7 +376,7 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   while (first != va.end())
   {
     action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
-    intervals.push_back(std::make_pair(first, next));
+    intervals.emplace_back(first, next);
     first = next;
   }
   std::vector<data::data_expression> z;

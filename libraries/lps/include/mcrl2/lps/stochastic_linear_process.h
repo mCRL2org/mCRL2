@@ -38,7 +38,7 @@ stochastic_action_summand_vector convert_action_summands(const action_summand_ve
   stochastic_action_summand_vector result;
   for (const action_summand& s: action_summands)
   {
-    result.push_back(stochastic_action_summand(s));
+    result.emplace_back(s);
   }
   return result;
 }

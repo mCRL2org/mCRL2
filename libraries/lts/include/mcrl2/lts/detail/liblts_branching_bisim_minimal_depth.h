@@ -48,7 +48,7 @@ public:
 
     for (transition trans : m_lts.get_transitions())
     {
-      trans_out[trans.from()].push_back(std::make_pair(trans.label(), trans.to()));
+      trans_out[trans.from()].emplace_back(trans.label(), trans.to());
       if (is_tau(trans.label()))
       {
         silent_out[trans.from()].insert(trans.to());
@@ -460,11 +460,11 @@ private:
       if (std::get<1>(path) == dist_label and (!is_tau(dist_label) or std::get<0>(path) != std::get<2>(path)))
       {
         // we might have B_1 -\tau -> B_1, I don't think its a problem.
-        T.push_back(std::make_pair(std::get<0>(path), std::get<2>(path)));
+        T.emplace_back(std::get<0>(path), std::get<2>(path));
         if (is_tau(dist_label))
         {
           // the following observation: block2 -\tau->> path2 -(tau)-> path2.
-          T.push_back(std::make_pair(std::get<2>(path), std::get<2>(path)));
+          T.emplace_back(std::get<2>(path), std::get<2>(path));
         }
       }
     }

@@ -242,16 +242,16 @@ inline void allowblockcomposition(
     }
     else if (smmnd.has_time())
     {
-      resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock(actiontime)));
+      resultdeltasumlist.emplace_back(sumvars, condition, deadlock(actiontime));
     }
     // summand has no time.
     else if (condition == data::sort_bool::true_())
     {
-      resultsimpledeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
+      resultsimpledeltasumlist.emplace_back(sumvars, condition, deadlock());
     }
     else
     {
-      resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
+      resultdeltasumlist.emplace_back(sumvars, condition, deadlock());
     }
   }
 

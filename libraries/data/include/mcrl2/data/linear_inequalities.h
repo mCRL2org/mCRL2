@@ -1168,7 +1168,7 @@ inline void remove_redundant_inequalities(
   // If false is among the inequalities, [false] is the minimal result.
   if (is_inconsistent(inequalities,r))
   {
-    resulting_inequalities.push_back(linear_inequality());
+    resulting_inequalities.emplace_back();
     return;
   }
 
@@ -1968,7 +1968,7 @@ std::set < variable >  gauss_elimination(
       // The input contains false. Return false and stop.
       resulting_equalities.clear();
       resulting_inequalities.clear();
-      resulting_inequalities.push_back(linear_inequality());
+      resulting_inequalities.emplace_back();
       return remaining_variables;
     }
     else if (!j->is_true(r)) // Do not consider redundant equations.
@@ -2011,7 +2011,7 @@ std::set < variable >  gauss_elimination(
             // The input is inconsistent. Return false.
             resulting_equalities.clear();
             resulting_inequalities.clear();
-            resulting_inequalities.push_back(linear_inequality());
+            resulting_inequalities.emplace_back();
             remaining_variables.clear();
             return remaining_variables;
           }
@@ -2049,7 +2049,7 @@ std::set < variable >  gauss_elimination(
               // The input is inconsistent. Return false.
               resulting_equalities.clear();
               resulting_inequalities.clear();
-              resulting_inequalities.push_back(linear_inequality());
+              resulting_inequalities.emplace_back();
               remaining_variables.clear();
               return remaining_variables;
             }

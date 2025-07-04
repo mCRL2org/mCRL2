@@ -149,7 +149,7 @@ class lpsreach_algorithm
       m_lts.process_parameters = symbolic::permute_copy(m_lts.process_parameters, m_variable_order);
       for (const data::variable& param : m_lts.process_parameters)
       {
-        m_lts.data_index.push_back(symbolic::data_expression_index(param.sort()));
+        m_lts.data_index.emplace_back(param.sort());
       }
 
       m_lts.initial_state = symbolic::state2ldd(symbolic::permute_copy(initial_state, m_variable_order), m_lts.data_index);

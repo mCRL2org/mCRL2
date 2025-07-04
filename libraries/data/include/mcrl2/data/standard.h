@@ -404,15 +404,15 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
   variable b("b", sort_bool::bool_());
   variable x("x", s);
   variable y("y", s);
-  result.push_back(data_equation(variable_list({x}), equal_to(x, x), sort_bool::true_()));
-  result.push_back(data_equation(variable_list({x, y}), not_equal_to(x, y), sort_bool::not_(equal_to(x, y))));
-  result.push_back(data_equation(variable_list({x, y}), if_(sort_bool::true_(), x, y), x));
-  result.push_back(data_equation(variable_list({x, y}), if_(sort_bool::false_(), x, y), y));
-  result.push_back(data_equation(variable_list({b, x}), if_(b, x, x), x));
-  result.push_back(data_equation(variable_list({x}), less(x,x), sort_bool::false_()));
-  result.push_back(data_equation(variable_list({x}), less_equal(x,x), sort_bool::true_()));
-  result.push_back(data_equation(variable_list({x, y}), greater_equal(x,y), less_equal(y,x)));
-  result.push_back(data_equation(variable_list({x, y}), greater(x,y), less(y,x)));
+  result.emplace_back(variable_list({x}), equal_to(x, x), sort_bool::true_());
+  result.emplace_back(variable_list({x, y}), not_equal_to(x, y), sort_bool::not_(equal_to(x, y)));
+  result.emplace_back(variable_list({x, y}), if_(sort_bool::true_(), x, y), x);
+  result.emplace_back(variable_list({x, y}), if_(sort_bool::false_(), x, y), y);
+  result.emplace_back(variable_list({b, x}), if_(b, x, x), x);
+  result.emplace_back(variable_list({x}), less(x, x), sort_bool::false_());
+  result.emplace_back(variable_list({x}), less_equal(x, x), sort_bool::true_());
+  result.emplace_back(variable_list({x, y}), greater_equal(x, y), less_equal(y, x));
+  result.emplace_back(variable_list({x, y}), greater(x, y), less(y, x));
 
   // For a function sort, add the equation f==g iff forall x.f(x)==g(x). This equation is not in the Specification and Analysis of Communicating Systems of 2014.
   if (is_function_sort(s))
@@ -431,12 +431,11 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
     variable f("f",s);
     variable g("g",s);
     variable_list xvar_list=variable_list(xvars.begin(),xvars.end());
-    result.push_back(data_equation(variable_list({ f, g }) + xvar_list,
-                                   equal_to(f,g),
-                                   abstraction(forall_binder(),xvar_list,
-                                      equal_to(
-                                          application(f,xvars.begin(),xvars.end()),
-                                          application(g,xvars.begin(),xvars.end())))));
+    result.emplace_back(variable_list({f, g}) + xvar_list,
+        equal_to(f, g),
+        abstraction(forall_binder(),
+            xvar_list,
+            equal_to(application(f, xvars.begin(), xvars.end()), application(g, xvars.begin(), xvars.end()))));
   }
 
   return result;
