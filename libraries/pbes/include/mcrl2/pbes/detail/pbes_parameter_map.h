@@ -93,7 +93,7 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& te
     {
       continue;
     }
-    std::regex sre(R"((\*|\w*)\(([:,#*\s\w>-]*)\)\s*)", std::regex::icase);
+    std::regex sre(R"((\*|\w*)\(([:,#*\s\w>'()-]*)\)\s*)", std::regex::icase);
     std::match_results<std::string::const_iterator> what;
     if (!regex_match(line, what, sre))
     {
