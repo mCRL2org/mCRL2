@@ -21,11 +21,11 @@ inline
 std::string translate_identifier(const std::string& id)
 {
   std::string result = id;
-  for(std::size_t i = 0; i < result.size(); i++)
+  for (char& i : result)
   {
-    if(result[i] == '\'')
+    if (i == '\'')
     {
-      result[i] = '!';
+      i = '!';
     }
   }
   return result;

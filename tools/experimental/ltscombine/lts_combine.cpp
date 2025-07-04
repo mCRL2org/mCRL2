@@ -512,10 +512,9 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
-  for (size_t i = 0; i < lts.size(); i++)
+  for (const lts::lts_lts_t& lt : lts)
   {
-    outgoing_transitions.push_back(
-        lts::outgoing_transitions_per_state_t(lts[i].get_transitions(), lts[i].num_states(), true));
+    outgoing_transitions.push_back(lts::outgoing_transitions_per_state_t(lt.get_transitions(), lt.num_states(), true));
   }
 
   // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).

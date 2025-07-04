@@ -13,6 +13,7 @@
 #define MCRL2_DATA_DETAIL_PROVER_SMT_LIB_SOLVER_H
 
 #include "mcrl2/core/print.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
 
@@ -113,7 +114,7 @@ class SMT_LIB_Solver: public SMT_Solver
               v_sort_domain_list = sort_expression_list({v_sort});
               v_sort = sort_expression();
             }
-            for (auto v_sort_domain_elt : v_sort_domain_list)
+            for (sort_expression v_sort_domain_elt : v_sort_domain_list)
             {
               if (is_function_sort(v_sort_domain_elt))
               {
@@ -169,7 +170,7 @@ class SMT_LIB_Solver: public SMT_Solver
         f_variables_extrafuns = "  :extrafuns (";
       }
 
-      for(auto v_variable : f_variables)
+      for(const variable& v_variable : f_variables)
       {
         std::string v_variable_string = v_variable.name();
         sort_expression v_sort = data_expression(v_variable).sort();
@@ -651,10 +652,10 @@ class SMT_LIB_Solver: public SMT_Solver
       if (data::is_application(a_clause))
       {
         const data::application& a = atermpp::down_cast<data::application>(a_clause);
-        for (application::const_iterator i = a.begin(); i != a.end(); ++i)
+        for (const data_expression& i : a)
         {
           f_formula = f_formula + " ";
-          translate_clause(*i, false);
+          translate_clause(i, false);
         }
       }
       f_formula = f_formula + ")";

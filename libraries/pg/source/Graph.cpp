@@ -93,9 +93,9 @@ void StaticGraph::make_random_scc(edge_list &edges)
     for (verti i = 0; i < sccs.size(); ++i)
     {
         const std::vector<verti> scc;
-        for (verti j = 0; j < scc.size(); ++j)
+        for (unsigned long j : scc)
         {
-            index[scc[j]] = i;
+          index[j] = i;
         }
     }
     std::vector<char> is_top(sccs.size(), 1),
@@ -247,13 +247,11 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
             StaticGraph parent;
             parent.make_random(j - i, outdeg, edge_dir, true);
             edge_list paredges = parent.get_edges();
-            for (std::size_t e = 0; e < paredges.size(); ++e)
+            for (const std::pair<verti, verti>& paredge : paredges)
             {
-                verti v = paredges[e].first,
-                      w = paredges[e].second;
-                edges.push_back(std::make_pair(
-                    offset[i + v] + rand()%subgraphs[i + v].V(),
-                    offset[i + w] + rand()%subgraphs[i + w].V() ));
+              verti v = paredge.first, w = paredge.second;
+              edges.push_back(std::make_pair(offset[i + v] + rand() % subgraphs[i + v].V(),
+                  offset[i + w] + rand() % subgraphs[i + w].V()));
             }
             next_subgraphs[c].assign(edges, edge_dir);
         }

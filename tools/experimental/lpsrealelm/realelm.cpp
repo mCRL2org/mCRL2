@@ -35,11 +35,11 @@ static inline
 variable_list get_real_variables(const variable_list& l)
 {
   variable_list r;
-  for (variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
+  for (const variable& i : l)
   {
-    if (i->sort() == sort_real::real_())
+    if (i.sort() == sort_real::real_())
     {
-      r.push_front(*i);
+      r.push_front(i);
     }
   }
   return r;
@@ -52,11 +52,11 @@ static inline
 variable_list get_nonreal_variables(const variable_list& l)
 {
   variable_list r;
-  for (variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
+  for (const variable& i : l)
   {
-    if (i->sort() != sort_real::real_())
+    if (i.sort() != sort_real::real_())
     {
-      r.push_front(*i);
+      r.push_front(i);
     }
   }
   return r;
@@ -76,11 +76,11 @@ static inline
 assignment_list get_real_assignments(const assignment_list& l)
 {
   assignment_list r;
-  for (assignment_list::const_iterator i = l.begin(); i != l.end(); ++i)
+  for (const assignment& i : l)
   {
-    if (i->lhs().sort() == sort_real::real_())
+    if (i.lhs().sort() == sort_real::real_())
     {
-      r.push_front(*i);
+      r.push_front(i);
     }
   }
   return r;
@@ -94,11 +94,11 @@ static inline
 assignment_list get_nonreal_assignments(const assignment_list& l)
 {
   assignment_list r;
-  for (assignment_list::const_iterator i = l.begin(); i != l.end(); ++i)
+  for (const assignment& i : l)
   {
-    if (i->lhs().sort() != sort_real::real_())
+    if (i.lhs().sort() != sort_real::real_())
     {
-      r.push_front(*i);
+      r.push_front(i);
     }
   }
   return r;
@@ -143,9 +143,9 @@ static data_expression replace_linear_inequalities_with_reals_by_variables(
     const where_clause tw(t);
     const assignment_expression_list& l=tw.declarations();
     assignment_expression_vector new_l;
-    for(assignment_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    for (const assignment_expression& i : l)
     {
-      const assignment ass(*i);
+      const assignment ass(i);
       new_l.push_back(assignment(ass.lhs(),replace_linear_inequalities_with_reals_by_variables(ass.rhs(),condition,vars,real_parameters)));
     }
 
@@ -168,9 +168,9 @@ static data_expression replace_linear_inequalities_with_reals_by_variables(
   }
 
   data_expression_vector new_args;
-  for(application::const_iterator a=ta.begin(); a!=ta.end(); ++a)
+  for (const data_expression& a : ta)
   {
-    new_args.push_back(replace_linear_inequalities_with_reals_by_variables(*a,condition,vars,real_parameters));
+    new_args.push_back(replace_linear_inequalities_with_reals_by_variables(a, condition, vars, real_parameters));
   }
   return application(replace_linear_inequalities_with_reals_by_variables(ta.head(),condition,vars,real_parameters),
                      new_args.begin(),new_args.end());
@@ -200,15 +200,19 @@ static void move_real_parameters_out_of_actions(stochastic_specification& s,
      variable_list replaced_variables;
      data_expression new_condition=sort_bool::true_();
      process::action_vector new_actions;
-     for(process::action_list::const_iterator a=ma.begin(); a!=ma.end(); ++a)
+     for (const process::action& a : ma)
      {
-       const data_expression_list l=a->arguments();
+       const data_expression_list l = a.arguments();
        data_expression_vector resulting_data;
-       for(data_expression_list::const_iterator j=l.begin(); j!=l.end(); ++j)
+       for (const data_expression& j : l)
        {
-         resulting_data.push_back(replace_linear_inequalities_with_reals_by_variables(*j,new_condition,replaced_variables,real_parameters));
+         resulting_data.push_back(replace_linear_inequalities_with_reals_by_variables(j,
+             new_condition,
+             replaced_variables,
+             real_parameters));
        }
-       new_actions.push_back(process::action(a->label(),data_expression_list(resulting_data.begin(),resulting_data.end())));
+       new_actions.push_back(
+           process::action(a.label(), data_expression_list(resulting_data.begin(), resulting_data.end())));
      }
 
      if (replaced_variables.empty())
@@ -229,9 +233,9 @@ static void move_real_parameters_out_of_actions(stochastic_specification& s,
          for(process::action_vector::const_iterator j=new_actions.begin(); j!=new_actions.end(); ++j)
          {
            data_expression_vector new_replaced_args;
-           for(data_expression_list::const_iterator k=j->arguments().begin();k!=j->arguments().end(); ++k)
+           for (const data_expression& k : j->arguments())
            {
-             new_replaced_args.push_back(replace_free_variables(*k,sigma));
+             new_replaced_args.push_back(replace_free_variables(k, sigma));
            }
            new_replaced_actions.push_back(process::action(j->label(),data_expression_list(new_replaced_args.begin(),new_replaced_args.end())));
          }
@@ -286,9 +290,9 @@ static void normalize_specification(
         std::vector < linear_inequality > inequalities;
         // Collect all real conditions from the condition from this summand and put them
         // into inequalities.
-        for (data_expression_list::const_iterator k=j_r->begin(); k!=j_r->end(); k++)
+        for (const data_expression& k : *j_r)
         {
-          inequalities.push_back(linear_inequality(*k,r));
+          inequalities.push_back(linear_inequality(k, r));
         }
 
         // Determine all variables that occur in the sum operator, but not in the
@@ -364,11 +368,11 @@ static void normalize_specification(
           {
             // Construct replacements to contain the nextstate values for real variables in a map
             std::map<variable, data_expression> replacements;
-            for (assignment_list::const_iterator j = i.assignments().begin(); j != i.assignments().end(); ++j)
+            for (const assignment& j : i.assignments())
             {
-              if (j->lhs().sort() == sort_real::real_())
+              if (j.lhs().sort() == sort_real::real_())
               {
-                replacements[j->lhs()] = j->rhs();
+                replacements[j.lhs()] = j.rhs();
               }
             }
             const summand_base t(i.summation_variables(),non_real_condition);
@@ -411,9 +415,9 @@ static void normalize_specification(
         std::vector < linear_inequality > inequalities;
         // Collect all real conditions from the condition from this summand and put them
         // into inequalities.
-        for (data_expression_list::const_iterator k=j_r->begin(); k!=j_r->end(); k++)
+        for (const data_expression& k : *j_r)
         {
-          inequalities.push_back(linear_inequality(*k,r));
+          inequalities.push_back(linear_inequality(k, r));
         }
 
         // We can apply Fourier-Motzkin to eliminate the real variables from
@@ -680,19 +684,18 @@ static void add_summand(summand_information& summand_info,
     if (!summand_info.is_delta_summand() && is_may_summand)
     {
       process::action_list resulting_actions;
-      for (process::action_list::const_iterator i=new_actions.begin(); i!=new_actions.end(); i++)
+      for (const process::action& new_action : new_actions)
       {
         // put "_MAY" behind each action, and add its declaration to the action declarations.
-        data_expression_list args=i->arguments();
-        sort_expression_list sorts=i->label().sorts(); // get_sorts(args);
-        std::map < std::pair< std::string, sort_expression_list >,
-            std::string> ::iterator action_label_it=
-              action_label_map.find(std::pair< std::string, sort_expression_list >
-                                    (std::string(i->label().name()),sorts));
+        data_expression_list args = new_action.arguments();
+        sort_expression_list sorts = new_action.label().sorts(); // get_sorts(args);
+        std::map<std::pair<std::string, sort_expression_list>, std::string>::iterator action_label_it
+            = action_label_map.find(
+                std::pair<std::string, sort_expression_list>(std::string(new_action.label().name()), sorts));
         if (action_label_it==action_label_map.end())
         {
-          std::string may_action_label=variable_generator(std::string(i->label().name())+"_MAY");
-          std::pair< std::string, sort_expression_list > p(std::string(i->label().name()),sorts);
+          std::string may_action_label = variable_generator(std::string(new_action.label().name()) + "_MAY");
+          std::pair<std::string, sort_expression_list> p(std::string(new_action.label().name()), sorts);
           action_label_it=(action_label_map.insert(
                              std::pair< std::pair< std::string, sort_expression_list >,std::string>
                              (p,may_action_label))).first;
@@ -747,9 +750,9 @@ assignment_list determine_process_initialization(
   assignment_list init = reverse(get_nonreal_assignments(initialization));
   assignment_list real_assignments = get_real_assignments(initialization);
   mutable_map_substitution< std::map<variable, data_expression> > replacements;
-  for (assignment_list::const_iterator i = real_assignments.begin(); i != real_assignments.end(); ++i)
+  for (const assignment& real_assignment : real_assignments)
   {
-    replacements[i->lhs()] = i->rhs();
+    replacements[real_assignment.lhs()] = real_assignment.rhs();
   }
 
   for (context_type::const_iterator i = context.begin(); i != context.end(); ++i)

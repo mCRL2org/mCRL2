@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "mcrl2/data/data_expression.h"
 #include "pbes2yices.h"
 
 using namespace mcrl2;
@@ -323,11 +324,13 @@ static std::string assert_initial_state(const parsed_pbes &pbes, const translate
 	const std::vector<std::string> &equation_variables = variables.parameter_variables[0][variable_index];
 	data_expression_list values = pbes.initial_state.parameters();
 	size_t index = 0;
-	for (data_expression_list::const_iterator i = values.begin(); i != values.end(); ++i) {
-		output += "(assert (= " + equation_variables[index++] + " " + translate_expression(*i, variables.global_variables, translation) + "))\n";
-	}
-	
-	return output;
+        for (const data_expression& value : values)
+        {
+          output += "(assert (= " + equation_variables[index++] + " "
+                    + translate_expression(value, variables.global_variables, translation) + "))\n";
+        }
+
+        return output;
 }
 
 static std::string join(const std::vector<std::string> &clauses, const std::string &op, bool simplify = true)
@@ -358,10 +361,11 @@ static std::string assert_occurs(const parsed_pbes &pbes, const translated_data_
 			
 			std::map<mcrl2::data::variable, std::string> bound_variables = variables.global_variables;
 			size_t index = 0;
-			for (variable_list::const_iterator k = i->variable.parameters().begin(); k != i->variable.parameters().end(); ++k) {
-				bound_variables[*k] = variables.parameter_variables[from_round][from_variable_index][index++];
-			}
-			for (variable_vector::const_iterator k = j->quantification_domain.begin(); k != j->quantification_domain.end(); ++k) {
+                        for (const auto& k : i->variable.parameters())
+                        {
+                          bound_variables[k] = variables.parameter_variables[from_round][from_variable_index][index++];
+                        }
+                        for (variable_vector::const_iterator k = j->quantification_domain.begin(); k != j->quantification_domain.end(); ++k) {
 				bound_variables[*k] = variables.quantification_variables[from_round][from_variable_index][j - i->clauses.begin()][k - j->quantification_domain.begin()];
 			}
 			
@@ -370,13 +374,14 @@ static std::string assert_occurs(const parsed_pbes &pbes, const translated_data_
 			}
 			
 			index = 0;
-			for (data_expression_list::const_iterator k = j->instantiation.parameters().begin(); k != j->instantiation.parameters().end(); ++k) {
-				std::string rhs = translate_expression(*k, bound_variables, translation);
-				std::string lhs = variables.parameter_variables[to_round][to_variable_index][index++];
-				clauses.push_back("(= " + lhs + " " + rhs + ")");
-			}
-			
-			possibilities.push_back("\n  " + join(clauses, "and"));
+                        for (const auto& k : j->instantiation.parameters())
+                        {
+                          std::string rhs = translate_expression(k, bound_variables, translation);
+                          std::string lhs = variables.parameter_variables[to_round][to_variable_index][index++];
+                          clauses.push_back("(= " + lhs + " " + rhs + ")");
+                        }
+
+                        possibilities.push_back("\n  " + join(clauses, "and"));
 		}
 	}
 	
@@ -490,12 +495,16 @@ static std::string assert_distinct(const parsed_pbes &pbes, const translated_dat
 	output += "))\n";
 	
 	output += "(define make-pbes-state::(-> nat";
-	for (size_t i = 0; i < pbes.equations.size(); ++i) {
-		for (data::variable_list::const_iterator j = pbes.equations[i].variable.parameters().begin(); j != pbes.equations[i].variable.parameters().end(); ++j) {
-			output += " " + translation.sort_names.at(j->sort());
-		}
-	}
-	output += " pbes-state) (lambda (equation::nat";
+        for (const auto& equation : pbes.equations)
+        {
+          for (data::variable_list::const_iterator j = equation.variable.parameters().begin();
+              j != equation.variable.parameters().end();
+              ++j)
+          {
+            output += " " + translation.sort_names.at(j->sort());
+          }
+        }
+        output += " pbes-state) (lambda (equation::nat";
 	for (size_t i = 0; i < pbes.equations.size(); ++i) {
 		size_t index = 0;
 		for (data::variable_list::const_iterator j = pbes.equations[i].variable.parameters().begin(); j != pbes.equations[i].variable.parameters().end(); ++j) {
@@ -530,12 +539,14 @@ static std::string assert_distinct(const parsed_pbes &pbes, const translated_dat
 	output += "(define pbes-state-number::(-> pbes-state nat))\n";
 	for (size_t i = 0; i < levels; ++i) {
 		output += "(assert (= " + itoa(i) + " (pbes-state-number (make-pbes-state " + unrolling.equation_number_variables[i];
-		for (size_t j = 0; j < unrolling.parameter_variables[i].size(); ++j) {
-			for (size_t k = 0; k < unrolling.parameter_variables[i][j].size(); ++k) {
-				output += " " + unrolling.parameter_variables[i][j][k];
-			}
-		}
-		output += "))))\n";
+                for (const auto& j : unrolling.parameter_variables[i])
+                {
+                  for (size_t k = 0; k < j.size(); ++k)
+                  {
+                    output += " " + j[k];
+                  }
+                }
+                output += "))))\n";
 	}
 	
 	return output;

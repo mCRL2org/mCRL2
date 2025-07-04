@@ -38,14 +38,14 @@ static void write_string_with_escape_symbols(const std::string& s, std::ostream&
   {
     // This function symbol needs quotes.
     os << "\"";
-    for(std::string::const_iterator i=s.begin(); i!=s.end(); ++i)
+    for (char i : s)
     {
       // We need to escape special characters.
-      switch (*i)
+      switch (i)
       {
         case '\\':
         case '"':
-          os << "\\" << *i;
+          os << "\\" << i;
           break;
         case '\n':
           os << "\\n";
@@ -57,7 +57,7 @@ static void write_string_with_escape_symbols(const std::string& s, std::ostream&
           os << "\\r";
           break;
         default:
-          os << *i;
+          os << i;
           break;
       }
     }

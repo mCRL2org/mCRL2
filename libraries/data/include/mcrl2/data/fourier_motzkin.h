@@ -14,6 +14,7 @@
 #ifndef MCRL2_DATA_FOURIER_MOTZKIN_H
 #define MCRL2_DATA_FOURIER_MOTZKIN_H
 
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/detail/linear_inequalities_utilities.h"
 
@@ -264,9 +265,9 @@ inline void fourier_motzkin(const data_expression& e_in,
         std::vector < linear_inequality > inequalities;
         // Collect all real conditions from the condition from this summand and put them
         // into inequalities.
-        for (data_expression_list::const_iterator k=j_r->begin(); k!=j_r->end(); k++)
+        for (const data_expression& k : *j_r)
         {
-          inequalities.push_back(linear_inequality(*k,r));
+          inequalities.push_back(linear_inequality(k, r));
         }
 
         std::vector < linear_inequality > new_inequalities;
