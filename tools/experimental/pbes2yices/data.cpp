@@ -660,7 +660,7 @@ static std::string match_pattern(
 
 struct remove_duplicate_variables_builder: public data_expression_builder<remove_duplicate_variables_builder>
 {
-  typedef data_expression_builder<remove_duplicate_variables_builder> super;
+  using super = data_expression_builder<remove_duplicate_variables_builder>;
   using super::enter;
   using super::leave;
   using super::apply;

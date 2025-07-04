@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_accessors)
 
 BOOST_AUTO_TEST_CASE(test_term_traits)
 {
-  typedef core::term_traits<pres_expression> tr;
+  using tr = core::term_traits<pres_expression>;
 
   const std::string VARSPEC =
     "datavar         \n"

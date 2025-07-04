@@ -39,7 +39,7 @@ template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewr
 class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewriter, DataRewriter>
 {
   protected:
-    typedef enumerator_algorithm<Rewriter, DataRewriter> super;
+    using super = enumerator_algorithm<Rewriter, DataRewriter>;
     using super::r;
     using super::R;
     using super::dataspec;
@@ -326,7 +326,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_ca
     Filter m_accept;
 
   public:
-    typedef enumerator_algorithm_without_callback<Rewriter, DataRewriter> super;
+    using super = enumerator_algorithm_without_callback<Rewriter, DataRewriter>;
     using super::rewrite;
 
     /// \brief A class to enumerate solutions for terms.

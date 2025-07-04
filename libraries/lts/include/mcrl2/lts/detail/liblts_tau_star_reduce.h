@@ -36,9 +36,9 @@ std::map < std::size_t,
             calculate_non_reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>& l,
             const bool forward)
 {
-  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type state_t;
+  using state_t = typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type;
 
-  typedef std::map < state_t,std::set < state_t > > map_from_states_to_states;
+  using map_from_states_to_states = std::map<state_t, std::set<state_t>>;
   map_from_states_to_states resulting_tau_transitions;
 
   // Copy the internal transitions into the result.
@@ -87,7 +87,7 @@ template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
 void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>& l)
 // This method assumes there are no tau loops!
 {
-  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type state_t;
+  using state_t = typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type;
   const std::vector < transition >& original_transitions=l.get_transitions();
   std::set < transition> new_transitions;
 
@@ -134,8 +134,8 @@ void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BAS
 template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
 void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>& l)
 {
-  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type state_type;
-  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::labels_size_type label_type;
+  using state_type = typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type;
+  using label_type = typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::labels_size_type;
 
   outgoing_transitions_per_state_t outgoing_transitions(l.get_transitions(),l.num_states(),true);
   l.clear_transitions();
@@ -241,7 +241,7 @@ template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
 void tau_star_reduce(lts< STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS >& l)
 // This method assumes there are no tau loops!
 {
-  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type state_t;
+  using state_t = typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type;
   std::vector < transition >& original_transitions=l.get_transitions();
   std::set < transition> new_transitions;
 

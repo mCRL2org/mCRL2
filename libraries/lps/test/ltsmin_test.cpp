@@ -18,7 +18,7 @@
 
 using namespace mcrl2;
 
-typedef int* state_vector;
+using state_vector = int*;
 
 inline
 std::string print_state(const state_vector& s, std::size_t size, const std::string& msg = "state: ")

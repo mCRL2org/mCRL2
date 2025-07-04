@@ -24,7 +24,7 @@ class ppg_visitor
   {
   public:
     /// \brief The BQNF visitor type.
-    typedef bqnf_visitor bqnf;
+    using bqnf = bqnf_visitor;
 
     /// \brief Destructor.
     virtual ~ppg_visitor()

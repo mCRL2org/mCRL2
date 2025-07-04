@@ -26,7 +26,7 @@ namespace mcrl2::pbes_system::detail {
 /// \brief Visitor for checking if a pbes object is in BQNF.
 struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
 {
-  typedef pbes_expression_traverser<bqnf_traverser> super;
+  using super = pbes_expression_traverser<bqnf_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

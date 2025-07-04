@@ -1068,7 +1068,7 @@ void command_line_parser::process_default_options(interface_description& d)
   }
   else
   {
-    typedef std::vector< bool (*)(command_line_parser&) > action_list;
+    using action_list = std::vector<bool (*)(command_line_parser&)>;
 
     action_list& actions(get_registered_actions());
 

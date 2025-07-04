@@ -20,7 +20,7 @@ namespace mcrl2::process::detail
 template <typename Derived, typename Node = alphabet_node>
 struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
 {
-  typedef alphabet_traverser<Derived, Node> super;
+  using super = alphabet_traverser<Derived, Node>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -106,7 +106,7 @@ struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
 
 struct apply_alphabet_intersection_traverser: public alphabet_intersection_traverser<apply_alphabet_intersection_traverser>
 {
-  typedef alphabet_intersection_traverser<apply_alphabet_intersection_traverser> super;
+  using super = alphabet_intersection_traverser<apply_alphabet_intersection_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

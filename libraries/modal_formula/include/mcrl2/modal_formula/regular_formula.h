@@ -53,10 +53,10 @@ class regular_formula: public atermpp::aterm
 };
 
 /// \\brief list of regular_formulas
-typedef atermpp::term_list<regular_formula> regular_formula_list;
+using regular_formula_list = atermpp::term_list<regular_formula>;
 
 /// \\brief vector of regular_formulas
-typedef std::vector<regular_formula>    regular_formula_vector;
+using regular_formula_vector = std::vector<regular_formula>;
 
 // prototypes
 inline bool is_seq(const atermpp::aterm& x);

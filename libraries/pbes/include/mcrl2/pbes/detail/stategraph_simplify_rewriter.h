@@ -76,7 +76,7 @@ pbes_expression smart_or(const pbes_expression& x, const pbes_expression& y)
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction> super;
+  using super = simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction>;
   using super::apply;
 
   /// \brief Constructor.
@@ -222,10 +222,10 @@ class stategraph_simplify_rewriter
 
   public:
     /// \brief The term type
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Constructor
     /// \param rewriter A data rewriter

@@ -65,7 +65,7 @@ std::tuple<pres_expression, pres_expression> compute_Phi_Psi(const std::vector<p
 
 struct quantifiers_inside_builder: public pres_expression_builder<quantifiers_inside_builder>
 {
-  typedef pres_expression_builder<quantifiers_inside_builder> super;
+  using super = pres_expression_builder<quantifiers_inside_builder>;
   using super::apply;
 
   template <class T>
@@ -89,7 +89,7 @@ struct quantifiers_inside_builder: public pres_expression_builder<quantifiers_in
 
 struct quantifiers_inside_infimum_builder: public data_expression_builder<quantifiers_inside_infimum_builder>
 {
-  typedef data_expression_builder<quantifiers_inside_infimum_builder> super;
+  using super = data_expression_builder<quantifiers_inside_infimum_builder>;
   using super::apply;
 
   const std::set<data::variable>& V;
@@ -147,7 +147,7 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
   {
     using utilities::detail::set_difference;
     using utilities::detail::set_intersection;
-    typedef core::term_traits<pres_expression> tr;
+    using tr = core::term_traits<pres_expression>;
 
     std::vector<pres_expression> X;
     utilities::detail::split(x, std::back_inserter(X), tr::is_or, tr::left, tr::right);
@@ -194,7 +194,7 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
 
 struct quantifiers_inside_supremum_builder: public pres_expression_builder<quantifiers_inside_supremum_builder>
 {
-  typedef pres_expression_builder<quantifiers_inside_supremum_builder> super;
+  using super = pres_expression_builder<quantifiers_inside_supremum_builder>;
   using super::apply;
 
   const std::set<data::variable>& V;
@@ -252,7 +252,7 @@ struct quantifiers_inside_supremum_builder: public pres_expression_builder<quant
   {
     using utilities::detail::set_difference;
     using utilities::detail::set_intersection;
-    typedef core::term_traits<pres_expression> tr;
+    using tr = core::term_traits<pres_expression>;
 
     std::vector<pres_expression> X;
     utilities::detail::split(x, std::back_inserter(X), tr::is_and, tr::left, tr::right);
@@ -330,10 +330,10 @@ class quantifiers_inside_rewriter
 {
   public:
     /// \brief The term type
-    typedef pres_expression term_type;
+    using term_type = pres_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Rewrites a pres expression.
     /// \param x A term

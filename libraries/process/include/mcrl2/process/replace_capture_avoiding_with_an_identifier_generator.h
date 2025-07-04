@@ -25,7 +25,10 @@ namespace detail {
 template <template <class> class Builder, class Derived, class Substitution, class IdentifierGenerator>
 struct add_capture_avoiding_replacement_with_an_identifier_generator: public data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>
 {
-  typedef data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator> super;
+  using super = data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder,
+      Derived,
+      Substitution,
+      IdentifierGenerator>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -104,7 +107,13 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator: public dat
 template <template <class> class Builder, template <template <class> class, class, class, class> class Binder, class Substitution, class IdentifierGenerator>
 struct replace_capture_avoiding_variables__with_an_identifier_generator_builder: public Binder<Builder, replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator>
 {
-  typedef Binder<Builder, replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator> super;
+  using super = Binder<Builder,
+      replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder,
+          Binder,
+          Substitution,
+          IdentifierGenerator>,
+      Substitution,
+      IdentifierGenerator>;
   using super::enter;
   using super::leave;
   using super::apply;

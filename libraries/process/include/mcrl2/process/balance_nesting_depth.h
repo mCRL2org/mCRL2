@@ -24,7 +24,7 @@ namespace detail
 struct balance_summands_builder
     : public process_expression_builder<balance_summands_builder>
 {
-  typedef process_expression_builder<balance_summands_builder> super;
+  using super = process_expression_builder<balance_summands_builder>;
   using super::apply;
 
   template <class T>

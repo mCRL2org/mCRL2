@@ -24,7 +24,7 @@ namespace mcrl2::process
 template <template <class> class Builder, class Derived>
 struct add_sort_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -396,7 +396,7 @@ struct sort_expression_builder: public add_sort_expressions<data::sort_expressio
 template <template <class> class Builder, class Derived>
 struct add_data_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -745,7 +745,7 @@ struct data_expression_builder: public add_data_expressions<data::data_expressio
 template <template <class> class Builder, class Derived>
 struct add_variables: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -1105,7 +1105,7 @@ struct variable_builder: public add_variables<data::data_expression_builder, Der
 template <template <class> class Builder, class Derived>
 struct add_process_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -1453,7 +1453,7 @@ struct process_expression_builder: public add_process_expressions<core::builder,
 template <template <class> class Builder, class Derived>
 struct add_process_identifiers: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;

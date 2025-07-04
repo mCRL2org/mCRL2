@@ -2990,9 +2990,7 @@ class constln_ptr_less
     }
 };
 
-
-typedef std::set<bisim_gjkw::constln_t*, constln_ptr_less> R_map_t;
-
+using R_map_t = std::set<bisim_gjkw::constln_t*, constln_ptr_less>;
 
 /// \brief Split a block with new bottom states as needed
 /// \details The function splits RedB by checking whether all new bottom

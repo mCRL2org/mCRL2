@@ -195,10 +195,10 @@ class data_expression: public atermpp::aterm
 };
 
 /// \\brief list of data_expressions
-typedef atermpp::term_list<data_expression> data_expression_list;
+using data_expression_list = atermpp::term_list<data_expression>;
 
 /// \\brief vector of data_expressions
-typedef std::vector<data_expression>    data_expression_vector;
+using data_expression_vector = std::vector<data_expression>;
 
 // prototype declaration
 std::string pp(const data_expression& x, bool precedence_aware = true);
@@ -274,7 +274,7 @@ bool is_constant(const data_expression& x)
   return find_free_variables(x).empty();
 }
 
-typedef atermpp::term_list<variable> variable_list;
+using variable_list = atermpp::term_list<variable>;
 variable_list free_variables(const data_expression& x);
 
 } // namespace mcrl2::data

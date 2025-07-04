@@ -31,8 +31,8 @@ namespace detail
   class indexed_sorted_vector_for_tau_transitions
   {
     protected:
-      typedef std::size_t state_type;
-      typedef std::size_t label_type;
+      using state_type = std::size_t;
+      using label_type = std::size_t;
 
       std::vector <state_type> m_states_with_outgoing_or_incoming_tau_transition;
       std::vector <size_t> m_indices;
@@ -184,8 +184,8 @@ class scc_partitioner
 
   private:
 
-    typedef std::size_t state_type;
-    typedef std::size_t label_type;
+    using state_type = std::size_t;
+    using label_type = std::size_t;
 
     LTS_TYPE& aut;
 

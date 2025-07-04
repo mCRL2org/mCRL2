@@ -24,7 +24,7 @@ namespace detail {
 /// Computes dependencies of a process expression
 struct process_variable_dependency_traverser: public process_expression_traverser<process_variable_dependency_traverser>
 {
-  typedef process_expression_traverser<process_variable_dependency_traverser> super;
+  using super = process_expression_traverser<process_variable_dependency_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -45,7 +45,7 @@ struct process_variable_dependency_traverser: public process_expression_traverse
 /// Creates a dependency graph of process variables
 struct process_variable_dependency_graph_traverser: public process_expression_traverser<process_variable_dependency_graph_traverser>
 {
-  typedef process_expression_traverser<process_variable_dependency_graph_traverser> super;
+  using super = process_expression_traverser<process_variable_dependency_graph_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

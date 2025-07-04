@@ -131,17 +131,17 @@ class prob_bisim_partitioner_bem
 
   private:
 
-  typedef std::size_t block_key_type;
-  typedef std::size_t step_class_key_type;
-  typedef std::size_t state_type;
-  typedef std::size_t label_type;
-  typedef std::size_t distribution_key_type;
-  typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_fraction_type;
+    using block_key_type = std::size_t;
+    using step_class_key_type = std::size_t;
+    using state_type = std::size_t;
+    using label_type = std::size_t;
+    using distribution_key_type = std::size_t;
+    using probability_fraction_type = typename LTS_TYPE::probabilistic_state_t::probability_t;
 
-  struct distribution_type
-  {
-    distribution_key_type key;
-    std::vector< std::list<transition*> > incoming_transitions_per_label; // Incoming transitions organized per label
+    struct distribution_type
+    {
+      distribution_key_type key;
+      std::vector<std::list<transition*>> incoming_transitions_per_label; // Incoming transitions organized per label
   };
   
   struct block_type

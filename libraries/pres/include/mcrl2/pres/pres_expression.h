@@ -21,8 +21,8 @@
 namespace mcrl2::pres_system
 {
 
-/// \brief The propositional variable is taken from a pbes_system. 
-typedef pbes_system::propositional_variable propositional_variable;
+/// \brief The propositional variable is taken from a pbes_system.
+using propositional_variable = pbes_system::propositional_variable;
 
 //--- start generated classes ---//
 /// \\brief A pres expression
@@ -65,10 +65,10 @@ class pres_expression: public atermpp::aterm
 };
 
 /// \\brief list of pres_expressions
-typedef atermpp::term_list<pres_expression> pres_expression_list;
+using pres_expression_list = atermpp::term_list<pres_expression>;
 
 /// \\brief vector of pres_expressions
-typedef std::vector<pres_expression>    pres_expression_vector;
+using pres_expression_vector = std::vector<pres_expression>;
 
 // prototypes
 inline bool is_propositional_variable_instantiation(const atermpp::aterm& x);
@@ -192,10 +192,10 @@ inline void make_propositional_variable_instantiation(atermpp::aterm& t, const A
 }
 
 /// \\brief list of propositional_variable_instantiations
-typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
+using propositional_variable_instantiation_list = atermpp::term_list<propositional_variable_instantiation>;
 
 /// \\brief vector of propositional_variable_instantiations
-typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
+using propositional_variable_instantiation_vector = std::vector<propositional_variable_instantiation>;
 
 /// \\brief Test for a propositional_variable_instantiation expression
 /// \\param x A term
@@ -1963,10 +1963,10 @@ inline void make_propositional_variable(atermpp::aterm& t, const ARGUMENTS&... a
 }
 
 /// \\brief list of propositional_variables
-typedef atermpp::term_list<pbes_system::propositional_variable> propositional_variable_list;
+using propositional_variable_list = atermpp::term_list<pbes_system::propositional_variable>;
 
 /// \\brief vector of propositional_variables
-typedef std::vector<pbes_system::propositional_variable>    propositional_variable_vector;
+using propositional_variable_vector = std::vector<pbes_system::propositional_variable>;
 
 } // namespace mcrl2::pres_system
 
@@ -1978,28 +1978,28 @@ template <>
 struct term_traits<pres_system::pres_expression>
 {
   /// \brief The term type
-  typedef pres_system::pres_expression term_type;
+  using term_type = pres_system::pres_expression;
 
   /// \brief The data term type
-  typedef data::data_expression data_term_type;
+  using data_term_type = data::data_expression;
 
   /// \brief The data term sequence type
-  typedef data::data_expression_list data_term_sequence_type;
+  using data_term_sequence_type = data::data_expression_list;
 
   /// \brief The variable type
-  typedef data::variable variable_type;
+  using variable_type = data::variable;
 
   /// \brief The variable sequence type
-  typedef data::variable_list variable_sequence_type;
+  using variable_sequence_type = data::variable_list;
 
   /// \brief The propositional variable declaration type
-  typedef pres_system::propositional_variable propositional_variable_decl_type;
+  using propositional_variable_decl_type = pres_system::propositional_variable;
 
   /// \brief The propositional variable instantiation type
-  typedef pres_system::propositional_variable_instantiation propositional_variable_type;
+  using propositional_variable_type = pres_system::propositional_variable_instantiation;
 
   /// \brief The string type
-  typedef core::identifier_string string_type;
+  using string_type = core::identifier_string;
 
   /// \brief Make the value true
   /// \return The value \p true

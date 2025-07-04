@@ -22,7 +22,7 @@ template <typename Tool>
 class transform_tool: public Tool
 {
   protected:
-    typedef Tool super;
+    using super = Tool;
 
     std::string algorithm_and_options;
     int algorithm_number = -1;

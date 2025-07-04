@@ -35,7 +35,7 @@ int precedence(const T&)
 template <typename Derived>
 struct printer: public core::traverser<Derived>
 {
-  typedef core::traverser<Derived> super;
+  using super = core::traverser<Derived>;
 
   using super::enter;
   using super::leave;
@@ -193,7 +193,7 @@ struct printer: public core::traverser<Derived>
 template <template <class> class Traverser>
 struct apply_printer: public Traverser<apply_printer<Traverser>>
 {
-  typedef Traverser<apply_printer<Traverser>> super;
+  using super = Traverser<apply_printer<Traverser>>;
 
   using super::enter;
   using super::leave;
@@ -202,7 +202,7 @@ struct apply_printer: public Traverser<apply_printer<Traverser>>
   /// \brief precedence_aware Indicates whether the printer should take precendence into account when printing expressions.
   apply_printer(std::ostream& out, bool precedence_aware)
   {
-    typedef printer<apply_printer<Traverser> > Super;
+    using Super = printer<apply_printer<Traverser>>;
     static_cast<Super&>(*this).m_out = &out;
     static_cast<Super&>(*this).m_precedence_aware = precedence_aware;
   }

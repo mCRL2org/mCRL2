@@ -23,7 +23,7 @@ template <typename Tool>
 class prover_tool: public Tool
 {
   protected:
-    typedef mcrl2::data::detail::smt_solver_type smt_solver_type;
+    using smt_solver_type = mcrl2::data::detail::smt_solver_type;
 
     /// The data rewriter strategy
     smt_solver_type m_solver_type;

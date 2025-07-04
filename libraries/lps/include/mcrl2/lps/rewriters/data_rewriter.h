@@ -23,7 +23,8 @@ namespace detail {
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct data_rewriter_builder: public data::detail::add_data_rewriter<lps::data_expression_builder, Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef data::detail::add_data_rewriter<lps::data_expression_builder, Derived, DataRewriter, SubstitutionFunction> super;
+  using super
+      = data::detail::add_data_rewriter<lps::data_expression_builder, Derived, DataRewriter, SubstitutionFunction>;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -39,8 +40,8 @@ struct data_rewriter_builder: public data::detail::add_data_rewriter<lps::data_e
 template <typename DataRewriter>
 struct data_rewriter
 {
-  typedef data::data_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = data::data_expression;
+  using variable_type = data::variable;
 
   const DataRewriter& R;
 

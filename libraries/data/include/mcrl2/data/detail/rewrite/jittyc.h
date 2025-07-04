@@ -27,7 +27,7 @@
 namespace mcrl2::data::detail
 {
 
-typedef std::vector < sort_expression_list> sort_list_vector;
+using sort_list_vector = std::vector<sort_expression_list>;
 
 ///
 /// \brief The normal_form_cache class stores normal forms of data_expressions that
@@ -81,8 +81,8 @@ class normal_form_cache
 class RewriterCompilingJitty: public Rewriter
 {
   public:
-    typedef Rewriter::substitution_type substitution_type;
-    typedef void (*rewriter_function)(data_expression&, const application&, RewriterCompilingJitty*);
+    using substitution_type = Rewriter::substitution_type;
+    using rewriter_function = void (*)(data_expression&, const application&, RewriterCompilingJitty*);
 
     RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector&);
     virtual ~RewriterCompilingJitty();

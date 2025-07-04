@@ -24,7 +24,7 @@ namespace mcrl2::data::detail
 template <template <class> class Builder>
 struct replace_constants_by_variables_builder: public Builder<replace_constants_by_variables_builder<Builder>>
 {
-  typedef Builder<replace_constants_by_variables_builder<Builder>> super;
+  using super = Builder<replace_constants_by_variables_builder<Builder>>;
   using super::apply;
   using super::update;
 

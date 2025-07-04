@@ -236,7 +236,7 @@ std::ostream& operator<<(std::ostream& out, const find_equalities_expression& x)
 template <template <class> class Traverser, class Derived>
 struct find_equalities_traverser: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -441,7 +441,7 @@ struct find_equalities_traverser: public Traverser<Derived>
 
 struct find_equalities_traverser_inst: public find_equalities_traverser<data::data_expression_traverser, find_equalities_traverser_inst>
 {
-  typedef find_equalities_traverser<data::data_expression_traverser, find_equalities_traverser_inst> super;
+  using super = find_equalities_traverser<data::data_expression_traverser, find_equalities_traverser_inst>;
 
   using super::enter;
   using super::leave;

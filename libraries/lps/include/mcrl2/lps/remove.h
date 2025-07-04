@@ -56,7 +56,7 @@ struct is_singleton_sort
 /// Assignments to these parameters are removed as well.
 struct remove_parameters_builder: public data_expression_builder<remove_parameters_builder>
 {
-  typedef data_expression_builder<remove_parameters_builder> super;
+  using super = data_expression_builder<remove_parameters_builder>;
   using super::enter;
   using super::leave;
   using super::apply;

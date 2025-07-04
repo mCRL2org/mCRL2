@@ -31,7 +31,7 @@ protected:
   pres_expression m_term;
 
 public:
-  typedef  pres_expression_builder < substitute_pres_equation_builder > super;
+  using super = pres_expression_builder<substitute_pres_equation_builder>;
   using super::apply;
 
   substitute_pres_equation_builder(const propositional_variable& variable, const pres_expression& t)
@@ -1049,7 +1049,7 @@ protected:
   bool m_negate=false;
 
 public:
-  typedef pres_expression_builder<res_conjunctive_disjunctive_normal_form_builder> super;
+  using super = pres_expression_builder<res_conjunctive_disjunctive_normal_form_builder>;
   using super::apply;
 
   res_conjunctive_disjunctive_normal_form_builder(const bool conjunctive)

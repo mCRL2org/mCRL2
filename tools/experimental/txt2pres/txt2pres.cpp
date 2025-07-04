@@ -22,15 +22,15 @@ using mcrl2::pres_system::tools::pres_output_tool;
 
 class txt2pres_tool: public pres_output_tool<input_output_tool>
 {
-  typedef pres_output_tool<input_output_tool> super;
+  using super = pres_output_tool<input_output_tool>;
 
-  protected:
-    bool m_normalize = false;
+protected:
+  bool m_normalize = false;
 
-    void parse_options(const command_line_parser& parser) override
-    {
-      super::parse_options(parser);
-      m_normalize = 0 < parser.options.count("normalize");
+  void parse_options(const command_line_parser& parser) override
+  {
+    super::parse_options(parser);
+    m_normalize = 0 < parser.options.count("normalize");
     }
 
     void add_options(interface_description& desc) override

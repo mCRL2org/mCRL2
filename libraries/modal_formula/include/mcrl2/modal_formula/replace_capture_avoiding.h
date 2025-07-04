@@ -24,7 +24,7 @@ namespace detail {
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -138,7 +138,7 @@ namespace detail {
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public action_formulas::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef action_formulas::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = action_formulas::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -232,7 +232,7 @@ namespace detail {
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;

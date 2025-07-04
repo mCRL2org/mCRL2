@@ -19,7 +19,7 @@ namespace mcrl2::data::detail
 
 struct is_untyped_traverser: public sort_expression_traverser<is_untyped_traverser>
 {
-  typedef sort_expression_traverser<is_untyped_traverser> super;
+  using super = sort_expression_traverser<is_untyped_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

@@ -35,8 +35,8 @@ void enumerate(const data_specification& dataspec,
                std::size_t expected_no_of_solutions,
                bool more_solutions_possible)
 {
-  typedef enumerator_list_element_with_substitution<> enumerator_element;
-  typedef enumerator_algorithm_with_iterator<> enumerator_type;
+  using enumerator_element = enumerator_list_element_with_substitution<>;
+  using enumerator_type = enumerator_algorithm_with_iterator<>;
   std::cout << "ENUMERATE " << pp(variables) << " satisfying " << expression << "\n";
   data::enumerator_identifier_generator id_generator;
   rewriter rewr(dataspec);
@@ -71,8 +71,8 @@ void enumerate(const std::string& dataspec_text,
 
 BOOST_AUTO_TEST_CASE(empty_test)
 {
-  typedef enumerator_list_element_with_substitution<> enumerator_element;
-  typedef enumerator_algorithm_with_iterator<> enumerator_type;
+  using enumerator_element = enumerator_list_element_with_substitution<>;
+  using enumerator_type = enumerator_algorithm_with_iterator<>;
 
   // test manual construction of rewr with rewriter
   data_specification dataspec;
@@ -275,8 +275,8 @@ BOOST_AUTO_TEST_CASE(set_test)
 inline
 data_expression_vector generate_values(const data_specification& dataspec, const sort_expression& s, std::size_t max_size = 1000)
 {
-  typedef enumerator_list_element_with_substitution<> enumerator_element;
-  typedef enumerator_algorithm_with_iterator<> enumerator_type;
+  using enumerator_element = enumerator_list_element_with_substitution<>;
+  using enumerator_type = enumerator_algorithm_with_iterator<>;
 
   std::size_t max_internal_variables = 10000;
   data_expression_vector result;
@@ -386,7 +386,7 @@ BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form_test)
 
 BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
 {
-  typedef data::enumerator_list_element<data_expression> enumerator_element;
+  using enumerator_element = data::enumerator_list_element<data_expression>;
 
   data_expression result = data::sort_bool::true_();
   data::variable_list v  = { data::variable("r", data::sort_real::real_()) };
@@ -421,7 +421,7 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
 
 BOOST_AUTO_TEST_CASE(cannot_enumerate_real_with_substitution)
 {
-  typedef data::enumerator_list_element_with_substitution<data_expression> enumerator_element;
+  using enumerator_element = data::enumerator_list_element_with_substitution<data_expression>;
 
   data::data_specification dataspec;
   dataspec.add_context_sort(data::sort_real::real_());
@@ -451,7 +451,7 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_with_substitution)
 
 BOOST_AUTO_TEST_CASE(enumerate_callback)
 {
-  typedef data::enumerator_list_element<data_expression> enumerator_element;
+  using enumerator_element = data::enumerator_list_element<data_expression>;
   enumerator_identifier_generator id_generator;
   data_specification dataspec;
   dataspec.add_context_sort(data::sort_int::int_());

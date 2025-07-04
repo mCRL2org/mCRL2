@@ -32,25 +32,25 @@ aterm appl_apply(const aterm& a, const Function f)
 template <class Iterator>
 struct iterator_value
 {
-  typedef typename std::iterator_traits<Iterator>::value_type type;
+  using type = typename std::iterator_traits<Iterator>::value_type;
 };
 
 template <class Container>
 struct iterator_value<std::insert_iterator<Container> >
 {
-  typedef typename Container::value_type type;
+  using type = typename Container::value_type;
 };
 
 template <class Container>
 struct iterator_value<std::back_insert_iterator<Container> >
 {
-  typedef typename Container::value_type type;
+  using type = typename Container::value_type;
 };
 
 template <class Container>
 struct iterator_value<std::front_insert_iterator<Container> >
 {
-  typedef typename Container::value_type type;
+  using type = typename Container::value_type;
 };
 
 /// \internal
@@ -135,7 +135,7 @@ bool find_if_impl(const aterm& t, MatchPredicate match, aterm& output)
 template <typename MatchPredicate, typename OutputIterator>
 void find_all_if_impl(const aterm& t, MatchPredicate op, OutputIterator& destBegin)
 {
-  typedef typename iterator_value<OutputIterator>::type value_type;
+  using value_type = typename iterator_value<OutputIterator>::type;
 
   if (t.type_is_list())
   {

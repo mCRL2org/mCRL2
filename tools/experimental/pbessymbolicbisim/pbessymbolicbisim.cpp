@@ -33,7 +33,7 @@ class pbessymbolicbisim_tool: public rewriter_tool<input_tool>
 {
 
 protected:
-  typedef rewriter_tool<input_tool> super;
+  using super = rewriter_tool<input_tool>;
 
   simplifier_mode m_mode;
   std::size_t m_num_refine_steps;

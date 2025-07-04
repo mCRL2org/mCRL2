@@ -27,7 +27,7 @@ using pbes_system::tools::pbes_output_tool;
 class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {
   protected:
-    typedef pbes_input_tool<pbes_output_tool<input_output_tool> > super;
+    using super = pbes_input_tool<pbes_output_tool<input_output_tool>>;
 
     std::string m_abstraction_file;
     bool m_print_used_function_symbols;

@@ -23,7 +23,7 @@ namespace detail {
 
 struct find_subterm_traverser: public pbes_expression_traverser<find_subterm_traverser>
 {
-  typedef pbes_expression_traverser<find_subterm_traverser> super;
+  using super = pbes_expression_traverser<find_subterm_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -87,7 +87,7 @@ struct find_subterm_traverser: public pbes_expression_traverser<find_subterm_tra
 
 struct replace_subterm_builder: public pbes_expression_builder<replace_subterm_builder>
 {
-  typedef pbes_expression_builder<replace_subterm_builder> super;
+  using super = pbes_expression_builder<replace_subterm_builder>;
   using super::apply;
   using super::update;
 

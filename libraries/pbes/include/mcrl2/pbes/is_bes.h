@@ -22,7 +22,7 @@ namespace mcrl2::pbes_system
 /// \brief Visitor for checking if a pbes object is in BES form.
 struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
 {
-  typedef pbes_expression_traverser<is_bes_traverser> super;
+  using super = pbes_expression_traverser<is_bes_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

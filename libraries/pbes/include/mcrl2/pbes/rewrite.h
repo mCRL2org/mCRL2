@@ -25,7 +25,7 @@ namespace detail
 template <template <class> class Builder, class Rewriter>
 struct rewrite_pbes_expressions_builder: public Builder<rewrite_pbes_expressions_builder<Builder, Rewriter> >
 {
-  typedef Builder<rewrite_pbes_expressions_builder<Builder, Rewriter> > super;
+  using super = Builder<rewrite_pbes_expressions_builder<Builder, Rewriter>>;
   using super::apply;
   using super::update;
 
@@ -61,7 +61,7 @@ make_rewrite_pbes_expressions_builder(const Rewriter& R)
 template <template <class> class Builder, class Rewriter, class Substitution>
 struct rewrite_pbes_expressions_with_substitution_builder: public Builder<rewrite_pbes_expressions_with_substitution_builder<Builder, Rewriter, Substitution> >
 {
-  typedef Builder<rewrite_pbes_expressions_with_substitution_builder<Builder, Rewriter, Substitution> > super;
+  using super = Builder<rewrite_pbes_expressions_with_substitution_builder<Builder, Rewriter, Substitution>>;
   using super::apply;
 
   const Rewriter& R;

@@ -22,7 +22,7 @@ namespace mcrl2::pbes_system::detail
 /// \brief Visitor for checking if a pbes object is a PPG.
 struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
 {
-  typedef pbes_expression_traverser<ppg_traverser> super;
+  using super = pbes_expression_traverser<ppg_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

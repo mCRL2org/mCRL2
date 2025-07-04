@@ -232,7 +232,7 @@ struct structure_graph_builder
 
 struct manual_structure_graph_builder
 {
-  typedef structure_graph::index_type index_type;
+  using index_type = structure_graph::index_type;
 
   structure_graph& m_graph;
   structure_graph::vertex_vector m_vertices;

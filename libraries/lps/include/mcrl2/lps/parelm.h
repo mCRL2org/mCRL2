@@ -61,7 +61,7 @@ namespace detail
 template <typename Specification>
 class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 {
-  typedef typename lps::detail::lps_algorithm<Specification> super;
+  using super = typename lps::detail::lps_algorithm<Specification>;
   using super::m_spec;
   using super::verbose;
 
@@ -185,7 +185,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       }
 
       // compute the dependency graph G
-      typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> graph;
+      using graph = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS>;
       graph G(process_parameters.size());
       for (auto i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
       {

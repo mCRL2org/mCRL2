@@ -91,7 +91,7 @@ class real_representing_variable
     }
 };
 
-typedef std::vector< real_representing_variable > context_type;
+using context_type = std::vector<real_representing_variable>;
 
 class summand_information
 {

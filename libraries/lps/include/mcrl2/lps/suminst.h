@@ -41,11 +41,11 @@ std::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 template<typename DataRewriter, typename Specification>
 class suminst_algorithm: public detail::lps_algorithm<Specification>
 {
-  typedef detail::lps_algorithm<Specification> super;
-  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-  typedef typename Specification::process_type process_type;
-  typedef typename process_type::action_summand_type action_summand_type;
-  typedef std::vector<action_summand_type> action_summand_vector_type;
+  using super = detail::lps_algorithm<Specification>;
+  using enumerator_element = data::enumerator_list_element_with_substitution<>;
+  using process_type = typename Specification::process_type;
+  using action_summand_type = typename process_type::action_summand_type;
+  using action_summand_vector_type = std::vector<action_summand_type>;
   using super::m_spec;
 
   protected:

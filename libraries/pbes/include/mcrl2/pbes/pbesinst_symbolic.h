@@ -24,7 +24,7 @@ namespace mcrl2::pbes_system {
 class pbesinst_symbolic_algorithm
 {
   public:
-    typedef propositional_variable_instantiation state_type;
+    using state_type = propositional_variable_instantiation;
 
   protected:
     /// \brief The PBES that is being instantiated.

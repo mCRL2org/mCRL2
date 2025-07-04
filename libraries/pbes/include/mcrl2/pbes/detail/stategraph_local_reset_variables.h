@@ -43,7 +43,7 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
 class local_reset_variables_algorithm: public stategraph_local_algorithm
 {
   public:
-    typedef stategraph_local_algorithm super;
+    using super = stategraph_local_algorithm;
 
   protected:
     const pbes m_original_pbes; // TODO: make this a const reference again
@@ -162,7 +162,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 /// N.B. It is essential that this traverser uses the same traversal order as the guard_traverser.
 struct local_reset_traverser: public pbes_expression_traverser<local_reset_traverser>
 {
-  typedef pbes_expression_traverser<local_reset_traverser> super;
+  using super = pbes_expression_traverser<local_reset_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

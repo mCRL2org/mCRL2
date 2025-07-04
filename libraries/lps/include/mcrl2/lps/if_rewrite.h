@@ -22,7 +22,7 @@ namespace detail {
 
 struct if_rewrite_builder: public lps::data_expression_builder<if_rewrite_builder>
 {
-  typedef lps::data_expression_builder<if_rewrite_builder> super;
+  using super = lps::data_expression_builder<if_rewrite_builder>;
   using super::apply;
   using super::update;
 

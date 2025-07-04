@@ -126,7 +126,7 @@ public:
   template <class U>
   struct rebind
   {
-    typedef _aterm_appl_allocator<U> other;
+    using other = _aterm_appl_allocator<U>;
   };
 
   /// \brief Allocates space for an _aterm_appl where the arity is given by the function symbol.

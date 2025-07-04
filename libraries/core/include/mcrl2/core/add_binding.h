@@ -22,8 +22,8 @@ template <template <class> class TraverserOrBuilder, typename Derived, typename 
 class add_binding : public TraverserOrBuilder<Derived>
 {
   public:
-    typedef TraverserOrBuilder<Derived> super;
-    typedef Variable variable_type;
+    using super = TraverserOrBuilder<Derived>;
+    using variable_type = Variable;
 
   protected:
     std::multiset<variable_type> m_bound_variables;

@@ -20,7 +20,7 @@
 namespace atermpp
 {
 
-typedef void(*term_callback)(const aterm&);
+using term_callback = void (*)(const aterm&);
 
 extern void add_deletion_hook(const function_symbol&, term_callback);
 

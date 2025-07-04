@@ -38,7 +38,7 @@ public:
   template <class U>
   struct rebind
   {
-      typedef block_allocator<U, ElementsPerBlock, ThreadSafe> other;
+    using other = block_allocator<U, ElementsPerBlock, ThreadSafe>;
   };
 
   block_allocator() = default;

@@ -23,7 +23,7 @@ namespace detail
 template <template <class> class Builder>
 struct eliminate_real_if_builder: public Builder<eliminate_real_if_builder<Builder> >
 {
-  typedef Builder<eliminate_real_if_builder<Builder> > super;
+  using super = Builder<eliminate_real_if_builder<Builder>>;
   using super::enter;
   using super::leave;
   using super::apply;

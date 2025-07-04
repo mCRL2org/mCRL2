@@ -21,7 +21,7 @@ namespace data
 
 class simplifier_identity: public simplifier
 {
-  typedef simplifier super;
+  using super = simplifier;
 
 protected:
 

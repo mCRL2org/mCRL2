@@ -24,7 +24,7 @@ class untime_tool: public rewriter_tool< input_output_tool >
 {
   protected:
 
-    typedef rewriter_tool < input_output_tool > super;
+    using super = rewriter_tool<input_output_tool>;
 
     bool add_invariants;
     bool apply_fourier_motzkin;

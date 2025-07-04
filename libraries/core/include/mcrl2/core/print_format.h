@@ -19,7 +19,11 @@ namespace mcrl2::core
 {
 
 /// \brief print_format_type represents the available pretty print formats
-typedef enum { print_default, print_internal } print_format_type;
+using print_format_type = enum
+{
+  print_default,
+  print_internal
+};
 
 /// \brief Print string representation of pretty print format
 /// \param pp_format a pretty print format

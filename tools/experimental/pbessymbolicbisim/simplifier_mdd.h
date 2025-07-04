@@ -27,7 +27,7 @@ namespace data
  */
 class simplifier_mdd: public simplifier
 {
-  typedef simplifier super;
+  using super = simplifier;
   using super::rewr;
   using super::proving_rewr;
 

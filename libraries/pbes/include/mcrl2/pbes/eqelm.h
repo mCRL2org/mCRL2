@@ -24,7 +24,7 @@ template <typename Term, typename DataRewriter, typename PbesRewriter>
 class pbes_eqelm_algorithm
 {
   protected:
-    typedef std::set<data::variable> equivalence_class;
+    using equivalence_class = std::set<data::variable>;
 
     /// \brief Compares data expressions for equality.
     const DataRewriter& m_data_rewriter;
@@ -329,7 +329,7 @@ void eqelm(pbes& p,
   {
     case pbes_rewriter_type::simplify:
     {
-      typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
+      using pbes_rewriter = simplify_data_rewriter<data::rewriter>;
       pbes_rewriter pbesr(datar);
       pbes_eqelm_algorithm<pbes_expression, data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, ignore_initial_state);

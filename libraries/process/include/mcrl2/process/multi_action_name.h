@@ -21,7 +21,7 @@ namespace mcrl2::process
 /// \brief Represents the name of a multi action
 struct multi_action_name: public std::multiset<core::identifier_string>
 {
-  typedef std::multiset<core::identifier_string> super;
+  using super = std::multiset<core::identifier_string>;
 
   multi_action_name() = default;
 
@@ -32,7 +32,7 @@ struct multi_action_name: public std::multiset<core::identifier_string>
 };
 
 /// \brief Represents a set of multi action names
-typedef std::set<multi_action_name> multi_action_name_set;
+using multi_action_name_set = std::set<multi_action_name>;
 
 /// \brief Pretty print function for a multi action name
 inline

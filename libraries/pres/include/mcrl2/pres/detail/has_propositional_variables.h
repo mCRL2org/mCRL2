@@ -22,7 +22,7 @@ namespace mcrl2::pres_system::detail {
 
 struct has_propositional_variables_traverser: public pres_expression_traverser<has_propositional_variables_traverser>
 {
-  typedef pres_expression_traverser<has_propositional_variables_traverser> super;
+  using super = pres_expression_traverser<has_propositional_variables_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

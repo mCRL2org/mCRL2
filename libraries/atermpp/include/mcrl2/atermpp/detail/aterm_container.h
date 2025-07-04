@@ -20,7 +20,7 @@
 namespace atermpp
 {
 
-typedef std::stack<std::reference_wrapper<detail::_aterm>> term_mark_stack;
+using term_mark_stack = std::stack<std::reference_wrapper<detail::_aterm>>;
 
 inline void mark_term(const aterm_core& t, term_mark_stack& todo)
 {
@@ -94,7 +94,7 @@ template<class T, typename Type >
 class reference_aterm
 {
 protected:
-  typedef typename std::decay<T>::type T_type;
+  using T_type = typename std::decay<T>::type;
   T_type m_t;
 public:
   reference_aterm() = default;
@@ -162,7 +162,7 @@ template<class T>
 class reference_aterm < T, typename std::enable_if<std::is_fundamental<typename std::decay<T>::type>::value>::type >
 {
 protected:
-  typedef typename std::decay<T>::type T_type;
+  using T_type = typename std::decay<T>::type;
   T_type m_t;
 
 public:
@@ -308,13 +308,13 @@ class reference_aterm<T, typename std::enable_if<is_pair<T>::value>::type > :
                                                       reference_aterm< typename T::second_type > >::type >
 {
 protected:
-  typedef std::pair<typename std::conditional<is_reference_aterm<typename T::first_type>::value,
-                                          typename T::first_type,
-                                          reference_aterm< typename T::first_type > >::type,
-                    typename std::conditional<is_reference_aterm<typename T::second_type>::value,
-                                          typename T::second_type,
-                                          reference_aterm< typename T::second_type > >::type >  super;
-  typedef T std_pair;
+  using super = std::pair<typename std::conditional<is_reference_aterm<typename T::first_type>::value,
+                              typename T::first_type,
+                              reference_aterm<typename T::first_type>>::type,
+      typename std::conditional<is_reference_aterm<typename T::second_type>::value,
+          typename T::second_type,
+          reference_aterm<typename T::second_type>>::type>;
+  using std_pair = T;
 
 public:
   /// \brief Default constructor.
@@ -410,7 +410,7 @@ public:
   template <class U>
   struct rebind
   {
-      typedef aterm_allocator<U, typename Allocator::template rebind<U>::other> other;
+    using other = aterm_allocator<U, typename Allocator::template rebind<U>::other>;
   };
 
   aterm_allocator() = default;

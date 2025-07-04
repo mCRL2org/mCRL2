@@ -179,7 +179,8 @@ namespace mcrl2::data::sort_fbag {
     return result;
   }
   // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-  typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
+  using implementation_map = std::map<function_symbol,
+      std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
   /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for fbag.
   /// \param s A sort expression.
   /// \return All system defined constructors that are to be implemented in C++ for fbag.
@@ -820,7 +821,8 @@ namespace mcrl2::data::sort_fbag {
 
 
   // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-  typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
+  using implementation_map = std::map<function_symbol,
+      std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
   /// \brief Give all system defined mappings that are to be implemented in C++ code for fbag
   /// \param s A sort expression
   /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for fbag

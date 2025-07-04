@@ -21,9 +21,8 @@ struct D_ParseNode;
 struct D_ParserTables;
 struct D_Parser;
 struct d_loc_t;
-typedef void (*D_SyntaxErrorFn)(struct D_Parser *);
-typedef struct D_ParseNode *(*D_AmbiguityFn)(struct D_Parser *,
-               int n, struct D_ParseNode **v);
+using D_SyntaxErrorFn = void (*)(struct D_Parser*);
+using D_AmbiguityFn = struct D_ParseNode* (*)(struct D_Parser*, int, struct D_ParseNode**);
 
 namespace mcrl2::core
 {

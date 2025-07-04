@@ -336,11 +336,11 @@ namespace mcrl2::lts::detail
         class const_iterator
         {
           public:
-            typedef T value_type;
-            typedef T* pointer;
-            typedef T& reference;
-            typedef std::ptrdiff_t difference_type;
-            typedef std::forward_iterator_tag iterator_category;
+            using value_type = T;
+            using pointer = T*;
+            using reference = T&;
+            using difference_type = std::ptrdiff_t;
+            using iterator_category = std::forward_iterator_tag;
           protected:
             entry* ptr;
 

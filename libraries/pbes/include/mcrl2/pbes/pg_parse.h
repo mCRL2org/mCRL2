@@ -28,10 +28,10 @@ extern "C"
 namespace mcrl2::pbes_system
 {
 
-typedef unsigned long long identifier_t;
-typedef unsigned short priority_t;
+using identifier_t = unsigned long long;
+using priority_t = unsigned short;
 
-typedef bool owner_t;
+using owner_t = bool;
 
 struct node_t
 {

@@ -49,7 +49,7 @@ data_expression push_if_outside(const application& x)
 template <typename Derived>
 struct if_rewrite_builder: public data_expression_builder<Derived>
 {
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
 
   using super::apply;
 
@@ -168,7 +168,7 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
 
 struct if_rewrite_with_rewriter_builder: public if_rewrite_builder<if_rewrite_with_rewriter_builder>
 {
-  typedef if_rewrite_builder<if_rewrite_with_rewriter_builder> super;
+  using super = if_rewrite_builder<if_rewrite_with_rewriter_builder>;
   using super::apply;
   using super::apply_if;
 

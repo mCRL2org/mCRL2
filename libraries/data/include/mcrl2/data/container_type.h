@@ -44,10 +44,10 @@ class container_type: public atermpp::aterm
 };
 
 /// \\brief list of container_types
-typedef atermpp::term_list<container_type> container_type_list;
+using container_type_list = atermpp::term_list<container_type>;
 
 /// \\brief vector of container_types
-typedef std::vector<container_type>    container_type_vector;
+using container_type_vector = std::vector<container_type>;
 
 // prototype declaration
 std::string pp(const container_type& x, bool precedence_aware = true);

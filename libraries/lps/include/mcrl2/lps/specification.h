@@ -64,10 +64,10 @@ class specification_base
 
   public:
     /// \brief The process type
-    typedef LinearProcess process_type;
+    using process_type = LinearProcess;
 
     /// \brief The initial process type
-    typedef InitialProcessExpression initial_process_type;
+    using initial_process_type = InitialProcessExpression;
 
     /// \brief Constructor.
     specification_base()
@@ -171,7 +171,7 @@ class specification_base
 class specification: public specification_base<linear_process, process_initializer>
 {
   protected:
-    typedef specification_base<linear_process, process_initializer> super;
+    using super = specification_base<linear_process, process_initializer>;
 
   public:
     /// \brief Constructor.

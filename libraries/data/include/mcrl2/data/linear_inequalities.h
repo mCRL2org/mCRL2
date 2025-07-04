@@ -166,7 +166,7 @@ namespace detail
   };
 
   // typedef atermpp::term_list<variable_with_a_rational_factor> lhs_t;
-  typedef std::map < variable, data_expression > map_based_lhs_t;
+  using map_based_lhs_t = std::map<variable, data_expression>;
 
   class lhs_t: public atermpp::term_list<variable_with_a_rational_factor>
   {
@@ -1297,7 +1297,12 @@ static void pivot_and_update(
 namespace detail
 {
   /* False end nodes could be associated with NULL */
-  typedef enum { true_end_node, false_end_node, intermediate_node } node_type;
+using node_type = enum
+{
+  true_end_node,
+  false_end_node,
+  intermediate_node
+};
   class inequality_inconsistency_cache;
   class inequality_consistency_cache;
 

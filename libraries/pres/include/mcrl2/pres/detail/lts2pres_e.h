@@ -30,12 +30,12 @@ void E_lts2pres(const state_formulas::state_formula& x,
 template <typename Derived, typename TermTraits, typename Parameters>
 struct e_lts2pres_traverser: public state_formulas::state_formula_traverser<Derived>
 {
-  typedef state_formulas::state_formula_traverser<Derived> super;
+  using super = state_formulas::state_formula_traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  typedef std::vector<pres_equation> result_type;
+  using result_type = std::vector<pres_equation>;
 
   Parameters& parameters;
   std::vector<result_type> result_stack;
@@ -201,7 +201,7 @@ struct e_lts2pres_traverser: public state_formulas::state_formula_traverser<Deri
 template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
 struct apply_e_lts2pres_traverser: public Traverser<apply_e_lts2pres_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_e_lts2pres_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
+  using super = Traverser<apply_e_lts2pres_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>;
   using super::enter;
   using super::leave;
   using super::apply;

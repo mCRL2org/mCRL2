@@ -67,7 +67,7 @@ namespace detail
 template <typename Derived>
 struct printer: public action_formulas::add_traverser_sort_expressions<lps::detail::printer, Derived>
 {
-  typedef action_formulas::add_traverser_sort_expressions<lps::detail::printer, Derived> super;
+  using super = action_formulas::add_traverser_sort_expressions<lps::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;
@@ -221,7 +221,7 @@ namespace detail
 template <typename Derived>
 struct printer: public regular_formulas::add_traverser_sort_expressions<action_formulas::detail::printer, Derived>
 {
-  typedef regular_formulas::add_traverser_sort_expressions<action_formulas::detail::printer, Derived> super;
+  using super = regular_formulas::add_traverser_sort_expressions<action_formulas::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;
@@ -375,7 +375,7 @@ namespace detail
 template <typename Derived>
 struct printer: public state_formulas::add_traverser_sort_expressions<regular_formulas::detail::printer, Derived>
 {
-  typedef state_formulas::add_traverser_sort_expressions<regular_formulas::detail::printer, Derived> super;
+  using super = state_formulas::add_traverser_sort_expressions<regular_formulas::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;

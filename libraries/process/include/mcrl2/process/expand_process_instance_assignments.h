@@ -21,7 +21,7 @@ namespace detail {
 
 struct expand_process_instance_assignments_builder: public process_expression_builder<expand_process_instance_assignments_builder>
 {
-  typedef process_expression_builder<expand_process_instance_assignments_builder> super;
+  using super = process_expression_builder<expand_process_instance_assignments_builder>;
   using super::enter;
   using super::leave;
   using super::apply;

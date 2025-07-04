@@ -83,10 +83,10 @@ inline void make_propositional_variable(atermpp::aterm& t, const ARGUMENTS&... a
 }
 
 /// \\brief list of propositional_variables
-typedef atermpp::term_list<propositional_variable> propositional_variable_list;
+using propositional_variable_list = atermpp::term_list<propositional_variable>;
 
 /// \\brief vector of propositional_variables
-typedef std::vector<propositional_variable>    propositional_variable_vector;
+using propositional_variable_vector = std::vector<propositional_variable>;
 
 /// \\brief Test for a propositional_variable expression
 /// \\param x A term

@@ -167,7 +167,7 @@ void store_in_argument_array_(std::size_t i,
   {
     // function_or_term(static_cast<Term&>(argument_array[i]));
 
-    typedef mcrl2::utilities::function_traits<decltype(&FUNCTION_OR_TERM_TYPE::operator())> traits;
+    using traits = mcrl2::utilities::function_traits<decltype(&FUNCTION_OR_TERM_TYPE::operator())>;
     function_or_term(static_cast<typename traits::template arg<0>::type&>(argument_array[i]));
   }
   store_in_argument_array_(i+1, argument_array, args...);

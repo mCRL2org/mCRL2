@@ -193,9 +193,9 @@ class bisim_partitioner
 
   private:
 
-    typedef std::size_t block_index_type;
-    typedef std::size_t state_type;
-    typedef std::size_t label_type;
+    using block_index_type = std::size_t;
+    using state_type = std::size_t;
+    using label_type = std::size_t;
 
     state_type max_state_index;
     LTS_TYPE& aut;

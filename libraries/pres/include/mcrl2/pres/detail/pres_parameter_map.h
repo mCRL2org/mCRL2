@@ -24,7 +24,7 @@ namespace mcrl2::pres_system::detail
 {
 
 /// \brief Data structure for storing the variables that should be expanded by the finite presinst algorithm.
-typedef std::map<core::identifier_string, std::vector<data::variable>> pres_parameter_map;
+using pres_parameter_map = std::map<core::identifier_string, std::vector<data::variable>>;
 
 /// \brief Returns true if the declaration text matches with the variable d.
 inline

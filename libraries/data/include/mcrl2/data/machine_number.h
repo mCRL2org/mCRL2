@@ -18,8 +18,7 @@
 namespace mcrl2::data
 {
 
-typedef std::pair<atermpp::aterm, atermpp::aterm> machine_number_key_type;
-
+using machine_number_key_type = std::pair<atermpp::aterm, atermpp::aterm>;
 
 //--- start generated class machine_number ---//
 /// \\brief A machine number
@@ -65,10 +64,10 @@ inline void make_machine_number(atermpp::aterm& t, size_t n)
 }
 
 /// \\brief list of machine_numbers
-typedef atermpp::term_list<machine_number> machine_number_list;
+using machine_number_list = atermpp::term_list<machine_number>;
 
 /// \\brief vector of machine_numbers
-typedef std::vector<machine_number>    machine_number_vector;
+using machine_number_vector = std::vector<machine_number>;
 
 // prototype declaration
 std::string pp(const machine_number& x, bool precedence_aware = true);

@@ -24,9 +24,9 @@ class bqnf_rewriter
 {
   public:
     /// \brief The equation type
-    typedef pbes_equation equation_type;
+    using equation_type = pbes_equation;
     /// \brief The term type
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief Constructor
     bqnf_rewriter() {

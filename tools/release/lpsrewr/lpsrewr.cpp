@@ -30,7 +30,7 @@ using lps::tools::lps_rewriter_tool;
 class lps_rewriter : public lps_rewriter_tool<rewriter_tool< input_output_tool > >
 {
   protected:
-    typedef lps_rewriter_tool<rewriter_tool< input_output_tool > > super;
+    using super = lps_rewriter_tool<rewriter_tool<input_output_tool>>;
 
   public:
     lps_rewriter()

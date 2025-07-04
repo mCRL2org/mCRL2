@@ -347,7 +347,7 @@ void test_enumerator_substitution(const enumerator_substitution& sigma, const va
 
 void test_enumerator_substitution()
 {
-  typedef core::term_traits<data_expression> tr;
+  using tr = core::term_traits<data_expression>;
 
   variable x = parse_variable("x: Bool");
   variable y = parse_variable("y: Bool");

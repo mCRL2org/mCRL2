@@ -21,7 +21,7 @@ namespace detail {
 template <template <class> class Builder, class Derived>
 struct add_simplify: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::apply;
 
   template <class T>
@@ -187,7 +187,7 @@ struct simplify_builder: public add_simplify<pbes_system::pbes_expression_builde
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct simplify_data_rewriter_builder : public add_data_rewriter < pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction >
 {
-  typedef add_data_rewriter < pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction > super;
+  using super = add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction>;
   simplify_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma)
   {}
@@ -198,8 +198,8 @@ struct simplify_data_rewriter_builder : public add_data_rewriter < pbes_system::
 /// \brief A rewriter that simplifies boolean expressions in a term.
 struct simplify_rewriter
 {
-  typedef pbes_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pbes_expression;
+  using variable_type = data::variable;
 
   pbes_expression operator()(const pbes_expression& x) const
   {
@@ -218,8 +218,8 @@ struct simplify_rewriter
 template <typename DataRewriter>
 struct simplify_data_rewriter
 {
-  typedef pbes_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pbes_expression;
+  using variable_type = data::variable;
 
   const DataRewriter& R;
 

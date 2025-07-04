@@ -58,25 +58,25 @@ private:
   inline void resize_hashtable();
 
 public:
-  typedef Key key_type;
-  typedef std::size_t size_type;
-  typedef std::pair<const key_type, size_type> value_type;
-  typedef Equals key_equal;
-  typedef Hash hasher;
+  using key_type = Key;
+  using size_type = std::size_t;
+  using value_type = std::pair<const key_type, size_type>;
+  using key_equal = Equals;
+  using hasher = Hash;
 
-  typedef value_type& reference;
-  typedef const value_type& const_reference;
-  typedef value_type* pointer;
-  typedef const value_type* const_pointer;
+  using reference = value_type&;
+  using const_reference = const value_type&;
+  using pointer = value_type*;
+  using const_pointer = const value_type*;
 
-  typedef typename KeyTable::iterator iterator;
-  typedef typename KeyTable::const_iterator const_iterator;
+  using iterator = typename KeyTable::iterator;
+  using const_iterator = typename KeyTable::const_iterator;
 
-  typedef typename KeyTable::reverse_iterator reverse_iterator;
-  typedef typename KeyTable::const_reverse_iterator const_reverse_iterator;
+  using reverse_iterator = typename KeyTable::reverse_iterator;
+  using const_reverse_iterator = typename KeyTable::const_reverse_iterator;
 
-  typedef std::ptrdiff_t difference_type;
-  
+  using difference_type = std::ptrdiff_t;
+
   /// \brief Value returned when an element does not exist in the set.
   /// \return Value indicating non existing element, equal to std::numeric_limits<std::size_t>::max(). 
   static constexpr size_type npos = std::numeric_limits<std::size_t>::max();

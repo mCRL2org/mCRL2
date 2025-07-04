@@ -23,7 +23,7 @@ bool is_guarded(const process_expression& x, const std::vector<process_equation>
 
 struct is_guarded_traverser: public process_expression_traverser<is_guarded_traverser>
 {
-  typedef process_expression_traverser<is_guarded_traverser> super;
+  using super = process_expression_traverser<is_guarded_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

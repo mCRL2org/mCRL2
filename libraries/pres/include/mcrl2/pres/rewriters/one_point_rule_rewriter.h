@@ -27,7 +27,7 @@ namespace detail {
 template <typename Derived>
 struct one_point_rule_rewrite_builder: public pres_system::pres_expression_builder<Derived>
 {
-  typedef pres_system::pres_expression_builder<Derived> super;
+  using super = pres_system::pres_expression_builder<Derived>;
   using super::apply;
 
   Derived& derived()
@@ -168,10 +168,10 @@ class one_point_rule_rewriter
 {
   public:
     /// \brief The term type
-    typedef pres_expression term_type;
+    using term_type = pres_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Rewrites a pres expression.
     /// \param x A term

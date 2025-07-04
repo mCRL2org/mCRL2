@@ -20,14 +20,14 @@ namespace mcrl2::core
 
 /// \brief String type of the LPS library.
 /// Identifier strings are represented internally as ATerms.
-typedef atermpp::aterm_string identifier_string;
+using identifier_string = atermpp::aterm_string;
 
 //--- start generated class identifier_string ---//
 /// \\brief list of identifier_strings
-typedef atermpp::term_list<identifier_string> identifier_string_list;
+using identifier_string_list = atermpp::term_list<identifier_string>;
 
 /// \\brief vector of identifier_strings
-typedef std::vector<identifier_string>    identifier_string_vector;
+using identifier_string_vector = std::vector<identifier_string>;
 
 // prototype declaration
 std::string pp(const identifier_string& x, bool precedence_aware = true);

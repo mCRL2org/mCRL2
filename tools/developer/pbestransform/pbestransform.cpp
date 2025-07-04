@@ -312,38 +312,56 @@ struct normalize_command: public pbes_system::detail::pbes_command
 
 class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>>
 {
-  typedef transform_tool<rewriter_tool<input_output_tool>> super;
+  using super = transform_tool<rewriter_tool<input_output_tool>>;
 
-  public:
-    pbestransform_tool()
+public:
+  pbestransform_tool()
       : super("pbestransform",
-              "Wieger Wesselink",
-              "applies a transformation to a PBES",
-              "Transform the PBES in INFILE and write the result to OUTFILE. If OUTFILE "
-              "is not present, stdout is used. If INFILE is not present, stdin is used."
-             )
-    {}
+            "Wieger Wesselink",
+            "applies a transformation to a PBES",
+            "Transform the PBES in INFILE and write the result to OUTFILE. If OUTFILE "
+            "is not present, stdout is used. If INFILE is not present, stdin is used.")
+  {}
 
-    void add_commands(const std::vector<std::string>& options) override
-    {
-      add_command(std::make_shared<anonymize_pbes_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<is_well_typed_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<normalize_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<standard_recursive_form_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<rewrite_pbes_if_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<rewrite_pbes_data2pbes_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(std::make_shared<rewrite_pbes_one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<rewrite_pbes_quantifiers_inside_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<rewrite_pbes_quantifier_propagate_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<rewrite_pbes_simplify_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(std::make_shared<rewrite_pbes_simplify_quantifiers_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(std::make_shared<rewrite_pbes_simplify_quantifiers_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<rewrite_pbes_simplify_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<stategraph_global_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<stategraph_local_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<unify_parameters_command>(input_filename(), output_filename(), options));
+  void add_commands(const std::vector<std::string>& options) override
+  {
+    add_command(std::make_shared<anonymize_pbes_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<is_well_typed_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<normalize_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<standard_recursive_form_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<rewrite_pbes_if_rewriter_command>(input_filename(), output_filename(), options));
+    add_command(
+        std::make_shared<rewrite_pbes_data2pbes_rewriter_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(),
+        output_filename(),
+        options,
+        rewrite_strategy()));
+    add_command(std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(),
+        output_filename(),
+        options,
+        rewrite_strategy()));
+    add_command(
+        std::make_shared<rewrite_pbes_one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<rewrite_pbes_quantifiers_inside_rewriter_command>(input_filename(),
+        output_filename(),
+        options));
+    add_command(
+        std::make_shared<rewrite_pbes_quantifier_propagate_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<rewrite_pbes_simplify_data_rewriter_command>(input_filename(),
+        output_filename(),
+        options,
+        rewrite_strategy()));
+    add_command(std::make_shared<rewrite_pbes_simplify_quantifiers_data_rewriter_command>(input_filename(),
+        output_filename(),
+        options,
+        rewrite_strategy()));
+    add_command(std::make_shared<rewrite_pbes_simplify_quantifiers_rewriter_command>(input_filename(),
+        output_filename(),
+        options));
+    add_command(std::make_shared<rewrite_pbes_simplify_rewriter_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<stategraph_global_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<stategraph_local_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<unify_parameters_command>(input_filename(), output_filename(), options));
     }
 };
 

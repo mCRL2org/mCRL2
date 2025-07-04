@@ -36,7 +36,7 @@ class lpssymbolicbisim_tool: public rewriter_tool<input_output_tool>
 {
 
 protected:
-  typedef rewriter_tool<input_output_tool> super;
+  using super = rewriter_tool<input_output_tool>;
 
   simplifier_mode m_simplifier_mode;
 

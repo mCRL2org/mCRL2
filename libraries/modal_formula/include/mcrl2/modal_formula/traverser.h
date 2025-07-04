@@ -25,7 +25,7 @@ namespace action_formulas
 template <typename Derived>
 struct action_formula_traverser_base: public core::traverser<Derived>
 {
-  typedef core::traverser<Derived> super;
+  using super = core::traverser<Derived>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -42,7 +42,7 @@ struct action_formula_traverser_base: public core::traverser<Derived>
 template <template <class> class Traverser, class Derived>
 struct add_traverser_sort_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -194,7 +194,7 @@ struct sort_expression_traverser: public add_traverser_sort_expressions<lps::sor
 template <template <class> class Traverser, class Derived>
 struct add_traverser_data_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -344,7 +344,7 @@ struct data_expression_traverser: public add_traverser_data_expressions<lps::dat
 template <template <class> class Traverser, class Derived>
 struct add_traverser_action_formula_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -493,7 +493,7 @@ struct action_formula_traverser: public add_traverser_action_formula_expressions
 template <template <class> class Traverser, class Derived>
 struct add_traverser_variables: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -645,7 +645,7 @@ struct variable_traverser: public add_traverser_variables<lps::variable_traverse
 template <template <class> class Traverser, class Derived>
 struct add_traverser_identifier_strings: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -797,7 +797,7 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<lps:
 template <template <class> class Traverser, class Derived>
 struct add_traverser_action_labels: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -951,7 +951,7 @@ namespace regular_formulas
 template <typename Derived>
 struct regular_formula_traverser_base: public core::traverser<Derived>
 {
-  typedef core::traverser<Derived> super;
+  using super = core::traverser<Derived>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -975,7 +975,7 @@ struct regular_formula_traverser_base: public core::traverser<Derived>
 template <template <class> class Traverser, class Derived>
 struct add_traverser_sort_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1065,7 +1065,7 @@ struct sort_expression_traverser: public add_traverser_sort_expressions<action_f
 template <template <class> class Traverser, class Derived>
 struct add_traverser_data_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1155,7 +1155,7 @@ struct data_expression_traverser: public add_traverser_data_expressions<action_f
 template <template <class> class Traverser, class Derived>
 struct add_traverser_regular_formula_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1245,7 +1245,7 @@ struct regular_formula_traverser: public add_traverser_regular_formula_expressio
 template <template <class> class Traverser, class Derived>
 struct add_traverser_variables: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1335,7 +1335,7 @@ struct variable_traverser: public add_traverser_variables<action_formulas::varia
 template <template <class> class Traverser, class Derived>
 struct add_traverser_identifier_strings: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1426,7 +1426,7 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<acti
 template <template <class> class Traverser, class Derived>
 struct add_traverser_action_labels: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1521,7 +1521,7 @@ namespace state_formulas
 template <typename Derived>
 struct state_formula_traverser_base: public core::traverser<Derived>
 {
-  typedef core::traverser<Derived> super;
+  using super = core::traverser<Derived>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -1538,7 +1538,7 @@ struct state_formula_traverser_base: public core::traverser<Derived>
 template <template <class> class Traverser, class Derived>
 struct add_traverser_sort_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1857,7 +1857,7 @@ struct sort_expression_traverser: public add_traverser_sort_expressions<regular_
 template <template <class> class Traverser, class Derived>
 struct add_traverser_data_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -2170,7 +2170,7 @@ struct data_expression_traverser: public add_traverser_data_expressions<regular_
 template <template <class> class Traverser, class Derived>
 struct add_traverser_state_formula_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -2477,7 +2477,7 @@ struct state_formula_traverser: public add_traverser_state_formula_expressions<s
 template <template <class> class Traverser, class Derived>
 struct add_traverser_variables: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -2795,7 +2795,7 @@ struct variable_traverser: public add_traverser_variables<regular_formulas::vari
 template <template <class> class Traverser, class Derived>
 struct add_traverser_state_variables: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -3102,7 +3102,7 @@ struct state_variable_traverser: public add_traverser_state_variables<state_form
 template <template <class> class Traverser, class Derived>
 struct add_traverser_identifier_strings: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -3424,7 +3424,7 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<regu
 template <template <class> class Traverser, class Derived>
 struct add_traverser_regular_formula_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -3733,7 +3733,7 @@ struct regular_formula_traverser: public add_traverser_regular_formula_expressio
 template <template <class> class Traverser, class Derived>
 struct add_traverser_action_labels: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;

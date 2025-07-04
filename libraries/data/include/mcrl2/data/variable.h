@@ -80,10 +80,10 @@ inline void make_variable(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of variables
-typedef atermpp::term_list<variable> variable_list;
+using variable_list = atermpp::term_list<variable>;
 
 /// \\brief vector of variables
-typedef std::vector<variable>    variable_vector;
+using variable_vector = std::vector<variable>;
 
 // prototype declaration
 std::string pp(const variable& x, bool precedence_aware = true);

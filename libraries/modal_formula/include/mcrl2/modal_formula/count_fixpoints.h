@@ -24,7 +24,7 @@ namespace detail {
 
 struct count_fixpoints_traverser: public state_formula_traverser<count_fixpoints_traverser>
 {
-  typedef state_formula_traverser<count_fixpoints_traverser> super;
+  using super = state_formula_traverser<count_fixpoints_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

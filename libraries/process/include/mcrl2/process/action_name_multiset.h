@@ -61,10 +61,10 @@ inline void make_action_name_multiset(atermpp::aterm& t, const ARGUMENTS&... arg
 }
 
 /// \\brief list of action_name_multisets
-typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
+using action_name_multiset_list = atermpp::term_list<action_name_multiset>;
 
 /// \\brief vector of action_name_multisets
-typedef std::vector<action_name_multiset>    action_name_multiset_vector;
+using action_name_multiset_vector = std::vector<action_name_multiset>;
 
 /// \\brief Test for a action_name_multiset expression
 /// \\param x A term

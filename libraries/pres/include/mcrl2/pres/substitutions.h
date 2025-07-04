@@ -28,20 +28,20 @@ class propositional_variable_substitution
 {
   public:
     // maps X to (phi, d), where X(d) is the propositional variable corresponding to X
-    typedef std::map<core::identifier_string, std::pair<pres_expression, data::variable_list> > map_type;
+    using map_type = std::map<core::identifier_string, std::pair<pres_expression, data::variable_list>>;
 
-    typedef map_type::iterator iterator;
-    typedef map_type::const_iterator const_iterator;
+    using iterator = map_type::iterator;
+    using const_iterator = map_type::const_iterator;
 
   protected:
     map_type m_map;
 
   public:
     /// \brief type used to represent variables
-    typedef propositional_variable_instantiation variable_type;
+    using variable_type = propositional_variable_instantiation;
 
     /// \brief type used to represent expressions
-    typedef pres_expression expression_type;
+    using expression_type = pres_expression;
 
     /// \brief Apply this substitution to a single variable expression.
     /// \param[in] v The variable for which to give the associated expression.

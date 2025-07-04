@@ -70,7 +70,7 @@ template <template <class> class Traverser, class OutputStream>
 struct translate_data_expression_traverser
     : public Traverser<translate_data_expression_traverser<Traverser, OutputStream>>
 {
-  typedef Traverser<translate_data_expression_traverser<Traverser, OutputStream>> super;
+  using super = Traverser<translate_data_expression_traverser<Traverser, OutputStream>>;
   using super::apply;
 
   stack_outstream<OutputStream> out;

@@ -38,7 +38,7 @@ using utilities::tools::input_tool;
 class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
 {
   protected:
-    typedef rewriter_tool<pbes_input_tool<input_tool> > super;
+    using super = rewriter_tool<pbes_input_tool<input_tool>>;
 
     pbespgsolve_options m_options;
 

@@ -31,7 +31,7 @@ class variable_replace_builder: public pres_expression_builder <variable_replace
     const std::vector<propositional_variable_instantiation>& m_new_pres_variables;
 
   public:
-    typedef pres_expression_builder<variable_replace_builder> super;
+    using super = pres_expression_builder<variable_replace_builder>;
     using super::apply;
 
     variable_replace_builder(const atermpp::indexed_set<propositional_variable_instantiation>& stored_variables,

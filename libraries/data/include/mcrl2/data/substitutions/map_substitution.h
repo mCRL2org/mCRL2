@@ -23,8 +23,8 @@ namespace mcrl2::data
 template <typename AssociativeContainer>
 struct map_substitution
 {
-  typedef typename AssociativeContainer::key_type variable_type;
-  typedef typename AssociativeContainer::mapped_type expression_type;
+  using variable_type = typename AssociativeContainer::key_type;
+  using expression_type = typename AssociativeContainer::mapped_type;
   using argument_type = variable_type;
   using result_type = expression_type;
 

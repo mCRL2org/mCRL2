@@ -72,7 +72,7 @@ class pbes2cvc4_tool: public pbes_input_tool<input_output_tool>
     bool opt_hasgoal;
     goal_t opt_goal;
 
-    typedef pbes_input_tool<input_output_tool> super;
+    using super = pbes_input_tool<input_output_tool>;
 
   public:
     pbes2cvc4_tool()

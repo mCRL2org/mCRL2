@@ -20,7 +20,7 @@ namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Data structure for storing the variables that should be expanded by the finite pbesinst algorithm.
-typedef std::map<core::identifier_string, std::vector<data::variable>> pbes_parameter_map;
+using pbes_parameter_map = std::map<core::identifier_string, std::vector<data::variable>>;
 
 /// \brief Returns true if the declaration text matches with the variable d.
 inline

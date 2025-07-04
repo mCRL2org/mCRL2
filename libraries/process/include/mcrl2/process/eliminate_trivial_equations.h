@@ -92,7 +92,7 @@ process_instance apply_substitution(const process_instance& x, data::mutable_map
 
 struct process_instance_replace_builder: public process_expression_builder<process_instance_replace_builder>
 {
-  typedef process_expression_builder<process_instance_replace_builder> super;
+  using super = process_expression_builder<process_instance_replace_builder>;
   using super::enter;
   using super::leave;
   using super::apply;

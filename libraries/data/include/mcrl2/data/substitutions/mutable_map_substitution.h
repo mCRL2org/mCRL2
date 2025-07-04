@@ -36,10 +36,10 @@ protected:
   AssociativeContainer m_map;
 
 public:
-  typedef typename AssociativeContainer::key_type variable_type;
-  typedef typename AssociativeContainer::mapped_type expression_type;
-  typedef typename AssociativeContainer::const_iterator const_iterator;
-  typedef typename AssociativeContainer::iterator iterator;
+  using variable_type = typename AssociativeContainer::key_type;
+  using expression_type = typename AssociativeContainer::mapped_type;
+  using const_iterator = typename AssociativeContainer::const_iterator;
+  using iterator = typename AssociativeContainer::iterator;
   using argument_type = variable_type;
   using result_type = expression_type;
 

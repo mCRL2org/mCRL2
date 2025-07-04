@@ -108,7 +108,7 @@ namespace mcrl2::lts::detail
 /// \brief type used to store label numbers and counts
 /// \details It would be better to define it as LTS_TYPE::labels_size_type, but
 /// that would require most classes to become templates.
-typedef std::size_t label_type;
+using label_type = std::size_t;
 
 template <class LTS_TYPE> class bisim_partitioner_dnj;
 
@@ -187,7 +187,7 @@ class permutation_entry;
 ///
 /// Iterating over the states of a block will
 /// therefore be done using the permutation_t array.
-typedef fixed_vector<permutation_entry> permutation_t;
+using permutation_t = fixed_vector<permutation_entry>;
 
 class block_t;
 class bunch_t;
@@ -196,11 +196,9 @@ class pred_entry;
 class succ_entry;
 
 class block_bunch_slice_t;
-typedef simple_list<block_bunch_slice_t>::iterator block_bunch_slice_iter_t;
-typedef simple_list<block_bunch_slice_t>::const_iterator
-                                                block_bunch_slice_const_iter_t;
-typedef iterator_or_null_t<block_bunch_slice_t>
-                                              block_bunch_slice_iter_or_null_t;
+using block_bunch_slice_iter_t = simple_list<block_bunch_slice_t>::iterator;
+using block_bunch_slice_const_iter_t = simple_list<block_bunch_slice_t>::const_iterator;
+using block_bunch_slice_iter_or_null_t = iterator_or_null_t<block_bunch_slice_t>;
 
 enum new_block_mode_t { new_block_is_U, new_block_is_R };
 

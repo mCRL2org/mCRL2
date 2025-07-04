@@ -48,7 +48,7 @@ void test_pbes(const std::string& pbes_spec,
                bool /* remove_equations = true */,
                const std::string& msg = "")
 {
-  typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
+  using my_pbes_rewriter = simplify_data_rewriter<data::rewriter>;
 
   pbes p = txt2pbes(pbes_spec);
   pbes q = p;
@@ -106,7 +106,7 @@ void test_pbes(const std::string& pbes_spec,
 
 void test_eqelm(const std::string& pbes_spec, const bool expected_outcome)
 {
-  typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
+  using my_pbes_rewriter = simplify_data_rewriter<data::rewriter>;
 
   pbes p = txt2pbes(pbes_spec);
   pbes q = p;

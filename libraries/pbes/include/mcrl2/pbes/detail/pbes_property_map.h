@@ -46,7 +46,7 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
     // Allow base class access to protected functions
     friend class data::detail::data_property_map< pbes_property_map >;
 
-    typedef data::detail::data_property_map< pbes_property_map > super;
+    using super = data::detail::data_property_map<pbes_property_map>;
 
     using super::print;
 

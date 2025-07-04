@@ -88,8 +88,10 @@ namespace detail
 class lts_fsm_base
 {
   public:
-    typedef mcrl2::lts::probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> probabilistic_state;
-    typedef mcrl2::lps::state_probability_pair<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> state_probability_pair;
+    using probabilistic_state
+        = mcrl2::lts::probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>;
+    using state_probability_pair
+        = mcrl2::lps::state_probability_pair<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>;
 
   protected:
 
@@ -252,7 +254,7 @@ class lts_fsm_base
 class lts_fsm_t : public lts< state_label_fsm, action_label_string, detail::lts_fsm_base >
 {
   public:
-    typedef lts< state_label_fsm, action_label_string, detail::lts_fsm_base > super;
+    using super = lts<state_label_fsm, action_label_string, detail::lts_fsm_base>;
 
     /** \brief Save the labelled transition system to file.
      *  \details If the filename is empty, the result is read from stdout.
@@ -281,7 +283,7 @@ class probabilistic_lts_fsm_t :
 {
   public:
 
-    typedef probabilistic_lts< state_label_fsm, action_label_string, probabilistic_state_t, detail::lts_fsm_base > super;
+    using super = probabilistic_lts<state_label_fsm, action_label_string, probabilistic_state_t, detail::lts_fsm_base>;
 
     /** \brief Save the labelled transition system to file.
      *  \details If the filename is empty, the result is read from stdout.

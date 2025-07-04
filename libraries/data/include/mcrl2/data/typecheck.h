@@ -364,7 +364,7 @@ data_expression typecheck_untyped_data_parameter(data_type_checker& typechecker,
   }
 }
 
-typedef atermpp::term_list<sort_expression_list> sorts_list;
+using sorts_list = atermpp::term_list<sort_expression_list>;
 
 } // namespace mcrl2::data
 

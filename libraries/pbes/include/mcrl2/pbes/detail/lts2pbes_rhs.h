@@ -24,7 +24,7 @@
 
 namespace mcrl2::pbes_system::detail {
 
-typedef lts::lts_lts_t::states_size_type lts2pbes_state_type;
+using lts2pbes_state_type = lts::lts_lts_t::states_size_type;
 
 inline
 core::identifier_string make_identifier(const core::identifier_string& name, lts2pbes_state_type s)
@@ -60,7 +60,7 @@ struct lts2pbes_parameters
                                TermTraits
                               )
   {
-    typedef TermTraits tr;
+    using tr = TermTraits;
     if (is_must)
     {
       return tr::imp(left, right);
@@ -185,7 +185,7 @@ struct lts2pbes_counter_example_parameters: public lts2pbes_parameters
                                TermTraits
                               )
   {
-    typedef TermTraits tr;
+    using tr = TermTraits;
     auto f = action_expressions(a.actions());
     data::data_expression_list dx = data::data_expression_list({ data::sort_nat::nat(s) }) + f + data::data_expression_list({ data::sort_nat::nat(t) });
     propositional_variable_instantiation Pos(Zpos[i].name(), dx);
@@ -214,8 +214,8 @@ pbes_expression RHS(const state_formulas::state_formula& x,
 template <typename Derived, typename TermTraits, typename Parameters>
 struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<Derived>
 {
-  typedef state_formulas::state_formula_traverser<Derived> super;
-  typedef TermTraits tr;
+  using super = state_formulas::state_formula_traverser<Derived>;
+  using tr = TermTraits;
 
   using super::enter;
   using super::leave;
@@ -400,7 +400,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
 template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
 struct apply_rhs_lts2pbes_traverser: public Traverser<apply_rhs_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_rhs_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
+  using super = Traverser<apply_rhs_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>;
   using super::enter;
   using super::leave;
   using super::apply;

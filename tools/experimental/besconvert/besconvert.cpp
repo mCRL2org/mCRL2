@@ -49,7 +49,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
     };
 
   protected:
-    typedef detail::bes_algorithm super;
+    using super = detail::bes_algorithm;
     using super::m_bes; // Why doesn't the compiler see this by itself?
 
     equivalence_t m_equivalence;
@@ -115,7 +115,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
 
     boolean_operand_t get_operand(pbes_expression const& e)
     {
-      typedef core::term_traits<pbes_expression> tr;
+      using tr = core::term_traits<pbes_expression>;
 
       if (tr::is_and(e))
       {
@@ -546,7 +546,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
 
 /// \brief Simple input/output tool to perform strong as well as oblivious bisimulation
 ///        reduction on a boolean equation system.
-typedef pbes_input_output_tool<input_output_tool> super;
+using super = pbes_input_output_tool<input_output_tool>;
 class besconvert_tool: public super
 {
   protected:

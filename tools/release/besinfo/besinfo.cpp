@@ -30,7 +30,7 @@ using pbes_system::tools::pbes_input_tool;
 class besinfo_tool: public pbes_input_tool<input_tool>
 {
   protected:
-    typedef pbes_input_tool<input_tool> super;
+    using super = pbes_input_tool<input_tool>;
 
     bool opt_full;
 

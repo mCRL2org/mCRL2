@@ -24,9 +24,9 @@ namespace pres_system {
 class lts2pres_algorithm
 {
   public:
-    typedef lts::probabilistic_lts_lts_t::states_size_type state_type;
-    typedef lts::probabilistic_lts_lts_t::probabilistic_state_t probabilistic_state_type;
-    typedef pres_system::detail::lts2pres_lts::edge_list edge_list;
+    using state_type = lts::probabilistic_lts_lts_t::states_size_type;
+    using probabilistic_state_type = lts::probabilistic_lts_lts_t::probabilistic_state_t;
+    using edge_list = pres_system::detail::lts2pres_lts::edge_list;
 
   protected:
     const lts::probabilistic_lts_lts_t& lts0;

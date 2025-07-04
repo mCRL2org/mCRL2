@@ -22,7 +22,7 @@ namespace detail
 template <template <class> class Builder, class Rewriter>
 struct rewrite_data_expressions_builder: public Builder<rewrite_data_expressions_builder<Builder, Rewriter> >
 {
-  typedef Builder<rewrite_data_expressions_builder<Builder, Rewriter> > super;
+  using super = Builder<rewrite_data_expressions_builder<Builder, Rewriter>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -51,7 +51,7 @@ make_rewrite_data_expressions_builder(Rewriter R)
 template <template <class> class Builder, class Rewriter, class Substitution>
 struct rewrite_data_expressions_with_substitution_builder: public Builder<rewrite_data_expressions_with_substitution_builder<Builder, Rewriter, Substitution> >
 {
-  typedef Builder<rewrite_data_expressions_with_substitution_builder<Builder, Rewriter, Substitution> > super;
+  using super = Builder<rewrite_data_expressions_with_substitution_builder<Builder, Rewriter, Substitution>>;
   using super::enter;
   using super::leave;
   using super::apply;

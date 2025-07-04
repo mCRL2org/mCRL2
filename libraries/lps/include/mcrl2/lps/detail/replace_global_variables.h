@@ -27,30 +27,31 @@ namespace mcrl2::lps::detail
 class assignment_builder: public lps::data_expression_builder<assignment_builder>
 {
 public:
-    typedef lps::data_expression_builder<assignment_builder> super;
-    using super::enter;
-    using super::leave;
-    using super::update;
-    using super::apply;
-    
-    assignment_builder(const std::set<data::variable>& global_variables)
+  using super = lps::data_expression_builder<assignment_builder>;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
+
+  assignment_builder(const std::set<data::variable>& global_variables)
       : m_global_variables(global_variables)
-    {}
+  {}
 
-    void apply(data::assignment_list& result, const data::assignment_list& assignments)
+  void apply(data::assignment_list& result, const data::assignment_list& assignments)
+  {
+    std::vector<data::assignment> result_assignments;
+
+    for (auto&& assignment : assignments)
     {
-        std::vector<data::assignment> result_assignments;
+      if (!data::is_variable(assignment.rhs())
+          || m_global_variables.count(atermpp::down_cast<data::variable>(assignment.rhs())) == 0)
+      {
+        // Otherwise, keep the global variable assignment
+        result_assignments.emplace_back(assignment);
+      }
+    }
 
-        for (auto&& assignment : assignments)
-        {
-            if (!data::is_variable(assignment.rhs()) || m_global_variables.count(atermpp::down_cast<data::variable>(assignment.rhs())) == 0)
-            {
-                // Otherwise, keep the global variable assignment
-                result_assignments.emplace_back(assignment);
-            }
-        }
-
-        result = data::assignment_list(result_assignments.begin(), result_assignments.end());
+    result = data::assignment_list(result_assignments.begin(), result_assignments.end());
     }
 
 private:

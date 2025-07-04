@@ -14,7 +14,8 @@
 namespace mcrl2::smt
 {
 
-typedef std::function<void(data::data_expression, std::function<void(std::string)>, std::function<void(data::data_expression)>)> native_translation_t;
+using native_translation_t = std::function<
+    void(data::data_expression, std::function<void(std::string)>, std::function<void(data::data_expression)>)>;
 struct native_translations
 {
   // If f occurs in symbols, its translation should be symbols[f]

@@ -20,7 +20,11 @@
 namespace mcrl2::pbes_system
 {
 
-typedef enum { gauss, small_progr_measures } solution_strategy_t;
+using solution_strategy_t = enum
+{
+  gauss,
+  small_progr_measures
+};
 
 static
 std::string solution_strategy_to_string(const solution_strategy_t s)

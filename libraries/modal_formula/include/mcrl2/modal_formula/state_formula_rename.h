@@ -22,7 +22,8 @@ namespace mcrl2::state_formulas
 template <typename IdentifierGenerator>
 struct state_formula_predicate_variable_rename_builder: public state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> >
 {
-  typedef state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> > super;
+  using super
+      = state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator>>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -126,7 +127,7 @@ state_formula rename_predicate_variables(const state_formula& f, IdentifierGener
 /// Visitor that renames variables using the specified identifier generator. Also bound variables are renamed!
 struct state_formula_variable_rename_builder: public state_formulas::sort_expression_builder<state_formula_variable_rename_builder>
 {
-  typedef state_formulas::sort_expression_builder<state_formula_variable_rename_builder> super;
+  using super = state_formulas::sort_expression_builder<state_formula_variable_rename_builder>;
 
   using super::enter;
   using super::leave;

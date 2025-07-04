@@ -52,33 +52,27 @@ inline void check_lps2pres_actions(const state_formulas::state_formula& formula,
 
 class lps2pres_tool : public pres_output_tool<input_output_tool>
 {
-    typedef pres_output_tool<input_output_tool> super;
+  using super = pres_output_tool<input_output_tool>;
 
-  protected:
-    std::string formula_filename;
-    bool timed = false;
-    bool unoptimized = false;
-    bool preprocess_modal_operators = false;
-    bool check_only = false;
+protected:
+  std::string formula_filename;
+  bool timed = false;
+  bool unoptimized = false;
+  bool preprocess_modal_operators = false;
+  bool check_only = false;
 
-    std::string synopsis() const override
-    {
-      return "[OPTION]... --formula=FILE [INFILE [OUTFILE]]\n";
-    }
+  std::string synopsis() const override { return "[OPTION]... --formula=FILE [INFILE [OUTFILE]]\n"; }
 
-    void add_options(interface_description& desc) override
-    {
-      super::add_options(desc);
-      desc.add_option("formula", make_file_argument("FILE"),
-                      "use the state formula from FILE", 'f');
-      desc.add_option("preprocess-modal-operators",
-                      "insert dummy fixpoints in modal operators, which may lead to smaller PRESs", 'm');
-      desc.add_option("timed",
-                      "use the timed version of the algorithm, even for untimed LPS's", 't');
-      desc.add_option("unoptimized",
-                      "do not simplify boolean expressions", 'u');
-      desc.add_hidden_option("check-only",
-                             "check syntax and semantics of state formula; do not generate PRES", 'e');
+  void add_options(interface_description& desc) override
+  {
+    super::add_options(desc);
+    desc.add_option("formula", make_file_argument("FILE"), "use the state formula from FILE", 'f');
+    desc.add_option("preprocess-modal-operators",
+        "insert dummy fixpoints in modal operators, which may lead to smaller PRESs",
+        'm');
+    desc.add_option("timed", "use the timed version of the algorithm, even for untimed LPS's", 't');
+    desc.add_option("unoptimized", "do not simplify boolean expressions", 'u');
+    desc.add_hidden_option("check-only", "check syntax and semantics of state formula; do not generate PRES", 'e');
     }
 
     void parse_options(const command_line_parser& parser) override

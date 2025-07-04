@@ -38,9 +38,9 @@ namespace data
 
 class dependency_graph_partition
 {
-  typedef block block_t;
-  typedef pbes_system::detail::ppg_equation equation_type_t;
-  typedef pbes_system::structure_graph::index_type sg_index_t;
+  using block_t = block;
+  using equation_type_t = pbes_system::detail::ppg_equation;
+  using sg_index_t = pbes_system::structure_graph::index_type;
 
 protected:
   const pbes_system::detail::ppg_pbes m_spec;

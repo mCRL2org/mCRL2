@@ -91,7 +91,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     struct Rplus_traverser: public pbes_expression_traverser<Rplus_traverser>
     {
-      typedef pbes_expression_traverser<Rplus_traverser> super;
+      using super = pbes_expression_traverser<Rplus_traverser>;
       using super::enter;
       using super::leave;
       using super::apply;
@@ -500,7 +500,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     }
 
   public:
-    typedef pbesinst_structure_graph_algorithm super;
+    using super = pbesinst_structure_graph_algorithm;
 
     pbesinst_structure_graph_algorithm2(
       const pbessolve_options& options,

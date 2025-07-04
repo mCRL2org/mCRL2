@@ -24,7 +24,7 @@ namespace detail {
 template <template <class> class Builder, class Substitution>
 struct substitute_pres_expressions_builder: public Builder<substitute_pres_expressions_builder<Builder, Substitution> >
 {
-  typedef Builder<substitute_pres_expressions_builder<Builder, Substitution> > super;
+  using super = Builder<substitute_pres_expressions_builder<Builder, Substitution>>;
   using super::apply;
 
   Substitution sigma;
@@ -59,7 +59,7 @@ make_replace_pres_expressions_builder(Substitution sigma, bool innermost)
 template <template <class> class Builder, class Substitution>
 struct replace_propositional_variables_builder: public Builder<replace_propositional_variables_builder<Builder, Substitution> >
 {
-  typedef Builder<replace_propositional_variables_builder<Builder, Substitution> > super;
+  using super = Builder<replace_propositional_variables_builder<Builder, Substitution>>;
   using super::apply;
 
   const Substitution& sigma;

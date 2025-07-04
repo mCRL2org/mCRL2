@@ -83,10 +83,10 @@ class deadlock
 
 //--- start generated class deadlock ---//
 /// \\brief list of deadlocks
-typedef atermpp::term_list<deadlock> deadlock_list;
+using deadlock_list = atermpp::term_list<deadlock>;
 
 /// \\brief vector of deadlocks
-typedef std::vector<deadlock>    deadlock_vector;
+using deadlock_vector = std::vector<deadlock>;
 
 // prototype declaration
 std::string pp(const deadlock& x, bool precedence_aware = true);

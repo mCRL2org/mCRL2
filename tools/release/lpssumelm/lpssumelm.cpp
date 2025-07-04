@@ -24,7 +24,7 @@ class sumelm_tool: public input_output_tool
 {
   protected:
 
-    typedef input_output_tool super;
+    using super = input_output_tool;
     bool m_decluster;
 
     void add_options(interface_description& desc)

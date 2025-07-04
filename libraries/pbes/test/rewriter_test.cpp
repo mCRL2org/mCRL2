@@ -87,10 +87,10 @@ class rewriter_with_substitution
 
   public:
     /// \brief The term type
-    typedef typename Rewriter::term_type term_type;
+    using term_type = typename Rewriter::term_type;
 
     /// \brief The variable type
-    typedef typename Rewriter::variable_type variable_type;
+    using variable_type = typename Rewriter::variable_type;
 
     rewriter_with_substitution(Rewriter& R_, const std::string& substitution_text)
       : R(R_)

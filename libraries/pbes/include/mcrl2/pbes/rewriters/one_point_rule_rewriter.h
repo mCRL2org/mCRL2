@@ -27,7 +27,7 @@ namespace detail {
 template <typename Derived>
 struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_builder<Derived>
 {
-  typedef pbes_system::pbes_expression_builder<Derived> super;
+  using super = pbes_system::pbes_expression_builder<Derived>;
   using super::apply;
 
   Derived& derived()
@@ -135,10 +135,10 @@ class one_point_rule_rewriter
 {
   public:
     /// \brief The term type
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Rewrites a pbes expression.
     /// \param x A term

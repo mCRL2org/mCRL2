@@ -59,10 +59,10 @@ class action_formula: public atermpp::aterm
 };
 
 /// \\brief list of action_formulas
-typedef atermpp::term_list<action_formula> action_formula_list;
+using action_formula_list = atermpp::term_list<action_formula>;
 
 /// \\brief vector of action_formulas
-typedef std::vector<action_formula>    action_formula_vector;
+using action_formula_vector = std::vector<action_formula>;
 
 // prototypes
 inline bool is_true(const atermpp::aterm& x);

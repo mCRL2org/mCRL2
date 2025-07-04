@@ -21,7 +21,7 @@ namespace detail {
 
 struct is_stochastic_traverser: public lps::data_expression_traverser<is_stochastic_traverser>
 {
-  typedef lps::data_expression_traverser<is_stochastic_traverser> super;
+  using super = lps::data_expression_traverser<is_stochastic_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

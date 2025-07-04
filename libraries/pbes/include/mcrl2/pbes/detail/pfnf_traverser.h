@@ -28,7 +28,7 @@ namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Represents a quantifier Qv:V. If the bool is true it is a forall, otherwise an exists.
-typedef std::pair<bool, data::variable_list> pfnf_traverser_quantifier;
+using pfnf_traverser_quantifier = std::pair<bool, data::variable_list>;
 
 struct variable_variable_substitution
 {
@@ -73,8 +73,8 @@ struct variable_variable_substitution
 
 struct variable_data_expression_substitution
 {
-  typedef data::variable variable_type;
-  typedef data::data_expression expression_type;
+  using variable_type = data::variable;
+  using expression_type = data::data_expression;
 
   const variable_variable_substitution& sigma;
 
@@ -174,7 +174,7 @@ Container concat(const Container& x, const Container& y)
 /// \brief Applies the PFNF rewriter to a PBES expression.
 struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
 {
-  typedef pbes_expression_traverser<pfnf_traverser> super;
+  using super = pbes_expression_traverser<pfnf_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

@@ -26,7 +26,7 @@ namespace detail
 template <template <class> class Traverser, class OutputIterator>
 struct find_action_labels_traverser: public Traverser<find_action_labels_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_action_labels_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_action_labels_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -56,7 +56,7 @@ make_find_action_labels_traverser(OutputIterator out)
 
 struct find_action_names_traverser: public process::action_label_traverser<find_action_names_traverser>
 {
-  typedef process::action_label_traverser<find_action_names_traverser> super;
+  using super = process::action_label_traverser<find_action_names_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

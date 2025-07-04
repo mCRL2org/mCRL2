@@ -403,9 +403,9 @@ class interface_description
     };
     /// \endcond
 
-    typedef std::map< std::string, option_descriptor > option_map;
+    using option_map = std::map<std::string, option_descriptor>;
 
-    typedef std::map< const char,  std::string, option_identifier_less > short_to_long_map;
+    using short_to_long_map = std::map<const char, std::string, option_identifier_less>;
 
     /// \brief Maps long option identifiers to option descriptor objects
     option_map        m_options;
@@ -790,10 +790,10 @@ class command_line_parser
   public:
 
     /// Used to map options to arguments
-    typedef std::multimap< std::string, std::string >  option_map;
+    using option_map = std::multimap<std::string, std::string>;
 
     /// Used to store command line arguments that were not recognised as option or arguments to options
-    typedef std::vector< std::string >                 argument_list;
+    using argument_list = std::vector<std::string>;
 
   private:
 

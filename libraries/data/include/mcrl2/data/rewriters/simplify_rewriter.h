@@ -25,7 +25,7 @@ template <typename Derived>
 class simplify_rewrite_builder: public data_expression_builder<Derived>
 {
   public:
-    typedef data_expression_builder<Derived> super;
+    using super = data_expression_builder<Derived>;
 
     using super::apply;
 

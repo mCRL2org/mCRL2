@@ -46,11 +46,11 @@ class term_list_iterator
     } 
 
   public:
-    typedef Term value_type;
-    typedef Term& reference;
-    typedef Term* pointer;
-    typedef ptrdiff_t difference_type;
-    typedef std::forward_iterator_tag iterator_category;
+    using value_type = Term;
+    using reference = Term&;
+    using pointer = Term*;
+    using difference_type = ptrdiff_t;
+    using iterator_category = std::forward_iterator_tag;
 
     /// \brief Default constructor.
     term_list_iterator()
@@ -182,11 +182,11 @@ class reverse_term_list_iterator
     } 
 
   public:
-    typedef Term value_type;
-    typedef Term& reference;
-    typedef Term* pointer;
-    typedef ptrdiff_t difference_type;
-    typedef std::forward_iterator_tag iterator_category;
+    using value_type = Term;
+    using reference = Term&;
+    using pointer = Term*;
+    using difference_type = ptrdiff_t;
+    using iterator_category = std::forward_iterator_tag;
 
     /// \brief Default constructor.
     reverse_term_list_iterator()

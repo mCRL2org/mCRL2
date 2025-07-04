@@ -61,9 +61,9 @@ void plts_merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   // array, we first have to collect the labels of both LTSs in a
   // map, of which the second element indicates the new index of each action label.
 
-  typedef typename LTS_TYPE::action_label_t type1;
-  typedef typename LTS_TYPE::labels_size_type type2;
-  typedef typename std::pair< typename std::map < type1,type2 >::const_iterator, bool > insert_type;
+  using type1 = typename LTS_TYPE::action_label_t;
+  using type2 = typename LTS_TYPE::labels_size_type;
+  using insert_type = typename std::pair<typename std::map<type1, type2>::const_iterator, bool>;
   std::map < type1,type2 > labs;
 
   // Put the labels of the LTS l1 in a map.

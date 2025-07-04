@@ -94,7 +94,7 @@ class reduce_process_tool: public utilities::tools::input_output_tool
 {
   protected:
     const std::size_t undefined = std::size_t(-1);
-    typedef utilities::tools::input_output_tool super;
+    using super = utilities::tools::input_output_tool;
     bool m_print_max_depth = false;
     bool m_verbose = false;
     std::size_t m_depth = undefined;

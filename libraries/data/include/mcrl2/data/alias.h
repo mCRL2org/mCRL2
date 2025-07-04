@@ -66,10 +66,10 @@ inline void make_alias(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of aliass
-typedef atermpp::term_list<alias> alias_list;
+using alias_list = atermpp::term_list<alias>;
 
 /// \\brief vector of aliass
-typedef std::vector<alias>    alias_vector;
+using alias_vector = std::vector<alias>;
 
 /// \\brief Test for a alias expression
 /// \\param x A term

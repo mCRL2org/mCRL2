@@ -28,7 +28,7 @@ struct term_traits_optimized
 template <>
 struct term_traits_optimized<pres_system::pres_expression>: public core::term_traits<pres_system::pres_expression>
 {
-  typedef core::term_traits<pres_system::pres_expression> super;
+  using super = core::term_traits<pres_system::pres_expression>;
 
   /* static inline
   term_type not_(const term_type& x)

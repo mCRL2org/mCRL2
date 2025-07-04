@@ -42,8 +42,8 @@ template <typename VariableType = data::variable, typename ExpressionType = data
 class mutable_indexed_substitution
 {
 protected:
-  typedef atermpp::utilities::unordered_map < VariableType, ExpressionType > substitution_type;
-  
+  using substitution_type = atermpp::utilities::unordered_map<VariableType, ExpressionType>;
+
   /// \brief Internal storage for substitutions.
   /// Required to be a container with random access through [] operator.
   /// It is essential to store the variable also in the container, as it might be that
@@ -57,10 +57,10 @@ protected:
 public:
 
   /// \brief Type of variables
-  typedef VariableType variable_type;
+  using variable_type = VariableType;
 
   /// \brief Type of expressions
-  typedef ExpressionType expression_type;
+  using expression_type = ExpressionType;
 
   using argument_type = variable_type;
   using result_type = expression_type;

@@ -118,7 +118,7 @@ friend class lts_info;
 friend class explorer;
 
 public:
-    typedef parity_game_generator::operation_type operation_type;
+  using operation_type = parity_game_generator::operation_type;
 
 private:
     int priority; // Priority (depends on fixpoint operator and equation order)
@@ -183,7 +183,7 @@ friend class explorer;
 
 public:
     /// \brief The variable sequence type
-    typedef parity_game_generator::operation_type operation_type;
+  using operation_type = parity_game_generator::operation_type;
 private:
     pbes& p;
     detail::pbes_greybox_interface* pgg;
@@ -433,7 +433,7 @@ class explorer {
 
 public:
     /// \brief The expression type of the equation.
-    typedef parity_game_generator::operation_type operation_type;
+  using operation_type = parity_game_generator::operation_type;
 
 private:
     pbes p;

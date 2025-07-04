@@ -28,7 +28,7 @@ namespace detail
 
 struct typecheck_builder: public action_formula_builder<typecheck_builder>
 {
-  typedef action_formula_builder<typecheck_builder> super;
+  using super = action_formula_builder<typecheck_builder>;
   using super::apply;
 
   data::data_type_checker& m_data_type_checker;
@@ -172,7 +172,7 @@ namespace detail
 
 struct typecheck_builder: public regular_formula_builder<typecheck_builder>
 {
-  typedef regular_formula_builder<typecheck_builder> super;
+  using super = regular_formula_builder<typecheck_builder>;
   using super::apply;
 
   data::data_type_checker& m_data_type_checker;
@@ -345,7 +345,7 @@ namespace detail
 
 struct typecheck_builder: public state_formula_builder<typecheck_builder>
 {
-  typedef state_formula_builder<typecheck_builder> super;
+  using super = state_formula_builder<typecheck_builder>;
   using super::apply;
 
   data::data_type_checker& m_data_type_checker;

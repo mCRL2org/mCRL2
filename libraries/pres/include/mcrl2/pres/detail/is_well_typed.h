@@ -25,7 +25,7 @@ namespace mcrl2::pres_system::detail {
 /// Visitor for collecting the quantifier variables that occur in a pres expression.
 struct find_quantifier_variables_traverser: public pres_expression_traverser<find_quantifier_variables_traverser>
 {
-  typedef pres_expression_traverser<find_quantifier_variables_traverser> super;
+  using super = pres_expression_traverser<find_quantifier_variables_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -63,7 +63,7 @@ std::set<data::variable> find_quantifier_variables(const pres_expression& x)
 /// variables of free variables with the same name.
 struct has_quantifier_name_clashes_traverser: public pres_expression_traverser<has_quantifier_name_clashes_traverser>
 {
-  typedef pres_expression_traverser<has_quantifier_name_clashes_traverser> super;
+  using super = pres_expression_traverser<has_quantifier_name_clashes_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

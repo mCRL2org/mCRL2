@@ -22,7 +22,7 @@ namespace mcrl2::state_formulas
 // \brief Visitor for checking if a state formula is normalized.
 struct is_normalized_traverser: public state_formula_traverser<is_normalized_traverser>
 {
-  typedef state_formula_traverser<is_normalized_traverser> super;
+  using super = state_formula_traverser<is_normalized_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -58,7 +58,7 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
 // \brief Visitor for normalizing a state formula.
 struct normalize_builder: public state_formula_builder<normalize_builder>
 {
-  typedef state_formula_builder<normalize_builder> super;
+  using super = state_formula_builder<normalize_builder>;
   using super::enter;
   using super::leave;
   using super::update;

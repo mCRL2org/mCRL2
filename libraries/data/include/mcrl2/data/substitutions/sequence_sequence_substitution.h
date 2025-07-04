@@ -24,10 +24,10 @@ template <typename VariableContainer, typename ExpressionContainer>
 struct sequence_sequence_substitution
 {
   /// \brief type used to represent variables
-  typedef typename VariableContainer::value_type variable_type;
+  using variable_type = typename VariableContainer::value_type;
 
   /// \brief type used to represent expressions
-  typedef typename ExpressionContainer::value_type  expression_type;
+  using expression_type = typename ExpressionContainer::value_type;
 
   using argument_type = variable_type;
   using result_type = expression_type;

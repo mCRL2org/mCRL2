@@ -193,10 +193,10 @@ inline void make_structured_sort_constructor(atermpp::aterm& t, const ARGUMENTS&
 }
 
 /// \\brief list of structured_sort_constructors
-typedef atermpp::term_list<structured_sort_constructor> structured_sort_constructor_list;
+using structured_sort_constructor_list = atermpp::term_list<structured_sort_constructor>;
 
 /// \\brief vector of structured_sort_constructors
-typedef std::vector<structured_sort_constructor>    structured_sort_constructor_vector;
+using structured_sort_constructor_vector = std::vector<structured_sort_constructor>;
 
 /// \\brief Test for a structured_sort_constructor expression
 /// \\param x A term

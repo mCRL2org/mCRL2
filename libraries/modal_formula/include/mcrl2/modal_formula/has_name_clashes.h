@@ -23,7 +23,7 @@ namespace detail
 class state_variable_name_clash_checker: public state_formulas::state_formula_traverser<state_variable_name_clash_checker>
 {
   public:
-    typedef state_formulas::state_formula_traverser<state_variable_name_clash_checker> super;
+    using super = state_formulas::state_formula_traverser<state_variable_name_clash_checker>;
 
     using super::apply;
     using super::enter;
@@ -74,7 +74,7 @@ class state_variable_name_clash_checker: public state_formulas::state_formula_tr
 class state_formula_data_variable_name_clash_checker: public state_formulas::state_formula_traverser<state_formula_data_variable_name_clash_checker>
 {
   public:
-    typedef state_formulas::state_formula_traverser<state_formula_data_variable_name_clash_checker> super;
+    using super = state_formulas::state_formula_traverser<state_formula_data_variable_name_clash_checker>;
 
     using super::apply;
     using super::enter;

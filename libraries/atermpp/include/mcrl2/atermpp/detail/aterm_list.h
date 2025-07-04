@@ -20,7 +20,7 @@ namespace atermpp
 template <class Term>
 class term_list;
 
-typedef term_list<aterm> aterm_list;
+using aterm_list = term_list<aterm>;
 
 namespace detail
 {

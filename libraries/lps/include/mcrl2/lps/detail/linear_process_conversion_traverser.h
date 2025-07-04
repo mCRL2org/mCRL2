@@ -24,7 +24,7 @@ namespace mcrl2::process::detail
 /// Use the \p convert member functions for this.
 struct linear_process_conversion_traverser: public process_expression_traverser<linear_process_conversion_traverser>
 {
-  typedef process_expression_traverser<linear_process_conversion_traverser> super;
+  using super = process_expression_traverser<linear_process_conversion_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -419,7 +419,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
 /// Use the \p convert member functions for this.
 struct stochastic_linear_process_conversion_traverser: public process_expression_traverser<stochastic_linear_process_conversion_traverser>
 {
-  typedef process_expression_traverser<stochastic_linear_process_conversion_traverser> super;
+  using super = process_expression_traverser<stochastic_linear_process_conversion_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

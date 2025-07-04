@@ -40,30 +40,32 @@ template<class Key, class Val, Val Used = Val(0), Val Unused = Val(-1),
 class DenseMap
 {
 public:
-    typedef std::pair<Key, Val> value_type;
+  using value_type = std::pair<Key, Val>;
 
-    class Iterator
-    {
-        value_type *pos_;
+  class Iterator
+  {
+    value_type* pos_;
 
-    public:
-        Iterator(value_type *pos) : pos_(pos) { };
-        Iterator(const Iterator &it) : pos_(it.pos_) { };
-        Iterator& operator=(const Iterator &it) { pos_ = it.pos_; }
+  public:
+    Iterator(value_type* pos)
+        : pos_(pos) {};
+    Iterator(const Iterator& it)
+        : pos_(it.pos_) {};
+    Iterator& operator=(const Iterator& it) { pos_ = it.pos_; }
 
-        bool operator== (const Iterator &other) { return pos_ == other.pos_; }
-        bool operator!= (const Iterator &other) { return pos_ != other.pos_; }
-        bool operator<  (const Iterator &other) { return pos_ <  other.pos_; }
-        bool operator>  (const Iterator &other) { return pos_ >  other.pos_; }
-        bool operator<= (const Iterator &other) { return pos_ <= other.pos_; }
-        bool operator>= (const Iterator &other) { return pos_ >= other.pos_; }
+    bool operator==(const Iterator& other) { return pos_ == other.pos_; }
+    bool operator!=(const Iterator& other) { return pos_ != other.pos_; }
+    bool operator<(const Iterator& other) { return pos_ < other.pos_; }
+    bool operator>(const Iterator& other) { return pos_ > other.pos_; }
+    bool operator<=(const Iterator& other) { return pos_ <= other.pos_; }
+    bool operator>=(const Iterator& other) { return pos_ >= other.pos_; }
 
-        value_type operator*() { return *pos_; };
-        value_type *operator->() { return pos_; };
+    value_type operator*() { return *pos_; };
+    value_type* operator->() { return pos_; };
     };
 
-    typedef Iterator iterator;
-    typedef Iterator const_iterator;
+    using iterator = Iterator;
+    using const_iterator = Iterator;
 
     DenseMap(Key begin, Key end, const Alloc &alloc = Alloc())
         : range_begin(begin), range_end(end < begin ? begin : end),

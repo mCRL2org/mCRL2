@@ -129,7 +129,13 @@ template<template<class> class Builder,
 struct replace_capture_avoiding_variables_builder_with_an_identifier_generator
   : public Binder<Builder, replace_capture_avoiding_variables_builder_with_an_identifier_generator<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator>
 {
-  typedef Binder<Builder, replace_capture_avoiding_variables_builder_with_an_identifier_generator<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator> super;
+  using super = Binder<Builder,
+      replace_capture_avoiding_variables_builder_with_an_identifier_generator<Builder,
+          Binder,
+          Substitution,
+          IdentifierGenerator>,
+      Substitution,
+      IdentifierGenerator>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -160,26 +166,25 @@ apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator(Su
 template<template<class> class Builder, class Derived, class Substitution, class IdentifierGenerator>
 struct add_capture_avoiding_replacement_with_an_identifier_generator : public Builder<Derived>
 {
-    typedef Builder<Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::apply;
-    using super::update;
+  using super = Builder<Derived>;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::update;
 
-  protected:
-    substitution_updater_with_an_identifier_generator <Substitution, IdentifierGenerator> update_sigma;
+protected:
+  substitution_updater_with_an_identifier_generator<Substitution, IdentifierGenerator> update_sigma;
 
-  public:
-    add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma_,
-                                                                  IdentifierGenerator& id_generator_)
+public:
+  add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma_,
+      IdentifierGenerator& id_generator_)
       : update_sigma(sigma_, id_generator_)
-    {
-    }
+  {}
 
-    template <class T>
-    void apply(T& result, const variable& v)
-    {
-      result = update_sigma.substitution()(v);
+  template <class T>
+  void apply(T& result, const variable& v)
+  {
+    result = update_sigma.substitution()(v);
     }
 
     template <class T>

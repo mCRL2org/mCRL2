@@ -59,7 +59,7 @@ struct is_set : public
 template < template < typename O > class C, typename E >
 struct unary_template_swap
 {
-  typedef C< E > type;
+  using type = C<E>;
 };
 
 } // namespace atermpp

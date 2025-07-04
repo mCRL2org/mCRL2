@@ -36,7 +36,7 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
 {
   protected:
     friend struct lps_reset_traverser;
-    typedef local_reset_variables_algorithm super;
+    using super = local_reset_variables_algorithm;
 
     const lps::specification& m_original_lps;
     lps::specification m_transformed_lps; // will contain the result of the computation
@@ -151,7 +151,7 @@ data::assignment_list make_assignments(const data::variable_list& d, const data:
 
 struct lps_reset_traverser: public pbes_expression_traverser<lps_reset_traverser>
 {
-  typedef pbes_expression_traverser<lps_reset_traverser> super;
+  using super = pbes_expression_traverser<lps_reset_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

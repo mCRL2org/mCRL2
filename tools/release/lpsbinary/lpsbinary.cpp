@@ -27,7 +27,7 @@ class binary_tool: public rewriter_tool<input_output_tool>
 {
   protected:
 
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
     std::string m_parameter_selection;
 

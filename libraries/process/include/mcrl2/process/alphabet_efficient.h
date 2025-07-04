@@ -23,7 +23,7 @@ namespace detail {
 template <typename Derived, typename Node = alphabet_node>
 struct alphabet_efficient_traverser: public alphabet_traverser<Derived>
 {
-  typedef alphabet_traverser<Derived> super;
+  using super = alphabet_traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -102,7 +102,7 @@ struct alphabet_efficient_traverser: public alphabet_traverser<Derived>
 
 struct apply_alphabet_efficient_traverser: public alphabet_efficient_traverser<apply_alphabet_efficient_traverser>
 {
-  typedef alphabet_efficient_traverser<apply_alphabet_efficient_traverser> super;
+  using super = alphabet_efficient_traverser<apply_alphabet_efficient_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

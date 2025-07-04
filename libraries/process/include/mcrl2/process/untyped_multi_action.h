@@ -61,10 +61,10 @@ inline void make_untyped_multi_action(atermpp::aterm& t, const ARGUMENTS&... arg
 }
 
 /// \\brief list of untyped_multi_actions
-typedef atermpp::term_list<untyped_multi_action> untyped_multi_action_list;
+using untyped_multi_action_list = atermpp::term_list<untyped_multi_action>;
 
 /// \\brief vector of untyped_multi_actions
-typedef std::vector<untyped_multi_action>    untyped_multi_action_vector;
+using untyped_multi_action_vector = std::vector<untyped_multi_action>;
 
 /// \\brief Test for a untyped_multi_action expression
 /// \\param x A term

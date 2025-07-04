@@ -23,7 +23,7 @@ namespace detail {
 
 struct find_subterm_traverser: public process_expression_traverser<find_subterm_traverser>
 {
-  typedef process_expression_traverser<find_subterm_traverser> super;
+  using super = process_expression_traverser<find_subterm_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -157,7 +157,7 @@ struct find_subterm_traverser: public process_expression_traverser<find_subterm_
 
 struct replace_subterm_builder: public process_expression_builder<replace_subterm_builder>
 {
-  typedef process_expression_builder<replace_subterm_builder> super;
+  using super = process_expression_builder<replace_subterm_builder>;
   using super::apply;
   using super::update;
 

@@ -87,10 +87,10 @@ inline void make_structured_sort_constructor_argument(atermpp::aterm& t, const A
 }
 
 /// \\brief list of structured_sort_constructor_arguments
-typedef atermpp::term_list<structured_sort_constructor_argument> structured_sort_constructor_argument_list;
+using structured_sort_constructor_argument_list = atermpp::term_list<structured_sort_constructor_argument>;
 
 /// \\brief vector of structured_sort_constructor_arguments
-typedef std::vector<structured_sort_constructor_argument>    structured_sort_constructor_argument_vector;
+using structured_sort_constructor_argument_vector = std::vector<structured_sort_constructor_argument>;
 
 /// \\brief Test for a structured_sort_constructor_argument expression
 /// \\param x A term

@@ -58,10 +58,10 @@ class state_formula: public atermpp::aterm
 };
 
 /// \\brief list of state_formulas
-typedef atermpp::term_list<state_formula> state_formula_list;
+using state_formula_list = atermpp::term_list<state_formula>;
 
 /// \\brief vector of state_formulas
-typedef std::vector<state_formula>    state_formula_vector;
+using state_formula_vector = std::vector<state_formula>;
 
 // prototypes
 inline bool is_true(const atermpp::aterm& x);

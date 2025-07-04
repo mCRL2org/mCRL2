@@ -51,7 +51,7 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
     // Allow base class access to protected functions
     friend class data::detail::data_property_map<specification_property_map<Specification> >;
 
-    typedef data::detail::data_property_map<specification_property_map> super;
+    using super = data::detail::data_property_map<specification_property_map>;
 
     using super::m_data;
     using super::names;

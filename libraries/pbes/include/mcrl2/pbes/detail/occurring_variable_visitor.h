@@ -19,7 +19,7 @@ namespace mcrl2::pbes_system::detail
 
 struct occurring_variable_visitor: public pbes_expression_traverser<occurring_variable_visitor>
 {
-  typedef pbes_expression_traverser<occurring_variable_visitor> super;
+  using super = pbes_expression_traverser<occurring_variable_visitor>;
   using super::enter;
   using super::leave;
   using super::apply;

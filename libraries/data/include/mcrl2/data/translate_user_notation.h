@@ -26,7 +26,7 @@ template <typename Derived>
 class translate_user_notation_builder: public data_expression_builder<Derived>
 {
 public:
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
 
   using super::enter;
   using super::leave;

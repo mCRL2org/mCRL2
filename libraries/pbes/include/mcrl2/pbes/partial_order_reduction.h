@@ -52,7 +52,7 @@ data::data_expression equal_to(const data::data_expression_list& x, const data::
 
 } // namespace detail
 
-typedef boost::dynamic_bitset<> summand_set;
+using summand_set = boost::dynamic_bitset<>;
 
 inline
 std::string print_summand_set(const summand_set& s)
@@ -1459,7 +1459,7 @@ class partial_order_reduction_algorithm
         STARTS_CYCLE,   ///< Needs to be fully expanded, because it starts a cycle
         DONE            ///< Has been fully expanded
       };
-      typedef std::pair<propositional_variable_instantiation, todo_state> todo_pair;
+      using todo_pair = std::pair<propositional_variable_instantiation, todo_state>;
 
       // The set seen also stores for each node an index and a boolean that expresses whether
       // the node is currently in the DFS stack and not fully explored, ie, its state in the

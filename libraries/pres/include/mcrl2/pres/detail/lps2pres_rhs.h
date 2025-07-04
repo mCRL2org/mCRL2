@@ -54,7 +54,7 @@ struct lps2pres_parameters
                                TermTraits
                               )
   {
-    typedef TermTraits tr;
+    using tr = TermTraits;
     if (is_must)
     {
       return tr::infimum(y, tr::imp(left, tr::sum(dist.variables(), tr::const_multiply(dist.distribution(), right))));
@@ -74,9 +74,9 @@ pres_expression RHS(const state_formulas::state_formula& x, Parameters& paramete
 template <typename Derived, typename TermTraits, typename Parameters>
 struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 {
-  typedef state_formulas::state_formula_traverser<Derived> super;
-  typedef TermTraits tr;
-  typedef typename tr::term_type pres_expression;
+  using super = state_formulas::state_formula_traverser<Derived>;
+  using tr = TermTraits;
+  using pres_expression = typename tr::term_type;
 
   using super::enter;
   using super::leave;
@@ -425,7 +425,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
 struct apply_rhs_traverser: public Traverser<apply_rhs_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_rhs_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
+  using super = Traverser<apply_rhs_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -459,8 +459,8 @@ typename TermTraits::term_type RHS_structured(const state_formulas::state_formul
 template <typename Derived, typename TermTraits, typename Parameters>
 struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Parameters>
 {
-  typedef rhs_traverser<Derived, TermTraits, Parameters> super;
-  typedef TermTraits tr;
+  using super = rhs_traverser<Derived, TermTraits, Parameters>;
+  using tr = TermTraits;
 
   using super::enter;
   using super::leave;
@@ -599,7 +599,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Param
 template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
 struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_rhs_structured_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
+  using super = Traverser<apply_rhs_structured_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>;
   using super::enter;
   using super::leave;
   using super::apply;

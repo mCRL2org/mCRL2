@@ -33,10 +33,10 @@ template <typename Substitution>
 class maintain_variables_in_rhs: public Substitution
 {
   public:
-    typedef Substitution super;
-    typedef typename super::variable_type variable_type;
-    typedef typename super::expression_type expression_type;
-  
+    using super = Substitution;
+    using variable_type = typename super::variable_type;
+    using expression_type = typename super::expression_type;
+
   protected:
     std::multiset<variable_type> m_variables_in_rhs;
     std::set<variable_type> m_scratch_set;

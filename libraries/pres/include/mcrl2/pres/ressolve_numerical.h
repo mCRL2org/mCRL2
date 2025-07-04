@@ -30,12 +30,12 @@ namespace detail {
 double evaluate(const pres_expression& p, const std::unordered_map<core::identifier_string, double>& solution)
 {
 // std::cerr << "Evaluate: " << p << "\n";
-  typedef std::unordered_map<data::data_expression, double> value_cache_type;
-  static value_cache_type value_cache;
-  if (is_propositional_variable_instantiation(p))
-  {
-    const propositional_variable_instantiation& pv = atermpp::down_cast<propositional_variable_instantiation>(p);
-    return solution.at(pv.name());
+using value_cache_type = std::unordered_map<data::data_expression, double>;
+static value_cache_type value_cache;
+if (is_propositional_variable_instantiation(p))
+{
+  const propositional_variable_instantiation& pv = atermpp::down_cast<propositional_variable_instantiation>(p);
+  return solution.at(pv.name());
   }
   else if (is_plus(p))
   {

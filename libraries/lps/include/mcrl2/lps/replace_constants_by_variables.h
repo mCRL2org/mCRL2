@@ -22,7 +22,7 @@ namespace detail {
 
 struct replace_constants_by_variables_builder: public data::detail::replace_constants_by_variables_builder<lps::data_expression_builder>
 {
-  typedef data::detail::replace_constants_by_variables_builder<lps::data_expression_builder> super;
+  using super = data::detail::replace_constants_by_variables_builder<lps::data_expression_builder>;
   using super::apply;
   using super::update;
 

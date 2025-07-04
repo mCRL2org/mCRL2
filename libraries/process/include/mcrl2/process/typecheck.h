@@ -125,7 +125,7 @@ std::ostream& operator<<(std::ostream& out, const std::pair<core::identifier_str
 
 struct typecheck_builder: public process_expression_builder<typecheck_builder>
 {
-  typedef process_expression_builder<typecheck_builder> super;
+  using super = process_expression_builder<typecheck_builder>;
   using super::apply;
 
   data::data_type_checker& m_data_type_checker;

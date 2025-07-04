@@ -47,11 +47,7 @@ namespace mcrl2::lts::detail
 // state_type and trans_type are defined in check_complexity.h.
 
 /// \brief type used to store label numbers and counts
-typedef std::size_t label_type;
-
-
-
-
+using label_type = std::size_t;
 
 /* ************************************************************************* */
 /*                                                                           */
@@ -111,8 +107,8 @@ namespace bisim_gjkw
 
 class state_info_entry;
 
-typedef state_info_entry* state_info_ptr;
-typedef const state_info_entry* state_info_const_ptr;
+using state_info_ptr = state_info_entry*;
+using state_info_const_ptr = const state_info_entry*;
 
 /// \class permutation_t
 /// \brief stores a permutation of the states, ordered by block
@@ -123,9 +119,9 @@ typedef const state_info_entry* state_info_const_ptr;
 ///
 /// Iterating over the states of a block or the blocks of a constellation will
 /// therefore be done using the permutation_t array.
-typedef fixed_vector<state_info_ptr> permutation_t;
-typedef permutation_t::iterator permutation_iter_t;
-typedef permutation_t::const_iterator permutation_const_iter_t;
+using permutation_t = fixed_vector<state_info_ptr>;
+using permutation_iter_t = permutation_t::iterator;
+using permutation_const_iter_t = permutation_t::const_iterator;
 
 class block_t;
 class constln_t;
@@ -133,17 +129,17 @@ class constln_t;
 class B_to_C_entry;
 class pred_entry;
 class succ_entry;
-typedef fixed_vector<B_to_C_entry>::iterator B_to_C_iter_t;
-typedef fixed_vector<pred_entry>::iterator pred_iter_t;
-typedef fixed_vector<succ_entry>::iterator succ_iter_t;
+using B_to_C_iter_t = fixed_vector<B_to_C_entry>::iterator;
+using pred_iter_t = fixed_vector<pred_entry>::iterator;
+using succ_iter_t = fixed_vector<succ_entry>::iterator;
 
-typedef fixed_vector<B_to_C_entry>::const_iterator B_to_C_const_iter_t;
-typedef fixed_vector<pred_entry>::const_iterator pred_const_iter_t;
-typedef fixed_vector<succ_entry>::const_iterator succ_const_iter_t;
+using B_to_C_const_iter_t = fixed_vector<B_to_C_entry>::const_iterator;
+using pred_const_iter_t = fixed_vector<pred_entry>::const_iterator;
+using succ_const_iter_t = fixed_vector<succ_entry>::const_iterator;
 class B_to_C_descriptor;
-typedef std::list<B_to_C_descriptor> B_to_C_desc_list;
-typedef B_to_C_desc_list::iterator B_to_C_desc_iter_t;
-typedef B_to_C_desc_list::const_iterator B_to_C_desc_const_iter_t;
+using B_to_C_desc_list = std::list<B_to_C_descriptor>;
+using B_to_C_desc_iter_t = B_to_C_desc_list::iterator;
+using B_to_C_desc_const_iter_t = B_to_C_desc_list::const_iterator;
 
 /// \class state_info_entry
 /// \brief stores information about a single state
