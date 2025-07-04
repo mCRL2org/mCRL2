@@ -97,10 +97,10 @@ BOOST_AUTO_TEST_CASE(transitions_test)
 
   binary_aterm_istream input(stream);
 
-  for (const atermpp::aterm& index : sequence)
+  for (const atermpp::aterm& term : sequence)
   {
     aterm t;
     input.get(t);
-    BOOST_CHECK_EQUAL(t, index);
+    BOOST_CHECK_EQUAL(t, term);
   }
 }

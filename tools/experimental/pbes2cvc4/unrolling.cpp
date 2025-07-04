@@ -324,13 +324,13 @@ static std::string assert_initial_state(const parsed_pbes &pbes, const translate
 	const std::vector<std::string> &equation_variables = variables.parameter_variables[0][variable_index];
 	data_expression_list values = pbes.initial_state.parameters();
 	size_t index = 0;
-        for (const mcrl2::data::data_expression& value : values)
-        {
-          output += "(assert (= " + equation_variables[index++] + " "
-                    + translate_expression(value, variables.global_variables, translation) + "))\n";
-        }
+	for (const mcrl2::data::data_expression& value : values)
+	{
+		output += "(assert (= " + equation_variables[index++] + " "
+				+ translate_expression(value, variables.global_variables, translation) + "))\n";
+	}
 
-        return output;
+	return output;
 }
 
 static std::string join(const std::vector<std::string> &clauses, const std::string &op, bool simplify = true)
