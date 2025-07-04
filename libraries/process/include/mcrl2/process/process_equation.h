@@ -14,10 +14,7 @@
 
 #include "mcrl2/process/process_expression.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated class process_equation ---//
@@ -74,10 +71,10 @@ inline void make_process_equation(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of process_equations
-typedef atermpp::term_list<process_equation> process_equation_list;
+using process_equation_list = atermpp::term_list<process_equation>;
 
 /// \\brief vector of process_equations
-typedef std::vector<process_equation>    process_equation_vector;
+using process_equation_vector = std::vector<process_equation>;
 
 /// \\brief Test for a process_equation expression
 /// \\param x A term
@@ -114,8 +111,6 @@ std::string pp(const process_equation_vector& x);
 void normalize_sorts(process_equation_vector& x, const data::sort_specification& sortspec);
 std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x);
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_PROCESS_EQUATION_H

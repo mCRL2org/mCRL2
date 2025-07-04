@@ -17,11 +17,7 @@
 #include "mcrl2/lps/stochastic_specification.h"
 #include <boost/iterator/transform_iterator.hpp>
 
-namespace mcrl2 {
-
-namespace lps {
-
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 /// \brief Function object for applying a substitution to LPS data types.
@@ -403,10 +399,6 @@ bool check_well_typedness(const T& x)
   return result;
 }
 
-} // namespace detail
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif // MCRL2_LPS_IS_WELL_TYPED_H

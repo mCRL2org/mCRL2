@@ -14,11 +14,8 @@
 
 #include "mcrl2/data/join.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 struct
 one_point_rule_preprocessor
@@ -65,10 +62,6 @@ one_point_rule_preprocessor
   }
 };
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_ONE_POINT_RULE_PREPROCESSOR_H

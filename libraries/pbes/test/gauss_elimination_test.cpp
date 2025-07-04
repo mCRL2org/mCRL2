@@ -217,12 +217,12 @@ bool compare(const pbes_system::pbes_expression& x, const pbes_system::pbes_expr
   return x == y;
 }
 
-typedef bool (*compare_function)(const pbes_system::pbes_expression& x, const pbes_system::pbes_expression& y);
+using compare_function = bool (*)(const pbes_system::pbes_expression&, const pbes_system::pbes_expression&);
 
 void test_approximate()
 {
   using namespace pbes_system;
-  typedef core::term_traits<pbes_expression> tr;
+  using tr = core::term_traits<pbes_expression>;
 
   gauss_elimination_algorithm<pbes_traits> algorithm;
   pbes_system::pbes p = pbes_system::txt2pbes(BES4);

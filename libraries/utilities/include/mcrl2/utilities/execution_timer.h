@@ -19,10 +19,7 @@
 #include <map>
 #include <string>
 
-namespace mcrl2
-{
-
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief Simple timer to time the CPU time used by a piece of code.
@@ -172,8 +169,8 @@ class execution_timer
 
 };
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_UTILITIES_EXECUTION_TIMER_H

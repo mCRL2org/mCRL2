@@ -15,10 +15,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/process/process_expression.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 // prototype declaration
@@ -107,10 +104,10 @@ inline void make_multi_action(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of multi_actions
-typedef atermpp::term_list<multi_action> multi_action_list;
+using multi_action_list = atermpp::term_list<multi_action>;
 
 /// \\brief vector of multi_actions
-typedef std::vector<multi_action>    multi_action_vector;
+using multi_action_vector = std::vector<multi_action>;
 
 /// \\brief Test for a multi_action expression
 /// \\param x A term
@@ -335,13 +332,13 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   }
 
   // compute the intervals of a with equal names
-  typedef std::vector<process::action>::iterator action_iterator;
+  using action_iterator = std::vector<process::action>::iterator;
   std::vector<std::pair<action_iterator, action_iterator> > intervals;
   action_iterator first = va.begin();
   while (first != va.end())
   {
     action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
-    intervals.push_back(std::make_pair(first, next));
+    intervals.emplace_back(first, next);
     first = next;
   }
 
@@ -373,13 +370,13 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   }
 
   // compute the intervals of a with equal names
-  typedef std::vector<process::action>::iterator action_iterator;
+  using action_iterator = std::vector<process::action>::iterator;
   std::vector<std::pair<action_iterator, action_iterator> > intervals;
   action_iterator first = va.begin();
   while (first != va.end())
   {
     action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
-    intervals.push_back(std::make_pair(first, next));
+    intervals.emplace_back(first, next);
     first = next;
   }
   std::vector<data::data_expression> z;
@@ -389,9 +386,9 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 namespace std
 {

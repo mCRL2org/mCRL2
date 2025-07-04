@@ -20,11 +20,8 @@
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/standard_numbers_utility.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 /// \pre BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
 //     Real.
@@ -97,10 +94,6 @@ data_expression reconstruct_pos_mult(const data_expression& x, [[maybe_unused]] 
 #endif
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_PRINT_UTILITY_H

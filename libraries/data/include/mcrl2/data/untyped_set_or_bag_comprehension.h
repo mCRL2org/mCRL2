@@ -14,9 +14,7 @@
 
 #include "mcrl2/data/abstraction.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 /// \brief universal quantification.
 ///
@@ -86,8 +84,6 @@ inline void swap(untyped_set_or_bag_comprehension& t1, untyped_set_or_bag_compre
 }
 //--- end generated class untyped_set_or_bag_comprehension ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_UNTYPED_SET_OR_BAG_COMPREHENSION_H

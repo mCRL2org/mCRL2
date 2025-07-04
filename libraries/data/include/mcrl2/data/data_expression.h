@@ -16,10 +16,9 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/untyped_sort.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 /// \brief Returns true if the term t is an abstraction
@@ -196,10 +195,10 @@ class data_expression: public atermpp::aterm
 };
 
 /// \\brief list of data_expressions
-typedef atermpp::term_list<data_expression> data_expression_list;
+using data_expression_list = atermpp::term_list<data_expression>;
 
 /// \\brief vector of data_expressions
-typedef std::vector<data_expression>    data_expression_vector;
+using data_expression_vector = std::vector<data_expression>;
 
 // prototype declaration
 std::string pp(const data_expression& x, bool precedence_aware = true);
@@ -275,12 +274,12 @@ bool is_constant(const data_expression& x)
   return find_free_variables(x).empty();
 }
 
-typedef atermpp::term_list<variable> variable_list;
+using variable_list = atermpp::term_list<variable>;
 variable_list free_variables(const data_expression& x);
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 // The trick of including application.h only at this point is needed to break
 // the circular dependencies between application and data_expression. This
@@ -290,9 +289,8 @@ variable_list free_variables(const data_expression& x);
 #include "mcrl2/data/application.h"
 #endif
 
-namespace mcrl2
-{
-namespace data
+
+namespace mcrl2::data
 {
 /// \brief Returns true if the term t is an application.
 /// \param t The variable that is checked. 
@@ -356,8 +354,8 @@ application data_expression::operator()(const data_expression& e1, const data_ex
   return application(*this, e1, e2, e3, e4, e5, e6);
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
+
 
 
 namespace std

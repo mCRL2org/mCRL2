@@ -16,10 +16,7 @@
 #include "mcrl2/pbes/detail/pbes_context.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -27,7 +24,7 @@ namespace detail
 
 struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
 {
-  typedef pbes_expression_builder<typecheck_builder> super;
+  using super = pbes_expression_builder<typecheck_builder>;
   using super::apply;
 
   data::data_type_checker& m_data_type_checker;
@@ -342,8 +339,6 @@ pbes_expression typecheck_pbes_expression(pbes_expression& x,
   }
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_TYPECHECK_H

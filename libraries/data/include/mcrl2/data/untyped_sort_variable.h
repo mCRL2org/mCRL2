@@ -14,9 +14,7 @@
 
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 //--- start generated class untyped_sort_variable ---//
 /// \\brief Untyped sort variable
@@ -96,8 +94,6 @@ inline void swap(untyped_sort_variable& t1, untyped_sort_variable& t2)
 }
 //--- end generated class untyped_sort_variable ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_UNTYPED_SORT_VARIABLE_H

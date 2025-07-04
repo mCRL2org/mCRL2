@@ -11,11 +11,9 @@
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 class dependencies_rewrite_rule_pair
@@ -78,13 +76,13 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
           {
             bs[i] = true;
             const variable_list evars = get_free_vars(this_rule_lhs_iplus1_arg);
-            for (variable_list::const_iterator v=evars.begin(); v!=evars.end(); ++v)
+            for (const variable& evar : evars)
             {
               int j=0;
               const atermpp::term_list <variable_list>& next_vars=vars.tail();
-              for (atermpp::term_list <variable_list>::const_iterator o=next_vars.begin(); o!=next_vars.end(); ++o)
+              for (const atermpp::term_list<variable>& next_var : next_vars)
               {
-                if (std::find(o->begin(),o->end(),*v) != o->end())
+                if (std::find(next_var.begin(), next_var.end(), evar) != next_var.end())
                 {
                   bs[j] = true;
                 }
@@ -97,9 +95,9 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
           {
             int j = -1;
             bool b = false;
-            for (atermpp::term_list <variable_list>::const_iterator o=vars.begin(); o!=vars.end(); ++o)
+            for (const atermpp::term_list<variable>& var : vars)
             {
-              if (std::find(o->begin(),o->end(),variable(this_rule_lhs_iplus1_arg)) != o->end())
+              if (std::find(var.begin(), var.end(), variable(this_rule_lhs_iplus1_arg)) != var.end())
               {
                 if (j >= 0)
                 {
@@ -145,7 +143,7 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
           }
         }
 
-        m.push_back(dependencies_rewrite_rule_pair(deps,this_rule));
+        m.emplace_back(deps, this_rule);
       }
       else
       {
@@ -161,7 +159,7 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
         if (p.dependencies().empty())
         {
           const data_equation rule = p.equation();
-          strat.push_back(strategy_rule(rule));
+          strat.emplace_back(rule);
         }
         else
         {
@@ -198,14 +196,14 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
         used[maxidx-1] = true;
 
         const std::size_t k(maxidx-1);
-        strat.push_back(strategy_rule(k));
+        strat.emplace_back(k);
         m2.clear();
         for (const dependencies_rewrite_rule_pair& p: m)
         {
           const data_equation eq=p.equation();
           std::set<std::size_t> dependencies=p.dependencies();
           dependencies.erase(k);
-          m2.push_back(dependencies_rewrite_rule_pair(dependencies,eq));
+          m2.emplace_back(dependencies, eq);
         }
         m = m2;
       }
@@ -230,10 +228,10 @@ strategy RewriterJitty::create_a_cpp_function_based_strategy(const function_symb
   std::vector<strategy_rule> result;
   for(size_t i=0; i<number_of_arguments; ++i)
   {
-    result.push_back(strategy_rule(i));
+    result.emplace_back(i);
   }
-  result.push_back(strategy_rule(data_spec.cpp_implemented_functions().find(f)->second.first));
-  
+  result.emplace_back(data_spec.cpp_implemented_functions().find(f)->second.first);
+
   return strategy(0,result);
 }
 
@@ -253,6 +251,6 @@ strategy RewriterJitty::create_strategy(const function_symbol& f, const data_equ
   }
 }
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
+
+

@@ -14,11 +14,8 @@
 
 #include <string>
 
-namespace mcrl2 {
-
-namespace lps {
-
-namespace detail {
+namespace mcrl2::lps::detail
+{
 
 inline
 std::string ABP_SPECIFICATION()
@@ -236,10 +233,6 @@ std::string LINEAR_ABP_SPECIFICATION()
   ;
 }
 
-} // namespace detail
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif // MCRL2_LPS_DETAIL_TEST_INPUT_H

@@ -20,10 +20,7 @@
 #include "mcrl2/modal_formula/resolve_name_clashes.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
+namespace mcrl2::state_formulas
 {
 
 namespace detail
@@ -31,7 +28,7 @@ namespace detail
 
 struct count_modal_operator_nesting_traverser: public state_formula_traverser<count_modal_operator_nesting_traverser>
 {
-  typedef state_formula_traverser<count_modal_operator_nesting_traverser> super;
+  using super = state_formula_traverser<count_modal_operator_nesting_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -140,7 +137,7 @@ std::size_t count_modal_operator_nesting(const state_formula& x)
 
 struct has_unscoped_modal_formula_traverser: public state_formula_traverser<has_unscoped_modal_formula_traverser>
 {
-  typedef state_formula_traverser<has_unscoped_modal_formula_traverser> super;
+  using super = state_formula_traverser<has_unscoped_modal_formula_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -211,7 +208,8 @@ bool has_unscoped_modal_formulas(const state_formula& x)
 template <typename IdentifierGenerator>
 struct state_formula_preprocess_nested_modal_operators_builder: public state_formulas::state_formula_builder<state_formula_preprocess_nested_modal_operators_builder<IdentifierGenerator> >
 {
-  typedef state_formulas::state_formula_builder<state_formula_preprocess_nested_modal_operators_builder<IdentifierGenerator> > super;
+  using super = state_formulas::state_formula_builder<
+      state_formula_preprocess_nested_modal_operators_builder<IdentifierGenerator>>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -424,8 +422,6 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   return f;
 }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_PREPROCESS_STATE_FORMULA_H

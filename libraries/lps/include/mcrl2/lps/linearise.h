@@ -17,10 +17,7 @@
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/parse.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Options for linearisation
@@ -85,8 +82,6 @@ inline mcrl2::lps::stochastic_specification linearise(
   return linearise(spec, lin_options);
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_LINEARISE_H

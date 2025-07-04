@@ -15,11 +15,8 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail
+{
 
 class pbes_context
 {
@@ -67,10 +64,6 @@ class pbes_context
     }
 };
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_PBES_CONTEXT_H

@@ -14,9 +14,8 @@
 
 #include "mcrl2/lps/replace.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
@@ -153,8 +152,6 @@ void resolve_summand_variable_name_clashes(Specification& spec)
   }
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_RESOLVE_NAME_CLASHES_H

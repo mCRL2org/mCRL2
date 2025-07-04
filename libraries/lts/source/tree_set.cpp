@@ -20,11 +20,10 @@
 #define TAGS_BLOCK 15000
 #define BUCKETS_BLOCK 25000
 // simple hash function; uses two large primes
-#define hash(l,r,m) (36425657*l + 77673689*r) & m
+#define hash(l,r,m) ((36425657*(l) + 77673689*(r)) & (m))
 
-namespace mcrl2
-{
-namespace lts
+
+namespace mcrl2::lts
 {
 
 tree_set_store::tree_set_store()
@@ -220,4 +219,4 @@ ptrdiff_t tree_set_store::set_set_tag(ptrdiff_t set)
 }
 
 }
-}
+

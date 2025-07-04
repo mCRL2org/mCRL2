@@ -13,9 +13,8 @@
 #include "mcrl2/atermpp/detail/aterm_pool.h"
 #include "mcrl2/atermpp/detail/thread_aterm_pool.h"
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 /// \brief Storage for a global term pool that is not initialized.
@@ -47,8 +46,8 @@ inline aterm_pool& g_term_pool()
 // Implemented in a .cpp file. 
 //thread_aterm_pool& g_thread_term_pool();
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #include "mcrl2/atermpp/detail/aterm_implementation.h"
 

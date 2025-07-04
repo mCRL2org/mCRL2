@@ -21,10 +21,7 @@
 #include "mcrl2/pbes/normal_forms.h"
 #include "mcrl2/pbes/print.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 template <typename T>
@@ -215,8 +212,8 @@ std::ostream& operator<<(std::ostream& out, const progress_measures_vertex& v)
 class small_progress_measures_algorithm
 {
   protected:
-    typedef progress_measures_vertex vertex;
-    typedef std::map<propositional_variable_instantiation, vertex> vertex_map;
+    using vertex = progress_measures_vertex;
+    using vertex_map = std::map<propositional_variable_instantiation, vertex>;
 
     void initialize_vertices()
     {
@@ -373,8 +370,6 @@ bool small_progress_measures(pbes& b)
   return algorithm.run(first);
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_BES_SMALL_PROGRESS_MEASURES_H

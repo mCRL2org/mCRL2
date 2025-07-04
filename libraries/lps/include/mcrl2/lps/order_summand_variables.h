@@ -14,9 +14,8 @@
 
 #include "mcrl2/lps/specification.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 /// \brief Order summand variables to make enumeration over these variables more efficient.
 template <typename Specification>
@@ -28,8 +27,6 @@ void order_summand_variables(Specification& lpsspec)
   }
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_ORDER_SUMMAND_VARIABLES_H

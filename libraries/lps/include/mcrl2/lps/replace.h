@@ -16,10 +16,7 @@
 #include "mcrl2/lps/replace_capture_avoiding.h"
 #include "mcrl2/process/replace.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail {
@@ -174,7 +171,7 @@ namespace detail {
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
 struct replace_process_parameter_builder: public Binder<Builder, replace_process_parameter_builder<Builder, Binder, Substitution> >
 {
-  typedef Binder<Builder, replace_process_parameter_builder<Builder, Binder, Substitution> > super;
+  using super = Binder<Builder, replace_process_parameter_builder<Builder, Binder, Substitution>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -295,8 +292,6 @@ void replace_summand_variables(specification& spec, data::mutable_map_substituti
   }
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_REPLACE_H

@@ -16,16 +16,15 @@
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/find.h"
 
-namespace mcrl2 {
-
-namespace action_formulas {
+namespace mcrl2::action_formulas
+{
 
 namespace detail {
 
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -129,20 +128,17 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated action_formulas replace_capture_avoiding code ---//
 
-} // namespace action_formulas
+} // namespace mcrl2::action_formulas
 
-} // namespace mcrl2
-
-namespace mcrl2 {
-
-namespace regular_formulas {
+namespace mcrl2::regular_formulas
+{
 
 namespace detail {
 
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public action_formulas::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef action_formulas::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = action_formulas::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -226,20 +222,17 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated regular_formulas replace_capture_avoiding code ---//
 
-} // namespace regular_formulas
+} // namespace mcrl2::regular_formulas
 
-} // namespace mcrl2
-
-namespace mcrl2 {
-
-namespace state_formulas {
+namespace mcrl2::state_formulas
+{
 
 namespace detail {
 
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -339,8 +332,6 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated state_formulas replace_capture_avoiding code ---//
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_REPLACE_CAPTURE_AVOIDING_H

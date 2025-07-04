@@ -14,13 +14,11 @@
 
 #include "mcrl2/lts/lts_builder.h"
 
-namespace mcrl2 {
-
-namespace lts {
+namespace mcrl2::lts {
 
 struct stochastic_lts_builder
 {
-  typedef atermpp::indexed_set<lps::state, mcrl2::utilities::detail::GlobalThreadSafe> indexed_set_for_states_type;
+  using indexed_set_for_states_type = atermpp::indexed_set<lps::state, mcrl2::utilities::detail::GlobalThreadSafe>;
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
   // is needed to avoid duplicates.
   utilities::unordered_map_large<lps::multi_action, std::size_t> m_actions;
@@ -291,7 +289,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
 class stochastic_lts_fsm_builder: public stochastic_lts_lts_builder
 {
   public:
-    typedef stochastic_lts_lts_builder super;
+    using super = stochastic_lts_lts_builder;
     stochastic_lts_fsm_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
       : super(dataspec, action_labels, process_parameters)
     { }
@@ -316,8 +314,8 @@ std::unique_ptr<stochastic_lts_builder> create_stochastic_lts_builder(const lps:
   }
 }
 
-} // namespace lts
+} // namespace mcrl2::lts
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LTS_STOCHASTIC_LTS_BUILDER_H

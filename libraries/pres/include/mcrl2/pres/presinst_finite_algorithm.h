@@ -20,17 +20,16 @@
 #include "mcrl2/pres/join.h"
 #include "mcrl2/pres/rewriters/data_rewriter.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 /// \brief Data structure for storing the indices of the variables that should be expanded by the finite presinst algorithm.
-typedef std::map<core::identifier_string, std::vector<std::size_t>> presinst_index_map;
+using presinst_index_map = std::map<core::identifier_string, std::vector<std::size_t>>;
 
 /// \brief Data structure for storing the variables that should be expanded by the finite presinst algorithm.
-typedef std::map<core::identifier_string, std::vector<data::variable>> presinst_variable_map;
+using presinst_variable_map = std::map<core::identifier_string, std::vector<data::variable>>;
 
 /// \brief Function object for renaming a propositional variable instantiation
 struct presinst_finite_rename
@@ -125,7 +124,7 @@ void split_parameters(const PropositionalVariable& X,
 template <typename DataRewriter, typename SubstitutionFunction>
 struct presinst_finite_builder: public pres_system::detail::data_rewriter_builder<presinst_finite_builder<DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction>
 {
-  typedef pres_system::detail::data_rewriter_builder<presinst_finite_builder, DataRewriter, SubstitutionFunction> super;
+  using super = pres_system::detail::data_rewriter_builder<presinst_finite_builder, DataRewriter, SubstitutionFunction>;
   using super::apply;
   using super::sigma;
 
@@ -203,7 +202,7 @@ struct presinst_finite_builder: public pres_system::detail::data_rewriter_builde
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+    using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
     // TODO: this code contains too much conversion between vectors and aterm lists
     std::vector<data::data_expression> finite_parameters;
@@ -347,7 +346,7 @@ class presinst_finite_algorithm
         detail::split_parameters(eqn.variable(), index_map, finite_parameters, infinite_parameters);
         data::variable_list infinite(infinite_parameters.begin(), infinite_parameters.end());
 
-        typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+        using enumerator_element = data::enumerator_list_element_with_substitution<>;
         bool accept_solutions_with_variables = false;
         data::enumerator_algorithm<> E(rewr, presspec.data(), rewr, m_id_generator, accept_solutions_with_variables);
         data::variable_list finite_parameter_list(finite_parameters.begin(), finite_parameters.end());
@@ -435,8 +434,8 @@ void presinst_finite(pres& p, data::rewrite_strategy rewrite_strategy, const std
   }
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PRESINST_FINITE_ALGORITHM_H

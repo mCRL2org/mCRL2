@@ -14,9 +14,9 @@
 
 #include "mcrl2/pres/pres_expression.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 /// \brief Returns or applied to the sequence of pres expressions [first, last)
 /// \param first Start of a sequence of pres expressions
@@ -126,8 +126,8 @@ inline pres_expression optimized_join_and(FwdIt first, FwdIt last)
                                  true_());
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_JOIN_H

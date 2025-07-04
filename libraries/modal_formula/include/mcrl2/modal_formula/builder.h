@@ -25,7 +25,7 @@ namespace action_formulas
 template <typename Derived>
 struct action_formula_builder_base: public core::builder<Derived>
 {
-  typedef core::builder<Derived> super;
+  using super = core::builder<Derived>;
   using super::apply;
 
   template <class T>
@@ -42,7 +42,7 @@ struct action_formula_builder_base: public core::builder<Derived>
 template <template <class> class Builder, class Derived>
 struct add_sort_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -215,7 +215,7 @@ struct sort_expression_builder: public add_sort_expressions<lps::sort_expression
 template <template <class> class Builder, class Derived>
 struct add_data_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -388,7 +388,7 @@ struct data_expression_builder: public add_data_expressions<lps::data_expression
 template <template <class> class Builder, class Derived>
 struct add_variables: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -561,7 +561,7 @@ struct variable_builder: public add_variables<lps::data_expression_builder, Deri
 template <template <class> class Builder, class Derived>
 struct add_action_formula_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -741,7 +741,7 @@ namespace regular_formulas
 template <typename Derived>
 struct regular_formula_builder_base: public core::builder<Derived>
 {
-  typedef core::builder<Derived> super;
+  using super = core::builder<Derived>;
   using super::apply;
 
   template <class T>
@@ -769,7 +769,7 @@ struct regular_formula_builder_base: public core::builder<Derived>
 template <template <class> class Builder, class Derived>
 struct add_sort_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -869,7 +869,7 @@ struct sort_expression_builder: public add_sort_expressions<action_formulas::sor
 template <template <class> class Builder, class Derived>
 struct add_data_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -969,7 +969,7 @@ struct data_expression_builder: public add_data_expressions<action_formulas::dat
 template <template <class> class Builder, class Derived>
 struct add_variables: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -1069,7 +1069,7 @@ struct variable_builder: public add_variables<action_formulas::data_expression_b
 template <template <class> class Builder, class Derived>
 struct add_regular_formula_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -1174,7 +1174,7 @@ namespace state_formulas
 template <typename Derived>
 struct state_formula_builder_base: public core::builder<Derived>
 {
-  typedef core::builder<Derived> super;
+  using super = core::builder<Derived>;
   using super::apply;
 
   template <class T>
@@ -1192,7 +1192,7 @@ struct state_formula_builder_base: public core::builder<Derived>
 template <template <class> class Builder, class Derived>
 struct add_sort_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -1559,7 +1559,7 @@ struct sort_expression_builder: public add_sort_expressions<regular_formulas::so
 template <template <class> class Builder, class Derived>
 struct add_data_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -1923,7 +1923,7 @@ struct data_expression_builder: public add_data_expressions<regular_formulas::da
 template <template <class> class Builder, class Derived>
 struct add_variables: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -2287,7 +2287,7 @@ struct variable_builder: public add_variables<regular_formulas::data_expression_
 template <template <class> class Builder, class Derived>
 struct add_state_formula_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;

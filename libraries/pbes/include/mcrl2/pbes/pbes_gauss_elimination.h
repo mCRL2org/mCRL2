@@ -15,20 +15,17 @@
 #include "mcrl2/pbes/gauss_elimination_algorithm.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Traits class for pbes expressions
 struct pbes_traits
 {
   public:
-    typedef pbes_expression expression_type;
-    typedef propositional_variable variable_type;
-    typedef pbes_equation equation_type;
-    typedef fixpoint_symbol symbol_type;
+    using expression_type = pbes_expression;
+    using variable_type = propositional_variable;
+    using equation_type = pbes_equation;
+    using symbol_type = fixpoint_symbol;
 
     /// \brief Applies the substitution X := phi to the PBES expression t.
     /// \param t A PBES expression
@@ -95,7 +92,7 @@ struct pbes_equation_solver
   /// \return True if e.symbol() == nu(), else false.
   pbes_expression sigma(const pbes_equation& e)
   {
-    typedef typename core::term_traits<pbes_expression> tr;
+    using tr = typename core::term_traits<pbes_expression>;
     return e.symbol().is_nu() ? tr::true_() : tr::false_();
   }
 
@@ -121,7 +118,7 @@ pbes_equation_solver<Rewriter> make_pbes_equation_solver(const Rewriter& rewrite
 inline
 int gauss_elimination(pbes& p)
 {
-  typedef core::term_traits<pbes_expression> tr;
+  using tr = core::term_traits<pbes_expression>;
 
   data::rewriter datar(p.data());
   enumerate_quantifiers_rewriter pbesr(datar, p.data());
@@ -143,8 +140,6 @@ int gauss_elimination(pbes& p)
   }
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_PBES_GAUSS_ELIMINATION_H

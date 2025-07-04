@@ -15,10 +15,7 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/utilities/detail/join.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
   /// \brief Returns or applied to the sequence of data expressions [first, last)
@@ -28,7 +25,7 @@ namespace data
   template <typename FwdIt>
   data_expression join_or(FwdIt first, FwdIt last)
   {
-    typedef core::term_traits<data::data_expression> tr;
+    using tr = core::term_traits<data::data_expression>;
     return utilities::detail::join(first, last, tr::or_, tr::false_());
   }
 
@@ -39,7 +36,7 @@ namespace data
   template <typename FwdIt>
   data_expression join_and(FwdIt first, FwdIt last)
   {
-    typedef core::term_traits<data::data_expression> tr;
+    using tr = core::term_traits<data::data_expression>;
     return utilities::detail::join(first, last, tr::and_, tr::true_());
   }
 
@@ -52,7 +49,7 @@ namespace data
   inline
   std::set<data_expression> split_or(const data_expression& expr)
   {
-    typedef core::term_traits<data::data_expression> tr;
+    using tr = core::term_traits<data::data_expression>;
     std::set<data_expression> result;
     utilities::detail::split(expr, std::insert_iterator<std::set<data_expression> >(result, result.begin()), tr::is_or, tr::left, tr::right);
     return result;
@@ -67,14 +64,12 @@ namespace data
   inline
   std::set<data_expression> split_and(const data_expression& expr)
   {
-    typedef core::term_traits<data::data_expression> tr;
+    using tr = core::term_traits<data::data_expression>;
     std::set<data_expression> result;
     utilities::detail::split(expr, std::insert_iterator<std::set<data_expression> >(result, result.begin()), tr::is_and, tr::left, tr::right);
     return result;
   }
 
-} // namespace data
-
-} // namespace mcrl2
+  } // namespace mcrl2::data
 
 #endif // MCRL2_DATA_JOIN_H

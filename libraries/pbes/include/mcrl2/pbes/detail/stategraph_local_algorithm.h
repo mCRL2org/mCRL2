@@ -15,11 +15,11 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 struct default_rules_predicate
 {
@@ -38,7 +38,7 @@ struct default_rules_predicate
 class belongs_relation
 {
   protected:
-    typedef std::map<core::identifier_string, std::set<data::variable> > belongs_map;
+    using belongs_map = std::map<core::identifier_string, std::set<data::variable>>;
 
     belongs_map m_belongs_map;
 
@@ -114,7 +114,7 @@ class belongs_relation
 class stategraph_local_algorithm: public stategraph_algorithm
 {
   public:
-    typedef stategraph_algorithm super;
+    using super = stategraph_algorithm;
 
   protected:
     // m_belongs[k] corresponds with m_control_flow_graphs[k]
@@ -1200,10 +1200,10 @@ class stategraph_local_algorithm: public stategraph_algorithm
     }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H

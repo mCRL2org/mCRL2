@@ -36,7 +36,7 @@ using namespace mcrl2::log;
 class lpsrealelm_tool: public rewriter_tool<input_output_tool >
 {
   protected:
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
     unsigned int max_iterations;
 

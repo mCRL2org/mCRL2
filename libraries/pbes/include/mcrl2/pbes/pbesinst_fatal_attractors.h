@@ -15,11 +15,11 @@
 #include "mcrl2/pbes/pbessolve_attractors.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 template <typename StructureGraph, typename Compare>
 deque_vertex_set attr_min_rank_todo_generic(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j, Compare compare)
@@ -378,10 +378,10 @@ void fatal_attractors_original(const simple_structure_graph& G,
   mCRL2log(log::debug) << "  inserted " << insertion_count << " vertices." << std::endl;
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_PBESINST_FATAL_ATTRACTORS_H

@@ -15,10 +15,7 @@
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 template <typename T>
@@ -41,8 +38,6 @@ T normalize_sorts(const T& x,
   return result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_NORMALIZE_SORTS_H

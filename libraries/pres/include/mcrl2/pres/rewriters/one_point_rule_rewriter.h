@@ -17,9 +17,8 @@
 #include "mcrl2/pres/find_equalities.h"
 #include "mcrl2/pres/replace.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system
+{
 
 /// \cond INTERNAL_DOCS
 namespace detail {
@@ -27,7 +26,7 @@ namespace detail {
 template <typename Derived>
 struct one_point_rule_rewrite_builder: public pres_system::pres_expression_builder<Derived>
 {
-  typedef pres_system::pres_expression_builder<Derived> super;
+  using super = pres_system::pres_expression_builder<Derived>;
   using super::apply;
 
   Derived& derived()
@@ -168,10 +167,10 @@ class one_point_rule_rewriter
 {
   public:
     /// \brief The term type
-    typedef pres_expression term_type;
+    using term_type = pres_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Rewrites a pres expression.
     /// \param x A term
@@ -184,8 +183,6 @@ class one_point_rule_rewriter
     }
 };
 
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system
 
 #endif // MCRL2_PRES_REWRITERS_ONE_POINT_RULE_REWRITER_H

@@ -16,9 +16,8 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/undefined.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 /// \brief Substitution that maps a single variable to a data expression
 struct variable_substitution
@@ -54,8 +53,6 @@ std::set<data::variable> substitution_variables(const variable_substitution& sig
   return result;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_VARIABLE_SUBSTITUTION_H

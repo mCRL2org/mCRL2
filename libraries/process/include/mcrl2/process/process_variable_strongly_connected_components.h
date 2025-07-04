@@ -14,9 +14,7 @@
 
 #include "mcrl2/process/find.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process {
 
 namespace detail {
 
@@ -25,8 +23,8 @@ namespace detail {
 class tarjan_scc_algorithm
 {
   public:
-    typedef std::pair<std::size_t, std::size_t> edge;
-    typedef std::vector<std::size_t> component;
+    using edge = std::pair<std::size_t, std::size_t>;
+    using component = std::vector<std::size_t>;
 
   protected:
     static inline std::size_t undefined()
@@ -126,7 +124,7 @@ class tarjan_scc_algorithm
 
       for (std::size_t i = 0; i < N; i++)
       {
-        V.push_back(vertex(i));
+        V.emplace_back(i);
       }
 
       component S;
@@ -147,7 +145,7 @@ class tarjan_scc_algorithm
 
 struct find_process_identifiers_traverser: public process_expression_traverser<find_process_identifiers_traverser>
 {
-  typedef process_expression_traverser<find_process_identifiers_traverser> super;
+  using super = process_expression_traverser<find_process_identifiers_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -245,7 +243,7 @@ struct process_variable_scc_algorithm
       for (const process_identifier& id: p.second)
       {
         std::size_t target = index[id];
-        E.push_back({ source, target });
+        E.emplace_back(source, target);
       }
     }
 
@@ -302,8 +300,8 @@ std::vector<std::set<process_identifier> > process_variable_strongly_connected_c
   return algorithm.run(equations, init);
 }
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_PROCESS_VARIABLE_STRONGLY_CONNECTED_COMPONENTS_H

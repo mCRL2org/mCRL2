@@ -17,9 +17,9 @@
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/atermpp/standard_containers/unordered_map.h"
 
-namespace atermpp {
 
-namespace detail {
+
+namespace atermpp::detail {
 
 template <typename Variable, typename KeyType>
 atermpp::unordered_map<KeyType, std::size_t>& variable_index_map()
@@ -139,8 +139,8 @@ public:
   }
 };
 
-} // namespace detail
+} // namespace atermpp::detail
 
-} // namespace atermpp
+
 
 #endif // MCRL2_ATERMPP_INDEX_TRAITS_H

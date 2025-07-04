@@ -69,9 +69,8 @@ struct hash<atermpp::aterm_core>
 
 } // namespace std
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 /// \brief Indicates that the number of arguments is not known at compile time.
@@ -398,7 +397,7 @@ bool aterm_int_equals::operator()(const _aterm_int& term, std::size_t value) con
   return (term.value() == value);
 }
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif // MCRL2_ATERMPP_DETAIL_ATERM_HASH_H_

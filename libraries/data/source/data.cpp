@@ -15,10 +15,9 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/translate_user_notation.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 //--- start generated data overloads ---//
@@ -279,7 +278,7 @@ std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::s
   return result;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 

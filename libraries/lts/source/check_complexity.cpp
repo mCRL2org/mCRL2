@@ -72,11 +72,9 @@
 
 #include "mcrl2/lts/detail/check_complexity.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+
+
+namespace mcrl2::lts::detail
 {
 
 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
@@ -508,5 +506,5 @@ void check_complexity::test_work_names()
 #endif // #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2

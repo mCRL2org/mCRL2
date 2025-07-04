@@ -14,9 +14,9 @@
 
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2 {
 
-namespace data {
+
+namespace mcrl2::data {
 
 /// \brief Returns \c true if the substitution \a sigma satisfies the property that
 /// <tt>FV(sigma(x))</tt> is included in <tt>{x}</tt> for all variables x.
@@ -45,8 +45,8 @@ bool is_simple_substitution(const data::variable& lhs, const data::data_expressi
   return false;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_IS_SIMPLE_SUBSTITUTION_H

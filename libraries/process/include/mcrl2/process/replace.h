@@ -15,10 +15,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/process/replace_capture_avoiding.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated process replace code ---//
@@ -167,8 +164,8 @@ struct process_identifier_assignment
   process_identifier lhs;
   process_identifier rhs;
 
-  typedef process_identifier result_type;
-  typedef process_identifier argument_type;
+  using result_type = process_identifier;
+  using argument_type = process_identifier;
 
   process_identifier_assignment(const process_identifier& lhs_, const process_identifier& rhs_)
     : lhs(lhs_), rhs(rhs_)
@@ -204,8 +201,6 @@ T replace_process_identifiers(const T& x,
   return result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_REPLACE_H

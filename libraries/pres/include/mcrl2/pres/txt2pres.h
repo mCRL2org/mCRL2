@@ -16,10 +16,7 @@
 #include "mcrl2/pres/io.h"
 #include "mcrl2/pres/parse.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 /// \brief Parses a PRES specification from an input stream
@@ -50,8 +47,8 @@ pres txt2pres(const std::string& text, bool normalize = true)
   return txt2pres(from, normalize);
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_TXT2PRES_H

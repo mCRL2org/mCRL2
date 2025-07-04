@@ -15,16 +15,15 @@
 #include "mcrl2/pres/rewriters/data_rewriter.h"
 #include "mcrl2/pres/rewriters/simplify_rewriter.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system
+{
 
 namespace detail {
 
 template <template <class> class Builder, class Derived>
 struct add_simplify_quantifiers: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::apply;
 
   template <class T>
@@ -150,7 +149,10 @@ struct simplify_quantifiers_builder: public add_simplify_quantifiers<pres_system
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<pres_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef add_data_rewriter<pres_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction> super;
+  using super = add_data_rewriter<pres_system::detail::simplify_quantifiers_builder,
+      Derived,
+      DataRewriter,
+      SubstitutionFunction>;
   using super::enter;
   using super::leave;
 
@@ -164,8 +166,8 @@ struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<pres
 /// \brief A rewriter that simplifies boolean expressions and quantifiers.
 struct simplify_quantifiers_rewriter
 {
-  typedef pres_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pres_expression;
+  using variable_type = data::variable;
 
   pres_expression operator()(const pres_expression& x) const
   {
@@ -179,8 +181,8 @@ struct simplify_quantifiers_rewriter
 template <typename DataRewriter>
 struct simplify_quantifiers_data_rewriter
 {
-  typedef pres_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pres_expression;
+  using variable_type = data::variable;
 
   const data::data_specification& m_data_spec;
   const DataRewriter& m_R;
@@ -207,8 +209,6 @@ struct simplify_quantifiers_data_rewriter
   }
 };
 
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system
 
 #endif // MCRL2_PRES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H

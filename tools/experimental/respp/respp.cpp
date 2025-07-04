@@ -24,7 +24,7 @@ using mcrl2::pres_system::tools::pres_input_tool;
 class respp_tool: public pres_input_tool<input_output_tool>
 {
   private:
-    typedef pres_input_tool<input_output_tool> super;
+    using super = pres_input_tool<input_output_tool>;
 
   public:
     respp_tool()

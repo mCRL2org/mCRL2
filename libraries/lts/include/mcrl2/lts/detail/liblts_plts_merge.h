@@ -32,11 +32,7 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template <class LTS_TYPE>
@@ -65,9 +61,9 @@ void plts_merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   // array, we first have to collect the labels of both LTSs in a
   // map, of which the second element indicates the new index of each action label.
 
-  typedef typename LTS_TYPE::action_label_t type1;
-  typedef typename LTS_TYPE::labels_size_type type2;
-  typedef typename std::pair< typename std::map < type1,type2 >::const_iterator, bool > insert_type;
+  using type1 = typename LTS_TYPE::action_label_t;
+  using type2 = typename LTS_TYPE::labels_size_type;
+  using insert_type = typename std::pair<typename std::map<type1, type2>::const_iterator, bool>;
   std::map < type1,type2 > labs;
 
   // Put the labels of the LTS l1 in a map.
@@ -175,9 +171,6 @@ void plts_merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   }
   l1.add_probabilistic_state(new_initial_prob_state_l2);
 }
-} // namespace detail
-} // namespace lts
-} // namespace mcrl2
-
+} // namespace mcrl2::lts::detail
 
 #endif  // MCRL2_LTS_LIBLTS_PLTS_MERGE_H

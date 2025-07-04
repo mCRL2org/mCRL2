@@ -29,7 +29,7 @@ using data::tools::rewriter_tool;
 class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>
 {
   protected:
-    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>> super;
+    using super = pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>;
 
     pbespathreduction_options m_options;
 

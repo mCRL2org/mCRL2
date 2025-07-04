@@ -16,16 +16,14 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/lts2pbes_e.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 /// \brief Algorithm for translating a state formula and an untimed specification to a pbes.
 class lts2pbes_algorithm
 {
   public:
-    typedef lts::lts_lts_t::states_size_type state_type;
-    typedef pbes_system::detail::lts2pbes_lts::edge_list edge_list;
+    using state_type = lts::lts_lts_t::states_size_type;
+    using edge_list = pbes_system::detail::lts2pbes_lts::edge_list;
 
   protected:
     const lts::lts_lts_t& lts0;
@@ -103,8 +101,8 @@ pbes lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula_speci
   return algorithm.run(formspec, preprocess_modal_operators, generate_counter_example);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_LTS2PBES_H

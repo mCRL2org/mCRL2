@@ -14,10 +14,7 @@
 
 #include "mcrl2/modal_formula/regular_formula.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
+namespace mcrl2::state_formulas
 {
 
 //--- start generated classes ---//
@@ -61,10 +58,10 @@ class state_formula: public atermpp::aterm
 };
 
 /// \\brief list of state_formulas
-typedef atermpp::term_list<state_formula> state_formula_list;
+using state_formula_list = atermpp::term_list<state_formula>;
 
 /// \\brief vector of state_formulas
-typedef std::vector<state_formula>    state_formula_vector;
+using state_formula_vector = std::vector<state_formula>;
 
 // prototypes
 inline bool is_true(const atermpp::aterm& x);
@@ -1905,8 +1902,8 @@ std::set<core::identifier_string> find_identifiers(const state_formulas::state_f
 std::set<process::action_label> find_action_labels(const state_formulas::state_formula& x);
 bool find_nil(const state_formulas::state_formula& x);
 
-} // namespace state_formulas
+} // namespace mcrl2::state_formulas
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_MODAL_FORMULA_STATE_FORMULA_H

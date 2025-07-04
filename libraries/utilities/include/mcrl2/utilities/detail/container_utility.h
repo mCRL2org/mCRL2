@@ -18,11 +18,7 @@
 #include <unordered_set>
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2 {
-
-namespace utilities {
-
-namespace detail {
+namespace mcrl2::utilities::detail {
 
 /// \brief Returns the value corresponding to the given key in the map m. If the key is not
 /// present, an exception is thrown.
@@ -231,10 +227,10 @@ std::set<T> as_set(const std::vector<T>& x)
   return std::set<T>(x.begin(), x.end());
 }
 
-} // namespace detail
+} // namespace mcrl2::utilities::detail
 
-} // namespace utilities
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H

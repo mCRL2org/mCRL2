@@ -7,13 +7,11 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 // Substitutor to replace predicate variables OTHER than the self-referencing onces to functions from params to booleans
@@ -21,7 +19,7 @@ template <template <class> class Builder>
 struct replace_other_propositional_variables_with_functions_builder
     : public Builder<replace_other_propositional_variables_with_functions_builder<Builder>>
 {
-  typedef Builder<replace_other_propositional_variables_with_functions_builder<Builder>> super;
+  using super = Builder<replace_other_propositional_variables_with_functions_builder<Builder>>;
   using super::apply;
 
   core::identifier_string name;
@@ -142,7 +140,7 @@ template <template <class> class Builder>
 struct substitute_propositional_variables_for_bools_builder
     : public Builder<substitute_propositional_variables_for_bools_builder<Builder>>
 {
-  typedef Builder<substitute_propositional_variables_for_bools_builder<Builder>> super;
+  using super = Builder<substitute_propositional_variables_for_bools_builder<Builder>>;
   using super::apply;
 
   simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
@@ -174,7 +172,7 @@ struct substitute_propositional_variables_for_bools_builder
 template <template <class> class Builder>
 struct substitute_propositional_variables_builder : public Builder<substitute_propositional_variables_builder<Builder>>
 {
-  typedef Builder<substitute_propositional_variables_builder<Builder>> super;
+  using super = Builder<substitute_propositional_variables_builder<Builder>>;
   using super::apply;
 
   pbes_equation m_eq;
@@ -231,10 +229,10 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif

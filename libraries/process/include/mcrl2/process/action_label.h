@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated class action_label ---//
@@ -74,10 +71,10 @@ inline void make_action_label(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of action_labels
-typedef atermpp::term_list<action_label> action_label_list;
+using action_label_list = atermpp::term_list<action_label>;
 
 /// \\brief vector of action_labels
-typedef std::vector<action_label>    action_label_vector;
+using action_label_vector = std::vector<action_label>;
 
 /// \\brief Test for a action_label expression
 /// \\param x A term
@@ -114,8 +111,8 @@ std::string pp(const action_label_vector& x, bool precedence_aware = true);
 action_label_list normalize_sorts(const action_label_list& x, const data::sort_specification& sortspec);
 std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x);
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_ACTION_LABEL_H

@@ -14,15 +14,14 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
 struct significant_variables_traverser: public pbes_expression_traverser<significant_variables_traverser>
 {
-  typedef pbes_expression_traverser<significant_variables_traverser> super;
+  using super = pbes_expression_traverser<significant_variables_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -116,8 +115,6 @@ std::set<data::variable> significant_variables(const pbes_expression& x)
   return f.pop();
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_SIGNIFICANT_VARIABLES_H

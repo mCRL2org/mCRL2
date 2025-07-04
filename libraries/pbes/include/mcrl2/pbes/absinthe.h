@@ -12,8 +12,6 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
-#define MCRL2_ABSINTHE_CHECK_EXPRESSIONS
-
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/consistency.h"
@@ -22,16 +20,13 @@
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/data/detail/print_parse_check.h"
 
-#include <ranges>
+namespace mcrl2::pbes_system
+{
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-  template <typename Term>
-  std::string print_term(const Term& x)
-  {
-    return data::pp(x) + " " + data::pp(x);
+template <typename Term>
+std::string print_term(const Term& x)
+{
+  return data::pp(x) + " " + data::pp(x);
   }
 
   template <typename Term>
@@ -116,16 +111,16 @@ namespace detail {
 
 struct absinthe_algorithm
 {
-  typedef std::map<data::sort_expression, data::sort_expression> sort_expression_substitution_map;
-  typedef std::map<data::function_symbol, data::function_symbol> function_symbol_substitution_map;
-  typedef std::map<data::sort_expression, data::function_symbol> abstraction_map;
+  using sort_expression_substitution_map = std::map<data::sort_expression, data::sort_expression>;
+  using function_symbol_substitution_map = std::map<data::function_symbol, data::function_symbol>;
+  using abstraction_map = std::map<data::sort_expression, data::function_symbol>;
 
   // Used for generating variables of sort comprehensions.
   data::set_identifier_generator m_generator;
 
   struct absinthe_sort_expression_builder: public sort_expression_builder<absinthe_sort_expression_builder>
   {
-    typedef sort_expression_builder<absinthe_sort_expression_builder> super;
+    using super = sort_expression_builder<absinthe_sort_expression_builder>;
     using super::apply;
 
     const abstraction_map& sigmaH;
@@ -264,7 +259,7 @@ struct absinthe_algorithm
 
   struct absinthe_data_expression_builder: public pbes_expression_builder<absinthe_data_expression_builder>
   {
-    typedef pbes_expression_builder<absinthe_data_expression_builder> super;
+    using super = pbes_expression_builder<absinthe_data_expression_builder>;
     using super::apply;
     using super::update;
 
@@ -1047,8 +1042,6 @@ struct absinthe_algorithm
   }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_ABSINTHE_H

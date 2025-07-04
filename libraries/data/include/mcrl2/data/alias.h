@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/basic_sort.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated class alias ---//
@@ -69,10 +66,10 @@ inline void make_alias(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of aliass
-typedef atermpp::term_list<alias> alias_list;
+using alias_list = atermpp::term_list<alias>;
 
 /// \\brief vector of aliass
-typedef std::vector<alias>    alias_vector;
+using alias_vector = std::vector<alias>;
 
 /// \\brief Test for a alias expression
 /// \\param x A term
@@ -103,9 +100,7 @@ inline void swap(alias& t1, alias& t2)
 }
 //--- end generated class alias ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_ALIAS_H
 

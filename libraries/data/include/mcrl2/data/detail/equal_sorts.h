@@ -14,11 +14,8 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 /// \brief Checks if the sorts of the variables/expressions in both lists are equal.
 /// \param v A sequence of data variables
@@ -43,10 +40,6 @@ bool equal_sorts(const data::variable_list& v, const data::data_expression_list&
   return true;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_EQUAL_SORTS_H

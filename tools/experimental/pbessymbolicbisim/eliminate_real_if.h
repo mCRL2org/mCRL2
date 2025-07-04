@@ -12,9 +12,7 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_ELIMINATE_REAL_IF_H
 #define MCRL2_PBESSYMBOLICBISIM_ELIMINATE_REAL_IF_H
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -23,7 +21,7 @@ namespace detail
 template <template <class> class Builder>
 struct eliminate_real_if_builder: public Builder<eliminate_real_if_builder<Builder> >
 {
-  typedef Builder<eliminate_real_if_builder<Builder> > super;
+  using super = Builder<eliminate_real_if_builder<Builder>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -89,6 +87,6 @@ T eliminate_real_if(const T x,
 }
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_ELIMINATE_REAL_IF_H

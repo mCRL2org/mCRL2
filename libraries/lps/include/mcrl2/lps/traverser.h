@@ -17,17 +17,14 @@
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 //--- start generated add_traverser_sort_expressions code ---//
 template <template <class> class Traverser, class Derived>
 struct add_traverser_sort_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -157,7 +154,7 @@ struct sort_expression_traverser: public add_traverser_sort_expressions<process:
 template <template <class> class Traverser, class Derived>
 struct add_traverser_data_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -277,7 +274,7 @@ struct data_expression_traverser: public add_traverser_data_expressions<process:
 template <template <class> class Traverser, class Derived>
 struct add_traverser_variables: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -405,7 +402,7 @@ struct variable_traverser: public add_traverser_variables<process::variable_trav
 template <template <class> class Traverser, class Derived>
 struct add_traverser_identifier_strings: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -535,7 +532,7 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<proc
 template <template <class> class Traverser, class Derived>
 struct add_traverser_action_labels: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -600,8 +597,6 @@ struct action_label_traverser: public add_traverser_action_labels<process::actio
 };
 //--- end generated add_traverser_action_labels code ---//
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_TRAVERSER_H

@@ -16,9 +16,8 @@
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/find.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -26,7 +25,7 @@ template<template<class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement
   : public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef data::detail::add_capture_avoiding_replacement <Builder, Derived, Substitution> super;
+  using super = data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -174,8 +173,6 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated process replace_capture_avoiding code ---//
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_REPLACE_CAPTURE_AVOIDING_H

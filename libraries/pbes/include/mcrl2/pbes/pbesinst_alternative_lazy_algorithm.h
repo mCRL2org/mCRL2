@@ -19,10 +19,9 @@
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -480,7 +479,7 @@ class pbesinst_alternative_lazy_algorithm
     // false, then p2 can be removed, as its value does not influence the rewrite system.
     // The result of the function is a pair, with the simplified expression as first term, and the expression that is rewritten under the
     // simplifications in trivial as the second term.
-    typedef std::pair < pbes_expression, pbes_expression > pbes_expression_pair;
+    using pbes_expression_pair = std::pair<pbes_expression, pbes_expression>;
     pbes_expression_pair simplify_pbes_expression(const pbes_expression& p, const std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial)
     {
       if (is_propositional_variable_instantiation(p))
@@ -723,7 +722,7 @@ class pbesinst_alternative_lazy_algorithm
         {
           const propositional_variable lhs = propositional_variable(renamer(X_e).name(), data::variable_list());
           const pbes_expression rhs = replace_propositional_variables(equation[X_e], renamer);
-          result.equations().push_back(pbes_equation(symbol, lhs, rhs));
+          result.equations().emplace_back(symbol, lhs, rhs);
           mCRL2log(log::debug) << "BESEquation: " << atermpp::aterm(symbol) << " " << lhs << " = " << rhs << std::endl;
 
         }
@@ -739,8 +738,8 @@ class pbesinst_alternative_lazy_algorithm
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H

@@ -17,16 +17,13 @@
 #include "mcrl2/pbes/traverser.h"
 #include <boost/iterator/transform_iterator.hpp>
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail
+{
 
 /// Visitor for collecting the quantifier variables that occur in a pbes expression.
 struct find_quantifier_variables_traverser: public pbes_expression_traverser<find_quantifier_variables_traverser>
 {
-  typedef pbes_expression_traverser<find_quantifier_variables_traverser> super;
+  using super = pbes_expression_traverser<find_quantifier_variables_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -58,7 +55,7 @@ std::set<data::variable> find_quantifier_variables(const pbes_expression& x)
 /// variables of free variables with the same name.
 struct has_quantifier_name_clashes_traverser: public pbes_expression_traverser<has_quantifier_name_clashes_traverser>
 {
-  typedef pbes_expression_traverser<has_quantifier_name_clashes_traverser> super;
+  using super = pbes_expression_traverser<has_quantifier_name_clashes_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -352,10 +349,6 @@ bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
   return true;
 }
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_IS_WELL_TYPED_H

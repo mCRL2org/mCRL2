@@ -15,13 +15,7 @@
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace tools
+namespace mcrl2::data::tools
 {
 
 /// \brief Base class for tools that use a rewriter.
@@ -29,7 +23,7 @@ template <typename Tool>
 class prover_tool: public Tool
 {
   protected:
-    typedef mcrl2::data::detail::smt_solver_type smt_solver_type;
+    using smt_solver_type = mcrl2::data::detail::smt_solver_type;
 
     /// The data rewriter strategy
     smt_solver_type m_solver_type;
@@ -82,10 +76,6 @@ class prover_tool: public Tool
     }
 };
 
-} // namespace tools
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::tools
 
 #endif // MCRL2_DATA_PROVER_TOOL_H

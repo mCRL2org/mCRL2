@@ -15,10 +15,7 @@
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -45,9 +42,9 @@ template <typename Specification>
 class untime_algorithm: public detail::lps_algorithm<Specification>
 {
   protected:
-    typedef typename detail::lps_algorithm<Specification> super;
-    typedef typename Specification::process_type process_type;
-    typedef typename process_type::action_summand_type action_summand_type;
+    using super = typename detail::lps_algorithm<Specification>;
+    using process_type = typename Specification::process_type;
+    using action_summand_type = typename process_type::action_summand_type;
     using super::m_spec;
 
     bool m_add_invariants;
@@ -254,8 +251,6 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_UNTIME_H

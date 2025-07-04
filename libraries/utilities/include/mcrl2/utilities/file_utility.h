@@ -16,10 +16,7 @@
 #include "mcrl2/utilities/logger.h"
 #include <fstream>
 
-namespace mcrl2
-{
-
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief Returns true if the given filename has the extension ext. The extension does not start with a dot. 
@@ -114,10 +111,8 @@ bool file_exists(const std::string& filename)
     return true;
   }
   return false;
-} 
+}
 
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_FILE_UTILITY_H

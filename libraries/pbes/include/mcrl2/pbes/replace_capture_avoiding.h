@@ -16,9 +16,9 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/find.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -26,7 +26,7 @@ template<template<class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement
   : public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef data::detail::add_capture_avoiding_replacement <Builder, Derived, Substitution> super;
+  using super = data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -148,8 +148,8 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated pbes_system replace_capture_avoiding code ---//
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REPLACE_CAPTURE_AVOIDING_H

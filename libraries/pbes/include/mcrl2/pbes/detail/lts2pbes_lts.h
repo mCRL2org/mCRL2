@@ -14,11 +14,11 @@
 
 #include "mcrl2/lts/lts_lts.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 inline
 std::ostream& operator<<(std::ostream& out, const lts::lts_lts_t& ltsspec)
@@ -36,8 +36,8 @@ std::ostream& operator<<(std::ostream& out, const lts::lts_lts_t& ltsspec)
 class lts2pbes_lts
 {
   public:
-    typedef std::size_t state_type;
-    typedef std::size_t label_type;
+    using state_type = std::size_t;
+    using label_type = std::size_t;
 
     struct edge
     {
@@ -52,7 +52,7 @@ class lts2pbes_lts
       std::size_t index;
     };
 
-    typedef std::vector<edge> edge_list;
+    using edge_list = std::vector<edge>;
 
   protected:
     std::map<state_type, edge_list> m_state_map;
@@ -124,10 +124,10 @@ std::ostream& operator<<(std::ostream& out, const lts2pbes_lts& ltsspec)
   return out;
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LTS2PBES_LTS_H

@@ -21,18 +21,14 @@
 #include "mcrl2/data/bag_comprehension.h"
 #include "mcrl2/data/untyped_set_or_bag_comprehension.h"
 
-
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief Maintains a multiset of bound data variables during traversal
 template <template <class> class Builder, class Derived>
 struct add_data_variable_binding: public core::add_binding<Builder, Derived, variable>
 {
-  typedef core::add_binding<Builder, Derived, variable> super;
+  using super = core::add_binding<Builder, Derived, variable>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -141,7 +137,7 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
 template <template <class> class Builder, class Derived>
 struct add_data_variable_traverser_binding: public add_data_variable_binding<Builder, Derived>
 {
-  typedef add_data_variable_binding<Builder, Derived> super;
+  using super = add_data_variable_binding<Builder, Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -162,7 +158,7 @@ struct add_data_variable_traverser_binding: public add_data_variable_binding<Bui
 template <template <class> class Builder, class Derived>
 struct add_data_variable_builder_binding: public add_data_variable_binding<Builder, Derived>
 {
-  typedef add_data_variable_binding<Builder, Derived> super;
+  using super = add_data_variable_binding<Builder, Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -183,8 +179,6 @@ struct add_data_variable_builder_binding: public add_data_variable_binding<Build
   }
 };
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_ADD_BINDING_H

@@ -16,13 +16,7 @@
 
 #include "mcrl2/data/linear_inequalities.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 inline data_expression negate_inequality(const data_expression& e)
@@ -149,7 +143,7 @@ static bool split_condition_aux(
     {
       // There are no real variables on either side so we can
       // just store the expression e in non_real_conditions
-      real_conditions.push_back(data_expression_list());
+      real_conditions.emplace_back();
       non_real_conditions.push_back(data_expression_list({ negate ? data_expression(sort_bool::not_(e)) : e }));
     }
     else if ((!negate && sort_bool::is_and_application(e))  || (negate && sort_bool::is_or_application(e)))
@@ -198,7 +192,7 @@ static bool split_condition_aux(
       }
     }
     real_conditions.push_back(data_expression_list({ negate ? negate_inequality(e) : e }));
-    non_real_conditions.push_back(data_expression_list());
+    non_real_conditions.emplace_back();
     return true;
   }
   else
@@ -215,7 +209,7 @@ static bool split_condition_aux(
       }
     }
     non_real_conditions.push_back(data_expression_list({ negate ? data_expression(sort_bool::not_(e)) : e }));
-    real_conditions.push_back(data_expression_list());
+    real_conditions.emplace_back();
     return false;
   }
 }
@@ -258,10 +252,5 @@ inline void split_condition(
 }
 
 } // end namespace detail
-
-
-} // namespace data
-
-} // namespace mcrl2
 
 #endif // MCRL2_LPSREALELM_DETAIL_LINEAR_INEQUALITY_UTILITIES_H

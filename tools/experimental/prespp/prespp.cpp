@@ -23,7 +23,7 @@ using pres_system::tools::pres_input_tool;
 class prespp_tool: public pres_input_tool<input_output_tool>
 {
   private:
-    typedef pres_input_tool<input_output_tool> super;
+    using super = pres_input_tool<input_output_tool>;
 
   public:
     prespp_tool()

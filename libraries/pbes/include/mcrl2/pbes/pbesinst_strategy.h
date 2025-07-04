@@ -15,9 +15,9 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \brief pbesinst transformation strategies
 enum pbesinst_strategy
@@ -110,8 +110,8 @@ std::string description(const pbesinst_strategy strategy)
   throw mcrl2::runtime_error("unknown pbesinst strategy");
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESINST_STRATEGY_H

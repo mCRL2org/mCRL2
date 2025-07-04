@@ -14,15 +14,12 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail
+{
 
 struct has_propositional_variables_traverser: public pbes_expression_traverser<has_propositional_variables_traverser>
 {
-  typedef pbes_expression_traverser<has_propositional_variables_traverser> super;
+  using super = pbes_expression_traverser<has_propositional_variables_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -47,10 +44,6 @@ bool has_propositional_variables(const pbes_expression& x)
   return f.result;
 }
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_HAS_PROPOSITIONAL_VARIABLES_H

@@ -14,11 +14,9 @@
 
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2
-{
-namespace core
-{
-namespace detail
+
+
+namespace mcrl2::core::detail
 {
 
 // Component that helps applying the Singleton design pattern
@@ -45,9 +43,9 @@ template < typename Derived >
 struct singleton_identifier : public singleton_expression< Derived, core::identifier_string >
   {};
 
-} // namespace detail
-} // namespace core
-} // namespace mcrl2
+} // namespace mcrl2::core::detail
+
+
 
 
 #endif

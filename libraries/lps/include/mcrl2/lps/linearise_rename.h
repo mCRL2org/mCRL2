@@ -17,11 +17,7 @@
 #include "mcrl2/lps/detail/configuration.h"
 #include "mcrl2/process/process_expression.h"
 
-
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
   inline
@@ -114,10 +110,6 @@ namespace lps
     }
   }
 
-} // namespace lps
-
-} // namespace mcrl2
-
-
+  } // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_LINEARISE_RENAME_H

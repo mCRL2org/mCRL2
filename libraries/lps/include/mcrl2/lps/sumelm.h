@@ -22,16 +22,14 @@
 #include "mcrl2/data/find_equalities.h"
 #include "mcrl2/lps/decluster.h"
 
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Class implementing the sum elimination lemma.
 template <typename Specification = specification>
 class sumelm_algorithm: public detail::lps_algorithm<Specification>
 {
-  typedef typename detail::lps_algorithm<Specification> super;
+  using super = typename detail::lps_algorithm<Specification>;
   using super::m_spec;
 
   protected:
@@ -143,8 +141,8 @@ bool sumelm(deadlock_summand& s)
   return algorithm.removed() > 0;
 }
 
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
+
 
 #endif // MCRL2_LPS_SUMELM_H
 

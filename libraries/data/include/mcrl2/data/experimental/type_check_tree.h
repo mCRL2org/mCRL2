@@ -16,12 +16,10 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/experimental/type_checker.h"
 
-namespace mcrl2 {
+namespace mcrl2::data {
 
-namespace data {
-
-typedef std::map<untyped_sort_variable, sort_expression> sort_substitution;
-typedef std::pair<sort_substitution, int> solution; // the second element is the cost of the solution
+using sort_substitution = std::map<untyped_sort_variable, sort_expression>;
+using solution = std::pair<sort_substitution, int>; // the second element is the cost of the solution
 
 template <typename T>
 bool has_untyped_sort(const T& x)
@@ -89,7 +87,7 @@ std::string print_vector(const std::string& name, const Container& nodes)
 
 struct type_check_node;
 
-typedef std::shared_ptr<type_check_node> type_check_node_ptr;
+using type_check_node_ptr = std::shared_ptr<type_check_node>;
 
 struct type_check_context
 {
@@ -185,7 +183,7 @@ protected:
 };
 
 struct type_check_constraint;
-typedef std::shared_ptr<type_check_constraint> constraint_ptr;
+using constraint_ptr = std::shared_ptr<type_check_constraint>;
 constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& sigma);
 
 struct type_check_constraint
@@ -1128,7 +1126,7 @@ struct where_clause_node final: public type_check_node
     for (const std::pair<std::string, type_check_node_ptr>& a: assignments)
     {
       children.push_back(a.second);
-      variables.push_back(variable(a.first, a.second->sort));
+      variables.emplace_back(a.first, a.second->sort);
     }
   }
 
@@ -1365,8 +1363,8 @@ constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& 
   return p;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_EXPERIMENTAL_TYPE_CHECK_TREE_H

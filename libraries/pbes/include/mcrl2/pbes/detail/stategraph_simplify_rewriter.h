@@ -17,11 +17,11 @@
 #include "mcrl2/pbes/detail/stategraph_split.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 inline
 pbes_expression stategraph_not(const pbes_expression& x)
@@ -76,7 +76,7 @@ pbes_expression smart_or(const pbes_expression& x, const pbes_expression& y)
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction> super;
+  using super = simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction>;
   using super::apply;
 
   /// \brief Constructor.
@@ -222,10 +222,10 @@ class stategraph_simplify_rewriter
 
   public:
     /// \brief The term type
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Constructor
     /// \param rewriter A data rewriter
@@ -257,10 +257,10 @@ class stategraph_simplify_rewriter
     }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H

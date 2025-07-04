@@ -15,20 +15,14 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/join.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
-{
-
-namespace detail
+namespace mcrl2::pbes_system::detail
 {
 
 // Simplifying PBES rewriter.
 template <typename Derived>
 struct normalize_and_or_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -110,10 +104,10 @@ void normalize_and_or(T& x,
   core::make_apply_builder<normalize_and_or_builder>().update(x);
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_NORMALIZE_AND_OR_H

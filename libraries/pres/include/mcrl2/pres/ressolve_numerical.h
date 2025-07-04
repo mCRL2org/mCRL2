@@ -20,9 +20,9 @@
 #include "mcrl2/pres/pressolve_options.h"
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -30,12 +30,12 @@ namespace detail {
 double evaluate(const pres_expression& p, const std::unordered_map<core::identifier_string, double>& solution)
 {
 // std::cerr << "Evaluate: " << p << "\n";
-  typedef std::unordered_map<data::data_expression, double> value_cache_type;
-  static value_cache_type value_cache;
-  if (is_propositional_variable_instantiation(p))
-  {
-    const propositional_variable_instantiation& pv = atermpp::down_cast<propositional_variable_instantiation>(p);
-    return solution.at(pv.name());
+using value_cache_type = std::unordered_map<data::data_expression, double>;
+static value_cache_type value_cache;
+if (is_propositional_variable_instantiation(p))
+{
+  const propositional_variable_instantiation& pv = atermpp::down_cast<propositional_variable_instantiation>(p);
+  return solution.at(pv.name());
   }
   else if (is_plus(p))
   {
@@ -234,8 +234,8 @@ class ressolve_by_numerical_iteration
     }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_RESSOLVE_NUMERICAL_H

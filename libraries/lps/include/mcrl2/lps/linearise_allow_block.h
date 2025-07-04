@@ -19,10 +19,7 @@
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/process/process_expression.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 inline std::string log_allow_block_application(const lps_statistics_t& lps_statistics_before,
@@ -245,16 +242,16 @@ inline void allowblockcomposition(
     }
     else if (smmnd.has_time())
     {
-      resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock(actiontime)));
+      resultdeltasumlist.emplace_back(sumvars, condition, deadlock(actiontime));
     }
     // summand has no time.
     else if (condition == data::sort_bool::true_())
     {
-      resultsimpledeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
+      resultsimpledeltasumlist.emplace_back(sumvars, condition, deadlock());
     }
     else
     {
-      resultdeltasumlist.push_back(deadlock_summand(sumvars, condition, deadlock()));
+      resultdeltasumlist.emplace_back(sumvars, condition, deadlock());
     }
   }
 
@@ -307,8 +304,6 @@ inline void allowblockcomposition(
   }
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_LINEARISE_ALLLOW_BLOCK_H

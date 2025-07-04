@@ -16,17 +16,16 @@
 #include "mcrl2/pres/lps2pres.h"
 #include "mcrl2/pres/detail/lts2pres_e.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system
+{
 
 /// \brief Algorithm for translating a state formula and an untimed specification to a pres.
 class lts2pres_algorithm
 {
   public:
-    typedef lts::probabilistic_lts_lts_t::states_size_type state_type;
-    typedef lts::probabilistic_lts_lts_t::probabilistic_state_t probabilistic_state_type;
-    typedef pres_system::detail::lts2pres_lts::edge_list edge_list;
+    using state_type = lts::probabilistic_lts_lts_t::states_size_type;
+    using probabilistic_state_type = lts::probabilistic_lts_lts_t::probabilistic_state_t;
+    using edge_list = pres_system::detail::lts2pres_lts::edge_list;
 
   protected:
     const lts::probabilistic_lts_lts_t& lts0;
@@ -98,7 +97,9 @@ class lts2pres_algorithm
           }
         }
         init = propositional_variable_instantiation(detail::mu_name(f),data::data_expression_list());
-        equations.push_back(pres_equation(fixpoint_symbol::mu(), propositional_variable(detail::mu_name(f),data::variable_list()), initial_state));
+        equations.emplace_back(fixpoint_symbol::mu(),
+            propositional_variable(detail::mu_name(f), data::variable_list()),
+            initial_state);
       }
 
       return pres(lts0.data(), equations, init);
@@ -117,8 +118,6 @@ pres lts2pres(const lts::probabilistic_lts_lts_t& l, const state_formulas::state
   return algorithm.run(formspec, preprocess_modal_operators);
 }
 
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system
 
 #endif // MCRL2_PRES_LTS2PRES_H

@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/function_symbol.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated class structured_sort_constructor_argument ---//
@@ -90,10 +87,10 @@ inline void make_structured_sort_constructor_argument(atermpp::aterm& t, const A
 }
 
 /// \\brief list of structured_sort_constructor_arguments
-typedef atermpp::term_list<structured_sort_constructor_argument> structured_sort_constructor_argument_list;
+using structured_sort_constructor_argument_list = atermpp::term_list<structured_sort_constructor_argument>;
 
 /// \\brief vector of structured_sort_constructor_arguments
-typedef std::vector<structured_sort_constructor_argument>    structured_sort_constructor_argument_vector;
+using structured_sort_constructor_argument_vector = std::vector<structured_sort_constructor_argument>;
 
 /// \\brief Test for a structured_sort_constructor_argument expression
 /// \\param x A term
@@ -124,9 +121,7 @@ inline void swap(structured_sort_constructor_argument& t1, structured_sort_const
 }
 //--- end generated class structured_sort_constructor_argument ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_ARGUMENT_H
 

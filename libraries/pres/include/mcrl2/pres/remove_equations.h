@@ -14,9 +14,9 @@
 
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -37,7 +37,7 @@ std::string print_removed_equations(const std::vector<propositional_variable>& r
 inline
 std::set<propositional_variable> reachable_variables(const pres& p)
 {
-  typedef std::vector<pres_equation>::const_iterator iterator;
+  using iterator = std::vector<pres_equation>::const_iterator;
 
   // create a mapping from variable names to iterators
   std::map<core::identifier_string, iterator> index;
@@ -100,8 +100,8 @@ std::vector<propositional_variable> remove_unreachable_variables(pres& p)
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REMOVE_EQUATIONS_H

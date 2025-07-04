@@ -15,9 +15,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/find.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 namespace detail {
 
@@ -238,7 +236,7 @@ std::ostream& operator<<(std::ostream& out, const find_equalities_expression& x)
 template <template <class> class Traverser, class Derived>
 struct find_equalities_traverser: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -443,7 +441,7 @@ struct find_equalities_traverser: public Traverser<Derived>
 
 struct find_equalities_traverser_inst: public find_equalities_traverser<data::data_expression_traverser, find_equalities_traverser_inst>
 {
-  typedef find_equalities_traverser<data::data_expression_traverser, find_equalities_traverser_inst> super;
+  using super = find_equalities_traverser<data::data_expression_traverser, find_equalities_traverser_inst>;
 
   using super::enter;
   using super::leave;
@@ -502,8 +500,8 @@ std::string print_inequalities(const std::map<variable, std::set<data_expression
   return print_set(result);
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_FIND_EQUALITIES_H

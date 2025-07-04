@@ -17,9 +17,9 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pres/resalgorithm_type.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 struct pressolve_options
 {
@@ -41,8 +41,8 @@ std::ostream& operator<<(std::ostream& out, const pressolve_options& options)
   return out;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PRESSOLVE_OPTIONS_H

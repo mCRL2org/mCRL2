@@ -16,9 +16,8 @@
 #include <vector>
 #include "mcrl2/utilities/detail/container_utility.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 /// \brief Search for a unique representative in a graph.
 /// \param u0 The root of the graph.
@@ -108,8 +107,6 @@ Node find_representative(Node& u0, GenerateSuccessors generate_successors)
   throw mcrl2::runtime_error("find_representative did not find a solution");
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_FIND_REPRESENTATIVE_H

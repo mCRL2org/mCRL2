@@ -15,11 +15,7 @@
 #include <mcrl2/atermpp/standard_containers/unordered_map.h>
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail {
 
 struct structure_graph_builder
 {
@@ -236,7 +232,7 @@ struct structure_graph_builder
 
 struct manual_structure_graph_builder
 {
-  typedef structure_graph::index_type index_type;
+  using index_type = structure_graph::index_type;
 
   structure_graph& m_graph;
   structure_graph::vertex_vector m_vertices;
@@ -290,10 +286,10 @@ struct manual_structure_graph_builder
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_STRUCTURE_GRAPH_BUILDER_H

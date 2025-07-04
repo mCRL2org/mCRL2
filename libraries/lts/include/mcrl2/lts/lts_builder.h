@@ -16,9 +16,7 @@
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
 
-namespace mcrl2 {
-
-namespace lts {
+namespace mcrl2::lts {
 
 /// \brief Removes the last element from state s
 inline
@@ -29,7 +27,7 @@ lps::state remove_time_stamp(const lps::state& s)
 
 struct lts_builder
 {
-  typedef atermpp::indexed_set<lps::state, mcrl2::utilities::detail::GlobalThreadSafe> indexed_set_for_states_type;
+  using indexed_set_for_states_type = atermpp::indexed_set<lps::state, mcrl2::utilities::detail::GlobalThreadSafe>;
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
   // is needed to avoid duplicates.
   utilities::unordered_map_large<lps::multi_action, std::size_t> m_actions;
@@ -299,7 +297,7 @@ class lts_lts_disk_builder: public lts_builder
 class lts_dot_builder: public lts_lts_builder
 {
   public:
-    typedef lts_lts_builder super;
+    using super = lts_lts_builder;
     lts_dot_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
       : super(dataspec, action_labels, process_parameters)
     { }
@@ -315,7 +313,7 @@ class lts_dot_builder: public lts_lts_builder
 class lts_fsm_builder: public lts_lts_builder
 {
   public:
-    typedef lts_lts_builder super;
+    using super = lts_lts_builder;
     lts_fsm_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
       : super(dataspec, action_labels, process_parameters)
     { }
@@ -361,8 +359,8 @@ std::unique_ptr<lts_builder> create_lts_builder(const lps::specification& lpsspe
   }
 }
 
-} // namespace lts
+} // namespace mcrl2::lts
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LTS_BUILDER_H

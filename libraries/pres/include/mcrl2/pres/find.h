@@ -15,10 +15,7 @@
 #include "mcrl2/pres/add_binding.h"
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 namespace detail
@@ -27,7 +24,7 @@ namespace detail
 template <template <class> class Traverser, class OutputIterator>
 struct find_propositional_variables_traverser: public Traverser<find_propositional_variables_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_propositional_variables_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_propositional_variables_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -221,8 +218,8 @@ bool search_variable(const T& x, const data::variable& v)
   return f.found;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_FIND_H

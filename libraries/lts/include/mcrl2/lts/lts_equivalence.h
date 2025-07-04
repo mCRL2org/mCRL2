@@ -19,9 +19,7 @@
 #include <string>
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief LTS equivalence relations.
@@ -373,8 +371,7 @@ inline std::string description(const lts_equivalence eq)
   }
 }
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif // MCRL2_LTS_LTS_EQUIVALENCE_H
 

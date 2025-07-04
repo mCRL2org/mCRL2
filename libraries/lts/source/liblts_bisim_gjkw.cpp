@@ -26,11 +26,9 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_utilities.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+
+
+namespace mcrl2::lts::detail
 {
 namespace bisim_gjkw
 {
@@ -2992,9 +2990,7 @@ class constln_ptr_less
     }
 };
 
-
-typedef std::set<bisim_gjkw::constln_t*, constln_ptr_less> R_map_t;
-
+using R_map_t = std::set<bisim_gjkw::constln_t*, constln_ptr_less>;
 
 /// \brief Split a block with new bottom states as needed
 /// \details The function splits RedB by checking whether all new bottom
@@ -3270,5 +3266,5 @@ template class bisim_partitioner_gjkw<lts_aut_t>;
 template class bisim_partitioner_gjkw<lts_fsm_t>;
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2

@@ -80,7 +80,7 @@ bool has_counter_example_information(const pbes& pbesspec)
 
 struct subsitute_counterexample: public pbes_expression_builder<subsitute_counterexample>
 {
-  typedef pbes_expression_builder<subsitute_counterexample> super;
+  using super = pbes_expression_builder<subsitute_counterexample>;
   using super::enter;
   using super::leave;
   using super::apply;

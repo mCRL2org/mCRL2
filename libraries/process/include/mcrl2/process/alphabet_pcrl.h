@@ -14,16 +14,14 @@
 
 #include "mcrl2/process/detail/pcrl_equation_cache.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process {
 
 namespace detail {
 
 /// \brief Traverser that computes the alphabet of pCRL process expressions
 struct alphabet_pcrl_traverser: public process_expression_traverser<alphabet_pcrl_traverser>
 {
-  typedef process_expression_traverser<alphabet_pcrl_traverser> super;
+  using super = process_expression_traverser<alphabet_pcrl_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -132,8 +130,8 @@ multi_action_name_set alphabet_pcrl(const process_expression& x, const std::map<
   return f.result;
 }
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_ALPHABET_PCRL_H

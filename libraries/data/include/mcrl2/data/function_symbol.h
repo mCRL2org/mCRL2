@@ -14,13 +14,12 @@
 
 #include "mcrl2/data/application.h"
 
-namespace mcrl2
+
+
+namespace mcrl2::data
 {
 
-namespace data
-{
-
-typedef std::pair<core::identifier_string, sort_expression> function_symbol_key_type;
+using function_symbol_key_type = std::pair<core::identifier_string, sort_expression>;
 
 //--- start generated class function_symbol ---//
 /// \\brief A function symbol
@@ -85,10 +84,10 @@ inline void make_function_symbol(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of function_symbols
-typedef atermpp::term_list<function_symbol> function_symbol_list;
+using function_symbol_list = atermpp::term_list<function_symbol>;
 
 /// \\brief vector of function_symbols
-typedef std::vector<function_symbol>    function_symbol_vector;
+using function_symbol_vector = std::vector<function_symbol>;
 
 // prototype declaration
 std::string pp(const function_symbol& x, bool precedence_aware = true);
@@ -115,9 +114,9 @@ std::string pp(const function_symbol_list& x, bool precedence_aware = true);
 std::string pp(const function_symbol_vector& x, bool precedence_aware = true);
 std::set<data::variable> find_all_variables(const data::function_symbol& x);
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_FUNCTION_SYMBOL_H
 

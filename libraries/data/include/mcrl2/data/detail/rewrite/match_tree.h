@@ -15,11 +15,7 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/machine_number.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// This is a list where variables and aterm ints can be stored.
@@ -38,7 +34,7 @@ class variable_or_number: public atermpp::aterm
     }
 };
 
-typedef atermpp::term_list<variable_or_number> variable_or_number_list;
+using variable_or_number_list = atermpp::term_list<variable_or_number>;
 
 class match_tree:public atermpp::aterm
 {
@@ -588,10 +584,10 @@ class match_tree_Me:public match_tree
     }
 };
 
-typedef atermpp::term_list < match_tree > match_tree_list;
-typedef std::vector < match_tree > match_tree_vector;
-typedef atermpp::term_list < match_tree_list > match_tree_list_list;
-typedef atermpp::term_list < match_tree_list_list > match_tree_list_list_list;
+using match_tree_list = atermpp::term_list<match_tree>;
+using match_tree_vector = std::vector<match_tree>;
+using match_tree_list_list = atermpp::term_list<match_tree_list>;
+using match_tree_list_list_list = atermpp::term_list<match_tree_list_list>;
 
 // Structure for build_tree parameters
 class build_pars
@@ -702,10 +698,6 @@ std::ostream& operator<<(std::ostream& s, const match_tree& t)
   return s;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_MATCH_TREE_H

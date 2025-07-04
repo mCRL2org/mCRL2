@@ -15,17 +15,14 @@
 #include "mcrl2/modal_formula/negate_variables.h"
 #include "mcrl2/modal_formula/traverser.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
+namespace mcrl2::state_formulas
 {
 
 /// \cond INTERNAL_DOCS
 // \brief Visitor for checking if a state formula is normalized.
 struct is_normalized_traverser: public state_formula_traverser<is_normalized_traverser>
 {
-  typedef state_formula_traverser<is_normalized_traverser> super;
+  using super = state_formula_traverser<is_normalized_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -61,7 +58,7 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
 // \brief Visitor for normalizing a state formula.
 struct normalize_builder: public state_formula_builder<normalize_builder>
 {
-  typedef state_formula_builder<normalize_builder> super;
+  using super = state_formula_builder<normalize_builder>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -441,8 +438,6 @@ T normalize(const T& x, bool quantitative = false, bool negated = false, typenam
   return result;
 }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_NORMALIZE_H

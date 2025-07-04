@@ -24,10 +24,7 @@
 #include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/action_label_string.h"
 
-
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief This class contains labels for states in dot format.
@@ -176,9 +173,6 @@ class probabilistic_lts_dot_t :
     void save(const std::string& filename) const;
 };
 
-
-
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif

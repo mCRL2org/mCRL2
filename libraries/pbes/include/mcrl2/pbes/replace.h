@@ -15,10 +15,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/replace_capture_avoiding.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 namespace detail {
@@ -27,7 +24,7 @@ namespace detail {
 template <template <class> class Builder, class Substitution>
 struct substitute_pbes_expressions_builder: public Builder<substitute_pbes_expressions_builder<Builder, Substitution> >
 {
-  typedef Builder<substitute_pbes_expressions_builder<Builder, Substitution> > super;
+  using super = Builder<substitute_pbes_expressions_builder<Builder, Substitution>>;
   using super::apply;
 
   Substitution sigma;
@@ -62,7 +59,7 @@ make_replace_pbes_expressions_builder(Substitution sigma, bool innermost)
 template <template <class> class Builder, class Substitution>
 struct replace_propositional_variables_builder: public Builder<replace_propositional_variables_builder<Builder, Substitution> >
 {
-  typedef Builder<replace_propositional_variables_builder<Builder, Substitution> > super;
+  using super = Builder<replace_propositional_variables_builder<Builder, Substitution>>;
   using super::apply;
 
   const Substitution& sigma;
@@ -286,9 +283,9 @@ T replace_pbes_expressions(const T& x,
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #ifndef MCRL2_PBES_SUBSTITUTIONS_H
 #include "mcrl2/pbes/substitutions.h"

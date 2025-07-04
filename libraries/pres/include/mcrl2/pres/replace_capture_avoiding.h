@@ -16,9 +16,7 @@
 #include "mcrl2/pres/builder.h"
 #include "mcrl2/pres/find.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system {
 
 namespace detail {
 
@@ -26,7 +24,7 @@ template<template<class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement
   : public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef data::detail::add_capture_avoiding_replacement <Builder, Derived, Substitution> super;
+  using super = data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -158,8 +156,8 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated pres_system replace_capture_avoiding code ---//
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REPLACE_CAPTURE_AVOIDING_H

@@ -245,7 +245,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       }
 
       term=rewr(term);
-      typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
+      using enumerator_type = enumerator_algorithm_with_iterator<rewriter>;
       data::enumerator_identifier_generator id_generator;
       enumerator_type enumerator(rewr, spec, rewr, id_generator, 10000, true);
 

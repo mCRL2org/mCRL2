@@ -13,10 +13,7 @@
 #include <string>
 #include <cassert>
 
-namespace mcrl2
-{
-
-namespace smt
+namespace mcrl2::smt
 {
 
 class translation_error : public std::runtime_error
@@ -26,7 +23,6 @@ class translation_error : public std::runtime_error
     {}
 };
 
-}
 }
 
 #endif

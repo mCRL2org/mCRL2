@@ -21,32 +21,31 @@ using pres_system::tools::pres_output_tool;
 
 class txt2res_tool: public pres_output_tool<input_output_tool>
 {
-    typedef pres_output_tool<input_output_tool> super;
+  using super = pres_output_tool<input_output_tool>;
 
-  public:
-    txt2res_tool()
+public:
+  txt2res_tool()
       : super("lps2res",
-              "Jan Friso Groote", 
-              "parse a textual description of a BES",
-              "Parse the textual description of a BES from INFILE and write it to OUTFILE. "
-              "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."
-             )
-    {}
+            "Jan Friso Groote",
+            "parse a textual description of a BES",
+            "Parse the textual description of a BES from INFILE and write it to OUTFILE. "
+            "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.")
+  {}
 
-    bool run()
+  bool run()
+  {
+    pres_system::pres p;
+    if (input_filename().empty())
     {
-      pres_system::pres p;
-      if (input_filename().empty())
-      {
-        p = pres_system::txt2pres(std::cin);
-      }
-      else
-      {
-        std::ifstream from(input_filename().c_str());
-        p = pres_system::txt2pres(from);
-      }
-      pres_system::save_pres(p, output_filename(), pres_output_format());
-      return true;
+      p = pres_system::txt2pres(std::cin);
+    }
+    else
+    {
+      std::ifstream from(input_filename().c_str());
+      p = pres_system::txt2pres(from);
+    }
+    pres_system::save_pres(p, output_filename(), pres_output_format());
+    return true;
     }
 };
 

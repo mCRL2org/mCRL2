@@ -37,10 +37,7 @@
 #include "mcrl2/utilities/detail/container_utility.h"
 
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 // This todo set maintains elements that were removed by the reset procedure.
@@ -516,8 +513,8 @@ class pbesinst_lazy_algorithm
     };
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESINST_LAZY_H

@@ -25,7 +25,7 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
 {
   protected:
 
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
     bool m_instantiate_free_variables = false;
     bool m_ignore_conditions = false;

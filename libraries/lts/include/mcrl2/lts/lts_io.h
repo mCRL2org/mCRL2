@@ -30,8 +30,13 @@ namespace mcrl2::lts
 /// \brief Type for data files that contain extra information for an lts in .aut or .fsm
 ///         format. Typically this is a data_specification (data_e), a linear process (lps_e) or
 ///         an .mcrl2 file. The value none_e indicates that no information is available.
-typedef enum { none_e, data_e, lps_e, mcrl2_e } data_file_type_t; 
-
+using data_file_type_t = enum
+{
+  none_e,
+  data_e,
+  lps_e,
+  mcrl2_e
+};
 
 namespace detail
 {

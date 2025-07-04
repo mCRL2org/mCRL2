@@ -15,17 +15,14 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 /// \brief Builder class
 template <typename Derived>
 struct pres_expression_builder_base: public core::builder<Derived>
 {
-  typedef core::builder<Derived> super;
+  using super = core::builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -43,7 +40,7 @@ struct pres_expression_builder_base: public core::builder<Derived>
 template <template <class> class Builder, class Derived>
 struct add_sort_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -298,7 +295,7 @@ struct sort_expression_builder: public add_sort_expressions<data::sort_expressio
 template <template <class> class Builder, class Derived>
 struct add_data_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -551,7 +548,7 @@ struct data_expression_builder: public add_data_expressions<data::data_expressio
 template <template <class> class Builder, class Derived>
 struct add_variables: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -806,7 +803,7 @@ struct variable_builder: public add_variables<data::data_expression_builder, Der
 template <template <class> class Builder, class Derived>
 struct add_pres_expressions: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -1054,8 +1051,8 @@ struct pres_expression_builder: public add_pres_expressions<pres_system::pres_ex
 };
 //--- end generated add_pres_expressions code ---//
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_BUILDER_H

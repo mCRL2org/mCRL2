@@ -48,7 +48,7 @@ public:
 
     for (transition trans : m_lts.get_transitions())
     {
-      trans_out[trans.from()].push_back(std::make_pair(trans.label(), trans.to()));
+      trans_out[trans.from()].emplace_back(trans.label(), trans.to());
       if (is_tau(trans.label()))
       {
         silent_out[trans.from()].insert(trans.to());
@@ -118,13 +118,13 @@ private:
   LTS_TYPE& m_lts;
   state_type initial_l2;
   state_type max_state_index = 0;
-  typedef std::size_t block_index_type;
-  typedef std::size_t level_type;
+  using block_index_type = std::size_t;
+  using level_type = std::size_t;
   // This tuple is meant for an observation (s', a, s'') such that s -(silent)-> s' -a-> s''.
-  typedef std::tuple<block_index_type, label_type, block_index_type> branching_observation_type;
-  typedef std::set<branching_observation_type> signature_type;
-  typedef std::pair<label_type, state_type> observation;
-  typedef std::pair<block_index_type, block_index_type> blockpair_type;
+  using branching_observation_type = std::tuple<block_index_type, label_type, block_index_type>;
+  using signature_type = std::set<branching_observation_type>;
+  using observation = std::pair<label_type, state_type>;
+  using blockpair_type = std::pair<block_index_type, block_index_type>;
 
   std::map<state_type, std::set<state_type>> silent_in;
   std::map<state_type, std::set<state_type>> silent_out;
@@ -460,11 +460,11 @@ private:
       if (std::get<1>(path) == dist_label and (!is_tau(dist_label) or std::get<0>(path) != std::get<2>(path)))
       {
         // we might have B_1 -\tau -> B_1, I don't think its a problem.
-        T.push_back(std::make_pair(std::get<0>(path), std::get<2>(path)));
+        T.emplace_back(std::get<0>(path), std::get<2>(path));
         if (is_tau(dist_label))
         {
           // the following observation: block2 -\tau->> path2 -(tau)-> path2.
-          T.push_back(std::make_pair(std::get<2>(path), std::get<2>(path)));
+          T.emplace_back(std::get<2>(path), std::get<2>(path));
         }
       }
     }

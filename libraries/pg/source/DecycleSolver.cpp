@@ -59,16 +59,16 @@ void CycleFinder::run( ParityGame::Strategy &strategy,
                             winning_set_, winning_queue_, substrat_ );
 
         // Map computed winning set and strategy back to global game:
-        for ( DenseSet<verti>::const_iterator it = winning_set_.begin();
-              it != winning_set_.end(); ++it )
+        for (unsigned long it : winning_set_)
         {
-            verti v = mapping_[*it];
-            verti w = substrat_[*it];
-            if (w != NO_VERTEX) w = mapping_[w];
-            strategy[v] = w;
-            assert(!done_set.count(v));
-            done_set.insert(v);
-            done_queue.push_back(v);
+          verti v = mapping_[it];
+          verti w = substrat_[it];
+          if (w != NO_VERTEX)
+            w = mapping_[w];
+          strategy[v] = w;
+          assert(!done_set.count(v));
+          done_set.insert(v);
+          done_queue.push_back(v);
         }
     }
 }

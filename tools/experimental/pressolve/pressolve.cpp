@@ -42,26 +42,29 @@ class pressolve_tool
     : public rewriter_tool<pres_input_tool<input_tool>>
 {
   protected:
-  typedef rewriter_tool<pres_input_tool<input_tool>> super;
+    using super = rewriter_tool<pres_input_tool<input_tool>>;
 
-  pressolve_options options;
-  std::string lpsfile;
+    pressolve_options options;
+    std::string lpsfile;
 
-  void add_options(utilities::interface_description& desc) override
-  {
-    super::add_options(desc);
-    desc.add_hidden_option("no-remove-unused-rewrite-rules",
-                           "do not remove unused rewrite rules. ", 'u');
-    desc.add_hidden_option(
-        "no-replace-constants-by-variables",
-        "Do not move constant expressions to a substitution.");
-    desc.add_option("algorithm", utilities::make_enum_argument<pres_system::solution_algorithm>("NAME")
-                                 .add_value_short(pres_system::solution_algorithm::gauss_elimination, "g", true)
-                                 .add_value_short(pres_system::solution_algorithm::numerical, "n")
-                                 .add_value_short(pres_system::solution_algorithm::numerical_directed, "m"),
-                    "select the algorithm NAME to solve the res after it is generated.",'a');
-    desc.add_option("precision", utilities::make_mandatory_argument("NUM"),
-                    "provide an answer within precision 10^-precision. [AS IT STANDS THIS IS THE NOW THE DIFFERENCE BETWEEN TWO ITERATIONS]", 'p');
+    void add_options(utilities::interface_description& desc) override
+    {
+      super::add_options(desc);
+      desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
+      desc.add_hidden_option("no-replace-constants-by-variables",
+          "Do not move constant expressions to a substitution.");
+      desc.add_option("algorithm",
+          utilities::make_enum_argument<pres_system::solution_algorithm>("NAME")
+              .add_value_short(pres_system::solution_algorithm::gauss_elimination, "g", true)
+              .add_value_short(pres_system::solution_algorithm::numerical, "n")
+              .add_value_short(pres_system::solution_algorithm::numerical_directed, "m"),
+          "select the algorithm NAME to solve the res after it is generated.",
+          'a');
+      desc.add_option("precision",
+          utilities::make_mandatory_argument("NUM"),
+          "provide an answer within precision 10^-precision. [AS IT STANDS THIS IS THE NOW THE DIFFERENCE BETWEEN TWO "
+          "ITERATIONS]",
+          'p');
   }
 
   void parse_options(const utilities::command_line_parser& parser) override

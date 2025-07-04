@@ -20,9 +20,7 @@
 #include <functional>
 #include "mcrl2/utilities/hash_utility.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 static const std::size_t const_tau_label_index=0;
@@ -48,7 +46,7 @@ class transition
 {
   public:
     /// \brief The type of the elements in a transition.
-    typedef std::size_t size_type;
+    using size_type = std::size_t;
 
   private:
     size_type m_from;
@@ -151,8 +149,8 @@ class transition
     }
 };
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
+
 
 namespace std
 {

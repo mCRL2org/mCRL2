@@ -14,17 +14,14 @@
 
 #include "mcrl2/pres/pres.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 /// \brief Maintains a multiset of bound data variables during traversal
 template <template <class> class Builder, class Derived>
 struct add_data_variable_binding: public data::add_data_variable_binding<Builder, Derived>
 {
-  typedef data::add_data_variable_binding<Builder, Derived> super;
+  using super = data::add_data_variable_binding<Builder, Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -87,7 +84,7 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
 template <template <class> class Builder, class Derived>
 struct add_data_variable_traverser_binding: public add_data_variable_binding<Builder, Derived>
 {
-  typedef add_data_variable_binding<Builder, Derived> super;
+  using super = add_data_variable_binding<Builder, Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -108,7 +105,7 @@ struct add_data_variable_traverser_binding: public add_data_variable_binding<Bui
 template <template <class> class Builder, class Derived>
 struct add_data_variable_builder_binding: public add_data_variable_binding<Builder, Derived>
 {
-  typedef add_data_variable_binding<Builder, Derived> super;
+  using super = add_data_variable_binding<Builder, Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -126,8 +123,8 @@ struct add_data_variable_builder_binding: public add_data_variable_binding<Build
   }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_ADD_BINDING_H

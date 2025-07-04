@@ -15,17 +15,14 @@
 
 #include "mcrl2/pbes/pbes_functions.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail
+{
 
 /// \cond INTERNAL_DOCS
 /// \brief Visitor for checking if a pbes object is a PPG.
 struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
 {
-  typedef pbes_expression_traverser<ppg_traverser> super;
+  using super = pbes_expression_traverser<ppg_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -264,10 +261,6 @@ bool is_ppg(const T& x)
   return f.result;
 }
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_PPG_TRAVERSER_H

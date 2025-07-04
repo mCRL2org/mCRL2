@@ -497,7 +497,7 @@ void SmallProgressMeasuresSolver::preprocess_game(ParityGame &game)
                 {
                     if (*it != v)
                     {
-                        obsolete_edges.push_back(std::make_pair(v, *it));
+                      obsolete_edges.emplace_back(v, *it);
                     }
                 }
             }
@@ -505,7 +505,7 @@ void SmallProgressMeasuresSolver::preprocess_game(ParityGame &game)
             if (graph.outdegree(v) > 1)
             {
                 // Self-edge is detrimental; remove it
-                obsolete_edges.push_back(std::make_pair(v, v));
+                obsolete_edges.emplace_back(v, v);
             }
         }
     }

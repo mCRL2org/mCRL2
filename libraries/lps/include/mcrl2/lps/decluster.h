@@ -15,18 +15,16 @@
 #include "mcrl2/data/join.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 template <typename Specification>
 class decluster_algorithm: public detail::lps_algorithm<Specification>
 {
-  typedef typename detail::lps_algorithm<Specification> super;
-  typedef typename Specification::process_type process_type;
-  typedef typename process_type::action_summand_type action_summand_type;
-  typedef std::vector<action_summand_type> action_summand_vector_type;
+  using super = typename detail::lps_algorithm<Specification>;
+  using process_type = typename Specification::process_type;
+  using action_summand_type = typename process_type::action_summand_type;
+  using action_summand_vector_type = std::vector<action_summand_type>;
   using super::m_spec;
 
   protected:
@@ -71,8 +69,8 @@ class decluster_algorithm: public detail::lps_algorithm<Specification>
 
 }; // decluster_algorithm
 
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
+
 
 #endif // MCRL2_LPS_DECLUSTER_H
 

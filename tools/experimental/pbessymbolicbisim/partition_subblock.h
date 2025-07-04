@@ -13,9 +13,7 @@
 #include "eliminate_real_if.h"
 #include "utilities.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 /**
@@ -24,8 +22,8 @@ namespace data
  */
 class subblock
 {
-  typedef pbes_system::detail::ppg_summand summand_type_t;
-  typedef pbes_system::detail::ppg_equation equation_type_t;
+  using summand_type_t = pbes_system::detail::ppg_summand;
+  using equation_type_t = pbes_system::detail::ppg_equation;
 
 protected:
   // pointer to a const equation_type_t object
@@ -261,8 +259,7 @@ std::ostream& operator<<(std::ostream& out, const subblock& b)
   return out << pp(b);
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 namespace std
 {

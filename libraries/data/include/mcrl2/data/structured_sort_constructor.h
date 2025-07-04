@@ -15,10 +15,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/structured_sort_constructor_argument.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 class structured_sort;
@@ -170,7 +167,7 @@ class structured_sort_constructor: public atermpp::aterm
       {
         if (i.name() != core::empty_identifier_string())
         {
-          result.push_back(function_symbol(i.name(), make_function_sort_(s, i.sort())));
+          result.emplace_back(i.name(), make_function_sort_(s, i.sort()));
         }
       }
       return result;
@@ -196,10 +193,10 @@ inline void make_structured_sort_constructor(atermpp::aterm& t, const ARGUMENTS&
 }
 
 /// \\brief list of structured_sort_constructors
-typedef atermpp::term_list<structured_sort_constructor> structured_sort_constructor_list;
+using structured_sort_constructor_list = atermpp::term_list<structured_sort_constructor>;
 
 /// \\brief vector of structured_sort_constructors
-typedef std::vector<structured_sort_constructor>    structured_sort_constructor_vector;
+using structured_sort_constructor_vector = std::vector<structured_sort_constructor>;
 
 /// \\brief Test for a structured_sort_constructor expression
 /// \\param x A term
@@ -234,8 +231,8 @@ inline void swap(structured_sort_constructor& t1, structured_sort_constructor& t
 std::string pp(const structured_sort_constructor_list& x);
 std::string pp(const structured_sort_constructor_vector& x);
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_H

@@ -16,10 +16,7 @@
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/process/parse.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail {
@@ -218,8 +215,8 @@ process::action parse_action(const std::string& text, const process::action_labe
   return result.actions().front();
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_PARSE_H

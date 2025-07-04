@@ -16,15 +16,15 @@
 #include "mcrl2/data/rewriters/if_rewriter.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
 struct if_rewrite_builder: public pbes_system::data_expression_builder<if_rewrite_builder>
 {
-  typedef pbes_system::data_expression_builder<if_rewrite_builder> super;
+  using super = pbes_system::data_expression_builder<if_rewrite_builder>;
   using super::apply;
   using super::update;
 
@@ -43,25 +43,25 @@ class if_rewriter
 {
   public:
   /// \brief The term type
-  typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
-  /// \brief The variable type
-  typedef data::variable variable_type;
+    /// \brief The variable type
+    using variable_type = data::variable;
 
-  /// \brief Rewrites a pbes expression.
-  /// \param x A term
-  /// \return The rewrite result.
-  pbes_expression operator()(const pbes_expression& x) const
-  {
-    detail::if_rewrite_builder f;
-    pbes_expression result;
-    f.apply(result, x);
-    return result;
+    /// \brief Rewrites a pbes expression.
+    /// \param x A term
+    /// \return The rewrite result.
+    pbes_expression operator()(const pbes_expression& x) const
+    {
+      detail::if_rewrite_builder f;
+      pbes_expression result;
+      f.apply(result, x);
+      return result;
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REWRITERS_IF_REWRITER_H

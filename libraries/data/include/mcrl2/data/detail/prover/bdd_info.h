@@ -14,11 +14,7 @@
 
 #include "mcrl2/data/bool.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief The class BDD_Info provides information about the structure of binary decision diagrams.
@@ -88,8 +84,6 @@ class BDD_Info
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

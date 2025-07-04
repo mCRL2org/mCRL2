@@ -15,12 +15,15 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2 {
-
-namespace core {
+namespace mcrl2::core
+{
 
 /// \brief print_format_type represents the available pretty print formats
-typedef enum { print_default, print_internal } print_format_type;
+using print_format_type = enum
+{
+  print_default,
+  print_internal
+};
 
 /// \brief Print string representation of pretty print format
 /// \param pp_format a pretty print format
@@ -81,8 +84,6 @@ std::istream& operator>>(std::istream& is, print_format_type& f)
   return is;
 }
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_PRINT_FORMAT_H

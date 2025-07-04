@@ -16,11 +16,8 @@
 #include "mcrl2/process/detail/action_context.h"
 #include "mcrl2/process/process_expression.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 class process_context
 {
@@ -172,10 +169,6 @@ class process_context
     }
 };
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_PROCESS_CONTEXT_H

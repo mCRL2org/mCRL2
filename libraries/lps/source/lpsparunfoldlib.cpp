@@ -714,7 +714,7 @@ std::map<data::variable, data::data_expression> lpsparunfold::parameter_substitu
   data_expression_vector dev;
 
   auto new_pars_it = m_injected_parameters.cbegin();
-  dev.push_back(data_expression(*new_pars_it));
+  dev.emplace_back(*new_pars_it);
   ++new_pars_it;
 
   for (const data::function_symbol& constr: new_cache_element.affected_constructors)

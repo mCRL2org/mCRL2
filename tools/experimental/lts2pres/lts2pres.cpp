@@ -70,7 +70,7 @@ inline void check_lts2pres_actions(const state_formulas::state_formula& formula,
 class lts2pres_tool : public pres_output_tool<input_output_tool>
 {
   private:
-    typedef pres_output_tool<input_output_tool> super;
+    using super = pres_output_tool<input_output_tool>;
 
   protected:
 

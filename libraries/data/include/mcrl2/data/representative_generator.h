@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 /// \brief Components for generating an arbitrary element of a sort
 /// \details This component delivers a term based on a lexicographic ordering of
@@ -290,7 +287,7 @@ class representative_generator
     }
 };
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
+
 #endif
 

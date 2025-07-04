@@ -13,10 +13,7 @@
 
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \cond INTERNAL_DOCS
@@ -51,7 +48,7 @@ atermpp::term_list<Term> remove_elements(const atermpp::term_list<Term>& l, cons
 template <typename Derived>
 struct remove_parameters_builder: public pbes_system::pbes_expression_builder<Derived>
 {
-  typedef pbes_system::pbes_expression_builder<Derived> super;
+  using super = pbes_system::pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -134,7 +131,7 @@ namespace detail
 template <typename Derived>
 struct map_based_remove_parameters_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -236,7 +233,7 @@ namespace detail
 template <typename Derived>
 struct set_based_remove_parameters_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -350,8 +347,6 @@ void remove_pbes_parameters(pbes& x,
 }
 /// \endcond
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REMOVE_PARAMETERS_H

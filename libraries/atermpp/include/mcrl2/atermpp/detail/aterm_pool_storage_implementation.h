@@ -17,9 +17,8 @@
 #include <type_traits>
 #include <cstring>
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 /// \brief Construct the proxy where its arguments are given by applying the converter
@@ -79,7 +78,7 @@ void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& t
   if (!root.is_marked())
   {
     // Do not use the stack, because this might run out of stack memory for large lists.
-    todo.push(const_cast<_aterm&>(root));
+    todo.emplace(const_cast<_aterm&>(root));
 
     // Mark the term depth-first to reduce the maximum todo size required.
     while (!todo.empty())
@@ -103,7 +102,7 @@ void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& t
           argument.mark();
 
           // Add the argument to be explored as well.
-          todo.push(argument);
+          todo.emplace(argument);
         }
       }
 
@@ -168,7 +167,7 @@ void store_in_argument_array_(std::size_t i,
   {
     // function_or_term(static_cast<Term&>(argument_array[i]));
 
-    typedef mcrl2::utilities::function_traits<decltype(&FUNCTION_OR_TERM_TYPE::operator())> traits;
+    using traits = mcrl2::utilities::function_traits<decltype(&FUNCTION_OR_TERM_TYPE::operator())>;
     function_or_term(static_cast<typename traits::template arg<0>::type&>(argument_array[i]));
   }
   store_in_argument_array_(i+1, argument_array, args...);
@@ -459,7 +458,7 @@ bool ATERM_POOL_STORAGE::verify_term(const _aterm& term)
 #undef ATERM_POOL_STORAGE_TEMPLATES
 #undef ATERM_POOL_STORAGE
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif

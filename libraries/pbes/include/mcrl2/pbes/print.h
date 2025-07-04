@@ -15,9 +15,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 constexpr inline int precedence(const forall&) { return 21; }
 constexpr inline int precedence(const exists&) { return 21; }
@@ -64,7 +62,7 @@ namespace detail {
 template <typename Derived>
 struct printer: public pbes_system::add_traverser_sort_expressions<data::detail::printer, Derived>
 {
-  typedef pbes_system::add_traverser_sort_expressions<data::detail::printer, Derived> super;
+  using super = pbes_system::add_traverser_sort_expressions<data::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;
@@ -259,8 +257,8 @@ std::string pp(const T& x, bool precedence_aware = true)
   return out.str();
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PRINT_H

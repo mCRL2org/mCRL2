@@ -14,9 +14,8 @@
 
 #include "mcrl2/process/find.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -24,7 +23,7 @@ bool is_guarded(const process_expression& x, const std::vector<process_equation>
 
 struct is_guarded_traverser: public process_expression_traverser<is_guarded_traverser>
 {
-  typedef process_expression_traverser<is_guarded_traverser> super;
+  using super = process_expression_traverser<is_guarded_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -100,8 +99,6 @@ bool is_guarded(const process_expression& x, const std::vector<process_equation>
   return detail::is_guarded(x, equations, W);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_GUARDED_H

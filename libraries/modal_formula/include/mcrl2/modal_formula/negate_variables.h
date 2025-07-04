@@ -14,10 +14,7 @@
 
 #include "mcrl2/modal_formula/builder.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
+namespace mcrl2::state_formulas
 {
 
 namespace detail
@@ -27,7 +24,7 @@ namespace detail
 template <typename Derived>
 struct state_variable_negator: public state_formulas::state_formula_builder<Derived>
 {
-  typedef state_formulas::state_formula_builder<Derived> super;
+  using super = state_formulas::state_formula_builder<Derived>;
   using super::apply;
 
   core::identifier_string m_name;
@@ -73,8 +70,6 @@ state_formula negate_variables(const core::identifier_string& name, bool quantit
   return result;
 }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_NEGATE_VARIABLES_H

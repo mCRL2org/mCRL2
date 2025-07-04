@@ -15,11 +15,8 @@
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/modal_formula/state_formula_specification.h"
 
-namespace mcrl2 {
-
-namespace state_formulas {
-
-namespace algorithms {
+namespace mcrl2::state_formulas::algorithms
+{
 
 /// \brief Parses a state formula from an input stream
 // spec may be updated as the data implementation of the state formula
@@ -66,10 +63,6 @@ bool is_normalized(const state_formula& x);
 /// \brief Returns the names of the state variables that occur in x.
 std::set<core::identifier_string> find_state_variable_names(const state_formula& x);
 
-} // namespace algorithms
-
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas::algorithms
 
 #endif // MCRL2_MODAL_FORMULA_ALGORITHMS_H

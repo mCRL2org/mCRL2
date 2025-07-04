@@ -15,16 +15,16 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 // Applies the reset variables expansion to a pbes expression
 struct reset_variable_builder: public pbes_expression_builder<reset_variable_builder>
 {
-  typedef pbes_expression_builder<reset_variable_builder> super;
+  using super = pbes_expression_builder<reset_variable_builder>;
   using super::apply;
 
   std::vector<pbes_expression>::const_iterator i;
@@ -41,10 +41,10 @@ struct reset_variable_builder: public pbes_expression_builder<reset_variable_bui
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_RESET_VARIABLES_H

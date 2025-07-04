@@ -25,9 +25,8 @@
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/utilities/skip.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -52,7 +51,7 @@ data::data_expression equal_to(const data::data_expression_list& x, const data::
 
 } // namespace detail
 
-typedef boost::dynamic_bitset<> summand_set;
+using summand_set = boost::dynamic_bitset<>;
 
 inline
 std::string print_summand_set(const summand_set& s)
@@ -166,9 +165,7 @@ struct summand_equivalence_key
   }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 namespace std {
 
@@ -193,9 +190,8 @@ struct hash<mcrl2::pbes_system::summand_equivalence_key>
 
 } // namespace std
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 enum tribool
 {
@@ -1459,7 +1455,7 @@ class partial_order_reduction_algorithm
         STARTS_CYCLE,   ///< Needs to be fully expanded, because it starts a cycle
         DONE            ///< Has been fully expanded
       };
-      typedef std::pair<propositional_variable_instantiation, todo_state> todo_pair;
+      using todo_pair = std::pair<propositional_variable_instantiation, todo_state>;
 
       // The set seen also stores for each node an index and a boolean that expresses whether
       // the node is currently in the DFS stack and not fully explored, ie, its state in the
@@ -1678,8 +1674,6 @@ class partial_order_reduction_algorithm
     }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_PARTIAL_ORDER_REDUCTION_H

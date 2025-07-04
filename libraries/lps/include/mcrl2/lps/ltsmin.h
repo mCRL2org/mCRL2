@@ -21,7 +21,7 @@
 #include "mcrl2/lps/parse.h"
 
 // For backwards compatibility
-typedef mcrl2::log::log_level_t mcrl2_log_level_t;
+using mcrl2_log_level_t = mcrl2::log::log_level_t;
 using mcrl2::log::logger;
 
 namespace mcrl2::log {
@@ -32,15 +32,14 @@ namespace mcrl2::log {
 #define MCRL2_JITTYC_AVAILABLE
 #endif
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 /// \brief Generates possible values of the data type (at most max_size).
 inline
 std::vector<std::string> generate_values(const data::data_specification& dataspec, const data::sort_expression& s, std::size_t max_size = 1000)
 {
-  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+  using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
   std::vector<std::string> result;
   std::size_t max_iterations = 10000;
@@ -314,13 +313,13 @@ class action_label_data_type: public pins_data_type
 class pins
 {
   public:
-    typedef int* ltsmin_state_type; /**< the state type used by LTSMin */
+    using ltsmin_state_type = int*; /**< the state type used by LTSMin */
 
     /// \brief guard evaluations have ternary logic. A guard may not always rewrite
     /// to true or false
     enum guard_evaluation_t { GUARD_FALSE = 0, GUARD_TRUE = 1, GUARD_MAYBE = 2 };
 
-    typedef data::rewriter::substitution_type substitution_t;
+    using substitution_t = data::rewriter::substitution_type;
 
   protected:
     std::size_t m_group_count;
@@ -329,7 +328,7 @@ class pins
     std::vector<std::vector<std::size_t> > m_write_group;
     std::vector<std::vector<std::size_t> > m_update_group;
     lps::specification m_specification;
-    typedef lps::explorer<false, false, lps::specification>  generator_type;
+    using generator_type = lps::explorer<false, false, lps::specification>;
     generator_type m_generator;
     
     std::vector<data::variable> m_parameters_list;
@@ -534,7 +533,7 @@ class pins
     }
 
   public:
-    typedef std::size_t datatype_index; /**< the index type for datatype maps */
+    using datatype_index = std::size_t; /**< the index type for datatype maps */
 
     /// \brief Returns the number of process parameters of the LPS
     std::size_t process_parameter_count() const
@@ -646,7 +645,10 @@ class pins
         m_guard_info.push_back(guard_info);
 
         // add the new summand to the list of summands.
-        reduced_summands.push_back(lps::action_summand(summand.summation_variables(), reduced_condition, summand.multi_action(), summand.assignments()));
+        reduced_summands.emplace_back(summand.summation_variables(),
+            reduced_condition,
+            summand.multi_action(),
+            summand.assignments());
       }
 
       // create a new LPS
@@ -1029,8 +1031,6 @@ class pins
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_LTSMIN_H

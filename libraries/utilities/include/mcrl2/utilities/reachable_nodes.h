@@ -20,9 +20,8 @@
 #include <iterator>
 #include <vector>
 
-namespace mcrl2 {
-
-namespace utilities {
+namespace mcrl2::utilities
+{
 
 /// \cond INTERNAL_DOCS
 namespace detail
@@ -31,7 +30,7 @@ namespace detail
 template <typename Graph>
 struct reachable_nodes_recorder: public boost::default_dfs_visitor
 {
-  typedef typename Graph::vertex_descriptor vertex_descriptor;
+  using vertex_descriptor = typename Graph::vertex_descriptor;
   std::vector<std::size_t>& m_result;
 
   reachable_nodes_recorder(std::vector<std::size_t>& result)
@@ -58,7 +57,7 @@ struct reachable_nodes_recorder: public boost::default_dfs_visitor
 template <typename Graph, typename Iter>
 std::vector<std::size_t> reachable_nodes(const Graph& g, Iter first, Iter last)
 {
-  typedef boost::color_traits<boost::default_color_type> Color;
+  using Color = boost::color_traits<boost::default_color_type>;
 
   std::vector<std::size_t> result;
   detail::reachable_nodes_recorder<Graph> recorder(result);
@@ -77,8 +76,6 @@ std::vector<std::size_t> reachable_nodes(const Graph& g, Iter first, Iter last)
   return result;
 }
 
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_REACHABLE_NODES_H

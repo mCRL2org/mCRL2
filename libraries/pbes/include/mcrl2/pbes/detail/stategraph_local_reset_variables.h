@@ -15,11 +15,11 @@
 #include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 template <typename Container>
 std::string print_vector(const Container& v, const std::string& delim)
@@ -43,7 +43,7 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
 class local_reset_variables_algorithm: public stategraph_local_algorithm
 {
   public:
-    typedef stategraph_local_algorithm super;
+    using super = stategraph_local_algorithm;
 
   protected:
     const pbes m_original_pbes; // TODO: make this a const reference again
@@ -162,7 +162,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 /// N.B. It is essential that this traverser uses the same traversal order as the guard_traverser.
 struct local_reset_traverser: public pbes_expression_traverser<local_reset_traverser>
 {
-  typedef pbes_expression_traverser<local_reset_traverser> super;
+  using super = pbes_expression_traverser<local_reset_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -365,10 +365,10 @@ data::data_expression_list local_reset_variables_algorithm::reset_variable_param
 }
 
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H

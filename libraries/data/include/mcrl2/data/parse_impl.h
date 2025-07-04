@@ -20,11 +20,8 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/untyped_data_specification.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 struct sort_expression_actions: public core::default_parser_actions
 {
@@ -194,7 +191,7 @@ struct data_expression_actions: public sort_expression_actions
       data::sort_expression sort = parse_SortExpr(node.child(2));
       for (const core::identifier_string& name: names)
       {
-        result.push_back(variable(name, sort));
+        result.emplace_back(name, sort);
       }
       return true;
     }
@@ -346,7 +343,7 @@ struct data_specification_actions: public data_expression_actions
       data::sort_expression sort = parse_SortExpr(node.child(2));
       for (const core::identifier_string& name: names)
       {
-        result.push_back(function_symbol(name, sort));
+        result.emplace_back(name, sort);
       }
       return true;
     }
@@ -390,7 +387,7 @@ struct data_specification_actions: public data_expression_actions
       {
         condition = parse_DataExpr(node.child(0).child(0).child(0));
       }
-      result.push_back(data_equation(variables, condition, parse_DataExpr(node.child(1)), parse_DataExpr(node.child(3))));
+      result.emplace_back(variables, condition, parse_DataExpr(node.child(1)), parse_DataExpr(node.child(3)));
       return true;
     }
     return false;
@@ -466,10 +463,6 @@ struct data_specification_actions: public data_expression_actions
   }
 };
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_PARSE_IMPL_H

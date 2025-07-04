@@ -15,11 +15,8 @@
 #include "mcrl2/process/alphabet_efficient.h"
 #include "mcrl2/process/process_variable_strongly_connected_components.h" // find_process_identifiers
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 // Returns a mapping P -> alphabet(P) for all pCRL equations P.
 // TODO: This mapping can probably be computed more efficiently using the SCC decomposition of the equations.
@@ -115,10 +112,6 @@ std::map<process_identifier, multi_action_name_set> compute_pcrl_equation_cache(
   return result;
 }
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_PCRL_EQUATION_CACHE_H

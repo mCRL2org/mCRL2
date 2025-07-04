@@ -14,15 +14,13 @@
 
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
 struct order_quantified_variables_builder: public pbes_expression_builder<order_quantified_variables_builder>
 {
-  typedef pbes_expression_builder<order_quantified_variables_builder> super;
+  using super = pbes_expression_builder<order_quantified_variables_builder>;
   using super::apply;
 
   const data::data_specification& dataspec;
@@ -59,8 +57,8 @@ pbes_expression order_quantified_variables(const pbes_expression& x, const data:
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_TRANSFORMATIONS_H

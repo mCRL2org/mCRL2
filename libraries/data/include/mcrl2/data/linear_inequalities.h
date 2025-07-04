@@ -19,10 +19,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/map_substitution.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 // Functions below should be made available in the data library.
@@ -169,7 +166,7 @@ namespace detail
   };
 
   // typedef atermpp::term_list<variable_with_a_rational_factor> lhs_t;
-  typedef std::map < variable, data_expression > map_based_lhs_t;
+  using map_based_lhs_t = std::map<variable, data_expression>;
 
   class lhs_t: public atermpp::term_list<variable_with_a_rational_factor>
   {
@@ -899,9 +896,9 @@ class linear_inequality: public atermpp::aterm
 
     void add_variables(std::set < variable >&  variable_set) const
     {
-      for (detail::lhs_t::const_iterator i=lhs().begin(); i!=lhs().end(); ++i)
+      for (const detail::variable_with_a_rational_factor& i : lhs())
       {
-        variable_set.insert(i->variable_name());
+        variable_set.insert(i.variable_name());
       }
     }
 };
@@ -1171,7 +1168,7 @@ inline void remove_redundant_inequalities(
   // If false is among the inequalities, [false] is the minimal result.
   if (is_inconsistent(inequalities,r))
   {
-    resulting_inequalities.push_back(linear_inequality());
+    resulting_inequalities.emplace_back();
     return;
   }
 
@@ -1300,7 +1297,12 @@ static void pivot_and_update(
 namespace detail
 {
   /* False end nodes could be associated with NULL */
-  typedef enum { true_end_node, false_end_node, intermediate_node } node_type;
+using node_type = enum
+{
+  true_end_node,
+  false_end_node,
+  intermediate_node
+};
   class inequality_inconsistency_cache;
   class inequality_consistency_cache;
 
@@ -1845,18 +1847,25 @@ inline bool is_inconsistent(
       // select the smallest non-basic variable with which pivoting can take place.
       bool found=false;
       const detail::lhs_t& lhs=working_equalities[xi];
-      for (detail::lhs_t::const_iterator xj_it=lhs.begin(); xj_it!=lhs.end(); ++xj_it)
+      for (const detail::variable_with_a_rational_factor& lh : lhs)
       {
-        const variable xj=xj_it->variable_name();
-        mCRL2log(log::trace) << pp(xj) << "  --  " << pp(xj_it->factor()) << "\n";
-        if ((is_positive(xj_it->factor(),r) &&
-             ((upperbounds.count(xj)==0) ||
-              ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool::true_())||
-               ((beta[xj]==upperbounds[xj])&& (rewrite_with_memory(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]),r)==sort_bool::true_()))))) ||
-            (is_negative(xj_it->factor(),r) &&
-             ((lowerbounds.count(xj)==0) ||
-              ((rewrite_with_memory(greater(beta[xj],lowerbounds[xj]),r)==sort_bool::true_())||
-               ((beta[xj]==lowerbounds[xj]) && (rewrite_with_memory(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]),r)==sort_bool::true_()))))))
+        const variable xj = lh.variable_name();
+        mCRL2log(log::trace) << pp(xj) << "  --  " << pp(lh.factor()) << "\n";
+        if ((is_positive(lh.factor(), r)
+                && ((upperbounds.count(xj) == 0)
+                    || ((rewrite_with_memory(less(beta[xj], upperbounds[xj]), r) == sort_bool::true_())
+                        || ((beta[xj] == upperbounds[xj])
+                            && (rewrite_with_memory(less(beta_delta_correction[xj], upperbounds_delta_correction[xj]),
+                                    r)
+                                == sort_bool::true_())))))
+            || (is_negative(lh.factor(), r)
+                && ((lowerbounds.count(xj) == 0)
+                    || ((rewrite_with_memory(greater(beta[xj], lowerbounds[xj]), r) == sort_bool::true_())
+                        || ((beta[xj] == lowerbounds[xj])
+                            && (rewrite_with_memory(
+                                    greater(beta_delta_correction[xj], lowerbounds_delta_correction[xj]),
+                                    r)
+                                == sort_bool::true_()))))))
         {
           found=true;
           pivot_and_update(xi,xj,lowerbounds[xi],lowerbounds_delta_correction[xi],
@@ -1959,7 +1968,7 @@ std::set < variable >  gauss_elimination(
       // The input contains false. Return false and stop.
       resulting_equalities.clear();
       resulting_inequalities.clear();
-      resulting_inequalities.push_back(linear_inequality());
+      resulting_inequalities.emplace_back();
       return remaining_variables;
     }
     else if (!j->is_true(r)) // Do not consider redundant equations.
@@ -2002,7 +2011,7 @@ std::set < variable >  gauss_elimination(
             // The input is inconsistent. Return false.
             resulting_equalities.clear();
             resulting_inequalities.clear();
-            resulting_inequalities.push_back(linear_inequality());
+            resulting_inequalities.emplace_back();
             remaining_variables.clear();
             return remaining_variables;
           }
@@ -2040,7 +2049,7 @@ std::set < variable >  gauss_elimination(
               // The input is inconsistent. Return false.
               resulting_equalities.clear();
               resulting_inequalities.clear();
-              resulting_inequalities.push_back(linear_inequality());
+              resulting_inequalities.emplace_back();
               remaining_variables.clear();
               return remaining_variables;
             }
@@ -2126,8 +2135,6 @@ inline data_expression rewrite_with_memory(
   return i->second;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_LINEAR_INEQUALITY_H

@@ -16,10 +16,7 @@
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 //--- start generated classes ---//
@@ -63,10 +60,10 @@ class pbes_expression: public atermpp::aterm
 };
 
 /// \\brief list of pbes_expressions
-typedef atermpp::term_list<pbes_expression> pbes_expression_list;
+using pbes_expression_list = atermpp::term_list<pbes_expression>;
 
 /// \\brief vector of pbes_expressions
-typedef std::vector<pbes_expression>    pbes_expression_vector;
+using pbes_expression_vector = std::vector<pbes_expression>;
 
 // prototypes
 inline bool is_propositional_variable_instantiation(const atermpp::aterm& x);
@@ -186,10 +183,10 @@ inline void make_propositional_variable_instantiation(atermpp::aterm& t, const A
 }
 
 /// \\brief list of propositional_variable_instantiations
-typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
+using propositional_variable_instantiation_list = atermpp::term_list<propositional_variable_instantiation>;
 
 /// \\brief vector of propositional_variable_instantiations
-typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
+using propositional_variable_instantiation_vector = std::vector<propositional_variable_instantiation>;
 
 /// \\brief Test for a propositional_variable_instantiation expression
 /// \\param x A term
@@ -1070,14 +1067,9 @@ data::variable_list free_variables(const pbes_expression& x)
   return data::variable_list(v.begin(), v.end());
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
-
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /// \brief Contains type information for pbes expressions.
@@ -1085,28 +1077,28 @@ template <>
 struct term_traits<pbes_system::pbes_expression>
 {
   /// \brief The term type
-  typedef pbes_system::pbes_expression term_type;
+  using term_type = pbes_system::pbes_expression;
 
   /// \brief The data term type
-  typedef data::data_expression data_term_type;
+  using data_term_type = data::data_expression;
 
   /// \brief The data term sequence type
-  typedef data::data_expression_list data_term_sequence_type;
+  using data_term_sequence_type = data::data_expression_list;
 
   /// \brief The variable type
-  typedef data::variable variable_type;
+  using variable_type = data::variable;
 
   /// \brief The variable sequence type
-  typedef data::variable_list variable_sequence_type;
+  using variable_sequence_type = data::variable_list;
 
   /// \brief The propositional variable declaration type
-  typedef pbes_system::propositional_variable propositional_variable_decl_type;
+  using propositional_variable_decl_type = pbes_system::propositional_variable;
 
   /// \brief The propositional variable instantiation type
-  typedef pbes_system::propositional_variable_instantiation propositional_variable_type;
+  using propositional_variable_type = pbes_system::propositional_variable_instantiation;
 
   /// \brief The string type
-  typedef core::identifier_string string_type;
+  using string_type = core::identifier_string;
 
   /// \brief Make the value true
   /// \return The value \p true
@@ -1453,9 +1445,7 @@ struct term_traits<pbes_system::pbes_expression>
   }
 };
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 namespace std
 {

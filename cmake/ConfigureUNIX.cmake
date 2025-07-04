@@ -76,15 +76,12 @@ mcrl2_add_cxx_flag(-fno-plt)
 if(NOT ${MCRL2_IS_CLANG})
   # Disable interposition, which allows inlining external definitions.
   mcrl2_add_cxx_flag(-fno-semantic-interposition)
-  
-  # Change to lld as default linker.
+else()
+  # Change to lld as linker.
   if(MCRL2_ENABLE_LLD)
     mcrl2_add_cxx_flag(-fuse-ld=lld)
   endif()
 endif()
-
-# Enable clang-tidy static analysis.
-#set(CMAKE_CXX_CLANG_TIDY clang-tidy)
 
 # This prevents warnings in the dnj bisimulation algorithm.
 mcrl2_add_cxx_flag(-Wno-switch)
@@ -157,8 +154,9 @@ endif()
 
 if(NOT ${MCRL2_IS_CLANG})
   mcrl2_add_c_flag(-fno-semantic-interposition)
-  
-  if(MCRL2_ENABLE_LINKER_LLD)
+else()
+  # Change to lld as linker.
+  if(MCRL2_ENABLE_LLD)
     mcrl2_add_c_flag(-fuse-ld=lld)
   endif()
 endif()

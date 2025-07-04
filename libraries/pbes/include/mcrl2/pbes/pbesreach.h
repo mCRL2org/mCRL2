@@ -353,7 +353,7 @@ class pbesreach_algorithm
 
       for (const data::variable& param: m_process_parameters)
       {
-        m_data_index.push_back(symbolic::data_expression_index(param.sort()));
+        m_data_index.emplace_back(param.sort());
       }
       
       mCRL2log(log::debug) << "Final read/write matrix:" << std::endl;

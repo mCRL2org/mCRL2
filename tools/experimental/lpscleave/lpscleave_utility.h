@@ -22,18 +22,20 @@ std::list<std::string> split_actions(const std::string& s)
   std::size_t pcount = 0;
   std::string a;
   std::list<std::string> result;
-  for (std::string::const_iterator i = s.begin(); i != s.end(); ++i)
+  for (char i : s)
   {
-    if (*i == ',' && pcount == 0)
+    if (i == ',' && pcount == 0)
     {
       result.push_back(a);
       a.clear();
     }
     else
     {
-      if (*i == '(') ++pcount;
-      else if (*i == ')') --pcount;
-      a.push_back(*i);
+      if (i == '(')
+        ++pcount;
+      else if (i == ')')
+        --pcount;
+      a.push_back(i);
     }
   }
 

@@ -13,10 +13,9 @@
 
 #include "mcrl2/pres/builder.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 /// \cond INTERNAL_DOCS
@@ -51,7 +50,7 @@ atermpp::term_list<Term> remove_elements(const atermpp::term_list<Term>& l, cons
 template <typename Derived>
 struct remove_parameters_builder: public pres_system::pres_expression_builder<Derived>
 {
-  typedef pres_system::pres_expression_builder<Derived> super;
+  using super = pres_system::pres_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -134,7 +133,7 @@ namespace detail
 template <typename Derived>
 struct map_based_remove_parameters_builder: public pres_expression_builder<Derived>
 {
-  typedef pres_expression_builder<Derived> super;
+  using super = pres_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -236,7 +235,7 @@ namespace detail
 template <typename Derived>
 struct set_based_remove_parameters_builder: public pres_expression_builder<Derived>
 {
-  typedef pres_expression_builder<Derived> super;
+  using super = pres_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -350,8 +349,8 @@ void remove_pres_parameters(pres& x,
 }
 /// \endcond
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REMOVE_PARAMETERS_H

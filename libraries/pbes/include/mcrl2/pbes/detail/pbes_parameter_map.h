@@ -16,17 +16,11 @@
 #include "mcrl2/pbes/pbes.h"
 #include <regex>
 
-namespace mcrl2
-{
-
-namespace pbes_system
-{
-
-namespace detail
+namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Data structure for storing the variables that should be expanded by the finite pbesinst algorithm.
-typedef std::map<core::identifier_string, std::vector<data::variable>> pbes_parameter_map;
+using pbes_parameter_map = std::map<core::identifier_string, std::vector<data::variable>>;
 
 /// \brief Returns true if the declaration text matches with the variable d.
 inline
@@ -162,10 +156,6 @@ std::ostream& print_pbes_parameter_map(std::ostream& out, const pbes_parameter_m
   return out;
 }
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_PBES_PARAMETER_MAP_H

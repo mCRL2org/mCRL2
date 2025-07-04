@@ -30,14 +30,11 @@
 #include "mcrl2/lts/lts_type.h"
 
 
-namespace mcrl2
-{
-
 /** \brief The main LTS namespace.
  * \details This namespace contains all data structures and members of the LTS
  * library.
  */
-namespace lts
+namespace mcrl2::lts
 {
 
 class lts_default_base
@@ -85,27 +82,27 @@ class lts: public LTS_BASE
 
     /** \brief The type of state labels.
     */
-    typedef STATE_LABEL_T state_label_t;
+    using state_label_t = STATE_LABEL_T;
 
     /** \brief The type of action labels.
     */
-    typedef ACTION_LABEL_T action_label_t;
+    using action_label_t = ACTION_LABEL_T;
 
     /** \brief The type of the used lts base.
     */
-    typedef LTS_BASE base_t;
+    using base_t = LTS_BASE;
 
     /** \brief The sort that contains the indices of states.
     */
-    typedef typename std::vector < STATE_LABEL_T >::size_type states_size_type;
+    using states_size_type = typename std::vector<STATE_LABEL_T>::size_type;
 
     /** \brief The sort that represents the indices of labels.
     */
-    typedef typename std::vector < ACTION_LABEL_T >::size_type labels_size_type;
+    using labels_size_type = typename std::vector<ACTION_LABEL_T>::size_type;
 
     /** \brief The sort that contains indices of transitions.
     */
-    typedef typename std::vector<transition>::size_type transitions_size_type;
+    using transitions_size_type = typename std::vector<transition>::size_type;
 
     /** \brief An indicator that this is not a probabilistic lts. 
     */
@@ -668,6 +665,6 @@ class lts: public LTS_BASE
 };
 
 }
-}
+
 
 #endif // MCRL2_LTS_LTS_H

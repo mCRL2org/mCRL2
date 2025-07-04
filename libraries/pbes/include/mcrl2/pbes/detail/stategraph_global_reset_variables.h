@@ -15,11 +15,11 @@
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 class global_reset_variables_algorithm;
 pbes_expression reset_variables(global_reset_variables_algorithm& algorithm, const pbes_expression& x, const stategraph_equation& eq_X);
@@ -28,7 +28,7 @@ pbes_expression reset_variables(global_reset_variables_algorithm& algorithm, con
 class global_reset_variables_algorithm: public stategraph_global_algorithm
 {
   public:
-    typedef stategraph_global_algorithm super;
+    using super = stategraph_global_algorithm;
 
   protected:
     const pbes& m_original_pbes;
@@ -292,7 +292,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
 /// N.B. It is essential that this traverser uses the same traversal order as the guard_traverser.
 struct reset_traverser: public pbes_expression_traverser<reset_traverser>
 {
-  typedef pbes_expression_traverser<reset_traverser> super;
+  using super = pbes_expression_traverser<reset_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -394,10 +394,10 @@ pbes_expression reset_variables(global_reset_variables_algorithm& algorithm, con
   return f.top();
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_RESET_VARIABLES_H

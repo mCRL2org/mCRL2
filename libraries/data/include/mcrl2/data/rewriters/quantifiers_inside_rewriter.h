@@ -17,9 +17,8 @@
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 namespace detail {
 
@@ -78,7 +77,7 @@ std::tuple<data_expression, data_expression> compute_Phi_Psi(const std::vector<d
 
 struct quantifiers_inside_builder: public data_expression_builder<quantifiers_inside_builder>
 {
-  typedef data_expression_builder<quantifiers_inside_builder> super;
+  using super = data_expression_builder<quantifiers_inside_builder>;
   using super::apply;
 
   template <class T>
@@ -102,7 +101,7 @@ struct quantifiers_inside_builder: public data_expression_builder<quantifiers_in
 
 struct quantifiers_inside_forall_builder: public data_expression_builder<quantifiers_inside_forall_builder>
 {
-  typedef data_expression_builder<quantifiers_inside_forall_builder> super;
+  using super = data_expression_builder<quantifiers_inside_forall_builder>;
   using super::apply;
 
   const std::set<variable>& V;
@@ -153,7 +152,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
     {
       using utilities::detail::set_difference;
       using utilities::detail::set_intersection;
-      typedef core::term_traits<data::data_expression> tr;
+      using tr = core::term_traits<data::data_expression>;
 
       std::vector<data_expression> X;
       utilities::detail::split(x, std::back_inserter(X), tr::is_or, tr::left, tr::right);
@@ -190,7 +189,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
 
 struct quantifiers_inside_exists_builder: public data_expression_builder<quantifiers_inside_exists_builder>
 {
-  typedef data_expression_builder<quantifiers_inside_exists_builder> super;
+  using super = data_expression_builder<quantifiers_inside_exists_builder>;
   using super::apply;
 
   const std::set<variable>& V;
@@ -240,7 +239,7 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
     {
       using utilities::detail::set_difference;
       using utilities::detail::set_intersection;
-      typedef core::term_traits<data::data_expression> tr;
+      using tr = core::term_traits<data::data_expression>;
 
       std::vector<data_expression> X;
       utilities::detail::split(x, std::back_inserter(X), tr::is_and, tr::left, tr::right);
@@ -333,8 +332,6 @@ T quantifiers_inside_rewrite(const T& x, typename std::enable_if< std::is_base_o
   return result;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REWRITERS_QUANTIFIERS_INSIDE_REWRITER_H

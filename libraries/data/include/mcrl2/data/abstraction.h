@@ -15,10 +15,7 @@
 #include "mcrl2/data/binder_type.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief An abstraction expression.
@@ -103,9 +100,9 @@ inline void swap(abstraction& t1, abstraction& t2)
 }
 //--- end generated class abstraction ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_ABSTRACTION_H
 

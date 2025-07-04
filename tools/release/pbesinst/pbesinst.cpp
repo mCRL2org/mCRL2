@@ -41,7 +41,7 @@ using utilities::make_enum_argument;
 class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_tool> >
 {
   protected:
-    typedef rewriter_tool<pbes_input_output_tool<input_output_tool> > super;
+    using super = rewriter_tool<pbes_input_output_tool<input_output_tool>>;
 
     pbesinst_strategy m_strategy;
     std::string m_finite_parameter_selection;

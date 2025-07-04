@@ -14,10 +14,7 @@
 
 #include "mcrl2/atermpp/type_traits.h"
 
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /// \brief Traverser that defines functions for maintaining bound variables.
@@ -25,8 +22,8 @@ template <template <class> class TraverserOrBuilder, typename Derived, typename 
 class add_binding : public TraverserOrBuilder<Derived>
 {
   public:
-    typedef TraverserOrBuilder<Derived> super;
-    typedef Variable variable_type;
+    using super = TraverserOrBuilder<Derived>;
+    using variable_type = Variable;
 
   protected:
     std::multiset<variable_type> m_bound_variables;
@@ -83,8 +80,6 @@ class add_binding : public TraverserOrBuilder<Derived>
     }
 };
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_ADD_BINDING_H

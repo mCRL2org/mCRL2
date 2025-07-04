@@ -15,15 +15,14 @@
 #include "mcrl2/data/rewriters/if_rewriter.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
 struct if_rewrite_builder: public lps::data_expression_builder<if_rewrite_builder>
 {
-  typedef lps::data_expression_builder<if_rewrite_builder> super;
+  using super = lps::data_expression_builder<if_rewrite_builder>;
   using super::apply;
   using super::update;
 
@@ -59,8 +58,6 @@ T if_rewrite(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm,
   return result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_IF_REWRITE_H

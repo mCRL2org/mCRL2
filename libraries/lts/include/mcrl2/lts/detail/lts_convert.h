@@ -24,11 +24,7 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_dot.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 /** \brief Translate a fraction given as a data_expression to a representation
@@ -115,9 +111,7 @@ lts_convert_probabilistic_state<probabilistic_state<std::size_t, lps::probabilis
   std::vector<lps::state_probability_pair<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> > result;
   for(const lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>& p: state_in)
   {
-    result.push_back(lps::state_probability_pair<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>(
-                          p.state(),
-                          translate_probability_data_prob(p.probability())));
+    result.emplace_back(p.state(), translate_probability_data_prob(p.probability()));
   }
   return probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>(result.begin(), result.end());
 }
@@ -978,8 +972,6 @@ inline void lts_convert(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, PRO
 
 // ======================  END ACTUAL CONVERSIONS  =============================
 
-} // namespace detail
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts::detail
 
 #endif

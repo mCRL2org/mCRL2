@@ -14,15 +14,15 @@
 
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail {
 
 struct significant_variables_traverser: public pres_expression_traverser<significant_variables_traverser>
 {
-  typedef pres_expression_traverser<significant_variables_traverser> super;
+  using super = pres_expression_traverser<significant_variables_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -123,8 +123,8 @@ std::set<data::variable> significant_variables(const pres_expression& x)
   return f.result_stack.back();
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_SIGNIFICANT_VARIABLES_H

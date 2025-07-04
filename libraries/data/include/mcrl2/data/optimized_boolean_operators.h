@@ -15,10 +15,7 @@
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -30,7 +27,7 @@ void optimized_not(typename TermTraits::term_type& result,
                    const typename TermTraits::term_type& arg, 
                    TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (tr::is_true(arg))
   {
@@ -61,7 +58,7 @@ void optimized_and(typename TermTraits::term_type& result,
                    const typename TermTraits::term_type& right, 
                    TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (tr::is_true(left))
   {
@@ -133,7 +130,7 @@ void optimized_or(typename TermTraits::term_type& result,
                   const typename TermTraits::term_type& left, 
                   const typename TermTraits::term_type& right, TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (tr::is_true(left))
   {
@@ -171,7 +168,7 @@ void optimized_imp(typename TermTraits::term_type& result,
                    const typename TermTraits::term_type& left, 
                    const typename TermTraits::term_type& right, TermTraits t)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (tr::is_true(left))
   {
@@ -215,7 +212,7 @@ void optimized_forall(typename TermTraits::term_type& result,
                       bool remove_variables, 
                       bool empty_domain_allowed, TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (v.empty())
   {
@@ -274,7 +271,7 @@ void optimized_exists(typename TermTraits::term_type& result,
                       bool empty_domain_allowed, 
                       TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (v.empty())
   {
@@ -627,8 +624,6 @@ void optimized_exists_no_empty_domain(Term& result, const VariableSequence& l, c
   detail::optimized_exists(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_OPTIMIZED_BOOLEAN_OPERATORS_H

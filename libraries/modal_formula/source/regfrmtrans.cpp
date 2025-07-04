@@ -17,11 +17,9 @@ using namespace mcrl2::data;
 using namespace mcrl2::state_formulas;
 using namespace mcrl2::regular_formulas;
 
-namespace mcrl2
-{
-namespace regular_formulas
-{
-namespace detail
+
+
+namespace mcrl2::regular_formulas::detail
 {
 
 //local declarations
@@ -235,6 +233,6 @@ inline state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
   return part;
 }
 
-}   // namespace detail
-}   // namespace regular_formulas
-}     // namespace mcrl2
+} // namespace mcrl2::regular_formulas::detail
+
+

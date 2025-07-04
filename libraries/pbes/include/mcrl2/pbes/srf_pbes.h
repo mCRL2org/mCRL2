@@ -263,7 +263,7 @@ std::vector<pre_srf_summand<allow_ce>> srf_or(const pbes_expression& phi,
 template <bool allow_ce>
 struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allow_ce>>
 {
-  typedef pbes_expression_traverser<srf_or_traverser> super;
+  using super = pbes_expression_traverser<srf_or_traverser>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -336,7 +336,7 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
       const propositional_variable& X = eqn.variable();
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
-      equations.push_front(pbes_equation(eqn.symbol(), X1, x));
+      equations.emplace_front(eqn.symbol(), X1, x);
       summands.emplace_back(data::variable_list(),
           f,
           propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
@@ -423,7 +423,7 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
       const propositional_variable& X = eqn.variable();
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
-      equations.push_front(pbes_equation(eqn.symbol(), X1, x));
+      equations.emplace_front(eqn.symbol(), X1, x);
       summands.emplace_back(data::variable_list(),
           f,
           propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
@@ -485,7 +485,7 @@ std::vector<pre_srf_summand<allow_ce>> srf_and(const pbes_expression& phi,
 template<bool allow_ce>
 struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<allow_ce>>
 {
-  typedef pbes_expression_traverser<srf_and_traverser> super;
+  using super = pbes_expression_traverser<srf_and_traverser>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -558,7 +558,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
       const propositional_variable& X = eqn.variable();
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
-      equations.push_front(pbes_equation(eqn.symbol(), X1, x));
+      equations.emplace_front(eqn.symbol(), X1, x);
       summands.emplace_back(data::variable_list(),
           f,
           propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
@@ -643,7 +643,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
       const propositional_variable& X = eqn.variable();
       propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
-      equations.push_front(pbes_equation(eqn.symbol(), X1, x));
+      equations.emplace_front(eqn.symbol(), X1, x);
       summands.emplace_back(data::variable_list(),
           f,
           propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));

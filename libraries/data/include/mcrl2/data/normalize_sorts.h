@@ -15,10 +15,7 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/sort_specification.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -85,11 +82,9 @@ struct normalize_sorts_function
         const structured_sort_constructor_argument_list& i_arguments(e_constructor.arguments());
         for (const structured_sort_constructor_argument& i_argument : i_arguments)
         {
-          new_arguments.push_back(structured_sort_constructor_argument(
-                                    i_argument.name(),
-                                    this->operator()(i_argument.sort())));
+          new_arguments.emplace_back(i_argument.name(), this->operator()(i_argument.sort()));
         }
-        new_constructors.push_back(structured_sort_constructor(e_constructor.name(), new_arguments, e_constructor.recogniser()));
+        new_constructors.emplace_back(e_constructor.name(), new_arguments, e_constructor.recogniser());
       }
       new_sort=structured_sort(new_constructors);
     }
@@ -159,8 +154,6 @@ inline sort_expression normalize_sorts(const structured_sort& x,
 }
 */
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_NORMALIZE_SORTS_H

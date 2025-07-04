@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 //--- start generated class fixpoint_symbol ---//
@@ -75,10 +72,10 @@ class fixpoint_symbol: public atermpp::aterm
 };
 
 /// \\brief list of fixpoint_symbols
-typedef atermpp::term_list<fixpoint_symbol> fixpoint_symbol_list;
+using fixpoint_symbol_list = atermpp::term_list<fixpoint_symbol>;
 
 /// \\brief vector of fixpoint_symbols
-typedef std::vector<fixpoint_symbol>    fixpoint_symbol_vector;
+using fixpoint_symbol_vector = std::vector<fixpoint_symbol>;
 
 // prototype declaration
 std::string pp(const fixpoint_symbol& x, bool precedence_aware = true);
@@ -100,8 +97,8 @@ inline void swap(fixpoint_symbol& t1, fixpoint_symbol& t2)
 }
 //--- end generated class fixpoint_symbol ---//
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_FIXPOINT_SYMBOL_H

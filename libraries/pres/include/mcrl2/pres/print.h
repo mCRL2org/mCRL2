@@ -15,9 +15,9 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 constexpr inline int precedence(const infimum&)  { return 21; }
 constexpr inline int precedence(const supremum&) { return 21; }
@@ -84,7 +84,7 @@ namespace detail {
 template <typename Derived>
 struct printer: public pres_system::add_traverser_sort_expressions<data::detail::printer, Derived>
 {
-  typedef pres_system::add_traverser_sort_expressions<data::detail::printer, Derived> super;
+  using super = pres_system::add_traverser_sort_expressions<data::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;
@@ -359,8 +359,8 @@ std::string pp(const T& x, bool precedence_aware = true)
   return out.str();
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PRINT_H

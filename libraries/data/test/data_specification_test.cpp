@@ -506,10 +506,10 @@ BOOST_AUTO_TEST_CASE(test_system_defined)
   std::vector< data::structured_sort_constructor_argument > arguments;
 
   // sort that references itself by a name
-  arguments.push_back(data::structured_sort_constructor_argument(basic_sort("Q")));
+  arguments.emplace_back(basic_sort("Q"));
 
   std::vector< data::structured_sort_constructor > constructors;
-  constructors.push_back(data::structured_sort_constructor("q",structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1)));
+  constructors.emplace_back("q", structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1));
 
   specification.add_alias(alias(basic_sort("Q"), data::structured_sort(constructors)));
 }
@@ -612,14 +612,14 @@ BOOST_AUTO_TEST_CASE(test_normalisation)
 
   std::vector< structured_sort_constructor_argument > arguments;
 
-  arguments.push_back(structured_sort_constructor_argument(basic_sort("B")));
-  arguments.push_back(structured_sort_constructor_argument(basic_sort("A")));
+  arguments.emplace_back(basic_sort("B"));
+  arguments.emplace_back(basic_sort("A"));
 
   std::vector< structured_sort_constructor > constructors;
 
-  constructors.push_back(structured_sort_constructor("a", structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1)));
-  constructors.push_back(structured_sort_constructor("b", structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.end())));
-  constructors.push_back(structured_sort_constructor("c"));
+  constructors.emplace_back("a", structured_sort_constructor_argument_list(arguments.begin(), arguments.begin() + 1));
+  constructors.emplace_back("b", structured_sort_constructor_argument_list(arguments.begin() + 1, arguments.end()));
+  constructors.emplace_back("c");
 
   structured_sort sA(data::structured_sort(structured_sort_constructor_list(constructors.begin(), constructors.begin() + 1)));
   structured_sort sB(data::structured_sort(structured_sort_constructor_list(constructors.begin() + 1, constructors.end())));
@@ -637,19 +637,19 @@ BOOST_AUTO_TEST_CASE(test_normalisation)
                     "sort A = struct f(A) | g;");
 
   std::vector< structured_sort_constructor_argument > arguments1;
-  arguments1.push_back(structured_sort_constructor_argument(basic_sort("A")));
+  arguments1.emplace_back(basic_sort("A"));
 
   std::vector< structured_sort_constructor > constructors1;
-  constructors1.push_back(structured_sort_constructor("f", arguments1));
-  constructors1.push_back(structured_sort_constructor("g"));
+  constructors1.emplace_back("f", arguments1);
+  constructors1.emplace_back("g");
 
   sort_expression s1=structured_sort(constructors1); // s1 has the shape struct f(A)|g
   std::vector< structured_sort_constructor_argument > arguments2;
-  arguments2.push_back(structured_sort_constructor_argument(s1));
+  arguments2.emplace_back(s1);
 
   std::vector< structured_sort_constructor > constructors2;
-  constructors2.push_back(structured_sort_constructor("f", arguments2));
-  constructors2.push_back(structured_sort_constructor("g"));
+  constructors2.emplace_back("f", arguments2);
+  constructors2.emplace_back("g");
 
   sort_expression s2=structured_sort(constructors2); // s2 has the shape f(struct f(A)|g) |g
   BOOST_CHECK(normalize_sorts(s2,specification)==basic_sort("A"));

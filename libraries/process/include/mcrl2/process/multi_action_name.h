@@ -15,14 +15,13 @@
 #include "mcrl2/atermpp/aterm_io_text.h"
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 /// \brief Represents the name of a multi action
 struct multi_action_name: public std::multiset<core::identifier_string>
 {
-  typedef std::multiset<core::identifier_string> super;
+  using super = std::multiset<core::identifier_string>;
 
   multi_action_name() = default;
 
@@ -33,7 +32,7 @@ struct multi_action_name: public std::multiset<core::identifier_string>
 };
 
 /// \brief Represents a set of multi action names
-typedef std::set<multi_action_name> multi_action_name_set;
+using multi_action_name_set = std::set<multi_action_name>;
 
 /// \brief Pretty print function for a multi action name
 inline
@@ -88,8 +87,6 @@ std::ostream& operator<<(std::ostream& out, const multi_action_name_set& A)
   return out << pp(A);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_MULTI_ACTION_NAME_H

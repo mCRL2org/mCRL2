@@ -14,9 +14,7 @@
 
 #include <cassert>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief An interface to implement a replacement policy for the fixed_size_cache.
@@ -123,7 +121,6 @@ private:
   typename std::forward_list<key_type>::iterator m_last_element_it;
 };
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_CACHE_POLICY_H

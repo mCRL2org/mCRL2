@@ -45,17 +45,17 @@ class pres_parelm_algorithm
 {
   protected:
     /// \brief The graph type of the dependency graph
-    typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS> graph;
+    using graph = boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>;
 
     /// \brief The vertex type of the dependency graph
-    typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
+    using vertex_descriptor = boost::graph_traits<graph>::vertex_descriptor;
 
     /// \brief The edge type of the dependency graph
-    typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
+    using edge_descriptor = boost::graph_traits<graph>::edge_descriptor;
 
     struct parelm_dependency_traverser: public pres_expression_traverser<parelm_dependency_traverser>
     {
-      typedef pres_expression_traverser<parelm_dependency_traverser> super;
+      using super = pres_expression_traverser<parelm_dependency_traverser>;
       using super::enter;
       using super::leave;
       using super::apply;
@@ -300,7 +300,7 @@ class pres_parelm_algorithm
         mCRL2log(log::debug) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
       }
       mCRL2log(log::debug) << "\ndependencies:" << std::endl;
-      typedef boost::graph_traits<graph>::edge_iterator edge_iterator;
+      using edge_iterator = boost::graph_traits<graph>::edge_iterator;
       std::pair<edge_iterator, edge_iterator> e = edges(G);
       edge_iterator first = e.first;
       edge_iterator last  = e.second;

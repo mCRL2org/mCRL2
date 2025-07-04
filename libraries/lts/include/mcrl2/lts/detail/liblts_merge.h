@@ -32,11 +32,7 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/lts/lts.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template <class LTS_TYPE>
@@ -64,9 +60,9 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   // array, we first have to collect the labels of both LTSs in a
   // map, of which the second element indicates the new index of each action label.
 
-  typedef typename LTS_TYPE::action_label_t action_label_type;
-  typedef typename LTS_TYPE::labels_size_type label_index;
-  typedef typename std::pair< typename std::map < action_label_type,label_index >::const_iterator, bool > insert_type;
+  using action_label_type = typename LTS_TYPE::action_label_t;
+  using label_index = typename LTS_TYPE::labels_size_type;
+  using insert_type = typename std::pair<typename std::map<action_label_type, label_index>::const_iterator, bool>;
   std::map < action_label_type,label_index > labs;
 
   // Put the labels of the LTS l1 in a map.
@@ -134,9 +130,6 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   }
 
 }
-} // namespace detail
-} // namespace lts
-} // namespace mcrl2
-
+} // namespace mcrl2::lts::detail
 
 #endif

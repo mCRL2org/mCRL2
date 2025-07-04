@@ -15,15 +15,14 @@
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/detail/position_count_traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
 struct find_subterm_traverser: public process_expression_traverser<find_subterm_traverser>
 {
-  typedef process_expression_traverser<find_subterm_traverser> super;
+  using super = process_expression_traverser<find_subterm_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -157,7 +156,7 @@ struct find_subterm_traverser: public process_expression_traverser<find_subterm_
 
 struct replace_subterm_builder: public process_expression_builder<replace_subterm_builder>
 {
-  typedef process_expression_builder<replace_subterm_builder> super;
+  using super = process_expression_builder<replace_subterm_builder>;
   using super::apply;
   using super::update;
 
@@ -350,8 +349,6 @@ process_expression find_subterm(const process_specification& procspec, std::size
   return f.result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_REPLACE_SUBTERM_H

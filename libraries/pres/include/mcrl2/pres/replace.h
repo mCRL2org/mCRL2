@@ -15,10 +15,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pres/replace_capture_avoiding.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 namespace detail {
@@ -27,7 +24,7 @@ namespace detail {
 template <template <class> class Builder, class Substitution>
 struct substitute_pres_expressions_builder: public Builder<substitute_pres_expressions_builder<Builder, Substitution> >
 {
-  typedef Builder<substitute_pres_expressions_builder<Builder, Substitution> > super;
+  using super = Builder<substitute_pres_expressions_builder<Builder, Substitution>>;
   using super::apply;
 
   Substitution sigma;
@@ -62,7 +59,7 @@ make_replace_pres_expressions_builder(Substitution sigma, bool innermost)
 template <template <class> class Builder, class Substitution>
 struct replace_propositional_variables_builder: public Builder<replace_propositional_variables_builder<Builder, Substitution> >
 {
-  typedef Builder<replace_propositional_variables_builder<Builder, Substitution> > super;
+  using super = Builder<replace_propositional_variables_builder<Builder, Substitution>>;
   using super::apply;
 
   const Substitution& sigma;
@@ -286,9 +283,9 @@ T replace_pres_expressions(const T& x,
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #ifndef MCRL2_PRES_SUBSTITUTIONS_H
 #include "mcrl2/pres/substitutions.h"

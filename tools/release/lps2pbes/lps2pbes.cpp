@@ -16,11 +16,11 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/modal_formula/parse.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 /// \brief Prints a warning if formula contains an action that is not used in lpsspec.
 inline void check_lps2pbes_actions(const state_formulas::state_formula& formula, const lps::stochastic_specification& lpsspec)
@@ -36,11 +36,11 @@ inline void check_lps2pbes_actions(const state_formulas::state_formula& formula,
   }
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -51,42 +51,35 @@ using pbes_system::tools::pbes_output_tool;
 
 class lps2pbes_tool : public pbes_output_tool<input_output_tool>
 {
-    typedef pbes_output_tool<input_output_tool> super;
+  using super = pbes_output_tool<input_output_tool>;
 
-  protected:
-    std::string formula_filename;
-    bool timed = false;
-    bool structured = false;
-    bool unoptimized = false;
-    bool preprocess_modal_operators = false;
-    bool generate_counter_example = false;
-    bool check_only = false;
-    bool print_ast = false;
+protected:
+  std::string formula_filename;
+  bool timed = false;
+  bool structured = false;
+  bool unoptimized = false;
+  bool preprocess_modal_operators = false;
+  bool generate_counter_example = false;
+  bool check_only = false;
+  bool print_ast = false;
 
-    std::string synopsis() const override
-    {
-      return "[OPTION]... --formula=FILE [INFILE [OUTFILE]]\n";
-    }
+  std::string synopsis() const override { return "[OPTION]... --formula=FILE [INFILE [OUTFILE]]\n"; }
 
-    void add_options(interface_description& desc) override
-    {
-      super::add_options(desc);
-      desc.add_option("formula", make_file_argument("FILE"),
-                      "use the state formula from FILE", 'f');
-      desc.add_option("preprocess-modal-operators",
-                      "insert dummy fixpoints in modal operators, which may lead to smaller PBESs", 'm');
-      desc.add_option("timed",
-                      "use the timed version of the algorithm, even for untimed LPS's", 't');
-      desc.add_option("structured",
-                      "generate equations such that no mixed conjunctions and disjunctions occur", 's');
-      desc.add_option("unoptimized",
-                      "do not simplify boolean expressions", 'u');
-      desc.add_option("counter-example",
-                      "add counter example equations to the generated PBES", 'c');
-      desc.add_option("check-only",
-                      "check syntax and semantics of state formula; do not generate PBES", 'e');
-      desc.add_hidden_option("print-ast",
-                      "prints the abstract syntax tree of the state formula; do not generate PBES", 'A');
+  void add_options(interface_description& desc) override
+  {
+    super::add_options(desc);
+    desc.add_option("formula", make_file_argument("FILE"), "use the state formula from FILE", 'f');
+    desc.add_option("preprocess-modal-operators",
+        "insert dummy fixpoints in modal operators, which may lead to smaller PBESs",
+        'm');
+    desc.add_option("timed", "use the timed version of the algorithm, even for untimed LPS's", 't');
+    desc.add_option("structured", "generate equations such that no mixed conjunctions and disjunctions occur", 's');
+    desc.add_option("unoptimized", "do not simplify boolean expressions", 'u');
+    desc.add_option("counter-example", "add counter example equations to the generated PBES", 'c');
+    desc.add_option("check-only", "check syntax and semantics of state formula; do not generate PBES", 'e');
+    desc.add_hidden_option("print-ast",
+        "prints the abstract syntax tree of the state formula; do not generate PBES",
+        'A');
     }
 
     void parse_options(const command_line_parser& parser) override

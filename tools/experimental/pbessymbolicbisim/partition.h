@@ -30,17 +30,14 @@
 #include "ppg_parser.h"
 #include "partition_block.h"
 
-
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 class dependency_graph_partition
 {
-  typedef block block_t;
-  typedef pbes_system::detail::ppg_equation equation_type_t;
-  typedef pbes_system::structure_graph::index_type sg_index_t;
+  using block_t = block;
+  using equation_type_t = pbes_system::detail::ppg_equation;
+  using sg_index_t = pbes_system::structure_graph::index_type;
 
 protected:
   const pbes_system::detail::ppg_pbes m_spec;
@@ -518,8 +515,6 @@ public:
 
 };
 
-} // namespace data
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_PARTITION_H

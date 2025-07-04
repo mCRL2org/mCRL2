@@ -70,7 +70,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
                                              // If approximate_true is false, true is used, meaning that
                                              // the answer false is correct, and true might be incorrect.
 
-    typedef rewriter_tool<pbes_input_tool<pbes_output_tool<input_output_tool> > > super;
+    using super = rewriter_tool<pbes_input_tool<pbes_output_tool<input_output_tool>>>;
 
     pbes_rewriter_type default_rewriter() const
     {

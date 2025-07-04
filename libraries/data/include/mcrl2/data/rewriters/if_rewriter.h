@@ -17,9 +17,7 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/standard.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 namespace detail {
 
@@ -51,7 +49,7 @@ data_expression push_if_outside(const application& x)
 template <typename Derived>
 struct if_rewrite_builder: public data_expression_builder<Derived>
 {
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
 
   using super::apply;
 
@@ -170,7 +168,7 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
 
 struct if_rewrite_with_rewriter_builder: public if_rewrite_builder<if_rewrite_with_rewriter_builder>
 {
-  typedef if_rewrite_builder<if_rewrite_with_rewriter_builder> super;
+  using super = if_rewrite_builder<if_rewrite_with_rewriter_builder>;
   using super::apply;
   using super::apply_if;
 
@@ -230,8 +228,8 @@ T if_rewrite(const T& x, typename std::enable_if< std::is_base_of< atermpp::ater
   return result;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_REWRITERS_IF_REWRITER_H

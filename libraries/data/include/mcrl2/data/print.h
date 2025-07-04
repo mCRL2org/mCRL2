@@ -17,10 +17,7 @@
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/standard_container_utility.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail {
@@ -447,7 +444,7 @@ namespace detail
 template <typename Derived>
 struct printer: public data::add_traverser_sort_expressions<core::detail::printer, Derived>
 {
-  typedef data::add_traverser_sort_expressions<core::detail::printer, Derived> super;
+  using super = data::add_traverser_sort_expressions<core::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;
@@ -612,7 +609,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     if (maximally_shared)
     {
-      typedef typename Container::value_type T;
+      using T = typename Container::value_type;
 
       // sort_map[s] will contain all elements t of container with t.sort() == s.
       std::map<sort_expression, std::vector<T> > sort_map;
@@ -2545,8 +2542,6 @@ std::string pp(const T& x, bool precendence_aware = true)
   return out.str();
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif

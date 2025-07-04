@@ -14,9 +14,8 @@
 
 #include "mcrl2/modal_formula/traverser.h"
 
-namespace mcrl2 {
-
-namespace state_formulas {
+namespace mcrl2::state_formulas
+{
 
 namespace detail {
 
@@ -24,7 +23,7 @@ namespace detail {
 // \brief Visitor for checking if a state formula is timed.
 struct is_timed_traverser: public action_label_traverser<is_timed_traverser>
 {
-  typedef action_label_traverser<is_timed_traverser> super;
+  using super = action_label_traverser<is_timed_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -64,8 +63,6 @@ bool is_timed(const state_formula& x)
   return f.result;
 }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_IS_TIMED_H

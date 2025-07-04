@@ -15,9 +15,8 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 constexpr inline int precedence(const choice&)              { return 1; }
 constexpr inline int precedence(const sum&)                 { return 2; }
@@ -88,7 +87,7 @@ namespace detail
 template <typename Derived>
 struct printer: public process::add_traverser_sort_expressions<data::detail::printer, Derived>
 {
-  typedef process::add_traverser_sort_expressions<data::detail::printer, Derived> super;
+  using super = process::add_traverser_sort_expressions<data::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;
@@ -167,7 +166,7 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
                                                   const std::string& separator = ", "
                                                  )
   {
-    typedef typename Container::value_type T;
+    using T = typename Container::value_type;
 
     // print nothing if the container is empty
     if (container.empty())
@@ -493,8 +492,6 @@ std::string pp(const T& x, bool precedence_aware = true)
   return out.str();
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_PRINT_H

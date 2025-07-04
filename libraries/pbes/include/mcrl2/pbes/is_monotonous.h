@@ -14,10 +14,9 @@
 
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 /// \brief Returns true if the pbes expression is monotonous.
@@ -151,8 +150,8 @@ bool is_monotonous(const pbes& p)
   return true;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_IS_MONOTONOUS_H

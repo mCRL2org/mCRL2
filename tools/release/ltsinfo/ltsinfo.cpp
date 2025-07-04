@@ -20,7 +20,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::log;
 
-typedef input_tool ltsinfo_base;
+using ltsinfo_base = input_tool;
 class ltsinfo_tool : public ltsinfo_base
 {
 

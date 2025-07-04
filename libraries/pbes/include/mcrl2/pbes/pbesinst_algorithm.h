@@ -18,10 +18,9 @@
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 /// \brief Creates a substitution function for the pbesinst rewriter.
@@ -251,8 +250,8 @@ class pbesinst_algorithm
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESINST_ALGORITHM_H

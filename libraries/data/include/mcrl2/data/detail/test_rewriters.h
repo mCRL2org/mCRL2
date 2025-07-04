@@ -19,17 +19,14 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 // Normalizes conjunctions and disjunctions.
 template <typename Derived>
 struct normalize_and_or_builder: public data_expression_builder<Derived>
 {
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -104,7 +101,7 @@ void normalize_and_or(T& x,
 template <typename Derived>
 struct normalize_equality_builder: public data_expression_builder<Derived>
 {
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -250,11 +247,7 @@ data_expression I(const data_expression& x)
   return x;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_TEST_REWRITERS_H
 

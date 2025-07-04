@@ -15,9 +15,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 struct is_not_false
 {
@@ -35,8 +33,8 @@ struct is_not_true
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_ENUMERATOR_H

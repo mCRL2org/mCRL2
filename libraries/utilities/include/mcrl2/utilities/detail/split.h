@@ -15,11 +15,11 @@
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include <map>
 
-namespace mcrl2 {
 
-namespace utilities {
 
-namespace detail {
+
+
+namespace mcrl2::utilities::detail {
 
   // Splits a text into non-empty sections. The sections are trimmed.
   inline
@@ -71,10 +71,10 @@ namespace detail {
     return result;
   }
 
-} // namespace detail
+} // namespace mcrl2::utilities::detail
 
-} // namespace utilities
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_UTILITIES_DETAIL_SPLIT_H

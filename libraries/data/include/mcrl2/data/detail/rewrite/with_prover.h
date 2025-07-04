@@ -14,11 +14,7 @@
 
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 class RewriterProver: public Rewriter
@@ -26,7 +22,7 @@ class RewriterProver: public Rewriter
   public:
     BDD_Prover prover_obj;
 
-    typedef Rewriter::substitution_type substitution_type;
+    using substitution_type = Rewriter::substitution_type;
 
   public:
     RewriterProver(const data_specification& data_spec, mcrl2::data::rewriter::strategy strat, 
@@ -113,8 +109,6 @@ class RewriterProver: public Rewriter
     }
 };
 
-}
-}
 }
 
 #endif

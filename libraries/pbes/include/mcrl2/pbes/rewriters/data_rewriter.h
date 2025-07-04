@@ -17,9 +17,7 @@
 #include "mcrl2/data/substitutions/no_substitution.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -54,7 +52,7 @@ void data_rewrite(data::data_expression& result, const data::data_expression& x,
 template <template <class> class Builder, class Derived, class DataRewriter, class SubstitutionFunction = data::no_substitution>
 struct add_data_rewriter: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::apply;
 
   const DataRewriter& R;
@@ -92,7 +90,7 @@ struct add_data_rewriter: public Builder<Derived>
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct data_rewriter_builder: public add_data_rewriter<pbes_system::pbes_expression_builder, Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef add_data_rewriter<pbes_system::pbes_expression_builder, Derived, DataRewriter, SubstitutionFunction> super;
+  using super = add_data_rewriter<pbes_system::pbes_expression_builder, Derived, DataRewriter, SubstitutionFunction>;
   using super::enter;
   using super::leave;
 
@@ -104,7 +102,9 @@ struct data_rewriter_builder: public add_data_rewriter<pbes_system::pbes_express
 template <template <class, class, class> class Builder, class DataRewriter, class SubstitutionFunction>
 struct apply_rewriter_builder: public Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction>
 {
-  typedef Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction> super;
+  using super = Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>,
+      DataRewriter,
+      SubstitutionFunction>;
   using super::enter;
   using super::leave;
 
@@ -126,8 +126,8 @@ make_apply_rewriter_builder(const DataRewriter& datar, SubstitutionFunction& sig
 template <typename DataRewriter>
 struct data_rewriter
 {
-  typedef pbes_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pbes_expression;
+  using variable_type = data::variable;
 
   const DataRewriter& R;
 
@@ -152,8 +152,8 @@ struct data_rewriter
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REWRITERS_DATA_REWRITER_H

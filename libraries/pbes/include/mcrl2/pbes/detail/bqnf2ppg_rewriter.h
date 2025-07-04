@@ -19,18 +19,18 @@
 
 #include "mcrl2/pbes/detail/bqnf_visitor.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 struct bqnf2ppg_rewriter: public bqnf_visitor
   {
     /// \brief The equation type.
-    typedef pbes_equation equation_type;
+    using equation_type = pbes_equation;
     /// \brief The expression type of the equation.
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The set of variable names already in use.
     std::set<std::string> variable_names;
@@ -559,10 +559,10 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
 
   };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_BQNF2PPG_REWRITER_H

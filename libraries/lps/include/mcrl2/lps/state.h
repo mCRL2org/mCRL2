@@ -15,13 +15,10 @@
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
+namespace mcrl2::lps
 {
 
-namespace lps
-{
-
-typedef atermpp::term_balanced_tree<data::data_expression> state;
+using state = atermpp::term_balanced_tree<data::data_expression>;
 
 template<class ForwardTraversalIterator, class Transformer>
 void make_state(state& result,
@@ -51,8 +48,7 @@ inline std::string pp(const lps::state& x)
   return atermpp::pp(x);
 }
 
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_STATE_H
 

@@ -11,15 +11,13 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_FIND_LINEAR_INEQUALITY_H
 #define MCRL2_LPSSYMBOLICBISIM_FIND_LINEAR_INEQUALITY_H
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 template <template <class> class Traverser, class OutputIterator>
 struct find_linear_inequality_traverser: public Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_linear_inequality_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -93,9 +91,6 @@ std::set<data::data_expression> find_linear_inequalities(const T& x, std::set< v
   return result;
 }
 
-
-} // namespace data
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 #endif // MCRL2_LPSSYMBOLICBISIM_FIND_LINEAR_INEQUALITY_H

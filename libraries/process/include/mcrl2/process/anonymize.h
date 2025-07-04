@@ -15,16 +15,15 @@
 #include "mcrl2/data/anonymize.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
 template <typename Derived>
 struct anonymize_builder: public add_sort_expressions<data::detail::anonymize_builder, Derived>
 {
-  typedef add_sort_expressions<data::detail::anonymize_builder, Derived> super;
+  using super = add_sort_expressions<data::detail::anonymize_builder, Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -169,8 +168,6 @@ void anonymize(process_specification& procspec)
   f.update(procspec);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ANONYMIZE_H

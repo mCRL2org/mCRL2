@@ -10,9 +10,8 @@
 #ifndef MCRL2_UTILITIES_NONCOPYABLE_H_
 #define MCRL2_UTILITIES_NONCOPYABLE_H_
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \brief Inherit from this class to prevent it from being copyable.
@@ -26,6 +25,6 @@ public:
 };
 
 }
-}
+
 
 #endif // MCRL2_UTILITIES_NONCOPYABLE_H_

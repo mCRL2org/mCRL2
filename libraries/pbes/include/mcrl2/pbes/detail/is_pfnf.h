@@ -15,11 +15,11 @@
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_functions.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 /// \brief Splits a conjunction into a sequence of operands
 /// Given a pbes expression of the form p1 && p2 && ... && pn, this will yield a
@@ -167,7 +167,7 @@ bool is_pfnf_expression(const pbes_expression& x)
 
 struct is_pfnf_traverser: public pbes_expression_traverser<is_pfnf_traverser>
 {
-  typedef pbes_expression_traverser<is_pfnf_traverser> super;
+  using super = pbes_expression_traverser<is_pfnf_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -249,10 +249,10 @@ void split_pfnf_expression(const pbes_expression& phi, pbes_expression& h, std::
   }
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_IS_PFNF_H

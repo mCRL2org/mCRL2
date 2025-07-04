@@ -17,17 +17,14 @@
 
 #include "mcrl2/pbes/detail/bqnf_visitor.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail
+{
 
 class ppg_visitor
   {
   public:
     /// \brief The BQNF visitor type.
-    typedef bqnf_visitor bqnf;
+    using bqnf = bqnf_visitor;
 
     /// \brief Destructor.
     virtual ~ppg_visitor()
@@ -205,10 +202,6 @@ class ppg_visitor
     }
   };
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+  } // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_PPG_VISITOR_H

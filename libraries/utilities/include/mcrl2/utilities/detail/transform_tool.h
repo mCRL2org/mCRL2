@@ -15,17 +15,14 @@
 #include "mcrl2/utilities/detail/command.h"
 #include "mcrl2/utilities/tool.h"
 
-namespace mcrl2 {
-
-namespace utilities {
-
-namespace detail {
+namespace mcrl2::utilities::detail
+{
 
 template <typename Tool>
 class transform_tool: public Tool
 {
   protected:
-    typedef Tool super;
+    using super = Tool;
 
     std::string algorithm_and_options;
     int algorithm_number = -1;
@@ -131,10 +128,6 @@ class transform_tool: public Tool
     }
 };
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::detail
 
 #endif // MCRL2_UTILITIES_DETAIL_TRANSFORM_TOOL_H

@@ -15,10 +15,7 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/process/untyped_multi_action.h"
 
-namespace mcrl2
-{
-
-namespace action_formulas
+namespace mcrl2::action_formulas
 {
 
 //--- start generated classes ---//
@@ -62,10 +59,10 @@ class action_formula: public atermpp::aterm
 };
 
 /// \\brief list of action_formulas
-typedef atermpp::term_list<action_formula> action_formula_list;
+using action_formula_list = atermpp::term_list<action_formula>;
 
 /// \\brief vector of action_formulas
-typedef std::vector<action_formula>    action_formula_vector;
+using action_formula_vector = std::vector<action_formula>;
 
 // prototypes
 inline bool is_true(const atermpp::aterm& x);
@@ -827,8 +824,6 @@ inline void swap(multi_action& t1, multi_action& t2)
 // template function overloads
 std::set<data::variable> find_all_variables(const action_formulas::action_formula& x);
 
-} // namespace action_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::action_formulas
 
 #endif // MCRL2_MODAL_FORMULA_ACTION_FORMULA_H

@@ -16,14 +16,12 @@
 
 #include "simplifier_mdd.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 class simplifier_fourier_motzkin : public simplifier
 {
-  typedef simplifier super;
+  using super = simplifier;
   using super::rewr;
   using super::proving_rewr;
 
@@ -95,6 +93,6 @@ public:
 
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_FOURIER_MOTZKIN_H

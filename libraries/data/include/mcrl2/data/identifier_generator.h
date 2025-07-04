@@ -15,10 +15,9 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 /// \brief Abstract base class for identifier generators.
@@ -95,8 +94,8 @@ class identifier_generator
     }
 };
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_IDENTIFIER_GENERATOR_H

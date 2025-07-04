@@ -11,12 +11,11 @@
 
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 
-typedef std::function<void(data::data_expression, std::function<void(std::string)>, std::function<void(data::data_expression)>)> native_translation_t;
+using native_translation_t = std::function<
+    void(data::data_expression, std::function<void(std::string)>, std::function<void(data::data_expression)>)>;
 struct native_translations
 {
   // If f occurs in symbols, its translation should be symbols[f]
@@ -130,7 +129,6 @@ struct native_translations
 
 native_translations initialise_native_translation(const data::data_specification& dataspec);
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif

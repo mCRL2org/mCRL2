@@ -16,16 +16,14 @@
 #include "mcrl2/lps/stochastic_distribution.h"
 #include "mcrl2/lps/summand.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 /// \brief LPS summand containing a deadlock.
 class deadlock_summand: public summand_base
 {
   protected:
     /// \brief The super class
-    typedef summand_base super;
+    using super = summand_base;
 
     /// \brief The deadlock of the summand
     lps::deadlock m_deadlock;
@@ -78,10 +76,10 @@ class deadlock_summand: public summand_base
 
 //--- start generated class deadlock_summand ---//
 /// \\brief list of deadlock_summands
-typedef atermpp::term_list<deadlock_summand> deadlock_summand_list;
+using deadlock_summand_list = atermpp::term_list<deadlock_summand>;
 
 /// \\brief vector of deadlock_summands
-typedef std::vector<deadlock_summand>    deadlock_summand_vector;
+using deadlock_summand_vector = std::vector<deadlock_summand>;
 
 // prototype declaration
 std::string pp(const deadlock_summand& x, bool precedence_aware = true);
@@ -119,8 +117,8 @@ atermpp::aterm deadlock_summand_to_aterm(const deadlock_summand& s)
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_DEADLOCK_SUMMAND_H

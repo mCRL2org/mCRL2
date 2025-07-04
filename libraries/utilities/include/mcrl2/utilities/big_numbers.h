@@ -18,28 +18,24 @@
 #ifndef MCRL2_UTILITIES_BIG_NUMBERS_H
 #define MCRL2_UTILITIES_BIG_NUMBERS_H
 
-#include <algorithm>
-#include <limits>
-#include <string>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/hash_utility.h"
+#include <algorithm>
+#include <limits>
+#include <ranges>
+#include <string>
 
 // Prototype.
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 class big_natural_number;
 
 inline std::string pp(const big_natural_number& l);
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
-
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 namespace detail
 {
@@ -806,9 +802,9 @@ inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
   }
   else
   {
-    for(std::string::const_reverse_iterator i=s.rbegin(); i!=s.rend(); ++i)
+    for (char i : std::ranges::reverse_view(s))
     {
-      ss << *i;
+      ss << i;
     }
   }
   return ss;
@@ -822,8 +818,7 @@ inline void swap(big_natural_number& x, big_natural_number& y)
   x.m_number.swap(y.m_number);
 }
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 namespace std
 {
@@ -841,9 +836,7 @@ struct hash< mcrl2::utilities::big_natural_number >
   
 } // namespace std
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 /* \brief A pretty print operator on action labels, returning it as a string.
 */
@@ -853,9 +846,7 @@ inline std::string pp(const big_natural_number& l)
   s << l;
   return s.str();
 }
-}  // namespace utilities
-}  // namespace mcrl2
-
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_BIG_NUMBERS_H
 

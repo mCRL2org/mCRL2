@@ -6,16 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#define __COMMAND_LINE_INTERFACE__
 #include <locale>
 #include <regex>
 
 #include "mcrl2/utilities/platform.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 template <typename Iter>
@@ -998,7 +996,7 @@ std::vector< std::string > command_line_parser::parse_command_line(char const* c
         }
         while (*current != '\0' && *current != ' ');
 
-        result.push_back(std::string(current_argument, current - current_argument));
+        result.emplace_back(current_argument, current - current_argument);
       }
     }
   }
@@ -1070,7 +1068,7 @@ void command_line_parser::process_default_options(interface_description& d)
   }
   else
   {
-    typedef std::vector< bool (*)(command_line_parser&) > action_list;
+    using action_list = std::vector<bool (*)(command_line_parser&)>;
 
     action_list& actions(get_registered_actions());
 
@@ -1082,5 +1080,5 @@ void command_line_parser::process_default_options(interface_description& d)
     }
   }
 }
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
+

@@ -19,10 +19,7 @@
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated classes ---//
@@ -56,10 +53,10 @@ class process_expression: public atermpp::aterm
 };
 
 /// \\brief list of process_expressions
-typedef atermpp::term_list<process_expression> process_expression_list;
+using process_expression_list = atermpp::term_list<process_expression>;
 
 /// \\brief vector of process_expressions
-typedef std::vector<process_expression>    process_expression_vector;
+using process_expression_vector = std::vector<process_expression>;
 
 // prototypes
 inline bool is_action(const atermpp::aterm& x);
@@ -184,10 +181,10 @@ inline void make_action(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of actions
-typedef atermpp::term_list<action> action_list;
+using action_list = atermpp::term_list<action>;
 
 /// \\brief vector of actions
-typedef std::vector<action>    action_vector;
+using action_vector = std::vector<action>;
 
 /// \\brief Test for a action expression
 /// \\param x A term
@@ -1819,9 +1816,7 @@ bool equal_signatures(const action& a, const action& b)
   return std::equal(a_args.begin(), a_args.end(), b_args.begin(), [](const data::data_expression& x, const data::data_expression& y) { return x.sort() == y.sort(); });
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 namespace std
 {

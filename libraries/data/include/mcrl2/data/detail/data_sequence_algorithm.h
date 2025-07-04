@@ -14,13 +14,7 @@
 
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief Returns the intersection of two unordered sets, that are stored in ATerm lists.
@@ -69,10 +63,6 @@ variable_list set_difference(const variable_list& x, const variable_list& y)
   return variable_list(result.begin(), result.end());
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_DATA_SEQUENCE_ALGORITHM_H

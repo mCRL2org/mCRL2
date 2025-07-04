@@ -57,9 +57,9 @@ BOOST_AUTO_TEST_CASE(test_procinst)
 BOOST_AUTO_TEST_CASE(test_action_name_multiset)
 {
   std::vector<core::identifier_string> v;
-  v.push_back(core::identifier_string("a"));
-  v.push_back(core::identifier_string("b"));
-  v.push_back(core::identifier_string("c"));
+  v.emplace_back("a");
+  v.emplace_back("b");
+  v.emplace_back("c");
   core::identifier_string_list l(v.begin(), v.end());
   action_name_multiset A(l);
   std::string text = process::pp(A, true);

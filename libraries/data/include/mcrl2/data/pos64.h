@@ -26,18 +26,14 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/machine_word.h"
 
-namespace mcrl2 {
-
-  namespace data {
-
     /// \brief Namespace for system defined sort pos.
-    namespace sort_pos {
+namespace mcrl2::data::sort_pos
+{
 
-      inline
-      const core::identifier_string& pos_name()
-      {
-        static core::identifier_string pos_name = core::identifier_string("Pos");
-        return pos_name;
+inline const core::identifier_string& pos_name()
+{
+  static core::identifier_string pos_name = core::identifier_string("Pos");
+  return pos_name;
       }
 
       /// \brief Constructor for sort expression Pos.
@@ -179,7 +175,8 @@ namespace mcrl2 {
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
+      using implementation_map = std::map<function_symbol,
+          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for pos.
       /// \return All system defined constructors that are to be implemented in C++ for pos.
       inline
@@ -1139,7 +1136,8 @@ namespace mcrl2 {
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
+      using implementation_map = std::map<function_symbol,
+          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for pos
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for pos
       inline
@@ -1235,64 +1233,183 @@ namespace mcrl2 {
         variable voverflow("overflow",sort_machine_word::machine_word());
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list(), c1(), most_significant_digit(sort_machine_word::one_word())));
-        result.push_back(data_equation(variable_list({vw}), equals_one(most_significant_digit(vw)), sort_machine_word::equals_one_word(vw)));
-        result.push_back(data_equation(variable_list({vp, vw}), equals_one(concat_digit(vp, vw)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vp}), succ(vp), succpos(vp)));
-        result.push_back(data_equation(variable_list({vw1}), succpos(most_significant_digit(vw1)), if_(sort_machine_word::equals_max_word(vw1), concat_digit(most_significant_digit(sort_machine_word::one_word()), sort_machine_word::zero_word()), most_significant_digit(sort_machine_word::succ_word(vw1)))));
-        result.push_back(data_equation(variable_list({vp, vw1}), succpos(concat_digit(vp, vw1)), if_(sort_machine_word::equals_max_word(vw1), concat_digit(succpos(vp), sort_machine_word::zero_word()), concat_digit(vp, sort_machine_word::succ_word(vw1)))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), equal_to(most_significant_digit(vw1), most_significant_digit(vw2)), sort_machine_word::equal_word(vw1, vw2)));
-        result.push_back(data_equation(variable_list({vp, vw1, vw2}), equal_to(concat_digit(vp, vw1), most_significant_digit(vw2)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vp, vw1, vw2}), equal_to(most_significant_digit(vw1), concat_digit(vp, vw2)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), equal_to(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), sort_bool::and_(sort_machine_word::equal_word(vw1, vw2), equal_to(vp1, vp2))));
-        result.push_back(data_equation(variable_list({vp1, vp2}), equal_to(succpos(vp1), vp2), sort_bool::and_(sort_bool::not_(equals_one(vp2)), equal_to(vp1, pos_predecessor(vp2)))));
-        result.push_back(data_equation(variable_list({vp1, vp2}), equal_to(vp1, succpos(vp2)), sort_bool::and_(sort_bool::not_(equals_one(vp1)), equal_to(pos_predecessor(vp1), vp2))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), less(most_significant_digit(vw1), most_significant_digit(vw2)), sort_machine_word::less_word(vw1, vw2)));
-        result.push_back(data_equation(variable_list({vp, vw1, vw2}), less(concat_digit(vp, vw1), most_significant_digit(vw2)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vp, vw1, vw2}), less(most_significant_digit(vw1), concat_digit(vp, vw2)), sort_bool::true_()));
-        result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), less(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), if_(sort_machine_word::less_word(vw1, vw2), less_equal(vp1, vp2), less(vp1, vp2))));
-        result.push_back(data_equation(variable_list({vp1, vp2}), less(succpos(vp1), vp2), sort_bool::and_(less(most_significant_digit(sort_machine_word::two_word()), vp2), less(vp1, pos_predecessor(vp2)))));
-        result.push_back(data_equation(variable_list({vp1, vp2}), less(vp1, succpos(vp2)), less_equal(vp1, vp2)));
-        result.push_back(data_equation(variable_list({vp, vw1}), sort_machine_word::equals_one_word(vw1), less(vp, most_significant_digit(vw1)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(most_significant_digit(vw1), most_significant_digit(vw2)), sort_machine_word::less_equal_word(vw1, vw2)));
-        result.push_back(data_equation(variable_list({vp, vw1, vw2}), less_equal(concat_digit(vp, vw1), most_significant_digit(vw2)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vp, vw1, vw2}), less_equal(most_significant_digit(vw1), concat_digit(vp, vw2)), sort_bool::true_()));
-        result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), less_equal(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), if_(sort_machine_word::less_equal_word(vw1, vw2), less_equal(vp1, vp2), less(vp1, vp2))));
-        result.push_back(data_equation(variable_list({vp1, vp2}), less_equal(succpos(vp1), vp2), less(vp1, vp2)));
-        result.push_back(data_equation(variable_list({vp1, vp2}), less_equal(vp1, succpos(vp2)), sort_bool::or_(equals_one(vp1), less_equal(pos_predecessor(vp1), vp2))));
-        result.push_back(data_equation(variable_list({vp, vw1}), sort_machine_word::equals_one_word(vw1), less_equal(most_significant_digit(vw1), vp), sort_bool::true_()));
-        result.push_back(data_equation(variable_list({vp1, vp2}), maximum(vp1, vp2), if_(less_equal(vp1, vp2), vp2, vp1)));
-        result.push_back(data_equation(variable_list({vp1, vp2}), minimum(vp1, vp2), if_(less_equal(vp1, vp2), vp1, vp2)));
-        result.push_back(data_equation(variable_list({vw1}), pos_predecessor(most_significant_digit(vw1)), if_(sort_machine_word::equals_one_word(vw1), most_significant_digit(sort_machine_word::one_word()), most_significant_digit(sort_machine_word::pred_word(vw1)))));
-        result.push_back(data_equation(variable_list({vp, vw1}), pos_predecessor(concat_digit(vp, vw1)), if_(sort_machine_word::equals_zero_word(vw1), if_(equals_one(vp), most_significant_digit(sort_machine_word::max_word()), concat_digit(pos_predecessor(vp), sort_machine_word::max_word())), concat_digit(vp, sort_machine_word::pred_word(vw1)))));
-        result.push_back(data_equation(variable_list({vp}), pos_predecessor(succpos(vp)), vp));
-        result.push_back(data_equation(variable_list({vw1, vw2}), plus(most_significant_digit(vw1), most_significant_digit(vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(most_significant_digit(sort_machine_word::one_word()), sort_machine_word::add_word(vw1, vw2)), most_significant_digit(sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), add_with_carry(most_significant_digit(vw1), most_significant_digit(vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(most_significant_digit(sort_machine_word::one_word()), sort_machine_word::add_with_carry_word(vw1, vw2)), most_significant_digit(sort_machine_word::add_with_carry_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vp1, vw1, vw2}), plus(concat_digit(vp1, vw1), most_significant_digit(vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(succpos(vp1), sort_machine_word::add_word(vw1, vw2)), concat_digit(vp1, sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vp1, vw1, vw2}), add_with_carry(concat_digit(vp1, vw1), most_significant_digit(vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(succpos(vp1), sort_machine_word::add_with_carry_word(vw1, vw2)), concat_digit(vp1, sort_machine_word::add_with_carry_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vp2, vw1, vw2}), plus(most_significant_digit(vw1), concat_digit(vp2, vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(succpos(vp2), sort_machine_word::add_word(vw1, vw2)), concat_digit(vp2, sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vp2, vw1, vw2}), add_with_carry(most_significant_digit(vw1), concat_digit(vp2, vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(succpos(vp2), sort_machine_word::add_with_carry_word(vw1, vw2)), concat_digit(vp2, sort_machine_word::add_with_carry_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), plus(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(add_with_carry(vp1, vp2), sort_machine_word::add_word(vw1, vw2)), concat_digit(plus(vp1, vp2), sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), add_with_carry(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(add_with_carry(vp1, vp2), sort_machine_word::add_with_carry_word(vw1, vw2)), concat_digit(plus(vp1, vp2), sort_machine_word::add_with_carry_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vp1, vp2}), plus(succpos(vp1), vp2), succpos(plus(vp1, vp2))));
-        result.push_back(data_equation(variable_list({vp1, vp2}), plus(vp1, succpos(vp2)), succpos(plus(vp1, vp2))));
-        result.push_back(data_equation(variable_list({vp1, vp2}), auxiliary_plus_pos(vp1, vp2), plus(vp1, vp2)));
-        result.push_back(data_equation(variable_list({vw1, vw2}), times(most_significant_digit(vw1), most_significant_digit(vw2)), times_whr_mult_overflow(sort_machine_word::times_word(vw1, vw2), sort_machine_word::times_overflow_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vp2, vw1, vw2}), times(most_significant_digit(vw1), concat_digit(vp2, vw2)), concat_digit(times_overflow(vp2, vw1, sort_machine_word::times_overflow_word(vw1, vw2)), sort_machine_word::times_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vp1, vw1, vw2}), times(concat_digit(vp1, vw1), most_significant_digit(vw2)), concat_digit(times_overflow(vp1, vw2, sort_machine_word::times_overflow_word(vw1, vw2)), sort_machine_word::times_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), times(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), if_(less(vp1, vp2), times_ordered(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), times_ordered(concat_digit(vp2, vw2), concat_digit(vp1, vw1)))));
-        result.push_back(data_equation(variable_list({vp2, vw1, vw2}), times_ordered(most_significant_digit(vw1), concat_digit(vp2, vw2)), concat_digit(times_overflow(vp2, vw1, sort_machine_word::times_overflow_word(vw1, vw2)), sort_machine_word::times_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vp1, vp2, vw1}), times_ordered(concat_digit(vp1, vw1), vp2), plus(concat_digit(times_ordered(vp1, vp2), sort_machine_word::zero_word()), times_overflow(vp2, vw1, sort_machine_word::zero_word()))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), times_whr_mult_overflow(vw1, vw2), if_(sort_machine_word::equals_zero_word(vw2), most_significant_digit(vw1), concat_digit(most_significant_digit(vw2), vw1))));
-        result.push_back(data_equation(variable_list({voverflow, vw1, vw2}), times_overflow(most_significant_digit(vw1), vw2, voverflow), times_whr_mult_overflow(sort_machine_word::times_with_carry_word(vw1, vw2, voverflow), sort_machine_word::times_with_carry_overflow_word(vw1, vw2, voverflow))));
-        result.push_back(data_equation(variable_list({voverflow, vp1, vw1, vw2}), times_overflow(concat_digit(vp1, vw1), vw2, voverflow), concat_digit(times_overflow(vp1, vw2, sort_machine_word::times_with_carry_overflow_word(vw1, vw2, voverflow)), sort_machine_word::times_with_carry_word(vw1, vw2, voverflow))));
+        result.emplace_back(variable_list(), c1(), most_significant_digit(sort_machine_word::one_word()));
+        result.emplace_back(variable_list({vw}),
+            equals_one(most_significant_digit(vw)),
+            sort_machine_word::equals_one_word(vw));
+        result.emplace_back(variable_list({vp, vw}), equals_one(concat_digit(vp, vw)), sort_bool::false_());
+        result.emplace_back(variable_list({vp}), succ(vp), succpos(vp));
+        result.emplace_back(variable_list({vw1}),
+            succpos(most_significant_digit(vw1)),
+            if_(sort_machine_word::equals_max_word(vw1),
+                concat_digit(most_significant_digit(sort_machine_word::one_word()), sort_machine_word::zero_word()),
+                most_significant_digit(sort_machine_word::succ_word(vw1))));
+        result.emplace_back(variable_list({vp, vw1}),
+            succpos(concat_digit(vp, vw1)),
+            if_(sort_machine_word::equals_max_word(vw1),
+                concat_digit(succpos(vp), sort_machine_word::zero_word()),
+                concat_digit(vp, sort_machine_word::succ_word(vw1))));
+        result.emplace_back(variable_list({vw1, vw2}),
+            equal_to(most_significant_digit(vw1), most_significant_digit(vw2)),
+            sort_machine_word::equal_word(vw1, vw2));
+        result.emplace_back(variable_list({vp, vw1, vw2}),
+            equal_to(concat_digit(vp, vw1), most_significant_digit(vw2)),
+            sort_bool::false_());
+        result.emplace_back(variable_list({vp, vw1, vw2}),
+            equal_to(most_significant_digit(vw1), concat_digit(vp, vw2)),
+            sort_bool::false_());
+        result.emplace_back(variable_list({vp1, vp2, vw1, vw2}),
+            equal_to(concat_digit(vp1, vw1), concat_digit(vp2, vw2)),
+            sort_bool::and_(sort_machine_word::equal_word(vw1, vw2), equal_to(vp1, vp2)));
+        result.emplace_back(variable_list({vp1, vp2}),
+            equal_to(succpos(vp1), vp2),
+            sort_bool::and_(sort_bool::not_(equals_one(vp2)), equal_to(vp1, pos_predecessor(vp2))));
+        result.emplace_back(variable_list({vp1, vp2}),
+            equal_to(vp1, succpos(vp2)),
+            sort_bool::and_(sort_bool::not_(equals_one(vp1)), equal_to(pos_predecessor(vp1), vp2)));
+        result.emplace_back(variable_list({vw1, vw2}),
+            less(most_significant_digit(vw1), most_significant_digit(vw2)),
+            sort_machine_word::less_word(vw1, vw2));
+        result.emplace_back(variable_list({vp, vw1, vw2}),
+            less(concat_digit(vp, vw1), most_significant_digit(vw2)),
+            sort_bool::false_());
+        result.emplace_back(variable_list({vp, vw1, vw2}),
+            less(most_significant_digit(vw1), concat_digit(vp, vw2)),
+            sort_bool::true_());
+        result.emplace_back(variable_list({vp1, vp2, vw1, vw2}),
+            less(concat_digit(vp1, vw1), concat_digit(vp2, vw2)),
+            if_(sort_machine_word::less_word(vw1, vw2), less_equal(vp1, vp2), less(vp1, vp2)));
+        result.emplace_back(variable_list({vp1, vp2}),
+            less(succpos(vp1), vp2),
+            sort_bool::and_(less(most_significant_digit(sort_machine_word::two_word()), vp2),
+                less(vp1, pos_predecessor(vp2))));
+        result.emplace_back(variable_list({vp1, vp2}), less(vp1, succpos(vp2)), less_equal(vp1, vp2));
+        result.emplace_back(variable_list({vp, vw1}),
+            sort_machine_word::equals_one_word(vw1),
+            less(vp, most_significant_digit(vw1)),
+            sort_bool::false_());
+        result.emplace_back(variable_list({vw1, vw2}),
+            less_equal(most_significant_digit(vw1), most_significant_digit(vw2)),
+            sort_machine_word::less_equal_word(vw1, vw2));
+        result.emplace_back(variable_list({vp, vw1, vw2}),
+            less_equal(concat_digit(vp, vw1), most_significant_digit(vw2)),
+            sort_bool::false_());
+        result.emplace_back(variable_list({vp, vw1, vw2}),
+            less_equal(most_significant_digit(vw1), concat_digit(vp, vw2)),
+            sort_bool::true_());
+        result.emplace_back(variable_list({vp1, vp2, vw1, vw2}),
+            less_equal(concat_digit(vp1, vw1), concat_digit(vp2, vw2)),
+            if_(sort_machine_word::less_equal_word(vw1, vw2), less_equal(vp1, vp2), less(vp1, vp2)));
+        result.emplace_back(variable_list({vp1, vp2}), less_equal(succpos(vp1), vp2), less(vp1, vp2));
+        result.emplace_back(variable_list({vp1, vp2}),
+            less_equal(vp1, succpos(vp2)),
+            sort_bool::or_(equals_one(vp1), less_equal(pos_predecessor(vp1), vp2)));
+        result.emplace_back(variable_list({vp, vw1}),
+            sort_machine_word::equals_one_word(vw1),
+            less_equal(most_significant_digit(vw1), vp),
+            sort_bool::true_());
+        result.emplace_back(variable_list({vp1, vp2}), maximum(vp1, vp2), if_(less_equal(vp1, vp2), vp2, vp1));
+        result.emplace_back(variable_list({vp1, vp2}), minimum(vp1, vp2), if_(less_equal(vp1, vp2), vp1, vp2));
+        result.emplace_back(variable_list({vw1}),
+            pos_predecessor(most_significant_digit(vw1)),
+            if_(sort_machine_word::equals_one_word(vw1),
+                most_significant_digit(sort_machine_word::one_word()),
+                most_significant_digit(sort_machine_word::pred_word(vw1))));
+        result.emplace_back(variable_list({vp, vw1}),
+            pos_predecessor(concat_digit(vp, vw1)),
+            if_(sort_machine_word::equals_zero_word(vw1),
+                if_(equals_one(vp),
+                    most_significant_digit(sort_machine_word::max_word()),
+                    concat_digit(pos_predecessor(vp), sort_machine_word::max_word())),
+                concat_digit(vp, sort_machine_word::pred_word(vw1))));
+        result.emplace_back(variable_list({vp}), pos_predecessor(succpos(vp)), vp);
+        result.emplace_back(variable_list({vw1, vw2}),
+            plus(most_significant_digit(vw1), most_significant_digit(vw2)),
+            if_(sort_machine_word::add_overflow_word(vw1, vw2),
+                concat_digit(most_significant_digit(sort_machine_word::one_word()),
+                    sort_machine_word::add_word(vw1, vw2)),
+                most_significant_digit(sort_machine_word::add_word(vw1, vw2))));
+        result.emplace_back(variable_list({vw1, vw2}),
+            add_with_carry(most_significant_digit(vw1), most_significant_digit(vw2)),
+            if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2),
+                concat_digit(most_significant_digit(sort_machine_word::one_word()),
+                    sort_machine_word::add_with_carry_word(vw1, vw2)),
+                most_significant_digit(sort_machine_word::add_with_carry_word(vw1, vw2))));
+        result.emplace_back(variable_list({vp1, vw1, vw2}),
+            plus(concat_digit(vp1, vw1), most_significant_digit(vw2)),
+            if_(sort_machine_word::add_overflow_word(vw1, vw2),
+                concat_digit(succpos(vp1), sort_machine_word::add_word(vw1, vw2)),
+                concat_digit(vp1, sort_machine_word::add_word(vw1, vw2))));
+        result.emplace_back(variable_list({vp1, vw1, vw2}),
+            add_with_carry(concat_digit(vp1, vw1), most_significant_digit(vw2)),
+            if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2),
+                concat_digit(succpos(vp1), sort_machine_word::add_with_carry_word(vw1, vw2)),
+                concat_digit(vp1, sort_machine_word::add_with_carry_word(vw1, vw2))));
+        result.emplace_back(variable_list({vp2, vw1, vw2}),
+            plus(most_significant_digit(vw1), concat_digit(vp2, vw2)),
+            if_(sort_machine_word::add_overflow_word(vw1, vw2),
+                concat_digit(succpos(vp2), sort_machine_word::add_word(vw1, vw2)),
+                concat_digit(vp2, sort_machine_word::add_word(vw1, vw2))));
+        result.emplace_back(variable_list({vp2, vw1, vw2}),
+            add_with_carry(most_significant_digit(vw1), concat_digit(vp2, vw2)),
+            if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2),
+                concat_digit(succpos(vp2), sort_machine_word::add_with_carry_word(vw1, vw2)),
+                concat_digit(vp2, sort_machine_word::add_with_carry_word(vw1, vw2))));
+        result.emplace_back(variable_list({vp1, vp2, vw1, vw2}),
+            plus(concat_digit(vp1, vw1), concat_digit(vp2, vw2)),
+            if_(sort_machine_word::add_overflow_word(vw1, vw2),
+                concat_digit(add_with_carry(vp1, vp2), sort_machine_word::add_word(vw1, vw2)),
+                concat_digit(plus(vp1, vp2), sort_machine_word::add_word(vw1, vw2))));
+        result.emplace_back(variable_list({vp1, vp2, vw1, vw2}),
+            add_with_carry(concat_digit(vp1, vw1), concat_digit(vp2, vw2)),
+            if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2),
+                concat_digit(add_with_carry(vp1, vp2), sort_machine_word::add_with_carry_word(vw1, vw2)),
+                concat_digit(plus(vp1, vp2), sort_machine_word::add_with_carry_word(vw1, vw2))));
+        result.emplace_back(variable_list({vp1, vp2}), plus(succpos(vp1), vp2), succpos(plus(vp1, vp2)));
+        result.emplace_back(variable_list({vp1, vp2}), plus(vp1, succpos(vp2)), succpos(plus(vp1, vp2)));
+        result.emplace_back(variable_list({vp1, vp2}), auxiliary_plus_pos(vp1, vp2), plus(vp1, vp2));
+        result.emplace_back(variable_list({vw1, vw2}),
+            times(most_significant_digit(vw1), most_significant_digit(vw2)),
+            times_whr_mult_overflow(sort_machine_word::times_word(vw1, vw2),
+                sort_machine_word::times_overflow_word(vw1, vw2)));
+        result.emplace_back(variable_list({vp2, vw1, vw2}),
+            times(most_significant_digit(vw1), concat_digit(vp2, vw2)),
+            concat_digit(times_overflow(vp2, vw1, sort_machine_word::times_overflow_word(vw1, vw2)),
+                sort_machine_word::times_word(vw1, vw2)));
+        result.emplace_back(variable_list({vp1, vw1, vw2}),
+            times(concat_digit(vp1, vw1), most_significant_digit(vw2)),
+            concat_digit(times_overflow(vp1, vw2, sort_machine_word::times_overflow_word(vw1, vw2)),
+                sort_machine_word::times_word(vw1, vw2)));
+        result.emplace_back(variable_list({vp1, vp2, vw1, vw2}),
+            times(concat_digit(vp1, vw1), concat_digit(vp2, vw2)),
+            if_(less(vp1, vp2),
+                times_ordered(concat_digit(vp1, vw1), concat_digit(vp2, vw2)),
+                times_ordered(concat_digit(vp2, vw2), concat_digit(vp1, vw1))));
+        result.emplace_back(variable_list({vp2, vw1, vw2}),
+            times_ordered(most_significant_digit(vw1), concat_digit(vp2, vw2)),
+            concat_digit(times_overflow(vp2, vw1, sort_machine_word::times_overflow_word(vw1, vw2)),
+                sort_machine_word::times_word(vw1, vw2)));
+        result.emplace_back(variable_list({vp1, vp2, vw1}),
+            times_ordered(concat_digit(vp1, vw1), vp2),
+            plus(concat_digit(times_ordered(vp1, vp2), sort_machine_word::zero_word()),
+                times_overflow(vp2, vw1, sort_machine_word::zero_word())));
+        result.emplace_back(variable_list({vw1, vw2}),
+            times_whr_mult_overflow(vw1, vw2),
+            if_(sort_machine_word::equals_zero_word(vw2),
+                most_significant_digit(vw1),
+                concat_digit(most_significant_digit(vw2), vw1)));
+        result.emplace_back(variable_list({voverflow, vw1, vw2}),
+            times_overflow(most_significant_digit(vw1), vw2, voverflow),
+            times_whr_mult_overflow(sort_machine_word::times_with_carry_word(vw1, vw2, voverflow),
+                sort_machine_word::times_with_carry_overflow_word(vw1, vw2, voverflow)));
+        result.emplace_back(variable_list({voverflow, vp1, vw1, vw2}),
+            times_overflow(concat_digit(vp1, vw1), vw2, voverflow),
+            concat_digit(
+                times_overflow(vp1, vw2, sort_machine_word::times_with_carry_overflow_word(vw1, vw2, voverflow)),
+                sort_machine_word::times_with_carry_word(vw1, vw2, voverflow)));
         return result;
       }
 
-    } // namespace sort_pos
-
-  } // namespace data
-
-} // namespace mcrl2
+      } // namespace mcrl2::data::sort_pos
 
 #endif // MCRL2_DATA_POS64_H

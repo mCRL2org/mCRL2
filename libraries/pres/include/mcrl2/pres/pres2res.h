@@ -21,9 +21,8 @@
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pres/is_res.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system
+{
 
 class variable_replace_builder: public pres_expression_builder <variable_replace_builder>
 {
@@ -31,7 +30,7 @@ class variable_replace_builder: public pres_expression_builder <variable_replace
     const std::vector<propositional_variable_instantiation>& m_new_pres_variables;
 
   public:
-    typedef pres_expression_builder<variable_replace_builder> super;
+    using super = pres_expression_builder<variable_replace_builder>;
     using super::apply;
 
     variable_replace_builder(const atermpp::indexed_set<propositional_variable_instantiation>& stored_variables,
@@ -89,8 +88,8 @@ class pres2res_algorithm
       while (m_next_res_variable_index<m_stored_variables.size())
       {
         const propositional_variable_instantiation& X_e=m_stored_variables.at(m_next_res_variable_index);
-        m_next_res_variable_index++; 
-        new_pres_variables.push_back(propositional_variable_instantiation(fresh_identifier_generator(),data::data_expression_list()));
+        m_next_res_variable_index++;
+        new_pres_variables.emplace_back(fresh_identifier_generator(), data::data_expression_list());
 
         std::size_t index = m_equation_index.index(X_e.name());
         const pres_equation& eqn = m_input_pres.equations()[index];
@@ -137,7 +136,7 @@ class pres2res_algorithm
         for(const pres_equation& eqn: eqns)
         {
           variable_replacer.apply(result, eqn.formula());
-          resulting_equations.push_back(pres_equation(eqn.symbol(), eqn.variable(), result));
+          resulting_equations.emplace_back(eqn.symbol(), eqn.variable(), result);
           mCRL2log(log::debug) <<  resulting_equations.back() << "\n";
         }
         eqns=atermpp::vector<pres_equation>(); // clear the equations.
@@ -149,8 +148,6 @@ class pres2res_algorithm
     }
 };
 
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system
 
 #endif // MCRL2_PRES_PRES2RES_H

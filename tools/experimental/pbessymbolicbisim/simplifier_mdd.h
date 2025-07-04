@@ -16,9 +16,7 @@
 
 #include "simplifier.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 /**
@@ -27,7 +25,7 @@ namespace data
  */
 class simplifier_mdd: public simplifier
 {
-  typedef simplifier super;
+  using super = simplifier;
   using super::rewr;
   using super::proving_rewr;
 
@@ -127,6 +125,6 @@ public:
 
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MDD_H

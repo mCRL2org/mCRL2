@@ -15,10 +15,7 @@
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated class rename_expression ---//
@@ -75,10 +72,10 @@ inline void make_rename_expression(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of rename_expressions
-typedef atermpp::term_list<rename_expression> rename_expression_list;
+using rename_expression_list = atermpp::term_list<rename_expression>;
 
 /// \\brief vector of rename_expressions
-typedef std::vector<rename_expression>    rename_expression_vector;
+using rename_expression_vector = std::vector<rename_expression>;
 
 /// \\brief Test for a rename_expression expression
 /// \\param x A term
@@ -109,8 +106,8 @@ inline void swap(rename_expression& t1, rename_expression& t2)
 }
 //--- end generated class rename_expression ---//
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_RENAME_EXPRESSION_H

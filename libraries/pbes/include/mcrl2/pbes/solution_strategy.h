@@ -15,13 +15,16 @@
 #include <fstream>
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2
+
+
+namespace mcrl2::pbes_system
 {
 
-namespace pbes_system
+using solution_strategy_t = enum
 {
-
-typedef enum { gauss, small_progr_measures } solution_strategy_t;
+  gauss,
+  small_progr_measures
+};
 
 static
 std::string solution_strategy_to_string(const solution_strategy_t s)
@@ -93,8 +96,8 @@ std::string description(const solution_strategy_t s)
   throw mcrl2::runtime_error("unknown solution strategy");
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_SOLUTION_STRATEGY_H

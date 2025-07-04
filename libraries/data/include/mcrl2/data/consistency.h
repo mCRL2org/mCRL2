@@ -19,9 +19,8 @@
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 /// \brief Test if x is true
 /// \param x a data expression
@@ -173,8 +172,6 @@ data_expression make_exists_(const data::variable_list& v, const data_expression
   return exists(v, x);
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_CONSISTENCY_H

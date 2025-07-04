@@ -27,10 +27,9 @@
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/machine_number.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 // Adds sort expression traversal to a traverser
@@ -38,7 +37,7 @@ namespace data
 template <template <class> class Traverser, class Derived>
 struct add_traverser_sort_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -363,7 +362,7 @@ struct sort_expression_traverser: public add_traverser_sort_expressions<core::tr
 template <template <class> class Traverser, class Derived>
 struct add_traverser_data_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -575,7 +574,7 @@ struct data_expression_traverser: public add_traverser_data_expressions<core::tr
 template <template <class> class Traverser, class Derived>
 struct add_traverser_variables: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -795,7 +794,7 @@ struct variable_traverser: public add_traverser_variables<core::traverser, Deriv
 template <template <class> class Traverser, class Derived>
 struct add_traverser_identifier_strings: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1124,8 +1123,8 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<core
 };
 //--- end generated add_traverser_identifier_strings code ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_TRAVERSER_H

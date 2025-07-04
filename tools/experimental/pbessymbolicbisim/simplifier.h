@@ -16,9 +16,7 @@
 
 #include "simplifier_mode.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 class simplifier
@@ -101,6 +99,6 @@ simplifier* get_simplifier_instance(const simplifier_mode& mode, const rewriter&
   const std::map< variable, std::pair<data_expression, data_expression> >& lu_map = std::map< variable, std::pair<data_expression, data_expression> >());
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_H

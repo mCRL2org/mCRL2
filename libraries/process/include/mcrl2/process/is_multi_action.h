@@ -15,15 +15,14 @@
 #include "mcrl2/process/multi_action_name.h"
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
 struct sync_multi_action_name_traverser: public process_expression_traverser<sync_multi_action_name_traverser>
 {
-  typedef process_expression_traverser<sync_multi_action_name_traverser> super;
+  using super = process_expression_traverser<sync_multi_action_name_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -63,8 +62,6 @@ multi_action_name sync_multi_action_name(const sync& x)
   return f.result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_MULTI_ACTION_H

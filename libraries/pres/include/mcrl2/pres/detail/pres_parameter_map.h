@@ -16,17 +16,15 @@
 #include "mcrl2/pres/pres.h"
 #include <regex>
 
-namespace mcrl2
-{
 
-namespace pres_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pres_system::detail
 {
 
 /// \brief Data structure for storing the variables that should be expanded by the finite presinst algorithm.
-typedef std::map<core::identifier_string, std::vector<data::variable>> pres_parameter_map;
+using pres_parameter_map = std::map<core::identifier_string, std::vector<data::variable>>;
 
 /// \brief Returns true if the declaration text matches with the variable d.
 inline
@@ -162,10 +160,10 @@ std::ostream& print_pres_parameter_map(std::ostream& out, const pres_parameter_m
   return out;
 }
 
-} // namespace detail
+} // namespace mcrl2::pres_system::detail
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_DETAIL_PRES_PARAMETER_MAP_H

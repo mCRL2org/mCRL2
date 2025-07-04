@@ -16,13 +16,7 @@
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/rewrite.h"
 
-namespace mcrl2
-{
-
-namespace lps
-{
-
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 /// \brief Algorithm class for algorithms on linear process specifications.
@@ -141,10 +135,6 @@ class lps_algorithm
     }
 };
 
-} // namespace detail
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif // MCRL2_LPS_DETAIL_LPS_ALGORITHM_H

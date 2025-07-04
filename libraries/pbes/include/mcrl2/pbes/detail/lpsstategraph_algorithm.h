@@ -18,11 +18,11 @@
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 class lpsstategraph_algorithm;
 void lps_reset_variables(lpsstategraph_algorithm& algorithm,
@@ -36,7 +36,7 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
 {
   protected:
     friend struct lps_reset_traverser;
-    typedef local_reset_variables_algorithm super;
+    using super = local_reset_variables_algorithm;
 
     const lps::specification& m_original_lps;
     lps::specification m_transformed_lps; // will contain the result of the computation
@@ -151,7 +151,7 @@ data::assignment_list make_assignments(const data::variable_list& d, const data:
 
 struct lps_reset_traverser: public pbes_expression_traverser<lps_reset_traverser>
 {
-  typedef pbes_expression_traverser<lps_reset_traverser> super;
+  using super = pbes_expression_traverser<lps_reset_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -193,10 +193,10 @@ void lps_reset_variables(lpsstategraph_algorithm& algorithm,
   f.apply(x);
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LPSSTATEGRAPH_ALGORITHM_H

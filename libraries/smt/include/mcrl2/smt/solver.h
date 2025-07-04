@@ -15,9 +15,7 @@
 #include "mcrl2/smt/native_translation.h"
 #include "mcrl2/smt/answer.h"
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 
 class smt_solver
@@ -37,7 +35,6 @@ public:
   answer solve(const data::variable_list& vars, const data::data_expression& expr, const std::chrono::microseconds& timeout = std::chrono::microseconds::zero());
 };
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif // MCRL2_SMT_SOLVER_H

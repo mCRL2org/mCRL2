@@ -16,9 +16,9 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/srf_pbes.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -84,8 +84,8 @@ void resolve_summand_variable_name_clashes(detail::pre_srf_pbes<allow_ce>& pbess
   }
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_RESOLVE_NAME_CLASHES_H

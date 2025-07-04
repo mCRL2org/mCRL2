@@ -14,18 +14,16 @@
 
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pres_system::detail
 {
 
 struct occurring_variable_visitor: public pres_expression_traverser<occurring_variable_visitor>
 {
-  typedef pres_expression_traverser<occurring_variable_visitor> super;
+  using super = pres_expression_traverser<occurring_variable_visitor>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -38,10 +36,10 @@ struct occurring_variable_visitor: public pres_expression_traverser<occurring_va
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pres_system::detail
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_DETAIL_OCCURRING_VARIABLE_VISITOR_H

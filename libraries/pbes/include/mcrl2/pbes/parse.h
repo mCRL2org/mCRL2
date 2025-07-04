@@ -18,10 +18,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/join.hpp>
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -132,8 +129,6 @@ pbes_expression parse_pbes_expression(const std::string& text,
   return parse_pbes_expression(text, pbesspec.data(), variables, propositional_variables, type_check, translate_user_notation, normalize_sorts);
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_PARSE_H

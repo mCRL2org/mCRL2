@@ -16,15 +16,15 @@
 
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \brief Algorithm class for the symbolic_exploration instantiation algorithm.
 class pbesinst_symbolic_algorithm
 {
   public:
-    typedef propositional_variable_instantiation state_type;
+    using state_type = propositional_variable_instantiation;
 
   protected:
     /// \brief The PBES that is being instantiated.
@@ -100,8 +100,8 @@ class pbesinst_symbolic_algorithm
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESINST_SYMBOLIC_H

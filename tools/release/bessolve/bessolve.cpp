@@ -31,7 +31,7 @@ using namespace mcrl2::pbes_system;
 class bessolve_tool: public pbes_input_tool<input_tool>
 {
   private:
-    typedef pbes_input_tool<input_tool> super;
+    using super = pbes_input_tool<input_tool>;
 
   public:
     bessolve_tool()

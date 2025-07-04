@@ -15,9 +15,8 @@
 #include <limits>
 #include <type_traits>
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \returns True when the given value is a power of two.
@@ -54,7 +53,7 @@ static T round_up_to_power_of_two(T value)
   return value + 1;
 }
 
-} // namespace utilities
-} // namespace mcrl2`
+} // namespace mcrl2::utilities
+// namespace mcrl2`
 
 #endif // MCRL2_UTILITY_POWER_OF_TWO_H_

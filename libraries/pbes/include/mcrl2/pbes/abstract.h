@@ -16,10 +16,9 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -28,7 +27,7 @@ namespace detail
 /// \brief Visitor that implements the pbes-abstract algorithm.
 struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_builder>
 {
-  typedef pbes_expression_builder<pbes_abstract_builder> super;
+  using super = pbes_expression_builder<pbes_abstract_builder>;
   using super::apply;
 
   std::vector<data::variable_list> m_quantifier_stack;
@@ -142,8 +141,8 @@ class pbes_abstract_algorithm
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_ABSTRACT_H

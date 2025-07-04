@@ -18,11 +18,8 @@
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/process/process_equation.h"
 
-namespace mcrl2
-{
-
 /// \brief The main namespace for the Process library.
-namespace process
+namespace mcrl2::process
 {
 
 class process_specification;
@@ -242,9 +239,7 @@ bool operator!=(const process_specification& spec1, const process_specification&
   return !(spec1 == spec2);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_PROCESS_SPECIFICATION_H
 

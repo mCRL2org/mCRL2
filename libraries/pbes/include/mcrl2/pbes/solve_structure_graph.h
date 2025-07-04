@@ -19,9 +19,7 @@
 #include "mcrl2/pbes/pbessolve_attractors.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 inline
 std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure_graph& G)
@@ -271,7 +269,7 @@ class solve_structure_graph_algorithm
       log_vertex_set(G, Wconj, "Wconj");
       log_vertex_set(G, Wdisj, "Wdisj");
 
-      typedef structure_graph::vertex vertex;
+      using vertex = structure_graph::vertex;
       structure_graph::index_type init = G.initial_vertex();
 
       // V contains the vertices of G, but not the edges
@@ -640,8 +638,8 @@ bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts
   return algorithm.solve_with_counter_example(G, ltsspec);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_SOLVE_STRUCTURE_GRAPH_H

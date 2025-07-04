@@ -24,12 +24,12 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard.h"
 
-namespace mcrl2 {
 
-  namespace data {
 
-    /// \brief Namespace for system defined sort bool_.
-    namespace sort_bool {
+  
+
+/// \brief Namespace for system defined sort bool_.
+namespace mcrl2::data::sort_bool {
 
       inline
       const core::identifier_string& bool_name()
@@ -147,7 +147,8 @@ namespace mcrl2 {
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
+      using implementation_map = std::map<function_symbol,
+          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for bool_.
       /// \return All system defined constructors that are to be implemented in C++ for bool_.
       inline
@@ -451,7 +452,8 @@ namespace mcrl2 {
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
+      using implementation_map = std::map<function_symbol,
+          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for bool_
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for bool_
       inline
@@ -504,40 +506,36 @@ namespace mcrl2 {
         variable vb("b",bool_());
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list(), not_(true_()), false_()));
-        result.push_back(data_equation(variable_list(), not_(false_()), true_()));
-        result.push_back(data_equation(variable_list({vb}), not_(not_(vb)), vb));
-        result.push_back(data_equation(variable_list({vb}), and_(vb, true_()), vb));
-        result.push_back(data_equation(variable_list({vb}), and_(vb, false_()), false_()));
-        result.push_back(data_equation(variable_list({vb}), and_(true_(), vb), vb));
-        result.push_back(data_equation(variable_list({vb}), and_(false_(), vb), false_()));
-        result.push_back(data_equation(variable_list({vb}), or_(vb, true_()), true_()));
-        result.push_back(data_equation(variable_list({vb}), or_(vb, false_()), vb));
-        result.push_back(data_equation(variable_list({vb}), or_(true_(), vb), true_()));
-        result.push_back(data_equation(variable_list({vb}), or_(false_(), vb), vb));
-        result.push_back(data_equation(variable_list({vb}), implies(vb, true_()), true_()));
-        result.push_back(data_equation(variable_list({vb}), implies(vb, false_()), not_(vb)));
-        result.push_back(data_equation(variable_list({vb}), implies(true_(), vb), vb));
-        result.push_back(data_equation(variable_list({vb}), implies(false_(), vb), true_()));
-        result.push_back(data_equation(variable_list({vb}), equal_to(true_(), vb), vb));
-        result.push_back(data_equation(variable_list({vb}), equal_to(false_(), vb), not_(vb)));
-        result.push_back(data_equation(variable_list({vb}), equal_to(vb, true_()), vb));
-        result.push_back(data_equation(variable_list({vb}), equal_to(vb, false_()), not_(vb)));
-        result.push_back(data_equation(variable_list({vb}), less(false_(), vb), vb));
-        result.push_back(data_equation(variable_list({vb}), less(true_(), vb), false_()));
-        result.push_back(data_equation(variable_list({vb}), less(vb, false_()), false_()));
-        result.push_back(data_equation(variable_list({vb}), less(vb, true_()), not_(vb)));
-        result.push_back(data_equation(variable_list({vb}), less_equal(false_(), vb), true_()));
-        result.push_back(data_equation(variable_list({vb}), less_equal(true_(), vb), vb));
-        result.push_back(data_equation(variable_list({vb}), less_equal(vb, false_()), not_(vb)));
-        result.push_back(data_equation(variable_list({vb}), less_equal(vb, true_()), true_()));
+        result.emplace_back(variable_list(), not_(true_()), false_());
+        result.emplace_back(variable_list(), not_(false_()), true_());
+        result.emplace_back(variable_list({vb}), not_(not_(vb)), vb);
+        result.emplace_back(variable_list({vb}), and_(vb, true_()), vb);
+        result.emplace_back(variable_list({vb}), and_(vb, false_()), false_());
+        result.emplace_back(variable_list({vb}), and_(true_(), vb), vb);
+        result.emplace_back(variable_list({vb}), and_(false_(), vb), false_());
+        result.emplace_back(variable_list({vb}), or_(vb, true_()), true_());
+        result.emplace_back(variable_list({vb}), or_(vb, false_()), vb);
+        result.emplace_back(variable_list({vb}), or_(true_(), vb), true_());
+        result.emplace_back(variable_list({vb}), or_(false_(), vb), vb);
+        result.emplace_back(variable_list({vb}), implies(vb, true_()), true_());
+        result.emplace_back(variable_list({vb}), implies(vb, false_()), not_(vb));
+        result.emplace_back(variable_list({vb}), implies(true_(), vb), vb);
+        result.emplace_back(variable_list({vb}), implies(false_(), vb), true_());
+        result.emplace_back(variable_list({vb}), equal_to(true_(), vb), vb);
+        result.emplace_back(variable_list({vb}), equal_to(false_(), vb), not_(vb));
+        result.emplace_back(variable_list({vb}), equal_to(vb, true_()), vb);
+        result.emplace_back(variable_list({vb}), equal_to(vb, false_()), not_(vb));
+        result.emplace_back(variable_list({vb}), less(false_(), vb), vb);
+        result.emplace_back(variable_list({vb}), less(true_(), vb), false_());
+        result.emplace_back(variable_list({vb}), less(vb, false_()), false_());
+        result.emplace_back(variable_list({vb}), less(vb, true_()), not_(vb));
+        result.emplace_back(variable_list({vb}), less_equal(false_(), vb), true_());
+        result.emplace_back(variable_list({vb}), less_equal(true_(), vb), vb);
+        result.emplace_back(variable_list({vb}), less_equal(vb, false_()), not_(vb));
+        result.emplace_back(variable_list({vb}), less_equal(vb, true_()), true_());
         return result;
       }
 
-    } // namespace sort_bool_
-
-  } // namespace data
-
-} // namespace mcrl2
+} // namespace sort_bool_
 
 #endif // MCRL2_DATA_BOOL_H

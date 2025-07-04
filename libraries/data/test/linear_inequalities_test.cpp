@@ -89,7 +89,7 @@ void split_conjunction_of_inequalities_set(const data_expression& e, std::vector
   }
   else
   {
-    v.push_back(linear_inequality(e,r));
+    v.emplace_back(e, r);
   }
 }
 
@@ -151,7 +151,7 @@ bool test_application_of_Fourier_Motzkin(const std::string& vars,
   fourier_motzkin(v_inequalities, v_elim.begin(), v_elim.end(), resulting_inequalities, r);
 
   std::vector < linear_inequality> inconsistent_inequalities=resulting_inequalities;
-  inconsistent_inequalities.push_back(linear_inequality(parse_data_expression(inconsistent_with,variables,data_spec),r));
+  inconsistent_inequalities.emplace_back(parse_data_expression(inconsistent_with, variables, data_spec), r);
   if (!(check_consistent ^ is_inconsistent(inconsistent_inequalities,r, false)))
   {
     std::cout << "Expected set of inequations to be " << (check_consistent ? "" : "in") << "consistent with given inequality after applying Fourier-Motzkin elimination\n";

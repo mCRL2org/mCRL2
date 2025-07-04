@@ -16,13 +16,7 @@
 #include "mcrl2/pres/io.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
-{
-
-namespace tools
+namespace mcrl2::pres_system::tools
 {
 
 /// \brief Base class for filter tools that take a pres as input.
@@ -133,10 +127,6 @@ class pres_input_tool: public Tool
     }
 };
 
-} // namespace tools
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::tools
 
 #endif // MCRL2_RES_PRES_INPUT_TOOL_H

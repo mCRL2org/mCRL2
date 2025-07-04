@@ -16,11 +16,8 @@
 #include "mcrl2/process/detail/process_io.h"
 #include "mcrl2/utilities/detail/command.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 struct process_command: public utilities::detail::command
 {
@@ -56,10 +53,6 @@ struct process_rewriter_command: public process_command
   {}
 };
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_PROCESS_COMMAND_H

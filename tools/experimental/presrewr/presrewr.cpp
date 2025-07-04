@@ -35,7 +35,7 @@ using utilities::tools::input_output_tool;
 class pres_rewriter : public pres_input_tool<pres_output_tool<pres_rewriter_tool<rewriter_tool<input_output_tool> > > >
 {
   protected:
-    typedef pres_input_tool<pres_output_tool<pres_rewriter_tool<rewriter_tool<input_output_tool> > > > super;
+    using super = pres_input_tool<pres_output_tool<pres_rewriter_tool<rewriter_tool<input_output_tool>>>>;
 
     /// \brief Returns the types of rewriters that are available for this tool.
     std::set<pres_system::pres_rewriter_type> available_rewriters() const override

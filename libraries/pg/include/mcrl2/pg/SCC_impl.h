@@ -72,7 +72,7 @@ private:
         component.push_back(v);
 
         // Add to stack to be processed in depth-first-search
-        stack.push_back(std::make_pair(v, 0));
+        stack.emplace_back(v, 0);
     }
 
     /* This implements depth-first-search using a stack, which is a bit more

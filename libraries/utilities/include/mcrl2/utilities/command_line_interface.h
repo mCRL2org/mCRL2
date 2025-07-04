@@ -21,9 +21,7 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/toolset_version.h"
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 class interface_description;
@@ -405,9 +403,9 @@ class interface_description
     };
     /// \endcond
 
-    typedef std::map< std::string, option_descriptor > option_map;
+    using option_map = std::map<std::string, option_descriptor>;
 
-    typedef std::map< const char,  std::string, option_identifier_less > short_to_long_map;
+    using short_to_long_map = std::map<const char, std::string, option_identifier_less>;
 
     /// \brief Maps long option identifiers to option descriptor objects
     option_map        m_options;
@@ -792,10 +790,10 @@ class command_line_parser
   public:
 
     /// Used to map options to arguments
-    typedef std::multimap< std::string, std::string >  option_map;
+    using option_map = std::multimap<std::string, std::string>;
 
     /// Used to store command line arguments that were not recognised as option or arguments to options
-    typedef std::vector< std::string >                 argument_list;
+    using argument_list = std::vector<std::string>;
 
   private:
 
@@ -1180,7 +1178,7 @@ class interface_description::enum_argument : public typed_argument< T >
     /// \brief Implementation that adds the value of an enum type
     enum_argument& add_value_with_short(const std::string& long_arg, const std::string& short_arg, const std::string& description, const bool is_default = false)
     {
-      m_enum.push_back(basic_argument::argument_description(long_arg, short_arg, description));
+      m_enum.emplace_back(long_arg, short_arg, description);
 
       if(is_default)
       {
@@ -1538,8 +1536,6 @@ interface_description::file_argument make_file_argument(std::string const& name)
   return interface_description::file_argument(name);
 }
 
-#if !defined(__COMMAND_LINE_INTERFACE__)
-
 template <>
 inline command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
   m_interface(d), m_continue(true), options(m_options), arguments(m_arguments)
@@ -1549,7 +1545,8 @@ inline command_line_parser::command_line_parser(interface_description& d, const 
 
   process_default_options(d);
 }
-# ifndef __CYGWIN__ // std::wstring is not available for Cygwin
+
+#ifndef __CYGWIN__ // std::wstring is not available for Cygwin
 template <>
 inline command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
   m_interface(d), m_continue(true), options(m_options), arguments(m_arguments)
@@ -1559,10 +1556,9 @@ inline command_line_parser::command_line_parser(interface_description& d, const 
 
   process_default_options(d);
 }
-# endif // __CYGWIN__
-#endif
+#endif // __CYGWIN__
+
 /// \endcond
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif

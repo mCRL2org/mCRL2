@@ -17,10 +17,7 @@
 #include "mcrl2/lps/traverser.h"
 #include "mcrl2/process/print.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -29,7 +26,7 @@ namespace detail
 template <typename Derived>
 struct printer: public lps::add_traverser_sort_expressions<process::detail::printer, Derived>
 {
-  typedef lps::add_traverser_sort_expressions<process::detail::printer, Derived> super;
+  using super = lps::add_traverser_sort_expressions<process::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;
@@ -243,7 +240,9 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
       if (x.action_summands().empty() && (x.deadlock_summands().empty()))
       {
         deadlock_summand_vector v;
-        v.push_back(deadlock_summand(data::variable_list(), data::sort_bool::true_(), lps::deadlock(data::parse_data_expression("0"))));
+        v.emplace_back(data::variable_list(),
+            data::sort_bool::true_(),
+            lps::deadlock(data::parse_data_expression("0")));
         print_numbered_list(v, separator, number_separator, 1, true);
       }
     }
@@ -268,7 +267,9 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
       if (x.action_summands().empty() && (x.deadlock_summands().empty()))
       {
         deadlock_summand_vector v;
-        v.push_back(deadlock_summand(data::variable_list(), data::sort_bool::true_(), lps::deadlock(data::parse_data_expression("0"))));
+        v.emplace_back(data::variable_list(),
+            data::sort_bool::true_(),
+            lps::deadlock(data::parse_data_expression("0")));
         print_list(v, opener, closer, separator);
       }
     }
@@ -352,8 +353,6 @@ std::string pp(const T& x, bool precedence_aware = true)
   return out.str();
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_PRINT_H

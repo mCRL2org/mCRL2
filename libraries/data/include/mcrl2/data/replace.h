@@ -16,10 +16,7 @@
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/replace_capture_avoiding.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -29,7 +26,7 @@ namespace detail
 template <template <class> class Builder, class Substitution>
 struct replace_sort_expressions_builder : public Builder<replace_sort_expressions_builder<Builder, Substitution>>
 {
-  typedef Builder<replace_sort_expressions_builder<Builder, Substitution>> super;
+  using super = Builder<replace_sort_expressions_builder<Builder, Substitution>>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -67,7 +64,7 @@ replace_sort_expressions_builder<Builder, Substitution> make_replace_sort_expres
 template <template <class> class Builder, class Substitution>
 struct replace_data_expressions_builder : public Builder<replace_data_expressions_builder<Builder, Substitution>>
 {
-  typedef Builder<replace_data_expressions_builder<Builder, Substitution>> super;
+  using super = Builder<replace_data_expressions_builder<Builder, Substitution>>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -106,7 +103,7 @@ template <template <class> class Builder, template <template <class> class, clas
 struct replace_free_variables_builder
     : public Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution>>
 {
-  typedef Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution>> super;
+  using super = Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution>>;
   using super::apply;
   using super::bound_variables;
   using super::enter;
@@ -320,8 +317,6 @@ T substitute_sorts(const T& x,
   return result;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REPLACE_H

@@ -15,11 +15,7 @@
 #include "mcrl2/data/detail/prover/bdd_info.h"
 #include <fstream>
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief The class BDD2Dot offers the ability to write binary decision diagrams to dot files.
@@ -102,8 +98,6 @@ class BDD2Dot
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

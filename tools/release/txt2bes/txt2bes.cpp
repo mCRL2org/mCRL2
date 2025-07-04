@@ -24,31 +24,31 @@ using pbes_system::tools::pbes_output_tool;
 
 class txt2bes_tool: public pbes_output_tool<input_output_tool>
 {
-    typedef pbes_output_tool<input_output_tool> super;
+  using super = pbes_output_tool<input_output_tool>;
 
-  public:
-    txt2bes_tool()
-      : super(NAME, AUTHOR,
-              "parse a textual description of a BES",
-              "Parse the textual description of a BES from INFILE and write it to OUTFILE. "
-              "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."
-             )
-    {}
+public:
+  txt2bes_tool()
+      : super(NAME,
+            AUTHOR,
+            "parse a textual description of a BES",
+            "Parse the textual description of a BES from INFILE and write it to OUTFILE. "
+            "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.")
+  {}
 
-    bool run()
+  bool run()
+  {
+    pbes_system::pbes p;
+    if (input_filename().empty())
     {
-      pbes_system::pbes p;
-      if (input_filename().empty())
-      {
-        p = pbes_system::txt2pbes(std::cin);
-      }
-      else
-      {
-        std::ifstream from(input_filename().c_str());
-        p = pbes_system::txt2pbes(from);
-      }
-      pbes_system::save_pbes(p, output_filename(), pbes_output_format());
-      return true;
+      p = pbes_system::txt2pbes(std::cin);
+    }
+    else
+    {
+      std::ifstream from(input_filename().c_str());
+      p = pbes_system::txt2pbes(from);
+    }
+    pbes_system::save_pbes(p, output_filename(), pbes_output_format());
+    return true;
     }
 };
 

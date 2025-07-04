@@ -16,11 +16,11 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 inline
 void split_pfnf_implication(const pbes_expression& x, pbes_expression& g, std::vector<propositional_variable_instantiation>& Xij)
@@ -315,10 +315,10 @@ class pfnf_pbes
     }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_PFNF_PBES_H
