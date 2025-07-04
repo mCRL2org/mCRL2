@@ -30,10 +30,7 @@
 #include "ppg_parser.h"
 #include "partition_block.h"
 
-
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 class dependency_graph_partition
@@ -518,8 +515,6 @@ public:
 
 };
 
-} // namespace data
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_PARTITION_H

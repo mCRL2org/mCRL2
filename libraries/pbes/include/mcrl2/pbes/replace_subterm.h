@@ -15,9 +15,8 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/position_count_traverser.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -196,8 +195,6 @@ pbes_expression find_subterm(const pbes& pbesspec, std::size_t x, std::size_t y)
   return f.result;
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REPLACE_SUBTERM_H

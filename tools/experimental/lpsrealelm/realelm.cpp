@@ -17,9 +17,7 @@
 
 #include "realelm.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 using namespace atermpp;
@@ -1002,5 +1000,4 @@ stochastic_specification realelm(stochastic_specification s, const std::size_t m
 
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data

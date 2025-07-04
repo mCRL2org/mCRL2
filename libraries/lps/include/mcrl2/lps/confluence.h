@@ -20,9 +20,8 @@
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/smt/solver.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
@@ -625,8 +624,6 @@ class confluence_checker
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_CONFLUENCE_H

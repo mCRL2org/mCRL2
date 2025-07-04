@@ -15,9 +15,8 @@
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/detail/position_count_traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -350,8 +349,6 @@ process_expression find_subterm(const process_specification& procspec, std::size
   return f.result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_REPLACE_SUBTERM_H

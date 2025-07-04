@@ -21,9 +21,8 @@
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pres/is_res.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system
+{
 
 class variable_replace_builder: public pres_expression_builder <variable_replace_builder>
 {
@@ -149,8 +148,6 @@ class pres2res_algorithm
     }
 };
 
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system
 
 #endif // MCRL2_PRES_PRES2RES_H

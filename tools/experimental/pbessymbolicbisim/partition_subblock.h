@@ -13,9 +13,7 @@
 #include "eliminate_real_if.h"
 #include "utilities.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 /**
@@ -261,8 +259,7 @@ std::ostream& operator<<(std::ostream& out, const subblock& b)
   return out << pp(b);
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 namespace std
 {

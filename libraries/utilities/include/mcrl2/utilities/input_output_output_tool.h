@@ -12,13 +12,7 @@
 
 #include "mcrl2/utilities/input_tool.h"
 
-namespace mcrl2
-{
-
-namespace utilities
-{
-
-namespace tools
+namespace mcrl2::utilities::tools
 {
 
 /// \brief Base class for tools that optionally takes one file as input, and writes the results
@@ -111,10 +105,6 @@ public:
   std::string& output_filename2() { return m_output_filename2; }
 };
 
-} // namespace tools
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::tools
 
 #endif // MCRL2_UTILITIES_INPUT_INPUT_OUTPUT_TOOL_H

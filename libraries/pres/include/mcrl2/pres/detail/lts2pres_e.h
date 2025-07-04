@@ -14,11 +14,8 @@
 
 #include "mcrl2/pres/detail/lts2pres_rhs.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
-
-namespace detail {
+namespace mcrl2::pres_system::detail
+{
 
 template <typename TermTraits, typename Parameters>
 void E_lts2pres(const state_formulas::state_formula& x,
@@ -224,10 +221,6 @@ void E_lts2pres(const state_formulas::state_formula& x,
   result.insert(result.end(), f.top().begin(), f.top().end());
 }
 
-} // namespace detail
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::detail
 
 #endif // MCRL2_PRES_DETAIL_LTS2PRES_E_H

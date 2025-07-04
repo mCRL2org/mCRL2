@@ -16,9 +16,8 @@
 #include "mcrl2/pres/lps2pres.h"
 #include "mcrl2/pres/detail/lts2pres_e.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system
+{
 
 /// \brief Algorithm for translating a state formula and an untimed specification to a pres.
 class lts2pres_algorithm
@@ -117,8 +116,6 @@ pres lts2pres(const lts::probabilistic_lts_lts_t& l, const state_formulas::state
   return algorithm.run(formspec, preprocess_modal_operators);
 }
 
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system
 
 #endif // MCRL2_PRES_LTS2PRES_H

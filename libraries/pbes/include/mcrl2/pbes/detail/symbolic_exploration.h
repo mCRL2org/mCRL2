@@ -16,11 +16,8 @@
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/pbesinst_symbolic.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail
+{
 
 class symbolic_exploration_algorithm
 {
@@ -434,10 +431,6 @@ void symbolic_exploration(const std::string& input_filename,
   }
 }
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_SYMBOLIC_EXPLORATION_H
