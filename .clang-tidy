@@ -1,9 +1,7 @@
 ---
 Checks: "-*,
-    boost-use-to-string,
-    bugprone-*,
-    -bugprone-easily-swappable-parameters,
-    modernize-avoid-bind,
-    modernize-concat-nested-namespaces"
+    modernize-use-using"
 WarningsAsErrors: 'false'
 HeaderFilterRegex: '.'
+ExcludeHeaderFilterRegex: '*3rd-party*'
+FormatStyle: 'file'
