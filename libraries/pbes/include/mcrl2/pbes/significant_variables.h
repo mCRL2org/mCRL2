@@ -55,7 +55,7 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
     return result_stack.back();
   }
 
-  // Merges the two alements A1 and A2 at the top of the stack into a single
+  // Merges the two elements A1 and A2 at the top of the stack into a single
   // stack element representing union(A1, A2)
   void join()
   {
