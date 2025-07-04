@@ -29,7 +29,7 @@ namespace mcrl2::process
 template <template <class> class Traverser, class Derived>
 struct add_traverser_sort_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -355,7 +355,7 @@ struct sort_expression_traverser: public add_traverser_sort_expressions<data::so
 template <template <class> class Traverser, class Derived>
 struct add_traverser_data_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -658,7 +658,7 @@ struct data_expression_traverser: public add_traverser_data_expressions<data::da
 template <template <class> class Traverser, class Derived>
 struct add_traverser_process_expressions: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -950,7 +950,7 @@ struct process_expression_traverser: public add_traverser_process_expressions<co
 template <template <class> class Traverser, class Derived>
 struct add_traverser_variables: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1267,7 +1267,7 @@ struct variable_traverser: public add_traverser_variables<data::variable_travers
 template <template <class> class Traverser, class Derived>
 struct add_traverser_identifier_strings: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -1624,7 +1624,7 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<data
 template <template <class> class Traverser, class Derived>
 struct add_traverser_action_labels: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;

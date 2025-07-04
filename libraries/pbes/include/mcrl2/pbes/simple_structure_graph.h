@@ -23,9 +23,9 @@ namespace mcrl2::pbes_system {
 class simple_structure_graph
 {
   public:
-    typedef structure_graph::decoration_type decoration_type;
-    typedef structure_graph::index_type index_type;
-    typedef structure_graph::vertex vertex;
+    using decoration_type = structure_graph::decoration_type;
+    using index_type = structure_graph::index_type;
+    using vertex = structure_graph::vertex;
 
   protected:
     const structure_graph::vertex_vector& m_vertices;

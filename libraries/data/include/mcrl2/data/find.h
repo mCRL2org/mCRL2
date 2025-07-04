@@ -25,7 +25,7 @@ namespace detail
 template <template <class> class Traverser, class OutputIterator>
 struct find_identifiers_traverser: public Traverser<find_identifiers_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_identifiers_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_identifiers_traverser<Traverser, OutputIterator>>;
 
   using super::enter;
   using super::leave;
@@ -53,7 +53,7 @@ make_find_identifiers_traverser(OutputIterator out)
 template <template <class> class Traverser, class OutputIterator>
 struct find_function_symbols_traverser: public Traverser<find_function_symbols_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_function_symbols_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_function_symbols_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -80,7 +80,7 @@ make_find_function_symbols_traverser(OutputIterator out)
 template <template <class> class Traverser, class OutputIterator>
 struct find_sort_expressions_traverser: public Traverser<find_sort_expressions_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_sort_expressions_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_sort_expressions_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -111,7 +111,7 @@ make_find_sort_expressions_traverser(OutputIterator out)
 template <template <class> class Traverser, class OutputIterator>
 struct find_data_expressions_traverser: public Traverser<find_data_expressions_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_data_expressions_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_data_expressions_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -141,7 +141,7 @@ make_find_data_expressions_traverser(OutputIterator out)
 template <template <class> class Traverser, class OutputIterator>
 struct find_all_variables_traverser: public Traverser<find_all_variables_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_all_variables_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_all_variables_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -170,7 +170,7 @@ template <typename T, typename OutputIterator> void find_free_variables(const T&
 template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator>
 struct find_free_variables_traverser: public Binder<Traverser, find_free_variables_traverser<Traverser, Binder, OutputIterator> >
 {
-  typedef Binder<Traverser, find_free_variables_traverser<Traverser, Binder, OutputIterator> > super;
+  using super = Binder<Traverser, find_free_variables_traverser<Traverser, Binder, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -217,7 +217,7 @@ make_find_free_variables_traverser(OutputIterator out, const VariableContainer& 
 template <template <class> class Traverser>
 struct search_variable_traverser: public Traverser<search_variable_traverser<Traverser> >
 {
-  typedef Traverser<search_variable_traverser<Traverser> > super;
+  using super = Traverser<search_variable_traverser<Traverser>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -248,7 +248,7 @@ make_search_variable_traverser(const data::variable& v)
 template <template <class> class Traverser, template <template <class> class, class> class Binder>
 struct search_free_variable_traverser: public Binder<Traverser, search_free_variable_traverser<Traverser, Binder> >
 {
-  typedef Binder<Traverser, search_free_variable_traverser<Traverser, Binder> > super;
+  using super = Binder<Traverser, search_free_variable_traverser<Traverser, Binder>>;
   using super::enter;
   using super::leave;
   using super::apply;

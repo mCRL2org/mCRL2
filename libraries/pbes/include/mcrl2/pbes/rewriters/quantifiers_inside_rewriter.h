@@ -65,7 +65,7 @@ std::tuple<pbes_expression, pbes_expression> compute_Phi_Psi(const std::vector<p
 
 struct quantifiers_inside_builder: public pbes_expression_builder<quantifiers_inside_builder>
 {
-  typedef pbes_expression_builder<quantifiers_inside_builder> super;
+  using super = pbes_expression_builder<quantifiers_inside_builder>;
   using super::apply;
 
   template <class T>
@@ -89,7 +89,7 @@ struct quantifiers_inside_builder: public pbes_expression_builder<quantifiers_in
 
 struct quantifiers_inside_forall_builder: public data_expression_builder<quantifiers_inside_forall_builder>
 {
-  typedef data_expression_builder<quantifiers_inside_forall_builder> super;
+  using super = data_expression_builder<quantifiers_inside_forall_builder>;
   using super::apply;
 
   const std::set<data::variable>& V;
@@ -140,7 +140,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
   {
     using utilities::detail::set_difference;
     using utilities::detail::set_intersection;
-    typedef core::term_traits<pbes_expression> tr;
+    using tr = core::term_traits<pbes_expression>;
 
     std::vector<pbes_expression> X;
     utilities::detail::split(x, std::back_inserter(X), tr::is_or, tr::left, tr::right);
@@ -186,7 +186,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
 
 struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantifiers_inside_exists_builder>
 {
-  typedef pbes_expression_builder<quantifiers_inside_exists_builder> super;
+  using super = pbes_expression_builder<quantifiers_inside_exists_builder>;
   using super::apply;
 
   const std::set<data::variable>& V;
@@ -237,7 +237,7 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
   {
     using utilities::detail::set_difference;
     using utilities::detail::set_intersection;
-    typedef core::term_traits<pbes_expression> tr;
+    using tr = core::term_traits<pbes_expression>;
 
     std::vector<pbes_expression> X;
     utilities::detail::split(x, std::back_inserter(X), tr::is_and, tr::left, tr::right);
@@ -315,10 +315,10 @@ class quantifiers_inside_rewriter
 {
   public:
     /// \brief The term type
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Rewrites a pbes expression.
     /// \param x A term

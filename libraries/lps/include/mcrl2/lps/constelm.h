@@ -21,39 +21,41 @@ namespace mcrl2::lps
 template <typename DataRewriter, typename Specification = specification>
 class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 {
-  typedef typename lps::detail::lps_algorithm<Specification> super;
+  using super = typename lps::detail::lps_algorithm<Specification>;
 
-  protected:
-    /// \brief If true, then the algorithm is allowed to instantiate free variables
-    /// as a side effect.
-    bool m_instantiate_global_variables;
+protected:
+  /// \brief If true, then the algorithm is allowed to instantiate free variables
+  /// as a side effect.
+  bool m_instantiate_global_variables;
 
-    /// \brief If true, conditions are not evaluated and assumed to be true.
-    bool m_ignore_conditions;
+  /// \brief If true, conditions are not evaluated and assumed to be true.
+  bool m_ignore_conditions;
 
-    /// \brief Maps process parameters to their index.
-    std::map<data::variable, std::size_t> m_index_of;
+  /// \brief Maps process parameters to their index.
+  std::map<data::variable, std::size_t> m_index_of;
 
-    /// \brief The rewriter used by the constelm algorithm.
-    const DataRewriter& R;
+  /// \brief The rewriter used by the constelm algorithm.
+  const DataRewriter& R;
 
-    void LOG_CONSTANT_PARAMETERS(const data::mutable_map_substitution<>& sigma, const std::string& constant_removed_msg = "", const std::string& nothing_removed_msg = "")
+  void LOG_CONSTANT_PARAMETERS(const data::mutable_map_substitution<>& sigma,
+      const std::string& constant_removed_msg = "",
+      const std::string& nothing_removed_msg = "")
+  {
+    if (mCRL2logEnabled(log::verbose))
     {
-      if (mCRL2logEnabled(log::verbose))
+      if (sigma.empty())
       {
-        if (sigma.empty())
+        mCRL2log(log::verbose) << nothing_removed_msg;
+      }
+      else
+      {
+        mCRL2log(log::verbose) << constant_removed_msg;
+        for (const auto& i : sigma)
         {
-          mCRL2log(log::verbose) << nothing_removed_msg;
-        }
-        else 
-        {  
-          mCRL2log(log::verbose) << constant_removed_msg;
-          for (const auto& i : sigma)
-          {
-            mCRL2log(log::verbose) << data::pp(i.first) << " := " << data::pp(i.second) << std::endl;
-          }
+          mCRL2log(log::verbose) << data::pp(i.first) << " := " << data::pp(i.second) << std::endl;
         }
       }
+    }
     }
 
     void LOG_PARAMETER_CHANGE(const data::data_expression& d_j,

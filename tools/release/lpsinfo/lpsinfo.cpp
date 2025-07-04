@@ -22,7 +22,7 @@ using namespace mcrl2::utilities::tools;
 class lpsinfo_tool: public input_tool
 {
   protected:
-    typedef input_tool super;
+    using super = input_tool;
 
   public:
     lpsinfo_tool()

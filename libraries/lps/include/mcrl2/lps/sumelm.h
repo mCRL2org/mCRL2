@@ -29,7 +29,7 @@ namespace mcrl2::lps
 template <typename Specification = specification>
 class sumelm_algorithm: public detail::lps_algorithm<Specification>
 {
-  typedef typename detail::lps_algorithm<Specification> super;
+  using super = typename detail::lps_algorithm<Specification>;
   using super::m_spec;
 
   protected:

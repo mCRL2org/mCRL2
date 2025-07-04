@@ -257,7 +257,7 @@ std::ostream& operator<<(std::ostream& out, const guard_expression& x)
 /// \brief Computes a multimap of propositional variable instantiations and the corresponding guards from a PBES expression
 struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 {
-  typedef pbes_expression_traverser<guard_traverser> super;
+  using super = pbes_expression_traverser<guard_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

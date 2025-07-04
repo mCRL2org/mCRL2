@@ -71,10 +71,10 @@ inline void make_action_label(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of action_labels
-typedef atermpp::term_list<action_label> action_label_list;
+using action_label_list = atermpp::term_list<action_label>;
 
 /// \\brief vector of action_labels
-typedef std::vector<action_label>    action_label_vector;
+using action_label_vector = std::vector<action_label>;
 
 /// \\brief Test for a action_label expression
 /// \\param x A term

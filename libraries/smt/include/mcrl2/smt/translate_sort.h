@@ -27,7 +27,7 @@ const std::map<data::structured_sort, std::string>& empty_name_map()
 template <template <class> class Traverser, class OutputStream>
 struct translate_sort_expression_traverser: public Traverser<translate_sort_expression_traverser<Traverser, OutputStream> >
 {
-  typedef Traverser<translate_sort_expression_traverser<Traverser, OutputStream> > super;
+  using super = Traverser<translate_sort_expression_traverser<Traverser, OutputStream>>;
   using super::enter;
   using super::leave;
   using super::apply;

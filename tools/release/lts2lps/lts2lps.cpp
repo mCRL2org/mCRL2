@@ -34,7 +34,7 @@ using namespace mcrl2::log;
 class lts2lps_tool : public input_output_tool
 {
   private:
-    typedef input_output_tool super;
+    using super = input_output_tool;
 
   protected:
     data_file_type_t data_file_type;

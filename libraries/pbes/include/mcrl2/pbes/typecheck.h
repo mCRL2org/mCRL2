@@ -24,7 +24,7 @@ namespace detail
 
 struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
 {
-  typedef pbes_expression_builder<typecheck_builder> super;
+  using super = pbes_expression_builder<typecheck_builder>;
   using super::apply;
 
   data::data_type_checker& m_data_type_checker;

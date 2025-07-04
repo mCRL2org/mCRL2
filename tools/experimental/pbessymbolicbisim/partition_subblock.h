@@ -24,8 +24,8 @@ namespace data
  */
 class subblock
 {
-  typedef pbes_system::detail::ppg_summand summand_type_t;
-  typedef pbes_system::detail::ppg_equation equation_type_t;
+  using summand_type_t = pbes_system::detail::ppg_summand;
+  using equation_type_t = pbes_system::detail::ppg_equation;
 
 protected:
   // pointer to a const equation_type_t object

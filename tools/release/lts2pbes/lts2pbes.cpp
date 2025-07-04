@@ -73,7 +73,7 @@ inline void check_lts2pbes_actions(const state_formulas::state_formula& formula,
 class lts2pbes_tool : public pbes_output_tool<input_output_tool>
 {
   private:
-    typedef pbes_output_tool<input_output_tool> super;
+    using super = pbes_output_tool<input_output_tool>;
 
   protected:
 

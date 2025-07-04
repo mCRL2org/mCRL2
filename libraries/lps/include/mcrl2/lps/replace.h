@@ -171,7 +171,7 @@ namespace detail {
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
 struct replace_process_parameter_builder: public Binder<Builder, replace_process_parameter_builder<Builder, Binder, Substitution> >
 {
-  typedef Binder<Builder, replace_process_parameter_builder<Builder, Binder, Substitution> > super;
+  using super = Binder<Builder, replace_process_parameter_builder<Builder, Binder, Substitution>>;
   using super::enter;
   using super::leave;
   using super::apply;

@@ -269,7 +269,7 @@ class solve_structure_graph_algorithm
       log_vertex_set(G, Wconj, "Wconj");
       log_vertex_set(G, Wdisj, "Wdisj");
 
-      typedef structure_graph::vertex vertex;
+      using vertex = structure_graph::vertex;
       structure_graph::index_type init = G.initial_vertex();
 
       // V contains the vertices of G, but not the edges

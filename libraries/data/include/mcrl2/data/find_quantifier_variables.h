@@ -20,7 +20,7 @@ namespace mcrl2::data {
 /// Visitor for collecting the quantifier variables that occur in a pbes expression.
 struct find_quantifier_variables_traverser: public data_expression_traverser<find_quantifier_variables_traverser>
 {
-  typedef data_expression_traverser<find_quantifier_variables_traverser> super;
+  using super = data_expression_traverser<find_quantifier_variables_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

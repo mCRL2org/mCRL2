@@ -28,13 +28,13 @@ template <>
 struct term_traits<data::data_expression>
 {
   /// \brief The term type
-  typedef data::data_expression term_type;
+  using term_type = data::data_expression;
 
   /// \brief The variable type
-  typedef data::variable variable_type;
+  using variable_type = data::variable;
 
   /// \brief The variable sequence type
-  typedef data::variable_list variable_sequence_type;
+  using variable_sequence_type = data::variable_list;
 
   /// \brief The value true
   /// \return The value true
@@ -336,7 +336,7 @@ template < typename Expression >
 struct expression_traits : public core::term_traits< Expression >
 {
   // Type of expression that represents variables
-  typedef mcrl2::data::variable variable_type;
+  using variable_type = mcrl2::data::variable;
 
   static bool is_true(const data_expression& e)
   {

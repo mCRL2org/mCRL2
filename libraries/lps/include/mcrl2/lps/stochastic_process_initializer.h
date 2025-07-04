@@ -19,20 +19,20 @@ namespace mcrl2::lps {
 /// \brief A stochastic process initializer
 class stochastic_process_initializer: public process_initializer
 {
-  typedef process_initializer super;
+  using super = process_initializer;
 
-  public:
-    /// \brief Default constructor.
-    stochastic_process_initializer()
+public:
+  /// \brief Default constructor.
+  stochastic_process_initializer()
       : super(core::detail::default_values::LinearProcessInit)
-    {}
+  {}
 
-    /// \brief Constructor.
-    /// \param term A term
-    explicit stochastic_process_initializer(const atermpp::aterm& term)
+  /// \brief Constructor.
+  /// \param term A term
+  explicit stochastic_process_initializer(const atermpp::aterm& term)
       : super(term, false)
-    {
-      assert(core::detail::check_term_LinearProcessInit(*this));
+  {
+    assert(core::detail::check_term_LinearProcessInit(*this));
     }
 
     /// \brief Constructor.
@@ -55,10 +55,10 @@ inline void make_stochastic_process_initializer(atermpp::aterm& t, ARGUMENTS... 
 
 //--- start generated class stochastic_process_initializer ---//
 /// \\brief list of stochastic_process_initializers
-typedef atermpp::term_list<stochastic_process_initializer> stochastic_process_initializer_list;
+using stochastic_process_initializer_list = atermpp::term_list<stochastic_process_initializer>;
 
 /// \\brief vector of stochastic_process_initializers
-typedef std::vector<stochastic_process_initializer>    stochastic_process_initializer_vector;
+using stochastic_process_initializer_vector = std::vector<stochastic_process_initializer>;
 
 /// \\brief Test for a stochastic_process_initializer expression
 /// \\param x A term

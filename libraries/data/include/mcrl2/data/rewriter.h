@@ -26,7 +26,7 @@ class basic_rewriter
 {
   public:
     /// \brief The type for the substitution that is used internally.
-    typedef data::mutable_indexed_substitution<> substitution_type;
+    using substitution_type = data::mutable_indexed_substitution<>;
 
   protected:
     /// \brief The wrapped Rewriter.
@@ -35,10 +35,10 @@ class basic_rewriter
   public:
 
     /// \brief The type for expressions manipulated by the rewriter.
-    typedef Term term_type;
+    using term_type = Term;
 
     /// \brief The rewrite strategies of the rewriter.
-    typedef rewrite_strategy strategy;
+    using strategy = rewrite_strategy;
 
   protected:
 
@@ -108,7 +108,7 @@ class rewriter: public basic_rewriter<data_expression>
 #endif
 
   public:
-    typedef basic_rewriter<data_expression>::substitution_type substitution_type;
+    using substitution_type = basic_rewriter<data_expression>::substitution_type;
 
     /// \brief Constructor.
     /// \param[in] r a rewriter.

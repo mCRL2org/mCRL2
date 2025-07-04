@@ -37,7 +37,7 @@ data::data_expression data_rewrite(const data::data_expression& x, const DataRew
 template <template <class> class Builder, class Derived, class DataRewriter, class SubstitutionFunction = data::no_substitution>
 struct add_data_rewriter: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -65,7 +65,7 @@ struct add_data_rewriter: public Builder<Derived>
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct data_rewriter_builder: public add_data_rewriter<data::data_expression_builder, Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef add_data_rewriter<data::data_expression_builder, Derived, DataRewriter, SubstitutionFunction> super;
+  using super = add_data_rewriter<data::data_expression_builder, Derived, DataRewriter, SubstitutionFunction>;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -78,7 +78,9 @@ struct data_rewriter_builder: public add_data_rewriter<data::data_expression_bui
 template <template <class, class, class> class Builder, class DataRewriter, class SubstitutionFunction>
 struct apply_rewriter_builder: public Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction>
 {
-  typedef Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction> super;
+  using super = Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>,
+      DataRewriter,
+      SubstitutionFunction>;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -105,8 +107,8 @@ make_apply_rewriter_builder(const DataRewriter& datar, SubstitutionFunction& sig
 template <typename DataRewriter>
 struct data_rewriter
 {
-  typedef data_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = data_expression;
+  using variable_type = data::variable;
 
   const DataRewriter& R;
 

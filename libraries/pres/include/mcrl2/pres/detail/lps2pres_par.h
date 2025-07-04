@@ -24,7 +24,7 @@ data::variable_list Par(const core::identifier_string& X, const data::variable_l
 
 struct par_traverser: public state_formulas::state_formula_traverser<par_traverser>
 {
-  typedef state_formulas::state_formula_traverser<par_traverser> super;
+  using super = state_formulas::state_formula_traverser<par_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

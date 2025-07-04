@@ -113,7 +113,7 @@ struct edge_details
 
 struct edge_traverser_stack_elem
 {
-  typedef std::multimap<QPVI, edge_details> edge_map;
+  using edge_map = std::multimap<QPVI, edge_details>;
 
   data::data_expression Cpos;
   data::data_expression Cneg;
@@ -129,14 +129,14 @@ struct edge_traverser_stack_elem
 
 struct edge_condition_traverser: public pbes_expression_traverser<edge_condition_traverser>
 {
-  typedef pbes_expression_traverser<edge_condition_traverser> super;
+  using super = pbes_expression_traverser<edge_condition_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  typedef edge_traverser_stack_elem stack_elem;
-  typedef stack_elem::edge_map edge_map;
-  typedef std::list<detail::quantified_variable> qvar_list;
+  using stack_elem = edge_traverser_stack_elem;
+  using edge_map = stack_elem::edge_map;
+  using qvar_list = std::list<detail::quantified_variable>;
 
   std::vector<stack_elem> condition_fv_stack;
   std::list<pbes_expression> quantified_context;
@@ -405,8 +405,8 @@ class pbes_constelm_algorithm
 {
   protected:
     /// \brief A map with constraints on the vertices of the graph
-    typedef std::map<data::variable, data::data_expression> constraint_map;
-    typedef std::list<detail::quantified_variable> qvar_list;
+    using constraint_map = std::map<data::variable, data::data_expression>;
+    using qvar_list = std::list<detail::quantified_variable>;
 
     /// \brief Compares data expressions for equality.
     const DataRewriter& m_data_rewriter;
@@ -762,10 +762,10 @@ class pbes_constelm_algorithm
     };
 
     /// \brief The storage type for vertices
-    typedef std::map<core::identifier_string, vertex> vertex_map;
+    using vertex_map = std::map<core::identifier_string, vertex>;
 
     /// \brief The storage type for edges
-    typedef std::map<core::identifier_string, std::vector<edge> > edge_map;
+    using edge_map = std::map<core::identifier_string, std::vector<edge>>;
 
     /// \brief The vertices of the dependency graph. They are stored in a map, to
     /// support searching for a vertex.
@@ -1057,7 +1057,7 @@ void constelm(pbes& p,
   {
     case pbes_rewriter_type::simplify:
     {
-      typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
+      using pbes_rewriter = simplify_data_rewriter<data::rewriter>;
       pbes_rewriter pbesr(datar);
       pbes_constelm_algorithm<data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, compute_conditions, check_quantifiers);

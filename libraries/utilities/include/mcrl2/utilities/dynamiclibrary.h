@@ -67,14 +67,13 @@
   }
 #else
   #include <dlfcn.h>
-  typedef void* library_handle;
-  typedef void* library_proc;
+using library_handle = void*;
+using library_proc = void*;
 
-  inline
-  library_handle get_module_handle(const std::string& fname)
-  {
-    // return dlopen(fname.c_str(), RTLD_LAZY);
-    return dlopen(fname.c_str(), RTLD_NOW);
+inline library_handle get_module_handle(const std::string& fname)
+{
+  // return dlopen(fname.c_str(), RTLD_LAZY);
+  return dlopen(fname.c_str(), RTLD_NOW);
   }
 
   inline

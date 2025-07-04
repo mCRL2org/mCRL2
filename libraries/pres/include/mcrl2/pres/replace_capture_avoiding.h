@@ -24,7 +24,7 @@ template<template<class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement
   : public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef data::detail::add_capture_avoiding_replacement <Builder, Derived, Substitution> super;
+  using super = data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;

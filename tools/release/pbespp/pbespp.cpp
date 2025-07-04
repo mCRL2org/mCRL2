@@ -27,7 +27,7 @@ using pbes_system::tools::pbes_input_tool;
 class pbespp_tool: public pbes_input_tool<input_output_tool>
 {
   private:
-    typedef pbes_input_tool<input_output_tool> super;
+    using super = pbes_input_tool<input_output_tool>;
 
   public:
     pbespp_tool()

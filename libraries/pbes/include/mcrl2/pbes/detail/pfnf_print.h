@@ -24,7 +24,7 @@ namespace detail {
 template <typename Derived>
 struct pfnf_printer: public pbes_system::detail::printer<Derived>
 {
-  typedef pbes_system::detail::printer<Derived> super;
+  using super = pbes_system::detail::printer<Derived>;
 
   using super::enter;
   using super::leave;

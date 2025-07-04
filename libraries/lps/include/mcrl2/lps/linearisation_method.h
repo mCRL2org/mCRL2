@@ -18,7 +18,12 @@ namespace mcrl2::lps
 {
 
 /// \brief The available linearisation methods
-typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
+using t_lin_method = enum
+{
+  lmStack,
+  lmRegular,
+  lmRegular2
+};
 
 /// \brief String representation of a linearisation method
 /// \param[in] lin_method A linerisation method

@@ -35,7 +35,7 @@ class parity_game_generator
 {
   protected:
     /// \brief Substitution function type used by the PBES rewriter.
-    typedef data::rewriter::substitution_type substitution_function;
+    using substitution_function = data::rewriter::substitution_type;
 
     /// \brief Mark whether initialization has been initialized.
     /// Needed to properly cope with virtual inheritance!

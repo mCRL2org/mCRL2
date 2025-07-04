@@ -68,10 +68,10 @@ class stochastic_action_summand: public action_summand
 
 //--- start generated class stochastic_action_summand ---//
 /// \\brief list of stochastic_action_summands
-typedef atermpp::term_list<stochastic_action_summand> stochastic_action_summand_list;
+using stochastic_action_summand_list = atermpp::term_list<stochastic_action_summand>;
 
 /// \\brief vector of stochastic_action_summands
-typedef std::vector<stochastic_action_summand>    stochastic_action_summand_vector;
+using stochastic_action_summand_vector = std::vector<stochastic_action_summand>;
 
 // prototype declaration
 std::string pp(const stochastic_action_summand& x, bool precedence_aware = true);

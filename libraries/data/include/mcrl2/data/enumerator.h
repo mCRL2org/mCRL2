@@ -231,7 +231,7 @@ class enumerator_list_element
     Expression phi;
 
   public:
-    typedef Expression expression_type;
+    using expression_type = Expression;
 
     /// \brief Default constructor
     enumerator_list_element() = default;
@@ -348,7 +348,7 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     data::data_expression_list m_expressions;
 
   public:
-    typedef Expression expression_type;
+    using expression_type = Expression;
 
     /// \brief Default constructor
     enumerator_list_element_with_substitution() = default;
@@ -511,8 +511,8 @@ class enumerator_queue
     data_expression scratch_data_expression;
     variable_list scratch_variable_list;
 
-    typedef EnumeratorListElement value_type;
-    typedef typename atermpp::deque<EnumeratorListElement>::size_type size_type;
+    using value_type = EnumeratorListElement;
+    using size_type = typename atermpp::deque<EnumeratorListElement>::size_type;
 
     /// \brief Default constructor
     enumerator_queue() = default;
@@ -1031,8 +1031,8 @@ data_expression_vector enumerate_expressions(const sort_expression& s,
                                              const Rewriter& rewr,
                                              enumerator_identifier_generator& id_generator)
 {
-  typedef typename Rewriter::term_type term_type;
-  typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
+  using term_type = typename Rewriter::term_type;
+  using enumerator_element = enumerator_list_element_with_substitution<term_type>;
   assert(dataspec.is_certainly_finite(s));
 
   bool accept_solutions_with_variables = false;

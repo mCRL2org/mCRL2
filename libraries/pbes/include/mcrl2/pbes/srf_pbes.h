@@ -282,7 +282,7 @@ std::vector<pre_srf_summand<allow_ce>> srf_or(const pbes_expression& phi,
 template <bool allow_ce>
 struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allow_ce>>
 {
-  typedef pbes_expression_traverser<srf_or_traverser> super;
+  using super = pbes_expression_traverser<srf_or_traverser>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -508,7 +508,7 @@ std::vector<pre_srf_summand<allow_ce>> srf_and(const pbes_expression& phi,
 template<bool allow_ce>
 struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<allow_ce>>
 {
-  typedef pbes_expression_traverser<srf_and_traverser> super;
+  using super = pbes_expression_traverser<srf_and_traverser>;
   using super::apply;
   using super::enter;
   using super::leave;

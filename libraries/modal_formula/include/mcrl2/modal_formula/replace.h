@@ -461,7 +461,7 @@ namespace detail
 template <template <class> class Builder, class Substitution>
 struct substitute_state_formulas_builder: public Builder<substitute_state_formulas_builder<Builder, Substitution> >
 {
-  typedef Builder<substitute_state_formulas_builder<Builder, Substitution> > super;
+  using super = Builder<substitute_state_formulas_builder<Builder, Substitution>>;
   using super::enter;
   using super::leave;
   using super::update;

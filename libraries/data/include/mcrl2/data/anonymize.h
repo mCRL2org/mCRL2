@@ -25,7 +25,7 @@ namespace detail {
 template <typename Derived>
 struct anonymize_builder: public data::sort_expression_builder<Derived>
 {
-  typedef data::sort_expression_builder<Derived> super;
+  using super = data::sort_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;

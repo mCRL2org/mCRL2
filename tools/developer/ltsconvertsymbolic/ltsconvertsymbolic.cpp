@@ -94,41 +94,48 @@ inline std::string description(const symbolic_lts_equivalence eq)
 
 class ltsconvert_tool : public input_output_tool
 {
-    typedef input_output_tool super;
+  using super = input_output_tool;
 
-    // Lace options
-    std::size_t lace_n_workers = 1;
-    std::size_t lace_dqsize = 1024*1024*4; // set large default
-    std::size_t lace_stacksize = 0; // use default
+  // Lace options
+  std::size_t lace_n_workers = 1;
+  std::size_t lace_dqsize = 1024 * 1024 * 4; // set large default
+  std::size_t lace_stacksize = 0;            // use default
 
-    // Sylvan options
-    std::size_t memory_limit = 3;
-    std::size_t initial_ratio = 16;
-    std::size_t table_ratio = 1;
+  // Sylvan options
+  std::size_t memory_limit = 3;
+  std::size_t initial_ratio = 16;
+  std::size_t table_ratio = 1;
 
-  public:
-    ltsconvert_tool() :
-      input_output_tool("ltsconvertsymbolic", "Maurice Laveaux",
-                      "applies various conversions to symbolic LTSs",
-                      "")
-    {}
-    
-    void add_options(utilities::interface_description& desc) override
-    {
-      super::add_options(desc);
+public:
+  ltsconvert_tool()
+      : input_output_tool("ltsconvertsymbolic", "Maurice Laveaux", "applies various conversions to symbolic LTSs", "")
+  {}
 
-      desc.add_option("equivalence", 
+  void add_options(utilities::interface_description& desc) override
+  {
+    super::add_options(desc);
+
+    desc.add_option("equivalence",
         make_enum_argument<symbolic_lts_equivalence>("NAME")
-          .add_value(symbolic_lts_equivalence::none, true)
-          .add_value(symbolic_lts_equivalence::bisim),
-          "generate an equivalent LTS, preserving equivalence NAME:",
-          'e');
-      desc.add_option("lace-workers", utilities::make_optional_argument("NUM", "1"), "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
-      desc.add_option("lace-dqsize", utilities::make_optional_argument("NUM", "4194304"), "set length of Lace task queue (default 1024*1024*4)");
-      desc.add_option("lace-stacksize", utilities::make_optional_argument("NUM", "0"), "set size of program stack in kilobytes (0=default stack size)");
-      desc.add_option("memory-limit", utilities::make_optional_argument("NUM", "3"), "Sylvan memory limit in gigabytes (default 3)", 'm');
+            .add_value(symbolic_lts_equivalence::none, true)
+            .add_value(symbolic_lts_equivalence::bisim),
+        "generate an equivalent LTS, preserving equivalence NAME:",
+        'e');
+    desc.add_option("lace-workers",
+        utilities::make_optional_argument("NUM", "1"),
+        "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
+    desc.add_option("lace-dqsize",
+        utilities::make_optional_argument("NUM", "4194304"),
+        "set length of Lace task queue (default 1024*1024*4)");
+    desc.add_option("lace-stacksize",
+        utilities::make_optional_argument("NUM", "0"),
+        "set size of program stack in kilobytes (0=default stack size)");
+    desc.add_option("memory-limit",
+        utilities::make_optional_argument("NUM", "3"),
+        "Sylvan memory limit in gigabytes (default 3)",
+        'm');
 
-      desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "use FORMAT as the output format.", 'o');
+    desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "use FORMAT as the output format.", 'o');
     }
 
     void parse_options(const utilities::command_line_parser& parser) override

@@ -592,9 +592,9 @@ template <class CONTENT>
 class indexed_sorted_vector_for_transitions
 {
   protected:
-    typedef std::size_t state_type;
-    typedef std::size_t label_type;
-    typedef std::pair<label_type,state_type> label_state_pair;
+    using state_type = std::size_t;
+    using label_type = std::size_t;
+    using label_state_pair = std::pair<label_type, state_type>;
 
     std::vector < CONTENT > m_states_with_outgoing_or_incoming_transition;
     std::vector <size_t> m_indices;
@@ -679,9 +679,9 @@ class indexed_sorted_vector_for_transitions
 
 //
 /// \brief Type for exploring transitions per state.
-typedef std::pair<transition::size_type, transition::size_type> outgoing_pair_t;
+using outgoing_pair_t = std::pair<transition::size_type, transition::size_type>;
 
-typedef detail::indexed_sorted_vector_for_transitions < outgoing_pair_t > outgoing_transitions_per_state_t;
+using outgoing_transitions_per_state_t = detail::indexed_sorted_vector_for_transitions<outgoing_pair_t>;
 
 /// \brief Label of a pair of a label and target state. 
 inline std::size_t label(const outgoing_pair_t& p)
@@ -698,9 +698,9 @@ inline std::size_t to(const outgoing_pair_t& p)
 /// \brief Type for exploring transitions per state and action.
 // It can be considered to replace this function with an unordered_multimap.
 // This may increase memory requirements, but would allow for constant versus logarithmic access times
-// of elements. 
-typedef std::multimap<std::pair<transition::size_type, transition::size_type>, transition::size_type>
-                     outgoing_transitions_per_state_action_t;
+// of elements.
+using outgoing_transitions_per_state_action_t
+    = std::multimap<std::pair<transition::size_type, transition::size_type>, transition::size_type>;
 
 /// \brief From state of an iterator exploring transitions per outgoing state and action.
 inline std::size_t from(const outgoing_transitions_per_state_action_t::const_iterator& i)

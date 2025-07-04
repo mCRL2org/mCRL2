@@ -118,13 +118,13 @@ private:
   LTS_TYPE& m_lts;
   state_type initial_l2;
   state_type max_state_index = 0;
-  typedef std::size_t block_index_type;
-  typedef std::size_t level_type;
+  using block_index_type = std::size_t;
+  using level_type = std::size_t;
   // This tuple is meant for an observation (s', a, s'') such that s -(silent)-> s' -a-> s''.
-  typedef std::tuple<block_index_type, label_type, block_index_type> branching_observation_type;
-  typedef std::set<branching_observation_type> signature_type;
-  typedef std::pair<label_type, state_type> observation;
-  typedef std::pair<block_index_type, block_index_type> blockpair_type;
+  using branching_observation_type = std::tuple<block_index_type, label_type, block_index_type>;
+  using signature_type = std::set<branching_observation_type>;
+  using observation = std::pair<label_type, state_type>;
+  using blockpair_type = std::pair<block_index_type, block_index_type>;
 
   std::map<state_type, std::set<state_type>> silent_in;
   std::map<state_type, std::set<state_type>> silent_out;

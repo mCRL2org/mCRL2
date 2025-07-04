@@ -439,10 +439,10 @@ inline void make_structured_sort(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of structured_sorts
-typedef atermpp::term_list<structured_sort> structured_sort_list;
+using structured_sort_list = atermpp::term_list<structured_sort>;
 
 /// \\brief vector of structured_sorts
-typedef std::vector<structured_sort>    structured_sort_vector;
+using structured_sort_vector = std::vector<structured_sort>;
 
 // prototype declaration
 std::string pp(const structured_sort& x, bool precedence_aware = true);

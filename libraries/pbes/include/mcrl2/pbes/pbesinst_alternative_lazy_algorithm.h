@@ -479,7 +479,7 @@ class pbesinst_alternative_lazy_algorithm
     // false, then p2 can be removed, as its value does not influence the rewrite system.
     // The result of the function is a pair, with the simplified expression as first term, and the expression that is rewritten under the
     // simplifications in trivial as the second term.
-    typedef std::pair < pbes_expression, pbes_expression > pbes_expression_pair;
+    using pbes_expression_pair = std::pair<pbes_expression, pbes_expression>;
     pbes_expression_pair simplify_pbes_expression(const pbes_expression& p, const std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial)
     {
       if (is_propositional_variable_instantiation(p))

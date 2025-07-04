@@ -31,11 +31,11 @@ class bisimulation_algorithm
 {
   public:
     /// \brief The iterator type for non-delta summands
-    typedef lps::action_summand_vector::const_iterator my_iterator;
+    using my_iterator = lps::action_summand_vector::const_iterator;
 
   protected:
     /// \brief A map type for mapping summands to strings.
-    typedef std::map<const lps::action_summand*, std::string> name_map;
+    using name_map = std::map<const lps::action_summand*, std::string>;
 
     /// \brief Maps summands to strings.
     name_map summand_names;

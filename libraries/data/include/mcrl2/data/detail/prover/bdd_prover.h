@@ -83,7 +83,7 @@ enum Answer
 class BDD_Prover: protected rewriter
 {
   public:
-    typedef rewriter::substitution_type substitution_type;
+    using substitution_type = rewriter::substitution_type;
 
   private:
 

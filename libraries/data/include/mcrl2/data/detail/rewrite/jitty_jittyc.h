@@ -21,7 +21,7 @@ namespace mcrl2::data::detail
 template <template <class> class Traverser>
 struct double_variable_traverser : public Traverser<double_variable_traverser<Traverser> >
 {
-  typedef Traverser<double_variable_traverser<Traverser> > super;
+  using super = Traverser<double_variable_traverser<Traverser>>;
   using super::enter;
   using super::leave;
   using super::apply;

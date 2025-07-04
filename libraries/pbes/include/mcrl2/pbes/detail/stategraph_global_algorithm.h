@@ -27,7 +27,7 @@ namespace mcrl2::pbes_system::detail {
 class stategraph_global_algorithm: public stategraph_algorithm
 {
   public:
-    typedef stategraph_algorithm super;
+    using super = stategraph_algorithm;
 
   protected:
     // the control flow graph

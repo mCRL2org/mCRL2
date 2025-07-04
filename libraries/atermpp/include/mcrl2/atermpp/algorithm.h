@@ -26,7 +26,7 @@ namespace detail
 template <template <class> class Builder, class ReplaceFunction>
 struct replace_aterm_builder: public Builder<replace_aterm_builder<Builder, ReplaceFunction> >
 {
-  typedef Builder<replace_aterm_builder<Builder, ReplaceFunction> > super;
+  using super = Builder<replace_aterm_builder<Builder, ReplaceFunction>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -63,7 +63,7 @@ make_replace_aterm_builder(ReplaceFunction f)
 template <template <class> class Builder, class ReplaceFunction>
 struct partial_replace_aterm_builder: public Builder<partial_replace_aterm_builder<Builder, ReplaceFunction> >
 {
-  typedef Builder<partial_replace_aterm_builder<Builder, ReplaceFunction> > super;
+  using super = Builder<partial_replace_aterm_builder<Builder, ReplaceFunction>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -100,7 +100,7 @@ make_partial_replace_aterm_builder(ReplaceFunction f)
 template <template <class> class Builder, class ReplaceFunction>
 struct bottom_up_replace_aterm_builder: public Builder<bottom_up_replace_aterm_builder<Builder, ReplaceFunction> >
 {
-  typedef Builder<bottom_up_replace_aterm_builder<Builder, ReplaceFunction> > super;
+  using super = Builder<bottom_up_replace_aterm_builder<Builder, ReplaceFunction>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -131,7 +131,7 @@ make_bottom_up_replace_aterm_builder(ReplaceFunction f)
 template <template <class> class Builder, class ReplaceFunction>
 struct cached_bottom_up_replace_aterm_builder: public Builder<cached_bottom_up_replace_aterm_builder<Builder, ReplaceFunction> >
 {
-  typedef Builder<cached_bottom_up_replace_aterm_builder<Builder, ReplaceFunction> > super;
+  using super = Builder<cached_bottom_up_replace_aterm_builder<Builder, ReplaceFunction>>;
   using super::enter;
   using super::leave;
   using super::apply;

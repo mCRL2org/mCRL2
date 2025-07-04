@@ -37,7 +37,7 @@ namespace mcrl2::lts
 class state_label_lts : public atermpp::term_list< lps::state >
 {
   public:
-    typedef atermpp::term_list< lps::state > super;
+    using super = atermpp::term_list<lps::state>;
 
     /** \brief Default constructor.
     */

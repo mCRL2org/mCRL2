@@ -42,7 +42,7 @@ std::ostream& operator<<(std::ostream& out, const alphabet_node& x)
 template <typename Derived, typename Node = alphabet_node>
 struct alphabet_traverser: public process_expression_traverser<Derived>
 {
-  typedef process_expression_traverser<Derived> super;
+  using super = process_expression_traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -246,7 +246,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
 
 struct apply_alphabet_traverser: public alphabet_traverser<apply_alphabet_traverser>
 {
-  typedef alphabet_traverser<apply_alphabet_traverser> super;
+  using super = alphabet_traverser<apply_alphabet_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

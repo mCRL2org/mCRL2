@@ -22,7 +22,7 @@ namespace detail {
 
 struct sync_multi_action_name_traverser: public process_expression_traverser<sync_multi_action_name_traverser>
 {
-  typedef process_expression_traverser<sync_multi_action_name_traverser> super;
+  using super = process_expression_traverser<sync_multi_action_name_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

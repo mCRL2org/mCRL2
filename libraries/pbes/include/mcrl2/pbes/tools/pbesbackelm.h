@@ -39,7 +39,7 @@ struct substitute_propositional_variables_builder: public Builder<substitute_pro
 template <template <class> class Builder>
 struct substitute_propositional_variables_builder: public Builder<substitute_propositional_variables_builder<Builder> >
 {
-  typedef Builder<substitute_propositional_variables_builder<Builder> > super;
+  using super = Builder<substitute_propositional_variables_builder<Builder>>;
   using super::apply;
 
 

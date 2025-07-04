@@ -49,7 +49,7 @@ class RewriterJitty: public Rewriter
   public:
     friend class jitty_argument_rewriter;
 
-    typedef Rewriter::substitution_type substitution_type;
+    using substitution_type = Rewriter::substitution_type;
 
     RewriterJitty(const data_specification& data_spec, const used_data_equation_selector& );
     

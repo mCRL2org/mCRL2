@@ -44,20 +44,26 @@ public:
         Key key_;
 
     public:
-        typedef ptrdiff_t                  difference_type;
-        typedef std::forward_iterator_tag  iterator_category;
-        typedef Key                        value_type;
-        typedef Key*                       pointer;
-        typedef Key&                       reference;
+      using difference_type = ptrdiff_t;
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = Key;
+      using pointer = Key*;
+      using reference = Key&;
 
-        Iterator(const DenseSet *set, Key key) : set_(set), key_(key) { }
-        Iterator(const Iterator &it) : set_(it.set_), key_(it.key_) { }
+      Iterator(const DenseSet* set, Key key)
+          : set_(set),
+            key_(key)
+      {}
+      Iterator(const Iterator& it)
+          : set_(it.set_),
+            key_(it.key_)
+      {}
 
-        Iterator& operator=(const Iterator &it)
-        {
-            set_ = it.set_;
-            key_ = it.key_;
-            return *this;
+      Iterator& operator=(const Iterator& it)
+      {
+        set_ = it.set_;
+        key_ = it.key_;
+        return *this;
         }
 
         bool operator== (const Iterator &other) const { return key_ == other.key_; }
@@ -83,10 +89,10 @@ public:
         }
     };
 
-    typedef std::size_t size_type;
-    typedef Key value_type;
-    typedef Iterator iterator;
-    typedef Iterator const_iterator;
+    using size_type = std::size_t;
+    using value_type = Key;
+    using iterator = Iterator;
+    using const_iterator = Iterator;
 
     DenseSet(Key begin, Key end, const Alloc &alloc = Alloc())
         : range_begin(begin), range_end(end < begin ? begin : end),

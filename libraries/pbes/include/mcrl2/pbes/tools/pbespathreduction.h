@@ -44,7 +44,7 @@ template <template <class> class Builder>
 struct substitute_propositional_variables_for_true_false_builder
     : public Builder<substitute_propositional_variables_for_true_false_builder<Builder>>
 {
-  typedef Builder<substitute_propositional_variables_for_true_false_builder<Builder>> super;
+  using super = Builder<substitute_propositional_variables_for_true_false_builder<Builder>>;
   using super::apply;
 
   simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
@@ -76,7 +76,7 @@ struct substitute_propositional_variables_for_true_false_builder
 template <template <class> class Builder>
 struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
 {
-  typedef Builder<rewrite_if_builder<Builder>> super;
+  using super = Builder<rewrite_if_builder<Builder>>;
   using super::apply;
 
   simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
@@ -115,7 +115,7 @@ struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
 template <template <class> class Builder>
 struct substitute_propositional_variables_builder : public Builder<substitute_propositional_variables_builder<Builder>>
 {
-  typedef Builder<substitute_propositional_variables_builder<Builder>> super;
+  using super = Builder<substitute_propositional_variables_builder<Builder>>;
   using super::apply;
 
   pbes_equation m_eq;

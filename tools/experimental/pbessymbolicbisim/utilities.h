@@ -148,15 +148,14 @@ public:
 template <typename Element, typename Container>
 class elements_iterator: public elements_iterator<Element, typename Container::value_type>
 {
-
-  typedef Element value_type;
-  typedef value_type& reference;
-  typedef value_type* pointer;
-  typedef ptrdiff_t difference_type;
-  typedef std::forward_iterator_tag iterator_category;
+  using value_type = Element;
+  using reference = value_type&;
+  using pointer = value_type*;
+  using difference_type = ptrdiff_t;
+  using iterator_category = std::forward_iterator_tag;
 
 protected:
-  typedef elements_iterator<Element, typename Container::value_type> super;
+  using super = elements_iterator<Element, typename Container::value_type>;
 
   typename Container::const_iterator m_it;
   typename Container::const_iterator m_end;
@@ -251,8 +250,8 @@ public:
 template < class BLOCK >
 class split_cache
 {
-  typedef std::unordered_set< std::pair< BLOCK, BLOCK > > refinement_cache_t;
-  typedef std::unordered_map< std::pair< BLOCK, BLOCK >, bool> transition_cache_t;
+  using refinement_cache_t = std::unordered_set<std::pair<BLOCK, BLOCK>>;
+  using transition_cache_t = std::unordered_map<std::pair<BLOCK, BLOCK>, bool>;
 
 protected:
   /// If a pair of blocks is present here, it means that the first is stable wrt to the second

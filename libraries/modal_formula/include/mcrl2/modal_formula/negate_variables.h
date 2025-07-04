@@ -24,7 +24,7 @@ namespace detail
 template <typename Derived>
 struct state_variable_negator: public state_formulas::state_formula_builder<Derived>
 {
-  typedef state_formulas::state_formula_builder<Derived> super;
+  using super = state_formulas::state_formula_builder<Derived>;
   using super::apply;
 
   core::identifier_string m_name;

@@ -26,31 +26,31 @@ using mcrl2::data::tools::rewriter_tool;
 
 class sim_tool : public rewriter_tool< input_tool >
 {
-    typedef rewriter_tool<input_tool> super;
+  using super = rewriter_tool<input_tool>;
 
-  private:
-    static std::string print_state(const state& s)
+private:
+  static std::string print_state(const state& s)
+  {
+    std::string output;
+    bool first = true;
+    for (const data_expression& d : s)
     {
-      std::string output;
-      bool first = true;
-      for (const data_expression& d: s)
+      if (!first)
       {
-        if (!first)
-        {
-          output += ", ";
-        }
-        first = false;
+        output += ", ";
+      }
+      first = false;
 
-        if (mcrl2::data::is_variable(d))
-        {
-          output += "_";
-        }
-        else
-        {
-          output += data::pp(d);
-        }   
-      }       
-      return "[" + output + "]";
+      if (mcrl2::data::is_variable(d))
+      {
+        output += "_";
+      }
+      else
+      {
+        output += data::pp(d);
+      }
+    }
+    return "[" + output + "]";
     }     
 
     static std::string print_state(const stochastic_state& s)

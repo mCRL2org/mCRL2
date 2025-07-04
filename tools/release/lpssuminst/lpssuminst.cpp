@@ -26,7 +26,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
 {
   protected:
 
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
     bool m_tau_summands_only;
     bool m_finite_sorts_only;

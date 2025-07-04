@@ -24,7 +24,7 @@ namespace detail
 template <template <class> class Traverser, class OutputIterator>
 struct find_propositional_variables_traverser: public Traverser<find_propositional_variables_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_propositional_variables_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_propositional_variables_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;

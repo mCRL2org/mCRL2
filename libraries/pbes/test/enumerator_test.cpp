@@ -35,8 +35,8 @@ using namespace mcrl2::pbes_system;
 
 BOOST_AUTO_TEST_CASE(test_enumerator)
 {
-  typedef pbes_system::simplify_data_rewriter<data::rewriter> pbes_rewriter;
-  typedef data::enumerator_list_element<pbes_expression> enumerator_element;
+  using pbes_rewriter = pbes_system::simplify_data_rewriter<data::rewriter>;
+  using enumerator_element = data::enumerator_list_element<pbes_expression>;
 
   data::data_specification data_spec;
   data_spec.add_context_sort(data::sort_nat::nat());
@@ -66,8 +66,8 @@ BOOST_AUTO_TEST_CASE(test_enumerator)
 
 BOOST_AUTO_TEST_CASE(test_enumerator_with_iterator)
 {
-  typedef pbes_system::simplify_data_rewriter<data::rewriter> pbes_rewriter;
-  typedef data::enumerator_list_element<pbes_expression> enumerator_element;
+  using pbes_rewriter = pbes_system::simplify_data_rewriter<data::rewriter>;
+  using enumerator_element = data::enumerator_list_element<pbes_expression>;
 
   data::data_specification data_spec;
   data_spec.add_context_sort(data::sort_nat::nat());
@@ -94,8 +94,8 @@ BOOST_AUTO_TEST_CASE(test_enumerator_with_iterator)
 
 BOOST_AUTO_TEST_CASE(test_enumerator_with_substitutions)
 {
-  typedef pbes_system::simplify_data_rewriter<data::rewriter> pbes_rewriter;
-  typedef data::enumerator_list_element_with_substitution<pbes_expression> enumerator_element;
+  using pbes_rewriter = pbes_system::simplify_data_rewriter<data::rewriter>;
+  using enumerator_element = data::enumerator_list_element_with_substitution<pbes_expression>;
 
   data::data_specification data_spec;
   data_spec.add_context_sort(data::sort_nat::nat());
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(test_enumerator_with_substitutions)
 
 BOOST_AUTO_TEST_CASE(enumerate_callback)
 {
-  typedef pbes_system::simplify_data_rewriter<data::rewriter> pbes_rewriter;
-  typedef data::enumerator_list_element<pbes_expression> enumerator_element;
+  using pbes_rewriter = pbes_system::simplify_data_rewriter<data::rewriter>;
+  using enumerator_element = data::enumerator_list_element<pbes_expression>;
   data::enumerator_identifier_generator id_generator;
   data::data_specification dataspec;
   dataspec.add_context_sort(data::sort_int::int_());

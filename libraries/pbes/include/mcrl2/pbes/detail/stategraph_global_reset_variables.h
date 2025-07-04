@@ -28,7 +28,7 @@ pbes_expression reset_variables(global_reset_variables_algorithm& algorithm, con
 class global_reset_variables_algorithm: public stategraph_global_algorithm
 {
   public:
-    typedef stategraph_global_algorithm super;
+    using super = stategraph_global_algorithm;
 
   protected:
     const pbes& m_original_pbes;
@@ -292,7 +292,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
 /// N.B. It is essential that this traverser uses the same traversal order as the guard_traverser.
 struct reset_traverser: public pbes_expression_traverser<reset_traverser>
 {
-  typedef pbes_expression_traverser<reset_traverser> super;
+  using super = pbes_expression_traverser<reset_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

@@ -19,7 +19,7 @@ namespace data
 template <template <class> class Traverser, class OutputIterator>
 struct find_linear_inequality_traverser: public Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_linear_inequality_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;

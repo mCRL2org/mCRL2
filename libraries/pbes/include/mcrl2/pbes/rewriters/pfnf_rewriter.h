@@ -23,10 +23,10 @@ class pfnf_rewriter
 {
   public:
     /// \brief The term type
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Rewrites a pbes expression.
     /// \param x A term

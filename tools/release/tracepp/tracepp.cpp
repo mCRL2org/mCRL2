@@ -198,7 +198,7 @@ inline void save_trace(mcrl2::lts::trace& trace, output_type outtype, std::ostre
 class tracepp_tool: public input_output_tool
 {
   protected:
-    typedef input_output_tool super;
+    using super = input_output_tool;
 
   public:
     tracepp_tool()

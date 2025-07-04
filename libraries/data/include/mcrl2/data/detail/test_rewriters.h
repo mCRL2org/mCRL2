@@ -26,7 +26,7 @@ namespace mcrl2::data::detail
 template <typename Derived>
 struct normalize_and_or_builder: public data_expression_builder<Derived>
 {
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -101,7 +101,7 @@ void normalize_and_or(T& x,
 template <typename Derived>
 struct normalize_equality_builder: public data_expression_builder<Derived>
 {
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;

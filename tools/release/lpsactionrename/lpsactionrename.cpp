@@ -32,7 +32,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 {
     //Type definitions
     //----------------
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
   protected:
 

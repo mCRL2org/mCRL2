@@ -63,7 +63,7 @@ struct fresh_variable_name_generator
 /// \brief Traverser that rewrites the given PBES to PPG format.
 struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
 {
-  typedef pbes_expression_traverser<ppg_rewriter> super;
+  using super = pbes_expression_traverser<ppg_rewriter>;
   using super::enter;
   using super::leave;
   using super::apply;

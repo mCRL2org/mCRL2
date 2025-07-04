@@ -18,8 +18,8 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-typedef data::rewriter::strategy rewrite_strategy;
-typedef std::vector<rewrite_strategy> rewrite_strategy_vector;
+using rewrite_strategy = data::rewriter::strategy;
+using rewrite_strategy_vector = std::vector<rewrite_strategy>;
 
 void run_linearisation_instance(const std::string& spec, const t_lin_options& options, bool expect_success)
 {

@@ -31,7 +31,7 @@ public:
   using key_type = Key;
   using mapped_type = T;
   using value_type = std::pair<const Key, T>;
-  typedef value_type node_type;
+  using node_type = value_type;
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;
 
@@ -108,7 +108,7 @@ public:
   using const_iterator = typename Set::const_iterator;
   using local_iterator = typename bucket_type::iterator;
   using const_local_iterator = typename Set::const_local_iterator;
-  typedef typename std::pair<unordered_map::iterator, bool> insert_return_type;
+  using insert_return_type = typename std::pair<unordered_map::iterator, bool>;
 
   unordered_map()
     : m_set(0, PairHash(hasher()), PairEquals(key_equal()))

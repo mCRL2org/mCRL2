@@ -159,7 +159,7 @@ process_expression push_block(const std::set<core::identifier_string>& B, const 
 template <typename Derived>
 struct push_block_builder: public process_expression_builder<Derived>
 {
-  typedef process_expression_builder<Derived> super;
+  using super = process_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -332,7 +332,7 @@ struct push_block_builder: public process_expression_builder<Derived>
 template <template <class> class Traverser>
 struct apply_push_block_builder: public Traverser<apply_push_block_builder<Traverser> >
 {
-  typedef Traverser<apply_push_block_builder<Traverser> > super;
+  using super = Traverser<apply_push_block_builder<Traverser>>;
   using super::enter;
   using super::leave;
   using super::apply;

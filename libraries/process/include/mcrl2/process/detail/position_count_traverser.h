@@ -23,7 +23,7 @@ namespace detail {
 
 struct position_count_traverser: public process_expression_traverser<position_count_traverser>
 {
-  typedef process_expression_traverser<position_count_traverser> super;
+  using super = process_expression_traverser<position_count_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

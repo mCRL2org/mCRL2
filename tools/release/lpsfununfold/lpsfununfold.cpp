@@ -198,7 +198,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 {
   protected:
 
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
     std::set< std::size_t > m_set_index; ///< Options of the algorithm
     std::string m_unfoldsort;

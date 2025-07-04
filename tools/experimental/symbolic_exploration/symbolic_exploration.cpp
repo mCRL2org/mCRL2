@@ -23,19 +23,19 @@ using pbes_system::tools::pbes_input_tool;
 
 class symbolic_exploration_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {
-  typedef pbes_input_tool<pbes_output_tool<input_output_tool> > super;
+  using super = pbes_input_tool<pbes_output_tool<input_output_tool>>;
 
-  protected:
-    bool m_optimized;
-    bool m_clustered;
-    bool m_instantiate;
+protected:
+  bool m_optimized;
+  bool m_clustered;
+  bool m_instantiate;
 
-    void parse_options(const command_line_parser& parser)
-    {
-      super::parse_options(parser);
-      m_optimized = parser.option_argument_as<bool>("optimize");
-      m_clustered = parser.options.count("clustered") > 0;
-      m_instantiate = parser.options.count("instantiate") > 0;
+  void parse_options(const command_line_parser& parser)
+  {
+    super::parse_options(parser);
+    m_optimized = parser.option_argument_as<bool>("optimize");
+    m_clustered = parser.options.count("clustered") > 0;
+    m_instantiate = parser.options.count("instantiate") > 0;
     }
 
     void add_options(interface_description& desc)

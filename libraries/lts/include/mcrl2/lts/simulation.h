@@ -22,7 +22,7 @@ class simulation : protected explorer<true, false, stochastic_specification>
 {
   public:
 
-    typedef transition transition_t;
+    using transition_t = transition;
 
     struct simulator_state_t
     {

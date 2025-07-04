@@ -462,7 +462,7 @@ namespace detail
   template <template <class> class Builder>
   struct replace_pattern_match_builder: public Builder<replace_pattern_match_builder<Builder> >
   {
-    typedef Builder<replace_pattern_match_builder<Builder> > super;
+    using super = Builder<replace_pattern_match_builder<Builder>>;
     using super::enter;
     using super::leave;
     using super::apply;
@@ -570,95 +570,96 @@ namespace detail
 
 class lpsparunfold: public detail::lps_algorithm<lps::stochastic_specification>
 {
-  typedef typename detail::lps_algorithm<lps::stochastic_specification> super;
+  using super = typename detail::lps_algorithm<lps::stochastic_specification>;
 
-  public:
+public:
 
-    // old parameter, case function, determinizing parameter, replacement expressions
-    typedef std::tuple<data::variable, std::map<data::sort_expression, data::function_symbol>, data::variable, data::data_expression_vector> case_func_replacement;
+  // old parameter, case function, determinizing parameter, replacement expressions
+  using case_func_replacement = std::tuple<data::variable,
+      std::map<data::sort_expression, data::function_symbol>,
+      data::variable,
+      data::data_expression_vector>;
 
-    /** \brief  Constructor for lpsparunfold algorithm.
-      * \param[in] spec which is a valid mCRL2 process specification.
-      * \param[in,out] cache Cache to store information for reuse.
-      * \param[in] alt_case_placement If true, case functions are placed at a higher level.
-      * \param[in] possibly_inconsistent If true, case functions over Booleans are replaced by a disjunction of conjunctions.
-      *                 For this to be correct, the unfolded sort needs to satisfy some restrictions.
-      * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
-      **/
-    lpsparunfold(lps::stochastic_specification& spec,
-                 std::map< data::sort_expression , unfold_cache_element >& cache,
-                 bool alt_case_placement = false,
-                 bool possibly_inconsistent = false,
-                 bool unfold_pattern_matching = true);
+  /** \brief  Constructor for lpsparunfold algorithm.
+   * \param[in] spec which is a valid mCRL2 process specification.
+   * \param[in,out] cache Cache to store information for reuse.
+   * \param[in] alt_case_placement If true, case functions are placed at a higher level.
+   * \param[in] possibly_inconsistent If true, case functions over Booleans are replaced by a disjunction of
+   *conjunctions. For this to be correct, the unfolded sort needs to satisfy some restrictions.
+   * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
+   **/
+  lpsparunfold(lps::stochastic_specification& spec,
+      std::map<data::sort_expression, unfold_cache_element>& cache,
+      bool alt_case_placement = false,
+      bool possibly_inconsistent = false,
+      bool unfold_pattern_matching = true);
 
-    /** \brief  Applies lpsparunfold algorithm on a process parameter of an mCRL2 process specification .
-     *  \pre algorithm has not been called before.
-     *  \param[in] parameter_at_index An integer value that represents the index value of an process parameter.
-     *  \post   The process parameter at index parameter_at_index is unfolded in the mCRL2 process specification.
-    **/
-    void algorithm(const std::size_t parameter_at_index);
+  /** \brief  Applies lpsparunfold algorithm on a process parameter of an mCRL2 process specification .
+   *  \pre algorithm has not been called before.
+   *  \param[in] parameter_at_index An integer value that represents the index value of an process parameter.
+   *  \post   The process parameter at index parameter_at_index is unfolded in the mCRL2 process specification.
+   **/
+  void algorithm(const std::size_t parameter_at_index);
 
-  private:
-    /// \brief set to true when the algorithm has been run once; as the algorithm should
-    /// run only once...
-    bool m_run_before;
+private:
+  /// \brief set to true when the algorithm has been run once; as the algorithm should
+  /// run only once...
+  bool m_run_before;
 
-    /// @brief Bookkeeper for recogniser and projection functions.
-    detail::unfold_data_manager m_datamgr;
-    detail::pattern_match_unfolder m_pattern_unfolder;
+  /// @brief Bookkeeper for recogniser and projection functions.
+  detail::unfold_data_manager m_datamgr;
+  detail::pattern_match_unfolder m_pattern_unfolder;
 
-    /// \brief The process parameter that needs to be unfold.
-    mcrl2::data::variable m_unfold_parameter;
+  /// \brief The process parameter that needs to be unfold.
+  mcrl2::data::variable m_unfold_parameter;
 
-    /// \brief The process parameters that are inserted.
-    mcrl2::data::variable_vector m_injected_parameters;
+  /// \brief The process parameters that are inserted.
+  mcrl2::data::variable_vector m_injected_parameters;
 
-    /// \brief Boolean to indicate if alternative placement of case functions should be used.
-    bool m_alt_case_placement;
+  /// \brief Boolean to indicate if alternative placement of case functions should be used.
+  bool m_alt_case_placement;
 
-    /// \brief Indicates whether functions defined by pattern matching that occur in the scope of
-    /// a Det or pi in a state update should be unfolded.
-    bool m_unfold_pattern_matching;
+  /// \brief Indicates whether functions defined by pattern matching that occur in the scope of
+  /// a Det or pi in a state update should be unfolded.
+  bool m_unfold_pattern_matching;
 
+  // data::data_expression apply_case_function(const data::data_expression& expr, const case_func_replacement&
+  // case_funcs);
+  case_func_replacement parameter_case_function();
 
-    //data::data_expression apply_case_function(const data::data_expression& expr, const case_func_replacement& case_funcs);
-    case_func_replacement parameter_case_function();
+  /** \brief  Get the process parameter at given index
+   * \param  index The index of the parameter which must be obtained.
+   * \return the process parameter at given index.
+   **/
+  mcrl2::data::variable process_parameter_at(const std::size_t index);
 
-    /** \brief  Get the process parameter at given index
-      * \param  index The index of the parameter which must be obtained.
-      * \return the process parameter at given index.
-    **/
-    mcrl2::data::variable process_parameter_at(const std::size_t index);
+  /** \brief  substitute function for replacing process parameters with unfolded process parameters functions.
+   * \return substitute function for replacing process parameters with unfolded process parameters functions.
+   **/
+  std::map<mcrl2::data::variable, mcrl2::data::data_expression> parameter_substitution();
 
-    /** \brief  substitute function for replacing process parameters with unfolded process parameters functions.
-      * \return substitute function for replacing process parameters with unfolded process parameters functions.
-    **/
-    std::map<mcrl2::data::variable, mcrl2::data::data_expression> parameter_substitution();
+  data::data_expression apply_function(const data::function_symbol& f, const data::data_expression& de) const;
 
-    data::data_expression apply_function(const data::function_symbol& f, const data::data_expression& de) const;
+  /** \brief unfolds a data expression into a vector of process parameters
+   * \param  de the data expression
+   * \return The following vector: < det(de), pi_0(de), ... ,pi_n(de) >
+   **/
+  mcrl2::data::data_expression_vector unfold_constructor(const mcrl2::data::data_expression& de);
 
-    /** \brief unfolds a data expression into a vector of process parameters
-      * \param  de the data expression
-      * \return The following vector: < det(de), pi_0(de), ... ,pi_n(de) >
-    **/
-    mcrl2::data::data_expression_vector unfold_constructor(
-      const mcrl2::data::data_expression& de);
+  /** \brief substitute unfold process parameter in the linear process
+   * \param  parameter_at_index the parameter index
+   * \post the process parameter at given index is unfolded in the the linear process
+   **/
+  void update_linear_process(std::size_t parameter_at_index);
 
-    /** \brief substitute unfold process parameter in the linear process
-      * \param  parameter_at_index the parameter index
-      * \post the process parameter at given index is unfolded in the the linear process
-    **/
-    void update_linear_process(std::size_t parameter_at_index);
+  /** \brief substitute unfold process parameter in the initialization of the linear process
+   * \param  parameter_at_index the parameter index
+   * \post the initialization for the linear process is updated by unfolding the parameter at given index is unfolded
+   **/
+  void update_linear_process_initialization(std::size_t parameter_at_index);
 
-    /** \brief substitute unfold process parameter in the initialization of the linear process
-      * \param  parameter_at_index the parameter index
-      * \post the initialization for the linear process is updated by unfolding the parameter at given index is unfolded
-    **/
-   void update_linear_process_initialization(
-      std::size_t parameter_at_index);
-
-    // Applies 'process unfolding' to a sequence of summands.
-    void unfold_summands(mcrl2::lps::stochastic_action_summand_vector& summands);
+  // Applies 'process unfolding' to a sequence of summands.
+  void unfold_summands(mcrl2::lps::stochastic_action_summand_vector& summands);
 };
 
 
@@ -666,7 +667,7 @@ template <template <class> class Builder, template <template <class> class, clas
 struct parunfold_replacement: public
 Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Builder, Binder>>
 {
-  typedef Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Builder, Binder>> super;
+  using super = Binder<Builder, parunfold_replacement<Builder, Binder>, parunfold_replacement<Builder, Binder>>;
   using super::enter;
   using super::leave;
   using super::apply;

@@ -31,14 +31,14 @@ template <class IteratorTag>
 class prepend_iterator_tag_convertor
 {
   public:
-    typedef std::forward_iterator_tag iterator_category;
+    using iterator_category = std::forward_iterator_tag;
 };
 
 template <>
 class prepend_iterator_tag_convertor<std::input_iterator_tag>
 {
   public:
-    typedef std::input_iterator_tag iterator_category;
+    using iterator_category = std::input_iterator_tag;
 };
 
 // Iterator for term_appl which prepends a data_expression to a list convertible to data_expressions.
@@ -46,21 +46,21 @@ template <class Iterator >
 class term_appl_prepend_iterator
 {
   private:
-    typedef std::iterator_traits<int*> traits;
+    using traits = std::iterator_traits<int*>;
 
   public:
     // The value_type.
-    typedef data_expression value_type;
+    using value_type = data_expression;
     // The reference type.
-    typedef const data_expression& reference;
+    using reference = const data_expression&;
     // The pointer type.
-    typedef const data_expression* pointer;
+    using pointer = const data_expression*;
     // Difference type
-    typedef ptrdiff_t difference_type;
+    using difference_type = ptrdiff_t;
     // The iterator category.
     // The iterator category is a forward_iterator, unless Iterator is an input iterator, in which case
     // it is an input iterator.
-    typedef typename prepend_iterator_tag_convertor<traits::iterator_category>::iterator_category iterator_category;
+    using iterator_category = typename prepend_iterator_tag_convertor<traits::iterator_category>::iterator_category;
 
   protected:
     Iterator m_it;
@@ -393,7 +393,7 @@ class application: public data_expression
     // forbid the use of iterator, which is silently inherited from
     // aterm. Modifying the arguments of an application through the iterator
     // is not allowed!
-    typedef data_expression::iterator iterator;
+    using iterator = data_expression::iterator;
 
   public:
 
@@ -405,7 +405,7 @@ class application: public data_expression
     ///          application starts at the first argument. This also means that
     ///          t[n] for t an application is equal to t[n+1] if t is interpreted as an
     ///          aterm.
-    typedef atermpp::term_appl_iterator<data_expression> const_iterator;
+    using const_iterator = atermpp::term_appl_iterator<data_expression>;
 
     /// \brief Constructor.
     template <typename FwdIter>

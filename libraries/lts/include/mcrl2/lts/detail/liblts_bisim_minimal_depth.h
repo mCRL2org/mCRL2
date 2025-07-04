@@ -123,11 +123,11 @@ public:
 
 
 private:
-  typedef std::size_t block_index_type;
-  typedef std::size_t state_type;
-  typedef std::size_t level_type;
-  typedef std::size_t formula_index_type;
-  typedef std::size_t label_type;
+  using block_index_type = std::size_t;
+  using state_type = std::size_t;
+  using level_type = std::size_t;
+  using formula_index_type = std::size_t;
+  using label_type = std::size_t;
   state_type initial_l2;
 
   state_type max_state_index;
@@ -184,8 +184,8 @@ private:
 
   std::vector<block_index_type> to_be_processed;
   std::vector<block_index_type> BL;
-  typedef std::pair<label_type, block_index_type> observation_t;
-  typedef std::set<observation_t> derivatives_t;
+  using observation_t = std::pair<label_type, block_index_type>;
+  using derivatives_t = std::set<observation_t>;
   std::map<std::pair<block_index_type, block_index_type>, level_type> greatest_common_ancestor;
 
   /* Post processes the partition structure to save outgoing transitions per block */

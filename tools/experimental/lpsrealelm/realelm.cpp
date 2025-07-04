@@ -723,7 +723,7 @@ static bool compare(const data_expression& t1,
                     const detail::comparison_t comp,
                     const rewriter& r)
 {
- typedef mcrl2::data::detail::comparison_t ct;
+  using ct = mcrl2::data::detail::comparison_t;
   switch (comp)
   {
     case ct::less: return r(less(t1,t2))==sort_bool::true_();

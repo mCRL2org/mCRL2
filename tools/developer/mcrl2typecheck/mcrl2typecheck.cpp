@@ -16,7 +16,7 @@ using namespace mcrl2;
 
 struct print_sub_expressions_traverser: public data::data_expression_traverser<print_sub_expressions_traverser>
 {
-  typedef data::data_expression_traverser<print_sub_expressions_traverser> super;
+  using super = data::data_expression_traverser<print_sub_expressions_traverser>;
 
   template <typename T>
   void leave(const T& x,
@@ -116,7 +116,7 @@ void rewrite_expressions(std::string text, bool print_subterms)
 class mcrl2typecheck_tool: public utilities::tools::input_tool
 {
   protected:
-    typedef utilities::tools::input_tool super;
+    using super = utilities::tools::input_tool;
     bool print_subterms = false;
 
     void parse_options(const utilities::command_line_parser& parser)

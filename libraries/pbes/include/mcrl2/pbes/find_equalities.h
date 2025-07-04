@@ -24,7 +24,7 @@ namespace detail {
 template <template <class> class Traverser, class Derived>
 struct find_equalities_traverser: public data::detail::find_equalities_traverser<Traverser, Derived>
 {
-  typedef data::detail::find_equalities_traverser<Traverser, Derived> super;
+  using super = data::detail::find_equalities_traverser<Traverser, Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -91,7 +91,8 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
 
 struct find_equalities_traverser_inst: public pbes_system::detail::find_equalities_traverser<pbes_system::data_expression_traverser, find_equalities_traverser_inst>
 {
-  typedef pbes_system::detail::find_equalities_traverser<pbes_system::data_expression_traverser, find_equalities_traverser_inst> super;
+  using super = pbes_system::detail::find_equalities_traverser<pbes_system::data_expression_traverser,
+      find_equalities_traverser_inst>;
 
   using super::enter;
   using super::leave;

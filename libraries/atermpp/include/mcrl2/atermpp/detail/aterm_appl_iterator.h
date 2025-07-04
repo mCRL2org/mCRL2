@@ -41,11 +41,11 @@ class term_appl_iterator
     {}
 
   public:
-    typedef Term value_type;
-    typedef const Term& reference;
-    typedef const Term* pointer;
-    typedef ptrdiff_t difference_type;
-    typedef std::random_access_iterator_tag iterator_category;
+    using value_type = Term;
+    using reference = const Term&;
+    using pointer = const Term*;
+    using difference_type = ptrdiff_t;
+    using iterator_category = std::random_access_iterator_tag;
 
     /// \brief The copy constructor.
     /// \param other The iterator that is copy constructed.

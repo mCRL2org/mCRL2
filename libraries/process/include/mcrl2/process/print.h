@@ -87,7 +87,7 @@ namespace detail
 template <typename Derived>
 struct printer: public process::add_traverser_sort_expressions<data::detail::printer, Derived>
 {
-  typedef process::add_traverser_sort_expressions<data::detail::printer, Derived> super;
+  using super = process::add_traverser_sort_expressions<data::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;
@@ -166,7 +166,7 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
                                                   const std::string& separator = ", "
                                                  )
   {
-    typedef typename Container::value_type T;
+    using T = typename Container::value_type;
 
     // print nothing if the container is empty
     if (container.empty())

@@ -68,32 +68,34 @@ using namespace mcrl2::process;
 
 /*  Preamble */
 
-typedef enum { unknown,
-               mCRL,
-               mCRLdone,
-               mCRLbusy,
-               mCRLlin,
-               pCRL,
-               multiAction,
-               GNF,
-               GNFalpha,
-               GNFbusy,
-               error
-             } processstatustype;
-
-
+using processstatustype = enum
+{
+  unknown,
+  mCRL,
+  mCRLdone,
+  mCRLbusy,
+  mCRLlin,
+  pCRL,
+  multiAction,
+  GNF,
+  GNFalpha,
+  GNFbusy,
+  error
+};
 
 /**************** Definitions of object class  ***********************/
 
-typedef enum { none,
-               _map,
-               func,
-               act,
-               proc,
-               variable_,
-               sorttype,
-               multiact
-             } objecttype;
+using objecttype = enum
+{
+  none,
+  _map,
+  func,
+  act,
+  proc,
+  variable_,
+  sorttype,
+  multiact
+};
 
 class objectdatatype
 {
@@ -1851,7 +1853,11 @@ class specification_basic_type
     /*                                                                  */
     /********************************************************************/
 
-    typedef enum { first, later } variableposition;
+    using variableposition = enum
+    {
+      first,
+      later
+    };
 
     /****************  tovarheadGNF  *********************************/
 
@@ -2004,7 +2010,14 @@ class specification_basic_type
       return process_expression();
     }
 
-    typedef enum { alt_state, sum_state, /* cond,*/ seq_state, name_state, multiaction_state } state;
+    using state = enum
+    {
+      alt_state,
+      sum_state, /* cond,*/
+      seq_state,
+      name_state,
+      multiaction_state
+    };
 
     variable get_fresh_variable(const std::string& s, const sort_expression& sort, const int reuse_index=-1)
     {
@@ -2509,7 +2522,11 @@ class specification_basic_type
 
     /**************** towards real GREIBACH normal form **************/
 
-    typedef enum {terminating,infinite} terminationstatus;
+    using terminationstatus = enum
+    {
+      terminating,
+      infinite
+    };
 
     process_expression putbehind(const process_expression& body1, const process_expression& body2)
     {
@@ -3753,7 +3770,7 @@ class specification_basic_type
       identifier_identifier_map.swap(new_identifier_identifier_map);
 #ifndef NDEBUG
       /* In the result no right hand side occurs as the left hand side of identifier_identifier_map */
-      typedef std::pair< const process_identifier, process_identifier > identifier_identifier_pair;
+      using identifier_identifier_pair = std::pair<const process_identifier, process_identifier>;
       for(const identifier_identifier_pair& p: identifier_identifier_map)
       {
         assert(identifier_identifier_map.count(p.second)==0);
@@ -3763,8 +3780,8 @@ class specification_basic_type
 
     struct make_substitution
     {
-      typedef process_identifier result_type;
-      typedef process_identifier argument_type;
+      using result_type = process_identifier;
+      using argument_type = process_identifier;
       const std::map< process_identifier, process_identifier >& m_map;
 
       make_substitution(const std::map< process_identifier, process_identifier >& map)
@@ -3787,9 +3804,9 @@ class specification_basic_type
                                                         const process_identifier& initial_process)
     {
       assert(reachable_process_identifiers.count(initial_process)>0);
-      typedef std::pair< variable_list, process_expression > parameters_process_pair;
-      typedef std::map< std::pair< variable_list, process_expression >, process_identifier > mapping_type;
-      typedef std::pair<const std::pair< variable_list, process_expression >, process_identifier > mapping_type_pair;
+      using parameters_process_pair = std::pair<variable_list, process_expression>;
+      using mapping_type = std::map<std::pair<variable_list, process_expression>, process_identifier>;
+      using mapping_type_pair = std::pair<const std::pair<variable_list, process_expression>, process_identifier>;
 
       /* First put the identifiers in reachable_process_identifiers in the process mapping */
       mapping_type process_mapping;

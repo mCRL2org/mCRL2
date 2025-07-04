@@ -42,7 +42,7 @@ template <typename Term>
 inline
 term_list<Term> push_back(const term_list<Term>& l, const Term& el)
 {
-  typedef typename term_list<Term>::const_iterator const_iterator;
+  using const_iterator = typename term_list<Term>::const_iterator;
 
   const std::size_t len = l.size();
 
@@ -286,7 +286,7 @@ template <typename Term>
 inline
 term_list<Term> remove_one_element(const term_list<Term>& list, const Term& t)
 {
-  typedef typename term_list<Term>::const_iterator const_iterator;
+  using const_iterator = typename term_list<Term>::const_iterator;
 
   std::size_t len=0;
   const_iterator i = list.begin();
@@ -339,8 +339,8 @@ operator+(const term_list<Term1>& l, const term_list<Term2>& m)
                 "aterm cast cannot be applied types derived from aterms where extra fields are added. ");
   static_assert(sizeof(Term2) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added. ");
-  typedef typename std::conditional<std::is_convertible<Term2,Term1>::value,Term1,Term2>::type ResultType;
-  typedef typename term_list<Term1>::const_iterator const_iterator;
+  using ResultType = typename std::conditional<std::is_convertible<Term2, Term1>::value, Term1, Term2>::type;
+  using const_iterator = typename term_list<Term1>::const_iterator;
 
   if (m.empty())
   {

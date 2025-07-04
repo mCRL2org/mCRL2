@@ -72,10 +72,10 @@ inline void make_rename_expression(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of rename_expressions
-typedef atermpp::term_list<rename_expression> rename_expression_list;
+using rename_expression_list = atermpp::term_list<rename_expression>;
 
 /// \\brief vector of rename_expressions
-typedef std::vector<rename_expression>    rename_expression_vector;
+using rename_expression_vector = std::vector<rename_expression>;
 
 /// \\brief Test for a rename_expression expression
 /// \\param x A term

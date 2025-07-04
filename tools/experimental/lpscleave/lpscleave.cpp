@@ -27,7 +27,7 @@ using mcrl2::utilities::tools::input_output_output_tool;
 
 class lpscleave_tool : public input_output_output_tool
 {
-  typedef input_output_output_tool super;
+  using super = input_output_output_tool;
 
 public:
   lpscleave_tool() : super(

@@ -23,7 +23,7 @@ class action_summand: public summand_base
 {
   protected:
     /// \brief The super class
-    typedef summand_base super;
+    using super = summand_base;
 
     /// \brief The summation variables of the summand
     lps::multi_action m_multi_action;
@@ -111,10 +111,10 @@ class action_summand: public summand_base
 
 //--- start generated class action_summand ---//
 /// \\brief list of action_summands
-typedef atermpp::term_list<action_summand> action_summand_list;
+using action_summand_list = atermpp::term_list<action_summand>;
 
 /// \\brief vector of action_summands
-typedef std::vector<action_summand>    action_summand_vector;
+using action_summand_vector = std::vector<action_summand>;
 
 // prototype declaration
 std::string pp(const action_summand& x, bool precedence_aware = true);

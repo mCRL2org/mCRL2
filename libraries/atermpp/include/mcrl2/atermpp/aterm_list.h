@@ -33,31 +33,31 @@ protected:
 
 public:
   /// The type of object, T stored in the term_list.
-  typedef Term value_type;
+  using value_type = Term;
 
   /// Pointer to T.
-  typedef Term* pointer;
+  using pointer = Term*;
 
   /// Reference to T.
-  typedef Term& reference;
+  using reference = Term&;
 
   /// Const reference to T.
-  typedef const Term& const_reference;
+  using const_reference = const Term&;
 
   /// An unsigned integral type.
-  typedef std::size_t size_type;
+  using size_type = std::size_t;
 
   /// A signed integral type.
-  typedef ptrdiff_t difference_type;
+  using difference_type = ptrdiff_t;
 
   /// Iterator used to iterate through an term_list.
-  typedef term_list_iterator<Term> iterator;
+  using iterator = term_list_iterator<Term>;
 
   /// Const iterator used to iterate through an term_list.
-  typedef term_list_iterator<Term> const_iterator;
+  using const_iterator = term_list_iterator<Term>;
 
   /// Const iterator used to iterate through an term_list.
-  typedef reverse_term_list_iterator<Term> const_reverse_iterator;
+  using const_reverse_iterator = reverse_term_list_iterator<Term>;
 
   /// \brief Default constructor. Creates an empty list.
   term_list() noexcept
@@ -506,8 +506,7 @@ public:
 
 
 /// \brief A term_list with elements of type aterm.
-typedef term_list<aterm> aterm_list;
-
+using aterm_list = term_list<aterm>;
 
 /// \brief Returns the list with the elements in reversed order.
 /// \param l A list.

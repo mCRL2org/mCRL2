@@ -53,7 +53,7 @@ atermpp::aterm pbes_to_aterm(const pbes& p);
 class pbes
 {
   public:
-    typedef pbes_equation equation_type;
+    using equation_type = pbes_equation;
 
   protected:
     /// \brief The data specification

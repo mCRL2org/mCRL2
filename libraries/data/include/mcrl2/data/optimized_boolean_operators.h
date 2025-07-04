@@ -27,7 +27,7 @@ void optimized_not(typename TermTraits::term_type& result,
                    const typename TermTraits::term_type& arg, 
                    TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (tr::is_true(arg))
   {
@@ -58,7 +58,7 @@ void optimized_and(typename TermTraits::term_type& result,
                    const typename TermTraits::term_type& right, 
                    TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (tr::is_true(left))
   {
@@ -130,7 +130,7 @@ void optimized_or(typename TermTraits::term_type& result,
                   const typename TermTraits::term_type& left, 
                   const typename TermTraits::term_type& right, TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (tr::is_true(left))
   {
@@ -168,7 +168,7 @@ void optimized_imp(typename TermTraits::term_type& result,
                    const typename TermTraits::term_type& left, 
                    const typename TermTraits::term_type& right, TermTraits t)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (tr::is_true(left))
   {
@@ -212,7 +212,7 @@ void optimized_forall(typename TermTraits::term_type& result,
                       bool remove_variables, 
                       bool empty_domain_allowed, TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (v.empty())
   {
@@ -271,7 +271,7 @@ void optimized_exists(typename TermTraits::term_type& result,
                       bool empty_domain_allowed, 
                       TermTraits)
 {
-  typedef TermTraits tr;
+  using tr = TermTraits;
 
   if (v.empty())
   {

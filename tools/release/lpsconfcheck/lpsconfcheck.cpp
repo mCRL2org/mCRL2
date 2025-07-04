@@ -42,7 +42,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 {
   protected:
 
-    typedef prover_tool< rewriter_tool<input_output_tool> > super;
+    using super = prover_tool<rewriter_tool<input_output_tool>>;
 
     /// \brief The name of a file containing an invariant that is used to check confluence.
     /// \brief If this string is 0, the constant true is used as invariant.

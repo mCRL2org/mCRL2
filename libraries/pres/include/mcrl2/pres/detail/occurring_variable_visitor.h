@@ -23,7 +23,7 @@ namespace mcrl2::pres_system::detail
 
 struct occurring_variable_visitor: public pres_expression_traverser<occurring_variable_visitor>
 {
-  typedef pres_expression_traverser<occurring_variable_visitor> super;
+  using super = pres_expression_traverser<occurring_variable_visitor>;
   using super::enter;
   using super::leave;
   using super::apply;

@@ -48,7 +48,7 @@ atermpp::term_list<Term> remove_elements(const atermpp::term_list<Term>& l, cons
 template <typename Derived>
 struct remove_parameters_builder: public pbes_system::pbes_expression_builder<Derived>
 {
-  typedef pbes_system::pbes_expression_builder<Derived> super;
+  using super = pbes_system::pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -131,7 +131,7 @@ namespace detail
 template <typename Derived>
 struct map_based_remove_parameters_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -233,7 +233,7 @@ namespace detail
 template <typename Derived>
 struct set_based_remove_parameters_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;

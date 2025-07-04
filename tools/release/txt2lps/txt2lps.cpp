@@ -24,30 +24,30 @@ using namespace mcrl2::utilities::tools;
 
 class txt2lps_tool : public input_output_tool
 {
-    typedef input_output_tool super;
+  using super = input_output_tool;
 
-  public:
+public:
 
-    txt2lps_tool() : super(
-        TOOLNAME,
-        AUTHOR,
-        "translates an mCRL2 specification of a linear process into an LPS",
-        "Translates the mCRL2 specification in INFILE and writes the resulting LPS to "
-        "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
-        "present, standard input is used.")
-    {}
+  txt2lps_tool()
+      : super(TOOLNAME,
+            AUTHOR,
+            "translates an mCRL2 specification of a linear process into an LPS",
+            "Translates the mCRL2 specification in INFILE and writes the resulting LPS to "
+            "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
+            "present, standard input is used.")
+  {}
 
-    bool run() override
-    {      
-      lps::stochastic_specification spec;
-      std::ifstream ifs(input_filename());
-      if (!ifs.good())
-      {
-        throw mcrl2::runtime_error("Could not open file " + input_filename() + ".");
-      }
-      parse_lps(ifs, spec);
-      save_lps(spec, output_filename());
-      return true;
+  bool run() override
+  {
+    lps::stochastic_specification spec;
+    std::ifstream ifs(input_filename());
+    if (!ifs.good())
+    {
+      throw mcrl2::runtime_error("Could not open file " + input_filename() + ".");
+    }
+    parse_lps(ifs, spec);
+    save_lps(spec, output_filename());
+    return true;
     }
 
 };

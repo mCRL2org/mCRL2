@@ -152,94 +152,90 @@ inline process::action make_ctau_action()
 template <typename Specification>
 class Confluence_Checker
 {
-  typedef typename Specification::process_type process_type;
-  typedef typename process_type::action_summand_type action_summand_type;
-  typedef std::vector<action_summand_type> action_summand_vector_type;
+  using process_type = typename Specification::process_type;
+  using action_summand_type = typename process_type::action_summand_type;
+  using action_summand_vector_type = std::vector<action_summand_type>;
 
-  private:
-    /// \brief Class that can check if two summands are disjoint.
-    Disjointness_Checker f_disjointness_checker;
+private:
+  /// \brief Class that can check if two summands are disjoint.
+  Disjointness_Checker f_disjointness_checker;
 
-    /// \brief Class that checks if an invariant holds for an LPS.
-    Invariant_Checker<Specification> f_invariant_checker;
+  /// \brief Class that checks if an invariant holds for an LPS.
+  Invariant_Checker<Specification> f_invariant_checker;
 
-    /// \brief BDD based prover.
-    data::detail::BDD_Prover f_bdd_prover;
+  /// \brief BDD based prover.
+  data::detail::BDD_Prover f_bdd_prover;
 
-    /// \brief Class that prints BDDs in dot format.
-    data::detail::BDD2Dot f_bdd2dot;
+  /// \brief Class that prints BDDs in dot format.
+  data::detail::BDD2Dot f_bdd2dot;
 
-    /// \brief A linear process specification.
-    Specification& f_lps;
+  /// \brief A linear process specification.
+  Specification& f_lps;
 
-    /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
-    // bool f_no_marking;
+  /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
+  // bool f_no_marking;
 
-    /// \brief Flag indicating whether or not the process of checking the confluence of a summand stops when
-    /// \brief a summand is encountered that is not confluent with the tau summand at hand.
-    bool f_check_all;
+  /// \brief Flag indicating whether or not the process of checking the confluence of a summand stops when
+  /// \brief a summand is encountered that is not confluent with the tau summand at hand.
+  bool f_check_all;
 
-    /// \brief Do not rewrite summands with sum operators.
-    bool f_no_sums;
+  /// \brief Do not rewrite summands with sum operators.
+  bool f_no_sums;
 
-    /// \brief Confluence types for which the tool should check.
-    std::string f_conditions;
+  /// \brief Confluence types for which the tool should check.
+  std::string f_conditions;
 
-    /// \brief Flag indicating whether or not counter examples are printed.
-    bool f_counter_example;
+  /// \brief Flag indicating whether or not counter examples are printed.
+  bool f_counter_example;
 
-    /// \brief The prefix for the names of the files written in dot format.
-    std::string f_dot_file_name;
+  /// \brief The prefix for the names of the files written in dot format.
+  std::string f_dot_file_name;
 
-    /// \brief Flag indicating whether or not invariants are generated and checked each time a
-    /// \brief summand is encountered that is not confluent with the tau summand at hand.
-    bool f_generate_invariants;
+  /// \brief Flag indicating whether or not invariants are generated and checked each time a
+  /// \brief summand is encountered that is not confluent with the tau summand at hand.
+  bool f_generate_invariants;
 
-    /// \brief The number of summands of the current LPS.
-    std::size_t f_number_of_summands;
+  /// \brief The number of summands of the current LPS.
+  std::size_t f_number_of_summands;
 
-    /// \brief An integer array, storing intermediate results per summand.
-    std::vector <std::size_t> f_intermediate;
+  /// \brief An integer array, storing intermediate results per summand.
+  std::vector<std::size_t> f_intermediate;
 
-    /// \brief Identifier generator to allow variables to be uniquely renamed.
-    data::set_identifier_generator f_set_identifier_generator;
+  /// \brief Identifier generator to allow variables to be uniquely renamed.
+  data::set_identifier_generator f_set_identifier_generator;
 
-    /// \brief Writes a dot file of the BDD created when checking the confluence of summands a_summand_number_1 and a_summand_number_2.
-    void save_dot_file(std::size_t a_summand_number_1, std::size_t a_summand_number_2);
+  /// \brief Writes a dot file of the BDD created when checking the confluence of summands a_summand_number_1 and
+  /// a_summand_number_2.
+  void save_dot_file(std::size_t a_summand_number_1, std::size_t a_summand_number_2);
 
-    /// \brief Outputs a path in the BDD corresponding to the condition at hand that leads to a node labelled false.
-    void print_counter_example();
+  /// \brief Outputs a path in the BDD corresponding to the condition at hand that leads to a node labelled false.
+  void print_counter_example();
 
-    /// \brief Checks the confluence of summand a_summand_1 and a_summand_2
-    bool check_summands(
-      const data::data_expression& a_invariant,
+  /// \brief Checks the confluence of summand a_summand_1 and a_summand_2
+  bool check_summands(const data::data_expression& a_invariant,
       const action_summand_type a_summand_1,
       const std::size_t a_summand_number_1,
       const action_summand_type a_summand_2,
       const std::size_t a_summand_number_2,
       const char a_condition_type);
 
-    /// \brief Checks and updates the confluence of summand a_summand concerning all other tau-summands.
-    void check_confluence_and_mark_summand(
-      action_summand_type& a_summand,
+  /// \brief Checks and updates the confluence of summand a_summand concerning all other tau-summands.
+  void check_confluence_and_mark_summand(action_summand_type& a_summand,
       const std::size_t a_summand_number,
       const data::data_expression& a_invariant,
       const char a_condition_type,
       bool& a_is_marked);
 
-    // Returns a modified instance of a summand in which summation variables are uniquely renamed.
-    void uniquely_rename_summutation_variables(
-      action_summand_type& summand);
+  // Returns a modified instance of a summand in which summation variables are uniquely renamed.
+  void uniquely_rename_summutation_variables(action_summand_type& summand);
 
-  public:
-    /// \brief Constructor that initializes Confluence_Checker::f_lps, Confluence_Checker::f_bdd_prover,
-    /// \brief Confluence_Checker::f_generate_invariants and Confluence_Checker::f_dot_file_name.
-    /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
-    /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
-    /// to 0, no time limit will be enforced
-    Confluence_Checker
-    (
-      Specification& a_lps,
+public:
+  /// \brief Constructor that initializes Confluence_Checker::f_lps, Confluence_Checker::f_bdd_prover,
+  /// \brief Confluence_Checker::f_generate_invariants and Confluence_Checker::f_dot_file_name.
+  /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
+  /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is
+  /// equal to 0, no time limit will be enforced
+  Confluence_Checker(Specification& a_lps,
       data::rewriter::strategy a_rewrite_strategy = data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
@@ -250,14 +246,14 @@ class Confluence_Checker
       std::string a_conditions = "c",
       bool a_counter_example = false,
       bool a_generate_invariants = false,
-      std::string const& a_dot_file_name = std::string()
-    );
+      std::string const& a_dot_file_name = std::string());
 
-    /// \brief Check the confluence of the LPS Confluence_Checker::f_lps.
-    /// precondition: the argument passed as parameter a_invariant is an expression of sort Bool in internal mCRL2 format
-    /// precondition: the argument passed as parameter a_summand_number corresponds with a summand of the LPS for which
-    /// confluence must be checked (lowest summand has number 1). If this number is 0 confluence for all summands is checked.
-    void check_confluence_and_mark(const data::data_expression& a_invariant, const std::size_t a_summand_number);
+  /// \brief Check the confluence of the LPS Confluence_Checker::f_lps.
+  /// precondition: the argument passed as parameter a_invariant is an expression of sort Bool in internal mCRL2 format
+  /// precondition: the argument passed as parameter a_summand_number corresponds with a summand of the LPS for which
+  /// confluence must be checked (lowest summand has number 1). If this number is 0 confluence for all summands is
+  /// checked.
+  void check_confluence_and_mark(const data::data_expression& a_invariant, const std::size_t a_summand_number);
 };
 
 // Auxiliary functions ----------------------------------------------------------------------------
@@ -746,7 +742,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
   const char a_condition_type,
   bool& a_is_marked)
 {
-  typedef typename Specification::process_type::action_summand_type action_summand_type;
+  using action_summand_type = typename Specification::process_type::action_summand_type;
   assert(a_summand.is_tau());
   std::vector<action_summand_type>& v_summands = f_lps.process().action_summands();
   std::size_t v_summand_number = 1;
@@ -878,7 +874,7 @@ Confluence_Checker<Specification>::Confluence_Checker(
 template <typename Specification>
 void Confluence_Checker<Specification>::check_confluence_and_mark(const data::data_expression& a_invariant, const std::size_t a_summand_number)
 {
-  typedef typename Specification::process_type::action_summand_type action_summand_type;
+  using action_summand_type = typename Specification::process_type::action_summand_type;
   typename Specification::process_type& v_process_equation = f_lps.process();
   std::vector<action_summand_type>& v_summands = v_process_equation.action_summands();
   bool v_is_marked = false;

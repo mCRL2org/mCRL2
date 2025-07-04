@@ -72,10 +72,10 @@ class fixpoint_symbol: public atermpp::aterm
 };
 
 /// \\brief list of fixpoint_symbols
-typedef atermpp::term_list<fixpoint_symbol> fixpoint_symbol_list;
+using fixpoint_symbol_list = atermpp::term_list<fixpoint_symbol>;
 
 /// \\brief vector of fixpoint_symbols
-typedef std::vector<fixpoint_symbol>    fixpoint_symbol_vector;
+using fixpoint_symbol_vector = std::vector<fixpoint_symbol>;
 
 // prototype declaration
 std::string pp(const fixpoint_symbol& x, bool precedence_aware = true);

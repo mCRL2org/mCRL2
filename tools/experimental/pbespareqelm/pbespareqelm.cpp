@@ -34,7 +34,7 @@ using data::tools::rewriter_tool;
 class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > >
 {
   protected:
-    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > > super;
+    using super = pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>;
 
     /// \brief If true, the initial state is ignored.
     bool m_ignore_initial_state;

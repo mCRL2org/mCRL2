@@ -26,28 +26,28 @@ using data::tools::rewriter_tool;
 
 class pbes_stategraph_tool: public pbes_input_tool<pbes_output_tool<rewriter_tool<input_output_tool> > >
 {
-  typedef pbes_input_tool<pbes_output_tool<rewriter_tool<input_output_tool> > > super;
+  using super = pbes_input_tool<pbes_output_tool<rewriter_tool<input_output_tool>>>;
 
-  protected:
-    pbesstategraph_options options;
+protected:
+  pbesstategraph_options options;
 
-    void parse_options(const command_line_parser& parser) override
+  void parse_options(const command_line_parser& parser) override
+  {
+    super::parse_options(parser);
+    options.rewrite_strategy = rewrite_strategy();
+    options.simplify = 0 == parser.options.count("no-simplify");
+    options.use_global_variant = 0 < parser.options.count("use-global-variant");
+    options.print_influence_graph = 0 < parser.options.count("print-influence-graph");
+    options.cache_marking_updates = 0 == parser.options.count("disable-cache-marking-updates");
+    options.marking_algorithm = parser.option_argument_as<int>("marking-algorithm");
+    if (options.marking_algorithm < 0 || options.marking_algorithm > 2)
     {
-      super::parse_options(parser);
-      options.rewrite_strategy = rewrite_strategy();
-      options.simplify = 0 == parser.options.count("no-simplify");
-      options.use_global_variant = 0 < parser.options.count("use-global-variant");
-      options.print_influence_graph = 0 < parser.options.count("print-influence-graph");
-      options.cache_marking_updates = 0 == parser.options.count("disable-cache-marking-updates");
-      options.marking_algorithm = parser.option_argument_as<int>("marking-algorithm");
-      if (options.marking_algorithm < 0 || options.marking_algorithm > 2)
-      {
-        throw mcrl2::runtime_error("invalid value for marking-algorithm!");
-      }
-      options.use_alternative_lcfp_criterion = 0 < parser.options.count("use-alternative-lcfp-criterion");
-      options.use_alternative_gcfp_relation = 0 < parser.options.count("use-alternative-gcfp-relation");
-      options.use_alternative_gcfp_consistency = 0 < parser.options.count("use-alternative-gcfp-consistency");
-      options.timer = &timer();
+      throw mcrl2::runtime_error("invalid value for marking-algorithm!");
+    }
+    options.use_alternative_lcfp_criterion = 0 < parser.options.count("use-alternative-lcfp-criterion");
+    options.use_alternative_gcfp_relation = 0 < parser.options.count("use-alternative-gcfp-relation");
+    options.use_alternative_gcfp_consistency = 0 < parser.options.count("use-alternative-gcfp-consistency");
+    options.timer = &timer();
     }
 
     void add_options(interface_description& desc) override

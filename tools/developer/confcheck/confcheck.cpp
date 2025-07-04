@@ -20,34 +20,35 @@ using utilities::tools::input_output_tool;
 
 class confcheck_tool: public rewriter_tool<input_output_tool>
 {
-  typedef rewriter_tool<input_output_tool> super;
+  using super = rewriter_tool<input_output_tool>;
 
-  protected:
-    /// \brief Confluence types for which the tool should check.
-    std::string m_conditions;
-    bool m_use_smt_solver = false;
+protected:
+  /// \brief Confluence types for which the tool should check.
+  std::string m_conditions;
+  bool m_use_smt_solver = false;
 
-  public:
-    confcheck_tool()
+public:
+  confcheck_tool()
       : super("confcheck",
-              "Wieger Wesselink",
-              "checks confluence on an LPS",
-              "Transforms the LPS in INFILE and writes the result to OUTFILE."
-              " If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
-              " Confluent tau actions are replaced by ctau."
-             )
-    {}
+            "Wieger Wesselink",
+            "checks confluence on an LPS",
+            "Transforms the LPS in INFILE and writes the result to OUTFILE."
+            " If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
+            " Confluent tau actions are replaced by ctau.")
+  {}
 
-    void add_options(utilities::interface_description& desc) override
-    {
-      super::add_options(desc);
-      desc.add_option("conditions", utilities::make_optional_argument("CONDITIONS", "C"),
-                 "use the confluence conditions specified by individual characters ("
-                 "Q: commutative confluence; "
-                 "C: square confluence; "
-                 "T: triangular confluence; "
-                 "Z: trivial confluence)", 'x');
-      desc.add_option("use-smt-solver", "Use the SMT solver Z3 (must be in the path)", 's');
+  void add_options(utilities::interface_description& desc) override
+  {
+    super::add_options(desc);
+    desc.add_option("conditions",
+        utilities::make_optional_argument("CONDITIONS", "C"),
+        "use the confluence conditions specified by individual characters ("
+        "Q: commutative confluence; "
+        "C: square confluence; "
+        "T: triangular confluence; "
+        "Z: trivial confluence)",
+        'x');
+    desc.add_option("use-smt-solver", "Use the SMT solver Z3 (must be in the path)", 's');
     }
 
     void parse_options(const utilities::command_line_parser& parser) override

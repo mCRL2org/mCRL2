@@ -22,8 +22,8 @@ namespace data
 
 class block
 {
-  typedef subblock subblock_t;
-  typedef pbes_system::structure_graph::index_type sg_index_t;
+  using subblock_t = subblock;
+  using sg_index_t = pbes_system::structure_graph::index_type;
 
 protected:
   // const pbes_type_t m_spec;

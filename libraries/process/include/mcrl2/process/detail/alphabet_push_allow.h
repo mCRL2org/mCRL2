@@ -280,7 +280,7 @@ push_allow_node push_allow(const process_expression& x, const allow_set& A, std:
 template <typename Derived, typename Node = push_allow_node>
 struct push_allow_traverser: public process_expression_traverser<Derived>
 {
-  typedef process_expression_traverser<Derived> super;
+  using super = process_expression_traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -691,7 +691,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 template <template <class, class> class Traverser, typename Node = push_allow_node>
 struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<Traverser, Node>, Node>
 {
-  typedef Traverser<apply_push_allow_traverser<Traverser, Node>, Node> super;
+  using super = Traverser<apply_push_allow_traverser<Traverser, Node>, Node>;
   using super::enter;
   using super::leave;
   using super::apply;

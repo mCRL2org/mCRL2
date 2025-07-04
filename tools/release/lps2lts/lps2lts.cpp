@@ -27,7 +27,7 @@ using data::tools::rewriter_tool;
 
 class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 {
-  typedef parallel_tool<rewriter_tool<input_output_tool>> super;
+  using super = parallel_tool<rewriter_tool<input_output_tool>>;
 
   lps::explorer_options options;
   lts::lts_type output_format = lts::lts_none;

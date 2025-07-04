@@ -39,13 +39,13 @@ class pbes_equation
 
   public:
     /// \brief The expression type of the equation.
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The variable type of the equation.
-    typedef propositional_variable variable_type;
+    using variable_type = propositional_variable;
 
     /// \brief The symbol type of the equation.
-    typedef fixpoint_symbol symbol_type;
+    using symbol_type = fixpoint_symbol;
 
     /// \brief Constructor.
     pbes_equation() = default;
@@ -134,10 +134,10 @@ class pbes_equation
 
 //--- start generated class pbes_equation ---//
 /// \\brief list of pbes_equations
-typedef atermpp::term_list<pbes_equation> pbes_equation_list;
+using pbes_equation_list = atermpp::term_list<pbes_equation>;
 
 /// \\brief vector of pbes_equations
-typedef std::vector<pbes_equation>    pbes_equation_vector;
+using pbes_equation_vector = std::vector<pbes_equation>;
 
 // prototype declaration
 std::string pp(const pbes_equation& x, bool precedence_aware = true);

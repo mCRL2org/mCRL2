@@ -23,8 +23,8 @@ namespace detail {
 class tarjan_scc_algorithm
 {
   public:
-    typedef std::pair<std::size_t, std::size_t> edge;
-    typedef std::vector<std::size_t> component;
+    using edge = std::pair<std::size_t, std::size_t>;
+    using component = std::vector<std::size_t>;
 
   protected:
     static inline std::size_t undefined()
@@ -145,7 +145,7 @@ class tarjan_scc_algorithm
 
 struct find_process_identifiers_traverser: public process_expression_traverser<find_process_identifiers_traverser>
 {
-  typedef process_expression_traverser<find_process_identifiers_traverser> super;
+  using super = process_expression_traverser<find_process_identifiers_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

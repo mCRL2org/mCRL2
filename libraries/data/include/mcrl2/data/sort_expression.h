@@ -96,10 +96,10 @@ class sort_expression: public atermpp::aterm
 };
 
 /// \\brief list of sort_expressions
-typedef atermpp::term_list<sort_expression> sort_expression_list;
+using sort_expression_list = atermpp::term_list<sort_expression>;
 
 /// \\brief vector of sort_expressions
-typedef std::vector<sort_expression>    sort_expression_vector;
+using sort_expression_vector = std::vector<sort_expression>;
 
 // prototype declaration
 std::string pp(const sort_expression& x, bool precedence_aware = true);

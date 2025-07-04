@@ -94,9 +94,9 @@ inline void swap(function_sort& t1, function_sort& t2)
 //--- end generated class function_sort ---//
 
 /// \brief list of function sorts
-typedef atermpp::term_list<function_sort> function_sort_list;
+using function_sort_list = atermpp::term_list<function_sort>;
 /// \brief vector of function sorts
-typedef std::vector<function_sort> function_sort_vector;
+using function_sort_vector = std::vector<function_sort>;
 
 /// \brief Convenience constructor for function sort with domain size 1
 ///
