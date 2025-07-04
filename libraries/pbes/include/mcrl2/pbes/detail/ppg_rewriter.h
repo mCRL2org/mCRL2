@@ -97,10 +97,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     throw mcrl2::runtime_error("Unexpected implication in PPG rewriter: " + pp(x));
   }
 
-  void enter(const data::data_expression& x)
-  {
-    expression_stack.push(x);
-  }
+  void enter(const data::data_expression& x) { expression_stack.emplace(x); }
 
   void enter(const propositional_variable_instantiation& x)
   {

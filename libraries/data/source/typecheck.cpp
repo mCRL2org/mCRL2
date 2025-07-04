@@ -4578,7 +4578,7 @@ void mcrl2::data::data_type_checker::operator()(data_equation_vector& eqns)
         throw mcrl2::runtime_error("The variable " + data::pp(culprit) + " in the condition is not included in the left hand side of the equation " + data::pp(eqn) + ".");
       }
     }
-    resulting_equations.push_back(data_equation(vars,cond,left,right));
+    resulting_equations.emplace_back(vars, cond, left, right);
   }
   eqns = resulting_equations;
 }

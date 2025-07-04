@@ -432,7 +432,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
               // Construct part of formula
               std::stringstream name;
               name << "X" << i->to();
-              variables.push_back(propositional_variable_instantiation(name.str()));
+              variables.emplace_back(name.str());
             }
           }
           else
@@ -440,7 +440,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
             // Construct part of formula
             std::stringstream name;
             name << "X" << i->to();
-            variables.push_back(propositional_variable_instantiation(name.str()));
+            variables.emplace_back(name.str());
           }
           ++i;
         }

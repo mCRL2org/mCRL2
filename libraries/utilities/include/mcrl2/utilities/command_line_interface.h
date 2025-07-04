@@ -1178,7 +1178,7 @@ class interface_description::enum_argument : public typed_argument< T >
     /// \brief Implementation that adds the value of an enum type
     enum_argument& add_value_with_short(const std::string& long_arg, const std::string& short_arg, const std::string& description, const bool is_default = false)
     {
-      m_enum.push_back(basic_argument::argument_description(long_arg, short_arg, description));
+      m_enum.emplace_back(long_arg, short_arg, description);
 
       if(is_default)
       {

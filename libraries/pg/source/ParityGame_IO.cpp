@@ -91,7 +91,7 @@ void ParityGame::read_pgsolver( std::istream &is,
             if (!(is >> succ)) break;
             if (succ >= vertices.size()) vertices.resize(succ + 1, invalid);
 
-            edges.push_back(std::make_pair(id, succ));
+            edges.emplace_back(id, succ);
 
             // Skip to separator (comma) or end-of-list (semicolon), while
             // ignoring the contents of quoted strings.
@@ -204,7 +204,7 @@ void ParityGame::assign_pbes(mcrl2::pbes_system::pbes &pbes, verti *goal_vertex,
             verti w = (verti)*it;
             assert(w >= begin);
             if (w >= end) end = w + 1;
-            edges.push_back(std::make_pair(v - begin, w - begin));
+            edges.emplace_back(v - begin, w - begin);
         }
     }
 

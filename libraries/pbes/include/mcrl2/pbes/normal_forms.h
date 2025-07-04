@@ -86,7 +86,7 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     /// \brief Pushes (first, second) on the stack.
     void push(const pbes_expression& first, standard_form_type second)
     {
-      m_expression_stack.push_back(standard_form_pair(first, second));
+      m_expression_stack.emplace_back(first, second);
     }
 
     /// \brief Generates a fresh pbes variable.
@@ -110,11 +110,11 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
       m_table[expr] = varinst;
       if (type == standard_form_and)
       {
-        m_equations2.push_back(pbes_equation(m_symbol, var, expr));
+        m_equations2.emplace_back(m_symbol, var, expr);
       }
       else
       {
-        m_equations2.push_back(pbes_equation(m_symbol, var, expr));
+        m_equations2.emplace_back(m_symbol, var, expr);
       }
       return varinst;
     }
@@ -247,7 +247,7 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     void leave(const pbes_equation& eq)
     {
       standard_form_pair p = pop();
-      m_equations.push_back(pbes_equation(eq.symbol(), eq.variable(), p.first));
+      m_equations.emplace_back(eq.symbol(), eq.variable(), p.first);
       // m_table[p.first] = eq.variable();
     }
 
@@ -278,15 +278,15 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
       {
         if (m_has_true)
         {
-          m_equations.push_back(pbes_equation(fixpoint_symbol::nu(), 
-                                              propositional_variable(atermpp::down_cast<propositional_variable_instantiation>(m_true).name()), 
-                                              m_true));
+          m_equations.emplace_back(fixpoint_symbol::nu(),
+              propositional_variable(atermpp::down_cast<propositional_variable_instantiation>(m_true).name()),
+              m_true);
         }
         if (m_has_false)
         {
-          m_equations.push_back(pbes_equation(fixpoint_symbol::mu(), 
-                                              propositional_variable(atermpp::down_cast<propositional_variable_instantiation>(m_false).name()), 
-                                              m_false));
+          m_equations.emplace_back(fixpoint_symbol::mu(),
+              propositional_variable(atermpp::down_cast<propositional_variable_instantiation>(m_false).name()),
+              m_false);
         }
       }
     }

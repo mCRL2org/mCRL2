@@ -344,7 +344,7 @@ class summand_information
         // we can simply take vec_lin_eq to remain untouched and we do not have to consider
         // t<u and t>u.
 
-        vec_lin_eq.push_back(linear_inequality(t,u,comparison,r));
+        vec_lin_eq.emplace_back(t, u, comparison, r);
         if (!is_inconsistent(vec_lin_eq,r))
         {
           // Add a vector with t operator u at the end.
@@ -354,7 +354,7 @@ class summand_information
           if (!is_inconsistent(vec_lin_eq,r))
           {
             // add a vector with u<t at the end
-            new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
+            new_nextstate_context_combinations.emplace_back();
             vec_lin_eq.swap(new_nextstate_context_combinations.back());
           }
         }

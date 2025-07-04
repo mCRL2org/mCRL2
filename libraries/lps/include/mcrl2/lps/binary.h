@@ -337,7 +337,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
                 disjuncts.push_back(data::equal_to(a.rhs(), *k++));
               }
             }
-            result.push_back(data::assignment(new_parameters[j], data::lazy::join_or(disjuncts.begin(), disjuncts.end())));
+            result.emplace_back(new_parameters[j], data::lazy::join_or(disjuncts.begin(), disjuncts.end()));
           }
 
         }

@@ -131,7 +131,7 @@ void StaticGraph::make_random_scc(edge_list &edges)
     {
         const verti v = vertis[i],
                     w = vertis[(i + 1)%sccs.size()];
-        edges.push_back(std::make_pair(v, w));
+        edges.emplace_back(v, w);
     }
 }
 
@@ -167,7 +167,7 @@ void StaticGraph::make_random(verti V, unsigned outdeg, EdgeDirection edge_dir,
                 std::swap( neighbours[n],
                            neighbours[n + 1 + rand()%(V - n - 1)] );
             }
-            edges.push_back(std::make_pair(i, neighbours[n]));
+            edges.emplace_back(i, neighbours[n]);
         }
     }
 
@@ -238,8 +238,7 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
                 for ( edge_list::const_iterator it = subedges.begin();
                       it != subedges.end(); ++it )
                 {
-                    edges.push_back(std::make_pair( it->first  + offset[k],
-                                                    it->second + offset[k] ));
+                  edges.emplace_back(it->first + offset[k], it->second + offset[k]);
                 }
             }
 
@@ -250,8 +249,8 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
             for (const std::pair<verti, verti>& paredge : paredges)
             {
               verti v = paredge.first, w = paredge.second;
-              edges.push_back(std::make_pair(offset[i + v] + rand() % subgraphs[i + v].V(),
-                  offset[i + w] + rand() % subgraphs[i + w].V()));
+              edges.emplace_back(offset[i + v] + rand() % subgraphs[i + v].V(),
+                  offset[i + w] + rand() % subgraphs[i + w].V());
             }
             next_subgraphs[c].assign(edges, edge_dir);
         }
@@ -363,7 +362,7 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
 void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
 {
     // Add end-of-list marker:
-    edges.push_back(std::make_pair(V_, V_));
+    edges.emplace_back(V_, V_);
 
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
@@ -445,7 +444,7 @@ StaticGraph::edge_list StaticGraph::get_edges() const
         for (edgei i = begin; i < end; ++i)
         {
             verti w = successors_[i];
-            result.push_back(std::make_pair(v, w));
+            result.emplace_back(v, w);
         }
     }
     assert(result.size() == E_);

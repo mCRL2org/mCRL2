@@ -210,7 +210,7 @@ public:
       {
         data::data_expression rhs;
         apply(rhs, (*i).rhs());
-        a.push_back(data::assignment(*j, rhs));
+        a.emplace_back(*j, rhs);
       }
       data::make_where_clause(result, new_body, assignment_list(a.begin(), a.end()));
     }

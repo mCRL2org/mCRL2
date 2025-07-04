@@ -645,7 +645,10 @@ class pins
         m_guard_info.push_back(guard_info);
 
         // add the new summand to the list of summands.
-        reduced_summands.push_back(lps::action_summand(summand.summation_variables(), reduced_condition, summand.multi_action(), summand.assignments()));
+        reduced_summands.emplace_back(summand.summation_variables(),
+            reduced_condition,
+            summand.multi_action(),
+            summand.assignments());
       }
 
       // create a new LPS

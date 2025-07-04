@@ -193,10 +193,14 @@ class structured_sort: public sort_expression
         // constructor does not take arguments
         if (i->arguments().empty())
         {
-          result.push_back(data_equation(to_pos_function(s)(i->constructor_function(s)), sort_pos::pos(index)));
-          result.push_back(data_equation(equal_arguments_function(s)(i->constructor_function(s),i->constructor_function(s)), sort_bool::true_()));
-          result.push_back(data_equation(smaller_arguments_function(s)(i->constructor_function(s),i->constructor_function(s)), sort_bool::false_()));
-          result.push_back(data_equation(smaller_equal_arguments_function(s)(i->constructor_function(s),i->constructor_function(s)), sort_bool::true_()));
+          result.emplace_back(to_pos_function(s)(i->constructor_function(s)), sort_pos::pos(index));
+          result.emplace_back(equal_arguments_function(s)(i->constructor_function(s), i->constructor_function(s)),
+              sort_bool::true_());
+          result.emplace_back(smaller_arguments_function(s)(i->constructor_function(s), i->constructor_function(s)),
+              sort_bool::false_());
+          result.emplace_back(
+              smaller_equal_arguments_function(s)(i->constructor_function(s), i->constructor_function(s)),
+              sort_bool::true_());
         }
         else
         {
@@ -206,13 +210,13 @@ class structured_sort: public sort_expression
           std::vector< variable > variables2;
           for (const structured_sort_constructor_argument& k: i->arguments())
           {
-            variables1.push_back(variable(generator("v"), k.sort()));
-            variables2.push_back(variable(generator("w"), k.sort()));
+            variables1.emplace_back(generator("v"), k.sort());
+            variables2.emplace_back(generator("w"), k.sort());
           }
           application instance1(i->constructor_function(s), variables1);
           application instance2(i->constructor_function(s), variables2);
 
-          result.push_back(data_equation(variables1, sort_bool::true_(), to_pos_function(s)(instance1), sort_pos::pos(index)));
+          result.emplace_back(variables1, sort_bool::true_(), to_pos_function(s)(instance1), sort_pos::pos(index));
 
           // constructors are the same, generate right hand sides of equal_arguments_function, etc.
           variable_vector::const_reverse_iterator end(variables1.rend());
@@ -249,9 +253,9 @@ class structured_sort: public sort_expression
           application left_smaller = application(smaller_arguments_function(s), instance1, instance2);
           application left_smaller_equal = application(smaller_equal_arguments_function(s), instance1, instance2);
           variables1.insert(variables1.end(),variables2.begin(),variables2.end());
-          result.push_back(data_equation(variables1, sort_bool::true_(),left_equal, right_equal));
-          result.push_back(data_equation(variables1, sort_bool::true_(),left_smaller, right_smaller));
-          result.push_back(data_equation(variables1, sort_bool::true_(),left_smaller_equal, right_smaller_equal));
+          result.emplace_back(variables1, sort_bool::true_(), left_equal, right_equal);
+          result.emplace_back(variables1, sort_bool::true_(), left_smaller, right_smaller);
+          result.emplace_back(variables1, sort_bool::true_(), left_smaller_equal, right_smaller_equal);
         }
       }
       return result;
@@ -269,14 +273,14 @@ class structured_sort: public sort_expression
       application equal_arguments_xy         = application(equal_arguments_function(s), x, y);
       application smaller_arguments_xy       = application(smaller_arguments_function(s), x, y);
       application smaller_equal_arguments_xy = application(smaller_equal_arguments_function(s), x, y);
-      result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     equal_to(x,y), equal_arguments_xy));
-      result.push_back(data_equation(xy, not_equal_to(to_pos_x, to_pos_y), equal_to(x,y), sort_bool::false_()));
-      result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),         less(x,y), sort_bool::true_()));
-      result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     less(x,y), smaller_arguments_xy));
-      result.push_back(data_equation(xy, greater(to_pos_x, to_pos_y),      less(x,y), sort_bool::false_()));
-      result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),         less_equal(x,y), sort_bool::true_()));
-      result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     less_equal(x,y), smaller_equal_arguments_xy));
-      result.push_back(data_equation(xy, greater(to_pos_x, to_pos_y),      less_equal(x,y), sort_bool::false_()));
+      result.emplace_back(xy, equal_to(to_pos_x, to_pos_y), equal_to(x, y), equal_arguments_xy);
+      result.emplace_back(xy, not_equal_to(to_pos_x, to_pos_y), equal_to(x, y), sort_bool::false_());
+      result.emplace_back(xy, less(to_pos_x, to_pos_y), less(x, y), sort_bool::true_());
+      result.emplace_back(xy, equal_to(to_pos_x, to_pos_y), less(x, y), smaller_arguments_xy);
+      result.emplace_back(xy, greater(to_pos_x, to_pos_y), less(x, y), sort_bool::false_());
+      result.emplace_back(xy, less(to_pos_x, to_pos_y), less_equal(x, y), sort_bool::true_());
+      result.emplace_back(xy, equal_to(to_pos_x, to_pos_y), less_equal(x, y), smaller_equal_arguments_xy);
+      result.emplace_back(xy, greater(to_pos_x, to_pos_y), less_equal(x, y), sort_bool::false_());
       // (JK) The following encoding of the equations would be more desirable; however,
       // rewriting fails if we use this.
 /*
@@ -304,7 +308,7 @@ class structured_sort: public sort_expression
           // Create variables for equation
           for (const auto & argument : arguments)
           {
-            variables.push_back(variable(generator("v"), argument.sort()));
+            variables.emplace_back(generator("v"), argument.sort());
           }
 
           std::vector< variable >::const_iterator v = variables.begin();
@@ -316,7 +320,7 @@ class structured_sort: public sort_expression
               application lhs(function_symbol(j->name(), make_function_sort_(s, j->sort()))
                               (application(i.constructor_function(s), variables)));
 
-              result.push_back(data_equation(variables, lhs, *v));
+              result.emplace_back(variables, lhs, *v);
             }
           }
         }
@@ -341,7 +345,7 @@ class structured_sort: public sort_expression
 
             if (i->arguments().empty())
             {
-              result.push_back(data_equation(j.recogniser_function(s)(i->constructor_function(s)), right));
+              result.emplace_back(j.recogniser_function(s)(i->constructor_function(s)), right);
             }
             else
             {
@@ -355,11 +359,12 @@ class structured_sort: public sort_expression
 
               for (const auto & argument : arguments)
               {
-                variables.push_back(variable(generator("v"), argument.sort()));
+                variables.emplace_back(generator("v"), argument.sort());
               }
 
-              result.push_back(data_equation(variables, j.recogniser_function(s)(
-                                               application(i->constructor_function(s), variables)), right));
+              result.emplace_back(variables,
+                  j.recogniser_function(s)(application(i->constructor_function(s), variables)),
+                  right);
             }
           }
         }

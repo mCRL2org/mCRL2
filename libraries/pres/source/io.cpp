@@ -25,9 +25,9 @@ const std::vector<utilities::file_format>& pres_file_formats()
   static std::vector<utilities::file_format> result;
   if (result.empty())
   {
-    result.push_back(utilities::file_format("pres", "PRES in internal format", false));
+    result.emplace_back("pres", "PRES in internal format", false);
     result.back().add_extension("pres");
-    result.push_back(utilities::file_format("text", "PRES in textual (mCRL2) format", true));
+    result.emplace_back("text", "PRES in textual (mCRL2) format", true);
     result.back().add_extension("txt");
   }
   return result;

@@ -1126,7 +1126,7 @@ struct where_clause_node final: public type_check_node
     for (const std::pair<std::string, type_check_node_ptr>& a: assignments)
     {
       children.push_back(a.second);
-      variables.push_back(variable(a.first, a.second->sort));
+      variables.emplace_back(a.first, a.second->sort);
     }
   }
 

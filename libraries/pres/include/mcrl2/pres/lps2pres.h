@@ -123,9 +123,9 @@ class lps2pres_algorithm
       if (!initial_distribution.variables().empty())
       {
         core::identifier_string initial_variable_name("Xinit");
-        equations.push_back(pres_equation(pbes_system::fixpoint_symbol::mu(),
-                                          propositional_variable(initial_variable_name, data::variable_list()),
-                                          sum(initial_distribution.variables(), const_multiply(initial_distribution.distribution(), init))));
+        equations.emplace_back(pbes_system::fixpoint_symbol::mu(),
+            propositional_variable(initial_variable_name, data::variable_list()),
+            sum(initial_distribution.variables(), const_multiply(initial_distribution.distribution(), init)));
         init = propositional_variable_instantiation(initial_variable_name, data::data_expression_list());
       }
       pres result(lpsspec.data(), lpsspec.global_variables(), equations, init);

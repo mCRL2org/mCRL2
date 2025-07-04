@@ -236,8 +236,8 @@ class lts_fsm_base
     void add_process_parameter(const std::string& name, const std::string& sort)
     {
       assert(m_parameters.size()==m_state_element_values.size());
-      m_parameters.push_back(std::pair<std::string,std::string>(name,sort));
-      m_state_element_values.push_back(std::vector < std::string >());
+      m_parameters.emplace_back(name, sort);
+      m_state_element_values.emplace_back();
     }
 
 

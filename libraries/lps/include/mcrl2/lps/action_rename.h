@@ -180,7 +180,7 @@ class action_rename_specification
       atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>((*i)[0]);
       for (const atermpp::aterm& r: rules_list)
       {
-        m_rules.push_back(action_rename_rule(r));
+        m_rules.emplace_back(r);
       }
     }
 
@@ -839,7 +839,7 @@ stochastic_specification action_rename(
     else
     {
       // Add a new deadlock summand, copying most of the information for the old action summand
-      new_deadlock_summands.push_back(deadlock_summand(as.summation_variables(), as.condition(), deadlock(as.multi_action().time())));
+      new_deadlock_summands.emplace_back(as.summation_variables(), as.condition(), deadlock(as.multi_action().time()));
     }
   }
 

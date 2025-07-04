@@ -802,7 +802,7 @@ std::vector < mcrl2::lts::transition> sim_partitioner<LTS_TYPE>::get_transitions
         if (!pre_sim[gamma])
         {
           // add the transition gamma -l-> beta
-          ts.push_back(transition(gamma,l,beta));
+          ts.emplace_back(gamma, l, beta);
         }
       }
     }

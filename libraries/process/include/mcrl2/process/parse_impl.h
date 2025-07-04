@@ -69,7 +69,7 @@ struct action_actions: public data::detail::data_specification_actions
       }
       for (const core::identifier_string& id: ids)
       {
-        result.push_back(action_label(id, sorts));
+        result.emplace_back(id, sorts);
       }
       return true;
     }

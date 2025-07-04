@@ -27,13 +27,13 @@ const std::vector<utilities::file_format>& pbes_file_formats()
   static std::vector<utilities::file_format> result;
   if (result.empty())
   {
-    result.push_back(utilities::file_format("pbes", "PBES in internal format", false));
+    result.emplace_back("pbes", "PBES in internal format", false);
     result.back().add_extension("pbes");
-    result.push_back(utilities::file_format("text", "PBES in textual (mCRL2) format", true));
+    result.emplace_back("text", "PBES in textual (mCRL2) format", true);
     result.back().add_extension("txt");
-    result.push_back(utilities::file_format("bes", "BES in internal format", false));
+    result.emplace_back("bes", "BES in internal format", false);
     result.back().add_extension("bes");
-    result.push_back(utilities::file_format("pgsolver", "BES in PGSolver format", true));
+    result.emplace_back("pgsolver", "BES in PGSolver format", true);
     result.back().add_extension("gm");
     result.back().add_extension("pg");
   }

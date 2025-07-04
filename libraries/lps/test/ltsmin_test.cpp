@@ -316,11 +316,11 @@ void test_serialisation()
     std::cout << i << ": " << p1.data_type(i).name() << std::endl;
   }
   std::vector<std::pair<std::string, std::size_t>> expressions;
-  expressions.push_back(std::make_pair("1", 0));
-  expressions.push_back(std::make_pair("0", 1));
-  expressions.push_back(std::make_pair("1", 1));
-  expressions.push_back(std::make_pair("Red", 2));
-  expressions.push_back(std::make_pair("Yellow", 2));
+  expressions.emplace_back("1", 0);
+  expressions.emplace_back("0", 1);
+  expressions.emplace_back("1", 1);
+  expressions.emplace_back("Red", 2);
+  expressions.emplace_back("Yellow", 2);
 
   for(auto e : expressions)
   {

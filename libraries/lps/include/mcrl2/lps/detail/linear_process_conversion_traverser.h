@@ -92,7 +92,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     {
       if (m_next_state_changed)
       {
-        m_action_summands.push_back(lps::action_summand(m_sum_variables, m_condition, m_multi_action, m_next_state));
+        m_action_summands.emplace_back(m_sum_variables, m_condition, m_multi_action, m_next_state);
         mCRL2log(log::debug) << "adding action summand\n" << m_action_summands.back() << std::endl;
         clear_summand();
       }
@@ -103,7 +103,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     }
     else if (m_deadlock_changed)
     {
-      m_deadlock_summands.push_back(lps::deadlock_summand(m_sum_variables, m_condition, m_deadlock));
+      m_deadlock_summands.emplace_back(m_sum_variables, m_condition, m_deadlock);
       mCRL2log(log::debug) << "adding deadlock summand\n" << m_deadlock_summands.back() << std::endl;
       clear_summand();
     }
@@ -491,7 +491,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     {
       if (m_next_state_changed)
       {
-        m_action_summands.push_back(lps::stochastic_action_summand(m_sum_variables, m_condition, m_multi_action, m_next_state, m_distribution));
+        m_action_summands.emplace_back(m_sum_variables, m_condition, m_multi_action, m_next_state, m_distribution);
         mCRL2log(log::debug) << "adding action summand\n" << m_action_summands.back() << std::endl;
         clear_summand();
       }
@@ -502,7 +502,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     }
     else if (m_deadlock_changed)
     {
-      m_deadlock_summands.push_back(lps::deadlock_summand(m_sum_variables, m_condition, m_deadlock));
+      m_deadlock_summands.emplace_back(m_sum_variables, m_condition, m_deadlock);
       mCRL2log(log::debug) << "adding deadlock summand\n" << m_deadlock_summands.back() << std::endl;
       clear_summand();
     }

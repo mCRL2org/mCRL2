@@ -78,7 +78,7 @@ void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& t
   if (!root.is_marked())
   {
     // Do not use the stack, because this might run out of stack memory for large lists.
-    todo.push(const_cast<_aterm&>(root));
+    todo.emplace(const_cast<_aterm&>(root));
 
     // Mark the term depth-first to reduce the maximum todo size required.
     while (!todo.empty())
@@ -102,7 +102,7 @@ void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& t
           argument.mark();
 
           // Add the argument to be explored as well.
-          todo.push(argument);
+          todo.emplace(argument);
         }
       }
 

@@ -303,7 +303,7 @@ std::vector<std::size_t> compute_variable_order_weighted(const std::vector<boost
 
   std::vector<boost::dynamic_bitset<>> adjacency;
   for (std::size_t i = 0; i < n; ++i) {
-    adjacency.push_back(boost::dynamic_bitset<>(n, false));
+    adjacency.emplace_back(n, false);
 
     for (const auto& read_write_group_pattern : read_write_group_patterns)
     {

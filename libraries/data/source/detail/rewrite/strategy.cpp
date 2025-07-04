@@ -143,7 +143,7 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
           }
         }
 
-        m.push_back(dependencies_rewrite_rule_pair(deps,this_rule));
+        m.emplace_back(deps, this_rule);
       }
       else
       {
@@ -159,7 +159,7 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
         if (p.dependencies().empty())
         {
           const data_equation rule = p.equation();
-          strat.push_back(strategy_rule(rule));
+          strat.emplace_back(rule);
         }
         else
         {
@@ -196,14 +196,14 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
         used[maxidx-1] = true;
 
         const std::size_t k(maxidx-1);
-        strat.push_back(strategy_rule(k));
+        strat.emplace_back(k);
         m2.clear();
         for (const dependencies_rewrite_rule_pair& p: m)
         {
           const data_equation eq=p.equation();
           std::set<std::size_t> dependencies=p.dependencies();
           dependencies.erase(k);
-          m2.push_back(dependencies_rewrite_rule_pair(dependencies,eq));
+          m2.emplace_back(dependencies, eq);
         }
         m = m2;
       }
@@ -228,10 +228,10 @@ strategy RewriterJitty::create_a_cpp_function_based_strategy(const function_symb
   std::vector<strategy_rule> result;
   for(size_t i=0; i<number_of_arguments; ++i)
   {
-    result.push_back(strategy_rule(i));
+    result.emplace_back(i);
   }
-  result.push_back(strategy_rule(data_spec.cpp_implemented_functions().find(f)->second.first));
-  
+  result.emplace_back(data_spec.cpp_implemented_functions().find(f)->second.first);
+
   return strategy(0,result);
 }
 

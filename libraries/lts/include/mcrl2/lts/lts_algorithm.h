@@ -1131,7 +1131,7 @@ void determinise(LTS_TYPE& l)
       // generate the transitions to each of the next states
       if (!tss.is_set_empty(s))
       {
-        d_transitions.push_back(transition(d_id,lbl,tss.set_set_tag(s)));
+        d_transitions.emplace_back(d_id, lbl, tss.set_set_tag(s));
 
         if (d_ntransitions%10000 == 0)
         {

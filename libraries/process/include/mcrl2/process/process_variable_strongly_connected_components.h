@@ -124,7 +124,7 @@ class tarjan_scc_algorithm
 
       for (std::size_t i = 0; i < N; i++)
       {
-        V.push_back(vertex(i));
+        V.emplace_back(i);
       }
 
       component S;
@@ -243,7 +243,7 @@ struct process_variable_scc_algorithm
       for (const process_identifier& id: p.second)
       {
         std::size_t target = index[id];
-        E.push_back({ source, target });
+        E.emplace_back(source, target);
       }
     }
 
