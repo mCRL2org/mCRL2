@@ -1,7 +1,13 @@
 ---
 Checks: "-*,
-    modernize-use-using"
+    modernize-avoid-bind,
+    modernize-concat-nested-namespaces,
+    modernize-deprecated-headers,
+    modernize-deprecated-ios-base-aliases,
+    modernize-loop-convert,
+    modernize-use-using,
+    "
 WarningsAsErrors: 'false'
 HeaderFilterRegex: '.'
-ExcludeHeaderFilterRegex: '*3rd-party*'
+ExcludeHeaderFilterRegex: './3rd-party/'
 FormatStyle: 'file'
