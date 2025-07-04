@@ -298,18 +298,18 @@ void test_sort_substitution()
 
   // s1 = f(A)|g
   std::vector< structured_sort_constructor_argument > arguments1;
-  arguments1.push_back(structured_sort_constructor_argument(basic_sort("A")));
+  arguments1.emplace_back(basic_sort("A"));
   std::vector< structured_sort_constructor > constructors1;
-  constructors1.push_back(structured_sort_constructor("f", arguments1));
-  constructors1.push_back(structured_sort_constructor("g"));
+  constructors1.emplace_back("f", arguments1);
+  constructors1.emplace_back("g");
   sort_expression s1=structured_sort(constructors1);
 
   // s2 = f(struct f(A)|g) |g
   std::vector< structured_sort_constructor_argument > arguments2;
-  arguments2.push_back(structured_sort_constructor_argument(s1));
+  arguments2.emplace_back(s1);
   std::vector< structured_sort_constructor > constructors2;
-  constructors2.push_back(structured_sort_constructor("f", arguments2));
-  constructors2.push_back(structured_sort_constructor("g"));
+  constructors2.emplace_back("f", arguments2);
+  constructors2.emplace_back("g");
   sort_expression s2=structured_sort(constructors2);
 
   std::cout << "s0 = " << data::pp(s0) << std::endl;

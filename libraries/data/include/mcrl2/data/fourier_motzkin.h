@@ -159,7 +159,7 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
                                                    detail::less,r);
         if (new_inequality.is_false(r))
         {
-          resulting_inequalities.push_back(linear_inequality()); // This is a single contraditory inequality;
+          resulting_inequalities.emplace_back(); // This is a single contraditory inequality;
           return;
         }
         if (!new_inequality.is_true(r))
@@ -267,7 +267,7 @@ inline void fourier_motzkin(const data_expression& e_in,
         // into inequalities.
         for (const data_expression& k : *j_r)
         {
-          inequalities.push_back(linear_inequality(k, r));
+          inequalities.emplace_back(k, r);
         }
 
         std::vector < linear_inequality > new_inequalities;

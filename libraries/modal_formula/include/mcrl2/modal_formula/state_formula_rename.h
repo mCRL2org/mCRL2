@@ -47,7 +47,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
   core::identifier_string push(const core::identifier_string& n)
   {
     core::identifier_string new_name = generator(n);
-    replacements.push_front(std::make_pair(n, new_name));
+    replacements.emplace_front(n, new_name);
     return new_name;
   }
 

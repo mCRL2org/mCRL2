@@ -112,7 +112,7 @@ std::istream& operator>>(std::istream& stream, symbolic_lts& lts)
   lts.data_index.clear();
   for (const data::variable& parameter : lts.process_parameters)
   {
-    lts.data_index.push_back(parameter.sort());
+    lts.data_index.emplace_back(parameter.sort());
 
     std::size_t number_of_entries = bitstream->read_integer();
     for (std::size_t i = 0; i < number_of_entries; ++i)

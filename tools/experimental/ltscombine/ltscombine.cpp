@@ -149,12 +149,12 @@ protected:
             throw mcrl2::runtime_error("Could not parse file " + filename + ".");
           }
 
-          syncs.push_back(core::identifier_string_list(labels.begin(), labels.end()));
+          syncs.emplace_back(labels.begin(), labels.end());
 
           // Add multi-action and resulting action to list of sychronisations
           label = line.substr(delim + 2);
           trim(label);
-          resulting_actions.push_back(label);
+          resulting_actions.emplace_back(label);
         }
         else
         {
@@ -195,7 +195,7 @@ protected:
 
         // Trim action and add to list of blocked actions
         trim(action_label);
-        blocks.push_back(action_label);
+        blocks.emplace_back(action_label);
       }
     }
 
@@ -239,7 +239,7 @@ protected:
         labels.insert(label);
 
         // Add multi-action to the list of allowed actions
-        allow.push_back(core::identifier_string_list(labels.begin(), labels.end()));
+        allow.emplace_back(labels.begin(), labels.end());
       }
     }
 
@@ -269,7 +269,7 @@ protected:
 
         // Trim action and add to list of hiden actions
         trim(action_label);
-        hiden.push_back(action_label);
+        hiden.emplace_back(action_label);
       }
     }
   }

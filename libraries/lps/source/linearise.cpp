@@ -560,7 +560,7 @@ class specification_basic_type
       assignment_vector v;
       for(const assignment& a: t)
       {
-        v.push_back(assignment(a.lhs(), RewriteTerm(a.rhs())));
+        v.emplace_back(a.lhs(), RewriteTerm(a.rhs()));
       }
       return assignment_list(v.begin(),v.end());
     }
@@ -1626,7 +1626,7 @@ class specification_basic_type
         const std::map<variable,data_expression>::const_iterator j=assignment_map.find(v);
         if (j!=assignment_map.end()) // found
         {
-          result.push_back(assignment(j->first,j->second));
+          result.emplace_back(j->first, j->second);
         }
       }
       return assignment_list(result.begin(),result.end());
@@ -1830,12 +1830,12 @@ class specification_basic_type
         {
           if (bound_variables.count(*i)>0) // Now *j is a different variable than *i
           {
-            new_assignments.push_back(assignment(*i,*j));
+            new_assignments.emplace_back(*i, *j);
           }
         }
         else
         {
-          new_assignments.push_back(assignment(*i,*j));
+          new_assignments.emplace_back(*i, *j);
         }
       }
       assert(j==rhss.end());
@@ -2148,7 +2148,7 @@ class specification_basic_type
      {
        if (variables_bound_in_sum.count(v)>0)
        {
-         result.push_back(assignment(v,v)); // rhs is another variable than the lhs!!
+         result.emplace_back(v, v); // rhs is another variable than the lhs!!
        }
      }
      return assignment_list(result.begin(),result.end());
@@ -2995,7 +2995,7 @@ class specification_basic_type
             for(variable_list::const_iterator i=pars2.begin(), j=new_pars.begin(); i!=pars2.end(); ++i,++j)
             {
               assert(j!=new_pars.end());
-              new_assignment.push_back(assignment(*i,*j));
+              new_assignment.emplace_back(*i, *j);
             }
             assert(check_valid_process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())));
             newbody=seq(process_instance_assignment(procId,assignment_list(new_assignment.begin(),new_assignment.end())),newbody);
@@ -3024,8 +3024,8 @@ class specification_basic_type
       {
         if (variables_bound_in_sum.count(v)>0 && occursinpCRLterm(v,t,false))
         {
-          result.push_back(assignment(v,v)); // Here an identity assignment is used, as it is possible
-                                               // that the *i at the lhs is not the same variable as *i at the rhs.
+          result.emplace_back(v, v); // Here an identity assignment is used, as it is possible
+                                     // that the *i at the lhs is not the same variable as *i at the rhs.
         }
       }
       return assignment_list(result.begin(),result.end());
@@ -4092,10 +4092,10 @@ class specification_basic_type
           structured_sort_constructor_argument_vector sp_push_arguments;
           for (const variable& v: pl)
           {
-            sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("get" + std::string(v.name())), v.sort()));
+            sp_push_arguments.emplace_back(spec.fresh_identifier_generator("get" + std::string(v.name())), v.sort());
             sorts.push_front(v.sort());
           }
-          sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("pop"), stack_sort_alias));
+          sp_push_arguments.emplace_back(spec.fresh_identifier_generator("pop"), stack_sort_alias);
           sorts=reverse(sorts);
           structured_sort_constructor sc_push(spec.fresh_identifier_generator("push"), sp_push_arguments);
           structured_sort_constructor sc_emptystack(spec.fresh_identifier_generator("emptystack"),spec.fresh_identifier_generator("isempty"));
@@ -4547,7 +4547,7 @@ class specification_basic_type
       {
         const data_expression_vector vec(
             adapt_termlist_to_stack(act.arguments().begin(), act.arguments().end(), stack, vars, variable_list()));
-        result.push_back(action(act.label(), data_expression_list(vec.begin(), vec.end())));
+        result.emplace_back(act.label(), data_expression_list(vec.begin(), vec.end()));
       }
 
       // As the arguments change, sort order w.r.t. action_label is preserved, but order w.r.t. arguments is changed.
@@ -4641,14 +4641,14 @@ class specification_basic_type
         if (std::find(stochastic_variables.begin(),stochastic_variables.end(),v)!=stochastic_variables.end())
         {
           // v is a stochastic variable. Insert the identity assignment.
-          result.push_back(assignment(v,v));
+          result.emplace_back(v, v);
         }
         else if (free_variables_in_body.find(v)==free_variables_in_body.end())
         {
           {
             // The variable *i must get a default value.
             const data_expression rhs=representative_generator_internal(v.sort());
-            result.push_back(assignment(v,rhs));
+            result.emplace_back(v, rhs);
           }
         }
         else
@@ -4656,7 +4656,7 @@ class specification_basic_type
           const std::map<variable,data_expression>::iterator k=assignment_map.find(v);
           if (k!=assignment_map.end())  // There is assignment for v. Use it.
           {
-            result.push_back(assignment(k->first,k->second));
+            result.emplace_back(k->first, k->second);
             assignment_map.erase(k);
           }
         }
@@ -4891,7 +4891,7 @@ class specification_basic_type
         // Check whether it is a stochastic variable.
         if (std::find(stochastic_variables.begin(),stochastic_variables.end(),par)!=pars.end())
         {
-          result.push_back(assignment(par,par));
+          result.emplace_back(par, par);
         }
         // Otherwise, check that is is an ordinary parameter.
         else if (std::find(pars.begin(),pars.end(),par)!=pars.end())
@@ -4901,7 +4901,7 @@ class specification_basic_type
            make it a don't care variable. */
         else
         {
-          result.push_back(assignment(par,representative_generator_internal(par.sort())));
+          result.emplace_back(par, representative_generator_internal(par.sort()));
         }
       }
       return assignment_list(result.begin(), result.end());
@@ -5040,13 +5040,11 @@ class specification_basic_type
       }
       else
       {
-        action_summands.push_back(stochastic_action_summand(
-                                                 sumvars,
-                                                 rewritten_condition,
-                                                 has_time ? multi_action(multiAction, actTime) : multi_action(multiAction),
-                                                 procargs,
-                                                 stochastic_distribution(distribution.variables(),
-                                                                         RewriteTerm(distribution.distribution()))));
+        action_summands.emplace_back(sumvars,
+            rewritten_condition,
+            has_time ? multi_action(multiAction, actTime) : multi_action(multiAction),
+            procargs,
+            stochastic_distribution(distribution.variables(), RewriteTerm(distribution.distribution())));
       }
     }
 
@@ -5426,7 +5424,7 @@ class specification_basic_type
 
       if (w==enumeratedtypes.size()) // There is no enumeratedtype of arity n.
       {
-        enumeratedtypes.push_back(enumeratedtype(n,*this));
+        enumeratedtypes.emplace_back(n, *this);
       }
       return w;
     }
@@ -7032,7 +7030,7 @@ class specification_basic_type
            this delta. As the removal of timed delta's
            is time consuming in the linearisation, the use
            of this flag, can speed up linearisation considerably */
-        deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
+        deadlock_summands.emplace_back(variable_list(), sort_bool::true_(), deadlock());
       }
     }
 
@@ -7509,12 +7507,11 @@ class specification_basic_type
         nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_stochastic_vars);
         nextstate=substitute_assignmentlist(nextstate,pars,true,true,sigma);
 
-        result_action_summands.push_back(stochastic_action_summand(
-                                                        unique_sumvars,
-                                                        condition,
-                                                        smmnd.multi_action().has_time()?multi_action(multiaction,actiontime):multi_action(multiaction),
-                                                        nextstate,
-                                                        distribution));
+        result_action_summands.emplace_back(unique_sumvars,
+            condition,
+            smmnd.multi_action().has_time() ? multi_action(multiaction, actiontime) : multi_action(multiaction),
+            nextstate,
+            distribution);
       }
       pars=unique_pars;
       action_summands.swap(result_action_summands);
@@ -7539,9 +7536,9 @@ class specification_basic_type
         actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars);
         actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma);
 
-        result_deadlock_summands.push_back(deadlock_summand(unique_sumvars,
-                                                            condition,
-                                                            smmnd.deadlock().has_time()?deadlock(actiontime):deadlock()));
+        result_deadlock_summands.emplace_back(unique_sumvars,
+            condition,
+            smmnd.deadlock().has_time() ? deadlock(actiontime) : deadlock());
       }
       pars=unique_pars;
       result_deadlock_summands.swap(deadlock_summands);
@@ -7641,12 +7638,11 @@ class specification_basic_type
 
           if (condition1!=sort_bool::false_())
           {
-            action_summands.push_back(stochastic_action_summand(
-                                             sumvars1,
-                                             condition1,
-                                             has_time?multi_action(multiaction1, actiontime1):multi_action(multiaction1),
-                                             nextstate1,
-                                             distribution1));
+            action_summands.emplace_back(sumvars1,
+                condition1,
+                has_time ? multi_action(multiaction1, actiontime1) : multi_action(multiaction1),
+                nextstate1,
+                distribution1);
           }
         }
       }
@@ -7872,12 +7868,11 @@ class specification_basic_type
             if (condition3!=sort_bool::false_())
             {
               assert(std::is_sorted(multiaction3.begin(), multiaction3.end(), action_compare()));
-              action_summands.push_back(stochastic_action_summand(
-                                           allsums,
-                                           condition3,
-                                           has_time3?multi_action(multiaction3,action_time3):multi_action(multiaction3),
-                                           nextstate3,
-                                           distribution3));
+              action_summands.emplace_back(allsums,
+                  condition3,
+                  has_time3 ? multi_action(multiaction3, action_time3) : multi_action(multiaction3),
+                  nextstate3,
+                  distribution3);
             }
           }
         }
@@ -8095,7 +8090,7 @@ class specification_basic_type
         // Inline allow is only supported for ignore_time,
         // for in other cases generation of delta summands cannot be inlined in any simple way.
         assert(!options.nodeltaelimination && options.ignore_time);
-        deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
+        deadlock_summands.emplace_back(variable_list(), sort_bool::true_(), deadlock());
       }
 
       /* first we enumerate the summands of t1 */

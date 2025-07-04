@@ -3692,9 +3692,9 @@ namespace mcrl2::data::sort_machine_word {
     variable vw2("w2",machine_word());
 
     data_equation_vector result;
-    result.push_back(data_equation(variable_list({vw1, vw2}), equal_to(vw1, vw2), equal_word(vw1, vw2)));
-    result.push_back(data_equation(variable_list({vw1, vw2}), less(vw1, vw2), less_word(vw1, vw2)));
-    result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(vw1, vw2), less_equal_word(vw1, vw2)));
+    result.emplace_back(variable_list({vw1, vw2}), equal_to(vw1, vw2), equal_word(vw1, vw2));
+    result.emplace_back(variable_list({vw1, vw2}), less(vw1, vw2), less_word(vw1, vw2));
+    result.emplace_back(variable_list({vw1, vw2}), less_equal(vw1, vw2), less_equal_word(vw1, vw2));
     return result;
   }
 

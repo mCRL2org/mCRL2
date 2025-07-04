@@ -80,7 +80,7 @@ process_expression make_allow(const multi_action_name_set& A, const process_expr
   {
     if (!alpha.empty()) // exclude tau
     {
-      v.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
+      v.emplace_back(core::identifier_string_list(alpha.begin(), alpha.end()));
     }
   }
   action_name_multiset_list B(v.begin(), v.end());

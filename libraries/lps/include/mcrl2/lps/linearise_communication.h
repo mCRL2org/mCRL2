@@ -445,7 +445,7 @@ public:
       // Inline allow is only supported for ignore_time,
       // for in other cases generation of delta summands cannot be inlined in any simple way.
       assert(!nodeltaelimination && ignore_time);
-      deadlock_summands.push_back(deadlock_summand(data::variable_list(), data::sort_bool::true_(), deadlock()));
+      deadlock_summands.emplace_back(data::variable_list(), data::sort_bool::true_(), deadlock());
     }
 
     stochastic_action_summand_vector resulting_action_summands;

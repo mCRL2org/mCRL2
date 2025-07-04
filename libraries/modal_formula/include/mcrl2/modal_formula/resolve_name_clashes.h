@@ -54,7 +54,7 @@ class state_variable_name_clash_resolver: public state_formulas::state_formula_b
       }
       else
       {
-        names.push_back(m_generator(std::string(name) + "_"));
+        names.emplace_back(m_generator(std::string(name) + "_"));
       }
     }
 
@@ -137,7 +137,7 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
     {
       if (utilities::detail::contains(bound_variables, v))
       {
-        substitutions[v].push_back(data::variable(generator(v.name()), v.sort()));
+        substitutions[v].emplace_back(generator(v.name()), v.sort());
       }
       bound_variables.insert(v);
     }

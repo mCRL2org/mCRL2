@@ -1779,72 +1779,209 @@ return bag;
     variable vw("w",sort_fbag::fbag(s));
 
     data_equation_vector result;
-    result.push_back(data_equation(variable_list({vb}), bag_fbag(s, vb), constructor(s, zero_function(s), vb)));
-    result.push_back(data_equation(variable_list({vf}), sort_bag::bag_comprehension(s, vf), constructor(s, vf, sort_fbag::empty(s))));
-    result.push_back(data_equation(variable_list({vb, ve, vf}), count(s, ve, constructor(s, vf, vb)), sort_nat::swap_zero(vf(ve), count(s, ve, vb))));
-    result.push_back(data_equation(variable_list({ve, vx}), in(s, ve, vx), greater(count(s, ve, vx), sort_nat::c0())));
-    result.push_back(data_equation(variable_list({vb, vc, vf, vg}), equal_to(constructor(s, vf, vb), constructor(s, vg, vc)), if_(equal_to(vf, vg), equal_to(vb, vc), forall(variable_list({vd}), equal_to(count(s, vd, constructor(s, vf, vb)), count(s, vd, constructor(s, vg, vc)))))));
-    result.push_back(data_equation(variable_list({vx, vy}), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
-    result.push_back(data_equation(variable_list({vx, vy}), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
-    result.push_back(data_equation(variable_list({vb, vc, vf, vg}), union_(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, add_function(s, vf, vg), join(s, vf, vg, vb, vc))));
-    result.push_back(data_equation(variable_list({vx}), intersection(s, vx, vx), vx));
-    result.push_back(data_equation(variable_list({vx, vy}), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
-    result.push_back(data_equation(variable_list({vx, vy}), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx)));
-    result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
-    result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
-    result.push_back(data_equation(variable_list({vb, vc, vf, vg}), intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, min_function(s, vf, vg), fbag_intersect(s, vf, vg, vb, vc))));
-    result.push_back(data_equation(variable_list({vx}), intersection(s, sort_fbag::empty(s), vx), sort_fbag::empty(s)));
-    result.push_back(data_equation(variable_list({vb, vd, vp, vx}), intersection(s, sort_fbag::cons_(s, vd, vp, vb), vx), if_(in(s, vd, vx), sort_fbag::cons_(s, vd, sort_nat::minimum(vp, sort_nat::nat2pos(count(s, vd, vx))), intersection(s, vb, vx)), intersection(s, vb, vx))));
-    result.push_back(data_equation(variable_list({vb, vx}), intersection(s, vx, vb), intersection(s, vb, vx)));
-    result.push_back(data_equation(variable_list({vb, vc, vf, vg}), difference(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, monus_function(s, vf, vg), fbag_difference(s, vf, vg, vb, vc))));
-    result.push_back(data_equation(variable_list({vx}), difference(s, sort_fbag::empty(s), vx), sort_fbag::empty(s)));
-    result.push_back(data_equation(variable_list({vb, vd, vp, vx}), difference(s, sort_fbag::cons_(s, vd, vp, vb), vx), if_(greater(sort_nat::pos2nat(vp), count(s, vd, vx)), sort_fbag::cons_(s, vd, sort_nat::nat2pos(sort_nat::monus(sort_nat::pos2nat(vp), count(s, vd, vx))), difference(s, vb, vx)), difference(s, vb, vx))));
-    result.push_back(data_equation(variable_list({vb, vf}), bag2set(s, constructor(s, vf, vb)), sort_set::constructor(s, nat2bool_function(s, vf), fbag2fset(s, vf, vb))));
-    result.push_back(data_equation(variable_list({vh, vs}), set2bag(s, sort_set::constructor(s, vh, vs)), constructor(s, bool2nat_function(s, vh), fset2fbag(s, vs))));
-    result.push_back(data_equation(variable_list({ve}), zero_function(s, ve), sort_nat::c0()));
-    result.push_back(data_equation(variable_list({ve}), one_function(s, ve), sort_nat::most_significant_digit_nat(sort_machine_word::one_word())));
-    result.push_back(data_equation(variable_list(), equal_to(zero_function(s), one_function(s)), sort_bool::false_()));
-    result.push_back(data_equation(variable_list(), equal_to(one_function(s), zero_function(s)), sort_bool::false_()));
-    result.push_back(data_equation(variable_list({ve, vf, vg}), add_function(s, vf, vg)(ve), sort_nat::auxiliary_plus_nat(vf(ve), vg(ve))));
-    result.push_back(data_equation(variable_list({vf}), add_function(s, vf, zero_function(s)), vf));
-    result.push_back(data_equation(variable_list({vf}), add_function(s, zero_function(s), vf), vf));
-    result.push_back(data_equation(variable_list({ve, vf, vg}), min_function(s, vf, vg)(ve), sort_nat::minimum(vf(ve), vg(ve))));
-    result.push_back(data_equation(variable_list({vf}), min_function(s, vf, vf), vf));
-    result.push_back(data_equation(variable_list({vf}), min_function(s, vf, zero_function(s)), zero_function(s)));
-    result.push_back(data_equation(variable_list({vf}), min_function(s, zero_function(s), vf), zero_function(s)));
-    result.push_back(data_equation(variable_list({ve, vf, vg}), monus_function(s, vf, vg)(ve), sort_nat::monus(vf(ve), vg(ve))));
-    result.push_back(data_equation(variable_list({vf}), monus_function(s, vf, vf), zero_function(s)));
-    result.push_back(data_equation(variable_list({vf}), monus_function(s, vf, zero_function(s)), vf));
-    result.push_back(data_equation(variable_list({vf}), monus_function(s, zero_function(s), vf), zero_function(s)));
-    result.push_back(data_equation(variable_list({ve, vf}), nat2bool_function(s, vf)(ve), greater(vf(ve), sort_nat::c0())));
-    result.push_back(data_equation(variable_list(), nat2bool_function(s, zero_function(s)), sort_set::false_function(s)));
-    result.push_back(data_equation(variable_list(), nat2bool_function(s, one_function(s)), sort_set::true_function(s)));
-    result.push_back(data_equation(variable_list({ve, vh}), bool2nat_function(s, vh)(ve), if_(vh(ve), sort_nat::most_significant_digit_nat(sort_machine_word::one_word()), sort_nat::c0())));
-    result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::false_function(s)), zero_function(s)));
-    result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::true_function(s)), one_function(s)));
-    result.push_back(data_equation(variable_list({vw, vz}), join(s, zero_function(s), zero_function(s), vw, vz), union_(s, vw, vz)));
-    result.push_back(data_equation(variable_list({vf, vg}), join(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)), sort_fbag::empty(s)));
-    result.push_back(data_equation(variable_list({vb, vd, vf, vg, vp}), join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()), join(s, vf, vg, vb, sort_fbag::empty(s)))));
-    result.push_back(data_equation(variable_list({vc, ve, vf, vg, vq}), join(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)), join(s, vf, vg, sort_fbag::empty(s), vc))));
-    result.push_back(data_equation(variable_list({vb, vc, vd, vf, vg, vp, vq}), join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, vd, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::pos2nat(vq)), join(s, vf, vg, vb, vc))));
-    result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(vd, ve), join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()), join(s, vf, vg, vb, sort_fbag::cons_(s, ve, vq, vc)))));
-    result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(ve, vd), join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)), join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), vc))));
-    result.push_back(data_equation(variable_list({vf, vg}), fbag_intersect(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)), sort_fbag::empty(s)));
-    result.push_back(data_equation(variable_list({vb, vd, vf, vg, vp}), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()), fbag_intersect(s, vf, vg, vb, sort_fbag::empty(s)))));
-    result.push_back(data_equation(variable_list({vc, ve, vf, vg, vq}), fbag_intersect(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)), fbag_intersect(s, vf, vg, sort_fbag::empty(s), vc))));
-    result.push_back(data_equation(variable_list({vb, vc, vd, vf, vg, vp, vq}), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, vd, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::pos2nat(vq)), fbag_intersect(s, vf, vg, vb, vc))));
-    result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(vd, ve), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()), fbag_intersect(s, vf, vg, vb, sort_fbag::cons_(s, ve, vq, vc)))));
-    result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(ve, vd), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)), fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), vc))));
-    result.push_back(data_equation(variable_list({vf, vg}), fbag_difference(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)), sort_fbag::empty(s)));
-    result.push_back(data_equation(variable_list({vb, vd, vf, vg, vp}), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()), fbag_difference(s, vf, vg, vb, sort_fbag::empty(s)))));
-    result.push_back(data_equation(variable_list({vc, ve, vf, vg, vq}), fbag_difference(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)), fbag_difference(s, vf, vg, sort_fbag::empty(s), vc))));
-    result.push_back(data_equation(variable_list({vb, vc, vd, vf, vg, vp, vq}), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, vd, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::pos2nat(vq)), fbag_difference(s, vf, vg, vb, vc))));
-    result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(vd, ve), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()), fbag_difference(s, vf, vg, vb, sort_fbag::cons_(s, ve, vq, vc)))));
-    result.push_back(data_equation(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}), less(ve, vd), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)), sort_fbag::cinsert(s, ve, sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)), fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), vc))));
-    result.push_back(data_equation(variable_list({vf}), fbag2fset(s, vf, sort_fbag::empty(s)), sort_fset::empty(s)));
-    result.push_back(data_equation(variable_list({vb, vd, vf, vp}), fbag2fset(s, vf, sort_fbag::cons_(s, vd, vp, vb)), sort_fset::cinsert(s, vd, equal_to(equal_to(vf(vd), sort_nat::pos2nat(vp)), greater(vf(vd), sort_nat::c0())), fbag2fset(s, vf, vb))));
-    result.push_back(data_equation(variable_list(), fset2fbag(s, sort_fset::empty(s)), sort_fbag::empty(s)));
-    result.push_back(data_equation(variable_list({vd, vs}), fset2fbag(s, sort_fset::cons_(s, vd, vs)), sort_fbag::cinsert(s, vd, sort_nat::pos2nat(sort_pos::c1()), fset2fbag(s, vs))));
+    result.emplace_back(variable_list({vb}), bag_fbag(s, vb), constructor(s, zero_function(s), vb));
+    result.emplace_back(variable_list({vf}),
+        sort_bag::bag_comprehension(s, vf),
+        constructor(s, vf, sort_fbag::empty(s)));
+    result.emplace_back(variable_list({vb, ve, vf}),
+        count(s, ve, constructor(s, vf, vb)),
+        sort_nat::swap_zero(vf(ve), count(s, ve, vb)));
+    result.emplace_back(variable_list({ve, vx}), in(s, ve, vx), greater(count(s, ve, vx), sort_nat::c0()));
+    result.emplace_back(variable_list({vb, vc, vf, vg}),
+        equal_to(constructor(s, vf, vb), constructor(s, vg, vc)),
+        if_(equal_to(vf, vg),
+            equal_to(vb, vc),
+            forall(variable_list({vd}),
+                equal_to(count(s, vd, constructor(s, vf, vb)), count(s, vd, constructor(s, vg, vc))))));
+    result.emplace_back(variable_list({vx, vy}),
+        less(vx, vy),
+        sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy)));
+    result.emplace_back(variable_list({vx, vy}), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx));
+    result.emplace_back(variable_list({vb, vc, vf, vg}),
+        union_(s, constructor(s, vf, vb), constructor(s, vg, vc)),
+        constructor(s, add_function(s, vf, vg), join(s, vf, vg, vb, vc)));
+    result.emplace_back(variable_list({vx}), intersection(s, vx, vx), vx);
+    result.emplace_back(variable_list({vx, vy}), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy));
+    result.emplace_back(variable_list({vx, vy}), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx));
+    result.emplace_back(variable_list({vx, vy}), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy));
+    result.emplace_back(variable_list({vx, vy}), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx));
+    result.emplace_back(variable_list({vb, vc, vf, vg}),
+        intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)),
+        constructor(s, min_function(s, vf, vg), fbag_intersect(s, vf, vg, vb, vc)));
+    result.emplace_back(variable_list({vx}), intersection(s, sort_fbag::empty(s), vx), sort_fbag::empty(s));
+    result.emplace_back(variable_list({vb, vd, vp, vx}),
+        intersection(s, sort_fbag::cons_(s, vd, vp, vb), vx),
+        if_(in(s, vd, vx),
+            sort_fbag::cons_(s,
+                vd,
+                sort_nat::minimum(vp, sort_nat::nat2pos(count(s, vd, vx))),
+                intersection(s, vb, vx)),
+            intersection(s, vb, vx)));
+    result.emplace_back(variable_list({vb, vx}), intersection(s, vx, vb), intersection(s, vb, vx));
+    result.emplace_back(variable_list({vb, vc, vf, vg}),
+        difference(s, constructor(s, vf, vb), constructor(s, vg, vc)),
+        constructor(s, monus_function(s, vf, vg), fbag_difference(s, vf, vg, vb, vc)));
+    result.emplace_back(variable_list({vx}), difference(s, sort_fbag::empty(s), vx), sort_fbag::empty(s));
+    result.emplace_back(variable_list({vb, vd, vp, vx}),
+        difference(s, sort_fbag::cons_(s, vd, vp, vb), vx),
+        if_(greater(sort_nat::pos2nat(vp), count(s, vd, vx)),
+            sort_fbag::cons_(s,
+                vd,
+                sort_nat::nat2pos(sort_nat::monus(sort_nat::pos2nat(vp), count(s, vd, vx))),
+                difference(s, vb, vx)),
+            difference(s, vb, vx)));
+    result.emplace_back(variable_list({vb, vf}),
+        bag2set(s, constructor(s, vf, vb)),
+        sort_set::constructor(s, nat2bool_function(s, vf), fbag2fset(s, vf, vb)));
+    result.emplace_back(variable_list({vh, vs}),
+        set2bag(s, sort_set::constructor(s, vh, vs)),
+        constructor(s, bool2nat_function(s, vh), fset2fbag(s, vs)));
+    result.emplace_back(variable_list({ve}), zero_function(s, ve), sort_nat::c0());
+    result.emplace_back(variable_list({ve}),
+        one_function(s, ve),
+        sort_nat::most_significant_digit_nat(sort_machine_word::one_word()));
+    result.emplace_back(variable_list(), equal_to(zero_function(s), one_function(s)), sort_bool::false_());
+    result.emplace_back(variable_list(), equal_to(one_function(s), zero_function(s)), sort_bool::false_());
+    result.emplace_back(variable_list({ve, vf, vg}),
+        add_function(s, vf, vg)(ve),
+        sort_nat::auxiliary_plus_nat(vf(ve), vg(ve)));
+    result.emplace_back(variable_list({vf}), add_function(s, vf, zero_function(s)), vf);
+    result.emplace_back(variable_list({vf}), add_function(s, zero_function(s), vf), vf);
+    result.emplace_back(variable_list({ve, vf, vg}), min_function(s, vf, vg)(ve), sort_nat::minimum(vf(ve), vg(ve)));
+    result.emplace_back(variable_list({vf}), min_function(s, vf, vf), vf);
+    result.emplace_back(variable_list({vf}), min_function(s, vf, zero_function(s)), zero_function(s));
+    result.emplace_back(variable_list({vf}), min_function(s, zero_function(s), vf), zero_function(s));
+    result.emplace_back(variable_list({ve, vf, vg}), monus_function(s, vf, vg)(ve), sort_nat::monus(vf(ve), vg(ve)));
+    result.emplace_back(variable_list({vf}), monus_function(s, vf, vf), zero_function(s));
+    result.emplace_back(variable_list({vf}), monus_function(s, vf, zero_function(s)), vf);
+    result.emplace_back(variable_list({vf}), monus_function(s, zero_function(s), vf), zero_function(s));
+    result.emplace_back(variable_list({ve, vf}), nat2bool_function(s, vf)(ve), greater(vf(ve), sort_nat::c0()));
+    result.emplace_back(variable_list(), nat2bool_function(s, zero_function(s)), sort_set::false_function(s));
+    result.emplace_back(variable_list(), nat2bool_function(s, one_function(s)), sort_set::true_function(s));
+    result.emplace_back(variable_list({ve, vh}),
+        bool2nat_function(s, vh)(ve),
+        if_(vh(ve), sort_nat::most_significant_digit_nat(sort_machine_word::one_word()), sort_nat::c0()));
+    result.emplace_back(variable_list(), bool2nat_function(s, sort_set::false_function(s)), zero_function(s));
+    result.emplace_back(variable_list(), bool2nat_function(s, sort_set::true_function(s)), one_function(s));
+    result.emplace_back(variable_list({vw, vz}),
+        join(s, zero_function(s), zero_function(s), vw, vz),
+        union_(s, vw, vz));
+    result.emplace_back(variable_list({vf, vg}),
+        join(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)),
+        sort_fbag::empty(s));
+    result.emplace_back(variable_list({vb, vd, vf, vg, vp}),
+        join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)),
+        sort_fbag::cinsert(s,
+            vd,
+            sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()),
+            join(s, vf, vg, vb, sort_fbag::empty(s))));
+    result.emplace_back(variable_list({vc, ve, vf, vg, vq}),
+        join(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)),
+        sort_fbag::cinsert(s,
+            ve,
+            sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)),
+            join(s, vf, vg, sort_fbag::empty(s), vc)));
+    result.emplace_back(variable_list({vb, vc, vd, vf, vg, vp, vq}),
+        join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, vd, vq, vc)),
+        sort_fbag::cinsert(s,
+            vd,
+            sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::pos2nat(vq)),
+            join(s, vf, vg, vb, vc)));
+    result.emplace_back(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}),
+        less(vd, ve),
+        join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)),
+        sort_fbag::cinsert(s,
+            vd,
+            sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()),
+            join(s, vf, vg, vb, sort_fbag::cons_(s, ve, vq, vc))));
+    result.emplace_back(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}),
+        less(ve, vd),
+        join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)),
+        sort_fbag::cinsert(s,
+            ve,
+            sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)),
+            join(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), vc)));
+    result.emplace_back(variable_list({vf, vg}),
+        fbag_intersect(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)),
+        sort_fbag::empty(s));
+    result.emplace_back(variable_list({vb, vd, vf, vg, vp}),
+        fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)),
+        sort_fbag::cinsert(s,
+            vd,
+            sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()),
+            fbag_intersect(s, vf, vg, vb, sort_fbag::empty(s))));
+    result.emplace_back(variable_list({vc, ve, vf, vg, vq}),
+        fbag_intersect(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)),
+        sort_fbag::cinsert(s,
+            ve,
+            sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)),
+            fbag_intersect(s, vf, vg, sort_fbag::empty(s), vc)));
+    result.emplace_back(variable_list({vb, vc, vd, vf, vg, vp, vq}),
+        fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, vd, vq, vc)),
+        sort_fbag::cinsert(s,
+            vd,
+            sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::pos2nat(vq)),
+            fbag_intersect(s, vf, vg, vb, vc)));
+    result.emplace_back(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}),
+        less(vd, ve),
+        fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)),
+        sort_fbag::cinsert(s,
+            vd,
+            sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()),
+            fbag_intersect(s, vf, vg, vb, sort_fbag::cons_(s, ve, vq, vc))));
+    result.emplace_back(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}),
+        less(ve, vd),
+        fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)),
+        sort_fbag::cinsert(s,
+            ve,
+            sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)),
+            fbag_intersect(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), vc)));
+    result.emplace_back(variable_list({vf, vg}),
+        fbag_difference(s, vf, vg, sort_fbag::empty(s), sort_fbag::empty(s)),
+        sort_fbag::empty(s));
+    result.emplace_back(variable_list({vb, vd, vf, vg, vp}),
+        fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::empty(s)),
+        sort_fbag::cinsert(s,
+            vd,
+            sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()),
+            fbag_difference(s, vf, vg, vb, sort_fbag::empty(s))));
+    result.emplace_back(variable_list({vc, ve, vf, vg, vq}),
+        fbag_difference(s, vf, vg, sort_fbag::empty(s), sort_fbag::cons_(s, ve, vq, vc)),
+        sort_fbag::cinsert(s,
+            ve,
+            sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)),
+            fbag_difference(s, vf, vg, sort_fbag::empty(s), vc)));
+    result.emplace_back(variable_list({vb, vc, vd, vf, vg, vp, vq}),
+        fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, vd, vq, vc)),
+        sort_fbag::cinsert(s,
+            vd,
+            sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::pos2nat(vq)),
+            fbag_difference(s, vf, vg, vb, vc)));
+    result.emplace_back(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}),
+        less(vd, ve),
+        fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)),
+        sort_fbag::cinsert(s,
+            vd,
+            sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::pos2nat(vp), sort_nat::c0()),
+            fbag_difference(s, vf, vg, vb, sort_fbag::cons_(s, ve, vq, vc))));
+    result.emplace_back(variable_list({vb, vc, vd, ve, vf, vg, vp, vq}),
+        less(ve, vd),
+        fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), sort_fbag::cons_(s, ve, vq, vc)),
+        sort_fbag::cinsert(s,
+            ve,
+            sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::pos2nat(vq)),
+            fbag_difference(s, vf, vg, sort_fbag::cons_(s, vd, vp, vb), vc)));
+    result.emplace_back(variable_list({vf}), fbag2fset(s, vf, sort_fbag::empty(s)), sort_fset::empty(s));
+    result.emplace_back(variable_list({vb, vd, vf, vp}),
+        fbag2fset(s, vf, sort_fbag::cons_(s, vd, vp, vb)),
+        sort_fset::cinsert(s,
+            vd,
+            equal_to(equal_to(vf(vd), sort_nat::pos2nat(vp)), greater(vf(vd), sort_nat::c0())),
+            fbag2fset(s, vf, vb)));
+    result.emplace_back(variable_list(), fset2fbag(s, sort_fset::empty(s)), sort_fbag::empty(s));
+    result.emplace_back(variable_list({vd, vs}),
+        fset2fbag(s, sort_fset::cons_(s, vd, vs)),
+        sort_fbag::cinsert(s, vd, sort_nat::pos2nat(sort_pos::c1()), fset2fbag(s, vs)));
     return result;
   }
 

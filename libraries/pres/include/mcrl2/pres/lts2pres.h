@@ -97,7 +97,9 @@ class lts2pres_algorithm
           }
         }
         init = propositional_variable_instantiation(detail::mu_name(f),data::data_expression_list());
-        equations.push_back(pres_equation(fixpoint_symbol::mu(), propositional_variable(detail::mu_name(f),data::variable_list()), initial_state));
+        equations.emplace_back(fixpoint_symbol::mu(),
+            propositional_variable(detail::mu_name(f), data::variable_list()),
+            initial_state);
       }
 
       return pres(lts0.data(), equations, init);

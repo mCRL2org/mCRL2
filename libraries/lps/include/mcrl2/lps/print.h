@@ -240,7 +240,9 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
       if (x.action_summands().empty() && (x.deadlock_summands().empty()))
       {
         deadlock_summand_vector v;
-        v.push_back(deadlock_summand(data::variable_list(), data::sort_bool::true_(), lps::deadlock(data::parse_data_expression("0"))));
+        v.emplace_back(data::variable_list(),
+            data::sort_bool::true_(),
+            lps::deadlock(data::parse_data_expression("0")));
         print_numbered_list(v, separator, number_separator, 1, true);
       }
     }
@@ -265,7 +267,9 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
       if (x.action_summands().empty() && (x.deadlock_summands().empty()))
       {
         deadlock_summand_vector v;
-        v.push_back(deadlock_summand(data::variable_list(), data::sort_bool::true_(), lps::deadlock(data::parse_data_expression("0"))));
+        v.emplace_back(data::variable_list(),
+            data::sort_bool::true_(),
+            lps::deadlock(data::parse_data_expression("0")));
         print_list(v, opener, closer, separator);
       }
     }

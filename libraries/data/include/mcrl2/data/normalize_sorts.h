@@ -82,11 +82,9 @@ struct normalize_sorts_function
         const structured_sort_constructor_argument_list& i_arguments(e_constructor.arguments());
         for (const structured_sort_constructor_argument& i_argument : i_arguments)
         {
-          new_arguments.push_back(structured_sort_constructor_argument(
-                                    i_argument.name(),
-                                    this->operator()(i_argument.sort())));
+          new_arguments.emplace_back(i_argument.name(), this->operator()(i_argument.sort()));
         }
-        new_constructors.push_back(structured_sort_constructor(e_constructor.name(), new_arguments, e_constructor.recogniser()));
+        new_constructors.emplace_back(e_constructor.name(), new_arguments, e_constructor.recogniser());
       }
       new_sort=structured_sort(new_constructors);
     }

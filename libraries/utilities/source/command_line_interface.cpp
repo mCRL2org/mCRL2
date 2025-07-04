@@ -996,7 +996,7 @@ std::vector< std::string > command_line_parser::parse_command_line(char const* c
         }
         while (*current != '\0' && *current != ' ');
 
-        result.push_back(std::string(current_argument, current - current_argument));
+        result.emplace_back(current_argument, current - current_argument);
       }
     }
   }

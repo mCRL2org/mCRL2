@@ -887,7 +887,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
   {
     if (recursive_number_of_args(eq.lhs()) <= arity)
     {
-      rule_deps.push_front(std::make_pair(eq, dep_list_t()));
+      rule_deps.emplace_front(eq, dep_list_t());
       dep_list_t& deps = rule_deps.front().second;
 
       const std::vector<bool> is_dependent_arg = dep_vars(eq);

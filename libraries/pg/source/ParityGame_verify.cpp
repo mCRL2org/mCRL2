@@ -111,7 +111,7 @@ bool ParityGame::verify(const Strategy &s, verti *error) const
                 {
                     if (priority(s[v]) >= prio)
                     {
-                        edges.push_back(std::make_pair(v, s[v]));
+                      edges.emplace_back(v, s[v]);
                     }
                 }
                 else
@@ -121,7 +121,7 @@ bool ParityGame::verify(const Strategy &s, verti *error) const
                     {
                         if (priority(*it) >= prio)
                         {
-                            edges.push_back(std::make_pair(v, *it));
+                          edges.emplace_back(v, *it);
                         }
                     }
                 }

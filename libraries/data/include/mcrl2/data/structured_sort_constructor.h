@@ -167,7 +167,7 @@ class structured_sort_constructor: public atermpp::aterm
       {
         if (i.name() != core::empty_identifier_string())
         {
-          result.push_back(function_symbol(i.name(), make_function_sort_(s, i.sort())));
+          result.emplace_back(i.name(), make_function_sort_(s, i.sort()));
         }
       }
       return result;

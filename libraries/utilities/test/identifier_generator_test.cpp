@@ -25,8 +25,8 @@ BOOST_AUTO_TEST_CASE(identifier_generator_test)
   BOOST_CHECK_EQUAL(s, "c7");
 
   std::vector<std::string> v;
-  v.push_back("a1");
-  v.push_back("c012");
+  v.emplace_back("a1");
+  v.emplace_back("c012");
   generator.add_identifiers(v.begin(), v.end());
 
   s = generator("c");
