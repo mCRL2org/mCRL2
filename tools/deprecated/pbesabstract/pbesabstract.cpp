@@ -106,6 +106,7 @@ class pbes_abstract_tool: public pbes_input_tool<pbes_output_tool<input_output_t
       pbes_abstract_algorithm algorithm;
       pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, m_parameter_selection);
       algorithm.run(p, parameter_map, m_value_true);
+      save_pbes(p, output_filename(), pbes_output_format());
       return true;
     }
 };
