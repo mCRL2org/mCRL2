@@ -63,9 +63,9 @@ BOOST_AUTO_TEST_CASE(test_aterm_list)
   q.push_front(read_term_from_string("[5,6]")); // q == [[5,6],1,2,3,4]
 
   std::stringstream os;
-  for (aterm_list::iterator i = q.begin(); i != q.end(); ++i)
+  for (const atermpp::aterm& i : q)
   {
-    os << *i;
+    os << i;
   }
   BOOST_CHECK(os.str() == "[5,6]1234");
 

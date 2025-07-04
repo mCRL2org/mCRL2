@@ -84,9 +84,9 @@ std::vector<boost::dynamic_bitset<>> compute_read_write_patterns(const pbes_syst
   std::size_t n = process_parameters.size();
   std::map<data::variable, std::size_t> index = process_parameter_index(process_parameters);
 
-  for (const auto& equation: pbesspec.equations())
+  for (const detail::pre_srf_equation<false>& equation: pbesspec.equations())
   {
-    for (const auto& summand: equation.summands())
+    for (const detail::pre_srf_summand<false>& summand: equation.summands())
     {
       auto [read_parameters, write_parameters] = read_write_parameters(equation, summand, process_parameters);
       auto read = symbolic::parameter_indices(read_parameters, index);
@@ -148,10 +148,10 @@ struct pbes_summand_group: public symbolic::summand_group
 
     const auto& equations = pbesspec.equations();
     std::size_t k = 0;
-    for (std::size_t i = 0; i < equations.size(); i++)
+    for (const auto& equation : equations)
     {
-      const core::identifier_string& X_i = equations[i].variable().name();
-      const auto& equation_summands = equations[i].summands();
+      const core::identifier_string& X_i = equation.variable().name();
+      const auto& equation_summands = equation.summands();
       for (std::size_t j = 0; j < equation_summands.size(); j++, k++)
       {
         if (contains(summand_group_indices, k))

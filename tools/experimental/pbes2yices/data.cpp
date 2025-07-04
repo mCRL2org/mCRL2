@@ -8,6 +8,8 @@
 
 #include <cstdio>
 
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/sort_expression.h"
 #include "pbes2yices.h"
 
 #include "mcrl2/utilities/exception.h"
@@ -146,8 +148,9 @@ std::string translate_expression(data_expression expression, const std::map<vari
     }
     
     std::string output = "(" + translation.function_names.at(function_symbol(a.head()));
-    for (application::const_iterator i = a.begin(); i != a.end(); ++i) {
-      output += " " + translate_expression(*i, bound_variables, translation);
+    for (const mcrl2::data::data_expression& i : a)
+    {
+      output += " " + translate_expression(i, bound_variables, translation);
     }
     output += ")";
     return output;
@@ -174,9 +177,11 @@ static std::vector<mcrl2::data::sort_expression> required_sorts(const mcrl2::pbe
       for (function_symbol_vector::iterator j = constructors.begin(); j != constructors.end(); j++) {
         if (is_function_sort(j->sort())) {
           sort_expression_list domain = function_sort(j->sort()).domain();
-          for (sort_expression_list::iterator k = domain.begin(); k != domain.end(); k++) {
-            if (sort_expression(*k) != *i) {
-              dependencies.insert(sort_expression(*k));
+          for (const mcrl2::data::sort_expression& k : domain)
+          {
+            if (sort_expression(k) != *i)
+            {
+              dependencies.insert(sort_expression(k));
             }
           }
         }
@@ -252,20 +257,24 @@ static void translate_sort_definition(const mcrl2::data::data_specification &dat
           definition += "(" + constructor_name;
           
           sort_expression_list domain = function_sort(i->sort()).domain();
-          for (sort_expression_list::iterator j = domain.begin(); j != domain.end(); j++) {
+          for (const mcrl2::data::sort_expression& j : domain)
+          {
             std::string sort_name;
-            if (*j == sort) {
+            if (j == sort)
+            {
               sort_name = name;
-            } else {
-              assert(translation.sort_names.count(*j) > 0);
-              sort_name = translation.sort_names[*j];
             }
-            
+            else
+            {
+              assert(translation.sort_names.count(j) > 0);
+              sort_name = translation.sort_names[j];
+            }
+
             std::string field_name = "@@" + name + itoa(index++);
             translation.constructor_field_names[*i].push_back(field_name);
             definition += " " + field_name + "::" + sort_name;
           }
-          
+
           definition += ")";
         } else {
           definition += constructor_name;
@@ -582,8 +591,9 @@ static std::string match_pattern(
             constructor = function_symbol(a.head());
             
             size_t index = arguments.size() - 1;
-            for (application::const_iterator k = a.begin(); k != a.end(); ++k) {
-              new_rule.parameters[index++] = *k;
+            for (const mcrl2::data::data_expression& k : a)
+            {
+              new_rule.parameters[index++] = k;
             }
           }
           assert(constructor_indices.count(constructor));
@@ -607,11 +617,12 @@ static std::string match_pattern(
         
         std::vector<std::string> case_arguments = base_arguments;
         std::vector<variable> term_variables;
-        for (size_t k = 0; k < constructor_field_names.size(); ++k) {
-          case_arguments.push_back("(" + constructor_field_names[k] + " " + arguments[i] + ")");
+        for (const std::string& constructor_field_name : constructor_field_names)
+        {
+          case_arguments.push_back("(" + constructor_field_name + " " + arguments[i] + ")");
           term_variables.push_back(variable(argument_variable_generator("v"), sort_bool::bool_()));
         }
-        
+
         std::vector<variable> case_argument_variables = base_argument_variables;
         case_argument_variables.insert(case_argument_variables.end(), term_variables.begin(), term_variables.end());
         data_expression term;
@@ -717,10 +728,11 @@ static std::string construct_function_definition(data::function_symbol function,
   
   function_sort sort(function.sort());
   sort_expression_list domain = sort.domain();
-  for (sort_expression_list::iterator i = domain.begin(); i != domain.end(); ++i) {
+  for (const sort_expression& i : domain)
+  {
     core::identifier_string name = argument_variable_generator("v");
     arguments.push_back(name);
-    argument_variables.push_back(variable(name, *i));
+    argument_variables.push_back(variable(name, i));
   }
   data_expression pattern = application(function, argument_variables.begin(), argument_variables.end());
   
@@ -731,8 +743,9 @@ static std::string construct_function_definition(data::function_symbol function,
     // The lhs may contain duplicate variables.
     // Replace them with fresh ones, and add equality conditions.
     set_identifier_generator generator;
-    for (variable_list::iterator j = i->variables().begin(); j != i->variables().end(); ++j) {
-      generator.add_identifier(j->name());
+    for (const variable& j : i->variables())
+    {
+      generator.add_identifier(j.name());
     }
     remove_duplicate_variables_builder remover(generator);
     data_expression lhs;
@@ -757,10 +770,11 @@ static std::string construct_function_definition(data::function_symbol function,
     
     int index = 0;
     bool invalid = false;
-    for (application::const_iterator j = a.begin(); j != a.end(); ++j) {
-      new_rule.parameters[index++] = *j;
-      
-      std::set<function_symbol> functions_used = find_function_symbols(*j);
+    for (const data_expression& j : a)
+    {
+      new_rule.parameters[index++] = j;
+
+      std::set<function_symbol> functions_used = find_function_symbols(j);
       for (std::set<function_symbol>::iterator k = functions_used.begin(); k != functions_used.end(); ++k) {
         if (!all_constructors.count(*k)) {
           invalid = true;
@@ -768,7 +782,7 @@ static std::string construct_function_definition(data::function_symbol function,
         }
       }
     }
-    
+
     if (!invalid) {
       rules.push_back(new_rule);
     }
@@ -783,21 +797,23 @@ static std::string construct_function_definition(data::function_symbol function,
   output += "(define ";
   output += translation.function_names.at(function);
   output += "::(-> ";
-  for (sort_expression_list::iterator i = domain.begin(); i != domain.end(); ++i) {
-    assert(translation.sort_names.count(*i));
-    output += translation.sort_names.at(*i);
+  for (const sort_expression& i : domain)
+  {
+    assert(translation.sort_names.count(i));
+    output += translation.sort_names.at(i);
     output += " ";
   }
   output += translation.sort_names.at(sort.codomain());
   output += ") (lambda (";
   size_t index = 0;
-  for (sort_expression_list::iterator i = domain.begin(); i != domain.end(); ++i) {
+  for (const sort_expression& i : domain)
+  {
     if (index != 0) {
       output += " ";
     }
     output += arguments[index++];
     output += "::";
-    output += translation.sort_names.at(*i);
+    output += translation.sort_names.at(i);
   }
   output += ") ";
   output += rhs;

@@ -9,6 +9,8 @@
 /// \file jittyc.cpp
 
 #include "mcrl2/data/detail/rewrite.h" // Required for MCRL2_JITTTYC_AVAILABLE.
+#include "mcrl2/data/detail/rewrite/match_tree.h"
+#include "mcrl2/data/sort_expression.h"
 
 #ifdef MCRL2_ENABLE_JITTYC
 
@@ -425,9 +427,8 @@ match_tree_list RewriterCompilingJitty::subst_var(const match_tree_list& l,
                                                   const mutable_map_substitution<>& substs)
 {
   match_tree_vector result;
-  for(match_tree_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+  for (match_tree head : l)
   {
-    match_tree head=*i;
     if (head.isM())
     {
       const match_tree_M headM(head);
@@ -542,9 +543,9 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
     if (!r.is_defined())
     {
       match_tree tree = build_tree(pars,i);
-      for (match_tree_list::const_iterator i=readies.begin(); i!=readies.end(); ++i)
+      for (const match_tree& ready : readies)
       {
-        match_tree_CRe t(*i);
+        match_tree_CRe t(ready);
         inc_usedcnt(t.variables_condition());
         inc_usedcnt(t.variables_result());
         tree = match_tree_C(t.condition(),match_tree_R(t.result()),tree);
@@ -854,9 +855,10 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
       for(sort_list_vector::const_iterator sl=requested_sorts.begin(); sl!=requested_sorts.end(); ++sl)
       {
         variable_vector var_vec;
-        for(sort_expression_list::const_iterator s=sl->begin(); s!=sl->end(); ++s)
+        for (const sort_expression& s : *sl)
         {
-          variable v=variable(jitty_rewriter.identifier_generator()(),*s); // Find a new name for a variable that is temporarily in use.
+          variable v = variable(jitty_rewriter.identifier_generator()(),
+              s); // Find a new name for a variable that is temporarily in use.
           var_vec.push_back(v);
           vars.push_front(v);
         }
@@ -1068,9 +1070,9 @@ class RewriterCompilingJitty::ImplementTree
   bool opid_is_nf(const function_symbol& opid, std::size_t num_args)
   {
     data_equation_list l = m_rewriter.jittyc_eqns[opid];
-    for (data_equation_list::const_iterator it = l.begin(); it != l.end(); ++it)
+    for (const auto& it : l)
     {
-      if (recursive_number_of_args(it->lhs()) <= num_args)
+      if (recursive_number_of_args(it.lhs()) <= num_args)
       {
         return false;
       }

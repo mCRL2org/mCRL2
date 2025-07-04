@@ -54,6 +54,7 @@
 // Process libraries.
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/balance_nesting_depth.h"
+#include "mcrl2/process/process_expression.h"
 
 
 // For Aterm library extension functions
@@ -4542,8 +4543,8 @@ class specification_basic_type
     {
       action_vector result;
 
-      for (action_list::const_iterator it = multiAction.begin(); it != multiAction.end(); ++it) {
-        const action& act = *it;
+      for (const action& act : multiAction)
+      {
         const data_expression_vector vec(
             adapt_termlist_to_stack(act.arguments().begin(), act.arguments().end(), stack, vars, variable_list()));
         result.push_back(action(act.label(), data_expression_list(vec.begin(), vec.end())));
@@ -5652,10 +5653,9 @@ class specification_basic_type
       So, we must find out whether *var is an allowed variable, not
       occuring in the variablelist v.
       But if so, we must replace it by a new one. */
-      for (variable_list::const_iterator i=v.begin() ; i!=v.end() ; ++i)
+      for (const variable& var1 : v)
       {
-        variable var1=*i;
-        if (var.name()==var1.name())
+        if (var.name() == var1.name())
         {
           pars.push_front(var);
           var=get_fresh_variable(var.name(),var.sort());
