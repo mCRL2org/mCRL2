@@ -63,9 +63,7 @@ struct hash<std::tuple<mcrl2::data::data_expression, mcrl2::data::data_expressio
 
 }
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 core::identifier_string iff_name()
@@ -804,8 +802,6 @@ public:
   }
 };
 
-} // namespace data
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 #endif // MCRL2_LPSSYMBOLICBISIM_SYMBOLIC_BISIM_H

@@ -15,9 +15,8 @@
 #include <string>
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system
+{
 
 /// \brief An enumerated type for the available pres rewriters
 enum pres_rewriter_type
@@ -126,8 +125,6 @@ std::ostream& operator<<(std::ostream& os, const pres_rewriter_type t)
   return os;
 }
 
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system
 
 #endif // MCRL2_PRES_PRES_REWRITER_TYPE_H

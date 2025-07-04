@@ -24,10 +24,7 @@
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 #include <cstddef>
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 struct pbespathreduction_options
@@ -559,8 +556,6 @@ void pbespathreduction(const std::string& input_filename,
   save_pbes(p, output_filename, output_format);
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_TOOLS_PBESPATHREDUCTION_H

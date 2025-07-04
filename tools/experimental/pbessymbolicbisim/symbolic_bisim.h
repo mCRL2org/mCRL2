@@ -17,9 +17,7 @@
 
 #include "partition.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 class symbolic_bisim_algorithm
@@ -133,8 +131,6 @@ public:
   }
 };
 
-} // namespace data
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_SYMBOLIC_BISIM_H

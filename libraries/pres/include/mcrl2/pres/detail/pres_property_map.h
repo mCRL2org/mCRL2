@@ -17,13 +17,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-namespace mcrl2
-{
-
-namespace pres_system
-{
-
-namespace detail
+namespace mcrl2::pres_system::detail
 {
 
 /// \brief Stores the following properties of a linear process specification:
@@ -210,10 +204,6 @@ class pres_property_map : public mcrl2::data::detail::data_property_map< pres_pr
     }
 };
 
-} // namespace detail
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::detail
 
 #endif // MCRL2_PRES_DETAIL_PRES_PROPERTY_MAP_H

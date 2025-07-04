@@ -25,9 +25,8 @@
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/utilities/skip.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -166,9 +165,7 @@ struct summand_equivalence_key
   }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 namespace std {
 
@@ -193,9 +190,8 @@ struct hash<mcrl2::pbes_system::summand_equivalence_key>
 
 } // namespace std
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 enum tribool
 {
@@ -1678,8 +1674,6 @@ class partial_order_reduction_algorithm
     }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_PARTIAL_ORDER_REDUCTION_H

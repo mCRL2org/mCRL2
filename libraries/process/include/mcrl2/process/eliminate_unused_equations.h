@@ -15,9 +15,8 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -145,8 +144,6 @@ void eliminate_unused_equations(std::vector<process_equation>& equations, const 
   algorithm.run();
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ELIMINATE_UNUSED_EQUATIONS_H

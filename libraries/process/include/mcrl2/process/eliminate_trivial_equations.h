@@ -16,9 +16,8 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -285,8 +284,6 @@ void eliminate_trivial_equations(process_specification& procspec)
   algorithm.run();
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ELIMINATE_TRIVIAL_EQUATIONS_H

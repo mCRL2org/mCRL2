@@ -17,10 +17,7 @@
 
 #include "mcrl2/data/linear_inequalities.h"
 
-
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 mcrl2::lps::stochastic_specification realelm(mcrl2::lps::stochastic_specification s, 
@@ -376,8 +373,7 @@ class summand_information
     }
 };
 
-} // namespace data
-} // namsepace mcrl2
-
+} // namespace mcrl2::data
+// namsepace mcrl2
 
 #endif // MCRL2_LPSREALELM_REALELM_H

@@ -21,9 +21,8 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/io.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 struct pbesbackelm_options
 {
@@ -160,8 +159,6 @@ struct pbesbackelm_pbes_backward_substituter
   }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_TOOLS_PBESBACKELM_H

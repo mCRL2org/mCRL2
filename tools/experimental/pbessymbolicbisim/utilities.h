@@ -15,9 +15,7 @@
 #include "mcrl2/smt/translation_error.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 data_expression make_abstraction(const binder_type&, const variable_list&, const data_expression&);
@@ -351,7 +349,6 @@ public:
   }
 };
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_UTILITIES_H

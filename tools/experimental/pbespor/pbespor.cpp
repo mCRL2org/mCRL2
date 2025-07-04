@@ -30,10 +30,8 @@ using pbes_system::tools::pbes_output_tool;
 using pbes_system::tools::pbes_rewriter_tool;
 using data::tools::rewriter_tool;
 
-
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 struct pbespor_pbes_composer
 {
@@ -164,9 +162,7 @@ struct pbespor_pbes_composer
   }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>
 {

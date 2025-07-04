@@ -16,9 +16,7 @@
 
 #include "simplifier.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 /**
@@ -127,6 +125,6 @@ public:
 
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MDD_H

@@ -15,11 +15,8 @@
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/detail/position_counter.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail
+{
 
 struct position_count_traverser: public pbes_expression_traverser<position_count_traverser>
 {
@@ -82,10 +79,6 @@ std::vector<std::size_t> position_counts(const pbes& x)
   return f.counter.ycounts;
 }
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_POSITION_COUNT_TRAVERSER_H

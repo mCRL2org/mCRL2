@@ -16,9 +16,8 @@
 #include "mcrl2/pres/builder.h"
 #include "mcrl2/pres/join.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system
+{
 
 namespace detail {
 
@@ -344,8 +343,6 @@ class quantifiers_inside_rewriter
     }
 };
 
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system
 
 #endif // MCRL2_PRES_REWRITERS_QUANTIFIERS_INSIDE_REWRITER_H

@@ -14,9 +14,7 @@
 
 #include "simplifier.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 class simplifier_identity: public simplifier
@@ -39,6 +37,6 @@ public:
 
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_IDENTITY_H

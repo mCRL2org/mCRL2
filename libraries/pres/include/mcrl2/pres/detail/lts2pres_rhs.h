@@ -18,11 +18,8 @@
 #include "mcrl2/pres/detail/lts2pres_lts.h"
 #include "mcrl2/utilities/progress_meter.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
-
-namespace detail {
+namespace mcrl2::pres_system::detail
+{
 
 using lts2pres_state_type = lts::probabilistic_lts_lts_t::states_size_type;
 
@@ -354,10 +351,6 @@ pres_expression RHS(const state_formulas::state_formula& x,
   return f.top();
 }
 
-} // namespace detail
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::detail
 
 #endif // MCRL2_PBES_DETAIL_LTS2PBES_RHS_H

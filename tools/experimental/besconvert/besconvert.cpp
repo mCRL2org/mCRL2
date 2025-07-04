@@ -25,9 +25,7 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
 using mcrl2::pbes_system::tools::pbes_input_output_tool;
 
-namespace mcrl2
-{
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 class bes_reduction_algorithm: public detail::bes_algorithm
@@ -540,9 +538,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
     }
 
 };
-} // namespace pbes_system
-} // namespace mcrl2
-
+} // namespace mcrl2::pbes_system
 
 /// \brief Simple input/output tool to perform strong as well as oblivious bisimulation
 ///        reduction on a boolean equation system.

@@ -15,9 +15,8 @@
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 /// \brief Substitution that maps a data expression to a data expression
 struct data_expression_assignment
@@ -45,8 +44,6 @@ struct data_expression_assignment
   }
 };
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_DATA_EXPRESSION_ASSIGNMENT_H
