@@ -213,10 +213,9 @@ public:
               std::size_t i = 1;
               auto param_Y_it = Y.parameters().begin();
 
-
-              for (auto param_X_it = X.parameters().begin(); param_X_it != X.parameters().end(); ++param_X_it)
+              for (const data::data_expression& param_X_it : X.parameters())
               {
-                singleton.emplace_back(data_index[i].index(*param_X_it));
+                singleton.emplace_back(data_index[i].index(param_X_it));
                 singleton.emplace_back(data_index[i].index(*param_Y_it));
 
                 ++param_Y_it;

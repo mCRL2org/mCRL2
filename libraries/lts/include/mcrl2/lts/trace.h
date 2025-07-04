@@ -18,6 +18,7 @@
 #define MCRL2_LTS_TRACE_H
 
 #include <fstream>
+#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -602,9 +603,9 @@ class trace
     void save_text_to_stream(std::ostream& os, std::string separator) const
     {
       std::string sep;
-      for (std::size_t i=0; i<m_actions.size(); i++)
+      for (const lps::multi_action& action : m_actions)
       {
-        os << sep << pp(m_actions[i]);
+        os << sep << pp(action);
         sep = separator;
         if (os.bad())
         {

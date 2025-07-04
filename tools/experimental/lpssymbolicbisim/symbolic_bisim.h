@@ -483,16 +483,18 @@ protected:
 
       // A list of updates for each process parameter
       data_expression_list updates;
-      for(variable_list::const_iterator it = process_parameters.begin(); it != process_parameters.end(); it++)
+      for (const variable& process_parameter : process_parameters)
       {
-        assignment_list::const_iterator assign = std::find_if(as.assignments().begin(), as.assignments().end(), [&it](const assignment& arg) {return arg.lhs() == *it;});
+        assignment_list::const_iterator assign = std::find_if(as.assignments().begin(),
+            as.assignments().end(),
+            [&process_parameter](const assignment& arg) { return arg.lhs() == process_parameter; });
         if(assign != as.assignments().end())
         {
           updates.push_front(assign->rhs());
         }
         else
         {
-          updates.push_front(*it);
+          updates.push_front(process_parameter);
         }
       }
       updates = reverse(updates);

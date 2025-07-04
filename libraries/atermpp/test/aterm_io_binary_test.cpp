@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
   {
     binary_aterm_ostream output(stream);
 
-    for (const auto& term : sequence)
+    for (const atermpp::aterm& term : sequence)
     {
       output << term;
     }
@@ -57,11 +57,11 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 
   binary_aterm_istream input(stream);
 
-  for (std::size_t index = 0; index < sequence.size(); ++index)
+  for (const atermpp::aterm& index : sequence)
   {
     aterm t;
     input.get(t);
-    BOOST_CHECK_EQUAL(t, sequence[index]);
+    BOOST_CHECK_EQUAL(t, index);
   }
 }
 
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(transitions_test)
   {
     binary_aterm_ostream output(stream);
 
-    for (const auto& term : sequence)
+    for (const atermpp::aterm& term : sequence)
     {
       output << term;
     }
@@ -97,10 +97,10 @@ BOOST_AUTO_TEST_CASE(transitions_test)
 
   binary_aterm_istream input(stream);
 
-  for (std::size_t index = 0; index < sequence.size(); ++index)
+  for (const atermpp::aterm& index : sequence)
   {
     aterm t;
     input.get(t);
-    BOOST_CHECK_EQUAL(t, sequence[index]);
+    BOOST_CHECK_EQUAL(t, index);
   }
 }

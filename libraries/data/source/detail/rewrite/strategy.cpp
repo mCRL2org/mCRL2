@@ -76,13 +76,13 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
           {
             bs[i] = true;
             const variable_list evars = get_free_vars(this_rule_lhs_iplus1_arg);
-            for (variable_list::const_iterator v=evars.begin(); v!=evars.end(); ++v)
+            for (const variable& evar : evars)
             {
               int j=0;
               const atermpp::term_list <variable_list>& next_vars=vars.tail();
-              for (atermpp::term_list <variable_list>::const_iterator o=next_vars.begin(); o!=next_vars.end(); ++o)
+              for (const atermpp::term_list<variable>& next_var : next_vars)
               {
-                if (std::find(o->begin(),o->end(),*v) != o->end())
+                if (std::find(next_var.begin(), next_var.end(), evar) != next_var.end())
                 {
                   bs[j] = true;
                 }
@@ -95,9 +95,9 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
           {
             int j = -1;
             bool b = false;
-            for (atermpp::term_list <variable_list>::const_iterator o=vars.begin(); o!=vars.end(); ++o)
+            for (const atermpp::term_list<variable>& var : vars)
             {
-              if (std::find(o->begin(),o->end(),variable(this_rule_lhs_iplus1_arg)) != o->end())
+              if (std::find(var.begin(), var.end(), variable(this_rule_lhs_iplus1_arg)) != var.end())
               {
                 if (j >= 0)
                 {

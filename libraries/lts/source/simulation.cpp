@@ -72,9 +72,9 @@ void simulation::environment(std::vector<std::string> values)
 {
   assert(values.size() == m_specification.process().process_parameters().size());
   std::vector<data::data_expression> data_values;
-  for (std::size_t i = 0; i < values.size(); ++i)
+  for (const std::string& value : values)
   {
-    data_values.push_back(data::parse_data_expression(values[i], m_specification.data()));
+    data_values.push_back(data::parse_data_expression(value, m_specification.data()));
   }
 
   simulator_state_t result_state;

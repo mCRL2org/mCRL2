@@ -59,7 +59,7 @@ std::vector<std::set<std::size_t>> parse_summand_groups(std::string text, std::s
   {
     expected.insert(i);
   }
-  for (const auto& group: result)
+  for (const std::set<std::size_t>& group: result)
   {
     std::size_t size = all.size();
     all.insert(group.begin(), group.end());
@@ -305,11 +305,13 @@ std::vector<std::size_t> compute_variable_order_weighted(const std::vector<boost
   for (std::size_t i = 0; i < n; ++i) {
     adjacency.push_back(boost::dynamic_bitset<>(n, false));
 
-    for (std::size_t s = 0; s < read_write_group_patterns.size(); ++s) {
-      if (is_used(read_write_group_patterns[s], i)) {
+    for (const auto& read_write_group_pattern : read_write_group_patterns)
+    {
+      if (is_used(read_write_group_pattern, i))
+      {
         for (std::size_t j = 0; j < n; ++j) {
           if (i != j) {
-            adjacency[i][j] |= is_used(read_write_group_patterns[s], j);
+            adjacency[i][j] |= is_used(read_write_group_pattern, j);
           }
         }
       }

@@ -102,9 +102,11 @@ static std::vector<mcrl2::data::sort_expression> order_sorts(const data_specific
       for (function_symbol_vector::iterator j = constructors.begin(); j != constructors.end(); j++) {
         if (is_function_sort(j->sort())) {
           sort_expression_list domain = function_sort(j->sort()).domain();
-          for (sort_expression_list::iterator k = domain.begin(); k != domain.end(); k++) {
-            if (sort_expression(*k) != *i) {
-              dependencies.insert(sort_expression(*k));
+          for (const mcrl2::data::sort_expression& k : domain)
+          {
+            if (sort_expression(k) != *i)
+            {
+              dependencies.insert(sort_expression(k));
             }
           }
         }
@@ -168,8 +170,9 @@ std::string translate_expression(data_expression expression, const std::map<vari
     }
     
     std::string output = "(" + translation.function_names.at(function_symbol(a.head()));
-    for (application::const_iterator i = a.begin(); i != a.end(); ++i) {
-      output += " " + translate_expression(*i, bound_variables, translation);
+    for (const mcrl2::data::data_expression& i : a)
+    {
+      output += " " + translate_expression(i, bound_variables, translation);
     }
     output += ")";
     return output;
@@ -201,10 +204,12 @@ std::string sanitize_term(std::string term)
   if (term == "#") return "count";
   if (term == "++") return "concat_";
   if (term == ".") return "at";
-  for (size_t i = 0; i < term.size(); i++) {
-    if (term[i] == '\'') term[i] = '_';
-    if (term[i] == '@') term[i] = '_';
-    
+  for (char& i : term)
+  {
+    if (i == '\'')
+      i = '_';
+    if (i == '@')
+      i = '_';
   }
   return term;
 }
@@ -239,9 +244,10 @@ static bool is_structured_sort(const mcrl2::data::data_specification &data, mcrl
   if (sort_list::is_list(sort)) {
     return true;
   }
-  for (size_t i = 0; i < data.mappings().size(); i++) {
-    function_symbol mapping = data.mappings()[i];
-    if (std::string(mapping.name()) == "@to_pos" && mapping.sort() == make_function_sort_(sort, sort_pos::pos())) {
+  for (const mcrl2::data::function_symbol& mapping : data.mappings())
+  {
+    if (std::string(mapping.name()) == "@to_pos" && mapping.sort() == make_function_sort_(sort, sort_pos::pos()))
+    {
       return true;
     }
   }
@@ -293,9 +299,10 @@ static void translate_sort_definition(const mcrl2::data::data_specification &dat
         if (is_function_sort(i->sort())) {
           translation.definition += "  ( " + constructor_name;
           sort_expression_list domain = function_sort(i->sort()).domain();
-          for (sort_expression_list::iterator j = domain.begin(); j != domain.end(); j++) {
-            assert(translation.sort_names.count(*j) > 0);
-            std::string sort_name = translation.sort_names[*j];
+          for (const mcrl2::data::sort_expression& j : domain)
+          {
+            assert(translation.sort_names.count(j) > 0);
+            std::string sort_name = translation.sort_names[j];
             std::string parameter_name = function_name_generator(name + itoa(index++));
             
             translation.definition += " (" + parameter_name + " " + sort_name + ")";
@@ -690,9 +697,10 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
       translation.definition += "(declare-fun " + name + " (";
       if (is_function_sort(i->sort())) {
         sort_expression_list domain = function_sort(i->sort()).domain();
-        for (sort_expression_list::iterator j = domain.begin(); j != domain.end(); j++) {
-          assert(translation.sort_names.count(*j) > 0);
-          translation.definition += translation.sort_names[*j] + " ";
+        for (const mcrl2::data::sort_expression& j : domain)
+        {
+          assert(translation.sort_names.count(j) > 0);
+          translation.definition += translation.sort_names[j] + " ";
         }
       }
       assert(translation.sort_names.count(i->sort().target_sort()));
