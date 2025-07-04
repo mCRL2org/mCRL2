@@ -102,8 +102,8 @@ std::vector<std::set<std::size_t>> compute_summand_groups_used(const std::vector
     {
       if (pattern[j] || pattern[j+1])
       {
-        new_pattern[j] = 1;
-        new_pattern[j+1] = 1;
+        new_pattern[j] = true;
+        new_pattern[j + 1] = true;
       }
     }
 

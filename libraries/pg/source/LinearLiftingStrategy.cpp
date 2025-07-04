@@ -9,11 +9,13 @@
 
 #include "mcrl2/pg/LinearLiftingStrategy.h"
 
-LinearLiftingStrategy::LinearLiftingStrategy(
-    const ParityGame &game, bool alternate )
-    : LiftingStrategy(), alternate_(alternate),
+LinearLiftingStrategy::LinearLiftingStrategy(const ParityGame& game, bool alternate)
+    : LiftingStrategy(),
+      alternate_(alternate),
       last_vertex_(game.graph().V() - 1),
-      dir_(0), vertex_(NO_VERTEX), failed_lifts_(0) 
+      dir_(false),
+      vertex_(NO_VERTEX),
+      failed_lifts_(0)
 {
 }
 
@@ -29,9 +31,9 @@ verti LinearLiftingStrategy::next()
 
     if (vertex_ == NO_VERTEX)
     {
-        dir_          = 0;
-        vertex_       = 0;
-        failed_lifts_ = 0;
+      dir_ = false;
+      vertex_ = 0;
+      failed_lifts_ = 0;
     }
     else
     {
@@ -50,8 +52,8 @@ verti LinearLiftingStrategy::next()
             }
             else
             {
-                dir_ = 1;
-                vertex_ = vertex_ - failed_lifts_ - 1;
+              dir_ = true;
+              vertex_ = vertex_ - failed_lifts_ - 1;
             }
         }
         else  // backward
@@ -67,8 +69,8 @@ verti LinearLiftingStrategy::next()
             }
             else
             {
-                dir_ = 0;
-                vertex_ = failed_lifts_;
+              dir_ = false;
+              vertex_ = failed_lifts_;
             }
         }
     }

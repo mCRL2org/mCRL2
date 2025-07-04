@@ -135,11 +135,11 @@ public:
         is greater than the current value, and returns whether it changed.
         val[] must be an array of length len(v). If carry is set, the new
         value must be strictly greater (or top). */
-    bool lift_to(verti v, const verti vec2[], bool carry = 0);
+    bool lift_to(verti v, const verti vec2[], bool carry = false);
 
     /*! Returns the same result as lift_to() but without changing any
         progress measure vectors. */
-    bool less_than(verti v, const verti vec2[], bool carry = 0);
+    bool less_than(verti v, const verti vec2[], bool carry = false);
 
     /*! For debugging: print current state to stdout */
     void debug_print() const;
