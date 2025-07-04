@@ -1,13 +1,27 @@
 ---
 Checks: "-*,
+    boost-use-to-string,
+    bugprone-*,
+    -bugprone-crtp-constructor-accessibility,
+    -bugprone-narrowing-conversions,
+    -bugprone-swapped-arguments,
     modernize-avoid-bind,
     modernize-concat-nested-namespaces,
     modernize-deprecated-headers,
     modernize-deprecated-ios-base-aliases,
     modernize-loop-convert,
-    modernize-use-using,
+    modernize-make-shared,
+    modernize-make-unique,
+    modernize-pass-by-value,
+    modernize-raw-string-literal,
+    modernize-redundant-void-arg,
+    modernize-replace-random-shuffle,
+    modernize-shrink-to-fit,
+    modernize-use-bool-literals,
     "
+CheckOptions:
+    modernize-convert-loop.MinConfidence: 'risky'
 WarningsAsErrors: 'false'
 HeaderFilterRegex: '.'
-ExcludeHeaderFilterRegex: './3rd-party/'
+ExcludeHeaderFilterRegex: '.*3rd-party.*'
 FormatStyle: 'file'
