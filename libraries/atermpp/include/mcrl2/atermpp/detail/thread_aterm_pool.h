@@ -27,11 +27,15 @@ class thread_aterm_pool final : public mcrl2::utilities::noncopyable
 {
 public:
   thread_aterm_pool(aterm_pool& global_pool)
-    : m_pool(global_pool),
-      m_shared_mutex(global_pool.shared_mutex()),
-      m_variables(new mcrl2::utilities::hashtable<aterm_core*>()),
-      m_containers(new mcrl2::utilities::hashtable<detail::aterm_container*>()),
-      m_thread_interface(global_pool, std::bind(&thread_aterm_pool::mark, this), std::bind(&thread_aterm_pool::print_local_performance_statistics, this), std::bind(&thread_aterm_pool::protection_set_size, this))
+      : m_pool(global_pool),
+        m_shared_mutex(global_pool.shared_mutex()),
+        m_variables(new mcrl2::utilities::hashtable<aterm_core*>()),
+        m_containers(new mcrl2::utilities::hashtable<detail::aterm_container*>()),
+        m_thread_interface(
+            global_pool,
+            [this] { mark(); },
+            [this] { print_local_performance_statistics(); },
+            [this] { return protection_set_size(); })
   {
     /// Identify the first constructor call as the main thread.
     static bool is_main_thread = true;
