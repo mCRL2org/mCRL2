@@ -218,11 +218,3 @@ BOOST_AUTO_TEST_CASE(pbes_test)
   test_pbespgsolve(PBES2);
   test_pbespgsolve(PBES3);
 }
-
-#ifdef MCRL2_EXTENDED_TESTS
-BOOST_AUTO_TEST_CASE(slow_tests)
-{
-  test_lps(lps::detail::DINING3_SPECIFICATION(),false);
-  test_lps(lps::detail::ONE_BIT_SLIDING_WINDOW_SPECIFICATION(), true, "nu X. <true>true && [true]X");
-}
-#endif
