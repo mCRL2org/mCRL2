@@ -77,7 +77,8 @@ inline const core::identifier_string& real_name()
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
+      using implementation_map = std::map<function_symbol,
+          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for real_.
       /// \return All system defined constructors that are to be implemented in C++ for real_.
       inline
@@ -1919,7 +1920,8 @@ inline const core::identifier_string& real_name()
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
+      using implementation_map = std::map<function_symbol,
+          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for real_
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for real_
       inline

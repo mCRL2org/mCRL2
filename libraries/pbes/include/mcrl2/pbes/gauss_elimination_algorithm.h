@@ -24,9 +24,9 @@ template <typename ExpressionTraits>
 class gauss_elimination_algorithm
 {
   public:
-    typedef typename ExpressionTraits::expression_type expression_type;
-    typedef typename ExpressionTraits::variable_type variable_type;
-    typedef typename ExpressionTraits::equation_type equation_type;
+    using expression_type = typename ExpressionTraits::expression_type;
+    using variable_type = typename ExpressionTraits::variable_type;
+    using equation_type = typename ExpressionTraits::equation_type;
 
   protected:
 
@@ -92,9 +92,9 @@ struct approximate
 
   void operator()(typename BooleanExpressionTraits::equation_type& eq) const
   {
-    typedef BooleanExpressionTraits tr;
-    typedef typename BooleanExpressionTraits::expression_type expression_type;
-    typedef typename BooleanExpressionTraits::variable_type variable_type;
+    using tr = BooleanExpressionTraits;
+    using expression_type = typename BooleanExpressionTraits::expression_type;
+    using variable_type = typename BooleanExpressionTraits::variable_type;
 
     const expression_type& phi = eq.formula();
     const variable_type& X = eq.variable();

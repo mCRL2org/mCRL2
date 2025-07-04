@@ -26,7 +26,7 @@ variable bool_(const std::string& name)
 template <typename Derived>
 struct my_builder: public add_data_variable_binding<data::data_expression_builder, Derived>
 {
-  typedef add_data_variable_binding<data::data_expression_builder, Derived> super;
+  using super = add_data_variable_binding<data::data_expression_builder, Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -49,7 +49,7 @@ struct my_builder: public add_data_variable_binding<data::data_expression_builde
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
 struct replace_free_variables_builder: public Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution> >
 {
-  typedef Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution> > super;
+  using super = Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution>>;
   using super::enter;
   using super::leave;
   using super::update;

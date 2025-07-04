@@ -20,7 +20,7 @@ namespace detail {
 
 struct order_quantified_variables_builder: public pbes_expression_builder<order_quantified_variables_builder>
 {
-  typedef pbes_expression_builder<order_quantified_variables_builder> super;
+  using super = pbes_expression_builder<order_quantified_variables_builder>;
   using super::apply;
 
   const data::data_specification& dataspec;

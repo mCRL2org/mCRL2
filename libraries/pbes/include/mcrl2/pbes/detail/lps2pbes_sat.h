@@ -33,9 +33,9 @@ typename TermTraits::term_type Sat(const lps::multi_action& a,
 template <typename Derived, typename TermTraits>
 struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 {
-  typedef action_formulas::action_formula_traverser<Derived> super;
-  typedef TermTraits tr;
-  typedef typename tr::term_type expression_type;
+  using super = action_formulas::action_formula_traverser<Derived>;
+  using tr = TermTraits;
+  using expression_type = typename tr::term_type;
 
   using super::enter;
   using super::leave;
@@ -151,7 +151,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 template <template <class, class> class Traverser, typename TermTraits>
 struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser, TermTraits>, TermTraits>
 {
-  typedef Traverser<apply_sat_traverser<Traverser, TermTraits>, TermTraits> super;
+  using super = Traverser<apply_sat_traverser<Traverser, TermTraits>, TermTraits>;
   using super::enter;
   using super::leave;
   using super::apply;

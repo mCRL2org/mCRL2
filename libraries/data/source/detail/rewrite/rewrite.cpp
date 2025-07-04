@@ -452,9 +452,8 @@ void Rewriter::quantifier_enumeration(
     }
   }
 
-  typedef enumerator_algorithm<rewriter_wrapper, rewriter_wrapper > enumerator_type; 
-    typedef data::enumerator_list_element<data_expression> enumerator_element;
-
+  using enumerator_type = enumerator_algorithm<rewriter_wrapper, rewriter_wrapper>;
+  using enumerator_element = data::enumerator_list_element<data_expression>;
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);

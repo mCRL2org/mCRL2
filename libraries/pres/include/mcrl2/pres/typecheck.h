@@ -26,7 +26,7 @@ namespace detail
 
 struct typecheck_builder: public pres_expression_builder<typecheck_builder>
 {
-  typedef pres_expression_builder<typecheck_builder> super;
+  using super = pres_expression_builder<typecheck_builder>;
   using super::apply;
 
   data::data_type_checker& m_data_type_checker;

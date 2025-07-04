@@ -38,14 +38,14 @@ private:
 public:
   
   /// Standard typedefs.
-  typedef typename Container::allocator_type allocator_type;
-  typedef typename Container::value_type value_type;
-  typedef typename Container::size_type size_type;
-  typedef typename Container::reference reference;
-  typedef typename Container::const_reference const_reference;
-  typedef typename Container::iterator iterator;
-  typedef typename Container::const_iterator const_iterator;
-  
+  using allocator_type = typename Container::allocator_type;
+  using value_type = typename Container::value_type;
+  using size_type = typename Container::size_type;
+  using reference = typename Container::reference;
+  using const_reference = typename Container::const_reference;
+  using iterator = typename Container::iterator;
+  using const_iterator = typename Container::const_iterator;
+
   /// \brief Constructor.
   explicit stack(const Container& cont = Container())
    : m_container(cont)     

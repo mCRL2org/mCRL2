@@ -23,7 +23,7 @@ using utilities::tools::tool;
 class my_tool: public tool
 {
   protected:
-    typedef tool super;
+    using super = tool;
 
     std::string synopsis() const
     {

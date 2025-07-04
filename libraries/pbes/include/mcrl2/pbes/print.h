@@ -62,7 +62,7 @@ namespace detail {
 template <typename Derived>
 struct printer: public pbes_system::add_traverser_sort_expressions<data::detail::printer, Derived>
 {
-  typedef pbes_system::add_traverser_sort_expressions<data::detail::printer, Derived> super;
+  using super = pbes_system::add_traverser_sort_expressions<data::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;

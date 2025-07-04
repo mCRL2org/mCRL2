@@ -29,8 +29,16 @@ namespace detail {
 // We introduce a user defined class for res's in which real constants are
 // stored as double's and variables are stored by their index. 
 //
-// The values of true and false are represented by the real constants -infinity and infinity. 
-typedef enum {propositional_variable, real_constant, plus, and_, or_, const_multiply} internal_res_expression_type;
+// The values of true and false are represented by the real constants -infinity and infinity.
+using internal_res_expression_type = enum
+{
+  propositional_variable,
+  real_constant,
+  plus,
+  and_,
+  or_,
+  const_multiply
+};
 
 class internal_res_expression
 {
@@ -294,7 +302,7 @@ class ressolve_by_numerical_iteration_directed
     std::deque<detail::internal_or> or_terms;
     std::deque<detail::internal_const_multiply> const_multiply_terms;
 
-    typedef std::unordered_map<pres_expression, detail::internal_res_expression*> pres_expressions_hash_map;
+    using pres_expressions_hash_map = std::unordered_map<pres_expression, detail::internal_res_expression*>;
     pres_expressions_hash_map translated_pres_expressions;
     
     std::vector<double> m_new_solution, m_previous_solution;

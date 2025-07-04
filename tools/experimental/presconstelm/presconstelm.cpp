@@ -29,7 +29,7 @@ using data::tools::rewriter_tool;
 class pres_constelm_tool: public pres_input_tool<pres_output_tool<pres_rewriter_tool<rewriter_tool<input_output_tool> > > >
 {
   protected:
-    typedef pres_input_tool<pres_output_tool<pres_rewriter_tool<rewriter_tool<input_output_tool> > > > super;
+    using super = pres_input_tool<pres_output_tool<pres_rewriter_tool<rewriter_tool<input_output_tool>>>>;
 
     bool m_compute_conditions = false;
     bool m_remove_redundant_equations = false;

@@ -109,22 +109,22 @@ class term_balanced_tree : public aterm
   public:
 
     /// The type of object, T stored in the term_balanced_tree.
-    typedef Term value_type;
-    
+    using value_type = Term;
+
     /// Pointer to T.
-    typedef Term* pointer;
+    using pointer = Term*;
 
     /// Reference to T.
-    typedef Term& reference;
+    using reference = Term&;
 
     /// Const reference to T.
-    typedef const Term const_reference;
+    using const_reference = const Term;
 
     /// An unsigned integral type.
-    typedef std::size_t size_type;
+    using size_type = std::size_t;
 
     /// A signed integral type.
-    typedef ptrdiff_t difference_type;
+    using difference_type = ptrdiff_t;
 
     /// \brief Default constructor. Creates an empty tree.
     term_balanced_tree()
@@ -423,8 +423,7 @@ void make_term_balanced_tree(term_balanced_tree<Term>& result,
 }
 
 /// \brief A term_balanced_tree with elements of type aterm.
-typedef term_balanced_tree<aterm> aterm_balanced_tree;
-
+using aterm_balanced_tree = term_balanced_tree<aterm>;
 
 inline bool is_aterm_balanced_tree(const aterm& t)
 {

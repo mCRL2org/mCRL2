@@ -47,7 +47,7 @@ std::size_t child_count(const state_formula& x)
 template <template <class> class Traverser, class Node, class Derived>
 struct bottom_up_traverser: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::apply;
 
@@ -58,7 +58,7 @@ struct bottom_up_traverser: public Traverser<Derived>
 
   // Maintain a stack with nodes, used to store intermediate results
   std::vector<Node> node_stack;
-  typedef typename std::vector<Node>::const_iterator node_iterator;
+  using node_iterator = typename std::vector<Node>::const_iterator;
 
   // Push a node to node_stack
   void push(const Node& node)
@@ -150,7 +150,7 @@ std::ostream& operator<<(std::ostream& out, const maximal_closed_subformula_node
 template <typename Derived>
 struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_formulas::state_formula_traverser, maximal_closed_subformula_node, Derived>
 {
-  typedef bottom_up_traverser<state_formulas::state_formula_traverser, maximal_closed_subformula_node, Derived> super;
+  using super = bottom_up_traverser<state_formulas::state_formula_traverser, maximal_closed_subformula_node, Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -159,7 +159,7 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
   using super::top;
   using super::node_stack;
 
-  typedef typename super::node_iterator node_iterator;
+  using node_iterator = typename super::node_iterator;
 
   Derived& derived()
   {
@@ -233,7 +233,7 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
 
 struct apply_maximal_closed_subformula_traverser: public maximal_closed_subformula_traverser<apply_maximal_closed_subformula_traverser>
 {
-  typedef maximal_closed_subformula_traverser<apply_maximal_closed_subformula_traverser> super;
+  using super = maximal_closed_subformula_traverser<apply_maximal_closed_subformula_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

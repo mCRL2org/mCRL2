@@ -24,9 +24,9 @@ namespace data
 
 class symbolic_bisim_algorithm
 {
-  typedef rewriter::substitution_type substitution_t;
-  typedef std::pair< pbes_system::propositional_variable, data_expression > block_t;
-  typedef pbes_system::structure_graph::index_type sg_index_t;
+  using substitution_t = rewriter::substitution_type;
+  using block_t = std::pair<pbes_system::propositional_variable, data_expression>;
+  using sg_index_t = pbes_system::structure_graph::index_type;
 
 protected:
   rewriter rewr;

@@ -84,7 +84,7 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
     /// \brief The invariant provided as input.
     data_expression m_invariant;
 
-    typedef prover_tool< rewriter_tool<input_output_tool> > super;
+    using super = prover_tool<rewriter_tool<input_output_tool>>;
 
   protected:
     std::string synopsis() const

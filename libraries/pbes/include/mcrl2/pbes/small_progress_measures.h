@@ -212,8 +212,8 @@ std::ostream& operator<<(std::ostream& out, const progress_measures_vertex& v)
 class small_progress_measures_algorithm
 {
   protected:
-    typedef progress_measures_vertex vertex;
-    typedef std::map<propositional_variable_instantiation, vertex> vertex_map;
+    using vertex = progress_measures_vertex;
+    using vertex_map = std::map<propositional_variable_instantiation, vertex>;
 
     void initialize_vertices()
     {

@@ -28,10 +28,10 @@ template<typename Key,
          typename KeyTable = atermpp::deque<Key > >
 class indexed_set: public mcrl2::utilities::indexed_set<Key, ThreadSafe, Hash, Equals, Allocator, KeyTable>
 {
-  typedef mcrl2::utilities::indexed_set<Key, ThreadSafe, Hash, Equals, Allocator, KeyTable> super;
+  using super = mcrl2::utilities::indexed_set<Key, ThreadSafe, Hash, Equals, Allocator, KeyTable>;
 
 public:
-  typedef typename super::size_type size_type;
+  using size_type = typename super::size_type;
 
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
   indexed_set()

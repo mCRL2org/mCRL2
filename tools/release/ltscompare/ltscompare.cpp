@@ -39,7 +39,7 @@ struct t_tool_options
   bool enable_preprocessing      = true;
 };
 
-typedef  input_tool ltscompare_base;
+using ltscompare_base = input_tool;
 class ltscompare_tool : public ltscompare_base
 {
   private:

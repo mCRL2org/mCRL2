@@ -54,7 +54,7 @@ atermpp::aterm pres_to_aterm(const pres& p);
 class pres
 {
   public:
-    typedef pres_equation equation_type;
+    using equation_type = pres_equation;
 
   protected:
     /// \brief The data specification

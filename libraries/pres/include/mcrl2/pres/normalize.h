@@ -25,7 +25,7 @@ namespace mcrl2::pres_system
 // \brief Visitor for checking if a pres expression is normalized.
 struct is_normalized_traverser: public pres_expression_traverser<is_normalized_traverser>
 {
-  typedef pres_expression_traverser<is_normalized_traverser> super;
+  using super = pres_expression_traverser<is_normalized_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -54,7 +54,7 @@ struct is_normalized_traverser: public pres_expression_traverser<is_normalized_t
 // \brief Visitor for checking if a pres expression is normalized.
 struct normalize_builder: public pres_expression_builder<normalize_builder>
 {
-  typedef pres_expression_builder<normalize_builder> super;
+  using super = pres_expression_builder<normalize_builder>;
   using super::apply;
 
   bool negated;

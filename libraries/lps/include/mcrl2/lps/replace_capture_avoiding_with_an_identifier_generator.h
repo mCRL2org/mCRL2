@@ -27,7 +27,10 @@ template<template<class> class Builder, class Derived, class Substitution, class
 struct add_capture_avoiding_replacement_with_an_identifier_generator
   : public process::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>
 {
-  typedef process::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator> super;
+  using super = process::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder,
+      Derived,
+      Substitution,
+      IdentifierGenerator>;
   using super::enter;
   using super::leave;
   using super::apply;

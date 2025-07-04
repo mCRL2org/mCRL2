@@ -27,7 +27,7 @@ using utilities::tools::input_input_output_tool;
 using namespace mcrl2::log;
 using pbes_system::tools::pbes_output_tool;
 
-typedef pbes_output_tool<input_input_output_tool> super;
+using super = pbes_output_tool<input_input_output_tool>;
 class lpsbisim2pbes_tool: public super
 {
   protected:

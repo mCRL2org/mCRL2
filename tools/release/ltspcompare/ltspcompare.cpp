@@ -45,7 +45,7 @@ struct t_tool_options
   {}
 };
 
-typedef  input_tool ltscompare_base;
+using ltscompare_base = input_tool;
 class ltspcompare_tool : public ltscompare_base
 {
   private:

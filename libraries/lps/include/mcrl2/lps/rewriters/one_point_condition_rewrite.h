@@ -69,7 +69,7 @@ void find_equality_conjuncts(const data::data_expression& x, std::map<data::vari
 template <typename DataRewriter>
 struct one_point_condition_rewrite_builder: public lps::data_expression_builder<one_point_condition_rewrite_builder<DataRewriter> >
 {
-  typedef lps::data_expression_builder<one_point_condition_rewrite_builder<DataRewriter> > super;
+  using super = lps::data_expression_builder<one_point_condition_rewrite_builder<DataRewriter>>;
   using super::enter;
   using super::leave;
   using super::apply;

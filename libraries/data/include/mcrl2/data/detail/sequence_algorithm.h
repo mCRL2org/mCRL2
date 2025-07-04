@@ -41,7 +41,7 @@ bool sequence_contains_duplicates(Iterator first, Iterator last)
 template <typename Iterator1, typename Iterator2>
 bool sequences_do_overlap(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2)
 {
-  typedef typename std::iterator_traits<Iterator1>::value_type value_type;
+  using value_type = typename std::iterator_traits<Iterator1>::value_type;
   std::set<value_type> s1(first1, last1);
   std::set<value_type> s2(first2, last2);
   std::vector<value_type> intersection;

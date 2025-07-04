@@ -29,7 +29,7 @@ data_expression enumerator_replace(const T& x,
 
 struct enumerator_replace_builder: public data_expression_builder<enumerator_replace_builder>
 {
-  typedef data_expression_builder<enumerator_replace_builder> super;
+  using super = data_expression_builder<enumerator_replace_builder>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -99,10 +99,10 @@ data_expression enumerator_replace(const T& x, const variable_list& variables, c
 struct enumerator_substitution
 {
   /// \brief type used to represent variables
-  typedef data::variable variable_type;
+  using variable_type = data::variable;
 
   /// \brief type used to represent expressions
-  typedef data::data_expression expression_type;
+  using expression_type = data::data_expression;
 
   data::variable_list variables;
   data::data_expression_list expressions;

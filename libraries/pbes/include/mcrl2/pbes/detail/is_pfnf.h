@@ -167,7 +167,7 @@ bool is_pfnf_expression(const pbes_expression& x)
 
 struct is_pfnf_traverser: public pbes_expression_traverser<is_pfnf_traverser>
 {
-  typedef pbes_expression_traverser<is_pfnf_traverser> super;
+  using super = pbes_expression_traverser<is_pfnf_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

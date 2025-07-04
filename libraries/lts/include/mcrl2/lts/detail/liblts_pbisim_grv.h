@@ -134,16 +134,16 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
   protected:
 
     // --------------- BEGIN DECLARATION OF DATA TYPES ---------------------------------------------------------------
-    
-    typedef std::size_t block_key_type;
-    typedef std::size_t constellation_key_type;
-    typedef std::size_t transition_key_type;
-    typedef std::size_t state_key_type;
-    typedef std::size_t label_type;
+
+    using block_key_type = std::size_t;
+    using constellation_key_type = std::size_t;
+    using transition_key_type = std::size_t;
+    using state_key_type = std::size_t;
+    using label_type = std::size_t;
     // typedef probabilistic_arbitrary_precision_fraction probability_label_type;
-    typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_label_type;
+    using probability_label_type = typename LTS_TYPE::probabilistic_state_t::probability_t;
     // typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
-    typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_fraction_type;
+    using probability_fraction_type = typename LTS_TYPE::probabilistic_state_t::probability_t;
 
     struct action_transition_type : public embedded_list_node <action_transition_type>
     {

@@ -27,7 +27,7 @@ namespace detail
 /// \brief Visitor that implements the pbes-abstract algorithm.
 struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_builder>
 {
-  typedef pbes_expression_builder<pbes_abstract_builder> super;
+  using super = pbes_expression_builder<pbes_abstract_builder>;
   using super::apply;
 
   std::vector<data::variable_list> m_quantifier_stack;

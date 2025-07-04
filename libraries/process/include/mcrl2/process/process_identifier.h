@@ -76,10 +76,10 @@ inline void make_process_identifier(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of process_identifiers
-typedef atermpp::term_list<process_identifier> process_identifier_list;
+using process_identifier_list = atermpp::term_list<process_identifier>;
 
 /// \\brief vector of process_identifiers
-typedef std::vector<process_identifier>    process_identifier_vector;
+using process_identifier_vector = std::vector<process_identifier>;
 
 /// \\brief Test for a process_identifier expression
 /// \\param x A term

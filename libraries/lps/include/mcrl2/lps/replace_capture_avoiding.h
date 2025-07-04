@@ -24,7 +24,7 @@ namespace detail {
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public process::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef process::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = process::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::apply;

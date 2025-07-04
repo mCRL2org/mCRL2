@@ -34,9 +34,9 @@ namespace detail {
 // the equations for S2 and T1 will be removed
 struct duplicate_equation_removal
 {
-  typedef std::vector<process_equation>::const_iterator iterator;
-  typedef std::set<iterator> group;
-  typedef data::mutable_map_substitution<std::map<process_identifier, process_identifier> > substitution;
+  using iterator = std::vector<process_equation>::const_iterator;
+  using group = std::set<iterator>;
+  using substitution = data::mutable_map_substitution<std::map<process_identifier, process_identifier>>;
 
   process_specification& procspec;
   data::set_identifier_generator generator;

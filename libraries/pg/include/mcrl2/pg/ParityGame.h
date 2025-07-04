@@ -29,11 +29,13 @@
 */
 
 /*! Type of priorities in the game */
-typedef std::size_t priority_t;
+ using priority_t = std::size_t;
 
-/*! The two players in a parity game (Even and Odd) */
-enum player_t { PLAYER_EVEN =  0,  //!< Even (0)
-                PLAYER_ODD  =  1   //!< Odd (1)
+ /*! The two players in a parity game (Even and Odd) */
+ enum player_t
+ {
+   PLAYER_EVEN = 0, //!< Even (0)
+   PLAYER_ODD = 1   //!< Odd (1)
               } ATTR_PACKED;
 
 inline
@@ -84,74 +86,71 @@ inline bool operator!= (const ParityGameVertex &a, const ParityGameVertex &b)
 class ParityGame
 {
 public:
-    typedef player_t Player;
+  using Player = player_t;
 
-    /*! A strategy determines the partitioning of the game's vertices into
-        winning sets for both players and provides a deterministic strategy for
-        the vertices controlled by a player in its winning set.
+  /*! A strategy determines the partitioning of the game's vertices into
+      winning sets for both players and provides a deterministic strategy for
+      the vertices controlled by a player in its winning set.
 
-        For each vertex v owned by player p:
-        - strategy[v] == NO_VERTEX if vertex v is not in p's winning set
-        - strategy[v] == w if vertex v is in p's winning set, (v,w) is an edge
-          in the game graph, and (v,w) is a winning move for player p. */
-    typedef std::vector<verti> Strategy;
+      For each vertex v owned by player p:
+      - strategy[v] == NO_VERTEX if vertex v is not in p's winning set
+      - strategy[v] == w if vertex v is in p's winning set, (v,w) is an edge
+        in the game graph, and (v,w) is a winning move for player p. */
+  using Strategy = std::vector<verti>;
 
-    /*! Construct an empty parity game */
-    ParityGame();
+  /*! Construct an empty parity game */
+  ParityGame();
 
-    /*! Destroy a parity game */
-    ~ParityGame();
+  /*! Destroy a parity game */
+  ~ParityGame();
 
-    /*! Reset to an empty game. */
-    void clear();
+  /*! Reset to an empty game. */
+  void clear();
 
-    /*! Reset the game to a copy of `game`. */
-    void assign(const ParityGame &game);
+  /*! Reset the game to a copy of `game`. */
+  void assign(const ParityGame& game);
 
-    /*! Reset the game with the given graph and node attributes. */
-    void assign(const StaticGraph& g, ParityGameVertex* na);
+  /*! Reset the game with the given graph and node attributes. */
+  void assign(const StaticGraph& g, ParityGameVertex* na);
 
-    /*! Returns whether the game is empty. */
-    bool empty() const { return graph().empty(); }
+  /*! Returns whether the game is empty. */
+  bool empty() const { return graph().empty(); }
 
-    /*! Efficiently swaps the contents of this parity game with another one. */
-    void swap(ParityGame &pg);
+  /*! Efficiently swaps the contents of this parity game with another one. */
+  void swap(ParityGame& pg);
 
+  //!\name Generation
+  //!@{
 
-    //!\name Generation
-    //!@{
+  /*! Generate a random parity game, with vertices assigned uniformly at
+      random to players, and priority assigned uniformly between 0 and d-1.
 
-    /*! Generate a random parity game, with vertices assigned uniformly at
-        random to players, and priority assigned uniformly between 0 and d-1.
+      The generated game is a clustered random game if clustersize > 0, or
+      an unclustered random game otherwise.
 
-        The generated game is a clustered random game if clustersize > 0, or
-        an unclustered random game otherwise.
+      \param V            number of game vertices
+      \param clustersize  cluster size (or 0 for no clustering)
+      \param outdeg       average outdegree (at least 1)
+      \param edge_dir     part of edges to store
+      \param d            number of priorities (at least 1)
+      \sa void StaticGraph::make_random()
+  */
+  void make_random(verti V, unsigned clustersize, unsigned outdeg, StaticGraph::EdgeDirection edge_dir, int d);
 
-        \param V            number of game vertices
-        \param clustersize  cluster size (or 0 for no clustering)
-        \param outdeg       average outdegree (at least 1)
-        \param edge_dir     part of edges to store
-        \param d            number of priorities (at least 1)
-        \sa void StaticGraph::make_random()
-    */
-    void make_random( verti V, unsigned clustersize, unsigned outdeg,
-                      StaticGraph::EdgeDirection edge_dir, int d );
+  /*! Create a subgame containing only the given vertices from the original
+      game. Vertices are renumbered to be in range [0..num_vertices).
+      Edges going out of the vertex subset specified by `vertices` are
+      removed, so every vertex must have at least one outgoing edge that stays
+      within the vertex subset, or the result is not a valid parity game.
 
-    /*! Create a subgame containing only the given vertices from the original
-        game. Vertices are renumbered to be in range [0..num_vertices).
-        Edges going out of the vertex subset specified by `vertices` are
-        removed, so every vertex must have at least one outgoing edge that stays
-        within the vertex subset, or the result is not a valid parity game.
-
-        \sa make_subgame(const ParityGame &, const verti *, verti, const Strategy &)
-    */
-    template<class ForwardIterator>
-    void make_subgame( const ParityGame &game,
-                       ForwardIterator vertices_begin,
-                       ForwardIterator vertices_end,
-                       bool proper,
-                       StaticGraph::EdgeDirection edge_dir
-                            = StaticGraph::EDGE_NONE );
+      \sa make_subgame(const ParityGame &, const verti *, verti, const Strategy &)
+  */
+  template <class ForwardIterator>
+  void make_subgame(const ParityGame& game,
+      ForwardIterator vertices_begin,
+      ForwardIterator vertices_end,
+      bool proper,
+      StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_NONE);
 
 #ifdef MCRL2_ENABLE_MULTITHREADING
     void make_subgame_threads( const ParityGame &game,

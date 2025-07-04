@@ -67,31 +67,32 @@ namespace mcrl2::lps::detail
 template <typename Specification>
 class Invariant_Checker
 {
-  typedef typename Specification::process_type process_type;
-  typedef typename process_type::action_summand_type action_summand_type;
-  typedef std::vector<action_summand_type> action_summand_vector_type;
+  using process_type = typename Specification::process_type;
+  using action_summand_type = typename process_type::action_summand_type;
+  using action_summand_vector_type = std::vector<action_summand_type>;
 
-  private:
-    const Specification& f_spec;
-    data::detail::BDD_Prover f_bdd_prover;
-    data::detail::BDD2Dot f_bdd2dot;
-    process_initializer f_init;
-    action_summand_vector_type f_summands;
-    bool f_counter_example;
-    bool f_all_violations;
-    std::string f_dot_file_name;
-    void print_counter_example();
-    void save_dot_file(std::size_t a_summand_number);
-    bool check_init(const data::data_expression& a_invariant);
-    bool check_summand(const data::data_expression& a_invariant, const action_summand_type& a_summand, const std::size_t a_summand_number);
-    bool check_summands(const data::data_expression& a_invariant);
-  public:
+private:
+  const Specification& f_spec;
+  data::detail::BDD_Prover f_bdd_prover;
+  data::detail::BDD2Dot f_bdd2dot;
+  process_initializer f_init;
+  action_summand_vector_type f_summands;
+  bool f_counter_example;
+  bool f_all_violations;
+  std::string f_dot_file_name;
+  void print_counter_example();
+  void save_dot_file(std::size_t a_summand_number);
+  bool check_init(const data::data_expression& a_invariant);
+  bool check_summand(const data::data_expression& a_invariant,
+      const action_summand_type& a_summand,
+      const std::size_t a_summand_number);
+  bool check_summands(const data::data_expression& a_invariant);
+public:
 
-    /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
-    /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
-    /// to 0, no time limit will be enforced
-    Invariant_Checker(
-      const Specification& a_lps,
+  /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
+  /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is
+  /// equal to 0, no time limit will be enforced
+  Invariant_Checker(const Specification& a_lps,
       data::rewriter::strategy a_rewrite_strategy = data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
@@ -99,11 +100,10 @@ class Invariant_Checker
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_all_violations = false,
-      const std::string& a_dot_file_name = std::string()
-    );
+      const std::string& a_dot_file_name = std::string());
 
-    /// precondition: the argument passed as parameter a_invariant is a valid expression in internal mCRL2 format
-    bool check_invariant(const data::data_expression& a_invariant);
+  /// precondition: the argument passed as parameter a_invariant is a valid expression in internal mCRL2 format
+  bool check_invariant(const data::data_expression& a_invariant);
 };
 
 // Class Invariant_Checker ------------------------------------------------------------------------

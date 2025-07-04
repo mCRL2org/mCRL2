@@ -64,7 +64,7 @@ struct traverser
 template <template <class> class Traverser>
 struct apply_traverser: public Traverser<apply_traverser<Traverser> >
 {
-  typedef Traverser<apply_traverser<Traverser> > super;
+  using super = Traverser<apply_traverser<Traverser>>;
 
   using super::enter;
   using super::leave;

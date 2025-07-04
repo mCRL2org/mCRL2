@@ -40,7 +40,7 @@ namespace mcrl2::pbes_system
 template <typename Derived>
 struct complement_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;

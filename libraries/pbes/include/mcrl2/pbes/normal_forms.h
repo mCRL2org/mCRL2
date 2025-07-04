@@ -27,13 +27,13 @@ enum standard_form_type
   standard_form_or
 };
 
-typedef std::pair<pbes_expression, standard_form_type> standard_form_pair;
+using standard_form_pair = std::pair<pbes_expression, standard_form_type>;
 
 /// \brief Traverser that implements the standard form normalization.
 class standard_form_traverser: public pbes_system::pbes_expression_traverser<standard_form_traverser>
 {
   public:
-    typedef pbes_system::pbes_expression_traverser<standard_form_traverser> super;
+    using super = pbes_system::pbes_expression_traverser<standard_form_traverser>;
 
     using super::apply;
     using super::enter;

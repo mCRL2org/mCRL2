@@ -76,7 +76,7 @@ class reduce_pbes_tool: public pbes_input_tool<input_tool>
 {
   protected:
     const std::size_t undefined = std::size_t(-1);
-    typedef pbes_input_tool<input_tool> super;
+    using super = pbes_input_tool<input_tool>;
     bool m_print_max_depth;
     bool m_verbose;
     std::size_t m_depth = undefined;

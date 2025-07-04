@@ -73,10 +73,10 @@ inline void make_stochastic_distribution(atermpp::aterm& t, const ARGUMENTS&... 
 }
 
 /// \\brief list of stochastic_distributions
-typedef atermpp::term_list<stochastic_distribution> stochastic_distribution_list;
+using stochastic_distribution_list = atermpp::term_list<stochastic_distribution>;
 
 /// \\brief vector of stochastic_distributions
-typedef std::vector<stochastic_distribution>    stochastic_distribution_vector;
+using stochastic_distribution_vector = std::vector<stochastic_distribution>;
 
 /// \\brief Test for a stochastic_distribution expression
 /// \\param x A term

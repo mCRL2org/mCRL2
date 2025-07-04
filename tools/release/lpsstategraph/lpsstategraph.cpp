@@ -23,28 +23,28 @@ using data::tools::rewriter_tool;
 
 class lpsstategraph_tool: public rewriter_tool<input_output_tool>
 {
-  typedef rewriter_tool<input_output_tool> super;
+  using super = rewriter_tool<input_output_tool>;
 
-  protected:
-    pbesstategraph_options options;
+protected:
+  pbesstategraph_options options;
 
-    void parse_options(const command_line_parser& parser) override
+  void parse_options(const command_line_parser& parser) override
+  {
+    super::parse_options(parser);
+    options.rewrite_strategy = rewrite_strategy();
+    options.simplify = 0 == parser.options.count("no-simplify");
+    options.use_global_variant = false;
+    options.print_influence_graph = false;
+    options.cache_marking_updates = 0 == parser.options.count("disable-cache-marking-updates");
+    options.marking_algorithm = parser.option_argument_as<int>("marking-algorithm");
+    if (options.marking_algorithm < 0 || options.marking_algorithm > 2)
     {
-      super::parse_options(parser);
-      options.rewrite_strategy = rewrite_strategy();
-      options.simplify = 0 == parser.options.count("no-simplify");
-      options.use_global_variant = false;
-      options.print_influence_graph = false;
-      options.cache_marking_updates = 0 == parser.options.count("disable-cache-marking-updates");
-      options.marking_algorithm = parser.option_argument_as<int>("marking-algorithm");
-      if (options.marking_algorithm < 0 || options.marking_algorithm > 2)
-      {
-        throw mcrl2::runtime_error("invalid value for marking-algorithm!");
-      }
-      options.use_alternative_lcfp_criterion = 0 < parser.options.count("use-alternative-lcfp-criterion");
-      options.use_alternative_gcfp_relation = 0 < parser.options.count("use-alternative-gcfp-relation");
-      options.use_alternative_gcfp_consistency = 0 < parser.options.count("use-alternative-gcfp-consistency");
-      options.timer = &timer();
+      throw mcrl2::runtime_error("invalid value for marking-algorithm!");
+    }
+    options.use_alternative_lcfp_criterion = 0 < parser.options.count("use-alternative-lcfp-criterion");
+    options.use_alternative_gcfp_relation = 0 < parser.options.count("use-alternative-gcfp-relation");
+    options.use_alternative_gcfp_consistency = 0 < parser.options.count("use-alternative-gcfp-consistency");
+    options.timer = &timer();
     }
 
     void add_options(interface_description& desc) override

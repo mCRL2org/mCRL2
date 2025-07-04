@@ -38,7 +38,7 @@ struct default_rules_predicate
 class belongs_relation
 {
   protected:
-    typedef std::map<core::identifier_string, std::set<data::variable> > belongs_map;
+    using belongs_map = std::map<core::identifier_string, std::set<data::variable>>;
 
     belongs_map m_belongs_map;
 
@@ -114,7 +114,7 @@ class belongs_relation
 class stategraph_local_algorithm: public stategraph_algorithm
 {
   public:
-    typedef stategraph_algorithm super;
+    using super = stategraph_algorithm;
 
   protected:
     // m_belongs[k] corresponds with m_control_flow_graphs[k]

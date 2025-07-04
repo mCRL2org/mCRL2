@@ -24,13 +24,13 @@ template <typename Derived>
 class state_variable_name_clash_resolver: public state_formulas::state_formula_builder<Derived>
 {
   public:
-    typedef state_formulas::state_formula_builder<Derived> super;
+    using super = state_formulas::state_formula_builder<Derived>;
 
     using super::enter;
     using super::leave;
     using super::apply;
 
-    typedef std::map<core::identifier_string, std::vector<core::identifier_string> > name_map;
+    using name_map = std::map<core::identifier_string, std::vector<core::identifier_string>>;
 
     /// \brief The stack of names.
     name_map m_names;
@@ -119,7 +119,7 @@ class state_variable_name_clash_resolver: public state_formulas::state_formula_b
 class state_formula_data_variable_name_clash_resolver: public state_formulas::data_expression_builder<state_formula_data_variable_name_clash_resolver>
 {
   public:
-    typedef state_formulas::data_expression_builder<state_formula_data_variable_name_clash_resolver> super;
+    using super = state_formulas::data_expression_builder<state_formula_data_variable_name_clash_resolver>;
 
     using super::enter;
     using super::leave;

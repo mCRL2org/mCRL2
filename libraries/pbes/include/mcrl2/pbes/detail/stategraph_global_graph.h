@@ -198,9 +198,9 @@ struct stategraph_global_graph
   // an index for the vertices in the control flow graph with a given name
   std::map<core::identifier_string, std::set<stategraph_vertex*> > m_stategraph_index;
 
-  typedef std::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
-  typedef std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator vertex_const_iterator;
-  typedef stategraph_vertex vertex_type;
+  using vertex_iterator = std::map<propositional_variable_instantiation, stategraph_vertex>::iterator;
+  using vertex_const_iterator = std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator;
+  using vertex_type = stategraph_vertex;
 
   void create_index()
   {

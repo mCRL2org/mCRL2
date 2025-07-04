@@ -21,8 +21,8 @@ namespace mcrl2::data
 /// \brief Substitution that maps a sort expression to a sort expression.
 struct sort_expression_assignment
 {
-  typedef sort_expression variable_type;
-  typedef sort_expression expression_type;
+  using variable_type = sort_expression;
+  using expression_type = sort_expression;
 
   sort_expression lhs;
   sort_expression rhs;

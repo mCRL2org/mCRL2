@@ -105,8 +105,8 @@ public:
 struct quantifier_propagate_builder: public pbes_expression_builder<quantifier_propagate_builder>
 {
 public:
-  typedef pbes_expression_builder<quantifier_propagate_builder> super;
-  typedef std::map<core::identifier_string, pbes_equation> equation_map_t;
+  using super = pbes_expression_builder<quantifier_propagate_builder>;
+  using equation_map_t = std::map<core::identifier_string, pbes_equation>;
   using super::apply;
   using super::enter;
 

@@ -27,36 +27,34 @@ using pres_system::tools::pres_output_tool;
 //[pres_parelm_tool
 class pres_parelm_tool: public pres_input_tool<pres_output_tool<input_output_tool> >
 {
-    typedef pres_input_tool<pres_output_tool<input_output_tool> > super;
+  using super = pres_input_tool<pres_output_tool<input_output_tool>>;
 
-  public:
-    pres_parelm_tool()
-      : super(
-        "presparelm",
-        "Wieger Wesselink; Simon Janssen and Tim Willemse",
-        "remove unused parameters from a PRES",
-        "Reads a file containing a PRES, and applies parameter elimination to it. If OUTFILE "
-        "is not present, standard output is used. If INFILE is not present, standard input is used."
-      )
-    {}
+public:
+  pres_parelm_tool()
+      : super("presparelm",
+            "Wieger Wesselink; Simon Janssen and Tim Willemse",
+            "remove unused parameters from a PRES",
+            "Reads a file containing a PRES, and applies parameter elimination to it. If OUTFILE "
+            "is not present, standard output is used. If INFILE is not present, standard input is used.")
+  {}
 
-    bool run() override /*< The virtual function `run` executes the tool.
-                   The user has to override this function to add behavior. >*/
-    {
-      mCRL2log(verbose) << "presparelm parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+  bool run() override /*< The virtual function `run` executes the tool.
+                 The user has to override this function to add behavior. >*/
+  {
+    mCRL2log(verbose) << "presparelm parameters:" << std::endl;
+    mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+    mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
-      // load the pres
-      pres p;
-      load_pres(p, input_filename(), pres_input_format());
+    // load the pres
+    pres p;
+    load_pres(p, input_filename(), pres_input_format());
 
-      parelm(p);
+    parelm(p);
 
-      // save the result
-      save_pres(p, output_filename(), pres_output_format());
+    // save the result
+    save_pres(p, output_filename(), pres_output_format());
 
-      return true;
+    return true;
     }
 };
 

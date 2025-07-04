@@ -18,8 +18,8 @@
 
 namespace mcrl2::data {
 
-typedef std::map<untyped_sort_variable, sort_expression> sort_substitution;
-typedef std::pair<sort_substitution, int> solution; // the second element is the cost of the solution
+using sort_substitution = std::map<untyped_sort_variable, sort_expression>;
+using solution = std::pair<sort_substitution, int>; // the second element is the cost of the solution
 
 template <typename T>
 bool has_untyped_sort(const T& x)
@@ -87,7 +87,7 @@ std::string print_vector(const std::string& name, const Container& nodes)
 
 struct type_check_node;
 
-typedef std::shared_ptr<type_check_node> type_check_node_ptr;
+using type_check_node_ptr = std::shared_ptr<type_check_node>;
 
 struct type_check_context
 {
@@ -183,7 +183,7 @@ protected:
 };
 
 struct type_check_constraint;
-typedef std::shared_ptr<type_check_constraint> constraint_ptr;
+using constraint_ptr = std::shared_ptr<type_check_constraint>;
 constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& sigma);
 
 struct type_check_constraint

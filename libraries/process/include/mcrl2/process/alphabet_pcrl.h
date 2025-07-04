@@ -21,7 +21,7 @@ namespace detail {
 /// \brief Traverser that computes the alphabet of pCRL process expressions
 struct alphabet_pcrl_traverser: public process_expression_traverser<alphabet_pcrl_traverser>
 {
-  typedef process_expression_traverser<alphabet_pcrl_traverser> super;
+  using super = process_expression_traverser<alphabet_pcrl_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

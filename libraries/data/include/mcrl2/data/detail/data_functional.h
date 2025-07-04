@@ -90,7 +90,7 @@ struct sort_of_expression
 };
 
 /// \brief Function object that returns the sort of a data variable
-typedef sort_of_expression<variable> sort_of_variable;
+using sort_of_variable = sort_of_expression<variable>;
 
 struct sort_has_name
 {

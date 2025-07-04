@@ -33,7 +33,7 @@ void normalize_sorts(stochastic_specification& x, const data::sort_specification
 class stochastic_specification: public specification_base<stochastic_linear_process, stochastic_process_initializer>
 {
   protected:
-    typedef specification_base<stochastic_linear_process, stochastic_process_initializer> super;
+    using super = specification_base<stochastic_linear_process, stochastic_process_initializer>;
 
   public:
     /// \brief Constructor.

@@ -41,7 +41,7 @@ using utilities::make_enum_argument;
 class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_tool> >
 {
   protected:
-    typedef rewriter_tool<pres_input_output_tool<input_output_tool> > super;
+    using super = rewriter_tool<pres_input_output_tool<input_output_tool>>;
 
     presinst_strategy m_strategy;
     std::string m_finite_parameter_selection;

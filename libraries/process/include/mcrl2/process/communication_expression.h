@@ -71,10 +71,10 @@ inline void make_communication_expression(atermpp::aterm& t, const ARGUMENTS&...
 }
 
 /// \\brief list of communication_expressions
-typedef atermpp::term_list<communication_expression> communication_expression_list;
+using communication_expression_list = atermpp::term_list<communication_expression>;
 
 /// \\brief vector of communication_expressions
-typedef std::vector<communication_expression>    communication_expression_vector;
+using communication_expression_vector = std::vector<communication_expression>;
 
 /// \\brief Test for a communication_expression expression
 /// \\param x A term

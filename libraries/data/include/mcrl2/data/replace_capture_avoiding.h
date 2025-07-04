@@ -109,7 +109,8 @@ std::ostream& operator<<(std::ostream& out, const capture_avoiding_substitution_
 template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
 struct replace_capture_avoiding_variables_builder: public Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution>
 {
-  typedef Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution> super;
+  using super
+      = Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -130,7 +131,7 @@ apply_replace_capture_avoiding_variables_builder(capture_avoiding_substitution_u
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;

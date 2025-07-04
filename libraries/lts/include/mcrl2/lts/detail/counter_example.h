@@ -56,7 +56,7 @@ class action_index_pair
 class counter_example_constructor
 {
   public:
-    typedef std::size_t index_type;
+    using index_type = std::size_t;
 
   protected:
     // The backward three is stored in a deque. 
@@ -175,7 +175,7 @@ class counter_example_constructor
 class dummy_counter_example_constructor
 {
   public:
-    typedef dummy_counter_example_constructor index_type;  // This yields an empty type.
+    using index_type = dummy_counter_example_constructor; // This yields an empty type.
 
     static index_type root_index()
     {

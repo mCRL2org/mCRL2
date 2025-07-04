@@ -44,7 +44,7 @@ private:
 
 private:
     const SmallProgressMeasures &spm_;
-    typedef std::set<std::pair<std::vector<verti>, verti> > queue_t;
+    using queue_t = std::set<std::pair<std::vector<verti>, verti>>;
     queue_t queue_;
     std::vector<queue_t::iterator> queue_pos_;
 };

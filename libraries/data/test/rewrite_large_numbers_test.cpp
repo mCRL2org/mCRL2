@@ -39,7 +39,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 
-typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
+using rewrite_strategy_vector = std::vector<rewrite_strategy>;
 
 template <typename Rewriter>
 void data_rewrite_test(Rewriter& R, const data_expression& input, const data_expression& expected_output)

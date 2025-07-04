@@ -50,7 +50,7 @@ class Rewriter
     Rewriter(const Rewriter& other) = default;
 
   public:
-    typedef mutable_indexed_substitution<> substitution_type;
+    using substitution_type = mutable_indexed_substitution<>;
 
     used_data_equation_selector data_equation_selector;
     /**

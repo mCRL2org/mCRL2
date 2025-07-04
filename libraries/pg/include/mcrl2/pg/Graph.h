@@ -21,8 +21,8 @@
 #include <vector>
 
 // Note: these should be unsigned types; some algorithms depend on it!
-typedef std::size_t verti;    //!< type used to number vertices
-typedef std::size_t edgei;    //!< type used to number edges
+using verti = std::size_t; //!< type used to number vertices
+using edgei = std::size_t; //!< type used to number edges
 
 #define NO_VERTEX ((verti)-1)
 
@@ -63,7 +63,7 @@ public:
 
 public:
     /*! Iterator used to iterate over predecessor/successor vertices. */
-    typedef const verti *const_iterator;
+  using const_iterator = const verti*;
 
 #if 0
     /*! Iterator used to iterate over edges. */
@@ -71,21 +71,21 @@ public:
 #endif
 
     /*! A list of edges */
-    typedef std::vector<std::pair<verti, verti> > edge_list;
+  using edge_list = std::vector<std::pair<verti, verti>>;
 
-    /*! Specifies which parts of the edges are stored.
-        When storing successors only, the functions succ_begin() and succ_end()
-        can be used to iterate over the successors of a given vertex.
-        Conversely, when storing predecessors, pred_begin() and pred_end()
-        can be used to iterate over predecessors.
-        When storing bidirectional edges, both pairs of functions can be used,
-        but this requires more memory. */
-    enum EdgeDirection
-    {
-        EDGE_NONE           = 0,  /* for internal use only! */
-        EDGE_SUCCESSOR      = 1,
-        EDGE_PREDECESSOR    = 2,
-        EDGE_BIDIRECTIONAL  = 3
+  /*! Specifies which parts of the edges are stored.
+      When storing successors only, the functions succ_begin() and succ_end()
+      can be used to iterate over the successors of a given vertex.
+      Conversely, when storing predecessors, pred_begin() and pred_end()
+      can be used to iterate over predecessors.
+      When storing bidirectional edges, both pairs of functions can be used,
+      but this requires more memory. */
+  enum EdgeDirection
+  {
+    EDGE_NONE = 0, /* for internal use only! */
+    EDGE_SUCCESSOR = 1,
+    EDGE_PREDECESSOR = 2,
+    EDGE_BIDIRECTIONAL = 3
     };
 
     StaticGraph();          /*!< Construct an empty static graph. */

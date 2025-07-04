@@ -52,7 +52,7 @@ void data_rewrite(data::data_expression& result, const data::data_expression& x,
 template <template <class> class Builder, class Derived, class DataRewriter, class SubstitutionFunction = data::no_substitution>
 struct add_data_rewriter: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::apply;
 
   const DataRewriter& R;
@@ -90,7 +90,7 @@ struct add_data_rewriter: public Builder<Derived>
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct data_rewriter_builder: public add_data_rewriter<pres_system::pres_expression_builder, Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef add_data_rewriter<pres_system::pres_expression_builder, Derived, DataRewriter, SubstitutionFunction> super;
+  using super = add_data_rewriter<pres_system::pres_expression_builder, Derived, DataRewriter, SubstitutionFunction>;
   using super::enter;
   using super::leave;
 
@@ -102,7 +102,9 @@ struct data_rewriter_builder: public add_data_rewriter<pres_system::pres_express
 template <template <class, class, class> class Builder, class DataRewriter, class SubstitutionFunction>
 struct apply_rewriter_builder: public Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction>
 {
-  typedef Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction> super;
+  using super = Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>,
+      DataRewriter,
+      SubstitutionFunction>;
   using super::enter;
   using super::leave;
 
@@ -124,8 +126,8 @@ make_apply_rewriter_builder(const data::data_specification& dataspec, const Data
 template <typename DataRewriter>
 struct data_rewriter
 {
-  typedef pres_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pres_expression;
+  using variable_type = data::variable;
 
   const DataRewriter& R;
 

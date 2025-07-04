@@ -88,10 +88,10 @@ inline application iff(const data_expression& d1, const data_expression& d2)
 template <typename Specification>
 class symbolic_bisim_algorithm: public mcrl2::lps::detail::lps_algorithm<Specification>
 {
-  typedef typename mcrl2::lps::detail::lps_algorithm<Specification> super;
-  typedef typename Specification::process_type process_type;
-  typedef typename process_type::action_summand_type action_summand_type;
-  typedef rewriter::substitution_type substitution_t;
+  using super = typename mcrl2::lps::detail::lps_algorithm<Specification>;
+  using process_type = typename Specification::process_type;
+  using action_summand_type = typename process_type::action_summand_type;
+  using substitution_t = rewriter::substitution_type;
   using super::m_spec;
 
 protected:
@@ -105,11 +105,12 @@ protected:
   simplifier*                    simpl;
   smt::smt_solver                m_smt_solver;
 
-  typedef std::unordered_set< std::tuple< data_expression, data_expression, lps::action_summand > > refinement_cache_t;
+  using refinement_cache_t = std::unordered_set<std::tuple<data_expression, data_expression, lps::action_summand>>;
   refinement_cache_t refinement_cache;
-  typedef std::map< std::pair< data_expression, data_expression >, bool > reachability_cache_t;
+  using reachability_cache_t = std::map<std::pair<data_expression, data_expression>, bool>;
   reachability_cache_t reachability_cache;
-  typedef std::unordered_map< std::tuple< data_expression, data_expression, lps::action_summand >, bool> transition_cache_t;
+  using transition_cache_t
+      = std::unordered_map<std::tuple<data_expression, data_expression, lps::action_summand>, bool>;
   transition_cache_t transition_cache;
 
   std::map< lps::action_summand, variable_list > m_primed_summation_variables_map;
@@ -191,8 +192,9 @@ protected:
   void enumerate(const data_expression& parent_block, const variable_list& vars, const lambda& split_block,
     const data_expression& lli, std::set< data_expression >& new_part)
   {
-
-    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, enumerate_filter_print> enumerator_type;
+    using enumerator_type = enumerator_algorithm_with_iterator<rewriter,
+        enumerator_list_element_with_substitution<>,
+        enumerate_filter_print>;
     enumerator_identifier_generator id_generator;
     enumerator_type enumerator(rewr, m_spec.data(), rewr, id_generator, (std::numeric_limits<std::size_t>::max)(), true, enumerate_filter_print(lli, rewr));
 

@@ -40,10 +40,10 @@ std::size_t nr_of_booleans_for_elements(std::size_t n)
 template<typename DataRewriter, typename Specification>
 class binary_algorithm: public detail::lps_algorithm<Specification>
 {
-  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-  typedef typename detail::lps_algorithm<Specification> super;
-  typedef typename Specification::process_type process_type;
-  typedef typename process_type::action_summand_type action_summand_type;
+  using enumerator_element = data::enumerator_list_element_with_substitution<>;
+  using super = typename detail::lps_algorithm<Specification>;
+  using process_type = typename Specification::process_type;
+  using action_summand_type = typename process_type::action_summand_type;
   using super::m_spec;
 
   protected:

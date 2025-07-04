@@ -210,7 +210,7 @@ class add_edges
 class local_control_flow_graph_vertex: public LCFP_vertex, public add_edges<local_control_flow_graph_vertex>
 {
   protected:
-    typedef add_edges<local_control_flow_graph_vertex> super;
+    using super = add_edges<local_control_flow_graph_vertex>;
 
     data::data_expression m_value;
     mutable std::set<data::variable> m_marking; // used in the reset variables procedure
@@ -518,7 +518,7 @@ std::ostream& operator<<(std::ostream& out, const control_flow_graph<Vertex>& G)
 
 struct local_control_flow_graph: public control_flow_graph<local_control_flow_graph_vertex>
 {
-  typedef control_flow_graph<local_control_flow_graph_vertex> super;
+  using super = control_flow_graph<local_control_flow_graph_vertex>;
 
   using super::find_vertex;
   using super::has_label;
@@ -601,7 +601,7 @@ std::ostream& operator<<(std::ostream& out, const global_control_flow_graph_vert
 class global_control_flow_graph_vertex: public add_edges<global_control_flow_graph_vertex>
 {
   protected:
-    typedef add_edges<global_control_flow_graph_vertex> super;
+    using super = add_edges<global_control_flow_graph_vertex>;
     core::identifier_string m_name;
     data::data_expression_list m_values;
     mutable std::set<data::variable> m_sig;
@@ -749,8 +749,8 @@ std::ostream& operator<<(std::ostream& out, const global_control_flow_graph_vert
 
 struct global_control_flow_graph: public control_flow_graph<global_control_flow_graph_vertex>
 {
-  typedef control_flow_graph<global_control_flow_graph_vertex> super;
-  typedef global_control_flow_graph_vertex vertex_type;
+  using super = control_flow_graph<global_control_flow_graph_vertex>;
+  using vertex_type = global_control_flow_graph_vertex;
 
   /// \brief Default constructor
   global_control_flow_graph() = default;

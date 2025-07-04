@@ -88,11 +88,11 @@ inline void swap(container_sort& t1, container_sort& t2)
 
 /// \brief list of function sorts
 ///
-typedef atermpp::term_list<container_sort> container_sort_list;
+using container_sort_list = atermpp::term_list<container_sort>;
 
 /// \brief list of function sorts
 ///
-typedef std::vector<container_sort> container_sort_vector;
+using container_sort_vector = std::vector<container_sort>;
 
 } // namespace mcrl2::data
 

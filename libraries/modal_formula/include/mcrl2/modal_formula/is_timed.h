@@ -23,7 +23,7 @@ namespace detail {
 // \brief Visitor for checking if a state formula is timed.
 struct is_timed_traverser: public action_label_traverser<is_timed_traverser>
 {
-  typedef action_label_traverser<is_timed_traverser> super;
+  using super = action_label_traverser<is_timed_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

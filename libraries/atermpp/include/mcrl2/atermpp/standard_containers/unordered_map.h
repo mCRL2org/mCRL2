@@ -37,21 +37,21 @@ template < class Key,
 class unordered_map : public std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc >
 {
 protected:
-  typedef std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc > super;
+  using super = std::unordered_map<detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc>;
 
   detail::generic_aterm_container<std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc > > container_wrapper;
 
 public:
   
   /// Standard typedefs.
-  typedef typename super::allocator_type allocator_type;
-  typedef typename super::value_type value_type;
-  typedef typename super::size_type size_type;
-  typedef typename super::node_type node_type;
-  typedef typename super::reference reference;
-  typedef typename super::iterator iterator;
-  typedef typename super::const_iterator const_iterator;
-  typedef typename super::insert_return_type insert_return_type;
+  using allocator_type = typename super::allocator_type;
+  using value_type = typename super::value_type;
+  using size_type = typename super::size_type;
+  using node_type = typename super::node_type;
+  using reference = typename super::reference;
+  using iterator = typename super::iterator;
+  using const_iterator = typename super::const_iterator;
+  using insert_return_type = typename super::insert_return_type;
 
   /// \brief Default constructor.
   unordered_map()
@@ -242,19 +242,20 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
                                                               detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false >
 {
   protected:
-    typedef mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false > super;
+    using super = mcrl2::utilities::
+        unordered_map<detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false>;
 
     detail::generic_aterm_container<mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false > > container_wrapper;
 
   public:
 
     /// Standard typedefs.
-    typedef typename super::allocator_type allocator_type;
-    typedef typename super::value_type value_type;
-    typedef typename super::size_type size_type;
-    typedef typename super::reference reference;
-    typedef typename super::iterator iterator;
-    typedef typename super::const_iterator const_iterator;
+    using allocator_type = typename super::allocator_type;
+    using value_type = typename super::value_type;
+    using size_type = typename super::size_type;
+    using reference = typename super::reference;
+    using iterator = typename super::iterator;
+    using const_iterator = typename super::const_iterator;
 
     /// \brief Default constructor.
     unordered_map()

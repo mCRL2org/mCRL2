@@ -28,7 +28,7 @@ using pres_system::tools::pres_input_tool;
 class resinfo_tool: public pres_input_tool<input_tool>
 {
   protected:
-    typedef pres_input_tool<input_tool> super;
+    using super = pres_input_tool<input_tool>;
 
     bool opt_full;
 

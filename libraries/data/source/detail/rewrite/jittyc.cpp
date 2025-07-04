@@ -156,8 +156,7 @@ static std::set<variable> find_variables_in_the_scope_of_main_function_symbol_in
   return result;
 }
 
-
-typedef atermpp::term_list<variable_list> variable_list_list;
+using variable_list_list = atermpp::term_list<variable_list>;
 
 static std::vector<bool> dep_vars(const data_equation& eqn)
 {
@@ -877,7 +876,7 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
 
 match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list& rules, const std::size_t arity)
 {
-  typedef std::list<std::size_t> dep_list_t;
+  using dep_list_t = std::list<std::size_t>;
   match_tree_list strat;
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
   std::vector<std::size_t> arg_use_count(arity, 0);
@@ -3092,7 +3091,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   rewriter_interface interface = { mcrl2::utilities::get_toolset_version(), "Unknown error when loading rewriter.", this, nullptr, nullptr };
   try
   {
-    typedef bool rewrite_function_type(rewriter_interface*, RewriterCompilingJitty*);
+    using rewrite_function_type = bool(rewriter_interface*, RewriterCompilingJitty*);
     init = reinterpret_cast<rewrite_function_type*>(rewriter_so->proc_address("init"));
   }
   catch(std::runtime_error& e)

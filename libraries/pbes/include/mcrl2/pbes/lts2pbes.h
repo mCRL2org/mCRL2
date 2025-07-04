@@ -22,8 +22,8 @@ namespace mcrl2::pbes_system {
 class lts2pbes_algorithm
 {
   public:
-    typedef lts::lts_lts_t::states_size_type state_type;
-    typedef pbes_system::detail::lts2pbes_lts::edge_list edge_list;
+    using state_type = lts::lts_lts_t::states_size_type;
+    using edge_list = pbes_system::detail::lts2pbes_lts::edge_list;
 
   protected:
     const lts::lts_lts_t& lts0;

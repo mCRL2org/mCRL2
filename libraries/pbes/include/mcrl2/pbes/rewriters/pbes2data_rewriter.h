@@ -31,7 +31,7 @@ namespace detail {
 template <typename Derived>
 struct pbes2data_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::apply;
 
   data::data_expression pbes2data(const pbes_expression& x) const
@@ -103,10 +103,10 @@ class pbes2data_rewriter
 {
   public:
     /// \brief The term type
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Rewrites a pbes expression.
     /// \param x A term

@@ -164,8 +164,8 @@ struct process_identifier_assignment
   process_identifier lhs;
   process_identifier rhs;
 
-  typedef process_identifier result_type;
-  typedef process_identifier argument_type;
+  using result_type = process_identifier;
+  using argument_type = process_identifier;
 
   process_identifier_assignment(const process_identifier& lhs_, const process_identifier& rhs_)
     : lhs(lhs_), rhs(rhs_)

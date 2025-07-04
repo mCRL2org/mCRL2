@@ -116,10 +116,10 @@ inline void make_data_equation(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of data_equations
-typedef atermpp::term_list<data_equation> data_equation_list;
+using data_equation_list = atermpp::term_list<data_equation>;
 
 /// \\brief vector of data_equations
-typedef std::vector<data_equation>    data_equation_vector;
+using data_equation_vector = std::vector<data_equation>;
 
 // prototype declaration
 std::string pp(const data_equation& x, bool precedence_aware = true);

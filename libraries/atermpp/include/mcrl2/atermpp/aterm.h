@@ -36,16 +36,16 @@ protected:
 
 public:
   /// An unsigned integral type.
-  typedef std::size_t size_type;
+  using size_type = std::size_t;
 
   /// A signed integral type.
-  typedef ptrdiff_t difference_type;
+  using difference_type = ptrdiff_t;
 
   /// Iterator used to iterate through an term_appl.
-  typedef term_appl_iterator<aterm> iterator;
+  using iterator = term_appl_iterator<aterm>;
 
   /// Const iterator used to iterate through an term_appl.
-  typedef term_appl_iterator<aterm> const_iterator;
+  using const_iterator = term_appl_iterator<aterm>;
 
   /// \brief Default constructor.
   aterm()
@@ -176,7 +176,7 @@ public:
   }
 };
 
-typedef void (*term_callback)(const aterm&);
+using term_callback = void (*)(const aterm&);
 
 extern void add_deletion_hook(const function_symbol&, term_callback);
 

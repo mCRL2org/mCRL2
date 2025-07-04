@@ -102,14 +102,14 @@ struct builder
 template <template <class> class Builder>
 class apply_builder: public Builder<apply_builder<Builder> >
 {
-  typedef Builder<apply_builder<Builder> > super;
+  using super = Builder<apply_builder<Builder>>;
 
-  public:
+public:
 
-    using super::enter;
-    using super::leave;
-    using super::apply;
-    using super::update;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::update;
 };
 
 template <template <class> class Builder>
@@ -123,17 +123,17 @@ make_apply_builder()
 template <template <class> class Builder, class Arg1>
 class apply_builder_arg1: public Builder<apply_builder_arg1<Builder, Arg1> >
 {
-  typedef Builder<apply_builder_arg1<Builder, Arg1> > super;
+  using super = Builder<apply_builder_arg1<Builder, Arg1>>;
 
-  public:
-    using super::enter;
-    using super::leave;
-    using super::apply;
-    using super::update;
+public:
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::update;
 
-    apply_builder_arg1(const Arg1& arg1):
-      super(arg1)
-    {}
+  apply_builder_arg1(const Arg1& arg1)
+      : super(arg1)
+  {}
 };
 
 template <template <class> class Builder, class Arg1>
@@ -147,17 +147,17 @@ make_apply_builder_arg1(const Arg1& arg1)
 template <template <class> class Builder, class Arg1, class Arg2>
 class apply_builder_arg2: public Builder<apply_builder_arg2<Builder, Arg1, Arg2> >
 {
-  typedef Builder<apply_builder_arg2<Builder, Arg1, Arg2> > super;
+  using super = Builder<apply_builder_arg2<Builder, Arg1, Arg2>>;
 
-  public:
-    using super::enter;
-    using super::leave;
-    using super::apply;
-    using super::update;
+public:
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::update;
 
-    apply_builder_arg2(const Arg1& arg1, const Arg2& arg2):
-      super(arg1, arg2)
-    {}
+  apply_builder_arg2(const Arg1& arg1, const Arg2& arg2)
+      : super(arg1, arg2)
+  {}
 };
 
 template <template <class> class Builder, class Arg1, class Arg2>
@@ -172,7 +172,7 @@ make_apply_builder_arg2(const Arg1& arg1, const Arg2& arg2)
 template <template <class> class Builder, class Function>
 struct update_apply_builder: public Builder<update_apply_builder<Builder, Function> >
 {
-  typedef Builder<update_apply_builder<Builder, Function> > super;
+  using super = Builder<update_apply_builder<Builder, Function>>;
 
   using super::enter;
   using super::leave;
@@ -206,7 +206,7 @@ make_update_apply_builder(const Function& f)
 template <template <class> class Builder, class Function, class Arg1>
 class update_apply_builder_arg1: public Builder<update_apply_builder_arg1<Builder, Function, Arg1> >
 {
-  typedef Builder<update_apply_builder_arg1<Builder, Function, Arg1> > super;
+  using super = Builder<update_apply_builder_arg1<Builder, Function, Arg1>>;
 
   using super::enter;
   using super::leave;

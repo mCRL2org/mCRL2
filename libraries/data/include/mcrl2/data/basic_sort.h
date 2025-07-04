@@ -88,9 +88,9 @@ inline void swap(basic_sort& t1, basic_sort& t2)
 //--- end generated class basic_sort ---//
 
 /// \brief list of basic sorts
-typedef atermpp::term_list<basic_sort> basic_sort_list;
+using basic_sort_list = atermpp::term_list<basic_sort>;
 /// \brief vector of basic sorts
-typedef std::vector<basic_sort> basic_sort_vector;
+using basic_sort_vector = std::vector<basic_sort>;
 
 } // namespace mcrl2::data
 

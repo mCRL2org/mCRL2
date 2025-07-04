@@ -46,7 +46,7 @@ class transition
 {
   public:
     /// \brief The type of the elements in a transition.
-    typedef std::size_t size_type;
+    using size_type = std::size_t;
 
   private:
     size_type m_from;

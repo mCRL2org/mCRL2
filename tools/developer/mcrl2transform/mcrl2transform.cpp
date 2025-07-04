@@ -134,25 +134,24 @@ struct separate_equations_command: public process::detail::process_command
 
 class mcrl2transform_tool: public transform_tool<rewriter_tool<input_output_tool>>
 {
-  typedef transform_tool<rewriter_tool<input_output_tool>> super;
+  using super = transform_tool<rewriter_tool<input_output_tool>>;
 
-  public:
-    mcrl2transform_tool()
+public:
+  mcrl2transform_tool()
       : super("mcrl2transform",
-              "Wieger Wesselink",
-              "applies a transformation to an mCRL2 process specification",
-              "Transform the object in INFILE and write the result to OUTFILE. If OUTFILE "
-              "is not present, stdout is used. If INFILE is not present, stdin is used."
-             )
-    {}
+            "Wieger Wesselink",
+            "applies a transformation to an mCRL2 process specification",
+            "Transform the object in INFILE and write the result to OUTFILE. If OUTFILE "
+            "is not present, stdout is used. If INFILE is not present, stdin is used.")
+  {}
 
-    void add_commands(const std::vector<std::string>& options) override
-    {
-      add_command(std::make_shared<alphabet_reduce_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<anonymize_process_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<eliminate_trivial_equations_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<eliminate_unused_equations_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<separate_equations_command>(input_filename(), output_filename(), options));
+  void add_commands(const std::vector<std::string>& options) override
+  {
+    add_command(std::make_shared<alphabet_reduce_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<anonymize_process_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<eliminate_trivial_equations_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<eliminate_unused_equations_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<separate_equations_command>(input_filename(), output_filename(), options));
     }
 };
 

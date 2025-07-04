@@ -53,10 +53,10 @@ class process_expression: public atermpp::aterm
 };
 
 /// \\brief list of process_expressions
-typedef atermpp::term_list<process_expression> process_expression_list;
+using process_expression_list = atermpp::term_list<process_expression>;
 
 /// \\brief vector of process_expressions
-typedef std::vector<process_expression>    process_expression_vector;
+using process_expression_vector = std::vector<process_expression>;
 
 // prototypes
 inline bool is_action(const atermpp::aterm& x);
@@ -181,10 +181,10 @@ inline void make_action(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of actions
-typedef atermpp::term_list<action> action_list;
+using action_list = atermpp::term_list<action>;
 
 /// \\brief vector of actions
-typedef std::vector<action>    action_vector;
+using action_vector = std::vector<action>;
 
 /// \\brief Test for a action expression
 /// \\param x A term

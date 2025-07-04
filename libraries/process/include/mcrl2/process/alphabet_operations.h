@@ -618,7 +618,7 @@ multi_action_name_set rename(const rename_expression_list& R, const multi_action
   return result;
 }
 
-typedef std::map<core::identifier_string, std::vector<core::identifier_string> > rename_inverse_map;
+using rename_inverse_map = std::map<core::identifier_string, std::vector<core::identifier_string>>;
 
 // Example: R = {b -> c}, then rename_inverse(R) = {b -> [], c -> [b, c]}
 inline

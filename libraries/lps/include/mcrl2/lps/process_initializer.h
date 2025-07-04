@@ -71,10 +71,10 @@ inline void make_process_initializer(atermpp::aterm& t, EXPRESSION_LIST args)
 
 //--- start generated class process_initializer ---//
 /// \\brief list of process_initializers
-typedef atermpp::term_list<process_initializer> process_initializer_list;
+using process_initializer_list = atermpp::term_list<process_initializer>;
 
 /// \\brief vector of process_initializers
-typedef std::vector<process_initializer>    process_initializer_vector;
+using process_initializer_vector = std::vector<process_initializer>;
 
 /// \\brief Test for a process_initializer expression
 /// \\param x A term

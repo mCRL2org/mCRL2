@@ -23,7 +23,7 @@ namespace mcrl2::pbes_system
 // \brief Visitor for checking if a pbes expression is normalized.
 struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_traverser>
 {
-  typedef pbes_expression_traverser<is_normalized_traverser> super;
+  using super = pbes_expression_traverser<is_normalized_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -52,7 +52,7 @@ struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_t
 // \brief Visitor for checking if a pbes expression is normalized.
 struct normalize_builder: public pbes_expression_builder<normalize_builder>
 {
-  typedef pbes_expression_builder<normalize_builder> super;
+  using super = pbes_expression_builder<normalize_builder>;
   using super::apply;
 
   bool negated;

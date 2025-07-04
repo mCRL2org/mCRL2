@@ -31,11 +31,11 @@ namespace mcrl2::lts
 namespace detail
 {
 
-typedef std::size_t state_type;
-typedef std::size_t label_type;
-typedef boost::container::flat_set<state_type> set_of_states;
-typedef boost::container::flat_set<label_type> action_label_set;
-typedef std::multimap<detail::state_type, detail::set_of_states> anti_chain_type;
+using state_type = std::size_t;
+using label_type = std::size_t;
+using set_of_states = boost::container::flat_set<state_type>;
+using action_label_set = boost::container::flat_set<label_type>;
+using anti_chain_type = std::multimap<detail::state_type, detail::set_of_states>;
 
 template <class COUNTER_EXAMPLE_CONSTRUCTOR>
 class state_states_counter_example_index_triple

@@ -44,10 +44,10 @@ class binder_type: public atermpp::aterm
 };
 
 /// \\brief list of binder_types
-typedef atermpp::term_list<binder_type> binder_type_list;
+using binder_type_list = atermpp::term_list<binder_type>;
 
 /// \\brief vector of binder_types
-typedef std::vector<binder_type>    binder_type_vector;
+using binder_type_vector = std::vector<binder_type>;
 
 // prototype declaration
 std::string pp(const binder_type& x, bool precedence_aware = true);

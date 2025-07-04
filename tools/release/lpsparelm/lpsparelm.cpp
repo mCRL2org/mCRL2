@@ -19,27 +19,26 @@ using namespace mcrl2::utilities;
 
 class lps_parelm_tool : public input_output_tool
 {
-    typedef input_output_tool super;
+  using super = input_output_tool;
 
-  public:
+public:
 
-    lps_parelm_tool() : super(
-        "lpsparelm",
-        "Wieger Wesselink and Jeroen van der Wulp; Frank Stappers and Tim Willemse",
-        "remove unused parameters from an LPS",
-        "Remove unused parameters from the linear process specification (LPS) in INFILE "
-        "and write the result to OUTFILE. If INFILE is not present, stdin is used. If "
-        "OUTFILE is not present, stdout is used.")
-    {
-    }
+  lps_parelm_tool()
+      : super("lpsparelm",
+            "Wieger Wesselink and Jeroen van der Wulp; Frank Stappers and Tim Willemse",
+            "remove unused parameters from an LPS",
+            "Remove unused parameters from the linear process specification (LPS) in INFILE "
+            "and write the result to OUTFILE. If INFILE is not present, stdin is used. If "
+            "OUTFILE is not present, stdout is used.")
+  {}
 
-    bool run() override
-    {
-      lps::stochastic_specification spec;
-      load_lps(spec, input_filename());
-      lps::parelm(spec, true);
-      save_lps(spec, output_filename());
-      return true;
+  bool run() override
+  {
+    lps::stochastic_specification spec;
+    load_lps(spec, input_filename());
+    lps::parelm(spec, true);
+    save_lps(spec, output_filename());
+    return true;
     }
 
 };

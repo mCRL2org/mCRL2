@@ -25,7 +25,7 @@ namespace detail
 
 struct find_free_variables_traverser: public pres_expression_traverser<find_free_variables_traverser>
 {
-  typedef pres_expression_traverser<find_free_variables_traverser> super;
+  using super = pres_expression_traverser<find_free_variables_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;

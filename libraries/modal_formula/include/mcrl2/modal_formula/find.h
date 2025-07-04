@@ -427,7 +427,7 @@ namespace detail {
 // collects state variable names in a set
 struct state_variable_name_traverser: public state_formulas::state_formula_traverser<state_variable_name_traverser>
 {
-  typedef state_formulas::state_formula_traverser<state_variable_name_traverser> super;
+  using super = state_formulas::state_formula_traverser<state_variable_name_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -443,7 +443,7 @@ struct state_variable_name_traverser: public state_formulas::state_formula_trave
 template <template <class> class Traverser, class OutputIterator>
 struct find_state_variables_traverser: public Traverser<find_state_variables_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_state_variables_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_state_variables_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -470,7 +470,7 @@ make_find_state_variables_traverser(OutputIterator out)
 template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator>
 struct find_free_state_variables_traverser: public Binder<Traverser, find_free_state_variables_traverser<Traverser, Binder, OutputIterator> >
 {
-  typedef Binder<Traverser, find_free_state_variables_traverser<Traverser, Binder, OutputIterator> > super;
+  using super = Binder<Traverser, find_free_state_variables_traverser<Traverser, Binder, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;

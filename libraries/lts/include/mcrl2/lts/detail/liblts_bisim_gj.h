@@ -48,15 +48,12 @@ struct constellation_type;
 struct transition_type;
 struct outgoing_transition_type;
 
-typedef std::size_t state_index;
-typedef std::size_t transition_index;
+using state_index = std::size_t;
+using transition_index = std::size_t;
 
-
-typedef std::size_t label_index;
-typedef fixed_vector<outgoing_transition_type>::iterator
-                                                       outgoing_transitions_it;
-typedef fixed_vector<outgoing_transition_type>::const_iterator
-                                                 outgoing_transitions_const_it;
+using label_index = std::size_t;
+using outgoing_transitions_it = fixed_vector<outgoing_transition_type>::iterator;
+using outgoing_transitions_const_it = fixed_vector<outgoing_transition_type>::const_iterator;
 
 constexpr constellation_type* null_constellation=nullptr;
 constexpr transition_index null_transition=-1;
@@ -122,9 +119,9 @@ static inline void clear(CONTAINER& c)
 
 // The struct below facilitates to walk through a LBC_list starting from an
 // arbitrary transition.
-typedef transition_index* BLC_list_iterator; // should not be nullptr
-typedef transition_index* BLC_list_iterator_or_null; // can be nullptr
-typedef const transition_index* BLC_list_const_iterator; // should not be nullptr
+using BLC_list_iterator = transition_index*;             // should not be nullptr
+using BLC_list_iterator_or_null = transition_index*;     // can be nullptr
+using BLC_list_const_iterator = const transition_index*; // should not be nullptr
 
 /// information about a transition stored in m_outgoing_transitions
 struct outgoing_transition_type
@@ -197,8 +194,8 @@ class todo_state_vector
   std::vector<state_in_block_pointer> m_vec;
 
   public:
-    typedef std::vector<state_in_block_pointer>::const_iterator const_iterator;
-                                                                                #ifndef NDEBUG
+    using const_iterator = std::vector<state_in_block_pointer>::const_iterator;
+#ifndef NDEBUG
                                                                                   bool find(const state_in_block_pointer s) const
                                                                                   {
                                                                                     return std::find(m_vec.begin(), m_vec.end(), s)!=m_vec.end();
@@ -273,7 +270,7 @@ class todo_state_vector
       m_vec.reserve(new_cap);
     }
 
-    typedef std::vector<state_in_block_pointer>::iterator iterator;
+    using iterator = std::vector<state_in_block_pointer>::iterator;
 
     iterator begin()
     {
@@ -723,9 +720,9 @@ class bisim_partitioner_gj
 {
   private:
 
-    typedef std::unordered_set<state_index> set_of_states_type;
-    typedef std::unordered_set<transition_index> set_of_transitions_type;
-                                                                                #ifndef NDEBUG
+    using set_of_states_type = std::unordered_set<state_index>;
+    using set_of_transitions_type = std::unordered_set<transition_index>;
+#ifndef NDEBUG
                                                                                   public: // needed for the debugging functions, e.g. debug_id().
                                                                                 #endif
     /// \brief automaton that is being reduced

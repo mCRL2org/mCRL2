@@ -26,7 +26,7 @@ using mcrl2::utilities::tools::xinput_output_tool;
 
 class ltscombine_tool : public parallel_tool<xinput_output_tool>
 {
-  typedef parallel_tool<xinput_output_tool> super;
+  using super = parallel_tool<xinput_output_tool>;
 
 public:
   ltscombine_tool()

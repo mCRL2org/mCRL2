@@ -26,7 +26,7 @@ namespace detail
 template <typename Derived>
 struct printer: public lps::add_traverser_sort_expressions<process::detail::printer, Derived>
 {
-  typedef lps::add_traverser_sort_expressions<process::detail::printer, Derived> super;
+  using super = lps::add_traverser_sort_expressions<process::detail::printer, Derived>;
 
   using super::enter;
   using super::leave;

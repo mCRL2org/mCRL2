@@ -20,7 +20,7 @@ namespace mcrl2::lts
 {
 
 /** \brief A signature is a pair of an action label and a block */
-typedef std::set<std::pair<std::size_t, std::size_t> > signature_t;
+using signature_t = std::set<std::pair<std::size_t, std::size_t>>;
 
 /** \brief Base class for signature computation */
 template < class LTS_T >

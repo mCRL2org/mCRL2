@@ -19,7 +19,7 @@
 namespace mcrl2::pres_system
 {
 
-typedef pbes_system::fixpoint_symbol fixpoint_symbol;
+using fixpoint_symbol = pbes_system::fixpoint_symbol;
 
 class pres_equation;
 atermpp::aterm pres_equation_to_aterm(const pres_equation& eqn);
@@ -41,13 +41,13 @@ class pres_equation
 
   public:
     /// \brief The expression type of the equation.
-    typedef pres_expression term_type;
+    using term_type = pres_expression;
 
     /// \brief The variable type of the equation.
-    typedef propositional_variable variable_type;
+    using variable_type = propositional_variable;
 
     /// \brief The symbol type of the equation.
-    typedef fixpoint_symbol symbol_type;
+    using symbol_type = fixpoint_symbol;
 
     /// \brief Constructor.
     pres_equation() = default;
@@ -128,10 +128,10 @@ class pres_equation
 
 //--- start generated class pres_equation ---//
 /// \\brief list of pres_equations
-typedef atermpp::term_list<pres_equation> pres_equation_list;
+using pres_equation_list = atermpp::term_list<pres_equation>;
 
 /// \\brief vector of pres_equations
-typedef std::vector<pres_equation>    pres_equation_vector;
+using pres_equation_vector = std::vector<pres_equation>;
 
 // prototype declaration
 std::string pp(const pres_equation& x, bool precedence_aware = true);

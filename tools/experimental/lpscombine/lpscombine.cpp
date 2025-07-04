@@ -20,7 +20,7 @@ using mcrl2::utilities::tools::input_input_output_tool;
 
 class lpscombine_tool : public input_input_output_tool
 {
-  typedef input_input_output_tool super;
+  using super = input_input_output_tool;
 
 public:
   lpscombine_tool() : super(

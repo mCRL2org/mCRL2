@@ -71,10 +71,10 @@ inline void make_process_equation(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of process_equations
-typedef atermpp::term_list<process_equation> process_equation_list;
+using process_equation_list = atermpp::term_list<process_equation>;
 
 /// \\brief vector of process_equations
-typedef std::vector<process_equation>    process_equation_vector;
+using process_equation_vector = std::vector<process_equation>;
 
 /// \\brief Test for a process_equation expression
 /// \\param x A term

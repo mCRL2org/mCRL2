@@ -18,7 +18,7 @@
 namespace mcrl2::lps
 {
 
-typedef atermpp::term_balanced_tree<data::data_expression> state;
+using state = atermpp::term_balanced_tree<data::data_expression>;
 
 template<class ForwardTraversalIterator, class Transformer>
 void make_state(state& result,

@@ -24,24 +24,24 @@ template<typename Key,
 class hashtable
 {
 public:
-  typedef Key key_type;
-  typedef std::size_t size_type;
-  typedef std::pair<const key_type, size_type> value_type;
-  typedef Equals key_equal;
-  typedef Hash hasher;
+  using key_type = Key;
+  using size_type = std::size_t;
+  using value_type = std::pair<const key_type, size_type>;
+  using key_equal = Equals;
+  using hasher = Hash;
 
-  typedef value_type& reference;
-  typedef const value_type& const_reference;
-  typedef value_type* pointer;
-  typedef const value_type* const_pointer;
+  using reference = value_type&;
+  using const_reference = const value_type&;
+  using pointer = value_type*;
+  using const_pointer = const value_type*;
 
-  typedef typename std::vector < Key >::iterator iterator;
-  typedef typename std::vector < Key >::const_iterator const_iterator;
+  using iterator = typename std::vector<Key>::iterator;
+  using const_iterator = typename std::vector<Key>::const_iterator;
 
-  typedef typename std::vector < Key >::reverse_iterator reverse_iterator;
-  typedef typename std::vector < Key >::const_reverse_iterator const_reverse_iterator;
+  using reverse_iterator = typename std::vector<Key>::reverse_iterator;
+  using const_reverse_iterator = typename std::vector<Key>::const_reverse_iterator;
 
-  typedef std::ptrdiff_t difference_type;
+  using difference_type = std::ptrdiff_t;
 
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
   hashtable();

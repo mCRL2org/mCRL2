@@ -111,16 +111,16 @@ namespace detail {
 
 struct absinthe_algorithm
 {
-  typedef std::map<data::sort_expression, data::sort_expression> sort_expression_substitution_map;
-  typedef std::map<data::function_symbol, data::function_symbol> function_symbol_substitution_map;
-  typedef std::map<data::sort_expression, data::function_symbol> abstraction_map;
+  using sort_expression_substitution_map = std::map<data::sort_expression, data::sort_expression>;
+  using function_symbol_substitution_map = std::map<data::function_symbol, data::function_symbol>;
+  using abstraction_map = std::map<data::sort_expression, data::function_symbol>;
 
   // Used for generating variables of sort comprehensions.
   data::set_identifier_generator m_generator;
 
   struct absinthe_sort_expression_builder: public sort_expression_builder<absinthe_sort_expression_builder>
   {
-    typedef sort_expression_builder<absinthe_sort_expression_builder> super;
+    using super = sort_expression_builder<absinthe_sort_expression_builder>;
     using super::apply;
 
     const abstraction_map& sigmaH;
@@ -259,7 +259,7 @@ struct absinthe_algorithm
 
   struct absinthe_data_expression_builder: public pbes_expression_builder<absinthe_data_expression_builder>
   {
-    typedef pbes_expression_builder<absinthe_data_expression_builder> super;
+    using super = pbes_expression_builder<absinthe_data_expression_builder>;
     using super::apply;
     using super::update;
 

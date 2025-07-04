@@ -224,7 +224,7 @@ std::string x19 = "binding_variables = X, Y(b,b1: Bool)";
 
 void test_pbes(const std::string& pbes_spec, const std::string& expected_result, bool compute_conditions, bool remove_equations = true)
 {
-  typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
+  using my_pbes_rewriter = simplify_data_rewriter<data::rewriter>;
 
   pbes p = txt2pbes(pbes_spec);
   pbes q = p;

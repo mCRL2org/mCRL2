@@ -24,7 +24,7 @@ namespace detail {
 template <typename Derived>
 struct anonymize_builder: public add_sort_expressions<data::detail::anonymize_builder, Derived>
 {
-  typedef add_sort_expressions<data::detail::anonymize_builder, Derived> super;
+  using super = add_sort_expressions<data::detail::anonymize_builder, Derived>;
   using super::enter;
   using super::leave;
   using super::update;

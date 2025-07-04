@@ -22,7 +22,7 @@ namespace detail {
 template <template <class> class Builder, class Derived>
 struct add_simplify: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::apply;
 
 protected:
@@ -594,7 +594,7 @@ struct simplify_builder: public add_simplify<pres_system::pres_expression_builde
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct simplify_data_rewriter_builder : public mcrl2::pres_system::detail::add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction >
 {
-  typedef add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction > super;
+  using super = add_data_rewriter<pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction>;
 
   using super::apply;
   const data::data_specification m_data_spec;
@@ -802,8 +802,8 @@ public:
 /// \brief A rewriter that simplifies boolean expressions in a term.
 struct simplify_rewriter
 {
-  typedef pres_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pres_expression;
+  using variable_type = data::variable;
 
   pres_expression operator()(const pres_expression& x) const
   {
@@ -822,8 +822,8 @@ struct simplify_rewriter
 template <typename DataRewriter>
 struct simplify_data_rewriter
 {
-  typedef pres_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pres_expression;
+  using variable_type = data::variable;
 
   const DataRewriter& R;
   const data::data_specification& m_dataspec;

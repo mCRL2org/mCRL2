@@ -44,10 +44,10 @@ class assignment_expression: public atermpp::aterm
 };
 
 /// \\brief list of assignment_expressions
-typedef atermpp::term_list<assignment_expression> assignment_expression_list;
+using assignment_expression_list = atermpp::term_list<assignment_expression>;
 
 /// \\brief vector of assignment_expressions
-typedef std::vector<assignment_expression>    assignment_expression_vector;
+using assignment_expression_vector = std::vector<assignment_expression>;
 
 // prototypes
 inline bool is_assignment(const atermpp::aterm& x);
@@ -140,10 +140,10 @@ inline void make_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of assignments
-typedef atermpp::term_list<assignment> assignment_list;
+using assignment_list = atermpp::term_list<assignment>;
 
 /// \\brief vector of assignments
-typedef std::vector<assignment>    assignment_vector;
+using assignment_vector = std::vector<assignment>;
 
 /// \\brief Test for a assignment expression
 /// \\param x A term
@@ -236,10 +236,10 @@ inline void make_untyped_identifier_assignment(atermpp::aterm& t, const ARGUMENT
 }
 
 /// \\brief list of untyped_identifier_assignments
-typedef atermpp::term_list<untyped_identifier_assignment> untyped_identifier_assignment_list;
+using untyped_identifier_assignment_list = atermpp::term_list<untyped_identifier_assignment>;
 
 /// \\brief vector of untyped_identifier_assignments
-typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignment_vector;
+using untyped_identifier_assignment_vector = std::vector<untyped_identifier_assignment>;
 
 /// \\brief Test for a untyped_identifier_assignment expression
 /// \\param x A term

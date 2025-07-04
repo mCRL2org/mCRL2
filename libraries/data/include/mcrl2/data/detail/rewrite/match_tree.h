@@ -34,7 +34,7 @@ class variable_or_number: public atermpp::aterm
     }
 };
 
-typedef atermpp::term_list<variable_or_number> variable_or_number_list;
+using variable_or_number_list = atermpp::term_list<variable_or_number>;
 
 class match_tree:public atermpp::aterm
 {
@@ -584,10 +584,10 @@ class match_tree_Me:public match_tree
     }
 };
 
-typedef atermpp::term_list < match_tree > match_tree_list;
-typedef std::vector < match_tree > match_tree_vector;
-typedef atermpp::term_list < match_tree_list > match_tree_list_list;
-typedef atermpp::term_list < match_tree_list_list > match_tree_list_list_list;
+using match_tree_list = atermpp::term_list<match_tree>;
+using match_tree_vector = std::vector<match_tree>;
+using match_tree_list_list = atermpp::term_list<match_tree_list>;
+using match_tree_list_list_list = atermpp::term_list<match_tree_list_list>;
 
 // Structure for build_tree parameters
 class build_pars

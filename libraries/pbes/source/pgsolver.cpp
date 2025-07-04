@@ -18,7 +18,7 @@
 namespace mcrl2::pbes_system
 {
 
-typedef std::map<core::identifier_string, std::size_t> variable_map;
+using variable_map = std::map<core::identifier_string, std::size_t>;
 
 ///
 /// \brief Convert a sequence of Boolean variables to PGSolver format.

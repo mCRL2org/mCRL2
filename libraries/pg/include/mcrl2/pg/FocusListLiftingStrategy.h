@@ -58,22 +58,22 @@ protected:
     verti phase2();
 
 private:
-    typedef std::vector<std::pair<verti, unsigned> > focus_list;
+  using focus_list = std::vector<std::pair<verti, unsigned int>>;
 
-    const verti V_;                     //!< game graph vertex count
+  const verti V_; //!< game graph vertex count
 
-    std::size_t max_lift_attempts_;       //!< maximum lift attempts per list
-    int phase_;                         //!< current phase
-    std::size_t num_lift_attempts_;       //!< number of consecutive lift attempts
-    bool prev_lifted_;                  //!< whether previous vertex was lifted
+  std::size_t max_lift_attempts_; //!< maximum lift attempts per list
+  int phase_;                     //!< current phase
+  std::size_t num_lift_attempts_; //!< number of consecutive lift attempts
+  bool prev_lifted_;              //!< whether previous vertex was lifted
 
-    // For phase 1:
-    LinearLiftingStrategy lls_;         //!< strategy for phase 1
+  // For phase 1:
+  LinearLiftingStrategy lls_; //!< strategy for phase 1
 
-    // For phase 2:
-    focus_list focus_list_;             //!< nodes on the focus list
-    focus_list::iterator read_pos_;     //!< current position in the focus list
-    focus_list::iterator write_pos_;    //!< current position in the focus list
+  // For phase 2:
+  focus_list focus_list_;          //!< nodes on the focus list
+  focus_list::iterator read_pos_;  //!< current position in the focus list
+  focus_list::iterator write_pos_; //!< current position in the focus list
 };
 
 /*! \ingroup LiftingStrategies
