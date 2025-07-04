@@ -17,9 +17,8 @@
 #include "mcrl2/pres/find_equalities.h"
 #include "mcrl2/pres/replace.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system
+{
 
 /// \cond INTERNAL_DOCS
 namespace detail {
@@ -184,8 +183,6 @@ class one_point_rule_rewriter
     }
 };
 
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system
 
 #endif // MCRL2_PRES_REWRITERS_ONE_POINT_RULE_REWRITER_H

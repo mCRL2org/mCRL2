@@ -18,13 +18,7 @@
 #include <limits>
 #include <stdexcept>
 
-namespace mcrl2
-{
-
-namespace pres_system
-{
-
-namespace detail
+namespace mcrl2::pres_system::detail
 {
 
 template <class T> // note, T is only a dummy
@@ -51,10 +45,6 @@ void check_res_equation_limit(std::size_t size)
   }
 }
 
-} // namespace detail
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::detail
 
 #endif // MCRL2_PRES_DETAIL_RES_EQUATION_LIMIT_H

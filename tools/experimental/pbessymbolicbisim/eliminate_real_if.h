@@ -12,9 +12,7 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_ELIMINATE_REAL_IF_H
 #define MCRL2_PBESSYMBOLICBISIM_ELIMINATE_REAL_IF_H
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -89,6 +87,6 @@ T eliminate_real_if(const T x,
 }
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_ELIMINATE_REAL_IF_H

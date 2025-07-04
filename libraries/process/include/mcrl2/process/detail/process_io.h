@@ -14,11 +14,8 @@
 #include <fstream>
 #include "mcrl2/process/parse.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 /// \brief Loads a process specification from input_filename, or from stdin if filename equals "".
 inline
@@ -37,10 +34,6 @@ process_specification parse_process_specification(const std::string& input_filen
   return result;
 }
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_PROCESS_IO_H

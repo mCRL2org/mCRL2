@@ -24,11 +24,7 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
 using pres_system::tools::pres_output_tool;
 
-namespace mcrl2 {
-
-namespace pres_system {
-
-namespace detail
+namespace mcrl2::pres_system::detail
 {
 /// \brief Prints a warning if formula contains an action that is not used in lpsspec.
 inline void check_lps2pres_actions(const state_formulas::state_formula& formula, const lps::stochastic_specification& lpsspec)
@@ -44,11 +40,7 @@ inline void check_lps2pres_actions(const state_formulas::state_formula& formula,
   }
 }
 
-} // namespace detail
-
-}
-
-}
+} // namespace mcrl2::pres_system::detail
 
 class lps2pres_tool : public pres_output_tool<input_output_tool>
 {

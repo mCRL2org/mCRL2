@@ -15,9 +15,8 @@
 #include "mcrl2/data/anonymize.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -169,8 +168,6 @@ void anonymize(process_specification& procspec)
   f.update(procspec);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ANONYMIZE_H

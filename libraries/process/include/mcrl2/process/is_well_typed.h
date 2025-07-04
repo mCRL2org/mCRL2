@@ -14,9 +14,8 @@
 
 #include "mcrl2/process/process_specification.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 /// \brief Returns true if the process specification is well typed. N.B. The check is very incomplete!
 inline
@@ -26,8 +25,6 @@ bool is_well_typed(const process_specification& procspec)
   return free_variables.empty();
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_WELL_TYPED_H

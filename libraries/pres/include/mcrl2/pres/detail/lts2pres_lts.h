@@ -14,11 +14,8 @@
 
 #include "mcrl2/lts/lts_lts.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
-
-namespace detail {
+namespace mcrl2::pres_system::detail
+{
 
 inline
 std::ostream& operator<<(std::ostream& out, const lts::probabilistic_lts_lts_t& ltsspec)
@@ -125,10 +122,6 @@ std::ostream& operator<<(std::ostream& out, const lts2pres_lts& ltsspec)
   return out;
 }
 
-} // namespace detail
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::detail
 
 #endif // MCRL2_PRES_DETAIL_LTS2PRES_LTS_H

@@ -14,13 +14,7 @@
 
 #include "mcrl2/utilities/xinput_tool.h"
 
-namespace mcrl2
-{
-
-namespace utilities
-{
-
-namespace tools
+namespace mcrl2::utilities::tools
 {
 
 /// \brief Base class for tools that take an x number of files as input and one output file.
@@ -100,10 +94,6 @@ class xinput_output_tool: public xinput_tool
     std::string& output_filename() { return m_output_filename; }
 };
 
-} // namespace tools
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::tools
 
 #endif // MCRL2_UTILITIES_XINPUT_OUTPUT_TOOL_H

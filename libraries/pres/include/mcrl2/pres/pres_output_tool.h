@@ -15,13 +15,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/pres/io.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
-{
-
-namespace tools
+namespace mcrl2::pres_system::tools
 {
 
 /// \brief Base class for filter tools that produce a pres as output.
@@ -131,10 +125,6 @@ class pres_output_tool: public Tool
     }
 };
 
-} // namespace tools
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::tools
 
 #endif // MCRL2_RES_PRES_OUTPUT_TOOL_H

@@ -15,11 +15,8 @@
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/utilities/detail/position_counter.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 struct position_count_traverser: public process_expression_traverser<position_count_traverser>
 {
@@ -152,10 +149,6 @@ std::vector<std::size_t> position_counts(const process_specification& x)
   return f.counter.ycounts;
 }
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_POSITION_COUNT_TRAVERSER_H

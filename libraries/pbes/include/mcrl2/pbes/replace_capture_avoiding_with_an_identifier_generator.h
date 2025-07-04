@@ -16,9 +16,8 @@
 #include "mcrl2/pbes/add_binding.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -126,8 +125,6 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
 }
 //--- end generated pbes_system replace_capture_avoiding_with_identifier_generator code ---//
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H

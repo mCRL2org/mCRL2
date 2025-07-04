@@ -22,11 +22,7 @@
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 
-namespace mcrl2
-{
-namespace pbes_system
-{
-namespace detail
+namespace mcrl2::pbes_system::detail
 {
 
 class ppg_summand;
@@ -532,12 +528,6 @@ std::ostream& operator<<(std::ostream& out, const ppg_pbes& x)
   return out << pp(x);
 }
 
-
-
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBESSYMBOLICBISIM_PPG_PARSER_H

@@ -14,9 +14,7 @@
 #include "simplifier_fourier_motzkin.h"
 #include "simplifier_identity.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 data_specification simplifier::norm_rules_spec()
@@ -192,5 +190,4 @@ simplifier* get_simplifier_instance(const simplifier_mode& mode, const rewriter&
   }
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data

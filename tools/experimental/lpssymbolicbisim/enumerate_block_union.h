@@ -11,9 +11,7 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_ENUMERATE_BLOCK_UNION_H
 #define MCRL2_LPSSYMBOLICBISIM_ENUMERATE_BLOCK_UNION_H
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 struct enumerate_filter_print
@@ -79,9 +77,6 @@ struct enumerate_filter_print
   }
 };
 
-
-} // namespace data
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 #endif // MCRL2_LPSSYMBOLICBISIM_ENUMERATE_BLOCK_UNION_H
