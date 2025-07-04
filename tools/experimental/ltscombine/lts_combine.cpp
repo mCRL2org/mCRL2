@@ -128,9 +128,9 @@ bool is_allowed(const std::vector<core::identifier_string_list>& allowed, const 
     return true;
   }
 
-  for (const auto& it : allowed)
+  for (const auto& action : allowed)
   {
-    if (it == action_names)
+    if (action == action_names)
     {
       return true;
     }
@@ -512,9 +512,9 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
-  for (const lts::lts_lts_t& lt : lts)
+  for (const lts::lts_lts_t& input : lts)
   {
-    outgoing_transitions.emplace_back(lt.get_transitions(), lt.num_states(), true);
+    outgoing_transitions.emplace_back(input.get_transitions(), input.num_states(), true);
   }
 
   // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).
