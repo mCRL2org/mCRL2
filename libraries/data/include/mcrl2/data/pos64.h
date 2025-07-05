@@ -1238,6 +1238,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list(), c1(), most_significant_digit(sort_machine_word::one_word())));
         result.push_back(data_equation(variable_list({vw}), equals_one(most_significant_digit(vw)), sort_machine_word::equals_one_word(vw)));
         result.push_back(data_equation(variable_list({vp, vw}), equals_one(concat_digit(vp, vw)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vp}), equals_one(succpos(vp)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vp}), succ(vp), succpos(vp)));
         result.push_back(data_equation(variable_list({vw1}), succpos(most_significant_digit(vw1)), if_(sort_machine_word::equals_max_word(vw1), concat_digit(most_significant_digit(sort_machine_word::one_word()), sort_machine_word::zero_word()), most_significant_digit(sort_machine_word::succ_word(vw1)))));
         result.push_back(data_equation(variable_list({vp, vw1}), succpos(concat_digit(vp, vw1)), if_(sort_machine_word::equals_max_word(vw1), concat_digit(succpos(vp), sort_machine_word::zero_word()), concat_digit(vp, sort_machine_word::succ_word(vw1)))));

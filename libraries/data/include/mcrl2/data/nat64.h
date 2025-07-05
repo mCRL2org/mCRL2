@@ -4870,8 +4870,10 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list(), c0(), most_significant_digit_nat(sort_machine_word::zero_word())));
         result.push_back(data_equation(variable_list({vw}), equals_zero(most_significant_digit_nat(vw)), sort_machine_word::equals_zero_word(vw)));
         result.push_back(data_equation(variable_list({vn, vw}), equals_zero(concat_digit(vn, vw)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vn}), equals_zero(succ_nat(vn)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vw}), not_equals_zero(most_significant_digit_nat(vw)), sort_machine_word::not_equals_zero_word(vw)));
         result.push_back(data_equation(variable_list({vn, vw}), not_equals_zero(concat_digit(vn, vw)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vn}), not_equals_zero(succ_nat(vn)), sort_bool::true_()));
         result.push_back(data_equation(variable_list({vw}), equals_one(most_significant_digit_nat(vw)), sort_machine_word::equals_one_word(vw)));
         result.push_back(data_equation(variable_list({vn, vw}), equals_one(concat_digit(vn, vw)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vw}), succ_nat(most_significant_digit_nat(vw)), if_(sort_machine_word::equals_max_word(vw), concat_digit(most_significant_digit_nat(sort_machine_word::one_word()), sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::succ_word(vw)))));

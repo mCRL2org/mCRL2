@@ -191,7 +191,6 @@ namespace mcrl2 {
       implementation_map fbag_cpp_implementable_constructors(const sort_expression& s)
       {
         implementation_map result;
-        static_cast< void >(s); // suppress unused variable warnings
         return result;
       }
 
@@ -832,7 +831,6 @@ namespace mcrl2 {
       implementation_map fbag_cpp_implementable_mappings(const sort_expression& s)
       {
         implementation_map result;
-        static_cast< void >(s); // suppress unused variable warnings
         return result;
       }
       ///\brief Function for projecting out argument.

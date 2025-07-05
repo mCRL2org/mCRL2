@@ -101,9 +101,8 @@ namespace mcrl2 {
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      void zero_word_application(data_expression& result, const data_expression& a)
+      void zero_word_application(data_expression& result, [[maybe_unused]] const data_expression& a)
       {
-        static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==zero_word());
         zero_word_manual_implementation(result);
@@ -265,9 +264,8 @@ namespace mcrl2 {
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      void one_word_application(data_expression& result, const data_expression& a)
+      void one_word_application(data_expression& result, [[maybe_unused]] const data_expression& a)
       {
-        static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==one_word());
         one_word_manual_implementation(result);
@@ -313,9 +311,8 @@ namespace mcrl2 {
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      void two_word_application(data_expression& result, const data_expression& a)
+      void two_word_application(data_expression& result, [[maybe_unused]] const data_expression& a)
       {
-        static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==two_word());
         two_word_manual_implementation(result);
@@ -361,9 +358,8 @@ namespace mcrl2 {
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      void three_word_application(data_expression& result, const data_expression& a)
+      void three_word_application(data_expression& result, [[maybe_unused]] const data_expression& a)
       {
-        static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==three_word());
         three_word_manual_implementation(result);
@@ -409,9 +405,8 @@ namespace mcrl2 {
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      void four_word_application(data_expression& result, const data_expression& a)
+      void four_word_application(data_expression& result, [[maybe_unused]] const data_expression& a)
       {
-        static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==four_word());
         four_word_manual_implementation(result);
@@ -457,9 +452,8 @@ namespace mcrl2 {
 
       /// \brief Application of a function that is user defined instead of by rewrite rules. It does not have sort parameters.
       inline
-      void max_word_application(data_expression& result, const data_expression& a)
+      void max_word_application(data_expression& result, [[maybe_unused]] const data_expression& a)
       {
-        static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         // assert(a==max_word());
         max_word_manual_implementation(result);
