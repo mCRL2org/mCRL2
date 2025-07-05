@@ -48,6 +48,7 @@ var  b: Bool;
 eqn  @c1 = @most_significant_digit(@one_word);
      @equals_one(@most_significant_digit(w)) = @equals_one_word(w);
      @equals_one(@concat_digit(p,w)) = false;
+     @equals_one(@succ_pos(p)) = false;
      succ(p) = @succ_pos(p);
      @succ_pos(@most_significant_digit(w1)) = if(@equals_max_word(w1),
                                                  @concat_digit(@most_significant_digit(@one_word),@zero_word),

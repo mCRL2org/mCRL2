@@ -129,8 +129,10 @@ var  b:Bool;
 eqn  @c0 = @most_significant_digitNat(@zero_word);
      @equals_zero(@most_significant_digitNat(w)) = @equals_zero_word(w);
      @equals_zero(@concat_digit(n,w)) = false;
+     @equals_zero(@succ_nat(n)) = false;
      @not_equals_zero(@most_significant_digitNat(w)) = @not_equals_zero_word(w);
      @not_equals_zero(@concat_digit(n,w)) = true;
+     @not_equals_zero(@succ_nat(n)) = true;
      @equals_one(@most_significant_digitNat(w)) = @equals_one_word(w);
      @equals_one(@concat_digit(n,w)) = false;
      @succ_nat(@most_significant_digitNat(w)) = if(@equals_max_word(w),
