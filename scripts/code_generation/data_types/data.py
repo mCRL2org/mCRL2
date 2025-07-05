@@ -1969,7 +1969,7 @@ class mapping_specification():
         code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
       code += "      /// \\return All system defined mappings for that can be used in mCRL2 specificationis %s\n" % (escape(namespace_string))
       code += "      inline\n"
-      code += "      function_symbol_vector %s_mCRL2_usable_mappings([[maybe_unused]] %s)\n" % (namespace_string, sort_parameters)
+      code += "      function_symbol_vector %s_mCRL2_usable_mappings(%s)\n" % (namespace_string, sort_parameters)
       code += "      {\n"
       code += "        function_symbol_vector result;\n"
       add_mappings_code = self.declarations.mCRL2_usable_functions(spec) + (spec.sort_specification.structured_sort_mapping_code())
@@ -1985,7 +1985,7 @@ class mapping_specification():
         code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
       code += "      /// \\return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for %s\n" % (escape(namespace_string))
       code += "      inline\n"
-      code += "      implementation_map %s_cpp_implementable_mappings([[maybe_unused]] %s)\n" % (namespace_string, sort_parameters)
+      code += "      implementation_map %s_cpp_implementable_mappings(%s)\n" % (namespace_string, sort_parameters)
       code += "      {\n"
       code += "        implementation_map result;\n"
       add_mappings_code = self.declarations.cplusplus_implementable_functions(spec, data_parameters)
@@ -2037,7 +2037,7 @@ class constructor_specification():
       code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
     code += "      /// \\return All system defined constructors for %s.\n" % (escape(namespace_string))
     code += "      inline\n"
-    code += "      function_symbol_vector %s_generate_constructors_code([[maybe_unused]] %s)\n" % (namespace_string,sort_parameters)
+    code += "      function_symbol_vector %s_generate_constructors_code(%s)\n" % (namespace_string,sort_parameters)
     code += "      {\n"
     code += "        function_symbol_vector result;\n"
     add_constructors_code = self.declarations.generator_code(spec) + (spec.sort_specification.structured_sort_constructor_code())
@@ -2052,7 +2052,7 @@ class constructor_specification():
       code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
     code += "      /// \\return All system defined constructors that can be used in an mCRL2 specification for %s.\n" % (escape(namespace_string))
     code += "      inline\n"
-    code += "      function_symbol_vector %s_mCRL2_usable_constructors([[maybe_unused]] %s)\n" % (namespace_string,sort_parameters)
+    code += "      function_symbol_vector %s_mCRL2_usable_constructors(%s)\n" % (namespace_string,sort_parameters)
     code += "      {\n"
     code += "        function_symbol_vector result;\n"
     add_constructors_code = self.declarations.mCRL2_usable_functions(spec) + (spec.sort_specification.structured_sort_constructor_code())
@@ -2069,7 +2069,7 @@ class constructor_specification():
       code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
     code += "      /// \\return All system defined constructors that are to be implemented in C++ for %s.\n" % (escape(namespace_string))
     code += "      inline\n"
-    code += "      implementation_map %s_cpp_implementable_constructors([[maybe_unused]] %s)\n" % (namespace_string,sort_parameters)
+    code += "      implementation_map %s_cpp_implementable_constructors(%s)\n" % (namespace_string,sort_parameters)
     code += "      {\n"
     code += "        implementation_map result;\n"
     add_constructors_code = self.declarations.cplusplus_implementable_functions(spec,data_parameters) + (spec.sort_specification.structured_sort_constructor_code())
