@@ -26,7 +26,7 @@ In the folder *models*, the following mutual exclusion algorithms are modelled:
 * Lamport's 3-bit algorithm (Lamport_3-bit.mcrl2), and a version where the z variable is implemented incorrectly (Lamport_3-bit_incorrect_z.mcrl2)
 * Peterson's algorithm (Peterson.mcrl2)
 * Szymanski's 3-bit linear wait algorithm, both its original presentation (Szymanski_3-bit_lin_wait.mcrl2) and a variant with minor modifications (Szymanski_3-bit_lin_wait_alt.mcrl2)
-* Szymanski's flag algorithm, both the variant with integers (Szymanski_flag.mcrl2) and the variant with Booleans (Szymanski_flag_bit.mcrl2)
+* Szymanski's flag algorithm, both the variant with integers (Szymanski_flag.mcrl2) and the variant with Booleans (Szymanski_flag_bit.mcrl2 with the original exit protocol and Szymanski_flag_bit_altexit.mcrl2 with the alternative exit protocol)
 
 We refer to the full version of *Just Verification of Mutual Exclusion Algorithms* for the pseudocode of the modelled algorithms, for references to the originating literature, and for additional explanations.
 
