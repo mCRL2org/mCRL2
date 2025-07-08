@@ -194,8 +194,8 @@ public:
       const propositional_variable_instantiation& X,
       const pbes_expression& psi) override
   {
-    rewrite_star(result, symbol, X, psi, G, alpha, mapping);
     pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, psi);
+    rewrite_star(result, symbol, X, psi, G, alpha, mapping);
   }
 
 private:

@@ -203,15 +203,15 @@ pbes_system::srf_pbes_with_ce preprocess(pbes_system::pbes pbesspec, const symbo
   }
 
   auto result = pbes2pre_srf(pbesspec, true);
-  
+
   // Unify the parameters of the original PBES (which has potential counter example information)
   unify_parameters(result, true, options.reset_parameters);
-  
+
   pbes_system::resolve_summand_variable_name_clashes(result, result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
 
   return result;
 }
-  
+
 // Store information per lace worker.
 struct per_worker_information
 {
@@ -356,7 +356,7 @@ class pbesreach_algorithm
       {
         m_data_index.emplace_back(param.sort());
       }
-      
+
       mCRL2log(log::debug) << "Final read/write matrix:" << std::endl;
       mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
     }
@@ -530,8 +530,8 @@ class pbesreach_algorithm
       for (std::size_t i = 0; i < R.size(); i++)
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << print_size(R[i].L) << " transitions (learn time = "
-                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls 
-                               << " calls, cached " << print_size(R[i].Ldomain) << " values" 
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls
+                               << " calls, cached " << print_size(R[i].Ldomain) << " values"
                                << std::endl;
 
         total_time += R[i].learn_time;
@@ -565,7 +565,6 @@ class pbesreach_algorithm
       return false;
     }
 
-    /// \returns True iff the vertex is won by even and nothing if the solution has not been determined.
     virtual sylvan::ldds::ldd W0() const
     {
       return sylvan::ldds::empty_set();
@@ -575,6 +574,10 @@ class pbesreach_algorithm
     {
       return sylvan::ldds::empty_set();
     }
+
+    virtual sylvan::ldds::ldd S0() const { return sylvan::ldds::empty_set(); }
+
+    virtual sylvan::ldds::ldd S1() const { return sylvan::ldds::empty_set(); }
 
     std::vector<symbolic::summand_group> summand_groups() const
     {
