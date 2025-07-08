@@ -50,6 +50,8 @@ public:
   {
     m_Vwon[0] = sylvan::ldds::empty_set();
     m_Vwon[1] = sylvan::ldds::empty_set();
+    m_S[0] = sylvan::ldds::empty_set();
+    m_S[1] = sylvan::ldds::empty_set();
   }
 
   void on_end_while_loop() override
@@ -73,15 +75,17 @@ public:
 
       if (m_options.solve_strategy == 1)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_solitair_cycles(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
-      }      
+        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1])
+            = solver.detect_solitair_cycles(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+      }
       else if (m_options.solve_strategy == 2)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_solitair_cycles(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
-      }      
+        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1])
+            = solver.detect_solitair_cycles(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+      }
       else if (m_options.solve_strategy == 3)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_forced_cycles(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_forced_cycles(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
       else if (m_options.solve_strategy == 4)
       {
@@ -133,9 +137,15 @@ public:
     return m_Vwon[1];
   }
 
+  ldd S0() const override { return m_S[0]; }
+
+  ldd S1() const override { return m_S[1]; }
+
 private:
   // States for which winners have already been determined.
   std::array<sylvan::ldds::ldd, 2> m_Vwon;
+  // Strategies for both players for the states for which winners have been determined
+  std::array<sylvan::ldds::ldd, 2> m_S;
   std::size_t iteration_count = 0;
 
   double time_solving = 0.0;
@@ -222,7 +232,7 @@ public:
                 ++param_Y_it;
                 ++i;
               }
-              
+
               if (sylvan::ldds::member_cube(strategy, singleton))
               {
                 // If Y in E0
@@ -232,7 +242,7 @@ public:
               else
               {
                 changed = true;
-                if (alpha == 0) 
+                if (alpha == 0)
                 {
                   // If Y is not reachable, replace it by false
                   mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
@@ -252,7 +262,7 @@ public:
                 return Y;
             }
           }
-      );
+
     }
 
     if (changed)
@@ -453,7 +463,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.solve_strategy));
       }
-      
+
       if (parser.has_option("max-iterations"))
       {
         options.max_iterations = parser.option_argument_as<std::size_t>("max-iterations");
@@ -485,7 +495,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       if (options.check_strategy && options.summand_groups.compare("none") != 0)
       {
         throw mcrl2::runtime_error("Cannot check strategy for merged summand groups");
-      }    
+      }
     }
 
   public:
@@ -506,13 +516,13 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       using namespace sylvan::ldds;
 
       bool has_counter_example = mcrl2::pbes_system::detail::has_counter_example_information(pbesspec);
-      if (has_counter_example && options_.solve_strategy != 0)
-      {
-        // TODO: Cannot use the partial solvers.
-        mCRL2log(mcrl2::log::warning) << "Warning: Cannot use partial solving with PBES that has counter example information, using solving strategy 0 instead." << std::endl;
-        options_.solve_strategy = 0;
-      }
-      
+      // if (has_counter_example && options_.solve_strategy != 0)
+      // {
+      //   // TODO: Cannot use the partial solvers.
+      //   mCRL2log(mcrl2::log::warning) << "Warning: Cannot use partial solving with PBES that has counter example information, using solving strategy 0 instead." << std::endl;
+      //   options_.solve_strategy = 0;
+      // }
+
       if (has_counter_example)
       {
         if (lpsfile.empty() && ltsfile.empty())
@@ -530,7 +540,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
               " --counter-example option when generating the PBES?"
             << std::endl;
       }
-      
+
       // This has to be done consistently with the LPS for the counter examples.
       data::mutable_map_substitution<> sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
       pbes_system::detail::replace_global_variables(pbesspec, sigma);
@@ -570,8 +580,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           {
             if (options.max_iterations == 0)
             {
-              bool chaining = options.chaining;              
-              if (options.check_strategy && options.chaining) 
+              bool chaining = options.chaining;
+              if (options.check_strategy && options.chaining)
               {
                 mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while checking the strategy" << std::endl;
                 chaining = false;
@@ -595,7 +605,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             }
           }
         }
-        else 
+        else
         {
           timer().start("first-instantiation");
           ldd V = reach.run();
@@ -605,7 +615,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             print_dot(options.dot_file, V);
           }
 
-          if (options.chaining) 
+          if (options.chaining)
           {
             mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while computing the strategy" << std::endl;
           }
@@ -615,12 +625,13 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           pbes_system::symbolic_pbessolve_algorithm solver(G, options.check_strategy);
 
           timer().start("first-solving");
+          // TODO: Allow for partial solving here.
           auto [result, W0, W1, S0, S1] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
           timer().finish("first-solving");
 
           mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
-          
-          // Based on the result remove the unnecessary equations related to counter example information. 
+
+          // Based on the result remove the unnecessary equations related to counter example information.
           mCRL2log(log::verbose) << "Removing unnecessary counter example information for other player." << std::endl;
           auto pbesspec_simplified = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
           mCRL2log(log::trace) << pbesspec_simplified << std::endl;
@@ -629,13 +640,15 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
           // Set some options for the second instantiation.
           pbessolve_options pbessolve_options;
+          // only remove self-loops. The other optimizations are disabled for the second run.
+          //pbessolve_options.optimization = std::min(partial_solve_strategy::remove_self_loops, options_.solve_strategy);
           pbessolve_options.rewrite_strategy = options_.rewrite_strategy;
           pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
           pbessolve_options.number_of_threads = options_.max_workers;
 
           PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1, reach.rewriter());
 
-          // Perform the second instantiation given the proof graph.      
+          // Perform the second instantiation given the proof graph.
           timer().start("second-instantiation");
           second_instantiate.run();
           timer().finish("second-instantiation");
@@ -643,7 +656,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
                                 << SG.all_vertices().size() << std::endl;
           [[maybe_unused]]
-          bool final_result = pbes_system::detail::run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());                            
+          bool final_result = pbes_system::detail::run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
           if (result != final_result)
           {
             throw mcrl2::runtime_error("The result of the first and second instantiations do not match, this is a bug in the tool!");
@@ -660,7 +673,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
       sylvan::ldds::initialise();
-  
+
       mCRL2log(log::verbose) << options << std::endl;
 
       pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
