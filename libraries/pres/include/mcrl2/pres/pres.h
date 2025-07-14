@@ -27,7 +27,6 @@ class pres;
 void complete_data_specification(pres&);
 
 // template function overloads
-std::string pp(const pres& x, bool precedence_aware = true);
 void normalize_sorts(pres& x, const data::sort_specification& sortspec);
 void translate_user_notation(pres_system::pres& x);
 std::set<data::sort_expression> find_sort_expressions(const pres_system::pres& x);
@@ -298,7 +297,7 @@ class pres
 
 //--- start generated class pres ---//
 // prototype declaration
-std::string pp(const pres& x, bool precedence_aware);
+std::string pp(const pres& x, bool precedence_aware = true);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
