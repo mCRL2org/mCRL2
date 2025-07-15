@@ -213,17 +213,17 @@ pbes_expression make_conjunction(Iterator first, Iterator last)
   {
     return true_();
   }
-  
+
   Iterator it = first;
   pbes_expression result = *it;
   ++it;
-  
+
   while (it != last)
   {
     make_and_(result, result, *it);
     ++it;
   }
-  
+
   return result;
 }
 
@@ -234,17 +234,17 @@ pbes_expression make_disjunction(Iterator first, Iterator last)
   {
     return false_();
   }
-  
+
   Iterator it = first;
   pbes_expression result = *it;
   ++it;
-  
+
   while (it != last)
   {
     make_or_(result, result, *it);
     ++it;
   }
-  
+
   return result;
 }
 
@@ -342,7 +342,7 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
           propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
     }
   }
-  
+
 
   void apply(const or_& x)
   {
@@ -359,7 +359,7 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
     std::vector<pbes_expression> simple_clauses;
     for (const auto& clause : clauses)
     {
-      if (m_merge_simple_expressions && is_simple_expression(clause, allow_ce))
+      if (m_merge_simple_expressions && is_simple_expression(clause, false))
       {
         simple_clauses.emplace_back(clause);
         apply(clause);
@@ -378,9 +378,9 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
 
     for (const auto& clause : clauses)
     {
-      if (!m_merge_simple_expressions || !is_simple_expression(clause, allow_ce))
-      {   
-        mCRL2log(log::trace) << "Clause " << clause << "\n";   
+      if (!m_merge_simple_expressions || !is_simple_expression(clause, false))
+      {
+        mCRL2log(log::trace) << "Clause " << clause << "\n";
         std::size_t size = summands.size();
         apply(clause);
         for (auto i = summands.begin() + size; i != summands.end(); ++i)
@@ -534,7 +534,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
   {}
 
   void apply(const or_& x)
-  {    
+  {
     if (m_merge_simple_expressions && is_simple_expression(x.left(), allow_ce))
     {
       std::size_t size = summands.size();
@@ -569,7 +569,8 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
   {
     if (!allow_ce)
     {
-      return super::apply(x);
+      super::apply(x);
+      return;
     }
 
     mCRL2log(log::trace) << "Expression " << x << "\n";
@@ -578,14 +579,17 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
     std::set<pbes_expression> clauses = split_and(x, false);
 
     std::vector<pbes_expression> simple_clauses;
+    // Collect simple expressions to strengthen conjuncts of result of
+    // recursive calls. We do not include counterexample information to
+    // ensure that the PBES remains in positive form.
     for (const auto& clause : clauses)
     {
-      if (m_merge_simple_expressions && is_simple_expression(clause, allow_ce))
+      if (m_merge_simple_expressions && is_simple_expression(clause, false))
       {
         simple_clauses.emplace_back(clause);
         apply(clause);
       }
-    }    
+    }
 
     if (simple_clauses.empty())
     {
@@ -594,14 +598,16 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
       return;
     }
 
+    // condition used for strengthening guards of dependencies.
     pbes_expression condition = make_conjunction(simple_clauses.begin(), simple_clauses.end());
     mCRL2log(log::trace) << "Simple condition " << condition << "\n";
 
+    // Recursively apply (pre)SRF transformation.
     for (const auto& clause : clauses)
     {
-      if (!m_merge_simple_expressions || !is_simple_expression(clause, allow_ce))
-      {      
-        mCRL2log(log::trace) << "Clause " << clause << "\n";   
+      if (!m_merge_simple_expressions || !is_simple_expression(clause, false))
+      {
+        mCRL2log(log::trace) << "Clause " << clause << "\n";
         std::size_t size = summands.size();
         apply(clause);
         for (auto i = summands.begin() + size; i != summands.end(); ++i)
@@ -885,7 +891,7 @@ inline srf_pbes pre_srf2srfpbes(const srf_pbes_with_ce& p)
         propositional_variable_instantiation variable = atermpp::down_cast<propositional_variable_instantiation>(simplify(result));
 
         f.apply(result, summand.condition());
-        
+
         summands.emplace_back(summand.parameters(), simplify(result), variable);
       }
 
