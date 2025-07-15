@@ -48,6 +48,64 @@ inline pbes_expression make_not(const pbes_expression& x)
   return not_(x);
 }
 
+template <typename Iterator>
+pbes_expression make_conjunction(Iterator first, Iterator last)
+{
+  if (first == last)
+  {
+    return true_();
+  }
+
+  Iterator it = first;
+  pbes_expression result = *it;
+  ++it;
+
+  while (it != last)
+  {
+    make_and_(result, result, *it);
+    ++it;
+  }
+
+  return result;
+}
+
+template <typename Iterator>
+pbes_expression make_disjunction(Iterator first, Iterator last)
+{
+  if (first == last)
+  {
+    return false_();
+  }
+
+  Iterator it = first;
+  pbes_expression result = *it;
+  ++it;
+
+  while (it != last)
+  {
+    make_or_(result, result, *it);
+    ++it;
+  }
+
+  return result;
+}
+
+/// @brief Assuming that x is of the form (x1 && x2 && ... xn), generates
+///        expression !x1 || !x2 || ... !xn
+/// @param x a pbes_expression that is conjunctive
+/// @return disjunctive expression that is equivalent to !x.
+inline pbes_expression distribute_not_over_and(const pbes_expression& x)
+{
+  std::set<pbes_expression> conjuncts = split_and(x);
+  std::set<pbes_expression> disjuncts;
+  // negate each of the expressions
+  for (const pbes_expression& conjunct : conjuncts)
+  {
+    disjuncts.insert(make_not(conjunct));
+  }
+  return make_disjunction(disjuncts.begin(), disjuncts.end());
+}
+
 /// A summand in a srf equation, if allow_ce is true then counter example information is
 /// allowed in the condition. This means that the condition contains propositional variables.
 template <bool allow_ce>
@@ -106,7 +164,11 @@ public:
   {
     if (conjunctive)
     {
-      return make_forall_(m_parameters, or_(not_(pbes_expression(m_condition)), m_X));
+      // if counterexample information is allowed, we may have generated conjuncts
+      // with guards of the form !X, where X is a variable that encodes counterexample
+      // information. As other algorithms expect expressions in positive form, we need
+      // to push the negation inside.
+      return make_forall_(m_parameters, or_(distribute_not_over_and(m_condition), m_X));
     }
     else
     {
@@ -205,49 +267,6 @@ inline std::ostream& operator<<(std::ostream& out, const pre_srf_equation<allow_
   }
   return out;
 }
-
-template <typename Iterator>
-pbes_expression make_conjunction(Iterator first, Iterator last)
-{
-  if (first == last)
-  {
-    return true_();
-  }
-
-  Iterator it = first;
-  pbes_expression result = *it;
-  ++it;
-
-  while (it != last)
-  {
-    make_and_(result, result, *it);
-    ++it;
-  }
-
-  return result;
-}
-
-template <typename Iterator>
-pbes_expression make_disjunction(Iterator first, Iterator last)
-{
-  if (first == last)
-  {
-    return false_();
-  }
-
-  Iterator it = first;
-  pbes_expression result = *it;
-  ++it;
-
-  while (it != last)
-  {
-    make_or_(result, result, *it);
-    ++it;
-  }
-
-  return result;
-}
-
 
 template <bool allow_ce>
 std::vector<pre_srf_summand<allow_ce>> srf_or(const pbes_expression& phi,
@@ -450,9 +469,13 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
     }
   }
 
-  void apply(const not_& /* x */) { throw mcrl2::runtime_error("unsupported term!"); }
+  void apply(const not_& x) {
+    throw mcrl2::runtime_error("srf_or_traverser::apply(not_) unsupported term " + pbes_system::pp(x));
+  }
 
-  void apply(const imp& /* x */) { throw mcrl2::runtime_error("unsupported term!"); }
+  void apply(const imp& x) {
+    throw mcrl2::runtime_error("srf_or_traverser::apply(imp) unsupported term " + pbes_system::pp(x));
+  }
 };
 
 template<bool allow_ce>
@@ -676,9 +699,13 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
     }
   }
 
-  void apply(const not_& /* x */) { throw mcrl2::runtime_error("unsupported term!"); }
+  void apply(const not_& x) {
+    throw mcrl2::runtime_error("srf_and_traverser::apply(not_) unsupported term " + pbes_system::pp(x));
+  }
 
-  void apply(const imp& /* x */) { throw mcrl2::runtime_error("unsupported term!"); }
+  void apply(const imp& x) {
+    throw mcrl2::runtime_error("srf_and_traverser::apply(imp) unsupported term " + pbes_system::pp(x));
+  }
 };
 
 template<bool allow_ce>
@@ -903,7 +930,7 @@ inline srf_pbes pre_srf2srfpbes(const srf_pbes_with_ce& p)
 }
 
 
-/// \brief Converts a PBES into standard recursive form
+/// \brief Converts a PBES into pre standard recursive form
 /// \pre The pbes p must be normalized
 inline srf_pbes_with_ce pbes2pre_srf(const pbes& p, bool merge_simple_expressions = true)
 {
