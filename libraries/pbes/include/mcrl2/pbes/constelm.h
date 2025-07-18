@@ -15,6 +15,7 @@
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
 namespace mcrl2
 {
@@ -1044,6 +1045,11 @@ void constelm(pbes& p,
               bool check_quantifiers = true
              )
 {
+  const bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
+  if (has_counter_example)
+  {
+    mCRL2log(log::warning) << "Warning: the PBES has counter example information, which may not be preserved by constant elimination." << std::endl;
+  }
   // data rewriter
   data::rewriter datar(p.data(), rewrite_strategy);
 

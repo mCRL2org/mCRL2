@@ -14,6 +14,7 @@
 #include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/utilities/reachable_nodes.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
 namespace mcrl2::pbes_system {
 
@@ -308,6 +309,11 @@ class pbes_parelm_algorithm
 inline
 void parelm(pbes& p)
 {
+  const bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
+  if (has_counter_example)
+  {
+    mCRL2log(log::warning) << "Warning: the PBES has counter example information, which may not be preserved by parameter elimination." << std::endl;
+  }
   pbes_parelm_algorithm algorithm;
   algorithm.run(p);
 }
