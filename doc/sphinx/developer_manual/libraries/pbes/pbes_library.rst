@@ -1,6 +1,6 @@
 .. math::
    :nowrap:
-   
+
 Parameterised Boolean Equation Systems
 ======================================
 
@@ -188,13 +188,13 @@ or
 where :math:`d = (d_1, \ldots, d_m)`. Below the transformation rules for converting a PBES to standard recursive form are given.
 
 .. math::
-   :nowrap:   
+   :nowrap:
 
    \begin{alignat*}{3}
-   & R_{\lor,\sigma}(f, V)                       && = &&\; \langle \exists d \ap \singletonD \ldotp f \land X_\TRUE(\singletonelem), \emptyset \rangle\\ 
+   & R_{\lor,\sigma}(f, V)                       && = &&\; \langle \exists d \ap \singletonD \ldotp f \land X_\TRUE(\singletonelem), \emptyset \rangle\\
    & R_{\lor,\sigma}(X(e), V)                    && = &&\; \langle \exists d \ap \singletonD \ldotp \mathit{true} \land X(e), \emptyset \rangle\\
    & R_{\lor,\sigma}(\varphi \land f, V)         && = &&\; \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f \land f_i \land X_i(g_i), \PBES^\varphi \rangle \\
-   & ~                                           && ~ &&\; \quad \text{where } \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle = R_{\lor,\sigma}(\varphi, V)\\  
+   & ~                                           && ~ &&\; \quad \text{where } \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle = R_{\lor,\sigma}(\varphi, V)\\
    & R_{\lor,\sigma}(f \land \varphi, V)         && = &&\; \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f \land f_i \land X_i(g_i), \PBES^\varphi \rangle \\
    & ~                                           && ~ &&\; \quad \text{where } \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle = R_{\lor,\sigma}(\varphi, V)\\
    & R_{\lor,\sigma}(\varphi \land \psi, V)      && = &&\; \langle \exists d \ap \singletonD \ldotp \mathit{true} \land \tilde{X}(V), (\sigma\tilde{X}(V) = \varphi \land \psi) \rangle \\
@@ -204,13 +204,13 @@ where :math:`d = (d_1, \ldots, d_m)`. Below the transformation rules for convert
    & R_{\lor,\sigma}(\forall W\ldotp f, V)       && = &&\; \langle \exists d \ap \singletonD \ldotp (\forall W\ldotp f) \land X_\TRUE(\singletonelem), \emptyset \rangle\\
    & R_{\lor,\sigma}(\forall W\ldotp \varphi, V) && = &&\; \langle \exists d \ap \singletonD \ldotp \mathit{true} \land \tilde{X}(V), (\sigma\tilde{X}(V) = \forall W \ldotp \varphi) \rangle\\
    & R_{\lor,\sigma}(\exists W\ldotp \varphi, V)    && = &&\; \langle \bigvee_{i \in I^\varphi} \exists {W \cup W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle\\
-   & ~                                           && ~ &&\; \quad \text{where } \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle = R_{\lor,\sigma}(\varphi, V \cup W)       
+   & ~                                           && ~ &&\; \quad \text{where } \langle \bigvee_{i \in I^\varphi} \exists {W_i} \ldotp f_i \land X_i(g_i), \PBES^\varphi \rangle = R_{\lor,\sigma}(\varphi, V \cup W)
    \end{alignat*}
 
 Where :math:`R_\land` is defined dually to :math:`R_\lor`.
 
 .. math::
-   :nowrap: 
+   :nowrap:
 
    \begin{alignat*}{3}
    & R_{\land,\sigma}(f, V)                       && = &&\; \langle \forall d \ap \singletonD \ldotp \neg f \Rightarrow X_\FALSE(\singletonelem), \emptyset \rangle\\
@@ -227,13 +227,14 @@ Where :math:`R_\land` is defined dually to :math:`R_\lor`.
    & ~                                            && ~ &&\; \quad \text{where } \langle \bigwedge_{i \in I^\varphi} \forall {W_i} \ldotp f_i \Rightarrow X_i(g_i), \PBES^\varphi \rangle = R_{\land,\sigma}(\varphi, V \cup W)\\
    & R_{\land,\sigma}(\exists W\ldotp f, V)       && = &&\; \langle \forall d \ap \singletonD \ldotp (\exists W\ldotp f) \Rightarrow X_\FALSE(\singletonelem), \emptyset \rangle\\
    & R_{\land,\sigma}(\exists W\ldotp \varphi, V) && = &&\; \langle \forall d \ap \singletonD \ldotp \mathit{true} \Rightarrow \tilde{X}(V), (\sigma\tilde{X}(V) = \exists W \ldotp \varphi) \rangle
-   \end{alignat*} 
+   \end{alignat*}
 
-For the `pbessolvesymbolic` we have introduced a so-called pre-SRF form where
+For `pbessolvesymbolic` we have introduced a so-called pre-SRF form where
 all :math:`f_{ij}` can contain propositional variables related to identifying
 counter example information, these are called `Zpos` and `Zneg` by convention.
+We refer to these as pseudo-simple formulas.
 In the transformation from PBES to pre-SRF we have the rules above, where all
-`f` might contain these propositional variables, and in addition to that we
+`f` are pseudo-simple formulas instead of simple formulas, and in addition to that we
 introduce the following rules (subsuming the corresponding original rules):
 
 .. math::
@@ -241,18 +242,21 @@ introduce the following rules (subsuming the corresponding original rules):
 
    \begin{align*}
    & R_{\lor,\sigma}((\bigvee_{i \in I} f_i) \lor (\bigvee_{j \in J} \varphi_j), V)       && = &&\; \langle
-   (\bigvee_{i \in I} f_i \land X_{\mathit{true}}) \lor \bigvee_{k \in \bigcup_{j \in J} I^{\varphi_j}} \exists {W_i} \ldotp (\lnot \bigvee_{i \in I} f_i) \land f_k \land
-   X_k(g_k), \PBES^\varphi\PBES^\psi \rangle\\
+   (\bigvee_{i \in I} f_i \land X_{\mathit{true}}) \lor \bigvee_{k \in \bigcup_{j \in J} I^{\varphi_j}} \exists {W_k} \ldotp (\lnot \bigvee_{i \in I} f_i) \land f_k \land
+   X_k(g_k), \PBES^{\varphi_{1}}\cdots \PBES^{\varphi_{|J|}} \rangle\\
    \end{align*}
 
-and dually for :math:`R_{\land,\sigma}`:
+where :math:`f_i` are simple formulas, and dually for :math:`R_{\land,\sigma}`:
 
 .. math::
    :nowrap:
 
-   
+
    \begin{align*}
    R_{\land,\sigma}((\bigwedge_{i \in I} f_i) \land (\bigwedge_{j \in J} \varphi_j), V)      & =  \langle   \left(
    \bigwedge_{i \in I} (\lnot f_i \implies X_{\mathit{false}}) \right) \land \bigwedge_{k \in \bigcup_{j \in J} I^{\varphi_j}} \forall {W_k} \ldotp (\bigwedge_{i \in I} f_i ) \land f_k
    \implies X_k(g_k), \PBES^{\varphi_{1}}\cdots \PBES^{\varphi_{|J|}} \rangle\\
    \end{align*}
+
+Note the latter two rules are introduced to ensure that counterexamples that are
+computed are a subset of the original state space.
