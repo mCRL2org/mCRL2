@@ -75,21 +75,51 @@ public:
 
       if (m_options.solve_strategy == 1)
       {
-        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1])
-            = solver.detect_solitair_cycles(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_solitair_cycles(m_initial_vertex,
+            V,
+            m_todo,
+            false,
+            m_deadlocks,
+            m_Vwon[0],
+            m_Vwon[1],
+            m_S[0],
+            m_S[1]);
       }
       else if (m_options.solve_strategy == 2)
       {
-        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1])
-            = solver.detect_solitair_cycles(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_solitair_cycles(m_initial_vertex,
+            V,
+            m_todo,
+            true,
+            m_deadlocks,
+            m_Vwon[0],
+            m_Vwon[1],
+            m_S[0],
+            m_S[1]);
       }
       else if (m_options.solve_strategy == 3)
       {
-        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_forced_cycles(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_forced_cycles(m_initial_vertex,
+            V,
+            m_todo,
+            false,
+            m_deadlocks,
+            m_Vwon[0],
+            m_Vwon[1],
+            m_S[0],
+            m_S[1]);
       }
       else if (m_options.solve_strategy == 4)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_forced_cycles(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_forced_cycles(m_initial_vertex,
+            V,
+            m_todo,
+            true,
+            m_deadlocks,
+            m_Vwon[0],
+            m_Vwon[1],
+            m_S[0],
+            m_S[1]);
       }
       else if (m_options.solve_strategy == 5)
       {
@@ -101,7 +131,8 @@ public:
       }
       else if (m_options.solve_strategy == 7)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1])
+            = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]);
       }
 
       mCRL2log(log::verbose) << "found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;
@@ -262,6 +293,7 @@ public:
                 return Y;
             }
           }
+        );
 
     }
 
@@ -516,12 +548,12 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       using namespace sylvan::ldds;
 
       bool has_counter_example = mcrl2::pbes_system::detail::has_counter_example_information(pbesspec);
-      // if (has_counter_example && options_.solve_strategy != 0)
-      // {
-      //   // TODO: Cannot use the partial solvers.
-      //   mCRL2log(mcrl2::log::warning) << "Warning: Cannot use partial solving with PBES that has counter example information, using solving strategy 0 instead." << std::endl;
-      //   options_.solve_strategy = 0;
-      // }
+      if (has_counter_example && (options_.solve_strategy == 5 || options_.solve_strategy == 6))
+      {
+        // TODO: Cannot use the partial solvers.
+        mCRL2log(mcrl2::log::warning) << "Warning: Cannot use partial solving using fatal attractor solving (solve strategies 5 and 6) with PBES that has counter example information, using solving strategy 0 instead." << std::endl;
+        options_.solve_strategy = 0;
+      }
 
       if (has_counter_example)
       {
@@ -625,8 +657,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           pbes_system::symbolic_pbessolve_algorithm solver(G, options.check_strategy);
 
           timer().start("first-solving");
-          // TODO: Allow for partial solving here.
-          auto [result, W0, W1, S0, S1] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
+          // Solve the remainder of the partially solved game.
+          auto [result, W0, W1, S0, S1] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1(), reach.S0(), reach.S1());
           timer().finish("first-solving");
 
           mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
