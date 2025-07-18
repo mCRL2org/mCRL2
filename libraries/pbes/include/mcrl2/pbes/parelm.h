@@ -309,11 +309,10 @@ class pbes_parelm_algorithm
 inline
 void parelm(pbes& p)
 {
-  bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
+  const bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
   if (has_counter_example)
   {
     mCRL2log(log::warning) << "Warning: the PBES has counter example information, which may not be preserved by parameter elimination." << std::endl;
-
   }
   pbes_parelm_algorithm algorithm;
   algorithm.run(p);

@@ -1045,7 +1045,7 @@ void constelm(pbes& p,
               bool check_quantifiers = true
              )
 {
-  bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
+  const bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
   if (has_counter_example)
   {
     mCRL2log(log::warning) << "Warning: the PBES has counter example information, which may not be preserved by constant elimination." << std::endl;
