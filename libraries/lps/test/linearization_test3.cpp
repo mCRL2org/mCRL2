@@ -73,7 +73,6 @@ BOOST_AUTO_TEST_CASE(type_checking_a_finite_set_with_numbers_can_go_astray)
   run_linearisation_test_case(spec,true);
 }
 
-#ifndef MCRL2_SKIP_LONG_TESTS 
 
 BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
 {
@@ -130,11 +129,4 @@ BOOST_AUTO_TEST_CASE(linearisation_of_the_enclosed_spec_caused_a_name_conflict_w
   run_linearisation_test_case(spec,true);
 } 
 
-#else // ndef MCRL2_SKIP_LONG_TESTS
-
-BOOST_AUTO_TEST_CASE(skip_linearization_test)
-{
-}
-
-#endif // ndef MCRL2_SKIP_LONG_TESTS
 

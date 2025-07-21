@@ -274,29 +274,26 @@ class specification_basic_type
 
     /*****************  retrieve basic objects  ******************/
 
-    void detail_check_objectdata(const aterm& o) const
+    void detail_check_objectdata(const process_identifier& o) const
     {
       if (objectdata.count(o)==0)
       {
-        if (is_process_identifier(o))
-        {
-          throw mcrl2::runtime_error("Fail to recognize " + process::pp(process_identifier(o)) + ". Most likely due to unguarded recursion in a process equation. ");
-        }
-        else
-        {
-          throw mcrl2::runtime_error("Fail to recognize " + process::pp(o) + ". This is an internal error in the lineariser. ");
-        }
+        throw mcrl2::runtime_error("Fail to recognize " + process::pp(process_identifier(o)) + 
+                                   ". Most likely due to unguarded recursion in a process equation. ");
       }
     }
-    objectdatatype& objectIndex(const aterm& o)
+
+    objectdatatype& objectIndex(const process_identifier& o)
     {
       detail_check_objectdata(o);
+      assert(objectdata.find(o)->second.parameters==o.variables());
       return objectdata.find(o)->second;
     }
 
-    const objectdatatype& objectIndex(const aterm& o) const
+    const objectdatatype& objectIndex(const process_identifier& o) const
     {
       detail_check_objectdata(o);
+      assert(objectdata.find(o)->second.parameters==o.variables());
       return objectdata.find(o)->second;
     }
 
@@ -470,7 +467,7 @@ class specification_basic_type
     {
       if (!object.free_variables_defined)
       {
-        object.free_variables=find_free_variables_process(object.processbody);
+        object.free_variables=process::find_free_variables(object.processbody);
         object.free_variables_defined=true;
       }
       return object.free_variables;
@@ -1464,209 +1461,11 @@ class specification_basic_type
       sumvars=reverse(newsumvars);
     }
 
-    /******************* find_free_variables_process *****************************************/
-
-
-    /* We define our own variant of the standard function find_free_variables, because
-       find_free_variables is not correctly defined on processes, due to process_instance_assignments,
-       where variables can occur by not being mentioned. It is necessary to know the parameters of
-       a process to retrieve these. Concrete example in P() defined by P(x:Nat)= ..., the variable x
-       appears as a free variable, although it is not explicitly mentioned.
-       If the standard function find_free_variable on processes is repaired, this function can
-       be removed */
-    void find_free_variables_process(const process_expression& p, std::set< variable >& free_variables_in_p)
-    {
-      if (is_choice(p))
-      {
-         find_free_variables_process(choice(p).left(),free_variables_in_p);
-         find_free_variables_process(choice(p).right(),free_variables_in_p);
-         return;
-      }
-      if (is_seq(p))
-      {
-        find_free_variables_process(seq(p).left(),free_variables_in_p);
-        find_free_variables_process(seq(p).right(),free_variables_in_p);
-        return;
-      }
-      if (is_sync(p))
-      {
-        find_free_variables_process(process::sync(p).left(),free_variables_in_p);
-        find_free_variables_process(process::sync(p).right(),free_variables_in_p);
-        return;
-      }
-      if (is_if_then(p))
-      {
-        for(const variable& v: find_free_variables(if_then(p).condition()))
-        {
-          free_variables_in_p.insert(v);
-        }
-        find_free_variables_process(if_then(p).then_case(),free_variables_in_p);
-        return;
-      }
-      if (is_if_then_else(p))
-      {
-        for(const variable& v: find_free_variables(if_then(p).condition()))
-        {
-          free_variables_in_p.insert(v);
-        }
-        find_free_variables_process(if_then_else(p).then_case(),free_variables_in_p);
-        find_free_variables_process(if_then_else(p).else_case(),free_variables_in_p);
-        return;
-      }
-
-      if (is_sum(p))
-      {
-        std::set<variable> aux_variable_set;
-        find_free_variables_process(sum(p).operand(),aux_variable_set);
-
-        for(const variable& v: static_cast<const sum&>(p).variables())
-        {
-          aux_variable_set.erase(v);
-        }
-        
-        free_variables_in_p.insert(aux_variable_set.begin(), aux_variable_set.end());
-        return;
-      }
-
-      if (is_stochastic_operator(p))
-      {
-        const stochastic_operator& sto=down_cast<const stochastic_operator>(p);
-        std::set<variable> aux_variable_set;
-        find_free_variables_process(sto.operand(),aux_variable_set);
-        for(const variable& v: find_free_variables(sto.distribution()))
-        {
-          aux_variable_set.insert(v);
-        }
-
-        for(const variable& v: sto.variables())
-        {
-          aux_variable_set.erase(v);
-        }
-        
-        free_variables_in_p.insert(aux_variable_set.begin(), aux_variable_set.end());
-        return;
-      }
-
-      if (is_process_instance(p))
-      {
-        const process_instance q = atermpp::down_cast<process_instance>(p);
-        for(const variable& v: find_free_variables(q.actual_parameters()))
-        {
-          free_variables_in_p.insert(v);
-        }
-        return;
-      }
-      if (is_process_instance_assignment(p))
-      {
-        const process_instance_assignment q(p);
-        objectdatatype& object=objectIndex(q.identifier());
-        const variable_list parameters=object.parameters;
-        std::set<variable> parameter_set(parameters.begin(),parameters.end());
-        const assignment_list& assignments=q.assignments();
-        for(const assignment& a: assignments)
-        {
-          for(const variable& v: find_free_variables(a.rhs()))
-          {
-            free_variables_in_p.insert(v);
-          }
-          parameter_set.erase(a.lhs());
-        }
-        // Add all remaining variables in the parameter_set, as they have an identity assignment.
-        for(const variable& v: parameter_set)
-        {
-          free_variables_in_p.insert(v);
-        }
-        return;
-      }
-
-      if (is_action(p))
-      {
-        for(const variable& v: process::find_free_variables(p))
-        {
-          free_variables_in_p.insert(v);
-        }
-        return;
-      }
-
-      if (is_at(p))
-      {
-        for(const variable& v: data::find_free_variables(at(p).time_stamp()))
-        {
-          free_variables_in_p.insert(v);
-        }
-        find_free_variables_process(at(p).operand(),free_variables_in_p);
-        return;
-      }
-
-      if (is_delta(p))
-      {
-        return;
-      }
-
-      if (is_tau(p))
-      {
-        return;
-      }
-
-      if (is_sync(p))
-      {
-        find_free_variables_process(process::sync(p).left(),free_variables_in_p);
-        find_free_variables_process(process::sync(p).right(),free_variables_in_p);
-        return;
-      }
-
-      if (is_left_merge(p))
-      {
-        find_free_variables_process(process::left_merge(p).left(),free_variables_in_p);
-        find_free_variables_process(process::left_merge(p).right(),free_variables_in_p);
-        return;
-      }
-
-      if (is_merge(p))
-      {
-        find_free_variables_process(process::merge(p).left(),free_variables_in_p);
-        find_free_variables_process(process::merge(p).right(),free_variables_in_p);
-        return;
-      }
-
-      if (is_allow(p))
-      {
-        find_free_variables_process(process::allow(p).operand(),free_variables_in_p);
-        return;
-      }
-
-      if (is_comm(p))
-      {
-        find_free_variables_process(process::comm(p).operand(),free_variables_in_p);
-        return;
-      }
-
-      if (is_block(p))
-      {
-        find_free_variables_process(process::block(p).operand(),free_variables_in_p);
-        return;
-      }
-
-      if (is_hide(p))
-      {
-        find_free_variables_process(process::hide(p).operand(),free_variables_in_p);
-        return;
-      }
-
-      if (is_rename(p))
-      {
-        find_free_variables_process(process::rename(p).operand(),free_variables_in_p);
-        return;
-      }
-
-      throw mcrl2::runtime_error("Internal error: expect a pCRL process (1) " + process::pp(p));
-    }
-
     std::set< variable > find_free_variables_process(const process_expression& p)
     {
-      std::set<variable> free_variables_in_p;
-      find_free_variables_process(p,free_variables_in_p);
-      return free_variables_in_p;
+      std::set<variable> free_variables_in_p_new;
+      free_variables_in_p_new=process::find_free_variables(p); 
+      return free_variables_in_p_new; 
     }
 
     /* Remove assignments that do not appear in the parameter list. */
@@ -4169,36 +3968,39 @@ class specification_basic_type
 
     /**************** Collectparameterlist ******************************/
 
-    static
-    bool alreadypresent(variable& var,const variable_list& vl)
+    bool alreadypresent(variable& var,
+                        const variable_list& vl, 
+                        mutable_indexed_substitution<>& parameter_renaming)
     {
       /* Note: variables can be different, although they have the
          same string, due to different types. If they have the
          same string, but different types, the conflict must
-         be resolved by renaming the name of the variable */
+         be resolved by renaming the name of the variable.
+         Note that var is changed to the new variable name. */
 
-      if (vl.empty())
+      for(const variable& v: vl)
       {
-        return false;
+        if (v.name()==var.name())
+        {
+          if (v.sort()==var.sort())
+          {
+            return true; // The variable is present. 
+          }
+          else 
+          {
+            const variable new_var(fresh_identifier_generator(var.name()),var.sort());
+            parameter_renaming[var]=new_var;
+            var=new_var;
+            return false; // variable var is renamed, as name clashed with a variable with a different sort. Not present.
+          }
+        }
       }
-      const variable& var1=vl.front();
-      assert(is_variable(var1));
-
-      /* The variable with correct type is present: */
-      if (var==var1)
-      {
-        return true;
-      }
-
-      assert(var.name()!=var1.name());
-
-      /* otherwise it can be present in vl */
-      return alreadypresent(var,vl.tail());
+      return false; // The variable var is not present. 
     }
 
-    static
     variable_list joinparameters(const variable_list& par1,
-                                 const variable_list& par2)
+                                 const variable_list& par2,
+                                 mutable_indexed_substitution<>& parameter_renaming)
     {
       if (par2.empty())
       {
@@ -4208,8 +4010,8 @@ class specification_basic_type
       variable var2=par2.front();
       assert(is_variable(var2));
 
-      variable_list result=joinparameters(par1,par2.tail());
-      if (alreadypresent(var2,par1))
+      variable_list result=joinparameters(par1,par2.tail(), parameter_renaming);
+      if (alreadypresent(var2,par1, parameter_renaming))
       {
         return result;
       }
@@ -4218,13 +4020,14 @@ class specification_basic_type
       return result;
     }
 
-    variable_list collectparameterlist(const std::set< process_identifier >& pCRLprocs)
+    variable_list collectparameterlist(const std::set< process_identifier >& pCRLprocs, 
+                                       mutable_indexed_substitution<>& parameter_renaming)
     {
       variable_list parameters;
       for (const process_identifier& p: pCRLprocs)
       {
         const objectdatatype& object=objectIndex(p);
-        parameters=joinparameters(parameters,object.parameters);
+        parameters=joinparameters(parameters,object.parameters, parameter_renaming);
       }
       return parameters;
     }
@@ -5240,6 +5043,7 @@ class specification_basic_type
       const bool regular,
       const bool singlestate,
       const variable_list& process_parameters)
+      
     {
       data_expression atTime;
       action_list multiAction;
@@ -5461,7 +5265,8 @@ class specification_basic_type
       const stacklisttype& stack,
       const bool regular,
       const bool singlestate,
-      const std::set < process_identifier >& pCRLprocs)
+      const std::set < process_identifier >& pCRLprocs,
+      mutable_indexed_substitution<>& parameter_renaming)
     {
       if (is_choice(body))
       {
@@ -5469,9 +5274,9 @@ class specification_basic_type
         const process_expression& t2=down_cast<choice>(body).right();
 
         collectsumlistterm(procId,action_summands,deadlock_summands,t1,pars,stack,
-                           regular,singlestate,pCRLprocs);
+                           regular,singlestate,pCRLprocs,parameter_renaming);
         collectsumlistterm(procId,action_summands,deadlock_summands,t2,pars,stack,
-                           regular,singlestate,pCRLprocs);
+                           regular,singlestate,pCRLprocs,parameter_renaming);
         return;
       }
       if (is_stochastic_operator(body))
@@ -5480,12 +5285,20 @@ class specification_basic_type
            part of this summand */
         const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(body);
         collectsumlistterm(procId,action_summands,deadlock_summands,sto.operand(),pars,stack,
-                           regular,singlestate,pCRLprocs);
+                           regular,singlestate,pCRLprocs,parameter_renaming);
       }
       else
       {
-        add_summands(procId,action_summands,deadlock_summands,body,pCRLprocs,stack,
-                     regular,singlestate,pars);
+        add_summands(procId,
+                     action_summands,
+                     deadlock_summands,
+                     process::replace_variables(body,parameter_renaming), // This renaming renames variables with the same name but 
+                                                                          // conflicting types, e.g., x:Bool and x:Nat. 
+                     pCRLprocs,
+                     stack,
+                     regular,
+                     singlestate,
+                     pars);
       }
     }
 
@@ -5496,7 +5309,8 @@ class specification_basic_type
       const variable_list& pars,
       const stacklisttype& stack,
       bool regular,
-      bool singlestate)
+      bool singlestate,
+      mutable_indexed_substitution<>& parameter_renaming)
     {
       for (const process_identifier& p: pCRLprocs)
       {
@@ -5511,7 +5325,8 @@ class specification_basic_type
           stack,
           regular,
           singlestate,
-          pCRLprocs);
+          pCRLprocs,
+          parameter_renaming);
       }
     }
 
@@ -7149,7 +6964,8 @@ class specification_basic_type
       {
         singlecontrolstate=true;
       }
-      parameters=collectparameterlist(stochastic_normalized_process_identifiers);
+      mutable_indexed_substitution<> parameter_renaming;
+      parameters=collectparameterlist(stochastic_normalized_process_identifiers,parameter_renaming);
 
       if ((!regular)||((!singlecontrolstate) && (options.newstate) && (!options.binary)))
       {
@@ -7181,7 +6997,7 @@ class specification_basic_type
       }
       init=make_initialstate(initial_proc_id,stack,stochastic_normalized_process_identifiers,regular,singlecontrolstate,initial_stochastic_distribution);
       assert(init.size()==parameters.size());
-      collectsumlist(action_summands,deadlock_summands,stochastic_normalized_process_identifiers,parameters,stack,regular,singlecontrolstate);
+      collectsumlist(action_summands,deadlock_summands,stochastic_normalized_process_identifiers,parameters,stack,regular,singlecontrolstate,parameter_renaming);
 
       if (!options.no_intermediate_cluster)
       {
@@ -9974,236 +9790,6 @@ class specification_basic_type
       throw mcrl2::runtime_error("unexpected process format in transform_process_arguments_body " + process::pp(t) +".");
     }
 
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-/* guarantee that all process parameters have a unique sort.
- *   If different process parameters or sum variables occur with the same string, e.g. x:A en x:B,
- *   then one of them is renamed, such that all variable strings have a unique
- *   type. The names are replaced in object_data and in assignment lists.
-*/
-
-
-    void guarantee_that_parameters_have_unique_type(
-            const process_identifier& procId,
-            std::set<process_identifier>& visited_processes,
-            std::set<identifier_string>& used_variable_names,
-            maintain_variables_in_rhs<mutable_map_substitution<> >& parameter_mapping,
-            std::set<variable>& variables_in_lhs_of_parameter_mapping)
-    {
-      if (visited_processes.count(procId)==0)
-      {
-        visited_processes.insert(procId);
-        objectdatatype& object=objectIndex(procId);
-        const variable_list parameters=object.parameters;
-        for(const variable& v: parameters)
-        {
-          if (used_variable_names.count(v.name())==0)
-          {
-            used_variable_names.insert(v.name());
-            parameter_mapping[v]=v;  // This is the first parameter with this name. Map it to itself.
-            variables_in_lhs_of_parameter_mapping.insert(v);
-          }
-          else
-          {
-            // A variable already exists with this name.
-            if (variables_in_lhs_of_parameter_mapping.count(v)==0) // The variables must be separately stored, as the parameter_mapping
-                                                                    // forgets variables mapped to itself.
-            {
-              // This parameter needs a fresh name.
-              const variable fresh_var(fresh_identifier_generator(v.name()),v.sort());
-              parameter_mapping[v]=fresh_var;
-              variables_in_lhs_of_parameter_mapping.insert(v);
-            }
-          }
-        }
-        object.old_parameters=object.parameters;
-        object.parameters=data::replace_variables(parameters,parameter_mapping);
-        object.processbody=guarantee_that_parameters_have_unique_type_body(
-                                         object.processbody,
-                                         visited_processes,
-                                         used_variable_names,
-                                         parameter_mapping,
-                                         variables_in_lhs_of_parameter_mapping);
-      }
-    }
-
-    void guarantee_that_parameters_have_unique_type(const process_identifier& procId)
-    {
-      std::set<process_identifier> visited_processes;
-      std::set<identifier_string> used_variable_names;
-      maintain_variables_in_rhs< mutable_map_substitution<> > parameter_mapping;
-      std::set<variable> variables_in_lhs_of_parameter_mapping;
-      guarantee_that_parameters_have_unique_type(procId,
-                                                 visited_processes,
-                                                 used_variable_names,
-                                                 parameter_mapping,
-                                                 variables_in_lhs_of_parameter_mapping);
-    }
-
-    process_expression guarantee_that_parameters_have_unique_type_body(
-      const process_expression& t,
-      std::set<process_identifier>& visited_processes,
-      std::set<identifier_string>& used_variable_names,
-      maintain_variables_in_rhs<mutable_map_substitution<> >& parameter_mapping,
-      std::set<variable>& variables_in_lhs_of_parameter_mapping)
-    {
-      if (is_process_instance_assignment(t))
-      {
-        guarantee_that_parameters_have_unique_type(process_instance_assignment(t).identifier(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping);
-        const process_instance_assignment u(t);
-        objectdatatype& object=objectIndex(u.identifier());
-        assert(check_valid_process_instance_assignment(u.identifier(),
-                 substitute_assignmentlist(u.assignments(),object.old_parameters,true,true,parameter_mapping)));
-        return process_instance_assignment(
-                     u.identifier(),
-                     substitute_assignmentlist(u.assignments(),object.old_parameters,true,true,parameter_mapping));
-      }
-      if (is_hide(t))
-      {
-        return hide(hide(t).hide_set(),
-                    guarantee_that_parameters_have_unique_type_body(hide(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_rename(t))
-      {
-        return process::rename(
-                 process::rename(t).rename_set(),
-                 guarantee_that_parameters_have_unique_type_body(process::rename(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_allow(t))
-      {
-        return allow(allow(t).allow_set(),
-                     guarantee_that_parameters_have_unique_type_body(allow(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_block(t))
-      {
-        return block(block(t).block_set(),
-                     guarantee_that_parameters_have_unique_type_body(block(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_comm(t))
-      {
-        return comm(comm(t).comm_set(),
-                    guarantee_that_parameters_have_unique_type_body(comm(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_merge(t))
-      {
-        return merge(
-                 guarantee_that_parameters_have_unique_type_body(merge(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(merge(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_choice(t))
-      {
-        return choice(
-                 guarantee_that_parameters_have_unique_type_body(choice(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(choice(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_seq(t))
-      {
-        return seq(
-                 guarantee_that_parameters_have_unique_type_body(seq(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(seq(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_if_then_else(t))
-      {
-        return if_then_else(
-                 replace_variables_capture_avoiding_alt(if_then_else(t).condition(),parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(if_then_else(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(if_then_else(t).else_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_if_then(t))
-      {
-        return if_then(
-                 replace_variables_capture_avoiding_alt(if_then(t).condition(),parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(if_then(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_sum(t))
-      {
-        // Also rename bound variables in a sum, such that there are no two variables with
-        // the same name, but different types. We do the renaming globally, i.e. all occurrences of variables
-        // x:D that require renaming are renamed to x':D.
-        for(const variable& v: static_cast<const sum&>(t).variables())
-        {
-          if (used_variable_names.count(v.name())==0)
-          {
-            used_variable_names.insert(v.name());
-            parameter_mapping[v]=v;  // This is the first parameter with this name. Map it to itself.
-            variables_in_lhs_of_parameter_mapping.insert(v);
-          }
-          else
-          {
-            // A variable already exists with this name.
-            if (variables_in_lhs_of_parameter_mapping.count(v)==0) // The variables must be separately stored, as the parameter_mapping
-                                                                    // forgets variables mapped to itself.
-            {
-              // This parameter needs a fresh name.
-              const variable fresh_var(fresh_identifier_generator(v.name()),v.sort());
-              parameter_mapping[v]=fresh_var;
-              variables_in_lhs_of_parameter_mapping.insert(v);
-            }
-          }
-        }
-        return sum(
-                 data::replace_variables(sum(t).variables(),parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(sum(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_action(t))
-      {
-        return lps::replace_variables_capture_avoiding_with_an_identifier_generator(action(t),parameter_mapping,fresh_identifier_generator);
-      }
-      if (is_delta(t))
-      {
-        return t;
-      }
-      if (is_tau(t))
-      {
-        return t;
-      }
-      if (is_at(t))
-      {
-        return at(
-                 guarantee_that_parameters_have_unique_type_body(at(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
-                 replace_variables_capture_avoiding_alt(at(t).time_stamp(),parameter_mapping));
-      }
-      if (is_sync(t))
-      {
-        return process::sync(
-                 guarantee_that_parameters_have_unique_type_body(process::sync(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(process::sync(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      if (is_stochastic_operator(t))
-      {
-        const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
-        // Also rename bound variables in a stochastic operator, such that there are no two variables with
-        // the same name, but different types. We do the renaming globally, i.e. all occurrences of variables
-        // x:D that require renaming are renamed to x':D.
-        for(const variable& v: sto.variables())
-        {
-          if (used_variable_names.count(v.name())==0)
-          {
-            used_variable_names.insert(v.name());
-            parameter_mapping[v]=v;  // This is the first parameter with this name. Map it to itself.
-            variables_in_lhs_of_parameter_mapping.insert(v);
-          }
-          else
-          {
-            // A variable already exists with this name.
-            if (variables_in_lhs_of_parameter_mapping.count(v)==0) // The variables must be separately stored, as the parameter_mapping
-                                                                    // forgets variables mapped to itself.
-            {
-              // This parameter needs a fresh name.
-              const variable fresh_var(fresh_identifier_generator(v.name()),v.sort());
-              parameter_mapping[v]=fresh_var;
-              variables_in_lhs_of_parameter_mapping.insert(v);
-            }
-          }
-        }
-        return stochastic_operator(
-                   data::replace_variables(sto.variables(),parameter_mapping),
-                   replace_variables_capture_avoiding_alt(sto.distribution(),parameter_mapping),
-                   guarantee_that_parameters_have_unique_type_body(sto.operand(),visited_processes,
-                           used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
-      }
-      throw mcrl2::runtime_error("unexpected process format in guarantee_that_parameters_have_unique_type_body " + process::pp(t) +".");
-    }
-
 /* -----------------------------   split body  --------------------------- */
 
     process_expression split_body(
@@ -10425,7 +10011,6 @@ class specification_basic_type
       /* Then select the BPA processes, and check that the others
          are proper parallel processes */
       transform_process_arguments(init);   // Also merges nested stochastic operators.
-      guarantee_that_parameters_have_unique_type(init);
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
       const process_identifier init_=splitmCRLandpCRLprocsAndAddTerminatedAction(init);

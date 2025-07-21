@@ -52,6 +52,30 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
   {
     decrease_bind_count(x.variables());
   }
+
+  // Searching the variables in a process assignments should be
+  // equivalent as searching variables in an expliciet list of parameters.
+  // So, if there is a parameter p not mentioned in the assignment list,
+  // this is taken as the equation p=p, where p at the right hand side
+  // may be a bound variable. Furthermore, in an assignment p=t, the variable
+  // p at the left does not need to be visited. 
+  void apply(const process::process_instance_assignment& x)
+  {
+    data::assignment_list::const_iterator ass_it=x.assignments().begin();
+    for(const data::variable& parameter: x.identifier().variables())
+    {
+      if (ass_it!=x.assignments().end() && ass_it->lhs()==parameter)
+      {
+        static_cast<Derived&>(*this).apply(ass_it->rhs());
+        ++ass_it;
+      }
+      else 
+      {
+        static_cast<Derived&>(*this).apply(parameter);
+      }
+    }
+    assert(ass_it==x.assignments().end());
+  }
 };
 
 // TODO: get rid of this code duplication

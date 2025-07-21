@@ -12,8 +12,6 @@
 #define BOOST_TEST_MODULE linearization_test4
 #include <boost/test/included/unit_test.hpp>
 
-#ifndef MCRL2_SKIP_LONG_TESTS
-
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/linearise.h"
@@ -280,11 +278,16 @@ BOOST_AUTO_TEST_CASE(various_case_26)
   run_linearisation_test_case(various_case_26);
 }
 
-#else // ndef MCRL2_SKIP_LONG_TESTS
-
-BOOST_AUTO_TEST_CASE(skip_linearization_test)
+// The following testcase tests whether two parameters with the same name
+// but different type is handled properly. Added Juli 20, 2025. 
+BOOST_AUTO_TEST_CASE(various_case_27)
 {
+  const std::string various_case_27=
+    "act a:Bool;\n"
+    "proc X(n:Nat)=a(n<10).Y(true);\n"
+    "     Y(n:Bool)=a(n).X(7);\n"
+    "init X(1);\n";
+  run_linearisation_test_case(various_case_27);
 }
 
-#endif // ndef MCRL2_SKIP_LONG_TESTS
 

@@ -42,7 +42,7 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
 
   void increase_bind_count(const assignment_list& assignments)
   {
-    for (const auto& assignment : assignments)
+    for (const assignment& assignment : assignments)
     {
       increase_bind_count(assignment.lhs());
     }
@@ -50,7 +50,7 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
 
   void decrease_bind_count(const assignment_list& assignments)
   {
-    for (const auto& assignment : assignments)
+    for (const assignment& assignment : assignments)
     {
       decrease_bind_count(assignment.lhs());
     }
