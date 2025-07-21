@@ -413,13 +413,15 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
                 for(data_expression_list l: old_enumerated_domain_elements)
                 {
                   new_enumerated_domain_elements.push_back(l);
-                  new_enumerated_domain_elements.back().push_front(d);
+                  new_enumerated_domain_elements.back().push_front(d); 
                 }
               }
             }
-            for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
+            for(data_expression_list& l: new_enumerated_domain_elements)
+            // for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
             {
               new_parameters.emplace_back(fresh_name_generator(v.name()), s.codomain());
+              l=reverse(l); // Then new_enumerated_domain_elements were stored in the wrong order. 
             }
             mCRL2log(verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by " 
                               << new_enumerated_domain_elements.size() << " new parameters.\n";
