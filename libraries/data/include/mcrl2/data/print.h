@@ -1710,6 +1710,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print(") + ");
       derived().apply(sort_pos::arg2(x));
     }
+    else if (sort_pos::is_equals_one_application(x))
+    {
+      derived().print("(");
+      derived().apply(sort_pos::arg(x));
+      derived().print(" == 1)");
+    }
+    else if (sort_pos::is_pos_predecessor_application(x))
+    {
+      derived().print("if(");
+      derived().apply(sort_pos::arg(x));
+      derived().print(" == 1,1,");
+      derived().apply(sort_pos::arg(x));
+      derived().print(" - 1)");
+    }
 #else
     else if (sort_pos::is_cdub_application(x))
     {
