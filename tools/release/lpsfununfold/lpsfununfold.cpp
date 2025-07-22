@@ -240,8 +240,13 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
         variable vf("f",s);
         variable vg("g",s);
         variable_list vt;
-        for(const sort_expression& s1: s.domain()) { vt=push_back(vt,variable("t",s1)); } ;
-        // Equation: if(b, f, g)(t) = if(b, f(t), g(t)).
+        std::size_t i=0;
+        for(const sort_expression& s1: s.domain()) 
+        { 
+          vt=push_back(vt,variable("t"+std::to_string(i),s1)); 
+          ++i;
+        } 
+        // Equation: if(b, f, g)(t0, t1,....) = if(b, f(t0,t1,...), g(t0,t1,...)).
         data_spec.add_equation(data_equation(variable_list({vb, vf, vg}) + vt, 
                                              application(if_(vb, vf, vg),vt),
                                              if_(vb,application(vf,vt),application(vg,vt))));
@@ -614,7 +619,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
       unfold_initializer(spec.initial_process(), representation_for_the_new_parameters, old_process_parameters, R);
       assert(spec.initial_process().expressions().size()==new_parameters.size());
       spec.process().process_parameters()=variable_list(new_parameters.begin(), new_parameters.end());
-      
+      assert(check_well_typedness(spec));      
       save_lps(spec, output_filename());
 
       return true;
