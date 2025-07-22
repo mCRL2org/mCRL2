@@ -655,6 +655,9 @@ eqn
   init_fs(fpa) = free;
   fpa == fpb  -> update(fpa, osa, fsa)(fpb) = osa;
   fpa != fpb  -> update(fpa, osa, fsa)(fpb) = fsa(fpb);
+  % The two rules below have been added to allow the effective use of the tool lpsfununfold (July 2025).
+  fpa == fpb  -> ins_upd(fpa, osa, fsa)(fpb) = osa;
+  fpa != fpb  -> ins_upd(fpa, osa, fsa)(fpb) = fsa(fpb);
   cond_upd(fpa, osa, fsa) =
     if(fsa(fpa) == osa, fsa, update(fpa, osa, fsa));
   ins_upd(fpa, osa, init_fs) = cond_upd(fpa, osa, init_fs);
@@ -773,6 +776,11 @@ eqn
     update(spa, soa, asa, shs)(spb, sob) = asa;
   spa != spb  || soa != sob  ->
     update(spa, soa, asa, shs)(spb, sob) = shs(spb, sob);
+  % The two rules below have been added to allow the effective use of the tool lpsfununfold (July 2025).
+  spa == spb  && soa == sob  ->
+    ins_upd(spa, soa, asa, shs)(spb, sob) = asa;
+  spa != spb  || soa != sob  ->
+    ins_upd(spa, soa, asa, shs)(spb, sob) = shs(spb, sob);
   cond_upd(spa, soa, asa, shs) =
     if(shs(spa, soa) == asa, shs, update(spa, soa, asa, shs));
   ins_upd(spa, soa, asa, init_shs) =
