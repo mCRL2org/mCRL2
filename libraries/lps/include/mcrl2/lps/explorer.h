@@ -642,8 +642,8 @@ class explorer: public abortable
 
         throw data::enumerator_error("Condition " + data::pp(reduced_condition) +
                                      " does not rewrite to true or false. \nCulprit: "
-                                     + printed_condition.substr(0,300)
-                                     + (printed_condition.size() > 300 ? "..." : ""));
+                                     + printed_condition.substr(0,2000)
+                                     + (printed_condition.size() > 2000 ? "..." : ""));
       }
     }
 
