@@ -37,13 +37,13 @@ public:
         pos = cur_queue.begin();
     }
 
-    void lifted(verti v)
+    void lifted(verti v) override
     {
         for ( StaticGraph::const_iterator it = graph_.pred_begin(v);
               it != graph_.pred_end(v); ++it ) next_queue.push_back(*it);
     }
 
-    verti next()
+    verti next() override
     {
         if (pos == cur_queue.end())
         {
@@ -81,10 +81,9 @@ class LinPredLiftingStrategyFactory : public LiftingStrategyFactory
 {
 public:
     //! Return a new LinPredLiftingStrategy instance.
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm )
-    {
-        return new LinPredLiftingStrategy(game, spm);
+  LiftingStrategy* create(const ParityGame& game, const SmallProgressMeasures& spm) override
+  {
+    return new LinPredLiftingStrategy(game, spm);
     }
 };
 

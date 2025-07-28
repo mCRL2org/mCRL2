@@ -34,7 +34,7 @@ class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_t
     bool m_enable_logging;
     absinthe_strategy m_strategy;
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_strategy = parser.option_argument_as<absinthe_strategy>("strategy");
@@ -43,7 +43,7 @@ class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_t
       m_enable_logging = parser.options.count("enable-logging") > 0;
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
 
@@ -74,7 +74,7 @@ class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_t
       )
     {}
 
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "pbesabsinthe parameters:  " << std::endl;
       mCRL2log(verbose) << "  input file:             " << m_input_filename << std::endl;

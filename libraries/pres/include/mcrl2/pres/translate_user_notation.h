@@ -27,7 +27,7 @@ void translate_user_notation(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::
 }
 
 template <typename T>
-T translate_user_notation(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
+T translate_user_notation(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<pres_system::data_expression_builder>(data::detail::translate_user_notation_function()).apply(result, x);

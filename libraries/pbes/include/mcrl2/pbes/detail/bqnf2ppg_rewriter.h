@@ -167,7 +167,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the expression e conforms to BQNF.
-    virtual bool visit_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool
+    visit_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_bounded_forall: " << print_brief(e) << std::endl;
@@ -271,7 +272,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the expression e conforms to BQNF.
-    virtual bool visit_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool
+    visit_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_bounded_exists" << print_brief(e) << std::endl;
@@ -372,7 +374,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the expression e conforms to BQNF.
-    virtual bool visit_and(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool visit_and(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_and: " << print_brief(e) << std::endl;
@@ -476,7 +478,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the expression e conforms to BQNF.
-    virtual bool visit_or(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool visit_or(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_or: " << print_brief(e) << std::endl;
@@ -513,7 +515,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the right hand side of the equation is in BQNF.
-    virtual bool visit_bqnf_expression(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool
+    visit_bqnf_expression(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_bqnf_expression: " << print_brief(e) << std::endl;
@@ -539,7 +542,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// The resulting equations are added to the sequence of result equations.
     /// \param eqn a PBES equation
     /// \return true if the right hand side of the equation is in BQNF.
-    virtual bool visit_bqnf_equation(const equation_type& eqn)
+    bool visit_bqnf_equation(const equation_type& eqn) override
     {
       const fixpoint_symbol& sigma = eqn.symbol();
       const propositional_variable& var = eqn.variable();

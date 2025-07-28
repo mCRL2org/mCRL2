@@ -22,12 +22,14 @@ struct structure_graph_builder
   using index_type = structure_graph::index_type;
 
   structure_graph& m_graph;
-  atermpp::utilities::unordered_map<pbes_expression, 
-    index_type,
-    std::hash<atermpp::detail::reference_aterm<pbes_expression> >,
-    std::equal_to<atermpp::detail::reference_aterm<pbes_expression> >,
-    std::allocator< std::pair<const atermpp::detail::reference_aterm<pbes_expression>, atermpp::detail::reference_aterm<index_type> > >,
-    true> m_vertex_map;
+  atermpp::utilities::unordered_map<pbes_expression,
+      index_type,
+      std::hash<atermpp::detail::reference_aterm<pbes_expression>>,
+      std::equal_to<>,
+      std::allocator<std::pair<const atermpp::detail::reference_aterm<pbes_expression>,
+          atermpp::detail::reference_aterm<index_type>>>,
+      true>
+      m_vertex_map;
   pbes_expression m_initial_state; // The initial state.
 
   explicit structure_graph_builder(structure_graph& G)

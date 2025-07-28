@@ -1132,7 +1132,7 @@ class interface_description::typed_argument : public basic_argument
     }
 
     /// Checks whether string is convertible to a value of a specific type
-    inline bool validate(std::string const& s) const
+    inline bool validate(std::string const& s) const override
     {
       std::istringstream test(s);
 
@@ -1200,35 +1200,19 @@ class interface_description::enum_argument : public typed_argument< T >
     }
 
     /// \overload
-    virtual
-    enum_argument* clone() const
-    {
-      return new enum_argument< T >(*this);
-    }
+    enum_argument* clone() const override { return new enum_argument<T>(*this); }
 
     /// \overload
-    virtual
-    bool has_default() const
-    {
-      return m_has_default;
-    }
+    bool has_default() const override { return m_has_default; }
 
     /// \overload
-    virtual
-    const std::string& get_default() const
-    {
-      return m_default;
-    }
+    const std::string& get_default() const override { return m_default; }
 
     /// \overload
-    virtual
-    bool is_optional() const
-    {
-      return false;
-    }
+    bool is_optional() const override { return false; }
 
     /// \overload
-    inline bool validate(std::string const& s) const
+    inline bool validate(std::string const& s) const override
     {
       for(typename std::vector< basic_argument::argument_description >::const_iterator i = m_enum.begin(); i != m_enum.end(); ++i)
       {
@@ -1297,17 +1281,10 @@ class interface_description::enum_argument : public typed_argument< T >
 
 
     /// \overload
-    virtual bool has_description() const
-    {
-      return true;
-    }
+    bool has_description() const override { return true; }
 
     /// \overload
-    virtual const std::vector< basic_argument::argument_description >& get_description() const
-    {
-      return m_enum;
-    }
-
+    const std::vector<basic_argument::argument_description>& get_description() const override { return m_enum; }
 };
 
 /// Represents an optional argument to an option
@@ -1328,10 +1305,7 @@ class interface_description::optional_argument : public typed_argument< T >
 
   public:
 
-    virtual basic_argument* clone() const
-    {
-      return new optional_argument< T >(*this);
-    }
+    basic_argument* clone() const override { return new optional_argument<T>(*this); }
 
     /**
      * Constructor
@@ -1347,31 +1321,19 @@ class interface_description::optional_argument : public typed_argument< T >
     /**
      * \brief Throws because mandatory arguments have no default
      **/
-    inline bool has_default() const
-    {
-      return true;
-    }
+    inline bool has_default() const override { return true; }
 
     /**
      * \brief Returns the default argument
      **/
-    inline std::string const& get_default() const
-    {
-      return m_default;
-    }
+    inline std::string const& get_default() const override { return m_default; }
 
     /// whether the argument is optional or not
-    inline bool is_optional() const
-    {
-      return true;
-    }
+    inline bool is_optional() const override { return true; }
 
-    inline bool has_description() const
-    {
-      return false;
-    }
+    inline bool has_description() const override { return false; }
 
-    inline const std::vector< basic_argument::argument_description >& get_description() const
+    inline const std::vector<basic_argument::argument_description>& get_description() const override
     {
       return m_description;
     }
@@ -1395,10 +1357,7 @@ class interface_description::mandatory_argument : public typed_argument< T >
 
   public:
 
-    virtual basic_argument* clone() const
-    {
-      return new mandatory_argument< T >(*this);
-    }
+    basic_argument* clone() const override { return new mandatory_argument<T>(*this); }
 
     /**
      * Constructor
@@ -1423,31 +1382,19 @@ class interface_description::mandatory_argument : public typed_argument< T >
     /**
      * \brief Throws because mandatory arguments have no default
      **/
-    inline std::string const& get_default() const
-    {
-      return m_default;
-    }
+    inline std::string const& get_default() const override { return m_default; }
 
     /**
      * \brief Throws because mandatory arguments have no default
      **/
-    inline bool has_default() const
-    {
-      return m_has_default;
-    }
+    inline bool has_default() const override { return m_has_default; }
 
     /// whether the argument is optional or not
-    inline bool is_optional() const
-    {
-      return false;
-    }
+    inline bool is_optional() const override { return false; }
 
-    inline bool has_description() const
-    {
-      return false;
-    }
+    inline bool has_description() const override { return false; }
 
-    inline const std::vector< basic_argument::argument_description >& get_description() const
+    inline const std::vector<basic_argument::argument_description>& get_description() const override
     {
       return m_description;
     }
@@ -1470,17 +1417,10 @@ class interface_description::file_argument : public typed_argument<std::string>
 
   public:
 
-    virtual basic_argument* clone() const
-    {
-      return new file_argument(*this);
-    }
-
+    basic_argument* clone() const override { return new file_argument(*this); }
 
     /// \overload
-    inline bool validate(std::string const& /*s*/) const
-    {
-      return true;
-    }
+    inline bool validate(std::string const& /*s*/) const override { return true; }
 
     /**
      * Constructor
@@ -1495,31 +1435,19 @@ class interface_description::file_argument : public typed_argument<std::string>
     /**
      * \brief Throws because mandatory arguments have no default
      **/
-    inline std::string const& get_default() const
-    {
-      return m_default;
-    }
+    inline std::string const& get_default() const override { return m_default; }
 
     /**
      * \brief Throws because mandatory arguments have no default
      **/
-    inline bool has_default() const
-    {
-      return m_has_default;
-    }
+    inline bool has_default() const override { return m_has_default; }
 
     /// whether the argument is optional or not
-    inline bool is_optional() const
-    {
-      return false;
-    }
+    inline bool is_optional() const override { return false; }
 
-    inline bool has_description() const
-    {
-      return false;
-    }
+    inline bool has_description() const override { return false; }
 
-    inline const std::vector< basic_argument::argument_description >& get_description() const
+    inline const std::vector<basic_argument::argument_description>& get_description() const override
     {
       return m_description;
     }

@@ -43,12 +43,12 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
     std::string     m_action_rename_filename;
     std::string     m_regex;
 
-    std::string synopsis() const
+    std::string synopsis() const override
     {
       return "[OPTION]... (--renamefile=NAME | --regex=EXPR) [INFILE [OUTFILE]]\n";
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("renamefile", make_file_argument("NAME"),
@@ -68,7 +68,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -105,7 +105,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       m_typecheck(true)
     {}
 
-    bool run()
+    bool run() override
     {
       //load LPS
       if (input_filename().empty())

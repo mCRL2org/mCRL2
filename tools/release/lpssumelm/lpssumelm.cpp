@@ -27,13 +27,13 @@ class sumelm_tool: public input_output_tool
     using super = input_output_tool;
     bool m_decluster;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("decluster", "first decluster disjunctive conditions", 'c');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_decluster = 0 < parser.options.count("decluster");
@@ -54,7 +54,7 @@ class sumelm_tool: public input_output_tool
 
     /// Reads a specification from input_file,
     /// applies sum elimination to it and writes the result to output_file.
-    bool run()
+    bool run() override
     {      
       stochastic_specification spec;
       load_lps(spec, input_filename());

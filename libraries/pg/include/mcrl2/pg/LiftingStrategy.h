@@ -81,28 +81,27 @@ public:
 class LiftingStrategyFactory : public RefCounted
 {
 public:
-    virtual ~LiftingStrategyFactory();
+  ~LiftingStrategyFactory() override;
 
-    /*! Returns pre-formatted plain-text documentation of the description
-        strings accepted by create(), intended to be shown to the user.
-        \see create(const std::string &description) */
-    static const char *usage();
+  /*! Returns pre-formatted plain-text documentation of the description
+      strings accepted by create(), intended to be shown to the user.
+      \see create(const std::string &description) */
+  static const char* usage();
 
-    /*! Creates a lifting strategy factory from a string description.
-    \returns A factory object or NULL if the description could not be parsed.
-    \see usage() for a description of available format strings. */
-    static LiftingStrategyFactory *create(const std::string &description);
+  /*! Creates a lifting strategy factory from a string description.
+  \returns A factory object or NULL if the description could not be parsed.
+  \see usage() for a description of available format strings. */
+  static LiftingStrategyFactory* create(const std::string& description);
 
-    virtual bool supports_version(int version) { return version == 1; }
+  virtual bool supports_version(int version) { return version == 1; }
 
-    /*! Create a lifting strategy for the given game, to be used by the given
-        Small Progress Measures solver. */
-    virtual LiftingStrategy *create( const ParityGame &game,
-                                     const SmallProgressMeasures &spm ) = 0;
+  /*! Create a lifting strategy for the given game, to be used by the given
+      Small Progress Measures solver. */
+  virtual LiftingStrategy* create(const ParityGame& game, const SmallProgressMeasures& spm) = 0;
 
-    virtual LiftingStrategy2 *create2( const ParityGame & /*game*/,
-                                       const SmallProgressMeasures &/*spm*/ ) {
-      return nullptr;
+  virtual LiftingStrategy2* create2(const ParityGame& /*game*/, const SmallProgressMeasures& /*spm*/)
+  {
+    return nullptr;
     }
 };
 

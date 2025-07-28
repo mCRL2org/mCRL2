@@ -30,7 +30,7 @@ class untime_tool: public rewriter_tool< input_output_tool >
     bool apply_fourier_motzkin;
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -44,7 +44,7 @@ class untime_tool: public rewriter_tool< input_output_tool >
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("invariant",
@@ -71,7 +71,7 @@ class untime_tool: public rewriter_tool< input_output_tool >
       apply_fourier_motzkin(false)
     {}
 
-    bool run()
+    bool run() override
     {      
       stochastic_specification spec;
       load_lps(spec, m_input_filename);

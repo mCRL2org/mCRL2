@@ -38,7 +38,7 @@ PredecessorLiftingStrategy::PredecessorLiftingStrategy(
     else  // version != 1
     {
         assert(version == 2);
-        queued_ = NULL;
+        queued_ = nullptr;
     }
 }
 

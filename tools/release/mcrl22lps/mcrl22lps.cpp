@@ -31,7 +31,7 @@ private:
 
 protected:
 
-  void add_options(mcrl2::utilities::interface_description& desc)
+  void add_options(mcrl2::utilities::interface_description& desc) override
   {
     super::add_options(desc);
     desc.add_option("lin-method",
@@ -135,7 +135,7 @@ protected:
     desc.add_hidden_option("print-ast", "print the abstract syntax tree of the input specification to stdout", 'A');
     }
 
-    void parse_options(const mcrl2::utilities::command_line_parser& parser)
+    void parse_options(const mcrl2::utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -178,7 +178,7 @@ protected:
         "stdin is used."), opt_check_only(false)
     {}
 
-    bool run()
+    bool run() override
     {
       mcrl2::process::process_specification spec;
       if (input_filename().empty())

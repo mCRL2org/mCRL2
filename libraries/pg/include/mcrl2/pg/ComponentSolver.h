@@ -38,9 +38,9 @@ public:
       int max_depth,
       const verti* vmap = nullptr,
       verti vmap_size = 0);
-  ~ComponentSolver();
+  ~ComponentSolver() override;
 
-  ParityGame::Strategy solve();
+  ParityGame::Strategy solve() override;
 
 private:
     // SCC callback
@@ -63,13 +63,12 @@ public:
     //! \see ComponentSolver::ComponentSolver()
     ComponentSolverFactory(ParityGameSolverFactory &pgsf, int max_depth = 10)
         : pgsf_(pgsf), max_depth_(max_depth) { pgsf_.ref(); }
-    ~ComponentSolverFactory() { pgsf_.deref(); }
+    ~ComponentSolverFactory() override { pgsf_.deref(); }
 
     //! Return a new ComponentSolver instance.
-    ParityGameSolver *create( const ParityGame &game,
-        const verti *vertex_map, verti vertex_map_size );
+    ParityGameSolver* create(const ParityGame& game, const verti* vertex_map, verti vertex_map_size) override;
 
-protected:
+  protected:
     ParityGameSolverFactory &pgsf_;     //!< Factory used to create subsolvers
     const int max_depth_;               //!< Maximum recursion depth
 };

@@ -29,7 +29,7 @@ class transform_tool: public Tool
     bool print_algorithms = false;
     std::map<std::string, std::shared_ptr<utilities::detail::command>> commands;
 
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       algorithm_and_options = parser.option_argument("algorithm");
@@ -37,7 +37,7 @@ class transform_tool: public Tool
       print_algorithms = parser.options.count("print-algorithms") > 0;
     }
 
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("algorithm", utilities::make_optional_argument<std::string>("NAME", ""), "the algorithm that is to be applied", 'a');
@@ -63,7 +63,7 @@ class transform_tool: public Tool
       : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
-    bool run()
+    bool run() override
     {
       std::vector<std::string> options;
       std::set<std::string> algorithms;

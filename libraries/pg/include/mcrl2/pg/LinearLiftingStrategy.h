@@ -25,8 +25,8 @@ class LinearLiftingStrategy : public LiftingStrategy
 {
 public:
     LinearLiftingStrategy(const ParityGame &game, bool alternate);
-    void lifted(verti v);
-    verti next();
+    void lifted(verti v) override;
+    verti next() override;
 
     bool alternate() const { return alternate_; }
 
@@ -47,10 +47,9 @@ public:
         : alternate_(alternate) { };
 
     //! Return a new LinearLiftingStrategy instance.
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm );
+    LiftingStrategy* create(const ParityGame& game, const SmallProgressMeasures& spm) override;
 
-private:
+  private:
     const bool alternate_;
 };
 

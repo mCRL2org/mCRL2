@@ -326,7 +326,7 @@ class file_output: public output_policy
   public:
     file_output() = default;
 
-    virtual ~file_output() = default;
+    ~file_output() override = default;
 
     /// \param[in] stream A file handle
     static
@@ -344,7 +344,10 @@ class file_output: public output_policy
     ///
     /// \note This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
     /// atomic.
-    virtual void output(const log_level_t level, const time_t timestamp, const std::string& msg, const bool print_time_information) override
+    void output(const log_level_t level,
+        const time_t timestamp,
+        const std::string& msg,
+        const bool print_time_information) override
     {
       assert(quiet != level);
       FILE* p_stream = get_stream();
