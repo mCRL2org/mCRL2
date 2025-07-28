@@ -32,7 +32,7 @@ public:
             "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.")
   {}
 
-  bool run()
+  bool run() override
   {
     pres_system::pres p;
     if (input_filename().empty())

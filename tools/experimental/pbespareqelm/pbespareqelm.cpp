@@ -39,13 +39,13 @@ class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_too
     /// \brief If true, the initial state is ignored.
     bool m_ignore_initial_state;
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_ignore_initial_state = parser.options.count("ignore-initial-state") > 0;
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("ignore-initial-state", "ignore the initial state in the computation", 'I');
@@ -63,7 +63,7 @@ class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_too
       )
     {}
 
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "pbeseqelm parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;

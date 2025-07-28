@@ -43,10 +43,7 @@ lts_type::lts_type(int state_length)
     this->state_length = state_length;
 }
 
-
-lts_type::~lts_type()
-{}
-
+lts_type::~lts_type() = default;
 
 int lts_type::get_state_length() const
 {

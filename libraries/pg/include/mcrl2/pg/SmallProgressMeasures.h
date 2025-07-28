@@ -289,12 +289,12 @@ public:
       LiftingStatistics* stats = nullptr,
       const verti* vertex_map = nullptr,
       verti vertex_map_size = 0);
-  ~DenseSPM();
+  ~DenseSPM() override;
 
   // verti *vec(verti v) { return &spm_[(std::size_t)len_*v]; }
-  const verti* vec(verti v) const { return &spm_[(std::size_t)len_ * v]; }
-  void set_vec(verti v, const verti src[], bool carry);
-  void set_vec_to_top(verti v);
+  const verti* vec(verti v) const override { return &spm_[(std::size_t)len_ * v]; }
+  void set_vec(verti v, const verti src[], bool carry) override;
+  void set_vec_to_top(verti v) override;
 
 protected:
     verti *spm_;  //!< array storing the SPM vector data
@@ -337,7 +337,7 @@ public:
       const verti* vmap = nullptr,
       verti vmap_size = 0);
 
-  ParityGame::Strategy solve();
+  ParityGame::Strategy solve() override;
 
   /*! Solves the game by applying Jurdziński's proposed algorithm that solves
       the game for one player only, and then solves a subgame with the
@@ -385,8 +385,8 @@ public:
       const verti* vmap = nullptr,
       verti vmap_size = 0);
 
-  ParityGame::Strategy solve_normal();
-  ParityGame::Strategy solve_alternate();
+  ParityGame::Strategy solve_normal() override;
+  ParityGame::Strategy solve_alternate() override;
 
 private:
   SmallProgressMeasuresSolver2(const SmallProgressMeasuresSolver2&) = delete;
@@ -404,7 +404,7 @@ public:
       bool alt = false,
       LiftingStatistics* stats = nullptr);
 
-  ParityGameSolver* create(const ParityGame& game, const verti* vmap, verti vmap_size);
+  ParityGameSolver* create(const ParityGame& game, const verti* vmap, verti vmap_size) override;
 
 private:
     std::shared_ptr<LiftingStrategyFactory>  lsf_;

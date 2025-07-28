@@ -115,13 +115,13 @@ class mcrl2typecheck_tool: public utilities::tools::input_tool
     using super = utilities::tools::input_tool;
     bool print_subterms = false;
 
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       print_subterms = parser.options.count("print-subterms") > 0;
     }
 
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("print-subterms", "print the sorts of subterms", 's');
@@ -137,7 +137,7 @@ class mcrl2typecheck_tool: public utilities::tools::input_tool
              )
     {}
 
-    bool run()
+    bool run() override
     {
       std::string text = utilities::read_text(input_filename());
       rewrite_expressions(text, print_subterms);

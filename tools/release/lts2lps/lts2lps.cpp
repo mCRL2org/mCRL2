@@ -40,8 +40,7 @@ class lts2lps_tool : public input_output_tool
     data_file_type_t data_file_type;
     std::string data_file;
 
-
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
 
@@ -58,7 +57,7 @@ class lts2lps_tool : public input_output_tool
                       "FILE must be a .mcrl2 file. ", 'm');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -107,8 +106,7 @@ class lts2lps_tool : public input_output_tool
       data_file_type(mcrl2::lts::data_file_type_t::none_e)
     {}
 
-
-    bool run()
+    bool run() override
     {
       lts_lts_t l;
       const lts_type intype=mcrl2::lts::detail::guess_format(input_filename());

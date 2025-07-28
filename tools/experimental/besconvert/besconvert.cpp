@@ -551,7 +551,7 @@ class besconvert_tool: public super
     bes_reduction_algorithm::to_lts_translation_t m_translation;
     bool m_no_reduction;
 
-    void add_options(mcrl2::utilities::interface_description& desc)
+    void add_options(mcrl2::utilities::interface_description& desc) override
     {
       using namespace mcrl2::utilities::tools;
       using namespace mcrl2::utilities;
@@ -574,7 +574,7 @@ class besconvert_tool: public super
                       "do not perform the reduction, only store the intermediate LTS", 'n');
     }
 
-    void parse_options(const mcrl2::utilities::command_line_parser& parser)
+    void parse_options(const mcrl2::utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -639,7 +639,7 @@ class besconvert_tool: public super
       m_no_reduction(false)
     {}
 
-    bool run()
+    bool run() override
     {
       using namespace mcrl2::pbes_system;
       using namespace mcrl2;

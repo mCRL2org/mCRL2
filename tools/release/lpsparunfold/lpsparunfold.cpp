@@ -48,7 +48,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
     bool m_possibly_inconsistent;
     bool m_disable_pattern_unfolding;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("index", make_mandatory_argument("[NUM]"),
@@ -65,7 +65,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
                       "do not unfold pattern matching functions in state updates", 'x');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -139,7 +139,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
     ///Reads a specification from input_file,
     ///applies instantiation of sums to it and writes the result to output_file.
-    bool run()
+    bool run() override
     {
       if ((m_set_index.empty() && m_unfoldsort.empty()) ||
           (!m_set_index.empty() && !m_unfoldsort.empty())

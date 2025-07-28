@@ -37,11 +37,11 @@ public:
                                 const SmallProgressMeasures &spm,
                                 Order order, Metric metric );
 
-    void push(verti v);
-    void bump(verti v);
-    verti pop();
+    void push(verti v) override;
+    void bump(verti v) override;
+    verti pop() override;
 
-protected:
+  protected:
 
     /*! Moves the element at index i up the heap until the heap property
         is restored. */
@@ -94,14 +94,13 @@ public:
                 MaxMeasureLiftingStrategy2::MAX_VALUE )
         : order_(order), metric_(metric) { };
 
-    bool supports_version(int version);
+    bool supports_version(int version) override;
 
-    LiftingStrategy *create(const ParityGame&, const SmallProgressMeasures &);
+    LiftingStrategy* create(const ParityGame&, const SmallProgressMeasures&) override;
 
-    LiftingStrategy2 *create2( const ParityGame &game,
-                               const SmallProgressMeasures &spm );
+    LiftingStrategy2* create2(const ParityGame& game, const SmallProgressMeasures& spm) override;
 
-private:
+  private:
     const MaxMeasureLiftingStrategy2::Order  order_;
     const MaxMeasureLiftingStrategy2::Metric metric_;
 };

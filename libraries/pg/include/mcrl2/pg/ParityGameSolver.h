@@ -34,7 +34,7 @@ class ParityGameSolver : public Abortable, RefCounted
 public:
     ParityGameSolver(const ParityGame &game)
         : game_(game) { };
-    virtual ~ParityGameSolver() = default;
+    ~ParityGameSolver() override = default;
 
     /*! Solve the game and return the strategies for both players. */
     virtual ParityGame::Strategy solve() = 0;
@@ -50,7 +50,7 @@ protected:
 class ParityGameSolverFactory : public RefCounted
 {
 public:
-  virtual ~ParityGameSolverFactory() = default;
+  ~ParityGameSolverFactory() override = default;
 
   /*! Create a parity game solver for the given game.
       \param vertex_map maps vertex indices from the given subgame to the

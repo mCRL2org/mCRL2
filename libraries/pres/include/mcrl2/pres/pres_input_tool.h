@@ -57,7 +57,7 @@ class pres_input_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// input format options.
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       Tool::add_options(desc);
       std::set<utilities::file_format> types = available_input_formats();
@@ -71,7 +71,7 @@ class pres_input_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
       m_pres_input_format = utilities::file_format();
@@ -117,7 +117,7 @@ class pres_input_tool: public Tool
     {}
 
     /// \brief Destructor.
-    virtual ~pres_input_tool() = default;
+    ~pres_input_tool() override = default;
 
     /// \brief Returns the input file format
     /// \return The input format

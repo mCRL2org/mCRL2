@@ -81,13 +81,13 @@ class RewriterCompilingJitty: public Rewriter
     using rewriter_function = void (*)(data_expression&, const application&, RewriterCompilingJitty*);
 
     RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector&);
-    virtual ~RewriterCompilingJitty();
+    ~RewriterCompilingJitty() override;
 
-    rewrite_strategy getStrategy();
+    rewrite_strategy getStrategy() override;
 
-    data_expression rewrite(const data_expression& term, substitution_type& sigma);
+    data_expression rewrite(const data_expression& term, substitution_type& sigma) override;
 
-    void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma);
+    void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma) override;
 
     // The variable global_sigma is a temporary store to maintain the substitution 
     // sigma during rewriting a single term. It is not a variable for public use. 
@@ -231,7 +231,7 @@ class RewriterCompilingJitty: public Rewriter
     // Standard assignment operator.
     RewriterCompilingJitty& operator=(const RewriterCompilingJitty& other)=delete;
 
-    std::shared_ptr<detail::Rewriter> clone()
+    std::shared_ptr<detail::Rewriter> clone() override
     {
       return std::shared_ptr<Rewriter>(new RewriterCompilingJitty(*this));
     }
@@ -287,10 +287,10 @@ class RewriterCompilingJitty: public Rewriter
     match_tree build_tree(build_pars pars, std::size_t i);
     match_tree create_tree(const data_equation_list& rules);
 
-  void thread_initialise()
-  {
-    mCRL2log(mcrl2::log::debug) << "Initialise busy/forbidden flags\n";
-    m_thread_aterm_pool = &atermpp::detail::g_thread_term_pool();
+    void thread_initialise() override
+    {
+      mCRL2log(mcrl2::log::debug) << "Initialise busy/forbidden flags\n";
+      m_thread_aterm_pool = &atermpp::detail::g_thread_term_pool();
   }
 };
 

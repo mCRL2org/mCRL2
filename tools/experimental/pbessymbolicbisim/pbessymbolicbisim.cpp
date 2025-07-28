@@ -42,7 +42,7 @@ protected:
   bool m_randomize;
 
   /// Parse the non-default options.
-  void parse_options(const command_line_parser& parser)
+  void parse_options(const command_line_parser& parser) override
   {
     super::parse_options(parser);
 
@@ -56,7 +56,7 @@ protected:
     m_randomize = parser.options.count("randomize") > 0;
   }
 
-  void add_options(interface_description& desc)
+  void add_options(interface_description& desc) override
   {
     super::add_options(desc);
     desc.add_option("simplifier", make_enum_argument<simplifier_mode>("MODE")
@@ -99,7 +99,7 @@ public:
   /// Runs the algorithm.
   /// Reads a specification from input_file,
   /// applies real time abstraction to it and writes the result to output_file.
-  bool run()
+  bool run() override
   {
     mCRL2log(verbose) << "Parameters of pbessymbolicbisim:" << std::endl;
     mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
