@@ -213,7 +213,7 @@ class tracepp_tool: public input_output_tool
       format_for_output(otPlain)
     {}
 
-    bool run()
+    bool run() override
     {
       mcrl2::lts::trace trace;
 
@@ -267,7 +267,7 @@ class tracepp_tool: public input_output_tool
   protected:
     output_type     format_for_output;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("format", make_enum_argument<output_type>("FORMAT")
@@ -279,7 +279,7 @@ class tracepp_tool: public input_output_tool
                       "print the trace in the specified FORMAT:", 'f');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       format_for_output=parser.option_argument_as<output_type>("format");

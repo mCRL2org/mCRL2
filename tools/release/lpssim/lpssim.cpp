@@ -67,13 +67,13 @@ private:
 
     bool m_do_not_use_dummies;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("nodummy", "do not replace global variables in the LPS with dummy values", 'y');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_do_not_use_dummies = 0 < parser.options.count("nodummy");
@@ -364,7 +364,7 @@ private:
       m_do_not_use_dummies(false)
     {}
 
-    bool run()
+    bool run() override
     {
       mcrl2::lps::stochastic_specification spec;
       load_lps(spec, input_filename());

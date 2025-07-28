@@ -33,7 +33,7 @@ class input_input_tool: public tool
 
     /// \brief Checks if the number of positional options is OK.
     /// \param parser A command line parser
-    void check_positional_options(const command_line_parser& parser)
+    void check_positional_options(const command_line_parser& parser) override
     {
       if (2 < parser.arguments.size())
       {
@@ -42,14 +42,11 @@ class input_input_tool: public tool
     }
 
     /// \brief Returns the synopsis of the tool.
-    std::string synopsis() const
-    {
-      return "[OPTION]... INFILE1 [INFILE2]\n";
-    }
+    std::string synopsis() const override { return "[OPTION]... INFILE1 [INFILE2]\n"; }
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       tool::parse_options(parser);
       if (0 < parser.arguments.size())

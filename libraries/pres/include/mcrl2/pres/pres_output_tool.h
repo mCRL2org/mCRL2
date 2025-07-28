@@ -56,7 +56,7 @@ class pres_output_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// output format options.
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       Tool::add_options(desc);
       std::set<utilities::file_format> types = available_output_formats();
@@ -70,7 +70,7 @@ class pres_output_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
       m_pres_output_format = utilities::file_format();
@@ -115,7 +115,7 @@ class pres_output_tool: public Tool
     {}
 
     /// \brief Destructor.
-    virtual ~pres_output_tool() = default;
+    ~pres_output_tool() override = default;
 
     /// \brief Returns the output format
     /// \return The output format

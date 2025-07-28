@@ -30,9 +30,9 @@ template <class LTS_TYPE>
     /**
      * Computes the ready-simulation equivalence
      * classes and preorder relations of the LTS
-     */  
-  virtual void partitioning_algorithm();
-    /** Destroys this partitioner. */
+     */
+  void partitioning_algorithm() override;
+  /** Destroys this partitioner. */
   ~ready_sim_partitioner();
  private :
   // Non inherited data members...

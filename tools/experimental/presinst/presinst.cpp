@@ -48,7 +48,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
     bool m_remove_redundant_equations;
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -72,7 +72,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.
@@ -113,7 +113,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
     {}
 
     /// Runs the algorithm.
-    bool run()
+    bool run() override
     {
       using namespace mcrl2::pres_system;
 

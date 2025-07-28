@@ -39,7 +39,7 @@ class bespp_tool: public pbes_input_tool<input_output_tool>
       format(print_default)
     {}
 
-    bool run()
+    bool run() override
     {
       print_specification();
       return true;
@@ -48,7 +48,7 @@ class bespp_tool: public pbes_input_tool<input_output_tool>
   protected:
     print_format_type  format;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       input_output_tool::add_options(desc);
       desc.add_option("format", make_enum_argument<print_format_type>("FORMAT")
@@ -56,7 +56,7 @@ class bespp_tool: public pbes_input_tool<input_output_tool>
                       "print the PBES in the specified FORMAT:", 'f');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       format = parser.option_argument_as<print_format_type>("format");

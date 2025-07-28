@@ -30,7 +30,7 @@ protected:
   bool m_clustered;
   bool m_instantiate;
 
-  void parse_options(const command_line_parser& parser)
+  void parse_options(const command_line_parser& parser) override
   {
     super::parse_options(parser);
     m_optimized = parser.option_argument_as<bool>("optimize");
@@ -38,7 +38,7 @@ protected:
     m_instantiate = parser.options.count("instantiate") > 0;
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("optimize", make_optional_argument("NAME", "1"), "simplify the PBES during the normalization (default true)", 'O');
@@ -57,7 +57,7 @@ protected:
       )
     {}
 
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "symbolic_exploration parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;

@@ -31,11 +31,11 @@ class DeloopSolver : public ParityGameSolver
 public:
     DeloopSolver( const ParityGame &game, ParityGameSolverFactory &pgsf,
                   const verti *vmap, verti vmap_size );
-    ~DeloopSolver();
+    ~DeloopSolver() override;
 
-    ParityGame::Strategy solve();
+    ParityGame::Strategy solve() override;
 
-private:
+  private:
     // SCC callback
     int operator()(const verti *vertices, std::size_t num_vertices);
     friend class SCC<DeloopSolver>;
@@ -52,13 +52,12 @@ class DeloopSolverFactory : public ParityGameSolverFactory
 public:
     DeloopSolverFactory(ParityGameSolverFactory &pgsf)
         : pgsf_(pgsf) { pgsf_.ref(); }
-    ~DeloopSolverFactory() { pgsf_.deref(); }
+    ~DeloopSolverFactory() override { pgsf_.deref(); }
 
     //! Create a new DeloopSolver instance.
-    ParityGameSolver *create( const ParityGame &game,
-        const verti *vertex_map, verti vertex_map_size );
+    ParityGameSolver* create(const ParityGame& game, const verti* vertex_map, verti vertex_map_size) override;
 
-protected:
+  protected:
     ParityGameSolverFactory &pgsf_;     //!< Factory used to create subsolvers
 };
 

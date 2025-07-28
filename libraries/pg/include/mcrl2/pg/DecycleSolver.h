@@ -33,11 +33,11 @@ class DecycleSolver : public ParityGameSolver
 public:
     DecycleSolver( const ParityGame &game, ParityGameSolverFactory &pgsf,
                    const verti *vmap, verti vmap_size );
-    ~DecycleSolver();
+    ~DecycleSolver() override;
 
-    ParityGame::Strategy solve();
+    ParityGame::Strategy solve() override;
 
-protected:
+  protected:
     ParityGameSolverFactory &pgsf_;       //!< Solver factory to use
     const verti             *vmap_;       //!< Current vertex map
     const verti             vmap_size_;   //!< Size of vertex map
@@ -49,13 +49,12 @@ class DecycleSolverFactory : public ParityGameSolverFactory
 public:
     DecycleSolverFactory(ParityGameSolverFactory &pgsf)
         : pgsf_(pgsf) { pgsf_.ref(); }
-    ~DecycleSolverFactory() { pgsf_.deref(); }
+    ~DecycleSolverFactory() override { pgsf_.deref(); }
 
     //! Return a new DecycleSolver instance.
-    ParityGameSolver *create( const ParityGame &game,
-        const verti *vertex_map, verti vertex_map_size );
+    ParityGameSolver* create(const ParityGame& game, const verti* vertex_map, verti vertex_map_size) override;
 
-protected:
+  protected:
     ParityGameSolverFactory &pgsf_;     //!< Factory used to create subsolvers
 };
 

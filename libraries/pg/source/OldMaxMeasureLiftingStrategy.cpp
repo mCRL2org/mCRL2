@@ -25,9 +25,7 @@ OldMaxMeasureLiftingStrategy::OldMaxMeasureLiftingStrategy(
     }
 }
 
-OldMaxMeasureLiftingStrategy::~OldMaxMeasureLiftingStrategy()
-{
-}
+OldMaxMeasureLiftingStrategy::~OldMaxMeasureLiftingStrategy() = default;
 
 void OldMaxMeasureLiftingStrategy::lifted(verti v)
 {

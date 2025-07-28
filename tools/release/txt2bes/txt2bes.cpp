@@ -35,7 +35,7 @@ public:
             "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.")
   {}
 
-  bool run()
+  bool run() override
   {
     pbes_system::pbes p;
     if (input_filename().empty())

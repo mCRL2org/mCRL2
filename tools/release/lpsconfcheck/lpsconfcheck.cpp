@@ -90,7 +90,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
     /// \brief If no invariant was provided, the constant true is used as invariant.
     data_expression m_invariant;
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -143,7 +143,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.
@@ -205,7 +205,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       m_invariant(mcrl2::data::sort_bool::true_())
     {}
 
-    bool run()
+    bool run() override
     {
 
       mCRL2log(verbose) << "lpsconfcheck parameters:" << std::endl;

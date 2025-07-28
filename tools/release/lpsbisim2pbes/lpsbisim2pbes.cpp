@@ -39,14 +39,14 @@ class lpsbisim2pbes_tool: public super
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_normalize = parser.options.count("normalize") > 0;
       m_bisimulation_type = parser.option_argument_as<bisimulation_type>("bisimulation");
     }
 
-    void add_options(interface_description& desc) /*< One can add command line
+    void add_options(interface_description& desc) override /*< One can add command line
                      options by overriding the virtual function `add_options`. >*/
     {
       super::add_options(desc);
@@ -73,7 +73,7 @@ class lpsbisim2pbes_tool: public super
       )
     {}
 
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "lpsbisim2pbes parameters:" << std::endl;
       mCRL2log(verbose) << "  input file 1 :         " << input_filename1() << std::endl;

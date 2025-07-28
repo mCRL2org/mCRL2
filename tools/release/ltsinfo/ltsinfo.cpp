@@ -52,7 +52,7 @@ class ltsinfo_tool : public ltsinfo_base
 
   protected:
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       using namespace mcrl2::lts;
 
@@ -69,7 +69,7 @@ class ltsinfo_tool : public ltsinfo_base
                  "print the average, minimal and maximal branching factor",'b');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       using namespace mcrl2::lts;
 
@@ -305,7 +305,7 @@ class ltsinfo_tool : public ltsinfo_base
 
   public:
 
-    bool run()
+    bool run() override
     {
       using namespace mcrl2::lts;
       using namespace mcrl2::lts::detail;

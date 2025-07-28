@@ -48,8 +48,8 @@ public:
     FocusListLiftingStrategy( const ParityGame &game, bool alternate,
                               verti max_size, std::size_t max_lifts );
 
-    void lifted(verti vertex);
-    verti next();
+    void lifted(verti vertex) override;
+    verti next() override;
 
     bool max_size() const { return 0 != focus_list_.capacity(); }
 
@@ -101,10 +101,9 @@ public:
           lift_ratio_(lift_ratio > 0 ? lift_ratio : 10.0) { };
 
     //! Return a new FocusListLiftingStrategy instance.
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm );
+    LiftingStrategy* create(const ParityGame& game, const SmallProgressMeasures& spm) override;
 
-private:
+  private:
     const bool   alternate_;
     const double size_ratio_, lift_ratio_;
 };

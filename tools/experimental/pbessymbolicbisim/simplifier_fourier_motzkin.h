@@ -52,7 +52,7 @@ protected:
     }
   }
 
-  data_expression simplify_expression(const data_expression& expr)
+  data_expression simplify_expression(const data_expression& expr) override
   {
     // Split the expression into two equally sized lists of
     // expressions over real numbers and expressions over other

@@ -96,7 +96,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
 
 
   protected:
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -118,7 +118,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.
@@ -148,7 +148,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
     }
 
   public:
-    bool run()
+    bool run() override
     {
       using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;

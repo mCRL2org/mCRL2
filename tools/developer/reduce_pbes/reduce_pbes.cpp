@@ -81,7 +81,7 @@ class reduce_pbes_tool: public pbes_input_tool<input_tool>
     bool m_verbose;
     std::size_t m_depth = undefined;
 
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_verbose = parser.options.count("verbose") > 0;
@@ -91,7 +91,7 @@ class reduce_pbes_tool: public pbes_input_tool<input_tool>
       }
     }
 
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("depth", utilities::make_optional_argument<std::size_t>("DEPTH", "0"), "the depth at which the reductions are applied", 'D');
@@ -105,7 +105,7 @@ class reduce_pbes_tool: public pbes_input_tool<input_tool>
              )
     {}
 
-    bool run()
+    bool run() override
     {
       pbes p = pbes_system::detail::load_pbes(input_filename());
       if (m_verbose)

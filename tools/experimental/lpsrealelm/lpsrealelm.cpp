@@ -41,7 +41,7 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
     unsigned int max_iterations;
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -51,7 +51,7 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.
@@ -74,7 +74,7 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
     /// Runs the algorithm.
     /// Reads a specification from input_file,
     ///i applies real time abstraction to it and writes the result to output_file.
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "Parameters of lpsrealelm:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;

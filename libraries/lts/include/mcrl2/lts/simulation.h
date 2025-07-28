@@ -74,8 +74,7 @@ class simulation : protected explorer<true, false, stochastic_specification>
     /// Load a trace from a file.
     void load(const std::string& filename);
 
-    virtual ~simulation()
-    {}
+    virtual ~simulation() = default;
 
   protected:
     stochastic_specification m_specification;

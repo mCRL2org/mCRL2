@@ -110,10 +110,7 @@ protected:
     return result;
   }
 
-  data_expression simplify_expression(const data_expression& expr)
-  {
-    return rewr(make_mdd(expr));
-  }
+  data_expression simplify_expression(const data_expression& expr) override { return rewr(make_mdd(expr)); }
 
 public:
   simplifier_mdd(const rewriter& r, const rewriter& pr, const data_specification& dataspec_)

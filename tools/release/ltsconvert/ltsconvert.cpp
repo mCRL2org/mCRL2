@@ -299,7 +299,7 @@ class ltsconvert_tool : public input_output_tool
     }
 
   public:
-    bool run()
+    bool run() override
     {
       switch (tool_options.intype)
       {
@@ -337,7 +337,7 @@ class ltsconvert_tool : public input_output_tool
     }
 
   protected:
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       input_output_tool::add_options(desc);
 
@@ -406,7 +406,7 @@ class ltsconvert_tool : public input_output_tool
       tau_actions.push_back(act_names.substr(lastpos));
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       input_output_tool::parse_options(parser);
 

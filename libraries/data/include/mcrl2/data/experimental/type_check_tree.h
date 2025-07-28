@@ -494,10 +494,7 @@ struct or_constraint final: public type_check_constraint
     : alternatives(alternatives_)
   {}
 
-  std::string print() const
-  {
-    return print_node_vector("or", alternatives, "\n  ", "\n  ", "\n  ");
-  }
+  std::string print() const override { return print_node_vector("or", alternatives, "\n  ", "\n  ", "\n  "); }
 };
 
 inline
@@ -598,7 +595,7 @@ struct type_check_node
     sort = context.create_sort_variable();
   }
 
-  virtual ~type_check_node() {};
+  virtual ~type_check_node() = default;
 
   // Adds a value to the 'sort' attribute
   // Sets the constraints that apply to this node to 'constraint'
@@ -716,7 +713,7 @@ struct constant_node: public type_check_node
     : type_check_node(context, {}), name(name_)
   {}
 
-  virtual ~constant_node() {}
+  ~constant_node() override = default;
 
   void set_constraint(type_check_context& context) override
   {
@@ -976,7 +973,7 @@ struct unary_operator_node: public type_check_node
     : type_check_node(context, { arg }), name(name_)
   {}
 
-  virtual ~unary_operator_node() {}
+  ~unary_operator_node() override = default;
 
   void set_constraint(type_check_context& context) override
   {
