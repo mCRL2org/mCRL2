@@ -22,7 +22,7 @@ alignas(aterm_pool)
 extern std::byte g_aterm_pool_storage[sizeof(aterm_pool)];
 
 /// \brief A reference to the global term pool storage
-static aterm_pool& g_aterm_pool_instance = *static_cast<aterm_pool*>(static_cast<void*>(&g_aterm_pool_storage));
+static aterm_pool& g_aterm_pool_instance = *reinterpret_cast<aterm_pool*>(&g_aterm_pool_storage);
 
 /// \brief obtain a reference to the global aterm pool.
 /// \details provides lazy initialization which should be used when instantiating
