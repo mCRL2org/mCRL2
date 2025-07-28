@@ -325,7 +325,7 @@ void quantifiers_inside_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermp
 }
 
 template <typename T>
-T quantifiers_inside_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
+T quantifiers_inside_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<data_expression_builder>(quantifiers_inside_rewriter()).apply(result, x);

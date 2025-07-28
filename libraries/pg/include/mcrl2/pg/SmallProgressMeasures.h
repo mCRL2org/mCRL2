@@ -85,10 +85,11 @@ public:
     //! Maximum number of lifting attempts in a row before checking timer.
     static const int work_size = 10000;
 
-    SmallProgressMeasures(
-        const ParityGame &game, ParityGame::Player player,
-        LiftingStatistics *stats = 0,
-        const verti *vmap = 0, verti vmap_size = 0 );
+    SmallProgressMeasures(const ParityGame& game,
+        ParityGame::Player player,
+        LiftingStatistics* stats = nullptr,
+        const verti* vmap = nullptr,
+        verti vmap_size = 0);
 
     virtual ~SmallProgressMeasures();
 
@@ -283,16 +284,17 @@ protected:
 class DenseSPM : public SmallProgressMeasures
 {
 public:
-    DenseSPM(
-        const ParityGame &game, ParityGame::Player player,
-        LiftingStatistics *stats = 0,
-        const verti *vertex_map = 0, verti vertex_map_size = 0 );
-    ~DenseSPM();
+  DenseSPM(const ParityGame& game,
+      ParityGame::Player player,
+      LiftingStatistics* stats = nullptr,
+      const verti* vertex_map = nullptr,
+      verti vertex_map_size = 0);
+  ~DenseSPM();
 
-    // verti *vec(verti v) { return &spm_[(std::size_t)len_*v]; }
-    const verti *vec(verti v) const { return &spm_[(std::size_t)len_*v]; }
-    void set_vec(verti v, const verti src[], bool carry) ;
-    void set_vec_to_top(verti v);
+  // verti *vec(verti v) { return &spm_[(std::size_t)len_*v]; }
+  const verti* vec(verti v) const { return &spm_[(std::size_t)len_ * v]; }
+  void set_vec(verti v, const verti src[], bool carry);
+  void set_vec_to_top(verti v);
 
 protected:
     verti *spm_;  //!< array storing the SPM vector data
@@ -328,39 +330,39 @@ protected:
     };
 
 public:
-    SmallProgressMeasuresSolver( const ParityGame &game,
-                                 std::shared_ptr<LiftingStrategyFactory> lsf,
-                                 bool alternate = false,
-                                 LiftingStatistics *stats = 0,
-                                 const verti *vmap = 0,
-                                 verti vmap_size = 0 );
+  SmallProgressMeasuresSolver(const ParityGame& game,
+      std::shared_ptr<LiftingStrategyFactory> lsf,
+      bool alternate = false,
+      LiftingStatistics* stats = nullptr,
+      const verti* vmap = nullptr,
+      verti vmap_size = 0);
 
-    ParityGame::Strategy solve();
+  ParityGame::Strategy solve();
 
-    /*! Solves the game by applying Jurdziński's proposed algorithm that solves
-        the game for one player only, and then solves a subgame with the
-        remaining vertices. This algorithm is most efficient when the original
-        game is easier to solve than its dual. */
-    virtual ParityGame::Strategy solve_normal();
+  /*! Solves the game by applying Jurdziński's proposed algorithm that solves
+      the game for one player only, and then solves a subgame with the
+      remaining vertices. This algorithm is most efficient when the original
+      game is easier to solve than its dual. */
+  virtual ParityGame::Strategy solve_normal();
 
-    /*! Solves the game using Friedmann's alternate strategy. This allocates
-        solving algorithms for both the normal game and its dual at once, and
-        alternates working on each, exchanging information about solved vertices
-        in the process. */
-    virtual ParityGame::Strategy solve_alternate();
+  /*! Solves the game using Friedmann's alternate strategy. This allocates
+      solving algorithms for both the normal game and its dual at once, and
+      alternates working on each, exchanging information about solved vertices
+      in the process. */
+  virtual ParityGame::Strategy solve_alternate();
 
-    /*! Preprocess the game so that vertices with loops either have the loop
-        removed, or have all other edges removed. In the latter case, the vertex
-        is necessarily won by the player corresponding with its parity.
+  /*! Preprocess the game so that vertices with loops either have the loop
+      removed, or have all other edges removed. In the latter case, the vertex
+      is necessarily won by the player corresponding with its parity.
 
-        This preprocessing operation speeds up solving with small progress
-        measures considerably, though it is superseded by the DecycleSolver
-        which does more general preprocessing. */
-    static void preprocess_game(ParityGame &game);
+      This preprocessing operation speeds up solving with small progress
+      measures considerably, though it is superseded by the DecycleSolver
+      which does more general preprocessing. */
+  static void preprocess_game(ParityGame& game);
 
 private:
-    SmallProgressMeasuresSolver(const SmallProgressMeasuresSolver&);
-    SmallProgressMeasuresSolver &operator=(const SmallProgressMeasuresSolver&);
+  SmallProgressMeasuresSolver(const SmallProgressMeasuresSolver&) = delete;
+  SmallProgressMeasuresSolver& operator=(const SmallProgressMeasuresSolver&) = delete;
 
 protected:
     std::shared_ptr<LiftingStrategyFactory> lsf_;   //!< factory used to create lifting strategy
@@ -376,19 +378,19 @@ protected:
 class SmallProgressMeasuresSolver2 : public SmallProgressMeasuresSolver
 {
 public:
-    SmallProgressMeasuresSolver2( const ParityGame &game,
-                                  std::shared_ptr<LiftingStrategyFactory> lsf,
-                                  bool alternate = false,
-                                  LiftingStatistics *stats = 0,
-                                  const verti *vmap = 0,
-                                  verti vmap_size = 0 );
+  SmallProgressMeasuresSolver2(const ParityGame& game,
+      std::shared_ptr<LiftingStrategyFactory> lsf,
+      bool alternate = false,
+      LiftingStatistics* stats = nullptr,
+      const verti* vmap = nullptr,
+      verti vmap_size = 0);
 
-    ParityGame::Strategy solve_normal();
-    ParityGame::Strategy solve_alternate();
+  ParityGame::Strategy solve_normal();
+  ParityGame::Strategy solve_alternate();
 
 private:
-    SmallProgressMeasuresSolver2(const SmallProgressMeasuresSolver2&);
-    SmallProgressMeasuresSolver2 &operator=(const SmallProgressMeasuresSolver2&);
+  SmallProgressMeasuresSolver2(const SmallProgressMeasuresSolver2&) = delete;
+  SmallProgressMeasuresSolver2& operator=(const SmallProgressMeasuresSolver2&) = delete;
 };
 
 /*! \ingroup SmallProgressMeasures
@@ -397,12 +399,12 @@ private:
 class SmallProgressMeasuresSolverFactory : public ParityGameSolverFactory
 {
 public:
-    SmallProgressMeasuresSolverFactory(std::shared_ptr<LiftingStrategyFactory> lsf,
-        int version = 1, bool alt = false, LiftingStatistics *stats = 0 );
+  SmallProgressMeasuresSolverFactory(std::shared_ptr<LiftingStrategyFactory> lsf,
+      int version = 1,
+      bool alt = false,
+      LiftingStatistics* stats = nullptr);
 
-    ParityGameSolver *create( const ParityGame &game,
-                              const verti *vmap,
-                              verti vmap_size );
+  ParityGameSolver* create(const ParityGame& game, const verti* vmap, verti vmap_size);
 
 private:
     std::shared_ptr<LiftingStrategyFactory>  lsf_;

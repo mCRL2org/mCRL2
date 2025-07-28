@@ -151,7 +151,7 @@ class dynamic_library
         load();
       }
       library_proc result = get_proc_address(m_library, name.c_str());
-      if (result == 0)
+      if (result == nullptr)
       {
         throw std::runtime_error("Could not find proc address (" + m_filename + ":" + name + "): " + get_last_error());
       }

@@ -123,7 +123,7 @@ void one_point_rule_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::a
 }
 
 template <typename T>
-T one_point_rule_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
+T one_point_rule_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<data::data_expression_builder>(one_point_rule_rewriter()).apply(result, x);

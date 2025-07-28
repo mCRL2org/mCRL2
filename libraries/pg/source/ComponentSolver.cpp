@@ -32,8 +32,8 @@ ParityGame::Strategy ComponentSolver::solve()
     winning_[0] = &W0;
     winning_[1] = &W1;
     if (decompose_graph(game_.graph(), *this) != 0) strategy_.clear();
-    winning_[0] = NULL;
-    winning_[1] = NULL;
+    winning_[0] = nullptr;
+    winning_[1] = nullptr;
     ParityGame::Strategy result;
     result.swap(strategy_);
     return result;

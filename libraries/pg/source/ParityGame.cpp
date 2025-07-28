@@ -14,7 +14,9 @@
 #include <cstdlib>
 
 ParityGame::ParityGame()
-    : d_(0), vertex_(NULL), cardinality_(NULL)
+    : d_(0),
+      vertex_(nullptr),
+      cardinality_(nullptr)
 {
 }
 
@@ -31,8 +33,8 @@ void ParityGame::clear()
 
     d_ = 0;
     graph_.clear();
-    vertex_ = NULL;
-    cardinality_ = NULL;
+    vertex_ = nullptr;
+    cardinality_ = nullptr;
 }
 
 void ParityGame::assign(const ParityGame &game)
@@ -135,13 +137,13 @@ void ParityGame::shuffle(const std::vector<verti> &perm)
 void ParityGame::compress_priorities( const verti cardinality[],
                                                     bool preserve_parity )
 {
-    if (cardinality == 0) cardinality = cardinality_;
+  if (cardinality == nullptr)
+    cardinality = cardinality_;
 
-    // Quickly check if we have anything to compress first:
-    if ( empty() || std::find( cardinality + preserve_parity,
-                               cardinality + d_, 0 ) == cardinality + d_ )
-    {
-        return;
+  // Quickly check if we have anything to compress first:
+  if (empty() || std::find(cardinality + preserve_parity, cardinality + d_, 0) == cardinality + d_)
+  {
+    return;
     }
 
     // Find out how to map old priorities to new priorities

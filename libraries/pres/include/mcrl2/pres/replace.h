@@ -249,7 +249,7 @@ template <typename T, typename Substitution>
 void replace_pres_expressions(T& x,
     const Substitution& sigma,
     bool innermost = true,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   pres_system::detail::make_replace_pres_expressions_builder<pres_system::pres_expression_builder>(sigma, innermost).update(x);
 }

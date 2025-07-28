@@ -52,13 +52,13 @@ class ParityGameSolverFactory : public RefCounted
 public:
     virtual ~ParityGameSolverFactory() { };
 
-    /*! Create a parity game solver for the given game.
-        \param vertex_map maps vertex indices from the given subgame to the
-            main game. (This allows the SPM solver to correctly collect per-
-            vertex lifting statistics even if the game is decomposed first.)
-        \param vertex_map_size number of vertices mapped */
-    virtual ParityGameSolver *create( const ParityGame &game,
-        const verti *vertex_map = NULL, verti vertex_map_size = 0 ) = 0;
+  /*! Create a parity game solver for the given game.
+      \param vertex_map maps vertex indices from the given subgame to the
+          main game. (This allows the SPM solver to correctly collect per-
+          vertex lifting statistics even if the game is decomposed first.)
+      \param vertex_map_size number of vertices mapped */
+  virtual ParityGameSolver* create(const ParityGame& game, const verti* vertex_map = nullptr, verti vertex_map_size = 0)
+      = 0;
 };
 
 #include "ParityGameSolver_impl.h"

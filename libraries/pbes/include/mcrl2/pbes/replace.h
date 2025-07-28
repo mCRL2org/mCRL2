@@ -249,7 +249,7 @@ template <typename T, typename Substitution>
 void replace_pbes_expressions(T& x,
     const Substitution& sigma,
     bool innermost = true,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   pbes_system::detail::make_replace_pbes_expressions_builder<pbes_system::pbes_expression_builder>(sigma, innermost).update(x);
 }
