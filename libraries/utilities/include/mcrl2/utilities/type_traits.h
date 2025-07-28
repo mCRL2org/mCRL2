@@ -30,8 +30,8 @@ struct is_iterable<T, std::void_t<decltype(std::begin(std::declval<T>())),
 template<typename T, typename = void>
 struct is_iterator : std::false_type {};
 
-template <typename T>
-struct is_iterator<T, std::enable_if_t<!std::is_same_v<typename std::iterator_traits<T>::value_type, void>>>
+template<typename T>
+struct is_iterator<T, typename std::enable_if<!std::is_same<typename std::iterator_traits<T>::value_type, void>::value>::type>
     : std::true_type
 {};
 
@@ -40,8 +40,9 @@ template<typename... Conds>
 struct forall: std::true_type
 {};
 
-template <typename Cond, typename... Conds>
-struct forall<Cond, Conds...> : std::conditional_t<Cond::value, forall<Conds...>, std::false_type>
+template<typename Cond, typename... Conds>
+struct forall<Cond, Conds...>
+    : std::conditional<Cond::value, forall<Conds...>, std::false_type>::type
 {};
 
 // Helpers
