@@ -34,12 +34,18 @@ void LiftingStatistics::record_lift(verti v, bool success)
     }
 }
 
-SmallProgressMeasures::SmallProgressMeasures(
-        const ParityGame &game, ParityGame::Player player,
-        LiftingStatistics *stats, const verti *vmap, verti vmap_size )
-    : game_(game), p_(player), stats_(stats),
-      vmap_(vmap), vmap_size_(vmap_size),
-      strategy_(game.graph().V(), NO_VERTEX), dirty_(0)
+SmallProgressMeasures::SmallProgressMeasures(const ParityGame& game,
+    ParityGame::Player player,
+    LiftingStatistics* stats,
+    const verti* vmap,
+    verti vmap_size)
+    : game_(game),
+      p_(player),
+      stats_(stats),
+      vmap_(vmap),
+      vmap_size_(vmap_size),
+      strategy_(game.graph().V(), NO_VERTEX),
+      dirty_(nullptr)
 {
     assert(p_ == 0 || p_ == 1);
 
@@ -142,7 +148,7 @@ std::pair<verti, bool> SmallProgressMeasures::solve_one(LiftingStrategy &ls)
             success = true;
         }
     }
-    if (stats_ != NULL)
+    if (stats_ != nullptr)
     {
         stats_->record_lift(vmap_ && v < vmap_size_ ? vmap_[v] : v, success);
     }
@@ -220,7 +226,7 @@ verti SmallProgressMeasures::solve_one(LiftingStrategy2 &ls)
         }
     }
 
-    if (stats_ != NULL)
+    if (stats_ != nullptr)
     {
         stats_->record_lift(vmap_ && v < vmap_size_ ? vmap_[v] : v, true);
     }
@@ -664,7 +670,7 @@ ParityGameSolver *SmallProgressMeasuresSolverFactory::create(
         return new SmallProgressMeasuresSolver2(
             game, lsf_, alt_, stats_, vmap, vmap_size );
     }
-    return 0;
+    return nullptr;
 }
 
 //

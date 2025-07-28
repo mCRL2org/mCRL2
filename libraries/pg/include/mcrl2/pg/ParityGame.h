@@ -197,8 +197,7 @@ public:
         remapped to preserve winning sets. The function returns the parity of
         the priority that was mapped to zero.
     */
-    void compress_priorities( const verti cardinality[] = 0,
-                              bool preserve_parity = true );
+    void compress_priorities(const verti cardinality[] = nullptr, bool preserve_parity = true);
 
     /*! Propagate priorities in the graph, by changing the priority for a vertex
         to the maximum of the priorities of its successors, if this is less than
@@ -225,9 +224,10 @@ public:
     void write_pgsolver(std::ostream &os) const;
 
     /*! Read a game description from an mCRL2 PBES. */
-    void read_pbes( const std::string &file_path, verti *goal_vertex = 0,
+    void read_pbes(const std::string& file_path,
+        verti* goal_vertex = nullptr,
         StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL,
-        const std::string &rewrite_strategy = "jitty" );
+        const std::string& rewrite_strategy = "jitty");
 
     /*! Read raw parity game data from input stream */
     void read_raw(std::istream &is);
@@ -289,11 +289,12 @@ public:
     //!@}
 
     /*! Generate a parity game from an mCRL2 PBES. */
-    void assign_pbes( mcrl2::pbes_system::pbes &pbes, verti *goal_vertex = 0,
+    void assign_pbes(mcrl2::pbes_system::pbes& pbes,
+        verti* goal_vertex = nullptr,
         StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL,
-        const std::string &rewrite_strategy = "jitty" );
+        const std::string& rewrite_strategy = "jitty");
 
-protected:
+  protected:
     /*! Re-allocate memory to store information on V vertices with priorities
         between 0 and `d` (exclusive). */
     void reset(verti V, int d);

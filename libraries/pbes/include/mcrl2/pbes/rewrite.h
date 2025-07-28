@@ -155,7 +155,7 @@ void pbes_rewrite(T& x, const Rewriter& R, std::enable_if_t<!std::is_base_of_v<a
 /// \param R a pbes rewriter
 /// \return the rewrite result
 template <typename T, typename Rewriter>
-T pbes_rewrite(const T& x, const Rewriter& R, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
+T pbes_rewrite(const T& x, const Rewriter& R, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   pbes_system::detail::make_rewrite_pbes_expressions_builder<pbes_system::pbes_expression_builder>(R).apply(result, x);
@@ -184,7 +184,7 @@ template <typename T, typename Rewriter, typename Substitution>
 T pbes_rewrite(const T& x,
     const Rewriter& R,
     Substitution sigma,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   pbes_system::detail::make_rewrite_pbes_expressions_with_substitution_builder<pbes_system::pbes_expression_builder>(R, sigma).apply(result, x);

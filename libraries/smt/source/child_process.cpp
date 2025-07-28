@@ -217,7 +217,7 @@ std::string child_process::read(const std::chrono::microseconds& timeout) const
   FD_ZERO(&readfds);
   FD_SET(m_pimpl->pipe_stdout[0], &readfds);
 
-  int result = ::select(m_pimpl->pipe_stdout[0] + 1, &readfds, NULL, NULL, &tv);
+  int result = ::select(m_pimpl->pipe_stdout[0] + 1, &readfds, nullptr, nullptr, &tv);
 
   if(result == -1)
   {

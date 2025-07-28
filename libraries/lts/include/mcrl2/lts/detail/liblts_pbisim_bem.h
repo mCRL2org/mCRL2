@@ -181,8 +181,8 @@ class prob_bisim_partitioner_bem
     void init_node()
     {
       count = 0;
-      left = NULL;
-      right = NULL;
+      left = nullptr;
+      right = nullptr;
     }
   };
 
@@ -269,7 +269,7 @@ class prob_bisim_partitioner_bem
           
           step_classes[i].prev_states[s] = true;
 
-          if (v->left == NULL)
+          if (v->left == nullptr)
           {
             // create left node
             tree_type w;
@@ -288,7 +288,7 @@ class prob_bisim_partitioner_bem
         }
         else
         {
-          if (v->right == NULL)
+          if (v->right == nullptr)
           {
             // create left node
             tree_type w;

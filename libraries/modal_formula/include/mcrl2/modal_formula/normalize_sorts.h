@@ -70,7 +70,7 @@ namespace state_formulas
 template <typename T>
 void normalize_sorts(T& x,
     const data::sort_specification& sortspec,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   core::make_update_apply_builder<state_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).update(x);
 }

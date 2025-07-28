@@ -29,7 +29,7 @@ void normalize_sorts(T& x,
 template <typename T>
 T normalize_sorts(const T& x,
     const data::sort_specification& sortspec,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);

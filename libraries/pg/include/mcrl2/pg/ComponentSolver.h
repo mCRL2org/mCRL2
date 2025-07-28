@@ -33,12 +33,14 @@ public:
         been partially solved already (i.e. when some of their vertices lie in
         the attractor sets of winning regions identified earlier).
     */
-    ComponentSolver( const ParityGame &game, ParityGameSolverFactory &pgsf,
-                     int max_depth, const verti *vmap = 0, verti vmap_size = 0
-                   );
-    ~ComponentSolver();
+  ComponentSolver(const ParityGame& game,
+      ParityGameSolverFactory& pgsf,
+      int max_depth,
+      const verti* vmap = nullptr,
+      verti vmap_size = 0);
+  ~ComponentSolver();
 
-    ParityGame::Strategy solve();
+  ParityGame::Strategy solve();
 
 private:
     // SCC callback

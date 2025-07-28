@@ -11,14 +11,19 @@
 
 /* TODO: write short description of how this works! */
 
-MaxMeasureLiftingStrategy2::MaxMeasureLiftingStrategy2(
-    const ParityGame &game, const SmallProgressMeasures &spm,
-    Order order, Metric metric )
-        : LiftingStrategy2(), spm_(spm), order_(order), metric_(metric),
-          next_id_(0),
-          insert_id_(order < HEAP ? new uint64_t[game.graph().V()] : 0),
-          pq_pos_(new verti[game.graph().V()]),
-          pq_(new verti[game.graph().V()]), pq_size_(0)
+MaxMeasureLiftingStrategy2::MaxMeasureLiftingStrategy2(const ParityGame& game,
+    const SmallProgressMeasures& spm,
+    Order order,
+    Metric metric)
+    : LiftingStrategy2(),
+      spm_(spm),
+      order_(order),
+      metric_(metric),
+      next_id_(0),
+      insert_id_(order < HEAP ? new uint64_t[game.graph().V()] : nullptr),
+      pq_pos_(new verti[game.graph().V()]),
+      pq_(new verti[game.graph().V()]),
+      pq_size_(0)
 {
     std::fill(&pq_pos_[0], &pq_pos_[game.graph().V()], NO_VERTEX);
 }

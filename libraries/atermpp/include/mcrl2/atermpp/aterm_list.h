@@ -121,7 +121,7 @@ public:
       Iter last,
       const ATermConverter& convert_to_aterm,
       std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag,
-          typename std::iterator_traits<Iter>::iterator_category>>* = 0)
+          typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
       : aterm(detail::make_list_backward<Term, Iter, ATermConverter>(first, last, convert_to_aterm))
   {
     assert(!defined() || type_is_list());
@@ -142,7 +142,7 @@ public:
       const ATermConverter& convert_to_aterm,
       const ATermFilter& aterm_filter,
       std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag,
-          typename std::iterator_traits<Iter>::iterator_category>>* = 0)
+          typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
       : aterm(detail::make_list_backward<Term, Iter, ATermConverter, ATermFilter>(first,
             last,
             convert_to_aterm,

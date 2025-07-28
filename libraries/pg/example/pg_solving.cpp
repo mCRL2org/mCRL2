@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
   }
 
   // Optional: verify the solution
-  if (verify && !pg.verify(solution, NULL))
+  if (verify && !pg.verify(solution, nullptr))
   {
     printf("verification failed!\n");
     return 1;
