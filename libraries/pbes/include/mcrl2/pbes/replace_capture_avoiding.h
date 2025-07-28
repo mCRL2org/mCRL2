@@ -85,10 +85,9 @@ struct add_capture_avoiding_replacement
 /// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                                        Substitution& sigma,
-                                        data::set_identifier_generator& id_generator,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-)
+    Substitution& sigma,
+    data::set_identifier_generator& id_generator,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma1).update(x);
@@ -100,10 +99,9 @@ void replace_variables_capture_avoiding(T& x,
 /// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                                     Substitution& sigma,
-                                     data::set_identifier_generator& id_generator,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-)
+    Substitution& sigma,
+    data::set_identifier_generator& id_generator,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   T result;
@@ -116,9 +114,8 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                                        Substitution& sigma,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-)
+    Substitution& sigma,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(pbes_system::find_identifiers(x));
@@ -134,9 +131,8 @@ void replace_variables_capture_avoiding(T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                                     Substitution& sigma,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-)
+    Substitution& sigma,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(pbes_system::find_identifiers(x));

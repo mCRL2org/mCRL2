@@ -2934,8 +2934,7 @@ class bisim_partitioner_dnj
                                                     this step can be ignored */
         {
             /* Create a vector for the new labels */
-            typename std::remove_reference<decltype(aut.state_labels())>::type
-                                                  new_labels(num_eq_classes());
+            std::remove_reference_t<decltype(aut.state_labels())> new_labels(num_eq_classes());
 
             state_type i(0);                                                    assert(i < aut.num_states());
             do

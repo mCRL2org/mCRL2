@@ -105,17 +105,19 @@ namespace mcrl2::lts::detail
     /// have the same size as type T.
     template <class T, std::size_t NR_ELEMENTS = 4000>
     class my_pool
-    {                                                                           static_assert(std::is_trivially_destructible<T>::value);
-      private:                                                                  static_assert(sizeof(void*) <= sizeof(T));
-        class pool_block_t
-        {
-          public:
-            char data[NR_ELEMENTS*sizeof(T)];
-            pool_block_t* next_block;
+    {
+      static_assert(std::is_trivially_destructible_v<T>);
+    private:
+      static_assert(sizeof(void*) <= sizeof(T));
+      class pool_block_t
+      {
+      public:
+        char data[NR_ELEMENTS * sizeof(T)];
+        pool_block_t* next_block;
 
-            pool_block_t(pool_block_t* const new_next_block)
-              : next_block(new_next_block)
-            {  }
+        pool_block_t(pool_block_t* const new_next_block)
+            : next_block(new_next_block)
+        {}
         };                                                                      static_assert(sizeof(T) <= sizeof(pool_block_t::data));
 
         /// \brief first chunk in list of chunks
@@ -238,10 +240,11 @@ namespace mcrl2::lts::detail
         /// \brief allocate and construct a new element (of any type)
         template <class U, class... Args>
         U* construct(Args&&... args)
-        {                                                                       static_assert(std::is_trivially_destructible<U>::value);
-            if constexpr (sizeof(U) == sizeof(T))
-            {
-                return construct_samesize<U>(std::forward<Args>(args)...);
+        {
+          static_assert(std::is_trivially_destructible_v<U>);
+          if constexpr (sizeof(U) == sizeof(T))
+          {
+            return construct_samesize<U>(std::forward<Args>(args)...);
             }
             else
             {                                                                   static_assert(sizeof(U) <= sizeof(first_block->data));
@@ -259,8 +262,9 @@ namespace mcrl2::lts::detail
         template <class U>
         void destroy(U* const old_el)
         {                                                                       static_assert(sizeof(T) == sizeof(U));
-            old_el->~U();                                                       static_assert(std::is_trivially_destructible<U>::value);
-                                                                                #ifndef NDEBUG
+            old_el->~U();
+            static_assert(std::is_trivially_destructible_v<U>);
+#ifndef NDEBUG
                                                                                     // ensure that old_el points to an element in some block
                                                                                     static std::less<const void*> const total_order;
                                                                                     for (const pool_block_t* block(first_block);
@@ -453,7 +457,8 @@ namespace mcrl2::lts::detail
         /// \brief constructor
         simple_list()
           : first(nullptr)
-        {                                                                       static_assert(std::is_trivially_destructible<entry>::value);
+        {
+          static_assert(std::is_trivially_destructible_v<entry>);
         }
 
         #ifndef USE_POOL_ALLOCATOR

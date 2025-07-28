@@ -88,7 +88,7 @@ public:
   }
 
 protected:
-  using SizeType = typename std::conditional<ThreadSafe, std::atomic<std::size_t>, std::size_t>::type;
+  using SizeType = std::conditional_t<ThreadSafe, std::atomic<std::size_t>, std::size_t>;
 
   // The underlying reference counter can always be changed.
   mutable SizeType m_reference_count;

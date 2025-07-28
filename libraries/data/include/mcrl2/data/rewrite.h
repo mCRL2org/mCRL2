@@ -86,10 +86,7 @@ make_rewrite_data_expressions_with_substitution_builder(Rewriter R, Substitution
 /// \\param x an object containing expressions
 /// \\param R a rewriter
 template <typename T, typename Rewriter>
-void rewrite(T& x,
-             Rewriter R,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-            )
+void rewrite(T& x, Rewriter R, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R).update(x);
 }
@@ -99,10 +96,7 @@ void rewrite(T& x,
 /// \\param R a rewriter
 /// \\return the rewrite result
 template <typename T, typename Rewriter>
-T rewrite(const T& x,
-          Rewriter R,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-         )
+T rewrite(const T& x, Rewriter R, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R).apply(result, x);
@@ -115,10 +109,9 @@ T rewrite(const T& x,
 /// \\param sigma a substitution
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
-             Rewriter R,
-             const Substitution& sigma,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-            )
+    Rewriter R,
+    const Substitution& sigma,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma).update(x);
 }
@@ -130,10 +123,9 @@ void rewrite(T& x,
 /// \\return the rewrite result
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
-          Rewriter R,
-          const Substitution& sigma,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-         )
+    Rewriter R,
+    const Substitution& sigma,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result; 
   data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma).apply(result, x);

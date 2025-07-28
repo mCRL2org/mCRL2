@@ -121,7 +121,7 @@ using trans_type = std::size_t;
 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
 
 /// \brief type used to store differences between transition counters
-using signed_trans_type = std::make_signed<trans_type>::type;
+using signed_trans_type = std::make_signed_t<trans_type>;
 
 /// \brief class for time complexity checks
 /// \details The class stores (as static members) the global counters needed

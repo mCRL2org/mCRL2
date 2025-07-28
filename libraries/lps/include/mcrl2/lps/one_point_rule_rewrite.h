@@ -41,7 +41,7 @@ struct one_point_rule_rewrite_builder: public lps::data_expression_builder<one_p
 /// \brief Applies the one point rule rewriter to all embedded data expressions in an object x
 /// \param x an object containing data expressions
 template <typename T>
-void one_point_rule_rewrite(T& x, typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+void one_point_rule_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   detail::one_point_rule_rewrite_builder f;
   f.update(x);
@@ -51,7 +51,7 @@ void one_point_rule_rewrite(T& x, typename std::enable_if<!std::is_base_of<aterm
 /// \param x an object containing data expressions
 /// \return the rewrite result
 template <typename T>
-T one_point_rule_rewrite(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+T one_point_rule_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   detail::one_point_rule_rewrite_builder f;

@@ -69,10 +69,10 @@ struct make_timed_lps_summand
 /// \param context A term
 /// \return A timed linear process
 template <class LINEAR_PROCESS>
-void make_timed_lps(LINEAR_PROCESS& lps, 
-                    const std::set<core::identifier_string>& context,
-                     typename std::enable_if<std::is_same<LINEAR_PROCESS, linear_process>::value ||
-                                             std::is_same<LINEAR_PROCESS, stochastic_linear_process>::value>::type* = nullptr)
+void make_timed_lps(LINEAR_PROCESS& lps,
+    const std::set<core::identifier_string>& context,
+    std::enable_if_t<std::is_same_v<LINEAR_PROCESS, linear_process>
+                     || std::is_same_v<LINEAR_PROCESS, stochastic_linear_process>>* = nullptr)
 {
   data::set_identifier_generator generator;
   generator.add_identifiers(context);

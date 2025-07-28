@@ -102,9 +102,9 @@ public:
     friend class bucket_list;
 
   public:
-    using value_type = typename std::conditional<Constant, const Key, Key>::type;
-    using reference = typename std::conditional<Constant, const Key&, Key&>::type;
-    using pointer = typename std::conditional<Constant, const Key*, Key*>::type;
+    using value_type = std::conditional_t<Constant, const Key, Key>;
+    using reference = std::conditional_t<Constant, const Key&, Key&>;
+    using pointer = std::conditional_t<Constant, const Key*, Key*>;
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::forward_iterator_tag;
 

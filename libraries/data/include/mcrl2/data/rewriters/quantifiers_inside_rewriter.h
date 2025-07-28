@@ -319,13 +319,13 @@ struct quantifiers_inside_rewriter
 };
 
 template <typename T>
-void quantifiers_inside_rewrite(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
+void quantifiers_inside_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<data_expression_builder>(quantifiers_inside_rewriter()).update(x);
 }
 
 template <typename T>
-T quantifiers_inside_rewrite(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
+T quantifiers_inside_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   T result;
   core::make_update_apply_builder<data_expression_builder>(quantifiers_inside_rewriter()).apply(result, x);

@@ -25,10 +25,9 @@ struct is_container;
 
 /// type condition for use with std::enable_if
 /// T is the container type
-template < typename T >
-struct is_container< T, void > : public
-    detail::is_container_impl< typename std::remove_reference< typename std::remove_const< T >::type >::type >
-  { };
+template <typename T>
+struct is_container<T, void> : public detail::is_container_impl<std::remove_reference_t<std::remove_const_t<T>>>
+{};
 
 template < typename T, typename V >
 struct is_container : public detail::lazy_check_value_type< is_container< T, void >::value, T, V >
@@ -51,9 +50,8 @@ struct disable_if_container : public
   { };
 
 // type condition for use with std::enable_if
-template < typename T >
-struct is_set : public
-    detail::is_set_impl< typename std::remove_reference< typename std::remove_const< T >::type >::type >
+  template <typename T>
+  struct is_set : public detail::is_set_impl<std::remove_reference_t<std::remove_const_t<T>>>
   { };
 
 template < template < typename O > class C, typename E >

@@ -52,7 +52,7 @@ void load_lps(Specification& spec, std::istream& stream, const std::string& sour
 {
   mCRL2log(log::debug) << "Loading LPS" << (source.empty() ? "" : " from " + source) << ".\n";
 
-  if constexpr (std::is_same<Specification, specification>::value)
+  if constexpr (std::is_same_v<Specification, specification>)
   {
     stochastic_specification stoch_spec;
     atermpp::binary_aterm_istream(stream) >> stoch_spec;

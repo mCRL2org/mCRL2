@@ -65,9 +65,10 @@ private:
     {
       return hash(pair.first);
     }
-        
-    template<typename U, typename ...V, typename = std::enable_if_t<!std::is_same_v<U, std::pair<Key, T>>>>
-    std::size_t operator()(const U& key, const V&... /* args */) const 
+
+    template <typename U, typename... V>
+    std::size_t operator()(const U& key, const V&... /* args */) const
+      requires(!std::is_same_v<U, std::pair<Key, T>>)
     {
       return hash(key);
     }
@@ -91,8 +92,9 @@ private:
       return equals(first.first, second.first);
     }
 
-    template <typename U, typename...V, typename = std::enable_if_t<!std::is_same_v<U, std::pair<Key, T>>>>
+    template <typename U, typename... V>
     bool operator()(const value_type& first, const U& key, const V&... /* args */) const
+      requires(!std::is_same_v<U, std::pair<Key, T>>)
     {
       return equals(first.first, key);
     }

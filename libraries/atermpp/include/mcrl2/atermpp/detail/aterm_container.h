@@ -73,8 +73,8 @@ template<class T, class U>
 struct is_pair_helper<std::pair<T,U> > : public std::true_type
 {};
 
-template<class T>
-struct is_pair : public is_pair_helper<typename std::decay<T>::type >
+template <class T>
+struct is_pair : public is_pair_helper<std::decay_t<T>>
 {};
 
 template<class T>
@@ -85,8 +85,8 @@ template<class T>
 struct is_reference_aterm_helper<reference_aterm<T> > : public std::true_type
 {};
 
-template<class T>
-struct is_reference_aterm : public is_reference_aterm_helper<typename std::decay<T>::type >
+template <class T>
+struct is_reference_aterm : public is_reference_aterm_helper<std::decay_t<T>>
 {};
 
 /// \brief Base class that should not be used. 
@@ -94,7 +94,7 @@ template<class T, typename Type >
 class reference_aterm
 {
 protected:
-  using T_type = typename std::decay<T>::type;
+  using T_type = std::decay_t<T>;
   T_type m_t;
 public:
   reference_aterm() = default;
@@ -119,14 +119,14 @@ public:
 
   const reference_aterm& operator=(const T_type& other) noexcept
   {
-    static_assert(std::is_base_of<aterm_core, T_type>::value);
+    static_assert(std::is_base_of_v<aterm_core, T_type>);
     m_t=other;
     return m_t;
   }
 
   const reference_aterm& operator=(T_type&& other) noexcept
   {
-    static_assert(std::is_base_of<aterm_core, T_type>::value);
+    static_assert(std::is_base_of_v<aterm_core, T_type>);
     m_t = std::forward(other);
     return m_t;
   }
@@ -158,11 +158,11 @@ public:
 
 /// \brief A reference aterm_core applied to fundamental types, such as int, bool. Nothing needs to happen with such
 ///       terms. But a special class is needed, because such types are not classes, and we cannot derive from it.
-template<class T>
-class reference_aterm < T, typename std::enable_if<std::is_fundamental<typename std::decay<T>::type>::value>::type >
+template <class T>
+class reference_aterm<T, std::enable_if_t<std::is_fundamental_v<std::decay_t<T>>>>
 {
 protected:
-  using T_type = typename std::decay<T>::type;
+  using T_type = std::decay_t<T>;
   T_type m_t;
 
 public:
@@ -214,8 +214,8 @@ public:
 };
 
 /// \brief An unprotected term that is stored inside an aterm_container.
-template<typename T>
-class reference_aterm<T, typename std::enable_if<std::is_base_of<aterm_core, T>::value>::type> : public unprotected_aterm_core
+template <typename T>
+class reference_aterm<T, std::enable_if_t<std::is_base_of_v<aterm_core, T>>> : public unprotected_aterm_core
 {
 public:
   /// \brief Default constructor.
@@ -241,14 +241,14 @@ public:
   /// Converts implicitly to a protected term of type T.
   operator T&()
   {
-    static_assert(std::is_base_of<aterm_core, T>::value,"Term must be derived from an aterm_core");
+    static_assert(std::is_base_of_v<aterm_core, T>, "Term must be derived from an aterm_core");
     static_assert(sizeof(T)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
     return reinterpret_cast<T&>(*this);
   }
 
   operator const T&() const
   {
-    static_assert(std::is_base_of<aterm_core, T>::value,"Term must be derived from an aterm_core");
+    static_assert(std::is_base_of_v<aterm_core, T>, "Term must be derived from an aterm_core");
     static_assert(sizeof(T)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
     return reinterpret_cast<const T&>(*this);
 
@@ -263,13 +263,13 @@ public:
   }
 };
 
-template<typename T>
-typename std::pair<typename std::conditional<is_reference_aterm<typename T::first_type>::value,
-                                                      typename T::first_type,
-                                                      reference_aterm< typename T::first_type > >::type,
-                                          typename std::conditional<is_reference_aterm<typename T::second_type>::value,
-                                                      typename T::second_type,
-                                                      reference_aterm< typename T::second_type > >::type >
+template <typename T>
+typename std::pair<std::conditional_t<is_reference_aterm<typename T::first_type>::value,
+                       typename T::first_type,
+                       reference_aterm<typename T::first_type>>,
+    std::conditional_t<is_reference_aterm<typename T::second_type>::value,
+        typename T::second_type,
+        reference_aterm<typename T::second_type>>>
 reference_aterm_pair_constructor_helper(const T& other)
 {
   if constexpr (is_reference_aterm<typename T::first_type>::value && is_reference_aterm<typename T::second_type>::value)
@@ -297,23 +297,23 @@ reference_aterm_pair_constructor_helper(const T& other)
 
 
 /// \brief A pair that is stored into an atermpp container. This class takes care that all aterms that occur (recursively) inside
-///        such a pair are marked, whears non-aterm_core types are not marked. 
-template<typename T>
-class reference_aterm<T, typename std::enable_if<is_pair<T>::value>::type > : 
-                         public std::pair<typename std::conditional<is_reference_aterm<typename T::first_type>::value,
-                                                      typename T::first_type,
-                                                      reference_aterm< typename T::first_type > >::type, 
-                                          typename std::conditional<is_reference_aterm<typename T::second_type>::value,
-                                                      typename T::second_type,
-                                                      reference_aterm< typename T::second_type > >::type >
+///        such a pair are marked, whears non-aterm_core types are not marked.
+template <typename T>
+class reference_aterm<T, std::enable_if_t<is_pair<T>::value>>
+    : public std::pair<std::conditional_t<is_reference_aterm<typename T::first_type>::value,
+                           typename T::first_type,
+                           reference_aterm<typename T::first_type>>,
+          std::conditional_t<is_reference_aterm<typename T::second_type>::value,
+              typename T::second_type,
+              reference_aterm<typename T::second_type>>>
 {
 protected:
-  using super = std::pair<typename std::conditional<is_reference_aterm<typename T::first_type>::value,
+  using super = std::pair<std::conditional_t<is_reference_aterm<typename T::first_type>::value,
                               typename T::first_type,
-                              reference_aterm<typename T::first_type>>::type,
-      typename std::conditional<is_reference_aterm<typename T::second_type>::value,
+                              reference_aterm<typename T::first_type>>,
+      std::conditional_t<is_reference_aterm<typename T::second_type>::value,
           typename T::second_type,
-          reference_aterm<typename T::second_type>>::type>;
+          reference_aterm<typename T::second_type>>>;
   using std_pair = T;
 
 public:

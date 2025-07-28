@@ -98,12 +98,13 @@ public:
   /// \param first The start of a range of elements.
   /// \param last The end of a range of elements.
   template <class Iter>
-  explicit term_list(Iter first, Iter last, typename std::enable_if<std::is_base_of<
-                std::bidirectional_iterator_tag,
-                typename std::iterator_traits<Iter>::iterator_category
-            >::value>::type* = nullptr) :
-      aterm(detail::make_list_backward<Term,Iter,
-                detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>()))
+  explicit term_list(Iter first,
+      Iter last,
+      std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag,
+          typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
+      : aterm(detail::make_list_backward<Term, Iter, detail::do_not_convert_term<Term>>(first,
+            last,
+            detail::do_not_convert_term<Term>()))
   {
     assert(!defined() || type_is_list());
   }
@@ -116,12 +117,12 @@ public:
   /// \param convert_to_aterm A class with a () operation, which is applied to each element
   ///                   before it is put into the list.
   template <class Iter, class ATermConverter>
-  explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
-            typename std::enable_if<std::is_base_of<
-              std::bidirectional_iterator_tag,
-              typename std::iterator_traits<Iter>::iterator_category
-            >::value>::type* = 0):
-       aterm(detail::make_list_backward<Term,Iter,ATermConverter>(first, last, convert_to_aterm))
+  explicit term_list(Iter first,
+      Iter last,
+      const ATermConverter& convert_to_aterm,
+      std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag,
+          typename std::iterator_traits<Iter>::iterator_category>>* = 0)
+      : aterm(detail::make_list_backward<Term, Iter, ATermConverter>(first, last, convert_to_aterm))
   {
     assert(!defined() || type_is_list());
   }
@@ -136,12 +137,16 @@ public:
   ///                   before it is put into the list.
   /// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
   template <class Iter, class ATermConverter, class ATermFilter>
-  explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter,
-            typename std::enable_if<std::is_base_of<
-              std::bidirectional_iterator_tag,
-              typename std::iterator_traits<Iter>::iterator_category
-            >::value>::type* = 0):
-       aterm(detail::make_list_backward<Term,Iter,ATermConverter,ATermFilter>(first, last, convert_to_aterm, aterm_filter))
+  explicit term_list(Iter first,
+      Iter last,
+      const ATermConverter& convert_to_aterm,
+      const ATermFilter& aterm_filter,
+      std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag,
+          typename std::iterator_traits<Iter>::iterator_category>>* = 0)
+      : aterm(detail::make_list_backward<Term, Iter, ATermConverter, ATermFilter>(first,
+            last,
+            convert_to_aterm,
+            aterm_filter))
   {
     assert(!defined() || type_is_list());
   }
@@ -153,13 +158,13 @@ public:
   /// \param first The start of a range of elements.
   /// \param last The end of a range of elements.
   template <class Iter>
-  explicit term_list(Iter first, Iter last,
-                     typename std::enable_if< !std::is_base_of<
-                       std::bidirectional_iterator_tag,
-                       typename std::iterator_traits<Iter>::iterator_category
-                     >::value>::type* = nullptr):
-       aterm(detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
-                               (first, last, detail::do_not_convert_term<Term>()))
+  explicit term_list(Iter first,
+      Iter last,
+      std::enable_if_t<!std::is_base_of_v<std::bidirectional_iterator_tag,
+          typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
+      : aterm(detail::make_list_forward<Term, Iter, detail::do_not_convert_term<Term>>(first,
+            last,
+            detail::do_not_convert_term<Term>()))
   {
     assert(!defined() || type_is_list());
   }
@@ -174,14 +179,13 @@ public:
   /// \param last The end of a range of elements.
   /// \param convert_to_aterm A class with a () operation, whic is applied to each element
   ///                      before it is put into the list.
-  template <class Iter, class  ATermConverter>
-  explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
-                     typename std::enable_if< !std::is_base_of<
-                       std::bidirectional_iterator_tag,
-                       typename std::iterator_traits<Iter>::iterator_category
-                     >::value>::type* = nullptr):
-       aterm(detail::make_list_forward<Term,Iter,ATermConverter>
-                               (first, last, convert_to_aterm))
+  template <class Iter, class ATermConverter>
+  explicit term_list(Iter first,
+      Iter last,
+      const ATermConverter& convert_to_aterm,
+      std::enable_if_t<!std::is_base_of_v<std::bidirectional_iterator_tag,
+          typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
+      : aterm(detail::make_list_forward<Term, Iter, ATermConverter>(first, last, convert_to_aterm))
   {
     assert(!defined() || type_is_list());
   }
@@ -198,14 +202,14 @@ public:
   /// \param convert_to_aterm A class with a () operation, whic is applied to each element
   ///                      before it is put into the list.
   /// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
-  template <class Iter, class  ATermConverter, class ATermFilter>
-  explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter,
-                     typename std::enable_if< !std::is_base_of<
-                       std::random_access_iterator_tag,
-                       typename std::iterator_traits<Iter>::iterator_category
-                     >::value>::type* = nullptr):
-       aterm(detail::make_list_forward<Term,Iter,ATermConverter>
-                               (first, last, convert_to_aterm, aterm_filter))
+  template <class Iter, class ATermConverter, class ATermFilter>
+  explicit term_list(Iter first,
+      Iter last,
+      const ATermConverter& convert_to_aterm,
+      const ATermFilter& aterm_filter,
+      std::enable_if_t<!std::is_base_of_v<std::random_access_iterator_tag,
+          typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
+      : aterm(detail::make_list_forward<Term, Iter, ATermConverter>(first, last, convert_to_aterm, aterm_filter))
   {
     assert(!defined() || type_is_list());
   }
@@ -334,9 +338,11 @@ void make_term_list(term_list<Term>& target)
 /// \param first The start of a range of elements.
 /// \param last The end of a range of elements.
 template <class Term, class Iter>
-void make_term_list(term_list<Term>& target, Iter first, Iter last, typename std::enable_if<std::is_base_of<
-                                         std::bidirectional_iterator_tag,
-                                         typename std::iterator_traits<Iter>::iterator_category >::value>::type* = nullptr)
+void make_term_list(term_list<Term>& target,
+    Iter first,
+    Iter last,
+    std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag,
+        typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
 {
   detail::make_list_backward<Term,Iter,
               detail::do_not_convert_term<Term> >(target, first, last,detail::do_not_convert_term<Term>());
@@ -352,11 +358,12 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, typename std
 /// \param convert_to_aterm A class with a () operation, which is applied to each element
 ///                   before it is put into the list.
 template <class Term, class Iter, class ATermConverter>
-void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermConverter& convert_to_aterm,
-                            typename std::enable_if<std::is_base_of<
-                              std::bidirectional_iterator_tag,
-                              typename std::iterator_traits<Iter>::iterator_category
-                            >::value>::type* = 0)
+void make_term_list(term_list<Term>& target,
+    Iter first,
+    Iter last,
+    const ATermConverter& convert_to_aterm,
+    std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag,
+        typename std::iterator_traits<Iter>::iterator_category>>* = 0)
 {
   detail::make_list_backward<Term,Iter,ATermConverter>(target, first, last, convert_to_aterm);
   assert(!target.defined() || target.type_is_list());
@@ -373,11 +380,13 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermC
 ///                   before it is put into the list.
 /// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
 template <class Term, class Iter, class ATermConverter, class ATermFilter>
-void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter,
-                            typename std::enable_if<std::is_base_of<
-                              std::bidirectional_iterator_tag,
-                              typename std::iterator_traits<Iter>::iterator_category
-                            >::value>::type* = 0)
+void make_term_list(term_list<Term>& target,
+    Iter first,
+    Iter last,
+    const ATermConverter& convert_to_aterm,
+    const ATermFilter& aterm_filter,
+    std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag,
+        typename std::iterator_traits<Iter>::iterator_category>>* = 0)
 {
   detail::make_list_backward<Term,Iter,ATermConverter,ATermFilter>(target, first, last, convert_to_aterm, aterm_filter);
   assert(!target.defined() || target.type_is_list());
@@ -391,11 +400,11 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermC
 /// \param first The start of a range of elements.
 /// \param last The end of a range of elements.
 template <class Term, class Iter>
-void make_term_list(term_list<Term>& target, Iter first, Iter last,
-                             typename std::enable_if< !std::is_base_of<
-                               std::bidirectional_iterator_tag,
-                               typename std::iterator_traits<Iter>::iterator_category
-                             >::value>::type* = nullptr)
+void make_term_list(term_list<Term>& target,
+    Iter first,
+    Iter last,
+    std::enable_if_t<!std::is_base_of_v<std::bidirectional_iterator_tag,
+        typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
 {
   detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
                              (target, first, last, detail::do_not_convert_term<Term>());
@@ -413,12 +422,13 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last,
 /// \param last The end of a range of elements.
 /// \param convert_to_aterm A class with a () operation, which is applied to each element
 ///                      before it is put into the list.
-template <class Term, class Iter, class  ATermConverter>
-void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermConverter& convert_to_aterm,
-                              typename std::enable_if< !std::is_base_of<
-                                std::bidirectional_iterator_tag,
-                                typename std::iterator_traits<Iter>::iterator_category
-                              >::value>::type* = nullptr)
+template <class Term, class Iter, class ATermConverter>
+void make_term_list(term_list<Term>& target,
+    Iter first,
+    Iter last,
+    const ATermConverter& convert_to_aterm,
+    std::enable_if_t<!std::is_base_of_v<std::bidirectional_iterator_tag,
+        typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
 {
   detail::make_list_forward<Term,Iter,ATermConverter>
                              (target, first, last, convert_to_aterm);
@@ -438,12 +448,14 @@ void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermC
 /// \param convert_to_aterm A class with a () operation, which is applied to each element
 ///                      before it is put into the list.
 /// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
-template <class Term, class Iter, class  ATermConverter, class ATermFilter>
-void make_term_list(term_list<Term>& target, Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter,
-                               typename std::enable_if< !std::is_base_of<
-                                 std::random_access_iterator_tag,
-                                 typename std::iterator_traits<Iter>::iterator_category
-                               >::value>::type* = nullptr)
+template <class Term, class Iter, class ATermConverter, class ATermFilter>
+void make_term_list(term_list<Term>& target,
+    Iter first,
+    Iter last,
+    const ATermConverter& convert_to_aterm,
+    const ATermFilter& aterm_filter,
+    std::enable_if_t<!std::is_base_of_v<std::random_access_iterator_tag,
+        typename std::iterator_traits<Iter>::iterator_category>>* = nullptr)
 {
   detail::make_list_forward<Term,Iter,ATermConverter>
                              (target, first, last, convert_to_aterm, aterm_filter);
@@ -552,10 +564,8 @@ term_list<Term> merge_lists(const term_list<Term>& l1,
 /// \return The concatenation of the lists l followed by m.
 
 template <typename Term1, typename Term2>
-inline
-typename std::conditional<std::is_convertible<Term2,Term1>::value,term_list<Term1>,term_list<Term2>>::type
+inline std::conditional_t<std::is_convertible_v<Term2, Term1>, term_list<Term1>, term_list<Term2>>
 operator+(const term_list<Term1>& l, const term_list<Term2>& m);
-
 
 /// \brief Appends a new element at the end of the list. Note
 ///        that the complexity of this function is O(n), with n the number of

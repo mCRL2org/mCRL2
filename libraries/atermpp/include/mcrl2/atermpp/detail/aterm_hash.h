@@ -88,9 +88,9 @@ struct aterm_hasher
   std::size_t operator()(const function_symbol& symbol) const noexcept;
   std::size_t operator()(const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept;
 
-  template<typename ForwardIterator,
-           typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value, void>::type* = nullptr>
-  std::size_t operator()(const function_symbol& symbol, ForwardIterator begin, ForwardIterator end) const noexcept;
+  template <typename ForwardIterator>
+  std::size_t operator()(const function_symbol& symbol, ForwardIterator begin, ForwardIterator end) const noexcept 
+    requires mcrl2::utilities::is_iterator<ForwardIterator>::value;
 };
 
 /// \brief Computes the hash of the given term.
@@ -128,9 +128,12 @@ struct aterm_equals
   bool operator()(const _aterm& term, const function_symbol& symbol) const noexcept;
   bool operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept;
 
-  template<typename ForwardIterator,
-           typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr>
-  bool operator()(const _aterm& term, const function_symbol& symbol, ForwardIterator begin, ForwardIterator end) const noexcept;
+  template <typename ForwardIterator>
+  bool operator()(const _aterm& term,
+      const function_symbol& symbol,
+      ForwardIterator begin,
+      ForwardIterator end) const noexcept
+    requires mcrl2::utilities::is_iterator<ForwardIterator>::value;
 };
 
 template<std::size_t N>
@@ -203,10 +206,12 @@ std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, unprotect
   return hnr;
 }
 
-template<std::size_t N>
-template<typename ForwardIterator,
-         typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value, void>::type*>
-inline std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, ForwardIterator it, [[maybe_unused]] ForwardIterator end) const noexcept
+template <std::size_t N>
+template <typename ForwardIterator>
+inline std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol,
+    ForwardIterator it,
+    [[maybe_unused]] ForwardIterator end) const noexcept
+  requires mcrl2::utilities::is_iterator<ForwardIterator>::value
 {
   // The arity is defined by the function symbol iff N is unchanged and the arity is N otherwise.
   const std::size_t arity = (N == DynamicNumberOfArguments) ? symbol.arity() : N;
@@ -238,16 +243,16 @@ std::size_t aterm_hasher_finite<N>::operator()(const function_symbol& symbol, st
   return hnr;
 }
 
-template<std::size_t I = 0, typename... Tp,
-         typename std::enable_if<I == sizeof...(Tp), void>::type* = nullptr>
+template <std::size_t I = 0, typename... Tp>
 std::size_t combine_args(std::size_t seed, const Tp&...)
+  requires(I == sizeof...(Tp))
 {
   return seed;
 }
 
-template<std::size_t I = 0, typename... Tp,
-         typename std::enable_if<I < sizeof...(Tp), void>::type* = nullptr>
+template <std::size_t I = 0, typename... Tp>
 std::size_t combine_args(std::size_t seed, const Tp&... t)
+  requires(I < sizeof...(Tp))
 {
   return combine_args<I+1>(combine(seed, std::get<I>(std::forward_as_tuple(t...))), t...);
 }
@@ -327,10 +332,13 @@ bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symb
   return term.function() == symbol;
 }
 
-template<std::size_t N>
-template<typename ForwardIterator,
-         typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type*>
-inline bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symbol, ForwardIterator it, [[maybe_unused]] ForwardIterator end) const noexcept
+template <std::size_t N>
+template <typename ForwardIterator>
+inline bool aterm_equals<N>::operator()(const _aterm& term,
+    const function_symbol& symbol,
+    ForwardIterator it,
+    [[maybe_unused]] ForwardIterator end) const noexcept
+  requires mcrl2::utilities::is_iterator<ForwardIterator>::value
 {
   const std::size_t arity = (N == DynamicNumberOfArguments) ? symbol.arity() : N;
 
@@ -364,18 +372,16 @@ bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbo
   return term.function() == symbol;
 }
 
-template<std::size_t I = 0,
-         typename... Tp,
-         typename std::enable_if<I == sizeof...(Tp), void>::type* = nullptr>
+template <std::size_t I = 0, typename... Tp>
 bool equal_args(const _aterm_appl<8>&, const Tp&...)
+  requires(I == sizeof...(Tp))
 {
   return true;
 }
 
-template<std::size_t I = 0,
-         typename... Tp,
-         typename std::enable_if<I < sizeof...(Tp), void>::type* = nullptr>
+template <std::size_t I = 0, typename... Tp>
 bool equal_args(const _aterm_appl<8>& term, const Tp&... t)
+  requires(I < sizeof...(Tp))
 {
   return term.arg(I) == std::get<I>(std::forward_as_tuple(t...)) && equal_args<I+1>(term, t...);
 }

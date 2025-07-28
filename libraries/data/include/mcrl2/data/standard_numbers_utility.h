@@ -285,9 +285,9 @@ namespace sort_pos
 {
 /// \brief Constructs expression of type Bool from an integral type
 /// Type T is an unsigned integral type.
-template < typename T >
-inline typename std::enable_if<std::is_integral< T >::value, data_expression>::type
-pos(const T t)
+template <typename T>
+inline data_expression pos(const T t)
+  requires std::is_integral<T>::value
 {
   assert(t>0);
 
@@ -475,9 +475,9 @@ namespace sort_nat
 {
 
 /// \brief Constructs expression of type pos from an integral type
-template < typename T >
-inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
-nat(T t)
+template <typename T>
+inline data_expression nat(T t)
+  requires std::is_integral<T>::value
 {
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
   static_assert(sizeof(T)<=sizeof(std::size_t),"Can only convert numbers up till a size_t.");
@@ -662,24 +662,20 @@ namespace sort_int
 {
 
 /// \brief Constructs expression of type pos from an integral type
-template < typename T >
-inline typename std::enable_if< std::is_integral< T >::value && std::is_unsigned< T >::value, data_expression >::type
-int_(T t)
-{
-  return sort_int::cint(sort_nat::nat(t));
-}
+template <typename T>
+inline data_expression int_(T t)
+  requires(std::is_integral_v<T> && std::is_unsigned_v<T>) { return sort_int::cint(sort_nat::nat(t)); }
 
 /// \brief Constructs expression of type pos from an integral type.
-template < typename T >
-inline typename std::enable_if< std::is_integral< T >::value && std::is_signed< T >::value, data_expression >::type
-int_(T t)
-{
-  if (t<0)
-  {
-    return sort_int::cneg(sort_pos::pos(typename std::make_unsigned<T>::type(-t)));
+template <typename T>
+inline data_expression int_(T t)
+  requires(std::is_integral_v<T> && std::is_signed_v<T>) {
+    if (t < 0)
+    {
+      return sort_int::cneg(sort_pos::pos(typename std::make_unsigned<T>::type(-t)));
+    }
+    return sort_int::cint(sort_nat::nat(typename std::make_unsigned<T>::type(t)));
   }
-  return sort_int::cint(sort_nat::nat(typename std::make_unsigned<T>::type(t)));
-}
 
 /// \brief Constructs expression of type Int from a string.
 /// \param n A string.
@@ -744,9 +740,9 @@ namespace sort_real
 {
 /// \brief Constructs expression of type Real from an integral type
 /// \param t An expression of type T.
-template < typename T >
-inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
-real_(T t)
+template <typename T>
+inline data_expression real_(T t)
+  requires std::is_integral<T>::value
 {
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
   return sort_real::creal(sort_int::int_(t), sort_pos::pos(1));
@@ -758,9 +754,9 @@ real_(T t)
 /// \brief Constructs expression of type Real from an integral type
 /// \param numerator numerator.
 /// \param denominator denominator.
-template < typename T >
-inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
-real_(T numerator, T denominator)
+template <typename T>
+inline data_expression real_(T numerator, T denominator)
+  requires std::is_integral<T>::value
 {
   return sort_real::creal(sort_int::int_(numerator), sort_pos::pos(denominator));
 }
