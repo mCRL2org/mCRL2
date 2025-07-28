@@ -436,7 +436,7 @@ NUMERIC_TYPE positive_constant_to_value(const data_expression& n)
   {
     if (is_concat_digit_application(n))
     {
-      mcrl2::runtime_error("Number " + pp(n) + " is too large to transform to a machine number.");
+      throw mcrl2::runtime_error("Number " + pp(n) + " is too large to transform to a machine number.");
     }
     assert(is_most_significant_digit_application(n));
     assert(atermpp::down_cast<machine_number>(sort_pos::arg(n)).value()>0);
@@ -592,7 +592,7 @@ inline NUMERIC_TYPE natural_constant_to_value(const data_expression& n)
   {
     if (is_concat_digit_application(n))
     {
-      mcrl2::runtime_error("Number " + pp(n) + " is too large to transform to a machine number.");
+      throw mcrl2::runtime_error("Number " + pp(n) + " is too large to transform to a machine number.");
     }
     assert(is_most_significant_digit_nat_application(n));
     return atermpp::down_cast<machine_number>(sort_nat::arg(n)).value();

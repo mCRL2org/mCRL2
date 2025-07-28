@@ -26,9 +26,7 @@ std::string tolower(std::string s)
   return s;
 }
 
-LiftingStrategyFactory::~LiftingStrategyFactory()
-{
-}
+LiftingStrategyFactory::~LiftingStrategyFactory() = default;
 
 const char *LiftingStrategyFactory::usage()
 {
@@ -78,7 +76,8 @@ const char *LiftingStrategyFactory::usage()
 LiftingStrategyFactory *
     LiftingStrategyFactory::create(const std::string &description)
 {
-    if (description.empty()) return NULL;
+    if (description.empty())
+      return nullptr;
 
     // Split into parts, separated by semicolon characters
     std::vector<std::string> parts;

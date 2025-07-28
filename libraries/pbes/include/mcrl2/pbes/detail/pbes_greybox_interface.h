@@ -47,7 +47,7 @@ namespace mcrl2::pbes_system::detail {
       initialize_generation();
     }
 
-    virtual ~pbes_greybox_interface() {}
+    virtual ~pbes_greybox_interface() = default;
 
     /// \brief Returns the initial state, rewritten and simplified.
     /// \return the initial state.

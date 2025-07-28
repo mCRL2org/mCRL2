@@ -804,13 +804,9 @@ class SMT_LIB_Solver: public SMT_Solver
 
 
   public:
-    SMT_LIB_Solver()
-    {
-    }
+    SMT_LIB_Solver() = default;
 
-    virtual ~SMT_LIB_Solver()
-    {
-    }
+    virtual ~SMT_LIB_Solver() = default;
 };
 
 namespace prover

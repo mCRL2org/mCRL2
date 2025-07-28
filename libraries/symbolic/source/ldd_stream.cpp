@@ -118,8 +118,7 @@ binary_ldd_ostream::binary_ldd_ostream(std::ostream& is)
   : binary_ldd_ostream(std::make_shared<mcrl2::utilities::obitstream>(is))
 {}
 
-binary_ldd_ostream::~binary_ldd_ostream()
-{}
+binary_ldd_ostream::~binary_ldd_ostream() = default;
 
 void binary_ldd_ostream::put(const ldd& U)
 {

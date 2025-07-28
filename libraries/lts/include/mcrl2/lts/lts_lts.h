@@ -41,8 +41,7 @@ class state_label_lts : public atermpp::term_list< lps::state >
 
     /** \brief Default constructor.
     */
-    state_label_lts()
-    {}
+    state_label_lts() = default;
 
     /** \brief Copy constructor. */
     state_label_lts(const state_label_lts& )=default;
@@ -144,8 +143,7 @@ class action_label_lts: public mcrl2::lps::multi_action
   public:
 
     /** \brief Default constructor. */
-    action_label_lts()
-    {}
+    action_label_lts() = default;
 
     /** \brief Copy constructor. */
     action_label_lts(const action_label_lts& )=default;
@@ -286,8 +284,7 @@ class lts_lts_base
 
   public:
     /// \brief Default constructor
-    lts_lts_base()
-    {}
+    lts_lts_base() = default;
 
     /// \brief Standard equality function;
     bool operator==(const lts_lts_base& other) const
@@ -384,7 +381,7 @@ class lts_lts_t : public lts< state_label_lts, action_label_lts, detail::lts_lts
 {
   public:
     /** \brief Creates an object containing no information. */
-    lts_lts_t() {}
+    lts_lts_t() = default;
 
     /** \brief Load the labelled transition system from file.
      *  \details If the filename is empty, the result is read from stdout.
@@ -412,7 +409,7 @@ class probabilistic_lts_lts_t :
 {
   public:
     /** \brief Creates an object containing no information. */
-    probabilistic_lts_lts_t() {}
+    probabilistic_lts_lts_t() = default;
 
     /** \brief Load the labelled transition system from file.
      *  \details If the filename is empty, the result is read from stdout.

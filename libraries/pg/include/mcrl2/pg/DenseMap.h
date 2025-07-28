@@ -164,8 +164,8 @@ private:
     std::size_t used_;
 
 private:
-    DenseMap(const DenseMap &);
-    DenseMap &operator=(const DenseMap &);
+  DenseMap(const DenseMap&) = delete;
+  DenseMap& operator=(const DenseMap&) = delete;
 };
 
 #endif /* ndef MCRL2_PG_DENSE_MAP_H */

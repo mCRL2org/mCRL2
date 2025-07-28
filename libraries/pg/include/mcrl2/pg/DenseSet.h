@@ -59,26 +59,22 @@ public:
             key_(it.key_)
       {}
 
-      Iterator& operator=(const Iterator& it)
+      Iterator& operator=(const Iterator& it) = default;
+
+      bool operator==(const Iterator& other) const { return key_ == other.key_; }
+      bool operator!=(const Iterator& other) const { return key_ != other.key_; }
+      bool operator<(const Iterator& other) const { return key_ < other.key_; }
+      bool operator>(const Iterator& other) const { return key_ > other.key_; }
+      bool operator<=(const Iterator& other) const { return key_ <= other.key_; }
+      bool operator>=(const Iterator& other) const { return key_ >= other.key_; }
+
+      value_type operator*() { return key_; }
+
+      Iterator& operator++()
       {
-        set_ = it.set_;
-        key_ = it.key_;
+        do ++key_;
+        while (!set_->used_[key_]);
         return *this;
-        }
-
-        bool operator== (const Iterator &other) const { return key_ == other.key_; }
-        bool operator!= (const Iterator &other) const { return key_ != other.key_; }
-        bool operator<  (const Iterator &other) const { return key_ <  other.key_; }
-        bool operator>  (const Iterator &other) const { return key_ >  other.key_; }
-        bool operator<= (const Iterator &other) const { return key_ <= other.key_; }
-        bool operator>= (const Iterator &other) const { return key_ >= other.key_; }
-
-        value_type operator*() { return key_; }
-
-        Iterator& operator++()
-        {
-            do ++key_; while (!set_->used_[key_]);
-            return *this;
         }
 
         Iterator& operator++(int)
@@ -208,8 +204,8 @@ private:
     friend class Iterator;
 
 private:
-    DenseSet(const DenseSet &);
-    DenseSet &operator=(const DenseSet &);
+  DenseSet(const DenseSet&) = delete;
+  DenseSet& operator=(const DenseSet&) = delete;
 };
 
 #endif /* ndef MCRL2_PG_DENSE_SET_H */

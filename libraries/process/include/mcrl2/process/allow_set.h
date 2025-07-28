@@ -80,8 +80,7 @@ struct allow_set
     return true;
   }
 
-  allow_set()
-  {}
+  allow_set() = default;
 
   explicit allow_set(const multi_action_name_set& A_, bool A_includes_subsets_ = false, const std::set<core::identifier_string>& I_ = std::set<core::identifier_string>())
     : A_includes_subsets(A_includes_subsets_), I(I_)

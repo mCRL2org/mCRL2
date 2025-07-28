@@ -105,8 +105,7 @@ class execution_timer
     {}
 
     /// \brief Destructor
-    ~execution_timer()
-    {}
+    ~execution_timer() = default;
 
     /// \brief Start measurement with a hint
     /// \param[in] timing_name Name of the measurement being started

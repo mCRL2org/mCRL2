@@ -154,8 +154,7 @@ class tool
     {}
 
     /// \brief Destructor.
-    virtual ~tool()
-    {}
+    virtual ~tool() = default;
 
     /// \brief Run the tool. The options must be set manually.
     /// \return True if the tool execution was successful.

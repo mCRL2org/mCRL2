@@ -97,12 +97,7 @@ class term_appl_prepend_iterator
     // The assignment operator.
     // other The term to be assigned.
     // Returns a reference to the assigned iterator.
-    term_appl_prepend_iterator& operator=(const term_appl_prepend_iterator& other)
-    {
-      m_it=other.m_it;
-      m_prepend=other.m_prepend;
-      return *this;
-    }
+    term_appl_prepend_iterator& operator=(const term_appl_prepend_iterator& other) = default;
 
     // The dereference operator.
     // Return the dereferenced term.

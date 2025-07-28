@@ -70,8 +70,7 @@ class specification_base
     using initial_process_type = InitialProcessExpression;
 
     /// \brief Constructor.
-    specification_base()
-    { }
+    specification_base() = default;
 
     /// \brief Constructor.
     /// \param data A data specification

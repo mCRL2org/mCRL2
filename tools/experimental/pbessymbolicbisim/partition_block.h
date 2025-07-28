@@ -193,8 +193,7 @@ namespace std
   struct hash<mcrl2::data::block>
   {
     // Default constructor, required for const qualified hash functions.
-    hash()
-    {}
+    hash() = default;
 
     std::size_t operator()(const mcrl2::data::block& t) const
     {

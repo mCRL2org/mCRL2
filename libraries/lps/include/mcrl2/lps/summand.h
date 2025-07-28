@@ -29,8 +29,7 @@ class summand_base
 
   public:
     /// \brief Constructor.
-    summand_base()
-    {}
+    summand_base() = default;
 
     /// \brief Constructor.
     summand_base(const data::variable_list& summation_variables, const data::data_expression& condition)

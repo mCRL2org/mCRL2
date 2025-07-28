@@ -20,7 +20,7 @@ namespace mcrl2::data::detail
 class SMT_Solver
 {
   public:
-    virtual ~SMT_Solver() {};
+    virtual ~SMT_Solver() = default;
     virtual bool is_satisfiable(const data_expression_list &a_formula) = 0;
 };
 } // namespace mcrl2::data::detail

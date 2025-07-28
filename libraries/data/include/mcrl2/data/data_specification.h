@@ -310,9 +310,7 @@ class data_specification: public sort_specification
 
     ///\brief Default constructor. Generate a data specification that contains
     ///       only booleans and positive numbers.
-    data_specification()
-    {
-    }
+    data_specification() = default;
 
     ///\brief Constructor from an aterm.
     /// \param[in] t a term adhering to the internal format.

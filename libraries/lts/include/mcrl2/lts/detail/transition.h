@@ -177,8 +177,7 @@ class compare_transitions_tl
 class compare_transitions_target
 {
   public:
-    compare_transitions_target()
-    {}
+    compare_transitions_target() = default;
 
     bool operator()(const transition& t1, const transition& t2)
     {

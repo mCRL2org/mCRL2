@@ -64,8 +64,7 @@ class todo_set
     atermpp::deque<state> todo;
 
   public:
-    explicit todo_set()
-    {}
+    explicit todo_set() = default;
 
     explicit todo_set(const state& init)
       : todo{init}

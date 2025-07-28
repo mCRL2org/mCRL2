@@ -37,8 +37,7 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
 
   public:
     /// \brief Constructor.
-    stochastic_specification()
-    { }
+    stochastic_specification() = default;
 
     /// \brief Constructor.
     /// \param data A data specification

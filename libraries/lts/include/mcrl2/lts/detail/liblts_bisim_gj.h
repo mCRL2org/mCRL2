@@ -154,8 +154,7 @@ struct outgoing_transition_type
   outgoing_transitions_it start_same_saC;
 
   // The default initialiser does not initialize the fields of this struct.
-  outgoing_transition_type()
-  {}
+  outgoing_transition_type() = default;
 
   outgoing_transition_type(const outgoing_transitions_it sssaC)
    : ref(),
@@ -170,8 +169,7 @@ struct state_in_block_pointer
    : ref_state(new_ref_state)
   {}
 
-  state_in_block_pointer()
-  {}
+  state_in_block_pointer() = default;
 
   fixed_vector<state_type_gj>::iterator ref_state;
 

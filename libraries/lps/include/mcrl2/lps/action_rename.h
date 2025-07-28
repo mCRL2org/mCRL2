@@ -73,8 +73,7 @@ class action_rename_rule
 
   public:
     /// \brief Constructor.
-    action_rename_rule()
-    { }
+    action_rename_rule() = default;
 
     /// \brief Constructor.
     /// \param t A term
@@ -165,8 +164,7 @@ class action_rename_specification
 
   public:
     /// \brief Constructor.
-    action_rename_specification()
-    { }
+    action_rename_specification() = default;
 
     /// \brief Constructor.
     /// \param t A term

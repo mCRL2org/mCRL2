@@ -217,9 +217,7 @@ class data_property_map
     }
 
     /// \brief Default constructor for derived types
-    data_property_map()
-    {
-    }
+    data_property_map() = default;
 
     /// \brief Initializes the property map with text containing lines in
     /// <tt>KEY = VALUE</tt> format.

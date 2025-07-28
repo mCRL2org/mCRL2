@@ -33,8 +33,7 @@ struct counter
 
 struct func
 {
-  func()
-  {}
+  func() = default;
 
   func(int)
   {}

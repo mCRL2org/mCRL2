@@ -66,7 +66,7 @@ template<typename T>
 class tagged_pointer
 {
 public:
-  tagged_pointer() {}
+  tagged_pointer() = default;
   explicit tagged_pointer(T* p)
     : m_pointer(p)
   {}

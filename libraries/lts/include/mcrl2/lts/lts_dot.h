@@ -40,8 +40,7 @@ class state_label_dot
 
     /** \brief The default constructor.
     */
-    state_label_dot()
-    {}
+    state_label_dot() = default;
 
     /** \brief A constructor setting the name and label of this state label to the indicated values.
     */

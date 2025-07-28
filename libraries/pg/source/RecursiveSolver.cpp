@@ -56,9 +56,7 @@ RecursiveSolver::RecursiveSolver(const ParityGame &game)
 {
 }
 
-RecursiveSolver::~RecursiveSolver()
-{
-}
+RecursiveSolver::~RecursiveSolver() = default;
 
 ParityGame::Strategy RecursiveSolver::solve()
 {

@@ -36,7 +36,7 @@ class singleton_expression
     singleton_expression & operator=(singleton_expression &&) = delete;
 
   protected:
-    singleton_expression() {}
+    singleton_expression() = default;
 };
 
 template < typename Derived >

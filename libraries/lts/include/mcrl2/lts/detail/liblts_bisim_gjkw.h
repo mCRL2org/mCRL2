@@ -488,7 +488,7 @@ class block_t
                                                                                 // assert(int_end <= int_constln->end());
     }
 
-    ~block_t()  {  }
+    ~block_t() = default;
 
     /// assigns a unique sequence number
     void assign_seqnr()
@@ -863,7 +863,7 @@ class constln_t
     }
 
     /// \brief destructor
-    ~constln_t()  {  }
+    ~constln_t() = default;
 
     /// \brief provides an arbitrary non-trivial constellation
     /// \details The static function is implemented in a way to provide the

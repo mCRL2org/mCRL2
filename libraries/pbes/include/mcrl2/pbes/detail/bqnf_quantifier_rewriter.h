@@ -22,10 +22,7 @@ namespace mcrl2::pbes_system::detail
 struct bqnf_quantifier_rewriter: public bqnf_visitor
   {
     /// \brief Constructor.
-    bqnf_quantifier_rewriter()
-    {
-    }
-
+    bqnf_quantifier_rewriter() = default;
 
     /// \brief Filters the expression e such that subexpressions that are data expression that
     /// do not refer to variables in the set d are discarded:

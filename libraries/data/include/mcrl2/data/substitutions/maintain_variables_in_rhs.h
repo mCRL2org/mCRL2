@@ -43,10 +43,8 @@ class maintain_variables_in_rhs: public Substitution
   
   public:
     /// \brief Default constructor
-    maintain_variables_in_rhs() 
-    {
-    }
-  
+    maintain_variables_in_rhs() = default;
+
     /// \brief Wrapper class for internal storage and substitution updates using operator()
     class assignment
     {
