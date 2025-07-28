@@ -489,9 +489,7 @@ class bisim_partitioner
       BL.clear();
     }
 
-
-
-    void refine_partion_with_respect_to_divergences(void);
+    void refine_partion_with_respect_to_divergences();
 
     void split_the_blocks_in_BL(
       bool& partition_is_unstable,

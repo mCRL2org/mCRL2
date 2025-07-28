@@ -543,7 +543,7 @@ class part_state_t
     {                                                                           assert(0 < num_states);
         permutation_entry* perm_iter(permutation.data());
                                                                                 #ifdef USE_POOL_ALLOCATOR
-                                                                                    static_assert(std::is_trivially_destructible<block_t>::value);
+                                                                                    static_assert(std::is_trivially_destructible_v<block_t>);
                                                                                 #endif
         state_info_entry* state_iter(state_info.data());                        assert(perm_iter < permutation.data_end());
         do
@@ -1352,8 +1352,8 @@ class part_trans_t
 
   public:
     #ifdef USE_POOL_ALLOCATOR
-                                                                                static_assert(std::is_trivially_destructible<bunch_t>::value);
-    #endif
+    static_assert(std::is_trivially_destructible_v<bunch_t>);
+#endif
 
     /// \brief number of new bottom states found until now.
     state_type nr_of_new_bottom_states;

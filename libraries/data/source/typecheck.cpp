@@ -3957,7 +3957,7 @@ void mcrl2::data::data_type_checker::add_system_constants_and_functions(const st
   }
 }
 
-void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
+void mcrl2::data::data_type_checker::initialise_system_defined_functions()
 {
   //Creation of operation identifiers for system defined operations.
   //Bool

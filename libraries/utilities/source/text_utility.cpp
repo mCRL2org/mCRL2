@@ -28,7 +28,7 @@ std::vector<std::string> split_paragraphs(const std::string& text)
   std::vector<std::string> result;
 
   // find multiple line endings
-  std::regex paragraph_split {"\\n\\s*\\n"};
+  std::regex paragraph_split{R"(\n\s*\n)"};
 
   // the -1 below directs the token iterator to display the parts of
   // the string that did NOT match the regular expression.

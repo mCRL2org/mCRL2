@@ -23,18 +23,16 @@ namespace action_formulas
 
 template <typename T>
 void normalize_sorts(T& x,
-                     const data::sort_specification& sortspec,
-                     typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                    )
+    const data::sort_specification& sortspec,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<action_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).update(x);
 }
 
 template <typename T>
 T normalize_sorts(const T& x,
-                  const data::sort_specification& sortspec,
-                  typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                 )
+    const data::sort_specification& sortspec,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<action_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);
@@ -48,18 +46,16 @@ namespace regular_formulas
 
 template <typename T>
 void normalize_sorts(T& x,
-                     const data::sort_specification& sortspec,
-                     typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                    )
+    const data::sort_specification& sortspec,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<regular_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).update(x);
 }
 
 template <typename T>
 T normalize_sorts(const T& x,
-                  const data::sort_specification& sortspec,
-                  typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                 )
+    const data::sort_specification& sortspec,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<regular_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);
@@ -73,18 +69,16 @@ namespace state_formulas
 
 template <typename T>
 void normalize_sorts(T& x,
-                     const data::sort_specification& sortspec,
-                     typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                    )
+    const data::sort_specification& sortspec,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<state_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).update(x);
 }
 
 template <typename T>
 T normalize_sorts(const T& x,
-                  const data::sort_specification& sortspec,
-                  typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                 )
+    const data::sort_specification& sortspec,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<state_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);

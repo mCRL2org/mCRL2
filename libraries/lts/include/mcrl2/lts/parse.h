@@ -39,7 +39,7 @@ class simple_fsm_parser
     const std::regex regex_quoted_string {"\"([^\"]*)\""};
 
     // The initial state, is either a number or it has the shape [num1 prob1 ... num_n prob_n].
-    const std::regex regex_probabilistic_initial_distribution {"0|([1-9][0-9]*)|\\[[^\\]]*\\]"};
+    const std::regex regex_probabilistic_initial_distribution{R"(0|([1-9][0-9]*)|\[[^\]]*\])"};
 
     states next_state(states state)
     {
