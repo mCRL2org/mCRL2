@@ -806,7 +806,7 @@ class SMT_LIB_Solver: public SMT_Solver
   public:
     SMT_LIB_Solver() = default;
 
-    virtual ~SMT_LIB_Solver() = default;
+    ~SMT_LIB_Solver() override = default;
 };
 
 namespace prover
@@ -878,7 +878,7 @@ class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(const data_expression_list& a_formula)
+    bool is_satisfiable(const data_expression_list& a_formula) override
     {
       translate(a_formula);
 
@@ -916,7 +916,7 @@ class z3_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< z3_smt_so
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(const data_expression_list& a_formula)
+    bool is_satisfiable(const data_expression_list& a_formula) override
     {
       translate(a_formula);
 
@@ -953,7 +953,7 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(const data_expression_list& a_formula)
+    bool is_satisfiable(const data_expression_list& a_formula) override
     {
       translate(a_formula);
 

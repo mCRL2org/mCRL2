@@ -32,7 +32,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
     bool m_finite_sorts_only;
     std::string m_sorts_string;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("finite", "only instantiate variables whose sorts are finite", 'f');
@@ -43,7 +43,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
                        's');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_tau_summands_only = 0 < parser.options.count("tau");
@@ -75,7 +75,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
 
     ///Reads a specification from input_file,
     ///applies instantiation of sums to it and writes the result to output_file.
-    bool run()
+    bool run() override
     {
       stochastic_specification spec;
       load_lps(spec, input_filename());

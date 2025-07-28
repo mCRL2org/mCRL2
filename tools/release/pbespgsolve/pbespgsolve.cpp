@@ -42,7 +42,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
 
     pbespgsolve_options m_options;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("solver-type",
@@ -63,7 +63,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
                              'l');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_options.solver_type = parse_solver_type(parser.option_argument("solver-type"));
@@ -95,7 +95,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
     {
     }
 
-    bool run()
+    bool run() override
     {
       m_options.rewrite_strategy = rewrite_strategy();
 

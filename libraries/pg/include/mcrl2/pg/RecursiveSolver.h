@@ -102,11 +102,11 @@ class RecursiveSolver : public ParityGameSolver
 {
 public:
     RecursiveSolver(const ParityGame &game);
-    ~RecursiveSolver();
+    ~RecursiveSolver() override;
 
-    ParityGame::Strategy solve();
+    ParityGame::Strategy solve() override;
 
-private:
+  private:
     /*! Solves a subgame recursively, or returns false if solving is aborted. */
     bool solve(ParityGame &game, Substrategy &strat);
 };
@@ -115,8 +115,7 @@ private:
 class RecursiveSolverFactory : public ParityGameSolverFactory
 {
     //! Returns a new ResuriveSolver instance.
-    ParityGameSolver *create( const ParityGame &game,
-        const verti *vertex_map, verti vertex_map_size );
+    ParityGameSolver* create(const ParityGame& game, const verti* vertex_map, verti vertex_map_size) override;
 };
 
 #endif /* ndef MCRL2_PG_RECURSIVE_SOLVER_H */

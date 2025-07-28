@@ -75,8 +75,7 @@ hash_table2::hash_table2(std::size_t initsize)
   clear();
 }
 
-hash_table2::~hash_table2()
-{}
+hash_table2::~hash_table2() = default;
 
 void hash_table2::clear()
 {
@@ -196,8 +195,7 @@ hash_table3::hash_table3(std::size_t initsize)
   clear();
 }
 
-hash_table3::~hash_table3()
-{}
+hash_table3::~hash_table3() = default;
 
 void hash_table3::clear()
 {

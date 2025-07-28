@@ -25,13 +25,10 @@ class my_tool: public tool
   protected:
     using super = tool;
 
-    std::string synopsis() const
-    {
-      return "[OPTION]... [FIRST]\n";
-    }
+    std::string synopsis() const override { return "[OPTION]... [FIRST]\n"; }
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -60,7 +57,7 @@ class my_tool: public tool
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc
@@ -102,10 +99,7 @@ class my_tool: public tool
     {}
 
     /// Runs the tool.
-    bool run()
-    {
-      return true;
-    }
+    bool run() override { return true; }
 };
 
 int main(int argc, char* argv[])

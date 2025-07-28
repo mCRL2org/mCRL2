@@ -87,12 +87,9 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
     using super = prover_tool<rewriter_tool<input_output_tool>>;
 
   protected:
-    std::string synopsis() const
-    {
-      return "[OPTION]... --invfile=INVFILE [INFILE [OUTFILE]]\n";
-    }
+    std::string synopsis() const override { return "[OPTION]... --invfile=INVFILE [INFILE [OUTFILE]]\n"; }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -123,7 +120,7 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
 
@@ -175,7 +172,7 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       m_apply_induction(false)
     {}
 
-    bool run()
+    bool run() override
     {
       stochastic_specification spec;
       data::data_expression invariant;

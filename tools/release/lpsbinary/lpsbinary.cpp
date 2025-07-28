@@ -31,7 +31,7 @@ class binary_tool: public rewriter_tool<input_output_tool>
 
     std::string m_parameter_selection;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("select", make_mandatory_argument("[PARAMS]"),
@@ -41,7 +41,7 @@ class binary_tool: public rewriter_tool<input_output_tool>
                       'f');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -68,7 +68,7 @@ class binary_tool: public rewriter_tool<input_output_tool>
       )
     {}
 
-    bool run()
+    bool run() override
     {
       stochastic_specification spec;
       load_lps(spec, m_input_filename);

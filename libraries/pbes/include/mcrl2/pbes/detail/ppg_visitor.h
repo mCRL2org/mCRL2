@@ -27,12 +27,10 @@ class ppg_visitor
     using bqnf = bqnf_visitor;
 
     /// \brief Destructor.
-    virtual ~ppg_visitor()
-    { }
+    virtual ~ppg_visitor() = default;
 
     /// \brief Constructor.
-    ppg_visitor()
-    { }
+    ppg_visitor() = default;
 
     /// \brief Returns a string representation of the type of the root node of the expression.
     /// \param e a PBES expression

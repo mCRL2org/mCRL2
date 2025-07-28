@@ -31,7 +31,7 @@ class prover_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       Tool::add_options(desc, true);  // The parameter true suppresses messages allowing the jittyp rewriter. 
 
@@ -45,7 +45,7 @@ class prover_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
 

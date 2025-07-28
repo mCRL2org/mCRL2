@@ -42,8 +42,7 @@ struct increment
 
 struct func
 {
-  func()
-  {}
+  func() = default;
 
   func(int)
   {}

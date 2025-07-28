@@ -264,8 +264,8 @@ protected:
                         EdgeDirection edge_dir = EDGE_NONE );
 
 private:
-    explicit StaticGraph(const StaticGraph &graph);
-    StaticGraph &operator=(const StaticGraph &graph);
+  explicit StaticGraph(const StaticGraph& graph) = delete;
+  StaticGraph& operator=(const StaticGraph& graph) = delete;
 
 private:
     verti V_;  /*!< number of vertices */

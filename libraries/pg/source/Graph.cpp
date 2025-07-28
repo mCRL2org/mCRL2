@@ -11,10 +11,11 @@
 #include "mcrl2/pg/shuffle.h"
 #include "mcrl2/utilities/logger.h"
 
-
 StaticGraph::StaticGraph()
-    : successors_(NULL), predecessors_(NULL),
-      successor_index_(NULL), predecessor_index_(NULL)
+    : successors_(nullptr),
+      predecessors_(nullptr),
+      successor_index_(nullptr),
+      predecessor_index_(nullptr)
 {
     reset(0, 0, EDGE_NONE);
 }
@@ -51,8 +52,8 @@ void StaticGraph::reset(verti V, edgei E, EdgeDirection edge_dir)
     }
     else
     {
-        successors_      = NULL;
-        successor_index_ = NULL;
+      successors_ = nullptr;
+      successor_index_ = nullptr;
     }
 
     if ((edge_dir_ & EDGE_PREDECESSOR))
@@ -63,8 +64,8 @@ void StaticGraph::reset(verti V, edgei E, EdgeDirection edge_dir)
     }
     else
     {
-        predecessors_      = NULL;
-        predecessor_index_ = NULL;
+      predecessors_ = nullptr;
+      predecessor_index_ = nullptr;
     }
 }
 

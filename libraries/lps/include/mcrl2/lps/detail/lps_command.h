@@ -31,10 +31,7 @@ struct lps_command: public utilities::detail::command
     : utilities::detail::command(name, input_filename, output_filename, options)
   {}
 
-  void execute()
-  {
-    lps::load_lps(lpsspec, input_filename);
-  }
+  void execute() override { lps::load_lps(lpsspec, input_filename); }
 };
 
 /// \brief PBES command that uses a rewrite strategy

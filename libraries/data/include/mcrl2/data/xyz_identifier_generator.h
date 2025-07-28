@@ -73,7 +73,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     /// \param add_to_context If true, the generated identifier is added to the context,
     /// it is not added otherwise.
     /// \return A fresh identifier.
-    core::identifier_string operator()(const std::string& hint, bool add_to_context = true)
+    core::identifier_string operator()(const std::string& hint, bool add_to_context = true) override
     {
       core::identifier_string result(hint);
 

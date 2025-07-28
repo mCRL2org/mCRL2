@@ -35,13 +35,13 @@ class besinfo_tool: public pbes_input_tool<input_tool>
     bool opt_full;
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       opt_full = parser.options.count("full") > 0;
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("full",
@@ -70,7 +70,7 @@ class besinfo_tool: public pbes_input_tool<input_tool>
     /// - Show predicate variables and their type
     /// else
     /// - Give error
-    bool run()
+    bool run() override
     {
       pbes b;
       load_pbes(b,input_filename(), pbes_input_format());

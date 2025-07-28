@@ -47,11 +47,11 @@ namespace mcrl2::pbes_system::detail {
       initialize_generation();
     }
 
-    virtual ~pbes_greybox_interface() = default;
+    ~pbes_greybox_interface() override = default;
 
     /// \brief Returns the initial state, rewritten and simplified.
     /// \return the initial state.
-    propositional_variable_instantiation get_initial_state()
+    propositional_variable_instantiation get_initial_state() override
     {
       //std::clog << "get_initial_state()" << std::endl;
       propositional_variable_instantiation phi = atermpp::down_cast<propositional_variable_instantiation>(rewrite_and_simplify_expression(m_pbes.initial_state()));

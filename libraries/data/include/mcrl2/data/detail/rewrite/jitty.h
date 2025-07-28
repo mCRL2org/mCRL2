@@ -59,18 +59,15 @@ class RewriterJitty: public Rewriter
     // The assignment operator.
     RewriterJitty& operator=(const RewriterJitty& other) = delete;
 
-    virtual ~RewriterJitty();
+    ~RewriterJitty() override;
 
-    rewrite_strategy getStrategy();
+    rewrite_strategy getStrategy() override;
 
-    data_expression rewrite(const data_expression& term, substitution_type& sigma);
+    data_expression rewrite(const data_expression& term, substitution_type& sigma) override;
 
-    void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma);
+    void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma) override;
 
-    std::shared_ptr<detail::Rewriter> clone()
-    {
-      return std::shared_ptr<Rewriter>(new RewriterJitty(*this));
-    }
+    std::shared_ptr<detail::Rewriter> clone() override { return std::shared_ptr<Rewriter>(new RewriterJitty(*this)); }
 
     const function_symbol& this_term_is_in_normal_form() 
     {
@@ -132,11 +129,8 @@ class RewriterJitty: public Rewriter
             const jitty_assignments_for_a_rewrite_rule& assignments,
             const data_expression& t,
             data::enumerator_identifier_generator& generator);
-     
-    void thread_initialise()
-    {
-      m_thread_aterm_pool = &atermpp::detail::g_thread_term_pool();
-    }
+
+    void thread_initialise() override { m_thread_aterm_pool = &atermpp::detail::g_thread_term_pool(); }
 };
 
 /// \brief removes auxiliary expressions this_term_is_in_normal_form from data_expressions that are being rewritten.
