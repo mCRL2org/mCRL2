@@ -10,6 +10,7 @@
 
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <iomanip>
 #include <sylvan_ldd.hpp>
 
@@ -284,7 +285,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
     pbes_system::symbolic_reachability_options options;
 
     // Lace options
-    std::size_t lace_dqsize = 1024*1024*4; // set large default
+    std::size_t lace_dqsize = static_cast<std::size_t>(1024 * 1024 * 4); // set large default
     std::size_t lace_stacksize = 0; // use default
 
     // Sylvan options

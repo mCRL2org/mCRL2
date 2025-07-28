@@ -287,7 +287,7 @@ namespace sort_pos
 /// Type T is an unsigned integral type.
 template <typename T>
 inline data_expression pos(const T t)
-  requires std::is_integral<T>::value
+  requires std::is_integral_v<T>
 {
   assert(t>0);
 
@@ -432,7 +432,7 @@ inline
 NUMERIC_TYPE positive_constant_to_value(const data_expression& n)
 {
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
-  if constexpr (std::is_integral<NUMERIC_TYPE>::value)
+  if constexpr (std::is_integral_v<NUMERIC_TYPE>)
   {
     if (is_concat_digit_application(n))
     {
@@ -477,7 +477,7 @@ namespace sort_nat
 /// \brief Constructs expression of type pos from an integral type
 template <typename T>
 inline data_expression nat(T t)
-  requires std::is_integral<T>::value
+  requires std::is_integral_v<T>
 {
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
   static_assert(sizeof(T)<=sizeof(std::size_t),"Can only convert numbers up till a size_t.");
@@ -588,7 +588,7 @@ template <class NUMERIC_TYPE>
 inline NUMERIC_TYPE natural_constant_to_value(const data_expression& n)
 {
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
-  if constexpr (std::is_integral<NUMERIC_TYPE>::value)
+  if constexpr (std::is_integral_v<NUMERIC_TYPE>)
   {
     if (is_concat_digit_application(n))
     {
@@ -672,9 +672,9 @@ inline data_expression int_(T t)
   requires(std::is_integral_v<T> && std::is_signed_v<T>) {
     if (t < 0)
     {
-      return sort_int::cneg(sort_pos::pos(typename std::make_unsigned<T>::type(-t)));
+      return sort_int::cneg(sort_pos::pos(std::make_unsigned_t<T>(-t)));
     }
-    return sort_int::cint(sort_nat::nat(typename std::make_unsigned<T>::type(t)));
+    return sort_int::cint(sort_nat::nat(std::make_unsigned_t<T>(t)));
   }
 
 /// \brief Constructs expression of type Int from a string.
@@ -742,7 +742,7 @@ namespace sort_real
 /// \param t An expression of type T.
 template <typename T>
 inline data_expression real_(T t)
-  requires std::is_integral<T>::value
+  requires std::is_integral_v<T>
 {
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
   return sort_real::creal(sort_int::int_(t), sort_pos::pos(1));
@@ -756,7 +756,7 @@ inline data_expression real_(T t)
 /// \param denominator denominator.
 template <typename T>
 inline data_expression real_(T numerator, T denominator)
-  requires std::is_integral<T>::value
+  requires std::is_integral_v<T>
 {
   return sort_real::creal(sort_int::int_(numerator), sort_pos::pos(denominator));
 }
@@ -785,7 +785,8 @@ inline data_expression real_(const std::string& n)
 /// \brief Yields the real value of a data expression.
 /// \param r A data expression of sort real in normal form.
 template <class NUMERIC_TYPE>
-inline NUMERIC_TYPE value(const data_expression& r, typename std::enable_if<std::is_floating_point<NUMERIC_TYPE>::value>::type* = nullptr)
+inline NUMERIC_TYPE value(const data_expression& r,
+    std::enable_if_t<std::is_floating_point_v<NUMERIC_TYPE>>* = nullptr)
 {
   if (is_creal_application(r))
   {

@@ -67,19 +67,14 @@ make_eliminate_real_if_builder()
 
 } // namespace detail
 
-
 template <typename T>
-void eliminate_real_if(T& x,
-                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                       )
+void eliminate_real_if(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::detail::make_eliminate_real_if_builder<data::data_expression_builder>().update(x);
 }
 
 template <typename T>
-T eliminate_real_if(const T x,
-                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                    )
+T eliminate_real_if(const T x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result; 
   data::detail::make_eliminate_real_if_builder<data::data_expression_builder>().apply(result, x);

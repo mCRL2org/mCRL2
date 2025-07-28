@@ -19,17 +19,13 @@ namespace mcrl2::lps
 {
 
 template <typename T>
-void translate_user_notation(T& x,
-                             typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                            )
+void translate_user_notation(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   core::make_update_apply_builder<lps::data_expression_builder>(data::detail::translate_user_notation_function()).update(x);
 }
 
 template <typename T>
-T translate_user_notation(const T& x,
-                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                         )
+T translate_user_notation(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   T result;
   core::make_update_apply_builder<lps::data_expression_builder>(data::detail::translate_user_notation_function()).apply(result, x);

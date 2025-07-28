@@ -671,12 +671,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
           }
 
           // print the sort
-          if (print_sorts)
-          {
-            derived().print(": ");
-            derived().apply(get_sort(*first));
-          }
-
+          derived().print(": ");
+          derived().apply(get_sort(*first));
           // update first
           first = i;
         }

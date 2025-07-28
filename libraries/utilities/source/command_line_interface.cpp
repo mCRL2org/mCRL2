@@ -526,10 +526,8 @@ std::string interface_description::man_page() const
 
   std::string name_upper = m_name;
   std::transform(name_upper.begin(), name_upper.end(), name_upper.begin(), ::toupper);
-  s << ".TH " << name_upper << " \"1\" \""
-    << std::string(buffer) << "\" \""
-    << m_name << " mCRL2 toolset " << get_toolset_version()
-    << "\" \"User Commands\"" << std::endl;
+  s << ".TH " << name_upper << R"( "1" ")" << std::string(buffer) << "\" \"" << m_name << " mCRL2 toolset "
+    << get_toolset_version() << R"(" "User Commands")" << std::endl;
 
   s << ".SH NAME" << std::endl
     << m_name << " \\- " << m_what_is << std::endl;

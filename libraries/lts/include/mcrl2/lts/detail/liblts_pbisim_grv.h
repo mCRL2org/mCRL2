@@ -441,7 +441,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     /** Creates the initial partition.
     *  \details The blocks are initially partitioned based on the actions that can perform. 
     */
-    void create_initial_partition(void)
+    void create_initial_partition()
     {
       transitions_per_label.initialize(aut.num_action_labels());
       
@@ -709,7 +709,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     /** \brief Refine partition until it becomes stable.
     *  \details
     */
-    void refine_partition_until_it_becomes_stable(void)
+    void refine_partition_until_it_becomes_stable()
     {
 
       // Refine until all the constellations are trivial.

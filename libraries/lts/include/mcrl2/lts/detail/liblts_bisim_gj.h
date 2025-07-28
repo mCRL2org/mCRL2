@@ -569,8 +569,8 @@ struct block_type
     /// corresponding co-splitter in the list.
     /// During `stabilize()`, BLC sets that are regarded as unstable are near
     /// the end of the list.
-    linked_list<BLC_indicators> to_constellation;                               static_assert(std::is_trivially_destructible
-                                                                                                                        <linked_list<BLC_indicators> >::value);
+    linked_list<BLC_indicators> to_constellation;
+    static_assert(std::is_trivially_destructible_v<linked_list<BLC_indicators>>);
     /// \brief used during initialisation for a pointer to a vector of marked states
     /// \details During initialisation (when there is only one constellation)
     /// the same space as `to_constellation` is actually used for something
@@ -1948,8 +1948,7 @@ class bisim_partitioner_gj
     {                                                                           assert(count<m_aut.num_states());  assert(m_states_in_blocks.data()<=pos1);
       /* if (pos1 > pos2)  std::swap(pos1, pos2);                            */ assert(pos1<pos2);  assert(pos2<=m_states_in_blocks.data_end()-count);
       {
-        std::make_signed<state_index>::type
-                                       overlap=std::distance(pos2, pos1)+count;
+        std::make_signed_t<state_index> overlap = std::distance(pos2, pos1) + count;
         if (overlap > 0)
         {
           count -= overlap;

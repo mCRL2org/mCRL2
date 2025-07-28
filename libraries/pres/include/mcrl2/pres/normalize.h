@@ -173,9 +173,7 @@ bool is_normalized(const T& x)
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing pres expressions
 template <typename T>
-void normalize(T& x,
-               typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-              )
+void normalize(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   normalize_builder f;
   f.update(x);
@@ -185,9 +183,7 @@ void normalize(T& x,
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing pres expressions
 template <typename T>
-T normalize(const T& x,
-            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-           )
+T normalize(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   normalize_builder f;

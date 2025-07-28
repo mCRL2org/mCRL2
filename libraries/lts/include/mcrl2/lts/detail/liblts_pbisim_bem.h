@@ -189,7 +189,7 @@ class prob_bisim_partitioner_bem
   /** \brief Creates the initial partition of step classes and blocks.
    *  \detail The blocks are initially partitioned based on the actions that can perform.
    *          The step classes are partitioned based on the action that leads to the probabilistic state */
-  void create_initial_partition (void) 
+  void create_initial_partition()
   {
     std::vector< std::vector< std::list<distribution_type*> > > steps; // Representation of transition in 2-d array
     std::vector<transition>& transitions = aut.get_transitions();
@@ -478,7 +478,7 @@ class prob_bisim_partitioner_bem
   *   \detail Refinement of state partition and step partition until no new blocks/step classes
   *           are in front of the partition lists
   */
-  void refine_partition_until_it_becomes_stable (void) 
+  void refine_partition_until_it_becomes_stable()
   {
     std::list<step_class_type*> step_partition_old;
     std::list<block_type*> state_partition_old;
@@ -712,7 +712,7 @@ class prob_bisim_partitioner_bem
     }
   }
 
-  void postprocessing_stage(void)
+  void postprocessing_stage()
   {
     //---- Post processing to keep track of the parent block of each state ----//
     //block_index_of_a_state.resize(aut.num_states());

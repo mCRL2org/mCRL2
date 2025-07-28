@@ -158,7 +158,7 @@ class data_type_checker: public sort_type_checker
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors);
     void add_function(const data::function_symbol& f, const std::string& msg, bool allow_double_decls=false);
     void add_constant(const data::function_symbol& f, const std::string& msg);
-    void initialise_system_defined_functions(void);
+    void initialise_system_defined_functions();
     void add_system_constant(const data::function_symbol& f);
     void add_system_function(const data::function_symbol& f);
     void add_system_constants_and_functions(const std::vector<data::function_symbol>& v);

@@ -119,7 +119,7 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
 
     void run() override
     {
-      stategraph_local_algorithm::run();
+      mcrl2::pbes_system::detail::local_reset_variables_algorithm::run();
       m_transformed_lps = m_original_lps;
       compute_occurring_data_parameters();
       start_timer("reset_variables_to_original");

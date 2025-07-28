@@ -14,6 +14,7 @@
 
 #include "mcrl2/utilities/logger.h"
 
+#include <cstddef>
 #include <sylvan_ldd.hpp>
 
 #include <random>
@@ -120,9 +121,9 @@ sylvan::ldds::ldd to_ldd(const std::set<std::vector<std::uint32_t>>& vector_set)
 void initialise_sylvan()
 {
   //mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
-  lace_init(1, 1024*1024*4);
+  lace_init(1, static_cast<size_t>(1024 * 1024 * 4));
   lace_startup(0, nullptr, nullptr);
-  sylvan::sylvan_set_limits(1024 * 1024 * 1024, 6, 6);
+  sylvan::sylvan_set_limits(static_cast<size_t>(1024) * 1024 * 1024, 6, 6);
   sylvan::sylvan_init_package();
   sylvan::sylvan_init_ldd();
 }
