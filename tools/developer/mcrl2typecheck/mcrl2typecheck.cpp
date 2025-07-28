@@ -19,17 +19,13 @@ struct print_sub_expressions_traverser: public data::data_expression_traverser<p
   using super = data::data_expression_traverser<print_sub_expressions_traverser>;
 
   template <typename T>
-  void leave(const T& x,
-             typename std::enable_if<std::is_base_of<data::data_expression, T>::value>::type* = nullptr
-            )
+  void leave(const T& x, std::enable_if_t<std::is_base_of_v<data::data_expression, T>>* = nullptr)
   {
     std::cout << "    " << x << " : " << x.sort() << std::endl;
   }
 
   template <typename T>
-  void leave(const T& /* x */,
-             typename std::enable_if<!std::is_base_of<data::data_expression, T>::value>::type* = nullptr
-            )
+  void leave(const T& /* x */, std::enable_if_t<!std::is_base_of_v<data::data_expression, T>>* = nullptr)
   {}
 };
 

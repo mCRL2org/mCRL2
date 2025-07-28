@@ -445,7 +445,7 @@ template <bool Stochastic, bool Timed, typename Specification>
 class explorer: public abortable
 {
   public:
-    using state_type = typename std::conditional<Stochastic, stochastic_state, state>::type;
+    using state_type = std::conditional_t<Stochastic, stochastic_state, state>;
     using state_index_type = typename std::conditional<Stochastic, std::list<std::size_t>, std::size_t>::type;
     static constexpr bool is_stochastic = Stochastic;
     static constexpr bool is_timed = Timed;

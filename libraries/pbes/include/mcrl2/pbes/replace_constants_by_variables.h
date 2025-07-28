@@ -37,10 +37,9 @@ struct replace_constants_by_variables_builder: public data::detail::replace_cons
 /// multiple times.
 template <typename T>
 void replace_constants_by_variables(T& x,
-                                    const data::rewriter& r,
-                                    data::mutable_indexed_substitution<>& sigma,
-                                    typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                                   )
+    const data::rewriter& r,
+    data::mutable_indexed_substitution<>& sigma,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   detail::replace_constants_by_variables_builder f(r, sigma);
   f.update(x);
@@ -51,10 +50,9 @@ void replace_constants_by_variables(T& x,
 /// multiple times.
 template <typename T>
 T replace_constants_by_variables(const T& x,
-                                 const data::rewriter& r,
-                                 data::mutable_indexed_substitution<>& sigma,
-                                 typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                                )
+    const data::rewriter& r,
+    data::mutable_indexed_substitution<>& sigma,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   detail::replace_constants_by_variables_builder f(r, sigma);

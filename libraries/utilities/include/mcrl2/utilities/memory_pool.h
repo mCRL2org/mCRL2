@@ -195,7 +195,7 @@ private:
   using Block = std::array<Slot, ElementsPerBlock>;
 
   /// \brief The last slot in the first block that has never been returned by allocate.
-  using SizeType = typename std::conditional<ThreadSafe, std::atomic<std::size_t>, std::size_t>::type;
+  using SizeType = std::conditional_t<ThreadSafe, std::atomic<std::size_t>, std::size_t>;
   SizeType m_current_index = ElementsPerBlock;
 
   /// \brief Equal to the size of the blocks array to prevent iterating over the block list.

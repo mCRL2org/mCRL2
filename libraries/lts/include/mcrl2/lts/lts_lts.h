@@ -55,7 +55,8 @@ class state_label_lts : public atermpp::term_list< lps::state >
     template < class CONTAINER >
     explicit state_label_lts(const CONTAINER& l)
     {
-      static_assert(std::is_same<typename CONTAINER::value_type, data::data_expression>::value,"Value type must be a data_expression");
+      static_assert(std::is_same_v<typename CONTAINER::value_type, data::data_expression>,
+          "Value type must be a data_expression");
       this->push_front(lps::state(l.begin(),l.size()));
     }
 

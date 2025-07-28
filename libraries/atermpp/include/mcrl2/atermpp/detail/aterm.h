@@ -34,22 +34,21 @@ class _aterm_appl : public _aterm
 public:
 
   /// \brief Constructs a term application with the given symbol and arguments.
-  template<typename ...Terms,
-           typename std::enable_if<are_terms<Terms...>::value>::type* = nullptr,
-           typename std::enable_if<sizeof...(Terms) == N>::type* = nullptr>
-  _aterm_appl(const function_symbol& sym, const Terms& ...arguments)
-    : _aterm(sym),
-      m_arguments{{arguments...}}
+  template <typename... Terms, std::enable_if_t<are_terms<Terms...>::value>* = nullptr>
+  _aterm_appl(const function_symbol& sym, const Terms&... arguments)
+    requires(sizeof...(Terms) == N)
+      : _aterm(sym),
+        m_arguments{{arguments...}}
   {
     assert(N == sym.arity()); // The arity of the function symbol matches.
   }
 
   /// \brief constructs a term application with the given symbol and an iterator where the number
   ///        of elements is equal to the template parameter N.
-  template<typename Iterator,
-           typename std::enable_if<mcrl2::utilities::is_iterator<Iterator>::value>::type* = nullptr>
+  template <typename Iterator>
   _aterm_appl(const function_symbol& sym, Iterator it, [[maybe_unused]] Iterator end)
-    : _aterm(sym)
+    requires mcrl2::utilities::is_iterator<Iterator>::value
+      : _aterm(sym)
   {
     for (std::size_t i = 0; i < N; ++i)
     {
@@ -70,10 +69,10 @@ public:
   }
 
   /// \brief constructs a term application with the given symbol and its arguments from the iterator.
-  template<typename Iterator,
-           typename std::enable_if<mcrl2::utilities::is_iterator<Iterator>::value>::type* = nullptr>
+  template <typename Iterator>
   _aterm_appl(const function_symbol& symbol, Iterator it, [[maybe_unused]] Iterator end, bool)
-    : _aterm(symbol)
+    requires mcrl2::utilities::is_iterator<Iterator>::value
+      : _aterm(symbol)
   {
     for (std::size_t i = 0; i < symbol.arity(); ++i)
     {
@@ -184,12 +183,9 @@ private:
 
 static_assert(sizeof(_term_appl) == sizeof(_aterm) + sizeof(aterm_core), "Sanity check: aterm size");
 
-template < class Derived, class Base >
+template <class Derived, class Base>
 term_appl_iterator<Derived> aterm_appl_iterator_cast(term_appl_iterator<Base> a,
-                                                                typename std::enable_if<
-                                                                     std::is_base_of<aterm, Base>::value &&
-                                                                     std::is_base_of<aterm, Derived>::value
->::type* = nullptr);
+    std::enable_if_t<std::is_base_of_v<aterm, Base> && std::is_base_of_v<aterm, Derived>>* = nullptr);
 
 } // namespace detail
 } // namespace atermpp

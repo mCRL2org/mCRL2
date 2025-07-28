@@ -759,19 +759,17 @@ apply_parunfold_replacement_builder(const lpsparunfold::case_func_replacement& c
 
 template <typename T>
 void insert_case_functions(T& x,
-                           const lpsparunfold::case_func_replacement& cfv,
-                           data::set_identifier_generator& id_generator,
-                           typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-)
+    const lpsparunfold::case_func_replacement& cfv,
+    data::set_identifier_generator& id_generator,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   apply_parunfold_replacement_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(cfv, id_generator).update(x);
 }
 
 template <typename T>
 void insert_case_functions(T& x,
-                           const lpsparunfold::case_func_replacement& cfv,
-                           typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-)
+    const lpsparunfold::case_func_replacement& cfv,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(lps::find_identifiers(x));

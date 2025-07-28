@@ -418,7 +418,10 @@ bool is_normalized(const T& x)
 /// \param quantitative Indication whether the formula is a quantitative boolean formula.
 /// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
-void normalize(T& x, bool quantitative = false, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
+void normalize(T& x,
+    bool quantitative = false,
+    bool negated = false,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   normalize_builder f(quantitative, negated);
   f.update(x);
@@ -430,7 +433,10 @@ void normalize(T& x, bool quantitative = false, bool negated = false, typename s
 /// \param quantitative Indication whether the formula is a quantitative boolean formula.
 /// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
-T normalize(const T& x, bool quantitative = false, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
+T normalize(const T& x,
+    bool quantitative = false,
+    bool negated = false,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   normalize_builder f(quantitative, negated);

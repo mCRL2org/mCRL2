@@ -180,9 +180,8 @@ class ltsconvert_tool : public input_output_tool
 
       if (tool_options.add_state_as_state_label)
       {
-        // Add the state numbers as the labels of the states. 
-        if constexpr (std::is_same<LTS_TYPE,probabilistic_lts_fsm_t>::value ||
-                      std::is_same<LTS_TYPE,lts_fsm_t>::value)
+        // Add the state numbers as the labels of the states.
+        if constexpr (std::is_same_v<LTS_TYPE, probabilistic_lts_fsm_t> || std::is_same_v<LTS_TYPE, lts_fsm_t>)
         {
           l.clear_process_parameters();
           l.add_process_parameter("state_number","Nat");
@@ -191,8 +190,7 @@ class ltsconvert_tool : public input_output_tool
             l.add_state_element_value(0,std::to_string(i));
           }
         }
-        if constexpr (std::is_same<LTS_TYPE,probabilistic_lts_lts_t>::value ||
-                      std::is_same<LTS_TYPE,lts_lts_t>::value)
+        if constexpr (std::is_same_v<LTS_TYPE, probabilistic_lts_lts_t> || std::is_same_v<LTS_TYPE, lts_lts_t>)
         {
           // l.set_process_parameters(atermpp::term_list<mcrl2::data::variable>(mcrl2::data::variable("state_number",mcrl2::data::sort_nat::nat())));
           l.set_process_parameters({mcrl2::data::variable("state_number",mcrl2::data::sort_nat::nat())});

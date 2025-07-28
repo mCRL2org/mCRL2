@@ -73,17 +73,16 @@ public:
   /// \param begin The start of a range of elements.
   /// \param end The end of a range of elements.
   template <class ForwardIterator,
-      typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr,
-      typename std::enable_if<
-          !std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr,
-      typename std::enable_if<
-          !std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value>::type* = nullptr>
+      std::enable_if_t<mcrl2::utilities::is_iterator<ForwardIterator>::value>* = nullptr,
+      std::enable_if_t<
+          !std::is_same_v<typename ForwardIterator::iterator_category, std::input_iterator_tag>>* = nullptr>
   aterm(const function_symbol& sym, ForwardIterator begin, ForwardIterator end)
+    requires(!std::is_same_v<typename ForwardIterator::iterator_category, std::output_iterator_tag>)
   {
     detail::g_thread_term_pool().create_appl_dynamic(*this, sym, begin, end);
-    static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value,
+    static_assert(!std::is_same_v<typename ForwardIterator::iterator_category, std::input_iterator_tag>,
         "A forward iterator has more requirements than an input iterator.");
-    static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value,
+    static_assert(!std::is_same_v<typename ForwardIterator::iterator_category, std::output_iterator_tag>,
         "A forward iterator has more requirements than an output iterator.");
   }
 
@@ -94,14 +93,12 @@ public:
   /// \param sym A function symbol.
   /// \param begin The start of a range of elements.
   /// \param end The end of a range of elements.
-  template <class InputIterator,
-      typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr,
-      typename std::enable_if<
-          std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr>
+  template <class InputIterator, std::enable_if_t<mcrl2::utilities::is_iterator<InputIterator>::value>* = nullptr>
   aterm(const function_symbol& sym, InputIterator begin, InputIterator end)
+    requires std::is_same_v<typename InputIterator::iterator_category, std::input_iterator_tag>
       : aterm(sym, begin, end, [](const unprotected_aterm_core& term) -> const unprotected_aterm_core& { return term; })
   {
-    static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
+    static_assert(std::is_same_v<typename InputIterator::iterator_category, std::input_iterator_tag>,
         "The InputIterator is missing the input iterator tag.");
   }
 
@@ -113,13 +110,12 @@ public:
   /// \param end The end of a range of elements.
   /// \param converter An class or lambda term containing an operator Term operator()(const Term& t) which is
   ///        applied to each each element in the iterator range before it becomes an argument of this term.
-  template <class InputIterator,
-      class TermConverter,
-      typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr>
+  template <class InputIterator, class TermConverter>
   aterm(const function_symbol& sym, InputIterator begin, InputIterator end, TermConverter converter)
+    requires mcrl2::utilities::is_iterator<InputIterator>::value
   {
     detail::g_thread_term_pool().create_appl_dynamic(*this, sym, converter, begin, end);
-    static_assert(!std::is_same<typename InputIterator::iterator_category, std::output_iterator_tag>::value,
+    static_assert(!std::is_same_v<typename InputIterator::iterator_category, std::output_iterator_tag>,
         "The InputIterator has the output iterator tag.");
   }
 
@@ -191,20 +187,18 @@ extern void add_deletion_hook(const function_symbol&, term_callback);
 /// \param end The end of a range of elements.
 template <class Term,
     class ForwardIterator,
-    typename std::enable_if<mcrl2::utilities::is_iterator<ForwardIterator>::value>::type* = nullptr,
-    typename std::enable_if<
-        !std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr,
-    typename std::enable_if<
-        !std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value>::type* = nullptr>
+    std::enable_if_t<mcrl2::utilities::is_iterator<ForwardIterator>::value>* = nullptr,
+    std::enable_if_t<!std::is_same_v<typename ForwardIterator::iterator_category, std::input_iterator_tag>>* = nullptr>
 void make_term_appl(Term& target, const function_symbol& sym, ForwardIterator begin, ForwardIterator end)
+  requires(!std::is_same_v<typename ForwardIterator::iterator_category, std::output_iterator_tag>)
 {
   detail::g_thread_term_pool().create_appl_dynamic(target, sym, begin, end);
 
-  static_assert((std::is_base_of<aterm, Term>::value), "Term must be derived from an aterm");
+  static_assert((std::is_base_of_v<aterm, Term>), "Term must be derived from an aterm");
   static_assert(sizeof(Term) == sizeof(std::size_t), "Term derived from an aterm must not have extra fields");
-  static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::input_iterator_tag>::value,
+  static_assert(!std::is_same_v<typename ForwardIterator::iterator_category, std::input_iterator_tag>,
       "A forward iterator has more requirements than an input iterator.");
-  static_assert(!std::is_same<typename ForwardIterator::iterator_category, std::output_iterator_tag>::value,
+  static_assert(!std::is_same_v<typename ForwardIterator::iterator_category, std::output_iterator_tag>,
       "A forward iterator has more requirements than an output iterator.");
 }
 
@@ -218,16 +212,15 @@ void make_term_appl(Term& target, const function_symbol& sym, ForwardIterator be
 /// \param end The end of a range of elements.
 template <class Term,
     class InputIterator,
-    typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr,
-    typename std::enable_if<
-        std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value>::type* = nullptr>
+    std::enable_if_t<mcrl2::utilities::is_iterator<InputIterator>::value>* = nullptr>
 void make_term_appl(Term& target, const function_symbol& sym, InputIterator begin, InputIterator end)
+  requires std::is_same_v<typename InputIterator::iterator_category, std::input_iterator_tag>
 {
   make_term_appl(target, sym, begin, end, [](const Term& term) -> const Term& { return term; });
 
-  static_assert((std::is_base_of<aterm, Term>::value), "Term must be derived from an aterm");
+  static_assert((std::is_base_of_v<aterm, Term>), "Term must be derived from an aterm");
   static_assert(sizeof(Term) == sizeof(std::size_t), "Term derived from an aterm must not have extra fields");
-  static_assert(std::is_same<typename InputIterator::iterator_category, std::input_iterator_tag>::value,
+  static_assert(std::is_same_v<typename InputIterator::iterator_category, std::input_iterator_tag>,
       "The InputIterator is missing the input iterator tag.");
 }
 
@@ -241,21 +234,19 @@ void make_term_appl(Term& target, const function_symbol& sym, InputIterator begi
 /// \param end The end of a range of elements.
 /// \param converter An class or lambda term containing an operator Term operator()(const Term& t) which is
 ///        applied to each each element in the iterator range before it becomes an argument of this term.
-template <class Term,
-    class InputIterator,
-    class TermConverter,
-    typename std::enable_if<mcrl2::utilities::is_iterator<InputIterator>::value>::type* = nullptr>
+template <class Term, class InputIterator, class TermConverter>
 void make_term_appl(Term& target,
     const function_symbol& sym,
     InputIterator begin,
     InputIterator end,
     TermConverter converter)
+  requires mcrl2::utilities::is_iterator<InputIterator>::value
 {
   detail::g_thread_term_pool().create_appl_dynamic(target, sym, converter, begin, end);
 
-  static_assert(std::is_base_of<aterm, Term>::value, "Term must be derived from an aterm");
+  static_assert(std::is_base_of_v<aterm, Term>, "Term must be derived from an aterm");
   static_assert(sizeof(Term) == sizeof(std::size_t), "Term derived from an aterm must not have extra fields");
-  static_assert(!std::is_same<typename InputIterator::iterator_category, std::output_iterator_tag>::value,
+  static_assert(!std::is_same_v<typename InputIterator::iterator_category, std::output_iterator_tag>,
       "The InputIterator has the output iterator tag.");
 }
 
@@ -267,7 +258,7 @@ void make_term_appl(Term& target, const function_symbol& sym)
 {
   detail::g_thread_term_pool().create_term(target, sym);
 
-  static_assert(std::is_base_of<aterm, Term>::value, "Term must be derived from an aterm");
+  static_assert(std::is_base_of_v<aterm, Term>, "Term must be derived from an aterm");
   static_assert(sizeof(Term) == sizeof(std::size_t), "Term derived from an aterm must not have extra fields");
 }
 

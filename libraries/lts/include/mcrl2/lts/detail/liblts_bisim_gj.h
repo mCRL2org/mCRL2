@@ -1777,8 +1777,7 @@ class bisim_partitioner_gj
       {
         // The transitions are most efficiently directly extracted from the
         // block.to_constellation lists in blocks.
-        typename std::remove_reference<decltype(m_aut.get_transitions())>::type
-                                                                             T;
+        std::remove_reference_t<decltype(m_aut.get_transitions())> T;
         for (state_in_block_pointer*
               si=m_states_in_blocks.data(); m_states_in_blocks.data_end()!=si;
                                            si=si->ref_state->block->end_states)
@@ -1809,8 +1808,7 @@ class bisim_partitioner_gj
       if (m_aut.has_state_info())   // If there are no state labels
       {                             // this step is not needed
         /* Create a vector for the new labels */
-        typename std::remove_reference<decltype(m_aut.state_labels())>::type
-                                                  new_labels(num_eq_classes());
+        std::remove_reference_t<decltype(m_aut.state_labels())> new_labels(num_eq_classes());
 
         for(std::size_t i=0; i<m_aut.num_states(); ++i)
         {                                                                       //mCRL2complexity(&m_states[i], add_work(..., 1), *this);

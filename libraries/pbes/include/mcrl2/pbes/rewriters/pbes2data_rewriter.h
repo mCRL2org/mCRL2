@@ -80,9 +80,7 @@ struct pbes2data_builder: public pbes_expression_builder<Derived>
 };
 
 template <typename T>
-data::data_expression pbes2data(const T& x,
-            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-           )
+data::data_expression pbes2data(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::data_expression result;
   core::make_apply_builder<pbes2data_builder>().apply(result, x);
@@ -90,9 +88,7 @@ data::data_expression pbes2data(const T& x,
 }
 
 template <typename T>
-void pbes2data(T& x,
-               typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-              )
+void pbes2data(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_apply_builder<pbes2data_builder>().update(x);
 }

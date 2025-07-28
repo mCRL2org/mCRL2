@@ -23,12 +23,9 @@ class term_appl_iterator
 {
     friend class aterm;
 
-    template < class Derived, class Base >
+    template <class Derived, class Base>
     friend term_appl_iterator<Derived> detail::aterm_appl_iterator_cast(term_appl_iterator<Base> a,
-                                                                typename std::enable_if<
-                                                                     std::is_base_of<aterm, Base>::value &&
-                                                                     std::is_base_of<aterm, Derived>::value
-                                                                >::type*);
+        std::enable_if_t<std::is_base_of_v<aterm, Base> && std::is_base_of_v<aterm, Derived>>*);
 
 
   protected:
@@ -220,19 +217,16 @@ class term_appl_iterator
 
 namespace detail
 {
-  /// This function can be used to translate an term_appl_iterator of one sort into another. 
-  template < class Derived, class Base >
-  term_appl_iterator<Derived> aterm_appl_iterator_cast(term_appl_iterator<Base> a,
-                                                       typename std::enable_if<
-                                                                     std::is_base_of<aterm, Base>::value &&
-                                                                     std::is_base_of<aterm, Derived>::value
-                                                                >::type* /* = nullptr */)
-  {
-    static_assert(sizeof(Derived) == sizeof(_aterm*),
-                "term_appl_iterator only works on aterm classes to which no extra fields are added");
-    static_assert(sizeof(Base) == sizeof(_aterm*),
-                "term_appl_iterator only works on aterm classes to which no extra fields are added");
-    return term_appl_iterator<Derived>(reinterpret_cast<const Derived*>(a.m_term));
+  /// This function can be used to translate an term_appl_iterator of one sort into another.
+template <class Derived, class Base>
+term_appl_iterator<Derived> aterm_appl_iterator_cast(term_appl_iterator<Base> a,
+    std::enable_if_t<std::is_base_of_v<aterm, Base> && std::is_base_of_v<aterm, Derived>>* /* = nullptr */)
+{
+  static_assert(sizeof(Derived) == sizeof(_aterm*),
+      "term_appl_iterator only works on aterm classes to which no extra fields are added");
+  static_assert(sizeof(Base) == sizeof(_aterm*),
+      "term_appl_iterator only works on aterm classes to which no extra fields are added");
+  return term_appl_iterator<Derived>(reinterpret_cast<const Derived*>(a.m_term));
   }
 
 } // namespace detail

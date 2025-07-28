@@ -19,18 +19,20 @@ namespace atermpp
 
 namespace detail
 {
-  template<typename T>
-  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>&
-    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>::operator=(const unprotected_aterm_core& other) noexcept
-  {
-    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    m_term = address(other);
-    return *this;
+template <typename T>
+const reference_aterm<T, typename std::enable_if_t<std::is_base_of_v<aterm_core, T>>>&
+reference_aterm<T, typename std::enable_if_t<std::is_base_of_v<aterm_core, T>>>::operator=(
+    const unprotected_aterm_core& other) noexcept
+{
+  mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+  m_term = address(other);
+  return *this;
   }
 
-  template<typename T>
-  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>&
-    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>::operator=(unprotected_aterm_core&& other) noexcept
+  template <typename T>
+  const reference_aterm<T, typename std::enable_if_t<std::is_base_of_v<aterm_core, T>>>&
+  reference_aterm<T, typename std::enable_if_t<std::is_base_of_v<aterm_core, T>>>::operator=(
+      unprotected_aterm_core&& other) noexcept
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     m_term = address(other);

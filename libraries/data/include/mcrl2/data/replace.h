@@ -308,17 +308,13 @@ T replace_free_variables(const T& x,
 //--- end generated data replace code ---//
 
 template <typename T, typename Substitution>
-void substitute_sorts(T& x,
-    const Substitution& sigma,
-    typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0)
+void substitute_sorts(T& x, const Substitution& sigma, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<data::sort_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
-T substitute_sorts(const T& x,
-    const Substitution& sigma,
-    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0)
+T substitute_sorts(const T& x, const Substitution& sigma, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   T result;
   core::make_update_apply_builder<data::sort_expression_builder>(sigma).apply(result, x);

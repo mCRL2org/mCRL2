@@ -178,7 +178,7 @@ make_cached_bottom_up_replace_aterm_builder(ReplaceFunction f, std::unordered_ma
 template <typename UnaryFunction, typename Term>
 UnaryFunction for_each(Term t, UnaryFunction op)
 {
-  return detail::for_each_impl< typename std::add_lvalue_reference< UnaryFunction >::type >(t, op);
+  return detail::for_each_impl<std::add_lvalue_reference_t<UnaryFunction>>(t, op);
 }
 
 /// \brief Finds a subterm of t that matches a given predicate.
@@ -189,7 +189,7 @@ template <typename Term, typename MatchPredicate>
 aterm find_if(const Term& t, MatchPredicate match)
 {
   aterm output;
-  detail::find_if_impl< typename std::add_lvalue_reference< MatchPredicate >::type >(t, match, output);
+  detail::find_if_impl<std::add_lvalue_reference_t<MatchPredicate>>(t, match, output);
   return output;
 }
 
@@ -203,7 +203,7 @@ aterm find_if(const Term& t, MatchPredicate match)
 template <typename Term, typename MatchPredicate, typename StopPredicate>
 aterm partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
 {
-  return detail::partial_find_if_impl<typename std::add_lvalue_reference<MatchPredicate>::type>(t, match, stop);
+  return detail::partial_find_if_impl<std::add_lvalue_reference_t<MatchPredicate>>(t, match, stop);
 }
 
 /// \brief Finds all subterms of t that match a given predicate, and writes the found terms
@@ -215,7 +215,7 @@ template <typename Term, typename MatchPredicate, typename OutputIterator>
 void find_all_if(const Term& t, MatchPredicate match, OutputIterator destBegin)
 {
   OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
-  detail::find_all_if_impl< typename std::add_lvalue_reference< MatchPredicate >::type >(t, match, i);
+  detail::find_all_if_impl<std::add_lvalue_reference_t<MatchPredicate>>(t, match, i);
 }
 
 /// \brief Finds all subterms of t that match a given predicate, and writes the found terms
@@ -230,8 +230,8 @@ template <typename Term, typename MatchPredicate, typename StopPredicate, typena
 void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, OutputIterator destBegin)
 {
   OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
-  detail::partial_find_all_if_impl< typename std::add_lvalue_reference< MatchPredicate >::type,
-         typename std::add_lvalue_reference< StopPredicate >::type >(t, match, stop, i);
+  detail::partial_find_all_if_impl<std::add_lvalue_reference_t<MatchPredicate>,
+      std::add_lvalue_reference_t<StopPredicate>>(t, match, stop, i);
 }
 
 /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has

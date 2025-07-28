@@ -78,9 +78,9 @@ public:
     using tag = std::input_iterator_tag;
 
     friend class free_list<Element>;
-    using Freelist = typename std::conditional<Constant, const free_list<Element>, free_list<Element>>::type;
-    using reference = typename std::conditional<Constant, const Element&, Element&>::type;
-    using slot_pointer = typename std::conditional<Constant, const slot*, slot*>::type;
+    using Freelist = std::conditional_t<Constant, const free_list<Element>, free_list<Element>>;
+    using reference = std::conditional_t<Constant, const Element&, Element&>;
+    using slot_pointer = std::conditional_t<Constant, const slot*, slot*>;
 
   public:
     /// \brief A end of the iterator sentinel.
@@ -104,14 +104,16 @@ public:
       return *this;
     }
 
-    template<bool Constant_ = Constant>
-    typename std::enable_if<!Constant_, reference>::type operator*()
+    template <bool Constant_ = Constant>
+    reference operator*()
+      requires(!Constant_)
     {
       return m_slot->element();
     }
 
-    template<bool Constant_ = Constant>
-    typename std::enable_if<Constant_, reference>::type operator*() const
+    template <bool Constant_ = Constant>
+    reference operator*() const
+      requires(Constant_)
     {
       return m_slot->element();
     }

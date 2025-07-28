@@ -215,13 +215,13 @@ struct if_rewriter
 };
 
 template <typename T>
-void if_rewrite(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
+void if_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<data::data_expression_builder>(if_rewriter()).update(x);
 }
 
 template <typename T>
-T if_rewrite(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
+T if_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   T result;
   core::make_update_apply_builder<data::data_expression_builder>(if_rewriter()).apply(result, x);
