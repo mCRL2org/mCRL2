@@ -98,22 +98,23 @@ void MainWindow::setupMenuBar()
   QMenu* fileMenu = menuBar()->addMenu("File");
 
   newProjectAction =
-      fileMenu->addAction(QIcon(":/icons/new_project.png"), "New Project", QKeySequence::New, this,
-                          SLOT(actionNewProject()));
+      fileMenu->addAction(QIcon(":/icons/new_project.png"), "New Project", this,
+                          SLOT(actionNewProject()), QKeySequence::New);
 
   fileMenu->addSeparator();
 
   openProjectAction =
-      fileMenu->addAction(QIcon(":/icons/open_project.png"), "Open Project", QKeySequence::Open,
-                          this, SLOT(actionOpenProject()));
+      fileMenu->addAction(QIcon(":/icons/open_project.png"), "Open Project",
+                          this, SLOT(actionOpenProject()), QKeySequence::Open);
 
   fileMenu->addSeparator();
 
-  saveAction = fileMenu->addAction(saveProjectIcon, saveProjectText, QKeySequence::Save, this,
-                                   SLOT(actionSave()));
+  saveAction = fileMenu->addAction(saveProjectIcon, saveProjectText, this,
+                                   SLOT(actionSave()), QKeySequence::Save);
 
   saveAsAction =
-      fileMenu->addAction(saveProjectAsText, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S), this, SLOT(actionSaveAs()));
+      fileMenu->addAction(saveProjectAsText, this, SLOT(actionSaveAs()),
+                          QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
 
   fileMenu->addSeparator();
 
@@ -125,7 +126,8 @@ void MainWindow::setupMenuBar()
   fileMenu->addSeparator();
 
   importPropertiesAction = fileMenu->addAction(
-      "Import Properties", QKeySequence(Qt::ALT | Qt::Key_I), this, SLOT(actionImportProperties()));
+      "Import Properties", this, SLOT(actionImportProperties()),
+      QKeySequence(Qt::ALT | Qt::Key_I));
   importPropertiesAction->setEnabled(false);
 
   fileMenu->addSeparator();
@@ -135,7 +137,8 @@ void MainWindow::setupMenuBar()
 
   fileMenu->addSeparator();
 
-  exitAction = fileMenu->addAction("Exit", QKeySequence(Qt::CTRL | Qt::Key_Q), this, SLOT(close()));
+  exitAction = fileMenu->addAction("Exit", this, SLOT(close()),
+                                   QKeySequence(Qt::CTRL | Qt::Key_Q));
 
   /* Create the Edit menu (actions are added in updateEditMenu()) */
   editMenu = menuBar()->addMenu("Edit");
@@ -147,30 +150,33 @@ void MainWindow::setupMenuBar()
   /* Create the Tools menu */
   QMenu* toolsMenu = menuBar()->addMenu("Tools");
 
-  parseAction = toolsMenu->addAction(parseStartIcon, parseStartText, QKeySequence(Qt::ALT | Qt::Key_P), this,
-                                     SLOT(actionParse()));
+  parseAction = toolsMenu->addAction(parseStartIcon, parseStartText, this,
+                                     SLOT(actionParse()),
+                                     QKeySequence(Qt::ALT | Qt::Key_P));
 
-  simulateAction = toolsMenu->addAction(simulateStartIcon, simulateStartText, QKeySequence(Qt::ALT | Qt::Key_S),
-                                        this, SLOT(actionSimulate()));
+  simulateAction = toolsMenu->addAction(simulateStartIcon, simulateStartText,
+                                        this, SLOT(actionSimulate()),
+                                        QKeySequence(Qt::ALT | Qt::Key_S));
 
   toolsMenu->addSeparator();
 
-  showLtsAction = toolsMenu->addAction(showLtsStartIcon, showLtsStartText, QKeySequence(Qt::ALT | Qt::Key_T), this,
-                                       SLOT(actionShowLts()));
+  showLtsAction = toolsMenu->addAction(showLtsStartIcon, showLtsStartText, this,
+                                       SLOT(actionShowLts()),
+                                       QKeySequence(Qt::ALT | Qt::Key_T));
 
   showReducedLtsAction = toolsMenu->addAction(
-      showReducedLtsStartIcon, showReducedLtsStartText, QKeySequence(Qt::ALT | Qt::Key_R), this,
-      SLOT(actionShowReducedLts()));
+      showReducedLtsStartIcon, showReducedLtsStartText, this,
+      SLOT(actionShowReducedLts()), QKeySequence(Qt::ALT | Qt::Key_R));
 
   toolsMenu->addSeparator();
 
   addPropertyAction = toolsMenu->addAction(
-      QIcon(":/icons/add_property.png"), "Add Property", QKeySequence(Qt::ALT | Qt::Key_A), this,
-      SLOT(actionAddProperty()));
+      QIcon(":/icons/add_property.png"), "Add Property", this,
+      SLOT(actionAddProperty()), QKeySequence(Qt::ALT | Qt::Key_A));
 
   verifyAllPropertiesAction = toolsMenu->addAction(
-      verifyAllPropertiesStartIcon, verifyAllPropertiesStartText, QKeySequence(Qt::ALT | Qt::Key_V), this,
-      SLOT(actionVerifyAllProperties()));
+      verifyAllPropertiesStartIcon, verifyAllPropertiesStartText, this,
+      SLOT(actionVerifyAllProperties()), QKeySequence(Qt::ALT | Qt::Key_V));
 
   /* create the options menu */
   QMenu* optionsMenu = menuBar()->addMenu("Options");
@@ -577,16 +583,19 @@ void MainWindow::updateEditMenu(QWidget*, QWidget* widget)
     textwidget = specificationEditor;
   }
 
-  editMenu->addAction("Undo", QKeySequence::Undo, textwidget, SLOT(undo()));
-  editMenu->addAction("Redo", QKeySequence::Redo, textwidget, SLOT(redo()));
+  editMenu->addAction("Undo", textwidget, SLOT(undo()), QKeySequence::Undo);
+  editMenu->addAction("Redo", textwidget, SLOT(redo()), QKeySequence::Redo);
   editMenu->addSeparator();
-  editMenu->addAction("Find and Replace", QKeySequence::Find, this, SLOT(actionFindAndReplace()));
+  editMenu->addAction("Find and Replace", this, SLOT(actionFindAndReplace()),
+                      QKeySequence::Find);
   editMenu->addSeparator();
-  editMenu->addAction("Cut", QKeySequence::Cut, textwidget, SLOT(cut()));
-  editMenu->addAction("Copy", QKeySequence::Copy, textwidget, SLOT(copy()));
-  editMenu->addAction("Paste", QKeySequence::Paste, textwidget, SLOT(paste()));
-  editMenu->addAction("Delete", QKeySequence::Delete, textwidget, SLOT(deleteChar()));
-  editMenu->addAction("Select All", QKeySequence::SelectAll, textwidget, SLOT(selectAll()));
+  editMenu->addAction("Cut", textwidget, SLOT(cut()), QKeySequence::Cut);
+  editMenu->addAction("Copy", textwidget, SLOT(copy()), QKeySequence::Copy);
+  editMenu->addAction("Paste", textwidget, SLOT(paste()), QKeySequence::Paste);
+  editMenu->addAction("Delete", textwidget, SLOT(deleteChar()),
+                      QKeySequence::Delete);
+  editMenu->addAction("Select All", textwidget, SLOT(selectAll()),
+                      QKeySequence::SelectAll);
 
   if (!textWidgetHasFocus)
   {
