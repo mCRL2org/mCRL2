@@ -4115,9 +4115,7 @@ class specification_basic_type
           get=function_symbol_list(projection_functions.begin()+1,projection_functions.end()-1);
         }
 
-        ~stackoperations()
-        {
-        }
+        ~stackoperations() = default;
     };
 
     class stacklisttype
@@ -4235,10 +4233,7 @@ class specification_basic_type
           }
         }
 
-        ~stacklisttype()
-        {
-        }
-
+        ~stacklisttype() = default;
     };
 
     bool is_global_variable(const data_expression& d) const
@@ -5411,9 +5406,7 @@ class specification_basic_type
           functions=e.functions;
         }
 
-        ~enumeratedtype()
-        {
-        }
+        ~enumeratedtype() = default;
     };
 
     std::size_t create_enumeratedtype(const std::size_t n)
@@ -5582,9 +5575,7 @@ class specification_basic_type
           }
         }
 
-        ~enumtype()
-        {
-        }
+        ~enumtype() = default;
     };
     /************** Merge summands using enumerated type ***********************/
 

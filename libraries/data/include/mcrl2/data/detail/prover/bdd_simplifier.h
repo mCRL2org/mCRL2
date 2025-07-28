@@ -35,9 +35,7 @@ class BDD_Simplifier
     time_t f_deadline;
   public:
     /// \brief Destructor without any additional functionality.
-    virtual ~BDD_Simplifier()
-    {
-    }
+    virtual ~BDD_Simplifier() = default;
 
     /// \brief Sets the attribute BDD_Simplifier::f_deadline.
     void set_time_limit(time_t a_time_limit)

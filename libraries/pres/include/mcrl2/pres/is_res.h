@@ -37,8 +37,7 @@ struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
     return error_message;
   }
 
-  is_res_traverser()
-  {}
+  is_res_traverser() = default;
 
   void enter(const infimum& x)
   {

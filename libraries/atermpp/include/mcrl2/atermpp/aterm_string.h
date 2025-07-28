@@ -20,8 +20,7 @@ class aterm_string: public aterm
 {
 public:
   /// \brief Default constructor.
-  aterm_string()
-  {}
+  aterm_string() = default;
 
   /// \brief Constructor.
   /// \param t A term without arguments of type appl. The string is given by the function symbol.

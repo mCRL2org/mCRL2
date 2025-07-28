@@ -37,18 +37,18 @@ class SmallProgressMeasures;
 class LiftingStrategy
 {
 public:
-    virtual ~LiftingStrategy() { }
+  virtual ~LiftingStrategy() = default;
 
-    /*! Record that the given vertex was lifted: */
-    virtual void lifted(verti vertex) = 0;
+  /*! Record that the given vertex was lifted: */
+  virtual void lifted(verti vertex) = 0;
 
-    /*! Select the next vertex to lift. This method is called repeatedly by the
-        SPM solver until it returns NO_VERTEX to indicate the solution is
-        complete.
+  /*! Select the next vertex to lift. This method is called repeatedly by the
+      SPM solver until it returns NO_VERTEX to indicate the solution is
+      complete.
 
-        \see lifted(verti vertex)
-    */
-    virtual verti next() = 0;
+      \see lifted(verti vertex)
+  */
+  virtual verti next() = 0;
 };
 
 
@@ -67,12 +67,12 @@ public:
 class LiftingStrategy2
 {
 public:
-    virtual ~LiftingStrategy2() { }
+  virtual ~LiftingStrategy2() = default;
 
-    // TODO: document each separately like LiftingStrategy above
-    virtual void push(verti vertex) = 0;
-    virtual void bump(verti vertex) = 0;
-    virtual verti pop() = 0;
+  // TODO: document each separately like LiftingStrategy above
+  virtual void push(verti vertex) = 0;
+  virtual void bump(verti vertex) = 0;
+  virtual verti pop() = 0;
 };
 
 
@@ -101,7 +101,9 @@ public:
                                      const SmallProgressMeasures &spm ) = 0;
 
     virtual LiftingStrategy2 *create2( const ParityGame & /*game*/,
-                                       const SmallProgressMeasures &/*spm*/ ) { return 0; }
+                                       const SmallProgressMeasures &/*spm*/ ) {
+      return nullptr;
+    }
 };
 
 

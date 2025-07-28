@@ -113,8 +113,8 @@ public:
   vector& operator=(vector&& x) = default;
 
   /// \brief Standard destructor.
-  ~vector() {}
-  
+  ~vector() = default;
+
   void shrink_to_fit()
   {
     if constexpr (ThreadSafe) {

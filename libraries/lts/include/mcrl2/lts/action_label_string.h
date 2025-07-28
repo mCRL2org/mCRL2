@@ -37,8 +37,7 @@ class action_label_string: public std::string
 
     /* \brief Default constructor. The label will contain the default string.
      */
-    action_label_string()
-    {}
+    action_label_string() = default;
 
     /** \brief Copy constructor. */
     action_label_string(const action_label_string& )=default;

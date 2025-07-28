@@ -128,8 +128,7 @@ struct bqnf_visitor
   }
 
   /// \brief Destructor.
-  virtual ~bqnf_visitor()
-  { }
+  virtual ~bqnf_visitor() = default;
 
   /// \brief Constructor.
   bqnf_visitor():

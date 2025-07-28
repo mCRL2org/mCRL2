@@ -80,8 +80,7 @@ class process_specification
 
   public:
     /// \brief Constructor.
-    process_specification()
-    {}
+    process_specification() = default;
 
     /// \brief Constructor.
     /// \param t A term containing an aterm representation of a process specification.

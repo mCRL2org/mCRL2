@@ -109,7 +109,7 @@ public:
     using iterator_category = std::forward_iterator_tag;
 
     /// Default constructor.
-    key_iterator() {}
+    key_iterator() = default;
 
     /// \brief Implicit conversion to const_iterator.
     operator key_iterator<true>() const

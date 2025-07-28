@@ -24,8 +24,7 @@ class lambda: public abstraction
 {
   public:
     /// Constructor.
-    lambda()
-    {}
+    lambda() = default;
 
     /// Constructor.
     ///

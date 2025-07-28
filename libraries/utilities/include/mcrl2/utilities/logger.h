@@ -101,12 +101,10 @@ class output_policy
 {
   public:
     /// \brief Constructor.
-    output_policy()
-    {}
+    output_policy() = default;
 
     /// \brief Destructor.
-    virtual ~output_policy()
-    {}
+    virtual ~output_policy() = default;
 
     /// \brief Output message.
     /// \param[in] msg Message that is written to output.
@@ -326,12 +324,10 @@ class file_output: public output_policy
     }
 
   public:
-    file_output()
-    {}
+    file_output() = default;
 
-    virtual ~file_output()
-    {}
- 
+    virtual ~file_output() = default;
+
     /// \param[in] stream A file handle
     static
     void set_stream(FILE* stream)

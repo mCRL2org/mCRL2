@@ -142,7 +142,7 @@ public:
   using iterator = slot_iterator<false>;
   using const_iterator = slot_iterator<true>;
 
-  free_list() {}
+  free_list() = default;
 
   /// \returns An iterator over the keys of this bucket and successor buckets.
   iterator begin() { return iterator(head().next()); }

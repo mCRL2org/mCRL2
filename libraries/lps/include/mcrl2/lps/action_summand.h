@@ -33,8 +33,7 @@ class action_summand: public summand_base
 
   public:
     /// \brief Constructor.
-    action_summand()
-    {}
+    action_summand() = default;
 
     /// \brief Constructor.
     action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& action, const data::assignment_list& assignments)

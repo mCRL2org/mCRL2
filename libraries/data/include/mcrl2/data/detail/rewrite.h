@@ -65,9 +65,7 @@ class Rewriter
     }
 
     /** \brief Destructor. */
-    virtual ~Rewriter()
-    {
-    }
+    virtual ~Rewriter() = default;
 
     /** \brief The fresh name generator of the rewriter */
     data::enumerator_identifier_generator& identifier_generator()

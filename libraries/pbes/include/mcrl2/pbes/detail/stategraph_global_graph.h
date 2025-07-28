@@ -256,8 +256,7 @@ struct stategraph_global_graph
     }
   }
 
-  stategraph_global_graph()
-  {}
+  stategraph_global_graph() = default;
 
   stategraph_global_graph(const stategraph_global_graph& other)
     : m_control_vertices(other.m_control_vertices)

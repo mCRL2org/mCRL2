@@ -201,9 +201,7 @@ RewriterJitty::RewriterJitty(
   rebuild_strategy(data_spec, equation_selector);
 }
 
-RewriterJitty::~RewriterJitty()
-{
-}
+RewriterJitty::~RewriterJitty() = default;
 
 // Find the variables that occur in the lhs and the rhs of the assignments;
 //

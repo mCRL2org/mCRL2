@@ -81,8 +81,7 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 
     /** \brief Creates an empty LTS.
      */
-    probabilistic_lts()
-    {}
+    probabilistic_lts() = default;
 
     /** \brief Standard copy constructor. 
      * \param[in] other The LTS to copy. */

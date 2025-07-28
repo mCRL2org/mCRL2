@@ -360,7 +360,7 @@ class pbesreach_algorithm
       mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
     }
 
-    virtual ~pbesreach_algorithm() {}
+    virtual ~pbesreach_algorithm() = default;
 
     ldd initial_state()
     {

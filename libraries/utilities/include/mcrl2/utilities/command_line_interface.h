@@ -224,9 +224,7 @@ class interface_description
         virtual bool has_default() const = 0;
 
         /// Destructor
-        virtual ~basic_argument()
-        {
-        }
+        virtual ~basic_argument() = default;
     };
 
     /// Argument to an option
@@ -473,9 +471,7 @@ class interface_description
     }
 
     /// \brief Internal use only
-    inline interface_description()
-    {
-    }
+    inline interface_description() = default;
 
   public:
 

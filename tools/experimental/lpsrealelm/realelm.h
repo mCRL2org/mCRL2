@@ -58,14 +58,7 @@ class real_representing_variable
       m_comparison_operator=other.m_comparison_operator;
     }
 
-    real_representing_variable& operator =(const real_representing_variable& other)
-    {
-      m_variable=other.m_variable;
-      m_lowerbound=other.m_lowerbound;
-      m_upperbound=other.m_upperbound;
-      m_comparison_operator=other.m_comparison_operator;
-      return *this;
-    }
+    real_representing_variable& operator=(const real_representing_variable& other) = default;
 
     const mcrl2::data::variable& get_variable() const
     {
@@ -163,9 +156,7 @@ class summand_information
       // residual_inequalities=s.residual_inequalities;
     }
 
-    ~summand_information()
-    {
-    }
+    ~summand_information() = default;
 
     const mcrl2::lps::summand_base& get_summand() const
     {

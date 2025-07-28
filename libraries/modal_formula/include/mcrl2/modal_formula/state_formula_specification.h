@@ -30,8 +30,7 @@ class state_formula_specification
 
   public:
     /// \brief Constructor.
-    state_formula_specification()
-    {}
+    state_formula_specification() = default;
 
     /// \brief Constructor of a state formula specification.
     state_formula_specification(const state_formula& formula, const data::data_specification& data = data::data_specification(), const process::action_label_list& action_labels = {})

@@ -31,8 +31,7 @@ class deadlock_summand: public summand_base
   public:
     /// \brief Constructor.
     // TODO: check if the default constructor results in a deadlock summand
-    deadlock_summand()
-    {}
+    deadlock_summand() = default;
 
     /// \brief Constructor.
     deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& delta)

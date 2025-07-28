@@ -54,7 +54,7 @@ public:
     : runtime_error(format(name, message))
   {}
 
-  virtual ~command_line_error() throw() {}
+  virtual ~command_line_error() throw() = default;
 };
 
 } // namespace mcrl2

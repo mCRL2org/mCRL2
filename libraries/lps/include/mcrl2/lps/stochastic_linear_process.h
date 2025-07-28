@@ -52,7 +52,7 @@ class stochastic_linear_process: public linear_process_base<stochastic_action_su
 
 public:
   /// \brief Constructor.
-  stochastic_linear_process() {}
+  stochastic_linear_process() = default;
 
   /// \brief Constructor.
   stochastic_linear_process(const atermpp::aterm& t, bool stochastic_distributions_allowed = true)

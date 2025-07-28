@@ -53,12 +53,8 @@ class term_appl_iterator
     /// \brief The assignment operator.
     /// \param other The term to be assigned.
     /// \return A reference to the assigned iterator.
-    term_appl_iterator& operator=(const term_appl_iterator& other)
-    {
-      m_term=other.m_term;
-      return *this;
-    }
-    
+    term_appl_iterator& operator=(const term_appl_iterator& other) = default;
+
     /// \brief The dereference operator.
     /// \return The dereferenced term.
     const Term& operator*() const

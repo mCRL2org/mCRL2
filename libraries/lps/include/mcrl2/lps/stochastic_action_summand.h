@@ -25,8 +25,7 @@ class stochastic_action_summand: public action_summand
 
   public:
     /// \brief Constructor.
-    stochastic_action_summand()
-    {}
+    stochastic_action_summand() = default;
 
     /// \brief Constructor.
     stochastic_action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& action,

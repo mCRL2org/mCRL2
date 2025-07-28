@@ -236,9 +236,7 @@ class big_natural_number
 
   public:
     // Default constructor. The value is 0 by default.
-    explicit big_natural_number()
-    {
-    }
+    explicit big_natural_number() = default;
 
     // Constructor based on a std::size_t. The value of the number will be n.
     explicit big_natural_number(const std::size_t n)

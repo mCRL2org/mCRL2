@@ -24,8 +24,7 @@ struct alphabet_node
 {
   multi_action_name_set alphabet;
 
-  alphabet_node()
-  {}
+  alphabet_node() = default;
 
   alphabet_node(const multi_action_name_set& alphabet_)
     : alphabet(alphabet_)

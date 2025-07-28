@@ -56,8 +56,7 @@ struct explorer_options
   std::string confluence_action = "ctau";
 
   // Constructor.
-  explorer_options()
-  {}
+  explorer_options() = default;
 
   // Constructor.
   explorer_options(data::rewrite_strategy rewr_strat)

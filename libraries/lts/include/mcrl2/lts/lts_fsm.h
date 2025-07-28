@@ -37,8 +37,7 @@ class state_label_fsm:  public std::vector < std::size_t >
   public:
     /** \brief Default constructor. The label becomes an empty vector.
     */
-    state_label_fsm()
-    {}
+    state_label_fsm() = default;
 
     /** \brief Copy constructor. */
     state_label_fsm(const state_label_fsm& )=default;

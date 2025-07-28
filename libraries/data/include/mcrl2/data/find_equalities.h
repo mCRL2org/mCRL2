@@ -140,8 +140,7 @@ struct find_equalities_expression
   equality_set_with_top inequalities;
 
   /// @brief Creates (empty,empty)
-  find_equalities_expression()
-  {}
+  find_equalities_expression() = default;
 
   /// @brief Creates ({lhs == rhs}, empty) if is_equality is true, and (empty, {lhs == rhs}) otherwise
   /// @param is_equality Indicates whether to construct an equality or inequality

@@ -110,8 +110,7 @@ class tarjan_scc_algorithm
     std::vector<component> result;
 
   public:
-    tarjan_scc_algorithm()
-    {}
+    tarjan_scc_algorithm() = default;
 
     // The graph contains vertices [0, ... N).
     // The edges are pairs of vertices.

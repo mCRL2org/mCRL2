@@ -46,7 +46,7 @@ protected:
   typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type m_counter_example_index;
 
 public:
-  state_states_counter_example_index_triple() {}
+  state_states_counter_example_index_triple() = default;
 
   /// \brief Constructor.
   state_states_counter_example_index_triple(const state_type state,

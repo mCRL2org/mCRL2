@@ -40,12 +40,10 @@ class normal_form_cache
   private:
     std::set<data_expression> m_lookup;
   public:
-    normal_form_cache()
-    { 
-    }
+    normal_form_cache() = default;
 
-  // Caches cannot be copied or moved. The addresses in the cache must remain available the lifetime of 
-  // all rewriters using this cache. 
+    // Caches cannot be copied or moved. The addresses in the cache must remain available the lifetime of
+    // all rewriters using this cache. 
     normal_form_cache(const normal_form_cache& ) = delete;
     normal_form_cache(normal_form_cache&& ) = delete;
     normal_form_cache& operator=(const normal_form_cache& ) = delete;
@@ -73,9 +71,7 @@ class normal_form_cache
     return m_lookup.empty();
   }
 
-  ~normal_form_cache()
-  {
-  }
+  ~normal_form_cache() = default;
 };
 
 class RewriterCompilingJitty: public Rewriter
@@ -151,8 +147,7 @@ class RewriterCompilingJitty: public Rewriter
       {}
 
       // Default constructor
-      variable_index_where_stack_pair()
-      {}
+      variable_index_where_stack_pair() = default;
     };
 
     std::vector<variable> rewriter_bound_variables;

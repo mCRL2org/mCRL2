@@ -34,8 +34,7 @@ public:
   using size_type = typename super::size_type;
 
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
-  indexed_set()
-  {}
+  indexed_set() = default;
 
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
   indexed_set(std::size_t number_of_threads)

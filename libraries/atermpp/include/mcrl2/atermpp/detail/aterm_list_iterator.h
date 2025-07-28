@@ -66,11 +66,7 @@ class term_list_iterator
 
     /// \brief Assignment
     /// \param other A sequence of terms
-    term_list_iterator& operator=(const term_list_iterator& other)
-    { 
-      m_list=other.m_list;
-      return *this;
-    } 
+    term_list_iterator& operator=(const term_list_iterator& other) = default;
 
     /// \brief Dereference operator on an iterator
     const Term& operator*() const

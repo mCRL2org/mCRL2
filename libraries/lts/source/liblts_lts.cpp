@@ -13,6 +13,7 @@
 
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
 
+#include <algorithm>
 #include <fstream>
 #include <optional>
 
@@ -213,7 +214,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
       // Add the transition and update the number of states.
       lts.add_transition(transition(from.value(), index, target_index));
-      number_of_states = std::max(number_of_states, std::max(from.value() + 1, to.value() + 1));
+      number_of_states = std::max({number_of_states, from.value() + 1, to.value() + 1});
 
       if (inserted)
       {
@@ -248,7 +249,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
         lts.add_transition(transition(from.value(), index, to_index));
 
         // Update the number of states
-        number_of_states = std::max(number_of_states, std::max(from.value() + 1, to_index + 1));
+        number_of_states = std::max({number_of_states, from.value() + 1, to_index + 1});
 
         if (inserted)
         {

@@ -64,8 +64,8 @@ protected:
     bool check();
 
 private:
-    MaxMeasureLiftingStrategy2(const MaxMeasureLiftingStrategy2 &);
-    MaxMeasureLiftingStrategy2 &operator=(const MaxMeasureLiftingStrategy2 &);
+  MaxMeasureLiftingStrategy2(const MaxMeasureLiftingStrategy2&) = delete;
+  MaxMeasureLiftingStrategy2& operator=(const MaxMeasureLiftingStrategy2&) = delete;
 
 private:
     const SmallProgressMeasures &spm_;  //!< SPM instance being solved

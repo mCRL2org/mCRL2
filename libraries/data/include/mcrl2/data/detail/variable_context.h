@@ -45,8 +45,7 @@ class variable_context
     void typecheck_variable(const data_type_checker& typechecker, const variable& v) const;
 
   public:
-    variable_context()
-    { }
+    variable_context() = default;
 
     explicit variable_context(const std::map<core::identifier_string, sort_expression>& variables)
       : m_variables(variables)

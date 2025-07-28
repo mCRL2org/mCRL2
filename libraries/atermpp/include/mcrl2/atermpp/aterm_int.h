@@ -26,8 +26,7 @@ class aterm_int : public aterm
 {
 public:
   /// \brief Default constructor.
-  aterm_int() noexcept
-  {}
+  aterm_int() noexcept = default;
 
   /// \brief Constructs an integer term from a value.
   /// \param value The value of the new integer.
