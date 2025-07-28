@@ -102,9 +102,9 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator
 template <typename T, typename Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
-                       IdentifierGenerator& id_generator,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                       IdentifierGenerator& id_generator
                       )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<pres_system::data_expression_builder, pres_system::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
 }
@@ -121,9 +121,9 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 template <typename T, typename Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
-                    IdentifierGenerator& id_generator,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                    IdentifierGenerator& id_generator
                    )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<pres_system::data_expression_builder, pres_system::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);

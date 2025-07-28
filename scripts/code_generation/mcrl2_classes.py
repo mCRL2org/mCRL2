@@ -995,10 +995,10 @@ inline void make_<CLASSNAME>(atermpp::aterm& t, const ARGUMENTS&... args)
     # Returns typedefs for term lists and term vectors.
     def container_typedefs(self):
         text = r'''/// \\brief list of <CLASSNAME>s
-typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
+using <CLASSNAME>_list = atermpp::term_list<<CLASSNAME>>;
 
 /// \\brief vector of <CLASSNAME>s
-typedef std::vector<<CLASSNAME>>    <CLASSNAME>_vector;'''
+using <CLASSNAME>_vector = std::vector<<CLASSNAME>>;'''
         text = re.sub('<CLASSNAME>', self.classname(), text)
         return text
 
