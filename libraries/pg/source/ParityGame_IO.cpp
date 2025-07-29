@@ -56,7 +56,7 @@ void ParityGame::read_pgsolver( std::istream &is,
     }
 
     // Invalid vertex (used to mark uninitialized vertices)
-    ParityGameVertex invalid = { PLAYER_EVEN, (priority_t)-1 };
+    ParityGameVertex invalid = {.player = PLAYER_EVEN, .priority = (priority_t)-1};
 
     // Read vertex specs
     while (is)
