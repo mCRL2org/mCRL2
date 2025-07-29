@@ -983,7 +983,7 @@ struct absinthe_algorithm
     mCRL2log(log::debug) << "--- abstraction mapping ---\n" << abstraction_mapping_text << std::endl;
     mCRL2log(log::debug) << "--- pbes sorts ---\n" << pbes_sorts_text << std::endl;
 
-    if (abstraction_mapping_text.find("absmap") != 0)
+    if (!abstraction_mapping_text.starts_with("absmap"))
     {
       throw mcrl2::runtime_error("the abstraction mapping may not be empty!");
     }
