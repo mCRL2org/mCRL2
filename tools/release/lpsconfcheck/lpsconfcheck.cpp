@@ -50,41 +50,41 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     /// \brief The number of the summand that is checked for confluence.
     /// \brief If this number is 0, all summands are checked.
-    std::size_t m_summand_number;
+    std::size_t m_summand_number = 0;
 
     /// \brief The flag indicating if the invariance of resulting expressions should be checked in case a confluence
     /// \brief condition is neither a tautology nor a contradiction.
-    bool m_generate_invariants;
+    bool m_generate_invariants = false;
 
     /// \brief The flag indicating whether or not the invariance of the formula as found in the file
     /// \brief m_invariant_filename is checked.
-    bool m_no_check;
+    bool m_no_check = false;
 
     /// \brief The flag indicating whether or not the confluence of a tau-summand regarding all other summands is checked.
-    bool m_check_all;
+    bool m_check_all = false;
 
     /// \brief Do not rewrite summands with sum operators.
-    bool m_no_sums;
+    bool m_no_sums = false;
 
     /// \brief Confluence types for which the tool should check.
     std::string m_conditions;
 
     /// \brief The flag indicating whether or not counter examples are printed each time a condition is encountered
     /// \brief that is neither a contradiction nor a tautology.
-    bool m_counter_example;
+    bool m_counter_example = false;
 
     /// \brief The prefix of the files in dot format that are written each time a condition is encountered that is neither
     /// \brief a contradiction nor a tautology. If the string is empty, no files are written.
     std::string m_dot_file_name;
 
     /// \brief The maximal number of seconds spent on proving a single confluence condition.
-    int m_time_limit;
+    int m_time_limit = 0;
 
     /// \brief The flag indicating whether or not a path eliminator is used.
-    bool m_path_eliminator;
+    bool m_path_eliminator = false;
 
     /// \brief The flag indicating whether or not induction should be applied.
-    bool m_apply_induction;
+    bool m_apply_induction = false;
 
     /// \brief The invariant provided as input.
     /// \brief If no invariant was provided, the constant true is used as invariant.
@@ -184,25 +184,19 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
   public:
     /// \brief Constructor setting all flags to their default values.
-    lpsconfcheck_tool() : super(
-        "lpsconfcheck",
-        "Luc Engelen",
-        "mark confluent tau-summands of an LPS",
-        "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them by "
-        "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present "
-        "stdin is used. If OUTFILE is not present, stdout is used."),
-      m_summand_number(0),
-      m_generate_invariants(false),
-      m_no_check(false),
-      m_check_all(false),
-      m_no_sums(false),
-      m_conditions("c"),
-      m_counter_example(false),
-      m_dot_file_name(""),
-      m_time_limit(0),
-      m_path_eliminator(false),
-      m_apply_induction(false),
-      m_invariant(mcrl2::data::sort_bool::true_())
+    lpsconfcheck_tool()
+        : super("lpsconfcheck",
+              "Luc Engelen",
+              "mark confluent tau-summands of an LPS",
+              "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them by "
+              "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present "
+              "stdin is used. If OUTFILE is not present, stdout is used."),
+
+          m_conditions("c"),
+
+          m_dot_file_name(""),
+
+          m_invariant(mcrl2::data::sort_bool::true_())
     {}
 
     bool run() override

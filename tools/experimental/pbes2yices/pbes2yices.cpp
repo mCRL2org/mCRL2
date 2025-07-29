@@ -68,7 +68,7 @@ class pbes2yices_tool: public pbes_input_tool<input_output_tool>
 {
   protected:
     // Tool options.
-    unsigned int opt_levels; // Number of unrolling levels
+    unsigned int opt_levels = 10; // Number of unrolling levels
     bool opt_hasgoal;
     goal_t opt_goal;
 
@@ -82,7 +82,7 @@ class pbes2yices_tool: public pbes_input_tool<input_output_tool>
         "Generate a BES from a PBES and solve it. ",
         "Solves (P)BES from INFILE. "
         "If INFILE is not present, stdin is used. "),
-      opt_levels(10)
+
     {}
 
   protected:

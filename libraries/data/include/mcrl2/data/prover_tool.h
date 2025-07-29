@@ -26,7 +26,7 @@ class prover_tool: public Tool
     using smt_solver_type = mcrl2::data::detail::smt_solver_type;
 
     /// The data rewriter strategy
-    smt_solver_type m_solver_type;
+    smt_solver_type m_solver_type = mcrl2::data::detail::solver_type_cvc;
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
@@ -65,7 +65,7 @@ class prover_tool: public Tool
                 std::string known_issues = ""
                )
       : Tool(name, author, what_is, tool_description, known_issues),
-        m_solver_type(mcrl2::data::detail::solver_type_cvc)
+
     {}
 
     /// \brief Returns the rewrite strategy

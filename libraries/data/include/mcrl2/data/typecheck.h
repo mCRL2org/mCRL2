@@ -23,7 +23,7 @@ namespace mcrl2::data
 class data_type_checker: public sort_type_checker
 {
   protected:
-    mutable bool was_warning_upcasting; // This variable is used to limit the number of upcasting warnings.
+    mutable bool was_warning_upcasting = false; // This variable is used to limit the number of upcasting warnings.
 
     std::map<core::identifier_string,sort_expression_list> system_constants;   //name -> Set(sort expression)
     std::map<core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)

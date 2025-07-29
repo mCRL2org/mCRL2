@@ -15,11 +15,14 @@ static const unsigned initial_credit  = 2;
 /*! Credit increase when a vertex on the focus list is successfully lifted. */
 static const unsigned credit_increase = 2;
 
-
-FocusListLiftingStrategy::FocusListLiftingStrategy( const ParityGame &game,
-    bool alternate, verti max_size, std::size_t max_lifts )
-    : LiftingStrategy(), V_(game.graph().V()), max_lift_attempts_(max_lifts),
-      phase_(1), num_lift_attempts_(0), lls_(game, alternate)
+FocusListLiftingStrategy::FocusListLiftingStrategy(const ParityGame& game,
+    bool alternate,
+    verti max_size,
+    std::size_t max_lifts)
+    : LiftingStrategy(),
+      V_(game.graph().V()),
+      max_lift_attempts_(max_lifts),
+      lls_(game, alternate)
 {
     focus_list_.reserve(max_size);
 }

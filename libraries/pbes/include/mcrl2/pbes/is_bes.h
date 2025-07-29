@@ -27,10 +27,10 @@ struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result = true;
 
   is_bes_traverser()
-    : result(true)
+    :
   {}
 
   void enter(const forall& /* x */)

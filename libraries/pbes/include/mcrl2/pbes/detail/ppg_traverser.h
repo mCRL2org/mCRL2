@@ -57,11 +57,11 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     }
   }
 
-  bool result;
+  bool result = true;
   std::stack<expression_mode> mode_stack;
 
   ppg_traverser()
-    : result(true)
+    :
   {}
 
   void enter(const not_& x)

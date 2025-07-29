@@ -24,14 +24,14 @@ struct find_linear_inequality_traverser: public Traverser<find_linear_inequality
 
   OutputIterator out;
   std::set< variable > real_free_vars;
-  bool search_free_var;
-  bool found_free_var;
+  bool search_free_var = false;
+  bool found_free_var = false;
 
   find_linear_inequality_traverser(OutputIterator out_, std::set< variable > real_free_vars_)
     : out(out_)
     , real_free_vars(real_free_vars_)
-    , search_free_var(false)
-    , found_free_var(false)
+    ,
+
   {}
 
   void apply(const data::variable& v)

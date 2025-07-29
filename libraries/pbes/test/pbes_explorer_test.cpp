@@ -131,10 +131,10 @@ struct pbes_state_cb
 {
     ltsmin::test::explorer* explorer;
     std::vector<std::vector<int> > successors;
-    std::size_t count;
+    std::size_t count = 0;
 
     pbes_state_cb (ltsmin::test::explorer* explorer_)
-        : explorer(explorer_), count(0)
+        : explorer(explorer_),
     {}
 
     void operator()(int* const& next_state,

@@ -314,15 +314,15 @@ private:
     ParityGame &operator=(const ParityGame &game);
 
 private:
-    int d_;                 /*!< priority limit (max. priority + 1) */
-    StaticGraph graph_;     /*!< game graph */
+  int d_ = 0;         /*!< priority limit (max. priority + 1) */
+  StaticGraph graph_; /*!< game graph */
 
-    /*! Assignment of players and priorities to vertices (size graph_.V()) */
-    ParityGameVertex *vertex_;
+  /*! Assignment of players and priorities to vertices (size graph_.V()) */
+  ParityGameVertex* vertex_ = nullptr;
 
-    /*! Cardinality counts for priorities.
-        cardinality_[p] is equal to the number of vertices with priority p. */
-    verti *cardinality_;
+  /*! Cardinality counts for priorities.
+      cardinality_[p] is equal to the number of vertices with priority p. */
+  verti* cardinality_ = nullptr;
 };
 
 inline void swap(ParityGame &a, ParityGame &b)

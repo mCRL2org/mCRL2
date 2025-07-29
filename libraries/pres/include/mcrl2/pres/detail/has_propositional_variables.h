@@ -27,10 +27,10 @@ struct has_propositional_variables_traverser: public pres_expression_traverser<h
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result = false;
 
   has_propositional_variables_traverser()
-    : result(false)
+    :
   {}
 
   void enter(const propositional_variable_instantiation&)

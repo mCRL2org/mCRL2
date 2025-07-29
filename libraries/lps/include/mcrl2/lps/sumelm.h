@@ -34,7 +34,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
 
   protected:
     /// Stores the number of summation variables that has been removed.
-    std::size_t m_removed;
+    std::size_t m_removed = 0;
 
     /// Whether to decluster disjunctive conditions first.
     bool m_decluster;
@@ -46,9 +46,9 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
     /// \param decluster Control whether disjunctive conditions need to be split
     ///        into multiple summands.
     sumelm_algorithm(Specification& spec, bool decluster = false)
-      : lps::detail::lps_algorithm<Specification>(spec),
-        m_removed(0),
-        m_decluster(decluster)
+        : lps::detail::lps_algorithm<Specification>(spec),
+
+          m_decluster(decluster)
     {}
 
     /// \brief Apply the sum elimination lemma to all summands in the

@@ -528,7 +528,7 @@ class part_state_t
     /// \brief total number of blocks with unique sequence number allocated
     /// \details Upon starting the stuttering equivalence algorithm, the number
     /// of blocks must be zero.
-    state_type nr_of_blocks;
+    state_type nr_of_blocks = 0;
 
     /// \brief constructor
     /// \details The constructor allocates memory and makes the permutation and
@@ -539,7 +539,7 @@ class part_state_t
     part_state_t(state_type const num_states)
       : permutation(num_states),
         state_info(num_states),
-        nr_of_blocks(0)
+
     {                                                                           assert(0 < num_states);
         permutation_entry* perm_iter(permutation.data());
                                                                                 #ifdef USE_POOL_ALLOCATOR
@@ -1110,8 +1110,7 @@ class block_bunch_slice_t
     /// \brief pointer to the first marked transition in the block_bunch array
     /// \details If this pointer is nullptr, then the block_bunch_slice is
     /// stable.
-    block_bunch_entry* marked_begin;
-
+    block_bunch_entry* marked_begin = nullptr;
 
     /// \brief returns true iff the block_bunch-slice is registered as stable
     bool is_stable() const  {  return nullptr == marked_begin;  }
@@ -1136,7 +1135,7 @@ class block_bunch_slice_t
                             bunch_t* const new_bunch, bool const new_is_stable)
       : end(new_end),
         bunch(new_bunch),
-        marked_begin(nullptr)
+
     {
         if (!new_is_stable)  make_unstable();
     }
@@ -1348,21 +1347,21 @@ class part_trans_t
     simple_list<block_bunch_slice_t> splitter_list;
    private:
     /// \brief pointer to first non-trivial bunch
-    bunch_t* first_nontrivial;
+     bunch_t* first_nontrivial = nullptr;
 
-  public:
+   public:
     #ifdef USE_POOL_ALLOCATOR
     static_assert(std::is_trivially_destructible_v<bunch_t>);
 #endif
 
     /// \brief number of new bottom states found until now.
-    state_type nr_of_new_bottom_states;
+    state_type nr_of_new_bottom_states = 0;
 
     /// \brief counters to measure progress
-    trans_type nr_of_bunches;
-    trans_type nr_of_nontrivial_bunches;
-    trans_type nr_of_action_block_slices;
-    trans_type nr_of_block_bunch_slices;
+    trans_type nr_of_bunches = 0;
+    trans_type nr_of_nontrivial_bunches = 0;
+    trans_type nr_of_action_block_slices = 0;
+    trans_type nr_of_block_bunch_slices = 0;
 
     /// \brief constructor
     /// \details The constructor sets up the dummy transitions at the beginning
@@ -1382,12 +1381,7 @@ class part_trans_t
         block_bunch_inert_begin(block_bunch.data_end()),
         action_block_inert_begin(action_block.data_end()),
         splitter_list(),
-        first_nontrivial(nullptr),
-        nr_of_new_bottom_states(0),
-        nr_of_bunches(0),
-        nr_of_nontrivial_bunches(0),
-        nr_of_action_block_slices(0),
-        nr_of_block_bunch_slices(0)
+
     {
         succ.front().block_bunch = block_bunch.data();
         succ.back() .block_bunch = block_bunch.data();

@@ -180,13 +180,13 @@ class skip_function_application_to_head
 {
   protected:
     ArgumentConverter& m_f;
-    std::size_t m_current_index;
+    std::size_t m_current_index = 0;
     const bool m_skip_head;
   public:
-    skip_function_application_to_head(ArgumentConverter&f, const bool skip_head )
-     : m_f(f),
-       m_current_index(0),
-       m_skip_head(skip_head)
+    skip_function_application_to_head(ArgumentConverter& f, const bool skip_head)
+        : m_f(f),
+
+          m_skip_head(skip_head)
     {}
 
     data_expression operator()(const data_expression& d)
@@ -207,13 +207,13 @@ class skip_function_application_to_head_assignment
 {
   protected:
     ArgumentConverter& m_f;
-    std::size_t m_current_index;
+    std::size_t m_current_index = 0;
     const bool m_skip_head;
   public:
-    skip_function_application_to_head_assignment(ArgumentConverter& f, const bool skip_head )
-     : m_f(f),
-       m_current_index(0),
-       m_skip_head(skip_head)
+    skip_function_application_to_head_assignment(ArgumentConverter& f, const bool skip_head)
+        : m_f(f),
+
+          m_skip_head(skip_head)
     {}
  
     void operator()(data_expression& result, const data_expression& d)

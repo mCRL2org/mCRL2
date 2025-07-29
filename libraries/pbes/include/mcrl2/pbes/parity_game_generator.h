@@ -39,7 +39,7 @@ class parity_game_generator
 
     /// \brief Mark whether initialization has been initialized.
     /// Needed to properly cope with virtual inheritance!
-    bool m_initialized;
+    bool m_initialized = false;
 
     /// \brief The PBES that is being solved.
     pbes& m_pbes;
@@ -262,14 +262,22 @@ class parity_game_generator
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
     /// \param rewrite_strategy Strategy to use for the data rewriter
-    explicit parity_game_generator(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
-      :
-      m_initialized(false),
-      m_pbes(p),
-      datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables(), false), rewrite_strategy),
-      R(datar, p.data()),
-      m_true_false_dependencies(true_false_dependencies),
-      m_is_min_parity_game(is_min_parity)
+    explicit parity_game_generator(pbes& p,
+        bool true_false_dependencies = false,
+        bool is_min_parity = true,
+        data::rewriter::strategy rewrite_strategy = data::jitty)
+        :
+
+          m_pbes(p),
+          datar(p.data(),
+              mcrl2::data::used_data_equation_selector(p.data(),
+                  pbes_system::find_function_symbols(p),
+                  p.global_variables(),
+                  false),
+              rewrite_strategy),
+          R(datar, p.data()),
+          m_true_false_dependencies(true_false_dependencies),
+          m_is_min_parity_game(is_min_parity)
     {
       pbes_system::algorithms::instantiate_global_variables(p);
     }

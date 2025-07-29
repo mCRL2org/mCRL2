@@ -36,12 +36,12 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 
   protected:
 
-    bool            m_rewrite;
-    bool            m_sumelm;
-    bool            m_typecheck;
-    bool            m_use_renamefile;
-    std::string     m_action_rename_filename;
-    std::string     m_regex;
+    bool m_rewrite = true;
+    bool m_sumelm = true;
+    bool m_typecheck = true;
+    bool m_use_renamefile;
+    std::string m_action_rename_filename;
+    std::string m_regex;
 
     std::string synopsis() const override
     {
@@ -100,9 +100,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
         "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
       ),
-      m_rewrite(true),
-      m_sumelm(true),
-      m_typecheck(true)
+
     {}
 
     bool run() override

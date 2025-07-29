@@ -39,12 +39,11 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   using super::print_list;
   using super::print_variables;
 
-  bool m_print_summand_numbers;
+  bool m_print_summand_numbers = false;
   std::string m_process_name;
 
   printer()
-    : m_print_summand_numbers(false), 
-      m_process_name("P")
+      : m_process_name("P")
   {}
 
   bool& print_summand_numbers()

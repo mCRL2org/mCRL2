@@ -33,9 +33,9 @@ public:
 private:
     const bool alternate_;      //!< alternate direction after each pass
     const verti last_vertex_;   //!< last vertex index
-    bool dir_;                  //!< current direction of iteration
+    bool dir_ = false;          //!< current direction of iteration
     verti vertex_;              //!< next vertex to lift
-    verti failed_lifts_;        //!< number of consecutive failed lift attempts
+    verti failed_lifts_ = 0;    //!< number of consecutive failed lift attempts
 };
 
 /*! \ingroup LiftingStrategies

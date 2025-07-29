@@ -21,13 +21,13 @@ namespace mcrl2::utilities {
 class progress_meter
 {
   protected:
-    std::size_t n;
+    std::size_t n = 0;
     std::size_t N;
 
   public:
     /// \brief Constructor
     progress_meter(std::size_t N_ = 0)
-      : n(0), N(N_)
+        : N(N_)
     {}
 
     /// \brief Set the number of steps of the task
