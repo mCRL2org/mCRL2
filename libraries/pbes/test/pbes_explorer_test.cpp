@@ -134,7 +134,7 @@ struct pbes_state_cb
     std::size_t count = 0;
 
     pbes_state_cb (ltsmin::test::explorer* explorer_)
-        : explorer(explorer_),
+        : explorer(explorer_)
     {}
 
     void operator()(int* const& next_state,

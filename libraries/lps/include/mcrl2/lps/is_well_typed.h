@@ -29,10 +29,6 @@ struct lps_well_typed_checker
   // Error message are written to the output stream error.
   mutable std::ostringstream error;
 
-  lps_well_typed_checker()
-    :
-  {}
-
   /// \brief Checks if the sort of t has type real
   bool check_time(const data::data_expression& t, const std::string& type) const
   {

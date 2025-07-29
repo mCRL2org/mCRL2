@@ -30,10 +30,6 @@ struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_t
 
   bool result = true;
 
-  is_normalized_traverser()
-    :
-  {}
-
   /// \brief Visit not node
   void enter(const not_& /* x */)
   {
@@ -56,10 +52,6 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
   using super::apply;
 
   bool negated = false;
-
-  normalize_builder()
-    :
-  {}
 
   template <class T>
   void apply(T& result, const data::data_expression& x)

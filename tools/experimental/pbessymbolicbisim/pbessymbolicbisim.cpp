@@ -91,8 +91,7 @@ public:
       "Symbolically compute the solution of the given PBES",
       "Computes the solution to the given PBES using symbolic bismulation techniques. "
       "Mostly useful for PBESs of low complexity with an infinite underlying BES. "
-      "This tool is experimental. "),
-
+      "This tool is experimental. ")
   {}
 
   /// Runs the algorithm.

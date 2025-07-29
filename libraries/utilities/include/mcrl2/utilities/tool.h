@@ -149,8 +149,7 @@ class tool
         m_tool_description(tool_description),
         m_known_issues(known_issues),
         m_timing_filename(""),
-        m_timer(name),
-
+        m_timer(name)
     {}
 
     /// \brief Destructor.

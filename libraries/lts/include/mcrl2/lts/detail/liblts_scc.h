@@ -207,8 +207,7 @@ class scc_partitioner
 template < class LTS_TYPE>
 scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   :aut(l),
-    block_index_of_a_state(aut.num_states(),0),
-
+    block_index_of_a_state(aut.num_states(),0)
 {
   mCRL2log(log::debug) << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
               l.num_transitions() << " transitions" << std::endl;

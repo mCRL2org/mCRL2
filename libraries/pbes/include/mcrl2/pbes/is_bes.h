@@ -29,10 +29,6 @@ struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
 
   bool result = true;
 
-  is_bes_traverser()
-    :
-  {}
-
   void enter(const forall& /* x */)
   {
     result = false;

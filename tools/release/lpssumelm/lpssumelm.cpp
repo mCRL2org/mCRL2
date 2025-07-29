@@ -48,8 +48,7 @@ class sumelm_tool: public input_output_tool
         "remove superfluous summations from an LPS",
         "Remove superfluous summations from the linear process specification (LPS) in "
         "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
-        "If OUTFILE is not present, stdout is used."),
-
+        "If OUTFILE is not present, stdout is used.")
     {}
 
     /// Reads a specification from input_file,

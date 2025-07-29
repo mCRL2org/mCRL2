@@ -27,11 +27,7 @@ struct is_stochastic_traverser: public lps::data_expression_traverser<is_stochas
   using super::apply;
 
   bool result = false;
-
-  is_stochastic_traverser()
-    :
-  {}
-
+  
   void apply(const lps::stochastic_distribution& x)
   {
     if (x.is_defined())

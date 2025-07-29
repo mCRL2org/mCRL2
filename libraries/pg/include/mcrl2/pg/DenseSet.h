@@ -93,7 +93,7 @@ public:
     DenseSet(Key begin, Key end, const Alloc &alloc = Alloc())
         : range_begin(begin), range_end(end < begin ? begin : end),
           range_size_(range_end - range_begin), alloc_(alloc),
-          used_(alloc_.allocate(range_size_ + 1)),
+          used_(alloc_.allocate(range_size_ + 1))
     {
         for (size_type i = 0; i < range_size_; ++i) used_[i] = false;
         used_[range_size_] = true;  // marks end of data

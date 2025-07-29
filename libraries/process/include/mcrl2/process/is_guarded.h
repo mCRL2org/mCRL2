@@ -33,7 +33,7 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
   bool result = true;
 
   is_guarded_traverser(const std::vector<process_equation>& equations_, std::set<process_identifier>& W_)
-    : equations(equations_), W(W_),
+    : equations(equations_), W(W_)
   {}
 
   // P(e1, ..., en)

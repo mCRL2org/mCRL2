@@ -56,8 +56,7 @@ class resinfo_tool: public pres_input_tool<input_tool>
         "Jan Friso Groote",
         "display basic information about a RES",
         super::make_tool_description("Print basic information about the RES in INFILE.")
-      ),
-
+      )
     {}
 
     /// If RES can be loaded from file_name, then

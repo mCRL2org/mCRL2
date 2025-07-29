@@ -360,8 +360,7 @@ private:
         "Muck van Weerdenburg",
         "Command-line simulation of an LPS",
         "Simulate the LPS in INFILE via a text-based interface."
-      ),
-
+      )
     {}
 
     bool run() override

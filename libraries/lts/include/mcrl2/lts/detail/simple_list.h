@@ -139,9 +139,8 @@ namespace mcrl2::lts::detail
         my_pool()
           : first_block(new pool_block_t(nullptr)),
             begin_used_in_first_block(
-                                &first_block->data[sizeof(first_block->data)]),
-
-        {  }
+                                &first_block->data[sizeof(first_block->data)])
+        {}
 
 
         /// \brief destructor

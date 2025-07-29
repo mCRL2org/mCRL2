@@ -81,8 +81,7 @@ class pbes2yices_tool: public pbes_input_tool<input_output_tool>
         AUTHOR,
         "Generate a BES from a PBES and solve it. ",
         "Solves (P)BES from INFILE. "
-        "If INFILE is not present, stdin is used. "),
-
+        "If INFILE is not present, stdin is used. ")
     {}
 
   protected:

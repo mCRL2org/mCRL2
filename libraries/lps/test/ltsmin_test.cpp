@@ -46,8 +46,7 @@ struct state_callback_function
   std::size_t state_count = 0;
 
   explicit state_callback_function(std::size_t size)
-    : state_size(size),
-
+    : state_size(size)
   {}
 
   void operator()(state_vector const& next_state, int* const& labels, int group=-1)

@@ -102,8 +102,7 @@ class lts2lps_tool : public input_output_tool
         "translates an LTS into an LPS",
         "Translates an LTS in INFILE and writes the resulting LPS to "
         "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
-        "present, standard input is used."),
-
+        "present, standard input is used.")
     {}
 
     bool run() override
