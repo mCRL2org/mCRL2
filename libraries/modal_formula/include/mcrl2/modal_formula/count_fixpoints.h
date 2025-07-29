@@ -31,10 +31,6 @@ struct count_fixpoints_traverser: public state_formula_traverser<count_fixpoints
 
   std::size_t result = 0;
 
-  count_fixpoints_traverser()
-    :
-  {}
-
   void enter(const mu& /* x */)
   {
     result++;

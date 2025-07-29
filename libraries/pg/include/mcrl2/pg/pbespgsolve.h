@@ -137,12 +137,6 @@ struct pbespgsolve_options
   bool verify_solution = true;
   bool only_generate = false;
   data::rewriter::strategy rewrite_strategy = data::jitty;
-
-  pbespgsolve_options()
-    :
-
-  {
-  }
 };
 
 class pbespgsolve_algorithm

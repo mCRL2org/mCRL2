@@ -37,7 +37,6 @@ struct count_modal_operator_nesting_traverser: public state_formula_traverser<co
   std::vector<std::size_t> nesting_depth;
 
   count_modal_operator_nesting_traverser()
-    :
   {
     enter_scope();
   }
@@ -154,10 +153,6 @@ struct has_unscoped_modal_formula_traverser: public state_formula_traverser<has_
   {
     fixpoints.pop_back();
   }
-
-  has_unscoped_modal_formula_traverser()
-    :
-  {}
 
   void enter(const must&)
   {

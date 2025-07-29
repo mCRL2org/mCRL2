@@ -538,8 +538,7 @@ class part_state_t
     /// \param num_states number of states in the LTS
     part_state_t(state_type const num_states)
       : permutation(num_states),
-        state_info(num_states),
-
+        state_info(num_states)
     {                                                                           assert(0 < num_states);
         permutation_entry* perm_iter(permutation.data());
                                                                                 #ifdef USE_POOL_ALLOCATOR
@@ -1134,8 +1133,7 @@ class block_bunch_slice_t
     block_bunch_slice_t(block_bunch_entry* const new_end,
                             bunch_t* const new_bunch, bool const new_is_stable)
       : end(new_end),
-        bunch(new_bunch),
-
+        bunch(new_bunch)
     {
         if (!new_is_stable)  make_unstable();
     }
@@ -1380,8 +1378,7 @@ class part_trans_t
                                       ? 0 : num_transitions + num_actions - 1),
         block_bunch_inert_begin(block_bunch.data_end()),
         action_block_inert_begin(action_block.data_end()),
-        splitter_list(),
-
+        splitter_list()
     {
         succ.front().block_bunch = block_bunch.data();
         succ.back() .block_bunch = block_bunch.data();

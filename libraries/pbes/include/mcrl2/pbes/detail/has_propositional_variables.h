@@ -26,10 +26,6 @@ struct has_propositional_variables_traverser: public pbes_expression_traverser<h
 
   bool result = false;
 
-  has_propositional_variables_traverser()
-    :
-  {}
-
   void enter(const propositional_variable_instantiation&)
   {
     result = true;

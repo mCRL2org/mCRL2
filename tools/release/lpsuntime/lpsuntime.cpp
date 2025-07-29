@@ -66,8 +66,7 @@ class untime_tool: public rewriter_tool< input_output_tool >
         "remove time from an LPS",
         "Remove time from the linear process specification (LPS) in INFILE and write the "
         "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not "
-        "present, stdout is used."),
-
+        "present, stdout is used.")
     {}
 
     bool run() override

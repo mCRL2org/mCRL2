@@ -99,8 +99,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         "rename actions of an LPS",
         "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
         "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
-      ),
-
+      )
     {}
 
     bool run() override

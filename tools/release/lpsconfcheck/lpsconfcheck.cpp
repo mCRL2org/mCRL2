@@ -191,17 +191,13 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
               "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them by "
               "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present "
               "stdin is used. If OUTFILE is not present, stdout is used."),
-
           m_conditions("c"),
-
           m_dot_file_name(""),
-
           m_invariant(mcrl2::data::sort_bool::true_())
     {}
 
     bool run() override
     {
-
       mCRL2log(verbose) << "lpsconfcheck parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
