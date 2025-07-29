@@ -361,11 +361,12 @@ static std::string assert_occurs(const parsed_pbes &pbes, const translated_data_
 			
 			std::map<mcrl2::data::variable, std::string> bound_variables = variables.global_variables;
 			size_t index = 0;
-                        for (const auto& k : i->variable.parameters())
-                        {
-                          bound_variables[k] = variables.parameter_variables[from_round][from_variable_index][index++];
-                        }
-                        for (variable_vector::const_iterator k = j->quantification_domain.begin(); k != j->quantification_domain.end(); ++k) {
+			for (const mcrl2::data::variable& k: i->variable.parameters())
+			{
+				bound_variables[k] = variables.parameter_variables[from_round][from_variable_index][index++];
+			}
+
+			for (variable_vector::const_iterator k = j->quantification_domain.begin(); k != j->quantification_domain.end(); ++k) {
 				bound_variables[*k] = variables.quantification_variables[from_round][from_variable_index][j - i->clauses.begin()][k - j->quantification_domain.begin()];
 			}
 			
@@ -374,14 +375,14 @@ static std::string assert_occurs(const parsed_pbes &pbes, const translated_data_
 			}
 			
 			index = 0;
-                        for (const auto& k : j->instantiation.parameters())
-                        {
-                          std::string rhs = translate_expression(k, bound_variables, translation);
-                          std::string lhs = variables.parameter_variables[to_round][to_variable_index][index++];
-                          clauses.push_back("(= " + lhs + " " + rhs + ")");
-                        }
+			for (const mcrl2::data::data_expression& k: j->instantiation.parameters())
+			{
+				std::string rhs = translate_expression(k, bound_variables, translation);
+				std::string lhs = variables.parameter_variables[to_round][to_variable_index][index++];
+				clauses.push_back("(= " + lhs + " " + rhs + ")");
+			}
 
-                        possibilities.push_back("\n  " + join(clauses, "and"));
+			possibilities.push_back("\n  " + join(clauses, "and"));
 		}
 	}
 	
@@ -495,13 +496,11 @@ static std::string assert_distinct(const parsed_pbes &pbes, const translated_dat
 	output += "))\n";
 	
 	output += "(define make-pbes-state::(-> nat";
-        for (const auto& equation : pbes.equations)
+        for (const equation& equation: pbes.equations)
         {
-          for (data::variable_list::const_iterator j = equation.variable.parameters().begin();
-              j != equation.variable.parameters().end();
-              ++j)
+          for (const mcrl2::data::variable& j: equation.variable.parameters())
           {
-            output += " " + translation.sort_names.at(j->sort());
+            output += " " + translation.sort_names.at(j.sort());
           }
         }
         output += " pbes-state) (lambda (equation::nat";
@@ -539,14 +538,14 @@ static std::string assert_distinct(const parsed_pbes &pbes, const translated_dat
 	output += "(define pbes-state-number::(-> pbes-state nat))\n";
 	for (size_t i = 0; i < levels; ++i) {
 		output += "(assert (= " + itoa(i) + " (pbes-state-number (make-pbes-state " + unrolling.equation_number_variables[i];
-                for (const auto& j : unrolling.parameter_variables[i])
-                {
-                  for (size_t k = 0; k < j.size(); ++k)
-                  {
-                    output += " " + j[k];
-                  }
-                }
-                output += "))))\n";
+		for (const std::vector<std::basic_string<char>>& j: unrolling.parameter_variables[i])
+		{
+			for (const std::basic_string<char>& k: j)
+			{
+				output += " " + k;
+			}
+		}
+		output += "))))\n";
 	}
 	
 	return output;
