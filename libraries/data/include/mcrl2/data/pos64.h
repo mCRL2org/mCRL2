@@ -26,14 +26,18 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/machine_word.h"
 
-    /// \brief Namespace for system defined sort pos.
-namespace mcrl2::data::sort_pos
-{
+namespace mcrl2 {
 
-inline const core::identifier_string& pos_name()
-{
-  static core::identifier_string pos_name = core::identifier_string("Pos");
-  return pos_name;
+  namespace data {
+
+    /// \brief Namespace for system defined sort pos.
+    namespace sort_pos {
+
+      inline
+      const core::identifier_string& pos_name()
+      {
+        static core::identifier_string pos_name = core::identifier_string("Pos");
+        return pos_name;
       }
 
       /// \brief Constructor for sort expression Pos.
@@ -175,8 +179,7 @@ inline const core::identifier_string& pos_name()
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      using implementation_map = std::map<function_symbol,
-          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
+      using implementation_map = std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> >;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for pos.
       /// \return All system defined constructors that are to be implemented in C++ for pos.
       inline
@@ -1136,8 +1139,7 @@ inline const core::identifier_string& pos_name()
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      using implementation_map = std::map<function_symbol,
-          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
+      using implementation_map = std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> >;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for pos
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for pos
       inline
@@ -1288,6 +1290,10 @@ inline const core::identifier_string& pos_name()
         return result;
       }
 
-      } // namespace mcrl2::data::sort_pos
+    } // namespace sort_pos
+
+  } // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_POS64_H

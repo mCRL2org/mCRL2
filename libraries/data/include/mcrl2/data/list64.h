@@ -28,17 +28,21 @@
 #include "mcrl2/data/pos64.h"
 #include "mcrl2/data/nat64.h"
 
-    /// \brief Namespace for system defined sort list.
-namespace mcrl2::data::sort_list
-{
+namespace mcrl2 {
 
-/// \brief Constructor for sort expression List(S)
-/// \param s A sort expression
-/// \return Sort expression list(s)
-inline container_sort list(const sort_expression& s)
-{
-  container_sort list(list_container(), s);
-  return list;
+  namespace data {
+
+    /// \brief Namespace for system defined sort list.
+    namespace sort_list {
+
+      /// \brief Constructor for sort expression List(S)
+      /// \param s A sort expression
+      /// \return Sort expression list(s)
+      inline
+      container_sort list(const sort_expression& s)
+      {
+        container_sort list(list_container(), s);
+        return list;
       }
 
       /// \brief Recogniser for sort expression List(s)
@@ -176,8 +180,7 @@ inline container_sort list(const sort_expression& s)
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      using implementation_map = std::map<function_symbol,
-          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
+      using implementation_map = std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> >;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for list.
       /// \param s A sort expression.
       /// \return All system defined constructors that are to be implemented in C++ for list.
@@ -807,8 +810,7 @@ inline container_sort list(const sort_expression& s)
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      using implementation_map = std::map<function_symbol,
-          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
+      using implementation_map = std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> >;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for list
       /// \param s A sort expression
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for list
@@ -868,52 +870,38 @@ inline container_sort list(const sort_expression& s)
         variable vn("n",sort_nat::nat());
 
         data_equation_vector result;
-        result.emplace_back(variable_list({vd, vs}), equal_to(empty(s), cons_(s, vd, vs)), sort_bool::false_());
-        result.emplace_back(variable_list({vd, vs}), equal_to(cons_(s, vd, vs), empty(s)), sort_bool::false_());
-        result.emplace_back(variable_list({vd, ve, vs, vt}),
-            equal_to(cons_(s, vd, vs), cons_(s, ve, vt)),
-            sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt)));
-        result.emplace_back(variable_list({vd, vs}), less(empty(s), cons_(s, vd, vs)), sort_bool::true_());
-        result.emplace_back(variable_list({vd, vs}), less(cons_(s, vd, vs), empty(s)), sort_bool::false_());
-        result.emplace_back(variable_list({vd, ve, vs, vt}),
-            less(cons_(s, vd, vs), cons_(s, ve, vt)),
-            sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less(vs, vt)), less(vd, ve)));
-        result.emplace_back(variable_list({vd, vs}), less_equal(empty(s), cons_(s, vd, vs)), sort_bool::true_());
-        result.emplace_back(variable_list({vd, vs}), less_equal(cons_(s, vd, vs), empty(s)), sort_bool::false_());
-        result.emplace_back(variable_list({vd, ve, vs, vt}),
-            less_equal(cons_(s, vd, vs), cons_(s, ve, vt)),
-            sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less_equal(vs, vt)), less(vd, ve)));
-        result.emplace_back(variable_list({vd}), in(s, vd, empty(s)), sort_bool::false_());
-        result.emplace_back(variable_list({vd, ve, vs}),
-            in(s, vd, cons_(s, ve, vs)),
-            sort_bool::or_(equal_to(vd, ve), in(s, vd, vs)));
-        result.emplace_back(variable_list(), count(s, empty(s)), sort_nat::c0());
-        result.emplace_back(variable_list({vd, vs}), count(s, cons_(s, vd, vs)), sort_nat::succ_nat(count(s, vs)));
-        result.emplace_back(variable_list({vd}), snoc(s, empty(s), vd), cons_(s, vd, empty(s)));
-        result.emplace_back(variable_list({vd, ve, vs}), snoc(s, cons_(s, vd, vs), ve), cons_(s, vd, snoc(s, vs, ve)));
-        result.emplace_back(variable_list({vs}), concat(s, empty(s), vs), vs);
-        result.emplace_back(variable_list({vd, vs, vt}),
-            concat(s, cons_(s, vd, vs), vt),
-            cons_(s, vd, concat(s, vs, vt)));
-        result.emplace_back(variable_list({vs}), concat(s, vs, empty(s)), vs);
-        result.emplace_back(variable_list({vd, vn, vs}),
-            element_at(s, cons_(s, vd, vs), vn),
-            if_(equal_to(vn, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())),
-                vd,
-                element_at(s, vs, sort_nat::natpred(vn))));
-        result.emplace_back(variable_list({vd, vs}), head(s, cons_(s, vd, vs)), vd);
-        result.emplace_back(variable_list({vd, vs}), tail(s, cons_(s, vd, vs)), vs);
-        result.emplace_back(variable_list({vd}), rhead(s, cons_(s, vd, empty(s))), vd);
-        result.emplace_back(variable_list({vd, ve, vs}),
-            rhead(s, cons_(s, vd, cons_(s, ve, vs))),
-            rhead(s, cons_(s, ve, vs)));
-        result.emplace_back(variable_list({vd}), rtail(s, cons_(s, vd, empty(s))), empty(s));
-        result.emplace_back(variable_list({vd, ve, vs}),
-            rtail(s, cons_(s, vd, cons_(s, ve, vs))),
-            cons_(s, vd, rtail(s, cons_(s, ve, vs))));
+        result.push_back(data_equation(variable_list({vd, vs}), equal_to(empty(s), cons_(s, vd, vs)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, vs}), equal_to(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt))));
+        result.push_back(data_equation(variable_list({vd, vs}), less(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vd, vs}), less(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less(vs, vt)), less(vd, ve))));
+        result.push_back(data_equation(variable_list({vd, vs}), less_equal(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vd, vs}), less_equal(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less_equal(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less_equal(vs, vt)), less(vd, ve))));
+        result.push_back(data_equation(variable_list({vd}), in(s, vd, empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
+        result.push_back(data_equation(variable_list(), count(s, empty(s)), sort_nat::c0()));
+        result.push_back(data_equation(variable_list({vd, vs}), count(s, cons_(s, vd, vs)), sort_nat::succ_nat(count(s, vs))));
+        result.push_back(data_equation(variable_list({vd}), snoc(s, empty(s), vd), cons_(s, vd, empty(s))));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), snoc(s, cons_(s, vd, vs), ve), cons_(s, vd, snoc(s, vs, ve))));
+        result.push_back(data_equation(variable_list({vs}), concat(s, empty(s), vs), vs));
+        result.push_back(data_equation(variable_list({vd, vs, vt}), concat(s, cons_(s, vd, vs), vt), cons_(s, vd, concat(s, vs, vt))));
+        result.push_back(data_equation(variable_list({vs}), concat(s, vs, empty(s)), vs));
+        result.push_back(data_equation(variable_list({vd, vn, vs}), element_at(s, cons_(s, vd, vs), vn), if_(equal_to(vn, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), vd, element_at(s, vs, sort_nat::natpred(vn)))));
+        result.push_back(data_equation(variable_list({vd, vs}), head(s, cons_(s, vd, vs)), vd));
+        result.push_back(data_equation(variable_list({vd, vs}), tail(s, cons_(s, vd, vs)), vs));
+        result.push_back(data_equation(variable_list({vd}), rhead(s, cons_(s, vd, empty(s))), vd));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), rhead(s, cons_(s, vd, cons_(s, ve, vs))), rhead(s, cons_(s, ve, vs))));
+        result.push_back(data_equation(variable_list({vd}), rtail(s, cons_(s, vd, empty(s))), empty(s)));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), rtail(s, cons_(s, vd, cons_(s, ve, vs))), cons_(s, vd, rtail(s, cons_(s, ve, vs)))));
         return result;
       }
 
-      } // namespace mcrl2::data::sort_list
+    } // namespace sort_list
+
+  } // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_LIST64_H

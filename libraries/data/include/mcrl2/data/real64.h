@@ -28,14 +28,18 @@
 #include "mcrl2/data/nat64.h"
 #include "mcrl2/data/int64.h"
 
-    /// \brief Namespace for system defined sort real_.
-namespace mcrl2::data::sort_real
-{
+namespace mcrl2 {
 
-inline const core::identifier_string& real_name()
-{
-  static core::identifier_string real_name = core::identifier_string("Real");
-  return real_name;
+  namespace data {
+
+    /// \brief Namespace for system defined sort real_.
+    namespace sort_real {
+
+      inline
+      const core::identifier_string& real_name()
+      {
+        static core::identifier_string real_name = core::identifier_string("Real");
+        return real_name;
       }
 
       /// \brief Constructor for sort expression Real.
@@ -77,8 +81,7 @@ inline const core::identifier_string& real_name()
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      using implementation_map = std::map<function_symbol,
-          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
+      using implementation_map = std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> >;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for real_.
       /// \return All system defined constructors that are to be implemented in C++ for real_.
       inline
@@ -1920,8 +1923,7 @@ inline const core::identifier_string& real_name()
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      using implementation_map = std::map<function_symbol,
-          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
+      using implementation_map = std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> >;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for real_
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for real_
       inline
@@ -2017,116 +2019,47 @@ inline const core::identifier_string& real_name()
         variable vs("s",real_());
 
         data_equation_vector result;
-        result.emplace_back(variable_list({vp, vq, vx, vy}),
-            equal_to(creal(vx, vp), creal(vy, vq)),
-            equal_to(times(vx, sort_int::cint(sort_nat::pos2nat(vq))),
-                times(vy, sort_int::cint(sort_nat::pos2nat(vp)))));
-        result.emplace_back(variable_list({vp, vq, vx, vy}),
-            less(creal(vx, vp), creal(vy, vq)),
-            less(times(vx, sort_int::cint(sort_nat::pos2nat(vq))), times(vy, sort_int::cint(sort_nat::pos2nat(vp)))));
-        result.emplace_back(variable_list({vp, vq, vx, vy}),
-            less_equal(creal(vx, vp), creal(vy, vq)),
-            less_equal(times(vx, sort_int::cint(sort_nat::pos2nat(vq))),
-                times(vy, sort_int::cint(sort_nat::pos2nat(vp)))));
-        result.emplace_back(variable_list({vx}), int2real(vx), creal(vx, sort_pos::c1()));
-        result.emplace_back(variable_list({vn}), nat2real(vn), creal(sort_int::cint(vn), sort_pos::c1()));
-        result.emplace_back(variable_list({vp}),
-            pos2real(vp),
-            creal(sort_int::cint(sort_nat::pos2nat(vp)), sort_pos::c1()));
-        result.emplace_back(variable_list({vp, vx}), equal_to(vp, sort_pos::c1()), real2int(creal(vx, vp)), vx);
-        result.emplace_back(variable_list({vp, vx}),
-            equal_to(vp, sort_pos::c1()),
-            real2nat(creal(vx, vp)),
-            sort_int::int2nat(vx));
-        result.emplace_back(variable_list({vp, vx}),
-            equal_to(vp, sort_pos::c1()),
-            real2pos(creal(vx, vp)),
-            sort_int::int2pos(vx));
-        result.emplace_back(variable_list({vr, vs}), minimum(vr, vs), if_(less(vr, vs), vr, vs));
-        result.emplace_back(variable_list({vr, vs}), maximum(vr, vs), if_(less(vr, vs), vs, vr));
-        result.emplace_back(variable_list({vr}),
-            abs(vr),
-            if_(less(vr, creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr));
-        result.emplace_back(variable_list({vp, vx}), negate(creal(vx, vp)), creal(negate(vx), vp));
-        result.emplace_back(variable_list({vp, vx}),
-            succ(creal(vx, vp)),
-            creal(plus(vx, sort_int::cint(sort_nat::pos2nat(vp))), vp));
-        result.emplace_back(variable_list({vp, vx}),
-            pred(creal(vx, vp)),
-            creal(minus(vx, sort_int::cint(sort_nat::pos2nat(vp))), vp));
-        result.emplace_back(variable_list({vp, vq, vx, vy}),
-            plus(creal(vx, vp), creal(vy, vq)),
-            reduce_fraction(plus(times(vx, sort_int::cint(sort_nat::pos2nat(vq))),
-                                times(vy, sort_int::cint(sort_nat::pos2nat(vp)))),
-                sort_int::cint(sort_nat::pos2nat(times(vp, vq)))));
-        result.emplace_back(variable_list({vp, vq, vx, vy}),
-            minus(creal(vx, vp), creal(vy, vq)),
-            reduce_fraction(minus(times(vx, sort_int::cint(sort_nat::pos2nat(vq))),
-                                times(vy, sort_int::cint(sort_nat::pos2nat(vp)))),
-                sort_int::cint(sort_nat::pos2nat(times(vp, vq)))));
-        result.emplace_back(variable_list({vp, vq, vx, vy}),
-            times(creal(vx, vp), creal(vy, vq)),
-            reduce_fraction(times(vx, vy), sort_int::cint(sort_nat::pos2nat(times(vp, vq)))));
-        result.emplace_back(variable_list({vm, vp, vr}),
-            sort_nat::equals_zero(vm),
-            times(vr, creal(sort_int::cint(vm), vp)),
-            creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()));
-        result.emplace_back(variable_list({vm, vp, vr}),
-            sort_nat::equals_zero(vm),
-            times(creal(sort_int::cint(vm), vp), vr),
-            creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()));
-        result.emplace_back(variable_list({vp, vq, vx, vy}),
-            not_equal_to(vy, sort_int::cint(sort_nat::c0())),
-            divides(creal(vx, vp), creal(vy, vq)),
-            reduce_fraction(times(vx, sort_int::cint(sort_nat::pos2nat(vq))),
-                times(vy, sort_int::cint(sort_nat::pos2nat(vp)))));
-        result.emplace_back(variable_list({vp, vq}),
-            divides(vp, vq),
-            reduce_fraction(sort_int::cint(sort_nat::pos2nat(vp)), sort_int::cint(sort_nat::pos2nat(vq))));
-        result.emplace_back(variable_list({vm, vn}),
-            not_equal_to(vn, sort_nat::c0()),
-            divides(vm, vn),
-            reduce_fraction(sort_int::cint(vm), sort_int::cint(vn)));
-        result.emplace_back(variable_list({vx, vy}),
-            not_equal_to(vy, sort_int::cint(sort_nat::c0())),
-            divides(vx, vy),
-            reduce_fraction(vx, vy));
-        result.emplace_back(variable_list({vn, vp, vx}),
-            exp(creal(vx, vp), sort_int::cint(vn)),
-            reduce_fraction(exp(vx, vn), sort_int::cint(sort_nat::pos2nat(exp(vp, vn)))));
-        result.emplace_back(variable_list({vp, vq, vx}),
-            not_equal_to(vx, sort_int::cint(sort_nat::c0())),
-            exp(creal(vx, vp), sort_int::cneg(vq)),
-            reduce_fraction(sort_int::cint(sort_nat::pos2nat(exp(vp, sort_nat::pos2nat(vq)))),
-                exp(vx, sort_nat::pos2nat(vq))));
-        result.emplace_back(variable_list({vp, vx}), floor(creal(vx, vp)), sort_int::div(vx, vp));
-        result.emplace_back(variable_list({vr}), ceil(vr), negate(floor(negate(vr))));
-        result.emplace_back(variable_list({vr}),
-            round(vr),
-            floor(plus(vr,
-                creal(sort_int::cint(sort_nat::pos2nat(sort_pos::c1())), plus(sort_pos::c1(), sort_pos::c1())))));
-        result.emplace_back(variable_list({vp, vx}),
-            reduce_fraction(vx, sort_int::cneg(vp)),
-            reduce_fraction(negate(vx), sort_int::cint(sort_nat::pos2nat(vp))));
-        result.emplace_back(variable_list({vn, vx}),
-            reduce_fraction(vx, sort_int::cint(vn)),
-            reduce_fraction_where(vn,
-                sort_int::div(vx, sort_nat::nat2pos(vn)),
-                sort_int::mod(vx, sort_nat::nat2pos(vn))));
-        result.emplace_back(variable_list({vm, vn, vx}),
-            sort_nat::equals_zero(vm),
-            reduce_fraction_where(vn, vx, vm),
-            creal(vx, sort_pos::c1()));
-        result.emplace_back(variable_list({vm, vn, vx}),
-            sort_nat::not_equals_zero(vm),
-            reduce_fraction_where(vn, vx, vm),
-            reduce_fraction_helper(reduce_fraction(sort_int::cint(vn), sort_int::cint(vm)), vx));
-        result.emplace_back(variable_list({vp, vx, vy}),
-            reduce_fraction_helper(creal(vx, vp), vy),
-            creal(plus(sort_int::cint(sort_nat::pos2nat(vp)), times(vy, vx)), sort_int::int2pos(vx)));
+        result.push_back(data_equation(variable_list({vp, vq, vx, vy}), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int::cint(sort_nat::pos2nat(vq))), times(vy, sort_int::cint(sort_nat::pos2nat(vp))))));
+        result.push_back(data_equation(variable_list({vp, vq, vx, vy}), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int::cint(sort_nat::pos2nat(vq))), times(vy, sort_int::cint(sort_nat::pos2nat(vp))))));
+        result.push_back(data_equation(variable_list({vp, vq, vx, vy}), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int::cint(sort_nat::pos2nat(vq))), times(vy, sort_int::cint(sort_nat::pos2nat(vp))))));
+        result.push_back(data_equation(variable_list({vx}), int2real(vx), creal(vx, sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vn}), nat2real(vn), creal(sort_int::cint(vn), sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vp}), pos2real(vp), creal(sort_int::cint(sort_nat::pos2nat(vp)), sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vp, vx}), equal_to(vp, sort_pos::c1()), real2int(creal(vx, vp)), vx));
+        result.push_back(data_equation(variable_list({vp, vx}), equal_to(vp, sort_pos::c1()), real2nat(creal(vx, vp)), sort_int::int2nat(vx)));
+        result.push_back(data_equation(variable_list({vp, vx}), equal_to(vp, sort_pos::c1()), real2pos(creal(vx, vp)), sort_int::int2pos(vx)));
+        result.push_back(data_equation(variable_list({vr, vs}), minimum(vr, vs), if_(less(vr, vs), vr, vs)));
+        result.push_back(data_equation(variable_list({vr, vs}), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
+        result.push_back(data_equation(variable_list({vr}), abs(vr), if_(less(vr, creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
+        result.push_back(data_equation(variable_list({vp, vx}), negate(creal(vx, vp)), creal(negate(vx), vp)));
+        result.push_back(data_equation(variable_list({vp, vx}), succ(creal(vx, vp)), creal(plus(vx, sort_int::cint(sort_nat::pos2nat(vp))), vp)));
+        result.push_back(data_equation(variable_list({vp, vx}), pred(creal(vx, vp)), creal(minus(vx, sort_int::cint(sort_nat::pos2nat(vp))), vp)));
+        result.push_back(data_equation(variable_list({vp, vq, vx, vy}), plus(creal(vx, vp), creal(vy, vq)), reduce_fraction(plus(times(vx, sort_int::cint(sort_nat::pos2nat(vq))), times(vy, sort_int::cint(sort_nat::pos2nat(vp)))), sort_int::cint(sort_nat::pos2nat(times(vp, vq))))));
+        result.push_back(data_equation(variable_list({vp, vq, vx, vy}), minus(creal(vx, vp), creal(vy, vq)), reduce_fraction(minus(times(vx, sort_int::cint(sort_nat::pos2nat(vq))), times(vy, sort_int::cint(sort_nat::pos2nat(vp)))), sort_int::cint(sort_nat::pos2nat(times(vp, vq))))));
+        result.push_back(data_equation(variable_list({vp, vq, vx, vy}), times(creal(vx, vp), creal(vy, vq)), reduce_fraction(times(vx, vy), sort_int::cint(sort_nat::pos2nat(times(vp, vq))))));
+        result.push_back(data_equation(variable_list({vm, vp, vr}), sort_nat::equals_zero(vm), times(vr, creal(sort_int::cint(vm), vp)), creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vm, vp, vr}), sort_nat::equals_zero(vm), times(creal(sort_int::cint(vm), vp), vr), creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vp, vq, vx, vy}), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), reduce_fraction(times(vx, sort_int::cint(sort_nat::pos2nat(vq))), times(vy, sort_int::cint(sort_nat::pos2nat(vp))))));
+        result.push_back(data_equation(variable_list({vp, vq}), divides(vp, vq), reduce_fraction(sort_int::cint(sort_nat::pos2nat(vp)), sort_int::cint(sort_nat::pos2nat(vq)))));
+        result.push_back(data_equation(variable_list({vm, vn}), not_equal_to(vn, sort_nat::c0()), divides(vm, vn), reduce_fraction(sort_int::cint(vm), sort_int::cint(vn))));
+        result.push_back(data_equation(variable_list({vx, vy}), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(vx, vy), reduce_fraction(vx, vy)));
+        result.push_back(data_equation(variable_list({vn, vp, vx}), exp(creal(vx, vp), sort_int::cint(vn)), reduce_fraction(exp(vx, vn), sort_int::cint(sort_nat::pos2nat(exp(vp, vn))))));
+        result.push_back(data_equation(variable_list({vp, vq, vx}), not_equal_to(vx, sort_int::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int::cneg(vq)), reduce_fraction(sort_int::cint(sort_nat::pos2nat(exp(vp, sort_nat::pos2nat(vq)))), exp(vx, sort_nat::pos2nat(vq)))));
+        result.push_back(data_equation(variable_list({vp, vx}), floor(creal(vx, vp)), sort_int::div(vx, vp)));
+        result.push_back(data_equation(variable_list({vr}), ceil(vr), negate(floor(negate(vr)))));
+        result.push_back(data_equation(variable_list({vr}), round(vr), floor(plus(vr, creal(sort_int::cint(sort_nat::pos2nat(sort_pos::c1())), plus(sort_pos::c1(), sort_pos::c1()))))));
+        result.push_back(data_equation(variable_list({vp, vx}), reduce_fraction(vx, sort_int::cneg(vp)), reduce_fraction(negate(vx), sort_int::cint(sort_nat::pos2nat(vp)))));
+        result.push_back(data_equation(variable_list({vn, vx}), reduce_fraction(vx, sort_int::cint(vn)), reduce_fraction_where(vn, sort_int::div(vx, sort_nat::nat2pos(vn)), sort_int::mod(vx, sort_nat::nat2pos(vn)))));
+        result.push_back(data_equation(variable_list({vm, vn, vx}), sort_nat::equals_zero(vm), reduce_fraction_where(vn, vx, vm), creal(vx, sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vm, vn, vx}), sort_nat::not_equals_zero(vm), reduce_fraction_where(vn, vx, vm), reduce_fraction_helper(reduce_fraction(sort_int::cint(vn), sort_int::cint(vm)), vx)));
+        result.push_back(data_equation(variable_list({vp, vx, vy}), reduce_fraction_helper(creal(vx, vp), vy), creal(plus(sort_int::cint(sort_nat::pos2nat(vp)), times(vy, vx)), sort_int::int2pos(vx))));
         return result;
       }
 
-      } // namespace mcrl2::data::sort_real
+    } // namespace sort_real_
+
+  } // namespace data
+
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_REAL64_H
