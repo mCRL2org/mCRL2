@@ -27,12 +27,12 @@ struct is_iterable<T, std::void_t<decltype(std::begin(std::declval<T>())),
                   > : std::true_type {};
 
 /// \brief A typetrait that is std::true_type iff the given type has the iterator traits.
-template<typename T, typename = void>
+template<typename T>
 struct is_iterator : std::false_type {};
 
 template<typename T>
-struct is_iterator<T, typename std::enable_if<!std::is_same<typename std::iterator_traits<T>::value_type, void>::value>::type>
-    : std::true_type
+  requires (!std::is_same_v<typename std::iterator_traits<T>::value_type, void>)
+struct is_iterator<T> : std::true_type
 {};
 
 /// \brief Checks whether condition holds for all types passed as variadic template.
