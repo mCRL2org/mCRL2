@@ -39,11 +39,6 @@ struct t_lin_options
   bool balance_summands = false; // Used to balance long expressions of the shape p1 + p2 + ... + pn. By default the
                                  // parser delivers such expressions in a skewed form, causing stack overflow.
   mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::jitty;
-
-  t_lin_options()
-    :
-
-  {}
 };
 
 /// \brief Linearises a process specification

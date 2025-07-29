@@ -35,8 +35,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
               "pretty print a PBES",
               "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
-             ),
-
+             )
     {}
 
     bool run() override

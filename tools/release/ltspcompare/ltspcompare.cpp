@@ -37,8 +37,7 @@ struct t_tool_options
 
   t_tool_options()
       : name_for_first(""),
-        name_for_second(""),
-
+        name_for_second("")
   {}
 };
 

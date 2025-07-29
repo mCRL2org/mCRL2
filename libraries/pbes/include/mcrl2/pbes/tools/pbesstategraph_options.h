@@ -32,11 +32,6 @@ struct pbesstategraph_options
   bool use_alternative_gcfp_consistency = false;
   utilities::execution_timer* timer = nullptr; // if it is non-zero, it will be used to display timing information
 
-  pbesstategraph_options()
-  :
-
-  {}
-
   bool timing_enabled() const
   {
     return timer != nullptr;

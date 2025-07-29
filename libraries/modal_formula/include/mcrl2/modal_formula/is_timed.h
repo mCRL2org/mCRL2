@@ -30,10 +30,6 @@ struct is_timed_traverser: public action_label_traverser<is_timed_traverser>
 
   bool result = false;
 
-  is_timed_traverser()
-    :
-  {}
-
   void enter(const delay_timed& /* x */)
   {
     result = true;

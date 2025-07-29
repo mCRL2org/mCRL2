@@ -67,8 +67,7 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
         AUTHORS,
         "remove real numbers from an LPS",
         "Remove Real numbers from the linear process specification (LPS) in "
-        "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "),
-
+        "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. ")
     {}
 
     /// Runs the algorithm.

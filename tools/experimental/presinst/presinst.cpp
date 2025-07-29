@@ -108,8 +108,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
         "by an option). The supported formats are:\n"
         "  'pres' for the mCRL2 PRES format,\n"
         "  'res'  for the mCRL2 BES format,\n"
-      ),
-
+      )
     {}
 
     /// Runs the algorithm.

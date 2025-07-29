@@ -64,8 +64,7 @@ class prover_tool: public Tool
                 const std::string& tool_description,
                 std::string known_issues = ""
                )
-      : Tool(name, author, what_is, tool_description, known_issues),
-
+      : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
     /// \brief Returns the rewrite strategy

@@ -127,8 +127,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         "by an option). The supported formats are:\n"
         "  'pbes' for the mCRL2 PBES format,\n"
         "  'bes'  for the mCRL2 BES format,\n"
-      ),
-
+      )
     {}
 
     /// Runs the algorithm.

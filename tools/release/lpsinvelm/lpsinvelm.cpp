@@ -161,8 +161,7 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
         "violates the invariant, and writes the result to OUTFILE. "
         "If INFILE is present, stdin is used. If OUTFILE is not present, stdout is used.\n"
         "\n"
-        "The tool can also be used to simplify the conditions of the summands of the given LPS."),
-
+        "The tool can also be used to simplify the conditions of the summands of the given LPS.")
     {}
 
     bool run() override

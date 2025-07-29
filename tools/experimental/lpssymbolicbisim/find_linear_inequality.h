@@ -11,6 +11,12 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_FIND_LINEAR_INEQUALITY_H
 #define MCRL2_LPSSYMBOLICBISIM_FIND_LINEAR_INEQUALITY_H
 
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/traverser.h"
+#include "mcrl2/data/variable.h"
+
+#include <set>
+
 namespace mcrl2::data
 {
 
@@ -30,8 +36,6 @@ struct find_linear_inequality_traverser: public Traverser<find_linear_inequality
   find_linear_inequality_traverser(OutputIterator out_, std::set< variable > real_free_vars_)
     : out(out_)
     , real_free_vars(real_free_vars_)
-    ,
-
   {}
 
   void apply(const data::variable& v)

@@ -202,8 +202,7 @@ class fsm_transition
 struct fsm_builder
 {
   explicit fsm_builder(probabilistic_lts_fsm_t& fsm_)
-    : fsm(fsm_),
-
+    : fsm(fsm_)
   {}
 
   // Contains the result

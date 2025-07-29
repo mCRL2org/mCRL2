@@ -33,8 +33,7 @@ class respp_tool: public pres_input_tool<input_output_tool>
               "pretty print a RES",
               "Print the RES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
-             ),
-
+             )
     {}
 
     bool run() override

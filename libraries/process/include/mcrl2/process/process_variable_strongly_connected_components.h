@@ -50,7 +50,7 @@ class tarjan_scc_algorithm
       }
 
       vertex(std::size_t value_, std::size_t index_ = undefined(), std::size_t lowlink_ = undefined())
-        : value(value_), index(index_), lowlink(lowlink_),
+        : value(value_), index(index_), lowlink(lowlink_)
       {}
     };
 

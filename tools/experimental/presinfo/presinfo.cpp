@@ -51,8 +51,7 @@ class presinfo_tool: public pres_input_tool<input_tool>
         "Jan Friso Groote",
         "display basic information about a PRES",
         super::make_tool_description("Print basic information about the PRES in INFILE.")
-      ),
-
+      )
     {}
 
     /// If PRES can be loaded from file_name, then

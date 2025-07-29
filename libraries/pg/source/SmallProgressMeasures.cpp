@@ -44,8 +44,7 @@ SmallProgressMeasures::SmallProgressMeasures(const ParityGame& game,
       stats_(stats),
       vmap_(vmap),
       vmap_size_(vmap_size),
-      strategy_(game.graph().V(), NO_VERTEX),
-
+      strategy_(game.graph().V(), NO_VERTEX)
 {
     assert(p_ == 0 || p_ == 1);
 

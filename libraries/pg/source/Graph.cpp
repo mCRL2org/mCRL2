@@ -14,8 +14,6 @@
 #include "mcrl2/utilities/logger.h"
 
 StaticGraph::StaticGraph()
-    :
-
 {
     reset(0, 0, EDGE_NONE);
 }

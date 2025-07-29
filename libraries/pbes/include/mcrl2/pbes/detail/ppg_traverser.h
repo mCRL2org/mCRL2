@@ -60,10 +60,6 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
   bool result = true;
   std::stack<expression_mode> mode_stack;
 
-  ppg_traverser()
-    :
-  {}
-
   void enter(const not_& x)
   {
     result = result && is_simple_expression(x, false);

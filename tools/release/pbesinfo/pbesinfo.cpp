@@ -51,8 +51,7 @@ class pbesinfo_tool: public pbes_input_tool<input_tool>
         "Wieger Wesselink; Alexander van Dam",
         "display basic information about a PBES",
         super::make_tool_description("Print basic information about the PBES in INFILE.")
-      ),
-
+      )
     {}
 
     /// If PBES can be loaded from file_name, then

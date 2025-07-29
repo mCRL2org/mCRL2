@@ -28,11 +28,7 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
   using super::apply;
 
   bool result = true;
-
-  is_normalized_traverser()
-    :
-  {}
-
+  
   /// \brief Visit not node
   void enter(const not_& /* x */)
   {

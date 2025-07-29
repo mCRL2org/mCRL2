@@ -52,8 +52,7 @@ class rewrite_stack : protected atermpp::vector<data_expression>
   public:
 
     /// \brief Constructor
-    rewrite_stack() 
-      :
+    rewrite_stack()
     {
       reserve_more_space();
     }

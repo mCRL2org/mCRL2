@@ -26,10 +26,6 @@ struct is_untyped_traverser: public sort_expression_traverser<is_untyped_travers
 
   bool result = false;
 
-  is_untyped_traverser()
-    :
-  {}
-
   void apply(const data::untyped_identifier& )
   {
     result = true;

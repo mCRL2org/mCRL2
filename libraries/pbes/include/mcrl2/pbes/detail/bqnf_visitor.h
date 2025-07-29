@@ -130,11 +130,6 @@ struct bqnf_visitor
   /// \brief Destructor.
   virtual ~bqnf_visitor() = default;
 
-  /// \brief Constructor.
-  bqnf_visitor():
-
-  { }
-
   /// \brief Visits a simple expression.
   /// An expression is simple if it does not contain propositional variables.
   /// \param sigma fixpoint symbol (unused in this class)

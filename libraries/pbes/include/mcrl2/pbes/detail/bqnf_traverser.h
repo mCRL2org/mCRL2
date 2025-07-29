@@ -41,10 +41,6 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
   bool result = true;
   std::stack<expression_mode> mode_stack;
 
-  bqnf_traverser()
-    :
-  {}
-
   void enter(const pbes_system::forall& x)
   {
     expression_mode mode = mode_stack.top();

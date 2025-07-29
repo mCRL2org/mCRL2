@@ -89,7 +89,7 @@ class embedded_list
     
     // Constructor.
     embedded_list()
-      : m_first(nullptr), m_last(nullptr),
+      : m_first(nullptr), m_last(nullptr)
     {}
 
     // Copy constructor.

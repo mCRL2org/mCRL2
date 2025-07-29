@@ -99,7 +99,7 @@ public:
   using Strategy = std::vector<verti>;
 
   /*! Construct an empty parity game */
-  ParityGame();
+  ParityGame() = default;
 
   /*! Destroy a parity game */
   ~ParityGame();

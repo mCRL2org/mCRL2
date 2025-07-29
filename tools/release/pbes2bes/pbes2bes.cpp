@@ -86,9 +86,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
               "Generate a BES from a PBES. ",
               "Reads the PBES from INFILE and writes an equivalent BES to OUTFILE. "
               "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
-
-          m_maximal_todo_size(std::numeric_limits<std::size_t>::max()),
-
+          m_maximal_todo_size(std::numeric_limits<std::size_t>::max())
     {}
 
 

@@ -175,7 +175,7 @@ protected:
         "translate an mCRL2 specification to an LPS",
         "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
         "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-        "stdin is used."),
+        "stdin is used.")
     {}
 
     bool run() override

@@ -633,8 +633,7 @@ class besconvert_tool: public super
         "reduce a BES (or PBES) using (variations of) behavioural equivalences",
         "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
         "If INFILE is not "
-        "present, stdin is used. If OUTFILE is not present, stdout is used."),
-
+        "present, stdin is used. If OUTFILE is not present, stdout is used.")
     {}
 
     bool run() override

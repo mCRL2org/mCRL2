@@ -38,8 +38,7 @@ class bessolve_tool: public pbes_input_tool<input_tool>
       : super(NAME, AUTHOR,
               "solve a BES",
               "Solve the BES in INFILE. If INFILE is not present, stdin is used."
-             ),
-
+             )
     {}
 
     bool run() override

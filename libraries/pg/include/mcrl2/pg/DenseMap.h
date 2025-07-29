@@ -70,7 +70,7 @@ public:
     DenseMap(Key begin, Key end, const Alloc &alloc = Alloc())
         : range_begin(begin), range_end(end < begin ? begin : end),
           range_size_(range_end - range_begin),
-          values_(alloc),
+          values_(alloc)
     {
         values_.reserve(range_size_ + 1);
         for (Key k = range_begin; k != range_end; ++k)

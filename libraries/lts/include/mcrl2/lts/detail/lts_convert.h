@@ -371,10 +371,8 @@ class convertor<lts_lts_base, lts_dot_base>
   public:
     std::size_t m_state_count = 0;
 
-    convertor(const lts_lts_base& /* lts_base_in */, lts_dot_base& /* lts_base_out */):
-
-    {
-    }
+    convertor(const lts_lts_base& /* lts_base_in */, lts_dot_base& /* lts_base_out */)
+    {}
 };
 
 inline void lts_convert_base_class(const lts_lts_base& /* base_in */, lts_dot_base& /* base_out */) 

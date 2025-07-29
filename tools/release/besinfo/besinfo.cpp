@@ -58,8 +58,7 @@ class besinfo_tool: public pbes_input_tool<input_tool>
         "Jeroen Keiren",
         "display basic information about a BES",
         super::make_tool_description("Print basic information about the BES in INFILE.")
-      ),
-
+      )
     {}
 
     /// If BES can be loaded from file_name, then

@@ -13,12 +13,6 @@
 #include <map>
 #include <cstdlib>
 
-ParityGame::ParityGame()
-    :
-
-{
-}
-
 ParityGame::~ParityGame()
 {
     delete[] vertex_;

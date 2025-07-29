@@ -32,8 +32,7 @@ class lpspp_tool: public input_output_tool
               "pretty print an LPS",
               "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
-             ),
-
+             )
     {}
 
     bool run() override
