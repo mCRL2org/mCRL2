@@ -144,7 +144,7 @@ std::size_t function_symbol_pool::get_sufficiently_large_postfix_index(const std
   {
     const std::string& function_name = f.name();
 
-    if (function_name.compare(0, prefix.size(), prefix) == 0)   // The function name starts with the prefix
+    if (function_name.starts_with(prefix)) // The function name starts with the prefix
     {
       std::string potential_number = function_name.substr(prefix.size()); // Get the trailing string after prefix_ of function_name.
       std::size_t end_of_number;

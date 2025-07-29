@@ -51,7 +51,7 @@ std::set<action_name_multiset> compute_A(const lps::stochastic_specification& sp
     core::identifier_string_list removed_sync;
     for (const auto& name : names)
     {
-      if (static_cast<std::string>(name).find(syncname) != 0)
+      if (!static_cast<std::string>(name).starts_with(syncname))
       {
         removed_sync.push_front(name);
       }
