@@ -30,7 +30,7 @@ namespace detail {
 // stored as double's and variables are stored by their index. 
 //
 // The values of true and false are represented by the real constants -infinity and infinity.
-using internal_res_expression_type = enum
+enum internal_res_expression_type
 {
   propositional_variable,
   real_constant,
