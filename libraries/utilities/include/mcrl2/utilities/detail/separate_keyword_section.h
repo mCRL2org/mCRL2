@@ -42,7 +42,7 @@ inline std::pair<std::string, std::string> separate_keyword_section(const std::s
   std::string regex_other_keywords = boost::algorithm::join(v, "|");
 
   std::vector<std::string> specs = utilities::regex_split(text, regex_keyword);
-  if (text.find(keyword) != 0 && !specs.empty())
+  if (!text.starts_with(keyword) && !specs.empty())
   {
     out2 << specs.front() << std::endl;
     specs.erase(specs.begin());

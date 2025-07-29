@@ -36,7 +36,7 @@ std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(con
     for (const process::action& action : label.actions())
     {
       const std::string& name = action.label().name();
-      if (action == tag || name.find(syncname) == 0)
+      if (action == tag || name.starts_with(syncname))
       {
         assert(first == process::action()); // Can only contain one tag or sync.
         first = action;
