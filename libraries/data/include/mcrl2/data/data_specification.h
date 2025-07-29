@@ -55,12 +55,8 @@ class data_specification: public sort_specification
     /// \brief Cached constructors by target sort
     struct target_sort_to_function_map
     {
-      bool _outdated;
+      bool _outdated = true;
       std::map<sort_expression, std::vector<function_symbol> > _mapping;
-
-      target_sort_to_function_map()
-        : _outdated(true)
-      {}
 
       /// \brief Groups functions according to their target sorts.
       /// \param [in,out] c container in which the functions are stored grouped by target sort.

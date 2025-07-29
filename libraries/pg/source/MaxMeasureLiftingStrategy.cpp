@@ -19,11 +19,9 @@ MaxMeasureLiftingStrategy2::MaxMeasureLiftingStrategy2(const ParityGame& game,
       spm_(spm),
       order_(order),
       metric_(metric),
-      next_id_(0),
       insert_id_(order < HEAP ? new uint64_t[game.graph().V()] : nullptr),
       pq_pos_(new verti[game.graph().V()]),
-      pq_(new verti[game.graph().V()]),
-      pq_size_(0)
+      pq_(new verti[game.graph().V()])
 {
     std::fill(&pq_pos_[0], &pq_pos_[game.graph().V()], NO_VERTEX);
 }

@@ -159,9 +159,9 @@ class specification_basic_type
     std::vector < std::vector < process_instance_assignment > > representedprocesses; /* contains the sequences of process
                                                          instances that are represented by the variables in seq_varnames */
     t_lin_options options;
-    bool timeIsBeingUsed;
-    bool stochastic_operator_is_being_used;
-    bool fresh_equation_added;
+    bool timeIsBeingUsed = false;
+    bool stochastic_operator_is_being_used = false;
+    bool fresh_equation_added = false;
     std::map < aterm, objectdatatype > objectdata; // It is important to guarantee that the objects will not
                                                    // be moved to another place when the object data structure grows. This
                                                    // is because objects in this datatype  are passed around by reference.
@@ -182,10 +182,7 @@ class specification_basic_type
       global_variables(glob_vars),
       data(ds),
       rewr(data,opt.rewrite_strategy),
-      options(opt),
-      timeIsBeingUsed(false),
-      stochastic_operator_is_being_used(false),
-      fresh_equation_added(false)
+      options(opt)
     {
       // find_identifiers does not find the identifiers in the enclosed data specification.
       fresh_identifier_generator.add_identifiers(process::find_identifiers(procspec));

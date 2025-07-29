@@ -634,7 +634,7 @@ struct block_type
   /// \details If a block contains new bottom states, it will be ignored until
   /// `stabilizeB()` handles all blocks with new bottom states.  Such a block
   /// must also be added to the list `m_blocks_with_new_bottom_states`.
-  bool contains_new_bottom_states;
+  bool contains_new_bottom_states = false;
 
   /// constructor
   block_type(state_in_block_pointer* start_bottom,
@@ -645,10 +645,8 @@ struct block_type
       start_bottom_states(start_bottom),
       sta(start_non_bottom),
       end_states(end),
-      block(),
-      contains_new_bottom_states(false)
-  {                                                                             assert(start_bottom<=start_non_bottom);  assert(start_non_bottom<=end);
-  }
+      block()
+  {}
                                                                                 #ifndef NDEBUG
                                                                                   /// \brief print a block identification for debugging
                                                                                   template<class LTS_TYPE>
@@ -740,8 +738,8 @@ class bisim_partitioner_gj
                                                                   // the transition field contains the index of the transition.
     fixed_vector<transition_type> m_transitions;
     fixed_vector<state_in_block_pointer> m_states_in_blocks;
-    state_index no_of_blocks;
-    state_index no_of_constellations;
+    state_index no_of_blocks = 1;
+    state_index no_of_constellations = 1;
     fixed_vector<transition_index> m_BLC_transitions;
   private:
     std::vector<block_type*> m_blocks_with_new_bottom_states;
@@ -6259,13 +6257,13 @@ class bisim_partitioner_gj
     /// \brief number of new bottom states found after constructing the initial partition
     /// \details This count includes all states that were non-bottom state in
     /// the (unstable) trivial partition with a single block.
-    state_index no_of_new_bottom_states;
+    state_index no_of_new_bottom_states = 0;
 
     /// \brief number of non-inert BLC sets in the partition
     /// \details The sets that are in `m_BLC_indicators_to_be_deleted` are not
     /// included in this count.  Nor are sets that contain constellation-inert
     /// transitions.
-    transition_index no_of_non_constellation_inert_BLC_sets;
+    transition_index no_of_non_constellation_inert_BLC_sets = 0;
 
     void refine_partition_until_it_becomes_stable()
     {
@@ -6676,23 +6674,18 @@ class bisim_partitioner_gj
     ///                            applied.
     /// \param preserve_divergence If true and branching is true, preserve
     ///                            tau loops on states.
-    bisim_partitioner_gj(LTS_TYPE& aut,
-                         const bool branching = false,
-                         const bool preserve_divergence = false)
-      : m_aut(aut),
-        m_states(aut.num_states()),
-        m_outgoing_transitions(aut.num_transitions()),
-        m_transitions(aut.num_transitions()),
-        m_states_in_blocks(aut.num_states()),
-        no_of_blocks(1),
-        no_of_constellations(1),
-        m_BLC_transitions(aut.num_transitions()),
-        m_branching(branching),
-        m_preserve_divergence(preserve_divergence),
-        no_of_new_bottom_states(0),
-        no_of_non_constellation_inert_BLC_sets(0)
+    bisim_partitioner_gj(LTS_TYPE& aut, const bool branching = false, const bool preserve_divergence = false)
+        : m_aut(aut),
+          m_states(aut.num_states()),
+          m_outgoing_transitions(aut.num_transitions()),
+          m_transitions(aut.num_transitions()),
+          m_states_in_blocks(aut.num_states()),
+
+          m_BLC_transitions(aut.num_transitions()),
+          m_branching(branching),
+          m_preserve_divergence(preserve_divergence)
     {                                                                           assert(m_branching || !m_preserve_divergence);
-log::logger::set_reporting_level(log::debug);
+      log::logger::set_reporting_level(log::debug);
       mCRL2log(log::verbose) << "Start initialisation.\n";
       create_initial_partition();
       end_initial_part=std::clock();

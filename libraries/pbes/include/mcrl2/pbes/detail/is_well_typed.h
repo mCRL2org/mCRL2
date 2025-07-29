@@ -61,12 +61,8 @@ struct has_quantifier_name_clashes_traverser: public pbes_expression_traverser<h
   using super::apply;
 
   std::vector<data::variable_list> quantifier_stack;
-  bool result;
+  bool result = false;
   data::variable name_clash; // if result is true, then this attribute contains the conflicting variable
-
-  has_quantifier_name_clashes_traverser()
-    : result(false)
-  {}
 
   /// \brief Returns true if the quantifier_stack contains a data variable with the given name
   /// \param name A
