@@ -114,7 +114,7 @@ class SMT_LIB_Solver: public SMT_Solver
               v_sort_domain_list = sort_expression_list({v_sort});
               v_sort = sort_expression();
             }
-            for (sort_expression v_sort_domain_elt : v_sort_domain_list)
+            for (const sort_expression& v_sort_domain_elt : v_sort_domain_list)
             {
               if (is_function_sort(v_sort_domain_elt))
               {

@@ -38,7 +38,7 @@ static void write_string_with_escape_symbols(const std::string& s, std::ostream&
   {
     // This function symbol needs quotes.
     os << "\"";
-    for (char i : s)
+    for (char i: s)
     {
       // We need to escape special characters.
       switch (i)
