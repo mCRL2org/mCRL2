@@ -39,7 +39,7 @@ class bessolve_tool: public pbes_input_tool<input_tool>
               "solve a BES",
               "Solve the BES in INFILE. If INFILE is not present, stdin is used."
              ),
-      strategy(small_progr_measures)
+
     {}
 
     bool run() override
@@ -74,7 +74,7 @@ class bessolve_tool: public pbes_input_tool<input_tool>
     }
 
   protected:
-    solution_strategy_t strategy;
+    solution_strategy_t strategy = small_progr_measures;
 
     void add_options(interface_description& desc) override
     {

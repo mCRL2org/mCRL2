@@ -14,9 +14,8 @@
 #include <cstring>
 #include <memory>
 
-LiftingStatistics::LiftingStatistics( const ParityGame &game,
-                                      long long max_lifts )
-    : lifts_attempted_(0), lifts_succeeded_(0), max_lifts_(max_lifts)
+LiftingStatistics::LiftingStatistics(const ParityGame& game, long long max_lifts)
+    : max_lifts_(max_lifts)
 {
     vertex_stats_.resize(game.graph().V());
 }
@@ -46,7 +45,7 @@ SmallProgressMeasures::SmallProgressMeasures(const ParityGame& game,
       vmap_(vmap),
       vmap_size_(vmap_size),
       strategy_(game.graph().V(), NO_VERTEX),
-      dirty_(nullptr)
+
 {
     assert(p_ == 0 || p_ == 1);
 
@@ -385,7 +384,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
         std::unique_ptr<LiftingStrategy> ls(lsf_->create(game_, spm));
         while (spm.solve_some(*ls) == 0)
         {
-            if (aborted()) return ParityGame::Strategy();
+            if (aborted())
+              return {};
         }
         spm.get_strategy(strategy);
         spm.get_winning_set( PLAYER_ODD,
@@ -423,7 +423,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
         std::unique_ptr<LiftingStrategy> ls(lsf_->create(subgame, spm));
         while (spm.solve_some(*ls) == 0)
         {
-            if (aborted()) return ParityGame::Strategy();
+            if (aborted())
+              return {};
         }
         ParityGame::Strategy substrat(won_by_odd.size(), NO_VERTEX);
         spm.get_strategy(substrat);
@@ -459,7 +460,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
               work -= SmallProgressMeasures::work_size )
         {
             half_solved = spm[player]->solve_some(*ls) > 0;
-            if (aborted()) return ParityGame::Strategy();
+            if (aborted())
+              return {};
         }
 
         mCRL2log(mcrl2::log::verbose) << "Propagating solved vertices to other game..." << std::endl;
@@ -473,7 +475,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
     std::unique_ptr<LiftingStrategy> ls(lsf_->create(game_, *spm[player]));
     while (spm[player]->solve_some(*ls) == 0)
     {
-        if (aborted()) return ParityGame::Strategy();
+        if (aborted())
+          return {};
     }
 
     // Retrieve combined strategies:
@@ -543,7 +546,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
         spm.initialize_lifting_strategy(*ls);
         while (spm.solve_some(*ls) == 0)
         {
-            if (aborted()) return ParityGame::Strategy();
+            if (aborted())
+              return {};
         }
         spm.get_strategy(strategy);
         spm.get_winning_set( PLAYER_ODD,
@@ -582,7 +586,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
         spm.initialize_lifting_strategy(*ls);
         while (spm.solve_some(*ls) == 0)
         {
-            if (aborted()) return ParityGame::Strategy();
+            if (aborted())
+              return {};
         }
         ParityGame::Strategy substrat(won_by_odd.size(), NO_VERTEX);
         spm.get_strategy(substrat);
@@ -616,7 +621,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
               work -= SmallProgressMeasures::work_size )
         {
             half_solved = spm[player]->solve_some(*ls) > 0;
-            if (aborted()) return ParityGame::Strategy();
+            if (aborted())
+              return {};
         }
 
         mCRL2log(mcrl2::log::verbose) << "Propagating solved vertices to other game..." << std::endl;
@@ -631,7 +637,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
     spm[player]->initialize_lifting_strategy(*ls);
     while (spm[player]->solve_some(*ls) == 0)
     {
-        if (aborted()) return ParityGame::Strategy();
+        if (aborted())
+          return {};
     }
 
     // Retrieve combined strategies:

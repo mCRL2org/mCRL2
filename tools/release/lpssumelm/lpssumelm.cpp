@@ -25,7 +25,7 @@ class sumelm_tool: public input_output_tool
   protected:
 
     using super = input_output_tool;
-    bool m_decluster;
+    bool m_decluster = false;
 
     void add_options(interface_description& desc) override
     {
@@ -49,7 +49,7 @@ class sumelm_tool: public input_output_tool
         "Remove superfluous summations from the linear process specification (LPS) in "
         "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
         "If OUTFILE is not present, stdout is used."),
-        m_decluster(false)
+
     {}
 
     /// Reads a specification from input_file,

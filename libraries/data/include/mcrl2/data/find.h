@@ -222,11 +222,11 @@ struct search_variable_traverser: public Traverser<search_variable_traverser<Tra
   using super::leave;
   using super::apply;
 
-  bool found;
+  bool found = false;
   const variable& v;
 
   explicit search_variable_traverser(const variable& v_)
-    : found(false), v(v_)
+      : v(v_)
   {}
 
   void apply(const variable& x)
@@ -256,11 +256,11 @@ struct search_free_variable_traverser: public Binder<Traverser, search_free_vari
   using super::bound_variables;
   using super::increase_bind_count;
 
-  bool found;
+  bool found = false;
   const data::variable& v;
 
   explicit search_free_variable_traverser(const data::variable& v_)
-    : found(false), v(v_)
+      : v(v_)
   {}
 
   void apply(const variable& x)

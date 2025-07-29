@@ -36,7 +36,7 @@ class bespp_tool: public pbes_input_tool<input_output_tool>
               "Print the BES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              ),
-      format(print_default)
+
     {}
 
     bool run() override
@@ -46,7 +46,7 @@ class bespp_tool: public pbes_input_tool<input_output_tool>
     }
 
   protected:
-    print_format_type  format;
+    print_format_type format = print_default;
 
     void add_options(interface_description& desc) override
     {

@@ -1422,7 +1422,7 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
     noninert_out_per_block(1, 0),
     inert_out_per_block(1, 0),
     states_per_block(1, l.num_states()),
-    nr_of_nonbottom_states(0)
+
 {
     // log::logger::set_reporting_level(log::debug);
 

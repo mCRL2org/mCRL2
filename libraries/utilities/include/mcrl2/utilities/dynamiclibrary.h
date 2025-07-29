@@ -98,7 +98,7 @@ inline library_handle get_module_handle(const std::string& fname)
 class dynamic_library 
 {
   protected:
-    library_handle m_library;
+    library_handle m_library = nullptr;
     std::string m_filename;
 
     void load() 
@@ -126,9 +126,8 @@ class dynamic_library
     }
   
   public:
-    dynamic_library(const std::string& filename = std::string()) 
-     : m_library(nullptr), 
-       m_filename(filename) 
+    dynamic_library(const std::string& filename = std::string())
+        : m_filename(filename)
     {
     }
 

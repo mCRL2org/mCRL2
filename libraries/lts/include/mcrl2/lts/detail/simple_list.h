@@ -128,7 +128,7 @@ namespace mcrl2::lts::detail
         void* begin_used_in_first_block;
 
         /// \brief first freed element
-        void* first_free_T;
+        void* first_free_T = nullptr;
 
         static void*& deref_void(void* addr)
         {
@@ -140,7 +140,7 @@ namespace mcrl2::lts::detail
           : first_block(new pool_block_t(nullptr)),
             begin_used_in_first_block(
                                 &first_block->data[sizeof(first_block->data)]),
-            first_free_T(nullptr)
+
         {  }
 
 

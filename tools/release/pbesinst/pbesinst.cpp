@@ -43,7 +43,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
   protected:
     using super = rewriter_tool<pbes_input_output_tool<input_output_tool>>;
 
-    pbesinst_strategy m_strategy;
+    pbesinst_strategy m_strategy = pbesinst_lazy_strategy;
     std::string m_finite_parameter_selection;
     bool m_remove_redundant_equations;
     search_strategy m_search_strategy;
@@ -128,7 +128,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         "  'pbes' for the mCRL2 PBES format,\n"
         "  'bes'  for the mCRL2 BES format,\n"
       ),
-      m_strategy(pbesinst_lazy_strategy)
+
     {}
 
     /// Runs the algorithm.

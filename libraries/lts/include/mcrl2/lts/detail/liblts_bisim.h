@@ -46,15 +46,13 @@ class bisim_partitioner
      *  \warning Note that when compiled with optimisations, bisimulation partitioning
      *  is much faster than compiled without any optimisation. The difference can go up to a factor 10.
      *  \param[in] l Reference to the LTS. The LTS l is only changed if \ref replace_transition_system is called. */
-    bisim_partitioner(
-      LTS_TYPE& l,
-      const bool branching=false,
-      const bool preserve_divergence=false,
-      const bool generate_counter_examples=false)
-       : max_state_index(0), 
-         aut(l),
-         branching(branching),
-         store_counter_info(generate_counter_examples)
+    bisim_partitioner(LTS_TYPE& l,
+        const bool branching = false,
+        const bool preserve_divergence = false,
+        const bool generate_counter_examples = false)
+        : aut(l),
+          branching(branching),
+          store_counter_info(generate_counter_examples)
     {
       assert(branching || !preserve_divergence);
       mCRL2log(log::verbose) << (preserve_divergence?"Divergence preserving b":"B") <<
@@ -197,7 +195,7 @@ class bisim_partitioner
     using state_type = std::size_t;
     using label_type = std::size_t;
 
-    state_type max_state_index;
+    state_type max_state_index = 0;
     LTS_TYPE& aut;
     bool branching;
     bool store_counter_info;

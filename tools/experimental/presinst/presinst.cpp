@@ -43,7 +43,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
   protected:
     using super = rewriter_tool<pres_input_output_tool<input_output_tool>>;
 
-    presinst_strategy m_strategy;
+    presinst_strategy m_strategy = presinst_lazy_strategy;
     std::string m_finite_parameter_selection;
     bool m_remove_redundant_equations;
 
@@ -109,7 +109,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
         "  'pres' for the mCRL2 PRES format,\n"
         "  'res'  for the mCRL2 BES format,\n"
       ),
-      m_strategy(presinst_lazy_strategy)
+
     {}
 
     /// Runs the algorithm.

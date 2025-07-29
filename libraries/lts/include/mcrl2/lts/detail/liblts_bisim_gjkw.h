@@ -437,7 +437,7 @@ class block_t
     /// \details If this is the last block in the list, `refinable_next` points
     /// to this very block.  Consequently, it is possible to check whether some
     /// block is refinable without an additional variable.
-    block_t* refinable_next;
+    block_t* refinable_next = nullptr;
 
     /// first block in the list of refinable blocks
     static block_t* refinable_first;
@@ -463,19 +463,18 @@ class block_t
     /// \param constln_ constellation to which the block belongs
     /// \param begin_   initial iterator to the first state of the block
     /// \param end_     initial iterator past the last state of the block
-    block_t(constln_t* const constln_, permutation_iter_t const begin_,
-                                                 permutation_iter_t const end_)
-      : int_end(end_),
-        int_begin(begin_),
-        int_marked_nonbottom_begin(begin_), // no non-bottom state is marked
-        int_bottom_begin(begin_), // all states are bottom states
-        int_marked_bottom_begin(end_), // no bottom state is marked
-        // int_inert_begin -- is initialised by part_trans_t::create_new_block
-        // int_inert_end -- is initialised by part_trans_t::create_new_block
-        to_constln(), // empty list
-        int_constln(constln_),
-        refinable_next(nullptr),
-        int_seqnr(BLOCK_NO_SEQNR)
+    block_t(constln_t* const constln_, permutation_iter_t const begin_, permutation_iter_t const end_)
+        : int_end(end_),
+          int_begin(begin_),
+          int_marked_nonbottom_begin(begin_), // no non-bottom state is marked
+          int_bottom_begin(begin_),           // all states are bottom states
+          int_marked_bottom_begin(end_),      // no bottom state is marked
+          // int_inert_begin -- is initialised by part_trans_t::create_new_block
+          // int_inert_end -- is initialised by part_trans_t::create_new_block
+          to_constln(), // empty list
+          int_constln(constln_),
+
+          int_seqnr(BLOCK_NO_SEQNR)
     {                                                                           // The following assertions hold trivially.
                                                                                 // assert(int_begin <= int_marked_nonbottom_begin);
                                                                                 // assert(int_marked_nonbottom_begin <= int_bottom_begin);
@@ -818,7 +817,7 @@ class constln_t
     /// `nontrivial_next` points to this very constellation.  Consequently, it
     /// is possible to check whether some constellation is trivial without an
     /// additional variable.
-    constln_t* nontrivial_next;
+    constln_t* nontrivial_next = nullptr;
 
     /// first constellation in the list of non-trivial constellations
     static constln_t* nontrivial_first;
@@ -851,14 +850,13 @@ class constln_t
     /// \brief constructor
     /// \param begin_ iterator to the first state in the constellation
     /// \param end_   iterator past the last state in the constellation
-    constln_t(state_type sort_key_, permutation_iter_t begin_,
-                       permutation_iter_t end_, B_to_C_iter_t postprocess_none)
-      : int_end(end_),
-        int_begin(begin_),
-        nontrivial_next(nullptr),
-        postprocess_begin(postprocess_none),
-        postprocess_end(postprocess_none),
-        sort_key(sort_key_)
+    constln_t(state_type sort_key_, permutation_iter_t begin_, permutation_iter_t end_, B_to_C_iter_t postprocess_none)
+        : int_end(end_),
+          int_begin(begin_),
+
+          postprocess_begin(postprocess_none),
+          postprocess_end(postprocess_none),
+          sort_key(sort_key_)
     {                                                                           assert(int_begin<int_end);  assert((state_type)(int_end-int_begin)<=sort_key);
     }
 
@@ -1720,7 +1718,7 @@ class bisim_partitioner_gjkw_initialise_helper
     std::vector<state_type> noninert_in_per_state, inert_in_per_state;
     std::vector<state_type> noninert_out_per_block, inert_out_per_block;
     std::vector<state_type> states_per_block;
-    state_type nr_of_nonbottom_states;
+    state_type nr_of_nonbottom_states = 0;
   public:
     bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool branching,
                                                      bool preserve_divergence);

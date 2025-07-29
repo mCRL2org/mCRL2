@@ -7,15 +7,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <algorithm>
+
 #include "mcrl2/pg/SCC.h"
 #include "mcrl2/pg/shuffle.h"
 #include "mcrl2/utilities/logger.h"
 
 StaticGraph::StaticGraph()
-    : successors_(nullptr),
-      predecessors_(nullptr),
-      successor_index_(nullptr),
-      predecessor_index_(nullptr)
+    :
+
 {
     reset(0, 0, EDGE_NONE);
 }
@@ -323,9 +323,9 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
         /* Sort edges by predecessor first, successor second */
-        if (!std::is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
+        if (!std::ranges::is_sorted(edges, edge_cmp_forward))
         {
-            std::sort(edges.begin(), edges.end(), edge_cmp_forward);
+          std::ranges::sort(edges, edge_cmp_forward);
         }
 
         /* Create successor index */
@@ -344,7 +344,7 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     if (edge_dir_ & EDGE_PREDECESSOR)
     {
         /* Sort edges by successor first, predecessor second */
-        std::sort(edges.begin(), edges.end(), edge_cmp_backward);
+        std::ranges::sort(edges, edge_cmp_backward);
 
         /* Create predecessor index */
         edgei pos = 0;
@@ -368,9 +368,9 @@ void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
         // Sort edges by predecessor first, successor second
-        if (!std::is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
+        if (!std::ranges::is_sorted(edges, edge_cmp_forward))
         {
-            std::sort(edges.begin(), edges.end(), edge_cmp_forward);
+          std::ranges::sort(edges, edge_cmp_forward);
         }
 
         // Loop over existing edges and remove those listed in `edges`:
@@ -394,7 +394,7 @@ void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
     if (edge_dir_ & EDGE_PREDECESSOR)
     {
         // Sort edges by successor first, predecessor second
-        std::sort(edges.begin(), edges.end(), edge_cmp_backward);
+        std::ranges::sort(edges, edge_cmp_backward);
 
         // Loop over existing edges and remove those listed in `edges`:
         StaticGraph::edge_list::const_iterator it = edges.begin();

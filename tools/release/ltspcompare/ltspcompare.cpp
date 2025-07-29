@@ -27,21 +27,18 @@ using namespace mcrl2::log;
 
 struct t_tool_options
 {
-  std::string                   name_for_first;
-  std::string                   name_for_second;
-  lts_type                      format_for_first;
-  lts_type                      format_for_second;
-  lts_probabilistic_equivalence equivalence;
-  lts_probabilistic_preorder    preorder;
-  std::vector<std::string>      tau_actions;   // Actions with these labels must be considered equal to tau.
-  
-  t_tool_options():
-    name_for_first(""),
-    name_for_second(""),
-    format_for_first(lts_none),
-    format_for_second(lts_none),
-    equivalence(lts_probabilistic_eq_none),
-    preorder(lts_probabilistic_pre_none)
+  std::string name_for_first;
+  std::string name_for_second;
+  lts_type format_for_first = lts_none;
+  lts_type format_for_second = lts_none;
+  lts_probabilistic_equivalence equivalence = lts_probabilistic_eq_none;
+  lts_probabilistic_preorder preorder = lts_probabilistic_pre_none;
+  std::vector<std::string> tau_actions; // Actions with these labels must be considered equal to tau.
+
+  t_tool_options()
+      : name_for_first(""),
+        name_for_second(""),
+
   {}
 };
 

@@ -28,10 +28,10 @@ struct is_timed_traverser: public action_label_traverser<is_timed_traverser>
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result = false;
 
   is_timed_traverser()
-    : result(false)
+    :
   {}
 
   void enter(const delay_timed& /* x */)

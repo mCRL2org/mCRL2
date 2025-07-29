@@ -26,10 +26,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 protected:
   /// \brief If true, then the algorithm is allowed to instantiate free variables
   /// as a side effect.
-  bool m_instantiate_global_variables;
+  bool m_instantiate_global_variables = false;
 
   /// \brief If true, conditions are not evaluated and assumed to be true.
-  bool m_ignore_conditions;
+  bool m_ignore_conditions = false;
 
   /// \brief Maps process parameters to their index.
   std::map<data::variable, std::size_t> m_index_of;
@@ -111,10 +111,9 @@ protected:
 
     /// \brief Constructor
     constelm_algorithm(Specification& spec, const DataRewriter& R_)
-      : lps::detail::lps_algorithm<Specification>(spec),
-        m_instantiate_global_variables(false),
-        m_ignore_conditions(false),
-        R(R_)
+        : lps::detail::lps_algorithm<Specification>(spec),
+
+          R(R_)
     {}
 
     /// \brief Computes constant parameters
