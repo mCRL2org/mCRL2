@@ -143,7 +143,7 @@ bool ParityGame::verify(const Strategy &s, verti *error) const
         subgraph.assign(edges, StaticGraph::EDGE_SUCCESSOR);
 
         // Find a vertex with priority prio on a cycle:
-        VerifySCC verifier = { *this, subgraph, prio, error };
+        VerifySCC verifier = {.game = *this, .graph = subgraph, .prio = prio, .error = error};
         if (decompose_graph(subgraph, verifier) != 0)
         {
             // VerifySCC has already set *error here.
