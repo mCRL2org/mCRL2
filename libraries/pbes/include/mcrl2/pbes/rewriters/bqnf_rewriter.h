@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_REWRITERS_BQNF_REWRITER_H
 #define MCRL2_PBES_REWRITERS_BQNF_REWRITER_H
 
+#include <memory>
+
 #include "mcrl2/pbes/detail/bqnf_quantifier_rewriter.h"
 
 
@@ -30,8 +32,8 @@ class bqnf_rewriter
 
     /// \brief Constructor
     bqnf_rewriter() {
-      bqnf_checker = std::unique_ptr<pbes_system::detail::bqnf_visitor>(new pbes_system::detail::bqnf_visitor());
-      bqnf_quantifier_rewriter = std::unique_ptr<pbes_system::detail::bqnf_quantifier_rewriter>(new pbes_system::detail::bqnf_quantifier_rewriter());
+      bqnf_checker = std::make_unique<pbes_system::detail::bqnf_visitor>();
+      bqnf_quantifier_rewriter = std::make_unique<pbes_system::detail::bqnf_quantifier_rewriter>();
     }
 
     /// \brief Rewrites a PBES expression in BQNF such that universal quantifier over conjuncts

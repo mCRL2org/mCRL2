@@ -12,6 +12,7 @@
 #include "mcrl2/pg/SCC.h"
 
 #include <cstring>
+#include <memory>
 
 LiftingStatistics::LiftingStatistics( const ParityGame &game,
                                       long long max_lifts )
@@ -440,10 +441,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
 {
     // Create two SPM and two lifting strategy instances:
     std::unique_ptr<SmallProgressMeasures> spm[2];
-    spm[0].reset(new DenseSPM( game_, PLAYER_EVEN,
-                               stats_, vmap_, vmap_size_ ));
-    spm[1].reset(new DenseSPM( game_, PLAYER_ODD,
-                               stats_, vmap_, vmap_size_ ));
+    spm[0] = std::make_unique<DenseSPM>(game_, PLAYER_EVEN, stats_, vmap_, vmap_size_);
+    spm[1] = std::make_unique<DenseSPM>(game_, PLAYER_ODD, stats_, vmap_, vmap_size_);
 
     // Solve games alternatingly:
     int player = 0;
@@ -601,10 +600,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
 {
     // Create two SPM and two lifting strategy instances:
     std::unique_ptr<SmallProgressMeasures> spm[2];
-    spm[0].reset(new DenseSPM( game_, PLAYER_EVEN,
-                               stats_, vmap_, vmap_size_ ));
-    spm[1].reset(new DenseSPM( game_, PLAYER_ODD,
-                               stats_, vmap_, vmap_size_ ));
+    spm[0] = std::make_unique<DenseSPM>(game_, PLAYER_EVEN, stats_, vmap_, vmap_size_);
+    spm[1] = std::make_unique<DenseSPM>(game_, PLAYER_ODD, stats_, vmap_, vmap_size_);
 
     // Solve games alternatingly:
     int player = 0;

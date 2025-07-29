@@ -7,6 +7,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <memory>
+
 #include "mcrl2/pg/PredecessorLiftingStrategy.h"
 #include "mcrl2/pg/RecursiveSolver.h"
 #include "mcrl2/pg/ComponentSolver.h"
@@ -32,17 +34,15 @@ int main(int argc, char *argv[])
   if (use_spm)
   {
     // Create a lifting strategy factory:
-    lift_strat_factory.reset(
-        new PredecessorLiftingStrategyFactory );
+    lift_strat_factory = std::make_shared<PredecessorLiftingStrategyFactory>();
 
     // Create a SPM solver factory:
-    solver_factory.reset(
-        new SmallProgressMeasuresSolverFactory(lift_strat_factory, 2, true) );
+    solver_factory = std::make_shared<SmallProgressMeasuresSolverFactory>(lift_strat_factory, 2, true);
   }
   else if (use_rec)
   {
     // Create a recursive solver factory:
-    solver_factory.reset( new RecursiveSolverFactory );
+    solver_factory = std::make_shared<RecursiveSolverFactory>();
   }
   else
   {
@@ -54,8 +54,7 @@ int main(int argc, char *argv[])
   {
     // Wrap solver factory into a component solver factory:
     subsolver_factory = solver_factory;
-    solver_factory.reset(
-        new ComponentSolverFactory(*subsolver_factory) );
+    solver_factory = std::make_shared<ComponentSolverFactory>(*subsolver_factory);
   }
 
   // Generate the game from a PBES:

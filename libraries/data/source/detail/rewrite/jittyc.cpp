@@ -18,13 +18,15 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
-#include "mcrl2/utilities/basename.h"
-#include "mcrl2/utilities/stopwatch.h"
+
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/detail/aterm_list_implementation.h"
-#include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
+#include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/utilities/basename.h"
+#include "mcrl2/utilities/stopwatch.h"
+#include <memory>
 
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
 #include "mcrl2/data/detail/rewrite_statistics.h"
@@ -3060,7 +3062,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     compile_script = "mcrl2compilerewriter";
   }
 
-   rewriter_so = std::shared_ptr<uncompiled_library>(new uncompiled_library(compile_script));
+  rewriter_so = std::make_shared<uncompiled_library>(compile_script);
 
   mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
   stopwatch time;
