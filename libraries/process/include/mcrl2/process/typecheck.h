@@ -50,6 +50,41 @@ data::sorts_list sorts_list_intersection(const data::sorts_list& sorts1, const d
   return atermpp::reverse(result);
 }
 
+// returns the difference of the 2 type list lists
+inline
+data::sorts_list sorts_list_difference(const data::sorts_list& sorts1, const data::sorts_list& sorts2)
+{
+  data::sorts_list result;
+  for (const data::sort_expression_list& s: sorts1)
+  {
+    if (std::find(sorts2.begin(), sorts2.end(), s) == sorts1.end())
+    {
+      result.push_front(s);
+    }
+  }
+  return atermpp::reverse(result);
+}
+
+// print a sorts_list, i.e. a list of lists of sort expressions.
+inline
+std::string pp(const data::sorts_list& ll)
+{
+  std::string result;
+  bool empty1=true;
+  for(const data::sort_expression_list& l: ll)
+  {
+    bool empty2=true;
+    for(const data::sort_expression& s: l)
+    {
+      result=result+(empty2?"":"#")+pp(s);
+      empty2=false;
+    }
+    result=result+(empty1?"":", ");
+    empty2=false;
+  }
+  return result;
+}
+
 inline
 std::ostream& operator<<(std::ostream& out, const data::sorts_list& x)
 {
@@ -156,7 +191,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     if (!m_action_context.is_declared(a))
     {
-      throw mcrl2::runtime_error("Undefined action " + core::pp(a) + " (typechecking " + core::pp(x) + ")");
+      throw mcrl2::runtime_error("Undefined action " + core::pp(a) + " (typechecking " + core::pp(x) + ").");
     }
   }
 
@@ -168,7 +203,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       check_action_declared(a, x);
       if (!actions.insert(a).second)  // The action was already in the set.
       {
-        mCRL2log(log::warning) << "Used action " << a << " twice (typechecking " << x << ")" << std::endl;
+        mCRL2log(log::warning) << "Used action " << a << " twice (typechecking " << x << ").`" << std::endl;
       }
     }
   }
@@ -178,7 +213,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     if (c.empty())
     {
-      mCRL2log(log::warning) << msg << " (typechecking " << x << ")" << std::endl;
+      mCRL2log(log::warning) << msg << " (typechecking " << x << ")." << std::endl;
     }
   }
 
@@ -187,7 +222,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     if (first == second)
     {
-      mCRL2log(log::warning) << msg << " " << first << "(typechecking " << x << ")" << std::endl;
+      mCRL2log(log::warning) << msg << " " << first << "(typechecking " << x << ")." << std::endl;
     }
   }
 
@@ -202,7 +237,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     if (has_empty_intersection(action_sorts(a), action_sorts(b)))
     {
-      throw mcrl2::runtime_error("renaming action " + core::pp(a) + " into action " + core::pp(b) + ": these two have no common type (typechecking " + process::pp(x) + ")");
+      throw mcrl2::runtime_error("Renaming action " + core::pp(a) + " into action " + core::pp(b) + ": these two have no common type (typechecking " + process::pp(x) + ").");
     }
   }
 
@@ -214,7 +249,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       auto i = result.find(a.lhs());
       if (i != result.end()) // An data::assignment of the shape x := t already exists, this is not OK.
       {
-        throw mcrl2::runtime_error("Double data::assignment to data::variable " + core::pp(a.lhs()) + " (detected assigned values are " + data::pp(i->second) + " and " + core::pp(a.rhs()) + ")");
+        throw mcrl2::runtime_error("Double data::assignment to data::variable " + core::pp(a.lhs()) + " (detected assigned values are " + data::pp(i->second) + " and " + core::pp(a.rhs()) + ").");
       }
       result[a.lhs()]=a.rhs();
     }
@@ -394,7 +429,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       check_rename_common_type(r.source(), r.target(), x);
       if (!actions.insert(r.source()).second) // The element was already in the set.
       {
-        throw mcrl2::runtime_error("renaming action " + core::pp(r.source()) + " twice (typechecking " + process::pp(x) + ")");
+        throw mcrl2::runtime_error("Renaming action " + core::pp(r.source()) + " twice (typechecking " + process::pp(x) + ").");
       }
     }
     make_rename(result, x.rename_set(), [&](process_expression& r){ (*this).apply(r, x.operand()); } );
@@ -404,7 +439,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   template <class T>
   void apply(T& result, const process::comm& x)
   {
-    check_not_empty(x.comm_set(), "synchronizing empty set of (multi)actions", x);
+    check_not_empty(x.comm_set(), "Synchronizing empty set of (multi)actions", x);
 
     std::multiset<core::identifier_string> left_hand_side_actions;
     for (const communication_expression& c: x.comm_set())
@@ -414,29 +449,47 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
       if (cnames.size() == 1)
       {
-        throw mcrl2::runtime_error("using synchronization as renaming/hiding of action " + core::pp(cnames.front()) + " into " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ")");
+        throw mcrl2::runtime_error("Using synchronization as renaming/hiding of action " + core::pp(cnames.front()) + " into " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ").");
       }
 
       //Actions must be declared
-      data::sorts_list c_sorts;
       if (!m_action_context.is_declared(c.name()))
       {
-        throw mcrl2::runtime_error("synchronizing to an undefined action " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ")");
+        throw mcrl2::runtime_error("Synchronizing to an undefined action " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ").");
       }
-      c_sorts = action_sorts(c.name());
 
+      data::sorts_list c_sorts;
+      bool c_sorts_defined=false;
       for (const core::identifier_string& a: cnames)
       {
         if (!m_action_context.is_declared(a))
         {
-          throw mcrl2::runtime_error("synchronizing an undefined action " + core::pp(a) + " in (multi)action " + core::pp(cnames) + " (typechecking " + process::pp(x) + ")");
+          throw mcrl2::runtime_error("Synchronizing an undefined action " + core::pp(a) + " in (multi)action " + core::pp(cnames) + " (typechecking " + process::pp(x) + ").");
         }
-        c_sorts = sorts_list_intersection(c_sorts, action_sorts(a));
+        if (c_sorts_defined)
+        {
+          c_sorts = sorts_list_intersection(c_sorts, action_sorts(a));
+        }
+        else
+        {
+          c_sorts=action_sorts(a);
+          c_sorts_defined=true;
+        }
         if (c_sorts.empty())
         {
-          throw mcrl2::runtime_error("synchronizing action " + core::pp(a) + " from (multi)action " + core::pp(cnames) +
-                            " into action " + core::pp(c.name()) + ": these have no common type (typechecking " + process::pp(x) + ")");
+          throw mcrl2::runtime_error("Synchronizing action " + core::pp(a) + " from (multi)action " + core::pp(cnames) +
+                            " into action " + core::pp(c.name()) + ": these have no common type (typechecking " + process::pp(x) + ").");
         }
+      }
+      //Check that all sorts occurring in all actions at the lhs are also sorts of the actions at the right.
+      const data::sorts_list target_sorts = action_sorts(c.name());
+      const data::sorts_list difference_list=sorts_list_difference(c_sorts,target_sorts);
+      if (difference_list.size()>0)
+      {
+        throw mcrl2::runtime_error("In the communication clause " + process::pp(c) + 
+                  " the action at the right does not have type" + (difference_list.size()==1?" ":"s ") + pp(difference_list) + 
+                  " that the actions at the left have."); 
+
       }
 
       //the multiactions in the lhss of comm should not intersect.
@@ -446,7 +499,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       {
         if (this_left_hand_sides.count(a)==0 && left_hand_side_actions.find(a) != left_hand_side_actions.end())
         {
-          throw mcrl2::runtime_error("synchronizing action " + core::pp(a) + " in different ways (typechecking " + process::pp(x) + ")");
+          throw mcrl2::runtime_error("Synchronizing action " + core::pp(a) + " in different ways (typechecking " + process::pp(x) + ").");
         }
         else
         {
@@ -472,8 +525,8 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       assert(left_hand_side_actions.count(c.name())>=number_of_rhs_in_lhs);
       if (left_hand_side_actions.count(c.name())-number_of_rhs_in_lhs>0) // There are more actions x.name() in the lhss than just in this lhs.
       {
-        throw mcrl2::runtime_error("action " + core::pp(c.name()) + 
-                     " occurs at the left and the right in a communication (typechecking " + process::pp(x) + ")");
+        throw mcrl2::runtime_error("Action " + core::pp(c.name()) + 
+                     " occurs at the left and the right in a communication (typechecking " + process::pp(x) + ").");
       }
     }
     make_comm(result, x.comm_set(), [&](process_expression& r){ (*this).apply(r, x.operand()); } );
@@ -491,7 +544,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       {
         if (!m_action_context.is_declared(a))
         {
-          throw mcrl2::runtime_error("allowing an undefined action " + core::pp(a) + " in (multi)action " + core::pp(A.names()) + " (typechecking " + process::pp(x) + ")");
+          throw mcrl2::runtime_error("Allowing an undefined action " + core::pp(a) + " in (multi)action " + core::pp(A.names()) + " (typechecking " + process::pp(x) + ").");
         }
       }
       if (multi_actions_contains(A.names(), MActs))
@@ -544,7 +597,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
     catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + process::pp(x));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + process::pp(x) + ".");
     }
   }
 
@@ -563,7 +616,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
     catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + process::pp(x));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + process::pp(x) + ".");
     }
   }
 };

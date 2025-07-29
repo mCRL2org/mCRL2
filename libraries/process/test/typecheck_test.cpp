@@ -458,3 +458,23 @@ BOOST_AUTO_TEST_CASE(test_incomplete_assignment_in_init_clause)
   );
 }
 
+// Test case by Tim Willemse, showing that target actions in a communication must be well typed (July 2025).
+BOOST_AUTO_TEST_CASE(type_check_communication_with_mistyped_target_wrong)
+{
+  test_typechecker_case(
+    "act a, A: Nat; a: Bool;\n"                           // A also should have type Bool. 
+    "init comm({a|a -> A}, a(true)|a(true) . delta);",
+    false
+  );
+}
+
+// Test case by Tim Willemse, showing that target actions in a communication must be well typed (July 2025).
+BOOST_AUTO_TEST_CASE(type_check_communication_with_mistyped_target_ok)
+{
+  test_typechecker_case(
+    "act a, A: Nat; a, A: Bool;\n"                           // A has type Bool. This is ok.
+    "init comm({a|a -> A}, a(true)|a(true) . delta);",
+    true
+  );
+}
+

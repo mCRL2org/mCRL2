@@ -172,7 +172,7 @@ class action_rename_specification
     {
       assert(core::detail::check_rule_ActionRenameSpec(t));
       atermpp::aterm::iterator i = t.begin();
-      m_data            = *i++;
+      m_data            = static_cast<data::data_specification>(*i++);
       m_action_labels   = atermpp::down_cast<process::action_label_list>((*i++)[0]);
 
       atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>((*i)[0]);

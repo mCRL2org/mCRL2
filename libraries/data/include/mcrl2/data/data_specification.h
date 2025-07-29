@@ -314,7 +314,7 @@ class data_specification: public sort_specification
 
     ///\brief Constructor from an aterm.
     /// \param[in] t a term adhering to the internal format.
-    data_specification(const atermpp::aterm& t)
+    explicit data_specification(const atermpp::aterm& t)
     {
       build_from_aterm(t);
     }
