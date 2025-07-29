@@ -49,6 +49,25 @@ CheckOptions:
 WarningsAsErrors: 'false'
 HeaderFilterRegex: '.'
 ExcludeHeaderFilterRegex: '.*3rd-party.*,
+    libraries/data/include/mcrl2/data/bags1.h,
+    libraries/data/include/mcrl2/data/bag64.h,
+    libraries/data/include/mcrl2/data/bool.h,
+    libraries/data/include/mcrl2/data/fbags1.h,
+    libraries/data/include/mcrl2/data/fbag64.h,
+    libraries/data/include/mcrl2/data/fset1.h,
+    libraries/data/include/mcrl2/data/fset64.h,
+    libraries/data/include/mcrl2/data/int1.h,
+    libraries/data/include/mcrl2/data/int64.h,
+    libraries/data/include/mcrl2/data/list1.h,
+    libraries/data/include/mcrl2/data/list64.h,
+    libraries/data/include/mcrl2/data/nat1.h,
+    libraries/data//nclude/mcrl2/data/nat64.h,
+    libraries/data/include/mcrl2/data/pos1.h,
+    libraries/data/include/mcrl2/data/pos64.h,
+    libraries/data/include/mcrl2/data/real1.h,
+    libraries/data/include/mcrl2/data/real64.h,
+    libraries/data/include/mcrl2/data/set1.h,
+    libraries/data/include/mcrl2/data/set64.h,
     liblts_bisim_*.h
     '
 FormatStyle: 'file'
