@@ -27,10 +27,10 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result = true;
 
   is_normalized_traverser()
-    : result(true)
+    :
   {}
 
   /// \brief Visit not node

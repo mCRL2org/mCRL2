@@ -38,7 +38,7 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
   protected:
     using super = rewriter_tool<input_output_tool>;
 
-    unsigned int max_iterations;
+    unsigned int max_iterations = DEFAULT_MAX_ITERATIONS;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser) override
@@ -68,7 +68,7 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
         "remove real numbers from an LPS",
         "Remove Real numbers from the linear process specification (LPS) in "
         "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "),
-      max_iterations(DEFAULT_MAX_ITERATIONS)
+
     {}
 
     /// Runs the algorithm.

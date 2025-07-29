@@ -28,18 +28,15 @@ class t_tool_options
     std::string     infilename;
     std::string     outfilename;
     std::string     lpsfile;
-    lts_type        intype;
-    lts_type        outtype;
-    lts_probabilistic_equivalence equivalence;
+    lts_type intype = lts_none;
+    lts_type outtype = lts_none;
+    lts_probabilistic_equivalence equivalence = lts_probabilistic_eq_none;
     std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
-    bool            print_dot_state;
-    bool            determinise;
-    bool            check_reach;
+    bool print_dot_state = true;
+    bool determinise = false;
+    bool check_reach = true;
 
-    inline t_tool_options() : intype(lts_none), outtype(lts_none), equivalence(lts_probabilistic_eq_none),
-      print_dot_state(true), determinise(false), check_reach(true)
-    {
-    }
+    inline t_tool_options()  = default;
 
     inline std::string source_string() const
     {

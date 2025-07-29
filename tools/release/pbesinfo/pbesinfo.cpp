@@ -25,7 +25,7 @@ class pbesinfo_tool: public pbes_input_tool<input_tool>
   protected:
     using super = pbes_input_tool<input_tool>;
 
-    bool opt_full;
+    bool opt_full = false;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser) override
@@ -52,7 +52,7 @@ class pbesinfo_tool: public pbes_input_tool<input_tool>
         "display basic information about a PBES",
         super::make_tool_description("Print basic information about the PBES in INFILE.")
       ),
-      opt_full(false)
+
     {}
 
     /// If PBES can be loaded from file_name, then

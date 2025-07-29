@@ -59,16 +59,18 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
   protected:
     // Tool options.
     /// The output file name
-    transformation_strategy m_transformation_strategy; // The strategy to propagate true/false.
-    search_strategy m_search_strategy; // The search strategy (breadth or depth first).
-    remove_level m_erase_unused_bes_variables;       // Remove bes variables whenever they are not used anymore.
-    bool m_data_elm;                         // The data elimination option
+    transformation_strategy m_transformation_strategy
+        = mcrl2::pbes_system::lazy; // The strategy to propagate true/false.
+    search_strategy m_search_strategy
+        = mcrl2::pbes_system::breadth_first;          // The search strategy (breadth or depth first).
+    remove_level m_erase_unused_bes_variables = none; // Remove bes variables whenever they are not used anymore.
+    bool m_data_elm = true;                           // The data elimination option
     std::size_t m_maximal_todo_size;              // The maximal size of the todo queue when generating a bes
-    bool m_approximate_true;                 // If approximate_true holds, rhs's of variables that cannot
-                                             // be put in the todo queue are set to false, assuring that
-                                             // a true answer is correct, but false might be incorrect.
-                                             // If approximate_true is false, true is used, meaning that
-                                             // the answer false is correct, and true might be incorrect.
+    bool m_approximate_true = true;               // If approximate_true holds, rhs's of variables that cannot
+                                                  // be put in the todo queue are set to false, assuring that
+                                                  // a true answer is correct, but false might be incorrect.
+                                                  // If approximate_true is false, true is used, meaning that
+                                                  // the answer false is correct, and true might be incorrect.
 
     using super = rewriter_tool<pbes_input_tool<pbes_output_tool<input_output_tool>>>;
 
@@ -79,18 +81,13 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
 
   public:
     pbes2bes_tool()
-      : super(
-        NAME,
-        AUTHOR,
-        "Generate a BES from a PBES. ",
-        "Reads the PBES from INFILE and writes an equivalent BES to OUTFILE. "
-        "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
-      m_transformation_strategy(mcrl2::pbes_system::lazy),
-      m_search_strategy(mcrl2::pbes_system::breadth_first),
-      m_erase_unused_bes_variables(none),
-      m_data_elm(true),
-      m_maximal_todo_size(std::numeric_limits<std::size_t>::max()),
-      m_approximate_true(true)
+        : super(NAME,
+              AUTHOR,
+              "Generate a BES from a PBES. ",
+              "Reads the PBES from INFILE and writes an equivalent BES to OUTFILE. "
+              "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
+
+          m_maximal_todo_size(std::numeric_limits<std::size_t>::max()),
 
     {}
 

@@ -38,11 +38,11 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     UNDETERMINED
   };
 
-  bool result;
+  bool result = true;
   std::stack<expression_mode> mode_stack;
 
   bqnf_traverser()
-    : result(true)
+    :
   {}
 
   void enter(const pbes_system::forall& x)

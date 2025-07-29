@@ -14,9 +14,8 @@
 #include <cstdlib>
 
 ParityGame::ParityGame()
-    : d_(0),
-      vertex_(nullptr),
-      cardinality_(nullptr)
+    :
+
 {
 }
 

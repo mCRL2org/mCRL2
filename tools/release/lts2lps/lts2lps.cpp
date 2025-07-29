@@ -37,7 +37,7 @@ class lts2lps_tool : public input_output_tool
     using super = input_output_tool;
 
   protected:
-    data_file_type_t data_file_type;
+    data_file_type_t data_file_type = mcrl2::lts::data_file_type_t::none_e;
     std::string data_file;
 
     void add_options(interface_description& desc) override
@@ -103,7 +103,7 @@ class lts2lps_tool : public input_output_tool
         "Translates an LTS in INFILE and writes the resulting LPS to "
         "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
         "present, standard input is used."),
-      data_file_type(mcrl2::lts::data_file_type_t::none_e)
+
     {}
 
     bool run() override

@@ -25,7 +25,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
 private:
   mcrl2::lps::t_lin_options m_linearisation_options;
   // bool noalpha;   // indicates whether alpha reduction is needed.
-  bool opt_check_only;
+  bool opt_check_only = false;
 
   bool m_print_ast{false}; // indicates whether the abstract syntax tree should be printed
 
@@ -175,7 +175,7 @@ protected:
         "translate an mCRL2 specification to an LPS",
         "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
         "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-        "stdin is used."), opt_check_only(false)
+        "stdin is used."),
     {}
 
     bool run() override

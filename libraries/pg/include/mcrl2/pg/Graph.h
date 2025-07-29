@@ -275,12 +275,12 @@ private:
         If edges are pairs of nodes (i,j), then `successors` is the list of
         successors (j's) obtained after sorting edges by predecessors (i's),
         and vice versa for `predecessors`. */
-    verti *successors_, *predecessors_;
+    verti *successors_ = nullptr, *predecessors_ = nullptr;
 
     /*! Indices into the successor/predecessor lists (of size V + 1).
         successor_index[i] is the lowest index of an edge in `successors` with
         a predecessor >= i; successor_index[V] is E. */
-    edgei *successor_index_, *predecessor_index_;
+    edgei *successor_index_ = nullptr, *predecessor_index_ = nullptr;
 
     /*! Direction of stored edges. */
     EdgeDirection edge_dir_;

@@ -54,9 +54,9 @@ private:
     friend class SmallProgressMeasures;
 
 private:
-    long long lifts_attempted_, lifts_succeeded_;
-    std::vector<std::pair<long long, long long> > vertex_stats_;
-    long long max_lifts_;
+  long long lifts_attempted_ = 0, lifts_succeeded_ = 0;
+  std::vector<std::pair<long long, long long>> vertex_stats_;
+  long long max_lifts_;
 };
 
 /*! \ingroup SmallProgressMeasures
@@ -269,7 +269,7 @@ protected:
     std::size_t                 len_;       //!< length of SPM vectors
     verti                  *M_;        //!< bounds on the SPM vector components
     ParityGame::Strategy   strategy_;  //!< current strategy
-    bool                   *dirty_;    //!< marks unstable vertices
+    bool* dirty_ = nullptr;            //!< marks unstable vertices
 };
 
 /*! \ingroup SmallProgressMeasures

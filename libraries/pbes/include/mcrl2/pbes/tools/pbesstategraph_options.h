@@ -21,28 +21,20 @@ namespace mcrl2::pbes_system {
 
 struct pbesstategraph_options
 {
-  data::rewrite_strategy rewrite_strategy;
-  bool simplify;
-  bool use_global_variant;
-  bool print_influence_graph;
-  bool cache_marking_updates;
-  int marking_algorithm;
-  bool use_alternative_lcfp_criterion;
-  bool use_alternative_gcfp_relation;
-  bool use_alternative_gcfp_consistency;
-  utilities::execution_timer* timer;     // if it is non-zero, it will be used to display timing information
+  data::rewrite_strategy rewrite_strategy = data::jitty;
+  bool simplify = true;
+  bool use_global_variant = false;
+  bool print_influence_graph = false;
+  bool cache_marking_updates = false;
+  int marking_algorithm = 0;
+  bool use_alternative_lcfp_criterion = false;
+  bool use_alternative_gcfp_relation = false;
+  bool use_alternative_gcfp_consistency = false;
+  utilities::execution_timer* timer = nullptr; // if it is non-zero, it will be used to display timing information
 
   pbesstategraph_options()
-  : rewrite_strategy(data::jitty),
-    simplify(true),
-    use_global_variant(false),
-    print_influence_graph(false),
-    cache_marking_updates(false),
-    marking_algorithm(0),
-    use_alternative_lcfp_criterion(false),
-    use_alternative_gcfp_relation(false),
-    use_alternative_gcfp_consistency(false),
-    timer(nullptr)
+  :
+
   {}
 
   bool timing_enabled() const

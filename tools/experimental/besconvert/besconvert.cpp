@@ -546,10 +546,10 @@ using super = pbes_input_output_tool<input_output_tool>;
 class besconvert_tool: public super
 {
   protected:
-    bes_reduction_algorithm::equivalence_t equivalence;
+    bes_reduction_algorithm::equivalence_t equivalence = bes_reduction_algorithm::eq_none;
     std::string m_lts_filename;
-    bes_reduction_algorithm::to_lts_translation_t m_translation;
-    bool m_no_reduction;
+    bes_reduction_algorithm::to_lts_translation_t m_translation = bes_reduction_algorithm::to_lts_selfloop;
+    bool m_no_reduction = false;
 
     void add_options(mcrl2::utilities::interface_description& desc) override
     {
@@ -634,9 +634,7 @@ class besconvert_tool: public super
         "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
         "If INFILE is not "
         "present, stdin is used. If OUTFILE is not present, stdout is used."),
-      equivalence(bes_reduction_algorithm::eq_none),
-      m_translation(bes_reduction_algorithm::to_lts_selfloop),
-      m_no_reduction(false)
+
     {}
 
     bool run() override

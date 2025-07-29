@@ -191,7 +191,7 @@ class scc_partitioner
 
     std::vector < state_type > block_index_of_a_state;
     std::vector < state_type > dfsn2state;
-    state_type equivalence_class_index;
+    state_type equivalence_class_index = 0;
 
     void group_components(const state_type t,
                           const state_type equivalence_class_index,
@@ -208,7 +208,7 @@ template < class LTS_TYPE>
 scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   :aut(l),
     block_index_of_a_state(aut.num_states(),0),
-    equivalence_class_index(0)
+
 {
   mCRL2log(log::debug) << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
               l.num_transitions() << " transitions" << std::endl;

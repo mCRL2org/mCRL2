@@ -53,7 +53,7 @@ static void indent()
 struct bqnf_visitor
 {
   /// \brief flag that indicates if debug output should be printed.
-  bool debug;
+  bool debug = false;
 
   /// \brief Returns a string representation of the type of the root node of the expression.
   /// \param e a PBES expression
@@ -132,7 +132,7 @@ struct bqnf_visitor
 
   /// \brief Constructor.
   bqnf_visitor():
-    debug(false)
+
   { }
 
   /// \brief Visits a simple expression.

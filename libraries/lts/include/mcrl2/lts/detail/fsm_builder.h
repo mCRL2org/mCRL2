@@ -203,7 +203,7 @@ struct fsm_builder
 {
   explicit fsm_builder(probabilistic_lts_fsm_t& fsm_)
     : fsm(fsm_),
-      m_initial_state_is_set(false)
+
   {}
 
   // Contains the result
@@ -217,7 +217,7 @@ struct fsm_builder
 
   // This variable records if the initial state is set explicitly.
   // If not it needs to be done while finishing the fsm.
-  bool m_initial_state_is_set;
+  bool m_initial_state_is_set = false;
 
   void start()
   {

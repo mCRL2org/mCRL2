@@ -84,12 +84,11 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result = true;
   bool allow_counter_example_variables = false;
 
   is_simple_expression_traverser(bool allow_counter_example_variables)
-    : result(true),
-      allow_counter_example_variables(allow_counter_example_variables)
+      : allow_counter_example_variables(allow_counter_example_variables)
   {}
 
   void enter(const propositional_variable_instantiation& x)

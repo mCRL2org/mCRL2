@@ -352,7 +352,7 @@ protected:
   std::vector<std::size_t> m_partition;
 
   /** \brief The number of blocks in the current partition */
-  std::size_t m_count;
+  std::size_t m_count = 0;
 
   /** \brief The LTS that we are reducing */
   LTS_T& m_lts;
@@ -443,10 +443,10 @@ public:
     * \param[in] lts_ The LTS that is being reduced
     */
   sigref(LTS_T& lts_)
-    : m_partition(std::vector<std::size_t>(lts_.num_states(), 0)),
-      m_count(0),
-      m_lts(lts_),
-      m_signature(lts_)
+      : m_partition(std::vector<std::size_t>(lts_.num_states(), 0)),
+
+        m_lts(lts_),
+        m_signature(lts_)
   {}
 
   /** \brief Perform the reduction, modulo the equivalence for which the

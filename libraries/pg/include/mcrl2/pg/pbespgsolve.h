@@ -130,22 +130,17 @@ std::string print(StaticGraph::EdgeDirection edge_direction)
 
 struct pbespgsolve_options
 {
-  pbespg_solver_type solver_type;
-  bool use_scc_decomposition;
-  bool use_decycle_solver;
-  bool use_deloop_solver;
-  bool verify_solution;
-  bool only_generate;
-  data::rewriter::strategy rewrite_strategy;
+  pbespg_solver_type solver_type = spm_solver;
+  bool use_scc_decomposition = true;
+  bool use_decycle_solver = false;
+  bool use_deloop_solver = true;
+  bool verify_solution = true;
+  bool only_generate = false;
+  data::rewriter::strategy rewrite_strategy = data::jitty;
 
   pbespgsolve_options()
-    : solver_type(spm_solver),
-      use_scc_decomposition(true),
-      use_decycle_solver(false),
-      use_deloop_solver(true),
-      verify_solution(true),
-      only_generate(false),
-      rewrite_strategy(data::jitty)
+    :
+
   {
   }
 };

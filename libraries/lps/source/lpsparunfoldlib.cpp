@@ -460,12 +460,12 @@ void unfold_data_manager::generate_determine_function_equations(const data::sort
 
 /// \brief Constructor
 lpsparunfold::lpsparunfold(lps::stochastic_specification& spec,
-                           std::map< data::sort_expression , unfold_cache_element >& cache,
-                           bool alt_case_placement,
-                           bool possibly_inconsistent,
-                           bool unfold_pattern_matching)
+    std::map<data::sort_expression, unfold_cache_element>& cache,
+    bool alt_case_placement,
+    bool possibly_inconsistent,
+    bool unfold_pattern_matching)
     : lps::detail::lps_algorithm<lps::stochastic_specification>(spec),
-      m_run_before(false),
+
       m_datamgr(cache, spec.data(), possibly_inconsistent),
       m_pattern_unfolder(m_datamgr),
       m_alt_case_placement(alt_case_placement),

@@ -13,9 +13,9 @@ LinearLiftingStrategy::LinearLiftingStrategy(const ParityGame& game, bool altern
     : LiftingStrategy(),
       alternate_(alternate),
       last_vertex_(game.graph().V() - 1),
-      dir_(false),
+
       vertex_(NO_VERTEX),
-      failed_lifts_(0)
+
 {
 }
 

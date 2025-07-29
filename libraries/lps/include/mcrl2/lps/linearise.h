@@ -23,39 +23,26 @@ namespace mcrl2::lps
 /// \brief Options for linearisation
 struct t_lin_options
 {
-  t_lin_method lin_method;
-  bool no_intermediate_cluster;
-  bool final_cluster;
-  bool newstate;
-  bool binary;
-  bool statenames;
-  bool norewrite;
-  bool noglobalvars;
-  bool nosumelm;
-  bool nodeltaelimination;
-  bool ignore_time;
-  bool do_not_apply_constelm;
-  bool apply_alphabet_axioms;
-  bool balance_summands;      // Used to balance long expressions of the shape p1 + p2 + ... + pn. By default the parser delivers
-                              // such expressions in a skewed form, causing stack overflow. 
-  mcrl2::data::rewriter::strategy rewrite_strategy;
+  t_lin_method lin_method = lmRegular;
+  bool no_intermediate_cluster = false;
+  bool final_cluster = false;
+  bool newstate = false;
+  bool binary = false;
+  bool statenames = false;
+  bool norewrite = false;
+  bool noglobalvars = false;
+  bool nosumelm = false;
+  bool nodeltaelimination = false;
+  bool ignore_time = false;
+  bool do_not_apply_constelm = false;
+  bool apply_alphabet_axioms = false;
+  bool balance_summands = false; // Used to balance long expressions of the shape p1 + p2 + ... + pn. By default the
+                                 // parser delivers such expressions in a skewed form, causing stack overflow.
+  mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::jitty;
 
   t_lin_options()
-    : lin_method(lmRegular),
-      no_intermediate_cluster(false),
-      final_cluster(false),
-      newstate(false),
-      binary(false),
-      statenames(false),
-      norewrite(false),
-      noglobalvars(false),
-      nosumelm(false),
-      nodeltaelimination(false),
-      ignore_time(false),
-      do_not_apply_constelm(false),
-      apply_alphabet_axioms(false),
-      balance_summands(false),              
-      rewrite_strategy(mcrl2::data::jitty)
+    :
+
   {}
 };
 

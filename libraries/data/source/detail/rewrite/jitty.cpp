@@ -168,7 +168,7 @@ RewriterJitty::RewriterJitty(
         this_term_is_in_normal_form_symbol(
                          std::string("Rewritten@@term"),
                          function_sort({ untyped_sort() },untyped_sort())),
-        rewriting_in_progress(false)
+
 {
   thread_initialise();
   for (const data_equation& eq: data_spec.equations())

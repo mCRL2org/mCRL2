@@ -24,13 +24,13 @@ namespace mcrl2::lps::detail
 struct lps_well_typed_checker
 {
   // The result of the last well typedness check.
-  bool result;
+  bool result = false;
 
   // Error message are written to the output stream error.
   mutable std::ostringstream error;
 
   lps_well_typed_checker()
-    : result(false)
+    :
   {}
 
   /// \brief Checks if the sort of t has type real

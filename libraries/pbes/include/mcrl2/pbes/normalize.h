@@ -28,10 +28,10 @@ struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_t
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result = true;
 
   is_normalized_traverser()
-    : result(true)
+    :
   {}
 
   /// \brief Visit not node
@@ -55,10 +55,10 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
   using super = pbes_expression_builder<normalize_builder>;
   using super::apply;
 
-  bool negated;
+  bool negated = false;
 
   normalize_builder()
-    : negated(false)
+    :
   {}
 
   template <class T>

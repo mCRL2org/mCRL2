@@ -26,8 +26,8 @@ class untime_tool: public rewriter_tool< input_output_tool >
 
     using super = rewriter_tool<input_output_tool>;
 
-    bool add_invariants;
-    bool apply_fourier_motzkin;
+    bool add_invariants = false;
+    bool apply_fourier_motzkin = false;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser) override
@@ -67,8 +67,7 @@ class untime_tool: public rewriter_tool< input_output_tool >
         "Remove time from the linear process specification (LPS) in INFILE and write the "
         "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not "
         "present, stdout is used."),
-      add_invariants(false),
-      apply_fourier_motzkin(false)
+
     {}
 
     bool run() override

@@ -25,7 +25,7 @@ class rewriter_tool: public Tool
 {
   protected:
     /// The data rewriter strategy
-    data::rewrite_strategy m_rewrite_strategy;
+    data::rewrite_strategy m_rewrite_strategy = mcrl2::data::jitty;
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
@@ -95,7 +95,7 @@ class rewriter_tool: public Tool
                   std::string known_issues = ""
                  )
       : Tool(name, author, what_is, tool_description, known_issues),
-        m_rewrite_strategy(mcrl2::data::jitty)
+
     {}
 
     /// \brief Returns the rewrite strategy

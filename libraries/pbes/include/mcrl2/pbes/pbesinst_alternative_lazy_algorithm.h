@@ -148,7 +148,7 @@ class pbesinst_alternative_lazy_algorithm
 
     /// When the todo buffer is limited, due to m_maximum_todo_size, then the variable below counts how
     /// many elements are dropped out of the todo buffer.
-    std::size_t m_elements_not_stored_in_todo_buffer;
+    std::size_t m_elements_not_stored_in_todo_buffer = 0;
 
     /// Indicate to which extent explored bes equations that turn out not to reachable can be thrown away.
     /// Values are: none, some or all.
@@ -231,25 +231,22 @@ class pbesinst_alternative_lazy_algorithm
     ///                          true or false, depending on the parameter \p approximate_true.
     /// \param approximate_true If true BES variables that are not investigated are set to false. If false
     ///                         these variables are set to true.
-    pbesinst_alternative_lazy_algorithm(
-        const data::data_specification& data_spec,
+    pbesinst_alternative_lazy_algorithm(const data::data_specification& data_spec,
         const data::rewriter& datar,
         search_strategy search_strategy = breadth_first,
         transformation_strategy transformation_strategy = lazy,
         const mcrl2::pbes_system::remove_level erase_unused_bes_variables = mcrl2::pbes_system::none,
         const std::size_t maximum_todo_size = std::numeric_limits<std::size_t>::max(),
-        const bool approximate_true = true
-        )
-      :
-        m_data_spec(data_spec),
-        m_datar(datar),
-        R(datar, data_spec),
-        m_maximum_todo_size(maximum_todo_size),
-        m_approximate_true(approximate_true),
-        m_elements_not_stored_in_todo_buffer(0),
-        m_erase_unused_bes_variables(erase_unused_bes_variables),
-        m_search_strategy(search_strategy),
-        m_transformation_strategy(transformation_strategy)
+        const bool approximate_true = true)
+        : m_data_spec(data_spec),
+          m_datar(datar),
+          R(datar, data_spec),
+          m_maximum_todo_size(maximum_todo_size),
+          m_approximate_true(approximate_true),
+
+          m_erase_unused_bes_variables(erase_unused_bes_variables),
+          m_search_strategy(search_strategy),
+          m_transformation_strategy(transformation_strategy)
     {
       // Initialize the random generator, with an arbitrary seed, depending on a new time.
       time_t t=time(nullptr);

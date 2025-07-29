@@ -65,7 +65,7 @@ private:
 
   protected:
 
-    bool m_do_not_use_dummies;
+    bool m_do_not_use_dummies = false;
 
     void add_options(interface_description& desc) override
     {
@@ -361,7 +361,7 @@ private:
         "Command-line simulation of an LPS",
         "Simulate the LPS in INFILE via a text-based interface."
       ),
-      m_do_not_use_dummies(false)
+
     {}
 
     bool run() override

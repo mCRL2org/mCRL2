@@ -46,25 +46,25 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     /// \brief The flag indicating whether or not the invariance of the formula as found in
     /// \brief invelm_tool::m_invariant_file_name is checked.
-    bool m_no_check;
+    bool m_no_check = false;
 
     /// \brief The flag indicating whether or not elimination or simplification is applied.
-    bool m_no_elimination;
+    bool m_no_elimination = false;
 
     /// \brief The flag indicating whether or not the conditions of all summands will be simplified.
     /// \brief If this flag is set to false, only the summands whose conditions violate the invariant
     /// \brief are eliminated.
-    bool m_simplify_all;
+    bool m_simplify_all = false;
 
     /// \brief The flag indicating whether or not all violations encountered while checking the invariant
     /// \brief are reported. If this flag is set to false, the checking stops as soon as a violation is
     /// \brief encountered.
-    bool m_all_violations;
+    bool m_all_violations = false;
 
     /// \brief The flag indicating whether or not counter examples are printed each time a summand is
     /// \brief encountered whose condition in conjunction with the invariant is not a tautology or a
     /// \brief contradiction.
-    bool m_counter_example;
+    bool m_counter_example = false;
 
     /// \brief The prefix of the files in dot format that are written each time a summand is
     /// \brief encountered whose condition in conjunction with the invariant is not a tautology or a
@@ -73,13 +73,13 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     /// \brief The maximal number of seconds spent on proving the conjunction of the invariant
     /// \brief and a summands' condition
-    int m_time_limit;
+    int m_time_limit = 0;
 
     /// \brief The flag indicating whether or not a path eliminator is used.
-    bool m_path_eliminator;
+    bool m_path_eliminator = false;
 
     /// \brief The flag indicating whether or not induction should be applied.
-    bool m_apply_induction;
+    bool m_apply_induction = false;
 
     /// \brief The invariant provided as input.
     data_expression m_invariant;
@@ -162,14 +162,7 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
         "If INFILE is present, stdin is used. If OUTFILE is not present, stdout is used.\n"
         "\n"
         "The tool can also be used to simplify the conditions of the summands of the given LPS."),
-      m_no_check(false),
-      m_no_elimination(false),
-      m_simplify_all(false),
-      m_all_violations(false),
-      m_counter_example(false),
-      m_time_limit(0),
-      m_path_eliminator(false),
-      m_apply_induction(false)
+
     {}
 
     bool run() override
