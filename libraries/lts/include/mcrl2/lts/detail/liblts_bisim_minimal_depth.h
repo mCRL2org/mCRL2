@@ -39,7 +39,7 @@ public:
    */
   bisim_partitioner_minimal_depth(LTS_TYPE& l, const std::size_t init_l2)
       : initial_l2(init_l2),
-        max_state_index(0),
+
         aut(l)
   {
     to_be_processed.clear();
@@ -130,7 +130,7 @@ private:
   using label_type = std::size_t;
   state_type initial_l2;
 
-  state_type max_state_index;
+  state_type max_state_index = 0;
   LTS_TYPE& aut;
   std::set<block_index_type> partition;
 

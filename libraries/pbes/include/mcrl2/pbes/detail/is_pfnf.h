@@ -172,11 +172,7 @@ struct is_pfnf_traverser: public pbes_expression_traverser<is_pfnf_traverser>
   using super::leave;
   using super::apply;
 
-  bool result;
-
-  is_pfnf_traverser()
-    : result(true)
-  {}
+  bool result = true;
 
   void apply(const pbes_expression& x)
   {

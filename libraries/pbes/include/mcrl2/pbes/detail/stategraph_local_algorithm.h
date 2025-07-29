@@ -123,9 +123,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
     // if true, marking updates will be cached in the nodes of the local CFGs
     bool m_cache_marking_updates;
 
-    std::size_t m_marking_rewrite_count;
+    std::size_t m_marking_rewrite_count = 0;
 
-    std::size_t m_marking_rewrite_cached_count;
+    std::size_t m_marking_rewrite_cached_count = 0;
 
     std::vector<core::identifier_string> binding_variable_names() const
     {
@@ -1138,10 +1138,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
   public:
     stategraph_local_algorithm(const pbes& p, const pbesstategraph_options& options)
       : stategraph_algorithm(p, options),
-        m_cache_marking_updates(options.cache_marking_updates),
-        m_marking_rewrite_count(0),
-        m_marking_rewrite_cached_count(0)
-
+        m_cache_marking_updates(options.cache_marking_updates)
     { }
 
     /// \brief Computes the control flow graph
