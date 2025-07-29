@@ -128,7 +128,7 @@ bool is_allowed(const std::vector<core::identifier_string_list>& allowed, const 
     return true;
   }
 
-  for (const auto& action : allowed)
+  for (const atermpp::term_list<atermpp::aterm_string>& action: allowed)
   {
     if (action == action_names)
     {
