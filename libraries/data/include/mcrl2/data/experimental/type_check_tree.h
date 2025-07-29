@@ -96,10 +96,9 @@ struct type_check_context
   std::map<core::identifier_string, sort_expression> user_constants;
   std::map<core::identifier_string, function_sort_list> user_functions;
   std::map<core::identifier_string, std::vector<sort_expression> > declared_variables;
-  mutable std::size_t sort_variable_index;
+  mutable std::size_t sort_variable_index = 0;
 
   type_check_context(const data::data_specification& dataspec = data::data_specification())
-    : sort_variable_index(0)
   {
     type_checker checker(dataspec);
     system_constants = checker.system_constants();

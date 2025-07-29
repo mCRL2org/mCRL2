@@ -27,9 +27,9 @@ class ltsinfo_tool : public ltsinfo_base
   private:
 
     std::string                 infilename;
-    mcrl2::lts::lts_type        intype;
+    mcrl2::lts::lts_type intype = mcrl2::lts::lts_none;
     bool                        print_action_labels;
-    bool                        print_state_labels;
+    bool print_state_labels = false;
     bool                        print_branching_factor;
 
   public:
@@ -44,11 +44,8 @@ class ltsinfo_tool : public ltsinfo_base
                    "The option --in can be used to force the format for INFILE. "
                    "The supported formats are:\n"
                    +mcrl2::lts::detail::supported_lts_formats_text()
-                  ),
-      intype(mcrl2::lts::lts_none),
-      print_state_labels(false)
-    {
-    }
+                  )
+    {}
 
   protected:
 

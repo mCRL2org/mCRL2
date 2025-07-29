@@ -4342,8 +4342,7 @@ sort_expression_list mcrl2::data::data_type_checker::GetNotInferredList(const te
 }
 
 mcrl2::data::data_type_checker::data_type_checker(const data_specification& data_spec)
-      : sort_type_checker(data_spec),
-        was_warning_upcasting(false)
+      : sort_type_checker(data_spec)
 {
   initialise_system_defined_functions();
 
