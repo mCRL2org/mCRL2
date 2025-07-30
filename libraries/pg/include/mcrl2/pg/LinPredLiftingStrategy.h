@@ -33,14 +33,19 @@ public:
     {
         (void)spm;  // unused
         cur_queue.reserve(graph_.V());
-        for (verti v = 0; v < graph_.V(); ++v) cur_queue.push_back(v);
+        for (verti v = 0; v < graph_.V(); ++v)
+        {
+          cur_queue.push_back(v);
+        }
         pos = cur_queue.begin();
     }
 
     void lifted(verti v) override
     {
-        for ( StaticGraph::const_iterator it = graph_.pred_begin(v);
-              it != graph_.pred_end(v); ++it ) next_queue.push_back(*it);
+      for (StaticGraph::const_iterator it = graph_.pred_begin(v); it != graph_.pred_end(v); ++it)
+      {
+        next_queue.push_back(*it);
+      }
     }
 
     verti next() override
@@ -54,7 +59,10 @@ public:
             cur_queue.swap(next_queue);
             pos = cur_queue.begin();
         }
-        if (pos == cur_queue.end()) return NO_VERTEX;
+        if (pos == cur_queue.end())
+        {
+          return NO_VERTEX;
+        }
         return *pos++;
     }
 

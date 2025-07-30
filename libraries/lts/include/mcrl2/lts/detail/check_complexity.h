@@ -756,7 +756,10 @@ class check_complexity
             assert(to < FirstTempCounter || FirstPostprocessCounter <= to);
             assert(to <= LastCounter);
             assert(max_value <= (to < FirstTempCounter ? log_n : 1U));
-            if (0 == counters[from - FirstCounter])  return complexity_ok;
+            if (0 == counters[from - FirstCounter])
+            {
+              return complexity_ok;
+            }
             if (counters[to - FirstCounter] >= max_value)
             {
                 mCRL2log(log::error) << "Error 2: counter \""

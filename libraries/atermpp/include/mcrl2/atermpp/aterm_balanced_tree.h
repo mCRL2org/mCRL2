@@ -66,7 +66,10 @@ class term_balanced_tree : public aterm
                           {
                             transformer(reinterpret_cast<Term&>(target), *(p++));
                           }
-                          else make_tree_helper(target, p, new_size, transformer);
+                          else
+                          {
+                            make_tree_helper(target, p, new_size, transformer);
+                          }
                         },
                      [&size, &transformer, &p](aterm& target)
                         { 
@@ -77,7 +80,10 @@ class term_balanced_tree : public aterm
                           {
                             transformer(reinterpret_cast<Term&>(target), *(p++));
                           }
-                          else make_tree_helper(target, p, new_size, transformer);
+                          else
+                          {
+                            make_tree_helper(target, p, new_size, transformer);
+                          }
                         });
     }
 

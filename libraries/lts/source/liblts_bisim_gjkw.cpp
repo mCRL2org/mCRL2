@@ -89,7 +89,10 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
             *pos1 = *pos2;
             (*pos1)->pos = pos1;
             ++pos1;
-            if (0 == --swapcount)  break;
+            if (0 == --swapcount)
+            {
+              break;
+            }
             *pos2 = *pos1;
             (*pos2)-> pos = pos2;
         }
@@ -168,7 +171,10 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
             *pos1 = *--pos2;
             (*pos1)->pos = pos1;
             ++pos1;
-            if (0 == --swapcount)  break;
+            if (0 == --swapcount)
+            {
+              break;
+            }
             *pos2 = *pos1;
             (*pos2)->pos = pos2;
         }
@@ -291,11 +297,19 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                                                                                            ? " is inert.\n" : " are inert.\n");
                                                                                                 }
                                                                                                 // go to next block
-                                                                                                if (C->end() == B->end())  break;
+                                                                                                if (C->end()
+                                                                                                    == B->end())
+                                                                                                {
+                                                                                                  break;
+                                                                                                }
                                                                                                 B = (*B->end())->block;
                                                                                             }
                                                                                             // go to next constellation
-                                                                                            if (permutation.end() == C->end())  break;
+                                                                                            if (permutation.end()
+                                                                                                == C->end())
+                                                                                            {
+                                                                                              break;
+                                                                                            }
                                                                                             C = (*C->end())->constln();
                                                                                         }
                                                                                     }
@@ -579,10 +593,14 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s                           
                                                                                 assert(succ.end() == to_C_end || to_C_end->B_to_C->pred->succ == to_C_end);
                                                                                 assert(succ.end() == to_C_begin ||
                                                                                                              to_C_begin->B_to_C->pred->succ == to_C_begin);
-    if (!result)  ;
-    else if (split < to_C_end)
-    {
-        // s has both inert and non-inert transitions
+                                                                                if (!result)
+                                                                                {
+                                                                                  ;
+                                                                                }
+                                                                                else if (split < to_C_end)
+                                                                                {
+                                                                                  // s has both inert and non-inert
+                                                                                  // transitions
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
         /* the out-transitions of s also have to be swapped.                 */     unsigned const max_counter = check_complexity::log_n -
         /* Actually only B_to_C and the target need to be swapped, as the    */                                          check_complexity::ilog2(NewC->size());
@@ -604,7 +622,10 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s                           
             pos1->B_to_C = pos2->B_to_C;
             pos1->B_to_C->pred->succ = pos1;
             ++pos1;
-            if (0 == --swapcount)  break;
+            if (0 == --swapcount)
+            {
+              break;
+            }
             pos2->target = pos1->target;
             pos2->B_to_C = pos1->B_to_C;
             pos2->B_to_C->pred->succ = pos2;
@@ -1042,7 +1063,11 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                                                                                             for (;;)
                                                                                             {
                                                                                                 ++nr_of_nontrivial_constellations;
-                                                                                                if (C->get_nontrivial_next() == C)  break;
+                                                                                                if (C->get_nontrivial_next()
+                                                                                                    == C)
+                                                                                                {
+                                                                                                  break;
+                                                                                                }
                                                                                                 C = C->get_nontrivial_next();
                                                                                                 assert(nullptr != C);
                                                                                             }
@@ -1332,7 +1357,11 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                                                                                                                 --nr_of_reachable_constlns;
                                                                                                             }
                                                                                                     // end for
-                                                                                                            if (s->succ_end() <= succ_iter)  break;
+                                                                                                            if (s->succ_end()
+                                                                                                                <= succ_iter)
+                                                                                                            {
+                                                                                                              break;
+                                                                                                            }
                                                                                                             assert(0 != nr_of_reachable_constlns);
                                                                                                             assert(*targetC < *succ_iter->target->constln());
                                                                                                         }
@@ -1406,13 +1435,24 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                                                                                                 while (++s_iter < B->end());
                                                                                                 assert(0 == nr_of_inert_successors);
                                                                                             // end for (all blocks B in C)
-/* ************************************************************************* */                 if (B->end() == C->end())  break;
+                                                                                                /* *************************************************************************
+                                                                                                 */
+                                                                                                if (B->end()
+                                                                                                    == C->end())
+                                                                                                {
+                                                                                                  break;
+                                                                                                }
 /*                                                                           */                 assert(B->end() < C->end());
 /*                            A L G O R I T H M S                            */                 assert(B->end() == (*B->end())->block->begin());
 /*                                                                           */                 B = (*B->end())->block;
 /* ************************************************************************* */             }
                                                                                         // end for (all constellations C)
-                                                                                            if (C->end() == part_st.permutation.end())  break;
+                                                                                            if (C->end()
+                                                                                                == part_st.permutation
+                                                                                                    .end())
+                                                                                            {
+                                                                                              break;
+                                                                                            }
                                                                                             assert(C->end() < part_st.permutation.end());
                                                                                             assert(C->end() == (*C->end())->constln()->begin());
                                                                                             C = (*C->end())->constln();
@@ -1582,7 +1622,11 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             }                                                                   assert(succ_iter == succ_end);
             succ_end->set_slice_begin_or_before_end(
                                            part_st.state_info[s].succ_begin());
-        }                                                                       else  assert(succ_end == succ_iter);
+        }
+        else
+        {
+          assert(succ_end == succ_iter);
+        }
         if (s < aut.num_states())
         {
             // s is not an extra Kripke state.  It is in block 0.
@@ -2069,7 +2113,10 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             {
                 // 2.24: RedB := PostprocessNewBottom(RedB, BlueB)
                 RedB = postprocess_new_bottom(RedB);
-                if (nullptr == RedB)  continue;
+                if (nullptr == RedB)
+                {
+                  continue;
+                }
             // 2.25: end if
             }
             // 2.30: Unmark all states of the original RfnB as predecessors
@@ -2803,7 +2850,10 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
 
         COROUTINE
             // 3.5r: whenever |Red| > |RfnB|/2 then  Abort this coroutine
-            if (RfnB->marked_size() > RfnB->size()/2)  ABORT_THIS_COROUTINE();
+        if (RfnB->marked_size() > RfnB->size() / 2)
+        {
+          ABORT_THIS_COROUTINE();
+        }
             // The red block contains at most RfnB->size() -
             // RfnB->unmarked_bottom_size() + FromRed->size() states.  If that
             // is <= RfnB->size() / 2, we could abort the other coroutine
@@ -2948,7 +2998,11 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                                                         s_prime->block == RedB)
                     {
                         continue;
-                    }                                                           else  assert(s_prime->block == RfnB);
+                    }
+                    else
+                    {
+                      assert(s_prime->block == RfnB);
+                    }
                     // 3.33r: s --> s_prime is no longer inert
                     part_tr.make_noninert(succ_iter);
                 // 3.34r: end for

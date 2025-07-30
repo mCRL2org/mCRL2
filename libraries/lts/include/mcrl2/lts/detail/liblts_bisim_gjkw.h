@@ -733,7 +733,10 @@ class block_t
     /// \returns true if the state was not marked before
     bool mark_nonbottom(state_info_ptr s)
     {                                                                           assert(s->pos < nonbottom_end());  assert(nonbottom_begin() <= s->pos);
-        if (marked_nonbottom_begin() <= s->pos)  return false;
+      if (marked_nonbottom_begin() <= s->pos)
+      {
+        return false;
+      }
         set_marked_nonbottom_begin(marked_nonbottom_begin() - 1);
         swap_permutation(s->pos, marked_nonbottom_begin());
         return true;
@@ -749,7 +752,10 @@ class block_t
     {                                                                           assert(s->pos < end());
         if (bottom_begin() <= s->pos)
         {
-            if (marked_bottom_begin() <= s->pos)  return false;
+          if (marked_bottom_begin() <= s->pos)
+          {
+            return false;
+          }
             set_marked_bottom_begin(marked_bottom_begin() - 1);
             swap_permutation(s->pos, marked_bottom_begin());
             return true;
@@ -1078,9 +1084,15 @@ class part_state_t
             block_t* const B = permutation_iter[-1]->block;                     assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
                                                                                 #ifndef NDEBUG
-                                                                                    if (BLOCK_NO_SEQNR != B->seqnr())  ++deleted_blocks;
-                                                                                    else                               assert(0 == deleted_blocks);
-                                                                                #endif
+            if (BLOCK_NO_SEQNR != B->seqnr())
+            {
+              ++deleted_blocks;
+            }
+            else
+            {
+              assert(0 == deleted_blocks);
+            }
+#endif
             delete B;
         }                                                                       assert(deleted_blocks == block_t::nr_of_blocks);
         block_t::nr_of_blocks = 0;
@@ -1376,9 +1388,13 @@ class B_to_C_descriptor
                                                                                         assert(begin < end);
                                                                                         std::string result("slice containing transition");
                                                                                         if (end - begin > 1)
-                                                                                            result += "s ";
+                                                                                        {
+                                                                                          result += "s ";
+                                                                                        }
                                                                                         else
-                                                                                            result += " ";
+                                                                                        {
+                                                                                          result += " ";
+                                                                                        }
                                                                                         B_to_C_const_iter_t iter = begin;
                                                                                         assert(iter->pred->succ->B_to_C == iter);
                                                                                         result += iter->pred->debug_id_short();

@@ -24,13 +24,25 @@ inline int SmallProgressMeasures::vector_cmp(verti v, verti w, int N) const
 inline int SmallProgressMeasures::vector_cmp( const verti vec1[],
                                               const verti vec2[], int N ) const
 {
-    if (is_top(vec1)) return is_top(vec2) ? 0 : +1;  // v is top
-    if (is_top(vec2)) return -1;                     // w is top, but v isn't
+  if (is_top(vec1))
+  {
+    return is_top(vec2) ? 0 : +1; // v is top
+  }
+  if (is_top(vec2))
+  {
+    return -1; // w is top, but v isn't
+  }
 
     for (int n = 0; n < N; ++n)
     {
-        if (vec1[n] < vec2[n]) return -1;
-        if (vec1[n] > vec2[n]) return +1;
+      if (vec1[n] < vec2[n])
+      {
+        return -1;
+      }
+      if (vec1[n] > vec2[n])
+      {
+        return +1;
+      }
     }
 
     return 0;
@@ -49,7 +61,9 @@ inline verti SmallProgressMeasures::get_ext_succ(verti v, bool take_max) const
   {
     int d = vector_cmp(*it, res, N);
     if (take_max ? d > 0 : d < 0)
+    {
       res = *it;
+    }
     }
     return res;
 }
@@ -136,7 +150,10 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
         // Now collect guaranteed winning vertices:
         for (verti v = 0; v < V; ++v)
         {
-            if (!marked[v]) *result++ = v;
+          if (!marked[v])
+          {
+            *result++ = v;
+          }
         }
     }
     else
@@ -144,14 +161,20 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
         // All vertices with Top progress measures are won by opponent:
         for (verti v = 0; v < V; ++v)
         {
-            if (is_top(v)) *result++ = v;
+          if (is_top(v))
+          {
+            *result++ = v;
+          }
         }
     }
 }
 
 bool SmallProgressMeasures::lift_to_top(verti v)
 {
-    if (is_top(v)) return false;
+  if (is_top(v))
+  {
+    return false;
+  }
     set_top(v);
     return true;
 }
@@ -161,7 +184,10 @@ void SmallProgressMeasures::set_top(verti v)
     assert(!is_top(v));
     set_vec_to_top(v);
     std::size_t prio = game_.priority(v);
-    if (prio%2 != p_) decr_M(prio/2);
+    if (prio % 2 != p_)
+    {
+      decr_M(prio / 2);
+    }
 }
 
 #endif // MCRL2_PG_SMALLPROGRESSMEASURES_IMPL_H

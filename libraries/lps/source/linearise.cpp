@@ -1349,14 +1349,17 @@ class specification_basic_type
       if (is_sum(p))
       {
         if (strict)
+        {
           return occursintermlist(var,variable_list_to_data_expression_list(sum(p).variables())) ||
                  occursinpCRLterm(var,sum(p).operand(),strict);
         /* below appears better? , but leads
            to errors. Should be investigated. */
+        }
         else
-          return
-            (!occursintermlist(var,variable_list_to_data_expression_list(sum(p).variables()))) &&
-            occursinpCRLterm(var,sum(p).operand(),strict);
+        {
+          return (!occursintermlist(var, variable_list_to_data_expression_list(sum(p).variables())))
+                 && occursinpCRLterm(var, sum(p).operand(), strict);
+        }
       }
       if (is_stochastic_operator(p))
       {

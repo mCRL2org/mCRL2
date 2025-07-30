@@ -99,7 +99,10 @@ public:
     iterator begin()
     {
         Val *v = &values_[0];
-        while (v->second == Unused) ++v;
+        while (v->second == Unused)
+        {
+          ++v;
+        }
         return iterator(v);
     }
 

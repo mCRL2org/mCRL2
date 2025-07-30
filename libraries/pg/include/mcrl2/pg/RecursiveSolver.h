@@ -29,7 +29,10 @@ private:
 
         Reference &operator=(verti w)
         {
-            if (w != NO_VERTEX) w = substrat_.global(w);
+          if (w != NO_VERTEX)
+          {
+            w = substrat_.global(w);
+          }
             substrat_.strategy_[v_] = w;
             return *this;
         }
@@ -73,7 +76,10 @@ public:
     //! Returns the winner for vertex `v` assuming it is controlled by `p`.
     ParityGame::Player winner(verti v, ParityGame::Player p)
     {
-        if (strategy_[global(v)] == NO_VERTEX) p = opponent(p);
+      if (strategy_[global(v)] == NO_VERTEX)
+      {
+        p = opponent(p);
+      }
         return p;
     }
 

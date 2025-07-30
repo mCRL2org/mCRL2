@@ -33,7 +33,9 @@ inline std::string copyright_period()
   // We assume that the version number always starts with a four digit year
   // in which the version was released.
   if (get_toolset_version().size() >= 4)
+  {
     return get_toolset_version().substr(0, 4);
+  }
   return "Today";
 }
 

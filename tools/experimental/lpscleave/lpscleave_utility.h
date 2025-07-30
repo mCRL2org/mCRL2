@@ -32,9 +32,13 @@ std::list<std::string> split_actions(const std::string& s)
     else
     {
       if (i == '(')
+      {
         ++pcount;
+      }
       else if (i == ')')
+      {
         --pcount;
+      }
       a.push_back(i);
     }
   }

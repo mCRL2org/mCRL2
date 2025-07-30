@@ -515,7 +515,10 @@ template <class LTS_TYPE>
     }
 
     std::stack<cs_game_node> todo;
-    for (const cs_game_node& d : defender_nodes) todo.push(d); // XXX make me better
+    for (const cs_game_node& d: defender_nodes)
+    {
+      todo.push(d); // XXX make me better
+    }
     // todo.assign(defender_nodes.begin(), defender_nodes.end());
 
     mCRL2log(log::verbose)

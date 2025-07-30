@@ -194,13 +194,17 @@ inline std::set<propositional_variable_instantiation> filter_pvis(const proposit
       [&](const propositional_variable_instantiation& v)
       {
         if (v.name() != needle.name())
+        {
           return false;
+        }
 
         const auto& v_params = as_vector(v.parameters());
         const auto& needle_params = as_vector(needle.parameters());
 
         if (v_params.size() != needle_params.size())
+        {
           return false;
+        }
 
         for (std::size_t i = 0; i < v_params.size(); ++i)
         {
@@ -225,13 +229,17 @@ inline bool pvi_in_set(const propositional_variable_instantiation needle,
       [&](const propositional_variable_instantiation& v)
       {
         if (v.name() != needle.name())
+        {
           return false;
+        }
 
         const auto& v_params = as_vector(v.parameters());
         const auto& needle_params = as_vector(needle.parameters());
 
         if (v_params.size() != needle_params.size())
+        {
           return false;
+        }
 
         for (size_t i = 0; i < v_params.size(); i++)
         {
@@ -322,9 +330,13 @@ inline void self_substitute(pbes_equation& equation,
     for (const propositional_variable_instantiation& x: set)
     {
       if (equation.variable().name() != x.name())
+      {
         continue;
+      }
       if (auto it = stable_set.find(x); it != stable_set.end())
+      {
         continue;
+      }
       // Check if during the substitution of the other pvi this one got cancelled out
       std::set<propositional_variable_instantiation> path = {x};
 

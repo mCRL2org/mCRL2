@@ -29,7 +29,10 @@ MaxMeasureLiftingStrategy2::MaxMeasureLiftingStrategy2(const ParityGame& game,
 void MaxMeasureLiftingStrategy2::move_up(verti i)
 {
     // FIXME: this can be implemented with less swapping if I think harder.
-    for (verti j; i > 0 && cmp(i, j = (i - 1)/2) > 0; i = j) swap(i, j);
+    for (verti j; i > 0 && cmp(i, j = (i - 1) / 2) > 0; i = j)
+    {
+      swap(i, j);
+    }
 }
 
 void MaxMeasureLiftingStrategy2::move_down(verti i)
@@ -97,7 +100,10 @@ void MaxMeasureLiftingStrategy2::push(verti v)
     pq_[pq_size_] = v;
     pq_pos_[v] = pq_size_;
     ++pq_size_;
-    if (insert_id_) insert_id_[v] = next_id_++;
+    if (insert_id_)
+    {
+      insert_id_[v] = next_id_++;
+    }
     bumped_.push_back(pq_pos_[v]);
 }
 
@@ -120,8 +126,10 @@ verti MaxMeasureLiftingStrategy2::pop()
         std::sort(bumped_.begin(), bumped_.end());
         bumped_.erase( std::unique(bumped_.begin(), bumped_.end()),
                        bumped_.end() );
-        for (std::vector<verti>::iterator it = bumped_.begin();
-             it != bumped_.end(); ++it) move_up(*it);
+        for (std::vector<verti>::iterator it = bumped_.begin(); it != bumped_.end(); ++it)
+        {
+          move_up(*it);
+        }
 
         // CHECKME: why is this necessary for MAX_STEP too?
         //          shouldn't this just be for MIN_STEP?
@@ -139,13 +147,18 @@ verti MaxMeasureLiftingStrategy2::pop()
             */
 
             // Move bumped vertices down the heap.
-            for (std::vector<verti>::reverse_iterator it = bumped_.rbegin();
-                 it != bumped_.rend(); ++it) move_down(*it);
+            for (std::vector<verti>::reverse_iterator it = bumped_.rbegin(); it != bumped_.rend(); ++it)
+            {
+              move_down(*it);
+            }
         }
         bumped_.clear();
     }
 
-    if (pq_size_ == 0) return NO_VERTEX;
+    if (pq_size_ == 0)
+    {
+      return NO_VERTEX;
+    }
 
 #ifdef DEBUG
     if (ops >= pq_size_)
@@ -189,14 +202,29 @@ static int cmp_step( const verti *v1, const verti *v2, int v_len, bool v_carry,
     {
         int a = i < v_len ? v2[i] - v1[i] : 0;
         int b = i < w_len ? w2[i] - w1[i] : 0;
-        if (a != b) return (a > b) - (a < b);
+        if (a != b)
+        {
+          return (a > b) - (a < b);
+        }
     }
     if (v_carry || w_carry)
     {
-        if (!w_carry) return +1;
-        if (!v_carry) return -1;
-        if (v_len < w_len) return +1;
-        if (v_len > w_len) return -1;
+      if (!w_carry)
+      {
+        return +1;
+      }
+      if (!v_carry)
+      {
+        return -1;
+      }
+      if (v_len < w_len)
+      {
+        return +1;
+      }
+      if (v_len > w_len)
+      {
+        return -1;
+      }
     }
     return 0;
 }
@@ -252,12 +280,18 @@ bool MaxMeasureLiftingStrategy2::check()
 {
     for (verti i = 1; i < pq_size_; ++i)
     {
-        if (cmp(i, (i - 1)/2) > 0) return false;
+      if (cmp(i, (i - 1) / 2) > 0)
+      {
+        return false;
+      }
     }
 
     for (verti i = 0; i < pq_size_; ++i)
     {
-        if (pq_pos_[pq_[i]] != i) return false;
+      if (pq_pos_[pq_[i]] != i)
+      {
+        return false;
+      }
     }
 
     const verti V = spm_.game().graph().V();
@@ -265,7 +299,10 @@ bool MaxMeasureLiftingStrategy2::check()
     {
         if (pq_pos_[v] != NO_VERTEX)
         {
-            if (pq_[pq_pos_[v]] != v) return false;
+          if (pq_[pq_pos_[v]] != v)
+          {
+            return false;
+          }
         }
     }
 

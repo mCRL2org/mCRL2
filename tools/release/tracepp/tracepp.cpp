@@ -56,13 +56,34 @@ std::string description(const output_type t)
 static inline
 output_type parse_output_type(const std::string& s)
 {
-  if(s == "plain") return otPlain;
-  else if(s == "mcrl2") return otMcrl2;
-  else if(s == "dot") return otDot;
-  else if(s == "aut") return otAut;
-  else if(s == "none") return otNone;
-  else if(s == "states") return otStates;
-  else throw mcrl2::runtime_error("unknown trace format " + s);
+  if (s == "plain")
+  {
+    return otPlain;
+  }
+  else if (s == "mcrl2")
+  {
+    return otMcrl2;
+  }
+  else if (s == "dot")
+  {
+    return otDot;
+  }
+  else if (s == "aut")
+  {
+    return otAut;
+  }
+  else if (s == "none")
+  {
+    return otNone;
+  }
+  else if (s == "states")
+  {
+    return otStates;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown trace format " + s);
+  }
 }
 
 static inline

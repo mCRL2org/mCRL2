@@ -30,11 +30,26 @@ enum search_strategy
 inline
 search_strategy parse_search_strategy(const std::string& s)
 {
-  if (s == "breadth-first") return breadth_first;
-  else if (s == "b") return breadth_first_short;
-  else if (s == "depth-first") return depth_first;
-  else if (s == "d") return depth_first_short;
-  else throw mcrl2::runtime_error("unknown search strategy " + s);
+  if (s == "breadth-first")
+  {
+    return breadth_first;
+  }
+  else if (s == "b")
+  {
+    return breadth_first_short;
+  }
+  else if (s == "depth-first")
+  {
+    return depth_first;
+  }
+  else if (s == "d")
+  {
+    return depth_first_short;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown search strategy " + s);
+  }
 }
 
 inline

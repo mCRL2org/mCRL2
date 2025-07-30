@@ -73,81 +73,206 @@ static bool reduce_lts_in_various_ways(const std::string& test_description,
   std::istringstream is(lts);
   lts::lts_aut_t l_in;
   l_in.load(is);
-  if (!test_lts(test_description + " (plain input)",l_in, expected.labels_plain,expected.states_plain, expected.transitions_plain)) return false;
+  if (!test_lts(test_description + " (plain input)",
+          l_in,
+          expected.labels_plain,
+          expected.states_plain,
+          expected.transitions_plain))
+  {
+    return false;
+  }
   lts::lts_aut_t l=l_in;
   reduce(l,lts::lts_eq_none);
-  if (!test_lts(test_description + " (no reduction)",l, expected.labels_plain,expected.states_plain, expected.transitions_plain)) return false;
+  if (!test_lts(test_description + " (no reduction)",
+          l,
+          expected.labels_plain,
+          expected.states_plain,
+          expected.transitions_plain))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_bisim);
-  if (!test_lts(test_description + " (bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
+  if (!test_lts(test_description + " (bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+          l,
+          expected.labels_bisimulation,
+          expected.states_bisimulation,
+          expected.transitions_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_bisim_gv);
-  if (!test_lts(test_description + " (bisimulation [Groote/Vaandrager 1990])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
+  if (!test_lts(test_description + " (bisimulation [Groote/Vaandrager 1990])",
+          l,
+          expected.labels_bisimulation,
+          expected.states_bisimulation,
+          expected.transitions_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_bisim_gjkw);
-  if (!test_lts(test_description + " (bisimulation [Groote/Jansen/Keiren/Wijs 2017)",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
+  if (!test_lts(test_description + " (bisimulation [Groote/Jansen/Keiren/Wijs 2017)",
+          l,
+          expected.labels_bisimulation,
+          expected.states_bisimulation,
+          expected.transitions_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_bisim_sigref);
-  if (!test_lts(test_description + " (bisimulation signature [Blom/Orzan 2003])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
+  if (!test_lts(test_description + " (bisimulation signature [Blom/Orzan 2003])",
+          l,
+          expected.labels_bisimulation,
+          expected.states_bisimulation,
+          expected.transitions_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim);
-  if (!test_lts(test_description + " (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+          l,
+          expected.labels_branching_bisimulation,
+          expected.states_branching_bisimulation,
+          expected.transitions_branching_bisimulation))
+  {
+    return false;
+  }
 #ifdef  BRANCH_BIS_EXPERIMENT_JFG
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gj);
-  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen 2024 Experimental])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen 2024 Experimental])",
+          l,
+          expected.labels_branching_bisimulation,
+          expected.states_branching_bisimulation,
+          expected.transitions_branching_bisimulation))
+  {
+    return false;
+  }
 #endif
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gv);
-  if (!test_lts(test_description + " (branching bisimulation [Groote/Vaandrager 1990])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (branching bisimulation [Groote/Vaandrager 1990])",
+          l,
+          expected.labels_branching_bisimulation,
+          expected.states_branching_bisimulation,
+          expected.transitions_branching_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gjkw);
-  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
+          l,
+          expected.labels_branching_bisimulation,
+          expected.states_branching_bisimulation,
+          expected.transitions_branching_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_sigref);
-  if (!test_lts(test_description + " (branching bisimulation signature [Blom/Orzan 2003])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (branching bisimulation signature [Blom/Orzan 2003])",
+          l,
+          expected.labels_branching_bisimulation,
+          expected.states_branching_bisimulation,
+          expected.transitions_branching_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim);
-  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,
-                                      expected.labels_divergence_preserving_branching_bisimulation,
-                                      expected.states_divergence_preserving_branching_bisimulation,
-                                      expected.transitions_divergence_preserving_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
+          l,
+          expected.labels_divergence_preserving_branching_bisimulation,
+          expected.states_divergence_preserving_branching_bisimulation,
+          expected.transitions_divergence_preserving_branching_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gv);
-  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Vaandrager 1990])",l,
-                                      expected.labels_divergence_preserving_branching_bisimulation,
-                                      expected.states_divergence_preserving_branching_bisimulation,
-                                      expected.transitions_divergence_preserving_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Vaandrager 1990])",
+          l,
+          expected.labels_divergence_preserving_branching_bisimulation,
+          expected.states_divergence_preserving_branching_bisimulation,
+          expected.transitions_divergence_preserving_branching_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gjkw);
-  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,
-                                     expected.labels_divergence_preserving_branching_bisimulation,
-                                     expected.states_divergence_preserving_branching_bisimulation,
-                                     expected.transitions_divergence_preserving_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
+          l,
+          expected.labels_divergence_preserving_branching_bisimulation,
+          expected.states_divergence_preserving_branching_bisimulation,
+          expected.transitions_divergence_preserving_branching_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_sigref);
-  if (!test_lts(test_description + " (divergence-preserving branching bisimulation signature [Blom/Orzan 2003])",l,
-                                      expected.labels_divergence_preserving_branching_bisimulation,
-                                      expected.states_divergence_preserving_branching_bisimulation,
-                                      expected.transitions_divergence_preserving_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (divergence-preserving branching bisimulation signature [Blom/Orzan 2003])",
+          l,
+          expected.labels_divergence_preserving_branching_bisimulation,
+          expected.states_divergence_preserving_branching_bisimulation,
+          expected.transitions_divergence_preserving_branching_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_weak_bisim);
-  if (!test_lts(test_description + " (weak bisimulation)",l, expected.labels_weak_bisimulation,expected.states_weak_bisimulation, expected.transitions_weak_bisimulation)) return false;
+  if (!test_lts(test_description + " (weak bisimulation)",
+          l,
+          expected.labels_weak_bisimulation,
+          expected.states_weak_bisimulation,
+          expected.transitions_weak_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_weak_bisim);
-  if (!test_lts(test_description + " (divergence-preserving weak bisimulation)",l,
-                                      expected.labels_divergence_preserving_weak_bisimulation,
-                                      expected.states_divergence_preserving_weak_bisimulation,
-                                      expected.transitions_divergence_preserving_weak_bisimulation)) return false;
+  if (!test_lts(test_description + " (divergence-preserving weak bisimulation)",
+          l,
+          expected.labels_divergence_preserving_weak_bisimulation,
+          expected.states_divergence_preserving_weak_bisimulation,
+          expected.transitions_divergence_preserving_weak_bisimulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_sim);
-  if (!test_lts(test_description + " (simulation equivalence)",l, expected.labels_simulation,expected.states_simulation, expected.transitions_simulation)) return false;
+  if (!test_lts(test_description + " (simulation equivalence)",
+          l,
+          expected.labels_simulation,
+          expected.states_simulation,
+          expected.transitions_simulation))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_trace);
-  if (!test_lts(test_description + " (trace equivalence)",l, expected.labels_trace_equivalence,expected.states_trace_equivalence, expected.transitions_trace_equivalence)) return false;
+  if (!test_lts(test_description + " (trace equivalence)",
+          l,
+          expected.labels_trace_equivalence,
+          expected.states_trace_equivalence,
+          expected.transitions_trace_equivalence))
+  {
+    return false;
+  }
   l=l_in;
   reduce(l,lts::lts_eq_weak_trace);
-  if (!test_lts(test_description + " (weak trace equivalence)",l, expected.labels_weak_trace_equivalence,expected.states_weak_trace_equivalence, expected.transitions_weak_trace_equivalence)) return false;
+  if (!test_lts(test_description + " (weak trace equivalence)",
+          l,
+          expected.labels_weak_trace_equivalence,
+          expected.states_weak_trace_equivalence,
+          expected.transitions_weak_trace_equivalence))
+  {
+    return false;
+  }
   l=l_in;
   if (expected.is_deterministic)
   {
@@ -167,8 +292,14 @@ static bool reduce_lts_in_various_ways(const std::string& test_description,
   }
 
   reduce(l,lts::lts_red_determinisation);
-  if (!test_lts(test_description + " (determinisation)",l, expected.labels_determinisation,expected.states_determinisation, expected.transitions_determinisation)) return false;
-;
+  if (!test_lts(test_description + " (determinisation)",
+          l,
+          expected.labels_determinisation,
+          expected.states_determinisation,
+          expected.transitions_determinisation))
+  {
+    return false;
+  };
   if (!is_deterministic(l))
   {
     std::cerr << "LTS is non deterministic after deterministation: " << test_description << "\n";

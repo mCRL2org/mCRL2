@@ -463,12 +463,19 @@ struct bqnf_visitor
   /// \return true if the right hand side of the equation is in BQNF.
   virtual bool visit_bqnf_equation(const pbes_equation& eqn)
   {
-    if (debug) std::clog << "visit_bqnf_equation." << std::endl;
+    if (debug)
+    {
+      std::clog << "visit_bqnf_equation." << std::endl;
+    }
     const fixpoint_symbol& sigma = eqn.symbol();
     const propositional_variable& var = eqn.variable();
     const pbes_expression& e = eqn.formula();
     bool result = visit_bqnf_expression(sigma, var, e);
-    if (debug) std::clog << "visit_bqnf_equation: equation " << var.name() << " is " << (result ? "" : "NOT ") << "in BQNF." << std::endl;
+    if (debug)
+    {
+      std::clog << "visit_bqnf_equation: equation " << var.name() << " is " << (result ? "" : "NOT ") << "in BQNF."
+                << std::endl;
+    }
     return result;
   }
 
