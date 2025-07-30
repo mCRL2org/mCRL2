@@ -32,12 +32,11 @@ class expected_sizes
     bool is_deterministic;
 };
 
-bool test_lts(const std::string& test_description,
-              const lts::lts_aut_t& l,
-              std::size_t expected_label_count,
-              std::size_t expected_state_count,
-              std::size_t expected_transition_count
-             )
+inline bool test_lts(const std::string& test_description,
+    const lts::lts_aut_t& l,
+    std::size_t expected_label_count,
+    std::size_t expected_state_count,
+    std::size_t expected_transition_count)
 {
   if (l.num_action_labels() != expected_label_count)
   {

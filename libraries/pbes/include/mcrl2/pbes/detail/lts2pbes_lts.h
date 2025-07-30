@@ -110,7 +110,7 @@ class lts2pbes_lts
     }
 };
 
-std::ostream& operator<<(std::ostream& out, const lts2pbes_lts& ltsspec)
+inline std::ostream& operator<<(std::ostream& out, const lts2pbes_lts& ltsspec)
 {
   const auto& action_labels = ltsspec.action_labels();
   out << "pbes-LTS" << std::endl;

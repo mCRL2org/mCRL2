@@ -26,7 +26,8 @@ namespace mcrl2::lps
 namespace detail {
 
 // Extracts all conjuncts d == e from the data expression x, for variables d, and with e a constant.
-void find_equality_conjuncts(const data::data_expression& x, std::map<data::variable, data::data_expression>& result)
+inline void find_equality_conjuncts(const data::data_expression& x,
+    std::map<data::variable, data::data_expression>& result)
 {
   std::set<data::data_expression> conjuncts = data::split_and(x);
   for (const data::data_expression& expr: conjuncts)

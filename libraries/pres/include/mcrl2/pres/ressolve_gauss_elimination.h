@@ -59,10 +59,10 @@ namespace detail {
 
 pres_expression group_sums_conjuncts_disjuncts(const pres_expression& conjunctive_disjunctive_nf, const data::rewriter& rewrite);
 
-void collect_grouped_ands_ors(const pres_expression& conjunctive_disjunctive_nf, 
-                              const data::rewriter& rewrite, 
-                              std::set <pres_expression>& collected_terms, 
-                              const bool collect_ands)
+inline void collect_grouped_ands_ors(const pres_expression& conjunctive_disjunctive_nf,
+    const data::rewriter& rewrite,
+    std::set<pres_expression>& collected_terms,
+    const bool collect_ands)
 {
   if (is_propositional_variable_instantiation(conjunctive_disjunctive_nf) ||
       is_eqninf(conjunctive_disjunctive_nf))
@@ -106,12 +106,12 @@ void collect_grouped_ands_ors(const pres_expression& conjunctive_disjunctive_nf,
   throw runtime_error("Expect a simple conjunctive/disjunctive normal form when collecting terms: " + pp(conjunctive_disjunctive_nf) + ".");
 }
 
-void collect_grouped_constant_multiplies_mininf_terms_and_constant(
-              const pres_expression& conjunctive_disjunctive_nf,  
-              std::map <pres_expression, data::data_expression>& constant_multiply_terms, 
-              std::set <pres_expression>& mininf_terms, 
-              pres_expression& constant,
-              const data::rewriter& rewrite)
+inline void collect_grouped_constant_multiplies_mininf_terms_and_constant(
+    const pres_expression& conjunctive_disjunctive_nf,
+    std::map<pres_expression, data::data_expression>& constant_multiply_terms,
+    std::set<pres_expression>& mininf_terms,
+    pres_expression& constant,
+    const data::rewriter& rewrite)
 {
 // std::cerr << "collect_grouped_constant_multiplies_mininf_terms_and_constant " << conjunctive_disjunctive_nf << "\n";
   if (is_propositional_variable_instantiation(conjunctive_disjunctive_nf))
@@ -176,8 +176,8 @@ void collect_grouped_constant_multiplies_mininf_terms_and_constant(
   throw runtime_error("Expect a conjunctive/disjunctive normal form when collecting const multiplies, eqninfs and constants " + pp(conjunctive_disjunctive_nf) + ".");
 }
 
-
-pres_expression group_sums_conjuncts_disjuncts(const pres_expression& conjunctive_disjunctive_nf, const data::rewriter& rewrite)
+inline pres_expression group_sums_conjuncts_disjuncts(const pres_expression& conjunctive_disjunctive_nf,
+    const data::rewriter& rewrite)
 {
 // std::cerr << "GROUP CONJ DISJ " << conjunctive_disjunctive_nf << "\n";
   if (is_propositional_variable_instantiation(conjunctive_disjunctive_nf) ||
@@ -269,7 +269,10 @@ pres_expression group_sums_conjuncts_disjuncts(const pres_expression& conjunctiv
   throw runtime_error("Expect a conjunctive/disjunctive normal form when grouping equal terms: " + pp(conjunctive_disjunctive_nf) + ".");
 }
 
-void push_and_inside(pres_expression& result, const pres_expression t1, const pres_expression& t2, const bool conjunctive_normal_form)
+inline void push_and_inside(pres_expression& result,
+    const pres_expression t1,
+    const pres_expression& t2,
+    const bool conjunctive_normal_form)
 {
   pres_expression aux;
   if (is_condsm(t1))
@@ -311,7 +314,10 @@ void push_and_inside(pres_expression& result, const pres_expression t1, const pr
   else optimized_and(result, t1, t2);
 }
 
-void push_or_inside(pres_expression& result, const pres_expression t1, const pres_expression& t2, const bool conjunctive_normal_form)
+inline void push_or_inside(pres_expression& result,
+    const pres_expression t1,
+    const pres_expression& t2,
+    const bool conjunctive_normal_form)
 { 
   pres_expression aux;
   if (is_condsm(t1))
@@ -351,9 +357,12 @@ void push_or_inside(pres_expression& result, const pres_expression t1, const pre
     optimized_and(result, aux, result);
   }
   else optimized_or(result, t1, t2);
-} 
+}
 
-void push_plus_inside(pres_expression& result, const pres_expression t1, const pres_expression& t2, const bool conjunctive_normal_form)
+inline void push_plus_inside(pres_expression& result,
+    const pres_expression t1,
+    const pres_expression& t2,
+    const bool conjunctive_normal_form)
 {
   pres_expression aux;
   if (is_condsm(t1))
@@ -431,7 +440,8 @@ void push_plus_inside(pres_expression& result, const pres_expression t1, const p
   else optimized_plus(result, t1, t2);
 }
 
-void push_constant_inside(pres_expression& result, const data::data_expression& constant, const pres_expression& t)
+inline void
+push_constant_inside(pres_expression& result, const data::data_expression& constant, const pres_expression& t)
 {
   pres_expression aux;
   if (is_true(t))
@@ -543,8 +553,11 @@ struct linear_fixed_point_equation
   }
 };
 
-// Collect the linear equations for variable v in the current conjunct/disjunct. 
-void collect_line(linear_fixed_point_equation& line, const  propositional_variable& v, const pres_expression& t, const bool minimal_fixed_point)
+// Collect the linear equations for variable v in the current conjunct/disjunct.
+inline void collect_line(linear_fixed_point_equation& line,
+    const propositional_variable& v,
+    const pres_expression& t,
+    const bool minimal_fixed_point)
 {
   if (is_plus(t))
   {
@@ -598,10 +611,10 @@ void collect_line(linear_fixed_point_equation& line, const  propositional_variab
   }
 }
 
-void collect_lines(std::vector< linear_fixed_point_equation >& found_lines, 
-                   const propositional_variable& v, 
-                   const pres_expression& t,
-                   const bool minimal_fixed_point)
+inline void collect_lines(std::vector<linear_fixed_point_equation>& found_lines,
+    const propositional_variable& v,
+    const pres_expression& t,
+    const bool minimal_fixed_point)
 {
   if (is_and(t))
   {
@@ -622,13 +635,13 @@ void collect_lines(std::vector< linear_fixed_point_equation >& found_lines,
   }
 }
 
-void collect_m_and_split_lines(const std::vector< linear_fixed_point_equation >& lines, 
-                               pres_expression& m, 
-                               std::vector< linear_fixed_point_equation >& shallow_lines, 
-                               std::vector< linear_fixed_point_equation >& steep_lines,
-                               std::vector< linear_fixed_point_equation >& flat_lines,
-                               const data::rewriter& rewriter,
-                               const bool minimal_fixed_point)
+inline void collect_m_and_split_lines(const std::vector<linear_fixed_point_equation>& lines,
+    pres_expression& m,
+    std::vector<linear_fixed_point_equation>& shallow_lines,
+    std::vector<linear_fixed_point_equation>& steep_lines,
+    std::vector<linear_fixed_point_equation>& flat_lines,
+    const data::rewriter& rewriter,
+    const bool minimal_fixed_point)
 {
   bool m_defined=false;
   m = minimal_fixed_point?false_():true_();
@@ -677,10 +690,10 @@ void collect_m_and_split_lines(const std::vector< linear_fixed_point_equation >&
   }
 }
 
-void conjunction_disjunction_f_j(pres_expression& result, 
-                                 bool& result_defined,
-                                 std::vector< linear_fixed_point_equation >& l,
-                                 const bool is_conjunction)
+inline void conjunction_disjunction_f_j(pres_expression& result,
+    bool& result_defined,
+    std::vector<linear_fixed_point_equation>& l,
+    const bool is_conjunction)
 {
   for(const linear_fixed_point_equation& eq: l)
   {
@@ -706,10 +719,10 @@ void conjunction_disjunction_f_j(pres_expression& result,
   }
 }
 
-pres_expression conjunction_disjunction_f_j(std::vector< linear_fixed_point_equation >& l1,
-                                            std::vector< linear_fixed_point_equation >& l2,
-                                            std::vector< linear_fixed_point_equation >& l3,
-                                            const bool is_conjunction)
+inline pres_expression conjunction_disjunction_f_j(std::vector<linear_fixed_point_equation>& l1,
+    std::vector<linear_fixed_point_equation>& l2,
+    std::vector<linear_fixed_point_equation>& l3,
+    const bool is_conjunction)
 {
   pres_expression result=(is_conjunction?true_():false_());
   bool result_defined=false;
@@ -719,9 +732,9 @@ pres_expression conjunction_disjunction_f_j(std::vector< linear_fixed_point_equa
   return result;
 }
 
-pres_expression disjunction_infinity_cj_prime(std::vector< linear_fixed_point_equation >& l1,
-                                              std::vector< linear_fixed_point_equation >& l2, 
-                                              std::vector< linear_fixed_point_equation >& l3)
+inline pres_expression disjunction_infinity_cj_prime(std::vector<linear_fixed_point_equation>& l1,
+    std::vector<linear_fixed_point_equation>& l2,
+    std::vector<linear_fixed_point_equation>& l3)
 {
   for(const linear_fixed_point_equation& eq: l1)
   {
@@ -748,7 +761,7 @@ pres_expression disjunction_infinity_cj_prime(std::vector< linear_fixed_point_eq
   return false_();
 }
 
-pres_expression disjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
+inline pres_expression disjunction_cj_fj(std::vector<linear_fixed_point_equation>& l)
 {
   pres_expression result=false_();
   bool result_defined=false;
@@ -772,7 +785,7 @@ pres_expression disjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
   return result;
 }
 
-pres_expression conjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
+inline pres_expression conjunction_cj_fj(std::vector<linear_fixed_point_equation>& l)
 {
   pres_expression result=true_();
   bool result_defined=false;
@@ -796,8 +809,8 @@ pres_expression conjunction_cj_fj(std::vector< linear_fixed_point_equation >& l)
   return result;
 }
 
-
-pres_expression disjunction_fj_cj(std::vector< linear_fixed_point_equation >& l, const pres_expression& U, const data::rewriter& rewriter)
+inline pres_expression
+disjunction_fj_cj(std::vector<linear_fixed_point_equation>& l, const pres_expression& U, const data::rewriter& rewriter)
 {
   pres_expression result=false_();
   bool result_defined=false;
@@ -837,7 +850,8 @@ pres_expression disjunction_fj_cj(std::vector< linear_fixed_point_equation >& l,
   return result;
 }
 
-pres_expression conjunction_fj_cj(std::vector< linear_fixed_point_equation >& l, const pres_expression& U, const data::rewriter& rewriter)
+inline pres_expression
+conjunction_fj_cj(std::vector<linear_fixed_point_equation>& l, const pres_expression& U, const data::rewriter& rewriter)
 {
   pres_expression result=true_();
   bool result_defined=false;
@@ -880,11 +894,11 @@ pres_expression conjunction_fj_cj(std::vector< linear_fixed_point_equation >& l,
   return result;
 }
 
-pres_expression solve_fixed_point_inner(const propositional_variable& v, 
-                                        const pres_expression& t, 
-                                        const data::data_specification& dataspec,
-                                        const data::rewriter& rewriter, 
-                                        const bool minimal_fixed_point)
+inline pres_expression solve_fixed_point_inner(const propositional_variable& v,
+    const pres_expression& t,
+    const data::data_specification& dataspec,
+    const data::rewriter& rewriter,
+    const bool minimal_fixed_point)
 {
 // std::cerr << "SOLVE EQUATION " << v << "   " << t << "\n";
   std::vector< linear_fixed_point_equation > lines; // equations c_j X + c'_j*eqninf(X) + f_j  with 0<c_j<1
@@ -947,11 +961,11 @@ pres_expression solve_fixed_point_inner(const propositional_variable& v,
   }
 }
 
-const pres_expression solve_single_equation(const fixpoint_symbol& f, 
-                                            const propositional_variable& v, 
-                                            const pres_expression& t, 
-                                            const data::data_specification& dataspec, 
-                                            const data::rewriter& rewriter)
+inline const pres_expression solve_single_equation(const fixpoint_symbol& f,
+    const propositional_variable& v,
+    const pres_expression& t,
+    const data::data_specification& dataspec,
+    const data::rewriter& rewriter)
 {
   pres_expression aux;
   if (is_condsm(t) && f==pbes_system::fixpoint_symbol::mu())

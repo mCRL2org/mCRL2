@@ -264,7 +264,10 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
   return f.top();
 }
 
-data::data_expression_list local_reset_variables_algorithm::reset_variable_parameters(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
+inline data::data_expression_list local_reset_variables_algorithm::reset_variable_parameters(
+    const propositional_variable_instantiation& x,
+    const stategraph_equation& eq_X,
+    std::size_t i)
 {
   using utilities::detail::contains;
 

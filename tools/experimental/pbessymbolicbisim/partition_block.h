@@ -168,7 +168,7 @@ public:
 };
 
 std::string pp(const block&);
-std::string pp(const block& b)
+inline std::string pp(const block& b)
 {
   std::ostringstream out;
   for(const subblock& sb: b.subblocks())

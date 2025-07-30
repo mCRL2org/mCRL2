@@ -20,7 +20,7 @@
 using namespace mcrl2;
 
 /// \brief Make a data expression consisting of the clauses in conjective normal form.
-data::data_expression make_conjuntions(const std::set<data::data_expression>& clauses)
+inline data::data_expression make_conjuntions(const std::set<data::data_expression>& clauses)
 {
   data::data_expression result = data::sort_bool::true_();
   for (const data::data_expression& clause : clauses)
@@ -32,7 +32,7 @@ data::data_expression make_conjuntions(const std::set<data::data_expression>& cl
 }
 
 /// \brief Given a set of clauses and a set of variables computes a subset of clauses such that expressions over the given variables are not thrown away.
-std::set<data::data_expression> compute_clauses(const std::set<data::data_expression>& clauses, std::set<data::variable> dependencies)
+inline std::set<data::data_expression> compute_clauses(const std::set<data::data_expression>& clauses, std::set<data::variable> dependencies)
 {
   std::set<data::data_expression> result;
 
@@ -76,12 +76,11 @@ struct cleave_condition
 };
 
 /// \brief Split the given condition based on a number of (simple) heuristics.
-std::pair<cleave_condition, cleave_condition> split_condition(
-  const data::data_expression& condition,
-  const data::variable_list& left_parameters,
-  const data::variable_list& right_parameters,
-  const data::variable_list& summand_variables,
-  const std::set<data::variable>& synchronized)
+inline std::pair<cleave_condition, cleave_condition> split_condition(const data::data_expression& condition,
+    const data::variable_list& left_parameters,
+    const data::variable_list& right_parameters,
+    const data::variable_list& summand_variables,
+    const std::set<data::variable>& synchronized)
 {
   assert(data::sort_bool::is_bool(condition.sort()));
 

@@ -246,7 +246,7 @@ public:
 };
 
 std::string pp(const subblock&);
-std::string pp(const subblock& b)
+inline std::string pp(const subblock& b)
 {
   std::ostringstream out;
   out << b.variable().name() << " - " << b.charachteristic_function();
