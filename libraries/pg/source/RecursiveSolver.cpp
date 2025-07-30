@@ -22,7 +22,8 @@ static std::vector<verti> get_complement(verti V, const DenseSet<verti> &s)
     std::vector<verti> res;
     verti n = V - s.size();
     res.reserve(n);
-    DenseSet<verti>::const_iterator it = s.begin(), end = s.end();
+    DenseSet<verti>::const_iterator it = s.begin();
+    DenseSet<verti>::const_iterator end = s.end();
     verti v = 0;
     while (it != end)
     {

@@ -192,7 +192,8 @@ std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_
             types.end(),
             [](const lts_type& t1, const lts_type& t2){ return lts_named_cmp<lts_type>(extension_strings, t1, t2); });
 
-  std::string r, prev;
+  std::string r;
+  std::string prev;
   bool first = true;
   for (std::vector<lts_type>::iterator i=types.begin(); i!=types.end(); i++)
   {

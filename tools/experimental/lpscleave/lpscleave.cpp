@@ -130,7 +130,8 @@ public:
       }
 
       // The resulting LPSs
-      stochastic_specification left_spec, right_spec;
+      stochastic_specification left_spec;
+      stochastic_specification right_spec;
       std::tie(left_spec, right_spec) = cleave(spec, left_parameters, right_parameters, m_indices, invariant, m_action_prefix, m_split_condition, m_split_action, m_merge_heuristic, m_use_next_state);
 
       // Save the resulting components.

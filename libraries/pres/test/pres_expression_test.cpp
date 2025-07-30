@@ -51,7 +51,9 @@ BOOST_AUTO_TEST_CASE(test_accessors)
   {
     using namespace mcrl2::pres_system::accessors;
 
-    pres_expression a, b, c;
+    pres_expression a;
+    pres_expression b;
+    pres_expression c;
     data::variable_list w;
     core::identifier_string s;
     data::data_expression e;
@@ -144,7 +146,9 @@ BOOST_AUTO_TEST_CASE(test_term_traits)
     "  Y: Nat;       \n"
     ;
 
-  pres_expression x, y, z;
+  pres_expression x;
+  pres_expression y;
+  pres_expression z;
   data::variable_list v;
   data::data_expression_list e;
 

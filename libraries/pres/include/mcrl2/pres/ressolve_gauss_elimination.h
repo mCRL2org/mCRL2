@@ -1113,10 +1113,11 @@ public:
   void apply(T& result, const pres_system::plus& x)
   {
 // std::cerr << "NF PLUS " << static_cast<pres_expression>(x) << "\n";
-    pres_expression aux1, aux2;
-    apply(aux1, x.left());
-    apply(aux2, x.right());
-    detail::push_plus_inside(result, aux1, aux2, m_conjunctive_normal_form);
+pres_expression aux1;
+pres_expression aux2;
+apply(aux1, x.left());
+apply(aux2, x.right());
+detail::push_plus_inside(result, aux1, aux2, m_conjunctive_normal_form);
 // std::cerr << "NF PLUS " << static_cast<pres_expression>(x) << " ---> " << result << "\n";
   }
 

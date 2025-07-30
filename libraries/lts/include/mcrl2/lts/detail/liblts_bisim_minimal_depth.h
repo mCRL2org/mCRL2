@@ -512,7 +512,8 @@ private:
    *		   In other words a lvl i such that B1 and B2 are i-bisimilar. */
   level_type gca_level(const block_index_type B1, const block_index_type B2)
   {
-    block_index_type b1 = B1, b2 = B2;
+    block_index_type b1 = B1;
+    block_index_type b2 = B2;
     if (B1 < B2)
     {
       b1 = B2;
@@ -523,13 +524,15 @@ private:
     {
       return greatest_common_ancestor[bpair];
     }
-    level_type lvl1 = blocks[b1].level, lvl2 = blocks[b2].level;
+    level_type lvl1 = blocks[b1].level;
+    level_type lvl2 = blocks[b2].level;
     if (b1 == b2)
     {
       greatest_common_ancestor.emplace(bpair, lvl1);
       return lvl1;
     }
-    block_index_type B1parent = b1, B2parent = b2;
+    block_index_type B1parent = b1;
+    block_index_type B2parent = b2;
 
     if (lvl1 <= lvl2)
     {

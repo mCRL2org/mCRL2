@@ -81,7 +81,8 @@ LiftingStrategyFactory *
 
     // Split into parts, separated by semicolon characters
     std::vector<std::string> parts;
-    std::string::size_type i, j;
+    std::string::size_type i;
+    std::string::size_type j;
     for (i = 0; (j = description.find(':', i)) != std::string::npos; i = j + 1)
     {
       parts.emplace_back(description, i, j - i);

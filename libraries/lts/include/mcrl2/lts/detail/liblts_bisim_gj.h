@@ -3558,10 +3558,10 @@ class bisim_partitioner_gj
       //      NewBotSt-subblock because for them, having one NewBotSt-successor
       //      is enough.  There is no set of potentially-NewBotSt states.
 
-      std::vector<transition>::iterator current_source_iter[3],
-                                                  current_source_iter_NewBotSt;
-      std::vector<transition>::const_iterator current_source_iter_end[3],
-                                              current_source_iter_end_NewBotSt;
+      std::vector<transition>::iterator current_source_iter[3];
+      std::vector<transition>::iterator current_source_iter_NewBotSt;
+      std::vector<transition>::const_iterator current_source_iter_end[3];
+      std::vector<transition>::const_iterator current_source_iter_end_NewBotSt;
 
       state_in_block_pointer current_source_AvoidLrg;
       outgoing_transitions_const_it current_outgoing_iter_start_AvoidLrg;

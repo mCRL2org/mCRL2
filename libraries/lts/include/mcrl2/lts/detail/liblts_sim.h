@@ -294,8 +294,11 @@ void sim_partitioner<LTS_TYPE>::initialise_datastructures()
 template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::initialise_Pi(std::size_t gamma,std::size_t l)
 {
-  std::size_t alpha, a, c;
-  std::vector<std::size_t>::iterator ci, last;
+  std::size_t alpha;
+  std::size_t a;
+  std::size_t c;
+  std::vector<std::size_t>::iterator ci;
+  std::vector<std::size_t>::iterator last;
 
   contents.clear();
   for (ptrdiff_t i = contents_u[gamma]; i != LIST_END;
@@ -336,7 +339,8 @@ void sim_partitioner<LTS_TYPE>::initialise_Pi(std::size_t gamma,std::size_t l)
 template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::initialise_Sigma(std::size_t gamma,std::size_t l)
 {
-  std::vector<std::size_t>::iterator deltai, last;
+  std::vector<std::size_t>::iterator deltai;
+  std::vector<std::size_t>::iterator last;
   last = children[gamma].end();
   for (deltai = children[gamma].begin(); deltai != last; ++deltai)
   {
@@ -380,10 +384,15 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
 
   /* Some local variables */
   std::vector<bool> v_false(s_Sigma,false);
-  std::vector<std::size_t>::iterator alphai, last, gammai;
-  std::vector< std::vector<bool> >::iterator stable_alpha, P_gamma;
+  std::vector<std::size_t>::iterator alphai;
+  std::vector<std::size_t>::iterator last;
+  std::vector<std::size_t>::iterator gammai;
+  std::vector<std::vector<bool>>::iterator stable_alpha;
+  std::vector<std::vector<bool>>::iterator P_gamma;
   bool stable_alpha_gamma;
-  std::size_t gamma, delta, l;
+  std::size_t gamma;
+  std::size_t delta;
+  std::size_t l;
 
   /* The main loop */
   for (l = 0; l < aut.num_action_labels(); ++l)
@@ -544,8 +553,11 @@ void sim_partitioner<LTS_TYPE>::update()
   using namespace mcrl2::core;
   mCRL2log(log::debug) << "--------------------- Update ---------------------------------------" << std::endl;
 
-  std::size_t l,alpha,gamma;
-  std::vector<std::size_t>::iterator alphai, last;
+  std::size_t l;
+  std::size_t alpha;
+  std::size_t gamma;
+  std::vector<std::size_t>::iterator alphai;
+  std::vector<std::size_t>::iterator last;
 
   induce_P_on_Pi();
 
@@ -647,7 +659,8 @@ void sim_partitioner<LTS_TYPE>::induce_P_on_Pi()
   std::vector<bool> v(s_Pi,false);
   Q.assign(s_Pi,v);
 
-  std::size_t alpha,beta;
+  std::size_t alpha;
+  std::size_t beta;
   std::vector< std::vector<bool> >::iterator P_parent_alpha;
   for (alpha = 0; alpha < s_Pi; ++alpha)
   {
@@ -669,7 +682,11 @@ void sim_partitioner<LTS_TYPE>::filter(std::size_t S,std::vector< std::vector<bo
   /* Initialise the match function */
   match->clear();
 
-  std::size_t alpha,beta,gamma,delta,l;
+  std::size_t alpha;
+  std::size_t beta;
+  std::size_t gamma;
+  std::size_t delta;
+  std::size_t l;
   hash_table3_iterator etrans(exists);
   for (l = 0; l < aut.num_action_labels(); ++l)
   {
@@ -721,7 +738,10 @@ void sim_partitioner<LTS_TYPE>::filter(std::size_t S,std::vector< std::vector<bo
 template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::cleanup(std::size_t alpha,std::size_t beta)
 {
-  std::size_t l,alpha1,beta1,delta;
+  std::size_t l;
+  std::size_t alpha1;
+  std::size_t beta1;
+  std::size_t delta;
   bool match_l_beta1_alpha;
   hash_table3_iterator alpha1i(forall);
   hash_table3_iterator beta1i(exists);
@@ -769,7 +789,9 @@ std::vector < mcrl2::lts::transition> sim_partitioner<LTS_TYPE>::get_transitions
   ts.reserve(forall->get_num_elements());
 
   std::vector<bool> pre_sim;
-  transition::size_type l,beta,gamma;
+  transition::size_type l;
+  transition::size_type beta;
+  transition::size_type gamma;
   hash_table3_iterator alphai(exists);
   hash_table3_iterator gammai(forall);
   for (beta = 0; beta < s_Pi; ++beta)
@@ -988,7 +1010,8 @@ std::string sim_partitioner<LTS_TYPE>::print_Sigma()
 {
   using namespace mcrl2::core;
   std::stringstream result;
-  std::vector<std::size_t>::iterator ci, last;
+  std::vector<std::size_t>::iterator ci;
+  std::vector<std::size_t>::iterator last;
   for (std::size_t b = 0; b < s_Sigma; ++b)
   {
     result << "block " << b << ": {";
@@ -1037,7 +1060,8 @@ std::string sim_partitioner<LTS_TYPE>::print_relation(std::size_t s,
   using namespace mcrl2::core;
   std::stringstream result;
   result << "{";
-  std::size_t beta,gamma;
+  std::size_t beta;
+  std::size_t gamma;
   for (beta = 0; beta < s; ++beta)
   {
     for (gamma = 0; gamma < s; ++gamma)

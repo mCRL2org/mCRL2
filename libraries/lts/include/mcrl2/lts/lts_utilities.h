@@ -402,7 +402,8 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
   assert(number_of_states< (one << 2*log2cache_size));
   size_t relevant_bits=(number_of_states<2?1:std::log2(number_of_states-1)+1);
   assert((one<<relevant_bits)>=number_of_states);
-  size_t mask=0, shift=0;
+  size_t mask = 0;
+  size_t shift = 0;
   if (relevant_bits>log2cache_size)
   {
     // Sort in two phases, with the relevant bits evenly divided. 

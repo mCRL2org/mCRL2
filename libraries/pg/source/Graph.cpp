@@ -97,8 +97,8 @@ void StaticGraph::make_random_scc(edge_list &edges)
           index[j] = i;
         }
     }
-    std::vector<char> is_top(sccs.size(), 1),
-                      is_bot(sccs.size(), 1);
+    std::vector<char> is_top(sccs.size(), 1);
+    std::vector<char> is_bot(sccs.size(), 1);
     for (verti v = 0; v < V_; ++v)
     {
         for (const_iterator it = succ_begin(v); it != succ_end(v); ++it)
@@ -128,9 +128,9 @@ void StaticGraph::make_random_scc(edge_list &edges)
     shuffle_vector(vertis);
     for (verti i = 0; i < sccs.size(); ++i)
     {
-        const verti v = vertis[i],
-                    w = vertis[(i + 1)%sccs.size()];
-        edges.emplace_back(v, w);
+      const verti v = vertis[i];
+      const verti w = vertis[(i + 1) % sccs.size()];
+      edges.emplace_back(v, w);
     }
 }
 
@@ -217,8 +217,8 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
         for (std::size_t c = 0; c < next_clusters; ++c)
         {
             /* Combine clusters [i:j) into one: */
-            std::size_t i = c*clusters/next_clusters,
-                   j = (c + 1)*clusters/next_clusters;
+            std::size_t i = c * clusters / next_clusters;
+            std::size_t j = (c + 1) * clusters / next_clusters;
             mCRL2log(mcrl2::log::debug) << "combining " << j-i << " subgraphs ("
                                         << i << " through " << j << " of "
                                         << clusters << ")" << std::endl;
@@ -247,7 +247,8 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
             edge_list paredges = parent.get_edges();
             for (const std::pair<verti, verti>& paredge : paredges)
             {
-              verti v = paredge.first, w = paredge.second;
+              verti v = paredge.first;
+              verti w = paredge.second;
               edges.emplace_back(offset[i + v] + rand() % subgraphs[i + v].V(),
                   offset[i + w] + rand() % subgraphs[i + w].V());
             }
@@ -439,11 +440,12 @@ StaticGraph::edge_list StaticGraph::get_edges() const
     result.reserve(E_);
     for (verti v = 0; v < V_; ++v)
     {
-        edgei begin = successor_index_[v], end = successor_index_[v + 1];
-        for (edgei i = begin; i < end; ++i)
-        {
-            verti w = successors_[i];
-            result.emplace_back(v, w);
+      edgei begin = successor_index_[v];
+      edgei end = successor_index_[v + 1];
+      for (edgei i = begin; i < end; ++i)
+      {
+        verti w = successors_[i];
+        result.emplace_back(v, w);
         }
     }
     assert(result.size() == E_);
@@ -528,9 +530,11 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
         #pragma omp for reduction(+:num_edges)
         for (verti i = 0; i < num_vertices; ++i)
         {
-            const_iterator a = graph.succ_begin(verts[i]),
-                        b = graph.succ_end(verts[i]);
-            while (a != b) if (map[*a++] != NO_VERTEX) ++num_edges;
+          const_iterator a = graph.succ_begin(verts[i]);
+          const_iterator b = graph.succ_end(verts[i]);
+          while (a != b)
+            if (map[*a++] != NO_VERTEX)
+              ++num_edges;
         }
     }
 

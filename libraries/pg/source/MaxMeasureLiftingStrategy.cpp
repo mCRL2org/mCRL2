@@ -82,11 +82,12 @@ void MaxMeasureLiftingStrategy2::move_down(verti i)
 
 void MaxMeasureLiftingStrategy2::swap(verti i, verti j)
 {
-    verti v = pq_[i], w = pq_[j];
-    pq_[i] = w;
-    pq_[j] = v;
-    pq_pos_[w] = i;
-    pq_pos_[v] = j;
+  verti v = pq_[i];
+  verti w = pq_[j];
+  pq_[i] = w;
+  pq_[j] = v;
+  pq_pos_[w] = i;
+  pq_pos_[v] = j;
 }
 
 void MaxMeasureLiftingStrategy2::push(verti v)
@@ -202,22 +203,21 @@ static int cmp_step( const verti *v1, const verti *v2, int v_len, bool v_carry,
 
 int MaxMeasureLiftingStrategy2::cmp(verti i, verti j)
 {
-    verti v = pq_[i], w = pq_[j];
-    int d = 0;
+  verti v = pq_[i];
+  verti w = pq_[j];
+  int d = 0;
 
-    switch (metric_)
-    {
-    case MAX_VALUE:
-        d = spm_.vector_cmp( spm_.get_successor(v),
-                             spm_.get_successor(w), spm_.len_ );
-        break;
+  switch (metric_)
+  {
+  case MAX_VALUE:
+    d = spm_.vector_cmp(spm_.get_successor(v), spm_.get_successor(w), spm_.len_);
+    break;
 
-    case MIN_VALUE:
-        d = -spm_.vector_cmp( spm_.get_successor(v),
-                              spm_.get_successor(w), spm_.len_ );
-        break;
+  case MIN_VALUE:
+    d = -spm_.vector_cmp(spm_.get_successor(v), spm_.get_successor(w), spm_.len_);
+    break;
 
-    case MAX_STEP:
+  case MAX_STEP:
 #ifdef DEBUG
         // We assume vertices are only queued when they can be lifted;
         // i.e. their value is less than (or equal to) their successor:

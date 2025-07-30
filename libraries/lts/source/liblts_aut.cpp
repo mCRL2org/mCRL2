@@ -384,7 +384,8 @@ static size_t add_probablistic_state(
 static void read_from_aut(probabilistic_lts_aut_t& l, std::istream& is)
 {
   std::size_t line_no = 1;
-  std::size_t ntrans=0, nstate=0;
+  std::size_t ntrans = 0;
+  std::size_t nstate = 0;
 
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t initial_probabilistic_state;
   read_aut_header(is,initial_probabilistic_state,ntrans,nstate);
@@ -442,7 +443,8 @@ static void read_from_aut(probabilistic_lts_aut_t& l, std::istream& is)
 static void read_from_aut(lts_aut_t& l, std::istream& is)
 {
   std::size_t line_no = 1;
-  std::size_t ntrans=0, nstate=0;
+  std::size_t ntrans = 0;
+  std::size_t nstate = 0;
 
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t initial_probabilistic_state;
   read_aut_header(is,initial_probabilistic_state,ntrans,nstate);
@@ -464,9 +466,10 @@ static void read_from_aut(lts_aut_t& l, std::istream& is)
   
   mcrl2::utilities::unordered_map < action_label_string, std::size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
-  l.set_initial_state(initial_probabilistic_state.get()); 
+  l.set_initial_state(initial_probabilistic_state.get());
 
-  std::size_t from, to;
+  std::size_t from;
+  std::size_t to;
   std::string s;
   while (!is.eof())
   {

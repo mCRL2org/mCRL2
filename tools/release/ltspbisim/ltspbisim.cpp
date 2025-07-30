@@ -266,7 +266,8 @@ class ltsconvert_tool : public input_output_tool
 
   void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
   {
-    std::string::size_type lastpos = 0, pos;
+    std::string::size_type lastpos = 0;
+    std::string::size_type pos;
     while ((pos = act_names.find(',', lastpos)) != std::string::npos)
     {
       tau_actions.push_back(act_names.substr(lastpos, pos - lastpos));

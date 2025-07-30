@@ -28,7 +28,8 @@ ParityGame::Strategy ComponentSolver::solve()
 {
     verti V = game_.graph().V();
     strategy_.assign(V, NO_VERTEX);
-    DenseSet<verti> W0(0, V), W1(0, V);
+    DenseSet<verti> W0(0, V);
+    DenseSet<verti> W1(0, V);
     winning_[0] = &W0;
     winning_[1] = &W1;
     if (decompose_graph(game_.graph(), *this) != 0) strategy_.clear();

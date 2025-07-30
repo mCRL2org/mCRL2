@@ -585,7 +585,8 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
     }
     pars.Mlist = m;
 
-    match_tree true_tree,false_tree;
+    match_tree true_tree;
+    match_tree false_tree;
     match_tree_Re r ;
     match_tree_list readies;
 
@@ -624,7 +625,8 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
   else if (!pars.Flist.empty())
   {
     match_tree_list F = pars.Flist.front();
-    match_tree true_tree,false_tree;
+    match_tree true_tree;
+    match_tree false_tree;
 
     match_tree_list_list newupstack = pars.upstack;
     match_tree_list_list l;

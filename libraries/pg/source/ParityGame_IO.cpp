@@ -62,7 +62,8 @@ void ParityGame::read_pgsolver( std::istream &is,
     while (is)
     {
         verti id;
-        int prio_raw, player_raw;
+        int prio_raw;
+        int player_raw;
 
         if (!(is >> id >> prio_raw >> player_raw)) break;
 
@@ -95,7 +96,8 @@ void ParityGame::read_pgsolver( std::istream &is,
 
             // Skip to separator (comma) or end-of-list (semicolon), while
             // ignoring the contents of quoted strings.
-            bool quoted = false, escaped = false;
+            bool quoted = false;
+            bool escaped = false;
             while (is.get(ch)) {
                 if (ch == '"' && !escaped) quoted = !quoted;
                 escaped = ch == '\\' && !escaped;
@@ -159,8 +161,8 @@ void ParityGame::write_pgsolver(std::ostream &os) const
     for (verti v = 0; v < graph_.V(); ++v)
     {
         os << v << ' ' << (max_prio - priority(v)) << ' ' << player(v);
-        StaticGraph::const_iterator it  = graph_.succ_begin(v),
-                                    end = graph_.succ_end(v);
+        StaticGraph::const_iterator it = graph_.succ_begin(v);
+        StaticGraph::const_iterator end = graph_.succ_end(v);
         assert(it < end);
         os << ' ' << *it++;
         while (it != end) os << ',' << *it++;
@@ -194,7 +196,8 @@ void ParityGame::assign_pbes(mcrl2::pbes_system::pbes &pbes, verti *goal_vertex,
 
     // Build the edge list
     StaticGraph::edge_list edges;
-    verti begin = 0, end = 3;
+    verti begin = 0;
+    verti end = 3;
     for (verti v = begin; v < end; ++v)
     {
         std::set<std::size_t> deps = pgg.get_dependencies(v);
@@ -289,7 +292,8 @@ void ParityGame::write_debug(const Strategy &s, std::ostream &os) const
         os << v << ' ';
 
         // Print controlling player and vertex priority:
-        char l = ' ', r = ' ';
+        char l = ' ';
+        char r = ' ';
         if (player(v) == PLAYER_EVEN) l = '<', r = '>';
         if (player(v) == PLAYER_ODD)  l = '[', r = ']';
         os << l << priority(v) << r;

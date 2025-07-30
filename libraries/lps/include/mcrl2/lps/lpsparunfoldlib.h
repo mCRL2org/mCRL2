@@ -537,7 +537,8 @@ namespace detail
         // If so, unfold and start recursing
         if (m_unfolder.is_det_or_pi(x) && m_unfolder.can_unfold(x[0]))
         {
-          data::data_expression intermediate_result1, intermediate_result2;
+          data::data_expression intermediate_result1;
+          data::data_expression intermediate_result2;
           m_unfolder(intermediate_result1, atermpp::down_cast<data::application>(x[0]));
 
           m_currently_recursing = true;

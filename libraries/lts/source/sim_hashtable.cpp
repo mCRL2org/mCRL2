@@ -110,7 +110,8 @@ bool hash_table2::find(std::size_t x,std::size_t y)
 void hash_table2::remove(std::size_t x,std::size_t y)
 {
   bucket2 b{};
-  std::size_t i, prev_i;
+  std::size_t i;
+  std::size_t prev_i;
   std::size_t h = hash(x,y);
   i = table[h];
   if (i != END_OF_LIST)
@@ -231,7 +232,8 @@ bool hash_table3::find(std::size_t x,std::size_t y,std::size_t z)
 void hash_table3::remove(std::size_t x,std::size_t y,std::size_t z)
 {
   bucket3 b{};
-  std::size_t i, prev_i;
+  std::size_t i;
+  std::size_t prev_i;
   std::size_t h = hash(x,y,z);
   i = table[h];
   if (i != END_OF_LIST)

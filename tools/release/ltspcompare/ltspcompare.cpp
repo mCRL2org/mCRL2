@@ -88,7 +88,8 @@ class ltspcompare_tool : public ltscompare_base
     template <class LTS_TYPE>
     bool lts_probabilistic_compare()
     {
-      LTS_TYPE l1,l2;
+      LTS_TYPE l1;
+      LTS_TYPE l2;
       l1.load(tool_options.name_for_first);
       l2.load(tool_options.name_for_second);
 
@@ -206,7 +207,8 @@ class ltspcompare_tool : public ltscompare_base
 
     void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
     {
-      std::string::size_type lastpos = 0, pos;
+      std::string::size_type lastpos = 0;
+      std::string::size_type pos;
       while ((pos = act_names.find(',',lastpos)) != std::string::npos)
       {
         tau_actions.push_back(act_names.substr(lastpos,pos-lastpos));

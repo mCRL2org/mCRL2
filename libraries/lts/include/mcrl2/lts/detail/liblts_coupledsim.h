@@ -160,8 +160,8 @@ template <class LTS_TYPE>
     std::map<cs_game_node,std::set<cs_game_node>> predecessors;
     std::map<cs_game_node,int> successor_count;
     std::map<cs_game_node,int> node_winner;
-    const int WIN_DEFENDER = 0, WIN_ATTACKER = 1;
-
+    const int WIN_DEFENDER = 0;
+    const int WIN_ATTACKER = 1;
 
     std::set<cs_game_move> moves;  // moves (node,node)
     std::string move_label; // label as string representation.
@@ -171,12 +171,18 @@ template <class LTS_TYPE>
 
     /* Get Weak transitions. */
     std::stack<transition> todo_weak;
-    std::set<transition> l1_weak_transitions, l2_weak_transitions; // do I need to save them?
+    std::set<transition> l1_weak_transitions;
+    std::set<transition> l2_weak_transitions; // do I need to save them?
 
     /* filter transitions of t2. */
-    std::map<std::size_t, std::map<transition, bool>>  // if strong transition on true
-      l2_tran_from_node, l2_tran_into_node,
-      l1_tran_from_node, l1_tran_into_node;
+    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
+        l2_tran_from_node;
+    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
+        l2_tran_into_node;
+    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
+        l1_tran_from_node;
+    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
+        l1_tran_into_node;
 
     mCRL2log(log::debug)
       << "Find weak transitions."
@@ -387,7 +393,8 @@ template <class LTS_TYPE>
           // XXX reconsider, maybe TODO with delayed checks, bc l2_transitions are later reviewed
           for (const transition &bq1 : l2.get_transitions())
           {
-            std::size_t b = bq1.label(), q1 = bq1.to();
+            std::size_t b = bq1.label();
+            std::size_t q1 = bq1.to();
 
             // strong q a-> q1 demonstrates, p0 a=> p1 simulates.
             if (l2.action_label(b) == l1.action_label(a))
@@ -454,7 +461,8 @@ template <class LTS_TYPE>
           // XXX reconsider, maybe TODO with delayed checks, bc l2_transitions are later reviewed
           for (const transition &ap1 : l1.get_transitions())
           {
-            std::size_t a = ap1.label(), p1 = ap1.to();
+            std::size_t a = ap1.label();
+            std::size_t p1 = ap1.to();
 
             // strong q a-> q1 demonstrates, p0 a=> p1 simulates.
             if (l2.action_label(b) == l1.action_label(a))
