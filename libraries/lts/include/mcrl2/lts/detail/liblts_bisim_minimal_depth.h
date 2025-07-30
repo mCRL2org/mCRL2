@@ -146,7 +146,7 @@ private:
     std::vector<transition> transitions;
     std::set<std::pair<label_type, block_index_type>> outgoing_observations;
 
-    void swap(block& b)
+    void swap(block& b) noexcept
     {
       std::swap(b.state_index, state_index);
       std::swap(b.block_index, block_index);

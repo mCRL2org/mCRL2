@@ -63,11 +63,10 @@ std::ostream& operator<<(std::ostream& out, const container_type& x)
 }
 
 /// \\brief swap overload
-inline void swap(container_type& t1, container_type& t2)
+inline void swap(container_type& t1, container_type& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for lists
 class list_container: public container_type
@@ -116,11 +115,10 @@ std::ostream& operator<<(std::ostream& out, const list_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(list_container& t1, list_container& t2)
+inline void swap(list_container& t1, list_container& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for sets
 class set_container: public container_type
@@ -169,11 +167,10 @@ std::ostream& operator<<(std::ostream& out, const set_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(set_container& t1, set_container& t2)
+inline void swap(set_container& t1, set_container& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for bags
 class bag_container: public container_type
@@ -222,11 +219,10 @@ std::ostream& operator<<(std::ostream& out, const bag_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(bag_container& t1, bag_container& t2)
+inline void swap(bag_container& t1, bag_container& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for finite sets
 class fset_container: public container_type
@@ -275,11 +271,10 @@ std::ostream& operator<<(std::ostream& out, const fset_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(fset_container& t1, fset_container& t2)
+inline void swap(fset_container& t1, fset_container& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for finite bags
 class fbag_container: public container_type
@@ -328,7 +323,7 @@ std::ostream& operator<<(std::ostream& out, const fbag_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(fbag_container& t1, fbag_container& t2)
+inline void swap(fbag_container& t1, fbag_container& t2) noexcept
 {
   t1.swap(t2);
 }

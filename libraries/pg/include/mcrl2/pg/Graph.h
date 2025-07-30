@@ -170,7 +170,7 @@ public:
     void read_raw(std::istream &is);
 
     /*! Swaps the contents of this graph with another one. */
-    void swap(StaticGraph &g);
+    void swap(StaticGraph& g) noexcept;
 
     /*! Returns whether the graph is empty. */
     bool empty() const { return V_ == 0; }
@@ -293,10 +293,9 @@ private:
     friend class EdgeIterator;
 };
 
-
-inline void swap(StaticGraph &a, StaticGraph &b)
+inline void swap(StaticGraph& a, StaticGraph& b) noexcept
 {
-    a.swap(b);
+  a.swap(b);
 }
 
 #include "Graph_impl.h"

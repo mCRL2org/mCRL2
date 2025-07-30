@@ -228,7 +228,7 @@ class bisim_partitioner
       // with tau labels are at the end of this vector.
       std::vector < transition > non_inert_transitions;
 
-      void swap(block& b)
+      void swap(block& b) noexcept
       {
         state_type state_index1=b.state_index;
         b.state_index=state_index;

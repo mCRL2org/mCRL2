@@ -61,10 +61,10 @@ public:
     }
 
     //! Swaps this substrategy ovbect with another.
-    void swap(Substrategy &other)
+    void swap(Substrategy& other) noexcept
     {
-        strategy_.swap(other.strategy_);
-        global_.swap(other.global_);
+      strategy_.swap(other.strategy_);
+      global_.swap(other.global_);
     }
 
     //! Returns a write-only reference to the strategy for vertex `v`.

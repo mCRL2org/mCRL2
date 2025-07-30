@@ -461,8 +461,8 @@ namespace std
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term
 /// \param t2 The second term
-template <class T>
-inline void swap(atermpp::term_balanced_tree<T>& t1, atermpp::term_balanced_tree<T>& t2)
+template<class T>
+inline void swap(atermpp::term_balanced_tree<T>& t1, atermpp::term_balanced_tree<T>& t2) noexcept
 {
   t1.swap(t2);
 }

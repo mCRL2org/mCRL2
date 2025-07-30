@@ -182,7 +182,7 @@ inline std::string pp(const big_natural_number& l);
 class big_natural_number
 {
     friend std::hash<big_natural_number>;
-    friend inline void swap(big_natural_number& x, big_natural_number& y);
+    friend inline void swap(big_natural_number& x, big_natural_number& y) noexcept;
 
   protected:
     // Numbers are stored as std::size_t words, with the most significant number last. 
@@ -816,7 +816,7 @@ inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
 
 /** \brief Standard overload of swap.
  **/
-inline void swap(big_natural_number& x, big_natural_number& y)
+inline void swap(big_natural_number& x, big_natural_number& y) noexcept
 {
   x.m_number.swap(y.m_number);
 }

@@ -74,7 +74,7 @@ class deadlock
     }
 
     /// \brief Swaps the contents
-    void swap(deadlock& other)
+    void swap(deadlock& other) noexcept
     {
       using std::swap;
       swap(m_time, other.m_time);
@@ -102,7 +102,7 @@ std::ostream& operator<<(std::ostream& out, const deadlock& x)
 }
 
 /// \\brief swap overload
-inline void swap(deadlock& t1, deadlock& t2)
+inline void swap(deadlock& t1, deadlock& t2) noexcept
 {
   t1.swap(t2);
 }

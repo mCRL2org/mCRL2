@@ -120,7 +120,7 @@ class lts_fsm_base
     }
 
     /** \brief Standard swap function */
-    void swap(lts_fsm_base& other)
+    void swap(lts_fsm_base& other) noexcept
     {
       m_state_element_values.swap(other.m_state_element_values);
       m_parameters.swap(other.m_parameters);

@@ -147,7 +147,7 @@ private:
     level_type level = 0UL; // The level of the block in the partition.
     signature_type sig;
 
-    void swap(block& b)
+    void swap(block& b) noexcept
     {
       std::swap(b.state_index, state_index);
       std::swap(b.block_index, block_index);

@@ -83,7 +83,7 @@ std::ostream& operator<<(std::ostream& out, const stochastic_process_initializer
 }
 
 /// \\brief swap overload
-inline void swap(stochastic_process_initializer& t1, stochastic_process_initializer& t2)
+inline void swap(stochastic_process_initializer& t1, stochastic_process_initializer& t2) noexcept
 {
   t1.swap(t2);
 }

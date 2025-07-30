@@ -103,7 +103,7 @@ std::ostream& operator<<(std::ostream& out, const function_symbol& x)
 }
 
 /// \\brief swap overload
-inline void swap(function_symbol& t1, function_symbol& t2)
+inline void swap(function_symbol& t1, function_symbol& t2) noexcept
 {
   t1.swap(t2);
 }

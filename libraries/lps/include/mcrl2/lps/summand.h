@@ -66,7 +66,7 @@ class summand_base
     }
 
     /// \brief Swaps the contents
-    void swap(summand_base& other)
+    void swap(summand_base& other) noexcept
     {
       using std::swap;
       swap(m_summation_variables, other.m_summation_variables);

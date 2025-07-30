@@ -100,7 +100,7 @@ std::ostream& operator<<(std::ostream& out, const rename_expression& x)
 }
 
 /// \\brief swap overload
-inline void swap(rename_expression& t1, rename_expression& t2)
+inline void swap(rename_expression& t1, rename_expression& t2) noexcept noexcept
 {
   t1.swap(t2);
 }

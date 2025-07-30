@@ -65,7 +65,7 @@ class deadlock_summand: public summand_base
     }
 
     /// \brief Swaps the contents
-    void swap(deadlock_summand& other)
+    void swap(deadlock_summand& other) noexcept
     {
       summand_base::swap(other);
       using std::swap;
@@ -94,7 +94,7 @@ std::ostream& operator<<(std::ostream& out, const deadlock_summand& x)
 }
 
 /// \\brief swap overload
-inline void swap(deadlock_summand& t1, deadlock_summand& t2)
+inline void swap(deadlock_summand& t1, deadlock_summand& t2) noexcept
 {
   t1.swap(t2);
 }

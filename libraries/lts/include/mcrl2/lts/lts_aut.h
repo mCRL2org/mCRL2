@@ -42,7 +42,7 @@ class lts_aut_base
     }
 
     /** \brief Standard swap function. */
-    void swap(lts_aut_base& )
+    void swap(lts_aut_base&) noexcept
     {
       // Does intentionally not provide any action.
     }

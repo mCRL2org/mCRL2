@@ -101,7 +101,7 @@ std::ostream& operator<<(std::ostream& out, const stochastic_distribution& x)
 }
 
 /// \\brief swap overload
-inline void swap(stochastic_distribution& t1, stochastic_distribution& t2)
+inline void swap(stochastic_distribution& t1, stochastic_distribution& t2) noexcept
 {
   t1.swap(t2);
 }

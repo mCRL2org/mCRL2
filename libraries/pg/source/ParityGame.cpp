@@ -312,13 +312,13 @@ bool ParityGame::proper() const
     return true;
 }
 
-void ParityGame::swap(ParityGame &pg)
+void ParityGame::swap(ParityGame& pg) noexcept
 {
-    using std::swap;
-    swap(d_, pg.d_);
-    swap(graph_, pg.graph_);
-    swap(vertex_, pg.vertex_);
-    swap(cardinality_, pg.cardinality_);
+  using std::swap;
+  swap(d_, pg.d_);
+  swap(graph_, pg.graph_);
+  swap(vertex_, pg.vertex_);
+  swap(cardinality_, pg.cardinality_);
 }
 
 #ifdef MCRL2_ENABLE_MULTITHREADING
