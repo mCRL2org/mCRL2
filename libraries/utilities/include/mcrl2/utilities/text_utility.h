@@ -25,24 +25,6 @@
 namespace mcrl2::utilities
 {
 
-/// \brief Checks whether the input only contains proper ascii characters,
-///        including common control characters. 
-/// \param input The string to be checked. 
-/// \return true iff the input consists of ordinary ascii characters only. 
-template <class CharContainer>
-inline bool contains_only_ascii_symbols(const CharContainer& input)
-{
-  for(const typename CharContainer::value_type& c: input)
-  {
-    // Allow printable characters and a tab, line feed, and a carriage return
-    if (!(std::isprint(c) || c=='\t' || c=='\n' || c=='\r' ))
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
 /// \brief Transform parameter into string.
 /// \param x Some expression
 /// \pre type T has operator <<
