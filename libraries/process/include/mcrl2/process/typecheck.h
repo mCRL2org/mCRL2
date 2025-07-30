@@ -30,45 +30,24 @@ action typecheck_action(const core::identifier_string& name,
                        )
 {
   std::string msg = "action";
-  data::sorts_list parameter_list = action_context.matching_action_sorts(name, parameters);
+  std::set<data::sort_expression_list> parameter_list = action_context.matching_action_sorts(name, parameters);
   std::pair<data::data_expression_list, data::sort_expression_list> p = 
                 process::detail::match_action_parameters(parameters, parameter_list, variable_context, name, msg, typechecker);
   return action(action_label(name, p.second), p.first);
 }
 
-// returns the intersection of the 2 type list lists
-inline
-data::sorts_list sorts_list_union(const data::sorts_list& sorts1, const data::sorts_list& sorts2)
-{
-  data::sorts_list result=sorts1;
-  for (const data::sort_expression_list& s: sorts2)
-  {
-    if (std::find(sorts1.begin(), sorts1.end(), s) == sorts1.end())  // not found.
-    {
-      result.push_front(s);
-    }
-  }
-  return atermpp::reverse(result);
-}
-
 // returns the difference of the 2 type list lists
 inline
-data::sorts_list sorts_list_difference(const data::sorts_list& sorts1, const data::sorts_list& sorts2)
+std::set<data::sort_expression_list> sorts_list_difference(const std::set<data::sort_expression_list>& sorts1, const std::set<data::sort_expression_list>& sorts2)
 {
-  data::sorts_list result;
-  for (const data::sort_expression_list& s: sorts1)
-  {
-    if (std::find(sorts2.begin(), sorts2.end(), s) == sorts1.end())
-    {
-      result.push_front(s);
-    }
-  }
-  return atermpp::reverse(result);
+  std::set<data::sort_expression_list> result;
+  std::set_difference(sorts1.begin(),sorts1.end(), sorts2.begin(),sorts2.end(),std::inserter(result, result.begin()));
+  return result;
 }
 
 // print a sorts_list, i.e. a list of lists of sort expressions.
 inline
-std::string pp(const data::sorts_list& ll)
+std::string pp(const std::set<data::sort_expression_list>& ll)
 {
   std::string result;
   bool empty1=true;
@@ -84,21 +63,6 @@ std::string pp(const data::sorts_list& ll)
     empty2=false;
   }
   return result;
-}
-
-inline
-std::ostream& operator<<(std::ostream& out, const data::sorts_list& x)
-{
-  out << "[";
-  for (auto i = x.begin(); i != x.end(); ++i)
-  {
-    if (i != x.begin())
-    {
-      out << ", ";
-    }
-    out << *i;
-  }
-  return out;
 }
 
 namespace detail
@@ -153,12 +117,6 @@ bool equal_multi_actions(core::identifier_string_list a1, core::identifier_strin
   return false;
 }
 
-inline
-std::ostream& operator<<(std::ostream& out, const std::pair<core::identifier_string, data::sort_expression_list>& x)
-{
-  return out << "(" << x.first << ", " << x.second << ")";
-}
-
 struct typecheck_builder: public process_expression_builder<typecheck_builder>
 {
   using super = process_expression_builder<typecheck_builder>;
@@ -183,7 +141,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       m_current_equation(current_equation)
   {}
 
-  data::sorts_list action_sorts(const core::identifier_string& name)
+  std::set<data::sort_expression_list> action_sorts(const core::identifier_string& name)
   {
     return m_action_context.matching_action_sorts(name);
   }
@@ -227,7 +185,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
-  static bool has_empty_intersection(const data::sorts_list& s1, const data::sorts_list& s2)
+  static bool has_empty_intersection(const std::set<data::sort_expression_list>& s1, const std::set<data::sort_expression_list>& s2)
   {
     std::set<data::sort_expression_list> v1(s1.begin(), s1.end());
     std::set<data::sort_expression_list> v2(s2.begin(), s2.end());
@@ -275,7 +233,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   process_instance typecheck_process_instance(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
     std::string msg = "process";
-    data::sorts_list parameter_list = m_process_context.matching_process_sorts(name, parameters);
+    std::set<data::sort_expression_list> parameter_list = m_process_context.matching_process_sorts(name, parameters);
     std::pair<data::data_expression_list, data::sort_expression_list> p = 
             process::detail::match_action_parameters(parameters, parameter_list, m_variable_context, name, msg, m_data_type_checker);
     return m_process_context.make_process_instance(name, p.second, p.first);
@@ -461,7 +419,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
 
       //Below we check the first part of requirement 7 on page 279 of Groote/Mousave, The MIT Press, 2014.
-      data::sorts_list c_sorts;
+      std::set<data::sort_expression_list> c_sorts;
       bool c_sorts_defined=false;
       for (const core::identifier_string& a: cnames)
       {
@@ -471,7 +429,9 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         }
         if (c_sorts_defined)
         {
-          c_sorts = sorts_list_union(c_sorts, action_sorts(a));
+          // c_sorts = sorts_list_union(c_sorts, action_sorts(a));
+          std::set<data::sort_expression_list> s=action_sorts(a);
+          c_sorts.insert(s.begin(), s.end());
         }
         else
         {
@@ -485,8 +445,8 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         }
       }
       //Check that each sort occurring in an action at the lhs is also a sort of the action at the right.
-      const data::sorts_list target_sorts = action_sorts(c.name());
-      const data::sorts_list difference_list=sorts_list_difference(c_sorts,target_sorts);
+      const std::set<data::sort_expression_list> target_sorts = action_sorts(c.name());
+      const std::set<data::sort_expression_list> difference_list=sorts_list_difference(c_sorts,target_sorts);
       if (difference_list.size()>0)
       {
         throw mcrl2::runtime_error("In the communication clause " + process::pp(c) + 
@@ -499,8 +459,8 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       //in conformance with Groote/Mousavi, page 279, item 7.
       for (const core::identifier_string& a: cnames)
       {
-        const data::sorts_list target_sorts = action_sorts(a);
-        const data::sorts_list difference_list=sorts_list_difference(c_sorts,target_sorts);
+        const std::set<data::sort_expression_list> target_sorts = action_sorts(a);
+        const std::set<data::sort_expression_list> difference_list=sorts_list_difference(c_sorts,target_sorts);
         if (difference_list.size()>0)
         {
           throw mcrl2::runtime_error("In the communication clause " + process::pp(c) + 

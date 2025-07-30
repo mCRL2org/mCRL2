@@ -45,7 +45,7 @@ std::tuple<bool, data::data_expression_vector, std::string> match_action_paramet
 
 inline
 std::pair<data::data_expression_list, data::sort_expression_list> match_action_parameters(const data::data_expression_list& parameters,
-                                                                                          const data::sorts_list& possible_parameter_sorts,
+                                                                                          const std::set<data::sort_expression_list>& possible_parameter_sorts,
                                                                                           const data::detail::variable_context& variable_context,
                                                                                           const core::identifier_string& name,
                                                                                           const std::string& msg,

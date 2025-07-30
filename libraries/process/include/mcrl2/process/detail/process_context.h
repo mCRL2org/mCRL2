@@ -148,19 +148,19 @@ class process_context
       throw mcrl2::runtime_error("no matching process found for " + core::pp(name) + "(" + data::pp(formal_parameters) + ")");
     }
 
-    data::sorts_list matching_process_sorts(const core::identifier_string& name, const data::data_expression_list& parameters) const
+    std::set<data::sort_expression_list> matching_process_sorts(const core::identifier_string& name, const data::data_expression_list& parameters) const
     {
-      data::sorts_list result;
+      std::set<data::sort_expression_list> result;
       auto range = m_process_identifiers.equal_range(name);
       for (auto k = range.first; k != range.second; ++k)
       {
         const process_identifier& id = k->second;
         if (id.variables().size() == parameters.size())
         {
-          result.push_front(data::detail::parameter_sorts(id.variables()));
+          result.insert(data::detail::parameter_sorts(id.variables()));
         }
       }
-      return atermpp::reverse(result);
+      return result;
     }
 
     void clear()
