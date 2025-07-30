@@ -96,9 +96,9 @@ public:
   {}
   
   /// \brief Constructor.
-  unordered_map (unordered_map&& x)
-   : super::unordered_map(std::move(x)),
-     container_wrapper(*this)     
+  unordered_map(unordered_map&& x) noexcept
+      : super::unordered_map(std::move(x)),
+        container_wrapper(*this)
   {}
 
 
@@ -300,9 +300,9 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     {}
 
     /// \brief Constructor.
-    unordered_map(unordered_map&& x)
-      : super::unordered_map(std::move(x)),
-      container_wrapper(*this)
+    unordered_map(unordered_map&& x) noexcept
+        : super::unordered_map(std::move(x)),
+          container_wrapper(*this)
     {}
 
     /// \brief Constructor.
