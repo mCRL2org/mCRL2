@@ -12,19 +12,19 @@
 
 /// \brief Define macros to conditionally enable platform specific code.
 #ifdef _WIN32
-    #define MCRL2_PLATFORM_WINDOWS 1
+    #define MCRL2_PLATFORM_WINDOWS 1 // NOLINT(cppcoreguidelines-macro-usage)
 #endif
 
 #ifdef __linux
-    #define MCRL2_PLATFORM_LINUX 1
+    #define MCRL2_PLATFORM_LINUX 1 // NOLINT(cppcoreguidelines-macro-usage)
 #endif
 
 #ifdef __FreeBSD__
-    #define MCRL2_PLATFORM_FREEBSD 1
+    #define MCRL2_PLATFORM_FREEBSD 1 // NOLINT(cppcoreguidelines-macro-usage)
 #endif
 
 #ifdef __APPLE__
-    #define MCRL2_PLATFORM_MAC 1
+    #define MCRL2_PLATFORM_MAC 1 // NOLINT(cppcoreguidelines-macro-usage)
 #endif
 
 /// \brief Define macros to conditionally enable compiler specific code.
