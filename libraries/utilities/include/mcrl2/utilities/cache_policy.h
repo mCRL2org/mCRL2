@@ -22,6 +22,7 @@ template<typename Map>
 class replacement_policy
 {
 public:
+  virtual ~replacement_policy() = default;
   using key_type = typename Map::key_type;
   using map_type = Map;
 
@@ -61,9 +62,8 @@ public:
   using key_type = typename Map::key_type;
 
   fifo_policy()
-  {
-    m_last_element_it = m_queue.before_begin();
-  }
+      : m_last_element_it(m_queue.before_begin())
+  {}
 
   fifo_policy(const fifo_policy& other)
     : m_queue(other.m_queue)

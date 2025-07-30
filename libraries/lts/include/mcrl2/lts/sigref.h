@@ -39,6 +39,7 @@ public:
   signature(const LTS_T& lts_)
     : m_lts(lts_), m_sig(m_lts.num_states(), signature_t())
   {}
+  virtual ~signature() = default;
 
   /** \brief Compute a new signature based on \a partition.
     * \param[in] partition The current partition
@@ -76,6 +77,7 @@ protected:
   using signature<LTS_T>::m_sig;
 
 public:
+  virtual ~signature_bisim() = default;
   /** \brief Constructor */
   signature_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_)
@@ -141,6 +143,7 @@ protected:
   }
 
 public:
+  virtual ~signature_branching_bisim() = default;
   /** \brief Constructor  */
   signature_branching_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_),
@@ -293,6 +296,7 @@ protected:
   }
 
 public:
+  virtual ~signature_divergence_preserving_branching_bisim() = default;
   /** \brief Constructor
     *
     * This initialises \a m_divergent to record for each vertex whether it is
