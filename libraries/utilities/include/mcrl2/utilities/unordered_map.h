@@ -177,7 +177,7 @@ public:
     }
     else
     {
-      return emplace(std::forward<Key>(obj), std::forward<M>(obj));
+      return emplace(std::move(k), std::forward(obj));
     }
   }
 
