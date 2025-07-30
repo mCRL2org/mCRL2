@@ -28,13 +28,16 @@
 
 #ifdef MCRL2_PLATFORM_WINDOWS
   #include <malloc.h>
+  // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
   #define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) (reinterpret_cast<TYPE*>(_alloca((SIZE)*sizeof(TYPE))))
 #elif (MCRL2_PLATFORM_LINUX || MCRL2_PLATFORM_MAC)
   #include <alloca.h>
-#define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) (reinterpret_cast<TYPE*>(alloca((SIZE) * sizeof(TYPE))))
+  // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+  #define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) (reinterpret_cast<TYPE*>(alloca((SIZE) * sizeof(TYPE))))
 #elif MCRL2_PLATFORM_FREEBSD
   #include <cstdlib>
- #define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) (reinterpret_cast<TYPE*>(alloca((SIZE)*sizeof(TYPE))))
+  // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+  #define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) (reinterpret_cast<TYPE*>(alloca((SIZE)*sizeof(TYPE))))
 #else
   static_assert(false, "MCRL2_SPECIFICATION_STACK_ALLOCATOR has not yet been defined for your platform.");
 #endif
