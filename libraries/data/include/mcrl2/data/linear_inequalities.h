@@ -317,7 +317,10 @@ namespace detail
           result.emplace_back(p.variable_name(),p.factor());
         }
       }
-      else result.emplace_back(p.variable_name(),p.factor());
+      else
+      {
+        result.emplace_back(p.variable_name(), p.factor());
+      }
     }
     if (!inserted)
     {

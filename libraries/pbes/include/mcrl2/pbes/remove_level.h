@@ -33,10 +33,22 @@ enum remove_level
 inline
 remove_level parse_remove_level(const std::string& s)
 {
-  if (s == "none") return none;
-  else if (s == "some") return some;
-  else if (s == "all") return all;
-  else throw mcrl2::runtime_error("unknown bes variables remove level " + s);
+  if (s == "none")
+  {
+    return none;
+  }
+  else if (s == "some")
+  {
+    return some;
+  }
+  else if (s == "all")
+  {
+    return all;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown bes variables remove level " + s);
+  }
 }
 
 inline

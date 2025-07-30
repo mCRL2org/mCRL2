@@ -210,7 +210,9 @@ protected:
     for (std::size_t i = 0; i < m_lts.num_states(); ++i)
     {
       if (scc[i] == 0)
+      {
         stack.push(i);
+      }
       while (!stack.empty())
       {
         const std::size_t vi = stack.top();
@@ -244,7 +246,9 @@ protected:
           {
             const outgoing_pair_t& t=m_lts_succ_transitions.get_transitions()[i];
             if ((low[to(t)] != 0) && (m_lts.is_tau(m_lts.apply_hidden_label_map(label(t)))))
+            {
               low[vi] = low[vi] < low[to(t)] ? low[vi] : low[to(t)];
+            }
           }
           if (low[vi] == scc[vi])
           {

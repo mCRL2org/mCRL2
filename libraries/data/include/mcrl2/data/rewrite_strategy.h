@@ -24,16 +24,24 @@ enum rewrite_strategy
 inline
 rewrite_strategy parse_rewrite_strategy(const std::string& s)
 {
-  if(s == "jitty")
+  if (s == "jitty")
+  {
     return jitty;
+  }
   else if (s == "jittyp")
+  {
     return jitty_prover;
+  }
 
 #ifdef MCRL2_ENABLE_JITTYC
   if (s == "jittyc")
+  {
     return jitty_compiling;
+  }
   else if (s == "jittycp")
+  {
     return jitty_compiling_prover;
+  }
 #endif //MCRL2_ENABLE_JITTYC
 
   throw mcrl2::runtime_error("unknown rewrite strategy " + s);

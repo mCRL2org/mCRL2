@@ -311,7 +311,10 @@ inline void push_and_inside(pres_expression& result,
     push_and_inside(result, t1, atermpp::down_cast<or_>(t2).right(), conjunctive_normal_form);
     optimized_or(result, aux, result);
   }
-  else optimized_and(result, t1, t2);
+  else
+  {
+    optimized_and(result, t1, t2);
+  }
 }
 
 inline void push_or_inside(pres_expression& result,
@@ -356,7 +359,10 @@ inline void push_or_inside(pres_expression& result,
     push_or_inside(result, t1, atermpp::down_cast<and_>(t2).right(), conjunctive_normal_form);
     optimized_and(result, aux, result);
   }
-  else optimized_or(result, t1, t2);
+  else
+  {
+    optimized_or(result, t1, t2);
+  }
 }
 
 inline void push_plus_inside(pres_expression& result,
@@ -437,7 +443,10 @@ inline void push_plus_inside(pres_expression& result,
     push_plus_inside(result, t1, atermpp::down_cast<and_>(t2).right(), conjunctive_normal_form);
     optimized_and(result, aux, result);
   }
-  else optimized_plus(result, t1, t2);
+  else
+  {
+    optimized_plus(result, t1, t2);
+  }
 }
 
 inline void

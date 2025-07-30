@@ -197,19 +197,44 @@ std::string define_variable(const translated_data_specification &translation, st
 
 std::string sanitize_term(std::string term)
 {
-  if (term == "-") return "minus";
-  if (term == "[]") return "emptylist";
-  if (term == "|>") return "cons";
-  if (term == "<|") return "snoc";
-  if (term == "#") return "count";
-  if (term == "++") return "concat_";
-  if (term == ".") return "at";
+  if (term == "-")
+  {
+    return "minus";
+  }
+  if (term == "[]")
+  {
+    return "emptylist";
+  }
+  if (term == "|>")
+  {
+    return "cons";
+  }
+  if (term == "<|")
+  {
+    return "snoc";
+  }
+  if (term == "#")
+  {
+    return "count";
+  }
+  if (term == "++")
+  {
+    return "concat_";
+  }
+  if (term == ".")
+  {
+    return "at";
+  }
   for (char& i : term)
   {
     if (i == '\'')
+    {
       i = '_';
+    }
     if (i == '@')
+    {
       i = '_';
+    }
   }
   return term;
 }

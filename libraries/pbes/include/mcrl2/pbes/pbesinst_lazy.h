@@ -372,7 +372,10 @@ class pbesinst_lazy_algorithm
     {
       using utilities::detail::contains;
 
-      if (m_options.number_of_threads > 1) mCRL2log(log::debug) << "Start thread " << thread_index << ".\n";
+      if (m_options.number_of_threads > 1)
+      {
+        mCRL2log(log::debug) << "Start thread " << thread_index << ".\n";
+      }
       R.thread_initialise();
 
       propositional_variable_instantiation X_e;
@@ -437,7 +440,10 @@ class pbesinst_lazy_algorithm
         }
       }
 
-      if (m_options.number_of_threads>1) mCRL2log(log::debug) << "Stop thread " << thread_index << ".\n";
+      if (m_options.number_of_threads > 1)
+      {
+        mCRL2log(log::debug) << "Stop thread " << thread_index << ".\n";
+      }
     }
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.

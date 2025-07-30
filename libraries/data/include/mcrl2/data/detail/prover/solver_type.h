@@ -29,9 +29,18 @@ enum smt_solver_type
 inline
 smt_solver_type parse_solver_type(const std::string& s)
 {
-  if(s == "cvc") return solver_type_cvc;
-  else if(s == "z3") return solver_type_z3;
-  else throw mcrl2::runtime_error("unknown solver type " + s);
+  if (s == "cvc")
+  {
+    return solver_type_cvc;
+  }
+  else if (s == "z3")
+  {
+    return solver_type_z3;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown solver type " + s);
+  }
 }
 
 /// \brief standard conversion from stream to solver type

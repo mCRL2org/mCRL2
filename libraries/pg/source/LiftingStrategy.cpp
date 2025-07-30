@@ -76,8 +76,10 @@ const char *LiftingStrategyFactory::usage()
 LiftingStrategyFactory *
     LiftingStrategyFactory::create(const std::string &description)
 {
-    if (description.empty())
-      return nullptr;
+  if (description.empty())
+  {
+    return nullptr;
+  }
 
     // Split into parts, separated by semicolon characters
     std::vector<std::string> parts;

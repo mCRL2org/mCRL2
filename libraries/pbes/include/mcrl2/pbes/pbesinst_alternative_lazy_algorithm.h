@@ -250,13 +250,20 @@ class pbesinst_alternative_lazy_algorithm
     {
       // Initialize the random generator, with an arbitrary seed, depending on a new time.
       time_t t=time(nullptr);
-      for( ; t==time(nullptr) ; ); // Wait until time changes.
+      for (; t == time(nullptr);)
+      {
+        ; // Wait until time changes.
+      }
       srand((unsigned)time(nullptr));
 
       if (m_search_strategy == breadth_first_short)
+      {
         m_search_strategy = breadth_first;
+      }
       else if (m_search_strategy == depth_first_short)
+      {
         m_search_strategy = depth_first;
+      }
     }
 
     inline propositional_variable_instantiation next_todo()
