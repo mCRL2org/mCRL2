@@ -164,7 +164,7 @@ protected:
     data_expression replaced_relation = sort_bool::true_();
 
     uint32_t i = 0;
-    for(data_expression d: linear_inequalities)
+    for (const data_expression& d: linear_inequalities)
     {
       split_block = replace_data_expressions(split_block, data_expression_assignment(d, replacements[i]), true);
       enumeration_condition = replace_data_expressions(enumeration_condition, data_expression_assignment(d, replacements[i]), true);

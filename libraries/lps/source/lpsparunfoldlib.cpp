@@ -353,7 +353,7 @@ void unfold_data_manager::generate_case_function_equations(const data::sort_expr
   variable_vector::const_iterator vars_it = vars.begin();
   ++vars_it; // first variable to be skipped.
 
-  for(data::function_symbol new_constructor: new_cache_element.new_constructors)
+  for (const data::function_symbol& new_constructor: new_cache_element.new_constructors)
   {
     sub_args[0] = new_constructor; // set c_i
     const application lhs(case_function , sub_args);
