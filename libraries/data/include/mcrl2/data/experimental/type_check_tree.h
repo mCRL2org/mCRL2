@@ -192,6 +192,7 @@ struct type_check_constraint
   type_check_constraint(int cost_ = 0)
     : cost(cost_)
   {}
+  virtual ~type_check_constraint() = default;
 
   virtual std::string print() const = 0;
 };
