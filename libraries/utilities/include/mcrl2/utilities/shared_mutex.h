@@ -135,8 +135,8 @@ public:
     m_shared->register_mutex(this);
   }
 
-  shared_mutex(shared_mutex&& other)  
-    : m_shared(other.m_shared)
+  shared_mutex(shared_mutex&& other) noexcept
+      : m_shared(other.m_shared)
   {
     m_shared->register_mutex(this);
     m_shared->unregister_mutex(&other);
@@ -155,7 +155,7 @@ public:
     return *this;
   }
 
-  shared_mutex& operator=(shared_mutex&& other)
+  shared_mutex& operator=(shared_mutex&& other) noexcept
   {
     if (this != &other)
     {
@@ -167,7 +167,7 @@ public:
     }
     return *this;
   }
-  
+
   // Obtain exclusive access to the busy-forbidden lock.
   inline
   lock_guard lock()

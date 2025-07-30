@@ -91,9 +91,9 @@ public:
   {}
   
   /// \brief Constructor.
-  deque(deque&& x)
-   : super::deque(std::move(x)),
-     container_wrapper(*this)     
+  deque(deque&& x) noexcept
+      : super::deque(std::move(x)),
+        container_wrapper(*this)
   {}
 
   /// \brief Constructor.

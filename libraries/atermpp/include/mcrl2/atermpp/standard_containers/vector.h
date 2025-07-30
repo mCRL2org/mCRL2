@@ -89,9 +89,9 @@ public:
   {}
   
   /// \brief Constructor.
-  vector (vector&& x)
-   : super::vector(std::move(x)),
-     container_wrapper(*this)     
+  vector(vector&& x) noexcept
+      : super::vector(std::move(x)),
+        container_wrapper(*this)
   {}
 
   /// \brief Constructor.
