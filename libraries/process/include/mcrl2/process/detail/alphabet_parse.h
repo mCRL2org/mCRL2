@@ -124,7 +124,7 @@ multi_action_name parse_multi_action_name(const std::string& text)
 
 // Parses a multi action name set.
 // Example: "{ s1 | s2 | s3, t1 | t2 }" -> {{s1, s2, s3}, {t2, t2}}
-inline inline multi_action_name_set parse_multi_action_name_set(const std::string& text)
+inline multi_action_name_set parse_multi_action_name_set(const std::string& text)
 {
   std::vector<multi_action_name> result;
   for (const std::string& word: set_elements(text))
