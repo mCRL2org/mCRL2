@@ -15,12 +15,11 @@
 
 using namespace mcrl2;
 
-std::pair<process::action_list, process::action_list> split_action(
-  const process::action_list& actions,
-  std::size_t index,
-  const data::variable_list& left_parameters,
-  const data::variable_list& right_parameters,
-  const std::list<std::size_t>& indices)
+inline std::pair<process::action_list, process::action_list> split_action(const process::action_list& actions,
+    std::size_t index,
+    const data::variable_list& left_parameters,
+    const data::variable_list& right_parameters,
+    const std::list<std::size_t>& indices)
 {
   process::action_list left_action;
   process::action_list right_action;

@@ -255,7 +255,9 @@ find_structured_sort_functions(const data::data_specification& dataspec, Skip sk
  * \details Also sets native translations and build a set of all recognisers and
  * projections in dataspec.
  */
-std::set<data::function_symbol> complete_recognisers_projections(const data::data_specification& dataspec, native_translations& nt, structured_sort_functions& ssf)
+inline std::set<data::function_symbol> complete_recognisers_projections(const data::data_specification& dataspec,
+    native_translations& nt,
+    structured_sort_functions& ssf)
 {
   std::set<data::function_symbol> recog_and_proj;
 

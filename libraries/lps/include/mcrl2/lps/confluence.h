@@ -74,8 +74,8 @@ const stochastic_distribution& summand_distribution(const Summand& /* summand */
 }
 
 // TODO: reuse this code
-template <>
-const stochastic_distribution& summand_distribution(const lps::stochastic_action_summand& summand)
+template<>
+inline const stochastic_distribution& summand_distribution(const lps::stochastic_action_summand& summand)
 {
   return summand.distribution();
 }

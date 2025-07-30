@@ -128,7 +128,7 @@ std::string print_graph(
 }
 
 // print the indices of U (subset of V)
-std::string print_nodes(const ldd& U, const ldd& V)
+inline std::string print_nodes(const ldd& U, const ldd& V)
 {
   using namespace sylvan::ldds;
 
@@ -165,7 +165,7 @@ std::string print_nodes(const ldd& U, const ldd& V)
 }
 
 // print the indices of U (subset of V)
-std::string print_strategy(const ldd& S, const ldd& V)
+inline std::string print_strategy(const ldd& S, const ldd& V)
 {
   using namespace sylvan::ldds;
 
@@ -230,7 +230,8 @@ std::string print_strategy(const ldd& S, const ldd& V)
 
 
 /// \brief maps proposition variable ldd values to (rank, is_disjunctive)
-std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes, const std::vector<symbolic::data_expression_index>& data_index)
+inline std::map<std::size_t, std::pair<std::size_t, bool>> compute_equation_info(const pbes_system::srf_pbes& pbes,
+    const std::vector<symbolic::data_expression_index>& data_index)
 {
   pbes_system::pbes_equation_index equation_index(pbes);
 

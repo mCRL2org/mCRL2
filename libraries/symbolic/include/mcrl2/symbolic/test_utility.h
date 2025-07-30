@@ -23,7 +23,7 @@
 namespace mcrl2::symbolic
 {
 
-std::mt19937& gen()
+inline std::mt19937& gen()
 {
   static thread_local std::random_device rd;
   static thread_local std::mt19937 gen(rd());
@@ -31,7 +31,7 @@ std::mt19937& gen()
 }
 
 /// \brief Generate a random (state) vector.
-std::vector<std::uint32_t> random_vector(std::size_t length, std::size_t max_value)
+inline std::vector<std::uint32_t> random_vector(std::size_t length, std::size_t max_value)
 {    
   std::uniform_int_distribution<> dist(0, max_value);
 
@@ -45,7 +45,7 @@ std::vector<std::uint32_t> random_vector(std::size_t length, std::size_t max_val
 }
 
 /// \brief Generate a set of random (state) vectors.
-sylvan::ldds::ldd random_set(std::size_t amount, std::size_t length, std::size_t max_value)
+inline sylvan::ldds::ldd random_set(std::size_t amount, std::size_t length, std::size_t max_value)
 {
   sylvan::ldds::ldd result;
 
@@ -59,7 +59,7 @@ sylvan::ldds::ldd random_set(std::size_t amount, std::size_t length, std::size_t
 }
 
 /// \brief Returns a random subset of U.
-sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
+inline sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
 {
     std::uniform_int_distribution<> dist(0, satcount(U));
 
@@ -93,7 +93,8 @@ sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
 }
 
 /// Returns a random vector set containing at most number_of_insertions vectors of the given length with values in 0..max_value.
-std::set<std::vector<std::uint32_t>> random_vector_set(std::uint32_t length, std::uint32_t max_value, std::uint32_t number_of_insertions)
+inline std::set<std::vector<std::uint32_t>>
+random_vector_set(std::uint32_t length, std::uint32_t max_value, std::uint32_t number_of_insertions)
 {
   std::set<std::vector<std::uint32_t>> result;
 
@@ -105,7 +106,7 @@ std::set<std::vector<std::uint32_t>> random_vector_set(std::uint32_t length, std
   return result;
 }
 
-sylvan::ldds::ldd to_ldd(const std::set<std::vector<std::uint32_t>>& vector_set)
+inline sylvan::ldds::ldd to_ldd(const std::set<std::vector<std::uint32_t>>& vector_set)
 {
   sylvan::ldds::ldd result;
 
@@ -118,7 +119,7 @@ sylvan::ldds::ldd to_ldd(const std::set<std::vector<std::uint32_t>>& vector_set)
 }
 
 /// \brief Initialise the Sylvan library.
-void initialise_sylvan()
+inline void initialise_sylvan()
 {
   //mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
   lace_init(1, static_cast<size_t>(1024 * 1024 * 4));
@@ -129,7 +130,7 @@ void initialise_sylvan()
 }
 
 /// \brief Destroy the Sylvan library.
-void quit_sylvan()
+inline void quit_sylvan()
 {
   sylvan::sylvan_quit();
   lace_exit();

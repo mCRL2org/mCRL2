@@ -20,8 +20,9 @@
 namespace mcrl2
 {
 
-/// \brief Converts a state vector of indices to a vector of the corresponding data expressions. 
-lps::state array2state(const std::vector<symbolic::data_expression_index>& data_index, std::uint32_t* x, std::size_t n)
+/// \brief Converts a state vector of indices to a vector of the corresponding data expressions.
+inline lps::state
+array2state(const std::vector<symbolic::data_expression_index>& data_index, std::uint32_t* x, std::size_t n)
 {
   std::vector<data::data_expression> result;
   for (std::size_t i = 0; i < n; i++)

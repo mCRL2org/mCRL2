@@ -183,7 +183,7 @@ std::vector<propositional_variable_instantiation> count_propositional_variable_i
   return result;
 }
 
-std::set<propositional_variable_instantiation> filter_pvis(const propositional_variable_instantiation& needle,
+inline std::set<propositional_variable_instantiation> filter_pvis(const propositional_variable_instantiation& needle,
     const std::vector<propositional_variable_instantiation>& haystack)
 {
   std::set<propositional_variable_instantiation> result;
@@ -542,7 +542,7 @@ struct pbespathreduction_pbes_backward_substituter
   }
 };
 
-void pbespathreduction(const std::string& input_filename,
+inline void pbespathreduction(const std::string& input_filename,
     const std::string& output_filename,
     const utilities::file_format& input_format,
     const utilities::file_format& output_format,

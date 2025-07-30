@@ -24,14 +24,16 @@ namespace detail
 template <class INITIALIZER>
 INITIALIZER make_process_initializer(const data::data_expression_list& expressions, const INITIALIZER& init);
 
-template <>
-process_initializer make_process_initializer(const data::data_expression_list& expressions, const process_initializer& /* init */)
+template<>
+inline process_initializer make_process_initializer(const data::data_expression_list& expressions,
+    const process_initializer& /* init */)
 {
   return lps::process_initializer(expressions);
 }
 
-template <>
-stochastic_process_initializer make_process_initializer(const data::data_expression_list& expressions, const stochastic_process_initializer& init)
+template<>
+inline stochastic_process_initializer make_process_initializer(const data::data_expression_list& expressions,
+    const stochastic_process_initializer& init)
 {
   return stochastic_process_initializer(expressions, init.distribution());
 }

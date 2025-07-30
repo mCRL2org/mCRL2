@@ -132,7 +132,7 @@ struct maximal_closed_subformula_node: public free_variables_node
   { }
 };
 
-std::ostream& operator<<(std::ostream& out, const maximal_closed_subformula_node& node)
+inline std::ostream& operator<<(std::ostream& out, const maximal_closed_subformula_node& node)
 {
   out << "<node>variables = ";
   for (const data::variable& v: node.variables)

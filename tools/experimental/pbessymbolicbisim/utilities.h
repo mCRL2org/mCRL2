@@ -19,7 +19,7 @@ namespace mcrl2::data
 {
 
 data_expression make_abstraction(const binder_type&, const variable_list&, const data_expression&);
-data_expression make_abstraction(const binder_type& b, const variable_list& vars, const data_expression& expr)
+inline data_expression make_abstraction(const binder_type& b, const variable_list& vars, const data_expression& expr)
 {
   return vars.empty() ? expr : abstraction(b, vars, expr);
 }
