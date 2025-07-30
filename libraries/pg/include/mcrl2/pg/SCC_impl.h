@@ -57,7 +57,10 @@ public:
                 assert(stack.empty());
                 add(v);
                 int res = dfs();
-                if (res != 0) return res;
+                if (res != 0)
+                {
+                  return res;
+                }
             }
         }
         assert(stack.empty());

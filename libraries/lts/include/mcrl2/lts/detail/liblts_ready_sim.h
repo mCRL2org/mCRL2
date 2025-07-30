@@ -255,8 +255,12 @@ void ready_sim_partitioner<LTS_TYPE>::updatei()
       if (exists2->find(beta,l)) 
         {
           for (alpha = 0; alpha < s_Pi; ++alpha)
-          if (Q[alpha][beta] && !forall2->find(alpha,l))
-            Q[alpha][beta] = false ;
+          {
+            if (Q[alpha][beta] && !forall2->find(alpha, l))
+            {
+              Q[alpha][beta] = false;
+            }
+          }
         }
     }
   };

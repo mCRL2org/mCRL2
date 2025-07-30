@@ -633,7 +633,9 @@ bool refusals_contained_in(const state_type impl,
     const bool structured_output)
 {
   if (!weak_property_cache.stable(impl))
+  {
     return true; // Checking in case of instability is not necessary, but rather time consuming.
+  }
 
   const action_label_set& impl_action_labels = weak_property_cache.action_labels(impl);
   bool success = false;

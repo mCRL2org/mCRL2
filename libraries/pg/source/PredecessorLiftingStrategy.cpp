@@ -46,28 +46,40 @@ void PredecessorLiftingStrategy::push(verti v)
 {
     mCRL2log(mcrl2::log::debug) << "push(" << v << ")" << std::endl;
     queue_[queue_end_++] = v;
-    if (queue_end_ == queue_capacity_) queue_end_ = 0;
+    if (queue_end_ == queue_capacity_)
+    {
+      queue_end_ = 0;
+    }
     ++queue_size_;
     assert(queue_size_ <= queue_capacity_);
 }
 
 verti PredecessorLiftingStrategy::pop()
 {
-    if (queue_size_ == 0) return NO_VERTEX;
+  if (queue_size_ == 0)
+  {
+    return NO_VERTEX;
+  }
 
     // Remove an element from the queue
     verti res;
     if (stack_)
     {
         // Remove from the back of the queue
-        if (queue_end_ == 0) queue_end_ = queue_capacity_;
+        if (queue_end_ == 0)
+        {
+          queue_end_ = queue_capacity_;
+        }
         res = queue_[--queue_end_];
     }
     else
     {
         // Remove from the front of the queue
         res = queue_[queue_begin_++];
-        if (queue_begin_ == queue_capacity_) queue_begin_ = 0;
+        if (queue_begin_ == queue_capacity_)
+        {
+          queue_begin_ = 0;
+        }
     }
     --queue_size_;
     mCRL2log(mcrl2::log::debug) << "pop() -> " << res << std::endl;
@@ -92,7 +104,10 @@ void PredecessorLiftingStrategy::lifted(verti v)
 verti PredecessorLiftingStrategy::next()
 {
     verti res = pop();
-    if (res != NO_VERTEX) queued_[res] = false;
+    if (res != NO_VERTEX)
+    {
+      queued_[res] = false;
+    }
     return res;
 }
 

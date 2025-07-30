@@ -48,8 +48,10 @@ ParityGame::Strategy DeloopSolver::solve()
         }
 
         // Compute attractor set and associated strategy:
-        for ( std::deque<verti>::const_iterator it = winning.begin();
-                it != winning.end(); ++it ) solved.insert(*it);
+        for (std::deque<verti>::const_iterator it = winning.begin(); it != winning.end(); ++it)
+        {
+          solved.insert(*it);
+        }
         make_attractor_set( game_, (ParityGame::Player)player,
                             solved, winning, strategy );
 
@@ -80,7 +82,10 @@ ParityGame::Strategy DeloopSolver::solve()
         unsolved.reserve(num_unsolved);
         for (verti v = 0; v < V; ++v)
         {
-            if (solved.count(v) == 0) unsolved.push_back(v);
+          if (solved.count(v) == 0)
+          {
+            unsolved.push_back(v);
+          }
         }
         assert(!unsolved.empty() && unsolved.size() == num_unsolved);
 

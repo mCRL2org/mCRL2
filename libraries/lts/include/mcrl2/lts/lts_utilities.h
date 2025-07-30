@@ -104,7 +104,10 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
   assert(todo_stack.empty());
 #endif
 
-  if (USE_STACK) todo_stack.push_back(tau_label_index);
+  if (USE_STACK)
+  {
+    todo_stack.push_back(tau_label_index);
+  }
   for(std::vector<transition>::iterator ti=begin; ti!=end; ++ti)
   {
     const transition& t=*ti;
@@ -461,7 +464,10 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
                                          todo_stack_target);
         for(std::size_t i:todo_stack)
         {
-          if (value_sum_counter[i].first!=0) throw mcrl2::runtime_error("BLAH " + std::to_string(value_sum_counter[i].first));;
+          if (value_sum_counter[i].first != 0)
+          {
+            throw mcrl2::runtime_error("BLAH " + std::to_string(value_sum_counter[i].first));
+          };
           value_sum_counter[i].second=0;
         }
         todo_stack_target.clear();

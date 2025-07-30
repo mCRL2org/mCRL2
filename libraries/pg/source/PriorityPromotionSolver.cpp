@@ -169,7 +169,11 @@ void PriorityPromotionSolver::computeAttractor(std::vector<priority_t>& region_f
 
             // Skip predecessors that are already in the attractor set, also skip
             // vertices outside the subgame G >= prio. Or vertices that are computed
-            if (region_function[v] == prio || region_function[v] == COMPUTED_REGION || (inSubgraph && region_function[v] < prio)) continue;
+            if (region_function[v] == prio || region_function[v] == COMPUTED_REGION
+                || (inSubgraph && region_function[v] < prio))
+            {
+              continue;
+            }
 
             if (game().player(v) == alpha) {
                 // sigma(v) = w, a valid strategy for alpha is to pick a successor in A

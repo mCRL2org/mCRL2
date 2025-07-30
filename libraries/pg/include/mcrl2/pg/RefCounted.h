@@ -39,7 +39,10 @@ public:
     void deref() const
     {
         assert(refs_ > 0);
-        if (--refs_ == 0) delete this;
+        if (--refs_ == 0)
+        {
+          delete this;
+        }
     }
 
     //! Return the current reference count. Mostly useful for debugging.

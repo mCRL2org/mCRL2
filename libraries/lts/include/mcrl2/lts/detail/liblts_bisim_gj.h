@@ -858,7 +858,9 @@ class bisim_partitioner_gj
                                                                                                          transitions_per_block_to_constellation->end_same_BLC);
 
                                                                                       if (!check_block_to_constellation)
+                                                                                      {
                                                                                         continue;
+                                                                                      }
 
                                                                                       block_type* const b=m_states[t.from()].block;
 

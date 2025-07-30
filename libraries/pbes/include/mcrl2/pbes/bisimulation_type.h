@@ -30,10 +30,22 @@ enum bisimulation_type
 inline
 bisimulation_type parse_bisimulation_type(const std::string& type)
 {
-  if (type == "strong-bisim"        ) return strong_bisim;
-  else if (type == "weak-bisim"     ) return weak_bisim;
-  else if (type == "branching-bisim") return branching_bisim;
-  else if (type == "branching-sim"  ) return branching_sim;
+  if (type == "strong-bisim")
+  {
+    return strong_bisim;
+  }
+  else if (type == "weak-bisim")
+  {
+    return weak_bisim;
+  }
+  else if (type == "branching-bisim")
+  {
+    return branching_bisim;
+  }
+  else if (type == "branching-sim")
+  {
+    return branching_sim;
+  }
   throw mcrl2::runtime_error(std::string("unknown bisimulation type ") + type + "!");
   return strong_bisim;
 }

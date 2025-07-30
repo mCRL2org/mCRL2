@@ -1643,7 +1643,10 @@ void optimized_plus(pres_expression& result, const pres_expression& p, const pre
   {
     result=p;
   }
-  else make_plus(result, p, q);
+  else
+  {
+    make_plus(result, p, q);
+  }
 }
 
 /// \brief Make an implication

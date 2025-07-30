@@ -32,7 +32,10 @@ ParityGame::Strategy ComponentSolver::solve()
     DenseSet<verti> W1(0, V);
     winning_[0] = &W0;
     winning_[1] = &W1;
-    if (decompose_graph(game_.graph(), *this) != 0) strategy_.clear();
+    if (decompose_graph(game_.graph(), *this) != 0)
+    {
+      strategy_.clear();
+    }
     winning_[0] = nullptr;
     winning_[1] = nullptr;
     ParityGame::Strategy result;
@@ -42,7 +45,10 @@ ParityGame::Strategy ComponentSolver::solve()
 
 int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
 {
-    if (aborted()) return -1;
+  if (aborted())
+  {
+    return -1;
+  }
 
     assert(num_vertices > 0);
 
@@ -60,7 +66,10 @@ int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
     mCRL2log(mcrl2::log::verbose) << "SCC of size " << num_vertices << " with "
                                                      << unsolved.size() << " unsolved vertices..." << std::endl;
 
-    if (unsolved.empty()) return 0;
+    if (unsolved.empty())
+    {
+      return 0;
+    }
 
     // Construct a subgame for unsolved vertices in this component:
     ParityGame subgame;
@@ -107,7 +116,10 @@ int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
         }
         subsolver->solve().swap(substrat);
     }
-    if (substrat.empty()) return -1;  // solving failed
+    if (substrat.empty())
+    {
+      return -1; // solving failed
+    }
 
     mCRL2log(mcrl2::log::verbose) << "Merging strategies..." << std::endl;
     merge_strategies(strategy_, substrat, unsolved);

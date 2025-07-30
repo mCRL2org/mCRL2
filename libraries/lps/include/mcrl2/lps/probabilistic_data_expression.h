@@ -104,8 +104,14 @@ namespace detail
   // An algorithm to calculate the greatest common divisor
   inline std::size_t greatest_common_divisor(std::size_t x, std::size_t y)
   {
-    if (x==0) return y;
-    if (y==0) return x;
+    if (x == 0)
+    {
+      return y;
+    }
+    if (y == 0)
+    {
+      return x;
+    }
     if (x>y)
     {
       const std::size_t temp=x; x=y; y=temp; // swap(x,y)

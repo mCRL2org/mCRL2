@@ -46,7 +46,10 @@ void StaticGraph::reset(verti V, edgei E, EdgeDirection edge_dir)
     {
         successors_      = new verti[E];
         successor_index_ = new edgei[V + 1];
-        for (verti v = 0; v <= V; ++v) successor_index_[v] = 0;
+        for (verti v = 0; v <= V; ++v)
+        {
+          successor_index_[v] = 0;
+        }
     }
     else
     {
@@ -58,7 +61,10 @@ void StaticGraph::reset(verti V, edgei E, EdgeDirection edge_dir)
     {
         predecessors_      = new verti[E];
         predecessor_index_ = new edgei[V + 1];
-        for (verti v = 0; v <= V; ++v) predecessor_index_[v] = 0;
+        for (verti v = 0; v <= V; ++v)
+        {
+          predecessor_index_[v] = 0;
+        }
     }
     else
     {
@@ -85,7 +91,10 @@ void StaticGraph::make_random_scc(edge_list &edges)
     decompose_graph(*this, sccs);
 
     /* If we happen to have a single SCC by luck, we are done too: */
-    if (sccs.size() <= 1) return;
+    if (sccs.size() <= 1)
+    {
+      return;
+    }
 
     /* Otherwise, identify `top` and `bottom` components: */
     std::vector<verti> index(V_, NO_VERTEX);
@@ -153,11 +162,17 @@ void StaticGraph::make_random(verti V, unsigned outdeg, EdgeDirection edge_dir,
        possibly with self-edges). */
     edge_list edges;
     std::vector<verti> neighbours(V);
-    for (verti i = 0; i < V; ++i) neighbours[i] = i;
+    for (verti i = 0; i < V; ++i)
+    {
+      neighbours[i] = i;
+    }
     for (verti i = 0; i < V; ++i)
     {
         unsigned N = 1 + rand()%(2*outdeg - 1);
-        if (N >= V - 1) N = V - 1;
+        if (N >= V - 1)
+        {
+          N = V - 1;
+        }
         for (unsigned n = 0; n < N; ++n)
         {
             std::swap(neighbours[n], neighbours[n + rand()%(V - n)]);
@@ -266,7 +281,10 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
 void StaticGraph::shuffle_vertices()
 {
     std::vector<verti> perm(V_);
-    for (verti i = 0; i < V_; ++i) perm[i] = i;
+    for (verti i = 0; i < V_; ++i)
+    {
+      perm[i] = i;
+    }
     shuffle_vector(perm);
     shuffle_vertices(perm);
 }
@@ -284,7 +302,10 @@ void StaticGraph::shuffle_vertices(const std::vector<verti> &perm)
 
 void StaticGraph::assign(const StaticGraph &graph)
 {
-    if (&graph == this) return;
+  if (&graph == this)
+  {
+    return;
+  }
 
     reset(graph.V_, graph.E_, graph.edge_dir_);
 
@@ -308,8 +329,14 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     verti V = 0;
     for (edge_list::iterator it = edges.begin(); it != edges.end(); ++it)
     {
-        if (it->first  >= V) V = it->first  + 1;
-        if (it->second >= V) V = it->second + 1;
+      if (it->first >= V)
+      {
+        V = it->first + 1;
+      }
+      if (it->second >= V)
+      {
+        V = it->second + 1;
+      }
     }
 
     // Count number of vertices
@@ -331,13 +358,19 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
         edgei pos = 0;
         for (verti v = 0; v < V; ++v)
         {
-            while (pos < E && edges[pos].first < v) ++pos;
+          while (pos < E && edges[pos].first < v)
+          {
+            ++pos;
+          }
             successor_index_[v] = pos;
         }
         successor_index_[V] = E;
 
         /* Create successor list */
-        for (edgei e = 0; e < E; ++e) successors_[e] = edges[e].second;
+        for (edgei e = 0; e < E; ++e)
+        {
+          successors_[e] = edges[e].second;
+        }
     }
 
     if (edge_dir_ & EDGE_PREDECESSOR)
@@ -349,13 +382,19 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
         edgei pos = 0;
         for (verti v = 0; v < V; ++v)
         {
-            while (pos < E && edges[pos].second < v) ++pos;
+          while (pos < E && edges[pos].second < v)
+          {
+            ++pos;
+          }
             predecessor_index_[v] = pos;
         }
         predecessor_index_[V] = E;
 
         /* Create predecessor list */
-        for (edgei e = 0; e < E; ++e) predecessors_[e] = edges[e].first;
+        for (edgei e = 0; e < E; ++e)
+        {
+          predecessors_[e] = edges[e].first;
+        }
     }
 }
 
@@ -385,8 +424,18 @@ void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
                 continue;
             }
             std::pair<verti, verti> edge(v, *p++);
-            while (edge_cmp_forward(*it, edge)) ++it;
-            if (*it == edge) ++it; else successors_[e++] = edge.second;
+            while (edge_cmp_forward(*it, edge))
+            {
+              ++it;
+            }
+            if (*it == edge)
+            {
+              ++it;
+            }
+            else
+            {
+              successors_[e++] = edge.second;
+            }
         }
     }
 
@@ -408,8 +457,18 @@ void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
                 continue;
             }
             std::pair<verti, verti> edge(*p++, v);
-            while (edge_cmp_backward(*it, edge)) ++it;
-            if (*it == edge) ++it; else predecessors_[e++] = edge.first;
+            while (edge_cmp_backward(*it, edge))
+            {
+              ++it;
+            }
+            if (*it == edge)
+            {
+              ++it;
+            }
+            else
+            {
+              predecessors_[e++] = edge.first;
+            }
         }
     }
 
@@ -495,7 +554,10 @@ void StaticGraph::read_raw(std::istream &is)
 
 void StaticGraph::swap(StaticGraph &g)
 {
-    if (this == &g) return;
+  if (this == &g)
+  {
+    return;
+  }
     std::swap(V_, g.V_);
     std::swap(E_, g.E_);
     std::swap(successors_, g.successors_);
@@ -533,8 +595,12 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
           const_iterator a = graph.succ_begin(verts[i]);
           const_iterator b = graph.succ_end(verts[i]);
           while (a != b)
+          {
             if (map[*a++] != NO_VERTEX)
+            {
               ++num_edges;
+            }
+          }
         }
     }
 
@@ -560,14 +626,20 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
                  succ_it != succ_end; ++succ_it)
             {
                 verti w = map[*succ_it];
-                if (w != NO_VERTEX) successors_[e++] = w;
+                if (w != NO_VERTEX)
+                {
+                  successors_[e++] = w;
+                }
             }
             verti *end = &successors_[e];
             if (!std::is_sorted(begin, end, std::less<verti>()))
             {
                 std::sort(begin, end);
             }
-            if (proper) assert(begin != end);  /* proper parity game graph */
+            if (proper)
+            {
+              assert(begin != end); /* proper parity game graph */
+            }
         }
         assert(v == V_ && e == E_);
         successor_index_[v] = e;
@@ -588,7 +660,10 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
                  pred_it != pred_end; ++pred_it)
             {
                 verti w = map[*pred_it];
-                if (w != NO_VERTEX) predecessors_[e++] = w;
+                if (w != NO_VERTEX)
+                {
+                  predecessors_[e++] = w;
+                }
             }
             verti *end = &predecessors_[e];
             if (!std::is_sorted(begin, end, std::less<verti>()))

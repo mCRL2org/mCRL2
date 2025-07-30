@@ -111,7 +111,9 @@ bool find_if_impl(const aterm& t, MatchPredicate match, aterm& output)
     for (const aterm& x: t)
     {
       if (find_if_impl(x, match, output))
+      {
         return true;
+      }
     }
   }
   else if (t.type_is_list())

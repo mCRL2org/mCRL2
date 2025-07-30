@@ -4232,11 +4232,13 @@ bool mcrl2::data::data_type_checker::IsTypeAllowedL(const sort_expression_list& 
   //Checks if TypeList is allowed by PosTypeList (each respective element)
   assert(TypeList.size()==PosTypeList.size());
   sort_expression_list::const_iterator j=PosTypeList.begin();
-  for (sort_expression_list::const_iterator i=TypeList.begin(); i!=TypeList.end(); ++i,++j)
+  for (sort_expression_list::const_iterator i = TypeList.begin(); i != TypeList.end(); ++i, ++j)
+  {
     if (!IsTypeAllowedA(*i,*j))
     {
       return false;
     }
+  }
   return true;
 }
 
@@ -4718,11 +4720,13 @@ static bool HasUnknown(const sort_expression& Type)
   if (is_function_sort(Type))
   {
     const function_sort& s=down_cast<function_sort>(Type);
-    for (const sort_expression& TypeList : s.domain())
+    for (const sort_expression& TypeList: s.domain())
+    {
       if (HasUnknown(TypeList))
       {
         return true;
       }
+    }
     return HasUnknown(s.codomain());
   }
 

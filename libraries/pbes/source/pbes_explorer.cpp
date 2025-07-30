@@ -193,7 +193,10 @@ void lts_info::compute_lts_type()
             std::string signature = get_param_signature(varparam);
             bool new_param = true;
             for (auto & param : params) {
-               if (signature == param) new_param = false;
+              if (signature == param)
+              {
+                new_param = false;
+              }
             }
             if (new_param) {
                 params.push_back(signature);
@@ -690,7 +693,10 @@ bool lts_info::is_read_dependent_propvar(int /* group */)
 
 bool lts_info::is_read_dependent_parameter(int group, int part)
 {
-    if (group==0 || group==1) return false;
+  if (group == 0 || group == 1)
+  {
+    return false;
+  }
     std::string p = type.get_state_names()[part];
     mCRL2log(log::debug) << "is_read_dependent_parameter (group=" << group << ", part=" << part << " [" << p << "]" << std::endl;
     pbes_expression phi = transition_expression_plain[group];
@@ -725,7 +731,10 @@ bool lts_info::is_read_dependent_parameter(int group, int part)
 
 bool lts_info::is_write_dependent_propvar(int group)
 {
-    if (group==0 || group==1) return false;
+  if (group == 0 || group == 1)
+  {
+    return false;
+  }
     pbes_expression phi = transition_expression_plain[group];
     std::string X = transition_variable_name[group];
     if (lts_info::tf(phi))
@@ -751,7 +760,10 @@ bool lts_info::is_write_dependent_propvar(int group)
 
 bool lts_info::is_write_dependent_parameter(int group , int part)
 {
-  if (group==0 || group==1) return false;
+  if (group == 0 || group == 1)
+  {
+    return false;
+  }
     std::string p = type.get_state_names().at(part);
     pbes_expression phi = transition_expression_plain[group];
     std::string X = transition_variable_name[group];
@@ -1088,8 +1100,10 @@ std::string lts_info::state_to_string(const ltsmin_state& state)
             param_signatures.begin();
     for (std::vector<data_expression>::const_iterator param_value =
             param_values.begin(); param_value != param_values.end(); ++param_value) {
-        if (param_value != param_values.begin())
-            ss << ", ";
+      if (param_value != param_values.begin())
+      {
+        ss << ", ";
+      }
         ss << *param_signature << " = ";
         ss << *param_value;
         if (param_signature != param_signatures.end())
@@ -1214,13 +1228,22 @@ ltsmin_state::ltsmin_state(const std::string& varname,
 
 bool ltsmin_state::operator<( const ltsmin_state& other ) const
 {
-  if (this->var < other.var) return true;
+  if (this->var < other.var)
+  {
+    return true;
+  }
   else if (this->var == other.var)
   {
-    if (param_values.size() < other.param_values.size()) return true;
+    if (param_values.size() < other.param_values.size())
+    {
+      return true;
+    }
     else if (param_values.size() == other.param_values.size())
     {
-      if (param_values < other.param_values) return true;
+      if (param_values < other.param_values)
+      {
+        return true;
+      }
     }
   }
   return false;
@@ -1276,8 +1299,10 @@ std::string ltsmin_state::state_to_string() const
     ss << "[" << std::endl;
     for (std::vector<data_expression>::const_iterator entry =
             param_values.begin(); entry != param_values.end(); ++entry) {
-        if (entry != param_values.begin())
-            ss << std::endl << "  value = ";
+      if (entry != param_values.begin())
+      {
+        ss << std::endl << "  value = ";
+      }
         ss << *entry;
     }
     ss << "]";
