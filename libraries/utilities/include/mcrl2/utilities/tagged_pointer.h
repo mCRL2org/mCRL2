@@ -94,9 +94,10 @@ public:
     return get() != nullptr;
   }
 
-  void operator=(std::nullptr_t)
+  tagged_pointer& operator=(std::nullptr_t)
   {
     m_pointer = mcrl2::utilities::tag(static_cast<T*>(nullptr));
+    return *this;
   }
 
   bool operator==(std::nullptr_t) const

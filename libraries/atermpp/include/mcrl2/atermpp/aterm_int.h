@@ -42,12 +42,6 @@ public:
     assert(type_is_int() || !defined());
   }
 
-  /// This class has user-declared copy constructor so declare default copy and move operators.
-  aterm_int(const aterm_int& other) noexcept = default;
-  aterm_int& operator=(const aterm_int& other) noexcept = default;
-  aterm_int(aterm_int&& other) noexcept = default;
-  aterm_int& operator=(aterm_int&& other) noexcept = default;
-
   /// \brief Provide the value stored in an aterm. 
   /// \returns The value of the integer term.
   std::size_t value() const noexcept
