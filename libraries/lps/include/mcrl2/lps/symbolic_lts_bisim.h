@@ -48,7 +48,7 @@ void project_transitions(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void*
 }
 
 /// \brief Project on all transitions where n is the height of the LDD and action_index the action that we want to keep. (Assumes that action label is the last).
-sylvan::ldds::ldd project_transitions(const sylvan::ldds::ldd& x, std::size_t height, std::size_t action_index)
+inline sylvan::ldds::ldd project_transitions(const sylvan::ldds::ldd& x, std::size_t height, std::size_t action_index)
 {
   using namespace sylvan::ldds;
 
@@ -79,7 +79,7 @@ sylvan::ldds::ldd project_transitions(const sylvan::ldds::ldd& x, std::size_t he
   }
 }
 
-void bisim(const symbolic_lts& lts)
+inline void bisim(const symbolic_lts& lts)
 {
   using namespace sylvan::ldds;
 

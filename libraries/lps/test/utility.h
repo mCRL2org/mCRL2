@@ -18,7 +18,7 @@
 using rewrite_strategy = data::rewriter::strategy;
 using rewrite_strategy_vector = std::vector<rewrite_strategy>;
 
-void run_linearisation_instance(const std::string& spec, const t_lin_options& options, bool expect_success)
+inline void run_linearisation_instance(const std::string& spec, const t_lin_options& options, bool expect_success)
 {
   if (expect_success)
   {
@@ -30,7 +30,7 @@ void run_linearisation_instance(const std::string& spec, const t_lin_options& op
   }
 }
 
-void run_linearisation_test_case(const std::string& spec, const bool expect_success = true)
+inline void run_linearisation_test_case(const std::string& spec, const bool expect_success = true)
 {
   // Set various rewrite strategies
   rewrite_strategy_vector rewrite_strategies = data::detail::get_test_rewrite_strategies(false);

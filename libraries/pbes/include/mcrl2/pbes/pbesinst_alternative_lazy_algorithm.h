@@ -29,30 +29,30 @@ namespace detail
   // The following function is a helper function to allow to create m_pv_renaming outside
   // the class such that the class becomes a lightweight object.
 
-  std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>
-  create_pv_renaming(std::vector<std::vector<propositional_variable_instantiation> >& instantiations,
-                                bool short_renaming_scheme)
+inline std::unordered_map<propositional_variable_instantiation, propositional_variable_instantiation>
+create_pv_renaming(std::vector<std::vector<propositional_variable_instantiation>>& instantiations,
+    bool short_renaming_scheme)
+{
+  std::size_t index = 0;
+  std::unordered_map<propositional_variable_instantiation, propositional_variable_instantiation> pv_renaming;
+  for (const std::vector<propositional_variable_instantiation>& vec: instantiations)
   {
-    std::size_t index=0;
-    std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
-    for(const std::vector<propositional_variable_instantiation>& vec: instantiations)
+    for (const propositional_variable_instantiation& inst: vec)
     {
-      for(const propositional_variable_instantiation& inst:vec)
+      if (short_renaming_scheme)
       {
-        if (short_renaming_scheme)
-        {
-          std::stringstream ss;
-          ss << "X" << index;
-          pv_renaming[inst]=propositional_variable_instantiation(ss.str(),data::data_expression_list());
-        }
-        else
-        {
-          pv_renaming[inst]=pbesinst_rename()(inst);
-        }
-        index++;
+        std::stringstream ss;
+        ss << "X" << index;
+        pv_renaming[inst] = propositional_variable_instantiation(ss.str(), data::data_expression_list());
       }
+      else
+      {
+        pv_renaming[inst] = pbesinst_rename()(inst);
+      }
+      index++;
     }
-    return pv_renaming;
+  }
+  return pv_renaming;
   }
 
   class rename_pbesinst_consecutively

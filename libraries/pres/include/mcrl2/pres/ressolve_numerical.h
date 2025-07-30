@@ -26,8 +26,7 @@ namespace mcrl2::pres_system {
 
 namespace detail {
 
-
-double evaluate(const pres_expression& p, const std::unordered_map<core::identifier_string, double>& solution)
+inline double evaluate(const pres_expression& p, const std::unordered_map<core::identifier_string, double>& solution)
 {
 // std::cerr << "Evaluate: " << p << "\n";
 using value_cache_type = std::unordered_map<data::data_expression, double>;

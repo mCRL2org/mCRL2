@@ -43,7 +43,7 @@ struct pbesiteration_options
   bool early_stopping = false;
 };
 
-void substitute(pbes_equation& into,
+inline void substitute(pbes_equation& into,
     const pbes_equation& by,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
 {
@@ -54,7 +54,7 @@ void substitute(pbes_equation& into,
   into.formula() = p;
 }
 
-data::data_expression pbestodata(pbes_equation& equation,
+inline data::data_expression pbestodata(pbes_equation& equation,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
         replace_substituter)
 {
@@ -78,7 +78,7 @@ enum class InvResult
 };
 
 // Equation should be in full form.
-InvResult global_invariant_check(pbes_equation& equation,
+inline InvResult global_invariant_check(pbes_equation& equation,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
         replace_substituter,
@@ -219,7 +219,7 @@ InvResult global_invariant_check(pbes_equation& equation,
   return InvResult::INV_FALSE;
 }
 
-void perform_iteration(pbes_equation& equation,
+inline void perform_iteration(pbes_equation& equation,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
         replace_substituter,

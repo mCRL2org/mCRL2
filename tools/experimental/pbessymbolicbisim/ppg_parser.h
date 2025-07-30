@@ -447,7 +447,7 @@ public:
   }
 };
 
-std::string pp(const ppg_summand& summ, bool is_conjunctive)
+inline std::string pp(const ppg_summand& summ, bool is_conjunctive)
 {
   std::string connecting_operator = is_conjunctive ? "=>" : "&&";
   std::string quantifier = is_conjunctive ? "forall" : "exists";
@@ -479,7 +479,7 @@ std::string pp(const ppg_summand& summ, bool is_conjunctive)
   return out.str();
 }
 
-std::string pp(const ppg_equation& eq)
+inline std::string pp(const ppg_equation& eq)
 {
   std::string connecting_operator = eq.is_conjunctive() ? "&&" : "||";
   std::ostringstream out;
@@ -505,7 +505,7 @@ std::string pp(const ppg_equation& eq)
   return out.str();
 }
 
-std::string pp(const ppg_pbes& x)
+inline std::string pp(const ppg_pbes& x)
 {
   std::ostringstream out;
   out << pp(x.data()) << std::endl;

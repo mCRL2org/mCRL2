@@ -108,7 +108,7 @@ class lts2pres_lts
     }
 };
 
-std::ostream& operator<<(std::ostream& out, const lts2pres_lts& ltsspec)
+inline std::ostream& operator<<(std::ostream& out, const lts2pres_lts& ltsspec)
 {
   const auto& action_labels = ltsspec.action_labels();
   out << "pres-LTS" << std::endl;
