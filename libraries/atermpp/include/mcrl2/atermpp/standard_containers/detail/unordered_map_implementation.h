@@ -512,7 +512,7 @@ namespace atermpp::utilities {
   {
     rehash_if_needed();
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::try_emplace(hint, k, args...);
+    return super::try_emplace(hint, std::move(k), std::forward(args)...);
   }
   
   template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
@@ -521,7 +521,7 @@ namespace atermpp::utilities {
   {
     rehash_if_needed();
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::try_emplace(hint, k, args...);
+    return super::try_emplace(hint, std::move(k), std::forward(args)...);
   }
 
   template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >

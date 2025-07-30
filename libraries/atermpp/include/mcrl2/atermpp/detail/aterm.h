@@ -37,7 +37,7 @@ public:
   /// \brief Constructs a term application with the given symbol and arguments.
   template<typename... Terms>
   _aterm_appl(const function_symbol& sym, const Terms&... arguments)
-    requires(sizeof...(Terms) == N) && are_terms<Terms...>::value
+    requires (sizeof...(Terms) == N && are_terms<Terms...>::value)
       : _aterm(sym),
         m_arguments{{arguments...}}
   {

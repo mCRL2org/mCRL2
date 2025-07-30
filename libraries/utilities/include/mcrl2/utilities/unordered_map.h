@@ -164,7 +164,7 @@ public:
   iterator try_emplace(const_iterator /*hint*/, const Key& k, Args&&... args) { return try_emplace(k, std::forward<Args>(args)...); }
 
   template< class... Args >
-  iterator try_emplace(const_iterator /*hint*/, Key&& k, Args&&... args) { return try_emplace(std::forward<Key>(k), std::forward<Args>(args)...); }
+  iterator try_emplace(const_iterator /*hint*/, Key&& k, Args&&... args) { return try_emplace(std::move<Key>(k), std::forward<Args>(args)...); }
 
   template <typename M>
   std::pair<iterator, bool> insert_or_assign(Key&& k, M&& obj)
@@ -188,7 +188,7 @@ public:
   std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, const Key& k, M&& obj) { return insert_or_emplace(k, std::forward<M>(obj)); }
 
   template <typename M>
-  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, Key&& k, M&& obj) { return insert_or_emplace(k, std::forward<M>(obj)); }
+  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, Key&& k, M&& obj) { return insert_or_emplace(std::move<Key>(k), std::forward<M>(obj)); }
 
   /// \brief Erases elements.
   void erase(const key_type& key) { const_iterator it = m_set.find(key); m_set.erase(it); }
