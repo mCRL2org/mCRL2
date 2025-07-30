@@ -593,7 +593,7 @@ class prob_bisim_partitioner_bem
         }
 
         // Add the pending new blocks to the front of the list
-        for (typename std::list<step_class_type*>::iterator sc_iter : pending_new_step_classes)
+        for (const typename std::list<step_class_type*>::iterator& sc_iter: pending_new_step_classes)
         {
           step_partition.splice(step_partition.begin(), step_partition_old, sc_iter);
         }
@@ -697,7 +697,7 @@ class prob_bisim_partitioner_bem
         state_partition.splice(state_partition.begin(), state_partition_old);
 
         // move the blocks that should be in new blocks to the begining of the list
-        for (typename std::list<block_type*>::iterator block_iter : blocks_to_move_to_front)
+        for (const typename std::list<block_type*>::iterator& block_iter: blocks_to_move_to_front)
         {
           state_partition.splice(state_partition.begin(), state_partition, block_iter);
         }

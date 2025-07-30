@@ -384,7 +384,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 
       std::vector<data::variable> resulting_parameters;
       bool new_rewrite_rules_added=false;
-      for (data::variable v: spec.process().process_parameters())
+      for (const data::variable& v: spec.process().process_parameters())
       {
         if (is_function_sort(v.sort()))
         {
@@ -409,9 +409,9 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
               data_expression_vector new_elements=enumerate_expressions(se, spec.data(), R);
               std::vector<data::data_expression_list> old_enumerated_domain_elements=new_enumerated_domain_elements;
               new_enumerated_domain_elements.clear();
-              for(data_expression d: new_elements)
+              for (const data_expression& d: new_elements)
               {
-                for(data_expression_list l: old_enumerated_domain_elements)
+                for (const data_expression_list& l: old_enumerated_domain_elements)
                 {
                   new_enumerated_domain_elements.push_back(l);
                   new_enumerated_domain_elements.back().push_front(d); 
@@ -461,7 +461,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
                 new_arguments.emplace_back(fresh_name_generator("x"), s.element_sort());
                 std::vector<data::data_expression_list> new_enumerated_domain_elements;
                 data_expression_vector new_elements=enumerate_expressions(s.element_sort(), spec.data(), R);
-                for(data_expression d: new_elements)
+                for (const data_expression& d: new_elements)
                 {
                   data_expression_list l;
                   l.push_front(d);

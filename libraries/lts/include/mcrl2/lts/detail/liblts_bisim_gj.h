@@ -2624,11 +2624,18 @@ class bisim_partitioner_gj
                                                                                   unsigned char const max_B=check_complexity::log_n-
                                                                                                        check_complexity::ilog2(new_block_bottom_size+R.size());
                                                                                 #endif
-      for (state_in_block_pointer st: R)
-      {                                                                         mCRL2complexity(st.ref_state, add_work(check_complexity::
-                                                                                               split_block_B_into_R_and_BminR__carry_out_split, max_B), *this);
-        swap_states_in_states_in_block(to_pos++,
-                                           st.ref_state->ref_states_in_blocks);
+      for (const state_in_block_pointer& st: R)
+      {
+        mCRL2complexity(st.ref_state,
+            add_work(
+                check_complexity::
+                    split_block_B_into_R_and_BminR__carry_out_split,
+                max_B),
+            *this);
+        swap_states_in_states_in_block(
+            to_pos++,
+            st.ref_state
+                ->ref_states_in_blocks);
       }
       return;
     }
@@ -3214,13 +3221,13 @@ class bisim_partitioner_gj
         new (&bi->c) block_type::
                constellation_or_first_unmarked_bottom_state(new_constellation);
                                                                                 #ifndef NDEBUG
-                                                                                  for (state_in_block_pointer st: potential_non_bottom_states[ReachAlw]) {
-                                                                                    assert(0<st.ref_state->no_of_outgoing_block_inert_transitions);
-                                                                                    assert(st.ref_state->counter==marked(ReachAlw)+
-                                                                                                         st.ref_state->no_of_outgoing_block_inert_transitions);
-                                                                                    assert(is_in_marked_range_of(st.ref_state->counter, ReachAlw));
-                                                                                  }
-                                                                                #endif
+        for (const state_in_block_pointer& st: potential_non_bottom_states[ReachAlw])
+        {
+          assert(0 < st.ref_state->no_of_outgoing_block_inert_transitions);
+          assert(st.ref_state->counter == marked(ReachAlw) + st.ref_state->no_of_outgoing_block_inert_transitions);
+          assert(is_in_marked_range_of(st.ref_state->counter, ReachAlw));
+        }
+#endif
         large_splitter_iter_NewBotSt=m_BLC_transitions.data_end();
         large_splitter_iter_end_NewBotSt=m_BLC_transitions.data_end();
       }
@@ -3515,7 +3522,7 @@ class bisim_partitioner_gj
             }
           }                                                                     else  {  assert(potential_non_bottom_states_HitSmall.empty());  }
         }
-        for (state_in_block_pointer st: non_bottom_states_NewBotSt)
+        for (const state_in_block_pointer& st: non_bottom_states_NewBotSt)
         {                                                                       // The work can be assigned to the same main splitter transition(s) that made
                                                                                 // the state get into ReachAlw (depending on whether the source or target
           st.ref_state->counter=marked_NewBotSt;                                // constellation are new, see above).
@@ -3928,8 +3935,7 @@ class bisim_partitioner_gj
                             +potential_non_bottom_states[current_search].size()
                             -non_bottom_states[current_search].size());
               }
-              for (state_in_block_pointer st:
-                                   potential_non_bottom_states[current_search])
+              for (const state_in_block_pointer& st: potential_non_bottom_states[current_search])
               {                                                                 // The work in this loop can be assigned to the same transition(s) that made
                                                                                 // st go into `potential_non_bottom_states[current_search]`.  (It can now be
                                                                                 // a final counter, as we know for sure the subblock is not aborted.)
@@ -3963,8 +3969,7 @@ class bisim_partitioner_gj
                 // Algorithm 2, Line 2.37 left
                 /* The HitSmall states can be assigned to NewBotSt because   */ assert(finished!=status[AvoidSml]);
                 /* they cannot be in ReachAlw or AvoidLrg                    */ assert(finished!=status_NewBotSt);
-                for (state_in_block_pointer st:
-                                          potential_non_bottom_states_HitSmall)
+                for (const state_in_block_pointer& st: potential_non_bottom_states_HitSmall)
                 {                                                               assert(0<st.ref_state->no_of_outgoing_block_inert_transitions);
                                                                                 // The work in this loop can be assigned to the same transitions in
                                                                                 // the main splitter as the one(s) that made st become a member of
@@ -4129,10 +4134,14 @@ class bisim_partitioner_gj
               non_bottom_states[max_process].swap_vec
                                     (potential_non_bottom_states[max_process]);
                                                                                 #ifndef NDEBUG
-                                                                                  for (state_in_block_pointer st: potential_non_bottom_states_HitSmall) {
-                                                                                    assert(has_small_splitter);  assert(has_large_splitter);
-              /* All HitSmall states must have been assigned to some         */     assert(marked(ReachAlw)==st.ref_state->counter ||
-              /* subblock, so there is no need to clear these state counters */            marked(AvoidLrg)==st.ref_state->counter);
+              for (const state_in_block_pointer& st: potential_non_bottom_states_HitSmall)
+              {
+                assert(has_small_splitter);
+                assert(has_large_splitter);
+                /* All HitSmall states must have been assigned to some         */ assert(
+                    marked(ReachAlw) == st.ref_state->counter ||
+                    /* subblock, so there is no need to clear these state counters */ marked(AvoidLrg)
+                        == st.ref_state->counter);
               /* as well:                                                    */   }
                                                                                 #endif
               if (has_small_splitter && has_large_splitter)

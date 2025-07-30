@@ -3480,7 +3480,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     {
       sort_expression_list TypeList=j->second;
       sort_expression_list NewParList;
-      for (sort_expression Type : TypeList)
+      for (const sort_expression& Type: TypeList)
       {
         sort_expression result;
         if (TypeMatchA(Type,PosType,result))

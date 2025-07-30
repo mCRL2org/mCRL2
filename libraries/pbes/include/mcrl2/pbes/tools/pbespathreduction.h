@@ -319,7 +319,7 @@ inline void self_substitute(pbes_equation& equation,
     std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
     std::vector<propositional_variable_instantiation> set
         = count_propositional_variable_instantiations(equation.formula());
-    for (propositional_variable_instantiation x : set)
+    for (const propositional_variable_instantiation& x: set)
     {
       if (equation.variable().name() != x.name())
         continue;
@@ -360,7 +360,7 @@ inline void self_substitute(pbes_equation& equation,
 
         // (2) replace all reoccuring with true (nu) and false (mu)
         auto gauss_set = filter_pvis(cur_x, phi_vector);
-        for (auto gauss_pvi : gauss_set)
+        for (const auto& gauss_pvi: gauss_set)
         {
           mCRL2log(log::debug) << "Need to replace this with true/false " << pp(gauss_pvi) << "\n";
           mCRL2log(log::debug) << phi << "\n";
@@ -387,7 +387,7 @@ inline void self_substitute(pbes_equation& equation,
           propositional_variable_instantiation new_x = *phi_vector.begin();
 
           mCRL2log(log::debug) << "Trying loop " << new_x << " in path with \n";
-          for (auto itr : path)
+          for (const auto& itr: path)
           {
             mCRL2log(log::debug) << itr << "\n";
           }
@@ -396,7 +396,7 @@ inline void self_substitute(pbes_equation& equation,
           {
             // We have already seen this, so we are in a loop.
             mCRL2log(log::debug) << "Loop, seen " << new_x << " in path after " << cur_x << "    " << phi << "\n";
-            for (auto itr : path)
+            for (const auto& itr: path)
             {
               mCRL2log(log::debug) << itr << "\n";
             }

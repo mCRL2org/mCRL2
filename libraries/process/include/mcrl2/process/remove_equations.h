@@ -45,7 +45,7 @@ struct duplicate_equation_removal
   std::string print_group(const group& g)
   {
     std::ostringstream out;
-    for (auto i: g)
+    for (const auto& i: g)
     {
       const process_equation& eq = *i;
 
@@ -102,7 +102,7 @@ struct duplicate_equation_removal
     {
       const process_equation& first_equation = **g.begin();
       process_identifier id(generator("X"), first_equation.formal_parameters());
-      for (iterator i: g)
+      for (const iterator& i: g)
       {
         const process_equation& eq = *i;
         result[eq.identifier()] = id;
@@ -115,7 +115,7 @@ struct duplicate_equation_removal
   void split_group(const group& g, const substitution& sigma, std::vector<group>& result)
   {
     std::map<process_expression, group> m;
-    for (auto i: g)
+    for (const auto& i: g)
     {
       const process_equation& eq = *i;
       process_expression expr = replace_process_identifiers(eq.expression(), sigma);
