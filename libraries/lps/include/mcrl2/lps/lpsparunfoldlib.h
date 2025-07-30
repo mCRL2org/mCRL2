@@ -604,7 +604,7 @@ public:
 private:
   /// \brief set to true when the algorithm has been run once; as the algorithm should
   /// run only once...
-  bool m_run_before;
+  bool m_run_before = false;
 
   /// @brief Bookkeeper for recogniser and projection functions.
   detail::unfold_data_manager m_datamgr;

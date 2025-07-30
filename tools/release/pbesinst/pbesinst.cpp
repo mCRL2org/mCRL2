@@ -45,7 +45,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
 
     pbesinst_strategy m_strategy = pbesinst_lazy_strategy;
     std::string m_finite_parameter_selection;
-    bool m_remove_redundant_equations;
+    bool m_remove_redundant_equations = false;
     search_strategy m_search_strategy;
     transformation_strategy m_transformation_strategy;
 

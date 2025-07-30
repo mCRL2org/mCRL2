@@ -39,7 +39,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
     bool m_rewrite = true;
     bool m_sumelm = true;
     bool m_typecheck = true;
-    bool m_use_renamefile;
+    bool m_use_renamefile = false;
     std::string m_action_rename_filename;
     std::string m_regex;
 

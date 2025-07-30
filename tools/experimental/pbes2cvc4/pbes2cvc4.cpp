@@ -69,7 +69,7 @@ class pbes2cvc4_tool: public pbes_input_tool<input_output_tool>
   protected:
     // Tool options.
     unsigned int opt_levels = 10; // Number of unrolling levels
-    bool opt_hasgoal;
+    bool opt_hasgoal = false;
     goal_t opt_goal;
 
     using super = pbes_input_tool<input_output_tool>;

@@ -95,8 +95,8 @@ class sim_partitioner
 
     LTS_TYPE& aut;
     mcrl2::lts::outgoing_transitions_per_state_action_t trans_index;
-    std::size_t s_Sigma;
-    std::size_t s_Pi;
+    std::size_t s_Sigma = 0UL;
+    std::size_t s_Pi = 0UL;
     std::vector<bool> state_touched;
     std::vector<bool> block_touched;
     std::vector<state_bucket> state_buckets;

@@ -268,22 +268,22 @@ private:
   StaticGraph& operator=(const StaticGraph& graph) = delete;
 
 private:
-    verti V_;  /*!< number of vertices */
-    edgei E_;  /*!< number of edges */
+  verti V_ = 0UL; /*!< number of vertices */
+  edgei E_ = 0UL; /*!< number of edges */
 
-    /*! Successor/predecessor lists (of size E).
-        If edges are pairs of nodes (i,j), then `successors` is the list of
-        successors (j's) obtained after sorting edges by predecessors (i's),
-        and vice versa for `predecessors`. */
-    verti *successors_ = nullptr, *predecessors_ = nullptr;
+  /*! Successor/predecessor lists (of size E).
+      If edges are pairs of nodes (i,j), then `successors` is the list of
+      successors (j's) obtained after sorting edges by predecessors (i's),
+      and vice versa for `predecessors`. */
+  verti *successors_ = nullptr, *predecessors_ = nullptr;
 
-    /*! Indices into the successor/predecessor lists (of size V + 1).
-        successor_index[i] is the lowest index of an edge in `successors` with
-        a predecessor >= i; successor_index[V] is E. */
-    edgei *successor_index_ = nullptr, *predecessor_index_ = nullptr;
+  /*! Indices into the successor/predecessor lists (of size V + 1).
+      successor_index[i] is the lowest index of an edge in `successors` with
+      a predecessor >= i; successor_index[V] is E. */
+  edgei *successor_index_ = nullptr, *predecessor_index_ = nullptr;
 
-    /*! Direction of stored edges. */
-    EdgeDirection edge_dir_;
+  /*! Direction of stored edges. */
+  EdgeDirection edge_dir_;
 
 private:
     /* This is a bit of a hack to allow the small progress measures code to

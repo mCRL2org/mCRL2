@@ -61,7 +61,7 @@ private:
 
   unsigned int bits_in_buffer = 0; ///< how many bits in are used in the buffer.
 
-  std::uint8_t integer_buffer[integer_encoding_size<std::size_t>()]; ///< Reserved space to store an n byte integer.
+  std::uint8_t integer_buffer[integer_encoding_size<std::size_t>()]{}; ///< Reserved space to store an n byte integer.
 };
 
 /// \brief The counterpart of obitstream, guarantees that the same data is read as has been written when calling the read operators

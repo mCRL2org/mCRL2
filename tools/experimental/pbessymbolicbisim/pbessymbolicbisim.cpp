@@ -38,8 +38,8 @@ protected:
   simplifier_mode m_mode;
   std::size_t m_num_refine_steps = 1;
   bool m_fine_initial_partition = false;
-  bool m_early_termination;
-  bool m_randomize;
+  bool m_early_termination = false;
+  bool m_randomize = false;
 
   /// Parse the non-default options.
   void parse_options(const command_line_parser& parser) override

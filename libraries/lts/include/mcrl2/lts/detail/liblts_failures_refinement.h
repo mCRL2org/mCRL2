@@ -41,7 +41,7 @@ template <class COUNTER_EXAMPLE_CONSTRUCTOR>
 class state_states_counter_example_index_triple
 {
 protected:
-  detail::state_type m_state;
+  detail::state_type m_state = 0UL;
   detail::set_of_states m_states;
   typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type m_counter_example_index;
 

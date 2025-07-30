@@ -53,7 +53,7 @@ protected:
     const verti              *vmap_;        //!< Current vertex map
     const verti              vmap_size_;    //!< Size of vertex map
     ParityGame::Strategy     strategy_;     //!< Resulting strategy
-    DenseSet<verti>          *winning_[2];  //!< Resulting winning sets
+    DenseSet<verti>* winning_[2]{};         //!< Resulting winning sets
 };
 
 //! Factory class for ComponentSolver instances.

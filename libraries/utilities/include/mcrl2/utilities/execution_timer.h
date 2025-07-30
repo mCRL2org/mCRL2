@@ -50,8 +50,8 @@ class execution_timer
       std::chrono::steady_clock::time_point start;      
       std::chrono::steady_clock::time_point finish;
 
-      clock_t start_user;      
-      clock_t finish_user;
+      clock_t start_user = 0L;
+      clock_t finish_user = 0L;
 
       timing() :
         start(),

@@ -47,7 +47,7 @@ struct parsed_pbes
 	std::set<mcrl2::data::variable> global_variables;
 	std::vector<equation> equations;
 	mcrl2::pbes_system::propositional_variable_instantiation initial_state;
-	bool disjunctive;
+        bool disjunctive = false;
 };
 
 void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translated_data_specification &translation);

@@ -147,22 +147,22 @@ public:
 
 private:
     //! Index of next vertex to be labelled by inorder traversal.
-    verti next_index;
+  verti next_index = 0UL;
 
-    //! Inorder index and lowest link index of each vertex.
-    std::vector<std::pair<verti, verti> > info;
+  //! Inorder index and lowest link index of each vertex.
+  std::vector<std::pair<verti, verti>> info;
 
-    //! Vertex indices of the current component.
-    std::vector<verti> component;
+  //! Vertex indices of the current component.
+  std::vector<verti> component;
 
-    /*! The depth-first-search stack.
+  /*! The depth-first-search stack.
 
-        Each entry consists of a vertex index and an index into its successor
-        list.  When a new unvisited vertex `v` is discovered, a pair (`v`, 0)
-        is appened at the end of the stack.  The top element is popped off the
-        stack when its successor index points to the end of the successor list.
-    */
-    std::vector< std::pair< verti, verti > > stack;
+      Each entry consists of a vertex index and an index into its successor
+      list.  When a new unvisited vertex `v` is discovered, a pair (`v`, 0)
+      is appened at the end of the stack.  The top element is popped off the
+      stack when its successor index points to the end of the successor list.
+  */
+  std::vector<std::pair<verti, verti>> stack;
 };
 
 #endif // MCRL2_PG_SCC_IMPL_H

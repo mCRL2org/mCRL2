@@ -37,7 +37,7 @@ class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_too
     using super = pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>;
 
     /// \brief If true, the initial state is ignored.
-    bool m_ignore_initial_state;
+    bool m_ignore_initial_state = false;
 
     void parse_options(const command_line_parser& parser) override
     {

@@ -21,15 +21,21 @@ class expected_sizes
   public:
     std::size_t states_plain=-1, transitions_plain=-1, labels_plain=-1;
     std::size_t states_bisimulation=-1, transitions_bisimulation=-1, labels_bisimulation=-1;
-    std::size_t states_branching_bisimulation, transitions_branching_bisimulation, labels_branching_bisimulation;
-    std::size_t states_divergence_preserving_branching_bisimulation, transitions_divergence_preserving_branching_bisimulation, labels_divergence_preserving_branching_bisimulation;
-    std::size_t states_weak_bisimulation, transitions_weak_bisimulation, labels_weak_bisimulation;
-    std::size_t states_divergence_preserving_weak_bisimulation, transitions_divergence_preserving_weak_bisimulation, labels_divergence_preserving_weak_bisimulation;
-    std::size_t states_simulation, transitions_simulation, labels_simulation;
-    std::size_t states_trace_equivalence, transitions_trace_equivalence, labels_trace_equivalence;
-    std::size_t states_weak_trace_equivalence, transitions_weak_trace_equivalence, labels_weak_trace_equivalence;
-    std::size_t states_determinisation, transitions_determinisation, labels_determinisation;
-    bool is_deterministic;
+    std::size_t states_branching_bisimulation = 0UL, transitions_branching_bisimulation = 0UL,
+                labels_branching_bisimulation = 0UL;
+    std::size_t states_divergence_preserving_branching_bisimulation = 0UL,
+                transitions_divergence_preserving_branching_bisimulation = 0UL,
+                labels_divergence_preserving_branching_bisimulation = 0UL;
+    std::size_t states_weak_bisimulation = 0UL, transitions_weak_bisimulation = 0UL, labels_weak_bisimulation = 0UL;
+    std::size_t states_divergence_preserving_weak_bisimulation = 0UL,
+                transitions_divergence_preserving_weak_bisimulation = 0UL,
+                labels_divergence_preserving_weak_bisimulation = 0UL;
+    std::size_t states_simulation = 0UL, transitions_simulation = 0UL, labels_simulation = 0UL;
+    std::size_t states_trace_equivalence = 0UL, transitions_trace_equivalence = 0UL, labels_trace_equivalence = 0UL;
+    std::size_t states_weak_trace_equivalence = 0UL, transitions_weak_trace_equivalence = 0UL,
+                labels_weak_trace_equivalence = 0UL;
+    std::size_t states_determinisation = 0UL, transitions_determinisation = 0UL, labels_determinisation = 0UL;
+    bool is_deterministic = false;
 };
 
 inline bool test_lts(const std::string& test_description,

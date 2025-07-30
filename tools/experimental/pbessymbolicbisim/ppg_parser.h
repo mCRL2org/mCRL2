@@ -155,7 +155,7 @@ protected:
   mcrl2::pbes_system::fixpoint_symbol m_symbol;
   propositional_variable m_var;
   std::vector<ppg_summand> m_summands;
-  bool m_is_conjunctive;
+  bool m_is_conjunctive = false;
 
 public:
 

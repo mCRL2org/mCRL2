@@ -26,7 +26,7 @@ class BDD2Dot
 {
   private:
     /// \brief The smallest unused node number.
-    int f_node_number;
+    int f_node_number = 0;
 
     /// \brief The file the output is written to.
     std::ofstream f_dot_file;

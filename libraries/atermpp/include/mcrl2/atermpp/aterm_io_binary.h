@@ -56,7 +56,7 @@ private:
 
   std::shared_ptr<mcrl2::utilities::obitstream> m_stream;
 
-  unsigned int m_term_index_width; ///< caches the result of term_index_width().
+  unsigned int m_term_index_width = 0U;       ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
 
   atermpp::indexed_set<aterm> m_terms; ///< An index of already written terms.
@@ -82,7 +82,7 @@ private:
 
   std::shared_ptr<mcrl2::utilities::ibitstream> m_stream;
 
-  unsigned int m_term_index_width; ///< caches the result of term_index_width().
+  unsigned int m_term_index_width = 0U;       ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
 
   atermpp::deque<aterm> m_terms; ///< An index of read terms.

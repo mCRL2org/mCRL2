@@ -196,7 +196,7 @@ private:
   bool f_generate_invariants;
 
   /// \brief The number of summands of the current LPS.
-  std::size_t f_number_of_summands;
+  std::size_t f_number_of_summands = 0UL;
 
   /// \brief An integer array, storing intermediate results per summand.
   std::vector<std::size_t> f_intermediate;

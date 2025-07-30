@@ -26,9 +26,9 @@ class symbolic_exploration_tool: public pbes_input_tool<pbes_output_tool<input_o
   using super = pbes_input_tool<pbes_output_tool<input_output_tool>>;
 
 protected:
-  bool m_optimized;
-  bool m_clustered;
-  bool m_instantiate;
+  bool m_optimized = false;
+  bool m_clustered = false;
+  bool m_instantiate = false;
 
   void parse_options(const command_line_parser& parser) override
   {

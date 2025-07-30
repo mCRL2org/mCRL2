@@ -24,7 +24,7 @@ using namespace mcrl2::lps;
 
 struct per_component_information
 {
-  bool is_independent;
+  bool is_independent = false;
   cleave_condition condition;
   process::action_list action;
 };
@@ -35,7 +35,7 @@ struct per_summand_information
   per_component_information left;
   per_component_information right;
   std::set<data::variable> synchronised;
-  std::size_t index;
+  std::size_t index = 0UL;
 };
 
 struct per_variable_information

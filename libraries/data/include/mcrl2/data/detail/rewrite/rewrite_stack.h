@@ -46,9 +46,9 @@ class rewrite_stack : protected atermpp::vector<data_expression>
 {
   protected:
     std::size_t m_stack_size = 0;
-    std::size_t m_reserved_stack_size; // This is equal to the size() of the underlying stack.
-                                       // Access of "size()" expensive as it is surrounded by a mutex. 
-                                       
+    std::size_t m_reserved_stack_size = 0UL; // This is equal to the size() of the underlying stack.
+                                             // Access of "size()" expensive as it is surrounded by a mutex.
+
   public:
 
     /// \brief Constructor
