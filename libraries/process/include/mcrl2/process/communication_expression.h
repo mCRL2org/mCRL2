@@ -99,7 +99,7 @@ std::ostream& operator<<(std::ostream& out, const communication_expression& x)
 }
 
 /// \\brief swap overload
-inline void swap(communication_expression& t1, communication_expression& t2)
+inline void swap(communication_expression& t1, communication_expression& t2) noexcept
 {
   t1.swap(t2);
 }

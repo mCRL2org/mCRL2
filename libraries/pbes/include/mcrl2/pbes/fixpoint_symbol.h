@@ -91,7 +91,7 @@ std::ostream& operator<<(std::ostream& out, const fixpoint_symbol& x)
 }
 
 /// \\brief swap overload
-inline void swap(fixpoint_symbol& t1, fixpoint_symbol& t2)
+inline void swap(fixpoint_symbol& t1, fixpoint_symbol& t2) noexcept
 {
   t1.swap(t2);
 }

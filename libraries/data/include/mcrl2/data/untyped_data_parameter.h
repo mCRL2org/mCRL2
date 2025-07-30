@@ -100,7 +100,7 @@ std::ostream& operator<<(std::ostream& out, const untyped_data_parameter& x)
 }
 
 /// \\brief swap overload
-inline void swap(untyped_data_parameter& t1, untyped_data_parameter& t2)
+inline void swap(untyped_data_parameter& t1, untyped_data_parameter& t2) noexcept
 {
   t1.swap(t2);
 }

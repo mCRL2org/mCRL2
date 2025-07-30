@@ -99,7 +99,7 @@ std::ostream& operator<<(std::ostream& out, const process_equation& x)
 }
 
 /// \\brief swap overload
-inline void swap(process_equation& t1, process_equation& t2)
+inline void swap(process_equation& t1, process_equation& t2) noexcept
 {
   t1.swap(t2);
 }

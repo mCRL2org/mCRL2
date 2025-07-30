@@ -119,7 +119,7 @@ public:
   /// \brief Swap this function with its argument.
   /// \details More efficient than assigning twice.
   /// \param f The function symbol with which the swap takes place.
-  void swap(function_symbol& f)
+  void swap(function_symbol& f) noexcept
   {
     using std::swap;
     swap(f.m_function_symbol, m_function_symbol);

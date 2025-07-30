@@ -144,7 +144,7 @@ public:
     return pointer(m_pointer);
   }
 
-  void swap(tagged_pointer<T>& other)
+  void swap(tagged_pointer<T>& other) noexcept
   {
     // This is not atomic, so swaps are only allowed when no tags are being applied concurrently.
     auto tmp = other.m_pointer;

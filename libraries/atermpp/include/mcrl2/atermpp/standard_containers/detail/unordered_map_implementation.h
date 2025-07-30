@@ -196,8 +196,8 @@ namespace atermpp
     return super::erase(key);
   }
 
-  template< class Key, class T, class Hash, class Pred, class Alloc >
-  void unordered_map<Key,T,Hash,Pred,Alloc>::swap( unordered_map& other )
+  template<class Key, class T, class Hash, class Pred, class Alloc>
+  void unordered_map<Key, T, Hash, Pred, Alloc>::swap(unordered_map& other) noexcept
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::swap(other);
@@ -552,8 +552,8 @@ namespace atermpp::utilities {
     return super::erase(key);
   }
 
-  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
-  void unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::swap(unordered_map& other)
+  template<class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe>
+  void unordered_map<Key, T, Hash, Pred, Alloc, ThreadSafe>::swap(unordered_map& other) noexcept
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     super::swap(other);

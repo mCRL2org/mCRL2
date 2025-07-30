@@ -80,7 +80,7 @@ std::ostream& operator<<(std::ostream& out, const untyped_identifier& x)
 }
 
 /// \\brief swap overload
-inline void swap(untyped_identifier& t1, untyped_identifier& t2)
+inline void swap(untyped_identifier& t1, untyped_identifier& t2) noexcept
 {
   t1.swap(t2);
 }

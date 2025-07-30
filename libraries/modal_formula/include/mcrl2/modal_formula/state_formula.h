@@ -137,11 +137,10 @@ std::ostream& operator<<(std::ostream& out, const state_formula& x)
 }
 
 /// \\brief swap overload
-inline void swap(state_formula& t1, state_formula& t2)
+inline void swap(state_formula& t1, state_formula& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The value true for state formulas
 class true_: public state_formula
@@ -190,11 +189,10 @@ std::ostream& operator<<(std::ostream& out, const true_& x)
 }
 
 /// \\brief swap overload
-inline void swap(true_& t1, true_& t2)
+inline void swap(true_& t1, true_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The value false for state formulas
 class false_: public state_formula
@@ -243,11 +241,10 @@ std::ostream& operator<<(std::ostream& out, const false_& x)
 }
 
 /// \\brief swap overload
-inline void swap(false_& t1, false_& t2)
+inline void swap(false_& t1, false_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The not operator for state formulas
 class not_: public state_formula
@@ -314,11 +311,10 @@ std::ostream& operator<<(std::ostream& out, const not_& x)
 }
 
 /// \\brief swap overload
-inline void swap(not_& t1, not_& t2)
+inline void swap(not_& t1, not_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The minus operator for state formulas
 class minus: public state_formula
@@ -385,11 +381,10 @@ std::ostream& operator<<(std::ostream& out, const minus& x)
 }
 
 /// \\brief swap overload
-inline void swap(minus& t1, minus& t2)
+inline void swap(minus& t1, minus& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The and operator for state formulas
 class and_: public state_formula
@@ -461,11 +456,10 @@ std::ostream& operator<<(std::ostream& out, const and_& x)
 }
 
 /// \\brief swap overload
-inline void swap(and_& t1, and_& t2)
+inline void swap(and_& t1, and_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The or operator for state formulas
 class or_: public state_formula
@@ -537,11 +531,10 @@ std::ostream& operator<<(std::ostream& out, const or_& x)
 }
 
 /// \\brief swap overload
-inline void swap(or_& t1, or_& t2)
+inline void swap(or_& t1, or_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The implication operator for state formulas
 class imp: public state_formula
@@ -613,11 +606,10 @@ std::ostream& operator<<(std::ostream& out, const imp& x)
 }
 
 /// \\brief swap overload
-inline void swap(imp& t1, imp& t2)
+inline void swap(imp& t1, imp& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The plus operator for state formulas with values
 class plus: public state_formula
@@ -689,11 +681,10 @@ std::ostream& operator<<(std::ostream& out, const plus& x)
 }
 
 /// \\brief swap overload
-inline void swap(plus& t1, plus& t2)
+inline void swap(plus& t1, plus& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The multiply operator for state formulas with values
 class const_multiply: public state_formula
@@ -765,11 +756,10 @@ std::ostream& operator<<(std::ostream& out, const const_multiply& x)
 }
 
 /// \\brief swap overload
-inline void swap(const_multiply& t1, const_multiply& t2)
+inline void swap(const_multiply& t1, const_multiply& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The multiply operator for state formulas with values
 class const_multiply_alt: public state_formula
@@ -841,11 +831,10 @@ std::ostream& operator<<(std::ostream& out, const const_multiply_alt& x)
 }
 
 /// \\brief swap overload
-inline void swap(const_multiply_alt& t1, const_multiply_alt& t2)
+inline void swap(const_multiply_alt& t1, const_multiply_alt& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The universal quantification operator for state formulas
 class forall: public state_formula
@@ -917,11 +906,10 @@ std::ostream& operator<<(std::ostream& out, const forall& x)
 }
 
 /// \\brief swap overload
-inline void swap(forall& t1, forall& t2)
+inline void swap(forall& t1, forall& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The existential quantification operator for state formulas
 class exists: public state_formula
@@ -993,11 +981,10 @@ std::ostream& operator<<(std::ostream& out, const exists& x)
 }
 
 /// \\brief swap overload
-inline void swap(exists& t1, exists& t2)
+inline void swap(exists& t1, exists& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The infimum over a data type for state formulas
 class infimum: public state_formula
@@ -1069,11 +1056,10 @@ std::ostream& operator<<(std::ostream& out, const infimum& x)
 }
 
 /// \\brief swap overload
-inline void swap(infimum& t1, infimum& t2)
+inline void swap(infimum& t1, infimum& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The supremum over a data type for state formulas
 class supremum: public state_formula
@@ -1145,11 +1131,10 @@ std::ostream& operator<<(std::ostream& out, const supremum& x)
 }
 
 /// \\brief swap overload
-inline void swap(supremum& t1, supremum& t2)
+inline void swap(supremum& t1, supremum& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The sum over a data type for state formulas
 class sum: public state_formula
@@ -1221,11 +1206,10 @@ std::ostream& operator<<(std::ostream& out, const sum& x)
 }
 
 /// \\brief swap overload
-inline void swap(sum& t1, sum& t2)
+inline void swap(sum& t1, sum& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The must operator for state formulas
 class must: public state_formula
@@ -1297,11 +1281,10 @@ std::ostream& operator<<(std::ostream& out, const must& x)
 }
 
 /// \\brief swap overload
-inline void swap(must& t1, must& t2)
+inline void swap(must& t1, must& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The may operator for state formulas
 class may: public state_formula
@@ -1373,11 +1356,10 @@ std::ostream& operator<<(std::ostream& out, const may& x)
 }
 
 /// \\brief swap overload
-inline void swap(may& t1, may& t2)
+inline void swap(may& t1, may& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The yaled operator for state formulas
 class yaled: public state_formula
@@ -1426,11 +1408,10 @@ std::ostream& operator<<(std::ostream& out, const yaled& x)
 }
 
 /// \\brief swap overload
-inline void swap(yaled& t1, yaled& t2)
+inline void swap(yaled& t1, yaled& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The timed yaled operator for state formulas
 class yaled_timed: public state_formula
@@ -1497,11 +1478,10 @@ std::ostream& operator<<(std::ostream& out, const yaled_timed& x)
 }
 
 /// \\brief swap overload
-inline void swap(yaled_timed& t1, yaled_timed& t2)
+inline void swap(yaled_timed& t1, yaled_timed& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The delay operator for state formulas
 class delay: public state_formula
@@ -1550,11 +1530,10 @@ std::ostream& operator<<(std::ostream& out, const delay& x)
 }
 
 /// \\brief swap overload
-inline void swap(delay& t1, delay& t2)
+inline void swap(delay& t1, delay& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The timed delay operator for state formulas
 class delay_timed: public state_formula
@@ -1621,11 +1600,10 @@ std::ostream& operator<<(std::ostream& out, const delay_timed& x)
 }
 
 /// \\brief swap overload
-inline void swap(delay_timed& t1, delay_timed& t2)
+inline void swap(delay_timed& t1, delay_timed& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The state formula variable
 class variable: public state_formula
@@ -1702,11 +1680,10 @@ std::ostream& operator<<(std::ostream& out, const variable& x)
 }
 
 /// \\brief swap overload
-inline void swap(variable& t1, variable& t2)
+inline void swap(variable& t1, variable& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The nu operator for state formulas
 class nu: public state_formula
@@ -1788,11 +1765,10 @@ std::ostream& operator<<(std::ostream& out, const nu& x)
 }
 
 /// \\brief swap overload
-inline void swap(nu& t1, nu& t2)
+inline void swap(nu& t1, nu& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The mu operator for state formulas
 class mu: public state_formula
@@ -1874,7 +1850,7 @@ std::ostream& operator<<(std::ostream& out, const mu& x)
 }
 
 /// \\brief swap overload
-inline void swap(mu& t1, mu& t2)
+inline void swap(mu& t1, mu& t2) noexcept
 {
   t1.swap(t2);
 }

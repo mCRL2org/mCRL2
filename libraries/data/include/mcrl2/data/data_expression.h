@@ -214,7 +214,7 @@ std::ostream& operator<<(std::ostream& out, const data_expression& x)
 }
 
 /// \\brief swap overload
-inline void swap(data_expression& t1, data_expression& t2)
+inline void swap(data_expression& t1, data_expression& t2) noexcept
 {
   t1.swap(t2);
 }

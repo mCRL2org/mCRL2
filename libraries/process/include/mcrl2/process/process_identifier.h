@@ -104,7 +104,7 @@ std::ostream& operator<<(std::ostream& out, const process_identifier& x)
 }
 
 /// \\brief swap overload
-inline void swap(process_identifier& t1, process_identifier& t2)
+inline void swap(process_identifier& t1, process_identifier& t2) noexcept
 {
   t1.swap(t2);
 }

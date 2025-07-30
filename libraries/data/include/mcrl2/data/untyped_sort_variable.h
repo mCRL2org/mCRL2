@@ -88,7 +88,7 @@ std::ostream& operator<<(std::ostream& out, const untyped_sort_variable& x)
 }
 
 /// \\brief swap overload
-inline void swap(untyped_sort_variable& t1, untyped_sort_variable& t2)
+inline void swap(untyped_sort_variable& t1, untyped_sort_variable& t2) noexcept
 {
   t1.swap(t2);
 }

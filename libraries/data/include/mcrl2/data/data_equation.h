@@ -135,7 +135,7 @@ std::ostream& operator<<(std::ostream& out, const data_equation& x)
 }
 
 /// \\brief swap overload
-inline void swap(data_equation& t1, data_equation& t2)
+inline void swap(data_equation& t1, data_equation& t2) noexcept
 {
   t1.swap(t2);
 }

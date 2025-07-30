@@ -294,7 +294,7 @@ class lts_lts_base
              m_action_decls==other.m_action_decls;
     }
 
-    void swap(lts_lts_base& l)
+    void swap(lts_lts_base& l) noexcept noexcept
     {
       const data::data_specification auxd=m_data_spec;
       m_data_spec=l.m_data_spec;

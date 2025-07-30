@@ -552,7 +552,7 @@ void StaticGraph::read_raw(std::istream &is)
     }
 }
 
-void StaticGraph::swap(StaticGraph &g)
+void StaticGraph::swap(StaticGraph& g) noexcept
 {
   if (this == &g)
   {
