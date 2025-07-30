@@ -321,7 +321,7 @@ void test_serialisation()
   expressions.emplace_back("Red", 2);
   expressions.emplace_back("Yellow", 2);
 
-  for(auto e : expressions)
+  for (const auto& e: expressions)
   {
     std::string s = e.first;
 std::cerr << "STRING " << s << "\n";

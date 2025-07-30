@@ -128,7 +128,7 @@ inline InvResult global_invariant_check(pbes_equation& equation,
   mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
   mCRL2log(log::verbose) << "INV: PVI set size " << set.size() << "\n";
   int i = 0;
-  for (propositional_variable_instantiation pvi : set)
+  for (const propositional_variable_instantiation& pvi: set)
   {
     if (i % 5 == 0)
     {

@@ -57,7 +57,7 @@ struct replace_other_propositional_variables_with_functions_builder
     {
       data::variable da = atermpp::down_cast<data::variable>(d);
 
-      for (auto var : var_list)
+      for (const auto& var: var_list)
       {
         if (var.name() == da.name())
         {
@@ -76,12 +76,12 @@ struct replace_other_propositional_variables_with_functions_builder
       if (data::is_function_symbol(da.head()))
       {
         data::function_symbol fname = atermpp::down_cast<data::function_symbol>(da.head());
-        for (auto var : var_list)
+        for (const auto& var: var_list)
         {
           if (var.name() == fname.name())
           {
             data::data_expression_list params;
-            for (auto param : da)
+            for (const auto& param: da)
             {
               params.push_front(param);
             }

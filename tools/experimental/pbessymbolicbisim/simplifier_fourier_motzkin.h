@@ -73,7 +73,7 @@ protected:
     {
       // Reduce each of the linear systems individually
       data_expression real_condition = sort_bool::false_();
-      for(data_expression_list zone: it->second)
+      for (const data_expression_list& zone: it->second)
       {
         real_condition = lazy::or_(real_condition, reduce_lineq(zone));
       }
