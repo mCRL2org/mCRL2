@@ -41,7 +41,7 @@ struct printer: public core::traverser<Derived>
   using super::leave;
   using super::apply;
 
-  std::ostream* m_out;
+  std::ostream* m_out = nullptr;
   bool m_precedence_aware {true}; /// \brief Indicates whether the printer should take the precedence of operators into account.
 
   Derived& derived()

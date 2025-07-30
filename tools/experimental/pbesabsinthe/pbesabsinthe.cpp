@@ -30,8 +30,8 @@ class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_t
     using super = pbes_input_tool<pbes_output_tool<input_output_tool>>;
 
     std::string m_abstraction_file;
-    bool m_print_used_function_symbols;
-    bool m_enable_logging;
+    bool m_print_used_function_symbols = false;
+    bool m_enable_logging = false;
     absinthe_strategy m_strategy;
 
     void parse_options(const command_line_parser& parser) override

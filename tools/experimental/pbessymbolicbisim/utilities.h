@@ -36,7 +36,7 @@ struct data_manipulators
   rewriter proving_rewr;
   std::shared_ptr<smt::smt_solver> smt_solver;
   std::shared_ptr<std::map<pbes_system::propositional_variable, simplifier*>> simpl;
-  bool contains_reals;
+  bool contains_reals = false;
 
   data_manipulators() = default;
 

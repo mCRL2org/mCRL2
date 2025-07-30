@@ -113,8 +113,8 @@ protected:
 
 private:
   std::string m_action_prefix;
-  bool m_lts_mode;
-  bool m_introduce_tags;
+  bool m_lts_mode = false;
+  bool m_introduce_tags = false;
 };
 
 } // namespace mcrl2

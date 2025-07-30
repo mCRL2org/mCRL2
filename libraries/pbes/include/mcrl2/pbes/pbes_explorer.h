@@ -121,10 +121,10 @@ public:
   using operation_type = parity_game_generator::operation_type;
 
 private:
-    int priority; // Priority (depends on fixpoint operator and equation order)
-    std::string var; // Propositional variable name
-    operation_type type; // player or type (And/Or, Abelard/Eloise, Odd/Even)
-    std::vector<data_expression> param_values; // List of parameter values
+  int priority = 0;                          // Priority (depends on fixpoint operator and equation order)
+  std::string var;                           // Propositional variable name
+  operation_type type;                       // player or type (And/Or, Abelard/Eloise, Odd/Even)
+  std::vector<data_expression> param_values; // List of parameter values
 
 protected:
     /// \brief Constructor.
@@ -195,7 +195,7 @@ private:
     std::map<int,std::vector<bool> > matrix;
     std::map<std::string,int> param_index;
     std::vector<data_expression> param_default_values;
-    int number_of_groups;
+    int number_of_groups = 0;
     std::vector<pbes_expression> transition_expression;
     std::vector<pbes_expression> transition_expression_plain;
     std::vector<std::string> transition_variable_name;

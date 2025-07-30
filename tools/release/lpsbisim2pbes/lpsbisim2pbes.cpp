@@ -35,7 +35,7 @@ class lpsbisim2pbes_tool: public super
     bisimulation_type m_bisimulation_type;
 
     /// \brief If true the result is normalized
-    bool m_normalize;
+    bool m_normalize = false;
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser

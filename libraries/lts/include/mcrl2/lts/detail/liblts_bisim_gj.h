@@ -306,7 +306,7 @@ struct state_type_gj
   /// first outgoing transition
   outgoing_transitions_it start_outgoing_transitions;
   /// pointer to the corresponding entry in m_states_in_blocks
-  state_in_block_pointer* ref_states_in_blocks;
+  state_in_block_pointer* ref_states_in_blocks = nullptr;
   /// number of outgoing block-inert transitions
   transition_index no_of_outgoing_block_inert_transitions=0;
   /// counter used during splitting
@@ -467,7 +467,7 @@ struct transition_type
 {
   // The position of the transition type corresponds to m_aut.get_transitions().
   // std::size_t from, label, to are found in m_aut.get_transitions().
-  linked_list<BLC_indicators>::iterator transitions_per_block_to_constellation;
+  linked_list<BLC_indicators>::iterator transitions_per_block_to_constellation{};
   outgoing_transitions_it ref_outgoing_transitions;  // This refers to the position of this transition in m_outgoing_transitions.
                                                      // During initialisation m_outgoing_transitions contains the indices of this
                                                      // transition. After initialisation m_outgoing_transitions refers to the corresponding
@@ -2400,7 +2400,7 @@ class bisim_partitioner_gj
               // The following comments are all formulated for the case that
               // this_block_to_constellation is a main splitter (except when
               // indicated explicitly).
-              linked_list<BLC_indicators>::const_iterator old_co_splitter;
+              linked_list<BLC_indicators>::const_iterator old_co_splitter{};
               constellation_type* co_to_constln;
               if ((old_constellation==to_constln &&
                      // i.e. `this_block_to_constellation` is a co-splitter

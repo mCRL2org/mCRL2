@@ -292,8 +292,8 @@ class partial_order_reduction_algorithm
     // class k when !depends(i,k).
     std::vector<summand_set> m_dependency_nes;
 
-    std::chrono::high_resolution_clock::duration m_static_analysis_duration;
-    std::chrono::high_resolution_clock::duration m_exploration_duration;
+    std::chrono::high_resolution_clock::duration m_static_analysis_duration{};
+    std::chrono::high_resolution_clock::duration m_exploration_duration{};
 
     smt::smt_solver* m_solver;
 

@@ -106,7 +106,7 @@ class tarjan_scc_algorithm
 
     std::vector<vertex> V;
     std::vector<edge> E;
-    std::size_t N;
+    std::size_t N = 0UL;
     std::vector<component> result;
 
   public:

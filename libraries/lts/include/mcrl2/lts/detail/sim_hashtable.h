@@ -50,7 +50,7 @@ class hash_table2
     std::vector<bucket2> buckets;
     std::vector<std::size_t> table;
     std::size_t mask;
-    std::size_t removed_count;
+    std::size_t removed_count = 0UL;
     std::size_t hash(std::size_t x,std::size_t y);
     std::size_t hfind(std::size_t h,std::size_t x,std::size_t y);
     bool check_table();
@@ -99,7 +99,7 @@ class hash_table3
     std::vector<bucket3> buckets;
     std::vector<std::size_t> table;
     std::size_t mask;
-    std::size_t removed_count;
+    std::size_t removed_count = 0UL;
     std::size_t hash(std::size_t x,std::size_t y,std::size_t z);
     std::size_t hfind(std::size_t h,std::size_t x,std::size_t y,std::size_t z);
     bool check_table();

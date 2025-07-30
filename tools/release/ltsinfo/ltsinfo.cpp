@@ -28,9 +28,9 @@ class ltsinfo_tool : public ltsinfo_base
 
     std::string                 infilename;
     mcrl2::lts::lts_type intype = mcrl2::lts::lts_none;
-    bool                        print_action_labels;
+    bool print_action_labels = false;
     bool print_state_labels = false;
-    bool                        print_branching_factor;
+    bool print_branching_factor = false;
 
   public:
 

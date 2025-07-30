@@ -90,8 +90,8 @@ class RewriterCompilingJitty: public Rewriter
     void rewrite(data_expression& result, const data_expression& term, substitution_type& sigma) override;
 
     // The variable global_sigma is a temporary store to maintain the substitution 
-    // sigma during rewriting a single term. It is not a variable for public use. 
-    substitution_type *global_sigma;
+    // sigma during rewriting a single term. It is not a variable for public use.
+    substitution_type* global_sigma = nullptr;
     bool rewriting_in_progress;
     rewrite_stack m_rewrite_stack;
 
@@ -135,7 +135,7 @@ class RewriterCompilingJitty: public Rewriter
 
     struct variable_index_where_stack_pair
     {
-      std::size_t variable_index;
+      std::size_t variable_index = 0UL;
       // a stacked value true indicates variable bound in a where. Otherwise the
       // variable is bound by a lambda, forall or exist. 
       std::vector<std::string> declaration_stack;
@@ -217,8 +217,8 @@ class RewriterCompilingJitty: public Rewriter
     // precompiled functions. 
     //   arity_bound -- The maximum occurring arity + 1
     //   index_bound -- The maximum occurring index + 1
-    std::size_t arity_bound;
-    std::size_t index_bound;
+    std::size_t arity_bound = 0UL;
+    std::size_t index_bound = 0UL;
 
     // The two arrays below are intended to contain the precompiled functions used
     // for rewriting. They are used to find the relevant compiled rewriting code quickly. 
@@ -256,7 +256,7 @@ class RewriterCompilingJitty: public Rewriter
     // is relatively slow. It is expected that in some future version of the compiler
     // such access is faster, and no copy of these flags is needed anymore. 
   public:
-    atermpp::detail::thread_aterm_pool* m_thread_aterm_pool;
+    atermpp::detail::thread_aterm_pool* m_thread_aterm_pool = nullptr;
 
   protected:
     // Copy construction. Not (yet) for public use.

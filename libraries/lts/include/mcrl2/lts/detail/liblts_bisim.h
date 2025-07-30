@@ -215,9 +215,9 @@ class bisim_partitioner
 
     struct block
     {
-      state_type state_index;                   // The state number that represent the states in this block
-      block_index_type block_index;             // The sequence number of this block.
-      block_index_type parent_block_index;      // Index of the parent block.
+      state_type state_index = 0UL;              // The state number that represent the states in this block
+      block_index_type block_index = 0UL;        // The sequence number of this block.
+      block_index_type parent_block_index = 0UL; // Index of the parent block.
       // If there is no parent block, this refers to the block
       // itself.
       std::vector < state_type > bottom_states; // The non bottom states must be ordered

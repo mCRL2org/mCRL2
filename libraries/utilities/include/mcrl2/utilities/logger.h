@@ -135,9 +135,9 @@ class logger: private utilities::noncopyable
     log_level_t m_level;
 
     /// \brief Timestamp of the current message
-    time_t m_timestamp;
+    time_t m_timestamp = 0L;
 
-   static std::atomic<log_level_t>& log_level()
+    static std::atomic<log_level_t>& log_level()
     {
       static std::atomic<log_level_t> g_log_level(log_level_t::info);
       return g_log_level;

@@ -175,13 +175,13 @@ class state_info_entry
     succ_iter_t state_inert_out_end;
   public:
     /// block where the state belongs
-    block_t* block;
+    block_t* block = nullptr;
 
     /// position of the state in the permutation array
     permutation_iter_t pos;
 
     /// number of inert transitions to non-blue states
-    state_type notblue;
+    state_type notblue = 0UL;
   private:
     /// iterator to first outgoing transition to the constellation of interest
     succ_iter_t int_current_constln;
@@ -1182,7 +1182,7 @@ class succ_entry
 {
   public:
     B_to_C_iter_t B_to_C;
-    state_info_ptr target;
+    state_info_ptr target = nullptr;
 
   private:
     /// \brief points to the last or the first transition to the same
@@ -1276,8 +1276,8 @@ class pred_entry
 {
   public:
     succ_iter_t succ;
-    state_info_ptr source;
-                                                                                #ifndef NDEBUG
+    state_info_ptr source = nullptr;
+#ifndef NDEBUG
                                                                                     /// \brief print a short transition identification for debugging
                                                                                     /// \details This function is only available if compiled in Debug mode.
                                                                                     std::string debug_id_short() const

@@ -140,10 +140,11 @@ private:
 
   struct block
   {
-    state_type state_index;               // The state number that represent the states in this block
-    block_index_type block_index;         // The sequence number of this block.
-    block_index_type parent_block_index;  // Index of the parent block. If there is no parent block, this refers to the block itself.
-    level_type level;                     // The level of the block in the partition.
+    state_type state_index = 0UL;       // The state number that represent the states in this block
+    block_index_type block_index = 0UL; // The sequence number of this block.
+    block_index_type parent_block_index
+        = 0UL;              // Index of the parent block. If there is no parent block, this refers to the block itself.
+    level_type level = 0UL; // The level of the block in the partition.
     signature_type sig;
 
     void swap(block& b)

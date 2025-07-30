@@ -146,7 +146,7 @@ struct parser
 {
   parser_table m_table;
   D_Parser* m_parser;
-  std::size_t m_max_error_message_count;
+  std::size_t m_max_error_message_count = 0UL;
 
   explicit parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = nullptr, D_SyntaxErrorFn syntax_error_fn = nullptr, std::size_t max_error_message_count = 1);
 

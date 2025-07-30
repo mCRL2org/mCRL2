@@ -43,10 +43,10 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
     std::set< std::size_t > m_set_index; ///< Options of the algorithm
     std::string m_unfoldsort;
-    std::size_t m_repeat_unfold;
-    bool m_alt_case_placement;
-    bool m_possibly_inconsistent;
-    bool m_disable_pattern_unfolding;
+    std::size_t m_repeat_unfold = 0UL;
+    bool m_alt_case_placement = false;
+    bool m_possibly_inconsistent = false;
+    bool m_disable_pattern_unfolding = false;
 
     void add_options(interface_description& desc) override
     {
