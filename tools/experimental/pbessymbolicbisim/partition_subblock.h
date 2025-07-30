@@ -34,7 +34,7 @@ protected:
   data_expression m_char_func;
 
   const data_manipulators m_dm;
-  split_cache<subblock>* m_cache;
+  split_cache<subblock>* m_cache = nullptr;
 
 public:
 

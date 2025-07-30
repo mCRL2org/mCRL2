@@ -209,11 +209,11 @@ private:
   std::list<std::size_t> m_indices;
   std::string m_invariant_filename;
   std::string m_action_prefix;
-  bool m_use_next_state;
-  bool m_split_condition;
-  bool m_split_action;
-  bool m_split_summands;
-  bool m_merge_heuristic;
+  bool m_use_next_state = false;
+  bool m_split_condition = false;
+  bool m_split_action = false;
+  bool m_split_summands = false;
+  bool m_merge_heuristic = false;
 };
 
 } // namespace mcrl2

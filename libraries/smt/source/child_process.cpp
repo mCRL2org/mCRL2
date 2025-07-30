@@ -209,7 +209,7 @@ std::string child_process::read() const
 
 std::string child_process::read(const std::chrono::microseconds& timeout) const
 {
-  struct timeval tv;
+  struct timeval tv{};
   tv.tv_sec = 0;
   tv.tv_usec = timeout.count();
 

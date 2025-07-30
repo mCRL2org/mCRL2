@@ -200,7 +200,7 @@ aterm text_aterm_istream::parse_aterm_appl(const std::string& function_name, int
 
 aterm_int text_aterm_istream::parse_aterm_int(int& character)
 {
-  std::array<char, 32> number;
+  std::array<char, 32> number{};
   auto it = number.begin();
 
   if (character == '-')

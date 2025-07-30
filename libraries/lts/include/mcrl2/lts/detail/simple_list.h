@@ -112,7 +112,7 @@ namespace mcrl2::lts::detail
       class pool_block_t
       {
       public:
-        char data[NR_ELEMENTS * sizeof(T)];
+        char data[NR_ELEMENTS * sizeof(T)]{};
         pool_block_t* next_block;
 
         pool_block_t(pool_block_t* const new_next_block)

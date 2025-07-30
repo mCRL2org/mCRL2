@@ -136,10 +136,10 @@ private:
 
   struct block
   {
-    state_type state_index;              // The state number that represent the states in this block
-    block_index_type block_index;        // The sequence number of this block.
-    block_index_type parent_block_index; // Index of the parent block.
-    level_type level;
+    state_type state_index = 0UL;              // The state number that represent the states in this block
+    block_index_type block_index = 0UL;        // The sequence number of this block.
+    block_index_type parent_block_index = 0UL; // Index of the parent block.
+    level_type level = 0UL;
 
     // If there is no parent block, this refers to the block itself.
     std::vector<state_type> states;
@@ -159,9 +159,9 @@ private:
 
   struct formula
   {
-    formula_index_type index;
-    label_type label;
-    bool negated;
+    formula_index_type index = 0UL;
+    label_type label = 0UL;
+    bool negated = false;
     std::vector<formula> conjunctions;
     std::set<block_index_type> truths;
 

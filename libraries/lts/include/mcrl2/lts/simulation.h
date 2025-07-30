@@ -27,10 +27,11 @@ class simulation : protected explorer<true, false, stochastic_specification>
     struct simulator_state_t
     {
       lps::stochastic_state source_state;
-      std::size_t state_number; // This represents the number of the selected probabilistic state, or a number out of range
-                                // if not source state is chosen.
+      std::size_t state_number = 0UL; // This represents the number of the selected probabilistic state, or a number out
+                                      // of range if not source state is chosen.
       std::vector<transition_t> transitions;
-      std::size_t transition_number; // This indicates the chosen transition, or a number out of range if no transition is chosen.
+      std::size_t transition_number
+          = 0UL; // This indicates the chosen transition, or a number out of range if no transition is chosen.
     };
 
     /// Constructor.

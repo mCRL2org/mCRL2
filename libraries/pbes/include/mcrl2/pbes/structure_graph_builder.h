@@ -238,7 +238,7 @@ struct manual_structure_graph_builder
 
   structure_graph& m_graph;
   structure_graph::vertex_vector m_vertices;
-  index_type m_initial_state; // The initial state.
+  index_type m_initial_state = 0U; // The initial state.
 
   explicit manual_structure_graph_builder(structure_graph& G)
     : m_graph(G)

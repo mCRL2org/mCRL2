@@ -238,10 +238,10 @@ class state_info_entry
     union bl_t {
         pred_entry* ed_noninert_end;
         block_t* ock;
-    } bl;
+    } bl{};
 
     /// \brief position of the state in the permutation array
-    permutation_entry* pos;
+    permutation_entry* pos = nullptr;
 
     /// \brief number of inert transitions to non-U-states
     /// \details Actually, as we cannot easily count how many inert outgoing
@@ -823,7 +823,7 @@ class block_bunch_entry
 {
   public:
     /// \brief circular iterator to link the four transition arrays
-    pred_entry* pred;
+    pred_entry* pred = nullptr;
 
     /// \brief block_bunch-slice of which this transition is part
     /// \details The slice is null iff the transition is inert.
@@ -840,14 +840,14 @@ class pred_entry
 {
   public:
     /// \brief circular iterator to link the four transition arrays
-    action_block_entry* action_block;
+    action_block_entry* action_block = nullptr;
 
     /// \brief source state of the transition
-    state_info_entry* source;
+    state_info_entry* source = nullptr;
 
     /// \brief target state of the transition
-    state_info_entry* target;
-                                                                                #ifndef NDEBUG
+    state_info_entry* target = nullptr;
+#ifndef NDEBUG
                                                                                     /// \brief print a short transition identification for debugging
                                                                                     template <class LTS_TYPE>
                                                                                     std::string debug_id_short(const bisim_partitioner_dnj<LTS_TYPE>&
@@ -1339,8 +1339,8 @@ class part_trans_t
     action_block_entry* action_block_inert_begin;
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief pointer to the first inert transition in the initial partition
-                                                                                    const action_block_entry* action_block_orig_inert_begin;
-                                                                                #endif
+    const action_block_entry* action_block_orig_inert_begin = nullptr;
+#endif
     /// \brief list of unstable block_bunch-slices
     simple_list<block_bunch_slice_t> splitter_list;
    private:
@@ -4024,7 +4024,7 @@ class bisim_partitioner_dnj
         {
             bisim_dnj::block_bunch_entry* splitter_iter;
             bisim_dnj::permutation_entry* block;
-        } R_s_iter;
+        } R_s_iter{};
 
         if (extend_from_splitter == mode)
         {                                                                       assert(0 == block_B->marked_size());

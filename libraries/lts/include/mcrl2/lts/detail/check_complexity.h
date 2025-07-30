@@ -590,7 +590,7 @@ class check_complexity
                                         (enum counter_type) (LastCounter + 1));
       public:
         /// \brief actual space to store the counters
-        unsigned char counters[LastCounter - FirstCounter + 1];
+        unsigned char counters[LastCounter - FirstCounter + 1]{};
 
         /// \brief cancel temporary work
         /// \details The function registers that all counters from `first` to

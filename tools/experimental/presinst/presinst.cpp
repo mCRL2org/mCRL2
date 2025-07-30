@@ -45,7 +45,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
 
     presinst_strategy m_strategy = presinst_lazy_strategy;
     std::string m_finite_parameter_selection;
-    bool m_remove_redundant_equations;
+    bool m_remove_redundant_equations = false;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser) override

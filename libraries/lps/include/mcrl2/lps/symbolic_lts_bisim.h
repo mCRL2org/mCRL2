@@ -27,7 +27,7 @@ namespace
 struct result
 {
   sylvan::ldds::ldd projected;
-  std::size_t action_index;
+  std::size_t action_index = 0UL;
 };
 
 } // anonymous namespace

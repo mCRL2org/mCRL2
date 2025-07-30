@@ -26,7 +26,7 @@ std::ostream& operator<<(std::ostream& out, const allow_set& x);
 struct allow_set
 {
   multi_action_name_set A;
-  bool A_includes_subsets;
+  bool A_includes_subsets = false;
   std::set<core::identifier_string> I;
 
   bool is_empty() const

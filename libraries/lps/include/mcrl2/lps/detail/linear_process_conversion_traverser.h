@@ -51,13 +51,13 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   lps::deadlock m_deadlock;
 
   /// \brief True if m_deadlock was changed.
-  bool m_deadlock_changed;
+  bool m_deadlock_changed = false;
 
   /// \brief True if m_multi_action was changed.
-  bool m_multi_action_changed;
+  bool m_multi_action_changed = false;
 
   /// \brief True if m_next_state was changed.
-  bool m_next_state_changed;
+  bool m_next_state_changed = false;
 
   /// \brief Contains intermediary results.
   data::data_expression m_condition;
@@ -449,13 +449,13 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   lps::stochastic_distribution m_distribution;
 
   /// \brief True if m_deadlock was changed.
-  bool m_deadlock_changed;
+  bool m_deadlock_changed = false;
 
   /// \brief True if m_multi_action was changed.
-  bool m_multi_action_changed;
+  bool m_multi_action_changed = false;
 
   /// \brief True if m_next_state was changed.
-  bool m_next_state_changed;
+  bool m_next_state_changed = false;
 
   /// \brief Contains intermediary results.
   data::data_expression m_condition;

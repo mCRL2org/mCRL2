@@ -65,7 +65,7 @@ private:
   std::size_t max_lift_attempts_; //!< maximum lift attempts per list
   int phase_ = 1;                 //!< current phase
   std::size_t num_lift_attempts_ = 0; //!< number of consecutive lift attempts
-  bool prev_lifted_;              //!< whether previous vertex was lifted
+  bool prev_lifted_ = false;          //!< whether previous vertex was lifted
 
   // For phase 1:
   LinearLiftingStrategy lls_; //!< strategy for phase 1
