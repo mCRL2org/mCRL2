@@ -62,11 +62,14 @@ static bool parse_condition(pbes_expression expression, bool disjunctive, bool n
 		quantification_domain.insert(quantification_domain.end(), variables.begin(), variables.end());
 		return result;
 	} else if (is_pbes_and(expression) || is_pbes_or(expression)) {
-		data_expression left_condition, right_condition;
-		variable_vector left_domain, right_domain;
-		
-		if (!parse_condition(accessors::left(expression), disjunctive, negate, left_condition, left_domain)) {
-			return false;
+          data_expression left_condition;
+          data_expression right_condition;
+          variable_vector left_domain;
+          variable_vector right_domain;
+
+          if (!parse_condition(accessors::left(expression), disjunctive, negate, left_condition, left_domain))
+          {
+            return false;
 		}
 		if (!parse_condition(accessors::right(expression), disjunctive, negate, right_condition, right_domain)) {
 			return false;
@@ -122,9 +125,17 @@ bool parse_clauses(pbes_expression expression, bool disjunctive, propositional_v
 		pbes_expression right = accessors::right(expression);
 		
 		if (is_pbes_and(expression) ^ disjunctive ^ negate) {
-			std::vector<clause> left_clauses, right_clauses;
-			if (!parse_clauses(left, disjunctive, constant_instantiation, quantification_domain, condition, negate, left_clauses)) {
-				return false;
+                  std::vector<clause> left_clauses;
+                  std::vector<clause> right_clauses;
+                  if (!parse_clauses(left,
+                          disjunctive,
+                          constant_instantiation,
+                          quantification_domain,
+                          condition,
+                          negate,
+                          left_clauses))
+                  {
+                    return false;
 			}
 			if (!parse_clauses(right, disjunctive, constant_instantiation, quantification_domain, condition, negate, right_clauses)) {
 				return false;

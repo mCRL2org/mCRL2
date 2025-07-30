@@ -281,10 +281,14 @@ data::data_expression get_subst_equation_from_assignments(
 {
   data::data_expression v_result = data::sort_bool::true_();
 
-  const data::assignment_list v_assignment_1, v_assignment_2;
-  data::variable v_variable_1, v_variable_2;
-  data::data_expression v_expression_1, v_expression_2;
-  bool v_next_1 = true, v_next_2 = true;
+  const data::assignment_list v_assignment_1;
+  const data::assignment_list v_assignment_2;
+  data::variable v_variable_1;
+  data::variable v_variable_2;
+  data::data_expression v_expression_1;
+  data::data_expression v_expression_2;
+  bool v_next_1 = true;
+  bool v_next_2 = true;
 
   for (data::variable_list::const_iterator i=a_variables.begin(); i!=a_variables.end();)
   {

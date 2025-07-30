@@ -94,11 +94,12 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
     // Count number of new edges:
     for (ForwardIterator it = vertices_begin; it != vertices_end; ++it)
     {
-        const_iterator a, b;
-        if (graph.edge_dir() & EDGE_SUCCESSOR)
-        {
-            a = graph.succ_begin(*it);
-            b = graph.succ_end(*it);
+      const_iterator a;
+      const_iterator b;
+      if (graph.edge_dir() & EDGE_SUCCESSOR)
+      {
+        a = graph.succ_begin(*it);
+        b = graph.succ_end(*it);
         }
         else
         {

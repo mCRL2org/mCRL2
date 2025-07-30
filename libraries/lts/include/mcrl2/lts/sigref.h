@@ -197,7 +197,8 @@ protected:
    */
   void compute_tau_sccs()
   {
-    std::size_t unused = 1, lastscc = 1;
+    std::size_t unused = 1;
+    std::size_t lastscc = 1;
     std::vector<std::size_t> scc(m_lts.num_states(), 0);
     std::vector<std::size_t> low(m_lts.num_states(), 0);
     std::stack<std::size_t> stack;
@@ -247,7 +248,8 @@ protected:
           }
           if (low[vi] == scc[vi])
           {
-            std::size_t tos, scc_id = lastscc++;
+            std::size_t tos;
+            std::size_t scc_id = lastscc++;
             std::vector<std::size_t> this_scc;
             do
             {

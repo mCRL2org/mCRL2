@@ -79,7 +79,8 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
                                                                 0 != swapcount)
     {
         // vector swap the states:
-        permutation_iter_t pos1=blue_nonbottom_end, pos2=unmarked_bottom_end();
+        permutation_iter_t pos1 = blue_nonbottom_end;
+        permutation_iter_t pos2 = unmarked_bottom_end();
         state_info_ptr const temp = *pos1;
         for (;;)
         {
@@ -158,7 +159,8 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                                 0 != swapcount)
     {
         // vector swap the states:
-        permutation_iter_t pos1=red_nonbottom_begin,pos2=unmarked_bottom_end();
+        permutation_iter_t pos1 = red_nonbottom_begin;
+        permutation_iter_t pos2 = unmarked_bottom_end();
         state_info_ptr const temp = *pos1;
         for (;;)
         {                                                                       mCRL2complexity(*pos1, add_work(check_complexity::
@@ -553,14 +555,26 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s                           
 {
     constln_t* NewC = s->constln();                                             assert(*NewC < *OldC); assert(NewC->sort_key + OldC->size() == OldC->sort_key);
                                                                                 assert(OldC->end() == NewC->begin() || NewC->end() == OldC->begin());
-    succ_iter_t split = s->inert_succ_begin(), to_C_end = s->inert_succ_end();  assert(s->succ_begin() == to_C_end ||
-                                                                                                          to_C_end[-1].slice_begin_or_before_end() < to_C_end);
-    succ_iter_t to_C_begin = s->succ_begin() == to_C_end ? to_C_end
-                                    : to_C_end[-1].slice_begin_or_before_end();
-        //< If s has no transitions to OldC at all, then to_C_begin may be the
-        // beginning of the constln_slice for transitions to another
-        // constellation.  We will check that later.
-    bool result = to_C_begin < split;                                           assert(to_C_begin <= split);  assert(split <= to_C_end);
+                                                                                succ_iter_t split
+                                                                                    = s->inert_succ_begin();
+                                                                                succ_iter_t to_C_end
+                                                                                    = s->inert_succ_end();
+                                                                                assert(
+                                                                                    s->succ_begin() == to_C_end
+                                                                                    || to_C_end[-1]
+                                                                                               .slice_begin_or_before_end()
+                                                                                           < to_C_end);
+                                                                                succ_iter_t to_C_begin
+                                                                                    = s->succ_begin() == to_C_end
+                                                                                          ? to_C_end
+                                                                                          : to_C_end[-1]
+                                                                                                .slice_begin_or_before_end();
+                                                                                //< If s has no transitions to OldC at
+                                                                                //all, then to_C_begin may be the
+                                                                                // beginning of the constln_slice for
+                                                                                // transitions to another constellation.
+                                                                                // We will check that later.
+                                                                                bool result = to_C_begin < split;                                           assert(to_C_begin <= split);  assert(split <= to_C_end);
                                                                                 assert(succ.end() == split || split->B_to_C->pred->succ == split);
                                                                                 assert(succ.end() == to_C_end || to_C_end->B_to_C->pred->succ == to_C_end);
                                                                                 assert(succ.end() == to_C_begin ||
@@ -577,7 +591,8 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s                           
         trans_type swapcount = std::min(to_C_end - split, split - to_C_begin);
         split = to_C_end - split + to_C_begin;                                  assert(0 != swapcount);
 
-        succ_iter_t pos1 = to_C_begin, pos2 = to_C_end;
+        succ_iter_t pos1 = to_C_begin;
+        succ_iter_t pos2 = to_C_end;
         state_info_ptr temp_target = pos1->target;
         B_to_C_iter_t temp_B_to_C = pos1->B_to_C;
         for (;;)

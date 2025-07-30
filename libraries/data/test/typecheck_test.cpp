@@ -1564,7 +1564,8 @@ class testable_sort_type_checker: public data::sort_type_checker
       }
       std::set<data::basic_sort> sort_already_seen;
 
-      bool first, second;
+      bool first;
+      bool second;
       try
       {
         first = true;

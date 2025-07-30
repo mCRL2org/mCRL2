@@ -258,7 +258,8 @@ class probabilistic_data_expression: public data::data_expression
       const utilities::big_natural_number bnn_other_denominator=detail::make_bnn_pos(other_denominator);
       const utilities::probabilistic_arbitrary_precision_fraction left_arg(bnn_this_enumerator, bnn_this_denominator);
       const utilities::probabilistic_arbitrary_precision_fraction right_arg(bnn_other_enumerator, bnn_other_denominator);
-      data::data_expression result1, result2;
+      data::data_expression result1;
+      data::data_expression result2;
       if (negate_first==negate_second)
       {
         utilities::probabilistic_arbitrary_precision_fraction result=left_arg+right_arg;

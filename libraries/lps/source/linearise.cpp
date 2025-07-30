@@ -1895,7 +1895,8 @@ class specification_basic_type
         return p1;  // The process did already exist. No need to make a new one.
       }
 
-      static std::size_t numberOfNewProcesses=0, warningNumber=25;
+      static std::size_t numberOfNewProcesses = 0;
+      static std::size_t warningNumber = 25;
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
       {
@@ -2986,7 +2987,8 @@ class specification_basic_type
           {
             const process_identifier procId=process_instance_assignment(first).identifier();
             const variable_list pars=parscollect(seq(oldbody).right(),newbody);
-            variable_list pars1, pars2;
+            variable_list pars1;
+            variable_list pars2;
             const variable_list new_pars=construct_renaming(pars,objectIndex(procId).parameters,pars1,pars2,false);
             assignment_vector new_assignment;
             for(variable_list::const_iterator i=pars2.begin(), j=new_pars.begin(); i!=pars2.end(); ++i,++j)
@@ -7142,7 +7144,9 @@ class specification_basic_type
          unique is true.
        */
 
-      variable_list t, t1, t2;
+      variable_list t;
+      variable_list t1;
+      variable_list t2;
 
       if (pars2.empty())
       {
@@ -8338,12 +8342,18 @@ class specification_basic_type
 
       if (is_merge(t))
       {
-        variable_list pars1,pars2;
-        data_expression_list init1,init2;
-        stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
-        stochastic_action_summand_vector action_summands1, action_summands2;
-        deadlock_summand_vector deadlock_summands1, deadlock_summands2;
-        lps::detail::ultimate_delay ultimate_delay_condition1, ultimate_delay_condition2;
+        variable_list pars1;
+        variable_list pars2;
+        data_expression_list init1;
+        data_expression_list init2;
+        stochastic_distribution initial_stochastic_distribution1;
+        stochastic_distribution initial_stochastic_distribution2;
+        stochastic_action_summand_vector action_summands1;
+        stochastic_action_summand_vector action_summands2;
+        deadlock_summand_vector deadlock_summands1;
+        deadlock_summand_vector deadlock_summands2;
+        lps::detail::ultimate_delay ultimate_delay_condition1;
+        lps::detail::ultimate_delay ultimate_delay_condition2;
         generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(t).left(),
                               regular,rename_variables,pars1,init1,initial_stochastic_distribution1,ultimate_delay_condition1);
         generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(t).right(),
@@ -8369,12 +8379,18 @@ class specification_basic_type
         if (!options.nodeltaelimination && options.ignore_time && is_merge(par))
         {
           // Perform parallel composition with inline allow.
-          variable_list pars1,pars2;
-          data_expression_list init1,init2;
-          stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
-          stochastic_action_summand_vector action_summands1, action_summands2;
-          deadlock_summand_vector deadlock_summands1, deadlock_summands2;
-          lps::detail::ultimate_delay ultimate_delay_condition1, ultimate_delay_condition2;
+          variable_list pars1;
+          variable_list pars2;
+          data_expression_list init1;
+          data_expression_list init2;
+          stochastic_distribution initial_stochastic_distribution1;
+          stochastic_distribution initial_stochastic_distribution2;
+          stochastic_action_summand_vector action_summands1;
+          stochastic_action_summand_vector action_summands2;
+          deadlock_summand_vector deadlock_summands1;
+          deadlock_summand_vector deadlock_summands2;
+          lps::detail::ultimate_delay ultimate_delay_condition1;
+          lps::detail::ultimate_delay ultimate_delay_condition2;
           generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
                                 regular,rename_variables,pars1,init1,initial_stochastic_distribution1,ultimate_delay_condition1);
           generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
@@ -8404,12 +8420,18 @@ class specification_basic_type
         if (!options.nodeltaelimination && options.ignore_time && is_merge(par))
         {
           // Perform parallel composition with inline block.
-          variable_list pars1,pars2;
-          data_expression_list init1,init2;
-          stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
-          stochastic_action_summand_vector action_summands1, action_summands2;
-          deadlock_summand_vector deadlock_summands1, deadlock_summands2;
-          lps::detail::ultimate_delay ultimate_delay_condition1, ultimate_delay_condition2;
+          variable_list pars1;
+          variable_list pars2;
+          data_expression_list init1;
+          data_expression_list init2;
+          stochastic_distribution initial_stochastic_distribution1;
+          stochastic_distribution initial_stochastic_distribution2;
+          stochastic_action_summand_vector action_summands1;
+          stochastic_action_summand_vector action_summands2;
+          deadlock_summand_vector deadlock_summands1;
+          deadlock_summand_vector deadlock_summands2;
+          lps::detail::ultimate_delay ultimate_delay_condition1;
+          lps::detail::ultimate_delay ultimate_delay_condition2;
           generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
                                 regular,rename_variables,pars1,init1,initial_stochastic_distribution1,ultimate_delay_condition1);
           generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),

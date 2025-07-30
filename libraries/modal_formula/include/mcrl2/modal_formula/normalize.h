@@ -146,7 +146,8 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   template <class T>
   void apply(T& result, const and_& x)
   {
-    state_formula left, right;
+    state_formula left;
+    state_formula right;
     apply(left, x.left());
     apply(right, x.right()); 
     if (m_negated)
@@ -162,7 +163,8 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   template <class T>
   void apply(T& result, const or_& x)
   {
-    state_formula left, right;
+    state_formula left;
+    state_formula right;
     apply(left, x.left());
     apply(right, x.right()); 
     if (m_negated)
@@ -178,7 +180,8 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   template <class T>
   void apply(T& result, const plus& x)
   {
-    state_formula left, right;
+    state_formula left;
+    state_formula right;
     apply(left, x.left());
     apply(right, x.right()); 
     if (m_negated)

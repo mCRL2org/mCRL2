@@ -141,7 +141,8 @@ void ParityGame::compress_priorities( const verti cardinality[],
 
     // Find out how to map old priorities to new priorities
     std::vector<int> prio_map(d_, -1);
-    int first_prio = 0, last_prio = 0;
+    int first_prio = 0;
+    int last_prio = 0;
     if (!preserve_parity)
     {
         // Find lowest priority in use:
@@ -186,13 +187,16 @@ void ParityGame::compress_priorities( const verti cardinality[],
 int ParityGame::propagate_priority( verti v, StaticGraph::const_iterator it,
                                              StaticGraph::const_iterator end )
 {
-    int p = priority(v), q = 0;
-    for ( ; it != end; ++it)
-    {
-        verti w = *it;
-        int r = priority(w);
-        if (r >= p) return 0;
-        if (r > q) q = r;
+  int p = priority(v);
+  int q = 0;
+  for (; it != end; ++it)
+  {
+    verti w = *it;
+    int r = priority(w);
+    if (r >= p)
+      return 0;
+    if (r > q)
+      q = r;
     }
     vertex_[v].priority = q;
     --cardinality_[p];
