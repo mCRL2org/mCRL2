@@ -174,7 +174,7 @@ class prob_bisim_partitioner_bem
   struct tree_type
   {
     std::list<state_type> states;
-    std::size_t count = 0UL = 0UL;
+    std::size_t count = 0UL;
     tree_type* left = nullptr;
     tree_type* right = nullptr;
 
