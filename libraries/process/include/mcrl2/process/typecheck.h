@@ -31,18 +31,19 @@ action typecheck_action(const core::identifier_string& name,
 {
   std::string msg = "action";
   data::sorts_list parameter_list = action_context.matching_action_sorts(name, parameters);
-  auto p = process::detail::match_action_parameters(parameters, parameter_list, variable_context, name, msg, typechecker);
+  std::pair<data::data_expression_list, data::sort_expression_list> p = 
+                process::detail::match_action_parameters(parameters, parameter_list, variable_context, name, msg, typechecker);
   return action(action_label(name, p.second), p.first);
 }
 
 // returns the intersection of the 2 type list lists
 inline
-data::sorts_list sorts_list_intersection(const data::sorts_list& sorts1, const data::sorts_list& sorts2)
+data::sorts_list sorts_list_union(const data::sorts_list& sorts1, const data::sorts_list& sorts2)
 {
-  data::sorts_list result;
+  data::sorts_list result=sorts1;
   for (const data::sort_expression_list& s: sorts2)
   {
-    if (std::find(sorts1.begin(), sorts1.end(), s) != sorts1.end())
+    if (std::find(sorts1.begin(), sorts1.end(), s) == sorts1.end())  // not found.
     {
       result.push_front(s);
     }
@@ -275,7 +276,8 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     std::string msg = "process";
     data::sorts_list parameter_list = m_process_context.matching_process_sorts(name, parameters);
-    auto p = process::detail::match_action_parameters(parameters, parameter_list, m_variable_context, name, msg, m_data_type_checker);
+    std::pair<data::data_expression_list, data::sort_expression_list> p = 
+            process::detail::match_action_parameters(parameters, parameter_list, m_variable_context, name, msg, m_data_type_checker);
     return m_process_context.make_process_instance(name, p.second, p.first);
   }
 
@@ -458,6 +460,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         throw mcrl2::runtime_error("Synchronizing to an undefined action " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ").");
       }
 
+      //Below we check the first part of requirement 7 on page 279 of Groote/Mousave, The MIT Press, 2014.
       data::sorts_list c_sorts;
       bool c_sorts_defined=false;
       for (const core::identifier_string& a: cnames)
@@ -468,7 +471,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         }
         if (c_sorts_defined)
         {
-          c_sorts = sorts_list_intersection(c_sorts, action_sorts(a));
+          c_sorts = sorts_list_union(c_sorts, action_sorts(a));
         }
         else
         {
@@ -477,19 +480,35 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
         }
         if (c_sorts.empty())
         {
-          throw mcrl2::runtime_error("Synchronizing action " + core::pp(a) + " from (multi)action " + core::pp(cnames) +
+          throw mcrl2::runtime_error("Synchronizing action " + core::pp(a) + " from (multi)action " + process::pp(c) +
                             " into action " + core::pp(c.name()) + ": these have no common type (typechecking " + process::pp(x) + ").");
         }
       }
-      //Check that all sorts occurring in all actions at the lhs are also sorts of the actions at the right.
+      //Check that each sort occurring in an action at the lhs is also a sort of the action at the right.
       const data::sorts_list target_sorts = action_sorts(c.name());
       const data::sorts_list difference_list=sorts_list_difference(c_sorts,target_sorts);
       if (difference_list.size()>0)
       {
         throw mcrl2::runtime_error("In the communication clause " + process::pp(c) + 
-                  " the action at the right does not have type" + (difference_list.size()==1?" ":"s ") + pp(difference_list) + 
-                  " that the actions at the left have."); 
+                  " the action at the right does not have type" + 
+                  (difference_list.size()==1?" " + pp(difference_list) + " which is a type of some action at the left."
+                                            :"s " + pp(difference_list) + " which are types of actions at the left.")); 
 
+      }
+      //Check that each sort occurring in an action at the lhs is also a sort of each action at the left, 
+      //in conformance with Groote/Mousavi, page 279, item 7.
+      for (const core::identifier_string& a: cnames)
+      {
+        const data::sorts_list target_sorts = action_sorts(a);
+        const data::sorts_list difference_list=sorts_list_difference(c_sorts,target_sorts);
+        if (difference_list.size()>0)
+        {
+          throw mcrl2::runtime_error("In the communication clause " + process::pp(c) + 
+                    " the action " + pp(a) + " in the lhs does not have type" + 
+                    (difference_list.size()==1?" " + pp(difference_list) + " which is a type of some action at the left."
+                                              :"s " + pp(difference_list) + " which are types of actions at the left.")); 
+
+        }
       }
 
       //the multiactions in the lhss of comm should not intersect.

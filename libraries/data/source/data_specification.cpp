@@ -807,7 +807,6 @@ bool data_specification::is_well_typed() const
 /// Note, all sorts with name prefix \@legacy_ are eliminated
 void data_specification::build_from_aterm(const atermpp::aterm& term)
 {
-std::cerr << "XXX " << term << "\n";
   assert(core::detail::check_rule_DataSpec(term));
 
   // Note backwards compatibility measure: alias is no longer a sort_expression
