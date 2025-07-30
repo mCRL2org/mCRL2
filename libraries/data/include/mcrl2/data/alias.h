@@ -94,7 +94,7 @@ std::ostream& operator<<(std::ostream& out, const alias& x)
 }
 
 /// \\brief swap overload
-inline void swap(alias& t1, alias& t2)
+inline void swap(alias& t1, alias& t2) noexcept
 {
   t1.swap(t2);
 }

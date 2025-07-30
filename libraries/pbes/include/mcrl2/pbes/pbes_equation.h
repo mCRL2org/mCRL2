@@ -110,7 +110,7 @@ class pbes_equation
     bool is_solved() const;
 
     /// \brief Swaps the contents
-    void swap(pbes_equation& other)
+    void swap(pbes_equation& other) noexcept
     {
       using std::swap;
       swap(m_symbol, other.m_symbol);
@@ -153,7 +153,7 @@ std::ostream& operator<<(std::ostream& out, const pbes_equation& x)
 }
 
 /// \\brief swap overload
-inline void swap(pbes_equation& t1, pbes_equation& t2)
+inline void swap(pbes_equation& t1, pbes_equation& t2) noexcept
 {
   t1.swap(t2);
 }

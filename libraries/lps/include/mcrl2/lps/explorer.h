@@ -134,10 +134,7 @@ class breadth_first_todo_set : public todo_set
       return todo;
     }
 
-    void swap(breadth_first_todo_set& other)
-    {
-      todo.swap(other.todo);
-    }
+    void swap(breadth_first_todo_set& other) noexcept { todo.swap(other.todo); }
 };
 
 class depth_first_todo_set : public todo_set

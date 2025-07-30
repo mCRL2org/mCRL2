@@ -25,7 +25,7 @@ public:
   swappable(int x) : val_(x)
   {}
 
-  void swap(swappable& other)
+  void swap(swappable& other) noexcept
   {
     std::cerr << "swap method called" << std::endl;
     int tmp = other.val_;
@@ -60,11 +60,11 @@ namespace std
  */
 namespace nsp
 {
-  void swap(swappable& x, swappable& y)
-  {
-    std::cerr << "nsp::swap overload" << std::endl;
-    x.swap(y);
-  }
+void swap(swappable& x, swappable& y) noexcept
+{
+  std::cerr << "nsp::swap overload" << std::endl;
+  x.swap(y);
+}
 } // namespace nsp
 
 // This test case check whether, if both std::swap and
@@ -106,7 +106,7 @@ namespace nA {
       A(T x) : val_(x)
       {}
 
-      void swap(A<T>& other)
+      void swap(A<T>& other) noexcept
       {
         std::cerr << "swap method called" << std::endl;
         T tmp = other.val_;
@@ -126,8 +126,8 @@ namespace nA {
     return x.val() < y.val();
   }
 
-  template <typename T>
-  void swap(A<T>& x, A<T>& y)
+  template<typename T>
+  void swap(A<T>& x, A<T>& y) noexcept
   {
     std::cerr << "nA::swap overload" << std::endl;
     x.swap(y);

@@ -527,7 +527,7 @@ class application: public data_expression
 };
 
 /// \brief swap overload
-inline void swap(application& t1, application& t2)
+inline void swap(application& t1, application& t2) noexcept
 {
   t1.swap(t2);
 }

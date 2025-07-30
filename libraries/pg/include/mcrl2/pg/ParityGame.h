@@ -117,7 +117,7 @@ public:
   bool empty() const { return graph().empty(); }
 
   /*! Efficiently swaps the contents of this parity game with another one. */
-  void swap(ParityGame& pg);
+  void swap(ParityGame& pg) noexcept;
 
   //!\name Generation
   //!@{
@@ -325,9 +325,9 @@ private:
   verti* cardinality_ = nullptr;
 };
 
-inline void swap(ParityGame &a, ParityGame &b)
+inline void swap(ParityGame& a, ParityGame& b) noexcept
 {
-    a.swap(b);
+  a.swap(b);
 }
 
 #include "ParityGame_impl.h"

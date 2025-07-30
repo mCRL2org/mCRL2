@@ -117,11 +117,10 @@ class lts_dot_base
 
     /** \brief The standard swap function.
     */
-    void swap(lts_dot_base&)
+    void swap(lts_dot_base&) noexcept
     {
       // Intentionally empty.
     }
-
 };
 
 } // end namespace detail

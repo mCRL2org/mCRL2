@@ -112,14 +112,14 @@ class pres_equation
     bool is_solved() const;
 
     /// \brief Swaps the contents
-    void swap(pres_equation& other)
+    void swap(pres_equation& other) noexcept
     {
       using std::swap;
       swap(m_symbol, other.m_symbol);
       swap(m_variable, other.m_variable);
       swap(m_formula, other.m_formula);
     }
-   
+
     void mark(std::stack<std::reference_wrapper<atermpp::detail::_aterm>>& todo) const
     {
       mark_term(m_symbol, todo);
@@ -147,7 +147,7 @@ std::ostream& operator<<(std::ostream& out, const pres_equation& x)
 }
 
 /// \\brief swap overload
-inline void swap(pres_equation& t1, pres_equation& t2)
+inline void swap(pres_equation& t1, pres_equation& t2) noexcept
 {
   t1.swap(t2);
 }

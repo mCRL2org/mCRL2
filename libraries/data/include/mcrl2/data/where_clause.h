@@ -91,7 +91,7 @@ std::ostream& operator<<(std::ostream& out, const where_clause& x)
 }
 
 /// \\brief swap overload
-inline void swap(where_clause& t1, where_clause& t2)
+inline void swap(where_clause& t1, where_clause& t2) noexcept
 {
   t1.swap(t2);
 }

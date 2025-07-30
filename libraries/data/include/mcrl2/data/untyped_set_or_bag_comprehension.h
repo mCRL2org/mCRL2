@@ -78,7 +78,7 @@ std::ostream& operator<<(std::ostream& out, const untyped_set_or_bag_comprehensi
 }
 
 /// \\brief swap overload
-inline void swap(untyped_set_or_bag_comprehension& t1, untyped_set_or_bag_comprehension& t2)
+inline void swap(untyped_set_or_bag_comprehension& t1, untyped_set_or_bag_comprehension& t2) noexcept
 {
   t1.swap(t2);
 }

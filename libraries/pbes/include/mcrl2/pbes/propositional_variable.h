@@ -111,7 +111,7 @@ std::ostream& operator<<(std::ostream& out, const propositional_variable& x)
 }
 
 /// \\brief swap overload
-inline void swap(propositional_variable& t1, propositional_variable& t2)
+inline void swap(propositional_variable& t1, propositional_variable& t2) noexcept
 {
   t1.swap(t2);
 }

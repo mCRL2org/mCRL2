@@ -89,7 +89,7 @@ std::ostream& operator<<(std::ostream& out, const action_name_multiset& x)
 }
 
 /// \\brief swap overload
-inline void swap(action_name_multiset& t1, action_name_multiset& t2)
+inline void swap(action_name_multiset& t1, action_name_multiset& t2) noexcept
 {
   t1.swap(t2);
 }

@@ -80,7 +80,7 @@ std::ostream& operator<<(std::ostream& out, const container_sort& x)
 }
 
 /// \\brief swap overload
-inline void swap(container_sort& t1, container_sort& t2)
+inline void swap(container_sort& t1, container_sort& t2) noexcept
 {
   t1.swap(t2);
 }

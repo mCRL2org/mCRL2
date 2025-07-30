@@ -228,7 +228,7 @@ public:
     return m_var < other.m_var || (m_var == other.m_var && m_char_func < other.m_char_func);
   }
 
-  friend void swap(subblock& self, subblock& other)
+  friend void swap(subblock& self, subblock& other) noexcept
   {
     using std::swap;
     swap(self.m_equation, other.m_equation);

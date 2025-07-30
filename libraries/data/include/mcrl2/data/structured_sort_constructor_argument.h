@@ -115,7 +115,7 @@ std::ostream& operator<<(std::ostream& out, const structured_sort_constructor_ar
 }
 
 /// \\brief swap overload
-inline void swap(structured_sort_constructor_argument& t1, structured_sort_constructor_argument& t2)
+inline void swap(structured_sort_constructor_argument& t1, structured_sort_constructor_argument& t2) noexcept
 {
   t1.swap(t2);
 }

@@ -111,11 +111,10 @@ std::ostream& operator<<(std::ostream& out, const action_formula& x)
 }
 
 /// \\brief swap overload
-inline void swap(action_formula& t1, action_formula& t2)
+inline void swap(action_formula& t1, action_formula& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The value true for action formulas
 class true_: public action_formula
@@ -164,11 +163,10 @@ std::ostream& operator<<(std::ostream& out, const true_& x)
 }
 
 /// \\brief swap overload
-inline void swap(true_& t1, true_& t2)
+inline void swap(true_& t1, true_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The value false for action formulas
 class false_: public action_formula
@@ -217,11 +215,10 @@ std::ostream& operator<<(std::ostream& out, const false_& x)
 }
 
 /// \\brief swap overload
-inline void swap(false_& t1, false_& t2)
+inline void swap(false_& t1, false_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The not operator for action formulas
 class not_: public action_formula
@@ -288,11 +285,10 @@ std::ostream& operator<<(std::ostream& out, const not_& x)
 }
 
 /// \\brief swap overload
-inline void swap(not_& t1, not_& t2)
+inline void swap(not_& t1, not_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The and operator for action formulas
 class and_: public action_formula
@@ -364,11 +360,10 @@ std::ostream& operator<<(std::ostream& out, const and_& x)
 }
 
 /// \\brief swap overload
-inline void swap(and_& t1, and_& t2)
+inline void swap(and_& t1, and_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The or operator for action formulas
 class or_: public action_formula
@@ -440,11 +435,10 @@ std::ostream& operator<<(std::ostream& out, const or_& x)
 }
 
 /// \\brief swap overload
-inline void swap(or_& t1, or_& t2)
+inline void swap(or_& t1, or_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The implication operator for action formulas
 class imp: public action_formula
@@ -516,11 +510,10 @@ std::ostream& operator<<(std::ostream& out, const imp& x)
 }
 
 /// \\brief swap overload
-inline void swap(imp& t1, imp& t2)
+inline void swap(imp& t1, imp& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The universal quantification operator for action formulas
 class forall: public action_formula
@@ -592,11 +585,10 @@ std::ostream& operator<<(std::ostream& out, const forall& x)
 }
 
 /// \\brief swap overload
-inline void swap(forall& t1, forall& t2)
+inline void swap(forall& t1, forall& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The existential quantification operator for action formulas
 class exists: public action_formula
@@ -668,11 +660,10 @@ std::ostream& operator<<(std::ostream& out, const exists& x)
 }
 
 /// \\brief swap overload
-inline void swap(exists& t1, exists& t2)
+inline void swap(exists& t1, exists& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The at operator for action formulas
 class at: public action_formula
@@ -744,11 +735,10 @@ std::ostream& operator<<(std::ostream& out, const at& x)
 }
 
 /// \\brief swap overload
-inline void swap(at& t1, at& t2)
+inline void swap(at& t1, at& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The multi action for action formulas
 class multi_action: public action_formula
@@ -815,7 +805,7 @@ std::ostream& operator<<(std::ostream& out, const multi_action& x)
 }
 
 /// \\brief swap overload
-inline void swap(multi_action& t1, multi_action& t2)
+inline void swap(multi_action& t1, multi_action& t2) noexcept
 {
   t1.swap(t2);
 }
