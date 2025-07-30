@@ -183,6 +183,7 @@ bool can_sync(const lps::multi_action& label)
 
 struct combined_lts_builder
 {
+  virtual ~combined_lts_builder() = default;
   virtual void finalize_combined(size_t states) = 0;
 };
 
