@@ -17,10 +17,18 @@ Checks: "-*,
     -bugprone-multi-level-implicit-pointer-conversion,
     -bugprone-macro-parentheses,
     -bugprone-exception-escape,
-    cppcoreguidelines-*,
-    -cppcoreguidelines-pro-type-static-cast-downcast,
-    -cppcoreguidelines-pro-type-reinterpret-cast,
-    -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+    cppcoreguidelines-avoid-capturing-lambda-coroutines,
+    cppcoreguidelines-avoid-const-or-ref-data-members,
+    cppcoreguidelines-avoid-goto,
+    cppcoreguidelines-avoid-reference-coroutine-parameters,
+    cppcoreguidelines-macro-usage,
+    cppcoreguidelines-misleading-capture-default-by-value,
+    cppcoreguidelines-missing-std-forward,
+    cppcoreguidelines-no-malloc,
+    cppcoreguidelines-no-suspend-with-lock,
+    cppcoreguidelines-pro-type-const-cast,
+    cppcoreguidelines-pro-type-cstyle-cast,
+    cppcoreguidelines-pro-type-member-init,
     -google-explicit-constructor,
     modernize-*,
     -modernize-macro-to-enum,
@@ -37,6 +45,7 @@ CheckOptions:
     modernize-convert-loop.MinConfidence: 'risky'
     modernize-use-default-member-init.UseAssignment: 'true'
     cppcoreguidelines-pro-type-member-init.UseAssignment: 'true'
+    cppcoreguidelines-pro-type-const-cast.StrictMode: 'true'
 WarningsAsErrors: 'false'
 HeaderFilterRegex: '.'
 ExcludeHeaderFilterRegex: '(.*3rd-party.*)'
