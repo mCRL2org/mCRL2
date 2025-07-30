@@ -50,11 +50,11 @@ private:
   }
 
 public:
-  command_line_error(const std::string& name, const std::string& message) throw()
-    : runtime_error(format(name, message))
+  command_line_error(const std::string& name, const std::string& message) noexcept
+      : runtime_error(format(name, message))
   {}
 
-  ~command_line_error() throw() override = default;
+  ~command_line_error() noexcept override = default;
 };
 
 } // namespace mcrl2
