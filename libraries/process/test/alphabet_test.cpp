@@ -150,7 +150,8 @@ template <typename Operation>
 void test_alphabet_operation(const std::string& text1, const std::string& text2, const std::string& expected_result, Operation op, const std::string& title)
 {
   bool dummy;
-  multi_action_name_set A1, A2;
+  multi_action_name_set A1;
+  multi_action_name_set A2;
   std::tie(A1, dummy) = detail::parse_simple_multi_action_name_set(text1);
   std::tie(A2, dummy) = detail::parse_simple_multi_action_name_set(text2);
   multi_action_name_set A3 = op(A1, A2);

@@ -432,7 +432,8 @@ public:
     if (is_and(result))
     {  
        const and_& resulta = atermpp::down_cast<and_>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqinf(t1, resulta.left());
        apply(t2, t1);
        make_eqinf(t1, resulta.right());
@@ -444,7 +445,8 @@ public:
     if (is_or(result))
     {  
        const or_& resulta = atermpp::down_cast<or_>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqinf(t1, resulta.left());
        apply(t2, t1);
        make_eqinf(t1, resulta.right());
@@ -456,7 +458,8 @@ public:
     if (is_plus(result))
     {  
        const plus& resulta = atermpp::down_cast<plus>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqinf(t1, resulta.left());
        apply(t2, t1);
        make_eqinf(t1, resulta.right());
@@ -514,7 +517,8 @@ public:
     if (is_and(result))
     {
        const and_& resulta = atermpp::down_cast<and_>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqninf(t1, resulta.left());
        apply(t2, t1);
        make_eqninf(t1, resulta.right());
@@ -526,7 +530,8 @@ public:
     if (is_or(result))
     {
        const or_& resulta = atermpp::down_cast<or_>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqninf(t1, resulta.left());
        apply(t2, t1);
        make_eqninf(t1, resulta.right());
@@ -538,7 +543,11 @@ public:
     if (is_plus(result))
     {
        const plus& resulta = atermpp::down_cast<plus>(result);
-       pres_expression t, t1, t2, t3, t4;
+       pres_expression t;
+       pres_expression t1;
+       pres_expression t2;
+       pres_expression t3;
+       pres_expression t4;
        make_eqninf(t, resulta.left());
        apply(t1, t);
        make_eqinf(t, resulta.right());

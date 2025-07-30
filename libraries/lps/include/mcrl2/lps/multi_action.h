@@ -182,7 +182,8 @@ inline bool equal_action_signatures(const std::vector<process::action>& a, const
   {
     return false;
   }
-  std::vector<process::action>::const_iterator i, j;
+  std::vector<process::action>::const_iterator i;
+  std::vector<process::action>::const_iterator j;
   for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
   {
     if (i->label() != j->label())
@@ -243,13 +244,15 @@ struct equal_data_parameters_builder
   void operator()()
   {
     std::vector<data::data_expression> v;
-    std::vector<process::action>::const_iterator i, j;
+    std::vector<process::action>::const_iterator i;
+    std::vector<process::action>::const_iterator j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
       data::data_expression_list d1 = i->arguments();
       data::data_expression_list d2 = j->arguments();
       assert(d1.size() == d2.size());
-      data::data_expression_list::iterator i1 = d1.begin(), i2 = d2.begin();
+      data::data_expression_list::iterator i1 = d1.begin();
+      data::data_expression_list::iterator i2 = d2.begin();
       for (     ; i1 != d1.end(); ++i1, ++i2)
       {
         v.push_back(data::lazy::equal_to(*i1, *i2));
@@ -282,13 +285,15 @@ struct not_equal_multi_actions_builder
     using namespace data::lazy;
 
     std::vector<data::data_expression> v;
-    std::vector<process::action>::const_iterator i, j;
+    std::vector<process::action>::const_iterator i;
+    std::vector<process::action>::const_iterator j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
       data::data_expression_list d1 = i->arguments();
       data::data_expression_list d2 = j->arguments();
       assert(d1.size() == d2.size());
-      data::data_expression_list::iterator i1=d1.begin(), i2=d2.begin();
+      data::data_expression_list::iterator i1 = d1.begin();
+      data::data_expression_list::iterator i2 = d2.begin();
       for (   ; i1 != d1.end(); ++i1, ++i2)
       {
         v.push_back(data::not_equal_to(*i1, *i2));

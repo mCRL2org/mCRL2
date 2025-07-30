@@ -38,17 +38,18 @@ inline int SmallProgressMeasures::vector_cmp( const verti vec1[],
 
 inline verti SmallProgressMeasures::get_ext_succ(verti v, bool take_max) const
 {
-    const verti *it  = game_.graph().succ_begin(v),
-                *end = game_.graph().succ_end(v);
+  const verti* it = game_.graph().succ_begin(v);
+  const verti* end = game_.graph().succ_end(v);
 
-    assert(it < end);  /* assume we have at least one successor */
+  assert(it < end); /* assume we have at least one successor */
 
-    int N = len(v);
-    verti res = *it++;
-    for ( ; it != end; ++it)
-    {
-        int d = vector_cmp(*it, res, N);
-        if (take_max ? d > 0 : d < 0) res = *it;
+  int N = len(v);
+  verti res = *it++;
+  for (; it != end; ++it)
+  {
+    int d = vector_cmp(*it, res, N);
+    if (take_max ? d > 0 : d < 0)
+      res = *it;
     }
     return res;
 }

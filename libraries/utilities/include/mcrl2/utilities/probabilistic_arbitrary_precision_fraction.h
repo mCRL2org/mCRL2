@@ -271,7 +271,9 @@ class probabilistic_arbitrary_precision_fraction
     // The arguments are intentionally passed by value. That means this routine is not very efficient as it copies two vectors.
     static utilities::big_natural_number greatest_common_divisor(utilities::big_natural_number x, utilities::big_natural_number y)
     {
-      thread_local utilities::big_natural_number buffer1, buffer2, buffer3;
+      thread_local utilities::big_natural_number buffer1;
+      thread_local utilities::big_natural_number buffer2;
+      thread_local utilities::big_natural_number buffer3;
       greatest_common_divisor_destructive(x,y,buffer1,buffer2,buffer3);
       return x;
     } 
@@ -283,7 +285,12 @@ class probabilistic_arbitrary_precision_fraction
       denominator=denominator/gcd;
       assert(greatest_common_divisor(enumerator,denominator).is_number(1)); */
 
-      thread_local utilities::big_natural_number enumerator_copy, denominator_copy, gcd, buffer1, buffer2,buffer3;
+      thread_local utilities::big_natural_number enumerator_copy;
+      thread_local utilities::big_natural_number denominator_copy;
+      thread_local utilities::big_natural_number gcd;
+      thread_local utilities::big_natural_number buffer1;
+      thread_local utilities::big_natural_number buffer2;
+      thread_local utilities::big_natural_number buffer3;
       gcd=enumerator;
       enumerator_copy=enumerator;
       denominator_copy=denominator;
