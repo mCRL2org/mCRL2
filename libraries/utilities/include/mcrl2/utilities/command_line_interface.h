@@ -309,9 +309,8 @@ class interface_description
 
         /// copy constructor
         option_descriptor(option_descriptor const& o) : m_long(o.m_long),
-          m_description(o.m_description), m_argument(o.m_argument), m_short(o.m_short), m_show(true)
-        {
-        }
+          m_description(o.m_description), m_argument(o.m_argument), m_short(o.m_short)
+        {}
 
         option_descriptor operator=(option_descriptor const& o)
         {
