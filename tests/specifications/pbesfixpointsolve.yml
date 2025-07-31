@@ -18,12 +18,12 @@ tools:
     input: [l2]
     output: [l3]
     args: []
-    name: pbesiteration
+    name: pbesfixpointsolve
   t5:
     input: [l2]
     output: [l4]
     args: [-e]
-    name: pbesiteration
+    name: pbesfixpointsolve
   t3:
     input: [l2]
     output: []

@@ -6,14 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbesiteration.cpp
+/// \file pbesfixpointsolve.cpp
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/pbes_rewriter_tool.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
-#include "mcrl2/pbes/tools/pbesiteration.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/pbes/tools/pbesfixpointsolve.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -26,12 +28,12 @@ using pbes_system::tools::pbes_output_tool;
 using pbes_system::tools::pbes_rewriter_tool;
 using data::tools::rewriter_tool;
 
-class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>
+class pbesfixpointsolve_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>
 {
   protected:
     using super = pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>;
 
-    pbesiteration_options m_options;
+    pbesfixpointsolve_options m_options;
 
     void parse_options(const command_line_parser& parser) override
     {
@@ -54,9 +56,9 @@ class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
     }
 
   public:
-    pbesiteration_tool()
+    pbesfixpointsolve_tool()
       : super(
-        "pbesiteration",
+        "pbesfixpointsolve",
         "Jore Booy",
         "Simplify a pbes by checking if the base contraint is an invariant.",
         "Reads a file containing a PBES, and iterates to a solution. If OUTFILE "
@@ -66,7 +68,7 @@ class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbesiteration parameters:" << std::endl;
+      mCRL2log(verbose) << "pbesfixpointsolve parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
@@ -76,10 +78,14 @@ class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
       load_pbes(p, input_filename(), pbes_input_format());
       complete_data_specification(p);
       algorithms::normalize(p);
-      pbesiteration_pbes_fixpoint_iterator fixpoint_iterator;
+      pbesfixpointsolve_pbes_fixpoint_iterator fixpoint_iterator;
       fixpoint_iterator.run(p, m_options);
       save_pbes(p, output_filename(), pbes_output_format());
-
+      
+      log::logger::set_reporting_level(log::status);
+      bool result = mcrl2::pbes_system::detail::pbessolve(p);
+      mCRL2log(info) << (result ? "true" : "false") << std::endl;
+      
       return true;
     }
 
@@ -87,5 +93,5 @@ class pbesiteration_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_
 
 int main(int argc, char* argv[])
 {
-  return pbesiteration_tool().execute(argc, argv);
+  return pbesfixpointsolve_tool().execute(argc, argv);
 }

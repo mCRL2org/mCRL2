@@ -11,10 +11,10 @@ set(MCRL2_TOOLS
   pbes2yices
   pbesabsinthe
   pbesbackelm
-  pbesiteration
+  pbeschain
+  pbesfixpointsolve
   pbespareqelm
   pbespor
-  pbespathreduction
   pbessymbolicbisim
   presconstelm
   presinfo

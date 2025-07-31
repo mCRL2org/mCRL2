@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/tools/pbespathreduction.h
+/// \file mcrl2/pbes/tools/pbeschain.h
 /// \brief This file provides a tool that can simplify PBESs by
 ///        substituting PBES equations for variables in the rhs,
 ///        simplifying the result, and keeping it when it can
 ///        eliminate PBES variables.
 
-#ifndef MCRL2_PBES_TOOLS_PBESPATHREDUCTION_H
-#define MCRL2_PBES_TOOLS_PBESPATHREDUCTION_H
+#ifndef MCRL2_PBES_TOOLS_PBESCHAIN_H
+#define MCRL2_PBES_TOOLS_PBESCHAIN_H
 
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/rewriter.h"
@@ -31,7 +31,7 @@
 namespace mcrl2::pbes_system
 {
 
-struct pbespathreduction_options
+struct pbeschain_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   bool use_bdd_simplifier = false;
@@ -312,7 +312,7 @@ inline pbes_expression datatopbes(data::data_expression& data_expr,
 }
 
 inline pbes_expression simplify_expr(pbes_expression& phi,
-    pbespathreduction_options options,
+    pbeschain_options options,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
         replace_substituter,
@@ -347,7 +347,7 @@ inline void self_substitute(pbes_equation& equation,
     simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter,
     simplify_data_rewriter<data::rewriter>& pbes_default_rewriter,
     mcrl2::data::detail::BDD_Prover& f_bdd_prover,
-    pbespathreduction_options options)
+    pbeschain_options options)
 {
   bool stable = false;
 
@@ -574,9 +574,9 @@ inline pbes fill_pvi(pbes& p, data::rewriter data_rewriter)
   return res;
 }
 
-struct pbespathreduction_pbes_backward_substituter
+struct pbeschain_pbes_backward_substituter
 {
-  void run(pbes& p, pbespathreduction_options options)
+  void run(pbes& p, pbeschain_options options)
   {
     data::rewriter data_rewriter(p.data(), options.rewrite_strategy);
     data::rewriter data_default_rewriter(p.data());
@@ -627,20 +627,20 @@ struct pbespathreduction_pbes_backward_substituter
   }
 };
 
-inline void pbespathreduction(const std::string& input_filename,
+inline void pbeschain(const std::string& input_filename,
     const std::string& output_filename,
     const utilities::file_format& input_format,
     const utilities::file_format& output_format,
-    pbespathreduction_options options)
+    pbeschain_options options)
 {
   pbes p;
   load_pbes(p, input_filename, input_format);
   algorithms::normalize(p);
-  pbespathreduction_pbes_backward_substituter backward_substituter;
+  pbeschain_pbes_backward_substituter backward_substituter;
   backward_substituter.run(p, options);
   save_pbes(p, output_filename, output_format);
 }
 
 } // namespace mcrl2::pbes_system
 
-#endif // MCRL2_PBES_TOOLS_PBESPATHREDUCTION_H
+#endif // MCRL2_PBES_TOOLS_PBESCHAIN_H
