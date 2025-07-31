@@ -1,11 +1,11 @@
-.. index:: pbesiteration
+.. index:: pbesfixpointsolve
 
-.. _tool-pbesiteration:
+.. _tool-pbesfixpointsolve:
 
-pbesiteration
+pbesfixpointsolve
 =================
 
-This tool is aimed at solving parameterised Boolean equation systems with an
+This tool is aimed at solving Parameterised Boolean Equation Systems with an
 infinite underlying Boolean equation system using *iteration* or *symbolic
 approximation* [GW05]_.  In the context of finite data types, it is guaranteed
 (at least in theory) that we reach a fixpoint for each equation in a finite
@@ -133,4 +133,4 @@ Adding `pbesrewr -pquantifier-inside` and `pbesrewr -pquantifier-one-point`
 before solving the PBES resulted in a solving time of 413ms compared to 8m7s
 without the one-point rule.
 
-.. mcrl2_manual:: pbesiteration
+.. mcrl2_manual:: pbesfixpointsolve
