@@ -278,7 +278,7 @@ inline std::pair<typename INDEXED_SET::size_type, bool> INDEXED_SET::insert(cons
   m_keys[new_index] = key; 
 
   std::atomic_thread_fence(std::memory_order_seq_cst);   // Necessary for ARM. std::memory_order_acquire and 
-                                                         // std::memory_order_release appear to work, too.
+                                                            // std::memory_order_release appear to work, too.
   m_hashtable[new_position] = new_index;
 
 
