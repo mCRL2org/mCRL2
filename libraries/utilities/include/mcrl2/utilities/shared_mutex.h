@@ -139,7 +139,6 @@ public:
       : m_shared(other.m_shared)
   {
     m_shared->register_mutex(this);
-    m_shared->unregister_mutex(&other);
   }
 
   shared_mutex& operator=(const shared_mutex& other)
