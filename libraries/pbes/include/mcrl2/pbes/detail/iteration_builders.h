@@ -112,7 +112,7 @@ struct replace_other_propositional_variables_with_functions_builder
         atermpp::aterm sort(x.sort());
         term_list.push_front(sort);
       }
-      reverse(term_list);
+      term_list = reverse(term_list); 
       data::sort_expression_list sort_list(term_list);
 
       if (sort_list.size() > 0)

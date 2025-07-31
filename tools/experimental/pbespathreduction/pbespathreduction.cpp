@@ -29,7 +29,7 @@ using data::tools::rewriter_tool;
 class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>
 {
   protected:
-    using super = pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>;
+    typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>> super;
 
     pbespathreduction_options m_options;
 
@@ -43,6 +43,8 @@ class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
       }
       m_options.back_substitution = !parser.has_option("no-back-substitution");
       m_options.max_depth = parser.option_argument_as<int>("max-depth");
+      m_options.count_unique_pvi = parser.has_option("count-unique-pvi");
+      m_options.fill_pvi = parser.has_option("fill-pvi");
     }
 
     void add_options(interface_description& desc) override
@@ -56,9 +58,16 @@ class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
                   "of predicate variable instances in the equation is zero. "
                   "In some cases, this makes solving the equation faster. However, "
                   "less paths can be reduced.", 's');
-      desc.add_option("max-depth", utilities::make_optional_argument("TIMEOUT", "15"),
+      desc.add_option("max-depth", utilities::make_optional_argument("DEPTH", "15"),
                   "The maximum depth a single predicate variable instances "
-                  "gets unfolded.", 'm'); 
+                  "gets unfolded.", 'm');
+      desc.add_option("count-unique-pvi",
+                  "An unfolding is considered less complex if the number of "
+                  "*unique* predicate variable instances is no more than one.",
+                  'u');
+      desc.add_option("fill-pvi",
+                  "Use the guard of a pvi to fill the pvi with concrete values.",
+                  'f');
     }
 
   public:
