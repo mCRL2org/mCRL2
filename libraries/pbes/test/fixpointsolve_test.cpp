@@ -9,13 +9,14 @@
 /// \file iteration_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/pbes/tools/pbesfixpointsolve.h"
 #define BOOST_TEST_MODULE iteration_test
 #include <boost/regex.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <regex>
 
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/tools/pbesiteration.h"
+#include "mcrl2/pbes/tools/pbesfixpointsolve.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
@@ -33,8 +34,8 @@ void test_result(std::string input, std::string expected_result, bool option_che
 {
   bool normalize = false;
   pbes p = txt2pbes(input, normalize);
-  pbesiteration_pbes_fixpoint_iterator fixpoint_iterator;
-  pbesiteration_options options;
+  pbesfixpointsolve_pbes_fixpoint_iterator fixpoint_iterator;
+  pbesfixpointsolve_options options;
   options.check_global_invariant = option_check_global_invariant;
   fixpoint_iterator.run(p, options);
   std::string result = pbes_system::pp(p);

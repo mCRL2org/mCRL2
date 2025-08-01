@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbespathreduction.cpp
+/// \file pbeschain.cpp
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/pbes_rewriter_tool.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
-#include "mcrl2/pbes/tools/pbespathreduction.h"
+#include "mcrl2/pbes/tools/pbeschain.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -26,12 +26,12 @@ using pbes_system::tools::pbes_output_tool;
 using pbes_system::tools::pbes_rewriter_tool;
 using data::tools::rewriter_tool;
 
-class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>
+class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>
 {
   protected:
     using super = pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>>;
 
-    pbespathreduction_options m_options;
+    pbeschain_options m_options;
 
     void parse_options(const command_line_parser& parser) override
     {
@@ -43,6 +43,8 @@ class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
       }
       m_options.back_substitution = !parser.has_option("no-back-substitution");
       m_options.max_depth = parser.option_argument_as<int>("max-depth");
+      m_options.count_unique_pvi = parser.has_option("count-unique-pvi");
+      m_options.fill_pvi = parser.has_option("fill-pvi");
     }
 
     void add_options(interface_description& desc) override
@@ -56,30 +58,37 @@ class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
                   "of predicate variable instances in the equation is zero. "
                   "In some cases, this makes solving the equation faster. However, "
                   "less paths can be reduced.", 's');
-      desc.add_option("max-depth", utilities::make_optional_argument("TIMEOUT", "15"),
+      desc.add_option("max-depth", utilities::make_optional_argument("DEPTH", "15"),
                   "The maximum depth a single predicate variable instances "
-                  "gets unfolded.", 'm'); 
+                  "gets unfolded.", 'm');
+      desc.add_option("count-unique-pvi",
+                  "An unfolding is considered less complex if the number of "
+                  "*unique* predicate variable instances is no more than one.",
+                  'u');
+      desc.add_option("fill-pvi",
+                  "Use the guard of a pvi to fill the pvi with concrete values.",
+                  'f');
     }
 
   public:
-    pbespathreduction_tool()
+    pbeschain_tool()
       : super(
-        "pbespathreduction",
+        "pbeschain",
         "Jore Booy",
-        "Simplify a pbes by backwards substituting paths.",
-        "Reads a file containing a PBES, and iterates to a solution. If OUTFILE "
+        "Simplify a pbes by backwards chaining unfolded predicate variable instances.",
+        "Reads a file containing a PBES. If OUTFILE "
         "is not present, standard output is used. If INFILE is not present, standard input is used."
       )
     {}
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbespathreduction parameters:" << std::endl;
+      mCRL2log(verbose) << "pbeschain parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
       m_options.rewrite_strategy = rewrite_strategy();
-      pbespathreduction(input_filename(),
+      pbeschain(input_filename(),
                   output_filename(),
                   pbes_input_format(),
                   pbes_output_format(),
@@ -93,5 +102,5 @@ class pbespathreduction_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
 
 int main(int argc, char* argv[])
 {
-  return pbespathreduction_tool().execute(argc, argv);
+  return pbeschain_tool().execute(argc, argv);
 }

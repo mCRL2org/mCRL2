@@ -298,9 +298,9 @@ class PbesconstelmTest(PbesTest):
     def __init__(self, name, settings):
         super(PbesconstelmTest, self).__init__(name, ymlfile('pbesconstelm'), settings)
 
-class PbesiterationTest(PbesTest):
+class PbesfixpointsolveTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbesiterationTest, self).__init__(name, ymlfile('pbesiteration'), settings)
+        super(PbesfixpointsolveTest, self).__init__(name, ymlfile('pbesfixpointsolve'), settings)
 
 class PbesparelmTest(PbesTest):
     def __init__(self, name, settings):
@@ -510,7 +510,7 @@ available_tests = {
     'bisimulation-branching-bisim-gj'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj', settings)                    ,
     'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                              ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
-    'pbesiteration'                               : lambda name, settings: PbesiterationTest(name, settings)                                              ,
+    'pbesfixpointsolve'                           : lambda name, settings: PbesfixpointsolveTest(name, settings)                                              ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
     'pbespathreduction'                           : lambda name, settings: PbespathreductionTest(name, settings)                                            ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
