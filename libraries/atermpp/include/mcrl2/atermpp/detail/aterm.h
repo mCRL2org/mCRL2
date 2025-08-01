@@ -48,7 +48,7 @@ public:
   ///        of elements is equal to the template parameter N.
   template<typename Iterator>
   _aterm_appl(const function_symbol& sym, Iterator it, [[maybe_unused]] Iterator end)
-    requires mcrl2::utilities::is_iterator<Iterator>::value
+    requires (mcrl2::utilities::is_iterator<Iterator>::value)
       : _aterm(sym)
   {
     for (std::size_t i = 0; i < N; ++i)
