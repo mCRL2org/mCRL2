@@ -88,7 +88,7 @@ public:
   : super(r, pr)
   , simpl_discr(r, pr, dataspec_)
   {}
-  virtual ~simplifier_fourier_motzkin() = default;
+  ~simplifier_fourier_motzkin() override = default;
 };
 
 

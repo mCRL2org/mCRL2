@@ -137,8 +137,7 @@ struct pbes_state_cb
         : explorer(explorer_)
     {}
 
-    void operator()(int* const& next_state,
-                    int group = -1)
+    void operator()(int* const& next_state, int /*group*/ = -1)
     {
         int state_length = explorer->get_info()->get_lts_type().get_state_length();
         successors.push_back(explorer->to_int_vector(state_length, next_state));
@@ -210,10 +209,11 @@ void explorer::bfs()
 
 } // namespace ltsmin::test
 
-
-
-
-void run_pbes_explorer(const std::string& pbes_text, int num_parts, int num_groups, int num_states, int num_transitions,
+void run_pbes_explorer(const std::string& pbes_text,
+    int num_parts,
+    int /*num_groups*/,
+    int /*num_states*/,
+    int /*num_transitions*/,
     const std::string& rewrite_strategy = "jitty")
 {
   std::clog << "run_pbes_explorer" << std::endl;
@@ -249,7 +249,11 @@ void run_pbes_explorer(const std::string& pbes_text, int num_parts, int num_grou
 
 }
 
-void run_pbes_explorer_file(const std::string& filename, int num_parts, int num_groups, int num_states, int num_transitions,
+void run_pbes_explorer_file(const std::string& filename,
+    int num_parts,
+    int /*num_groups*/,
+    int /*num_states*/,
+    int /*num_transitions*/,
     const std::string& rewrite_strategy = "jitty")
 {
   std::clog << "run_pbes_explorer_file" << std::endl;

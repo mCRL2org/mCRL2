@@ -20,7 +20,6 @@
 namespace mcrl2
 {
 
-using log::log_level_t;
 using mcrl2::utilities::tools::parallel_tool;
 using mcrl2::utilities::tools::xinput_output_tool;
 

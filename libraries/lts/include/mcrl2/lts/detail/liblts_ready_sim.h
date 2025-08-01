@@ -288,7 +288,7 @@ std::string ready_sim_partitioner<LTS_TYPE>::print_structure(hash_table2* struc)
   return result.str();  
 }
 
-template <class LTS_TYPE>
+template<class LTS_TYPE>
 ready_sim_partitioner<LTS_TYPE>::~ready_sim_partitioner()
 {
   delete exists2;

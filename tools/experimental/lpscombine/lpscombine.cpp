@@ -15,7 +15,6 @@
 namespace mcrl2
 {
 
-using log::log_level_t;
 using mcrl2::utilities::tools::input_input_output_tool;
 
 class lpscombine_tool : public input_input_output_tool
